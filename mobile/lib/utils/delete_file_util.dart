@@ -14,10 +14,12 @@ import "package:photos/events/force_reload_trash_page_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/trash_item_request.dart';
+import "package:photos/models/backup_status.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/files_split.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
+import "package:photos/services/local_sync_service.dart";
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
@@ -333,6 +335,8 @@ Future<bool> deleteLocalFiles(
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
 
   try {
+    final dialog = createProgressDialog(context, "Loading...");
+    await dialog.show();
     for (final file in files) {
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
@@ -346,6 +350,8 @@ Future<bool> deleteLocalFiles(
     }
     deletedIDs.addAll(alreadyDeletedIDs);
     deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+
+    await dialog.hide();
 
     final bool shouldDeleteInBatches =
         await isAndroidSDKVersionLowerThan(android11SDKINT);
@@ -389,7 +395,78 @@ Future<bool> deleteLocalFiles(
     }
   } catch (e, s) {
     _logger.severe("Could not delete local files", e, s);
-    showToast(context, S.of(context).couldNotFreeUpSpace);
+    return false;
+  }
+}
+
+/// Only to be used on Android
+Future<bool> retryFreeUpSpaceAfterRemovingNonExistingAssets(
+  BuildContext context,
+) async {
+  _logger.info("Retrying free up space after removing non-existing assets");
+  try {
+    final dialog =
+        createProgressDialog(context, "Please wait, this will take a while...");
+    await dialog.show();
+
+    final stopwatch = Stopwatch()..start();
+    final res = await PhotoManager.editor.android.removeAllNoExistsAsset();
+    if (res == false) {
+      _logger.warning("Failed to remove non-existing assets");
+    }
+    _logger.info(
+      "removeAllNoExistsAsset took: ${stopwatch.elapsedMilliseconds}ms",
+    );
+    await LocalSyncService.instance.sync();
+
+    late final BackupStatus status;
+    final List<String> deletedIDs = [];
+    final List<String> localAssetIDs = [];
+    final List<String> localSharedMediaIDs = [];
+    status = await SyncService.instance.getBackupStatus();
+
+    for (String localID in status.localIDs) {
+      if (localID.startsWith(oldSharedMediaIdentifier) ||
+          localID.startsWith(sharedMediaIdentifier)) {
+        localSharedMediaIDs.add(localID);
+      } else {
+        localAssetIDs.add(localID);
+      }
+    }
+    deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+
+    await dialog.hide();
+
+    final bool shouldDeleteInBatches =
+        await isAndroidSDKVersionLowerThan(android11SDKINT);
+    if (shouldDeleteInBatches) {
+      _logger.info("Deleting in batches");
+      deletedIDs
+          .addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
+    } else {
+      _logger.info("Deleting in one shot");
+      deletedIDs
+          .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
+    }
+
+    if (deletedIDs.isNotEmpty) {
+      final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
+      await FilesDB.instance.deleteLocalFiles(deletedIDs);
+      _logger.info(deletedFiles.length.toString() + " files deleted locally");
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
+      );
+      return true;
+    } else {
+      //On android 10, even if files were deleted, deletedIDs is empty.
+      //This is a workaround so that users are not shown an error message on
+      //android 10
+      if (!await isAndroidSDKVersionLowerThan(android11SDKINT)) {
+        return false;
+      }
+      return true;
+    }
+  } catch (e) {
     return false;
   }
 }
