@@ -230,7 +230,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     }
 
     return (
-        <FileInfoSidebar open={open} onClose={onClose}>
+        <FileInfoSidebar {...{ open, onClose }}>
             <Titlebar onClose={onClose} title={t("info")} backIsClose />
             <Stack sx={{ pt: 1, pb: 3, gap: "20px" }}>
                 <Caption
@@ -329,37 +329,14 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     fileCollectionIDs &&
                     allCollectionsNameByID &&
                     onSelectCollection && (
-                        <InfoItem icon={<FolderOutlinedIcon />}>
-                            <Stack
-                                direction="row"
-                                sx={{
-                                    gap: 1,
-                                    flexWrap: "wrap",
-                                    justifyContent: "flex-start",
-                                    alignItems: "flex-start",
-                                }}
-                            >
-                                {fileCollectionIDs
-                                    .get(file.id)
-                                    ?.filter((collectionID) =>
-                                        allCollectionsNameByID.has(
-                                            collectionID,
-                                        ),
-                                    )
-                                    .map((collectionID) => (
-                                        <ChipButton
-                                            key={collectionID}
-                                            onClick={() =>
-                                                onSelectCollection(collectionID)
-                                            }
-                                        >
-                                            {allCollectionsNameByID.get(
-                                                collectionID,
-                                            )}
-                                        </ChipButton>
-                                    ))}
-                            </Stack>
-                        </InfoItem>
+                        <Albums
+                            {...{
+                                file,
+                                fileCollectionIDs,
+                                allCollectionsNameByID,
+                                onSelectCollection,
+                            }}
+                        />
                     )}
             </Stack>
             <RawExif
@@ -1042,6 +1019,48 @@ const ExifItem = styled("div")`
     flex-direction: column;
     gap: 4px;
 `;
+
+type AlbumsProps = Required<
+    Pick<
+        FileInfoProps,
+        "fileCollectionIDs" | "allCollectionsNameByID" | "onSelectCollection"
+    >
+> & {
+    file: EnteFile;
+};
+
+const Albums: React.FC<AlbumsProps> = ({
+    file,
+    fileCollectionIDs,
+    allCollectionsNameByID,
+    onSelectCollection,
+}) => (
+    <InfoItem icon={<FolderOutlinedIcon />}>
+        <Stack
+            direction="row"
+            sx={{
+                gap: 1,
+                flexWrap: "wrap",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+            }}
+        >
+            {fileCollectionIDs
+                .get(file.id)
+                ?.filter((collectionID) =>
+                    allCollectionsNameByID.has(collectionID),
+                )
+                .map((collectionID) => (
+                    <ChipButton
+                        key={collectionID}
+                        onClick={() => onSelectCollection(collectionID)}
+                    >
+                        {allCollectionsNameByID.get(collectionID)}
+                    </ChipButton>
+                ))}
+        </Stack>
+    </InfoItem>
+);
 
 const ChipButton = styled((props: ButtonProps) => (
     <Button color="secondary" {...props} />
