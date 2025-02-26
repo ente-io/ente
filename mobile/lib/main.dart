@@ -43,7 +43,6 @@ import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
-import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/sync_service.dart";
 import "package:photos/services/user_service.dart";
 import 'package:photos/ui/tools/app_lock.dart';
@@ -253,7 +252,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
 
     FavoritesService.instance.initFav().ignore();
     MemoriesService.instance.init(preferences);
-    unawaited(SmartMemoriesService.instance.init());
     LocalFileUpdateService.instance.init(preferences);
     SearchService.instance.init();
     FileDataService.instance.init(preferences);

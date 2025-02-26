@@ -42,7 +42,6 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
-import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/services/user_service.dart";
 import "package:photos/states/location_screen_state.dart";

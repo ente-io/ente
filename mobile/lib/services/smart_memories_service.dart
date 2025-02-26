@@ -57,19 +57,12 @@ class SmartMemoriesService {
     if (_isInit) return;
     _locale = await getLocale();
 
-    unawaited(
-      MLComputer.instance.runClipText(clipPositiveQuery).then((embedding) {
-        _clipPositiveTextVector ??= Vector.fromList(embedding);
-      }),
+    _clipPositiveTextVector ??= Vector.fromList(
+      await MLComputer.instance.runClipText(clipPositiveQuery),
     );
     for (final peopleActivity in PeopleActivity.values) {
-      unawaited(
-        MLComputer.instance
-            .runClipText(activityQuery(peopleActivity))
-            .then((embedding) {
-          _clipPeopleActivityVectors[peopleActivity] =
-              Vector.fromList(embedding);
-        }),
+      _clipPeopleActivityVectors[peopleActivity] = Vector.fromList(
+        await MLComputer.instance.runClipText(activityQuery(peopleActivity)),
       );
     }
     _isInit = true;
@@ -86,9 +79,6 @@ class SmartMemoriesService {
       );
       _seenTimes = await _memoriesDB.getSeenTimes();
       _logger.finest("All files length: ${allFiles.length}");
-
-      // Pause 10 seconds TODO: lau: remove this later
-      await Future.delayed(const Duration(seconds: 10));
 
       final peopleMemories = await _getPeopleResults(allFiles, null);
       _deductUsedMemories(allFiles, peopleMemories);
