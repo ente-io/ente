@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Eメールアドレスを入力",
   "accountWelcomeBack": "おかえりなさい！",
+  "emailAlreadyRegistered": "このメールアドレスはすでに登録されています。",
+  "emailNotRegistered": "このメールアドレスはまだ登録されていません。",
   "email": "Eメール",
   "cancel": "キャンセル",
   "verify": "確認",
@@ -185,6 +187,8 @@
   },
   "allowAddPhotosDescription": "リンクを持つ人が共有アルバムに写真を追加できるようにします。",
   "passwordLock": "パスワード保護",
+  "canNotOpenTitle": "このアルバムは開けません",
+  "canNotOpenBody": "申し訳ありません。このアルバムをアプリで開くことができませんでした。",
   "disableDownloadWarningTitle": "ご注意ください",
   "disableDownloadWarningBody": "ビューアーはスクリーンショットを撮ったり、外部ツールを使用して写真のコピーを保存したりすることができます",
   "allowDownloads": "ダウンロードを許可",
@@ -351,6 +355,7 @@
   "failedToLoadAlbums": "アルバムの読み込みに失敗しました",
   "hidden": "非表示",
   "authToViewYourHiddenFiles": "隠しファイルを表示するには認証してください",
+  "authToViewTrashedFiles": "削除したファイルを閲覧するには認証が必要です",
   "trash": "ゴミ箱",
   "uncategorized": "カテゴリなし",
   "videoSmallCase": "ビデオ",
@@ -412,6 +417,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "写真のグリッドサイズ",
+  "manageDeviceStorage": "端末のキャッシュを管理",
+  "manageDeviceStorageDesc": "端末上のキャッシュを確認・削除",
   "machineLearning": "機械学習",
   "mlConsent": "機械学習を有効にする",
   "mlConsentTitle": "機械学習を有効にしますか？",
@@ -419,13 +426,13 @@
   "mlConsentPrivacy": "この機能の詳細については、こちらをクリックしてください。",
   "mlConsentConfirmation": "機械学習を可能にしたい",
   "magicSearch": "マジックサーチ",
-  "discover": "ディスカバー",
+  "discover": "新たな発見",
   "@discover": {
     "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
   },
-  "discover_identity": "アイデンティティ",
+  "discover_identity": "身分証",
   "discover_screenshots": "スクリーンショット",
-  "discover_receipts": "領収書",
+  "discover_receipts": "レシート",
   "discover_notes": "メモ",
   "discover_memes": "ミーム",
   "discover_visiting_cards": "訪問カード",
@@ -687,6 +694,8 @@
   "noPhotosAreBeingBackedUpRightNow": "現在バックアップされている写真はありません",
   "preserveMore": "もっと保存する",
   "grantFullAccessPrompt": "設定アプリで、すべての写真へのアクセスを許可してください",
+  "allowPermTitle": "写真へのアクセスを許可",
+  "allowPermBody": "Enteがライブラリを表示およびバックアップできるように、端末の設定から写真へのアクセスを許可してください。",
   "openSettings": "設定を開く",
   "selectMorePhotos": "さらに写真を選択",
   "existingUser": "既存のユーザー",
@@ -733,7 +742,7 @@
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
   },
-  "onEnte": "<branding>Ente</branding>で保管",
+  "onEnte": "<branding>Ente</branding>が保管",
   "name": "名前順",
   "newest": "新しい順",
   "lastUpdated": "更新された順",
@@ -815,6 +824,16 @@
   "referFriendsAnd2xYourPlan": "友達に紹介して2倍",
   "shareAlbumHint": "アルバムを開いて右上のシェアボタンをタップ",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "完全に削除されるまでの日数が項目に表示されます",
+  "trashDaysLeft": "{count, plural, =0 {} =1 {1日} other {{count} 日}}",
+  "@trashDaysLeft": {
+    "description": "Text to indicate number of days remaining before permanent deletion",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
   "deleteAll": "全て削除",
   "renameAlbum": "アルバムの名前変更",
   "convertToAlbum": "アルバムに変換",
@@ -946,6 +965,14 @@
   "syncStopped": "同期が停止しました",
   "syncProgress": "{completed}/{total} のメモリが保存されました",
   "uploadingMultipleMemories": "{count} メモリを保存しています...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "1メモリを保存しています...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1013,7 +1040,7 @@
   "photoDescriptions": "写真の説明",
   "fileTypesAndNames": "ファイルの種類と名前",
   "location": "場所",
-  "moments": "モーメント",
+  "moments": "日々の瞬間",
   "searchFaceEmptySection": "学習が完了すると、ここに人が表示されます",
   "searchDatesEmptySection": "日付、月または年で検索",
   "searchLocationEmptySection": "当時の直近で撮影された写真をグループ化",
@@ -1222,6 +1249,7 @@
   "waitingForVerification": "確認を待っています...",
   "passkey": "パスキー",
   "passkeyAuthTitle": "パスキーの検証",
+  "loginWithTOTP": "TOTPでログイン",
   "passKeyPendingVerification": "検証はまだ保留中です",
   "loginSessionExpired": "セッション切れ",
   "loginSessionExpiredDetails": "セッションの有効期限が切れました。再度ログインしてください。",
@@ -1362,5 +1390,289 @@
   "extraPhotosFound": "追加の写真が見つかりました",
   "configuration": "設定",
   "localIndexing": "このデバイス上での実行",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "processed": "処理完了",
+  "resetPerson": "削除",
+  "areYouSureYouWantToResetThisPerson": "この人を忘れてもよろしいですね？",
+  "allPersonGroupingWillReset": "この人のグループ化がリセットされ、この人かもしれない写真への提案もなくなります",
+  "yesResetPerson": "リセット",
+  "onlyThem": "それらのみ",
+  "checkingModels": "モデルを確認しています...",
+  "enableMachineLearningBanner": "マジック検索と顔認識のため、機械学習を有効にする",
+  "searchDiscoverEmptySection": "処理と同期が完了すると、画像がここに表示されます",
+  "searchPersonsEmptySection": "処理と同期が完了すると、ここに人々が表示されます",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {{count}人のビューアーを追加} =1 {{count}人のビューアーを追加} other {{count}人のビューアーを追加}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {{count}人のコラボレーターを追加} =1 {{count}人のコラボレーターを追加} other {{count}人のコラボレーターを追加}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "アカウントが既に設定されています",
+  "sessionIdMismatch": "セッションIDが一致しません",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "アクティブなセッションの取得に失敗しました",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "サブスクリプションの更新に失敗しました",
+  "failedToPlayVideo": "動画の再生に失敗しました",
+  "uploadIsIgnoredDueToIgnorereason": "以下の理由によりアップロードは無視されます: {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "このギャラリーのタイプ {galleryType} は名前の変更には対応していません",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "アップロードするにはタップしてください。 以下の理由のためアップロードは現在無視されています: {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "タップしてアップロード",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "情報",
+  "addFiles": "ファイルを追加",
+  "castAlbum": "アルバムをキャスト",
+  "imageNotAnalyzed": "画像が分析されていません",
+  "noFacesFound": "顔が見つかりません",
+  "fileNotUploadedYet": "ファイルがまだアップロードされていません",
+  "noSuggestionsForPerson": "{personName} の候補はありません",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "月",
+  "yearShort": "年",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "現在実行中",
+  "ignored": "無視された",
+  "photosCount": "{count, plural, =0 {0枚の写真} =1 {1枚の写真} other {{count} 枚の写真}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "ファイル",
+  "searchSectionsLengthMismatch": "セクションの長さの不一致: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "メールアプリを選択",
+  "selectAllShort": "すべて",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "changeLogMagicSearchImprovementTitle": "マジック検索の改善",
+  "changeLogMagicSearchImprovementContent": "マジック検索が改善しました。もう、あなたが探しているものを見つけるのを待つ必要はありません。",
+  "changeLogBackupStatusTitle": "バックアップ ステータス",
+  "changeLogBackupStatusContent": "私たちは、失敗と待機中を含む、Enteにアップロードされたすべてのファイルのログを追加しました。",
+  "changeLogDiscoverTitle": "ディスカバー",
+  "changeLogDiscoverContent": "IDカード、メモなどの写真をお探しですか？検索タブに移動し、ディスカバーを確認してください。 \\n\\n機械学習を有効にしている場合にのみ利用できます。",
+  "selectCoverPhoto": "カバー写真を選択",
+  "newLocation": "新しいロケーション",
+  "faceNotClusteredYet": "顔がまだ集まっていません。後で戻ってきてください",
+  "theLinkYouAreTryingToAccessHasExpired": "アクセスしようとしているリンクの期限が切れています。",
+  "openFile": "ファイルを開く",
+  "backupFile": "バックアップファイル",
+  "openAlbumInBrowser": "ブラウザでアルバムを開く",
+  "openAlbumInBrowserTitle": "このアルバムに写真を追加するには、Webアプリを使用してください",
+  "allow": "許可",
+  "allowAppToOpenSharedAlbumLinks": "共有アルバムリンクを開くことをアプリに許可する",
+  "seePublicAlbumLinksInApp": "アプリ内で公開アルバムのリンクを見る",
+  "emergencyContacts": "緊急連絡先",
+  "acceptTrustInvite": "招待を受け入れる",
+  "declineTrustInvite": "招待を拒否する",
+  "removeYourselfAsTrustedContact": "あなた自身を信頼できる連絡先から削除",
+  "legacy": "レガシー",
+  "legacyPageDesc": "レガシーでは、信頼できる連絡先が不在時(あなたが亡くなった時など)にアカウントにアクセスできます。",
+  "legacyPageDesc2": "信頼できる連絡先はアカウントの回復を開始することができます。30日以内にあなたが拒否しない場合は、その信頼する人がパスワードをリセットしてあなたのアカウントにアクセスできるようになります。",
+  "legacyAccounts": "レガシーアカウント",
+  "trustedContacts": "信頼する連絡先",
+  "addTrustedContact": "信頼する連絡先を追加",
+  "removeInvite": "招待を削除",
+  "recoveryWarning": "信頼する連絡先の持ち主があなたのアカウントにアクセスしようとしています",
+  "rejectRecovery": "リカバリを拒否する",
+  "recoveryInitiated": "リカバリが開始されました",
+  "recoveryInitiatedDesc": "{days} 日後にアカウントにアクセスできます。通知は {email}に送信されます。",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "リカバリをキャンセル",
+  "recoveryAccount": "アカウントを復元",
+  "cancelAccountRecoveryBody": "リカバリをキャンセルしてもよろしいですか？",
+  "startAccountRecoveryTitle": "リカバリを開始",
+  "whyAddTrustContact": "信頼する連絡先は、データの復旧が必要な際に役立ちます。",
+  "recoveryReady": "{email}のアカウントを復元できるようになりました。新しいパスワードを設定してください。",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} はあなたのアカウントを復元しようとしています。",
+  "trustedInviteBody": "あなたは {email}から信頼する連絡先になってもらうよう、お願いされています。",
+  "warning": "警告",
+  "proceed": "続行",
+  "confirmAddingTrustedContact": "{email} を信頼する連絡先として追加しようとしています。 {numOfDays} 日間あなたの利用がなくなった場合、アカウントを復旧することができるようになります。",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} があなたを信頼する連絡先として招待しました",
+  "authToManageLegacy": "信頼する連絡先を管理するために認証してください",
+  "useDifferentPlayerInfo": "この動画の再生に問題がありますか？別のプレイヤーを試すには、ここを長押ししてください。",
+  "hideSharedItemsFromHomeGallery": "ホームギャラリーから共有された写真等を非表示",
+  "gallery": "ギャラリー",
+  "joinAlbum": "アルバムに参加",
+  "joinAlbumSubtext": "写真を表示したり、追加したりするために",
+  "joinAlbumSubtextViewer": "これを共有アルバムに追加するために",
+  "join": "参加する",
+  "linkEmail": "メールアドレスをリンクする",
+  "link": "リンク",
+  "noEnteAccountExclamation": "アカウントがありません！",
+  "orPickFromYourContacts": "または連絡先から選択",
+  "emailDoesNotHaveEnteAccount": "{email} は Ente アカウントを持っていません。",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (私)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignMe": "\"自分\" を再割り当て",
+  "me": "自分",
+  "linkEmailToContactBannerCaption": "共有を高速化するために",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "リンクする人を選択",
+  "linkPersonToEmail": "この人物を {email}に紐づけ",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "linkPersonToEmailConfirmation": "{personName} を {email} に紐づけします",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "あなたの顔を選択",
+  "reassigningLoading": "再割り当て中...",
+  "reassignedToName": "あなたを {name} に紐づけました",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "その前に変更を保存しますか？",
+  "dontSave": "保存しない",
+  "thisIsMeExclamation": "これは私です",
+  "linkPerson": "人を紐づけ",
+  "linkPersonCaption": "良い経験を分かち合うために",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "動画ストリーミング",
+  "processingVideos": "動画を処理中",
+  "streamDetails": "動画の詳細",
+  "processing": "処理中",
+  "queued": "処理待ち",
+  "ineligible": "対象外",
+  "failed": "失敗",
+  "playStream": "再生",
+  "playOriginal": "元動画を再生",
+  "joinAlbumConfirmationDialogBody": "アルバムに参加すると、参加者にメールアドレスが公開されます。"
 }

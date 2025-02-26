@@ -112,13 +112,12 @@ export const saveKeyInSessionStore = async (
     }
 };
 
-export async function encryptWithRecoveryKey(key: string) {
+export const encryptWithRecoveryKey = async (data: string) => {
     const cryptoWorker = await sharedCryptoWorker();
     const hexRecoveryKey = await getRecoveryKey();
     const recoveryKey = await cryptoWorker.fromHex(hexRecoveryKey);
-    const encryptedKey = await cryptoWorker.encryptToB64(key, recoveryKey);
-    return encryptedKey;
-}
+    return cryptoWorker.encryptBoxB64(data, recoveryKey);
+};
 
 export const getRecoveryKey = async () => {
     try {

@@ -242,6 +242,5 @@
   "longPressAnEmailToVerifyEndToEndEncryption": "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen.",
   "developerSettingsWarning": "Er du sikker på, at du vil ændre udviklerindstillingerne?",
   "next": "Næste",
-  "enterPin": "Indtast PIN",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "enterPin": "Indtast PIN"
 }
