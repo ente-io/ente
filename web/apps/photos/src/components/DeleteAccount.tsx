@@ -21,17 +21,12 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { Formik, type FormikHelpers } from "formik";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
 import * as Yup from "yup";
-
-interface FormValues {
-    reason: string;
-    feedback: string;
-}
 
 type DeleteAccountProps = ModalVisibilityProps & {
     /**
@@ -58,41 +53,47 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
         { reason: string; feedback: string } | undefined
     >(undefined);
 
-    const initiateDelete = async (
-        { reason, feedback }: FormValues,
-        { setFieldError }: FormikHelpers<FormValues>,
-    ) => {
-        try {
-            feedback = feedback.trim();
-            if (feedback.length === 0) {
-                switch (reason) {
-                    case "found_another_service":
-                        setFieldError(
-                            "feedback",
-                            t("feedback_required_found_another_service"),
-                        );
-                        break;
-                    default:
-                        setFieldError("feedback", t("feedback_required"));
+    const { values, errors, handleChange, handleSubmit } = useFormik({
+        initialValues: { reason: "", feedback: "" },
+        validationSchema: Yup.object().shape({
+            reason: Yup.string().required(t("required")),
+        }),
+        validateOnChange: false,
+        validateOnBlur: false,
+        onSubmit: async ({ reason, feedback }, { setFieldError }) => {
+            try {
+                feedback = feedback.trim();
+                if (feedback.length === 0) {
+                    switch (reason) {
+                        case "found_another_service":
+                            setFieldError(
+                                "feedback",
+                                t("feedback_required_found_another_service"),
+                            );
+                            break;
+                        default:
+                            setFieldError("feedback", t("feedback_required"));
+                    }
+                    return;
                 }
-                return;
+                setLoading(true);
+                reasonAndFeedbackRef.current = { reason, feedback };
+                const deleteChallengeResponse =
+                    await getAccountDeleteChallenge();
+                deleteAccountChallenge.current =
+                    deleteChallengeResponse.encryptedChallenge;
+                if (deleteChallengeResponse.allowDelete) {
+                    onAuthenticateUser().then(confirmAccountDeletion);
+                } else {
+                    askToMailForDeletion();
+                }
+            } catch (e) {
+                onGenericError(e);
+            } finally {
+                setLoading(false);
             }
-            setLoading(true);
-            reasonAndFeedbackRef.current = { reason, feedback };
-            const deleteChallengeResponse = await getAccountDeleteChallenge();
-            deleteAccountChallenge.current =
-                deleteChallengeResponse.encryptedChallenge;
-            if (deleteChallengeResponse.allowDelete) {
-                onAuthenticateUser().then(confirmAccountDeletion);
-            } else {
-                askToMailForDeletion();
-            }
-        } catch (e) {
-            onGenericError(e);
-        } finally {
-            setLoading(false);
-        }
-    };
+        },
+    });
 
     const confirmAccountDeletion = () =>
         showMiniDialog({
@@ -144,78 +145,56 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
             onClose={onClose}
             title={t("delete_account")}
         >
-            <Formik<FormValues>
-                initialValues={{
-                    reason: "",
-                    feedback: "",
-                }}
-                validationSchema={Yup.object().shape({
-                    reason: Yup.string().required(t("required")),
-                })}
-                validateOnChange={false}
-                validateOnBlur={false}
-                onSubmit={initiateDelete}
-            >
-                {({
-                    values,
-                    errors,
-                    handleChange,
-                    handleSubmit,
-                }): React.JSX.Element => (
-                    <form noValidate onSubmit={handleSubmit}>
-                        <Stack sx={{ gap: "24px" }}>
-                            <Stack sx={{ gap: "4px" }}>
-                                <Typography>
-                                    {t("delete_account_reason_label")}
-                                </Typography>
-                                <DropdownInput
-                                    options={deleteReasonOptions()}
-                                    placeholder={t(
-                                        "delete_account_reason_placeholder",
-                                    )}
-                                    selected={values.reason}
-                                    onSelect={handleChange("reason")}
-                                />
-                                {errors.reason && (
-                                    <Typography
-                                        variant="small"
-                                        sx={{ px: 1, color: "critical.main" }}
-                                    >
-                                        {errors.reason}
-                                    </Typography>
-                                )}
-                            </Stack>
-                            <FeedbackInput
-                                value={values.feedback}
-                                onChange={handleChange("feedback")}
-                                errorMessage={errors.feedback}
-                            />
-                            <ConfirmationCheckboxInput
-                                checked={acceptDataDeletion}
-                                onChange={setAcceptDataDeletion}
-                            />
-                            <Stack sx={{ gap: "8px" }}>
-                                <LoadingButton
-                                    type="submit"
-                                    fullWidth
-                                    color="critical"
-                                    disabled={!acceptDataDeletion}
-                                    loading={loading}
-                                >
-                                    {t("delete_account_confirm")}
-                                </LoadingButton>
-                                <FocusVisibleButton
-                                    fullWidth
-                                    color="secondary"
-                                    onClick={onClose}
-                                >
-                                    {t("cancel")}
-                                </FocusVisibleButton>
-                            </Stack>
-                        </Stack>
-                    </form>
-                )}
-            </Formik>
+            <form noValidate onSubmit={handleSubmit}>
+                <Stack sx={{ gap: "24px" }}>
+                    <Stack sx={{ gap: "4px" }}>
+                        <Typography>
+                            {t("delete_account_reason_label")}
+                        </Typography>
+                        <DropdownInput
+                            options={deleteReasonOptions()}
+                            placeholder={t("delete_account_reason_placeholder")}
+                            selected={values.reason}
+                            onSelect={handleChange("reason")}
+                        />
+                        {errors.reason && (
+                            <Typography
+                                variant="small"
+                                sx={{ px: 1, color: "critical.main" }}
+                            >
+                                {errors.reason}
+                            </Typography>
+                        )}
+                    </Stack>
+                    <FeedbackInput
+                        value={values.feedback}
+                        onChange={handleChange("feedback")}
+                        errorMessage={errors.feedback}
+                    />
+                    <ConfirmationCheckboxInput
+                        checked={acceptDataDeletion}
+                        onChange={setAcceptDataDeletion}
+                    />
+                    <Stack sx={{ gap: "8px" }}>
+                        <LoadingButton
+                            type="submit"
+                            fullWidth
+                            color="critical"
+                            disabled={!acceptDataDeletion}
+                            loading={loading}
+                        >
+                            {t("delete_account_confirm")}
+                        </LoadingButton>
+                        <FocusVisibleButton
+                            fullWidth
+                            color="secondary"
+                            onClick={onClose}
+                        >
+                            {t("cancel")}
+                        </FocusVisibleButton>
+                    </Stack>
+                </Stack>
+            </form>
         </TitledMiniDialog>
     );
 };
