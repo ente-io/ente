@@ -66,7 +66,7 @@
         "5": "バックアップが完了しました"
     },
     "FILE_NOT_UPLOADED_LIST": "次のファイルはアップロードされませんでした",
-    "initial_load_delay_warning": "最初の負荷に時間がかかる場合があります",
+    "initial_load_delay_warning": "最初の読み込みには時間がかかる場合があります",
     "no_account": "アカウントがありませんか",
     "existing_account": "既にアカウントをお持ちの方",
     "create": "作成",
@@ -458,7 +458,7 @@
     "upgrade_now": "今すぐアップグレード",
     "renew_now": "今すぐ更新",
     "storage": "ストレージ",
-    "used": "使用中",
+    "used": "used",
     "you": "あなた",
     "family": "ファミリー",
     "free": "free",
@@ -519,7 +519,7 @@
     "passphrase_strength_strong": "パスワード強度: 強い",
     "preferences": "設定",
     "language": "言語",
-    "advanced": "アドバンスド",
+    "advanced": "高度な設定",
     "export_directory_does_not_exist": "無効なエクスポートディレクトリ",
     "export_directory_does_not_exist_message": "<p>選択したエクスポートディレクトリは存在しません。</p><p>有効なディレクトリを選択してください。</p>",
     "storage_unit": {
