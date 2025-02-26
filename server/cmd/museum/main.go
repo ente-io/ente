@@ -243,13 +243,14 @@ func main() {
 	)
 
 	usageController := &controller.UsageController{
-		BillingCtrl:      billingController,
-		StorageBonusCtrl: storageBonusCtrl,
-		UserCacheCtrl:    userCacheCtrl,
-		UsageRepo:        usageRepo,
-		UserRepo:         userRepo,
-		FamilyRepo:       familyRepo,
-		FileRepo:         fileRepo,
+		BillingCtrl:       billingController,
+		StorageBonusCtrl:  storageBonusCtrl,
+		UserCacheCtrl:     userCacheCtrl,
+		UsageRepo:         usageRepo,
+		UserRepo:          userRepo,
+		FamilyRepo:        familyRepo,
+		FileRepo:          fileRepo,
+		UploadResultCache: make(map[int64]bool),
 	}
 
 	accessCtrl := access.NewAccessController(collectionRepo, fileRepo)

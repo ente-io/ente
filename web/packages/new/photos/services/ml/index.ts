@@ -6,7 +6,7 @@ import { isDesktop } from "@/base/app";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
-import { masterKeyFromSession } from "@/base/session-store";
+import { masterKeyFromSession } from "@/base/session";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import type { UploadItem } from "@/gallery/services/upload";

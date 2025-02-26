@@ -21,8 +21,5 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'gu';
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "orPickFromYourContacts":
-            MessageLookupByLibrary.simpleMessage("or pick from your contacts")
-      };
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{};
 }

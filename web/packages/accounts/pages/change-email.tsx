@@ -27,7 +27,7 @@ const Page: React.FC = () => {
         if (!user?.token) {
             void router.push("/");
         }
-    }, []);
+    }, [router]);
 
     return (
         <AccountsPageContents>
