@@ -430,7 +430,7 @@
     "lock": "Замок",
     "file": "Файл",
     "folder": "Папка",
-    "google_takeout": "Еда на вынос из Google",
+    "google_takeout": "Загрузить из Google",
     "deduplicate_files": "Проверить файлы на дубликаты",
     "remove_duplicates": "Удалить дубликаты",
     "total_size": "Общий размер",
