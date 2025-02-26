@@ -66,6 +66,8 @@ class PeopleMemory extends SmartMemory {
     super.name,
     super.firstCreationTime,
     super.lastCreationTime,
+    super.firstDateToShow,
+    super.lastDateToShow,
   }) : super(memories, MemoryType.people);
 
   @override
@@ -76,6 +78,8 @@ class PeopleMemory extends SmartMemory {
     String? name,
     int? firstCreationTime,
     int? lastCreationTime,
+    int? firstDateToShow,
+    int? lastDateToShow,
   }) {
     return PeopleMemory(
       memories ?? super.memories,
@@ -84,6 +88,8 @@ class PeopleMemory extends SmartMemory {
       name: name ?? super.name,
       firstCreationTime: firstCreationTime ?? super.firstCreationTime,
       lastCreationTime: lastCreationTime ?? super.lastCreationTime,
+      firstDateToShow: firstDateToShow ?? super.firstDateToShow,
+      lastDateToShow: lastDateToShow ?? super.lastDateToShow,
     );
   }
 }

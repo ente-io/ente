@@ -7,12 +7,16 @@ class TimeMemory extends SmartMemory {
     String? name,
     int? firstCreationTime,
     int? lastCreationTime,
+    int? firstDateToShow,
+    int? lastDateToShow,
   }) : super(
           memories,
           MemoryType.time,
           name: name,
           firstCreationTime: firstCreationTime,
           lastCreationTime: lastCreationTime,
+          firstDateToShow: firstDateToShow,
+          lastDateToShow: lastDateToShow,
         );
 
   @override
@@ -21,12 +25,16 @@ class TimeMemory extends SmartMemory {
     String? name,
     int? firstCreationTime,
     int? lastCreationTime,
+    int? firstDateToShow,
+    int? lastDateToShow,
   }) {
     return TimeMemory(
       memories ?? this.memories,
       name: name ?? this.name,
       firstCreationTime: firstCreationTime ?? super.firstCreationTime,
       lastCreationTime: lastCreationTime ?? super.lastCreationTime,
+      firstDateToShow: firstDateToShow ?? super.firstDateToShow,
+      lastDateToShow: lastDateToShow ?? super.lastDateToShow,
     );
   }
 }

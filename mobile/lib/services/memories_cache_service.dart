@@ -65,9 +65,18 @@ class ToShowMemory {
   final int firstTimeToShow;
   final int lastTimeToShow;
 
+  final String? personID;
+  final PeopleMemoryType? peopleMemoryType;
+  final Location? location;
+
   bool get shouldShowNow {
     final now = DateTime.now().microsecondsSinceEpoch;
     return now >= firstTimeToShow && now <= lastTimeToShow;
+  }
+
+  bool get isOld {
+    final now = DateTime.now().microsecondsSinceEpoch;
+    return now > lastTimeToShow;
   }
 
   ToShowMemory(
@@ -75,8 +84,41 @@ class ToShowMemory {
     this.fileUploadedIDs,
     this.type,
     this.firstTimeToShow,
-    this.lastTimeToShow,
-  );
+    this.lastTimeToShow, {
+    this.personID,
+    this.peopleMemoryType,
+    this.location,
+  }) : assert(
+          (type == MemoryType.people &&
+                  personID != null &&
+                  peopleMemoryType != null) ||
+              (type == MemoryType.trips && location != null) ||
+              (type != MemoryType.people && type != MemoryType.trips),
+          "PersonID and peopleMemoryType must be provided for people memory type, and location must be provided for trips memory type",
+        );
+
+  factory ToShowMemory.fromSmartMemory(SmartMemory memory) {
+    assert(memory.firstDateToShow != null && memory.lastDateToShow != null);
+    String? personID;
+    PeopleMemoryType? peopleMemoryType;
+    Location? location;
+    if (memory is PeopleMemory) {
+      personID = memory.personID;
+      peopleMemoryType = memory.peopleMemoryType;
+    } else if (memory is TripMemory) {
+      location = memory.location;
+    }
+    return ToShowMemory(
+      memory.name,
+      memory.memories.map((m) => m.file.uploadedFileID!).toList(),
+      memory.type,
+      memory.firstDateToShow!,
+      memory.lastDateToShow!,
+      personID: personID,
+      peopleMemoryType: peopleMemoryType,
+      location: location,
+    );
+  }
 
   factory ToShowMemory.fromJson(Map<String, dynamic> json) {
     return ToShowMemory(
@@ -85,6 +127,14 @@ class ToShowMemory {
       memoryTypeFromString(json['type']),
       json['firstTimeToShow'],
       json['lastTimeToShow'],
+      personID: json['personID'],
+      peopleMemoryType: peopleMemoryTypeFromString(json['peopleMemoryType']),
+      location: json['location'] != null
+          ? Location(
+              latitude: json['location']['latitude'],
+              longitude: json['location']['longitude'],
+            )
+          : null,
     );
   }
 
@@ -95,6 +145,14 @@ class ToShowMemory {
       'type': type.toString().split('.').last,
       'firstTimeToShow': firstTimeToShow,
       'lastTimeToShow': lastTimeToShow,
+      'personID': personID,
+      'peopleMemoryType': peopleMemoryType.toString().split('.').last,
+      'location': location != null
+          ? {
+              'latitude': location!.latitude!,
+              'longitude': location!.longitude!,
+            }
+          : null,
     };
   }
 
@@ -119,6 +177,19 @@ class PeopleShownLogs {
     this.peopleMemoryType,
     this.lastTimeShown,
   );
+
+  factory PeopleShownLogs.fromOldCacheMemory(ToShowMemory memory) {
+    assert(
+      memory.type == MemoryType.people &&
+          memory.personID != null &&
+          memory.peopleMemoryType != null,
+    );
+    return PeopleShownLogs(
+      memory.personID!,
+      memory.peopleMemoryType!,
+      memory.lastTimeToShow,
+    );
+  }
 
   factory PeopleShownLogs.fromJson(Map<String, dynamic> json) {
     return PeopleShownLogs(
@@ -155,6 +226,14 @@ class TripsShownLogs {
     this.location,
     this.lastTimeShown,
   );
+
+  factory TripsShownLogs.fromOldCacheMemory(ToShowMemory memory) {
+    assert(memory.type == MemoryType.trips && memory.location != null);
+    return TripsShownLogs(
+      memory.location!,
+      memory.lastTimeToShow,
+    );
+  }
 
   factory TripsShownLogs.fromJson(Map<String, dynamic> json) {
     return TripsShownLogs(
@@ -332,9 +411,8 @@ class MemoriesCacheService {
     final List<ToShowMemory> toShowMemories = [];
     final List<PeopleShownLogs> peopleShownLogs = [];
     final List<TripsShownLogs> tripsShownLogs = [];
-    final now = DateTime.now().microsecondsSinceEpoch;
     for (final memory in memories) {
-      if (memory.lastDateToShow != null && memory.lastDateToShow! < now) {
+      if (memory.isOld()) {
         if (memory is PeopleMemory) {
           peopleShownLogs.add(
             PeopleShownLogs(
@@ -352,16 +430,8 @@ class MemoriesCacheService {
           );
         }
       } else {
-        if (memory.firstDateToShow != null && memory.lastDateToShow != null) {
-          toShowMemories.add(
-            ToShowMemory(
-              memory.name!,
-              memory.memories.map((m) => m.file.uploadedFileID!).toList(),
-              memory.type,
-              memory.firstDateToShow!,
-              memory.lastDateToShow!,
-            ),
-          );
+        if (memory.hasShowTime()) {
+          toShowMemories.add(ToShowMemory.fromSmartMemory(memory));
         } else {
           _logger.severe('Memory has no first or last date to show');
         }
@@ -389,6 +459,30 @@ class MemoriesCacheService {
           continue;
         }
         tripsShownLogs.add(shownTrip);
+      }
+      for (final oldMemory in oldCache.toShowMemories) {
+        if (oldMemory.isOld) {
+          if (oldMemory.type == MemoryType.people) {
+            if (!peopleShownLogs.any(
+              (person) =>
+                  (person.personID == oldMemory.personID) &&
+                  (person.peopleMemoryType == oldMemory.peopleMemoryType),
+            )) {
+              peopleShownLogs
+                  .add(PeopleShownLogs.fromOldCacheMemory(oldMemory));
+            }
+          } else if (oldMemory.type == MemoryType.trips) {
+            if (!tripsShownLogs.any(
+              (trip) => isFileInsideLocationTag(
+                oldMemory.location!,
+                trip.location,
+                10.0,
+              ),
+            )) {
+              tripsShownLogs.add(TripsShownLogs.fromOldCacheMemory(oldMemory));
+            }
+          }
+        }
       }
     }
     return MemoriesCache(

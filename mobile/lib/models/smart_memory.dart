@@ -25,12 +25,13 @@ MemoryType memoryTypeFromString(String type) {
 class SmartMemory {
   final List<Memory> memories;
   final MemoryType type;
-  String? name;
+  String name;
   int? firstCreationTime;
   int? lastCreationTime;
 
   int? firstDateToShow;
   int? lastDateToShow;
+  // TODO: lau: make the above two non-nullable!!!
   // TODO: lau: actually use this in calculated filters
 
   SmartMemory(
@@ -43,6 +44,26 @@ class SmartMemory {
     this.lastDateToShow,
   }) : name = name != null ? name + "(I)" : null;
   // TODO: lau: remove (I) from name when opening up the feature flag
+
+  bool isOld() {
+    if (firstDateToShow == null || lastDateToShow == null) {
+      return false;
+    }
+    final now = DateTime.now().microsecondsSinceEpoch;
+    return lastDateToShow! < now;
+  }
+  
+  bool hasShowTime() {
+    return firstDateToShow != null && lastDateToShow != null;
+  }
+
+  bool shouldShowNow() {
+    if (!hasShowTime()) {
+      return false;
+    }
+    final int now = DateTime.now().microsecondsSinceEpoch;
+    return now >= firstDateToShow! && now <= lastDateToShow!;
+  }
 
   int averageCreationTime() {
     if (firstCreationTime != null && lastCreationTime != null) {
