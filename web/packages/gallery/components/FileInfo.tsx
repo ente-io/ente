@@ -22,6 +22,7 @@ import { useBaseContext } from "@/base/context";
 import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
 import { formattedDate, formattedTime } from "@/base/i18n-date";
+import log from "@/base/log";
 import type { Location } from "@/base/types";
 import { CopyButton } from "@/gallery/components/FileInfoComponents";
 import { tagNumericValue, type RawExifTags } from "@/gallery/services/exif";
@@ -86,13 +87,11 @@ import {
     type ButtonProps,
     type DialogProps,
 } from "@mui/material";
-import { useFormik, type FormikHelpers } from "formik";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import * as Yup from "yup";
 
 // Re-uses images from ~leaflet package.
-import log from "@/base/log";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
 import "leaflet/dist/leaflet.css";
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unused-expressions
@@ -516,10 +515,6 @@ const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
     </IconButton>
 );
 
-interface CaptionFormValues {
-    caption: string | undefined;
-}
-
 type CaptionProps = Pick<
     FileInfoProps,
     "allowEdits" | "scheduleUpdate" | "refreshPhotoswipe"
@@ -540,23 +535,14 @@ const Caption: React.FC<CaptionProps> = ({
 
     const caption = file.pubMagicMetadata?.data.caption ?? "";
 
-    const formik = useFormik<CaptionFormValues>({
+    const formik = useFormik<{ caption: string }>({
         initialValues: { caption },
-        validationSchema: Yup.object().shape({
-            caption: Yup.string().max(5000, t("caption_character_limit")),
-        }),
-        validateOnBlur: false,
-        onSubmit: async (
-            values: CaptionFormValues,
-            { setFieldError }: FormikHelpers<CaptionFormValues>,
-        ) => {
-            // TODO
-            const newCaption = values.caption!;
-            if (newCaption == caption) {
-                // Same as before.
-                return;
-            }
-
+        validate: ({ caption }) =>
+            caption.length > 5000
+                ? { caption: t("caption_character_limit") }
+                : {},
+        onSubmit: async ({ caption: newCaption }, { setFieldError }) => {
+            if (newCaption == caption) return;
             setIsSaving(true);
             try {
                 const updatedFile = await changeCaption(file, newCaption);
@@ -580,7 +566,7 @@ const Caption: React.FC<CaptionProps> = ({
     }
 
     return (
-        <CaptionForm noValidate onSubmit={handleSubmit}>
+        <CaptionForm onSubmit={handleSubmit}>
             <TextField
                 id="caption"
                 name="caption"
@@ -598,22 +584,19 @@ const Caption: React.FC<CaptionProps> = ({
             />
             {values.caption != caption && (
                 <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
-                    <IconButton type="submit" disabled={isSaving}>
+                    <IconButton
+                        type="submit"
+                        disabled={isSaving}
+                        // Prevent layout shift when we're showing progress.
+                        sx={{ minWidth: "48px" }}
+                    >
                         {isSaving ? (
                             <CircularProgress size="18px" color="inherit" />
                         ) : (
                             <DoneIcon />
                         )}
                     </IconButton>
-                    <IconButton
-                        onClick={() =>
-                            resetForm({
-                                values: { caption },
-                                touched: { caption: false },
-                            })
-                        }
-                        disabled={isSaving}
-                    >
+                    <IconButton onClick={() => resetForm()} disabled={isSaving}>
                         <CloseIcon />
                     </IconButton>
                 </Stack>
