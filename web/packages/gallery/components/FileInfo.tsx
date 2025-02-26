@@ -87,7 +87,7 @@ import {
     type ButtonProps,
     type DialogProps,
 } from "@mui/material";
-import { useFormik } from "formik";
+import { useFormik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
@@ -538,42 +538,45 @@ const Caption: React.FC<CaptionProps> = ({
 }) => {
     const { onGenericError } = useBaseContext();
 
-    const [caption, setCaption] = useState(file.pubMagicMetadata?.data.caption);
     const [isSaving, setIsSaving] = useState(false);
 
-    const onSubmit = async (values: CaptionFormValues) => {
-        const newCaption = values.caption;
-        if (!newCaption) return;
-        if (caption == newCaption) {
-            return;
-        }
+    const caption = file.pubMagicMetadata?.data.caption ?? "";
 
-        setIsSaving(true);
-        setCaption(newCaption);
-        try {
-            const updatedFile = await changeCaption(file, newCaption);
-            updateExistingFilePubMetadata(file, updatedFile);
-            // @ts-ignore
-            file.title = file.pubMagicMetadata.data.caption;
-            refreshPhotoswipe();
-            scheduleUpdate();
-        } catch (e) {
-            onGenericError(e);
-        }
-        setIsSaving(false);
-    };
+    const formik = useFormik<CaptionFormValues>({
+        initialValues: { caption },
+        validationSchema: Yup.object().shape({
+            caption: Yup.string().max(5000, t("caption_character_limit")),
+        }),
+        validateOnBlur: false,
+        onSubmit: async (
+            values: CaptionFormValues,
+            { setFieldError }: FormikHelpers<CaptionFormValues>,
+        ) => {
+            // TODO
+            const newCaption = values.caption!;
+            if (newCaption == caption) {
+                // Same as before.
+                return;
+            }
 
-    const { values, errors, handleChange, handleSubmit, resetForm } =
-        useFormik<CaptionFormValues>({
-            initialValues: { caption },
-            validationSchema: Yup.object().shape({
-                caption: Yup.string().max(5000, t("caption_character_limit")),
-            }),
-            validateOnBlur: false,
-            onSubmit,
-        });
+            setIsSaving(true);
+            try {
+                const updatedFile = await changeCaption(file, newCaption);
+                updateExistingFilePubMetadata(file, updatedFile);
+                // @ts-ignore
+                file.title = file.pubMagicMetadata.data.caption;
+                refreshPhotoswipe();
+                scheduleUpdate();
+            } catch (e) {
+                setFieldError("caption", t("generic_error"));
+            }
+            setIsSaving(false);
+        },
+    });
 
-    if (!caption?.length && !allowEdits) {
+    const { values, errors, handleChange, handleSubmit, resetForm } = formik;
+
+    if (!caption.length && !allowEdits) {
         return <></>;
     }
 
@@ -605,7 +608,7 @@ const Caption: React.FC<CaptionProps> = ({
                     <IconButton
                         onClick={() =>
                             resetForm({
-                                values: { caption: caption ?? "" },
+                                values: { caption },
                                 touched: { caption: false },
                             })
                         }
