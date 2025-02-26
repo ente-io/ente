@@ -12,6 +12,7 @@ import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import { SingleInputForm } from "@/base/components/SingleInputForm";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import {
@@ -22,7 +23,6 @@ import { useBaseContext } from "@/base/context";
 import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
 import { formattedDate, formattedTime } from "@/base/i18n-date";
-import log from "@/base/log";
 import type { Location } from "@/base/types";
 import { CopyButton } from "@/gallery/components/FileInfoComponents";
 import { tagNumericValue, type RawExifTags } from "@/gallery/services/exif";
@@ -60,9 +60,6 @@ import {
 } from "@/new/photos/services/ml";
 import { updateMapEnabled } from "@/new/photos/services/settings";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -79,6 +76,7 @@ import {
     Button,
     CircularProgress,
     IconButton,
+    InputAdornment,
     Link,
     Stack,
     styled,
@@ -739,26 +737,13 @@ const FileName: React.FC<FileNameProps> = ({
     allowEdits,
     scheduleUpdate,
 }) => {
-    const [isInEditMode, setIsInEditMode] = useState(false);
-    const openEditMode = () => setIsInEditMode(true);
-    const closeEditMode = () => setIsInEditMode(false);
-    const [fileName, setFileName] = useState<string>();
-    const [extension, setExtension] = useState<string>();
+    const { show: showRename, props: renameVisibilityProps } =
+        useModalVisibility();
 
-    useEffect(() => {
-        const [filename, extension] = nameAndExtension(file.metadata.title);
-        setFileName(filename);
-        setExtension(extension);
-    }, [file]);
+    const fileName = file.metadata.title;
 
-    const saveEdits = async (newFilename: string) => {
-        if (fileName === newFilename) {
-            closeEditMode();
-            return;
-        }
-        setFileName(newFilename);
-        const newTitle = [newFilename, extension].join(".");
-        const updatedFile = await changeFileName(file, newTitle);
+    const handleRename = async (newFileName: string) => {
+        const updatedFile = await changeFileName(file, newFileName);
         updateExistingFilePubMetadata(file, updatedFile);
         scheduleUpdate();
     };
@@ -781,18 +766,16 @@ const FileName: React.FC<FileNameProps> = ({
         <>
             <InfoItem
                 icon={icon}
-                title={[fileName, extension].join(".")}
+                title={fileName}
                 caption={caption}
                 trailingButton={
-                    allowEdits && <EditButton onClick={openEditMode} />
+                    allowEdits && <EditButton onClick={showRename} />
                 }
             />
-            <FileNameEditDialog
-                isInEditMode={isInEditMode}
-                closeEditMode={closeEditMode}
-                filename={fileName!}
-                extension={extension}
-                saveEdits={saveEdits}
+            <RenameFileDialog
+                {...renameVisibilityProps}
+                fileName={fileName}
+                onRename={handleRename}
             />
         </>
     );
@@ -810,49 +793,70 @@ const createMultipartCaption = (
     </Stack>
 );
 
-interface FileNameEditDialogProps {
-    isInEditMode: boolean;
-    closeEditMode: () => void;
-    filename: string;
-    extension: string | undefined;
-    saveEdits: (name: string) => Promise<void>;
-}
+type RenameFileDialogProps = ModalVisibilityProps & {
+    /**
+     * The current name of the file.
+     */
+    fileName: string;
+    /**
+     * Called when the user makes a change to the existing name and activates the
+     * rename button on the dialog.
+     *
+     * @param newFileName The changed name. The extension currently cannot be
+     * modified, but it is guaranteed the name component of {@link newFileName}
+     * will be different from that of the {@link fileName} prop of the dialog.
+     *
+     * Until the promise settles, the dialog will show an activity indicator. If
+     * the promise rejects, it will also show an error. If the promise is
+     * fulfilled, then the dialog will also be closed.
+     *
+     * The dialog will also be closed if the user activates the rename button
+     * without changing the name.
+     */
+    onRename: (newFileName: string) => Promise<void>;
+};
 
-const FileNameEditDialog: React.FC<FileNameEditDialogProps> = ({
-    isInEditMode,
-    closeEditMode,
-    filename,
-    extension,
-    saveEdits,
+const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
+    open,
+    onClose,
+    fileName,
+    onRename,
 }) => {
-    const onSubmit: SingleInputFormProps["callback"] = async (
-        filename,
-        setFieldError,
-    ) => {
-        try {
-            await saveEdits(filename);
-            closeEditMode();
-        } catch (e) {
-            log.error(e);
-            setFieldError(t("generic_error_retry"));
+    const [name, extension] = nameAndExtension(fileName);
+
+    const handleSubmit = async (newName: string) => {
+        const newFileName = [newName, extension].filter((x) => !!x).join(".");
+        if (newFileName != fileName) {
+            await onRename(newFileName);
         }
+        onClose();
     };
+
     return (
         <TitledMiniDialog
+            {...{ open, onClose }}
             sx={{ zIndex: aboveFileViewerContentZ }}
-            open={isInEditMode}
-            onClose={closeEditMode}
             title={t("rename_file")}
         >
             <SingleInputForm
-                initialValue={filename}
-                callback={onSubmit}
+                label={t("file_name")}
                 placeholder={t("enter_file_name")}
-                buttonText={t("rename")}
-                fieldType="text"
-                caption={extension}
-                secondaryButtonAction={closeEditMode}
-                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+                autoFocus
+                initialValue={name}
+                submitButtonTitle={t("rename")}
+                onSubmit={handleSubmit}
+                onCancel={onClose}
+                slotProps={{
+                    input: {
+                        // Align the adornment text to the input text.
+                        sx: { alignItems: "baseline" },
+                        endAdornment: extension && (
+                            <InputAdornment position="end">
+                                {`.${extension}`}
+                            </InputAdornment>
+                        ),
+                    },
+                }}
             />
         </TitledMiniDialog>
     );
