@@ -1,4 +1,3 @@
-import { assertionFailed } from "@/base/assert";
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
@@ -22,7 +21,7 @@ import {
 } from "@mui/material";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount } from "services/userService";
 
@@ -43,13 +42,8 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
 }) => {
     const { logout, showMiniDialog, onGenericError } = useBaseContext();
 
-    const [loading, setLoading] = useState(false);
-    const deleteAccountChallenge = useRef<string | undefined>(undefined);
-
     const [acceptDataDeletion, setAcceptDataDeletion] = useState(false);
-    const reasonAndFeedbackRef = useRef<
-        { reason: string; feedback: string } | undefined
-    >(undefined);
+    const [loading, setLoading] = useState(false);
 
     const { values, touched, errors, handleChange, handleSubmit } = useFormik({
         initialValues: { reason: "", feedback: "" },
@@ -69,13 +63,18 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
             try {
                 feedback = feedback.trim();
                 setLoading(true);
-                reasonAndFeedbackRef.current = { reason, feedback };
-                const deleteChallengeResponse =
+                const { allowDelete, encryptedChallenge } =
                     await getAccountDeleteChallenge();
-                deleteAccountChallenge.current =
-                    deleteChallengeResponse.encryptedChallenge;
-                if (deleteChallengeResponse.allowDelete) {
-                    onAuthenticateUser().then(confirmAccountDeletion);
+                if (allowDelete && encryptedChallenge) {
+                    onAuthenticateUser().then(() =>
+                        confirmAccountDeletion(() =>
+                            solveChallengeAndDeleteAccount(
+                                encryptedChallenge,
+                                reason,
+                                feedback,
+                            ),
+                        ),
+                    );
                 } else {
                     askToMailForDeletion();
                 }
@@ -87,14 +86,14 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
         },
     });
 
-    const confirmAccountDeletion = () =>
+    const confirmAccountDeletion = (onConfirm: () => void) =>
         showMiniDialog({
             title: t("delete_account"),
             message: <Trans i18nKey="delete_account_confirm_message" />,
             continue: {
                 text: t("delete"),
                 color: "critical",
-                action: solveChallengeAndDeleteAccount,
+                action: onConfirm,
             },
         });
 
@@ -118,15 +117,13 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
         });
     };
 
-    const solveChallengeAndDeleteAccount = async () => {
-        if (!deleteAccountChallenge.current || !reasonAndFeedbackRef.current) {
-            assertionFailed();
-            return;
-        }
-        const decryptedChallenge = await decryptDeleteAccountChallenge(
-            deleteAccountChallenge.current,
-        );
-        const { reason, feedback } = reasonAndFeedbackRef.current;
+    const solveChallengeAndDeleteAccount = async (
+        encryptedChallenge: string,
+        reason: string,
+        feedback: string,
+    ) => {
+        const decryptedChallenge =
+            await decryptDeleteAccountChallenge(encryptedChallenge);
         await deleteAccount(decryptedChallenge, reason, feedback);
         logout();
     };
