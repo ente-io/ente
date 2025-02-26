@@ -180,3 +180,29 @@ async function createNewRecoveryKey() {
 
     return recoveryKey;
 }
+
+/**
+ * Decrypt the {@link encryptedChallenge} sent by remote during the delete
+ * account flow ({@link getAccountDeleteChallenge}), returning a value that can
+ * then directly be passed to the actual delete account request
+ * ({@link deleteAccount}).
+ */
+export const decryptDeleteAccountChallenge = async (
+    encryptedChallenge: string,
+) => {
+    const cryptoWorker = await sharedCryptoWorker();
+    const masterKey = await getActualKey();
+    const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+    const secretKey = await cryptoWorker.decryptB64(
+        keyAttributes.encryptedSecretKey,
+        keyAttributes.secretKeyDecryptionNonce,
+        masterKey,
+    );
+    const b64DecryptedChallenge = await cryptoWorker.boxSealOpen(
+        encryptedChallenge,
+        keyAttributes.publicKey,
+        secretKey,
+    );
+    const utf8DecryptedChallenge = atob(b64DecryptedChallenge);
+    return utf8DecryptedChallenge;
+};

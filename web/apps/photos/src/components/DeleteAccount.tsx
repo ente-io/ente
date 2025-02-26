@@ -4,15 +4,13 @@ import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
-import { sharedCryptoWorker } from "@/base/crypto";
 import {
     DropdownInput,
     type DropdownOption,
 } from "@/new/photos/components/DropdownInput";
 import { getAccountDeleteChallenge } from "@/new/photos/services/user";
 import { initiateEmail } from "@/new/photos/utils/web";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
-import { getActualKey } from "@ente/shared/user";
+import { decryptDeleteAccountChallenge } from "@ente/shared/crypto/helpers";
 import {
     Checkbox,
     FormControlLabel,
@@ -276,21 +274,3 @@ const ConfirmationCheckboxInput: React.FC<ConfirmationCheckboxInputProps> = ({
         />
     </FormGroup>
 );
-
-async function decryptDeleteAccountChallenge(encryptedChallenge: string) {
-    const cryptoWorker = await sharedCryptoWorker();
-    const masterKey = await getActualKey();
-    const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-    const secretKey = await cryptoWorker.decryptB64(
-        keyAttributes.encryptedSecretKey,
-        keyAttributes.secretKeyDecryptionNonce,
-        masterKey,
-    );
-    const b64DecryptedChallenge = await cryptoWorker.boxSealOpen(
-        encryptedChallenge,
-        keyAttributes.publicKey,
-        secretKey,
-    );
-    const utf8DecryptedChallenge = atob(b64DecryptedChallenge);
-    return utf8DecryptedChallenge;
-}
