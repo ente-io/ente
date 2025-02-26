@@ -1,6 +1,7 @@
 import { setRecoveryKey } from "@/accounts/services/user";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
+import { masterKeyFromSession } from "@/base/session";
 import {
     LS_KEYS,
     getData,
@@ -191,11 +192,13 @@ export const decryptDeleteAccountChallenge = async (
     encryptedChallenge: string,
 ) => {
     const cryptoWorker = await sharedCryptoWorker();
-    const masterKey = await getActualKey();
+    const masterKey = await masterKeyFromSession();
     const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-    const secretKey = await cryptoWorker.decryptB64(
-        keyAttributes.encryptedSecretKey,
-        keyAttributes.secretKeyDecryptionNonce,
+    const secretKey = await cryptoWorker.decryptBoxB64(
+        {
+            encryptedData: keyAttributes.encryptedSecretKey,
+            nonce: keyAttributes.secretKeyDecryptionNonce,
+        },
         masterKey,
     );
     const b64DecryptedChallenge = await cryptoWorker.boxSealOpen(
