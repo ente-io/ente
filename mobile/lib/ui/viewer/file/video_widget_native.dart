@@ -160,6 +160,11 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
   @override
   void dispose() {
+    _subscription?.cancel();
+    _controller?.stop();
+    _controller?.dispose();
+    _controller = null;
+
     //https://github.com/fluttercandies/flutter_photo_manager/blob/8afba2745ebaac6af8af75de9cbded9157bc2690/README.md#clear-caches
     if (_shouldClearCache) {
       _logger.info("Clearing cache");
@@ -181,15 +186,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
-    _subscription?.cancel();
     _isPlaybackReady.dispose();
     _showControls.dispose();
     _isSeeking.removeListener(_seekListener);
     _isSeeking.dispose();
     _debouncer.cancelDebounceTimer();
     _elTooltipController.dispose();
-    _controller?.dispose();
-    _controller = null;
     super.dispose();
   }
 
