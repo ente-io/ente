@@ -58,37 +58,45 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
       return const SizedBox.shrink();
     }
     if (memoriesCacheService.enableSmartMemories) {
-      return FutureBuilder<List<SmartMemory>>(
-        future: memoriesCacheService.getMemories(
-          null,
-        ),
-        builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data!.isEmpty) {
-            return const SizedBox.shrink();
-          }
-          if (snapshot.hasError || !snapshot.hasData) {
-            return SizedBox(
-              height: _maxHeight + 12 + 10,
-              child: const EnteLoadingWidget(),
-            );
-          } else {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(
-                  height: 12,
-                ),
-                _buildSmartMemories(snapshot.data!),
-                const SizedBox(height: 10),
-              ],
-            ).animate().fadeIn(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeInOutCirc,
-                );
-          }
-        },
-      );
+      return _smartMemories();
     }
+    return _oldMemories();
+  }
+
+  Widget _smartMemories() {
+    return FutureBuilder<List<SmartMemory>>(
+      future: memoriesCacheService.getMemories(
+        null,
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.isEmpty) {
+          return _oldMemories();
+        }
+        if (snapshot.hasError || !snapshot.hasData) {
+          return SizedBox(
+            height: _maxHeight + 12 + 10,
+            child: const EnteLoadingWidget(),
+          );
+        } else {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 12,
+              ),
+              _buildSmartMemories(snapshot.data!),
+              const SizedBox(height: 10),
+            ],
+          ).animate().fadeIn(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOutCirc,
+              );
+        }
+      },
+    );
+  }
+
+  Widget _oldMemories() {
     return FutureBuilder<List<Memory>>(
       future: MemoriesService.instance.getMemories(),
       builder: (context, snapshot) {
