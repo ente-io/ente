@@ -9,7 +9,6 @@ import {
     DropdownInput,
     type DropdownOption,
 } from "@/new/photos/components/DropdownInput";
-import { usePhotosAppContext } from "@/new/photos/types/context";
 import { initiateEmail } from "@/new/photos/utils/web";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { getActualKey } from "@ente/shared/user";
@@ -49,8 +48,7 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
     onClose,
     onAuthenticateUser,
 }) => {
-    const { logout, showMiniDialog } = useBaseContext();
-    const { onGenericError } = usePhotosAppContext();
+    const { logout, showMiniDialog, onGenericError } = useBaseContext();
 
     const [loading, setLoading] = useState(false);
     const deleteAccountChallenge = useRef<string | undefined>(undefined);

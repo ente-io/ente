@@ -164,8 +164,8 @@ export const GalleryContext = createContext<GalleryContextType>(
  *           Photo List           v
  */
 const Page: React.FC = () => {
-    const { logout, showMiniDialog } = useBaseContext();
-    const { showLoadingBar, hideLoadingBar, onGenericError, watchFolderView } =
+    const { logout, showMiniDialog, onGenericError } = useBaseContext();
+    const { showLoadingBar, hideLoadingBar, watchFolderView } =
         usePhotosAppContext();
 
     const isOffline = useIsOffline();

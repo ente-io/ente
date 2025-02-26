@@ -40,7 +40,7 @@ const Page: React.FC = () => {
         } else {
             setSessionID(user.twoFactorSessionID);
         }
-    }, []);
+    }, [router]);
 
     const handleSubmit = async (otp: string) => {
         try {
