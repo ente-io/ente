@@ -111,9 +111,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
         ? IconType.simpleIcon
         : IconType.customIcon;
 
-    widget.code == null
-        ? _algorithm = Algorithm.sha1
-        : _algorithm = widget.code!.algorithm;
+    _algorithm = widget.code == null ? Algorithm.sha1 : widget.code!.algorithm;
 
     super.initState();
   }
