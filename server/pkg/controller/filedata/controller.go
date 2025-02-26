@@ -142,7 +142,7 @@ func (c *Controller) GetFileData(ctx *gin.Context, req fileData.GetFileData) (*f
 		return nil, stacktrace.Propagate(err, "")
 	}
 	if len(doRows) == 0 || doRows[0].IsDeleted {
-		return nil, stacktrace.Propagate(ente.ErrNotFound, "")
+		return nil, stacktrace.Propagate(&ente.ErrNotFoundError, "")
 	}
 	ctxLogger := log.WithFields(log.Fields{
 		"objectKey":     doRows[0].S3FileMetadataObjectKey(),
