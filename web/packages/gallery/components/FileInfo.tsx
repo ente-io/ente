@@ -58,7 +58,6 @@ import {
     type AnnotatedFaceID,
 } from "@/new/photos/services/ml";
 import { updateMapEnabled } from "@/new/photos/services/settings";
-import { FlexWrapper } from "@ente/shared/components/Container";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -93,6 +92,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
 
 // Re-uses images from ~leaflet package.
+import log from "@/base/log";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
 import "leaflet/dist/leaflet.css";
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unused-expressions
@@ -536,8 +536,6 @@ const Caption: React.FC<CaptionProps> = ({
     scheduleUpdate,
     refreshPhotoswipe,
 }) => {
-    const { onGenericError } = useBaseContext();
-
     const [isSaving, setIsSaving] = useState(false);
 
     const caption = file.pubMagicMetadata?.data.caption ?? "";
@@ -565,11 +563,12 @@ const Caption: React.FC<CaptionProps> = ({
                 updateExistingFilePubMetadata(file, updatedFile);
                 // @ts-ignore
                 file.title = file.pubMagicMetadata.data.caption;
-                refreshPhotoswipe();
-                scheduleUpdate();
             } catch (e) {
+                log.error("Failed to update caption", e);
                 setFieldError("caption", t("generic_error"));
             }
+            refreshPhotoswipe();
+            scheduleUpdate();
             setIsSaving(false);
         },
     });
@@ -583,24 +582,25 @@ const Caption: React.FC<CaptionProps> = ({
     return (
         <CaptionForm noValidate onSubmit={handleSubmit}>
             <TextField
-                hiddenLabel
-                fullWidth
                 id="caption"
                 name="caption"
                 type="text"
                 multiline
+                aria-label={t("description")}
+                hiddenLabel
+                fullWidth
                 placeholder={t("caption_placeholder")}
                 value={values.caption}
                 onChange={handleChange("caption")}
-                error={Boolean(errors.caption)}
+                error={!!errors.caption}
                 helperText={errors.caption}
                 disabled={!allowEdits || isSaving}
             />
-            {values.caption !== caption && (
-                <FlexWrapper justifyContent={"flex-end"}>
+            {values.caption != caption && (
+                <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
                     <IconButton type="submit" disabled={isSaving}>
                         {isSaving ? (
-                            <CircularProgress size={"18px"} color="inherit" />
+                            <CircularProgress size="18px" color="inherit" />
                         ) : (
                             <DoneIcon />
                         )}
@@ -616,7 +616,7 @@ const Caption: React.FC<CaptionProps> = ({
                     >
                         <CloseIcon />
                     </IconButton>
-                </FlexWrapper>
+                </Stack>
             )}
         </CaptionForm>
     );
@@ -674,11 +674,10 @@ const CreationTime: React.FC<CreationTimeProps> = ({
                 dateTime,
                 editedTime,
             });
-
-            scheduleUpdate();
         } catch (e) {
             onGenericError(e);
         }
+        scheduleUpdate();
         setIsSaving(false);
     };
 
