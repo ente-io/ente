@@ -1,5 +1,5 @@
 import log from "@/base/log";
-import { masterKeyFromSession } from "@/base/session-store";
+import { masterKeyFromSession } from "@/base/session";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import i18n, { t } from "i18next";

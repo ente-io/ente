@@ -81,29 +81,6 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
     }
 };
 
-export interface DeleteChallengeResponse {
-    allowDelete: boolean;
-    encryptedChallenge: string;
-}
-
-export const getAccountDeleteChallenge = async () => {
-    try {
-        const token = getToken();
-
-        const resp = await HTTPService.get(
-            await apiURL("/users/delete-challenge"),
-            null,
-            {
-                "X-Auth-Token": token,
-            },
-        );
-        return resp.data as DeleteChallengeResponse;
-    } catch (e) {
-        log.error("failed to get account delete challenge", e);
-        throw e;
-    }
-};
-
 export const deleteAccount = async (
     challenge: string,
     reason: string,

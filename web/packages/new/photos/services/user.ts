@@ -1,5 +1,6 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
+import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 
 /**
@@ -23,3 +24,20 @@ export const disable2FA = async () =>
             headers: await authenticatedRequestHeaders(),
         }),
     );
+
+const DeleteChallengeResponse = z.object({
+    // allowDelete indicates whether the user is allowed to delete their account
+    // via app (some special-cased accounts might need to contact support).
+    allowDelete: z.boolean(),
+    // An encrypted challenge that the client needs to decrypt and provide in
+    // the actual account deletion request.
+    encryptedChallenge: z.string().nullable().transform(nullToUndefined),
+});
+
+export const getAccountDeleteChallenge = async () => {
+    const res = await fetch(await apiURL("/users/delete-challenge"), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return DeleteChallengeResponse.parse(await res.json());
+};
