@@ -219,10 +219,10 @@ func (c *Controller) getS3FileMetadataParallel(dbRows []fileData.Row) ([]bulkS3M
 			defer func() { <-globalFileFetchSemaphore }() // Release back to global semaphore
 			dc := row.LatestBucket
 			// :todo:neeraj make it configurable
-			// treat b6 as preferred bucket for reading
-			if dc == "b5" {
-				if array.StringInList("b6", row.ReplicatedBuckets) {
-					dc = "b6"
+			// treat b5 as preferred bucket for reading
+			if dc == "b6" {
+				if array.StringInList("b5", row.ReplicatedBuckets) {
+					dc = "b5"
 				}
 			}
 			s3FileMetadata, err := c.fetchS3FileMetadata(context.Background(), row, dc)
