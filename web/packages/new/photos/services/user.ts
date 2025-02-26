@@ -41,3 +41,23 @@ export const getAccountDeleteChallenge = async () => {
     ensureOk(res);
     return DeleteChallengeResponse.parse(await res.json());
 };
+
+/**
+ * Delete the logged in user's account on remote.
+ *
+ * @param challenge Decrypted value of the challenge previously obtained via
+ * {@link getAccountDeleteChallenge}. The decryption algorithm is implemented in
+ * {@link decryptDeleteAccountChallenge}.
+ */
+export const deleteAccount = async (
+    challenge: string,
+    reason: string,
+    feedback: string,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/users/delete"), {
+            method: "DELETE",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ challenge, reason, feedback }),
+        }),
+    );

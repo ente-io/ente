@@ -37,6 +37,7 @@ import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { downloadString } from "@/base/utils/web";
+import { DeleteAccount } from "@/new/photos/components/DeleteAccount";
 import { DropdownInput } from "@/new/photos/components/DropdownInput";
 import { MLSettings } from "@/new/photos/components/sidebar/MLSettings";
 import { TwoFactorSettings } from "@/new/photos/components/sidebar/TwoFactorSettings";
@@ -109,7 +110,6 @@ import {
     useColorScheme,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { DeleteAccount } from "components/DeleteAccount";
 import { WatchFolder } from "components/WatchFolder";
 import { t } from "i18next";
 import { useRouter } from "next/router";
