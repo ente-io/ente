@@ -62,42 +62,43 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
             return {};
         },
         onSubmit: async ({ reason, feedback }) => {
+            feedback = feedback.trim();
+            setLoading(true);
             try {
-                feedback = feedback.trim();
-                setLoading(true);
                 const { allowDelete, encryptedChallenge } =
                     await getAccountDeleteChallenge();
                 if (allowDelete && encryptedChallenge) {
-                    onAuthenticateUser().then(() =>
-                        confirmAccountDeletion(() =>
+                    await onAuthenticateUser()
+                        .then(confirmAccountDeletion)
+                        .then(() =>
                             solveChallengeAndDeleteAccount(
                                 encryptedChallenge,
                                 reason,
                                 feedback,
                             ),
-                        ),
-                    );
+                        );
                 } else {
                     askToMailForDeletion();
                 }
             } catch (e) {
                 onGenericError(e);
-            } finally {
-                setLoading(false);
             }
+            setLoading(false);
         },
     });
 
-    const confirmAccountDeletion = (onConfirm: () => void) =>
-        showMiniDialog({
-            title: t("delete_account"),
-            message: <Trans i18nKey="delete_account_confirm_message" />,
-            continue: {
-                text: t("delete"),
-                color: "critical",
-                action: onConfirm,
-            },
-        });
+    const confirmAccountDeletion = () =>
+        new Promise<void>((resolve) =>
+            showMiniDialog({
+                title: t("delete_account"),
+                message: <Trans i18nKey="delete_account_confirm_message" />,
+                continue: {
+                    text: t("delete"),
+                    color: "critical",
+                    action: resolve,
+                },
+            }),
+        );
 
     const askToMailForDeletion = () => {
         const emailID = "account-deletion@ente.io";
