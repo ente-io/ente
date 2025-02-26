@@ -26,7 +26,6 @@ import { t } from "i18next";
 import React, { useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
-import * as Yup from "yup";
 
 type DeleteAccountProps = ModalVisibilityProps & {
     /**
@@ -55,25 +54,21 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
 
     const { values, errors, handleChange, handleSubmit } = useFormik({
         initialValues: { reason: "", feedback: "" },
-        validationSchema: Yup.object().shape({
-            reason: Yup.string().required(t("required")),
-        }),
-        onSubmit: async ({ reason, feedback }, { setFieldError }) => {
+        validate: ({ reason, feedback }) => {
+            if (!reason) return { reason: t("required") };
+            if (!feedback.trim().length) {
+                return {
+                    feedback:
+                        reason == "found_another_service"
+                            ? t("feedback_required_found_another_service")
+                            : t("feedback_required"),
+                };
+            }
+            return {};
+        },
+        onSubmit: async ({ reason, feedback }) => {
             try {
                 feedback = feedback.trim();
-                if (feedback.length === 0) {
-                    switch (reason) {
-                        case "found_another_service":
-                            setFieldError(
-                                "feedback",
-                                t("feedback_required_found_another_service"),
-                            );
-                            break;
-                        default:
-                            setFieldError("feedback", t("feedback_required"));
-                    }
-                    return;
-                }
                 setLoading(true);
                 reasonAndFeedbackRef.current = { reason, feedback };
                 const deleteChallengeResponse =
