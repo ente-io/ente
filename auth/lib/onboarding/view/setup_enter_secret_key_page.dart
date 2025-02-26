@@ -75,8 +75,6 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           : defaultDigits.toString(),
     );
 
-    _logger.info("------ Display Digits ${_digitsController.text}");
-
     _secretKeyObscured = widget.code != null;
     _loadTags();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
