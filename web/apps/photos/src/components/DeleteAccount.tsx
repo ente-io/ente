@@ -58,8 +58,6 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
         validationSchema: Yup.object().shape({
             reason: Yup.string().required(t("required")),
         }),
-        validateOnChange: false,
-        validateOnBlur: false,
         onSubmit: async ({ reason, feedback }, { setFieldError }) => {
             try {
                 feedback = feedback.trim();
@@ -145,7 +143,7 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
             onClose={onClose}
             title={t("delete_account")}
         >
-            <form noValidate onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
                 <Stack sx={{ gap: "24px" }}>
                     <Stack sx={{ gap: "4px" }}>
                         <Typography>
