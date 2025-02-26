@@ -13,6 +13,7 @@ import 'package:ente_auth/onboarding/view/common/field_label.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/algorithm_selector_widget.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/custom_icon_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
@@ -38,10 +39,12 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   final Logger _logger = Logger('_SetupEnterSecretKeyPageState');
   final int _notesLimit = 500;
   final int _otherTextLimit = 200;
+  final int defaultDigits = 6;
   late TextEditingController _issuerController;
   late TextEditingController _accountController;
   late TextEditingController _secretController;
   late TextEditingController _notesController;
+  late TextEditingController _digitsController;
   late bool _secretKeyObscured;
   late List<String> selectedTags = [...?widget.code?.display.tags];
   List<String> allTags = [];
@@ -49,6 +52,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   bool isCustomIcon = false;
   String _customIconID = "";
   late IconType _iconSrc;
+  late Algorithm _algorithm;
 
   @override
   void initState() {
@@ -65,6 +69,14 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     _notesController = TextEditingController(
       text: widget.code?.display.note,
     );
+    _digitsController = TextEditingController(
+      text: widget.code != null
+          ? widget.code!.digits.toString()
+          : defaultDigits.toString(),
+    );
+
+    _logger.info("------ Display Digits ${_digitsController.text}");
+
     _secretKeyObscured = widget.code != null;
     _loadTags();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
@@ -101,6 +113,10 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
         ? IconType.simpleIcon
         : IconType.customIcon;
 
+    widget.code == null
+        ? _algorithm = Algorithm.sha1
+        : _algorithm = widget.code!.algorithm;
+
     super.initState();
   }
 
@@ -121,6 +137,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     _issuerController.dispose();
     _accountController.dispose();
     _notesController.dispose();
+    _digitsController.dispose();
     super.dispose();
   }
 
@@ -268,6 +285,52 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const FieldLabel("Digits"),
+                      Expanded(
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          // The validator receives the text that the user has entered.
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter a number";
+                            }
+                            final intValue = int.tryParse(value);
+                            if (intValue == null) {
+                              return "Only integers are allowed";
+                            }
+                            if (intValue < 1 || intValue > 10) {
+                              return "OTP digits must be between 1 and 10";
+                            }
+                            return null;
+                          },
+                          maxLines: 1,
+                          decoration: const InputDecoration(
+                            contentPadding:
+                                EdgeInsets.symmetric(vertical: 12.0),
+                          ),
+                          style: getEnteTextTheme(context).small,
+                          controller: _digitsController,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: [
+                      const FieldLabel("Algorithm"),
+                      AlgorithmSelectorWidget(
+                        currentAlgorithm: _algorithm,
+                        onSelected: (newAlgorithm) async {
+                          setState(() {
+                            _algorithm = newAlgorithm;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   Wrap(
                     spacing: 12,
                     alignment: WrapAlignment.start,
@@ -322,12 +385,29 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                       onPressed: () async {
+                        final digits =
+                            int.tryParse(_digitsController.text.trim());
+                        if (digits != null && (digits < 1 || digits > 10)) {
+                          String message = "Digits must be between 1 and 10";
+                          _showIncorrectDetailsDialog(
+                            context,
+                            message: message,
+                          );
+                          return;
+                        }
+
                         if ((_accountController.text.trim().isEmpty &&
                                 _issuerController.text.trim().isEmpty) ||
-                            _secretController.text.trim().isEmpty) {
+                            _secretController.text.trim().isEmpty ||
+                            _digitsController.text.trim().isEmpty ||
+                            digits == null) {
                           String message;
                           if (_secretController.text.trim().isEmpty) {
                             message = context.l10n.secretCanNotBeEmpty;
+                          } else if (_digitsController.text.isEmpty) {
+                            message = "Digits cannot be empty";
+                          } else if (digits == null) {
+                            message = "Digits is not a integer";
                           } else {
                             message =
                                 context.l10n.bothIssuerAndAccountCanNotBeEmpty;
@@ -358,6 +438,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final issuer = _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
       final notes = _notesController.text.trim();
+      final digits = int.tryParse(_digitsController.text.trim());
+
       final isStreamCode = issuer.toLowerCase() == "steam" ||
           issuer.toLowerCase().contains('steampowered.com');
       final CodeDisplay display =
@@ -398,14 +480,18 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               issuer,
               secret,
               display,
-              isStreamCode ? Code.steamDigits : Code.defaultDigits,
+              isStreamCode ? Code.steamDigits : digits!,
+              _algorithm,
             )
           : widget.code!.copyWith(
               account: account,
               issuer: issuer,
               secret: secret,
               display: display,
+              algorithm: _algorithm,
+              digits: digits!,
             );
+
       // Verify the validity of the code
       getOTP(newCode);
       Navigator.of(context).pop(newCode);
