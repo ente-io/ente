@@ -255,8 +255,9 @@ func (c *Controller) getS3FileMetadataParallel(ctx *gin.Context, dbRows []fileDa
 
 func (c *Controller) fetchS3FileMetadata(ctx context.Context, row fileData.Row, ctxLogger *log.Entry) (*fileData.S3FileMetadata, error) {
 	dc := row.LatestBucket
-	// :todo:neeraj make it configurable
-	// treat b5 as preferred bucket for reading
+	// :todo:neeraj make it configurable to
+	// specify preferred dc to read from
+	// and fallback logic to read from different bucket when we fail to read from preferred dc
 	if dc == "b6" {
 		if array.StringInList("b5", row.ReplicatedBuckets) {
 			dc = "b5"
