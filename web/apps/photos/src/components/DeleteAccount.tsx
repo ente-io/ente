@@ -7,7 +7,10 @@ import {
     DropdownInput,
     type DropdownOption,
 } from "@/new/photos/components/DropdownInput";
-import { getAccountDeleteChallenge } from "@/new/photos/services/user";
+import {
+    deleteAccount,
+    getAccountDeleteChallenge,
+} from "@/new/photos/services/user";
 import { initiateEmail } from "@/new/photos/utils/web";
 import { decryptDeleteAccountChallenge } from "@ente/shared/crypto/helpers";
 import {
@@ -23,7 +26,6 @@ import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useState } from "react";
 import { Trans } from "react-i18next";
-import { deleteAccount } from "services/userService";
 
 type DeleteAccountProps = ModalVisibilityProps & {
     /**
