@@ -51,7 +51,7 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
         { reason: string; feedback: string } | undefined
     >(undefined);
 
-    const { values, errors, handleChange, handleSubmit } = useFormik({
+    const { values, touched, errors, handleChange, handleSubmit } = useFormik({
         initialValues: { reason: "", feedback: "" },
         validate: ({ reason, feedback }) => {
             if (!reason) return { reason: t("required") };
@@ -149,7 +149,7 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
                             selected={values.reason}
                             onSelect={handleChange("reason")}
                         />
-                        {errors.reason && (
+                        {touched.reason && errors.reason && (
                             <Typography
                                 variant="small"
                                 sx={{ px: 1, color: "critical.main" }}
@@ -161,7 +161,9 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
                     <FeedbackInput
                         value={values.feedback}
                         onChange={handleChange("feedback")}
-                        errorMessage={errors.feedback}
+                        errorMessage={
+                            touched.feedback ? errors.feedback : undefined
+                        }
                     />
                     <ConfirmationCheckboxInput
                         checked={acceptDataDeletion}
@@ -212,7 +214,7 @@ const deleteReasonOptions = (): DropdownOption<DeleteReason>[] =>
 
 interface FeedbackInputProps {
     value: string;
-    errorMessage?: string;
+    errorMessage?: string | undefined;
     onChange: (value: string) => void;
 }
 
@@ -242,9 +244,14 @@ const FeedbackInput: React.FC<FeedbackInputProps> = ({
                 },
             }}
         />
-        <Typography variant="small" sx={{ px: "8px", color: "critical.main" }}>
-            {errorMessage}
-        </Typography>
+        {errorMessage && (
+            <Typography
+                variant="small"
+                sx={{ px: "8px", color: "critical.main" }}
+            >
+                {errorMessage}
+            </Typography>
+        )}
     </Stack>
 );
 
