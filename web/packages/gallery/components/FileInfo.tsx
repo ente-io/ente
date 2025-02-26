@@ -8,7 +8,6 @@ Plan of action:
 */
 
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
-import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
@@ -75,6 +74,9 @@ import {
     Box,
     Button,
     CircularProgress,
+    Dialog,
+    DialogContent,
+    DialogTitle,
     IconButton,
     InputAdornment,
     Link,
@@ -833,32 +835,38 @@ const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
     };
 
     return (
-        <TitledMiniDialog
+        <Dialog
             {...{ open, onClose }}
             sx={{ zIndex: aboveFileViewerContentZ }}
-            title={t("rename_file")}
+            fullWidth
+            maxWidth="xs"
         >
-            <SingleInputForm
-                label={t("file_name")}
-                placeholder={t("enter_file_name")}
-                autoFocus
-                initialValue={name}
-                submitButtonTitle={t("rename")}
-                onSubmit={handleSubmit}
-                onCancel={onClose}
-                slotProps={{
-                    input: {
-                        // Align the adornment text to the input text.
-                        sx: { alignItems: "baseline" },
-                        endAdornment: extension && (
-                            <InputAdornment position="end">
-                                {`.${extension}`}
-                            </InputAdornment>
-                        ),
-                    },
-                }}
-            />
-        </TitledMiniDialog>
+            <DialogTitle sx={{ "&&&": { paddingBlock: "26px 0px" } }}>
+                {t("rename_file")}
+            </DialogTitle>
+            <DialogContent>
+                <SingleInputForm
+                    label={t("file_name")}
+                    placeholder={t("enter_file_name")}
+                    autoFocus
+                    initialValue={name}
+                    submitButtonTitle={t("rename")}
+                    onSubmit={handleSubmit}
+                    onCancel={onClose}
+                    slotProps={{
+                        input: {
+                            // Align the adornment text to the input text.
+                            sx: { alignItems: "baseline" },
+                            endAdornment: extension && (
+                                <InputAdornment position="end">
+                                    {`.${extension}`}
+                                </InputAdornment>
+                            ),
+                        },
+                    }}
+                />
+            </DialogContent>
+        </Dialog>
     );
 };
 
