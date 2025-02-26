@@ -809,7 +809,7 @@ const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
             <DialogContent>
                 <SingleInputForm
                     label={t("file_name")}
-                    placeholder={t("enter_file_name")}
+                    placeholder={t("file_name")}
                     autoFocus
                     initialValue={name}
                     submitButtonTitle={t("rename")}
