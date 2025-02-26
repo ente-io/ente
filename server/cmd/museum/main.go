@@ -755,14 +755,7 @@ func main() {
 	pushHandler := &api.PushHandler{PushController: pushController}
 	privateAPI.POST("/push/token", pushHandler.AddToken)
 
-	embeddingController := embeddingCtrl.New(embeddingRepo, accessCtrl, objectCleanupController, s3Config, queueRepo, taskLockingRepo, fileRepo, collectionRepo, hostName)
-	embeddingHandler := &api.EmbeddingHandler{Controller: embeddingController}
-
-	privateAPI.PUT("/embeddings", embeddingHandler.InsertOrUpdate)
-	privateAPI.GET("/embeddings/diff", embeddingHandler.GetDiff)
-	privateAPI.GET("/embeddings/indexed-files", embeddingHandler.GetIndexedFiles)
-	privateAPI.POST("/embeddings/files", embeddingHandler.GetFilesEmbedding)
-	privateAPI.DELETE("/embeddings", embeddingHandler.DeleteAll)
+	embeddingController := embeddingCtrl.New(embeddingRepo, objectCleanupController, queueRepo, taskLockingRepo, fileRepo, hostName)
 
 	offerHandler := &api.OfferHandler{Controller: offerController}
 	publicAPI.GET("/offers/black-friday", offerHandler.GetBlackFridayOffers)

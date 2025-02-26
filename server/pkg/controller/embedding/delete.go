@@ -4,23 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/ente-io/museum/pkg/repo"
-	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/time"
-	"github.com/ente-io/stacktrace"
-	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"strconv"
 )
-
-func (c *Controller) DeleteAll(ctx *gin.Context) error {
-	userID := auth.GetUserID(ctx.Request.Header)
-
-	err := c.Repo.DeleteAll(ctx, userID)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	return nil
-}
 
 // CleanupDeletedEmbeddings clears all embeddings for deleted files from the object store
 func (c *Controller) CleanupDeletedEmbeddings() {

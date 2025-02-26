@@ -23,8 +23,6 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
-            "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"),
-        "orPickFromYourContacts":
-            MessageLookupByLibrary.simpleMessage("or pick from your contacts")
+            "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας")
       };
 }

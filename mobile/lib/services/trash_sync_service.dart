@@ -1,6 +1,9 @@
 import 'dart:async';
+import "dart:convert";
+import "dart:math";
 
 import 'package:dio/dio.dart';
+import "package:ente_crypto/ente_crypto.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
@@ -13,20 +16,20 @@ import 'package:photos/models/api/collection/trash_item_request.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/ignored_file.dart';
+import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/services/ignored_files_service.dart';
-import 'package:photos/utils/trash_diff_fetcher.dart';
+import "package:photos/utils/file_key.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TrashSyncService {
   final _logger = Logger("TrashSyncService");
-  final TrashDiffFetcher _diffFetcher;
+
   final _trashDB = TrashDB.instance;
   static const kLastTrashSyncTime = "last_trash_sync_time";
   late SharedPreferences _prefs;
   final Dio _enteDio;
 
-  TrashSyncService(this._prefs, this._enteDio)
-      : _diffFetcher = TrashDiffFetcher(_enteDio) {
+  TrashSyncService(this._prefs, this._enteDio) {
     _logger.fine("TrashSyncService constructor");
   }
 
@@ -38,7 +41,7 @@ class TrashSyncService {
     final lastSyncTime = _getSyncTime();
     bool isLocalTrashUpdated = false;
     _logger.fine('sync trash sinceTime : $lastSyncTime');
-    final diff = await _diffFetcher.getTrashFilesDiff(lastSyncTime);
+    final diff = await getTrashFilesDiff(lastSyncTime);
     if (diff.trashedFiles.isNotEmpty) {
       isLocalTrashUpdated = true;
       _logger.fine("inserting ${diff.trashedFiles.length} items in trash");
@@ -80,7 +83,7 @@ class TrashSyncService {
     }
   }
 
-  Future<void> _updateIgnoredFiles(Diff diff) async {
+  Future<void> _updateIgnoredFiles(TrashDiff diff) async {
     final ignoredFiles = <IgnoredFile>[];
     for (TrashFile t in diff.trashedFiles) {
       final file = IgnoredFile.fromTrashItem(t);
@@ -119,6 +122,103 @@ class TrashSyncService {
         requestData["items"].add(item.toJson());
       }
       await _trashFiles(requestData);
+    }
+  }
+
+  Future<TrashDiff> getTrashFilesDiff(int sinceTime) async {
+    try {
+      final response = await _enteDio.get(
+        "/trash/v2/diff",
+        queryParameters: {
+          "sinceTime": sinceTime,
+        },
+      );
+      int latestUpdatedAtTime = 0;
+      final trashedFiles = <TrashFile>[];
+      final deletedUploadIDs = <int>[];
+      final restoredFiles = <TrashFile>[];
+
+      final diff = response.data["diff"] as List;
+      final bool hasMore = response.data["hasMore"] as bool;
+      final startTime = DateTime.now();
+      for (final item in diff) {
+        final trash = TrashFile();
+        trash.createdAt = item['createdAt'];
+        trash.updateAt = item['updatedAt'];
+        latestUpdatedAtTime = max(latestUpdatedAtTime, trash.updateAt);
+        if (item["isDeleted"]) {
+          deletedUploadIDs.add(item["file"]["id"]);
+          continue;
+        }
+
+        trash.deleteBy = item['deleteBy'];
+        trash.uploadedFileID = item["file"]["id"];
+        trash.collectionID = item["file"]["collectionID"];
+        trash.updationTime = item["file"]["updationTime"];
+        trash.ownerID = item["file"]["ownerID"];
+        trash.encryptedKey = item["file"]["encryptedKey"];
+        trash.keyDecryptionNonce = item["file"]["keyDecryptionNonce"];
+        trash.fileDecryptionHeader = item["file"]["file"]["decryptionHeader"];
+        trash.thumbnailDecryptionHeader =
+            item["file"]["thumbnail"]["decryptionHeader"];
+        trash.metadataDecryptionHeader =
+            item["file"]["metadata"]["decryptionHeader"];
+        final fileDecryptionKey = getFileKey(trash);
+        final encodedMetadata = await CryptoUtil.decryptChaCha(
+          CryptoUtil.base642bin(item["file"]["metadata"]["encryptedData"]),
+          fileDecryptionKey,
+          CryptoUtil.base642bin(trash.metadataDecryptionHeader!),
+        );
+        final Map<String, dynamic> metadata =
+            jsonDecode(utf8.decode(encodedMetadata));
+        trash.applyMetadata(metadata);
+        if (item["file"]['magicMetadata'] != null) {
+          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+            CryptoUtil.base642bin(item["file"]['magicMetadata']['data']),
+            fileDecryptionKey,
+            CryptoUtil.base642bin(item["file"]['magicMetadata']['header']),
+          );
+          trash.mMdEncodedJson = utf8.decode(utfEncodedMmd);
+          trash.mMdVersion = item["file"]['magicMetadata']['version'];
+        }
+        if (item["file"]['pubMagicMetadata'] != null) {
+          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+            CryptoUtil.base642bin(item["file"]['pubMagicMetadata']['data']),
+            fileDecryptionKey,
+            CryptoUtil.base642bin(item["file"]['pubMagicMetadata']['header']),
+          );
+          trash.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
+          trash.pubMmdVersion = item["file"]['pubMagicMetadata']['version'];
+          trash.pubMagicMetadata =
+              PubMagicMetadata.fromEncodedJson(trash.pubMmdEncodedJson!);
+        }
+        if (item['isRestored']) {
+          restoredFiles.add(trash);
+          continue;
+        }
+        trashedFiles.add(trash);
+      }
+
+      final endTime = DateTime.now();
+      _logger.info(
+        "time for parsing " +
+            diff.length.toString() +
+            ": " +
+            Duration(
+              microseconds: (endTime.microsecondsSinceEpoch -
+                  startTime.microsecondsSinceEpoch),
+            ).inMilliseconds.toString(),
+      );
+      return TrashDiff(
+        trashedFiles,
+        restoredFiles,
+        deletedUploadIDs,
+        hasMore,
+        latestUpdatedAtTime,
+      );
+    } catch (e, s) {
+      _logger.severe(e, s);
+      rethrow;
     }
   }
 
@@ -173,4 +273,19 @@ class TrashSyncService {
       rethrow;
     }
   }
+}
+
+class TrashDiff {
+  final List<TrashFile> trashedFiles;
+  final List<TrashFile> restoredFiles;
+  final List<int> deletedUploadIDs;
+  final bool hasMore;
+  final int lastSyncedTimeStamp;
+  TrashDiff(
+    this.trashedFiles,
+    this.restoredFiles,
+    this.deletedUploadIDs,
+    this.hasMore,
+    this.lastSyncedTimeStamp,
+  );
 }

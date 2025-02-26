@@ -58,6 +58,8 @@ bool isHandledSyncError(Object errObj) {
 
 class LockAlreadyAcquiredError extends Error {}
 
+class LockFreedError extends Error{}
+
 class UnauthorizedError extends Error {}
 
 class RequestCancelledError extends Error {}
