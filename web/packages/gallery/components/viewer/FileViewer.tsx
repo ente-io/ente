@@ -13,10 +13,7 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     throw new Error("Whoa");
 }
 
-import {
-    useModalVisibility,
-    type ModalVisibilityProps,
-} from "@/base/components/utils/modal";
+import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { LocalUser } from "@/base/local-user";
 import log from "@/base/log";
 import {
@@ -127,17 +124,17 @@ const FileViewer: React.FC<FileViewerProps> = ({
         FileInfoExif | undefined
     >(undefined);
 
+    const [openFileInfo, setOpenFileInfo] = useState(false);
+
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
-
-    const { show: showFileInfo, props: fileInfoVisibilityProps } =
-        useModalVisibility();
 
     const handleClose = useCallback(() => {
         setNeedsSync((needSync) => {
             if (needSync) onTriggerSyncWithRemote?.();
             return false;
         });
+        setOpenFileInfo(false);
         onClose();
     }, [onTriggerSyncWithRemote, onClose]);
 
@@ -158,10 +155,12 @@ const FileViewer: React.FC<FileViewerProps> = ({
                     setActiveFileExif(exif),
                 ),
             );
-            showFileInfo();
+            setOpenFileInfo(true);
         },
-        [showFileInfo],
+        [],
     );
+
+    const handleInfoClose = useCallback(() => setOpenFileInfo(false), []);
 
     const handleScheduleUpdate = useCallback(() => setNeedsSync(true), []);
 
@@ -235,7 +234,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
         <Container>
             <Button>Test</Button>
             <FileInfo
-                {...fileInfoVisibilityProps}
+                open={openFileInfo}
+                onClose={handleInfoClose}
                 file={activeAnnotatedFile?.file}
                 exif={activeFileExif}
                 allowEdits={!!activeAnnotatedFile?.annotation.isOwnFile}
