@@ -18,19 +18,6 @@ rootProject.buildDir = "../build"
 
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    afterEvaluate { project ->
-        if (project.plugins.hasPlugin("com.android.application") ||
-                project.plugins.hasPlugin("com.android.library")) {
-            project.android {
-                compileSdkVersion 35
-                buildToolsVersion "35.0.0"
-            }
-        }
-    }
-}
-subprojects {
     project.evaluationDependsOn(":app")
 }
 
