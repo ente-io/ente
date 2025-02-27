@@ -48,9 +48,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 
-// import "photoswipe/dist/photoswipe.css";
+import "photoswipe/dist/photoswipe.css";
 // TODO(PS): Note, auto hide only works with the new CSS.
-import "../../../../packages/gallery/components/viewer/ps5/dist/photoswipe.css";
+// import "../../../../packages/gallery/components/viewer/ps5/dist/photoswipe.css";
 
 import "styles/global.css";
 
