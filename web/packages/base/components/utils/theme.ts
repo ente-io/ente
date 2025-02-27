@@ -546,7 +546,8 @@ const components: Components = {
             // This is required to prevent console errors about aria-hiding a
             // focused button when the dialog is closed.
             //
-            // https://github.com/mui/material-ui/issues/43106#issuecomment-2314809028
+            // - https://github.com/mui/material-ui/issues/43106#issuecomment-2314809028
+            // - https://issues.chromium.org/issues/392121909
             closeAfterTransition: false,
         },
         styleOverrides: {
