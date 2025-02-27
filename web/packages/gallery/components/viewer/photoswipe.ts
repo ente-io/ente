@@ -5,6 +5,7 @@ import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { t } from "i18next";
+import { pt } from "@/base/i18n";
 import {
     forgetExif,
     forgetExifForItemData,
@@ -50,8 +51,13 @@ type FileViewerPhotoSwipeOptions = {
     onViewInfo: (annotatedFile: FileViewerAnnotatedFile) => void;
     /**
      * Called when the user activates the edit action on an image.
+     *
+     * If this callback is not provided, then the edit button is never shown. If
+     * this callback is provided, then the visibility of the edit button is
+     * determined by the {@link isEditableImage} property of
+     * {@link FileViewerFileAnnotation} for the file.
      */
-    onEditImage: (annotatedFile: FileViewerAnnotatedFile) => void;
+    onEditImage?: (annotatedFile: FileViewerAnnotatedFile) => void;
 } & Pick<FileViewerProps, "files" | "initialIndex" | "disableDownload">;
 
 /**
@@ -69,6 +75,13 @@ export interface FileViewerFileAnnotation {
      * `true` if this file is owned by the logged in user (if any).
      */
     isOwnFile: boolean;
+    /**
+     * `true` if this is an image which can be edited.
+     *
+     * The edit button is shown when this is true. See also the
+     * {@link onEditImage} option for {@link FileViewerPhotoSwipe} constructor.
+     */
+    isEditableImage: boolean;
 }
 
 /**
@@ -147,6 +160,7 @@ export class FileViewerPhotoSwipe {
         onClose,
         onAnnotate,
         onViewInfo,
+        onEditImage,
     }: FileViewerPhotoSwipeOptions) {
         this.files = files;
         this.opts = { disableDownload };
@@ -405,11 +419,33 @@ export class FileViewerPhotoSwipe {
             pswp.ui.registerElement({
                 name: "info",
                 title: t("info"),
-                order: 15,
+                order: 16,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("info"),
                 onClick: withCurrentAnnotatedFile(onViewInfo),
             });
+
+            if (onEditImage) {
+                pswp.ui.registerElement({
+                    name: "edit",
+                    // TODO(PS):
+                    // title: t("edit_image"),
+                    title: pt("Edit image"),
+                    order: 15,
+                    isButton: true,
+                    html: createPSRegisterElementIconHTML("edit"),
+                    onClick: withCurrentAnnotatedFile(onEditImage),
+                    onInit: (buttonElement, pswp) => {
+                        pswp.on("change", () => {
+                            const { annotation } = currentAnnotatedFile();
+                            buttonElement.classList.toggle(
+                                "pswp--ui-visible",
+                                annotation.isEditableImage,
+                            );
+                        });
+                    },
+                });
+            }
         });
 
         // Modify the default UI elements.

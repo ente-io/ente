@@ -13,7 +13,9 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     throw new Error("Whoa");
 }
 
+import { isDesktop } from "@/base/app";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
+import { lowercaseExtension } from "@/base/file-name";
 import type { LocalUser } from "@/base/local-user";
 import log from "@/base/log";
 import {
@@ -21,7 +23,9 @@ import {
     type FileInfoExif,
     type FileInfoProps,
 } from "@/gallery/components/FileInfo";
+import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/media/file.js";
+import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { ImageEditorOverlay } from "@/new/photos/components/ImageEditorOverlay";
 import { Button, styled } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -145,7 +149,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
         (file: EnteFile) => {
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
-            return { fileID, isOwnFile };
+            const isEditableImage = fileIsEditableImage(file);
+            return { fileID, isOwnFile, isEditableImage };
         },
         [user],
     );
@@ -227,7 +232,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             onClose: handleClose,
             onAnnotate: handleAnnotate,
             onViewInfo: handleViewInfo,
-            onEditImage: handleEditImage
+            onEditImage: handleEditImage,
         });
         pswpRef.current = pswp;
 
@@ -289,6 +294,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
     );
 };
 
+export default FileViewer;
+
 const Container = styled("div")`
     border: 1px solid red;
 
@@ -298,4 +305,20 @@ const Container = styled("div")`
     }
 `;
 
-export default FileViewer;
+const fileIsEditableImage = (file: EnteFile) => {
+    // Only images are editable.
+    if (file.metadata.fileType !== FileType.image) return false;
+
+    const extension = lowercaseExtension(file.metadata.title);
+    // Assume it is editable;
+    let isRenderable = true;
+    if (extension && needsJPEGConversion(extension)) {
+        // See if the file is on the whitelist of extensions that we know
+        // will not be directly renderable.
+        if (!isDesktop) {
+            // On the web, we only support HEIC conversion.
+            isRenderable = isHEICExtension(extension);
+        }
+    }
+    return isRenderable;
+};
