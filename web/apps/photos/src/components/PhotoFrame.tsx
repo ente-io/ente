@@ -9,6 +9,7 @@ import {
     type LoadedLivePhotoSourceURL,
     type RenderableSourceURLs,
 } from "@/gallery/services/download";
+import type { Collection } from "@/media/collection";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { FileViewer } from "@/new/photos/components/FileViewerComponents";
@@ -22,6 +23,7 @@ import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
 import { useCallback, useContext, useEffect, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
+import uploadManager from "services/upload/uploadManager";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
@@ -259,6 +261,15 @@ const PhotoFrame = ({
     const handleTriggerSyncWithRemote = useCallback(
         () => void syncWithRemote(),
         [syncWithRemote],
+    );
+
+    const handleSaveEditedImageCopy = useCallback(
+        (editedFile: File, collection: Collection, enteFile: EnteFile) => {
+            uploadManager.prepareForNewUpload();
+            uploadManager.showUploadProgressDialog();
+            uploadManager.uploadFile(editedFile, collection, enteFile);
+        },
+        [],
     );
 
     if (!displayFiles) {
@@ -541,6 +552,7 @@ const PhotoFrame = ({
                     initialIndex={currentIndex}
                     disableDownload={!enableDownload}
                     onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
+                    onSaveEditedImageCopy={handleSaveEditedImageCopy}
                     {...{
                         fileCollectionIDs,
                         allCollectionsNameByID,

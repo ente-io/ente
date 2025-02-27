@@ -23,10 +23,14 @@ import {
     type FileInfoExif,
     type FileInfoProps,
 } from "@/gallery/components/FileInfo";
+import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import { ImageEditorOverlay } from "@/new/photos/components/ImageEditorOverlay";
+import {
+    ImageEditorOverlay,
+    type ImageEditorOverlayProps,
+} from "@/new/photos/components/ImageEditorOverlay";
 import { Button, styled } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fileInfoExifForFile } from "./data-source";
@@ -87,6 +91,16 @@ export type FileViewerProps = ModalVisibilityProps & {
      * not defined, then this prop is not used.
      */
     onTriggerSyncWithRemote?: () => void;
+    /**
+     * Called when the user edits an image in the image editor and asks us to
+     * save their edits as a copy.
+     *
+     * Editing is disabled if this is not provided.
+     *
+     * See {@link onSaveEditedCopy} in the {@link ImageEditorOverlay} props for
+     * documentation about the parameters.
+     */
+    onSaveEditedImageCopy?: ImageEditorOverlayProps["onSaveEditedCopy"];
 } & Pick<
         FileInfoProps,
         | "fileCollectionIDs"
@@ -107,9 +121,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
     disableDownload,
     fileCollectionIDs,
     allCollectionsNameByID,
-    onTriggerSyncWithRemote,
     onSelectCollection,
     onSelectPerson,
+    onTriggerSyncWithRemote,
+    onSaveEditedImageCopy,
 }) => {
     const pswpRef = useRef<FileViewerPhotoSwipe | undefined>();
 
@@ -189,33 +204,29 @@ const FileViewer: React.FC<FileViewerProps> = ({
             : undefined;
     }, [onSelectPerson, handleClose]);
 
-    const handleEditImage = useCallback(
-        (annotatedFile: FileViewerAnnotatedFile) => {
-            setActiveAnnotatedFile(annotatedFile);
-            setActiveFileExif(undefined);
-            setOpenImageEditor(true);
-        },
-        [],
-    );
+    const handleEditImage = useMemo(() => {
+        return onSaveEditedImageCopy
+            ? (annotatedFile: FileViewerAnnotatedFile) => {
+                  setActiveAnnotatedFile(annotatedFile);
+                  setActiveFileExif(undefined);
+                  setOpenImageEditor(true);
+              }
+            : undefined;
+    }, [onSaveEditedImageCopy]);
 
     const handleImageEditorClose = useCallback(
         () => setOpenImageEditor(false),
         [],
     );
 
-    const handleSaveEditedCopy = (
-        editedFile: File,
-        collection: Collection,
-        enteFile: EnteFile,
-    ) => {
-        console.log(editedFile, collection, enteFile);
-        throw new Error("TODO");
-        // uploadManager.prepareForNewUpload();
-        // uploadManager.showUploadProgressDialog();
-        // uploadManager.uploadFile(editedFile, collection, enteFile);
-        handleImageEditorClose();
-        handleClose();
-    };
+    const handleSaveEditedCopy = useCallback(
+        (editedFile: File, collection: Collection, enteFile: EnteFile) => {
+            onSaveEditedImageCopy(editedFile, collection, enteFile);
+            handleImageEditorClose();
+            handleClose();
+        },
+        [onSaveEditedImageCopy, handleImageEditorClose, handleClose],
+    );
 
     useEffect(() => {
         log.debug(() => ["viewer", { action: "useEffect", open }]);
