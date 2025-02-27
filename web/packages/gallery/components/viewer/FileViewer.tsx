@@ -73,6 +73,14 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     initialIndex: number;
     /**
+     * `true` when we are viewing files in the Trash.
+     */
+    isInTrashSection?: boolean;
+    /**
+     * `true` when we are viewing files in the hidden section.
+     */
+    isInHiddenSection?: boolean;
+    /**
      * If true then the viewer does not show controls for downloading the file.
      */
     disableDownload?: boolean;
@@ -125,6 +133,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
     user,
     files,
     initialIndex,
+    isInTrashSection,
+    isInHiddenSection,
     disableDownload,
     favoriteFileIDs,
     fileCollectionIDs,
@@ -173,13 +183,24 @@ const FileViewer: React.FC<FileViewerProps> = ({
             log.debug(() => ["viewer", { action: "annotate", file }]);
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
-            const isFavorite = favoriteFileIDs?.has(file.id);
-            const isEditableImage = onSaveEditedImageCopy
-                ? fileIsEditableImage(file)
+            const canFavoriteOrEdit =
+                isOwnFile && !isInTrashSection && !isInHiddenSection;
+            const isFavorite = canFavoriteOrEdit
+                ? favoriteFileIDs?.has(file.id)
                 : undefined;
+            const isEditableImage =
+                onSaveEditedImageCopy && canFavoriteOrEdit
+                    ? fileIsEditableImage(file)
+                    : undefined;
             return { fileID, isOwnFile, isFavorite, isEditableImage };
         },
-        [user, favoriteFileIDs, onSaveEditedImageCopy],
+        [
+            user,
+            isInTrashSection,
+            isInHiddenSection,
+            favoriteFileIDs,
+            onSaveEditedImageCopy,
+        ],
     );
 
     const handleToggleFavorite = useMemo(() => {
@@ -282,7 +303,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
         // - Updates to initialIndex can be safely ignored: they don't matter,
         //   only their initial value at the time of open mattered.
         //
-        // - Updates to disableDownload are not expected after open. We could've
+        // - Updates to other properties are not expected after open. We could've
         //   also added it to the dependencies array, not adding it was a more
         //   conservative choice to be on the safer side and trigger too few
         //   instead of too many updates.

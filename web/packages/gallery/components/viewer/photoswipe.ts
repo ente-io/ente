@@ -409,8 +409,8 @@ export class FileViewerPhotoSwipe {
 
         const showIf = (element: HTMLElement, condition: boolean) =>
             condition
-                ? element.classList.remove("pswp--ui-visible")
-                : element.classList.add("pswp--ui-visible");
+                ? element.classList.remove("pswp__hidden")
+                : element.classList.add("pswp__hidden");
 
         // Add our custom UI elements to inside the PhotoSwipe dialog.
         //
