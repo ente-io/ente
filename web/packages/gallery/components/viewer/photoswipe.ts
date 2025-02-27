@@ -221,7 +221,7 @@ export class FileViewerPhotoSwipe {
                 // The above condition implies that annotation can never be
                 // undefined, but it doesn't seem to be enough to convince
                 // TypeScript. Writing the condition in a more unnatural way
-                // `(annotation && annotation?.fileID == file.id)` works, but
+                // `(!(annotation && annotation?.fileID == file.id))` works, but
                 // instead we use a non-null assertion here.
                 annotation: annotation!,
             };
@@ -231,7 +231,7 @@ export class FileViewerPhotoSwipe {
 
         const withCurrentAnnotatedFile =
             (cb: (af: AnnotatedFile) => void) => () =>
-                cb(currentFileAnnotation());
+                cb(currentAnnotatedFile());
 
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data

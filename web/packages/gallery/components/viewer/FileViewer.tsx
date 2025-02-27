@@ -189,7 +189,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             <Button>Test</Button>
             <FileInfo
                 {...fileInfoVisibilityProps}
-                file={activeAnnotatedFile.file}
+                file={activeAnnotatedFile?.file}
                 exif={activeFileExif}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
