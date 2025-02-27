@@ -26,6 +26,7 @@ import { decodeLivePhoto } from "@/media/live-photo";
 
 export interface LivePhotoSourceURL {
     image: () => Promise<string | undefined>;
+    originalImageBlob: () => Promise<Blob | undefined>;
     video: () => Promise<string | undefined>;
 }
 
@@ -52,7 +53,7 @@ export interface LoadedLivePhotoSourceURL {
  */
 export interface RenderableSourceURLs {
     url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
-    originalImageURL?: string | undefined;
+    originalImageBlob?: Blob | undefined;
     type: "normal" | "livePhoto";
     /**
      * `true` if there is potential conversion that can still be applied.
@@ -598,7 +599,9 @@ const createRenderableSourceURLs = async (
             : undefined;
 
     let url: RenderableSourceURLs["url"] | undefined;
-    let originalImageURL: RenderableSourceURLs["originalImageURL"] | undefined;
+    let originalImageBlob:
+        | RenderableSourceURLs["originalImageBlob"]
+        | undefined;
     let type: RenderableSourceURLs["type"] = "normal";
     let mimeType: string | undefined;
     let canForceConvert = false;
@@ -609,7 +612,7 @@ const createRenderableSourceURLs = async (
             const convertedBlob = await renderableImageBlob(fileBlob, fileName);
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
-            originalImageURL = originalFileURL;
+            originalImageBlob = fileBlob;
             mimeType = convertedBlob.type;
             break;
         }
@@ -646,7 +649,7 @@ const createRenderableSourceURLs = async (
     // @ts-ignore
     return {
         url: url!,
-        originalImageURL,
+        originalImageBlob,
         type,
         mimeType,
         canForceConvert,
@@ -671,6 +674,15 @@ async function getRenderableLivePhotoURL(
         }
     };
 
+    const getOriginalImageBlob = async () => {
+        try {
+            return new Blob([livePhoto.imageData]);
+        } catch {
+            //ignore and return null
+            return undefined;
+        }
+    };
+
     const getRenderableLivePhotoVideoURL = async () => {
         try {
             const videoBlob = new Blob([livePhoto.videoData]);
@@ -689,6 +701,7 @@ async function getRenderableLivePhotoURL(
 
     return {
         image: getRenderableLivePhotoImageURL,
+        originalImageBlob: getOriginalImageBlob,
         video: getRenderableLivePhotoVideoURL,
     };
 }
