@@ -31,7 +31,7 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 let PhotoSwipe;
 if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     // TODO(PS): Comment me before merging into main.
-    // PhotoSwipe = require("./ps5/dist/photoswipe.esm.js").default;
+    PhotoSwipe = require("./ps5/dist/photoswipe.esm.js").default;
 }
 
 type FileViewerPhotoSwipeOptions = {
