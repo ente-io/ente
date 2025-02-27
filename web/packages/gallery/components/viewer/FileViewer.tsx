@@ -167,19 +167,19 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const handleSelectCollection = useCallback(
         (collectionID: number) => {
             onSelectCollection(collectionID);
-            onClose();
+            handleClose();
         },
-        [onSelectCollection, onClose],
+        [onSelectCollection, handleClose],
     );
 
     const handleSelectPerson = useMemo(() => {
         return onSelectPerson
             ? (personID: string) => {
                   onSelectPerson(personID);
-                  onClose();
+                  handleClose();
               }
             : undefined;
-    }, [onSelectPerson, onClose]);
+    }, [onSelectPerson, handleClose]);
 
     useEffect(() => {
         log.debug(() => ["viewer", { action: "useEffect", open }]);
