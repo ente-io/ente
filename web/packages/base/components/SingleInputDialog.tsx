@@ -13,8 +13,8 @@ type SingleInputDialogProps = ModalVisibilityProps &
  * A dialog that can be used to ask for a single text input using a
  * {@link SingleInputForm}.
  *
- * If the submission handler provided to this component resolves successfully,
- * then the dialog is closed.
+ * The dialog closes when the promise returned by the {@link onSubmit} callback
+ * fulfills.
  *
  * See also: {@link CollectionNamer}, its older sibling.
  */

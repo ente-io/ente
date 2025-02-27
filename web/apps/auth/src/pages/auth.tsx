@@ -11,7 +11,7 @@ import {
 import { useBaseContext } from "@/base/context";
 import { isHTTP401Error } from "@/base/http";
 import log from "@/base/log";
-import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
+import { masterKeyFromSessionIfLoggedIn } from "@/base/session";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {

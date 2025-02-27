@@ -260,6 +260,18 @@ export interface Electron {
         writeFile: (path: string, contents: string) => Promise<void>;
 
         /**
+         * A variant of {@link writeFile} that first writes the file to a backup
+         * file, and then renames the backup file to the actual path. This both
+         * makes the write atomic (as far as the node's fs.rename guarantees
+         * atomicity), and also keeps the backup file around for recovery if
+         * something goes wrong during the rename.
+         *
+         * This behaviour of this function is tailored around for writes to the
+         * "export_status.json" during exports.
+         */
+        writeFileViaBackup: (path: string, contents: string) => Promise<void>;
+
+        /**
          * Return true if there is an item at {@link dirPath}, and it is as
          * directory.
          */
