@@ -1,3 +1,4 @@
+import { useModalVisibility } from "@/base/components/utils/modal";
 import { isSameDay } from "@/base/date";
 import { formattedDate } from "@/base/i18n-date";
 import log from "@/base/log";
@@ -179,9 +180,8 @@ const PhotoFrame = ({
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const router = useRouter();
 
-    // const { show: showPhotoSwipe, props: photoSwipeVisibilityProps } =
-    //     useModalVisibility();
-    const [open5, setOpen5] = useState(false);
+    const { show: showFileViewer, props: fileViewerVisibilityProps } =
+        useModalVisibility();
 
     const [displayFiles, setDisplayFiles] = useState<DisplayFile[] | undefined>(
         undefined,
@@ -281,7 +281,7 @@ const PhotoFrame = ({
 
     const handleClose = (needUpdate) => {
         if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
-            setOpen5(false);
+            throw new Error("Not implemented");
         } else {
             setOpen(false);
             needUpdate && syncWithRemote();
@@ -292,8 +292,7 @@ const PhotoFrame = ({
     const onThumbnailClick = (index: number) => () => {
         setCurrentIndex(index);
         if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
-            // showPhotoSwipe();
-            setOpen5(true);
+            showFileViewer();
         } else {
             setOpen(true);
             setIsPhotoSwipeOpen?.(true);
@@ -529,13 +528,14 @@ const PhotoFrame = ({
         <Container>
             {process.env.NEXT_PUBLIC_ENTE_WIP_PS5 && (
                 <FileViewer
+                    {...fileViewerVisibilityProps}
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     /* @ts-ignore TODO(PS): test */
-                    open={open5}
-                    onClose={handleClose}
                     user={galleryContext.user ?? undefined}
                     files={files}
                     initialIndex={currentIndex}
+                    disableDownload={!enableDownload}
+                    onTriggerSyncWithRemote={() => void syncWithRemote()}
                     {...{
                         fileCollectionIDs,
                         allCollectionsNameByID,

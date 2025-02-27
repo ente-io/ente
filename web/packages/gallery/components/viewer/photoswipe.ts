@@ -444,6 +444,13 @@ export class FileViewerPhotoSwipe {
         this.pswp.close();
     }
 
+    /**
+     * Reload the current slide, asking the data source for its data afresh.
+     */
+    refreshCurrentSlideContent() {
+        this.pswp.refreshSlideContent(this.pswp.currIndex);
+    }
+
     updateFiles(files: EnteFile[]) {
         // TODO(PS)
     }

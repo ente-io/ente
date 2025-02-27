@@ -69,6 +69,21 @@ export type FileViewerProps = ModalVisibilityProps & {
      * If true then the viewer does not show controls for downloading the file.
      */
     disableDownload?: boolean;
+    /**
+     * Called when there was some update performed within the file viewer that
+     * necessitates us to sync with remote again to fetch the latest updates.
+     *
+     * This is called lazily, and at most once, when the file viewer is closing
+     * if any changes were made in the file info panel of the file viewer for
+     * any of the files that the user was viewing (e.g. if they changed the
+     * caption). Those changes have already been applied to both remote and to
+     * the in-memory file object used by the file viewer; this callback is to
+     * trigger a sync so that our local database also gets up to speed.
+     *
+     * If we're in a context where edits are not possible, e.g. {@link user} is
+     * not defined, then this prop is not used.
+     */
+    onTriggerSyncWithRemote?: () => void;
 } & Pick<
         FileInfoProps,
         | "fileCollectionIDs"
@@ -89,6 +104,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     disableDownload,
     fileCollectionIDs,
     allCollectionsNameByID,
+    onTriggerSyncWithRemote,
     onSelectCollection,
     onSelectPerson,
 }) => {
@@ -110,8 +126,19 @@ const FileViewer: React.FC<FileViewerProps> = ({
         FileInfoExif | undefined
     >(undefined);
 
+    // If `true`, then we need to trigger a sync with remote when we close.
+    const [needsSync, setNeedsSync] = useState(false);
+
     const { show: showFileInfo, props: fileInfoVisibilityProps } =
         useModalVisibility();
+
+    const handleClose = () => {
+        if (needsSync) {
+            onTriggerSyncWithRemote?.();
+            setNeedsSync(false);
+        }
+        onClose();
+    };
 
     const handleAnnotate = useCallback(
         (file: EnteFile) => {
@@ -157,7 +184,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             files,
             initialIndex,
             disableDownload,
-            onClose,
+            onClose: handleClose,
             onAnnotate: handleAnnotate,
             onViewInfo: handleViewInfo,
         });
@@ -184,6 +211,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, onClose, handleViewInfo]);
 
+    const handleRefreshPhotoswipe = useCallback(() => {
+        pswpRef.current.refreshCurrentSlideContent();
+    }, []);
+
     return (
         <Container>
             <Button>Test</Button>
@@ -191,6 +222,11 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 {...fileInfoVisibilityProps}
                 file={activeAnnotatedFile?.file}
                 exif={activeFileExif}
+                allowEdits={!!activeAnnotatedFile?.annotation.isOwnFile}
+                allowMap={!!user}
+                showCollections={!!user}
+                scheduleUpdate={() => setNeedsSync(true)}
+                refreshPhotoswipe={handleRefreshPhotoswipe}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
                 {...{ fileCollectionIDs, allCollectionsNameByID }}
