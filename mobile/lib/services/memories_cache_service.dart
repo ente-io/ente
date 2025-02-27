@@ -204,36 +204,41 @@ class MemoriesCacheService {
   }
 
   Future<List<SmartMemory>> _fromCacheToMemories(MemoriesCache cache) async {
-    final List<SmartMemory> memories = [];
-    final allFiles = Set<EnteFile>.from(
-      await SearchService.instance.getAllFilesForSearch(),
-    );
-    final allFileIdsToFile = <int, EnteFile>{};
-    for (final file in allFiles) {
-      if (file.uploadedFileID != null) {
-        allFileIdsToFile[file.uploadedFileID!] = file;
+    try {
+      final List<SmartMemory> memories = [];
+      final allFiles = Set<EnteFile>.from(
+        await SearchService.instance.getAllFilesForSearch(),
+      );
+      final allFileIdsToFile = <int, EnteFile>{};
+      for (final file in allFiles) {
+        if (file.uploadedFileID != null) {
+          allFileIdsToFile[file.uploadedFileID!] = file;
+        }
       }
-    }
 
-    for (final ToShowMemory memory in cache.toShowMemories) {
-      if (memory.shouldShowNow) {
-        memories.add(
-          SmartMemory(
-            memory.fileUploadedIDs
-                .map(
-                  (fileID) =>
-                      Memory.fromFile(allFileIdsToFile[fileID]!, _seenTimes),
-                )
-                .toList(),
-            memory.type,
-            name: memory.title,
-            firstDateToShow: memory.firstTimeToShow,
-            lastDateToShow: memory.lastTimeToShow,
-          ),
-        );
+      for (final ToShowMemory memory in cache.toShowMemories) {
+        if (memory.shouldShowNow) {
+          memories.add(
+            SmartMemory(
+              memory.fileUploadedIDs
+                  .map(
+                    (fileID) =>
+                        Memory.fromFile(allFileIdsToFile[fileID]!, _seenTimes),
+                  )
+                  .toList(),
+              memory.type,
+              name: memory.title,
+              firstDateToShow: memory.firstTimeToShow,
+              lastDateToShow: memory.lastTimeToShow,
+            ),
+          );
+        }
       }
+      return memories;
+    } catch (e, s) {
+      _logger.severe("Error converting cache to memories", e, s);
+      return [];
     }
-    return memories;
   }
 
   Future<List<SmartMemory>> _getMemoriesFromCache() async {
