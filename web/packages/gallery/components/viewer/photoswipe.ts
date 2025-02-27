@@ -407,6 +407,11 @@ export class FileViewerPhotoSwipe {
             onClose();
         });
 
+        const showIf = (element: HTMLElement, condition: boolean) =>
+            condition
+                ? element.classList.remove("pswp--ui-visible")
+                : element.classList.add("pswp--ui-visible");
+
         // Add our custom UI elements to inside the PhotoSwipe dialog.
         //
         // API docs for registerElement:
@@ -445,14 +450,13 @@ export class FileViewerPhotoSwipe {
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
                     onClick: withCurrentAnnotatedFile(onToggleFavorite),
-                    onInit: (buttonElement, pswp) => {
+                    onInit: (buttonElement) =>
                         pswp.on("change", () =>
-                            buttonElement.classList.toggle(
-                                "pswp--ui-visible",
+                            showIf(
+                                buttonElement,
                                 currentFileAnnotation().isFavorite === false,
                             ),
-                        );
-                    },
+                        ),
                 });
                 pswp.ui.registerElement({
                     name: "unfavorite",
@@ -461,14 +465,13 @@ export class FileViewerPhotoSwipe {
                     isButton: true,
                     html: createPSRegisterElementIconHTML("unfavorite"),
                     onClick: withCurrentAnnotatedFile(onToggleFavorite),
-                    onInit: (buttonElement, pswp) => {
+                    onInit: (buttonElement) =>
                         pswp.on("change", () =>
-                            buttonElement.classList.toggle(
-                                "pswp--ui-visible",
+                            showIf(
+                                buttonElement,
                                 currentFileAnnotation().isFavorite === true,
                             ),
-                        );
-                    },
+                        ),
                 });
             }
 
@@ -491,14 +494,13 @@ export class FileViewerPhotoSwipe {
                     isButton: true,
                     html: createPSRegisterElementIconHTML("edit"),
                     onClick: withCurrentAnnotatedFile(onEditImage),
-                    onInit: (buttonElement, pswp) => {
+                    onInit: (buttonElement) =>
                         pswp.on("change", () =>
-                            buttonElement.classList.toggle(
-                                "pswp--ui-visible",
+                            showIf(
+                                buttonElement,
                                 !!currentFileAnnotation().isEditableImage,
                             ),
-                        );
-                    },
+                        ),
                 });
             }
         });
