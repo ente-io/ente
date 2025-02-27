@@ -53,20 +53,17 @@ export interface FileViewerFileAnnotation {
     /**
      * `true` if this file has been marked as a favorite by the user.
      *
-     * It will not be provided if favorite functionality is not available.
-     *
+     * The toggle favorite button will not be shown if this is not defined.
      * Otherwise it determines the toggle state of the toggle favorite button.
      */
-    isFavorite?: boolean;
+    isFavorite?: boolean | undefined;
     /**
      * `true` if this is an image which can be edited.
      *
-     * It will not be provided if editing is not available.
-     *
-     * Otherwise the edit button is shown when this is true. See also the
+     * The edit button is shown when this is true. See also the
      * {@link onEditImage} option for {@link FileViewerPhotoSwipe} constructor.
      */
-    isEditableImage?: boolean;
+    isEditableImage?: boolean | undefined;
 }
 
 type FileViewerPhotoSwipeOptions = {
@@ -83,9 +80,10 @@ type FileViewerPhotoSwipeOptions = {
      * Called when the user activates the toggle favorite action on a file.
      *
      * If this callback is not provided, then the toggle favorite button is not
-     * shown. If this callback is provided, then the current toggle state of the
-     * favorite button is determined by the {@link isFavorite} property of
-     * {@link FileViewerFileAnnotation} for the file.
+     * shown. If this callback is provided, then the favorite button is shown if
+     * the {@link isFavorite} property of {@link FileViewerFileAnnotation} for
+     * the file is provided. In that case, the value of the {@link isFavorite}
+     * property will determine the current toggle state of the favorite button.
      */
     onToggleFavorite?: (annotatedFile: FileViewerAnnotatedFile) => void;
     /**
@@ -438,24 +436,50 @@ export class FileViewerPhotoSwipe {
             });
 
             if (onToggleFavorite) {
+                // Only one of these two will end up being shown, so they can
+                // safely share the same order.
                 pswp.ui.registerElement({
                     name: "favorite",
-                    title: t("favorite"),
-                    order: 15,
+                    title: t("favorite_key"),
+                    order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
                     onClick: withCurrentAnnotatedFile(onToggleFavorite),
                     onInit: (buttonElement, pswp) => {
-                        // TODO:
-                        // pswp.on("change", () =>
-                        //     buttonElement.classList.toggle(
-                        //         "pswp--ui-visible",
-                        //         currentFileAnnotation().isFavorite,
-                        //     ),
-                        // );
+                        pswp.on("change", () =>
+                            buttonElement.classList.toggle(
+                                "pswp--ui-visible",
+                                currentFileAnnotation().isFavorite === false,
+                            ),
+                        );
+                    },
+                });
+                pswp.ui.registerElement({
+                    name: "unfavorite",
+                    title: t("unfavorite_key"),
+                    order: 8,
+                    isButton: true,
+                    html: createPSRegisterElementIconHTML("unfavorite"),
+                    onClick: withCurrentAnnotatedFile(onToggleFavorite),
+                    onInit: (buttonElement, pswp) => {
+                        pswp.on("change", () =>
+                            buttonElement.classList.toggle(
+                                "pswp--ui-visible",
+                                currentFileAnnotation().isFavorite === true,
+                            ),
+                        );
                     },
                 });
             }
+
+            pswp.ui.registerElement({
+                name: "info",
+                title: t("info"),
+                order: 9,
+                isButton: true,
+                html: createPSRegisterElementIconHTML("info"),
+                onClick: withCurrentAnnotatedFile(onViewInfo),
+            });
 
             if (onEditImage) {
                 pswp.ui.registerElement({
@@ -471,21 +495,12 @@ export class FileViewerPhotoSwipe {
                         pswp.on("change", () =>
                             buttonElement.classList.toggle(
                                 "pswp--ui-visible",
-                                currentFileAnnotation().isEditableImage,
+                                !!currentFileAnnotation().isEditableImage,
                             ),
                         );
                     },
                 });
             }
-
-            pswp.ui.registerElement({
-                name: "info",
-                title: t("info"),
-                order: 17,
-                isButton: true,
-                html: createPSRegisterElementIconHTML("info"),
-                onClick: withCurrentAnnotatedFile(onViewInfo),
-            });
         });
 
         // Modify the default UI elements.
