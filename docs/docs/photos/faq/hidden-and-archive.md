@@ -19,9 +19,6 @@ Keep in mind that hidden items will still show up in the "On device" albums
 within Ente as long as they are present in your native gallery. But once you
 remove them from your device, they'll stop showing up here.
 
-Hiding is currently only supported in the Ente mobile app, and items hidden from
-the mobile app will not be visible in the web and desktop app.
-
 For more details, see [features/hide](/photos/features/hide).
 
 ### Archive
