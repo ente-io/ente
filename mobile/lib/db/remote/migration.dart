@@ -9,6 +9,12 @@ const collectionColumns =
 
 const collectionFilesColumns =
     'collection_id, file_id, enc_key, enc_key_nonce, created_at, updated_at, is_deleted';
+
+const filesColumns =
+    'id, owner_id, file_header, thumb_header, metadata, pri_medata, pub_medata, info';
+const trashedFilesColumns =
+    'id, owner_id, file_header, thumb_header, metadata, pri_medata, pub_medata, info, trash_data';
+
 String collectionValuePlaceHolder =
     collectionColumns.split(',').map((_) => '?').join(',');
 
@@ -35,19 +41,33 @@ class RemoteDBMigration {
       shared_mmd_ver INTEGER NOT NULL DEFAULT 0
     );
     ''',
+    '''
+    CREATE TABLE collection_files (
+      file_id INTEGER NOT NULL,
+      collection_id INTEGER NOT NULL,
+      PRIMARY KEY (file_id, collection_id)
+      enc_key BLOB NOT NULL,
+      enc_key_nonce BLOB NOT NULL,
+      is_deleted INTEGER NOT NULL
+      updated_at INTEGER NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT 0,
+    )
+    ''',
+    '''
+    CREATE TABLE files (
+      id INTEGER PRIMARY KEY,
+      owner_id INTEGER NOT NULL,
+      file_header BLOB NOT NULL,
+      thumb_header BLOB NOT NULL,
+      metadata TEXT NOT NULL',
+      pri_medata TEXT NOT NULL DEFAULT '{}',
+      pub_medata TEXT NOT NULL DEFAULT '{}',
+      info TEXT DEFAULT '{}',
+      trash_data TEXT,
+      FOREIGN KEY(id) REFERENCES collection_files(file_id)
+    )
+    ''',
   ];
-  // '''
-  //   CREATE TABLE collection_files (
-  //     file_id INTEGER NOT NULL,
-  //     collection_id INTEGER NOT NULL,
-  //     PRIMARY KEY (file_id, collection_id)
-  //     enc_key TEXT NOT NULL,
-  //     enc_key_nonce TEXT NOT NULL,
-  //     is_deleted INTEGER NOT NULL
-  //     updated_at INTEGER NOT NULL,
-  //     created_at INTEGER NOT NULL DEFAULT 0,
-  //   )
-  //   ''',
 
   static Future<void> migrate(
     SqliteDatabase database,
