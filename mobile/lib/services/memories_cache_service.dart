@@ -160,8 +160,8 @@ class MemoriesCacheService {
     MemoriesCache? oldCache,
   ) {
     final List<ToShowMemory> toShowMemories = [];
-    final List<PeopleShownLogs> peopleShownLogs = [];
-    final List<TripsShownLogs> tripsShownLogs = [];
+    final List<PeopleShownLog> peopleShownLogs = [];
+    final List<TripsShownLog> tripsShownLogs = [];
     for (final memory in memories) {
       if (memory.hasShowTime()) {
         toShowMemories.add(ToShowMemory.fromSmartMemory(memory));
@@ -180,8 +180,7 @@ class MemoriesCacheService {
                   (person.personID == oldMemory.personID) &&
                   (person.peopleMemoryType == oldMemory.peopleMemoryType),
             )) {
-              peopleShownLogs
-                  .add(PeopleShownLogs.fromOldCacheMemory(oldMemory));
+              peopleShownLogs.add(PeopleShownLog.fromOldCacheMemory(oldMemory));
             }
           } else if (oldMemory.type == MemoryType.trips) {
             if (!tripsShownLogs.any(
@@ -191,7 +190,7 @@ class MemoriesCacheService {
                 10.0,
               ),
             )) {
-              tripsShownLogs.add(TripsShownLogs.fromOldCacheMemory(oldMemory));
+              tripsShownLogs.add(TripsShownLog.fromOldCacheMemory(oldMemory));
             }
           }
         }

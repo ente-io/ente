@@ -1,5 +1,3 @@
-
-
 import "dart:convert";
 
 import "package:photos/models/location/location.dart";
@@ -9,8 +7,8 @@ import "package:photos/models/trip_memory.dart";
 
 class MemoriesCache {
   final List<ToShowMemory> toShowMemories;
-  final List<PeopleShownLogs> peopleShownLogs;
-  final List<TripsShownLogs> tripsShownLogs;
+  final List<PeopleShownLog> peopleShownLogs;
+  final List<TripsShownLog> tripsShownLogs;
 
   MemoriesCache({
     required this.toShowMemories,
@@ -21,17 +19,16 @@ class MemoriesCache {
   factory MemoriesCache.fromJson(Map<String, dynamic> json) {
     return MemoriesCache(
       toShowMemories: ToShowMemory.decodeJsonToList(json['toShowMemories']),
-      peopleShownLogs:
-          PeopleShownLogs.decodeJsonToList(json['peopleShownLogs']),
-      tripsShownLogs: TripsShownLogs.decodeJsonToList(json['tripsShownLogs']),
+      peopleShownLogs: PeopleShownLog.decodeJsonToList(json['peopleShownLogs']),
+      tripsShownLogs: TripsShownLog.decodeJsonToList(json['tripsShownLogs']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'toShowMemories': ToShowMemory.encodeListToJson(toShowMemories),
-      'peopleShownLogs': PeopleShownLogs.encodeListToJson(peopleShownLogs),
-      'tripsShownLogs': TripsShownLogs.encodeListToJson(tripsShownLogs),
+      'peopleShownLogs': PeopleShownLog.encodeListToJson(peopleShownLogs),
+      'tripsShownLogs': TripsShownLog.encodeListToJson(tripsShownLogs),
     };
   }
 
@@ -153,32 +150,32 @@ class ToShowMemory {
   }
 }
 
-class PeopleShownLogs {
+class PeopleShownLog {
   final String personID;
   final PeopleMemoryType peopleMemoryType;
   final int lastTimeShown;
 
-  PeopleShownLogs(
+  PeopleShownLog(
     this.personID,
     this.peopleMemoryType,
     this.lastTimeShown,
   );
 
-  factory PeopleShownLogs.fromOldCacheMemory(ToShowMemory memory) {
+  factory PeopleShownLog.fromOldCacheMemory(ToShowMemory memory) {
     assert(
       memory.type == MemoryType.people &&
           memory.personID != null &&
           memory.peopleMemoryType != null,
     );
-    return PeopleShownLogs(
+    return PeopleShownLog(
       memory.personID!,
       memory.peopleMemoryType!,
       memory.lastTimeToShow,
     );
   }
 
-  factory PeopleShownLogs.fromJson(Map<String, dynamic> json) {
-    return PeopleShownLogs(
+  factory PeopleShownLog.fromJson(Map<String, dynamic> json) {
+    return PeopleShownLog(
       json['personID'],
       peopleMemoryTypeFromString(json['peopleMemoryType']),
       json['lastTimeShown'],
@@ -193,36 +190,36 @@ class PeopleShownLogs {
     };
   }
 
-  static String encodeListToJson(List<PeopleShownLogs> shownLogs) {
+  static String encodeListToJson(List<PeopleShownLog> shownLogs) {
     final jsonList = shownLogs.map((log) => log.toJson()).toList();
     return jsonEncode(jsonList);
   }
 
-  static List<PeopleShownLogs> decodeJsonToList(String jsonString) {
+  static List<PeopleShownLog> decodeJsonToList(String jsonString) {
     final jsonList = jsonDecode(jsonString) as List;
-    return jsonList.map((json) => PeopleShownLogs.fromJson(json)).toList();
+    return jsonList.map((json) => PeopleShownLog.fromJson(json)).toList();
   }
 }
 
-class TripsShownLogs {
+class TripsShownLog {
   final Location location;
   final int lastTimeShown;
 
-  TripsShownLogs(
+  TripsShownLog(
     this.location,
     this.lastTimeShown,
   );
 
-  factory TripsShownLogs.fromOldCacheMemory(ToShowMemory memory) {
+  factory TripsShownLog.fromOldCacheMemory(ToShowMemory memory) {
     assert(memory.type == MemoryType.trips && memory.location != null);
-    return TripsShownLogs(
+    return TripsShownLog(
       memory.location!,
       memory.lastTimeToShow,
     );
   }
 
-  factory TripsShownLogs.fromJson(Map<String, dynamic> json) {
-    return TripsShownLogs(
+  factory TripsShownLog.fromJson(Map<String, dynamic> json) {
+    return TripsShownLog(
       Location(
         latitude: json['location']['latitude'],
         longitude: json['location']['longitude'],
@@ -241,13 +238,13 @@ class TripsShownLogs {
     };
   }
 
-  static String encodeListToJson(List<TripsShownLogs> shownLogs) {
+  static String encodeListToJson(List<TripsShownLog> shownLogs) {
     final jsonList = shownLogs.map((log) => log.toJson()).toList();
     return jsonEncode(jsonList);
   }
 
-  static List<TripsShownLogs> decodeJsonToList(String jsonString) {
+  static List<TripsShownLog> decodeJsonToList(String jsonString) {
     final jsonList = jsonDecode(jsonString) as List;
-    return jsonList.map((json) => TripsShownLogs.fromJson(json)).toList();
+    return jsonList.map((json) => TripsShownLog.fromJson(json)).toList();
   }
 }
