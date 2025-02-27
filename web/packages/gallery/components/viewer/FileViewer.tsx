@@ -77,6 +77,13 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     disableDownload?: boolean;
     /**
+     * File IDs of all the files that the user has marked as a favorite.
+     *
+     * If this is not provided then the favorite toggle button will not be shown
+     * in the file actions.
+     */
+    favoriteFileIDs?: Set<number>;
+    /**
      * Called when there was some update performed within the file viewer that
      * necessitates us to sync with remote again to fetch the latest updates.
      *
@@ -119,6 +126,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     files,
     initialIndex,
     disableDownload,
+    favoriteFileIDs,
     fileCollectionIDs,
     allCollectionsNameByID,
     onSelectCollection,
@@ -162,13 +170,26 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleAnnotate = useCallback(
         (file: EnteFile) => {
+            log.debug(() => ["viewer", { action: "annotate", file }]);
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
-            const isEditableImage = fileIsEditableImage(file);
-            return { fileID, isOwnFile, isEditableImage };
+            const isFavorite = favoriteFileIDs?.has(file.id);
+            const isEditableImage = onSaveEditedImageCopy
+                ? fileIsEditableImage(file)
+                : undefined;
+            return { fileID, isOwnFile, isFavorite, isEditableImage };
         },
-        [user],
+        [user, favoriteFileIDs, onSaveEditedImageCopy],
     );
+
+    const handleToggleFavorite = useMemo(() => {
+        return favoriteFileIDs
+            ? (annotatedFile: FileViewerAnnotatedFile) => {
+                  setActiveAnnotatedFile(annotatedFile);
+                  console.log("handleToggleFavorite", annotatedFile);
+              }
+            : undefined;
+    }, [favoriteFileIDs]);
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
@@ -208,7 +229,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
         return onSaveEditedImageCopy
             ? (annotatedFile: FileViewerAnnotatedFile) => {
                   setActiveAnnotatedFile(annotatedFile);
-                  setActiveFileExif(undefined);
                   setOpenImageEditor(true);
               }
             : undefined;
@@ -242,6 +262,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             disableDownload,
             onClose: handleClose,
             onAnnotate: handleAnnotate,
+            onToggleFavorite: handleToggleFavorite,
             onViewInfo: handleViewInfo,
             onEditImage: handleEditImage,
         });

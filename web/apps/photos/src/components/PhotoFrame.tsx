@@ -554,6 +554,7 @@ const PhotoFrame = ({
                     onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
                     onSaveEditedImageCopy={handleSaveEditedImageCopy}
                     {...{
+                        favoriteFileIDs,
                         fileCollectionIDs,
                         allCollectionsNameByID,
                         onSelectCollection,

@@ -1,11 +1,11 @@
 /* eslint-disable */
 // @ts-nocheck
 
+import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { t } from "i18next";
-import { pt } from "@/base/i18n";
 import {
     forgetExif,
     forgetExifForItemData,
@@ -35,31 +35,6 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     PhotoSwipe = require("./ps5/dist/photoswipe.esm.js").default;
 }
 
-type FileViewerPhotoSwipeOptions = {
-    /**
-     * Called when the file viewer is closed.
-     */
-    onClose: () => void;
-    /**
-     * Called whenever the slide changes to obtain the derived data for the file
-     * that is about to be displayed.
-     */
-    onAnnotate: (file: EnteFile) => FileViewerFileAnnotation;
-    /**
-     * Called when the user activates the info action on a file.
-     */
-    onViewInfo: (annotatedFile: FileViewerAnnotatedFile) => void;
-    /**
-     * Called when the user activates the edit action on an image.
-     *
-     * If this callback is not provided, then the edit button is never shown. If
-     * this callback is provided, then the visibility of the edit button is
-     * determined by the {@link isEditableImage} property of
-     * {@link FileViewerFileAnnotation} for the file.
-     */
-    onEditImage?: (annotatedFile: FileViewerAnnotatedFile) => void;
-} & Pick<FileViewerProps, "files" | "initialIndex" | "disableDownload">;
-
 /**
  * Derived data for a file that is needed to display the file viewer controls
  * etc associated with the file.
@@ -76,13 +51,57 @@ export interface FileViewerFileAnnotation {
      */
     isOwnFile: boolean;
     /**
+     * `true` if this file has been marked as a favorite by the user.
+     *
+     * It will not be provided if favorite functionality is not available.
+     *
+     * Otherwise it determines the toggle state of the toggle favorite button.
+     */
+    isFavorite?: boolean;
+    /**
      * `true` if this is an image which can be edited.
      *
-     * The edit button is shown when this is true. See also the
+     * It will not be provided if editing is not available.
+     *
+     * Otherwise the edit button is shown when this is true. See also the
      * {@link onEditImage} option for {@link FileViewerPhotoSwipe} constructor.
      */
-    isEditableImage: boolean;
+    isEditableImage?: boolean;
 }
+
+type FileViewerPhotoSwipeOptions = {
+    /**
+     * Called when the file viewer is closed.
+     */
+    onClose: () => void;
+    /**
+     * Called whenever the slide changes to obtain the derived data for the file
+     * that is about to be displayed.
+     */
+    onAnnotate: (file: EnteFile) => FileViewerFileAnnotation;
+    /**
+     * Called when the user activates the toggle favorite action on a file.
+     *
+     * If this callback is not provided, then the toggle favorite button is not
+     * shown. If this callback is provided, then the current toggle state of the
+     * favorite button is determined by the {@link isFavorite} property of
+     * {@link FileViewerFileAnnotation} for the file.
+     */
+    onToggleFavorite?: (annotatedFile: FileViewerAnnotatedFile) => void;
+    /**
+     * Called when the user activates the info action on a file.
+     */
+    onViewInfo: (annotatedFile: FileViewerAnnotatedFile) => void;
+    /**
+     * Called when the user activates the edit action on an image.
+     *
+     * If this callback is not provided, then the edit button is never shown. If
+     * this callback is provided, then the visibility of the edit button is
+     * determined by the {@link isEditableImage} property of
+     * {@link FileViewerFileAnnotation} for the file.
+     */
+    onEditImage?: (annotatedFile: FileViewerAnnotatedFile) => void;
+} & Pick<FileViewerProps, "files" | "initialIndex" | "disableDownload">;
 
 /**
  * A file and its annotation, in a nice cosy box.
@@ -159,6 +178,7 @@ export class FileViewerPhotoSwipe {
         disableDownload,
         onClose,
         onAnnotate,
+        onToggleFavorite,
         onViewInfo,
         onEditImage,
     }: FileViewerPhotoSwipeOptions) {
@@ -416,14 +436,26 @@ export class FileViewerPhotoSwipe {
                     });
                 },
             });
-            pswp.ui.registerElement({
-                name: "info",
-                title: t("info"),
-                order: 16,
-                isButton: true,
-                html: createPSRegisterElementIconHTML("info"),
-                onClick: withCurrentAnnotatedFile(onViewInfo),
-            });
+
+            if (onToggleFavorite) {
+                pswp.ui.registerElement({
+                    name: "favorite",
+                    title: t("favorite"),
+                    order: 15,
+                    isButton: true,
+                    html: createPSRegisterElementIconHTML("favorite"),
+                    onClick: withCurrentAnnotatedFile(onToggleFavorite),
+                    onInit: (buttonElement, pswp) => {
+                        // TODO:
+                        // pswp.on("change", () =>
+                        //     buttonElement.classList.toggle(
+                        //         "pswp--ui-visible",
+                        //         currentFileAnnotation().isFavorite,
+                        //     ),
+                        // );
+                    },
+                });
+            }
 
             if (onEditImage) {
                 pswp.ui.registerElement({
@@ -431,21 +463,29 @@ export class FileViewerPhotoSwipe {
                     // TODO(PS):
                     // title: t("edit_image"),
                     title: pt("Edit image"),
-                    order: 15,
+                    order: 16,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("edit"),
                     onClick: withCurrentAnnotatedFile(onEditImage),
                     onInit: (buttonElement, pswp) => {
-                        pswp.on("change", () => {
-                            const { annotation } = currentAnnotatedFile();
+                        pswp.on("change", () =>
                             buttonElement.classList.toggle(
                                 "pswp--ui-visible",
-                                annotation.isEditableImage,
-                            );
-                        });
+                                currentFileAnnotation().isEditableImage,
+                            ),
+                        );
                     },
                 });
             }
+
+            pswp.ui.registerElement({
+                name: "info",
+                title: t("info"),
+                order: 17,
+                isButton: true,
+                html: createPSRegisterElementIconHTML("info"),
+                onClick: withCurrentAnnotatedFile(onViewInfo),
+            });
         });
 
         // Modify the default UI elements.
