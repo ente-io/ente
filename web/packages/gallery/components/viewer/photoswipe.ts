@@ -354,12 +354,10 @@ export class FileViewerPhotoSwipe {
             updateFileInfoExifIfNeeded(e.content.data),
         );
 
-        // pswp.on("change", (e) => {
-        //     const itemData = pswp.currSlide.content.data;
-        //     exifForItemData(itemData).then((data) =>
-        //         console.log("exif data", data),
-        //     );
-        // });
+        pswp.on("change", (e) => {
+            const itemData = pswp.currSlide.content.data;
+            updateFileInfoExifIfNeeded(itemData);
+        });
 
         pswp.on("contentDestroy", (e) => forgetExifForItemData(e.content.data));
 
