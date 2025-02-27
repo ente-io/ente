@@ -281,51 +281,78 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const FieldLabel("Digits"),
-                      Expanded(
-                        child: TextFormField(
-                          keyboardType: TextInputType.number,
-                          // The validator receives the text that the user has entered.
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Please enter a number";
-                            }
-                            final intValue = int.tryParse(value);
-                            if (intValue == null) {
-                              return "Only integers are allowed";
-                            }
-                            if (intValue < 1 || intValue > 10) {
-                              return "OTP digits must be between 1 and 10";
-                            }
-                            return null;
-                          },
-                          maxLines: 1,
-                          decoration: const InputDecoration(
-                            contentPadding:
-                                EdgeInsets.symmetric(vertical: 12.0),
+                  widget.code == null
+                      ? Theme(
+                          data: Theme.of(context).copyWith(
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
                           ),
-                          style: getEnteTextTheme(context).small,
-                          controller: _digitsController,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 22),
-                  Row(
-                    children: [
-                      const FieldLabel("Algorithm"),
-                      AlgorithmSelectorWidget(
-                        currentAlgorithm: _algorithm,
-                        onSelected: (newAlgorithm) async {
-                          setState(() {
-                            _algorithm = newAlgorithm;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
+                          child: ExpansionTile(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            collapsedShape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            collapsedBackgroundColor: Colors.transparent,
+                            tilePadding: EdgeInsets.zero,
+                            title: Text(
+                              "Advanced",
+                              style: getEnteTextTheme(context).small,
+                            ),
+                            children: <Widget>[
+                              Row(
+                                children: [
+                                  const FieldLabel("Digits"),
+                                  Expanded(
+                                    child: TextFormField(
+                                      keyboardType: TextInputType.number,
+                                      // The validator receives the text that the user has entered.
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return "Please enter a number";
+                                        }
+                                        final intValue = int.tryParse(value);
+                                        if (intValue == null) {
+                                          return "Only integers are allowed";
+                                        }
+                                        if (intValue < 1 || intValue > 10) {
+                                          return "OTP digits must be between 1 and 10";
+                                        }
+                                        return null;
+                                      },
+                                      maxLines: 1,
+                                      decoration: const InputDecoration(
+                                        contentPadding: EdgeInsets.symmetric(
+                                          vertical: 12.0,
+                                        ),
+                                      ),
+                                      style: getEnteTextTheme(context).small,
+                                      controller: _digitsController,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 22),
+                              Row(
+                                children: [
+                                  const FieldLabel("Algorithm"),
+                                  AlgorithmSelectorWidget(
+                                    currentAlgorithm: _algorithm,
+                                    onSelected: (newAlgorithm) async {
+                                      setState(() {
+                                        _algorithm = newAlgorithm;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 12,

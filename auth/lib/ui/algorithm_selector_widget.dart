@@ -1,4 +1,5 @@
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 
 class AlgorithmSelectorWidget extends StatelessWidget {
@@ -15,10 +16,7 @@ class AlgorithmSelectorWidget extends StatelessWidget {
     Text algorithmOptionText(Algorithm algorithm) {
       return Text(
         algorithm.name.toUpperCase(),
-        style: Theme.of(context).textTheme.titleMedium!.copyWith(
-              fontSize: 14,
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
-            ),
+        style: getEnteTextTheme(context).small,
       );
     }
 
