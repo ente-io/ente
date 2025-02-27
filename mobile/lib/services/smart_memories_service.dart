@@ -70,7 +70,7 @@ class SmartMemoriesService {
   }
 
   // One general method to get all memories, which calls on internal methods for each separate memory type
-  Future<List<SmartMemory>> calcMemories() async {
+  Future<List<SmartMemory>> calcMemories(DateTime now) async {
     try {
       await init();
       final List<SmartMemory> memories = [];
@@ -80,19 +80,19 @@ class SmartMemoriesService {
       _seenTimes = await _memoriesDB.getSeenTimes();
       _logger.finest("All files length: ${allFiles.length}");
 
-      final peopleMemories = await _getPeopleResults(allFiles, null);
+      final peopleMemories = await _getPeopleResults(allFiles, now);
       _deductUsedMemories(allFiles, peopleMemories);
       memories.addAll(peopleMemories);
       _logger.finest("All files length: ${allFiles.length}");
 
       // Trip memories
-      final tripMemories = await _getTripsResults(allFiles, null);
+      final tripMemories = await _getTripsResults(allFiles, now);
       _deductUsedMemories(allFiles, tripMemories);
       memories.addAll(tripMemories);
       _logger.finest("All files length: ${allFiles.length}");
 
       // Time memories
-      final timeMemories = await _onThisDayOrWeekResults(allFiles, null);
+      final timeMemories = await _onThisDayOrWeekResults(allFiles, now);
       _deductUsedMemories(allFiles, timeMemories);
       memories.addAll(timeMemories);
       _logger.finest("All files length: ${allFiles.length}");
@@ -122,7 +122,7 @@ class SmartMemoriesService {
 
   Future<List<PeopleMemory>> _getPeopleResults(
     Iterable<EnteFile> allFiles,
-    int? limit, // TODO: lau: implement limit
+    DateTime currentTime,
   ) async {
     final List<PeopleMemory> memoryResults = [];
     if (allFiles.isEmpty) return [];
@@ -132,7 +132,6 @@ class SmartMemoriesService {
         allFileIdsToFile[file.uploadedFileID!] = file;
       }
     }
-    final currentTime = DateTime.now().toLocal();
 
     // Get ordered list of important people (all named, from most to least files)
     final persons = await PersonService.instance.getPersons();
@@ -356,13 +355,12 @@ class SmartMemoriesService {
 
   Future<List<TripMemory>> _getTripsResults(
     Iterable<EnteFile> allFiles,
-    int? limit,
+    DateTime currentTime,
   ) async {
     final List<TripMemory> memoryResults = [];
     final Iterable<LocalEntity<LocationTag>> locationTagEntities =
         (await locationService.getLocationTags());
     if (allFiles.isEmpty) return [];
-    final currentTime = DateTime.now().toLocal();
     final currentMonth = currentTime.month;
     final cutOffTime = currentTime.subtract(const Duration(days: 365));
 
@@ -684,9 +682,6 @@ class SmartMemoriesService {
             name: name,
           ),
         );
-        if (limit != null && memoryResults.length >= limit) {
-          return memoryResults;
-        }
       }
     }
     // Otherwise, if no trips happened in the current month,
@@ -738,12 +733,11 @@ class SmartMemoriesService {
 
   Future<List<TimeMemory>> _onThisDayOrWeekResults(
     Iterable<EnteFile> allFiles,
-    int? limit,
+    DateTime currentTime,
   ) async {
     final List<TimeMemory> memoryResult = [];
     if (allFiles.isEmpty) return [];
 
-    final currentTime = DateTime.now().toLocal();
     final currentDayMonth = currentTime.month * 100 + currentTime.day;
     final currentWeek = _getWeekNumber(currentTime);
     final currentMonth = currentTime.month;
@@ -814,8 +808,6 @@ class SmartMemoriesService {
           );
         }
       }
-
-      if (limit != null && memoryResult.length >= limit) return memoryResult;
     }
 
     // process to find significant weeks (only if there are no significant days)
@@ -875,8 +867,6 @@ class SmartMemoriesService {
         }
       }
     }
-
-    if (limit != null && memoryResult.length >= limit) return memoryResult;
 
     // process to find fillers (months)
     const wantedMemories = 3;

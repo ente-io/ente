@@ -131,7 +131,12 @@ class MemoriesCacheService {
       final EnteWatch? w =
           kDebugMode ? EnteWatch("MemoriesCacheService") : null;
       w?.start();
-      final memories = await SmartMemoriesService.instance.calcMemories();
+      // calculate memories for this period and for the next period
+      final now = DateTime.now();
+      final next = now.add(_kUpdateFrequency);
+      final List<SmartMemory> memories = [];
+      memories.addAll(await SmartMemoriesService.instance.calcMemories(now));
+      memories.addAll(await SmartMemoriesService.instance.calcMemories(next));
       w?.log("calculated new memories");
       final oldCache = await _readCacheFromDisk();
       w?.log("gotten old cache");
