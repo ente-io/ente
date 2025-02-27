@@ -128,7 +128,8 @@ class MemoriesCacheService {
       }
       _logger.info("updating memories cache");
       _isUpdateInProgress = true;
-      final EnteWatch? w = kDebugMode ? EnteWatch("memoriesCacheWatch") : null;
+      final EnteWatch? w =
+          kDebugMode ? EnteWatch("MemoriesCacheService") : null;
       w?.start();
       final memories = await SmartMemoriesService.instance.calcMemories();
       w?.log("calculated new memories");
@@ -205,6 +206,7 @@ class MemoriesCacheService {
 
   Future<List<SmartMemory>> _fromCacheToMemories(MemoriesCache cache) async {
     try {
+      _logger.info('Processing disk cache memories to smart memories');
       final List<SmartMemory> memories = [];
       final allFiles = Set<EnteFile>.from(
         await SearchService.instance.getAllFilesForSearch(),
@@ -234,6 +236,7 @@ class MemoriesCacheService {
           );
         }
       }
+      _logger.info('Processing of disk cache memories done');
       return memories;
     } catch (e, s) {
       _logger.severe("Error converting cache to memories", e, s);
