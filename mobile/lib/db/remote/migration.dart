@@ -73,6 +73,7 @@ class RemoteDBMigration {
     SqliteDatabase database,
   ) async {
     final result = await database.execute('PRAGMA user_version');
+    await database.execute("PRAGMA foreign_keys = ON");
     final currentVersion = result[0]['user_version'] as int;
     final toVersion = migrationScripts.length;
 
