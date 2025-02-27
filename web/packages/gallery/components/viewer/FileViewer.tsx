@@ -22,6 +22,7 @@ import {
     type FileInfoProps,
 } from "@/gallery/components/FileInfo";
 import type { EnteFile } from "@/media/file.js";
+import { ImageEditorOverlay } from "@/new/photos/components/ImageEditorOverlay";
 import { Button, styled } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fileInfoExifForFile } from "./data-source";
@@ -125,6 +126,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     >(undefined);
 
     const [openFileInfo, setOpenFileInfo] = useState(false);
+    const [openImageEditor, setOpenImageEditor] = useState(false);
 
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
@@ -135,6 +137,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             return false;
         });
         setOpenFileInfo(false);
+        setOpenImageEditor(false);
         onClose();
     }, [onTriggerSyncWithRemote, onClose]);
 
@@ -181,6 +184,34 @@ const FileViewer: React.FC<FileViewerProps> = ({
             : undefined;
     }, [onSelectPerson, handleClose]);
 
+    const handleEditImage = useCallback(
+        (annotatedFile: FileViewerAnnotatedFile) => {
+            setActiveAnnotatedFile(annotatedFile);
+            setActiveFileExif(undefined);
+            setOpenImageEditor(true);
+        },
+        [],
+    );
+
+    const handleImageEditorClose = useCallback(
+        () => setOpenImageEditor(false),
+        [],
+    );
+
+    const handleSaveEditedCopy = (
+        editedFile: File,
+        collection: Collection,
+        enteFile: EnteFile,
+    ) => {
+        console.log(editedFile, collection, enteFile);
+        throw new Error("TODO");
+        // uploadManager.prepareForNewUpload();
+        // uploadManager.showUploadProgressDialog();
+        // uploadManager.uploadFile(editedFile, collection, enteFile);
+        handleImageEditorClose();
+        handleClose();
+    };
+
     useEffect(() => {
         log.debug(() => ["viewer", { action: "useEffect", open }]);
 
@@ -196,6 +227,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             onClose: handleClose,
             onAnnotate: handleAnnotate,
             onViewInfo: handleViewInfo,
+            onEditImage: handleEditImage
         });
         pswpRef.current = pswp;
 
@@ -246,6 +278,12 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
                 {...{ fileCollectionIDs, allCollectionsNameByID }}
+            />
+            <ImageEditorOverlay
+                open={openImageEditor}
+                onClose={handleImageEditorClose}
+                file={activeAnnotatedFile?.file}
+                onSaveEditedCopy={handleSaveEditedCopy}
             />
         </Container>
     );

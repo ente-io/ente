@@ -48,6 +48,10 @@ type FileViewerPhotoSwipeOptions = {
      * Called when the user activates the info action on a file.
      */
     onViewInfo: (annotatedFile: FileViewerAnnotatedFile) => void;
+    /**
+     * Called when the user activates the edit action on an image.
+     */
+    onEditImage: (annotatedFile: FileViewerAnnotatedFile) => void;
 } & Pick<FileViewerProps, "files" | "initialIndex" | "disableDownload">;
 
 /**
