@@ -11,9 +11,7 @@ import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/memories_cache.dart";
 import "package:photos/models/memory.dart";
-import "package:photos/models/people_memory.dart";
 import "package:photos/models/smart_memory.dart";
-import "package:photos/models/trip_memory.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/search_service.dart";
@@ -136,8 +134,7 @@ class MemoriesCacheService {
       w?.log("calculated new memories");
       final oldCache = await _readCacheFromDisk();
       w?.log("gotten old cache");
-      final MemoriesCache memoryCache =
-          _fromMemoriesToCache(memories, oldCache);
+      final MemoriesCache memoryCache = _toCache(memories, oldCache);
       w?.log("gotten cache from memories");
       final file = File(await _getCachePath());
       if (!file.existsSync()) {
@@ -158,7 +155,7 @@ class MemoriesCacheService {
     }
   }
 
-  MemoriesCache _fromMemoriesToCache(
+  MemoriesCache _toCache(
     List<SmartMemory> memories,
     MemoriesCache? oldCache,
   ) {
@@ -166,54 +163,15 @@ class MemoriesCacheService {
     final List<PeopleShownLogs> peopleShownLogs = [];
     final List<TripsShownLogs> tripsShownLogs = [];
     for (final memory in memories) {
-      if (memory.isOld()) {
-        if (memory is PeopleMemory) {
-          peopleShownLogs.add(
-            PeopleShownLogs(
-              memory.personID,
-              memory.peopleMemoryType,
-              memory.lastDateToShow!,
-            ),
-          );
-        } else if (memory is TripMemory) {
-          tripsShownLogs.add(
-            TripsShownLogs(
-              memory.location,
-              memory.lastDateToShow!,
-            ),
-          );
-        }
+      if (memory.hasShowTime()) {
+        toShowMemories.add(ToShowMemory.fromSmartMemory(memory));
       } else {
-        if (memory.hasShowTime()) {
-          toShowMemories.add(ToShowMemory.fromSmartMemory(memory));
-        } else {
-          _logger.severe('Memory has no first or last date to show');
-        }
+        _logger.severe('Memory has no first or last date to show');
       }
     }
     if (oldCache != null) {
-      for (final shownPerson in oldCache.peopleShownLogs) {
-        if (peopleShownLogs.any(
-          (person) =>
-              (person.personID == shownPerson.personID) &&
-              (person.peopleMemoryType == shownPerson.peopleMemoryType),
-        )) {
-          continue;
-        }
-        peopleShownLogs.add(shownPerson);
-      }
-      for (final shownTrip in oldCache.tripsShownLogs) {
-        if (tripsShownLogs.any(
-          (trip) => isFileInsideLocationTag(
-            shownTrip.location,
-            trip.location,
-            10.0,
-          ),
-        )) {
-          continue;
-        }
-        tripsShownLogs.add(shownTrip);
-      }
+      peopleShownLogs.addAll(oldCache.peopleShownLogs);
+      tripsShownLogs.addAll(oldCache.tripsShownLogs);
       for (final oldMemory in oldCache.toShowMemories) {
         if (oldMemory.isOld) {
           if (oldMemory.type == MemoryType.people) {
@@ -282,7 +240,6 @@ class MemoriesCacheService {
   Future<List<SmartMemory>> _getMemoriesFromCache() async {
     final cache = await _readCacheFromDisk();
     if (cache == null) {
-      // TODO: lau: if there's no cache, maybe we fall back to old memories?
       return [];
     }
     final result = await _fromCacheToMemories(cache);
