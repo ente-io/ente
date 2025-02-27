@@ -12,17 +12,25 @@ allprojects {
             url "${project(':background_fetch').projectDir}/libs"
         }
     }
-    ext {
-        compileSdkVersion   = 35
-        targetSdkVersion    = 35
-        appCompatVersion    = "1.7.0"
-    }
 }
 
 rootProject.buildDir = "../build"
 
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    afterEvaluate { project ->
+        if (project.plugins.hasPlugin("com.android.application") ||
+                project.plugins.hasPlugin("com.android.library")) {
+            project.android {
+                compileSdkVersion 35
+                buildToolsVersion "35.0.0"
+            }
+        }
+    }
+}
+subprojects {
     project.evaluationDependsOn(":app")
 }
 
