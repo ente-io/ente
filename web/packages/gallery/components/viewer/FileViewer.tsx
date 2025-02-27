@@ -18,6 +18,7 @@ import {
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
 import type { LocalUser } from "@/base/local-user";
+import log from "@/base/log";
 import {
     FileInfo,
     type FileInfoExif,
@@ -25,7 +26,7 @@ import {
 } from "@/gallery/components/FileInfo";
 import type { EnteFile } from "@/media/file.js";
 import { Button, styled } from "@mui/material";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fileInfoExifForFile } from "./data-source";
 import {
     FileViewerPhotoSwipe,
@@ -127,18 +128,18 @@ const FileViewer: React.FC<FileViewerProps> = ({
     >(undefined);
 
     // If `true`, then we need to trigger a sync with remote when we close.
-    const [needsSync, setNeedsSync] = useState(false);
+    const [, setNeedsSync] = useState(false);
 
     const { show: showFileInfo, props: fileInfoVisibilityProps } =
         useModalVisibility();
 
-    const handleClose = () => {
-        if (needsSync) {
-            onTriggerSyncWithRemote?.();
-            setNeedsSync(false);
-        }
+    const handleClose = useCallback(() => {
+        setNeedsSync((needSync) => {
+            if (needSync) onTriggerSyncWithRemote?.();
+            return false;
+        });
         onClose();
-    };
+    }, [onTriggerSyncWithRemote, onClose]);
 
     const handleAnnotate = useCallback(
         (file: EnteFile) => {
@@ -162,19 +163,28 @@ const FileViewer: React.FC<FileViewerProps> = ({
         [showFileInfo],
     );
 
-    const handleSelectCollection = (collectionID: number) => {
-        onSelectCollection(collectionID);
-        onClose();
-    };
+    const handleScheduleUpdate = useCallback(() => setNeedsSync(true), []);
 
-    const handleSelectPerson = onSelectPerson
-        ? (personID: string) => {
-              onSelectPerson(personID);
-              onClose();
-          }
-        : undefined;
+    const handleSelectCollection = useCallback(
+        (collectionID: number) => {
+            onSelectCollection(collectionID);
+            onClose();
+        },
+        [onSelectCollection, onClose],
+    );
+
+    const handleSelectPerson = useMemo(() => {
+        return onSelectPerson
+            ? (personID: string) => {
+                  onSelectPerson(personID);
+                  onClose();
+              }
+            : undefined;
+    }, [onSelectPerson, onClose]);
 
     useEffect(() => {
+        log.debug(() => ["viewer", { action: "useEffect", open }]);
+
         if (!open) {
             // The close state will be handled by the cleanup function.
             return;
@@ -191,6 +201,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
         pswpRef.current = pswp;
 
         return () => {
+            log.debug(() => [
+                "viewer",
+                { action: "useEffect/cleanup", pswpRef: pswpRef.current },
+            ]);
             pswpRef.current?.closeIfNeeded();
             pswpRef.current = undefined;
         };
@@ -215,6 +229,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
         pswpRef.current.refreshCurrentSlideContent();
     }, []);
 
+    log.debug(() => ["viewer", { action: "render", pswpRef: pswpRef.current }]);
+
     return (
         <Container>
             <Button>Test</Button>
@@ -225,7 +241,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 allowEdits={!!activeAnnotatedFile?.annotation.isOwnFile}
                 allowMap={!!user}
                 showCollections={!!user}
-                scheduleUpdate={() => setNeedsSync(true)}
+                scheduleUpdate={handleScheduleUpdate}
                 refreshPhotoswipe={handleRefreshPhotoswipe}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}

@@ -20,7 +20,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
     SelectedState,
@@ -255,6 +255,11 @@ const PhotoFrame = ({
             setRangeStart(null);
         }
     }, [selected]);
+
+    const handleTriggerSyncWithRemote = useCallback(
+        () => void syncWithRemote(),
+        [syncWithRemote],
+    );
 
     if (!displayFiles) {
         return <div />;
@@ -535,7 +540,7 @@ const PhotoFrame = ({
                     files={files}
                     initialIndex={currentIndex}
                     disableDownload={!enableDownload}
-                    onTriggerSyncWithRemote={() => void syncWithRemote()}
+                    onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
                     {...{
                         fileCollectionIDs,
                         allCollectionsNameByID,
