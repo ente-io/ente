@@ -314,7 +314,7 @@ const enqueueUpdates = async (file: EnteFile) => {
                     await livePhotoSourceURLs.image(),
                 );
                 const originalImageBlob =
-                    (await livePhotoSourceURLs.originalImageBlob())!;
+                    livePhotoSourceURLs.originalImageBlob()!;
                 const imageData = {
                     ...(await withDimensions(imageURL)),
                     imageURL,

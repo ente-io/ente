@@ -26,7 +26,7 @@ import { decodeLivePhoto } from "@/media/live-photo";
 
 export interface LivePhotoSourceURL {
     image: () => Promise<string | undefined>;
-    originalImageBlob: () => Promise<Blob | undefined>;
+    originalImageBlob: () => Blob | undefined;
     video: () => Promise<string | undefined>;
 }
 
@@ -674,7 +674,7 @@ async function getRenderableLivePhotoURL(
         }
     };
 
-    const getOriginalImageBlob = async () => {
+    const getOriginalImageBlob = () => {
         try {
             return new Blob([livePhoto.imageData]);
         } catch {
