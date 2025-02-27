@@ -11,21 +11,26 @@ This document describes Ente's handling of metadata
 
 Ente will import the date for your photos from three places:
 
-1. Exif
+1. Embedded metadata
 2. Metadata JSON
 3. File name
 
-### Exif
+### Embedded metadata
 
 Normally, Ente app tries to read the date of the photo from the Exif and other
 metadata (e.g. XMP, IPTC) embedded in the file.
+
+For JPG photos, you'll want to make sure that Exif tag `DateTimeOriginal` is present. Timezone
+info can be stored in Exif tag `OffsetTimeOriginal`. Video metadata will be extracted using
+ffmpeg. The correct tags depend on the video format. In general, if ffmpeg can read your date,
+so will Ente.
 
 > [!TIP]
 >
 > You can see all of the Exif metadata embedded within a photo by using the
 > "View all Exif data" option in the info panel for the photo in Ente.
 
-### Importing from Google takeout
+### Importing from Google Takeout
 
 In case of photos exported from Google Photos, the metadata is not embedded
 within the file itself, but is instead present in a separate sidecar ".json"
@@ -40,7 +45,7 @@ file named `flower.json`, Google will put the `.jpeg` and the `.json` in
 separate takeout zips, and Ente will be unable to correlate them.
 
 To avoid such issues, **we [recommend](/photos/migration/from-google-photos/)
-unzipping all of your Google takeout zips into a single folder, and then
+unzipping all of your Google Takeout zips into a single folder, and then
 importing that folder into Ente**. This way, we will be able to always correctly
 map, for example, `flower.jpeg` and `flower.json` and show the same date for
 `flower.jpeg` that you would've seen within Google Photos.
