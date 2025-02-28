@@ -272,14 +272,15 @@ const PhotoFrame = ({
 
     const handleToggleFavorite = useMemo(() => {
         return favoriteFileIDs
-            ? (file: EnteFile) => {
+            ? async (file: EnteFile) => {
                   const isFavorite = favoriteFileIDs!.has(file.id);
-                  return (isFavorite ? removeFromFavorites : addToFavorites)(
+                  await (isFavorite ? removeFromFavorites : addToFavorites)(
                       file,
                   );
+                  onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
               }
             : undefined;
-    }, [favoriteFileIDs]);
+    }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
 
     const handleSaveEditedImageCopy = useCallback(
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {

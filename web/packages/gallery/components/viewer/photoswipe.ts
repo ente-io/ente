@@ -499,14 +499,29 @@ export class FileViewerPhotoSwipe {
             if (showModifyActions) {
                 const toggleFavorite = async (
                     buttonElement: HTMLButtonElement,
-                    value: boolean,
                 ) => {
                     const af = currentAnnotatedFile();
                     this.pendingFavoriteUpdates.add(af.file.id);
                     buttonElement.disabled = true;
                     await delegate.toggleFavorite(af);
+                    // TODO: This can be improved in two ways:
+                    //
+                    // 1. We currently have a setTimeout to ensure that the
+                    //    updated `favoriteFileIDs` have made their way to our
+                    //    delegate before we query for the status again.
+                    //    Obviously, this is hacky. Note that a timeout of 0
+                    //    (i.e., just deferring till the next tick) isn't enough
+                    //    here, for reasons I need to investigate more (hence
+                    //    this TODO).
+                    //
+                    // 2. We reload the entire slide instead of just updating
+                    //    the button state. This is because there are two
+                    //    buttons, instead of a single button toggling between
+                    //    two states (e.g. like the zoom button). A single
+                    //    button can be achieved by moving the fill as a layer.
+                    await new Promise((r) => setTimeout(r, 100));
                     this.pendingFavoriteUpdates.delete(af.file.id);
-                    showFavoriteIf(buttonElement, value);
+                    this.refreshCurrentSlideContent();
                 };
 
                 const showFavoriteIf = (
@@ -529,7 +544,7 @@ export class FileViewerPhotoSwipe {
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
-                    onClick: (e) => toggleFavorite(e.target, false),
+                    onClick: (e) => toggleFavorite(e.target),
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
                             showFavoriteIf(buttonElement, false),
