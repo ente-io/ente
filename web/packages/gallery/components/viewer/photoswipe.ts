@@ -90,7 +90,11 @@ export interface FileViewerPhotoSwipeDelegate {
      * Called when the user activates the toggle favorite action on a file.
      *
      * The toggle favorite button will be disabled for the file until the
-     * promise returned by this function returns settles.
+     * promise returned by this function returns fulfills.
+     *
+     * > Note: The caller is expected to handle any errors that occur, and
+     * > should not reject for foreseeable failures, otherwise the button will
+     * > remain in the disabled state (until the file viewer is closed).
      */
     toggleFavorite: (annotatedFile: FileViewerAnnotatedFile) => Promise<void>;
 }

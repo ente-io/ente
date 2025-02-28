@@ -15,6 +15,7 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 
 import { isDesktop } from "@/base/app";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
 import type { LocalUser } from "@/base/local-user";
 import log from "@/base/log";
@@ -159,6 +160,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
     onSelectPerson,
     onSaveEditedImageCopy,
 }) => {
+    const { onGenericError } = useBaseContext();
+
     // There are 3 things involved in this dance:
     //
     // 1. Us, "FileViewer". We're a React component.
@@ -306,7 +309,12 @@ const FileViewer: React.FC<FileViewerProps> = ({
             if (!showModifyActions || !favoriteFileIDs)
                 throw new Error("Unexpected invocation");
 
-            await new Promise((r) => setTimeout(r, 7000));
+            try {
+                await new Promise((r) => setTimeout(r, 3000));
+                throw new Error("test");
+            } catch (e) {
+                onGenericError(e);
+            }
             console.log({ file, annotation });
             // TODO
             //   const isFavorite = annotation.isFavorite;
@@ -323,7 +331,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             //       onMarkUnsyncedFavoriteUpdate(file.id, undefined);
             //   });
         },
-        [showModifyActions, favoriteFileIDs],
+        [showModifyActions, onGenericError, favoriteFileIDs],
     );
 
     // Initial value of delegate.
