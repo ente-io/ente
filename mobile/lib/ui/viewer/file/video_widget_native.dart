@@ -10,6 +10,7 @@ import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
+import "package:photos/events/seekbar_triggered_event.dart";
 import "package:photos/events/stream_switched_event.dart";
 import "package:photos/events/use_media_kit_for_video.dart";
 import "package:photos/generated/l10n.dart";
@@ -108,44 +109,60 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         Bus.instance.on<StreamSwitchedEvent>().listen((event) {
       if (event.type != PlayerType.nativeVideoPlayer) return;
       if (event.selectedPreview) {
-        loadPreview();
+        loadPreview(update: true);
       } else {
-        loadOriginal();
+        loadOriginal(update: true);
       }
     });
   }
 
-  void loadPreview() {
-    _setFilePathForNativePlayer(widget.playlistData!.preview.path);
+  Future<void> setVideoSource() async {
+    final videoSource = VideoSource(
+      path: _filePath!,
+      type: VideoSourceType.file,
+    );
+    await _controller?.loadVideo(videoSource);
+    await _controller?.play();
+
+    Bus.instance.fire(SeekbarTriggeredEvent(position: 0));
   }
 
-  void loadOriginal() {
+  void loadPreview({bool update = false}) async {
+    _setFilePathForNativePlayer(widget.playlistData!.preview.path, update);
+
+    await setVideoSource();
+  }
+
+  void loadOriginal({bool update = false}) async {
     if (widget.file.isRemoteFile) {
-      _loadNetworkVideo();
+      _loadNetworkVideo(update);
       _setFileSizeIfNull();
     } else if (widget.file.isSharedMediaToAppSandbox) {
       final localFile = File(getSharedMediaFilePath(widget.file));
       if (localFile.existsSync()) {
-        _setFilePathForNativePlayer(localFile.path);
+        _setFilePathForNativePlayer(localFile.path, update);
       } else if (widget.file.uploadedFileID != null) {
-        _loadNetworkVideo();
+        _loadNetworkVideo(update);
       }
     } else {
-      widget.file.getAsset.then((asset) async {
+      await widget.file.getAsset.then((asset) async {
         if (asset == null || !(await asset.exists)) {
           if (widget.file.uploadedFileID != null) {
-            _loadNetworkVideo();
+            _loadNetworkVideo(update);
           }
         } else {
           // ignore: unawaited_futures
           getFile(widget.file, isOrigin: true).then((file) {
-            _setFilePathForNativePlayer(file!.path);
+            _setFilePathForNativePlayer(file!.path, update);
             if (Platform.isIOS) {
               _shouldClearCache = true;
             }
           });
         }
       });
+    }
+    if (update) {
+      await setVideoSource();
     }
   }
 
@@ -372,11 +389,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
       _isSeeking.addListener(_seekListener);
 
-      final videoSource = VideoSource(
-        path: _filePath!,
-        type: VideoSourceType.file,
-      );
-      await controller.loadVideo(videoSource);
+      await setVideoSource();
     } catch (e) {
       _logger.severe(
         "Error initializing native video player controller for file gen id: ${widget.file.generatedID}",
@@ -478,7 +491,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     }
   }
 
-  void _loadNetworkVideo() {
+  void _loadNetworkVideo(bool update) {
     getFileFromServer(
       widget.file,
       progressCallback: (count, total) {
@@ -494,7 +507,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
       },
     ).then((file) {
       if (file != null) {
-        _setFilePathForNativePlayer(file.path);
+        _setFilePathForNativePlayer(file.path, update);
       }
     }).onError((error, stackTrace) {
       showErrorDialog(
@@ -578,14 +591,17 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     );
   }
 
-  void _setFilePathForNativePlayer(String url) {
-    if (mounted) {
-      setState(() {
-        _filePath = url;
-      });
-      _setAspectRatioFromVideoProps().then((_) {
-        setState(() {});
-      });
+  void _setFilePathForNativePlayer(String url, bool update) {
+    if (!mounted) return;
+    setState(() {
+      _filePath = url;
+    });
+    _setAspectRatioFromVideoProps().then((_) {
+      setState(() {});
+    });
+
+    if (update) {
+      setVideoSource();
     }
   }
 

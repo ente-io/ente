@@ -2,6 +2,8 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:native_video_player/native_video_player.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/seekbar_triggered_event.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/debouncer.dart";
@@ -23,6 +25,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
     executionInterval: const Duration(milliseconds: 325),
   );
   StreamSubscription<void>? _eventsSubscription;
+  StreamSubscription<SeekbarTriggeredEvent>? _seekbarSubscription;
 
   @override
   void initState() {
@@ -33,6 +36,16 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
       value: 0,
     );
 
+    Future.microtask(() {
+      _seekbarSubscription =
+          Bus.instance.on<SeekbarTriggeredEvent>().listen((event) {
+        if (!mounted || _animationController.value == event.position) return;
+
+        _animationController.value = event.position.toDouble();
+        setState(() {});
+      });
+    });
+
     _eventsSubscription = widget.controller.events.listen(
       _listen,
     );
@@ -42,6 +55,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    _seekbarSubscription?.cancel();
     _eventsSubscription?.cancel();
     _animationController.dispose();
     _debouncer.cancelDebounceTimer();
@@ -57,6 +71,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
         return SliderTheme(
           data: SliderTheme.of(context).copyWith(
             trackHeight: 1.0,
+            tickMarkShape: SliderTickMarkShape.noTickMark,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
             overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),
             activeTrackColor: colorScheme.primary300,
