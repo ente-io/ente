@@ -32,7 +32,7 @@ class RemoteDiffService {
 
     final idsToRemoteUpdationTimeMap =
         await _collectionsService.getCollectionIDsToBeSynced();
-    await _syncUpdatedCollections(idsToRemoteUpdationTimeMap);
+    await _syncCollectionsFiles(idsToRemoteUpdationTimeMap);
     _isExistingSyncSilent = false;
     // unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
     // unawaited(_notifyNewFiles
@@ -40,11 +40,11 @@ class RemoteDiffService {
     // (idsToRemoteUpdationTimeMap.keys.toList()));
   }
 
-  Future<void> _syncUpdatedCollections(
+  Future<void> _syncCollectionsFiles(
     final Map<int, int> idsToRemoteUpdationTimeMap,
   ) async {
     for (final cid in idsToRemoteUpdationTimeMap.keys) {
-      await _syncCollectionDiff(
+      await _syncCollectionFiles(
         cid,
         _collectionsService.getCollectionSyncTime(cid, syncV2: true),
       );
@@ -59,46 +59,25 @@ class RemoteDiffService {
     Bus.instance.fire(DiffSyncCompleteEvent());
   }
 
-  Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
-    _logger.info(
-      "[Collection-$collectionID] fetch diff silently: $_isExistingSyncSilent "
-      "since: $sinceTime",
-    );
+  Future<void> _syncCollectionFiles(int collectionID, int sinceTime) async {
     if (!_isExistingSyncSilent) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
     }
     final diff = await getCollectionItemsDiff(collectionID, sinceTime);
     await remoteDB.deleteCollectionFilesDiff(diff.deletedItems);
-
-    if (diff.updatedItems.isNotEmpty) {
-      await remoteDB.insertCollectionFilesDiff(diff.updatedItems);
-      _logger.info(
-        "[Collection-$collectionID] Updated ${diff.updatedItems.length} files"
-        " from remote",
-      );
-
-      // Bus.instance.fire(
-      //   CollectionUpdatedEvent(
-      //     collectionID,
-      //     diff.updatedFiles,
-      //     "syncUpdateFromRemote",
-      //   ),
-      // );
-    }
-
-    if (diff.maxUpdatedAtTime > 0) {
-      await _collectionsService.setCollectionSyncTime(
-        collectionID,
-        diff.maxUpdatedAtTime,
-      );
-    }
+    await remoteDB.insertCollectionFilesDiff(diff.updatedItems);
+    await _collectionsService.setCollectionSyncTime(
+      collectionID,
+      max(diff.maxUpdatedAtTime, sinceTime),
+    );
     if (diff.hasMore) {
-      return await _syncCollectionDiff(
+      _logger.info("[Collection-$collectionID] syncing more files");
+      return await _syncCollectionFiles(
         collectionID,
         _collectionsService.getCollectionSyncTime(collectionID),
       );
     }
-    _logger.info("[Collection-$collectionID] synced");
+    _logger.info("[Collection-$collectionID] synced completely");
   }
 
   Future<DiffResult> getCollectionItemsDiff(
@@ -149,22 +128,22 @@ class RemoteDiffService {
         final fileKey =
             CryptoUtil.decryptSync(encFileKey, collectionKey, encFileKeyNonce);
 
-        final encodedMetadata = await CryptoUtil.decryptChaCha(
+        final encodedMetadata = CryptoUtil.decryptChaChaSync(
           CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
           fileKey,
           CryptoUtil.base642bin(item["metadata"]["decryptionHeader"]),
         );
-        final Map<String, dynamic> defaultMetdata =
+        final Map<String, dynamic> defaultMeta =
             jsonDecode(utf8.decode(encodedMetadata));
-        if (!defaultMetdata.containsKey('version')) {
-          defaultMetdata['version'] = 0;
+        if (!defaultMeta.containsKey('version')) {
+          defaultMeta['version'] = 0;
         }
-        if (defaultMetdata['hash'] == null &&
-            defaultMetdata.containsKey('imageHash') &&
-            defaultMetdata.containsKey('videoHash')) {
-          // old web version was putting live photo hash in dfferent fields
-          defaultMetdata['hash'] =
-              '${defaultMetdata['imageHash']}$kLivePhotoHashSeparator${defaultMetdata['videoHash']}';
+        if (defaultMeta['hash'] == null &&
+            defaultMeta.containsKey('imageHash') &&
+            defaultMeta.containsKey('videoHash')) {
+          // old web version was putting live photo hash in different fields
+          defaultMeta['hash'] =
+              '${defaultMeta['imageHash']}$kLivePhotoHashSeparator${defaultMeta['videoHash']}';
         }
         Metadata? pubMagicMetadata;
         Metadata? privateMagicMetadata;
@@ -208,7 +187,7 @@ class RemoteDiffService {
             thumnailDecryptionHeader:
                 CryptoUtil.base642bin(thumbnailDecryptionHeader),
             fileDecryotionHeader: CryptoUtil.base642bin(fileDecryptionHeader),
-            metadata: Metadata(data: defaultMetdata, version: 0),
+            metadata: Metadata(data: defaultMeta, version: 0),
             magicMetadata: privateMagicMetadata,
             pubMagicMetadata: pubMagicMetadata,
             info: info,

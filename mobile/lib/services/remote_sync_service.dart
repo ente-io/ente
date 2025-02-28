@@ -237,7 +237,7 @@ class RemoteSyncService {
     final Map<int, int> idsToRemoteUpdationTimeMap,
   ) async {
     for (final cid in idsToRemoteUpdationTimeMap.keys) {
-      await _syncCollectionDiff(
+      await _syncCollectionFiles(
         cid,
         _collectionsService.getCollectionSyncTime(cid),
       );
@@ -263,7 +263,7 @@ class RemoteSyncService {
     }
   }
 
-  Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
+  Future<void> _syncCollectionFiles(int collectionID, int sinceTime) async {
     _logger.info(
       "[Collection-$collectionID] fetch diff silently: $_isExistingSyncSilent "
       "since: $sinceTime",
@@ -304,7 +304,7 @@ class RemoteSyncService {
       );
     }
     if (diff.hasMore) {
-      return await _syncCollectionDiff(
+      return await _syncCollectionFiles(
         collectionID,
         _collectionsService.getCollectionSyncTime(collectionID),
       );
@@ -318,7 +318,7 @@ class RemoteSyncService {
   ) async {
     await _collectionsService.joinPublicCollection(context, collectionID);
     await _collectionsService.sync();
-    await _syncCollectionDiff(collectionID, 0);
+    await _syncCollectionFiles(collectionID, 0);
   }
 
   Future<void> _syncCollectionDiffDelete(Diff diff, int collectionID) async {
