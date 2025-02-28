@@ -530,7 +530,10 @@ export class FileViewerPhotoSwipe {
                 ) => {
                     const af = currentAnnotatedFile();
                     const isFavorite = delegate.isFavorite(af);
-                    showIf(buttonElement, isFavorite === value);
+                    showIf(
+                        buttonElement,
+                        af.annotation.showFavorite && isFavorite === value,
+                    );
                     buttonElement.disabled = this.pendingFavoriteUpdates.has(
                         af.file.id,
                     );
