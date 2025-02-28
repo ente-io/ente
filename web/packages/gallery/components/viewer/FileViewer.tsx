@@ -293,17 +293,19 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const getFiles = useCallback(() => files, [files]);
 
-    const [isFavorite, toggleFavorite] = useMemo(() => {
-        if (!showModifyActions || !favoriteFileIDs)
-            return [undefined, undefined];
-
-        const isFavorite = ({ file }: FileViewerAnnotatedFile) =>
+    const isFavorite = useCallback(
+        ({ file }: FileViewerAnnotatedFile) => {
+            if (!showModifyActions || !favoriteFileIDs) return undefined;
             favoriteFileIDs.has(file.id);
+        },
+        [showModifyActions, favoriteFileIDs],
+    );
 
-        const toggleFavorite = ({
-            file,
-            annotation,
-        }: FileViewerAnnotatedFile) => {
+    const toggleFavorite = useCallback(
+        ({ file, annotation }: FileViewerAnnotatedFile) => {
+            if (!showModifyActions || !favoriteFileIDs)
+                throw new Error("Unexpected invocation");
+
             console.log({ file, annotation });
             // TODO
             //   const isFavorite = annotation.isFavorite;
@@ -319,9 +321,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
             //       log.error("Failed to remove favorite", e);
             //       onMarkUnsyncedFavoriteUpdate(file.id, undefined);
             //   });
-        };
-        return [isFavorite, toggleFavorite];
-    }, [showModifyActions, favoriteFileIDs]);
+        },
+        [showModifyActions, favoriteFileIDs],
+    );
 
     // Initial value of delegate.
     if (!delegateRef.current) {

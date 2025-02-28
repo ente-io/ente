@@ -76,20 +76,23 @@ export interface FileViewerPhotoSwipeDelegate {
      * subsequent user initiated slide navigation (e.g. moving to the next
      * slide) will use the new list.
      */
-    getFiles?: () => EnteFile[];
+    getFiles: () => EnteFile[];
     /**
      * Return `true` if the provided file has been marked as a favorite by the
      * user.
      *
-     * The toggle favorite button will not be shown for the file if this returns
-     * `undefined`. Otherwise the return value determines the toggle state of
-     * the toggle favorite button for the file.
+     * The toggle favorite button will not be shown for the file if
+     * this callback returns `undefined`. Otherwise the return value determines
+     * the toggle state of the toggle favorite button for the file.
      */
-    isFavorite?: (annotatedFile: FileViewerAnnotatedFile) => boolean;
+    isFavorite: (annotatedFile: FileViewerAnnotatedFile) => boolean | undefined;
     /**
      * Called when the user activates the toggle favorite action on a file.
+     *
+     * The toggle favorite button will be disabled for the file until the
+     * promise returned by this function returns settles.
      */
-    toggleFavorite?: (annotatedFile: FileViewerAnnotatedFile) => void;
+    toggleFavorite: (annotatedFile: FileViewerAnnotatedFile) => Promise<void>;
 }
 
 type FileViewerPhotoSwipeOptions = Pick<
@@ -208,6 +211,10 @@ export class FileViewerPhotoSwipe {
      * scope.
      */
     private activeFileAnnotation: FileViewerFileAnnotation | undefined;
+    /**
+     * IDs of files for which a there is a favorite update in progress.
+     */
+    private pendingFavoriteUpdates = new Set<number>();
 
     constructor({
         initialIndex,
@@ -486,6 +493,25 @@ export class FileViewerPhotoSwipe {
             });
 
             if (showModifyActions) {
+                const toggleFavorite = async () => {
+                    const af = currentAnnotatedFile();
+                    this.pendingFavoriteUpdates.add(af.file.id);
+                    await delegate.toggleFavorite(af);
+                    this.pendingFavoriteUpdates.delete(af.file.id);
+                };
+
+                const forIsFavorite = (
+                    buttonElement: HTMLElement,
+                    value: boolean,
+                ) => {
+                    const af = currentAnnotatedFile();
+                    const isFavorite = delegate.isFavorite(af);
+                    showIf(buttonElement, isFavorite === value);
+                    buttonElement.disabled = this.pendingFavoriteUpdates.has(
+                        af.file.id,
+                    );
+                };
+
                 // Only one of these two ("favorite" or "unfavorite") will end
                 // up being shown, so they can safely share the same order.
                 pswp.ui.registerElement({
@@ -494,17 +520,11 @@ export class FileViewerPhotoSwipe {
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
-                    // TODO
-                    // onClick: withCurrentAnnotatedFile(
-                    //     delegate.onToggleFavorite,
-                    // ),
-                    // onInit: (buttonElement) =>
-                    //     pswp.on("change", () =>
-                    //         showIf(
-                    //             buttonElement,
-                    //             currentFileAnnotation().isFavorite === false,
-                    //         ),
-                    //     ),
+                    onClick: toggleFavorite,
+                    onInit: (buttonElement) =>
+                        pswp.on("change", () =>
+                            forIsFavorite(buttonElement, false),
+                        ),
                 });
                 pswp.ui.registerElement({
                     name: "unfavorite",
@@ -512,17 +532,11 @@ export class FileViewerPhotoSwipe {
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("unfavorite"),
-                    // TODO
-                    // onClick: withCurrentAnnotatedFile(
-                    //     delegate.onToggleFavorite,
-                    // ),
-                    // onInit: (buttonElement) =>
-                    //     pswp.on("change", () =>
-                    //         showIf(
-                    //             buttonElement,
-                    //             currentFileAnnotation().isFavorite === true,
-                    //         ),
-                    //     ),
+                    onClick: toggleFavorite,
+                    onInit: (buttonElement) =>
+                        pswp.on("change", () =>
+                            forIsFavorite(buttonElement, true),
+                        ),
                 });
             }
 
