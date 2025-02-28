@@ -553,17 +553,15 @@ const PhotoFrame = ({
                     user={galleryContext.user ?? undefined}
                     files={files}
                     initialIndex={currentIndex}
-                    isInTrashSection={activeCollectionID === TRASH_SECTION}
-                    isInHiddenSection={isInHiddenSection}
                     disableDownload={!enableDownload}
+                    isInHiddenSection={isInHiddenSection}
+                    isInTrashSection={activeCollectionID === TRASH_SECTION}
                     onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
                     onSaveEditedImageCopy={handleSaveEditedImageCopy}
                     {...{
                         favoriteFileIDs,
                         fileCollectionIDs,
                         allCollectionsNameByID,
-                        onMarkUnsyncedFavoriteUpdate,
-                        onMarkTempDeleted,
                         onSelectCollection,
                         onSelectPerson,
                     }}

@@ -37,6 +37,7 @@ import { fileInfoExifForFile } from "./data-source";
 import {
     FileViewerPhotoSwipe,
     type FileViewerAnnotatedFile,
+    type FileViewerFileAnnotation,
     type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
 
@@ -121,28 +122,6 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onTriggerSyncWithRemote?: () => void;
     /**
-     * Called when the viewer wants to update the in-memory, unsynced, favorite
-     * status of a file maintained by the top level gallery. For more details,
-     * see {@link unsyncedFavoriteUpdates} in the gallery reducer's
-     * documentation.
-     *
-     * If this is not provided then the toggle favorite action will not be
-     * shown.
-     */
-    onMarkUnsyncedFavoriteUpdate?: (
-        fileID: number,
-        isFavorite: boolean,
-    ) => void;
-    /**
-     * Called when the viewer wants to mark the given files as deleted in the
-     * the in-memory, unsynced, state maintained by the top level gallery. For
-     * more details, see {@link unsyncedFavoriteUpdates} in the gallery
-     * reducer's documentation.
-     *
-     * If this is not provided then the delete action will not be shown.
-     */
-    onMarkTempDeleted?: (files: EnteFile[]) => void;
-    /**
      * Called when the user edits an image in the image editor and asks us to
      * save their edits as a copy.
      *
@@ -175,39 +154,36 @@ const FileViewer: React.FC<FileViewerProps> = ({
     favoriteFileIDs,
     fileCollectionIDs,
     allCollectionsNameByID,
+    onTriggerSyncWithRemote,
     onSelectCollection,
     onSelectPerson,
-    onTriggerSyncWithRemote,
-    onMarkUnsyncedFavoriteUpdate,
-    // TODO
-    // onMarkTempDeleted,
     onSaveEditedImageCopy,
 }) => {
-    // [Note: FileViewer architecture]
-    //
-    // There are 3 parties involved.
+    // There are 3 things involved in this dance:
     //
     // 1. Us, "FileViewer". We're a React component.
+    // 2. The custom PhotoSwipe wrapper, "FileViewerPhotoSwipe". It is a class.
+    // 3. The delegate, "FileViewerPhotoSwipeDelegate".
     //
-    // 2. The custom PhotoSwipe wrapper, "FileViewerPhotoSwipe". It is a class,
-    //    and its currently active instance is maintained in `psRef`.
+    // The delegate acts as a bridge between us and (our custom) photoswipe
+    // class, to avoid recreating the class each time a "dynamic" prop changes.
+    // The delegate has a stable identity, we just keep updating the callback
+    // functions that it holds.
     //
-    // 3. The delegate, "FileViewerPhotoSwipeDelegate". The delegate acts as a
-    //    bridge between us and `psRef`. It is created once as an object with a
-    //    stable identity (and stored in `psDelegateRef`), but its properties
-    //    keep changing as our props change.
-    //
-    // The `psRef` is recreated each time open / close changes. The
-    // `psDelegateRef` remains the same.
-
-    const psRef = useRef<FileViewerPhotoSwipe | undefined>(undefined);
-    const psDelegateRef = useRef<FileViewerPhotoSwipeDelegate | undefined>(
+    // The word "dynamic" here means a prop on whose change we should not
+    // recreate the photoswipe dialog.
+    const delegateRef = useRef<FileViewerPhotoSwipeDelegate | undefined>(
         undefined,
     );
 
+    // We also need to maintain a ref to the currently displayed dialog since we
+    // might need to ask it to refresh its contents.
+    const psRef = useRef<FileViewerPhotoSwipe | undefined>(undefined);
+
     // Whenever we get a callback from our custom PhotoSwipe instance, we also
-    // get the active file on which that action was performed as an argument.
-    // Save it as a prop so that the rest of our React tree can use it.
+    // get the active file on which that action was performed as an argument. We
+    // save it as the `activeAnnotatedFile` state so that the rest of our React
+    // tree can use it.
     //
     // This is not guaranteed, or even intended, to be in sync with the active
     // file shown within the file viewer. All that this guarantees is this will
@@ -215,8 +191,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const [activeAnnotatedFile, setActiveAnnotatedFile] = useState<
         FileViewerAnnotatedFile | undefined
     >(undefined);
-    // With semantics similar to activeFile, this is the exif data associated
-    // with the activeAnnotatedFile, if any.
+
+    // With semantics similar to `activeAnnotatedFile`, this is the exif data
+    // associated with the `activeAnnotatedFile`, if any.
     const [activeFileExif, setActiveFileExif] = useState<
         FileInfoExif | undefined
     >(undefined);
@@ -238,54 +215,21 @@ const FileViewer: React.FC<FileViewerProps> = ({
     }, [onTriggerSyncWithRemote, onClose]);
 
     const handleAnnotate = useCallback(
-        (file: EnteFile) => {
+        (file: EnteFile): FileViewerFileAnnotation => {
             log.debug(() => ["viewer", { action: "annotate", file }]);
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
             const canModify =
                 isOwnFile && !isInTrashSection && !isInHiddenSection;
-            const isFavorite =
-                favoriteFileIDs && onMarkUnsyncedFavoriteUpdate && canModify
-                    ? favoriteFileIDs.has(file.id)
-                    : undefined;
+            const showFavorite = canModify;
             const isEditableImage =
                 onSaveEditedImageCopy && canModify
                     ? fileIsEditableImage(file)
                     : undefined;
-            return { fileID, isOwnFile, isFavorite, isEditableImage };
+            return { fileID, isOwnFile, showFavorite, isEditableImage };
         },
-        [
-            user,
-            isInTrashSection,
-            isInHiddenSection,
-            favoriteFileIDs,
-            onMarkUnsyncedFavoriteUpdate,
-            onSaveEditedImageCopy,
-        ],
+        [user, isInTrashSection, isInHiddenSection, onSaveEditedImageCopy],
     );
-
-    const handleToggleFavorite = useMemo(() => {
-        return favoriteFileIDs
-            ? ({ file, annotation }: FileViewerAnnotatedFile) => {
-                  console.log({ file, annotation });
-                  // TODO
-                  //   const isFavorite = annotation.isFavorite;
-                  //   if (isFavorite === undefined) {
-                  //       assertionFailed();
-                  //       return;
-                  //   }
-
-                  //   onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
-                  //   void (isFavorite ? removeFromFavorites : addToFavorites)(
-                  //       file,
-                  //   ).catch((e: unknown) => {
-                  //       log.error("Failed to remove favorite", e);
-                  //       onMarkUnsyncedFavoriteUpdate(file.id, undefined);
-                  //   });
-              }
-            : undefined;
-        // }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
-    }, [favoriteFileIDs]);
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
@@ -344,70 +288,85 @@ const FileViewer: React.FC<FileViewerProps> = ({
         [onSaveEditedImageCopy, handleImageEditorClose, handleClose],
     );
 
-    // Initial value of psDelegateRef.
-    if (!psDelegateRef.current) {
-        psDelegateRef.current = {
-            onClose: handleClose,
-            onAnnotate: handleAnnotate,
-            onToggleFavorite: handleToggleFavorite,
-            onViewInfo: handleViewInfo,
-            onEditImage: handleEditImage,
-        };
+    const haveUser = !!user;
+    const showModifyActions = haveUser;
+
+    const getFiles = useCallback(() => files, [files]);
+
+    const isFavorite = useMemo(() => {
+        return showModifyActions && favoriteFileIDs
+            ? (annotatedFile: FileViewerAnnotatedFile): boolean =>
+                  favoriteFileIDs.has(annotatedFile.file.id)
+            : undefined;
+    }, [showModifyActions, favoriteFileIDs]);
+
+    const toggleFavorite = useMemo(() => {
+        return favoriteFileIDs
+            ? ({ file, annotation }: FileViewerAnnotatedFile) => {
+                  console.log({ file, annotation });
+                  // TODO
+                  //   const isFavorite = annotation.isFavorite;
+                  //   if (isFavorite === undefined) {
+                  //       assertionFailed();
+                  //       return;
+                  //   }
+
+                  //   onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
+                  //   void (isFavorite ? removeFromFavorites : addToFavorites)(
+                  //       file,
+                  //   ).catch((e: unknown) => {
+                  //       log.error("Failed to remove favorite", e);
+                  //       onMarkUnsyncedFavoriteUpdate(file.id, undefined);
+                  //   });
+              }
+            : undefined;
+        // }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
+    }, [favoriteFileIDs]);
+
+    // Initial value of delegate.
+    if (!delegateRef.current) {
+        delegateRef.current = { getFiles, isFavorite, toggleFavorite };
     }
 
-    // Updates to callbacks held by psDelegateRef.
+    // Updates to delegate callbacks.
     useEffect(() => {
-        const delegate = psDelegateRef.current!;
-        delegate.onClose = handleClose;
-        delegate.onAnnotate = handleAnnotate;
-        delegate.onToggleFavorite = handleToggleFavorite;
-        delegate.onViewInfo = handleViewInfo;
-        delegate.onEditImage = handleEditImage;
-    }, [
-        handleClose,
-        handleAnnotate,
-        handleToggleFavorite,
-        handleViewInfo,
-        handleEditImage,
-    ]);
+        const delegate = delegateRef.current!;
+        delegate.getFiles = getFiles;
+        delegate.isFavorite = isFavorite;
+        delegate.toggleFavorite = toggleFavorite;
+    }, [getFiles, isFavorite, toggleFavorite]);
 
     useEffect(() => {
-        if (open && !psRef.current) {
-            // We're open, but we don't have a PhotoSwipe instance. Create
-            // one. This will show the file viewer dialog.
-            //
-            // Before creating it, also create a delegate. The delegate has
-            // a stable identity so that PhotoSwipe callbacks can be routed
-            // via it. When any of the
-            // callbacks change, we update the props of the delegate instead
-            // of changing the delegate itself.
-            log.debug(() => ["viewer", "open"]);
+        if (open) {
+            // We're open. Create psRef. This will show the file viewer dialog.
+            log.debug(() => ["viewer", { action: "open" }]);
+
             const pswp = new FileViewerPhotoSwipe({
-                files,
                 initialIndex,
-                showModifyActions: !!user,
                 disableDownload,
+                showModifyActions,
+                delegate: delegateRef.current!,
                 onClose: handleClose,
                 onAnnotate: handleAnnotate,
                 onViewInfo: handleViewInfo,
                 onEditImage: handleEditImage,
-                delegate: psDelegateRef.current!,
             });
+
             psRef.current = pswp;
-        } else if (!open && psRef.current) {
-            // We're closed, but we still have a PhotoSwipe instance. Cleanup.
-            log.debug(() => ["viewer", "close"]);
-            psRef.current.closeIfNeeded();
-            psRef.current = undefined;
+
+            return () => {
+                // Close dialog in the effect callback.
+                log.debug(() => ["viewer", { action: "close" }]);
+                pswp.closeIfNeeded();
+            };
         }
-        // TODO: How to relay files updates?
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         open,
         onClose,
         user,
         initialIndex,
         disableDownload,
+        showModifyActions,
         handleClose,
         handleAnnotate,
         handleViewInfo,
@@ -415,7 +374,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     ]);
 
     const handleRefreshPhotoswipe = useCallback(() => {
-        psRef.current.refreshCurrentSlideContent();
+        psRef.current!.refreshCurrentSlideContent();
     }, []);
 
     log.debug(() => ["viewer", { action: "render", psRef: psRef.current }]);
@@ -429,8 +388,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 file={activeAnnotatedFile?.file}
                 exif={activeFileExif}
                 allowEdits={!!activeAnnotatedFile?.annotation.isOwnFile}
-                allowMap={!!user}
-                showCollections={!!user}
+                allowMap={haveUser}
+                showCollections={haveUser}
                 scheduleUpdate={handleScheduleUpdate}
                 refreshPhotoswipe={handleRefreshPhotoswipe}
                 onSelectCollection={handleSelectCollection}
