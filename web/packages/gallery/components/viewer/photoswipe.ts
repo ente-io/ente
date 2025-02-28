@@ -54,10 +54,8 @@ export interface FileViewerFileAnnotation {
      */
     showFavorite: boolean;
     /**
-     * `true` if this is an image which can be edited.
-     *
-     * The edit button is shown when this is true. See also the
-     * {@link onEditImage} option for {@link FileViewerPhotoSwipe} constructor.
+     * `true` if this is an image which can be edited, and editing is possible,
+     * and the edit action should therefore be shown for this file.
      */
     isEditableImage: boolean;
 }
@@ -104,17 +102,18 @@ type FileViewerPhotoSwipeOptions = Pick<
     "initialIndex" | "disableDownload"
 > & {
     /**
-     * `true` if various actions that modify the file should be shown.
+     * `true` if we're running in the context of a logged in user, and so
+     * various actions that modify the file should be shown.
      *
-     * This is the static variant of various per file annotations. If this is
-     * not `true`, then various actions like favorite, delete etc are never
-     * shown. If this is `true`, then their visibility depends on the
-     * corresponding annotation.
+     * This is the static variant of various per file annotations that control
+     * various modifications. If this is not `true`, then various actions like
+     * favorite, delete etc are never shown. If this is `true`, then their
+     * visibility depends on the corresponding annotation.
      *
      * For example, the favorite action is shown only if both this and the
      * {@link showFavorite} file annotation are true.
      */
-    showModifyActions: boolean;
+    haveUser: boolean;
     /**
      * Dynamic callbacks.
      *
@@ -145,16 +144,6 @@ type FileViewerPhotoSwipeOptions = Pick<
         annotatedFile: FileViewerAnnotatedFile,
         buttonElement: HTMLElement,
     ) => void;
-    /**
-     * Called when the user activates the edit action on an image.
-     *
-     * If this callback is not provided, then the edit action is never shown. If
-     * this callback is provided (and {@link showModifyActions} is `true`), then
-     * the visibility of the edit action is determined by the
-     * {@link isEditableImage} property of the {@link FileViewerFileAnnotation}
-     * for the file.
-     */
-    onEditImage?: (annotatedFile: FileViewerAnnotatedFile) => void;
 };
 
 /**
@@ -248,13 +237,12 @@ export class FileViewerPhotoSwipe {
     constructor({
         initialIndex,
         disableDownload,
-        showModifyActions,
+        haveUser,
         delegate,
         onClose,
         onAnnotate,
         onViewInfo,
         onMore,
-        onEditImage,
     }: FileViewerPhotoSwipeOptions) {
         this.opts = { disableDownload };
         this.lastActivityDate = new Date();
@@ -522,7 +510,7 @@ export class FileViewerPhotoSwipe {
                 },
             });
 
-            if (showModifyActions) {
+            if (haveUser) {
                 const toggleFavorite = async (
                     buttonElement: HTMLButtonElement,
                 ) => {
@@ -602,7 +590,7 @@ export class FileViewerPhotoSwipe {
                 onClick: () => onViewInfo(currentAnnotatedFile()),
             });
 
-            if (showModifyActions && onEditImage) {
+            if (haveUser) {
                 pswp.ui.registerElement({
                     name: "more",
                     // TODO(PS):

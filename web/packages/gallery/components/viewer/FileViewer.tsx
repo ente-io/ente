@@ -211,33 +211,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
 
-    const handleClose = useCallback(() => {
-        setNeedsSync((needSync) => {
-            if (needSync) onTriggerSyncWithRemote?.();
-            return false;
-        });
-        setOpenFileInfo(false);
-        setOpenImageEditor(false);
-        onClose();
-    }, [onTriggerSyncWithRemote, onClose]);
-
-    const handleAnnotate = useCallback(
-        (file: EnteFile): FileViewerFileAnnotation => {
-            log.debug(() => ["viewer", { action: "annotate", file }]);
-            const fileID = file.id;
-            const isOwnFile = file.ownerID == user?.id;
-            const canModify =
-                isOwnFile && !isInTrashSection && !isInHiddenSection;
-            const showFavorite = canModify;
-            const isEditableImage =
-                onSaveEditedImageCopy && canModify
-                    ? fileIsEditableImage(file)
-                    : undefined;
-            return { fileID, isOwnFile, showFavorite, isEditableImage };
-        },
-        [user, isInTrashSection, isInHiddenSection, onSaveEditedImageCopy],
-    );
-
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
             setActiveAnnotatedFile(annotatedFile);
@@ -252,25 +225,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const handleFileInfoClose = useCallback(() => setOpenFileInfo(false), []);
-
-    const handleScheduleUpdate = useCallback(() => setNeedsSync(true), []);
-
-    const handleSelectCollection = useCallback(
-        (collectionID: number) => {
-            onSelectCollection(collectionID);
-            handleClose();
-        },
-        [onSelectCollection, handleClose],
-    );
-
-    const handleSelectPerson = useMemo(() => {
-        return onSelectPerson
-            ? (personID: string) => {
-                  onSelectPerson(personID);
-                  handleClose();
-              }
-            : undefined;
-    }, [onSelectPerson, handleClose]);
 
     const handleMore = useCallback(
         (
@@ -292,40 +246,91 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
-            ? (annotatedFile: FileViewerAnnotatedFile) => {
-                  setActiveAnnotatedFile(annotatedFile);
+            ? () => {
+                  handleMoreMenuClose();
                   setOpenImageEditor(true);
               }
             : undefined;
-    }, [onSaveEditedImageCopy]);
+    }, [onSaveEditedImageCopy, handleMoreMenuClose]);
 
     const handleImageEditorClose = useCallback(
         () => setOpenImageEditor(false),
         [],
     );
 
+    const handleClose = useCallback(() => {
+        setNeedsSync((needSync) => {
+            if (needSync) onTriggerSyncWithRemote?.();
+            return false;
+        });
+        handleFileInfoClose();
+        handleImageEditorClose();
+        handleMoreMenuClose();
+        onClose();
+    }, [
+        onTriggerSyncWithRemote,
+        handleFileInfoClose,
+        handleImageEditorClose,
+        handleMoreMenuClose,
+        onClose,
+    ]);
+
     const handleSaveEditedCopy = useCallback(
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
             onSaveEditedImageCopy(editedFile, collection, enteFile);
-            handleImageEditorClose();
             handleClose();
         },
-        [onSaveEditedImageCopy, handleImageEditorClose, handleClose],
+        [onSaveEditedImageCopy, handleClose],
     );
 
+    const handleAnnotate = useCallback(
+        (file: EnteFile): FileViewerFileAnnotation => {
+            log.debug(() => ["viewer", { action: "annotate", file }]);
+            const fileID = file.id;
+            const isOwnFile = file.ownerID == user?.id;
+            const canModify =
+                isOwnFile && !isInTrashSection && !isInHiddenSection;
+            const showFavorite = canModify;
+            const isEditableImage =
+                handleEditImage && canModify
+                    ? fileIsEditableImage(file)
+                    : undefined;
+            return { fileID, isOwnFile, showFavorite, isEditableImage };
+        },
+        [user, isInTrashSection, isInHiddenSection, handleEditImage],
+    );
+
+    const handleScheduleUpdate = useCallback(() => setNeedsSync(true), []);
+
+    const handleSelectCollection = useCallback(
+        (collectionID: number) => {
+            onSelectCollection(collectionID);
+            handleClose();
+        },
+        [onSelectCollection, handleClose],
+    );
+
+    const handleSelectPerson = useMemo(() => {
+        return onSelectPerson
+            ? (personID: string) => {
+                  onSelectPerson(personID);
+                  handleClose();
+              }
+            : undefined;
+    }, [onSelectPerson, handleClose]);
+
     const haveUser = !!user;
-    const showModifyActions = haveUser;
 
     const getFiles = useCallback(() => files, [files]);
 
     const isFavorite = useCallback(
         ({ file }: FileViewerAnnotatedFile) => {
-            if (!showModifyActions || !favoriteFileIDs || !onToggleFavorite) {
+            if (!haveUser || !favoriteFileIDs || !onToggleFavorite) {
                 return undefined;
             }
             return favoriteFileIDs.has(file.id);
         },
-        [showModifyActions, favoriteFileIDs, onToggleFavorite],
+        [haveUser, favoriteFileIDs, onToggleFavorite],
     );
 
     const toggleFavorite = useCallback(
@@ -355,13 +360,12 @@ const FileViewer: React.FC<FileViewerProps> = ({
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
                 disableDownload,
-                showModifyActions,
+                haveUser,
                 delegate: delegateRef.current!,
                 onClose: handleClose,
                 onAnnotate: handleAnnotate,
                 onViewInfo: handleViewInfo,
                 onMore: handleMore,
-                onEditImage: handleEditImage,
             });
 
             psRef.current = pswp;
@@ -378,12 +382,11 @@ const FileViewer: React.FC<FileViewerProps> = ({
         user,
         initialIndex,
         disableDownload,
-        showModifyActions,
+        haveUser,
         handleClose,
         handleAnnotate,
         handleViewInfo,
         handleMore,
-        handleEditImage,
     ]);
 
     const handleRefreshPhotoswipe = useCallback(() => {
@@ -419,7 +422,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 }}
             >
                 {activeAnnotatedFile?.annotation.isEditableImage && (
-                    <MenuItem>{/*TODO */ pt("Edit image")}</MenuItem>
+                    <MenuItem onClick={handleEditImage}>
+                        {/*TODO */ pt("Edit image")}
+                    </MenuItem>
                 )}
             </Menu>
             <ImageEditorOverlay
