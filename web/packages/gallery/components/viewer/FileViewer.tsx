@@ -14,7 +14,6 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 }
 
 import { isDesktop } from "@/base/app";
-import { assertionFailed } from "@/base/assert";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import type { LocalUser } from "@/base/local-user";
@@ -32,7 +31,6 @@ import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "@/new/photos/components/ImageEditorOverlay";
-import { wait } from "@/utils/promise";
 import { Button, styled } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fileInfoExifForFile } from "./data-source";
@@ -47,12 +45,13 @@ import {
 //     addToFavorites,
 //     removeFromFavorites,
 // } from "apps/photos/services/collectionService";
-const addToFavorites = async (file: EnteFile) => {
-    console.log(file);
-    await wait(3000);
-    throw new Error("test");
-};
-const removeFromFavorites = addToFavorites;
+// import { wait } from "@/utils/promise";
+// const addToFavorites = async (file: EnteFile) => {
+//     console.log(file);
+//     await wait(3000);
+//     throw new Error("test");
+// };
+// const removeFromFavorites = addToFavorites;
 
 export type FileViewerProps = ModalVisibilityProps & {
     /**
@@ -268,22 +267,25 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const handleToggleFavorite = useMemo(() => {
         return favoriteFileIDs
             ? ({ file, annotation }: FileViewerAnnotatedFile) => {
-                  const isFavorite = annotation.isFavorite;
-                  if (isFavorite === undefined) {
-                      assertionFailed();
-                      return;
-                  }
+                  console.log({ file, annotation });
+                  // TODO
+                  //   const isFavorite = annotation.isFavorite;
+                  //   if (isFavorite === undefined) {
+                  //       assertionFailed();
+                  //       return;
+                  //   }
 
-                  onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
-                  void (isFavorite ? removeFromFavorites : addToFavorites)(
-                      file,
-                  ).catch((e: unknown) => {
-                      log.error("Failed to remove favorite", e);
-                      onMarkUnsyncedFavoriteUpdate(file.id, undefined);
-                  });
+                  //   onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
+                  //   void (isFavorite ? removeFromFavorites : addToFavorites)(
+                  //       file,
+                  //   ).catch((e: unknown) => {
+                  //       log.error("Failed to remove favorite", e);
+                  //       onMarkUnsyncedFavoriteUpdate(file.id, undefined);
+                  //   });
               }
             : undefined;
-    }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
+        // }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
+    }, [favoriteFileIDs]);
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
@@ -383,7 +385,12 @@ const FileViewer: React.FC<FileViewerProps> = ({
             const pswp = new FileViewerPhotoSwipe({
                 files,
                 initialIndex,
+                showModifyActions: !!user,
                 disableDownload,
+                onClose: handleClose,
+                onAnnotate: handleAnnotate,
+                onViewInfo: handleViewInfo,
+                onEditImage: handleEditImage,
                 delegate: psDelegateRef.current!,
             });
             psRef.current = pswp;
@@ -395,7 +402,17 @@ const FileViewer: React.FC<FileViewerProps> = ({
         }
         // TODO: How to relay files updates?
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open, onClose, initialIndex, disableDownload]);
+    }, [
+        open,
+        onClose,
+        user,
+        initialIndex,
+        disableDownload,
+        handleClose,
+        handleAnnotate,
+        handleViewInfo,
+        handleEditImage,
+    ]);
 
     const handleRefreshPhotoswipe = useCallback(() => {
         psRef.current.refreshCurrentSlideContent();

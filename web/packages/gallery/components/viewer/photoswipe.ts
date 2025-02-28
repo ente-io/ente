@@ -1,7 +1,6 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { assertionFailed } from "@/base/assert";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
@@ -52,31 +51,23 @@ export interface FileViewerFileAnnotation {
      */
     isOwnFile: boolean;
     /**
-     * `true` if this file has been marked as a favorite by the user.
-     *
-     * The toggle favorite button will not be shown if this is not defined.
-     * Otherwise it determines the toggle state of the toggle favorite button.
+     * `true` if the toggle favorite action should be shown for this file.
      */
-    isFavorite?: boolean | undefined;
+    showFavorite: boolean;
     /**
      * `true` if this is an image which can be edited.
      *
      * The edit button is shown when this is true. See also the
      * {@link onEditImage} option for {@link FileViewerPhotoSwipe} constructor.
      */
-    isEditableImage?: boolean | undefined;
+    isEditableImage: boolean;
 }
 
 export interface FileViewerPhotoSwipeDelegate {
     /**
-     * Called when the file viewer is closed.
+     * Called to obtain the latest list of files.
      */
-    onClose: () => void;
-    /**
-     * Called whenever the slide changes to obtain the derived data for the file
-     * that is about to be displayed.
-     */
-    onAnnotate: (file: EnteFile) => FileViewerFileAnnotation;
+    onGetFiles?: unknown; // TODO
     /**
      * Called when the user activates the toggle favorite action on a file.
      *
@@ -87,6 +78,38 @@ export interface FileViewerPhotoSwipeDelegate {
      * property will determine the current toggle state of the favorite button.
      */
     onToggleFavorite?: (annotatedFile: FileViewerAnnotatedFile) => void;
+    // TODO(PS)
+    /**
+     * `true` if this file has been marked as a favorite by the user.
+     *
+     * The toggle favorite button will not be shown if this is not defined.
+     * Otherwise it determines the toggle state of the toggle favorite button.
+     */
+    isFavorite?: boolean | undefined;
+}
+
+type FileViewerPhotoSwipeOptions = {
+    /**
+     * `true` if various actions that modify the file should be shown.
+     *
+     * This is the static variant of various per file annotations. If this is
+     * not `true`, then various actions like favorite, delete etc are never
+     * shown. If this is `true`, then their visibility depends on the
+     * corresponding annotation.
+     *
+     * For example, the favorite action is shown only if both this and the
+     * {@link showFavorite} file annotation are true.
+     */
+    showModifyActions: boolean;
+    /**
+     * Called when the file viewer is closed.
+     */
+    onClose: () => void;
+    /**
+     * Called whenever the slide is initially displayed or changes, to obtain
+     * various derived data for the file that is about to be displayed.
+     */
+    onAnnotate: (file: EnteFile) => FileViewerFileAnnotation;
     /**
      * Called when the user activates the info action on a file.
      */
@@ -94,26 +117,21 @@ export interface FileViewerPhotoSwipeDelegate {
     /**
      * Called when the user activates the edit action on an image.
      *
-     * If this callback is not provided, then the edit button is never shown. If
-     * this callback is provided, then the visibility of the edit button is
-     * determined by the {@link isEditableImage} property of
-     * {@link FileViewerFileAnnotation} for the file.
+     * If this callback is not provided, then the edit action is never shown. If
+     * this callback is provided (and {@link showModifyActions} is `true`), then
+     * the visibility of the edit action is determined by the
+     * {@link isEditableImage} property of the {@link FileViewerFileAnnotation}
+     * for the file.
      */
     onEditImage?: (annotatedFile: FileViewerAnnotatedFile) => void;
-}
-
-type FileViewerPhotoSwipeOptions = Pick<
-    FileViewerProps,
-    "files" | "initialIndex" | "disableDownload"
-> & {
     /**
-     * Callbacks.
+     * Dynamic callbacks.
      *
      * The extra level of indirection allows these to be updated without
      * recreating us.
      */
     delegate: FileViewerPhotoSwipeDelegate;
-};
+} & Pick<FileViewerProps, "files" | "initialIndex" | "disableDownload">;
 
 /**
  * A file and its annotation, in a nice cosy box.
@@ -155,7 +173,7 @@ export class FileViewerPhotoSwipe {
      */
     private opts: Pick<FileViewerPhotoSwipeOptions, "disableDownload">;
     /**
-     * An object to which we should route various callbacks.
+     * An object via which we should route various dynamic callbacks.
      */
     private delegate: FileViewerPhotoSwipeDelegate;
     /**
@@ -192,10 +210,16 @@ export class FileViewerPhotoSwipe {
         files,
         initialIndex,
         disableDownload,
+        showModifyActions,
+        onClose,
+        onAnnotate,
+        onViewInfo,
+        onEditImage,
         delegate,
     }: FileViewerPhotoSwipeOptions) {
         this.files = files;
         this.opts = { disableDownload };
+        this.delegate = delegate;
         this.lastActivityDate = new Date();
 
         const pswp = new PhotoSwipe({
@@ -255,34 +279,6 @@ export class FileViewerPhotoSwipe {
 
         this.pswp = pswp;
 
-        // Helper routines to obtain the file at `currIndex`.
-
-        const currentFile = () => this.files[pswp.currIndex]!;
-
-        const currentAnnotatedFile = () => {
-            const file = currentFile();
-            let annotation = this.activeFileAnnotation;
-            if (annotation?.fileID != file.id) {
-                annotation = delegate.onAnnotate(file);
-                this.activeFileAnnotation = annotation;
-            }
-            return {
-                file,
-                // The above condition implies that annotation can never be
-                // undefined, but it doesn't seem to be enough to convince
-                // TypeScript. Writing the condition in a more unnatural way
-                // `(!(annotation && annotation?.fileID == file.id))` works, but
-                // instead we use a non-null assertion here.
-                annotation: annotation!,
-            };
-        };
-
-        const currentFileAnnotation = () => currentAnnotatedFile().annotation;
-
-        const withCurrentAnnotatedFile =
-            (cb: ((af: AnnotatedFile) => void) | undefined) => () =>
-                cb ? cb(currentAnnotatedFile()) : assertionFailed();
-
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
 
@@ -291,11 +287,11 @@ export class FileViewerPhotoSwipe {
         });
 
         pswp.addFilter("itemData", (_, index) => {
-            const file = files[index]!;
+            const file = this.files[index]!;
 
-            let itemData = itemDataForFile(file, () => {
-                this.pswp.refreshSlideContent(index);
-            });
+            let itemData = itemDataForFile(file, () =>
+                pswp.refreshSlideContent(index),
+            );
 
             const { fileType, videoURL, ...rest } = itemData;
             if (fileType === FileType.video && videoURL) {
@@ -381,7 +377,9 @@ export class FileViewerPhotoSwipe {
             //   more than 2 slides and then back, or if they reopen the viewer.
             //
             // See: [Note: File viewer error handling]
-            forgetFailedItemDataForFile(currentFile());
+            // TODO
+            console.log(this.currentFile(), e);
+            forgetFailedItemDataForFile(this.currentFile());
 
             // Pause the video element, if any, when we move away from the
             // slide.
@@ -405,7 +403,7 @@ export class FileViewerPhotoSwipe {
         );
 
         pswp.on("change", (e) => {
-            const itemData = pswp.currSlide.content.data;
+            const itemData = this.pswp.currSlide.content.data;
             updateFileInfoExifIfNeeded(itemData);
         });
 
@@ -418,7 +416,7 @@ export class FileViewerPhotoSwipe {
             forgetFailedItems();
             forgetExif();
             // Let our parent know that we have been closed.
-            delegate.onClose();
+            onClose();
         });
 
         const showIf = (element: HTMLElement, condition: boolean) =>
@@ -465,25 +463,26 @@ export class FileViewerPhotoSwipe {
                 },
             });
 
-            if (delegate.onToggleFavorite) {
-                // Only one of these two will end up being shown, so they can
-                // safely share the same order.
+            if (showModifyActions) {
+                // Only one of these two ("favorite" or "unfavorite") will end
+                // up being shown, so they can safely share the same order.
                 pswp.ui.registerElement({
                     name: "favorite",
                     title: t("favorite_key"),
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
-                    onClick: withCurrentAnnotatedFile(
-                        delegate.onToggleFavorite,
-                    ),
-                    onInit: (buttonElement) =>
-                        pswp.on("change", () =>
-                            showIf(
-                                buttonElement,
-                                currentFileAnnotation().isFavorite === false,
-                            ),
-                        ),
+                    // TODO
+                    // onClick: withCurrentAnnotatedFile(
+                    //     delegate.onToggleFavorite,
+                    // ),
+                    // onInit: (buttonElement) =>
+                    //     pswp.on("change", () =>
+                    //         showIf(
+                    //             buttonElement,
+                    //             currentFileAnnotation().isFavorite === false,
+                    //         ),
+                    //     ),
                 });
                 pswp.ui.registerElement({
                     name: "unfavorite",
@@ -491,16 +490,17 @@ export class FileViewerPhotoSwipe {
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("unfavorite"),
-                    onClick: withCurrentAnnotatedFile(
-                        delegate.onToggleFavorite,
-                    ),
-                    onInit: (buttonElement) =>
-                        pswp.on("change", () =>
-                            showIf(
-                                buttonElement,
-                                currentFileAnnotation().isFavorite === true,
-                            ),
-                        ),
+                    // TODO
+                    // onClick: withCurrentAnnotatedFile(
+                    //     delegate.onToggleFavorite,
+                    // ),
+                    // onInit: (buttonElement) =>
+                    //     pswp.on("change", () =>
+                    //         showIf(
+                    //             buttonElement,
+                    //             currentFileAnnotation().isFavorite === true,
+                    //         ),
+                    //     ),
                 });
             }
 
@@ -510,11 +510,11 @@ export class FileViewerPhotoSwipe {
                 order: 9,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("info"),
-                onClick: withCurrentAnnotatedFile(delegate.onViewInfo),
+                onClick: () => onViewInfo(this.currentAnnotatedFile()),
             });
 
             // TODO(PS):
-            if (delegate.onEditImage && false) {
+            if (showModifyActions && onEditImage && false) {
                 pswp.ui.registerElement({
                     name: "edit",
                     // TODO(PS):
@@ -523,14 +523,15 @@ export class FileViewerPhotoSwipe {
                     order: 16,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("edit"),
-                    onClick: withCurrentAnnotatedFile(delegate.onEditImage),
-                    onInit: (buttonElement) =>
-                        pswp.on("change", () =>
-                            showIf(
-                                buttonElement,
-                                !!currentFileAnnotation().isEditableImage,
-                            ),
-                        ),
+                    // TODO
+                    // onClick: withCurrentAnnotatedFile(delegate.onEditImage),
+                    // onInit: (buttonElement) =>
+                    //     pswp.on("change", () =>
+                    //         showIf(
+                    //             buttonElement,
+                    //             !!currentFileAnnotation().isEditableImage,
+                    //         ),
+                    //     ),
                 });
             }
 
@@ -541,7 +542,7 @@ export class FileViewerPhotoSwipe {
                 order: 17,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("more"),
-                onClick: withCurrentAnnotatedFile(delegate.onViewInfo),
+                // onClick: withCurrentAnnotatedFile(delegate.onViewInfo),
             });
         });
 
@@ -590,6 +591,34 @@ export class FileViewerPhotoSwipe {
 
     updateFiles(files: EnteFile[]) {
         // TODO(PS)
+    }
+
+    // Various helper routines to obtain the file at `currIndex`.
+
+    private currentFile() {
+        return this.files[this.pswp.currIndex]!;
+    }
+
+    private currentAnnotatedFile() {
+        const file = this.currentFile();
+        let annotation = this.activeFileAnnotation;
+        if (annotation?.fileID != file.id) {
+            annotation = this.delegate.onAnnotate(file);
+            this.activeFileAnnotation = annotation;
+        }
+        return {
+            file,
+            // The above condition implies that annotation can never be
+            // undefined, but it doesn't seem to be enough to convince
+            // TypeScript. Writing the condition in a more unnatural way
+            // `(!(annotation && annotation?.fileID == file.id))` works, but
+            // instead we use a non-null assertion here.
+            annotation: annotation!,
+        };
+    }
+
+    private currentFileAnnotation() {
+        return this.currentAnnotatedFile().annotation;
     }
 
     private clearAutoHideIntervalIfNeeded() {
