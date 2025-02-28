@@ -101,7 +101,6 @@ export type PhotoFrameProps = Pick<
      */
     modePlus?: GalleryBarMode | "search";
     files: EnteFile[];
-    syncWithRemote: () => Promise<void>;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
@@ -145,6 +144,7 @@ export type PhotoFrameProps = Pick<
     isInHiddenSection?: boolean;
     setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
     selectable?: boolean;
+    onSyncWithRemote: () => Promise<void>;
 };
 
 /**
@@ -154,7 +154,6 @@ const PhotoFrame = ({
     mode,
     modePlus,
     files,
-    syncWithRemote,
     setSelected,
     selected,
     favoriteFileIDs,
@@ -170,6 +169,7 @@ const PhotoFrame = ({
     isInHiddenSection,
     setFilesDownloadProgressAttributesCreator,
     selectable,
+    onSyncWithRemote,
     onSelectCollection,
     onSelectPerson,
 }: PhotoFrameProps) => {
@@ -262,8 +262,8 @@ const PhotoFrame = ({
     }, [selected]);
 
     const handleTriggerSyncWithRemote = useCallback(
-        () => void syncWithRemote(),
-        [syncWithRemote],
+        () => void onSyncWithRemote(),
+        [onSyncWithRemote],
     );
 
     const handleSaveEditedImageCopy = useCallback(
@@ -303,7 +303,7 @@ const PhotoFrame = ({
             throw new Error("Not implemented");
         } else {
             setOpen(false);
-            needUpdate && syncWithRemote();
+            needUpdate && onSyncWithRemote();
             setIsPhotoSwipeOpen?.(false);
         }
     };
