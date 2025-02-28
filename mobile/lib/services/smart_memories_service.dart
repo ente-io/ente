@@ -1334,7 +1334,7 @@ class SmartMemoriesService {
 
     // Order the final selection chronologically
     filteredMemories
-        .sort((a, b) => b.file.creationTime!.compareTo(a.file.creationTime!));
+        .sort((a, b) => a.file.creationTime!.compareTo(b.file.creationTime!));
     return filteredMemories;
   }
 }
