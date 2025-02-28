@@ -200,9 +200,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
     >(undefined);
 
     const [openFileInfo, setOpenFileInfo] = useState(false);
-    const [moreMenuAnchorEl, setMoreMenuAnchorEl] = useState<
-        HTMLElement | undefined
-    >(undefined);
+    const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
+        useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
 
     // If `true`, then we need to trigger a sync with remote when we close.
@@ -281,7 +280,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const handleMoreMenuClose = useCallback(
-        () => setMoreMenuAnchorEl(undefined),
+        () => setMoreMenuAnchorEl(null),
         [],
     );
 
