@@ -407,6 +407,11 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 open={!!moreMenuAnchorEl}
                 onClose={handleMoreMenuClose}
                 anchorEl={moreMenuAnchorEl}
+                slotProps={{
+                    list: {
+                        "aria-labelledby": moreMenuAnchorEl?.id,
+                    },
+                }}
             >
                 Test
             </Menu>

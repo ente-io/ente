@@ -617,6 +617,9 @@ export class FileViewerPhotoSwipe {
                 isButton: true,
                 html: createPSRegisterElementIconHTML("more"),
                 onClick: (e) => onMore(currentAnnotatedFile(), e.target),
+                onInit: (buttonElement) => {
+                    buttonElement.id = "ente-pswp-show-more";
+                },
             });
         });
 
