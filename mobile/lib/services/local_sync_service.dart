@@ -39,10 +39,6 @@ class LocalSyncService {
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
   static const kPermissionStateKey = "permission_state";
 
-  // Adding `_2` as a suffic to pull files that were earlier ignored due to permission errors
-  // See https://github.com/CaiJingLong/flutter_photo_manager/issues/589
-  static const kInvalidFileIDsKey = "invalid_file_ids_2";
-
   LocalSyncService._privateConstructor();
 
   static final LocalSyncService instance =
@@ -79,7 +75,7 @@ class LocalSyncService {
     }
     _existingSync = Completer<void>();
     final int ownerID = Configuration.instance.getUserID()!;
-    
+
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
     // This is a fix for https://github.com/ente-io/ente/issues/4296
@@ -98,7 +94,8 @@ class LocalSyncService {
         );
       } else {
         // Load from 0 - 01.01.2010
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
+        Bus.instance
+            .fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
         var startTime = 0;
         var toYear = 2010;
         var toTime = DateTime(toYear).microsecondsSinceEpoch;
@@ -170,12 +167,11 @@ class LocalSyncService {
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs(ownerID);
     final Map<String, Set<String>> pathToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
-    final invalidIDs = _getInvalidFileIDs().toSet();
+
     final localDiffResult = await getDiffWithLocal(
       localAssets,
       existingLocalFileIDs,
       pathToLocalIDs,
-      invalidIDs,
     );
     bool hasAnyMappingChanged = false;
     if (localDiffResult.newPathToLocalIDs?.isNotEmpty ?? false) {
@@ -235,18 +231,6 @@ class LocalSyncService {
       error.reason.name,
     );
     await IgnoredFilesService.instance.cacheAndInsert([ignored]);
-  }
-
-  @Deprecated(
-    "remove usage after few releases as we will switch to ignored files. Keeping it now to clear the invalid file ids from shared prefs",
-  )
-  List<String> _getInvalidFileIDs() {
-    if (_prefs.containsKey(kInvalidFileIDsKey)) {
-      _prefs.remove(kInvalidFileIDsKey);
-      return <String>[];
-    } else {
-      return <String>[];
-    }
   }
 
   Lock getLock() {
