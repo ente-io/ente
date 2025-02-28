@@ -14,6 +14,7 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 }
 
 import { isDesktop } from "@/base/app";
+import { assertionFailed } from "@/base/assert";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import type { LocalUser } from "@/base/local-user";
@@ -31,6 +32,7 @@ import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "@/new/photos/components/ImageEditorOverlay";
+import { wait } from "@/utils/promise";
 import { Button, styled } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fileInfoExifForFile } from "./data-source";
@@ -38,6 +40,18 @@ import {
     FileViewerPhotoSwipe,
     type FileViewerAnnotatedFile,
 } from "./photoswipe";
+
+// TODO
+// import {
+//     addToFavorites,
+//     removeFromFavorites,
+// } from "apps/photos/services/collectionService";
+const addToFavorites = async (file: EnteFile) => {
+    console.log(file);
+    await wait(3000);
+    throw new Error("test");
+};
+const removeFromFavorites = addToFavorites;
 
 export type FileViewerProps = ModalVisibilityProps & {
     /**
@@ -107,6 +121,20 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onTriggerSyncWithRemote?: () => void;
     /**
+     * Called when the viewer wants to update the in-memory, unsynced, favorite
+     * status of a file.
+     *
+     * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
+     * reducer's documentation.
+     *
+     * If this is not provided then the favorite toggle button will not be shown
+     * in the file actions.
+     */
+    onMarkUnsyncedFavoriteUpdate?: (
+        fileID: number,
+        isFavorite: boolean,
+    ) => void;
+    /**
      * Called when the user edits an image in the image editor and asks us to
      * save their edits as a copy.
      *
@@ -142,6 +170,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     onSelectCollection,
     onSelectPerson,
     onTriggerSyncWithRemote,
+    onMarkUnsyncedFavoriteUpdate,
     onSaveEditedImageCopy,
 }) => {
     const pswpRef = useRef<FileViewerPhotoSwipe | undefined>();
@@ -183,13 +212,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
             log.debug(() => ["viewer", { action: "annotate", file }]);
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
-            const canFavoriteOrEdit =
+            const canModify =
                 isOwnFile && !isInTrashSection && !isInHiddenSection;
-            const isFavorite = canFavoriteOrEdit
-                ? favoriteFileIDs?.has(file.id)
-                : undefined;
+            const isFavorite =
+                favoriteFileIDs && onMarkUnsyncedFavoriteUpdate && canModify
+                    ? favoriteFileIDs.has(file.id)
+                    : undefined;
             const isEditableImage =
-                onSaveEditedImageCopy && canFavoriteOrEdit
+                onSaveEditedImageCopy && canModify
                     ? fileIsEditableImage(file)
                     : undefined;
             return { fileID, isOwnFile, isFavorite, isEditableImage };
@@ -199,18 +229,30 @@ const FileViewer: React.FC<FileViewerProps> = ({
             isInTrashSection,
             isInHiddenSection,
             favoriteFileIDs,
+            onMarkUnsyncedFavoriteUpdate,
             onSaveEditedImageCopy,
         ],
     );
 
     const handleToggleFavorite = useMemo(() => {
         return favoriteFileIDs
-            ? (annotatedFile: FileViewerAnnotatedFile) => {
-                  setActiveAnnotatedFile(annotatedFile);
-                  console.log("handleToggleFavorite", annotatedFile);
+            ? ({ file, annotation }: FileViewerAnnotatedFile) => {
+                  const isFavorite = annotation.isFavorite;
+                  if (isFavorite === undefined) {
+                      assertionFailed();
+                      return;
+                  }
+
+                  onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
+                  void (isFavorite ? removeFromFavorites : addToFavorites)(
+                      file,
+                  ).catch((e: unknown) => {
+                      log.error("Failed to remove favorite", e);
+                      onMarkUnsyncedFavoriteUpdate(file.id, undefined);
+                  });
               }
             : undefined;
-    }, [favoriteFileIDs]);
+    }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {

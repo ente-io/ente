@@ -557,6 +557,7 @@ const PhotoFrame = ({
                     onSaveEditedImageCopy={handleSaveEditedImageCopy}
                     {...{
                         favoriteFileIDs,
+                        markUnsyncedFavoriteUpdate,
                         fileCollectionIDs,
                         allCollectionsNameByID,
                         onSelectCollection,
