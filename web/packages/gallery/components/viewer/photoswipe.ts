@@ -423,6 +423,17 @@ export class FileViewerPhotoSwipe {
         // - zoom: 10
         // - close: 20
         pswp.on("uiRegister", () => {
+            // Move the zoom button to the left so that it is in the same place
+            // as the other items like preloader or the error indicator that
+            // come and go as files get loaded.
+            //
+            // We cannot use the PhotoSwipe "uiElement" filter to modify the
+            // order since that only allows us to edit the DOM element, not the
+            // underlying UI element data.
+            pswp.ui.uiElementsData.find((e) => e.name == "zoom").order = 6;
+
+            // Register our custom elements...
+
             pswp.ui.registerElement({
                 name: "error",
                 order: 6,
