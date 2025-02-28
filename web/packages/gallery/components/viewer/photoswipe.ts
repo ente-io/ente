@@ -495,7 +495,8 @@ export class FileViewerPhotoSwipe {
                 onClick: withCurrentAnnotatedFile(onViewInfo),
             });
 
-            if (onEditImage) {
+            // TODO(PS):
+            if (onEditImage && false) {
                 pswp.ui.registerElement({
                     name: "edit",
                     // TODO(PS):
@@ -514,6 +515,17 @@ export class FileViewerPhotoSwipe {
                         ),
                 });
             }
+
+            pswp.ui.registerElement({
+                name: "more",
+                // TODO(PS):
+                title: pt("More"),
+                order: 17,
+                isButton: true,
+                html: createPSRegisterElementIconHTML("more"),
+                onClick: withCurrentAnnotatedFile(onViewInfo),
+            });
+
         });
 
         // Modify the default UI elements.
