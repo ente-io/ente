@@ -17,6 +17,7 @@ import { isDesktop } from "@/base/app";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
+import { pt } from "@/base/i18n";
 import type { LocalUser } from "@/base/local-user";
 import log from "@/base/log";
 import {
@@ -32,7 +33,7 @@ import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "@/new/photos/components/ImageEditorOverlay";
-import { Button, Menu, styled } from "@mui/material";
+import { Button, Menu, MenuItem, styled } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fileInfoExifForFile } from "./data-source";
 import {
@@ -417,7 +418,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
                     list: { "aria-labelledby": moreButtonID },
                 }}
             >
-                Test
+                {activeAnnotatedFile?.annotation.isEditableImage && (
+                    <MenuItem>{/*TODO */ pt("Edit image")}</MenuItem>
+                )}
             </Menu>
             <ImageEditorOverlay
                 open={openImageEditor}

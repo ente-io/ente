@@ -602,47 +602,33 @@ export class FileViewerPhotoSwipe {
                 onClick: () => onViewInfo(currentAnnotatedFile()),
             });
 
-            // TODO(PS):
-            if (showModifyActions && onEditImage && false) {
+            if (showModifyActions && onEditImage) {
                 pswp.ui.registerElement({
-                    name: "edit",
+                    name: "more",
                     // TODO(PS):
-                    // title: t("edit_image"),
-                    title: pt("Edit image"),
+                    title: pt("More"),
                     order: 16,
                     isButton: true,
-                    html: createPSRegisterElementIconHTML("edit"),
-                    // TODO
-                    // onClick: withCurrentAnnotatedFile(delegate.onEditImage),
-                    // onInit: (buttonElement) =>
-                    //     pswp.on("change", () =>
-                    //         showIf(
-                    //             buttonElement,
-                    //             !!currentFileAnnotation().isEditableImage,
-                    //         ),
-                    //     ),
+                    html: createPSRegisterElementIconHTML("more"),
+                    onInit: (buttonElement) => {
+                        buttonElement.setAttribute("id", moreButtonID);
+                        buttonElement.setAttribute("aria-haspopup", "true");
+                        pswp.on("change", () =>
+                            showIf(
+                                buttonElement,
+                                !!currentFileAnnotation().isEditableImage,
+                            ),
+                        );
+                    },
+                    onClick: (e) => {
+                        const buttonElement = e.target;
+                        // See also: `resetMoreMenuButtonOnMenuClose`.
+                        buttonElement.setAttribute("aria-controls", moreMenuID);
+                        buttonElement.setAttribute("aria-expanded", true);
+                        onMore(currentAnnotatedFile(), buttonElement);
+                    },
                 });
             }
-
-            pswp.ui.registerElement({
-                name: "more",
-                // TODO(PS):
-                title: pt("More"),
-                order: 17,
-                isButton: true,
-                html: createPSRegisterElementIconHTML("more"),
-                onInit: (buttonElement) => {
-                    buttonElement.setAttribute("id", moreButtonID);
-                    buttonElement.setAttribute("aria-haspopup", "true");
-                },
-                onClick: (e) => {
-                    const buttonElement = e.target;
-                    // See also: `resetMoreMenuButtonOnMenuClose`.
-                    buttonElement.setAttribute("aria-controls", moreMenuID);
-                    buttonElement.setAttribute("aria-expanded", true);
-                    onMore(currentAnnotatedFile(), buttonElement);
-                },
-            });
         });
 
         // Modify the default UI elements.
