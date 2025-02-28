@@ -48,8 +48,8 @@ import "package:photos/utils/local_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectionsService {
-  static const _collectionSyncTimeKeyPrefix = "collection_sync_time_x";
-  static const _collectionsSyncTimeKey = "collections_sync_time_xx";
+  static const _collectionSyncTimeKeyPrefix = "collection_sync_time_x3";
+  static const _collectionsSyncTimeKey = "collections_sync_time_xx3";
 
   static const int kMaximumWriteAttempts = 5;
 
@@ -207,7 +207,9 @@ class CollectionsService {
     _cachedPublicAlbumKey.clear();
   }
 
-  Future<Map<int, int>> getCollectionIDsToBeSynced() async {
+  Future<Map<int, int>> getCollectionIDsToBeSynced({
+    bool newSync = false,
+  }) async {
     final idsToRemoveUpdateTimeMap = <int, int>{};
     for (final collection in _collectionIDToCollections.values) {
       if (!collection.isDeleted) {
@@ -218,7 +220,8 @@ class CollectionsService {
     for (final MapEntry<int, int> e in idsToRemoveUpdateTimeMap.entries) {
       final int cid = e.key;
       final int remoteUpdateTime = e.value;
-      if (remoteUpdateTime > getCollectionSyncTime(cid)) {
+
+      if (remoteUpdateTime > getCollectionSyncTime(cid, syncV2: newSync)) {
         result[cid] = remoteUpdateTime;
       }
     }
@@ -289,7 +292,12 @@ class CollectionsService {
         .toSet();
   }
 
-  int getCollectionSyncTime(int collectionID) {
+  int getCollectionSyncTime(int collectionID, {bool syncV2 = false}) {
+    if (syncV2) {
+      return _prefs
+              .getInt('${_collectionSyncTimeKeyPrefix}_v2 $collectionID') ??
+          0;
+    }
     return _prefs
             .getInt(_collectionSyncTimeKeyPrefix + collectionID.toString()) ??
         0;

@@ -1,24 +1,66 @@
+import "dart:convert";
 import "dart:typed_data";
 
 class Info {
   final int fileSize;
-  final int thumbnailSize;
+  final int thumbSize;
 
   static Info? fromJson(Map<String, dynamic>? json) {
     if (json == null) return null;
     return Info(
-      fileSize: json['fileSize'],
-      thumbnailSize: json['thumbnailSize'],
+      fileSize: json['fileSize'] ?? 0,
+      thumbSize: json['thumbSize'] ?? 0,
     );
   }
 
-  Info({required this.fileSize, required this.thumbnailSize});
+  Info({required this.fileSize, required this.thumbSize});
+
+  Map<String, dynamic> toJson() {
+    return {
+      'fileSize': fileSize,
+      'thumbSize': thumbSize,
+    };
+  }
+
+  String toEncodedJson() {
+    return jsonEncode(toJson());
+  }
+
+  static Info? fromEncodedJson(String? encodedJson) {
+    if (encodedJson == null) return null;
+    return Info.fromJson(jsonDecode(encodedJson));
+  }
 }
 
 class Metadata {
   final Map<String, dynamic> data;
   final int version;
+
   Metadata({required this.data, required this.version});
+
+  static fromJson(Map<String, dynamic> json) {
+    if (json.isEmpty || json['data'] == null) return null;
+    return Metadata(
+      data: json['data'],
+      version: json['version'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'data': data,
+      'version': version,
+    };
+  }
+
+  static Metadata? fromEncodedJson(String? encodedJson) {
+    if (encodedJson == null) return null;
+    return Metadata.fromJson(jsonDecode(encodedJson));
+  }
+
+  String toEncodedJson() {
+    return jsonEncode(toJson());
+  }
 }
 
 class FileItem {

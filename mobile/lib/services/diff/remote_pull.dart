@@ -6,14 +6,100 @@ import "dart:typed_data";
 import "package:dio/dio.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/diff_sync_complete_event.dart";
+import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/models/api/diff/diff.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/utils/file_uploader_util.dart";
 
 class RemoteDiffService {
   final Logger _logger = Logger('RemoteDiffService');
   final Dio _enteDio;
-  RemoteDiffService(this._enteDio);
+  final CollectionsService _collectionsService;
+  RemoteDiffService(this._enteDio, this._collectionsService);
+
+  bool _isExistingSyncSilent = false;
+
+  Future<void> syncFromRemote() async {
+    _logger.info("Pulling remote diff");
+    final isFirstSync = !_collectionsService.hasSyncedCollections();
+    if (isFirstSync && !_isExistingSyncSilent) {
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
+    }
+    await _collectionsService.sync();
+
+    final idsToRemoteUpdationTimeMap =
+        await _collectionsService.getCollectionIDsToBeSynced();
+    await _syncUpdatedCollections(idsToRemoteUpdationTimeMap);
+    _isExistingSyncSilent = false;
+    // unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
+    // unawaited(_notifyNewFiles
+    //
+    // (idsToRemoteUpdationTimeMap.keys.toList()));
+  }
+
+  Future<void> _syncUpdatedCollections(
+    final Map<int, int> idsToRemoteUpdationTimeMap,
+  ) async {
+    for (final cid in idsToRemoteUpdationTimeMap.keys) {
+      await _syncCollectionDiff(
+        cid,
+        _collectionsService.getCollectionSyncTime(cid, syncV2: true),
+      );
+      // update syncTime for the collection in sharedPrefs. Note: the
+      // syncTime can change on remote but we might not get a diff for the
+      // collection if there are not changes in the file, but the collection
+      // metadata (name, archive status, sharing etc) has changed.
+      final remoteUpdateTime = idsToRemoteUpdationTimeMap[cid];
+      await _collectionsService.setCollectionSyncTime(cid, remoteUpdateTime);
+    }
+    _logger.info("All updated collections synced");
+    Bus.instance.fire(DiffSyncCompleteEvent());
+  }
+
+  Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
+    _logger.info(
+      "[Collection-$collectionID] fetch diff silently: $_isExistingSyncSilent "
+      "since: $sinceTime",
+    );
+    if (!_isExistingSyncSilent) {
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
+    }
+    final diff = await getCollectionItemsDiff(collectionID, sinceTime);
+    await remoteDB.deleteCollectionFilesDiff(diff.deletedItems);
+
+    if (diff.updatedItems.isNotEmpty) {
+      await remoteDB.insertCollectionFilesDiff(diff.updatedItems);
+      _logger.info(
+        "[Collection-$collectionID] Updated ${diff.updatedItems.length} files"
+        " from remote",
+      );
+
+      // Bus.instance.fire(
+      //   CollectionUpdatedEvent(
+      //     collectionID,
+      //     diff.updatedFiles,
+      //     "syncUpdateFromRemote",
+      //   ),
+      // );
+    }
+
+    if (diff.maxUpdatedAtTime > 0) {
+      await _collectionsService.setCollectionSyncTime(
+        collectionID,
+        diff.maxUpdatedAtTime,
+      );
+    }
+    if (diff.hasMore) {
+      return await _syncCollectionDiff(
+        collectionID,
+        _collectionsService.getCollectionSyncTime(collectionID),
+      );
+    }
+    _logger.info("[Collection-$collectionID] synced");
+  }
 
   Future<DiffResult> getCollectionItemsDiff(
     int collectionID,
@@ -63,7 +149,7 @@ class RemoteDiffService {
         final fileKey =
             CryptoUtil.decryptSync(encFileKey, collectionKey, encFileKeyNonce);
 
-        final encodedMetadata = CryptoUtil.decryptSync(
+        final encodedMetadata = await CryptoUtil.decryptChaCha(
           CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
           fileKey,
           CryptoUtil.base642bin(item["metadata"]["decryptionHeader"]),
@@ -87,7 +173,7 @@ class RemoteDiffService {
           final utfEncodedMmd = CryptoUtil.decryptChaChaSync(
             CryptoUtil.base642bin(item['magicMetadata']['data']),
             fileKey,
-            CryptoUtil.base642bin(item['magicMetadata']['header']),
+            CryptoUtil.base642bin(item['magicMetadata']['decryptionHeader']),
           );
           privateMagicMetadata = Metadata(
             data: jsonDecode(utf8.decode(utfEncodedMmd)),

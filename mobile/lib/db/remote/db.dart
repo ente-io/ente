@@ -16,7 +16,7 @@ var devLog = log;
 enum RemoteTable { collections, collection_files, files, entities }
 
 class RemoteDB {
-  static const _databaseName = "remote.db";
+  static const _databaseName = "remotex2.db";
   static const _batchInsertMaxCount = 1000;
   late final SqliteDatabase _sqliteDB;
 
@@ -82,12 +82,29 @@ class RemoteDB {
         'INSERT OR REPLACE INTO collection_files ($collectionFilesColumns) values(?, ?, ?, ?, ?, ?, ?)',
         values,
       );
+      final List<List<Object?>> fileValues = slice
+          .map(
+            (e) => [
+              e.fileItem.fileID,
+              e.fileItem.ownerID,
+              e.fileItem.fileDecryotionHeader,
+              e.fileItem.thumnailDecryptionHeader,
+              e.fileItem.metadata?.toEncodedJson(),
+              e.fileItem.magicMetadata?.toEncodedJson(),
+              e.fileItem.pubMagicMetadata?.toEncodedJson(),
+              e.fileItem.info?.toEncodedJson(),
+            ],
+          )
+          .toList();
+      await _sqliteDB.executeBatch(
+        'INSERT OR REPLACE INTO files ($filesColumns) values(?, ?, ?, ?, ?, ?, ?, ?)',
+        fileValues,
+      );
     });
     debugPrint(
       '$runtimeType insertCollectionFilesDiff complete in ${stopwatch.elapsed.inMilliseconds}ms for ${collections.length}',
     );
   }
-
 
   Future<void> deleteCollectionFilesDiff(
     List<CollectionFileItem> items,

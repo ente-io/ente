@@ -11,9 +11,9 @@ const collectionFilesColumns =
     'collection_id, file_id, enc_key, enc_key_nonce, created_at, updated_at, is_deleted';
 
 const filesColumns =
-    'id, owner_id, file_header, thumb_header, metadata, pri_medata, pub_medata, info';
+    'id, owner_id, file_header, thumb_header, metadata, priv_metadata, pub_metadata, info';
 const trashedFilesColumns =
-    'id, owner_id, file_header, thumb_header, metadata, pri_medata, pub_medata, info, trash_data';
+    'id, owner_id, file_header, thumb_header, metadata, priv_metadata, pub_metadata, info, trash_data';
 
 String collectionValuePlaceHolder =
     collectionColumns.split(',').map((_) => '?').join(',');
@@ -45,13 +45,13 @@ class RemoteDBMigration {
     CREATE TABLE collection_files (
       file_id INTEGER NOT NULL,
       collection_id INTEGER NOT NULL,
-      PRIMARY KEY (file_id, collection_id)
       enc_key BLOB NOT NULL,
       enc_key_nonce BLOB NOT NULL,
-      is_deleted INTEGER NOT NULL
+      is_deleted INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
       created_at INTEGER NOT NULL DEFAULT 0,
-    )
+      PRIMARY KEY (file_id, collection_id)
+    );
     ''',
     '''
     CREATE TABLE files (
@@ -59,12 +59,11 @@ class RemoteDBMigration {
       owner_id INTEGER NOT NULL,
       file_header BLOB NOT NULL,
       thumb_header BLOB NOT NULL,
-      metadata TEXT NOT NULL',
-      pri_medata TEXT NOT NULL DEFAULT '{}',
-      pub_medata TEXT NOT NULL DEFAULT '{}',
+      metadata TEXT NOT NULL,
+      priv_metadata TEXT NOT NULL DEFAULT '{}',
+      pub_metadata TEXT NOT NULL DEFAULT '{}',
       info TEXT DEFAULT '{}',
-      trash_data TEXT,
-      FOREIGN KEY(id) REFERENCES collection_files(file_id)
+      trash_data TEXT
     )
     ''',
   ];

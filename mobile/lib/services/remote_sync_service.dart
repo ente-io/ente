@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
+import "package:photos/core/network/network.dart";
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -26,6 +27,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/diff/diff_fetcher.dart';
+import "package:photos/services/diff/remote_pull.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
@@ -48,6 +50,8 @@ class RemoteSyncService {
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
   bool _isExistingSyncSilent = false;
+
+  late RemoteDiffService newService;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
   /* This setting is used to maintain a list of local IDs for videos that the user has manually
@@ -77,6 +81,8 @@ class RemoteSyncService {
 
   void init(SharedPreferences preferences) {
     _prefs = preferences;
+    newService =
+        RemoteDiffService(NetworkClient.instance.enteDio, _collectionsService);
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
       if (event.type == EventType.addedOrUpdated) {
@@ -203,6 +209,7 @@ class RemoteSyncService {
   }
 
   Future<void> _pullDiff() async {
+    await newService.syncFromRemote();
     _logger.info("Pulling remote diff");
     final isFirstSync = !_collectionsService.hasSyncedCollections();
     if (isFirstSync && !_isExistingSyncSilent) {
@@ -308,7 +315,6 @@ class RemoteSyncService {
   Future<void> joinAndSyncCollection(
     BuildContext context,
     int collectionID,
-  
   ) async {
     await _collectionsService.joinPublicCollection(context, collectionID);
     await _collectionsService.sync();
