@@ -293,35 +293,35 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const getFiles = useCallback(() => files, [files]);
 
-    const isFavorite = useMemo(() => {
-        return showModifyActions && favoriteFileIDs
-            ? (annotatedFile: FileViewerAnnotatedFile): boolean =>
-                  favoriteFileIDs.has(annotatedFile.file.id)
-            : undefined;
+    const [isFavorite, toggleFavorite] = useMemo(() => {
+        if (!showModifyActions || !favoriteFileIDs)
+            return [undefined, undefined];
+
+        const isFavorite = ({ file }: FileViewerAnnotatedFile) =>
+            favoriteFileIDs.has(file.id);
+
+        const toggleFavorite = ({
+            file,
+            annotation,
+        }: FileViewerAnnotatedFile) => {
+            console.log({ file, annotation });
+            // TODO
+            //   const isFavorite = annotation.isFavorite;
+            //   if (isFavorite === undefined) {
+            //       assertionFailed();
+            //       return;
+            //   }
+
+            //   onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
+            //   void (isFavorite ? removeFromFavorites : addToFavorites)(
+            //       file,
+            //   ).catch((e: unknown) => {
+            //       log.error("Failed to remove favorite", e);
+            //       onMarkUnsyncedFavoriteUpdate(file.id, undefined);
+            //   });
+        };
+        return [isFavorite, toggleFavorite];
     }, [showModifyActions, favoriteFileIDs]);
-
-    const toggleFavorite = useMemo(() => {
-        return favoriteFileIDs
-            ? ({ file, annotation }: FileViewerAnnotatedFile) => {
-                  console.log({ file, annotation });
-                  // TODO
-                  //   const isFavorite = annotation.isFavorite;
-                  //   if (isFavorite === undefined) {
-                  //       assertionFailed();
-                  //       return;
-                  //   }
-
-                  //   onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
-                  //   void (isFavorite ? removeFromFavorites : addToFavorites)(
-                  //       file,
-                  //   ).catch((e: unknown) => {
-                  //       log.error("Failed to remove favorite", e);
-                  //       onMarkUnsyncedFavoriteUpdate(file.id, undefined);
-                  //   });
-              }
-            : undefined;
-        // }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
-    }, [favoriteFileIDs]);
 
     // Initial value of delegate.
     if (!delegateRef.current) {

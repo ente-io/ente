@@ -85,9 +85,7 @@ export interface FileViewerPhotoSwipeDelegate {
      * `undefined`. Otherwise the return value determines the toggle state of
      * the toggle favorite button for the file.
      */
-    isFavorite?: (
-        annotatedFile: FileViewerAnnotatedFile,
-    ) => boolean | undefined;
+    isFavorite?: (annotatedFile: FileViewerAnnotatedFile) => boolean;
     /**
      * Called when the user activates the toggle favorite action on a file.
      */
