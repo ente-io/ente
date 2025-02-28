@@ -117,7 +117,9 @@ class ToShowMemory {
       json['lastTimeToShow'],
       json['calculationTime'],
       personID: json['personID'],
-      peopleMemoryType: peopleMemoryTypeFromString(json['peopleMemoryType']),
+      peopleMemoryType: json['peopleMemoryType'] != null
+          ? peopleMemoryTypeFromString(json['peopleMemoryType'])
+          : null,
       location: json['location'] != null
           ? Location(
               latitude: json['location']['latitude'],
@@ -136,7 +138,7 @@ class ToShowMemory {
       'lastTimeToShow': lastTimeToShow,
       'calculationTime': calculationTime,
       'personID': personID,
-      'peopleMemoryType': peopleMemoryType.toString().split('.').last,
+      'peopleMemoryType': peopleMemoryType?.toString().split('.').last,
       'location': location != null
           ? {
               'latitude': location!.latitude!,
