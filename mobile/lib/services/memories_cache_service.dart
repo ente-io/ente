@@ -95,7 +95,7 @@ class MemoriesCacheService {
 
   Future<String> _getCachePath() async {
     return (await getApplicationSupportDirectory()).path +
-        "/cache//test3/memories_cache";
+        "/cache/test3/memories_cache";
     // TODO: lau: remove the test1 directory after testing
   }
 
