@@ -7,32 +7,37 @@ class TripMemory extends SmartMemory {
 
   TripMemory(
     List<Memory> memories,
+    String title,
+    int firstDateToShow,
+    int lastDateToShow,
     this.location, {
-    super.name,
     super.firstCreationTime,
     super.lastCreationTime,
-    super.firstDateToShow,
-    super.lastDateToShow,
-  }) : super(memories, MemoryType.trips);
+  }) : super(
+          memories,
+          MemoryType.trips,
+          title,
+          firstDateToShow,
+          lastDateToShow,
+        );
 
-  @override
   TripMemory copyWith({
     List<Memory>? memories,
-    Location? location,
-    String? name,
-    int? firstCreationTime,
-    int? lastCreationTime,
+    String? title,
     int? firstDateToShow,
     int? lastDateToShow,
+    Location? location,
+    int? firstCreationTime,
+    int? lastCreationTime,
   }) {
     return TripMemory(
-      memories ?? super.memories,
+      memories ?? this.memories,
+      title ?? this.title,
+      firstDateToShow ?? this.firstDateToShow,
+      lastDateToShow ?? this.lastDateToShow,
       location ?? this.location,
-      name: name ?? super.name,
-      firstCreationTime: firstCreationTime ?? super.firstCreationTime,
-      lastCreationTime: lastCreationTime ?? super.lastCreationTime,
-      firstDateToShow: firstDateToShow ?? super.firstDateToShow,
-      lastDateToShow: lastDateToShow ?? super.lastDateToShow,
+      firstCreationTime: firstCreationTime ?? this.firstCreationTime,
+      lastCreationTime: lastCreationTime ?? this.lastCreationTime,
     );
   }
 }

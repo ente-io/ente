@@ -47,19 +47,23 @@ class ToShowMemory {
   final MemoryType type;
   final int firstTimeToShow;
   final int lastTimeToShow;
+  final int calculationTime;
 
   final String? personID;
   final PeopleMemoryType? peopleMemoryType;
   final Location? location;
 
-  bool get shouldShowNow {
-    final now = DateTime.now().microsecondsSinceEpoch;
-    return now >= firstTimeToShow && now <= lastTimeToShow;
-  }
-
   bool get isOld {
     final now = DateTime.now().microsecondsSinceEpoch;
     return now > lastTimeToShow;
+  }
+
+  bool shouldShowNow() {
+    final now = DateTime.now().microsecondsSinceEpoch;
+    final relevantForNow = now >= firstTimeToShow && now < lastTimeToShow;
+    final calculatedForNow = (now >= calculationTime) &&
+        (now < calculationTime + kMemoriesUpdateFrequency.inMicroseconds);
+    return relevantForNow && calculatedForNow;
   }
 
   ToShowMemory(
@@ -67,7 +71,8 @@ class ToShowMemory {
     this.fileUploadedIDs,
     this.type,
     this.firstTimeToShow,
-    this.lastTimeToShow, {
+    this.lastTimeToShow,
+    this.calculationTime, {
     this.personID,
     this.peopleMemoryType,
     this.location,
@@ -80,8 +85,7 @@ class ToShowMemory {
           "PersonID and peopleMemoryType must be provided for people memory type, and location must be provided for trips memory type",
         );
 
-  factory ToShowMemory.fromSmartMemory(SmartMemory memory) {
-    assert(memory.firstDateToShow != null && memory.lastDateToShow != null);
+  factory ToShowMemory.fromSmartMemory(SmartMemory memory, DateTime calcTime) {
     String? personID;
     PeopleMemoryType? peopleMemoryType;
     Location? location;
@@ -92,11 +96,12 @@ class ToShowMemory {
       location = memory.location;
     }
     return ToShowMemory(
-      memory.name,
+      memory.title,
       memory.memories.map((m) => m.file.uploadedFileID!).toList(),
       memory.type,
-      memory.firstDateToShow!,
-      memory.lastDateToShow!,
+      memory.firstDateToShow,
+      memory.lastDateToShow,
+      calcTime.microsecondsSinceEpoch,
       personID: personID,
       peopleMemoryType: peopleMemoryType,
       location: location,
@@ -110,6 +115,7 @@ class ToShowMemory {
       memoryTypeFromString(json['type']),
       json['firstTimeToShow'],
       json['lastTimeToShow'],
+      json['calculationTime'],
       personID: json['personID'],
       peopleMemoryType: peopleMemoryTypeFromString(json['peopleMemoryType']),
       location: json['location'] != null
@@ -128,6 +134,7 @@ class ToShowMemory {
       'type': type.toString().split('.').last,
       'firstTimeToShow': firstTimeToShow,
       'lastTimeToShow': lastTimeToShow,
+      'calculationTime': calculationTime,
       'personID': personID,
       'peopleMemoryType': peopleMemoryType.toString().split('.').last,
       'location': location != null

@@ -25,7 +25,6 @@ class MemoriesCacheService {
   /// Delay is for cache update to be done not during app init, during which a
   /// lot of other things are happening.
   static const _kCacheUpdateDelay = Duration(seconds: 10);
-  static const _kUpdateFrequency = Duration(days: 7);
 
   final SharedPreferences _prefs;
   late final Logger _logger = Logger("MemoriesCacheService");
@@ -48,7 +47,9 @@ class MemoriesCacheService {
     unawaited(_memoriesDB.getSeenTimes().then((value) => _seenTimes = value));
     unawaited(
       _memoriesDB.clearMemoriesSeenBeforeTime(
-        DateTime.now().subtract(_kUpdateFrequency).microsecondsSinceEpoch,
+        DateTime.now()
+            .subtract(kMemoriesUpdateFrequency)
+            .microsecondsSinceEpoch,
       ),
     );
 
@@ -86,14 +87,16 @@ class MemoriesCacheService {
 
   Future<void> _checkIfTimeToUpdateCache() async {
     if (lastMemoriesCacheUpdateTime <
-        DateTime.now().subtract(_kUpdateFrequency).microsecondsSinceEpoch) {
+        DateTime.now()
+            .subtract(kMemoriesUpdateFrequency)
+            .microsecondsSinceEpoch) {
       _shouldUpdate = true;
     }
   }
 
   Future<String> _getCachePath() async {
     return (await getApplicationSupportDirectory()).path +
-        "/cache//test1/memories_cache";
+        "/cache//test2/memories_cache";
     // TODO: lau: remove the test1 directory after testing
   }
 
@@ -133,20 +136,21 @@ class MemoriesCacheService {
       w?.start();
       // calculate memories for this period and for the next period
       final now = DateTime.now();
-      final next = now.add(_kUpdateFrequency);
-      final List<SmartMemory> memories = [];
-      memories.addAll(await SmartMemoriesService.instance.calcMemories(now));
-      memories.addAll(await SmartMemoriesService.instance.calcMemories(next));
+      final next = now.add(kMemoriesUpdateFrequency);
+      final nowMemories = await SmartMemoriesService.instance.calcMemories(now);
+      final nextMemories =
+          await SmartMemoriesService.instance.calcMemories(next);
       w?.log("calculated new memories");
       final oldCache = await _readCacheFromDisk();
       w?.log("gotten old cache");
-      final MemoriesCache memoryCache = _toCache(memories, oldCache);
+      final MemoriesCache memoryCache =
+          _toCache(nowMemories, now, nextMemories, next, oldCache);
       w?.log("gotten cache from memories");
       final file = File(await _getCachePath());
       if (!file.existsSync()) {
         file.createSync(recursive: true);
       }
-      _cachedMemories = memories;
+      _cachedMemories = nowMemories;
       await file.writeAsBytes(
         MemoriesCache.encodeToJsonString(memoryCache).codeUnits,
       );
@@ -162,18 +166,20 @@ class MemoriesCacheService {
   }
 
   MemoriesCache _toCache(
-    List<SmartMemory> memories,
+    List<SmartMemory> nowMemories,
+    DateTime now,
+    List<SmartMemory> nextMemories,
+    DateTime next,
     MemoriesCache? oldCache,
   ) {
     final List<ToShowMemory> toShowMemories = [];
     final List<PeopleShownLog> peopleShownLogs = [];
     final List<TripsShownLog> tripsShownLogs = [];
-    for (final memory in memories) {
-      if (memory.hasShowTime()) {
-        toShowMemories.add(ToShowMemory.fromSmartMemory(memory));
-      } else {
-        _logger.severe('Memory has no first or last date to show');
-      }
+    for (final nowMemory in nowMemories) {
+      toShowMemories.add(ToShowMemory.fromSmartMemory(nowMemory, now));
+    }
+    for (final nextMemory in nextMemories) {
+      toShowMemories.add(ToShowMemory.fromSmartMemory(nextMemory, next));
     }
     if (oldCache != null) {
       peopleShownLogs.addAll(oldCache.peopleShownLogs);
@@ -224,7 +230,7 @@ class MemoriesCacheService {
       }
 
       for (final ToShowMemory memory in cache.toShowMemories) {
-        if (memory.shouldShowNow) {
+        if (memory.shouldShowNow()) {
           memories.add(
             SmartMemory(
               memory.fileUploadedIDs
@@ -234,9 +240,9 @@ class MemoriesCacheService {
                   )
                   .toList(),
               memory.type,
-              name: memory.title,
-              firstDateToShow: memory.firstTimeToShow,
-              lastDateToShow: memory.lastTimeToShow,
+              memory.title,
+              memory.firstTimeToShow,
+              memory.lastTimeToShow,
             ),
           );
         }

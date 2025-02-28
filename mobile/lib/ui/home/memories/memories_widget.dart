@@ -128,7 +128,8 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   }
 
   Widget _buildSmartMemories(List<SmartMemory> memories) {
-    final collatedMemories = memories.map((e) => (e.memories, e.name)).toList();
+    final collatedMemories =
+        memories.map((e) => (e.memories, e.title)).toList();
 
     return SizedBox(
       height: _maxHeight + MemoryCoverWidget.outerStrokeWidth * 2,

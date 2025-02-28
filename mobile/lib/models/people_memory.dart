@@ -61,35 +61,40 @@ class PeopleMemory extends SmartMemory {
 
   PeopleMemory(
     List<Memory> memories,
+    String title,
+    int firstDateToShow,
+    int lastDateToShow, 
     this.peopleMemoryType,
     this.personID, {
-    super.name,
     super.firstCreationTime,
     super.lastCreationTime,
-    super.firstDateToShow,
-    super.lastDateToShow,
-  }) : super(memories, MemoryType.people);
+  }) : super(
+          memories,
+          MemoryType.people,
+          title,
+          firstDateToShow,
+          lastDateToShow,
+        );
 
-  @override
   PeopleMemory copyWith({
     List<Memory>? memories,
-    PeopleMemoryType? peopleMemoryType,
-    String? personID,
-    String? name,
-    int? firstCreationTime,
-    int? lastCreationTime,
+    String? title,
     int? firstDateToShow,
     int? lastDateToShow,
+    PeopleMemoryType? peopleMemoryType,
+    String? personID,
+    int? firstCreationTime,
+    int? lastCreationTime,
   }) {
     return PeopleMemory(
-      memories ?? super.memories,
+      memories ?? this.memories,
+      title ?? this.title,
+      firstDateToShow ?? this.firstDateToShow,
+      lastDateToShow ?? this.lastDateToShow,
       peopleMemoryType ?? this.peopleMemoryType,
       personID ?? this.personID,
-      name: name ?? super.name,
-      firstCreationTime: firstCreationTime ?? super.firstCreationTime,
-      lastCreationTime: lastCreationTime ?? super.lastCreationTime,
-      firstDateToShow: firstDateToShow ?? super.firstDateToShow,
-      lastDateToShow: lastDateToShow ?? super.lastDateToShow,
+      firstCreationTime: firstCreationTime ?? this.firstCreationTime,
+      lastCreationTime: lastCreationTime ?? this.lastCreationTime,
     );
   }
 }

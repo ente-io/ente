@@ -208,9 +208,11 @@ class SmartMemoriesService {
         );
         final spotlightMemory = PeopleMemory(
           selectSpotlightMemories,
+          title,
+          currentTime.microsecondsSinceEpoch,
+          currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch,
           PeopleMemoryType.spotlight,
           personID,
-          name: title,
         );
         personToMemories
             .putIfAbsent(personID, () => {})
@@ -236,9 +238,11 @@ class SmartMemoriesService {
           );
           final youAndThemMemory = PeopleMemory(
             selectYouAndThemMemories,
+            title,
+            currentTime.microsecondsSinceEpoch,
+            currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch,
             PeopleMemoryType.youAndThem,
             personID,
-            name: title,
           );
           personToMemories
               .putIfAbsent(personID, () => {})
@@ -281,9 +285,11 @@ class SmartMemoriesService {
           );
           final activityMemory = PeopleMemory(
             selectActivityMemories,
+            title,
+            currentTime.microsecondsSinceEpoch,
+            currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch,
             PeopleMemoryType.doingSomethingTogether,
             personID,
-            name: title,
           );
           personToMemories.putIfAbsent(personID, () => {}).putIfAbsent(
                 PeopleMemoryType.doingSomethingTogether,
@@ -326,9 +332,11 @@ class SmartMemoriesService {
           lastTimeYouSawThemFiles
               .map((f) => Memory.fromFile(f, _seenTimes))
               .toList(),
+          title,
+          currentTime.microsecondsSinceEpoch,
+          currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch,
           PeopleMemoryType.lastTimeYouSawThem,
           personID,
-          name: title,
         );
         personToMemories.putIfAbsent(personID, () => {}).putIfAbsent(
               PeopleMemoryType.lastTimeYouSawThem,
@@ -528,7 +536,10 @@ class SmartMemoriesService {
                 Memory.fromFiles(
                   currentBlockFiles,
                   _seenTimes,
-                ), // TODO: lau: properly check last seen times
+                ),
+                'Trip1',
+                0,
+                0,
                 location,
                 firstCreationTime: blockStart,
                 lastCreationTime: lastTime,
@@ -553,6 +564,9 @@ class SmartMemoriesService {
         tripLocations.add(
           TripMemory(
             Memory.fromFiles(currentBlockFiles, _seenTimes),
+            'Trip2',
+            0,
+            0,
             location,
             firstCreationTime: blockStart,
             lastCreationTime: lastTime,
@@ -584,6 +598,9 @@ class SmartMemoriesService {
             )) {
           mergedTrips[idx] = TripMemory(
             otherTrip.memories + trip.memories,
+            'Trip3',
+            0,
+            0,
             otherTrip.location,
             firstCreationTime:
                 min(otherTrip.firstCreationTime!, trip.firstCreationTime!),
@@ -599,6 +616,9 @@ class SmartMemoriesService {
       mergedTrips.add(
         TripMemory(
           trip.memories,
+          'Trip4',
+          0,
+          0,
           trip.location,
           firstCreationTime: trip.firstCreationTime,
           lastCreationTime: trip.lastCreationTime,
@@ -629,8 +649,10 @@ class SmartMemoriesService {
       memoryResults.add(
         TripMemory(
           Memory.fromFiles(baseLocation.files, _seenTimes),
+          name,
+          0,
+          0,
           baseLocation.location,
-          name: name,
         ),
       );
     }
@@ -676,10 +698,28 @@ class SmartMemoriesService {
           name = "Last year's trip";
         }
         final photoSelection = await _bestSelection(trip.memories);
+        final firstCreationDate = DateTime.fromMicrosecondsSinceEpoch(
+          trip.firstCreationTime!,
+        );
+        final firstDateToShow = DateTime(
+          currentTime.year,
+          firstCreationDate.month,
+          firstCreationDate.day,
+        ).subtract(kMemoriesMargin).microsecondsSinceEpoch;
+        final lastCreationDate = DateTime.fromMicrosecondsSinceEpoch(
+          trip.lastCreationTime!,
+        );
+        final lastDateToShow = DateTime(
+          currentTime.year,
+          lastCreationDate.month,
+          lastCreationDate.day,
+        ).add(kMemoriesMargin).microsecondsSinceEpoch;
         memoryResults.add(
           trip.copyWith(
             memories: photoSelection,
-            name: name,
+            title: name,
+            firstDateToShow: firstDateToShow,
+            lastDateToShow: lastDateToShow,
           ),
         );
       }
@@ -717,10 +757,28 @@ class SmartMemoriesService {
               name = "Last year's trip";
             }
             final photoSelection = await _bestSelection(trip.memories);
+            final firstCreationDate = DateTime.fromMicrosecondsSinceEpoch(
+              trip.firstCreationTime!,
+            );
+            final firstDateToShow = DateTime(
+              currentTime.year,
+              firstCreationDate.month,
+              firstCreationDate.day,
+            ).subtract(kMemoriesMargin).microsecondsSinceEpoch;
+            final lastCreationDate = DateTime.fromMicrosecondsSinceEpoch(
+              trip.lastCreationTime!,
+            );
+            final lastDateToShow = DateTime(
+              currentTime.year,
+              lastCreationDate.month,
+              lastCreationDate.day,
+            ).add(kMemoriesMargin).microsecondsSinceEpoch;
             memoryResults.add(
               trip.copyWith(
                 memories: photoSelection,
-                name: name,
+                title: name,
+                firstDateToShow: firstDateToShow,
+                lastDateToShow: lastDateToShow,
               ),
             );
             break checkUpcomingMonths;
@@ -741,6 +799,7 @@ class SmartMemoriesService {
     final currentDayMonth = currentTime.month * 100 + currentTime.day;
     final currentWeek = _getWeekNumber(currentTime);
     final currentMonth = currentTime.month;
+    final currentYear = currentTime.year;
     final cutOffTime = currentTime.subtract(const Duration(days: 365));
     final averageDailyPhotos = allFiles.length / 365;
     final significantDayThreshold = averageDailyPhotos * 0.25;
@@ -766,7 +825,7 @@ class SmartMemoriesService {
     // Process each nearby day-month to find significant days
     for (final dayMonth in dayMonthYearGroups.keys) {
       final dayDiff = dayMonth - currentDayMonth;
-      if (dayDiff < 0 || dayDiff > 2) continue;
+      if (dayDiff < 0 || dayDiff > kMemoriesUpdateFrequency.inDays) continue;
       // TODO: lau: this doesn't cover month changes properly
 
       final yearGroups = dayMonthYearGroups[dayMonth]!;
@@ -776,7 +835,6 @@ class SmartMemoriesService {
           .toList();
 
       if (significantDays.length >= 3) {
-        // THE ISSUE IS HERE, MOST LIKELY IN THE SELECTION!
         // Combine all years for this day-month
         final date =
             DateTime(currentTime.year, dayMonth ~/ 100, dayMonth % 100);
@@ -786,24 +844,35 @@ class SmartMemoriesService {
         memoryResult.add(
           TimeMemory(
             photoSelection,
-            name: "${DateFormat('MMMM d').format(date)} through the years",
+            "${DateFormat('MMMM d').format(date)} through the years",
+            date.subtract(kMemoriesMargin).microsecondsSinceEpoch,
+            date.add(const Duration(days: 1)).microsecondsSinceEpoch,
           ),
         );
       } else {
         // Individual entries for significant years
         for (final year in significantDays) {
           final date = DateTime(year, dayMonth ~/ 100, dayMonth % 100);
+          final showDate =
+              DateTime(currentYear, dayMonth ~/ 100, dayMonth % 100);
           final files = yearGroups[year]!;
           final photoSelection = await _bestSelection(files);
           String name = DateFormat.yMMMd(_locale?.languageCode).format(date);
-          if (date.day == currentTime.day && date.month == currentTime.month) {
-            name = "This day, ${currentTime.year - date.year} years back";
-          }
-
           memoryResult.add(
             TimeMemory(
               photoSelection,
-              name: name,
+              name,
+              showDate.subtract(kMemoriesMargin).microsecondsSinceEpoch,
+              showDate.microsecondsSinceEpoch,
+            ),
+          );
+          name = "This day, ${currentTime.year - date.year} years back";
+          memoryResult.add(
+            TimeMemory(
+              photoSelection,
+              name,
+              showDate.microsecondsSinceEpoch,
+              showDate.add(const Duration(days: 1)).microsecondsSinceEpoch,
             ),
           );
         }
@@ -843,7 +912,9 @@ class SmartMemoriesService {
           memoryResult.add(
             TimeMemory(
               photoSelection,
-              name: name,
+              name,
+              currentTime.subtract(kMemoriesMargin).microsecondsSinceEpoch,
+              currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch,
             ),
           );
         } else {
@@ -860,7 +931,11 @@ class SmartMemoriesService {
             memoryResult.add(
               TimeMemory(
                 photoSelection,
-                name: name,
+                name,
+                currentTime.subtract(kMemoriesMargin).microsecondsSinceEpoch,
+                currentTime
+                    .add(kMemoriesUpdateFrequency)
+                    .microsecondsSinceEpoch,
               ),
             );
           }
@@ -908,11 +983,18 @@ class SmartMemoriesService {
         );
         final monthName = DateFormat.MMMM(_locale?.languageCode)
             .format(DateTime(year, currentMonth));
+        final daysLeftInMonth = DateTime(currentYear, currentMonth + 1, 0).day -
+            currentTime.day +
+            1;
         final name = monthName + ", ${currentTime.year - year} years back";
         memoryResult.add(
           TimeMemory(
             photoSelection,
-            name: name,
+            name,
+            currentTime.microsecondsSinceEpoch,
+            currentTime
+                .add(Duration(days: daysLeftInMonth))
+                .microsecondsSinceEpoch,
           ),
         );
       }
@@ -926,17 +1008,22 @@ class SmartMemoriesService {
         await _bestSelection(allPhotos, prefferedSize: monthSelectionSize);
     final monthName = DateFormat.MMMM(_locale?.languageCode)
         .format(DateTime(currentTime.year, currentMonth));
+    final daysLeftInMonth =
+        DateTime(currentYear, currentMonth + 1, 0).day - currentTime.day + 1;
     final name = monthName + " through the years";
     memoryResult.add(
       TimeMemory(
         photoSelection,
-        name: name,
+        name,
+        currentTime.microsecondsSinceEpoch,
+        currentTime.add(Duration(days: daysLeftInMonth)).microsecondsSinceEpoch,
       ),
     );
 
     return memoryResult;
   }
 
+  /// TODO: lau: replace this by just taking next 7 days
   int _getWeekNumber(DateTime date) {
     // Get day of year (1-366)
     final int dayOfYear = int.parse(DateFormat('D').format(date));

@@ -1196,15 +1196,14 @@ class SearchService {
     final memories = await memoriesCacheService.getMemories(limit);
     final searchResults = <GenericSearchResult>[];
     for (final memory in memories) {
-      final name = memory.name ?? "memory";
       final files = Memory.filesFromMemories(memory.memories);
       searchResults.add(
         GenericSearchResult(
           ResultType.event,
-          name,
+          memory.title,
           files,
           hierarchicalSearchFilter: TopLevelGenericFilter(
-            filterName: name,
+            filterName: memory.title,
             occurrence: kMostRelevantFilter,
             filterResultType: ResultType.event,
             matchedUploadedIDs: filesToUploadedFileIDs(files),

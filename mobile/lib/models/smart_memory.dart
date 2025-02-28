@@ -1,5 +1,8 @@
 import "package:photos/models/memory.dart";
 
+const kMemoriesUpdateFrequency = Duration(days: 7);
+const kMemoriesMargin = Duration(days: 2);
+
 enum MemoryType {
   people,
   trips,
@@ -25,44 +28,34 @@ MemoryType memoryTypeFromString(String type) {
 class SmartMemory {
   final List<Memory> memories;
   final MemoryType type;
-  String name;
+  String title;
+  int firstDateToShow;
+  int lastDateToShow;
+
   int? firstCreationTime;
   int? lastCreationTime;
-
-  int? firstDateToShow;
-  int? lastDateToShow;
-  // TODO: lau: make the above two non-nullable!!!
   // TODO: lau: actually use this in calculated filters
 
   SmartMemory(
     this.memories,
-    this.type, {
-    name,
+    this.type,
+    title,
+    this.firstDateToShow,
+    this.lastDateToShow, {
     this.firstCreationTime,
     this.lastCreationTime,
-    this.firstDateToShow,
-    this.lastDateToShow,
-  }) : name = name != null ? name + "(I)" : null;
+  }) : title = title + "(I)";
   // TODO: lau: remove (I) from name when opening up the feature flag
 
+  bool get notForShow => firstDateToShow == 0 && lastDateToShow == 0;
+
   bool isOld() {
-    if (firstDateToShow == null || lastDateToShow == null) {
-      return false;
-    }
-    final now = DateTime.now().microsecondsSinceEpoch;
-    return lastDateToShow! < now;
-  }
-  
-  bool hasShowTime() {
-    return firstDateToShow != null && lastDateToShow != null;
+    return lastDateToShow < DateTime.now().microsecondsSinceEpoch;
   }
 
   bool shouldShowNow() {
-    if (!hasShowTime()) {
-      return false;
-    }
     final int now = DateTime.now().microsecondsSinceEpoch;
-    return now >= firstDateToShow! && now <= lastDateToShow!;
+    return now >= firstDateToShow && now <= lastDateToShow;
   }
 
   int averageCreationTime() {
@@ -74,6 +67,11 @@ class SmartMemory {
         .map((memory) => memory.file.creationTime!)
         .toList();
     if (creationTimes.length < 2) {
+      if (creationTimes.isEmpty) {
+        firstCreationTime = 0;
+        lastCreationTime = 0;
+        return 0;
+      }
       return creationTimes.isEmpty ? 0 : creationTimes.first;
     }
     creationTimes.sort();
