@@ -166,6 +166,21 @@ export interface FileViewerAnnotatedFile {
 }
 
 /**
+ * The ID that is used by the "more" action button (if one is being displayed).
+ *
+ * @see also {@link moreMenuID}.
+ */
+export const moreButtonID = "ente-pswp-more-button";
+
+/**
+ * The ID this is expected to be used by the more menu that is shown in response
+ * to the more action button being activated.
+ *
+ * @see also {@link moreButtonID}.
+ */
+export const moreMenuID = "ente-pswp-more-menu";
+
+/**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
  * viewer.
  *
@@ -616,9 +631,16 @@ export class FileViewerPhotoSwipe {
                 order: 17,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("more"),
-                onClick: (e) => onMore(currentAnnotatedFile(), e.target),
                 onInit: (buttonElement) => {
-                    buttonElement.id = "ente-pswp-show-more";
+                    buttonElement.setAttribute("id", moreButtonID);
+                    buttonElement.setAttribute("aria-haspopup", "true");
+                },
+                onClick: (e) => {
+                    const buttonElement = e.target;
+                    // See also: `resetMoreMenuButtonOnMenuClose`.
+                    buttonElement.setAttribute("aria-controls", moreMenuID);
+                    buttonElement.setAttribute("aria-expanded", true);
+                    onMore(currentAnnotatedFile(), buttonElement);
                 },
             });
         });
@@ -739,4 +761,13 @@ const createElementFromHTMLString = (htmlString: string) => {
     // be what we wanted them to be.
     template.innerHTML = htmlString.trim();
     return template.content.firstChild;
+};
+
+/**
+ * Update the ARIA attributes for the button that controls the more menu when
+ * the menu is closed.
+ */
+export const resetMoreMenuButtonOnMenuClose = (buttonElement: HTMLElement) => {
+    buttonElement.removeAttribute("aria-controls");
+    buttonElement.removeAttribute("aria-expanded");
 };

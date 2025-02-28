@@ -37,6 +37,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fileInfoExifForFile } from "./data-source";
 import {
     FileViewerPhotoSwipe,
+    moreButtonID,
+    moreMenuID,
+    resetMoreMenuButtonOnMenuClose,
     type FileViewerAnnotatedFile,
     type FileViewerFileAnnotation,
     type FileViewerPhotoSwipeDelegate,
@@ -279,10 +282,12 @@ const FileViewer: React.FC<FileViewerProps> = ({
         [],
     );
 
-    const handleMoreMenuClose = useCallback(
-        () => setMoreMenuAnchorEl(null),
-        [],
-    );
+    const handleMoreMenuClose = useCallback(() => {
+        setMoreMenuAnchorEl((el) => {
+            resetMoreMenuButtonOnMenuClose(el);
+            return null;
+        });
+    }, []);
 
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
@@ -407,10 +412,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 open={!!moreMenuAnchorEl}
                 onClose={handleMoreMenuClose}
                 anchorEl={moreMenuAnchorEl}
+                id={moreMenuID}
                 slotProps={{
-                    list: {
-                        "aria-labelledby": moreMenuAnchorEl?.id,
-                    },
+                    list: { "aria-labelledby": moreButtonID },
                 }}
             >
                 Test
