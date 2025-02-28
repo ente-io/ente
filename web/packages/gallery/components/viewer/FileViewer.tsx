@@ -32,7 +32,7 @@ import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "@/new/photos/components/ImageEditorOverlay";
-import { Button, styled } from "@mui/material";
+import { Button, Menu, styled } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fileInfoExifForFile } from "./data-source";
 import {
@@ -200,6 +200,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
     >(undefined);
 
     const [openFileInfo, setOpenFileInfo] = useState(false);
+    const [moreMenuAnchorEl, setMoreMenuAnchorEl] = useState<
+        HTMLElement | undefined
+    >(undefined);
     const [openImageEditor, setOpenImageEditor] = useState(false);
 
     // If `true`, then we need to trigger a sync with remote when we close.
@@ -245,7 +248,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
         [],
     );
 
-    const handleInfoClose = useCallback(() => setOpenFileInfo(false), []);
+    const handleFileInfoClose = useCallback(() => setOpenFileInfo(false), []);
 
     const handleScheduleUpdate = useCallback(() => setNeedsSync(true), []);
 
@@ -271,8 +274,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
             annotatedFile: FileViewerAnnotatedFile,
             buttonElement: HTMLElement,
         ) => {
-            console.log({ annotatedFile, buttonElement });
+            setActiveAnnotatedFile(annotatedFile);
+            setMoreMenuAnchorEl(buttonElement);
         },
+        [],
+    );
+
+    const handleMoreMenuClose = useCallback(
+        () => setMoreMenuAnchorEl(undefined),
         [],
     );
 
@@ -368,6 +377,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
         handleClose,
         handleAnnotate,
         handleViewInfo,
+        handleMore,
         handleEditImage,
     ]);
 
@@ -382,7 +392,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             <Button>Test</Button>
             <FileInfo
                 open={openFileInfo}
-                onClose={handleInfoClose}
+                onClose={handleFileInfoClose}
                 file={activeAnnotatedFile?.file}
                 exif={activeFileExif}
                 allowEdits={!!activeAnnotatedFile?.annotation.isOwnFile}
@@ -394,6 +404,13 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 onSelectPerson={handleSelectPerson}
                 {...{ fileCollectionIDs, allCollectionsNameByID }}
             />
+            <Menu
+                open={!!moreMenuAnchorEl}
+                onClose={handleMoreMenuClose}
+                anchorEl={moreMenuAnchorEl}
+            >
+                Test
+            </Menu>
             <ImageEditorOverlay
                 open={openImageEditor}
                 onClose={handleImageEditorClose}
