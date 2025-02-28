@@ -67,7 +67,7 @@ export interface FileViewerFileAnnotation {
     isEditableImage?: boolean | undefined;
 }
 
-interface FileViewerPhotoSwipeDelegate {
+export interface FileViewerPhotoSwipeDelegate {
     /**
      * Called when the file viewer is closed.
      */

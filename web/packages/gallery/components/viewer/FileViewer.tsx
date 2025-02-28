@@ -39,6 +39,7 @@ import { fileInfoExifForFile } from "./data-source";
 import {
     FileViewerPhotoSwipe,
     type FileViewerAnnotatedFile,
+    type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
 
 // TODO
@@ -183,8 +184,27 @@ const FileViewer: React.FC<FileViewerProps> = ({
     // onMarkTempDeleted,
     onSaveEditedImageCopy,
 }) => {
-    const psRef = useRef<FileViewerPhotoSwipe | undefined>();
-    const psDelegateRef = useRef<FileViewerPhotoSwipeDelegate | undefined>();
+    // [Note: FileViewer architecture]
+    //
+    // There are 3 parties involved.
+    //
+    // 1. Us, "FileViewer". We're a React component.
+    //
+    // 2. The custom PhotoSwipe wrapper, "FileViewerPhotoSwipe". It is a class,
+    //    and its currently active instance is maintained in `psRef`.
+    //
+    // 3. The delegate, "FileViewerPhotoSwipeDelegate". The delegate acts as a
+    //    bridge between us and `psRef`. It is created once as an object with a
+    //    stable identity (and stored in `psDelegateRef`), but its properties
+    //    keep changing as our props change.
+    //
+    // The `psRef` is recreated each time open / close changes. The
+    // `psDelegateRef` remains the same.
+
+    const psRef = useRef<FileViewerPhotoSwipe | undefined>(undefined);
+    const psDelegateRef = useRef<FileViewerPhotoSwipeDelegate | undefined>(
+        undefined,
+    );
 
     // Whenever we get a callback from our custom PhotoSwipe instance, we also
     // get the active file on which that action was performed as an argument.
@@ -322,78 +342,66 @@ const FileViewer: React.FC<FileViewerProps> = ({
         [onSaveEditedImageCopy, handleImageEditorClose, handleClose],
     );
 
-    useEffect(() => (
-        psDelegateRef.current.onClose = handleClose;
-        onAnnotate: handleAnnotate,
-        onToggleFavorite: handleToggleFavorite,
-        onViewInfo: handleViewInfo,
-        onEditImage: handleEditImage,
-    }), [
-        handleClose,
-        onAnnotate: handleAnnotate,
-        onToggleFavorite: handleToggleFavorite,
-        onViewInfo: handleViewInfo,
-        onEditImage: handleEditImage,
+    // Initial value of psDelegateRef.
+    if (!psDelegateRef.current) {
+        psDelegateRef.current = {
+            onClose: handleClose,
+            onAnnotate: handleAnnotate,
+            onToggleFavorite: handleToggleFavorite,
+            onViewInfo: handleViewInfo,
+            onEditImage: handleEditImage,
+        };
+    }
 
+    // Updates to callbacks held by psDelegateRef.
+    useEffect(() => {
+        const delegate = psDelegateRef.current!;
+        delegate.onClose = handleClose;
+        delegate.onAnnotate = handleAnnotate;
+        delegate.onToggleFavorite = handleToggleFavorite;
+        delegate.onViewInfo = handleViewInfo;
+        delegate.onEditImage = handleEditImage;
+    }, [
+        handleClose,
+        handleAnnotate,
+        handleToggleFavorite,
+        handleViewInfo,
+        handleEditImage,
     ]);
+
     useEffect(() => {
         if (open && !psRef.current) {
-                // We're open, but we don't have a PhotoSwipe instance. Create
-                // one. This will show the file viewer dialog.
-                //
-                // Before creating it, also create a delegate. The delegate has
-                // a stable identity so that PhotoSwipe callbacks can be routed
-                // via it. When any of the
-                // callbacks change, we update the props of the delegate instead
-                // of changing the delegate itself.
-                log.debug(() => ["viewer", "open"]);
-                const delegate = {
-                    onClose: handleClose,
-                    onAnnotate: handleAnnotate,
-                    onToggleFavorite: handleToggleFavorite,
-                    onViewInfo: handleViewInfo,
-                    onEditImage: handleEditImage,
-                }
-                const pswp = new FileViewerPhotoSwipe({
-                    files,
-                    initialIndex,
-                    disableDownload,
-                    delegate,
-                });
-                psRef.current = pswp;
-                psDelegateRef.current = delegate;
-
+            // We're open, but we don't have a PhotoSwipe instance. Create
+            // one. This will show the file viewer dialog.
+            //
+            // Before creating it, also create a delegate. The delegate has
+            // a stable identity so that PhotoSwipe callbacks can be routed
+            // via it. When any of the
+            // callbacks change, we update the props of the delegate instead
+            // of changing the delegate itself.
+            log.debug(() => ["viewer", "open"]);
+            const pswp = new FileViewerPhotoSwipe({
+                files,
+                initialIndex,
+                disableDownload,
+                delegate: psDelegateRef.current!,
+            });
+            psRef.current = pswp;
         } else if (!open && psRef.current) {
             // We're closed, but we still have a PhotoSwipe instance. Cleanup.
             log.debug(() => ["viewer", "close"]);
-            psRef.current?.closeIfNeeded();
+            psRef.current.closeIfNeeded();
             psRef.current = undefined;
-            psDelegateRef.current = undefined;
-
         }
-
-        // The hook is missing dependencies; this is intentional - we don't want
-        // to recreate the PhotoSwipe dialog when these dependencies change.
-        //
-        // - Updates to initialIndex can be safely ignored: they don't matter,
-        //   only their initial value at the time of open mattered.
-        //
-        // - Updates to other properties are not expected after open. We could've
-        //   also added it to the dependencies array, not adding it was a more
-        //   conservative choice to be on the safer side and trigger too few
-        //   instead of too many updates.
-        //
-        // - Updates to files matter, but these are conveyed separately.
-        //   TODO(PS):
-        //
+        // TODO: How to relay files updates?
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open, onClose, handleViewInfo]);
+    }, [open, onClose, initialIndex, disableDownload]);
 
     const handleRefreshPhotoswipe = useCallback(() => {
-        pswpRef.current.refreshCurrentSlideContent();
+        psRef.current.refreshCurrentSlideContent();
     }, []);
 
-    log.debug(() => ["viewer", { action: "render", pswpRef: pswpRef.current }]);
+    log.debug(() => ["viewer", { action: "render", psRef: psRef.current }]);
 
     return (
         <Container>
