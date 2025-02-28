@@ -136,6 +136,16 @@ type FileViewerPhotoSwipeOptions = Pick<
      */
     onViewInfo: (annotatedFile: FileViewerAnnotatedFile) => void;
     /**
+     * Called when the user activates the more action on a file.
+     *
+     * In addition to the file, callback is also passed a reference to the HTML
+     * DOM more button element.
+     */
+    onMore: (
+        annotatedFile: FileViewerAnnotatedFile,
+        buttonElement: HTMLElement,
+    ) => void;
+    /**
      * Called when the user activates the edit action on an image.
      *
      * If this callback is not provided, then the edit action is never shown. If
@@ -228,6 +238,7 @@ export class FileViewerPhotoSwipe {
         onClose,
         onAnnotate,
         onViewInfo,
+        onMore,
         onEditImage,
     }: FileViewerPhotoSwipeOptions) {
         this.opts = { disableDownload };
@@ -605,7 +616,7 @@ export class FileViewerPhotoSwipe {
                 order: 17,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("more"),
-                // onClick: withCurrentAnnotatedFile(delegate.onViewInfo),
+                onClick: (e) => onMore(currentAnnotatedFile(), e.target),
             });
         });
 

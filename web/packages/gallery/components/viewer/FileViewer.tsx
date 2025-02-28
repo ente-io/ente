@@ -266,6 +266,16 @@ const FileViewer: React.FC<FileViewerProps> = ({
             : undefined;
     }, [onSelectPerson, handleClose]);
 
+    const handleMore = useCallback(
+        (
+            annotatedFile: FileViewerAnnotatedFile,
+            buttonElement: HTMLElement,
+        ) => {
+            console.log({ annotatedFile, buttonElement });
+        },
+        [],
+    );
+
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
             ? (annotatedFile: FileViewerAnnotatedFile) => {
@@ -336,6 +346,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 onClose: handleClose,
                 onAnnotate: handleAnnotate,
                 onViewInfo: handleViewInfo,
+                onMore: handleMore,
                 onEditImage: handleEditImage,
             });
 
