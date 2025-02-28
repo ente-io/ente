@@ -515,88 +515,96 @@ const Page: React.FC = () => {
         };
     }, [selectAll, clearSelection]);
 
-    const showSessionExpiredDialog = () =>
-        showMiniDialog(sessionExpiredDialogAttributes(logout));
+    const showSessionExpiredDialog = useCallback(
+        () => showMiniDialog(sessionExpiredDialogAttributes(logout)),
+        [showMiniDialog, logout],
+    );
 
-    const syncWithRemote = async (force = false, silent = false) => {
-        if (!navigator.onLine) return;
-        if (syncInProgress.current && !force) {
-            resync.current = { force, silent };
-            return;
-        }
-        const isForced = syncInProgress.current && force;
-        syncInProgress.current = true;
-        try {
-            const token = getToken();
-            if (!token) {
+    const handleSyncWithRemote = useCallback(
+        async (force = false, silent = false) => {
+            if (!navigator.onLine) return;
+            if (syncInProgress.current && !force) {
+                resync.current = { force, silent };
                 return;
             }
-            const tokenValid = await isTokenValid(token);
-            if (!tokenValid) {
-                throw new Error(CustomError.SESSION_EXPIRED);
+            const isForced = syncInProgress.current && force;
+            syncInProgress.current = true;
+            try {
+                const token = getToken();
+                if (!token) {
+                    return;
+                }
+                const tokenValid = await isTokenValid(token);
+                if (!tokenValid) {
+                    throw new Error(CustomError.SESSION_EXPIRED);
+                }
+                !silent && showLoadingBar();
+                await preCollectionsAndFilesSync();
+                const allCollections = await getAllLatestCollections();
+                const [hiddenCollections, collections] = splitByPredicate(
+                    allCollections,
+                    isHiddenCollection,
+                );
+                dispatch({
+                    type: "setAllCollections",
+                    collections,
+                    hiddenCollections,
+                });
+                const didUpdateNormalFiles = await syncFiles(
+                    "normal",
+                    collections,
+                    (files) => dispatch({ type: "setFiles", files }),
+                    (files) => dispatch({ type: "fetchFiles", files }),
+                );
+                const didUpdateHiddenFiles = await syncFiles(
+                    "hidden",
+                    hiddenCollections,
+                    (hiddenFiles) =>
+                        dispatch({ type: "setHiddenFiles", hiddenFiles }),
+                    (hiddenFiles) =>
+                        dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
+                );
+                if (didUpdateNormalFiles || didUpdateHiddenFiles)
+                    exportService.onLocalFilesUpdated();
+                await syncTrash(allCollections, (trashedFiles: EnteFile[]) =>
+                    dispatch({ type: "setTrashedFiles", trashedFiles }),
+                );
+                // syncWithRemote is called with the force flag set to true before
+                // doing an upload. So it is possible, say when resuming a pending
+                // upload, that we get two syncWithRemotes happening in parallel.
+                //
+                // Do the non-file-related sync only for one of these parallel ones.
+                if (!isForced) {
+                    await sync();
+                }
+            } catch (e) {
+                switch (e.message) {
+                    case CustomError.SESSION_EXPIRED:
+                        showSessionExpiredDialog();
+                        break;
+                    case CustomError.KEY_MISSING:
+                        clearKeys();
+                        router.push(PAGES.CREDENTIALS);
+                        break;
+                    default:
+                        log.error("syncWithRemote failed", e);
+                }
+            } finally {
+                dispatch({ type: "clearUnsyncedState" });
+                !silent && hideLoadingBar();
             }
-            !silent && showLoadingBar();
-            await preCollectionsAndFilesSync();
-            const allCollections = await getAllLatestCollections();
-            const [hiddenCollections, collections] = splitByPredicate(
-                allCollections,
-                isHiddenCollection,
-            );
-            dispatch({
-                type: "setAllCollections",
-                collections,
-                hiddenCollections,
-            });
-            const didUpdateNormalFiles = await syncFiles(
-                "normal",
-                collections,
-                (files) => dispatch({ type: "setFiles", files }),
-                (files) => dispatch({ type: "fetchFiles", files }),
-            );
-            const didUpdateHiddenFiles = await syncFiles(
-                "hidden",
-                hiddenCollections,
-                (hiddenFiles) =>
-                    dispatch({ type: "setHiddenFiles", hiddenFiles }),
-                (hiddenFiles) =>
-                    dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
-            );
-            if (didUpdateNormalFiles || didUpdateHiddenFiles)
-                exportService.onLocalFilesUpdated();
-            await syncTrash(allCollections, (trashedFiles: EnteFile[]) =>
-                dispatch({ type: "setTrashedFiles", trashedFiles }),
-            );
-            // syncWithRemote is called with the force flag set to true before
-            // doing an upload. So it is possible, say when resuming a pending
-            // upload, that we get two syncWithRemotes happening in parallel.
-            //
-            // Do the non-file-related sync only for one of these parallel ones.
-            if (!isForced) {
-                await sync();
+            syncInProgress.current = false;
+            if (resync.current) {
+                const { force, silent } = resync.current;
+                setTimeout(() => handleSyncWithRemote(force, silent), 0);
+                resync.current = undefined;
             }
-        } catch (e) {
-            switch (e.message) {
-                case CustomError.SESSION_EXPIRED:
-                    showSessionExpiredDialog();
-                    break;
-                case CustomError.KEY_MISSING:
-                    clearKeys();
-                    router.push(PAGES.CREDENTIALS);
-                    break;
-                default:
-                    log.error("syncWithRemote failed", e);
-            }
-        } finally {
-            dispatch({ type: "clearUnsyncedState" });
-            !silent && hideLoadingBar();
-        }
-        syncInProgress.current = false;
-        if (resync.current) {
-            const { force, silent } = resync.current;
-            setTimeout(() => syncWithRemote(force, silent), 0);
-            resync.current = undefined;
-        }
-    };
+        },
+        [showLoadingBar, hideLoadingBar, router, showSessionExpiredDialog],
+    );
+
+    // Alias for existing code.
+    const syncWithRemote = handleSyncWithRemote;
 
     const setupSelectAllKeyBoardShortcutHandler = () => {
         const handleKeyUp = (e: KeyboardEvent) => {
@@ -695,7 +703,7 @@ const Page: React.FC = () => {
                 await handleFileOps(
                     ops,
                     toProcessFiles,
-                    (files) => dispatch({ type: "markTempDeleted", files }),
+                    handleMarkTempDeleted,
                     () => dispatch({ type: "clearTempDeleted" }),
                     (files) => dispatch({ type: "markTempHidden", files }),
                     () => dispatch({ type: "clearTempHidden" }),
@@ -792,6 +800,35 @@ const Page: React.FC = () => {
             callback?.();
         });
     };
+
+    const handleMarkUnsyncedFavoriteUpdate = useCallback(
+        (fileID: number, isFavorite: boolean) =>
+            dispatch({
+                type: "markUnsyncedFavoriteUpdate",
+                fileID,
+                isFavorite,
+            }),
+        [],
+    );
+
+    const handleMarkTempDeleted = useCallback(
+        (files: EnteFile[]) => dispatch({ type: "markTempDeleted", files }),
+        [],
+    );
+
+    const handleSelectCollection = useCallback(
+        (collectionID: number) =>
+            dispatch({
+                type: "showNormalOrHiddenCollectionSummary",
+                collectionSummaryID: collectionID,
+            }),
+        [],
+    );
+
+    const handleSelectPerson = useCallback(
+        (personID: string) => dispatch({ type: "showPerson", personID }),
+        [],
+    );
 
     const handleOpenCollectionSelector = useCallback(
         (attributes: CollectionSelectorAttributes) => {
@@ -934,9 +971,7 @@ const Page: React.FC = () => {
                             onSelectPeople={() =>
                                 dispatch({ type: "showPeople" })
                             }
-                            onSelectPerson={(personID) =>
-                                dispatch({ type: "showPerson", personID })
-                            }
+                            onSelectPerson={handleSelectPerson}
                         />
                     )}
                 </NavbarBase>
@@ -959,8 +994,7 @@ const Page: React.FC = () => {
                                 ? state.view.visiblePeople
                                 : undefined) ?? [],
                         activePerson,
-                        onSelectPerson: (personID) =>
-                            dispatch({ type: "showPerson", personID }),
+                        onSelectPerson: handleSelectPerson,
                         setCollectionNamerAttributes,
                         setPhotoListHeader,
                         setFilesDownloadProgressAttributesCreator,
@@ -1021,20 +1055,9 @@ const Page: React.FC = () => {
                         mode={barMode}
                         modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredFiles}
-                        syncWithRemote={syncWithRemote}
                         setSelected={setSelected}
                         selected={selected}
                         favoriteFileIDs={state.favoriteFileIDs}
-                        markUnsyncedFavoriteUpdate={(fileID, isFavorite) =>
-                            dispatch({
-                                type: "markUnsyncedFavoriteUpdate",
-                                fileID,
-                                isFavorite,
-                            })
-                        }
-                        markTempDeleted={(files) =>
-                            dispatch({ type: "markTempDeleted", files })
-                        }
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
@@ -1049,15 +1072,13 @@ const Page: React.FC = () => {
                             setFilesDownloadProgressAttributesCreator
                         }
                         selectable={true}
-                        onSelectCollection={(collectionID) =>
-                            dispatch({
-                                type: "showNormalOrHiddenCollectionSummary",
-                                collectionSummaryID: collectionID,
-                            })
+                        onMarkUnsyncedFavoriteUpdate={
+                            handleMarkUnsyncedFavoriteUpdate
                         }
-                        onSelectPerson={(personID) => {
-                            dispatch({ type: "showPerson", personID });
-                        }}
+                        onMarkTempDeleted={handleMarkTempDeleted}
+                        onSyncWithRemote={handleSyncWithRemote}
+                        onSelectCollection={handleSelectCollection}
+                        onSelectPerson={handleSelectPerson}
                     />
                 )}
                 <Export

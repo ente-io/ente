@@ -41,7 +41,7 @@ const getTheme = (appName: AppName): Theme => {
  *
  * 2. These can be groups of color values that have roughly the same hue, but
  *    different levels of saturation. Such hue groups are arranged together into
- *    a "Colors" exported by "@/mui/material":
+ *    a "Colors" exported by "@mui/material":
  *
  *        export interface Color {
  *            50: string;
@@ -546,7 +546,8 @@ const components: Components = {
             // This is required to prevent console errors about aria-hiding a
             // focused button when the dialog is closed.
             //
-            // https://github.com/mui/material-ui/issues/43106#issuecomment-2314809028
+            // - https://github.com/mui/material-ui/issues/43106#issuecomment-2314809028
+            // - https://issues.chromium.org/issues/392121909
             closeAfterTransition: false,
         },
         styleOverrides: {

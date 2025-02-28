@@ -65,6 +65,14 @@ export type ItemData = PhotoSwipeSlideData & {
      */
     imageURL?: string;
     /**
+     * The original image associated with the file, as a Blob.
+     *
+     * - For images, this will be the original image itself.
+     * - For live photos, this will be the image component of the live photo.
+     * - For videos, this will be not be present.
+     */
+    originalImageBlob?: Blob;
+    /**
      * The renderable object URL of the video associated with the file.
      *
      * - For images, this will not be defined.
@@ -216,8 +224,11 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
  * This is called when the user moves away from a slide so that we attempt a
  * full retry when they come back the next time.
  */
-export const forgetFailedItemDataForFile = (file: EnteFile) =>
-    forgetFailedItemDataForFileID(file.id);
+export const forgetFailedItemDataForFileID = (fileID: number) => {
+    if (_state.itemDataByFileID.get(fileID)?.fetchFailed) {
+        _state.itemDataByFileID.delete(fileID);
+    }
+};
 
 /**
  * Forget item data for the all files whose fetch had failed.
@@ -227,12 +238,6 @@ export const forgetFailedItemDataForFile = (file: EnteFile) =>
  */
 export const forgetFailedItems = () =>
     [..._state.itemDataByFileID.keys()].forEach(forgetFailedItemDataForFileID);
-
-const forgetFailedItemDataForFileID = (fileID: number) => {
-    if (_state.itemDataByFileID.get(fileID)?.fetchFailed) {
-        _state.itemDataByFileID.delete(fileID);
-    }
-};
 
 const enqueueUpdates = async (file: EnteFile) => {
     const fileID = file.id;
@@ -283,8 +288,9 @@ const enqueueUpdates = async (file: EnteFile) => {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
                 const imageURL = ensureString(sourceURLs.url);
+                const originalImageBlob = sourceURLs.originalImageBlob!;
                 const itemData = await withDimensions(imageURL);
-                update({ ...itemData, imageURL });
+                update({ ...itemData, imageURL, originalImageBlob });
                 break;
             }
 
@@ -301,8 +307,16 @@ const enqueueUpdates = async (file: EnteFile) => {
                     await downloadManager.renderableSourceURLs(file);
                 const livePhotoSourceURLs =
                     sourceURLs.url as LivePhotoSourceURL;
-                const imageURL = await livePhotoSourceURLs.image();
-                const imageData = await withDimensions(ensureString(imageURL));
+                const imageURL = ensureString(
+                    await livePhotoSourceURLs.image(),
+                );
+                const originalImageBlob =
+                    livePhotoSourceURLs.originalImageBlob()!;
+                const imageData = {
+                    ...(await withDimensions(imageURL)),
+                    imageURL,
+                    originalImageBlob,
+                };
                 update(imageData);
                 const videoURL = await livePhotoSourceURLs.video();
                 update({ ...imageData, videoURL });
@@ -390,7 +404,7 @@ export const fileInfoExifForFile = (
  *
  * This function is expected to be called when an item is loaded as PhotoSwipe
  * content. It can be safely called multiple times - it will ignore calls until
- * the item has an associated {@link imageURL}, and it will also ignore calls
+ * the item has an associated {@link originalImageBlob}, and it will also ignore calls
  * that are made after exif data has already been extracted.
  *
  * If required, it will extract the exif data from the file, massage it to a
@@ -401,7 +415,7 @@ export const fileInfoExifForFile = (
  * See also {@link forgetExifForItemData}.
  */
 export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
-    const { fileID, fileType, imageURL } = itemData;
+    const { fileID, fileType, originalImageBlob } = itemData;
 
     // We already have it available.
     if (_state.fileInfoExifByFileID.has(fileID)) return;
@@ -418,11 +432,10 @@ export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
     }
 
     // This is not a video, but the original image is not available yet.
-    if (!imageURL) return;
+    if (!originalImageBlob) return;
 
     try {
-        const blob = await (await fetch(imageURL)).blob();
-        const file = new File([blob], "");
+        const file = new File([originalImageBlob], "");
         const tags = await extractRawExif(file);
         const parsed = parseExif(tags);
         return updateNotifyAndReturn({ tags, parsed });

@@ -7,8 +7,8 @@
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.0",
         "@fontsource-variable/inter": "^5.1.1",
-        "@mui/icons-material": "^6.4.3",
-        "@mui/material": "^6.4.3",
+        "@mui/icons-material": "^6.4.6",
+        "@mui/material": "^6.4.6",
         "comlink": "^4.4.2",
         "formik": "^2.4.6",
         "get-user-locale": "^2.3.2",
@@ -16,18 +16,18 @@
         "i18next-resources-to-backend": "^1.2.1",
         "idb": "^8.0.2",
         "libsodium-wrappers-sumo": "^0.7.15",
-        "nanoid": "^5.0.9",
-        "next": "^15.1.6",
+        "nanoid": "^5.1.2",
+        "next": "^15.2.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
-        "react-i18next": "^15.4.0",
+        "react-i18next": "^15.4.1",
         "yup": "^1.6.1",
-        "zod": "^3.24.1"
+        "zod": "^3.24.2"
     },
     "devDependencies": {
         "@/build-config": "*",
         "@types/libsodium-wrappers-sumo": "^0.7.8",
-        "@types/react": "^19.0.8",
-        "@types/react-dom": "^19.0.3"
+        "@types/react": "^19.0.10",
+        "@types/react-dom": "^19.0.4"
     }
 }

@@ -14,7 +14,6 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
-import "package:photos/services/local_file_update_service.dart";
 import 'package:photos/ui/viewer/file/zoomable_image.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -58,9 +57,6 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
     _logger.info(
       'initState for ${_enteFile.generatedID} with tag ${_enteFile.tag} and name ${_enteFile.displayName}',
     );
-    if (_enteFile.isLivePhoto && _enteFile.isUploaded) {
-      LocalFileUpdateService.instance.checkLivePhoto(_enteFile).ignore();
-    }
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {

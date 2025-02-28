@@ -654,6 +654,8 @@ export interface AnnotatedFaceID {
 export const getAnnotatedFacesForFile = async (
     file: EnteFile,
 ): Promise<AnnotatedFaceID[]> => {
+    if (!isMLEnabled()) return [];
+
     const index = await savedFaceIndex(file.id);
     if (!index) return [];
 
