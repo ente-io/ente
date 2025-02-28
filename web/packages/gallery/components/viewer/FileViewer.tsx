@@ -211,6 +211,20 @@ const FileViewer: React.FC<FileViewerProps> = ({
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
 
+    const handleClose = useCallback(() => {
+        setNeedsSync((needSync) => {
+            console.log("needs sync", needSync);
+            if (needSync) onTriggerSyncWithRemote?.();
+            return false;
+        });
+        setOpenFileInfo(false);
+        setOpenImageEditor(false);
+        // No need to `resetMoreMenuButtonOnMenuClose` since we're closing
+        // anyway and it'll be removed from the DOM.
+        setMoreMenuAnchorEl(null);
+        onClose();
+    }, [onTriggerSyncWithRemote, onClose]);
+
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
             setActiveAnnotatedFile(annotatedFile);
@@ -257,23 +271,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
         () => setOpenImageEditor(false),
         [],
     );
-
-    const handleClose = useCallback(() => {
-        setNeedsSync((needSync) => {
-            if (needSync) onTriggerSyncWithRemote?.();
-            return false;
-        });
-        handleFileInfoClose();
-        handleImageEditorClose();
-        handleMoreMenuClose();
-        onClose();
-    }, [
-        onTriggerSyncWithRemote,
-        handleFileInfoClose,
-        handleImageEditorClose,
-        handleMoreMenuClose,
-        onClose,
-    ]);
 
     const handleSaveEditedCopy = useCallback(
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
@@ -335,8 +332,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const toggleFavorite = useCallback(
         ({ file }: FileViewerAnnotatedFile) =>
-            onToggleFavorite!(file).catch(onGenericError),
-        [onToggleFavorite, onGenericError],
+            onToggleFavorite!(file)
+                .then(handleScheduleUpdate)
+                .catch(onGenericError),
+        [onToggleFavorite, handleScheduleUpdate, onGenericError],
     );
 
     // Initial value of delegate.
