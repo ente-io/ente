@@ -122,18 +122,26 @@ export type FileViewerProps = ModalVisibilityProps & {
     onTriggerSyncWithRemote?: () => void;
     /**
      * Called when the viewer wants to update the in-memory, unsynced, favorite
-     * status of a file.
+     * status of a file maintained by the top level gallery. For more details,
+     * see {@link unsyncedFavoriteUpdates} in the gallery reducer's
+     * documentation.
      *
-     * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
-     * reducer's documentation.
-     *
-     * If this is not provided then the favorite toggle button will not be shown
-     * in the file actions.
+     * If this is not provided then the toggle favorite action will not be
+     * shown.
      */
     onMarkUnsyncedFavoriteUpdate?: (
         fileID: number,
         isFavorite: boolean,
     ) => void;
+    /**
+     * Called when the viewer wants to mark the given files as deleted in the
+     * the in-memory, unsynced, state maintained by the top level gallery. For
+     * more details, see {@link unsyncedFavoriteUpdates} in the gallery
+     * reducer's documentation.
+     *
+     * If this is not provided then the delete action will not be shown.
+     */
+    onMarkTempDeleted?: (files: EnteFile[]) => void;
     /**
      * Called when the user edits an image in the image editor and asks us to
      * save their edits as a copy.
@@ -171,6 +179,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
     onSelectPerson,
     onTriggerSyncWithRemote,
     onMarkUnsyncedFavoriteUpdate,
+    // TODO
+    // onMarkTempDeleted,
     onSaveEditedImageCopy,
 }) => {
     const pswpRef = useRef<FileViewerPhotoSwipe | undefined>();

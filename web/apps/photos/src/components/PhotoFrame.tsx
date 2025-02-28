@@ -121,7 +121,10 @@ export type PhotoFrameProps = Pick<
      *
      * Not set in the context of the shared albums app.
      */
-    markUnsyncedFavoriteUpdate?: (fileID: number, isFavorite: boolean) => void;
+    onMarkUnsyncedFavoriteUpdate?: (
+        fileID: number,
+        isFavorite: boolean,
+    ) => void;
     /**
      * Called when the component wants to mark the given files as deleted in the
      * the in-memory, unsynced, state maintained by the top level gallery.
@@ -131,7 +134,7 @@ export type PhotoFrameProps = Pick<
      *
      * Not set in the context of the shared albums app.
      */
-    markTempDeleted?: (files: EnteFile[]) => void;
+    onMarkTempDeleted?: (files: EnteFile[]) => void;
     /** This will be set if mode is not "people". */
     activeCollectionID: number;
     /** This will be set if mode is "people". */
@@ -155,8 +158,8 @@ const PhotoFrame = ({
     setSelected,
     selected,
     favoriteFileIDs,
-    markUnsyncedFavoriteUpdate,
-    markTempDeleted,
+    onMarkUnsyncedFavoriteUpdate,
+    onMarkTempDeleted,
     activeCollectionID,
     activePersonID,
     enableDownload,
@@ -554,12 +557,13 @@ const PhotoFrame = ({
                     isInHiddenSection={isInHiddenSection}
                     disableDownload={!enableDownload}
                     onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
-                    onMarkUnsyncedFavoriteUpdate={markUnsyncedFavoriteUpdate}
                     onSaveEditedImageCopy={handleSaveEditedImageCopy}
                     {...{
                         favoriteFileIDs,
                         fileCollectionIDs,
                         allCollectionsNameByID,
+                        onMarkUnsyncedFavoriteUpdate,
+                        onMarkTempDeleted,
                         onSelectCollection,
                         onSelectPerson,
                     }}
@@ -592,8 +596,8 @@ const PhotoFrame = ({
                 enableDownload={enableDownload}
                 {...{
                     favoriteFileIDs,
-                    markUnsyncedFavoriteUpdate,
-                    markTempDeleted,
+                    onMarkUnsyncedFavoriteUpdate,
+                    onMarkTempDeleted,
                     setFilesDownloadProgressAttributesCreator,
                     fileCollectionIDs,
                     allCollectionsNameByID,

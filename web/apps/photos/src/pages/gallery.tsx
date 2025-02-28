@@ -695,7 +695,7 @@ const Page: React.FC = () => {
                 await handleFileOps(
                     ops,
                     toProcessFiles,
-                    (files) => dispatch({ type: "markTempDeleted", files }),
+                    handleMarkTempDeleted,
                     () => dispatch({ type: "clearTempDeleted" }),
                     (files) => dispatch({ type: "markTempHidden", files }),
                     () => dispatch({ type: "clearTempHidden" }),
@@ -792,6 +792,21 @@ const Page: React.FC = () => {
             callback?.();
         });
     };
+
+    const handleMarkUnsyncedFavoriteUpdate = useCallback(
+        (fileID: number, isFavorite: boolean) =>
+            dispatch({
+                type: "markUnsyncedFavoriteUpdate",
+                fileID,
+                isFavorite,
+            }),
+        [],
+    );
+
+    const handleMarkTempDeleted = useCallback(
+        (files: EnteFile[]) => dispatch({ type: "markTempDeleted", files }),
+        [],
+    );
 
     const handleSelectCollection = useCallback(
         (collectionID: number) =>
@@ -1032,20 +1047,11 @@ const Page: React.FC = () => {
                         mode={barMode}
                         modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredFiles}
+                        // TODO: Warning: Doesn't have stable identity.
                         syncWithRemote={syncWithRemote}
                         setSelected={setSelected}
                         selected={selected}
                         favoriteFileIDs={state.favoriteFileIDs}
-                        markUnsyncedFavoriteUpdate={(fileID, isFavorite) =>
-                            dispatch({
-                                type: "markUnsyncedFavoriteUpdate",
-                                fileID,
-                                isFavorite,
-                            })
-                        }
-                        markTempDeleted={(files) =>
-                            dispatch({ type: "markTempDeleted", files })
-                        }
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
@@ -1060,6 +1066,10 @@ const Page: React.FC = () => {
                             setFilesDownloadProgressAttributesCreator
                         }
                         selectable={true}
+                        onMarkUnsyncedFavoriteUpdate={
+                            handleMarkUnsyncedFavoriteUpdate
+                        }
+                        onMarkTempDeleted={handleMarkTempDeleted}
                         onSelectCollection={handleSelectCollection}
                         onSelectPerson={handleSelectPerson}
                     />
