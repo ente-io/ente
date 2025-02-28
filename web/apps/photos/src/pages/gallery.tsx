@@ -793,6 +793,20 @@ const Page: React.FC = () => {
         });
     };
 
+    const handleSelectCollection = useCallback(
+        (collectionID: number) =>
+            dispatch({
+                type: "showNormalOrHiddenCollectionSummary",
+                collectionSummaryID: collectionID,
+            }),
+        [],
+    );
+
+    const handleSelectPerson = useCallback(
+        (personID: string) => dispatch({ type: "showPerson", personID }),
+        [],
+    );
+
     const handleOpenCollectionSelector = useCallback(
         (attributes: CollectionSelectorAttributes) => {
             setCollectionSelectorAttributes(attributes);
@@ -934,9 +948,7 @@ const Page: React.FC = () => {
                             onSelectPeople={() =>
                                 dispatch({ type: "showPeople" })
                             }
-                            onSelectPerson={(personID) =>
-                                dispatch({ type: "showPerson", personID })
-                            }
+                            onSelectPerson={handleSelectPerson}
                         />
                     )}
                 </NavbarBase>
@@ -959,8 +971,7 @@ const Page: React.FC = () => {
                                 ? state.view.visiblePeople
                                 : undefined) ?? [],
                         activePerson,
-                        onSelectPerson: (personID) =>
-                            dispatch({ type: "showPerson", personID }),
+                        onSelectPerson: handleSelectPerson,
                         setCollectionNamerAttributes,
                         setPhotoListHeader,
                         setFilesDownloadProgressAttributesCreator,
@@ -1049,15 +1060,8 @@ const Page: React.FC = () => {
                             setFilesDownloadProgressAttributesCreator
                         }
                         selectable={true}
-                        onSelectCollection={(collectionID) =>
-                            dispatch({
-                                type: "showNormalOrHiddenCollectionSummary",
-                                collectionSummaryID: collectionID,
-                            })
-                        }
-                        onSelectPerson={(personID) => {
-                            dispatch({ type: "showPerson", personID });
-                        }}
+                        onSelectCollection={handleSelectCollection}
+                        onSelectPerson={handleSelectPerson}
                     />
                 )}
                 <Export

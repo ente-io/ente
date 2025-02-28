@@ -554,10 +554,10 @@ const PhotoFrame = ({
                     isInHiddenSection={isInHiddenSection}
                     disableDownload={!enableDownload}
                     onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
+                    onMarkUnsyncedFavoriteUpdate={markUnsyncedFavoriteUpdate}
                     onSaveEditedImageCopy={handleSaveEditedImageCopy}
                     {...{
                         favoriteFileIDs,
-                        markUnsyncedFavoriteUpdate,
                         fileCollectionIDs,
                         allCollectionsNameByID,
                         onSelectCollection,
