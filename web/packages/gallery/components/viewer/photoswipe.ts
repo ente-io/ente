@@ -493,15 +493,20 @@ export class FileViewerPhotoSwipe {
             });
 
             if (showModifyActions) {
-                const toggleFavorite = async () => {
+                const toggleFavorite = async (
+                    buttonElement: HTMLButtonElement,
+                    value: boolean,
+                ) => {
                     const af = currentAnnotatedFile();
                     this.pendingFavoriteUpdates.add(af.file.id);
+                    buttonElement.disabled = true;
                     await delegate.toggleFavorite(af);
                     this.pendingFavoriteUpdates.delete(af.file.id);
+                    showFavoriteIf(buttonElement, value);
                 };
 
-                const forIsFavorite = (
-                    buttonElement: HTMLElement,
+                const showFavoriteIf = (
+                    buttonElement: HTMLButtonElement,
                     value: boolean,
                 ) => {
                     const af = currentAnnotatedFile();
@@ -520,10 +525,10 @@ export class FileViewerPhotoSwipe {
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
-                    onClick: toggleFavorite,
+                    onClick: (e) => toggleFavorite(e.target, false),
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
-                            forIsFavorite(buttonElement, false),
+                            showFavoriteIf(buttonElement, false),
                         ),
                 });
                 pswp.ui.registerElement({
@@ -532,10 +537,10 @@ export class FileViewerPhotoSwipe {
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("unfavorite"),
-                    onClick: toggleFavorite,
+                    onClick: (e) => toggleFavorite(e.target),
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
-                            forIsFavorite(buttonElement, true),
+                            showFavoriteIf(buttonElement, true),
                         ),
                 });
             }

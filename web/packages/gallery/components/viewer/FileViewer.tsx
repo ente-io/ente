@@ -296,16 +296,17 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const isFavorite = useCallback(
         ({ file }: FileViewerAnnotatedFile) => {
             if (!showModifyActions || !favoriteFileIDs) return undefined;
-            favoriteFileIDs.has(file.id);
+            return favoriteFileIDs.has(file.id);
         },
         [showModifyActions, favoriteFileIDs],
     );
 
     const toggleFavorite = useCallback(
-        ({ file, annotation }: FileViewerAnnotatedFile) => {
+        async ({ file, annotation }: FileViewerAnnotatedFile) => {
             if (!showModifyActions || !favoriteFileIDs)
                 throw new Error("Unexpected invocation");
 
+            await new Promise((r) => setTimeout(r, 7000));
             console.log({ file, annotation });
             // TODO
             //   const isFavorite = annotation.isFavorite;
