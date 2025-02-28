@@ -219,12 +219,11 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
                         message={t("copied")}
                         slotProps={{
                             content: {
-                                sx: (theme) => ({
-                                    backgroundColor:
-                                        theme.vars.palette.fill.faint,
-                                    color: theme.vars.palette.primary.main,
+                                sx: {
+                                    backgroundColor: "fill.faint",
+                                    color: "primary.main",
                                     backdropFilter: "blur(10px)",
-                                }),
+                                },
                             },
                         }}
                     />
