@@ -14,7 +14,6 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 }
 
 import { isDesktop } from "@/base/app";
-import { assertionFailed } from "@/base/assert";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
@@ -42,19 +41,6 @@ import {
     type FileViewerFileAnnotation,
     type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
-
-// TODO
-// import {
-//     addToFavorites,
-//     removeFromFavorites,
-// } from "apps/photos/services/collectionService";
-// import { wait } from "@/utils/promise";
-// const addToFavorites = async (file: EnteFile) => {
-//     console.log(file);
-//     await wait(3000);
-//     throw new Error("test");
-// };
-// const removeFromFavorites = addToFavorites;
 
 export type FileViewerProps = ModalVisibilityProps & {
     /**
@@ -124,6 +110,16 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onTriggerSyncWithRemote?: () => void;
     /**
+     * Called when the favorite status of given {@link file} should be toggled
+     * from its current value.
+     *
+     * If this is not provided then the favorite toggle button will not be shown
+     * in the file actions.
+     *
+     * See also {@link favoriteFileIDs}.
+     */
+    onToggleFavorite?: (file: EnteFile) => Promise<void>;
+    /**
      * Called when the user edits an image in the image editor and asks us to
      * save their edits as a copy.
      *
@@ -157,6 +153,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     fileCollectionIDs,
     allCollectionsNameByID,
     onTriggerSyncWithRemote,
+    onToggleFavorite,
     onSelectCollection,
     onSelectPerson,
     onSaveEditedImageCopy,
@@ -299,29 +296,18 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const isFavorite = useCallback(
         ({ file }: FileViewerAnnotatedFile) => {
-            if (!showModifyActions || !favoriteFileIDs) return undefined;
+            if (!showModifyActions || !favoriteFileIDs || !onToggleFavorite) {
+                return undefined;
+            }
             return favoriteFileIDs.has(file.id);
         },
-        [showModifyActions, favoriteFileIDs],
+        [showModifyActions, favoriteFileIDs, onToggleFavorite],
     );
 
     const toggleFavorite = useCallback(
-        async (annotatedFile: FileViewerAnnotatedFile) => {
-            const { file, annotation } = annotatedFile;
-
-            const isFav = isFavorite(annotatedFile);
-            if (isFav === undefined || !annotation.showFavorite) {
-                assertionFailed();
-                return;
-            }
-
-            try {
-                await (isFav ? removeFromFavorites : addToFavorites)(file);
-            } catch (e) {
-                onGenericError(e);
-            }
-        },
-        [onGenericError, isFavorite],
+        ({ file }: FileViewerAnnotatedFile) =>
+            onToggleFavorite!(file).catch(onGenericError),
+        [onToggleFavorite, onGenericError],
     );
 
     // Initial value of delegate.

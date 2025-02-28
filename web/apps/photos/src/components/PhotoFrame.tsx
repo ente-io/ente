@@ -21,8 +21,12 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
+import {
+    addToFavorites,
+    removeFromFavorites,
+} from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
 import {
     SelectedState,
@@ -265,6 +269,17 @@ const PhotoFrame = ({
         () => void onSyncWithRemote(),
         [onSyncWithRemote],
     );
+
+    const handleToggleFavorite = useMemo(() => {
+        return favoriteFileIDs
+            ? (file: EnteFile) => {
+                  const isFavorite = favoriteFileIDs!.has(file.id);
+                  return (isFavorite ? removeFromFavorites : addToFavorites)(
+                      file,
+                  );
+              }
+            : undefined;
+    }, [favoriteFileIDs]);
 
     const handleSaveEditedImageCopy = useCallback(
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
@@ -557,6 +572,7 @@ const PhotoFrame = ({
                     isInHiddenSection={isInHiddenSection}
                     isInTrashSection={activeCollectionID === TRASH_SECTION}
                     onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
+                    onToggleFavorite={handleToggleFavorite}
                     onSaveEditedImageCopy={handleSaveEditedImageCopy}
                     {...{
                         favoriteFileIDs,
