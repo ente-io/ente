@@ -104,6 +104,10 @@ if (process.env.NEXT_PUBLIC_ENTE_FAMILY_URL) {
 const nextConfig = {
     // Generate a static export when we run `next build`.
     output: "export",
+    // Instead of the nice and useful HMR indicator that used to exist prior to
+    // 15.2, the Next.js folks have made this a persistent "branding" indicator
+    // that gets in the way and needs to be disabled.
+    devIndicators: false,
     compiler: {
         emotion: true,
     },
