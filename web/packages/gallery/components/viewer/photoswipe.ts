@@ -1,6 +1,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
+import { assertionFailed } from "@/base/assert";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
@@ -66,7 +67,7 @@ export interface FileViewerFileAnnotation {
     isEditableImage?: boolean | undefined;
 }
 
-type FileViewerPhotoSwipeOptions = {
+interface FileViewerPhotoSwipeDelegate {
     /**
      * Called when the file viewer is closed.
      */
@@ -99,7 +100,20 @@ type FileViewerPhotoSwipeOptions = {
      * {@link FileViewerFileAnnotation} for the file.
      */
     onEditImage?: (annotatedFile: FileViewerAnnotatedFile) => void;
-} & Pick<FileViewerProps, "files" | "initialIndex" | "disableDownload">;
+}
+
+type FileViewerPhotoSwipeOptions = Pick<
+    FileViewerProps,
+    "files" | "initialIndex" | "disableDownload"
+> & {
+    /**
+     * Callbacks.
+     *
+     * The extra level of indirection allows these to be updated without
+     * recreating us.
+     */
+    delegate: FileViewerPhotoSwipeDelegate;
+};
 
 /**
  * A file and its annotation, in a nice cosy box.
@@ -141,6 +155,10 @@ export class FileViewerPhotoSwipe {
      */
     private opts: Pick<FileViewerPhotoSwipeOptions, "disableDownload">;
     /**
+     * An object to which we should route various callbacks.
+     */
+    private delegate: FileViewerPhotoSwipeDelegate;
+    /**
      * An interval that invokes a periodic check of whether we should the hide
      * controls if the user does not perform any pointer events for a while.
      */
@@ -174,11 +192,7 @@ export class FileViewerPhotoSwipe {
         files,
         initialIndex,
         disableDownload,
-        onClose,
-        onAnnotate,
-        onToggleFavorite,
-        onViewInfo,
-        onEditImage,
+        delegate,
     }: FileViewerPhotoSwipeOptions) {
         this.files = files;
         this.opts = { disableDownload };
@@ -249,7 +263,7 @@ export class FileViewerPhotoSwipe {
             const file = currentFile();
             let annotation = this.activeFileAnnotation;
             if (annotation?.fileID != file.id) {
-                annotation = onAnnotate(file);
+                annotation = delegate.onAnnotate(file);
                 this.activeFileAnnotation = annotation;
             }
             return {
@@ -266,8 +280,8 @@ export class FileViewerPhotoSwipe {
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
 
         const withCurrentAnnotatedFile =
-            (cb: (af: AnnotatedFile) => void) => () =>
-                cb(currentAnnotatedFile());
+            (cb: ((af: AnnotatedFile) => void) | undefined) => () =>
+                cb ? cb(currentAnnotatedFile()) : assertionFailed();
 
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
@@ -404,7 +418,7 @@ export class FileViewerPhotoSwipe {
             forgetFailedItems();
             forgetExif();
             // Let our parent know that we have been closed.
-            onClose();
+            delegate.onClose();
         });
 
         const showIf = (element: HTMLElement, condition: boolean) =>
@@ -451,7 +465,7 @@ export class FileViewerPhotoSwipe {
                 },
             });
 
-            if (onToggleFavorite) {
+            if (delegate.onToggleFavorite) {
                 // Only one of these two will end up being shown, so they can
                 // safely share the same order.
                 pswp.ui.registerElement({
@@ -460,7 +474,9 @@ export class FileViewerPhotoSwipe {
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
-                    onClick: withCurrentAnnotatedFile(onToggleFavorite),
+                    onClick: withCurrentAnnotatedFile(
+                        delegate.onToggleFavorite,
+                    ),
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
                             showIf(
@@ -475,7 +491,9 @@ export class FileViewerPhotoSwipe {
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("unfavorite"),
-                    onClick: withCurrentAnnotatedFile(onToggleFavorite),
+                    onClick: withCurrentAnnotatedFile(
+                        delegate.onToggleFavorite,
+                    ),
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
                             showIf(
@@ -492,11 +510,11 @@ export class FileViewerPhotoSwipe {
                 order: 9,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("info"),
-                onClick: withCurrentAnnotatedFile(onViewInfo),
+                onClick: withCurrentAnnotatedFile(delegate.onViewInfo),
             });
 
             // TODO(PS):
-            if (onEditImage && false) {
+            if (delegate.onEditImage && false) {
                 pswp.ui.registerElement({
                     name: "edit",
                     // TODO(PS):
@@ -505,7 +523,7 @@ export class FileViewerPhotoSwipe {
                     order: 16,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("edit"),
-                    onClick: withCurrentAnnotatedFile(onEditImage),
+                    onClick: withCurrentAnnotatedFile(delegate.onEditImage),
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
                             showIf(
@@ -523,9 +541,8 @@ export class FileViewerPhotoSwipe {
                 order: 17,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("more"),
-                onClick: withCurrentAnnotatedFile(onViewInfo),
+                onClick: withCurrentAnnotatedFile(delegate.onViewInfo),
             });
-
         });
 
         // Modify the default UI elements.
