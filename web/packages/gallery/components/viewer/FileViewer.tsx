@@ -14,6 +14,7 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 }
 
 import { isDesktop } from "@/base/app";
+import { assertionFailed } from "@/base/assert";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
@@ -305,33 +306,22 @@ const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const toggleFavorite = useCallback(
-        async ({ file, annotation }: FileViewerAnnotatedFile) => {
-            if (!showModifyActions || !favoriteFileIDs)
-                throw new Error("Unexpected invocation");
+        async (annotatedFile: FileViewerAnnotatedFile) => {
+            const { file, annotation } = annotatedFile;
+
+            const isFav = isFavorite(annotatedFile);
+            if (isFav === undefined || !annotation.showFavorite) {
+                assertionFailed();
+                return;
+            }
 
             try {
-                await new Promise((r) => setTimeout(r, 3000));
-                throw new Error("test");
+                await (isFav ? removeFromFavorites : addToFavorites)(file);
             } catch (e) {
                 onGenericError(e);
             }
-            console.log({ file, annotation });
-            // TODO
-            //   const isFavorite = annotation.isFavorite;
-            //   if (isFavorite === undefined) {
-            //       assertionFailed();
-            //       return;
-            //   }
-
-            //   onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
-            //   void (isFavorite ? removeFromFavorites : addToFavorites)(
-            //       file,
-            //   ).catch((e: unknown) => {
-            //       log.error("Failed to remove favorite", e);
-            //       onMarkUnsyncedFavoriteUpdate(file.id, undefined);
-            //   });
         },
-        [showModifyActions, onGenericError, favoriteFileIDs],
+        [onGenericError, isFavorite],
     );
 
     // Initial value of delegate.
