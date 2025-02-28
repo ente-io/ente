@@ -89,7 +89,7 @@ class _ContactSearchThumbnailWidgetState
         if (person == null) {
           return null;
         } else {
-          return PersonService.instance.getRecentFileOfPerson(person);
+          return PersonService.instance.getThumbnailFileOfPerson(person);
         }
       });
     }

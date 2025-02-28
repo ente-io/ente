@@ -844,8 +844,15 @@ const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
         } else if (p && typeof p == "object" && "path" in p) {
             electron.markUploadedFiles([p.path]);
         } else {
-            throw new Error(
-                "Attempting to mark upload completion of unexpected desktop upload items",
+            // We can come here when the user saves an image they've edited, in
+            // which case `item` will be a web File object which won't have a
+            // path. Such a la carte uploads don't mark the file as pending
+            // anyways, so there isn't anything to do also.
+            //
+            // Keeping a log here, though really the upper layers of the code
+            // need to be reworked so that we don't even get here in such cases.
+            log.info(
+                "Ignoring attempt to mark upload completion of (likely edited) item",
             );
         }
     }

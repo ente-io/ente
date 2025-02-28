@@ -19,10 +19,6 @@ export interface PhotosAppContextT {
      * using the provided {@link NotificationAttributes}.
      */
     showNotification: (attributes: NotificationAttributes) => void;
-    /**
-     * Show a generic error dialog, and log the given error.
-     */
-    onGenericError: (error: unknown) => void;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
 }

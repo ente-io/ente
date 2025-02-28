@@ -13,16 +13,27 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
     throw new Error("Whoa");
 }
 
-import {
-    useModalVisibility,
-    type ModalVisibilityProps,
-} from "@/base/components/utils/modal";
+import { isDesktop } from "@/base/app";
+import { type ModalVisibilityProps } from "@/base/components/utils/modal";
+import { lowercaseExtension } from "@/base/file-name";
 import type { LocalUser } from "@/base/local-user";
-import { FileInfo, type FileInfoProps } from "@/gallery/components/FileInfo";
+import log from "@/base/log";
+import {
+    FileInfo,
+    type FileInfoExif,
+    type FileInfoProps,
+} from "@/gallery/components/FileInfo";
+import type { Collection } from "@/media/collection";
+import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/media/file.js";
+import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
+import {
+    ImageEditorOverlay,
+    type ImageEditorOverlayProps,
+} from "@/new/photos/components/ImageEditorOverlay";
 import { Button, styled } from "@mui/material";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { fileInfoExifForFile, type FileInfoExif } from "./data-source";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fileInfoExifForFile } from "./data-source";
 import {
     FileViewerPhotoSwipe,
     type FileViewerAnnotatedFile,
@@ -62,9 +73,49 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     initialIndex: number;
     /**
+     * `true` when we are viewing files in the Trash.
+     */
+    isInTrashSection?: boolean;
+    /**
+     * `true` when we are viewing files in the hidden section.
+     */
+    isInHiddenSection?: boolean;
+    /**
      * If true then the viewer does not show controls for downloading the file.
      */
     disableDownload?: boolean;
+    /**
+     * File IDs of all the files that the user has marked as a favorite.
+     *
+     * If this is not provided then the favorite toggle button will not be shown
+     * in the file actions.
+     */
+    favoriteFileIDs?: Set<number>;
+    /**
+     * Called when there was some update performed within the file viewer that
+     * necessitates us to sync with remote again to fetch the latest updates.
+     *
+     * This is called lazily, and at most once, when the file viewer is closing
+     * if any changes were made in the file info panel of the file viewer for
+     * any of the files that the user was viewing (e.g. if they changed the
+     * caption). Those changes have already been applied to both remote and to
+     * the in-memory file object used by the file viewer; this callback is to
+     * trigger a sync so that our local database also gets up to speed.
+     *
+     * If we're in a context where edits are not possible, e.g. {@link user} is
+     * not defined, then this prop is not used.
+     */
+    onTriggerSyncWithRemote?: () => void;
+    /**
+     * Called when the user edits an image in the image editor and asks us to
+     * save their edits as a copy.
+     *
+     * Editing is disabled if this is not provided.
+     *
+     * See {@link onSaveEditedCopy} in the {@link ImageEditorOverlay} props for
+     * documentation about the parameters.
+     */
+    onSaveEditedImageCopy?: ImageEditorOverlayProps["onSaveEditedCopy"];
 } & Pick<
         FileInfoProps,
         | "fileCollectionIDs"
@@ -82,11 +133,16 @@ const FileViewer: React.FC<FileViewerProps> = ({
     user,
     files,
     initialIndex,
+    isInTrashSection,
+    isInHiddenSection,
     disableDownload,
+    favoriteFileIDs,
     fileCollectionIDs,
     allCollectionsNameByID,
     onSelectCollection,
     onSelectPerson,
+    onTriggerSyncWithRemote,
+    onSaveEditedImageCopy,
 }) => {
     const pswpRef = useRef<FileViewerPhotoSwipe | undefined>();
 
@@ -106,17 +162,55 @@ const FileViewer: React.FC<FileViewerProps> = ({
         FileInfoExif | undefined
     >(undefined);
 
-    const { show: showFileInfo, props: fileInfoVisibilityProps } =
-        useModalVisibility();
+    const [openFileInfo, setOpenFileInfo] = useState(false);
+    const [openImageEditor, setOpenImageEditor] = useState(false);
+
+    // If `true`, then we need to trigger a sync with remote when we close.
+    const [, setNeedsSync] = useState(false);
+
+    const handleClose = useCallback(() => {
+        setNeedsSync((needSync) => {
+            if (needSync) onTriggerSyncWithRemote?.();
+            return false;
+        });
+        setOpenFileInfo(false);
+        setOpenImageEditor(false);
+        onClose();
+    }, [onTriggerSyncWithRemote, onClose]);
 
     const handleAnnotate = useCallback(
         (file: EnteFile) => {
+            log.debug(() => ["viewer", { action: "annotate", file }]);
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
-            return { fileID, isOwnFile };
+            const canFavoriteOrEdit =
+                isOwnFile && !isInTrashSection && !isInHiddenSection;
+            const isFavorite = canFavoriteOrEdit
+                ? favoriteFileIDs?.has(file.id)
+                : undefined;
+            const isEditableImage =
+                onSaveEditedImageCopy && canFavoriteOrEdit
+                    ? fileIsEditableImage(file)
+                    : undefined;
+            return { fileID, isOwnFile, isFavorite, isEditableImage };
         },
-        [user],
+        [
+            user,
+            isInTrashSection,
+            isInHiddenSection,
+            favoriteFileIDs,
+            onSaveEditedImageCopy,
+        ],
     );
+
+    const handleToggleFavorite = useMemo(() => {
+        return favoriteFileIDs
+            ? (annotatedFile: FileViewerAnnotatedFile) => {
+                  setActiveAnnotatedFile(annotatedFile);
+                  console.log("handleToggleFavorite", annotatedFile);
+              }
+            : undefined;
+    }, [favoriteFileIDs]);
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
@@ -126,24 +220,58 @@ const FileViewer: React.FC<FileViewerProps> = ({
                     setActiveFileExif(exif),
                 ),
             );
-            showFileInfo();
+            setOpenFileInfo(true);
         },
-        [showFileInfo],
+        [],
     );
 
-    const handleSelectCollection = (collectionID: number) => {
-        onSelectCollection(collectionID);
-        onClose();
-    };
+    const handleInfoClose = useCallback(() => setOpenFileInfo(false), []);
 
-    const handleSelectPerson = onSelectPerson
-        ? (personID: string) => {
-              onSelectPerson(personID);
-              onClose();
-          }
-        : undefined;
+    const handleScheduleUpdate = useCallback(() => setNeedsSync(true), []);
+
+    const handleSelectCollection = useCallback(
+        (collectionID: number) => {
+            onSelectCollection(collectionID);
+            handleClose();
+        },
+        [onSelectCollection, handleClose],
+    );
+
+    const handleSelectPerson = useMemo(() => {
+        return onSelectPerson
+            ? (personID: string) => {
+                  onSelectPerson(personID);
+                  handleClose();
+              }
+            : undefined;
+    }, [onSelectPerson, handleClose]);
+
+    const handleEditImage = useMemo(() => {
+        return onSaveEditedImageCopy
+            ? (annotatedFile: FileViewerAnnotatedFile) => {
+                  setActiveAnnotatedFile(annotatedFile);
+                  setOpenImageEditor(true);
+              }
+            : undefined;
+    }, [onSaveEditedImageCopy]);
+
+    const handleImageEditorClose = useCallback(
+        () => setOpenImageEditor(false),
+        [],
+    );
+
+    const handleSaveEditedCopy = useCallback(
+        (editedFile: File, collection: Collection, enteFile: EnteFile) => {
+            onSaveEditedImageCopy(editedFile, collection, enteFile);
+            handleImageEditorClose();
+            handleClose();
+        },
+        [onSaveEditedImageCopy, handleImageEditorClose, handleClose],
+    );
 
     useEffect(() => {
+        log.debug(() => ["viewer", { action: "useEffect", open }]);
+
         if (!open) {
             // The close state will be handled by the cleanup function.
             return;
@@ -153,13 +281,19 @@ const FileViewer: React.FC<FileViewerProps> = ({
             files,
             initialIndex,
             disableDownload,
-            onClose,
+            onClose: handleClose,
             onAnnotate: handleAnnotate,
+            onToggleFavorite: handleToggleFavorite,
             onViewInfo: handleViewInfo,
+            onEditImage: handleEditImage,
         });
         pswpRef.current = pswp;
 
         return () => {
+            log.debug(() => [
+                "viewer",
+                { action: "useEffect/cleanup", pswpRef: pswpRef.current },
+            ]);
             pswpRef.current?.closeIfNeeded();
             pswpRef.current = undefined;
         };
@@ -169,7 +303,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
         // - Updates to initialIndex can be safely ignored: they don't matter,
         //   only their initial value at the time of open mattered.
         //
-        // - Updates to disableDownload are not expected after open. We could've
+        // - Updates to other properties are not expected after open. We could've
         //   also added it to the dependencies array, not adding it was a more
         //   conservative choice to be on the safer side and trigger too few
         //   instead of too many updates.
@@ -180,20 +314,40 @@ const FileViewer: React.FC<FileViewerProps> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, onClose, handleViewInfo]);
 
+    const handleRefreshPhotoswipe = useCallback(() => {
+        pswpRef.current.refreshCurrentSlideContent();
+    }, []);
+
+    log.debug(() => ["viewer", { action: "render", pswpRef: pswpRef.current }]);
+
     return (
         <Container>
             <Button>Test</Button>
             <FileInfo
-                {...fileInfoVisibilityProps}
-                file={activeAnnotatedFile.file}
+                open={openFileInfo}
+                onClose={handleInfoClose}
+                file={activeAnnotatedFile?.file}
                 exif={activeFileExif}
+                allowEdits={!!activeAnnotatedFile?.annotation.isOwnFile}
+                allowMap={!!user}
+                showCollections={!!user}
+                scheduleUpdate={handleScheduleUpdate}
+                refreshPhotoswipe={handleRefreshPhotoswipe}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
                 {...{ fileCollectionIDs, allCollectionsNameByID }}
             />
+            <ImageEditorOverlay
+                open={openImageEditor}
+                onClose={handleImageEditorClose}
+                file={activeAnnotatedFile?.file}
+                onSaveEditedCopy={handleSaveEditedCopy}
+            />
         </Container>
     );
 };
+
+export default FileViewer;
 
 const Container = styled("div")`
     border: 1px solid red;
@@ -204,4 +358,20 @@ const Container = styled("div")`
     }
 `;
 
-export default FileViewer;
+const fileIsEditableImage = (file: EnteFile) => {
+    // Only images are editable.
+    if (file.metadata.fileType !== FileType.image) return false;
+
+    const extension = lowercaseExtension(file.metadata.title);
+    // Assume it is editable;
+    let isRenderable = true;
+    if (extension && needsJPEGConversion(extension)) {
+        // See if the file is on the whitelist of extensions that we know
+        // will not be directly renderable.
+        if (!isDesktop) {
+            // On the web, we only support HEIC conversion.
+            isRenderable = isHEICExtension(extension);
+        }
+    }
+    return isRenderable;
+};

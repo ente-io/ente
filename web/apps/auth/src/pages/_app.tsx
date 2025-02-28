@@ -13,7 +13,7 @@ import {
     useSetupLogs,
 } from "@/base/components/utils/hooks-app";
 import { authTheme } from "@/base/components/utils/theme";
-import { BaseContext } from "@/base/context";
+import { BaseContext, deriveBaseContext } from "@/base/context";
 import { logStartupBanner } from "@/base/log-web";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -43,7 +43,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     }, []);
 
     const baseContext = useMemo(
-        () => ({ logout, showMiniDialog }),
+        () => deriveBaseContext({ logout, showMiniDialog }),
         [logout, showMiniDialog],
     );
 

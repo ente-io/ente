@@ -1,3 +1,4 @@
+import { useModalVisibility } from "@/base/components/utils/modal";
 import { isSameDay } from "@/base/date";
 import { formattedDate } from "@/base/i18n-date";
 import log from "@/base/log";
@@ -8,6 +9,7 @@ import {
     type LoadedLivePhotoSourceURL,
     type RenderableSourceURLs,
 } from "@/gallery/services/download";
+import type { Collection } from "@/media/collection";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { FileViewer } from "@/new/photos/components/FileViewerComponents";
@@ -19,8 +21,9 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
+import uploadManager from "services/upload/uploadManager";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
@@ -179,9 +182,8 @@ const PhotoFrame = ({
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const router = useRouter();
 
-    // const { show: showPhotoSwipe, props: photoSwipeVisibilityProps } =
-    //     useModalVisibility();
-    const [open5, setOpen5] = useState(false);
+    const { show: showFileViewer, props: fileViewerVisibilityProps } =
+        useModalVisibility();
 
     const [displayFiles, setDisplayFiles] = useState<DisplayFile[] | undefined>(
         undefined,
@@ -256,6 +258,20 @@ const PhotoFrame = ({
         }
     }, [selected]);
 
+    const handleTriggerSyncWithRemote = useCallback(
+        () => void syncWithRemote(),
+        [syncWithRemote],
+    );
+
+    const handleSaveEditedImageCopy = useCallback(
+        (editedFile: File, collection: Collection, enteFile: EnteFile) => {
+            uploadManager.prepareForNewUpload();
+            uploadManager.showUploadProgressDialog();
+            uploadManager.uploadFile(editedFile, collection, enteFile);
+        },
+        [],
+    );
+
     if (!displayFiles) {
         return <div />;
     }
@@ -281,7 +297,7 @@ const PhotoFrame = ({
 
     const handleClose = (needUpdate) => {
         if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
-            setOpen5(false);
+            throw new Error("Not implemented");
         } else {
             setOpen(false);
             needUpdate && syncWithRemote();
@@ -292,8 +308,7 @@ const PhotoFrame = ({
     const onThumbnailClick = (index: number) => () => {
         setCurrentIndex(index);
         if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
-            // showPhotoSwipe();
-            setOpen5(true);
+            showFileViewer();
         } else {
             setOpen(true);
             setIsPhotoSwipeOpen?.(true);
@@ -529,14 +544,19 @@ const PhotoFrame = ({
         <Container>
             {process.env.NEXT_PUBLIC_ENTE_WIP_PS5 && (
                 <FileViewer
+                    {...fileViewerVisibilityProps}
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     /* @ts-ignore TODO(PS): test */
-                    open={open5}
-                    onClose={handleClose}
                     user={galleryContext.user ?? undefined}
                     files={files}
                     initialIndex={currentIndex}
+                    isInTrashSection={activeCollectionID === TRASH_SECTION}
+                    isInHiddenSection={isInHiddenSection}
+                    disableDownload={!enableDownload}
+                    onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
+                    onSaveEditedImageCopy={handleSaveEditedImageCopy}
                     {...{
+                        favoriteFileIDs,
                         fileCollectionIDs,
                         allCollectionsNameByID,
                         onSelectCollection,

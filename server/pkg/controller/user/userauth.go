@@ -346,7 +346,7 @@ func (c *UserController) AddTokenAndNotify(userID int64, app ente.App, token str
 			return
 		}
 		emailSendErr := emailUtil.SendTemplatedEmail([]string{user.Email}, "Ente", "team@ente.io", emailCtrl.LoginSuccessSubject, emailCtrl.LoginSuccessTemplate, map[string]interface{}{
-      "Date":    t.Now().UTC().Format("02 Jan, 2006 15:04"),
+			"Date": t.Now().UTC().Format("02 Jan, 2006 15:04"),
 		}, nil)
 		if emailSendErr != nil {
 			log.WithError(emailSendErr).Error("Failed to send email")
@@ -479,7 +479,7 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 func convertStringToBytes(s string) []byte {
 	b, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("failed to base64dDecode string %s", s))
 	}
 	return b
 }
