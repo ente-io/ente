@@ -41,7 +41,7 @@ const getTheme = (appName: AppName): Theme => {
  *
  * 2. These can be groups of color values that have roughly the same hue, but
  *    different levels of saturation. Such hue groups are arranged together into
- *    a "Colors" exported by "@/mui/material":
+ *    a "Colors" exported by "@mui/material":
  *
  *        export interface Color {
  *            50: string;
