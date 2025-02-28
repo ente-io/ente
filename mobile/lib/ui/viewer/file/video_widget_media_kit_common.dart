@@ -34,7 +34,7 @@ class VideoWidget extends StatefulWidget {
 
 class _VideoWidgetState extends State<VideoWidget> {
   final showControlsNotifier = ValueNotifier<bool>(true);
-  static const verticalMargin = 72.0;
+  static const double verticalMargin = 64;
   final _hideControlsDebouncer = Debouncer(
     const Duration(milliseconds: 2000),
   );
@@ -74,7 +74,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       if (widget.controller.player.state.playing) {
         _hideControlsDebouncer.run(() async {
           showControlsNotifier.value = false;
-          widget.playbackCallback?.call(false);
+          widget.playbackCallback?.call(true);
         });
       }
     }

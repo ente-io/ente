@@ -92,7 +92,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
               });
               _seekTo(value);
             },
-            divisions: widget.duration ?? 4500,
+            divisions: 4500,
             onChangeEnd: (value) {
               setState(() {
                 _animationController.value = value;

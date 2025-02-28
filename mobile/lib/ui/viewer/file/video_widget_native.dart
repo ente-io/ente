@@ -487,6 +487,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   void _onPlaybackEnded() async {
     await _controller?.stop();
     if (localSettings.shouldLoopVideo()) {
+      Bus.instance.fire(SeekbarTriggeredEvent(position: 0));
       await _controller?.play();
     }
   }

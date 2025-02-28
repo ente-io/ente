@@ -227,7 +227,6 @@ class PreviewVideoStore {
       if (bitrate != null && bitrate <= 4000 * 1000 && codecIsH264) {
         session = await FFmpegKit.execute(
           '-i "${file.path}" '
-          '-metadata:s:v:0 rotate=0 '
           '-c:v copy -c:a copy '
           '-f hls -hls_time 2 -hls_flags single_file '
           '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
@@ -240,7 +239,6 @@ class PreviewVideoStore {
           !codecIsH264) {
         session = await FFmpegKit.execute(
           '-i "${file.path}" '
-          '-metadata:s:v:0 rotate=0 '
           '-vf "format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
           '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
           '-c:v libx264 -crf 23 -preset medium '
@@ -253,7 +251,6 @@ class PreviewVideoStore {
       else if (colorSpace != null && isColorGood) {
         session = await FFmpegKit.execute(
           '-i "${file.path}" '
-          '-metadata:s:v:0 rotate=0 '
           '-vf "scale=-2:720,fps=30" '
           '-c:v libx264 -b:v 2000k -crf 23 -preset medium '
           '-c:a aac -b:a 128k -f hls -hls_time 2 -hls_flags single_file '
@@ -264,7 +261,6 @@ class PreviewVideoStore {
       else {
         session = await FFmpegKit.execute(
           '-i "${file.path}" '
-          '-metadata:s:v:0 rotate=0 '
           '-vf "scale=-2:720,fps=30,format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
           '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
           '-x264-params "colorprim=bt709:transfer=bt709:colormatrix=bt709" '
