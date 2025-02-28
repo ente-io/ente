@@ -90,6 +90,19 @@ class FileItem {
       ownerID: ownerID,
     );
   }
+
+  List<Object?> rowValues() {
+    return [
+      fileID,
+      ownerID,
+      fileDecryotionHeader,
+      thumnailDecryptionHeader,
+      metadata?.toEncodedJson(),
+      magicMetadata?.toEncodedJson(),
+      pubMagicMetadata?.toEncodedJson(),
+      info?.toEncodedJson(),
+    ];
+  }
 }
 
 class CollectionFileItem {
@@ -111,4 +124,16 @@ class CollectionFileItem {
     this.encFileKeyNonce,
   });
   int get fileID => fileItem.fileID;
+
+  List<Object?> collectionFileRowValues() {
+    return [
+      collectionID,
+      fileID,
+      encFileKey,
+      encFileKeyNonce,
+      createdAt,
+      updatedAt,
+      isDeleted ? 1 : 0,
+    ];
+  }
 }

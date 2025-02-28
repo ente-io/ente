@@ -65,37 +65,16 @@ class RemoteDB {
     final stopwatch = Stopwatch()..start();
     await Future.forEach(collections.slices(_batchInsertMaxCount),
         (slice) async {
-      final List<List<Object?>> values = slice
-          .map(
-            (e) => [
-              e.collectionID,
-              e.fileID,
-              e.encFileKey,
-              e.encFileKeyNonce,
-              e.createdAt,
-              e.updatedAt,
-              e.isDeleted ? 1 : 0,
-            ],
-          )
-          .toList();
+      final List<List<Object?>> collectionFileValues = [];
+      final List<List<Object?>> fileValues = [];
+      for (final item in slice) {
+        collectionFileValues.add(item.collectionFileRowValues());
+        fileValues.add(item.fileItem.rowValues());
+      }
       await _sqliteDB.executeBatch(
         'INSERT OR REPLACE INTO collection_files ($collectionFilesColumns) values(?, ?, ?, ?, ?, ?, ?)',
-        values,
+        collectionFileValues,
       );
-      final List<List<Object?>> fileValues = slice
-          .map(
-            (e) => [
-              e.fileItem.fileID,
-              e.fileItem.ownerID,
-              e.fileItem.fileDecryotionHeader,
-              e.fileItem.thumnailDecryptionHeader,
-              e.fileItem.metadata?.toEncodedJson(),
-              e.fileItem.magicMetadata?.toEncodedJson(),
-              e.fileItem.pubMagicMetadata?.toEncodedJson(),
-              e.fileItem.info?.toEncodedJson(),
-            ],
-          )
-          .toList();
       await _sqliteDB.executeBatch(
         'INSERT OR REPLACE INTO files ($filesColumns) values(?, ?, ?, ?, ?, ?, ?, ?)',
         fileValues,
