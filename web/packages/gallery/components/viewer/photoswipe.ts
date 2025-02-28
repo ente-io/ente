@@ -9,7 +9,7 @@ import { t } from "i18next";
 import {
     forgetExif,
     forgetExifForItemData,
-    forgetFailedItemDataForFile,
+    forgetFailedItemDataForFileID,
     forgetFailedItems,
     itemDataForFile,
     updateFileInfoExifIfNeeded,
@@ -402,9 +402,8 @@ export class FileViewerPhotoSwipe {
             //   more than 2 slides and then back, or if they reopen the viewer.
             //
             // See: [Note: File viewer error handling]
-            // TODO
-            console.log(currentFile(), e);
-            forgetFailedItemDataForFile(currentFile());
+            const fileID = e.content?.data?.fileID;
+            if (fileID) forgetFailedItemDataForFileID(fileID);
 
             // Pause the video element, if any, when we move away from the
             // slide.
