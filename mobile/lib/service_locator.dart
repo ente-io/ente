@@ -11,6 +11,7 @@ import "package:photos/services/machine_learning/face_ml/face_recognition_servic
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/memories_cache_service.dart";
+import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/trash_sync_service.dart";
 import "package:photos/services/update_service.dart";
@@ -125,6 +126,12 @@ MemoriesCacheService get memoriesCacheService {
     ServiceLocator.instance.prefs,
   );
   return _memoriesCacheService!;
+}
+
+SmartMemoriesService? _smartMemoriesService;
+SmartMemoriesService get smartMemoriesService {
+  _smartMemoriesService ??= SmartMemoriesService();
+  return _smartMemoriesService!;
 }
 
 BillingService? _billingService;

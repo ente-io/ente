@@ -15,7 +15,6 @@ import "package:photos/models/smart_memory.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/services/smart_memories_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class MemoriesCacheService {
@@ -137,9 +136,9 @@ class MemoriesCacheService {
       // calculate memories for this period and for the next period
       final now = DateTime.now();
       final next = now.add(kMemoriesUpdateFrequency);
-      final nowMemories = await SmartMemoriesService.instance.calcMemories(now);
+      final nowMemories = await smartMemoriesService.calcMemories(now);
       final nextMemories =
-          await SmartMemoriesService.instance.calcMemories(next);
+          await smartMemoriesService.calcMemories(next);
       w?.log("calculated new memories");
       final oldCache = await _readCacheFromDisk();
       w?.log("gotten old cache");

@@ -48,10 +48,7 @@ class SmartMemoriesService {
   static const _clipSimilarImageThreshold = 0.75;
   static const _clipActivityQueryThreshold = 0.25;
 
-  // Singleton pattern
-  SmartMemoriesService._privateConstructor();
-  static final instance = SmartMemoriesService._privateConstructor();
-  factory SmartMemoriesService() => instance;
+  SmartMemoriesService();
 
   Future<void> init() async {
     if (_isInit) return;
