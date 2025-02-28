@@ -276,6 +276,7 @@ const PhotoFrame = ({
                   const isFavorite = favoriteFileIDs!.has(file.id);
                   await (isFavorite ? removeFromFavorites : addToFavorites)(
                       file,
+                      true,
                   );
                   onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
               }
