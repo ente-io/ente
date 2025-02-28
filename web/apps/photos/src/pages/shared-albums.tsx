@@ -60,7 +60,7 @@ import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { Upload } from "components/Upload";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
 import {
     getLocalPublicCollection,
@@ -289,7 +289,7 @@ export default function PublicCollectionGallery() {
         );
     }, [onAddPhotos]);
 
-    const syncWithRemote = async () => {
+    const handleSyncWithRemote = useCallback(async () => {
         const collectionUID = getPublicCollectionUID(
             credentials.current.accessToken,
         );
@@ -369,7 +369,10 @@ export default function PublicCollectionGallery() {
             hideLoadingBar();
             setLoading(false);
         }
-    };
+    }, [showLoadingBar, hideLoadingBar]);
+
+    // TODO: See gallery
+    const syncWithRemote = handleSyncWithRemote;
 
     const verifyLinkPassword: SingleInputFormProps["callback"] = async (
         password,
@@ -510,7 +513,7 @@ export default function PublicCollectionGallery() {
 
                 <PhotoFrame
                     files={publicFiles}
-                    syncWithRemote={syncWithRemote}
+                    onSyncWithRemote={handleSyncWithRemote}
                     setSelected={setSelected}
                     selected={selected}
                     activeCollectionID={ALL_SECTION}

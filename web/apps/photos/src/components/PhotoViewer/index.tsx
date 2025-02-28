@@ -76,8 +76,8 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 export type PhotoViewerProps = Pick<
     PhotoFrameProps,
     | "favoriteFileIDs"
-    | "markUnsyncedFavoriteUpdate"
-    | "markTempDeleted"
+    | "onMarkUnsyncedFavoriteUpdate"
+    | "onMarkTempDeleted"
     | "fileCollectionIDs"
     | "allCollectionsNameByID"
     | "onSelectCollection"
@@ -132,8 +132,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     gettingData,
     forceConvertItem,
     favoriteFileIDs,
-    markUnsyncedFavoriteUpdate,
-    markTempDeleted,
+    onMarkUnsyncedFavoriteUpdate,
+    onMarkTempDeleted,
     isTrashCollection,
     isInHiddenSection,
     enableDownload,
@@ -511,16 +511,16 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         const isFavorite = favoriteFileIDs!.has(file.id);
 
         if (!isFavorite) {
-            markUnsyncedFavoriteUpdate(file.id, true);
+            onMarkUnsyncedFavoriteUpdate(file.id, true);
             void addToFavorites(file).catch((e: unknown) => {
                 log.error("Failed to add favorite", e);
-                markUnsyncedFavoriteUpdate(file.id, undefined);
+                onMarkUnsyncedFavoriteUpdate(file.id, undefined);
             });
         } else {
-            markUnsyncedFavoriteUpdate(file.id, false);
+            onMarkUnsyncedFavoriteUpdate(file.id, false);
             void removeFromFavorites(file).catch((e: unknown) => {
                 log.error("Failed to remove favorite", e);
-                markUnsyncedFavoriteUpdate(file.id, undefined);
+                onMarkUnsyncedFavoriteUpdate(file.id, undefined);
             });
         }
 
@@ -538,7 +538,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     const handleDeleteFile = async () => {
         const file = fileToDelete!;
         await moveToTrash([file]);
-        markTempDeleted?.([file]);
+        onMarkTempDeleted?.([file]);
         updateItems(items.filter((item) => item.id !== file.id));
         setFileToDelete(undefined);
         needUpdate.current = true;

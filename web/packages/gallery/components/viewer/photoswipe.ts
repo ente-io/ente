@@ -9,12 +9,11 @@ import { t } from "i18next";
 import {
     forgetExif,
     forgetExifForItemData,
-    forgetFailedItemDataForFile,
+    forgetFailedItemDataForFileID,
     forgetFailedItems,
     itemDataForFile,
     updateFileInfoExifIfNeeded,
 } from "./data-source";
-import type { FileViewerProps } from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
 
 // TODO(PS): WIP gallery using upstream photoswipe
@@ -51,55 +50,101 @@ export interface FileViewerFileAnnotation {
      */
     isOwnFile: boolean;
     /**
-     * `true` if this file has been marked as a favorite by the user.
-     *
-     * The toggle favorite button will not be shown if this is not defined.
-     * Otherwise it determines the toggle state of the toggle favorite button.
+     * `true` if the toggle favorite action should be shown for this file.
      */
-    isFavorite?: boolean | undefined;
+    showFavorite: boolean;
     /**
-     * `true` if this is an image which can be edited.
-     *
-     * The edit button is shown when this is true. See also the
-     * {@link onEditImage} option for {@link FileViewerPhotoSwipe} constructor.
+     * `true` if this is an image which can be edited, and editing is possible,
+     * and the edit action should therefore be shown for this file.
      */
-    isEditableImage?: boolean | undefined;
+    isEditableImage: boolean;
 }
 
-type FileViewerPhotoSwipeOptions = {
+export interface FileViewerPhotoSwipeDelegate {
+    /**
+     * Called to obtain the latest list of files.
+     *
+     * [Note: Changes to underlying files when file viewer is open]
+     *
+     * The list of files shown by the viewer might change while the viewer is
+     * open. We do not actively refresh the viewer when this happens since that
+     * would result in the user's zoom / pan state being lost.
+     *
+     * However, we always read the latest list via the delegate, so any
+     * subsequent user initiated slide navigation (e.g. moving to the next
+     * slide) will use the new list.
+     */
+    getFiles: () => EnteFile[];
+    /**
+     * Return `true` if the provided file has been marked as a favorite by the
+     * user.
+     *
+     * The toggle favorite button will not be shown for the file if
+     * this callback returns `undefined`. Otherwise the return value determines
+     * the toggle state of the toggle favorite button for the file.
+     */
+    isFavorite: (annotatedFile: FileViewerAnnotatedFile) => boolean | undefined;
+    /**
+     * Called when the user activates the toggle favorite action on a file.
+     *
+     * The toggle favorite button will be disabled for the file until the
+     * promise returned by this function returns fulfills.
+     *
+     * > Note: The caller is expected to handle any errors that occur, and
+     * > should not reject for foreseeable failures, otherwise the button will
+     * > remain in the disabled state (until the file viewer is closed).
+     */
+    toggleFavorite: (annotatedFile: FileViewerAnnotatedFile) => Promise<void>;
+}
+
+type FileViewerPhotoSwipeOptions = Pick<
+    FileViewerProps,
+    "initialIndex" | "disableDownload"
+> & {
+    /**
+     * `true` if we're running in the context of a logged in user, and so
+     * various actions that modify the file should be shown.
+     *
+     * This is the static variant of various per file annotations that control
+     * various modifications. If this is not `true`, then various actions like
+     * favorite, delete etc are never shown. If this is `true`, then their
+     * visibility depends on the corresponding annotation.
+     *
+     * For example, the favorite action is shown only if both this and the
+     * {@link showFavorite} file annotation are true.
+     */
+    haveUser: boolean;
+    /**
+     * Dynamic callbacks.
+     *
+     * The extra level of indirection allows these to be updated without
+     * recreating us.
+     */
+    delegate: FileViewerPhotoSwipeDelegate;
     /**
      * Called when the file viewer is closed.
      */
     onClose: () => void;
     /**
-     * Called whenever the slide changes to obtain the derived data for the file
-     * that is about to be displayed.
+     * Called whenever the slide is initially displayed or changes, to obtain
+     * various derived data for the file that is about to be displayed.
      */
     onAnnotate: (file: EnteFile) => FileViewerFileAnnotation;
-    /**
-     * Called when the user activates the toggle favorite action on a file.
-     *
-     * If this callback is not provided, then the toggle favorite button is not
-     * shown. If this callback is provided, then the favorite button is shown if
-     * the {@link isFavorite} property of {@link FileViewerFileAnnotation} for
-     * the file is provided. In that case, the value of the {@link isFavorite}
-     * property will determine the current toggle state of the favorite button.
-     */
-    onToggleFavorite?: (annotatedFile: FileViewerAnnotatedFile) => void;
     /**
      * Called when the user activates the info action on a file.
      */
     onViewInfo: (annotatedFile: FileViewerAnnotatedFile) => void;
     /**
-     * Called when the user activates the edit action on an image.
+     * Called when the user activates the more action on a file.
      *
-     * If this callback is not provided, then the edit button is never shown. If
-     * this callback is provided, then the visibility of the edit button is
-     * determined by the {@link isEditableImage} property of
-     * {@link FileViewerFileAnnotation} for the file.
+     * In addition to the file, callback is also passed a reference to the HTML
+     * DOM more button element.
      */
-    onEditImage?: (annotatedFile: FileViewerAnnotatedFile) => void;
-} & Pick<FileViewerProps, "files" | "initialIndex" | "disableDownload">;
+    onMore: (
+        annotatedFile: FileViewerAnnotatedFile,
+        buttonElement: HTMLElement,
+    ) => void;
+};
 
 /**
  * A file and its annotation, in a nice cosy box.
@@ -108,6 +153,21 @@ export interface FileViewerAnnotatedFile {
     file: EnteFile;
     annotation: FileViewerFileAnnotation;
 }
+
+/**
+ * The ID that is used by the "more" action button (if one is being displayed).
+ *
+ * @see also {@link moreMenuID}.
+ */
+export const moreButtonID = "ente-pswp-more-button";
+
+/**
+ * The ID this is expected to be used by the more menu that is shown in response
+ * to the more action button being activated.
+ *
+ * @see also {@link moreButtonID}.
+ */
+export const moreMenuID = "ente-pswp-more-menu";
 
 /**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
@@ -169,18 +229,21 @@ export class FileViewerPhotoSwipe {
      * scope.
      */
     private activeFileAnnotation: FileViewerFileAnnotation | undefined;
+    /**
+     * IDs of files for which a there is a favorite update in progress.
+     */
+    private pendingFavoriteUpdates = new Set<number>();
 
     constructor({
-        files,
         initialIndex,
         disableDownload,
+        haveUser,
+        delegate,
         onClose,
         onAnnotate,
-        onToggleFavorite,
         onViewInfo,
-        onEditImage,
+        onMore,
     }: FileViewerPhotoSwipeOptions) {
-        this.files = files;
         this.opts = { disableDownload };
         this.lastActivityDate = new Date();
 
@@ -241,9 +304,9 @@ export class FileViewerPhotoSwipe {
 
         this.pswp = pswp;
 
-        // Helper routines to obtain the file at `currIndex`.
+        // Various helper routines to obtain the file at `currIndex`.
 
-        const currentFile = () => this.files[pswp.currIndex]!;
+        const currentFile = () => delegate.getFiles()[pswp.currIndex]!;
 
         const currentAnnotatedFile = () => {
             const file = currentFile();
@@ -265,23 +328,18 @@ export class FileViewerPhotoSwipe {
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
 
-        const withCurrentAnnotatedFile =
-            (cb: (af: AnnotatedFile) => void) => () =>
-                cb(currentAnnotatedFile());
-
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
 
-        pswp.addFilter("numItems", () => {
-            return this.files.length;
-        });
+        pswp.addFilter("numItems", () => delegate.getFiles().length);
 
         pswp.addFilter("itemData", (_, index) => {
+            const files = delegate.getFiles();
             const file = files[index]!;
 
-            let itemData = itemDataForFile(file, () => {
-                this.pswp.refreshSlideContent(index);
-            });
+            let itemData = itemDataForFile(file, () =>
+                pswp.refreshSlideContent(index),
+            );
 
             const { fileType, videoURL, ...rest } = itemData;
             if (fileType === FileType.video && videoURL) {
@@ -367,7 +425,8 @@ export class FileViewerPhotoSwipe {
             //   more than 2 slides and then back, or if they reopen the viewer.
             //
             // See: [Note: File viewer error handling]
-            forgetFailedItemDataForFile(currentFile());
+            const fileID = e.content?.data?.fileID;
+            if (fileID) forgetFailedItemDataForFileID(fileID);
 
             // Pause the video element, if any, when we move away from the
             // slide.
@@ -391,7 +450,7 @@ export class FileViewerPhotoSwipe {
         );
 
         pswp.on("change", (e) => {
-            const itemData = pswp.currSlide.content.data;
+            const itemData = this.pswp.currSlide.content.data;
             updateFileInfoExifIfNeeded(itemData);
         });
 
@@ -423,6 +482,17 @@ export class FileViewerPhotoSwipe {
         // - zoom: 10
         // - close: 20
         pswp.on("uiRegister", () => {
+            // Move the zoom button to the left so that it is in the same place
+            // as the other items like preloader or the error indicator that
+            // come and go as files get loaded.
+            //
+            // We cannot use the PhotoSwipe "uiElement" filter to modify the
+            // order since that only allows us to edit the DOM element, not the
+            // underlying UI element data.
+            pswp.ui.uiElementsData.find((e) => e.name == "zoom").order = 6;
+
+            // Register our custom elements...
+
             pswp.ui.registerElement({
                 name: "error",
                 order: 6,
@@ -440,22 +510,61 @@ export class FileViewerPhotoSwipe {
                 },
             });
 
-            if (onToggleFavorite) {
-                // Only one of these two will end up being shown, so they can
-                // safely share the same order.
+            if (haveUser) {
+                const toggleFavorite = async (
+                    buttonElement: HTMLButtonElement,
+                ) => {
+                    const af = currentAnnotatedFile();
+                    this.pendingFavoriteUpdates.add(af.file.id);
+                    buttonElement.disabled = true;
+                    await delegate.toggleFavorite(af);
+                    // TODO: This can be improved in two ways:
+                    //
+                    // 1. We currently have a setTimeout to ensure that the
+                    //    updated `favoriteFileIDs` have made their way to our
+                    //    delegate before we query for the status again.
+                    //    Obviously, this is hacky. Note that a timeout of 0
+                    //    (i.e., just deferring till the next tick) isn't enough
+                    //    here, for reasons I need to investigate more (hence
+                    //    this TODO).
+                    //
+                    // 2. We reload the entire slide instead of just updating
+                    //    the button state. This is because there are two
+                    //    buttons, instead of a single button toggling between
+                    //    two states (e.g. like the zoom button). A single
+                    //    button can be achieved by moving the fill as a layer.
+                    await new Promise((r) => setTimeout(r, 100));
+                    this.pendingFavoriteUpdates.delete(af.file.id);
+                    this.refreshCurrentSlideContent();
+                };
+
+                const showFavoriteIf = (
+                    buttonElement: HTMLButtonElement,
+                    value: boolean,
+                ) => {
+                    const af = currentAnnotatedFile();
+                    const isFavorite = delegate.isFavorite(af);
+                    showIf(
+                        buttonElement,
+                        af.annotation.showFavorite && isFavorite === value,
+                    );
+                    buttonElement.disabled = this.pendingFavoriteUpdates.has(
+                        af.file.id,
+                    );
+                };
+
+                // Only one of these two ("favorite" or "unfavorite") will end
+                // up being shown, so they can safely share the same order.
                 pswp.ui.registerElement({
                     name: "favorite",
                     title: t("favorite_key"),
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
-                    onClick: withCurrentAnnotatedFile(onToggleFavorite),
+                    onClick: (e) => toggleFavorite(e.target),
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
-                            showIf(
-                                buttonElement,
-                                currentFileAnnotation().isFavorite === false,
-                            ),
+                            showFavoriteIf(buttonElement, false),
                         ),
                 });
                 pswp.ui.registerElement({
@@ -464,13 +573,10 @@ export class FileViewerPhotoSwipe {
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("unfavorite"),
-                    onClick: withCurrentAnnotatedFile(onToggleFavorite),
+                    onClick: (e) => toggleFavorite(e.target),
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
-                            showIf(
-                                buttonElement,
-                                currentFileAnnotation().isFavorite === true,
-                            ),
+                            showFavoriteIf(buttonElement, true),
                         ),
                 });
             }
@@ -481,26 +587,34 @@ export class FileViewerPhotoSwipe {
                 order: 9,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("info"),
-                onClick: withCurrentAnnotatedFile(onViewInfo),
+                onClick: () => onViewInfo(currentAnnotatedFile()),
             });
 
-            if (onEditImage) {
+            if (haveUser) {
                 pswp.ui.registerElement({
-                    name: "edit",
+                    name: "more",
                     // TODO(PS):
-                    // title: t("edit_image"),
-                    title: pt("Edit image"),
+                    title: pt("More"),
                     order: 16,
                     isButton: true,
-                    html: createPSRegisterElementIconHTML("edit"),
-                    onClick: withCurrentAnnotatedFile(onEditImage),
-                    onInit: (buttonElement) =>
+                    html: createPSRegisterElementIconHTML("more"),
+                    onInit: (buttonElement) => {
+                        buttonElement.setAttribute("id", moreButtonID);
+                        buttonElement.setAttribute("aria-haspopup", "true");
                         pswp.on("change", () =>
                             showIf(
                                 buttonElement,
                                 !!currentFileAnnotation().isEditableImage,
                             ),
-                        ),
+                        );
+                    },
+                    onClick: (e) => {
+                        const buttonElement = e.target;
+                        // See also: `resetMoreMenuButtonOnMenuClose`.
+                        buttonElement.setAttribute("aria-controls", moreMenuID);
+                        buttonElement.setAttribute("aria-expanded", true);
+                        onMore(currentAnnotatedFile(), buttonElement);
+                    },
                 });
             }
         });
@@ -546,10 +660,6 @@ export class FileViewerPhotoSwipe {
      */
     refreshCurrentSlideContent() {
         this.pswp.refreshSlideContent(this.pswp.currIndex);
-    }
-
-    updateFiles(files: EnteFile[]) {
-        // TODO(PS)
     }
 
     private clearAutoHideIntervalIfNeeded() {
@@ -625,4 +735,13 @@ const createElementFromHTMLString = (htmlString: string) => {
     // be what we wanted them to be.
     template.innerHTML = htmlString.trim();
     return template.content.firstChild;
+};
+
+/**
+ * Update the ARIA attributes for the button that controls the more menu when
+ * the menu is closed.
+ */
+export const resetMoreMenuButtonOnMenuClose = (buttonElement: HTMLElement) => {
+    buttonElement.removeAttribute("aria-controls");
+    buttonElement.removeAttribute("aria-expanded");
 };

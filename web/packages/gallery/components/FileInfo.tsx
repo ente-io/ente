@@ -200,6 +200,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     useEffect(() => {
         if (!file) return;
+        if (!isMLEnabled()) return;
 
         let didCancel = false;
 
@@ -317,7 +318,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         )
                     }
                 />
-                {isMLEnabled() && annotatedFaces.length > 0 && (
+                {annotatedFaces.length > 0 && (
                     <InfoItem icon={<FaceRetouchingNaturalIcon />}>
                         <FilePeopleList
                             file={file}

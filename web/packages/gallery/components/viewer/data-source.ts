@@ -224,8 +224,11 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
  * This is called when the user moves away from a slide so that we attempt a
  * full retry when they come back the next time.
  */
-export const forgetFailedItemDataForFile = (file: EnteFile) =>
-    forgetFailedItemDataForFileID(file.id);
+export const forgetFailedItemDataForFileID = (fileID: number) => {
+    if (_state.itemDataByFileID.get(fileID)?.fetchFailed) {
+        _state.itemDataByFileID.delete(fileID);
+    }
+};
 
 /**
  * Forget item data for the all files whose fetch had failed.
@@ -235,12 +238,6 @@ export const forgetFailedItemDataForFile = (file: EnteFile) =>
  */
 export const forgetFailedItems = () =>
     [..._state.itemDataByFileID.keys()].forEach(forgetFailedItemDataForFileID);
-
-const forgetFailedItemDataForFileID = (fileID: number) => {
-    if (_state.itemDataByFileID.get(fileID)?.fetchFailed) {
-        _state.itemDataByFileID.delete(fileID);
-    }
-};
 
 const enqueueUpdates = async (file: EnteFile) => {
     const fileID = file.id;
