@@ -133,25 +133,35 @@ class MemoriesCacheService {
       final EnteWatch? w =
           kDebugMode ? EnteWatch("MemoriesCacheService") : null;
       w?.start();
+      final oldCache = await _readCacheFromDisk();
+      w?.log("gotten old cache");
+      final MemoriesCache newCache = _processOldCache(oldCache);
+      w?.log("processed old cache");
       // calculate memories for this period and for the next period
       final now = DateTime.now();
       final next = now.add(kMemoriesUpdateFrequency);
-      final nowMemories = await smartMemoriesService.calcMemories(now);
+      final nowMemories =
+          await smartMemoriesService.calcMemories(now, newCache);
       final nextMemories =
-          await smartMemoriesService.calcMemories(next);
+          await smartMemoriesService.calcMemories(next, newCache);
       w?.log("calculated new memories");
-      final oldCache = await _readCacheFromDisk();
-      w?.log("gotten old cache");
-      final MemoriesCache memoryCache =
-          _toCache(nowMemories, now, nextMemories, next, oldCache);
-      w?.log("gotten cache from memories");
+      for (final nowMemory in nowMemories) {
+        newCache.toShowMemories
+            .add(ToShowMemory.fromSmartMemory(nowMemory, now));
+      }
+      for (final nextMemory in nextMemories) {
+        newCache.toShowMemories
+            .add(ToShowMemory.fromSmartMemory(nextMemory, next));
+      }
+      w?.log("added memories to cache");
       final file = File(await _getCachePath());
       if (!file.existsSync()) {
         file.createSync(recursive: true);
       }
-      _cachedMemories = nowMemories;
+      _cachedMemories =
+          nowMemories.where((memory) => memory.shouldShowNow()).toList();
       await file.writeAsBytes(
-        MemoriesCache.encodeToJsonString(memoryCache).codeUnits,
+        MemoriesCache.encodeToJsonString(newCache).codeUnits,
       );
       w?.log("cacheWritten");
       await _resetLastMemoriesCacheUpdateTime();
@@ -164,25 +174,28 @@ class MemoriesCacheService {
     }
   }
 
-  MemoriesCache _toCache(
-    List<SmartMemory> nowMemories,
-    DateTime now,
-    List<SmartMemory> nextMemories,
-    DateTime next,
-    MemoriesCache? oldCache,
-  ) {
+  MemoriesCache _processOldCache(MemoriesCache? oldCache) {
     final List<ToShowMemory> toShowMemories = [];
     final List<PeopleShownLog> peopleShownLogs = [];
     final List<TripsShownLog> tripsShownLogs = [];
-    for (final nowMemory in nowMemories) {
-      toShowMemories.add(ToShowMemory.fromSmartMemory(nowMemory, now));
-    }
-    for (final nextMemory in nextMemories) {
-      toShowMemories.add(ToShowMemory.fromSmartMemory(nextMemory, next));
-    }
     if (oldCache != null) {
-      peopleShownLogs.addAll(oldCache.peopleShownLogs);
-      tripsShownLogs.addAll(oldCache.tripsShownLogs);
+      final now = DateTime.now();
+      for (final peopleLog in oldCache.peopleShownLogs) {
+        if (now.difference(
+              DateTime.fromMicrosecondsSinceEpoch(peopleLog.lastTimeShown),
+            ) <
+            maxShowTimeout) {
+          peopleShownLogs.add(peopleLog);
+        }
+      }
+      for (final tripsLog in oldCache.tripsShownLogs) {
+        if (now.difference(
+              DateTime.fromMicrosecondsSinceEpoch(tripsLog.lastTimeShown),
+            ) <
+            maxShowTimeout) {
+          tripsShownLogs.add(tripsLog);
+        }
+      }
       for (final oldMemory in oldCache.toShowMemories) {
         if (oldMemory.isOld) {
           if (oldMemory.type == MemoryType.people) {

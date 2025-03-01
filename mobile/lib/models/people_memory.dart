@@ -8,6 +8,12 @@ enum PeopleMemoryType {
   lastTimeYouSawThem,
 }
 
+const peopleRotationTypes = [
+  PeopleMemoryType.youAndThem,
+  PeopleMemoryType.doingSomethingTogether,
+  PeopleMemoryType.spotlight,
+];
+
 PeopleMemoryType peopleMemoryTypeFromString(String type) {
   switch (type) {
     case "youAndThem":
@@ -63,7 +69,7 @@ class PeopleMemory extends SmartMemory {
     List<Memory> memories,
     String title,
     int firstDateToShow,
-    int lastDateToShow, 
+    int lastDateToShow,
     this.peopleMemoryType,
     this.personID, {
     super.firstCreationTime,

@@ -5,6 +5,17 @@ import "package:photos/models/people_memory.dart";
 import "package:photos/models/smart_memory.dart";
 import "package:photos/models/trip_memory.dart";
 
+const kPersonShowTimeout = Duration(days: 7 * 10);
+const kPersonAndTypeShowTimeout = Duration(days: 7 * 26);
+const kTripShowTimeout = Duration(days: 7 * 25);
+
+final maxShowTimeout = 
+    [
+      kPersonShowTimeout,
+      kPersonAndTypeShowTimeout,
+      kTripShowTimeout,
+    ].reduce((value, element) => value > element ? value : element) * 3;
+
 class MemoriesCache {
   final List<ToShowMemory> toShowMemories;
   final List<PeopleShownLog> peopleShownLogs;

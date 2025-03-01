@@ -16,6 +16,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
+import "package:photos/models/memories_cache.dart";
 import "package:photos/models/memory.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -67,7 +68,10 @@ class SmartMemoriesService {
   }
 
   // One general method to get all memories, which calls on internal methods for each separate memory type
-  Future<List<SmartMemory>> calcMemories(DateTime now) async {
+  Future<List<SmartMemory>> calcMemories(
+    DateTime now,
+    MemoriesCache oldCache,
+  ) async {
     try {
       await init();
       final List<SmartMemory> memories = [];
@@ -77,7 +81,8 @@ class SmartMemoriesService {
       _seenTimes = await _memoriesDB.getSeenTimes();
       _logger.finest("All files length: ${allFiles.length}");
 
-      final peopleMemories = await _getPeopleResults(allFiles, now);
+      final peopleMemories =
+          await _getPeopleResults(allFiles, now, oldCache.peopleShownLogs);
       _deductUsedMemories(allFiles, peopleMemories);
       memories.addAll(peopleMemories);
       _logger.finest("All files length: ${allFiles.length}");
@@ -120,6 +125,7 @@ class SmartMemoriesService {
   Future<List<PeopleMemory>> _getPeopleResults(
     Iterable<EnteFile> allFiles,
     DateTime currentTime,
+    List<PeopleShownLog> shownPeople,
   ) async {
     final List<PeopleMemory> memoryResults = [];
     if (allFiles.isEmpty) return [];
@@ -129,6 +135,9 @@ class SmartMemoriesService {
         allFileIdsToFile[file.uploadedFileID!] = file;
       }
     }
+    final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
+    final windowEnd =
+        currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
 
     // Get ordered list of important people (all named, from most to least files)
     final persons = await PersonService.instance.getPersons();
@@ -206,8 +215,8 @@ class SmartMemoriesService {
         final spotlightMemory = PeopleMemory(
           selectSpotlightMemories,
           title,
-          currentTime.microsecondsSinceEpoch,
-          currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch,
+          nowInMicroseconds,
+          windowEnd,
           PeopleMemoryType.spotlight,
           personID,
         );
@@ -236,8 +245,8 @@ class SmartMemoriesService {
           final youAndThemMemory = PeopleMemory(
             selectYouAndThemMemories,
             title,
-            currentTime.microsecondsSinceEpoch,
-            currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch,
+            nowInMicroseconds,
+            windowEnd,
             PeopleMemoryType.youAndThem,
             personID,
           );
@@ -283,8 +292,8 @@ class SmartMemoriesService {
           final activityMemory = PeopleMemory(
             selectActivityMemories,
             title,
-            currentTime.microsecondsSinceEpoch,
-            currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch,
+            nowInMicroseconds,
+            windowEnd,
             PeopleMemoryType.doingSomethingTogether,
             personID,
           );
@@ -330,10 +339,11 @@ class SmartMemoriesService {
               .map((f) => Memory.fromFile(f, _seenTimes))
               .toList(),
           title,
-          currentTime.microsecondsSinceEpoch,
-          currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch,
+          nowInMicroseconds,
+          windowEnd,
           PeopleMemoryType.lastTimeYouSawThem,
           personID,
+          lastCreationTime: lastCreationTime,
         );
         personToMemories.putIfAbsent(personID, () => {}).putIfAbsent(
               PeopleMemoryType.lastTimeYouSawThem,
@@ -342,18 +352,122 @@ class SmartMemoriesService {
       }
     }
 
-    // Surface everything just for debug checking
-    for (final personID in personToMemories.keys) {
-      for (final memoryType in PeopleMemoryType.values) {
-        if (personToMemories[personID]!.containsKey(memoryType)) {
-          memoryResults.add(personToMemories[personID]![memoryType]!);
+    // // Surface everything just for debug checking
+    // for (final personID in personToMemories.keys) {
+    //   for (final memoryType in PeopleMemoryType.values) {
+    //     if (personToMemories[personID]!.containsKey(memoryType)) {
+    //       memoryResults.add(personToMemories[personID]![memoryType]!);
+    //     }
+    //   }
+    // }
+
+    // Loop through the people and check if we should surface anything based on relevancy (bday, last met)
+    personRelevancyLoop:
+    for (final personID in orderedImportantPersonsID) {
+      final personMemories = personToMemories[personID];
+      if (personID == meID || personMemories == null) continue;
+      final person = personIdToPerson[personID]!;
+      // Check if we should surface memory based on birthday
+      final birthdate = DateTime.tryParse(person.data.birthDate ?? "");
+      if (birthdate != null) {
+        final thisBirthday =
+            DateTime(currentTime.year, birthdate.month, birthdate.day);
+        final daysTillBirthday = thisBirthday.difference(currentTime).inDays;
+        if (daysTillBirthday < 7 && daysTillBirthday >= 0) {
+          final personName = person.data.name;
+          final int newAge = currentTime.year - birthdate.year;
+          final spotlightMem = personMemories[PeopleMemoryType.spotlight];
+          if (spotlightMem != null) {
+            final String firstTitle = "$personName turning $newAge!";
+            final String secondTitle = "$personName is $newAge!";
+            final thisBirthday = birthdate.copyWith(year: currentTime.year);
+            memoryResults.add(
+              spotlightMem.copyWith(
+                title: firstTitle,
+                firstDateToShow: thisBirthday
+                    .subtract(const Duration(days: 6))
+                    .microsecondsSinceEpoch,
+                lastDateToShow: thisBirthday.microsecondsSinceEpoch,
+              ),
+            );
+            memoryResults.add(
+              spotlightMem.copyWith(
+                title: secondTitle,
+                firstDateToShow: thisBirthday.microsecondsSinceEpoch,
+                lastDateToShow: thisBirthday
+                    .add(const Duration(days: 1))
+                    .microsecondsSinceEpoch,
+              ),
+            );
+          }
+          final youAndThemMem = personMemories[PeopleMemoryType.youAndThem];
+          if (youAndThemMem != null) {
+            memoryResults.add(
+              youAndThemMem.copyWith(
+                firstDateToShow: thisBirthday
+                    .subtract(const Duration(days: 6))
+                    .microsecondsSinceEpoch,
+                lastDateToShow: thisBirthday
+                    .add(const Duration(days: 1))
+                    .microsecondsSinceEpoch,
+              ),
+            );
+          }
+          continue personRelevancyLoop;
+        }
+      }
+
+      // Check if we should surface memory based on last met
+      final lastMetMemory = personMemories[PeopleMemoryType.lastTimeYouSawThem];
+      if (lastMetMemory != null) {
+        final lastMetTime = DateTime.fromMicrosecondsSinceEpoch(
+          lastMetMemory.lastCreationTime!,
+        ).copyWith(year: currentTime.year);
+        final daysSinceLastMet = lastMetTime.difference(currentTime).inDays;
+        if (daysSinceLastMet < 7 && daysSinceLastMet >= 0) {
+          memoryResults.add(lastMetMemory);
         }
       }
     }
 
-    // Loop through the people and check if we should surface anything based on relevancy (bday, last met)
-
-    // Loop through the people (and memory types) and add the remaining memories (for this month only?)
+    // Loop through the people (and memory types) and add based on rotation
+    if (memoryResults.length >= 3) return memoryResults;
+    peopleRotationLoop:
+    for (final personID in orderedImportantPersonsID) {
+      for (final memory in memoryResults) {
+        if (memory.personID == personID) {
+          continue peopleRotationLoop;
+        }
+      }
+      for (final shownLog in shownPeople) {
+        if (shownLog.personID != personID) continue;
+        final shownDate =
+            DateTime.fromMicrosecondsSinceEpoch(shownLog.lastTimeShown);
+        final bool seenPersonRecently =
+            currentTime.difference(shownDate) < kPersonShowTimeout;
+        if (seenPersonRecently) continue peopleRotationLoop;
+      }
+      if (personToMemories[personID] == null) continue peopleRotationLoop;
+      int added = 0;
+      potentialMemoryLoop:
+      for (final potentialMemory in personToMemories[personID]!.values) {
+        for (final shownLog in shownPeople) {
+          if (shownLog.personID != personID) continue;
+          if (shownLog.peopleMemoryType != potentialMemory.peopleMemoryType) {
+            continue;
+          }
+          final shownTypeDate =
+              DateTime.fromMicrosecondsSinceEpoch(shownLog.lastTimeShown);
+          final bool seenPersonTypeRecently =
+              currentTime.difference(shownTypeDate) < kPersonAndTypeShowTimeout;
+          if (seenPersonTypeRecently) continue potentialMemoryLoop;
+        }
+        memoryResults.add(potentialMemory);
+        added++;
+        if (added >= 2) break peopleRotationLoop;
+      }
+      if (added > 0) break peopleRotationLoop;
+    }
 
     return memoryResults;
   }
