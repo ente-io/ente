@@ -100,6 +100,14 @@ func main() {
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
 	viper.SetDefault("apps.family", "https://family.ente.io")
 
+	if viper.GetBool("http.use-tls") {
+		viper.SetDefault("http.bind", ":443");
+	} else {
+		viper.SetDefault("http.bind", ":8080");
+	}
+
+	viper.SetDefault("apps.family", "https://family.ente.io")
+
 	setupLogger(environment)
 	log.Infof("Booting up %s server with commit #%s", environment, os.Getenv("GIT_COMMIT"))
 
@@ -787,6 +795,7 @@ func main() {
 
 func runServer(environment string, server *gin.Engine) {
 	useTLS := viper.GetBool("http.use-tls")
+	bind := viper.GetString("http.bind")
 	if useTLS {
 		certPath, err := config.CredentialFilePath("tls.cert")
 		if err != nil {
@@ -798,9 +807,9 @@ func runServer(environment string, server *gin.Engine) {
 			log.Fatal(err)
 		}
 
-		log.Fatal(server.RunTLS(":443", certPath, keyPath))
+		log.Fatal(server.RunTLS(bind, certPath, keyPath))
 	} else {
-		server.Run(":8080")
+		server.Run(bind)
 	}
 }
 
