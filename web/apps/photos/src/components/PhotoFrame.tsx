@@ -21,8 +21,12 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
+import {
+    addToFavorites,
+    removeFromFavorites,
+} from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
 import {
     SelectedState,
@@ -101,7 +105,6 @@ export type PhotoFrameProps = Pick<
      */
     modePlus?: GalleryBarMode | "search";
     files: EnteFile[];
-    syncWithRemote: () => Promise<void>;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
@@ -121,7 +124,10 @@ export type PhotoFrameProps = Pick<
      *
      * Not set in the context of the shared albums app.
      */
-    markUnsyncedFavoriteUpdate?: (fileID: number, isFavorite: boolean) => void;
+    onMarkUnsyncedFavoriteUpdate?: (
+        fileID: number,
+        isFavorite: boolean,
+    ) => void;
     /**
      * Called when the component wants to mark the given files as deleted in the
      * the in-memory, unsynced, state maintained by the top level gallery.
@@ -131,7 +137,7 @@ export type PhotoFrameProps = Pick<
      *
      * Not set in the context of the shared albums app.
      */
-    markTempDeleted?: (files: EnteFile[]) => void;
+    onMarkTempDeleted?: (files: EnteFile[]) => void;
     /** This will be set if mode is not "people". */
     activeCollectionID: number;
     /** This will be set if mode is "people". */
@@ -142,6 +148,7 @@ export type PhotoFrameProps = Pick<
     isInHiddenSection?: boolean;
     setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
     selectable?: boolean;
+    onSyncWithRemote: () => Promise<void>;
 };
 
 /**
@@ -151,12 +158,11 @@ const PhotoFrame = ({
     mode,
     modePlus,
     files,
-    syncWithRemote,
     setSelected,
     selected,
     favoriteFileIDs,
-    markUnsyncedFavoriteUpdate,
-    markTempDeleted,
+    onMarkUnsyncedFavoriteUpdate,
+    onMarkTempDeleted,
     activeCollectionID,
     activePersonID,
     enableDownload,
@@ -167,6 +173,7 @@ const PhotoFrame = ({
     isInHiddenSection,
     setFilesDownloadProgressAttributesCreator,
     selectable,
+    onSyncWithRemote,
     onSelectCollection,
     onSelectPerson,
 }: PhotoFrameProps) => {
@@ -259,9 +266,22 @@ const PhotoFrame = ({
     }, [selected]);
 
     const handleTriggerSyncWithRemote = useCallback(
-        () => void syncWithRemote(),
-        [syncWithRemote],
+        () => void onSyncWithRemote(),
+        [onSyncWithRemote],
     );
+
+    const handleToggleFavorite = useMemo(() => {
+        return favoriteFileIDs
+            ? async (file: EnteFile) => {
+                  const isFavorite = favoriteFileIDs!.has(file.id);
+                  await (isFavorite ? removeFromFavorites : addToFavorites)(
+                      file,
+                      true,
+                  );
+                  onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
+              }
+            : undefined;
+    }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
 
     const handleSaveEditedImageCopy = useCallback(
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
@@ -300,7 +320,7 @@ const PhotoFrame = ({
             throw new Error("Not implemented");
         } else {
             setOpen(false);
-            needUpdate && syncWithRemote();
+            needUpdate && onSyncWithRemote();
             setIsPhotoSwipeOpen?.(false);
         }
     };
@@ -550,10 +570,11 @@ const PhotoFrame = ({
                     user={galleryContext.user ?? undefined}
                     files={files}
                     initialIndex={currentIndex}
-                    isInTrashSection={activeCollectionID === TRASH_SECTION}
-                    isInHiddenSection={isInHiddenSection}
                     disableDownload={!enableDownload}
+                    isInHiddenSection={isInHiddenSection}
+                    isInTrashSection={activeCollectionID === TRASH_SECTION}
                     onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
+                    onToggleFavorite={handleToggleFavorite}
                     onSaveEditedImageCopy={handleSaveEditedImageCopy}
                     {...{
                         favoriteFileIDs,
@@ -591,8 +612,8 @@ const PhotoFrame = ({
                 enableDownload={enableDownload}
                 {...{
                     favoriteFileIDs,
-                    markUnsyncedFavoriteUpdate,
-                    markTempDeleted,
+                    onMarkUnsyncedFavoriteUpdate,
+                    onMarkTempDeleted,
                     setFilesDownloadProgressAttributesCreator,
                     fileCollectionIDs,
                     allCollectionsNameByID,

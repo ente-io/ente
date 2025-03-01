@@ -74,12 +74,14 @@ export const OverflowMenu: React.FC<
                 {...(anchorEl ? { anchorEl } : {})}
                 open={!!anchorEl}
                 onClose={() => setAnchorEl(undefined)}
-                MenuListProps={{
-                    // Disable padding at the top and bottom of the menu list.
-                    disablePadding: true,
-                    "aria-labelledby": ariaID,
+                slotProps={{
+                    paper: { sx: menuPaperSxProps },
+                    list: {
+                        // Disable padding at the top and bottom of the menu list.
+                        disablePadding: true,
+                        "aria-labelledby": ariaID,
+                    },
                 }}
-                slotProps={{ paper: { sx: menuPaperSxProps } }}
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
             >

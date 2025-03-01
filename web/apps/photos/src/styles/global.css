@@ -148,10 +148,24 @@ body {
     height: 60px;
     /* Unlike the loading indicator, "display" is used to toggle visibility, and
       the opacity is fixed to be similar to that of the counter. */
-    opacity: 0.85;
     display: none;
+    opacity: 0.85;
 }
 
 .pswp-ente .pswp__error--active {
     display: initial;
+}
+
+/* Scale the built in controls to better fit our requirements */
+.pswp-ente .pswp__button--zoom .pswp__icn {
+    transform: scale(0.85);
+}
+
+.pswp-ente .pswp__button--arrow--prev .pswp__icn {
+    transform: scale(0.8);
+}
+
+.pswp-ente .pswp__button--arrow--next .pswp__icn {
+    /* default is a horizontal flip, transform: scale(-1, 1); */
+    transform: scale(-0.8, 0.8);
 }

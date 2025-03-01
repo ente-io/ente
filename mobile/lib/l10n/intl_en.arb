@@ -525,7 +525,7 @@
   "viewLargeFiles": "Large files",
   "viewLargeFilesDesc": "View files that are consuming the most amount of storage.",
   "noDuplicates": "✨ No duplicates",
-  "youveNoDuplicateFilesThatCanBeCleared": "You've no duplicate files that can be cleared",
+  "youveNoDuplicateFilesThatCanBeCleared": "You don't have any duplicate files that can be cleared",
   "success": "Success",
   "rateUs": "Rate us",
   "remindToEmptyDeviceTrash": "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
