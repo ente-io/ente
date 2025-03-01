@@ -12,6 +12,7 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/extensions/list.dart';
+import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/metadata/file_magic.dart";
@@ -193,60 +194,5 @@ class FileMagicService {
       _logger.severe("failed to sync magic metadata", e, s);
       rethrow;
     }
-  }
-}
-
-class UpdateMagicMetadataRequest {
-  final int id;
-  final MetadataRequest? magicMetadata;
-
-  UpdateMagicMetadataRequest({required this.id, required this.magicMetadata});
-
-  factory UpdateMagicMetadataRequest.fromJson(dynamic json) {
-    return UpdateMagicMetadataRequest(
-      id: json['id'],
-      magicMetadata: json['magicMetadata'] != null
-          ? MetadataRequest.fromJson(json['magicMetadata'])
-          : null,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map['id'] = id;
-    if (magicMetadata != null) {
-      map['magicMetadata'] = magicMetadata!.toJson();
-    }
-    return map;
-  }
-}
-
-class MetadataRequest {
-  int? version;
-  int? count;
-  String? data;
-  String? header;
-
-  MetadataRequest({
-    required this.version,
-    required this.count,
-    required this.data,
-    required this.header,
-  });
-
-  MetadataRequest.fromJson(dynamic json) {
-    version = json['version'];
-    count = json['count'];
-    data = json['data'];
-    header = json['header'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map['version'] = version;
-    map['count'] = count;
-    map['data'] = data;
-    map['header'] = header;
-    return map;
   }
 }
