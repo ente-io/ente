@@ -480,6 +480,9 @@ class SmartMemoriesService {
     final Iterable<LocalEntity<LocationTag>> locationTagEntities =
         (await locationService.getLocationTags());
     if (allFiles.isEmpty) return [];
+    final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
+    final windowEnd =
+        currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
     final currentMonth = currentTime.month;
     final cutOffTime = currentTime.subtract(const Duration(days: 365));
 
@@ -868,28 +871,12 @@ class SmartMemoriesService {
               name = "Last year's trip";
             }
             final photoSelection = await _bestSelection(trip.memories);
-            final firstCreationDate = DateTime.fromMicrosecondsSinceEpoch(
-              trip.firstCreationTime!,
-            );
-            final firstDateToShow = DateTime(
-              currentTime.year,
-              firstCreationDate.month,
-              firstCreationDate.day,
-            ).subtract(kMemoriesMargin).microsecondsSinceEpoch;
-            final lastCreationDate = DateTime.fromMicrosecondsSinceEpoch(
-              trip.lastCreationTime!,
-            );
-            final lastDateToShow = DateTime(
-              currentTime.year,
-              lastCreationDate.month,
-              lastCreationDate.day,
-            ).add(kMemoriesMargin).microsecondsSinceEpoch;
             memoryResults.add(
               trip.copyWith(
                 memories: photoSelection,
                 title: name,
-                firstDateToShow: firstDateToShow,
-                lastDateToShow: lastDateToShow,
+                firstDateToShow: nowInMicroseconds,
+                lastDateToShow: windowEnd,
               ),
             );
             break checkUpcomingMonths;
