@@ -1,17 +1,12 @@
 import "dart:async";
-import "dart:io";
 
 import 'package:fast_base58/fast_base58.dart';
-import "package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart";
-import "package:ffmpeg_kit_flutter_full_gpl/log.dart";
-import "package:ffmpeg_kit_flutter_full_gpl/return_code.dart";
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:local_auth/local_auth.dart";
 import "package:logging/logging.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
-// import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
@@ -31,6 +26,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/video_memory_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
@@ -47,7 +43,6 @@ import "package:photos/ui/viewer/location/update_location_data_widget.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_download_util.dart";
-import "package:photos/utils/file_util.dart";
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
@@ -669,153 +664,8 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _onCreateVideoMemoryClicked() async {
     final List<EnteFile> selectedFiles = widget.selectedFiles.files.toList();
-    final List<String> paths = [];
-    final List<int> imageHeight = [];
-    final List<int> imageWidth = [];
-    _logger.info("selected files length ${selectedFiles.length}");
-    for (EnteFile file in selectedFiles) {
-      if (file.fileType == FileType.livePhoto ||
-          file.fileType == FileType.video) {
-        continue;
-      }
-
-      final File? fileToSave = await getFile(file);
-      if (fileToSave != null) {
-        paths.add(File(fileToSave.path).path);
-        _logger.info("----- Path ${File(fileToSave.path).path}");
-        _logger.info("----- Height ${file.height}");
-        _logger.info("----- Width ${file.width}");
-        imageHeight.add(file.height);
-        imageWidth.add(file.width);
-        _logger.info("----- Has Dimenssion ${file.hasDimensions}");
-      }
-    }
-    for (var path in paths) {
-      _logger.info("----- Path: $path");
-    }
-
-    await _buildVideoMemoryFFmpegCommand(
-      paths.whereType<String>().toList(),
-      imageHeight,
-      imageWidth,
-    );
+    await createSlideshow(context, selectedFiles);
     widget.selectedFiles.clearAll();
-  }
-
-  String getTransitionType(int index) {
-    switch (index) {
-      case 0:
-        return 'fade';
-      case 1:
-        return 'smoothleft';
-      case 2:
-        return 'smoothright';
-      case 3:
-        return 'slideright';
-      default:
-        return 'fade';
-    }
-  }
-
-  Future<void> _buildVideoMemoryFFmpegCommand(
-    List<String> imagePaths,
-    List<int> imageHeight,
-    List<int> imageWidth,
-  ) async {
-    final dialog = createProgressDialog(context, "Video memory");
-    await dialog.show();
-    try {
-      final double desiredDuration = imagePaths.length * 2.0;
-      final int totalFrames = (desiredDuration * 60).toInt();
-
-      final Directory directory = Directory('/storage/emulated/0/Download');
-      final String tempDir = Configuration.instance.getTempDirectory();
-      final String outputPath =
-          "${directory.path}/video_memory${DateTime.now().millisecondsSinceEpoch}.mp4";
-
-      _logger.info("-------- Output path $outputPath");
-
-      StringBuffer command = StringBuffer();
-      command.write('-y ');
-
-      for (String imagePath in imagePaths) {
-        command.write('-loop 1 -t 2 -framerate 60 -i "$imagePath" ');
-      }
-
-      command.write('-filter_complex "');
-
-      command.write(
-          '[0]scale=1280:720:force_original_aspect_ratio=decrease:eval=frame,'
-          'zoompan=z=\'zoom+0.001\':x=iw/2-(iw/zoom/2):y=ih/2-(ih/zoom/2):d=180:fps=60,setsar=1[v0];');
-
-      String lastLabel = 'v0';
-
-      for (int i = 1; i < imagePaths.length; i++) {
-        final int height, width;
-        imageHeight[i] == 0 ? height = 720 : height = imageHeight[i];
-        imageWidth[i] == 0 ? width = 1280 : width = imageWidth[i];
-        command.write(
-            '[$i]scale=1280:720:force_original_aspect_ratio=decrease:eval=frame,'
-            'zoompan=z=\'zoom+0.001\':x=iw/2-(iw/zoom/2):y=ih/2-(ih/zoom/2):d=180:fps=60,setsar=1[v${i}];');
-
-        String transition = getTransitionType(i - 1);
-        String newLabel = 'tx${i}';
-        command.write(
-          '[$lastLabel][v$i]xfade=transition=$transition:duration=1:offset=${i * 2}[$newLabel];',
-        );
-        lastLabel = newLabel;
-      }
-
-      command.write('" ');
-
-      command.write('-map "[$lastLabel]" ');
-
-      command.write('-frames:v $totalFrames ');
-
-      command.write('-c:v libx264 '
-          '-pix_fmt yuv420p '
-          '-crf 23 '
-          '-preset medium '
-          '-movflags +faststart '
-          '-r 60 ');
-
-      command.write('"$outputPath"');
-
-      await FFmpegKit.executeAsync(
-        command.toString(),
-        (session) async {
-          final returnCode = await session.getReturnCode();
-
-          if (ReturnCode.isSuccess(returnCode)) {
-            _logger.info("Video created successfully at: $outputPath");
-          } else {
-            _logger.info("FFmpeg process failed with return code $returnCode");
-          }
-        },
-        (statistics) {
-          final progress = statistics.getTime() / (imagePaths.length * 2000);
-          _progressController.add(progress.clamp(0.0, 1.0));
-        },
-      );
-
-      _logger.info("------- Executing FFmpeg command: ${command.toString()}");
-
-      final DateTime now = DateTime.now();
-      final String formattedTime =
-          "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
-      _logger.info("Current time: $formattedTime");
-
-      // final File savedVideoMemory = File(outputPath);
-      // await PhotoManager.editor.saveVideo(
-      //   savedVideoMemory,
-      //   title: "ente_video_memory $formattedTime",
-      // );
-      await dialog.hide();
-    } catch (e) {
-      await dialog.hide();
-      _logger.info("------- Error in FFmpeg  $e");
-      rethrow;
-    }
   }
 
   Future<Uint8List> _createPlaceholder(
@@ -1038,8 +888,4 @@ class _FileSelectionActionsWidgetState
       await showGenericErrorDialog(context: context, error: e);
     }
   }
-}
-
-extension on Log {
-  getTime() {}
 }
