@@ -174,9 +174,9 @@ body {
 .pswp-ente .pswp__caption {
     color: white;
     position: absolute;
-    bottom: 0;
+    bottom: 0px;
     right: 0;
-    margin: 10px;
+    margin: 20px 24px;
     padding: 6px 16px;
     border-radius: 2px;
     background-color: rgba(0 0 0 / 0.2);
