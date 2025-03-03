@@ -18,7 +18,7 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ignored_file.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/ignored_files_service.dart";
-import "package:photos/services/local_sync_service.dart";
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/fake_progress.dart";
 import "package:photos/utils/file_key.dart";

@@ -13,7 +13,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/user/key_attributes.dart";
 import "package:photos/models/api/user/set_keys_request.dart";
 import "package:photos/models/api/user/srp.dart";
-import "package:photos/services/user_service.dart";
+import "package:photos/services/account/user_service.dart";
 import "package:photos/ui/common/user_dialogs.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/email_util.dart";

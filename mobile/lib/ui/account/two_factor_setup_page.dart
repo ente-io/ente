@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/services/user_service.dart';
+import 'package:photos/services/account/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
 import 'package:photos/utils/navigation_util.dart';

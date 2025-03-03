@@ -113,3 +113,5 @@ final tempDirCleanUpInterval = kDebugMode
 
 const kFilterChipHeight = 32.0;
 const kMaxAppbarFilters = 14;
+
+const kLivePhotoHashSeparator = ':';
