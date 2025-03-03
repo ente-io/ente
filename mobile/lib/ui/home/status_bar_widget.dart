@@ -13,7 +13,6 @@ import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/sync_service.dart';
-import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/account/verify_recovery_page.dart';
@@ -43,8 +42,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   bool _showStatus = false;
   bool _showErrorBanner = false;
-  bool _showMlBanner = !userRemoteFlagService
-          .getCachedBoolValue(UserRemoteFlagService.mlEnabled) &&
+  bool _showMlBanner = !flagService.hasGrantedMLConsent &&
       !localSettings.hasSeenMLEnablingBanner;
   Error? _syncError;
 
@@ -81,8 +79,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
     _notificationSubscription =
         Bus.instance.on<NotificationEvent>().listen((event) {
       if (mounted) {
-        _showMlBanner = !userRemoteFlagService
-                .getCachedBoolValue(UserRemoteFlagService.mlEnabled) &&
+        _showMlBanner = !flagService.hasGrantedMLConsent &&
             !localSettings.hasSeenMLEnablingBanner;
         setState(() {});
       }
@@ -115,7 +112,6 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
     _subscription.cancel();
     _notificationSubscription.cancel();
     _previewSubscription.cancel();
-
     super.dispose();
   }
 
@@ -179,9 +175,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                 ),
               )
             : const SizedBox.shrink(),
-        userRemoteFlagService.shouldShowRecoveryVerification() &&
-                !_showErrorBanner &&
-                !_showMlBanner
+        _showVerificationBanner()
             ? Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
@@ -202,6 +196,17 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
             : const SizedBox.shrink(),
       ],
     );
+  }
+
+  // _showVerificationBanner after 3 days of installation
+  bool _showVerificationBanner() {
+    if (_showErrorBanner ||
+        _showErrorBanner ||
+        flagService.recoveryKeyVerified) {
+      return false;
+    }
+    final DateTime installTime = localSettings.getInstallDateTime();
+    return DateTime.now().difference(installTime).inDays >= 3;
   }
 }
 

@@ -45,7 +45,6 @@ import "package:photos/services/machine_learning/face_ml/face_filtering/face_fil
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
-import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/services/user_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
@@ -249,8 +248,7 @@ class SearchService {
   Future<List<GenericSearchResult>> getMagicSectionResults(
     BuildContext context,
   ) async {
-    if (userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) {
+    if (flagService.hasGrantedMLConsent) {
       return magicCacheService.getMagicGenericSearchResult(context);
     } else {
       return <GenericSearchResult>[];
