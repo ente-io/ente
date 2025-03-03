@@ -26,6 +26,7 @@ import {
     type FileInfoProps,
 } from "@/gallery/components/FileInfo";
 import type { Collection } from "@/media/collection";
+import { fileCaption } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
@@ -292,7 +293,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 handleEditImage && canModify
                     ? fileIsEditableImage(file)
                     : undefined;
-            return { fileID, isOwnFile, showFavorite, isEditableImage };
+            const caption = fileCaption(file);
+
+            return {
+                fileID,
+                isOwnFile,
+                showFavorite,
+                isEditableImage,
+                caption,
+            };
         },
         [user, isInTrashSection, isInHiddenSection, handleEditImage],
     );
