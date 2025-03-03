@@ -1,5 +1,6 @@
 // ignore_for_file: always_use_package_imports
 
+import "dart:async";
 import "dart:convert";
 import "dart:developer";
 import "dart:io";
@@ -39,10 +40,18 @@ class FlagService {
     }
   }
 
+  Completer<void>? _fetchCompleter;
   Future<void> _fetch() async {
+    if (_fetchCompleter != null) {
+      await _fetchCompleter!.future;
+      return;
+    }
+    _fetchCompleter = Completer<void>();
     try {
       if (!_prefs.containsKey("token")) {
         log("token not found, skip", name: "FlagService");
+        _fetchCompleter!.complete();
+        _fetchCompleter = null;
         return;
       }
       log("fetching feature flags", name: "FlagService");
@@ -52,6 +61,9 @@ class FlagService {
       _flags = remoteFlags;
     } catch (e) {
       debugPrint("Failed to sync feature flags $e");
+    } finally {
+      _fetchCompleter!.complete();
+      _fetchCompleter = null;
     }
   }
 
