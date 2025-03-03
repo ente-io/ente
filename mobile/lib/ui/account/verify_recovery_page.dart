@@ -40,7 +40,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
       final String recoveryKeyWords = bip39.entropyToMnemonic(recoveryKey);
       if (inputKey == recoveryKey || inputKey == recoveryKeyWords) {
         try {
-          await userRemoteFlagService.markRecoveryVerificationAsDone();
+          await flagService.setRecoveryKeyVerified(true);
         } catch (e) {
           await dialog.hide();
           if (e is DioException && e.type == DioExceptionType.connectionError) {

@@ -112,7 +112,6 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
     _subscription.cancel();
     _notificationSubscription.cancel();
     _previewSubscription.cancel();
-
     super.dispose();
   }
 
@@ -176,9 +175,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                 ),
               )
             : const SizedBox.shrink(),
-        userRemoteFlagService.shouldShowRecoveryVerification() &&
-                !_showErrorBanner &&
-                !_showMlBanner
+        _showVerificationBanner()
             ? Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
@@ -199,6 +196,17 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
             : const SizedBox.shrink(),
       ],
     );
+  }
+
+  // _showVerificationBanner after 3 days of installation
+  bool _showVerificationBanner() {
+    if (_showErrorBanner ||
+        _showErrorBanner ||
+        flagService.recoveryKeyVerified) {
+      return false;
+    }
+    final DateTime installTime = localSettings.getInstallDateTime();
+    return DateTime.now().difference(installTime).inDays >= 3;
   }
 }
 

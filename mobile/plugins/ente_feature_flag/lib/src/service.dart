@@ -70,6 +70,11 @@ class FlagService {
     _updateFlags(flags.copyWith(faceSearchEnabled: isEnabled));
   }
 
+  Future<void> setRecoveryKeyVerified(bool isVerified) async {
+    await _updateKeyValue("recoveryKeyVerified", isVerified.toString());
+    _updateFlags(flags.copyWith(recoveryKeyVerified: isVerified));
+  }
+
   Completer<void>? _fetchCompleter;
   Future<void> _fetch() async {
     if (_fetchCompleter != null) {

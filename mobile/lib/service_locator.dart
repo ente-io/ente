@@ -13,7 +13,6 @@ import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/trash_sync_service.dart";
 import "package:photos/services/update_service.dart";
-import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -99,15 +98,6 @@ LocationService? _locationService;
 LocationService get locationService {
   _locationService ??= LocationService(ServiceLocator.instance.prefs);
   return _locationService!;
-}
-
-UserRemoteFlagService? _userRemoteFlagService;
-UserRemoteFlagService get userRemoteFlagService {
-  _userRemoteFlagService ??= UserRemoteFlagService(
-    ServiceLocator.instance.enteDio,
-    ServiceLocator.instance.prefs,
-  );
-  return _userRemoteFlagService!;
 }
 
 MagicCacheService? _magicCacheService;
