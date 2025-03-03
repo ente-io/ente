@@ -525,7 +525,6 @@
   "viewLargeFiles": "Büyük dosyalar",
   "viewLargeFilesDesc": "En fazla depolama alanı tüketen dosyaları görüntüleyin.",
   "noDuplicates": "Yinelenenleri kaldır",
-  "youveNoDuplicateFilesThatCanBeCleared": "Temizlenebilecek yinelenen dosyalarınız yok",
   "success": "Başarılı",
   "rateUs": "Bizi değerlendirin",
   "remindToEmptyDeviceTrash": "Ayrıca boşalan alanı talep etmek için \"Ayarlar\" -> \"Depolama\" bölümünden \"Son Silinenler \"i boşaltın",

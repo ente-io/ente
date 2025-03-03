@@ -525,7 +525,6 @@
   "viewLargeFiles": "Fișiere mari",
   "viewLargeFilesDesc": "Vizualizați fișierele care consumă cel mai mult spațiu.",
   "noDuplicates": "✨ Fără dubluri",
-  "youveNoDuplicateFilesThatCanBeCleared": "Nu aveți dubluri care pot fi șterse",
   "success": "Succes",
   "rateUs": "Evaluați-ne",
   "remindToEmptyDeviceTrash": "De asemenea, goliți dosarul „Șterse recent” din „Setări” -> „Spațiu” pentru a recupera spațiul eliberat",

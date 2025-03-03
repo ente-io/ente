@@ -525,7 +525,6 @@
   "viewLargeFiles": "Grote bestanden",
   "viewLargeFilesDesc": "Bekijk bestanden die de meeste opslagruimte verbruiken.",
   "noDuplicates": "✨ Geen duplicaten",
-  "youveNoDuplicateFilesThatCanBeCleared": "Je hebt geen dubbele bestanden die kunnen worden gewist",
   "success": "Succes",
   "rateUs": "Beoordeel ons",
   "remindToEmptyDeviceTrash": "Leeg ook \"Onlangs verwijderd\" uit \"Instellingen\" -> \"Opslag\" om de vrij gekomen ruimte te benutten",

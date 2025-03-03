@@ -525,7 +525,6 @@
   "viewLargeFiles": "Duże pliki",
   "viewLargeFilesDesc": "Wyświetl pliki zużywające największą ilość pamięci.",
   "noDuplicates": "✨ Brak duplikatów",
-  "youveNoDuplicateFilesThatCanBeCleared": "Nie masz duplikatów plików, które mogą być wyczyszczone",
   "success": "Sukces",
   "rateUs": "Oceń nas",
   "remindToEmptyDeviceTrash": "Również opróżnij \"Ostatnio usunięte\" z \"Ustawienia\" -> \"Pamięć\", aby odebrać wolną przestrzeń",
