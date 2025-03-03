@@ -6,6 +6,7 @@ import {
 } from "@/gallery/services/download";
 import { extractRawExif, parseExif } from "@/gallery/services/exif";
 import type { EnteFile } from "@/media/file";
+import { fileCaption } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { ensureString } from "@/utils/ensure";
 
@@ -97,6 +98,15 @@ export type ItemData = PhotoSwipeSlideData & {
      * It is set while the thumbnail is loaded.
      */
     isContentZoomable?: boolean;
+    /**
+     * The alt text associated with the file.
+     *
+     * This will be set to the file's caption. PhotoSwipe will use it as the alt
+     * text when constructing img elements (if any) for this item. We will also
+     * use this for displaying the visible "caption" element atop the file (both
+     * images and video).
+     */
+    alt?: string;
     /**
      * This will be `true` if the fetch for the file's data has failed.
      *
@@ -244,7 +254,11 @@ const enqueueUpdates = async (file: EnteFile) => {
     const fileType = file.metadata.fileType;
 
     const update = (itemData: Partial<ItemData>) => {
-        _state.itemDataByFileID.set(file.id, { ...itemData, fileType, fileID });
+        // Use the file's caption as its alt text (in addition to using it as
+        // the visible caption).
+        const alt = fileCaption(file);
+
+        _state.itemDataByFileID.set(file.id, { ...itemData, fileType, fileID, alt });
         _state.needsRefreshByFileID.get(file.id)?.();
     };
 

@@ -345,8 +345,8 @@ export class FileViewerPhotoSwipe {
                 pswp.refreshSlideContent(index),
             );
 
-            const { fileType, videoURL, ...rest } = itemData;
-            if (fileType === FileType.video && videoURL) {
+            const { videoURL, ...rest } = itemData;
+            if (itemData.fileType === FileType.video && videoURL) {
                 const disableDownload = !!this.opts.disableDownload;
                 itemData = {
                     ...rest,
@@ -631,19 +631,16 @@ export class FileViewerPhotoSwipe {
                 tagName: "p",
                 onInit: (captionElement, pswp) =>
                     pswp.on("change", () => {
-                        const { file, annotation } = currentAnnotatedFile();
-                        const caption = annotation.caption ?? "";
-                        captionElement.innerText = caption;
-                        captionElement.style.visibility = caption
+                        const { fileType, alt } = pswp.currSlide.content.data;
+                        captionElement.innerText = alt ?? "";
+                        captionElement.style.visibility = alt
                             ? "visible"
                             : "hidden";
                         // Add extra offset for video captions so that they do
                         // not overlap with the video controls. The constant is
                         // an ad-hoc value that looked okay-ish across browsers.
                         captionElement.style.bottom =
-                            file.metadata.fileType === FileType.video
-                                ? "36px"
-                                : "0";
+                            fileType === FileType.video ? "36px" : "0";
                     }),
             });
         });
