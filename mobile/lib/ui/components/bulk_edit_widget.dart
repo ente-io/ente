@@ -22,6 +22,7 @@ class PhotoDateSelectionBottomSheet extends StatelessWidget {
     if (photoCount == 0) {
       return const SizedBox.shrink();
     }
+    final colorScheme = getEnteColorScheme(context);
     final firstFileTime =
         DateTime.fromMicrosecondsSinceEpoch(enteFiles.first.creationTime!);
     DateTime startDate = firstFileTime;
@@ -40,7 +41,7 @@ class PhotoDateSelectionBottomSheet extends StatelessWidget {
     }
     return Container(
       decoration: BoxDecoration(
-        color: getEnteColorScheme(context).backgroundElevated2,
+        color: colorScheme.backgroundElevated,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(12),
           topRight: Radius.circular(12),
@@ -71,8 +72,8 @@ class PhotoDateSelectionBottomSheet extends StatelessWidget {
                     children: [
                       Text(
                         "$photoCount photos",
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: colorScheme.textBase,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -83,7 +84,7 @@ class PhotoDateSelectionBottomSheet extends StatelessWidget {
                           Text(
                             _formatDate(startDate),
                             style: TextStyle(
-                              color: Colors.grey[400],
+                              color: colorScheme.textMuted,
                               fontSize: 12,
                             ),
                           ),
@@ -92,7 +93,7 @@ class PhotoDateSelectionBottomSheet extends StatelessWidget {
                             child: Text(
                               "-",
                               style: TextStyle(
-                                color: Colors.grey[400],
+                                color: colorScheme.textMuted,
                                 fontSize: 12,
                               ),
                             ),
@@ -100,7 +101,7 @@ class PhotoDateSelectionBottomSheet extends StatelessWidget {
                           Text(
                             _formatDate(endDate),
                             style: TextStyle(
-                              color: Colors.grey[400],
+                              color: colorScheme.textMuted,
                               fontSize: 12,
                             ),
                           ),
@@ -112,76 +113,87 @@ class PhotoDateSelectionBottomSheet extends StatelessWidget {
               ],
             ),
           ),
-          Divider(
-            color: Colors.grey[800],
-            height: 1,
-          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorScheme.backgroundElevated2,
+                border: Border.all(
+                  color: colorScheme.strokeFaint,
+                  width: 0.5,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Select one date option
+                  ListTile(
+                    leading: Icon(
+                      Icons.calendar_today_outlined,
+                      color: colorScheme.textBase,
+                    ),
+                    title: Text(
+                      "Select one date and time",
+                      style: TextStyle(
+                        color: colorScheme.textBase,
+                        fontSize: 16,
+                      ),
+                    ),
+                    subtitle: Text(
+                      "Move selected photos to one date",
+                      style: TextStyle(
+                        color: colorScheme.textFaint,
+                        fontSize: 12,
+                      ),
+                    ),
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      color: colorScheme.strokeMuted,
+                    ),
+                    onTap: () => onSelectOneDate(true),
+                  ),
 
-          // Select one date option
-          ListTile(
-            leading: const Icon(
-              Icons.calendar_today,
-              color: Colors.white,
-            ),
-            title: const Text(
-              "Select one date and time",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-            ),
-            subtitle: Text(
-              "Move selected photos to one date",
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 12,
-              ),
-            ),
-            trailing: const Icon(
-              Icons.chevron_right,
-              color: Colors.white,
-            ),
-            onTap: () => onSelectOneDate(true),
-          ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Divider(
+                      color: colorScheme.blurStrokeFaint,
+                    ),
+                  ),
 
-          // Shift dates option
-          ListTile(
-            leading: const Icon(
-              Icons.calendar_month,
-              color: Colors.white,
-            ),
-            title: const Text(
-              "Shift dates and time",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
+                  // Shift dates option
+                  ListTile(
+                    leading: Icon(
+                      Icons.calendar_month_outlined,
+                      color: colorScheme.textBase,
+                    ),
+                    title: Text(
+                      "Shift dates and time",
+                      style: TextStyle(
+                        color: colorScheme.textBase,
+                        fontSize: 16,
+                      ),
+                    ),
+                    subtitle: Text(
+                      "Photos keep relative time difference",
+                      style: TextStyle(
+                        color: colorScheme.textFaint,
+                        fontSize: 12,
+                      ),
+                    ),
+                    trailing: Icon(
+                      Icons.chevron_right,
+                      color: colorScheme.strokeMuted,
+                    ),
+                    onTap: () => onShiftDates(true),
+                  ),
+                ],
               ),
             ),
-            subtitle: Text(
-              "Photos keep relative time difference",
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 12,
-              ),
-            ),
-            trailing: const Icon(
-              Icons.chevron_right,
-              color: Colors.white,
-            ),
-            onTap: () => onShiftDates(true),
           ),
 
           // Bottom indicator line
-          const SizedBox(height: 16),
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: Colors.grey[600],
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
+          const SizedBox(height: 48),
         ],
       ),
     );
