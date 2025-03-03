@@ -1,5 +1,5 @@
-# Please note that the below dockerfile is NOT directly meant 
-# to be copy pasted and deployed to production.
+# Please note that the below docker compose is NOT directly  
+# meant to be copy pasted and deployed to production.
 services:
   museum:
     build:
