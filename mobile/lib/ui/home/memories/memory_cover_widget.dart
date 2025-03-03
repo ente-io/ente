@@ -47,7 +47,8 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
 
     final widthOfScreen = MediaQuery.sizeOf(context).width;
     final index = _getNextMemoryIndex();
-    final title = widget.title ?? _getTitle(widget.memories[index]);
+    // TODO: lau: remove (I) from name when opening up the feature flag
+    final title = widget.title != null ? widget.title! + "(I)" : _getTitle(widget.memories[index]);
     final memory = widget.memories[index];
     final isSeen = memory.isSeen();
     final brightness =

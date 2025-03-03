@@ -40,13 +40,12 @@ class SmartMemory {
   SmartMemory(
     this.memories,
     this.type,
-    title,
+    this.title,
     this.firstDateToShow,
     this.lastDateToShow, {
     this.firstCreationTime,
     this.lastCreationTime,
-  }) : title = title + "(I)";
-  // TODO: lau: remove (I) from name when opening up the feature flag
+  });
 
   bool get notForShow => firstDateToShow == 0 && lastDateToShow == 0;
 
