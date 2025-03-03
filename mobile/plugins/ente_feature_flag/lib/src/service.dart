@@ -60,6 +60,16 @@ class FlagService {
 
   String get castUrl => flags.castUrl;
 
+  Future<void> setMapEnabled(bool isEnabled) async {
+    await _updateKeyValue("mapEnabled", isEnabled.toString());
+    _updateFlags(flags.copyWith(mapEnabled: isEnabled));
+  }
+
+  Future<void> setMLConsent(bool isEnabled) async {
+    await _updateKeyValue("faceSearchEnabled", isEnabled.toString());
+    _updateFlags(flags.copyWith(faceSearchEnabled: isEnabled));
+  }
+
   Completer<void>? _fetchCompleter;
   Future<void> _fetch() async {
     if (_fetchCompleter != null) {
@@ -103,11 +113,6 @@ class FlagService {
       debugPrint("Failed to set flag for $key $e");
       rethrow;
     }
-  }
-
-  Future<void> setMapEnabled(bool isEnabled) async {
-    await _updateKeyValue("mapEnabled", isEnabled.toString());
-    _updateFlags(flags.copyWith(mapEnabled: isEnabled));
   }
 
   void _updateFlags(RemoteFlags flags) {

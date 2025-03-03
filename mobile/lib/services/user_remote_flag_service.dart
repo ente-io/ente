@@ -7,7 +7,6 @@ import "package:flutter/foundation.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/notification_event.dart';
-import "package:photos/service_locator.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,7 +16,6 @@ class UserRemoteFlagService {
   final SharedPreferences _prefs;
 
   static const String recoveryVerificationFlag = "recoveryKeyVerified";
-  static const String mlEnabled = "faceSearchEnabled";
   static const String needRecoveryKeyVerification =
       "needRecoveryKeyVerification";
 
@@ -38,19 +36,6 @@ class UserRemoteFlagService {
       }
       return shouldShow;
     }
-  }
-
-  bool getCachedBoolValue(String key) {
-    bool defaultValue = false;
-    if (key == mlEnabled) {
-      defaultValue = flagService.hasGrantedMLConsent;
-    }
-    return _prefs.getBool(key) ?? defaultValue;
-  }
-
-  Future<bool> setBoolValue(String key, bool value) async {
-    await _updateKeyValue(key, value.toString());
-    return _prefs.setBool(key, value);
   }
 
   // markRecoveryVerificationAsDone is used to track if user has verified their
