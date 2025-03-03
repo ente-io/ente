@@ -1131,7 +1131,8 @@ class SmartMemoriesService {
     final windowEnd =
         currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
     final currentYear = currentTime.year;
-    final cutOffTime = currentTime.subtract(const Duration(days: 365));
+    final cutOffTime = currentTime
+        .subtract(const Duration(days: 364) - kMemoriesUpdateFrequency);
     final timeTillYearEnd = DateTime(currentYear + 1).difference(currentTime);
     final bool almostYearEnd = timeTillYearEnd < kMemoriesUpdateFrequency;
 
