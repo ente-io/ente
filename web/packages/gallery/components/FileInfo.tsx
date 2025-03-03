@@ -576,6 +576,7 @@ const Caption: React.FC<CaptionProps> = ({
                 name="caption"
                 type="text"
                 multiline
+                maxRows={7}
                 aria-label={t("description")}
                 hiddenLabel
                 fullWidth
