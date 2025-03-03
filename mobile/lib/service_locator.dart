@@ -4,7 +4,7 @@ import "package:ente_cast_normal/ente_cast_normal.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/gateways/entity_gw.dart";
-import "package:photos/services/billing_service.dart";
+import "package:photos/services/account/billing_service.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
