@@ -617,6 +617,18 @@ export class FileViewerPhotoSwipe {
                     },
                 });
             }
+
+            pswp.ui.registerElement({
+                name: "caption",
+                order: 50,
+                appendTo: "root",
+                html: "<p/>",
+                onInit: (captionElement, pswp) =>
+                    pswp.on("change", () => {
+                        const { file } = pswp.currSlide.content.data;
+                        captionElement.innerText = `${file}`;
+                    }),
+            });
         });
 
         // Modify the default UI elements.

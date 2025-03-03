@@ -170,3 +170,18 @@ body {
     /* default is a horizontal flip, transform: scale(-1, 1); */
     transform: scale(-0.8, 0.8);
 }
+
+.pswp-ente .pswp__caption {
+    color: white;
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    padding: 6px 16px;
+    border-radius: 2px;
+    background-color: rgba(0 0 0 / 0.2);
+    backdrop-filter: blur(10px);
+    word-break: break-word;
+    text-align: right;
+    max-width: 375px;
+    max-height: 200px;
+}
