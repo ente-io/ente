@@ -624,7 +624,9 @@ export class FileViewerPhotoSwipe {
 
             pswp.ui.registerElement({
                 name: "caption",
-                order: 50,
+                // Arbitrary order towards the end (it doesn't matter anyways
+                // since we're absolutely positioned).
+                order: 30,
                 appendTo: "root",
                 tagName: "p",
                 onInit: (captionElement, pswp) =>
@@ -637,12 +639,10 @@ export class FileViewerPhotoSwipe {
                             : "hidden";
                         // Add extra offset for video captions so that they do
                         // not overlap with the video controls. The constant is
-                        // something that worked and looked okay-ish across
-                        // Chrome, Safari and Firefox video players when I
-                        // tested, but might need tweaking in the future.
+                        // an ad-hoc value that looked okay-ish across browsers.
                         captionElement.style.bottom =
                             file.metadata.fileType === FileType.video
-                                ? "48px"
+                                ? "36px"
                                 : "0";
                     }),
             });
