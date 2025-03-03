@@ -7,7 +7,7 @@ import "package:photos/models/backup_status.dart";
 import "package:photos/models/duplicate_files.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/deduplication_service.dart";
-import "package:photos/services/sync_service.dart";
+import "package:photos/services/files_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -93,7 +93,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                   onTap: () async {
                                     BackupStatus status;
                                     try {
-                                      status = await SyncService.instance
+                                      status = await FilesService.instance
                                           .getBackupStatus();
                                     } catch (e) {
                                       await showGenericErrorDialog(
