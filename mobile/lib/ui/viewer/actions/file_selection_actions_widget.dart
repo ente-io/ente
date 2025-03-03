@@ -36,6 +36,7 @@ import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
+import "package:photos/ui/components/bulk_edit_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/sharing/show_images_prevew.dart";
@@ -378,6 +379,34 @@ class _FileSelectionActionsWidgetState
         ),
       );
     }
+
+    // test bulk edit ui widget TODO: lau: merge with bulk edit date later on
+    items.add(
+      SelectionActionButton(
+        shouldShow: widget.selectedFiles.files.every(
+          (element) => (element.ownerID == currentUserID),
+        ),
+        labelText: "test edit date",
+        icon: Icons.edit_calendar_outlined,
+        onTap: () async {
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (context) => PhotoDateSelectionBottomSheet(
+              enteFiles: widget.selectedFiles.files,
+              onSelectOneDate: (selected) {
+                Navigator.pop(context);
+                // Handle select one date action
+              },
+              onShiftDates: (selected) {
+                Navigator.pop(context);
+                // Handle shift dates action
+              },
+            ),
+          );
+        },
+      ),
+    );
 
     if (widget.type.showEditLocation()) {
       items.add(
