@@ -76,6 +76,7 @@ class SmartMemoriesService {
     MemoriesCache oldCache,
   ) async {
     try {
+      _logger.finest('calcMemories called with time: $now');
       await init();
       final List<SmartMemory> memories = [];
       final allFiles = Set<EnteFile>.from(
@@ -1163,6 +1164,9 @@ class SmartMemoriesService {
     for (var yearAgo = 1; yearAgo <= yearsBefore; yearAgo++) {
       final memories = yearsAgoToMemories[yearAgo];
       if (memories == null) continue;
+      memories.sort(
+        (a, b) => a.file.creationTime!.compareTo(b.file.creationTime!),
+      );
       final fillerMemory = FillerMemory(
         memories,
         "TEST",
