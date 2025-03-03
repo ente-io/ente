@@ -482,7 +482,6 @@
   "importFailureDescNew": "تعذر إعراب الملف المنتقى.",
   "duplicateCodes": "رموز مكررة",
   "noDuplicates": "✨ لا تكرارات",
-  "youveNoDuplicateCodesThatCanBeCleared": "ليس لديك رموز مكررة يمكن مسحها",
   "deselectAll": "ألغِ تحديد الكل",
   "selectAll": "حدد الكل",
   "deleteDuplicates": "احذف التكرار"

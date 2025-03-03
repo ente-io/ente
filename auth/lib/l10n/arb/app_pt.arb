@@ -499,7 +499,7 @@
   "appLockOfflineModeWarning": "Você prosseguiu sem cópias de segurança. Caso, se esqueça de seu aplicativo de bloqueio, você não poderá mais acessar seus dados.",
   "duplicateCodes": "Duplicar códigos",
   "noDuplicates": "✨ Sem duplicados",
-  "youveNoDuplicateCodesThatCanBeCleared": "Você não possui códigos duplicados para limpar",
+  "youveNoDuplicateCodesThatCanBeCleared": "Você não possui códigos duplicados que possam ser excluídos",
   "deduplicateCodes": "Desduplicar códigos",
   "deselectAll": "Deselecionar tudo",
   "selectAll": "Selecionar tudo",

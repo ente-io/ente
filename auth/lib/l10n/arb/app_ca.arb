@@ -499,7 +499,6 @@
   "appLockOfflineModeWarning": "Has triat procedir sense còpies de seguretat. Si oblides el bloqueig de l'aplicació, no podràs accedir a les teves dades.",
   "duplicateCodes": "Codis duplicats",
   "noDuplicates": "✨ Sense duplicats",
-  "youveNoDuplicateCodesThatCanBeCleared": "No teniu codis duplicats que es puguin esborrar",
   "deduplicateCodes": "Desduplica codis",
   "deselectAll": "Desselecciona-ho tot",
   "selectAll": "Seleccionar-ho tot",

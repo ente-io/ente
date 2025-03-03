@@ -495,7 +495,6 @@
   "appLockOfflineModeWarning": "Zvolili jste si pokračování bez zálohování. Pokud zapomenete heslo do aplikace, přístup k datům bude uzamčen.",
   "duplicateCodes": "Duplikovat kódy",
   "noDuplicates": "✨ Žádné duplikáty",
-  "youveNoDuplicateCodesThatCanBeCleared": "Nemáte žádné duplicitní kódy k odstranění",
   "deduplicateCodes": "Deduplikovat kódy",
   "deselectAll": "Zrušit výběr všech položek",
   "selectAll": "Vybrat vše",

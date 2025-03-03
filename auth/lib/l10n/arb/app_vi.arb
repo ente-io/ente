@@ -499,7 +499,6 @@
   "appLockOfflineModeWarning": "Bạn đã chọn tiếp tục mà không có bản sao lưu. Nếu bạn quên khóa ứng dụng, bạn sẽ bị khóa khỏi việc truy cập dữ liệu của mình.",
   "duplicateCodes": "Mã trùng lặp",
   "noDuplicates": "✨ Không có trùng lặp",
-  "youveNoDuplicateCodesThatCanBeCleared": "Bạn không có mã trùng lặp nào có thể được xóa",
   "deduplicateCodes": "Loại bỏ mã trùng lặp",
   "deselectAll": "Bỏ chọn tất cả",
   "selectAll": "Chọn tất cả",
