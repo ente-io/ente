@@ -395,7 +395,7 @@ class SmartMemoriesService {
                 title: secondTitle,
                 firstDateToShow: thisBirthday.microsecondsSinceEpoch,
                 lastDateToShow: thisBirthday
-                    .add(const Duration(days: 1))
+                    .add(kDayItself)
                     .microsecondsSinceEpoch,
               ),
             );
@@ -408,7 +408,7 @@ class SmartMemoriesService {
                     .subtract(const Duration(days: 6))
                     .microsecondsSinceEpoch,
                 lastDateToShow: thisBirthday
-                    .add(const Duration(days: 1))
+                    .add(kDayItself)
                     .microsecondsSinceEpoch,
               ),
             );
@@ -944,7 +944,7 @@ class SmartMemoriesService {
             photoSelection,
             "${DateFormat('MMMM d').format(date)} through the years",
             date.subtract(kMemoriesMargin).microsecondsSinceEpoch,
-            date.add(const Duration(days: 1)).microsecondsSinceEpoch,
+            date.add(kDayItself).microsecondsSinceEpoch,
           ),
         );
       } else {
@@ -970,7 +970,7 @@ class SmartMemoriesService {
               photoSelection,
               name,
               showDate.microsecondsSinceEpoch,
-              showDate.add(const Duration(days: 1)).microsecondsSinceEpoch,
+              showDate.add(kDayItself).microsecondsSinceEpoch,
             ),
           );
         }
