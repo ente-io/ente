@@ -497,7 +497,6 @@
   "appLockOfflineModeWarning": "Anda telah memilih untuk mengunci aplikasi tanpa cadangan apa pun. Jika Anda lupa kode Pengunci Apl Anda, Anda tidak akan dapat mengakses data-data Anda.",
   "duplicateCodes": "Kode duplikat",
   "noDuplicates": "✨ Tak ada duplikat",
-  "youveNoDuplicateCodesThatCanBeCleared": "Kamu tidak memiliki kode duplikat yang dapat dihapus",
   "deduplicateCodes": "Hapus kode duplikat",
   "deselectAll": "Batalkan semua pilihan",
   "selectAll": "Pilih semua",

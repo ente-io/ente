@@ -499,7 +499,6 @@
   "appLockOfflineModeWarning": "Pasirinkote tęsti be atsarginių kopijų. Jei pamiršite programos užraktą, jums bus užrakinta prieiga prie duomenų.",
   "duplicateCodes": "Dubliuoti kodus",
   "noDuplicates": "✨ Dublikatų nėra",
-  "youveNoDuplicateCodesThatCanBeCleared": "Neturite dubliuotų kodų, kuriuos būtų galima išvalyti.",
   "deduplicateCodes": "Atdubliuoti kodus",
   "deselectAll": "Naikinti visų pasirinkimą",
   "selectAll": "Pasirinkti viską",

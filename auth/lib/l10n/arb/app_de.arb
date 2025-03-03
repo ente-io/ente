@@ -495,7 +495,6 @@
   "authToViewPasskey": "Bitte authentifizieren, um deinen Passkey zu sehen",
   "duplicateCodes": "Doppelte Codes",
   "noDuplicates": "✨ Keine Duplikate",
-  "youveNoDuplicateCodesThatCanBeCleared": "Sie haben keine doppelten Codes, die gelöscht werden können",
   "deselectAll": "Alle abwählen",
   "selectAll": "Alles auswählen",
   "deleteDuplicates": "Duplikate löschen",

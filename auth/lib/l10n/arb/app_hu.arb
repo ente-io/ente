@@ -499,7 +499,6 @@
   "appLockOfflineModeWarning": "Úgy döntött, hogy biztonsági mentés nélkül folytatja. Ha elfelejti az alkalmazászárat, akkor nem férhet hozzá adataihoz.",
   "duplicateCodes": "Ismétlődő kódok",
   "noDuplicates": "✨Nincs ismétlődés",
-  "youveNoDuplicateCodesThatCanBeCleared": "Nincsenek ismétlődő kódjai, amelyeket törölni lehetne",
   "deduplicateCodes": "Ismétlődő kódok",
   "deselectAll": "Összes kijelölés megszüntetése",
   "selectAll": "Összes kijelölése",
