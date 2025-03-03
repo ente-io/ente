@@ -17,7 +17,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart' as ente;
 import 'package:photos/models/location/location.dart';
-import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';

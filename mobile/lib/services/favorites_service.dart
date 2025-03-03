@@ -13,7 +13,7 @@ import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/remote_sync_service.dart';
+import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 
 class FavoritesService {

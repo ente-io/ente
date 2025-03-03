@@ -15,9 +15,9 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/services/filedata/filedata_service.dart";
-import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/notification_service.dart';
-import 'package:photos/services/remote_sync_service.dart';
+import 'package:photos/services/sync/local_sync_service.dart';
+import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

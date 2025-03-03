@@ -7,7 +7,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/local_import_progress.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/services/local_sync_service.dart';
+import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";

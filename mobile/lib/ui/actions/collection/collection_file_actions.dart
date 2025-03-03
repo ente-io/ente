@@ -14,7 +14,7 @@ import "package:photos/services/collections_service.dart";
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/hidden_service.dart";
 import "package:photos/services/ignored_files_service.dart";
-import "package:photos/services/remote_sync_service.dart";
+import "package:photos/services/sync/remote_sync_service.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
