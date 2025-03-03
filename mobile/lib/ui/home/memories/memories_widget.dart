@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
+import "package:photos/models/filler_memory.dart";
 import 'package:photos/models/memory.dart';
 import "package:photos/models/smart_memory.dart";
 import "package:photos/service_locator.dart";
@@ -128,8 +129,14 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   }
 
   Widget _buildSmartMemories(List<SmartMemory> memories) {
-    final collatedMemories =
-        memories.map((e) => (e.memories, e.title)).toList();
+    final List<(List<Memory>, String?)> collatedMemories = [];
+    for (final memory in memories) {
+      if (memory is FillerMemory) {
+        collatedMemories.add((memory.memories, null));
+      } else {
+        collatedMemories.add((memory.memories, memory.title));
+      }
+    }
 
     return SizedBox(
       height: _maxHeight + MemoryCoverWidget.outerStrokeWidth * 2,

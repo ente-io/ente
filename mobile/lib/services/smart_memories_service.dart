@@ -13,6 +13,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/filler_memory.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
@@ -48,6 +49,8 @@ class SmartMemoriesService {
 
   static const _clipSimilarImageThreshold = 0.75;
   static const _clipActivityQueryThreshold = 0.25;
+
+  static const yearsBefore = 30;
 
   SmartMemoriesService();
 
@@ -99,11 +102,9 @@ class SmartMemoriesService {
       memories.addAll(timeMemories);
       _logger.finest("All files length: ${allFiles.length}");
 
-      // // Filler memories TODO: lau: add filler results
-      // final fillerMemories = await _getFillerResults(limit);
-      // _deductUsedMemories(allFiles, fillerMemories);
-      // memories.addAll(fillerMemories);
-      // _logger.finest("All files length: ${allFiles.length}");
+      // Filler memories
+      final fillerMemories = await _getFillerResults(allFiles, now);
+      memories.addAll(fillerMemories);
       return memories;
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
@@ -394,9 +395,8 @@ class SmartMemoriesService {
               spotlightMem.copyWith(
                 title: secondTitle,
                 firstDateToShow: thisBirthday.microsecondsSinceEpoch,
-                lastDateToShow: thisBirthday
-                    .add(kDayItself)
-                    .microsecondsSinceEpoch,
+                lastDateToShow:
+                    thisBirthday.add(kDayItself).microsecondsSinceEpoch,
               ),
             );
           }
@@ -407,9 +407,8 @@ class SmartMemoriesService {
                 firstDateToShow: thisBirthday
                     .subtract(const Duration(days: 6))
                     .microsecondsSinceEpoch,
-                lastDateToShow: thisBirthday
-                    .add(kDayItself)
-                    .microsecondsSinceEpoch,
+                lastDateToShow:
+                    thisBirthday.add(kDayItself).microsecondsSinceEpoch,
               ),
             );
           }
@@ -1119,6 +1118,60 @@ class SmartMemoriesService {
     );
 
     return memoryResult;
+  }
+
+  Future<List<FillerMemory>> _getFillerResults(
+    Iterable<EnteFile> allFiles,
+    DateTime currentTime,
+  ) async {
+    final List<FillerMemory> memoryResults = [];
+    if (allFiles.isEmpty) return [];
+    final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
+    final windowEnd =
+        currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
+    final currentYear = currentTime.year;
+    final cutOffTime = currentTime.subtract(const Duration(days: 365));
+    final timeTillYearEnd = DateTime(currentYear + 1).difference(currentTime);
+    final bool almostYearEnd = timeTillYearEnd < kMemoriesUpdateFrequency;
+
+    final Map<int, List<Memory>> yearsAgoToMemories = {};
+    for (final file in allFiles) {
+      if (file.creationTime == null ||
+          file.creationTime! > cutOffTime.microsecondsSinceEpoch) {
+        continue;
+      }
+      final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+      final fileTimeInYear = fileDate.copyWith(year: currentYear);
+      final diff = fileTimeInYear.difference(currentTime);
+      if (!diff.isNegative && diff < kMemoriesUpdateFrequency) {
+        final yearsAgo = currentYear - fileDate.year;
+        yearsAgoToMemories
+            .putIfAbsent(yearsAgo, () => [])
+            .add(Memory.fromFile(file, _seenTimes));
+      } else if (almostYearEnd) {
+        final altDiff = fileDate.copyWith(year: currentYear + 1).difference(
+              currentTime,
+            );
+        if (!altDiff.isNegative && altDiff < kMemoriesUpdateFrequency) {
+          final yearsAgo = currentYear - fileDate.year + 1;
+          yearsAgoToMemories
+              .putIfAbsent(yearsAgo, () => [])
+              .add(Memory.fromFile(file, _seenTimes));
+        }
+      }
+    }
+    for (var yearAgo = 1; yearAgo <= yearsBefore; yearAgo++) {
+      final memories = yearsAgoToMemories[yearAgo];
+      if (memories == null) continue;
+      final fillerMemory = FillerMemory(
+        memories,
+        "TEST",
+        nowInMicroseconds,
+        windowEnd,
+      );
+      memoryResults.add(fillerMemory);
+    }
+    return memoryResults;
   }
 
   /// TODO: lau: replace this by just taking next 7 days
