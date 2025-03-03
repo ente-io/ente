@@ -174,8 +174,9 @@ body {
 .pswp-ente .pswp__caption {
     color: white;
     position: absolute;
-    bottom: 8px;
-    right: 8px;
+    bottom: 0;
+    right: 0;
+    margin: 10px;
     padding: 6px 16px;
     border-radius: 2px;
     background-color: rgba(0 0 0 / 0.2);
@@ -184,4 +185,10 @@ body {
     text-align: right;
     max-width: 375px;
     max-height: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
 }

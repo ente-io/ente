@@ -626,11 +626,14 @@ export class FileViewerPhotoSwipe {
                 name: "caption",
                 order: 50,
                 appendTo: "root",
-                html: "<p/>",
+                tagName: "p",
                 onInit: (captionElement, pswp) =>
                     pswp.on("change", () => {
-                        captionElement.innerText =
-                            currentFileAnnotation().caption ?? "";
+                        const caption = currentFileAnnotation().caption ?? "";
+                        captionElement.innerText = caption;
+                        captionElement.style.visibility = caption
+                            ? "visible"
+                            : "hidden";
                     }),
             });
         });
