@@ -26,7 +26,6 @@ class RemoteFlags {
     required this.castUrl,
   });
 
-  // CopyWith
   RemoteFlags copyWith({
     bool? enableStripe,
     bool? disableCFWorker,
@@ -56,7 +55,7 @@ class RemoteFlags {
     disableCFWorker: false,
     mapEnabled: false,
     faceSearchEnabled: false,
-    recoveryKeyVerified: false,
+    recoveryKeyVerified: true,
     internalUser: kDebugMode,
     betaUser: kDebugMode,
     enableMobMultiPart: false,

@@ -22,7 +22,6 @@ class LocalSettings {
       "has_configured_links_in_app_permission";
   static const _hideSharedItemsFromHomeGalleryTag =
       "hide_shared_items_from_home_gallery";
-  static const _installTimeKey = "install_time";
 
   final SharedPreferences _prefs;
 
@@ -59,13 +58,13 @@ class LocalSettings {
   // getEstimatedInstallTimeInMs returns the time when the app was installed
   // The time is stored in shared preferences and will be reset on logout
   DateTime getInstallDateTime() {
-    if (_prefs.containsKey('install_time')) {
+    if (_prefs.containsKey('ls.install_time')) {
       return DateTime.fromMillisecondsSinceEpoch(
-        _prefs.getInt('install_time')!,
+        _prefs.getInt('ls.install_time')!,
       );
     } else {
       final installTime = DateTime.now();
-      _prefs.setInt('install_time', installTime.millisecondsSinceEpoch);
+      _prefs.setInt('ls.install_time', installTime.millisecondsSinceEpoch);
       return installTime;
     }
   }
