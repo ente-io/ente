@@ -38,6 +38,28 @@ class FlagService {
     }
   }
 
+  bool get disableCFWorker => flags.disableCFWorker;
+
+  bool get internalUser => flags.internalUser || kDebugMode;
+
+  bool get betaUser => flags.betaUser;
+
+  bool get internalOrBetaUser => internalUser || betaUser;
+
+  bool get enableStripe => Platform.isIOS ? false : flags.enableStripe;
+
+  bool get mapEnabled => flags.mapEnabled;
+
+  bool get isBetaUser => internalUser || flags.betaUser;
+
+  bool get recoveryKeyVerified => flags.recoveryKeyVerified;
+
+  bool get hasGrantedMLConsent => flags.faceSearchEnabled;
+
+  bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
+
+  String get castUrl => flags.castUrl;
+
   Completer<void>? _fetchCompleter;
   Future<void> _fetch() async {
     if (_fetchCompleter != null) {
@@ -65,25 +87,32 @@ class FlagService {
     }
   }
 
-  bool get disableCFWorker => flags.disableCFWorker;
+  Future<void> _updateKeyValue(String key, String value) async {
+    try {
+      final response = await _enteDio.post(
+        "/remote-store/update",
+        data: {
+          "key": key,
+          "value": value,
+        },
+      );
+      if (response.statusCode != HttpStatus.ok) {
+        throw Exception("Unexpected state");
+      }
+    } catch (e) {
+      debugPrint("Failed to set flag for $key $e");
+      rethrow;
+    }
+  }
 
-  bool get internalUser => flags.internalUser || kDebugMode;
+  Future<void> setMapEnabled(bool isEnabled) async {
+    await _updateKeyValue("mapEnabled", isEnabled.toString());
+    _updateFlags(flags.copyWith(mapEnabled: isEnabled));
+  }
 
-  bool get betaUser => flags.betaUser;
-
-  bool get internalOrBetaUser => internalUser || betaUser;
-
-  bool get enableStripe => Platform.isIOS ? false : flags.enableStripe;
-
-  bool get mapEnabled => flags.mapEnabled;
-
-  bool get isBetaUser => internalUser || flags.betaUser;
-
-  bool get recoveryKeyVerified => flags.recoveryKeyVerified;
-
-  bool get hasGrantedMLConsent => flags.faceSearchEnabled;
-
-  bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
-
-  String get castUrl => flags.castUrl;
+  void _updateFlags(RemoteFlags flags) {
+    _flags = flags;
+    _prefs.setString("remote_flags", flags.toJson());
+    _fetch().ignore();
+  }
 }

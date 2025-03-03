@@ -17,7 +17,6 @@ class UserRemoteFlagService {
   final SharedPreferences _prefs;
 
   static const String recoveryVerificationFlag = "recoveryKeyVerified";
-  static const String mapEnabled = "mapEnabled";
   static const String mlEnabled = "faceSearchEnabled";
   static const String videoStreamingEnabled = "videoStreamingEnabled";
   static const String needRecoveryKeyVerification =
@@ -44,9 +43,7 @@ class UserRemoteFlagService {
 
   bool getCachedBoolValue(String key) {
     bool defaultValue = false;
-    if (key == mapEnabled) {
-      defaultValue = flagService.mapEnabled;
-    } else if (key == mlEnabled) {
+    if (key == mlEnabled) {
       defaultValue = flagService.hasGrantedMLConsent;
     }
     return _prefs.getBool(key) ?? defaultValue;

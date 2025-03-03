@@ -3,7 +3,6 @@ import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/preview_video_store.dart";
-import "package:photos/services/user_remote_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -101,19 +100,10 @@ class AdvancedSettingsScreen extends StatelessWidget {
                         singleBorderRadius: 8,
                         alignCaptionedTextToLeft: true,
                         trailingWidget: ToggleSwitchWidget(
-                          value: () => userRemoteFlagService.getCachedBoolValue(
-                            UserRemoteFlagService.mapEnabled,
-                          ),
+                          value: () => flagService.mapEnabled,
                           onChanged: () async {
-                            final isEnabled =
-                                userRemoteFlagService.getCachedBoolValue(
-                              UserRemoteFlagService.mapEnabled,
-                            );
-
-                            await userRemoteFlagService.setBoolValue(
-                              UserRemoteFlagService.mapEnabled,
-                              !isEnabled,
-                            );
+                            final isEnabled = flagService.mapEnabled;
+                            await flagService.setMapEnabled(!isEnabled);
                           },
                         ),
                       ),

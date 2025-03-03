@@ -26,6 +26,31 @@ class RemoteFlags {
     required this.castUrl,
   });
 
+  // CopyWith
+  RemoteFlags copyWith({
+    bool? enableStripe,
+    bool? disableCFWorker,
+    bool? mapEnabled,
+    bool? faceSearchEnabled,
+    bool? recoveryKeyVerified,
+    bool? internalUser,
+    bool? betaUser,
+    bool? enableMobMultiPart,
+    String? castUrl,
+  }) {
+    return RemoteFlags(
+      enableStripe: enableStripe ?? this.enableStripe,
+      disableCFWorker: disableCFWorker ?? this.disableCFWorker,
+      mapEnabled: mapEnabled ?? this.mapEnabled,
+      faceSearchEnabled: faceSearchEnabled ?? this.faceSearchEnabled,
+      recoveryKeyVerified: recoveryKeyVerified ?? this.recoveryKeyVerified,
+      internalUser: internalUser ?? this.internalUser,
+      betaUser: betaUser ?? this.betaUser,
+      enableMobMultiPart: enableMobMultiPart ?? this.enableMobMultiPart,
+      castUrl: castUrl ?? this.castUrl,
+    );
+  }
+
   static RemoteFlags defaultValue = RemoteFlags(
     enableStripe: Platform.isAndroid,
     disableCFWorker: false,
