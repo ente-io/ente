@@ -40,7 +40,7 @@ class TimeLogger {
   final String context;
   final int logThreshold;
   DateTime _start;
-  TimeLogger({this.context = "TLog", this.logThreshold = 5})
+  TimeLogger({this.context = "TLog:", this.logThreshold = 5})
       : _start = DateTime.now();
 
   @override
@@ -48,7 +48,7 @@ class TimeLogger {
     final int diff = DateTime.now().difference(_start).inMilliseconds;
     late String res;
     if (diff > logThreshold) {
-      res = "[$context: $diff ms]";
+      res = "[$context$diff ms]";
     } else {
       res = "[]";
     }

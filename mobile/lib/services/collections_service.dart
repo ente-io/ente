@@ -1886,7 +1886,7 @@ class CollectionsService {
       if (file.collectionID != fromCollectionID) {
         throw AssertionError("All memories should belong to the same album");
       }
-      if (file.ownerID != Configuration.instance.getUserID()) {
+      if (file.ownerID != userID) {
         throw AssertionError("Can only move memories uploaded by you");
       }
     }

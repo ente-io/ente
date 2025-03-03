@@ -1,4 +1,3 @@
-import "dart:developer";
 import "dart:io";
 
 import "package:collection/collection.dart";
@@ -6,11 +5,10 @@ import "package:flutter/foundation.dart";
 import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/db/remote/migration.dart";
+import "package:photos/log/devlog.dart";
 import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:sqlite_async/sqlite_async.dart";
-
-var devLog = log;
 
 // ignore: constant_identifier_names
 enum RemoteTable { collections, collection_files, files, entities }

@@ -83,7 +83,6 @@ class RemoteSyncService {
   void init(SharedPreferences preferences) {
     _prefs = preferences;
     newService = RemoteDiffService(
-      NetworkClient.instance.enteDio,
       _collectionsService,
       CollectionFilesService(NetworkClient.instance.enteDio),
     );

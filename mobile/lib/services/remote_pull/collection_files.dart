@@ -6,6 +6,7 @@ import "package:dio/dio.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
+import "package:photos/log/devlog.dart";
 import "package:photos/models/api/diff/diff.dart";
 import "package:photos/utils/file_uploader_util.dart";
 
@@ -40,8 +41,10 @@ class CollectionFilesService {
         },
         taskName: "parseDiff",
       );
-      _logger.info('[Collection-$collectionID] parsed ${diff.length} '
-          'diff items ( ${result.updatedItems.length} updated) in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+      devLog(
+        '[Collection-$collectionID] $result in ${DateTime.now().difference(startTime).inMilliseconds} ms',
+        name: "CollectionFilesService.getCollectionItemsDiff",
+      );
       return result;
     } catch (e, s) {
       _logger.severe(e, s);
@@ -169,4 +172,9 @@ class DiffResult {
     this.hasMore,
     this.maxUpdatedAtTime,
   );
+
+  @override
+  String toString() {
+    return 'Diff{Up: ${updatedItems.length}, Del: ${deletedItems.length}, more?: $hasMore, maxUpdateTime: $maxUpdatedAtTime}';
+  }
 }
