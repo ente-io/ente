@@ -9,12 +9,12 @@ const kPersonShowTimeout = Duration(days: 7 * 10);
 const kPersonAndTypeShowTimeout = Duration(days: 7 * 26);
 const kTripShowTimeout = Duration(days: 7 * 25);
 
-final maxShowTimeout = 
-    [
+final maxShowTimeout = [
       kPersonShowTimeout,
       kPersonAndTypeShowTimeout,
       kTripShowTimeout,
-    ].reduce((value, element) => value > element ? value : element) * 3;
+    ].reduce((value, element) => value > element ? value : element) *
+    3;
 
 class MemoriesCache {
   final List<ToShowMemory> toShowMemories;
@@ -108,7 +108,10 @@ class ToShowMemory {
     }
     return ToShowMemory(
       memory.title,
-      memory.memories.map((m) => m.file.uploadedFileID!).toList(),
+      memory.memories
+          .where((m) => m.file.uploadedFileID != null)
+          .map((m) => m.file.uploadedFileID!)
+          .toList(),
       memory.type,
       memory.firstDateToShow,
       memory.lastDateToShow,
