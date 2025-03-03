@@ -14,10 +14,8 @@ import "model.dart";
 class FlagService {
   final SharedPreferences _prefs;
   final Dio _enteDio;
-  late final bool _usingEnteEmail;
 
   FlagService(this._prefs, this._enteDio) {
-    _usingEnteEmail = _prefs.getString("email")?.endsWith("@ente.io") ?? false;
     Future.delayed(const Duration(seconds: 5), () {
       _fetch();
     });
@@ -69,7 +67,7 @@ class FlagService {
 
   bool get disableCFWorker => flags.disableCFWorker;
 
-  bool get internalUser => flags.internalUser || _usingEnteEmail || kDebugMode;
+  bool get internalUser => flags.internalUser || kDebugMode;
 
   bool get betaUser => flags.betaUser;
 
