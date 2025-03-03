@@ -629,11 +629,21 @@ export class FileViewerPhotoSwipe {
                 tagName: "p",
                 onInit: (captionElement, pswp) =>
                     pswp.on("change", () => {
-                        const caption = currentFileAnnotation().caption ?? "";
+                        const { file, annotation } = currentAnnotatedFile();
+                        const caption = annotation.caption ?? "";
                         captionElement.innerText = caption;
                         captionElement.style.visibility = caption
                             ? "visible"
                             : "hidden";
+                        // Add extra offset for video captions so that they do
+                        // not overlap with the video controls. The constant is
+                        // something that worked and looked okay-ish across
+                        // Chrome, Safari and Firefox video players when I
+                        // tested, but might need tweaking in the future.
+                        captionElement.style.bottom =
+                            file.metadata.fileType === FileType.video
+                                ? "48px"
+                                : "0";
                     }),
             });
         });
