@@ -58,6 +58,10 @@ export interface FileViewerFileAnnotation {
      * and the edit action should therefore be shown for this file.
      */
     isEditableImage: boolean;
+    /**
+     * The caption ("description") of the file (if any).
+     */
+    caption: string | undefined;
 }
 
 export interface FileViewerPhotoSwipeDelegate {
@@ -625,8 +629,8 @@ export class FileViewerPhotoSwipe {
                 html: "<p/>",
                 onInit: (captionElement, pswp) =>
                     pswp.on("change", () => {
-                        const { file } = pswp.currSlide.content.data;
-                        captionElement.innerText = `${file}`;
+                        captionElement.innerText =
+                            currentFileAnnotation().caption ?? "";
                     }),
             });
         });

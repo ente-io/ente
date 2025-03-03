@@ -35,6 +35,7 @@ import {
 import { formattedByteSize } from "@/gallery/utils/units";
 import { type EnteFile } from "@/media/file";
 import {
+    fileCaption,
     fileCreationPhotoDate,
     fileLocation,
     filePublicMagicMetadata,
@@ -536,7 +537,7 @@ const Caption: React.FC<CaptionProps> = ({
 }) => {
     const [isSaving, setIsSaving] = useState(false);
 
-    const caption = file.pubMagicMetadata?.data.caption ?? "";
+    const caption = fileCaption(file) ?? "";
 
     const formik = useFormik<{ caption: string }>({
         initialValues: { caption },
