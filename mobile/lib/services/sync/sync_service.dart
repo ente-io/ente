@@ -9,20 +9,15 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network/network.dart';
-import 'package:photos/db/device_files_db.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
-import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/services/filedata/filedata_service.dart";
-import "package:photos/services/files_service.dart";
-import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/notification_service.dart';
-import 'package:photos/services/remote_sync_service.dart';
+import 'package:photos/services/sync/local_sync_service.dart';
+import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,7 +25,6 @@ class SyncService {
   final _logger = Logger("SyncService");
   final _localSyncService = LocalSyncService.instance;
   final _remoteSyncService = RemoteSyncService.instance;
-  final _enteDio = NetworkClient.instance.enteDio;
   final _uploader = FileUploader.instance;
   bool _syncStopRequested = false;
   Completer<bool>? _existingSync;
@@ -200,39 +194,6 @@ class SyncService {
       },
       UserCancelledUploadError(),
     );
-  }
-
-  Future<BackupStatus> getBackupStatus({String? pathID}) async {
-    BackedUpFileIDs ids;
-    final bool hasMigratedSize = await FilesService.instance.hasMigratedSizes();
-    if (pathID == null) {
-      ids = await FilesDB.instance.getBackedUpIDs();
-    } else {
-      ids = await FilesDB.instance.getBackedUpForDeviceCollection(
-        pathID,
-        Configuration.instance.getUserID()!,
-      );
-    }
-    late int size;
-    if (hasMigratedSize) {
-      size = ids.localSize;
-    } else {
-      size = await _getFileSize(ids.uploadedIDs);
-    }
-    return BackupStatus(ids.localIDs, size);
-  }
-
-  Future<int> _getFileSize(List<int> fileIDs) async {
-    try {
-      final response = await _enteDio.post(
-        "/files/size",
-        data: {"fileIDs": fileIDs},
-      );
-      return response.data["size"];
-    } catch (e) {
-      _logger.severe(e);
-      rethrow;
-    }
   }
 
   Future<void> _doSync() async {

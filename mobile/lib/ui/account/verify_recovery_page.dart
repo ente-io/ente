@@ -8,8 +8,8 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/notification_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
+import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/local_authentication_service.dart';
-import 'package:photos/services/user_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/gradient_button.dart';
@@ -40,7 +40,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
       final String recoveryKeyWords = bip39.entropyToMnemonic(recoveryKey);
       if (inputKey == recoveryKey || inputKey == recoveryKeyWords) {
         try {
-          await userRemoteFlagService.markRecoveryVerificationAsDone();
+          await flagService.setRecoveryKeyVerified(true);
         } catch (e) {
           await dialog.hide();
           if (e is DioException && e.type == DioExceptionType.connectionError) {

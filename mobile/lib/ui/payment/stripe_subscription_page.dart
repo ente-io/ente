@@ -10,7 +10,7 @@ import 'package:photos/models/api/billing/billing_plan.dart';
 import 'package:photos/models/api/billing/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import "package:photos/service_locator.dart";
-import 'package:photos/services/user_service.dart';
+import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -164,8 +164,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TitleBarTitleWidget(
-                  title:
-                      widget.isOnboarding ? S.of(context).selectYourPlan : S.of(context).subscription,
+                  title: widget.isOnboarding
+                      ? S.of(context).selectYourPlan
+                      : S.of(context).subscription,
                 ),
                 _isFreePlanUser() || !_hasLoadedData
                     ? const SizedBox.shrink()

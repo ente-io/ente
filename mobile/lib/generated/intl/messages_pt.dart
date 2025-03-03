@@ -2104,7 +2104,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "O código de verificação expirou"),
         "youveNoDuplicateFilesThatCanBeCleared":
             MessageLookupByLibrary.simpleMessage(
-                "Você não tem arquivos duplicados que possam ser limpos"),
+                "Você não possui nenhum arquivo duplicado que possa ser excluído"),
         "youveNoFilesInThisAlbumThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage(
                 "Você não tem arquivos neste álbum que possam ser excluídos"),

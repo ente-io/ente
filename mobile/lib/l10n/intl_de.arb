@@ -525,7 +525,6 @@
   "viewLargeFiles": "Große Dateien",
   "viewLargeFilesDesc": "Dateien anzeigen, die den meisten Speicherplatz belegen.",
   "noDuplicates": "✨ Keine Duplikate",
-  "youveNoDuplicateFilesThatCanBeCleared": "Du hast keine Duplikate, die gelöscht werden können",
   "success": "Abgeschlossen",
   "rateUs": "Bewerte uns",
   "remindToEmptyDeviceTrash": "Lösche auch Dateien aus \"Kürzlich gelöscht\" unter \"Einstellungen\" -> \"Speicher\" um freien Speicher zu erhalten",

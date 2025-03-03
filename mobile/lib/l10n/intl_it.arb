@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Inserisci il tuo indirizzo email",
   "accountWelcomeBack": "Bentornato!",
+  "emailAlreadyRegistered": "Email già registrata.",
+  "emailNotRegistered": "Email non registrata.",
   "email": "Email",
   "cancel": "Annulla",
   "verify": "Verifica",
@@ -523,7 +525,6 @@
   "viewLargeFiles": "File di grandi dimensioni",
   "viewLargeFilesDesc": "Visualizza i file che stanno occupando la maggior parte dello spazio di archiviazione.",
   "noDuplicates": "✨ Nessun doppione",
-  "youveNoDuplicateFilesThatCanBeCleared": "Non hai file duplicati che possono essere cancellati",
   "success": "Operazione riuscita",
   "rateUs": "Lascia una recensione",
   "remindToEmptyDeviceTrash": "Vuota anche \"Cancellati di recente\" da \"Impostazioni\" -> \"Storage\" per avere più spazio libero",
@@ -693,6 +694,7 @@
   "preserveMore": "Salva più foto",
   "grantFullAccessPrompt": "Consenti l'accesso a tutte le foto nelle Impostazioni",
   "allowPermTitle": "Consenti l'accesso alle foto",
+  "allowPermBody": "Permetti l'accesso alle tue foto da Impostazioni in modo che Ente possa visualizzare e fare il backup della tua libreria.",
   "openSettings": "Apri Impostazioni",
   "selectMorePhotos": "Seleziona più foto",
   "existingUser": "Accedi",
@@ -1246,6 +1248,7 @@
   "waitingForVerification": "In attesa di verifica...",
   "passkey": "Passkey",
   "passkeyAuthTitle": "Verifica della passkey",
+  "loginWithTOTP": "Login con TOTP",
   "passKeyPendingVerification": "La verifica è ancora in corso",
   "loginSessionExpired": "Sessione scaduta",
   "loginSessionExpiredDetails": "La sessione è scaduta. Si prega di accedere nuovamente.",
@@ -1488,7 +1491,11 @@
   "newLocation": "Nuova posizione",
   "faceNotClusteredYet": "Faccia non ancora raggruppata, per favore torna più tardi",
   "openFile": "Apri file",
+  "backupFile": "File di backup",
+  "openAlbumInBrowser": "Apri album nel browser",
+  "openAlbumInBrowserTitle": "Utilizza l'app web per aggiungere foto a questo album",
   "allow": "Consenti",
+  "allowAppToOpenSharedAlbumLinks": "Consenti all'app di aprire link all'album condiviso",
   "emergencyContacts": "Contatti di emergenza",
   "acceptTrustInvite": "Accetta l'invito",
   "declineTrustInvite": "Rifiuta l'invito",
@@ -1551,5 +1558,46 @@
   "authToManageLegacy": "Autenticati per gestire i tuoi contatti fidati",
   "useDifferentPlayerInfo": "Hai problemi a riprodurre questo video? Premi a lungo qui per provare un altro lettore.",
   "hideSharedItemsFromHomeGallery": "Nascondi gli elementi condivisi dalla galleria principale",
-  "gallery": "Galleria"
+  "gallery": "Galleria",
+  "accountOwnerPersonAppbarTitle": "{title} (Io)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignMe": "Riassegna \"Io\"",
+  "me": "Io",
+  "linkEmailToContactBannerCaption": "per una condivisione più veloce",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "Seleziona persona da collegare",
+  "linkPersonToEmail": "Collega persona a {email}",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "reassigningLoading": "Riassegnando...",
+  "reassignedToName": "Riassegnato a {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dontSave": "Non salvare",
+  "thisIsMeExclamation": "Questo sono io!",
+  "linkPerson": "Collega persona",
+  "linkPersonCaption": "per una migliore esperienza di condivisione",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "processingVideos": "Elaborando video"
 }

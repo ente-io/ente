@@ -3,7 +3,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/notification_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -153,10 +152,7 @@ class _EnableMachineLearningConsentState
 
   Future<void> enableMlConsent(BuildContext context) async {
     try {
-      await userRemoteFlagService.setBoolValue(
-        UserRemoteFlagService.mlEnabled,
-        true,
-      );
+      await flagService.setMLConsent(true);
       Bus.instance.fire(NotificationEvent());
       Navigator.of(context).pop(true);
     } catch (e) {

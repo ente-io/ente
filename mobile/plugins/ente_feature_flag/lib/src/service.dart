@@ -1,5 +1,6 @@
 // ignore_for_file: always_use_package_imports
 
+import "dart:async";
 import "dart:convert";
 import "dart:developer";
 import "dart:io";
@@ -13,10 +14,8 @@ import "model.dart";
 class FlagService {
   final SharedPreferences _prefs;
   final Dio _enteDio;
-  late final bool _usingEnteEmail;
 
   FlagService(this._prefs, this._enteDio) {
-    _usingEnteEmail = _prefs.getString("email")?.endsWith("@ente.io") ?? false;
     Future.delayed(const Duration(seconds: 5), () {
       _fetch();
     });
@@ -39,25 +38,9 @@ class FlagService {
     }
   }
 
-  Future<void> _fetch() async {
-    try {
-      if (!_prefs.containsKey("token")) {
-        log("token not found, skip", name: "FlagService");
-        return;
-      }
-      log("fetching feature flags", name: "FlagService");
-      final response = await _enteDio.get("/remote-store/feature-flags");
-      final remoteFlags = RemoteFlags.fromMap(response.data);
-      await _prefs.setString("remote_flags", remoteFlags.toJson());
-      _flags = remoteFlags;
-    } catch (e) {
-      debugPrint("Failed to sync feature flags $e");
-    }
-  }
-
   bool get disableCFWorker => flags.disableCFWorker;
 
-  bool get internalUser => flags.internalUser || _usingEnteEmail || kDebugMode;
+  bool get internalUser => flags.internalUser || kDebugMode;
 
   bool get betaUser => flags.betaUser;
 
@@ -76,4 +59,70 @@ class FlagService {
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 
   String get castUrl => flags.castUrl;
+
+  Future<void> setMapEnabled(bool isEnabled) async {
+    await _updateKeyValue("mapEnabled", isEnabled.toString());
+    _updateFlags(flags.copyWith(mapEnabled: isEnabled));
+  }
+
+  Future<void> setMLConsent(bool isEnabled) async {
+    await _updateKeyValue("faceSearchEnabled", isEnabled.toString());
+    _updateFlags(flags.copyWith(faceSearchEnabled: isEnabled));
+  }
+
+  Future<void> setRecoveryKeyVerified(bool isVerified) async {
+    await _updateKeyValue("recoveryKeyVerified", isVerified.toString());
+    _updateFlags(flags.copyWith(recoveryKeyVerified: isVerified));
+  }
+
+  Completer<void>? _fetchCompleter;
+  Future<void> _fetch() async {
+    if (_fetchCompleter != null) {
+      await _fetchCompleter!.future;
+      return;
+    }
+    _fetchCompleter = Completer<void>();
+    try {
+      if (!_prefs.containsKey("token")) {
+        log("token not found, skip", name: "FlagService");
+        _fetchCompleter!.complete();
+        _fetchCompleter = null;
+        return;
+      }
+      log("fetching feature flags", name: "FlagService");
+      final response = await _enteDio.get("/remote-store/feature-flags");
+      final remoteFlags = RemoteFlags.fromMap(response.data);
+      await _prefs.setString("remote_flags", remoteFlags.toJson());
+      _flags = remoteFlags;
+    } catch (e) {
+      debugPrint("Failed to sync feature flags $e");
+    } finally {
+      _fetchCompleter!.complete();
+      _fetchCompleter = null;
+    }
+  }
+
+  Future<void> _updateKeyValue(String key, String value) async {
+    try {
+      final response = await _enteDio.post(
+        "/remote-store/update",
+        data: {
+          "key": key,
+          "value": value,
+        },
+      );
+      if (response.statusCode != HttpStatus.ok) {
+        throw Exception("Unexpected state");
+      }
+    } catch (e) {
+      debugPrint("Failed to set flag for $key $e");
+      rethrow;
+    }
+  }
+
+  void _updateFlags(RemoteFlags flags) {
+    _flags = flags;
+    _prefs.setString("remote_flags", flags.toJson());
+    _fetch().ignore();
+  }
 }

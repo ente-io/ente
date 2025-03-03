@@ -31,7 +31,7 @@ import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/remote_pull/collection_files.dart";
 import "package:photos/services/remote_pull/remote_pull.dart";
-import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';

@@ -2121,9 +2121,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Dein Abonnement wurde erfolgreich aktualisiert."),
         "yourVerificationCodeHasExpired": MessageLookupByLibrary.simpleMessage(
             "Ihr Bestätigungscode ist abgelaufen"),
-        "youveNoDuplicateFilesThatCanBeCleared":
-            MessageLookupByLibrary.simpleMessage(
-                "Du hast keine Duplikate, die gelöscht werden können"),
         "youveNoFilesInThisAlbumThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage(
                 "Du hast keine Dateien in diesem Album, die gelöscht werden können"),

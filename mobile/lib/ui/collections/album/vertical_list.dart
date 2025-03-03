@@ -11,7 +11,7 @@ import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/hidden_service.dart";
-import 'package:photos/services/remote_sync_service.dart';
+import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/collections/album/column_item.dart";

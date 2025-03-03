@@ -6,9 +6,9 @@ import "package:dio/dio.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/log/devlog.dart";
 import "package:photos/models/api/diff/diff.dart";
-import "package:photos/utils/file_uploader_util.dart";
 
 class CollectionFilesService {
   final Logger _logger = Logger("CollectionFilesService");

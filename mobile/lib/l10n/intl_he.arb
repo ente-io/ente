@@ -462,7 +462,6 @@
   "noDeviceThatCanBeDeleted": "אין לך קבצים במכשיר הזה שניתן למחוק אותם",
   "removeDuplicates": "הסר כפילויות",
   "noDuplicates": "✨ אין כפילויות",
-  "youveNoDuplicateFilesThatCanBeCleared": "אין לך קבצים כפולים שניתן לנקות אותם",
   "success": "הצלחה",
   "rateUs": "דרג אותנו",
   "remindToEmptyDeviceTrash": "גם נקה \"נמחק לאחרונה\" מ-\"הגדרות\" -> \"אחסון\" על מנת לקבל המקום אחסון שהתפנה",

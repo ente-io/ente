@@ -499,7 +499,6 @@
   "appLockOfflineModeWarning": "Yedekleme olmadan devam etmeyi seçtiniz. Eğer uygulama parolanızı unutursanız, verilerinize erişiminiz engellenir.",
   "duplicateCodes": "Yinelenen kodlar",
   "noDuplicates": "✨ Yinelenen yok",
-  "youveNoDuplicateCodesThatCanBeCleared": "Temizlenebilecek yinelenen kodunuz yok",
   "deduplicateCodes": "Kodları tekilleştir",
   "deselectAll": "Tümünün seçimini kaldır",
   "selectAll": "Tümünü seç",

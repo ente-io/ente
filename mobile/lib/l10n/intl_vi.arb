@@ -525,7 +525,6 @@
   "viewLargeFiles": "Tệp lớn",
   "viewLargeFilesDesc": "Xem các tệp đang tiêu tốn nhiều dung lượng lưu trữ nhất.",
   "noDuplicates": "✨ Không có trùng lặp",
-  "youveNoDuplicateFilesThatCanBeCleared": "Bạn không có tệp trùng lặp nào có thể được xóa",
   "success": "Thành công",
   "rateUs": "Đánh giá chúng tôi",
   "remindToEmptyDeviceTrash": "Cũng hãy xóa \"Đã xóa gần đây\" từ \"Cài đặt\" -> \"Lưu trữ\" để chiếm không gian đã giải phóng",

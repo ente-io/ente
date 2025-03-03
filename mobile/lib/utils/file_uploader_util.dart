@@ -31,7 +31,6 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 
 final _logger = Logger("FileUtil");
 const kMaximumThumbnailCompressionAttempts = 2;
-const kLivePhotoHashSeparator = ':';
 
 class MediaUploadData {
   final File? sourceFile;
