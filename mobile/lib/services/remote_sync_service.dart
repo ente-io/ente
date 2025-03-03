@@ -26,12 +26,13 @@ import 'package:photos/models/upload_strategy.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/diff/diff_fetcher.dart';
-import "package:photos/services/diff/remote_pull.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
+import "package:photos/services/remote_pull/collection_files.dart";
+import "package:photos/services/remote_pull/remote_pull.dart";
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -81,8 +82,11 @@ class RemoteSyncService {
 
   void init(SharedPreferences preferences) {
     _prefs = preferences;
-    newService =
-        RemoteDiffService(NetworkClient.instance.enteDio, _collectionsService);
+    newService = RemoteDiffService(
+      NetworkClient.instance.enteDio,
+      _collectionsService,
+      CollectionFilesService(NetworkClient.instance.enteDio),
+    );
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
       if (event.type == EventType.addedOrUpdated) {
