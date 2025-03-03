@@ -7,10 +7,10 @@ import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { t } from "i18next";
 import {
-    forgetExif,
+    fileViewerDidClose,
+    fileViewerWillOpen,
     forgetExifForItemData,
     forgetFailedItemDataForFileID,
-    forgetFailedItems,
     itemDataForFile,
     updateFileInfoExifIfNeeded,
 } from "./data-source";
@@ -58,10 +58,6 @@ export interface FileViewerFileAnnotation {
      * and the edit action should therefore be shown for this file.
      */
     isEditableImage: boolean;
-    /**
-     * The caption ("description") of the file (if any).
-     */
-    caption: string | undefined;
 }
 
 export interface FileViewerPhotoSwipeDelegate {
@@ -464,8 +460,7 @@ export class FileViewerPhotoSwipe {
         // completed.
         pswp.on("destroy", () => {
             this.clearAutoHideIntervalIfNeeded();
-            forgetFailedItems();
-            forgetExif();
+            fileViewerDidClose();
             // Let our parent know that we have been closed.
             onClose();
         });
@@ -653,6 +648,9 @@ export class FileViewerPhotoSwipe {
             }
             return element;
         });
+
+        // Let our data source know.
+        fileViewerWillOpen();
 
         // Initializing PhotoSwipe adds it to the DOM as a dialog-like div with
         // the class "pswp".

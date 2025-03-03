@@ -213,7 +213,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleClose = useCallback(() => {
         setNeedsSync((needSync) => {
-            console.log("needs sync", needSync);
             if (needSync) onTriggerSyncWithRemote?.();
             return false;
         });

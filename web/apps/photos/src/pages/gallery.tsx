@@ -18,6 +18,7 @@ import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "@/new/photos/components/CollectionSelector";
+import { resetFileViewerDataSourceOnClose } from "@/new/photos/components/FileViewerComponents-temp";
 import { PlanSelector } from "@/new/photos/components/PlanSelector";
 import {
     SearchBar,
@@ -564,11 +565,14 @@ const Page: React.FC = () => {
                     (hiddenFiles) =>
                         dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
                 );
-                if (didUpdateNormalFiles || didUpdateHiddenFiles)
-                    exportService.onLocalFilesUpdated();
                 await syncTrash(allCollections, (trashedFiles: EnteFile[]) =>
                     dispatch({ type: "setTrashedFiles", trashedFiles }),
                 );
+                if (didUpdateNormalFiles || didUpdateHiddenFiles) {
+                    exportService.onLocalFilesUpdated();
+                    // TODO(PS): Use direct one
+                    resetFileViewerDataSourceOnClose();
+                }
                 // syncWithRemote is called with the force flag set to true before
                 // doing an upload. So it is possible, say when resuming a pending
                 // upload, that we get two syncWithRemotes happening in parallel.
