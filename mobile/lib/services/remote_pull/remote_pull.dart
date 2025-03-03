@@ -63,23 +63,26 @@ class RemoteDiffService {
     }
     final Uint8List collectionKey =
         _collectionsService.getCollectionKey(collectionID);
-    final diff = await collectionFiles.getCollectionItemsDiff(
-      collectionID,
-      sinceTime,
-      collectionKey,
-    );
-    await remoteDB.deleteCollectionFilesDiff(diff.deletedItems);
-    await remoteDB.insertCollectionFilesDiff(diff.updatedItems);
-    await _collectionsService.setCollectionSyncTime(
-      collectionID,
-      max(diff.maxUpdatedAtTime, sinceTime),
-    );
-    _logger.fine("[Collection-$collectionID] synced $diff");
-    if (diff.hasMore) {
-      return await _syncCollectionFiles(
+    int currentSinceTime = sinceTime;
+    bool hasMore = true;
+    while (hasMore) {
+      final diff = await collectionFiles.getCollectionItemsDiff(
         collectionID,
-        _collectionsService.getCollectionSyncTime(collectionID),
+        currentSinceTime,
+        collectionKey,
       );
+      await remoteDB.deleteCollectionFilesDiff(diff.deletedItems);
+      await remoteDB.insertCollectionFilesDiff(diff.updatedItems);
+      final int nextSyncFrom = max(diff.maxUpdatedAtTime, currentSinceTime);
+      await _collectionsService.setCollectionSyncTime(
+        collectionID,
+        nextSyncFrom,
+      );
+      _logger.fine("[Collection-$collectionID] synced $diff");
+      hasMore = diff.hasMore;
+      if (hasMore) {
+        currentSinceTime = nextSyncFrom;
+      }
     }
   }
 }
