@@ -29,6 +29,9 @@ class FileDataService {
     _prefs = prefs;
   }
 
+  /// Used to not sync preview ids everytime a chunking and preview
+  /// upload is successful, instead update the local copy of those
+  /// preview ids
   void appendPreview(int id) {
     if (previewIds?.containsKey(id) ?? false) return;
     previewIds ??= {};
