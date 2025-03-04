@@ -307,7 +307,7 @@ class UploadLocksDB {
     );
   }
 
-  Future<void> createStreamEntry(
+  Future<void> appendStreamEntry(
     int uploadedFileID,
     String errorMessage,
   ) async {
@@ -321,6 +321,7 @@ class UploadLocksDB {
         _streamUploadErrorTable.columnLastAttemptedAt:
             DateTime.now().millisecondsSinceEpoch,
       },
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 

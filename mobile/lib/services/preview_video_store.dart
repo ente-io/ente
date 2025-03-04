@@ -417,12 +417,12 @@ class PreviewVideoStore {
           _failureFiles?.contains(enteFile.uploadedFileID!) ?? false;
 
       if (isFailurePresent) {
-        UploadLocksDB.instance.updateStreamStatus(
+        UploadLocksDB.instance.appendStreamEntry(
           enteFile.uploadedFileID!,
           error.toString(),
         );
       } else {
-        UploadLocksDB.instance.createStreamEntry(
+        UploadLocksDB.instance.appendStreamEntry(
           enteFile.uploadedFileID!,
           error.toString(),
         );
