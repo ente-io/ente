@@ -225,8 +225,20 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const { show: showConfirmDelete, props: confirmDeleteVisibilityProps } =
         useModalVisibility();
 
+    // Callbacks to be invoked (only once) the next time we get an update to the
+    // `files` prop.
+    const [, setOnNextFilesUpdate] = useState<(() => void)[]>([]);
+
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
+
+    /**
+     * Add a callback to be fired (only once) the next time we get an update to
+     * the `files` prop.
+     */
+    const awaitNextFilesUpdate = useCallback((cb: () => void) => {
+        setOnNextFilesUpdate((cbs) => cbs.concat(cb));
+    }, []);
 
     const handleClose = useCallback(() => {
         setNeedsSync((needSync) => {
@@ -288,18 +300,23 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const handleDelete = async () => {
         const file = activeAnnotatedFile!.file;
         await onDelete(file);
+        // Be careful here. This works currently, deterministically, but it
+        // relies on the assumption that `onDelete` will asynchronously result
+        // in updates to the `files` prop.
+        awaitNextFilesUpdate(() => {
+            // Refreshing the current slide after the current file has gone will
+            // show the subsequent slide (since that will move down to the current
+            // index). TODO: What if it's the last file?
+            psRef.current!.refreshCurrentSlideContent();
+
+            handleNeedsRemoteSync();
+        });
         // TODO: We currently have a setTimeout to ensure that the updated
         // `files` prop has made its way to us delegate before we query for the
         // status again.
         //
         // See: [Note: File viewer action setTimeout TODO]
-        await new Promise((r) => setTimeout(r, 100));
-        // Refreshing the current slide after the current file has gone will
-        // show the subsequent slide (since that will move down to the current
-        // index). TODO: What if it's the last file?
-        psRef.current!.refreshCurrentSlideContent();
-
-        handleNeedsRemoteSync();
+        // await new Promise((r) => setTimeout(r, 100));
     };
 
     const handleEditImage = useMemo(() => {
@@ -410,6 +427,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
         delegate.isFavorite = isFavorite;
         delegate.toggleFavorite = toggleFavorite;
     }, [getFiles, isFavorite, toggleFavorite]);
+
+    // Notify the listeners, if any, for updates to files.
+    useEffect(() => {
+        setOnNextFilesUpdate((cbs) => {
+            cbs.forEach((cb) => cb());
+            return [];
+        });
+    }, [files]);
 
     useEffect(() => {
         if (open) {
