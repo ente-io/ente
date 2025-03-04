@@ -29,6 +29,18 @@ class FileDataService {
     _prefs = prefs;
   }
 
+  /// Used to not sync preview ids everytime a chunking and preview
+  /// upload is successful, instead update the local copy of those
+  /// preview ids
+  void appendPreview(int id, String objectId, int objectSize) {
+    if (previewIds?.containsKey(id) ?? false) return;
+    previewIds ??= {};
+    previewIds?[id] = PreviewInfo(
+      objectId: objectId,
+      objectSize: objectSize,
+    );
+  }
+
   Future<void> putFileData(EnteFile file, FileDataEntity data) async {
     data.validate();
     final ChaChaEncryptionResult encryptionResult = await gzipAndEncryptJson(

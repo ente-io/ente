@@ -9,9 +9,11 @@ import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
+import "package:photos/events/stream_switched_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -28,6 +30,8 @@ class VideoWidgetMediaKitNew extends StatefulWidget {
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
   final void Function() onStreamChange;
+  final File? preview;
+  final bool selectedPreview;
 
   const VideoWidgetMediaKitNew(
     this.file, {
@@ -35,6 +39,8 @@ class VideoWidgetMediaKitNew extends StatefulWidget {
     this.playbackCallback,
     this.isFromMemories = false,
     required this.onStreamChange,
+    this.preview,
+    required this.selectedPreview,
     super.key,
   });
 
@@ -53,6 +59,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   bool _isGuestView = false;
+  StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
 
   @override
   void initState() {
@@ -61,6 +68,38 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    if (widget.selectedPreview) {
+      loadPreview();
+    } else {
+      loadOriginal();
+    }
+
+    pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
+      player.pause();
+    });
+    _guestViewEventSubscription =
+        Bus.instance.on<GuestViewEvent>().listen((event) {
+      setState(() {
+        _isGuestView = event.isGuestView;
+      });
+    });
+    _streamSwitchedSubscription =
+        Bus.instance.on<StreamSwitchedEvent>().listen((event) {
+      if (event.type != PlayerType.mediaKit || !mounted) return;
+      if (event.selectedPreview) {
+        loadPreview();
+      } else {
+        loadOriginal();
+      }
+    });
+  }
+
+  void loadPreview() {
+    _setVideoController(widget.preview!.path);
+  }
+
+  void loadOriginal() {
     if (widget.file.isRemoteFile) {
       _loadNetworkVideo();
       _setFileSizeIfNull();
@@ -88,16 +127,6 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
         }
       });
     }
-
-    pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
-      player.pause();
-    });
-    _guestViewEventSubscription =
-        Bus.instance.on<GuestViewEvent>().listen((event) {
-      setState(() {
-        _isGuestView = event.isGuestView;
-      });
-    });
   }
 
   @override
@@ -111,6 +140,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
 
   @override
   void dispose() {
+    _streamSwitchedSubscription?.cancel();
     _guestViewEventSubscription.cancel();
     pauseVideoSubscription.cancel();
     removeCallBack(widget.file);
@@ -143,6 +173,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
                 widget.playbackCallback,
                 isFromMemories: widget.isFromMemories,
                 onStreamChange: widget.onStreamChange,
+                isPreviewPlayer: widget.selectedPreview,
               )
             : const Center(
                 child: EnteLoadingWidget(
@@ -198,8 +229,14 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
   void _setVideoController(String url) {
     if (mounted) {
       setState(() {
-        player.setPlaylistMode(PlaylistMode.single);
-        controller = VideoController(player);
+        if (controller == null) {
+          player.setPlaylistMode(
+            localSettings.shouldLoopVideo()
+                ? PlaylistMode.single
+                : PlaylistMode.none,
+          );
+          controller = VideoController(player);
+        }
         player.open(Media(url), play: _isAppInFG);
       });
     }

@@ -12,18 +12,15 @@ allprojects {
             url "${project(':background_fetch').projectDir}/libs"
         }
     }
-    ext {
-        compileSdkVersion   = 34
-        targetSdkVersion    = 34
-        appCompatVersion    = "1.7.0"
-    }
 }
 
-rootProject.buildDir = '../build'
+rootProject.buildDir = "../build"
 
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-    project.evaluationDependsOn(':app')
+}
+subprojects {
+    project.evaluationDependsOn(":app")
 }
 
 tasks.register("clean", Delete) {

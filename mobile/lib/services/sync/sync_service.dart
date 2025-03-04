@@ -14,7 +14,6 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/notification_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
@@ -81,7 +80,6 @@ class SyncService {
     _existingSync = Completer<bool>();
     bool successful = false;
     try {
-      FileDataService.instance.syncFDStatus().ignore();
       await _doSync();
       if (_lastSyncStatusEvent != null &&
           _lastSyncStatusEvent!.status !=
