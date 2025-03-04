@@ -278,6 +278,7 @@ const PhotoFrame = ({
                       file,
                       true,
                   );
+                  // See: [Note: File viewer update and dispatch]
                   onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
               }
             : undefined;
@@ -287,6 +288,7 @@ const PhotoFrame = ({
         return onMarkTempDeleted
             ? async (file: EnteFile) => {
                   await moveToTrash([file]);
+                  // See: [Note: File viewer update and dispatch]
                   onMarkTempDeleted?.([file]);
               }
             : undefined;
