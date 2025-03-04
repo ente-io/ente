@@ -273,6 +273,9 @@ class PreviewVideoStore {
 
       final returnCode = await session.getReturnCode();
 
+      String? objectId;
+      int? objectSize;
+
       if (ReturnCode.isSuccess(returnCode)) {
         try {
           _items[enteFile.uploadedFileID!] = PreviewItem(
@@ -289,8 +292,8 @@ class PreviewVideoStore {
           final previewFile = File("$prefix/output.ts");
           final result = await _uploadPreviewVideo(enteFile, previewFile);
 
-          final String objectID = result.$1;
-          final objectSize = result.$2;
+          objectId = result.$1;
+          objectSize = result.$2;
 
           // Fetch resolution of generated stream by decrypting a single frame
           final FFmpegSession session2 = await FFmpegKit.execute(
@@ -314,7 +317,7 @@ class PreviewVideoStore {
           await _reportVideoPreview(
             enteFile,
             playlistFile,
-            objectID: objectID,
+            objectId: objectId,
             objectSize: objectSize,
             width: width,
             height: height,
@@ -339,7 +342,11 @@ class PreviewVideoStore {
 
       if (error == null) {
         // update previewIds
-        FileDataService.instance.appendPreview(enteFile.uploadedFileID!);
+        FileDataService.instance.appendPreview(
+          enteFile.uploadedFileID!,
+          objectId!,
+          objectSize!,
+        );
 
         _items[enteFile.uploadedFileID!] = PreviewItem(
           status: PreviewItemStatus.uploaded,
@@ -427,7 +434,7 @@ class PreviewVideoStore {
   Future<void> _reportVideoPreview(
     EnteFile file,
     File playlist, {
-    required String objectID,
+    required String objectId,
     required int objectSize,
     required int? width,
     required int? height,
@@ -450,7 +457,7 @@ class PreviewVideoStore {
         "/files/video-data",
         data: {
           "fileID": file.uploadedFileID!,
-          "objectID": objectID,
+          "objectID": objectId,
           "objectSize": objectSize,
           "playlist": result.encData,
           "playlistHeader": result.header,
