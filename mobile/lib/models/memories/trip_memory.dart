@@ -1,6 +1,6 @@
 import "package:photos/models/location/location.dart";
-import "package:photos/models/memory.dart";
-import "package:photos/models/smart_memory.dart";
+import "package:photos/models/memories/memory.dart";
+import "package:photos/models/memories/smart_memory.dart";
 
 class TripMemory extends SmartMemory {
   final Location location;

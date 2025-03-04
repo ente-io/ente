@@ -1,5 +1,5 @@
-import "package:photos/models/memory.dart";
-import "package:photos/models/smart_memory.dart";
+import "package:photos/models/memories/memory.dart";
+import "package:photos/models/memories/smart_memory.dart";
 
 enum PeopleMemoryType {
   youAndThem,

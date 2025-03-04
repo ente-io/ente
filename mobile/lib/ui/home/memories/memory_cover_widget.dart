@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/memory.dart";
+import "package:photos/models/memories/memory.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";

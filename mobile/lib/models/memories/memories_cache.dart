@@ -1,9 +1,9 @@
 import "dart:convert";
 
 import "package:photos/models/location/location.dart";
-import "package:photos/models/people_memory.dart";
-import "package:photos/models/smart_memory.dart";
-import "package:photos/models/trip_memory.dart";
+import "package:photos/models/memories/people_memory.dart";
+import "package:photos/models/memories/smart_memory.dart";
+import "package:photos/models/memories/trip_memory.dart";
 
 const kPersonShowTimeout = Duration(days: 7 * 10);
 const kPersonAndTypeShowTimeout = Duration(days: 7 * 26);

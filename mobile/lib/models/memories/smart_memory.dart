@@ -1,4 +1,4 @@
-import "package:photos/models/memory.dart";
+import "package:photos/models/memories/memory.dart";
 
 const kMemoriesUpdateFrequency = Duration(days: 7);
 const kMemoriesMargin = Duration(days: 2);

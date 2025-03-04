@@ -1,8 +1,8 @@
-import "package:photos/models/memory.dart";
-import "package:photos/models/smart_memory.dart";
+import "package:photos/models/memories/memory.dart";
+import "package:photos/models/memories/smart_memory.dart";
 
-class TimeMemory extends SmartMemory {
-  TimeMemory(
+class FillerMemory extends SmartMemory {
+  FillerMemory(
     List<Memory> memories,
     String title,
     int firstDateToShow,
@@ -11,7 +11,7 @@ class TimeMemory extends SmartMemory {
     int? lastCreationTime,
   }) : super(
           memories,
-          MemoryType.time,
+          MemoryType.filler,
           title,
           firstDateToShow,
           lastDateToShow,
