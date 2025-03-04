@@ -10,9 +10,10 @@ import { SingleInputDialog } from "@/base/components/SingleInputDialog";
 import { Titlebar } from "@/base/components/Titlebar";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
+import { formattedDateTime } from "@/base/i18n-date";
 import log from "@/base/log";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
-import { formatDateTimeFull } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -28,10 +29,9 @@ import {
     renamePasskey,
     type Passkey,
 } from "services/passkey";
-import { useAppContext } from "../../types/context";
 
 const Page: React.FC = () => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const [token, setToken] = useState<string | undefined>();
     const [passkeys, setPasskeys] = useState<Passkey[]>([]);
@@ -252,7 +252,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     passkey,
     onUpdateOrDeletePasskey,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { show: showRenameDialog, props: renameDialogVisibilityProps } =
         useModalVisibility();
@@ -293,7 +293,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                             onRootClose={onClose}
                         />
                         <CreatedAtEntry>
-                            {formatDateTimeFull(passkey.createdAt / 1000)}
+                            {formattedDateTime(passkey.createdAt)}
                         </CreatedAtEntry>
                         <RowButtonGroup>
                             <RowButton

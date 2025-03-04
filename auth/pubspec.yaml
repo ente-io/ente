@@ -21,7 +21,7 @@ dependencies:
   connectivity_plus: ^6.0.5
   convert: ^3.1.1
   device_info_plus: ^9.1.1
-  dio: ^5.4.0
+  dio: ^5.8.0+1
   dotted_border: ^2.0.0+2
   dropdown_button2: ^2.3.9
   email_validator: ^3.0.0
@@ -72,6 +72,7 @@ dependencies:
   logging: ^1.0.1
   modal_bottom_sheet: ^3.0.0
   move_to_background: ^1.0.2
+  native_dio_adapter: ^1.4.0
   otp: ^3.1.1
   package_info_plus: ^8.0.2
   password_strength: ^0.2.0

@@ -504,7 +504,6 @@
   "removeDuplicatesDesc": "Просмотрите и удалите точные дубликаты.",
   "viewLargeFiles": "Большие файлы",
   "noDuplicates": "✨ Дубликатов нет",
-  "youveNoDuplicateFilesThatCanBeCleared": "У вас нет дубликатов файлов, которые можно очистить",
   "success": "Успешно",
   "rateUs": "Оцените нас",
   "remindToEmptyDeviceTrash": "Также очистите \"Недавно удалённые\" из \"Настройки\" -> \"Хранилище\", чтобы получить больше свободного места",
@@ -1462,6 +1461,5 @@
   "removeInvite": "Удалить приглашение",
   "recoveryWarning": "Доверенный контакт пытается получить доступ к вашей учетной записи",
   "rejectRecovery": "Отклонить восстановление",
-  "recoveryInitiated": "Восстановление запущено",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "recoveryInitiated": "Восстановление запущено"
 }

@@ -1733,6 +1733,7 @@ class FilesDB {
   Future<List<EnteFile>> getAllFilesAfterDate({
     required FileType fileType,
     required DateTime beginDate,
+    required int userID,
   }) async {
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
@@ -1741,6 +1742,7 @@ class FilesDB {
       WHERE $columnFileType = ?
       AND $columnCreationTime > ?
       AND $columnUploadedFileID  != -1
+      AND $columnOwnerID = $userID
       ORDER BY $columnCreationTime DESC
     ''',
       [getInt(fileType), beginDate.microsecondsSinceEpoch],

@@ -2,6 +2,7 @@ import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
+import { extractExifDates } from "@/gallery/services/exif";
 import { fileLogID, type EnteFile } from "@/media/file";
 import {
     decryptPublicMagicMetadata,
@@ -10,8 +11,7 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
-import { extractExifDates } from "@/new/photos/services/exif";
+import { FileDateTimePicker } from "@/new/photos/components/FileDateTimePicker";
 import {
     Dialog,
     DialogContent,
@@ -205,7 +205,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                         />
                     </RadioGroup>
                     {values.option == "custom" && (
-                        <PhotoDateTimePicker
+                        <FileDateTimePicker
                             onAccept={(customDate) =>
                                 setValues({ option: "custom", customDate })
                             }

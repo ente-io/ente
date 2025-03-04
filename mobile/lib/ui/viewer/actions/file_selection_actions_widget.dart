@@ -804,7 +804,7 @@ class _FileSelectionActionsWidgetState
             .getCollectionKey(_cachedCollectionForSharedLink!.id),
       );
       final String url =
-          "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
+          "${_cachedCollectionForSharedLink!.publicURLs.first.url}#$collectionKey";
       unawaited(Clipboard.setData(ClipboardData(text: url)));
       await shareImageAndUrl(
         placeholderBytes,

@@ -1,5 +1,5 @@
 import log from "@/base/log";
-import { masterKeyFromSession } from "@/base/session-store";
+import { masterKeyFromSession } from "@/base/session";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import i18n, { t } from "i18next";
@@ -176,10 +176,10 @@ const localizedSearchData = () =>
  * A list of holidays - their yearly dates and localized names.
  */
 const holidays = (): LabelledSearchDateComponents[] => [
-    { components: { month: 12, day: 25 }, label: t("CHRISTMAS") },
-    { components: { month: 12, day: 24 }, label: t("CHRISTMAS_EVE") },
-    { components: { month: 1, day: 1 }, label: t("NEW_YEAR") },
-    { components: { month: 12, day: 31 }, label: t("NEW_YEAR_EVE") },
+    { components: { month: 12, day: 25 }, label: t("christmas") },
+    { components: { month: 12, day: 24 }, label: t("christmas_eve") },
+    { components: { month: 1, day: 1 }, label: t("new_year") },
+    { components: { month: 12, day: 31 }, label: t("new_year_eve") },
 ];
 
 /**

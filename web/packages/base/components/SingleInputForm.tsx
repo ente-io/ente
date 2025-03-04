@@ -8,7 +8,7 @@ import React from "react";
 
 export type SingleInputFormProps = Pick<
     TextFieldProps,
-    "label" | "placeholder" | "autoComplete" | "autoFocus"
+    "label" | "placeholder" | "autoComplete" | "autoFocus" | "slotProps"
 > & {
     /**
      * The initial value, if any, to prefill in the input.
@@ -43,9 +43,8 @@ export type SingleInputFormProps = Pick<
  * A TextField and two buttons.
  *
  * A common requirement is taking a single textual input from the user. This is
- * a form suitable for that purpose - it is form containing a single MUI
- * {@link TextField}, with two accompanying buttons; one to submit, and one to
- * cancel.
+ * a form suitable for that purpose. It contains a single MUI {@link TextField}
+ * and two accompanying buttons; one to submit, and one to cancel.
  *
  * Submission is handled as an async function, during which the input is
  * disabled and a loading indicator is shown. Errors during submission are shown
@@ -107,7 +106,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 </FocusVisibleButton>
                 <LoadingButton
                     fullWidth
-                    color="accent"
+                    color="primary"
                     type="submit"
                     loading={formik.isSubmitting}
                 >

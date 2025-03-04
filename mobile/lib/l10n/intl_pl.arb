@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Podaj swój adres e-mail",
   "accountWelcomeBack": "Witaj ponownie!",
+  "emailAlreadyRegistered": "Adres e-mail jest już zarejestrowany.",
+  "emailNotRegistered": "Adres e-mail nie jest zarejestrowany.",
   "email": "Adres e-mail",
   "cancel": "Anuluj",
   "verify": "Zweryfikuj",
@@ -185,6 +187,8 @@
   },
   "allowAddPhotosDescription": "Pozwól osobom z linkiem na dodawania zdjęć do udostępnionego albumu.",
   "passwordLock": "Blokada hasłem",
+  "canNotOpenTitle": "Nie można otworzyć tego albumu",
+  "canNotOpenBody": "Przepraszamy, ten album nie może zostać otwarty w aplikacji.",
   "disableDownloadWarningTitle": "Uwaga",
   "disableDownloadWarningBody": "Widzowie mogą nadal robić zrzuty ekranu lub zapisywać kopie zdjęć za pomocą programów trzecich",
   "allowDownloads": "Zezwól na pobieranie",
@@ -351,6 +355,7 @@
   "failedToLoadAlbums": "Nie udało się załadować albumów",
   "hidden": "Ukryte",
   "authToViewYourHiddenFiles": "Prosimy uwierzytelnić się, aby wyświetlić ukryte pliki",
+  "authToViewTrashedFiles": "Prosimy uwierzytelnić się, aby wyświetlić swoje pliki w koszu",
   "trash": "Kosz",
   "uncategorized": "Bez kategorii",
   "videoSmallCase": "wideo",
@@ -520,7 +525,6 @@
   "viewLargeFiles": "Duże pliki",
   "viewLargeFilesDesc": "Wyświetl pliki zużywające największą ilość pamięci.",
   "noDuplicates": "✨ Brak duplikatów",
-  "youveNoDuplicateFilesThatCanBeCleared": "Nie masz duplikatów plików, które mogą być wyczyszczone",
   "success": "Sukces",
   "rateUs": "Oceń nas",
   "remindToEmptyDeviceTrash": "Również opróżnij \"Ostatnio usunięte\" z \"Ustawienia\" -> \"Pamięć\", aby odebrać wolną przestrzeń",
@@ -960,6 +964,14 @@
   "syncStopped": "Synchronizacja zatrzymana",
   "syncProgress": "Zachowano {completed}/{total} wspomnień",
   "uploadingMultipleMemories": "Zachowywanie {count} wspomnień...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "Zachowywanie 1 wspomnienia...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1377,6 +1389,7 @@
   "extraPhotosFound": "Znaleziono dodatkowe zdjęcia",
   "configuration": "Konfiguracja",
   "localIndexing": "Indeksowanie lokalne",
+  "processed": "Przetworzone",
   "resetPerson": "Usuń",
   "areYouSureYouWantToResetThisPerson": "Czy na pewno chcesz zresetować tę osobę?",
   "allPersonGroupingWillReset": "Wszystkie grupy dla tej osoby zostaną zresetowane i stracisz wszystkie sugestie dla tej osoby",
@@ -1578,5 +1591,11 @@
   "legacyInvite": "{email} zaprosił Cię do zostania zaufanym kontaktem",
   "authToManageLegacy": "Prosimy uwierzytelnić się, aby zarządzać zaufanymi kontaktami",
   "useDifferentPlayerInfo": "Masz problem z odtwarzaniem tego wideo? Przytrzymaj tutaj, aby spróbować innego odtwarzacza.",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "gallery": "Galeria",
+  "joinAlbum": "Dołącz do albumu",
+  "joinAlbumSubtext": "aby wyświetlić i dodać swoje zdjęcia",
+  "joinAlbumSubtextViewer": "aby dodać to do udostępnionych albumów",
+  "join": "Dołącz",
+  "linkEmail": "Połącz adres e-mail",
+  "noEnteAccountExclamation": "Brak konta Ente!"
 }

@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
+import 'package:ente_crypto/ente_crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import "package:path/path.dart";
@@ -23,23 +24,21 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/main.dart';
+import "package:photos/models/api/metadata.dart";
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
-import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
-import 'package:photos/models/upload_url.dart';
 import "package:photos/models/user_details.dart";
+import 'package:photos/module/upload/model/upload_url.dart';
 import "package:photos/module/upload/service/multipart.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/file_magic_service.dart";
-import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/preview_video_store.dart";
-import 'package:photos/services/sync_service.dart';
-import "package:photos/services/user_service.dart";
-import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/services/sync/local_sync_service.dart';
+import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/data_util.dart';
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -752,6 +751,12 @@ class FileUploader {
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
       }
+      final stillLocked =
+          await _uploadLocks.isLocked(lockKey, _processType.toString());
+      if (!stillLocked) {
+        _logger.warning('file ${file.tag} report paused is missing');
+        throw LockFreedError();
+      }
 
       EnteFile remoteFile;
       if (isUpdatedFile) {
@@ -1186,12 +1191,15 @@ class FileUploader {
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 413) {
+      final int statusCode = e.response?.statusCode ?? -1;
+      if (statusCode == 413) {
         throw FileTooLargeForPlanError();
-      } else if (e.response?.statusCode == 426) {
+      } else if (statusCode == 426) {
         _onStorageLimitExceeded();
-      } else if (attempt < kMaximumUploadAttempts) {
-        _logger.info("Upload file failed, will retry in 3 seconds");
+      } else if (attempt < kMaximumUploadAttempts && statusCode == -1) {
+        // retry when DioException contains no response/status code
+        _logger
+            .info("Upload file (${file.tag}) failed, will retry in 3 seconds");
         await Future.delayed(const Duration(seconds: 3));
         return _uploadFile(
           file,
@@ -1210,6 +1218,8 @@ class FileUploader {
           attempt: attempt + 1,
           pubMetadata: pubMetadata,
         );
+      } else {
+        _logger.severe("Failed to upload file ${file.tag}", e);
       }
       rethrow;
     }
@@ -1254,10 +1264,12 @@ class FileUploader {
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 426) {
+      final int statusCode = e.response?.statusCode ?? -1;
+      if (statusCode == 426) {
         _onStorageLimitExceeded();
-      } else if (attempt < kMaximumUploadAttempts) {
-        _logger.info("Update file failed, will retry in 3 seconds");
+      } else if (attempt < kMaximumUploadAttempts && statusCode == -1) {
+        _logger
+            .info("Update file (${file.tag}) failed, will retry in 3 seconds");
         await Future.delayed(const Duration(seconds: 3));
         return _updateFile(
           file,
@@ -1271,6 +1283,8 @@ class FileUploader {
           metadataDecryptionHeader,
           attempt: attempt + 1,
         );
+      } else {
+        _logger.severe("Failed to update file ${file.tag}", e);
       }
       rethrow;
     }

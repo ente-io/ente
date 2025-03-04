@@ -7,12 +7,12 @@ import {
 } from "@/base/components/OverflowMenu";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import type { ButtonishProps } from "@/base/components/mui";
+import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { EnteFile } from "@/media/file";
-import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
-import { useAppContext } from "@/new/photos/types/context";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { CustomError } from "@ente/shared/error";
 import FolderIcon from "@mui/icons-material/Folder";
@@ -42,15 +42,15 @@ import ExportInProgress from "./ExportInProgress";
 import ExportInit from "./ExportInit";
 
 type ExportProps = ModalVisibilityProps & {
-    collectionNameMap: Map<number, string>;
+    allCollectionsNameByID: Map<number, string>;
 };
 
 export const Export: React.FC<ExportProps> = ({
     open,
     onClose,
-    collectionNameMap,
+    allCollectionsNameByID,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState("");
     const [continuousExport, setContinuousExport] = useState(false);
@@ -202,7 +202,7 @@ export const Export: React.FC<ExportProps> = ({
                 lastExportTime={lastExportTime}
                 exportProgress={exportProgress}
                 pendingExports={pendingExports}
-                collectionNameMap={collectionNameMap}
+                allCollectionsNameByID={allCollectionsNameByID}
             />
         </Dialog>
     );
@@ -270,7 +270,7 @@ function ContinuousExport({ continuousExport, toggleContinuousExport }) {
     return (
         <SpaceBetweenFlex minHeight={"48px"}>
             <Typography sx={{ color: "text.muted" }}>
-                {t("CONTINUOUS_EXPORT")}
+                {t("sync_continuously")}
             </Typography>
             <Box>
                 <EnteSwitch
@@ -291,7 +291,7 @@ const ExportDynamicContent = ({
     lastExportTime,
     exportProgress,
     pendingExports,
-    collectionNameMap,
+    allCollectionsNameByID,
 }: {
     exportStage: ExportStage;
     startExport: (opts?: ExportOpts) => void;
@@ -300,7 +300,7 @@ const ExportDynamicContent = ({
     lastExportTime: number;
     exportProgress: ExportProgress;
     pendingExports: EnteFile[];
-    collectionNameMap: Map<number, string>;
+    allCollectionsNameByID: Map<number, string>;
 }) => {
     switch (exportStage) {
         case ExportStage.INIT:
@@ -326,7 +326,7 @@ const ExportDynamicContent = ({
                     onHide={onHide}
                     lastExportTime={lastExportTime}
                     pendingExports={pendingExports}
-                    collectionNameMap={collectionNameMap}
+                    allCollectionsNameByID={allCollectionsNameByID}
                     onResync={() => startExport({ resync: true })}
                 />
             );

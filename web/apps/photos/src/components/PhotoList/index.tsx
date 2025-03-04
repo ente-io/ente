@@ -1,4 +1,5 @@
 import { assertionFailed } from "@/base/assert";
+import { isSameDay } from "@/base/date";
 import { EnteFile } from "@/media/file";
 import {
     GAP_BTW_TILES,
@@ -7,7 +8,6 @@ import {
     MIN_COLUMNS,
 } from "@/new/photos/components/PhotoList";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import { formatDate } from "@ente/shared/time/format";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
 import type { PhotoFrameProps } from "components/PhotoFrame";
 import { t } from "i18next";
@@ -20,7 +20,7 @@ import {
     ListChildComponentProps,
     areEqual,
 } from "react-window";
-import { handleSelectCreator } from "utils/photoFrame";
+import { handleSelectCreatorMulti } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export const DATE_CONTAINER_HEIGHT = 48;
@@ -185,7 +185,9 @@ const NothingContainer = styled(ListItemContainer)`
 type Props = Pick<PhotoFrameProps, "mode" | "modePlus"> & {
     height: number;
     width: number;
-    displayFiles: EnteFile[];
+    displayFiles: (EnteFile & {
+        timelineDateString?: string;
+    })[];
     showAppDownloadBanner: boolean;
     getThumbnail: (
         file: EnteFile,
@@ -271,7 +273,11 @@ export function PhotoList({
     const shouldRefresh = useRef(false);
     const listRef = useRef(null);
 
-    const [checkedDates, setCheckedDates] = useState({});
+    // Timeline date strings for which all photos have been selected.
+    //
+    // See: [Note: Timeline date string]
+    const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
+        useState(new Set());
 
     const fittableColumns = getFractionFittableColumns(width);
     let columns = Math.floor(fittableColumns);
@@ -434,14 +440,7 @@ export function PhotoList({
 
                 timeStampList.push({
                     itemType: ITEM_TYPE.TIME,
-                    date: isSameDay(new Date(currentDate), new Date())
-                        ? t("TODAY")
-                        : isSameDay(
-                                new Date(currentDate),
-                                new Date(Date.now() - A_DAY),
-                            )
-                          ? t("YESTERDAY")
-                          : formatDate(currentDate),
+                    date: item.timelineDateString,
                     id: currentDate.toString(),
                 });
                 timeStampList.push({
@@ -743,61 +742,60 @@ export function PhotoList({
         // Nothing to do here if nothing is selected.
         if (!galleryContext.selectedFile) return;
 
-        const notSelectedFiles = displayFiles?.filter(
+        const notSelectedFiles = (displayFiles ?? []).filter(
             (item) => !galleryContext.selectedFile[item.id],
         );
-        const unselectedDates = [
-            ...new Set(notSelectedFiles?.map((item) => getDate(item))), // to get file's date which were manually unselected
-        ];
 
-        const localSelectedFiles = displayFiles.filter(
+        const unselectedDates = new Set(
+            notSelectedFiles.map((item) => item.timelineDateString),
+        ); // to get file's date which were manually unselected
+
+        const localSelectedFiles = (displayFiles ?? []).filter(
             // to get files which were manually selected
-            (item) => !unselectedDates.includes(getDate(item)),
+            (item) => !unselectedDates.has(item.timelineDateString),
         );
 
-        const localSelectedDates = [
-            ...new Set(localSelectedFiles?.map((item) => getDate(item))),
-        ]; // to get file's date which were manually selected
+        const localSelectedDates = new Set(
+            localSelectedFiles.map((item) => item.timelineDateString),
+        ); // to get file's date which were manually selected
 
-        unselectedDates.forEach((date) => {
-            setCheckedDates((prev) => ({
-                ...prev,
-                [date]: false,
-            })); // To uncheck select all checkbox if any of the file on the date is unselected
-        });
-
-        localSelectedDates.map((date) => {
-            setCheckedDates((prev) => ({
-                ...prev,
-                [date]: true,
-            }));
-            // To check select all checkbox if all of the files on the date is selected manually
+        setCheckedTimelineDateStrings((prev) => {
+            const checked = new Set(prev);
+            // Uncheck the "Select all" checkbox if any of the files on the date
+            // is unselected.
+            unselectedDates.forEach((date) => checked.delete(date));
+            // Check the "Select all" checkbox if all of the files on a date are
+            // selected.
+            localSelectedDates.forEach((date) => checked.add(date));
+            return checked;
         });
     }, [galleryContext.selectedFile]);
 
-    const handleSelect = handleSelectCreator(
+    const handleSelect = handleSelectCreatorMulti(
         galleryContext.setSelectedFiles,
         mode,
+        galleryContext?.user?.id,
         activeCollectionID,
         activePersonID,
     );
 
     const onChangeSelectAllCheckBox = (date: string) => {
-        const dates = { ...checkedDates, [date]: !checkedDates[date] };
-        const isDateSelected = !checkedDates[date];
-
-        setCheckedDates(dates);
+        const next = new Set(checkedTimelineDateStrings);
+        let isDateSelected: boolean;
+        if (!next.has(date)) {
+            next.add(date);
+            isDateSelected = true;
+        } else {
+            next.delete(date);
+            isDateSelected = false;
+        }
+        setCheckedTimelineDateStrings(next);
 
         const filesOnADay = displayFiles?.filter(
-            (item) => getDate(item) === date,
+            (item) => item.timelineDateString === date,
         ); // all files on a checked/unchecked day
 
-        filesOnADay.forEach((file) => {
-            handleSelect(
-                file.id,
-                file.ownerID === galleryContext?.user?.id,
-            )(isDateSelected);
-        });
+        handleSelect(filesOnADay)(isDateSelected);
     };
 
     const renderListItem = (
@@ -817,7 +815,9 @@ export function PhotoList({
                                     <Checkbox
                                         key={item.date}
                                         name={item.date}
-                                        checked={!!checkedDates[item.date]}
+                                        checked={checkedTimelineDateStrings.has(
+                                            item.date,
+                                        )}
                                         onChange={() =>
                                             onChangeSelectAllCheckBox(item.date)
                                         }
@@ -836,7 +836,9 @@ export function PhotoList({
                             <Checkbox
                                 key={listItem.date}
                                 name={listItem.date}
-                                checked={!!checkedDates[listItem.date]}
+                                checked={checkedTimelineDateStrings.has(
+                                    listItem.date,
+                                )}
                                 onChange={() =>
                                     onChangeSelectAllCheckBox(listItem.date)
                                 }
@@ -918,24 +920,3 @@ export function PhotoList({
         </List>
     );
 }
-
-const A_DAY = 24 * 60 * 60 * 1000;
-
-const getDate = (item: EnteFile) => {
-    const currentDate = item.metadata.creationTime / 1000;
-    const date = isSameDay(new Date(currentDate), new Date())
-        ? t("TODAY")
-        : isSameDay(new Date(currentDate), new Date(Date.now() - A_DAY))
-          ? t("YESTERDAY")
-          : formatDate(currentDate);
-
-    return date;
-};
-
-const isSameDay = (first: Date, second: Date) => {
-    return (
-        first.getFullYear() === second.getFullYear() &&
-        first.getMonth() === second.getMonth() &&
-        first.getDate() === second.getDate()
-    );
-};

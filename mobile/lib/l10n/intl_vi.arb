@@ -525,7 +525,6 @@
   "viewLargeFiles": "Tệp lớn",
   "viewLargeFilesDesc": "Xem các tệp đang tiêu tốn nhiều dung lượng lưu trữ nhất.",
   "noDuplicates": "✨ Không có trùng lặp",
-  "youveNoDuplicateFilesThatCanBeCleared": "Bạn không có tệp trùng lặp nào có thể được xóa",
   "success": "Thành công",
   "rateUs": "Đánh giá chúng tôi",
   "remindToEmptyDeviceTrash": "Cũng hãy xóa \"Đã xóa gần đây\" từ \"Cài đặt\" -> \"Lưu trữ\" để chiếm không gian đã giải phóng",
@@ -965,6 +964,14 @@
   "syncStopped": "Đồng bộ hóa đã dừng",
   "syncProgress": "{completed}/{total} kỷ niệm đã được lưu giữ",
   "uploadingMultipleMemories": "Đang lưu giữ {count} kỷ niệm...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "Đang lưu giữ 1 kỷ niệm...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1589,6 +1596,5 @@
   "joinAlbum": "Tham gia album",
   "joinAlbumSubtext": "để xem và thêm ảnh của bạn",
   "joinAlbumSubtextViewer": "thêm vào album được chia sẻ",
-  "join": "Tham gia",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "join": "Tham gia"
 }

@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 class FastScrollPhysics extends PageScrollPhysics {
   final double speedFactor;
 
-  const FastScrollPhysics({this.speedFactor = 2.0, ScrollPhysics? parent})
-      : super(parent: parent);
+  const FastScrollPhysics({this.speedFactor = 2.0, super.parent});
 
   @override
   FastScrollPhysics applyTo(ScrollPhysics? ancestor) {

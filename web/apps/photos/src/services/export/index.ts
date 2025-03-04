@@ -888,7 +888,7 @@ class ExportService {
         try {
             const exportRecord = await this.getExportRecord(folder);
             const newRecord: ExportRecord = { ...exportRecord, ...newData };
-            await ensureElectron().fs.writeFile(
+            await ensureElectron().fs.writeFileViaBackup(
                 joinPath(folder, exportRecordFileName),
                 JSON.stringify(newRecord, null, 2),
             );

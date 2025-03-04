@@ -1,6 +1,7 @@
 import { CenteredFill, SpacedRow } from "@/base/components/containers";
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import {
@@ -13,6 +14,7 @@ import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import {
     addCGroup,
@@ -58,8 +60,6 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
-import { useAppContext } from "../../types/context";
-import { DialogCloseIconButton } from "../mui/Dialog";
 import { SuggestionFaceList } from "../PeopleList";
 import {
     ItemCard,
@@ -110,7 +110,7 @@ interface CGroupPersonHeaderProps {
 const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
     const cgroup = person.cgroup;
 
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { show: showNameInput, props: nameInputVisibilityProps } =
         useModalVisibility();
@@ -225,7 +225,7 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 }) => {
     const cluster = person.cluster;
 
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { show: showAddPerson, props: addPersonVisibilityProps } =
         useModalVisibility();
@@ -545,7 +545,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     onClose,
     person,
 }) => {
-    const { showMiniDialog, onGenericError } = useAppContext();
+    const { showMiniDialog, onGenericError } = useBaseContext();
 
     const [state, dispatch] = useReducer(
         suggestionsDialogReducer,

@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
@@ -9,7 +8,7 @@ import 'package:photos/utils/exif_util.dart';
 
 class ExifInfoDialog extends StatelessWidget {
   final EnteFile file;
-  const ExifInfoDialog(this.file, {Key? key}) : super(key: key);
+  const ExifInfoDialog(this.file, {super.key});
 
   @override
   Widget build(BuildContext context) {

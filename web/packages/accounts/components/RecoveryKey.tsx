@@ -1,12 +1,12 @@
 import { type MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { SpacedRow } from "@/base/components/containers";
+import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { downloadString } from "@/base/utils/web";
-import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
     Dialog,

@@ -27,6 +27,13 @@ export interface CollectionUser {
 }
 
 export interface EncryptedCollection {
+    /**
+     * The collection's globally unique ID.
+     *
+     * The collection's ID is a integer assigned by remote as the identifier for
+     * an {@link Collection} when it is created. It is globally unique across
+     * all collections on an Ente instance (i.e., it is not scoped to a user).
+     */
     id: number;
     owner: CollectionUser;
     // collection name was unencrypted in the past, so we need to keep it as optional

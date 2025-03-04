@@ -21,7 +21,6 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
-import "package:photos/services/user_remote_flag_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
@@ -48,8 +47,7 @@ class SemanticSearchService {
       _logger.info("Initialized already");
       return;
     }
-    final hasGivenConsent = userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
+    final hasGivenConsent = flagService.hasGrantedMLConsent;
     if (!hasGivenConsent) return;
 
     _logger.info("init called");
@@ -67,9 +65,7 @@ class SemanticSearchService {
   }
 
   bool isMagicSearchEnabledAndReady() {
-    return userRemoteFlagService
-            .getCachedBoolValue(UserRemoteFlagService.mlEnabled) &&
-        _textModelIsLoaded;
+    return flagService.hasGrantedMLConsent && _textModelIsLoaded;
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
@@ -78,7 +74,7 @@ class SemanticSearchService {
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
-          "ML global consent: ${userRemoteFlagService.getCachedBoolValue(UserRemoteFlagService.mlEnabled)}, loaded: $_textModelIsLoaded ",
+          "ML global consent: ${flagService.hasGrantedMLConsent}, loaded: $_textModelIsLoaded ",
         );
       }
       return (query, <EnteFile>[]);

@@ -6,16 +6,14 @@ import {
     TranslucentLoadingOverlay,
 } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import {
-    genericErrorDialogAttributes,
-    useAttributedMiniDialog,
-} from "@/base/components/utils/dialog";
+import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
 import {
     useIsRouteChangeInProgress,
     useSetupI18n,
     useSetupLogs,
 } from "@/base/components/utils/hooks-app";
 import { photosTheme } from "@/base/components/utils/theme";
+import { BaseContext, deriveBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
@@ -30,12 +28,12 @@ import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migration";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
-import { AppContext } from "@/new/photos/types/context";
+import { PhotosAppContext } from "@/new/photos/types/context";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
     getData,
+    isLocalStorageAndIndexedDBMismatch,
     LS_KEYS,
-    migrateKVToken,
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import "@fontsource-variable/inter";
@@ -52,7 +50,7 @@ import { photosLogout } from "services/logout";
 
 import "photoswipe/dist/photoswipe.css";
 // TODO(PS): Note, auto hide only works with the new CSS.
-// import "../../../../packages/new/photos/components/ps5/dist/photoswipe.css";
+// import "../../../../packages/gallery/components/viewer/ps5/dist/photoswipe.css";
 
 import "styles/global.css";
 
@@ -68,13 +66,21 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const [watchFolderView, setWatchFolderView] = useState(false);
 
+    const logout = useCallback(() => void photosLogout(), []);
+
     useEffect(() => {
         const user = getData(LS_KEYS.USER) as User | undefined | null;
-        void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
-        void runMigrations();
-    }, []);
+        void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
+            if (mismatch) {
+                log.error("Logging out (IndexedDB and local storage mismatch)");
+                return logout();
+            } else {
+                return runMigrations();
+            }
+        });
+    }, [logout]);
 
     useEffect(() => {
         const electron = globalThis.electron;
@@ -137,61 +143,45 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         });
     }, []);
 
-    const onGenericError = useCallback((e: unknown) => {
-        log.error(e);
-        // The generic error handler is sometimes called in the context of
-        // actions that were initiated by a confirmation dialog action handler
-        // themselves, then we need to let the current one close.
-        //
-        // See: [Note: Chained MiniDialogs]
-        setTimeout(() => {
-            showMiniDialog(genericErrorDialogAttributes());
-        }, 0);
-    }, []);
-
-    const logout = useCallback(() => void photosLogout(), []);
-
+    const baseContext = useMemo(
+        () => deriveBaseContext({ logout, showMiniDialog }),
+        [logout, showMiniDialog],
+    );
     const appContext = useMemo(
         () => ({
             showLoadingBar,
             hideLoadingBar,
             watchFolderView,
             setWatchFolderView,
-            showMiniDialog,
             showNotification,
-            onGenericError,
-            logout,
         }),
         [
             showLoadingBar,
             hideLoadingBar,
             watchFolderView,
-            showMiniDialog,
+            setWatchFolderView,
             showNotification,
-            onGenericError,
-            logout,
         ],
     );
 
     const title = isI18nReady ? t("title_photos") : staticAppTitle;
 
     return (
-        <>
+        <ThemeProvider theme={photosTheme}>
             <CustomHead {...{ title }} />
+            <CssBaseline enableColorScheme />
+            <ThemedLoadingBar ref={loadingBarRef} />
 
-            <ThemeProvider theme={photosTheme}>
-                <CssBaseline enableColorScheme />
-                <ThemedLoadingBar ref={loadingBarRef} />
+            <AttributedMiniDialog
+                sx={{ zIndex: aboveFileViewerContentZ }}
+                {...miniDialogProps}
+            />
 
-                <AttributedMiniDialog
-                    sx={{ zIndex: aboveFileViewerContentZ }}
-                    {...miniDialogProps}
-                />
+            <Notification {...notificationProps} />
 
-                <Notification {...notificationProps} />
-
-                {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
-                <AppContext.Provider value={appContext}>
+            {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}
+            <BaseContext value={baseContext}>
+                <PhotosAppContext value={appContext}>
                     {!isI18nReady ? (
                         <LoadingIndicator />
                     ) : (
@@ -200,9 +190,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                             <Component {...pageProps} />
                         </>
                     )}
-                </AppContext.Provider>
-            </ThemeProvider>
-        </>
+                </PhotosAppContext>
+            </BaseContext>
+        </ThemeProvider>
     );
 };
 

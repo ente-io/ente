@@ -1,14 +1,14 @@
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
 import * as ffmpeg from "@/gallery/services/ffmpeg";
+import {
+    toDataOrPathOrZipEntry,
+    type DesktopUploadItem,
+} from "@/gallery/services/upload";
 import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { isHEICExtension } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { scaledImageDimensions } from "@/media/image";
-import {
-    toDataOrPathOrZipEntry,
-    type DesktopUploadItem,
-} from "@/new/photos/services/upload/types";
 import { withTimeout } from "@/utils/promise";
 
 /** Maximum width or height of the generated thumbnail */

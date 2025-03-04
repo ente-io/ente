@@ -72,6 +72,7 @@ export const authenticatedPublicAlbumsRequestHeaders = ({
  */
 export class HTTPError extends Error {
     res: Response;
+    details: Record<string, string>;
 
     constructor(res: Response) {
         // Trim off any query parameters from the URL before logging, it may
@@ -81,9 +82,10 @@ export class HTTPError extends Error {
         // necessarily the same as the request's URL.
         const url = new URL(res.url);
         url.search = "";
-        super(
-            `Fetch failed: ${url.href}: HTTP ${res.status} ${res.statusText}`,
-        );
+        super(`HTTP ${res.status} ${res.statusText} (${url.pathname})`);
+
+        const requestID = res.headers.get("x-request-id");
+        const details = { url: url.href, ...(requestID ? { requestID } : {}) };
 
         // Cargo culted from
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#custom_error_types
@@ -92,6 +94,7 @@ export class HTTPError extends Error {
 
         this.name = this.constructor.name;
         this.res = res;
+        this.details = details;
     }
 }
 
@@ -100,7 +103,11 @@ export class HTTPError extends Error {
  * {@link Response} does not have a HTTP 2xx status.
  */
 export const ensureOk = (res: Response) => {
-    if (!res.ok) throw new HTTPError(res);
+    if (!res.ok) {
+        const e = new HTTPError(res);
+        log.error(`${e.message} ${JSON.stringify(e.details)}`);
+        throw e;
+    }
 };
 
 /**

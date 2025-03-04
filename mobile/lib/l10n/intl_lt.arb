@@ -514,10 +514,16 @@
   "cannotDeleteSharedFiles": "Negalima ištrinti bendrinamų failų.",
   "theDownloadCouldNotBeCompleted": "Atsisiuntimas negalėjo būti baigtas.",
   "retry": "Kartoti",
+  "backedUpFolders": "Sukurtos atsarginės aplankų kopijos",
   "backup": "Kurti atsarginę kopiją",
+  "freeUpDeviceSpace": "Atlaisvinti įrenginio vietą",
+  "freeUpDeviceSpaceDesc": "Sutaupykite vietos savo įrenginyje išvalydami failus, kurių atsarginės kopijos jau buvo sukurtos.",
+  "allClear": "✨ Viskas išvalyta",
+  "noDeviceThatCanBeDeleted": "Neturite šiame įrenginyje failų, kuriuos galima ištrinti.",
   "removeDuplicates": "Šalinti dublikatus",
+  "removeDuplicatesDesc": "Peržiūrėkite ir pašalinkite failus, kurie yra tiksliai dublikatai.",
+  "viewLargeFiles": "Dideli failai",
   "noDuplicates": "✨ Dublikatų nėra",
-  "youveNoDuplicateFilesThatCanBeCleared": "Neturite dubliuotų failų, kuriuos būtų galima išvalyti.",
   "success": "Sėkmė",
   "rateUs": "Vertinti mus",
   "remindToEmptyDeviceTrash": "Taip pat ištuštinkite Neseniai ištrinti iš Nustatymai -> Saugykla, kad atlaisvintumėte vietos.",
@@ -547,6 +553,8 @@
   "security": "Saugumas",
   "authToViewYourRecoveryKey": "Nustatykite tapatybę, kad peržiūrėtumėte savo atkūrimo raktą",
   "twofactor": "Dvigubas tapatybės nustatymas",
+  "lockscreen": "Ekrano užraktas",
+  "viewActiveSessions": "Peržiūrėti aktyvius seansus",
   "disableTwofactor": "Išjungti dvigubą tapatybės nustatymą",
   "confirm2FADisable": "Ar tikrai norite išjungti dvigubą tapatybės nustatymą?",
   "no": "Ne",
@@ -564,7 +572,7 @@
   "reportABug": "Pranešti apie riktą",
   "reportBug": "Pranešti apie riktą",
   "suggestFeatures": "Siūlyti funkcijas",
-  "support": "Palaikymas",
+  "support": "Pagalba",
   "theme": "Tema",
   "lightTheme": "Šviesi",
   "darkTheme": "Tamsi",
@@ -589,6 +597,7 @@
   "subscription": "Prenumerata",
   "paymentDetails": "Mokėjimo duomenys",
   "manageFamily": "Tvarkyti šeimą",
+  "contactToManageSubscription": "Susisiekite su mumis adresu support@ente.io, kad sutvarkytumėte savo {provider} prenumeratą.",
   "renewSubscription": "Atnaujinti prenumeratą",
   "cancelSubscription": "Atsisakyti prenumeratos",
   "yesCancel": "Taip, atsisakyti",
@@ -626,6 +635,7 @@
   "playstoreSubscription": "„PlayStore“ prenumerata",
   "subAlreadyLinkedErrMessage": "Jūsų {id} jau susietas su kita „Ente“ paskyra.\nJei norite naudoti savo {id} su šia paskyra, susisiekite su mūsų palaikymo komanda.",
   "visitWebToManage": "Aplankykite web.ente.io, kad tvarkytumėte savo prenumeratą",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Susisiekite adresu support@ente.io ir mes mielai padėsime!",
   "paymentFailed": "Mokėjimas nepavyko",
   "paymentFailedTalkToProvider": "Kreipkitės į {providerName} palaikymo komandą, jei jums buvo nuskaičiuota.",
   "@paymentFailedTalkToProvider": {
@@ -740,6 +750,8 @@
     "description": "Page title while adding one or more items to album"
   },
   "createOrSelectAlbum": "Kurkite arba pasirinkite albumą",
+  "searchByAlbumNameHint": "Albumo pavadinimas",
+  "albumTitle": "Albumo pavadinimas",
   "enterAlbumName": "Įveskite albumo pavadinimą",
   "restoringFiles": "Atkuriami failai...",
   "sharedWithMe": "Bendrinta su manimi",
@@ -801,10 +813,13 @@
   "theRecoveryKeyYouEnteredIsIncorrect": "Įvestas atkūrimo raktas yra neteisingas.",
   "pleaseVerifyTheCodeYouHaveEntered": "Patvirtinkite įvestą kodą.",
   "yourVerificationCodeHasExpired": "Jūsų patvirtinimo kodas nebegaliojantis.",
+  "emailChangedTo": "El. paštas pakeistas į {newEmail}",
   "verifying": "Patvirtinama...",
+  "disablingTwofactorAuthentication": "Išjungiamas dvigubas tapatybės nustatymas...",
   "allMemoriesPreserved": "Išsaugoti visi prisiminimai",
   "loadingGallery": "Įkeliama galerija...",
   "syncing": "Sinchronizuojama...",
+  "encryptingBackup": "Šifruojama atsarginė kopija...",
   "syncStopped": "Sinchronizavimas sustabdytas",
   "syncProgress": "{completed} / {total} išsaugomi prisiminimai",
   "@syncProgress": {
@@ -1348,5 +1363,62 @@
   "linkEmail": "Susieti el. paštą",
   "link": "Susieti",
   "noEnteAccountExclamation": "Nėra „Ente“ paskyros!",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "orPickFromYourContacts": "arba pasirinkite iš savo kontaktų",
+  "emailDoesNotHaveEnteAccount": "{email} neturi „Ente“ paskyros.",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (Aš)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "me": "Aš",
+  "linkPersonToEmailConfirmation": "Tai susies {personName} su {email}.",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignedToName": "Perskirstė jus į {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "Išsaugoti pakeitimus prieš išeinant?",
+  "dontSave": "Neišsaugoti",
+  "thisIsMeExclamation": "Tai aš!",
+  "linkPerson": "Susiekite asmenį,",
+  "linkPersonCaption": "kad geriau bendrintumėte patirtį",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "Vaizdo įrašų srautinis perdavimas",
+  "processingVideos": "Apdorojami vaizdo įrašai",
+  "streamDetails": "Srautinio perdavimo išsami informacija",
+  "processing": "Apdorojama",
+  "queued": "Įtraukta eilėje",
+  "ineligible": "Netinkami",
+  "failed": "Nepavyko",
+  "playStream": "Leisti srautinį perdavimą",
+  "playOriginal": "Leisti originalą",
+  "joinAlbumConfirmationDialogBody": "Prisijungus prie albumo, jūsų el. paštas bus matomas jo dalyviams."
 }

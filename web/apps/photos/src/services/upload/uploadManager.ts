@@ -6,7 +6,13 @@ import type { PublicAlbumsCredentials } from "@/base/http";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import { shouldDisableCFUploadProxy } from "@/gallery/services/upload";
+import type { UploadItem } from "@/gallery/services/upload";
+import {
+    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    UPLOAD_RESULT,
+    shouldDisableCFUploadProxy,
+    type UploadPhase,
+} from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
 import {
     decryptFile,
@@ -18,12 +24,6 @@ import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { indexNewUpload } from "@/new/photos/services/ml";
-import type { UploadItem } from "@/new/photos/services/upload/types";
-import {
-    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
-    UPLOAD_RESULT,
-    type UploadPhase,
-} from "@/new/photos/services/upload/types";
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { Canceler } from "axios";
@@ -844,8 +844,15 @@ const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
         } else if (p && typeof p == "object" && "path" in p) {
             electron.markUploadedFiles([p.path]);
         } else {
-            throw new Error(
-                "Attempting to mark upload completion of unexpected desktop upload items",
+            // We can come here when the user saves an image they've edited, in
+            // which case `item` will be a web File object which won't have a
+            // path. Such a la carte uploads don't mark the file as pending
+            // anyways, so there isn't anything to do also.
+            //
+            // Keeping a log here, though really the upper layers of the code
+            // need to be reworked so that we don't even get here in such cases.
+            log.info(
+                "Ignoring attempt to mark upload completion of (likely edited) item",
             );
         }
     }

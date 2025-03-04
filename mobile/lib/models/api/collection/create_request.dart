@@ -1,5 +1,5 @@
+import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/collection/collection.dart';
-import 'package:photos/services/file_magic_service.dart';
 
 class CreateRequest {
   String encryptedKey;
@@ -45,7 +45,7 @@ class CreateRequest {
     map['keyDecryptionNonce'] = keyDecryptionNonce;
     map['encryptedName'] = encryptedName;
     map['nameDecryptionNonce'] = nameDecryptionNonce;
-    map['type'] = Collection.typeToString(type);
+    map['type'] = typeToString(type);
     if (attributes != null) {
       map['attributes'] = attributes!.toMap();
     }

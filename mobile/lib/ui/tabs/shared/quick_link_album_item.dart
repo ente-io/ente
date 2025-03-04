@@ -109,7 +109,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
                                     style: textTheme.smallMuted,
                                   ),
                                   c.hasLink
-                                      ? (c.publicURLs!.first!.isExpired
+                                      ? (c.publicURLs.first.isExpired
                                           ? Icon(
                                               Icons.link_outlined,
                                               color: colorScheme.warning500,

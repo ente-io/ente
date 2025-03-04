@@ -81,7 +81,7 @@ const RemoteAuthenticatorEntityChange = z.object({
      */
     isDeleted: z.boolean(),
     /**
-     * Epoch milliseconds when this entity was last updated.
+     * Epoch microseconds when this entity was last updated.
      *
      * This value is suitable for being passed as the `sinceTime` in the diff
      * requests to implement pagination.

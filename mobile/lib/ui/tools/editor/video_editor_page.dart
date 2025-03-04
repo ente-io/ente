@@ -12,7 +12,7 @@ import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
-import "package:photos/services/sync_service.dart";
+import "package:photos/services/sync/sync_service.dart";
 import "package:photos/ui/tools/editor/export_video_service.dart";
 import 'package:photos/ui/tools/editor/video_crop_page.dart';
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
@@ -209,15 +209,14 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
     final config = VideoFFmpegVideoEditorConfig(
       _controller!,
-      format: VideoExportFormat(
-        path.extension(widget.ioFile.path).substring(1),
-      ),
-      // commandBuilder: (config, videoPath, outputPath) {
-      //   final List<String> filters = config.getExportFilters();
-      //   filters.add('hflip'); // add horizontal flip
+      format: VideoExportFormat.mp4,
+      commandBuilder: (config, videoPath, outputPath) {
+        final List<String> filters = config.getExportFilters();
 
-      //   return '-i $videoPath ${config.filtersCmd(filters)} -preset ultrafast $outputPath';
-      // },
+        final String startTrimCmd = "-ss ${_controller!.startTrim}";
+        final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
+        return '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
+      },
     );
 
     try {
@@ -241,12 +240,12 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           await PhotoManager.stopChangeNotify();
 
           try {
-            final AssetEntity? newAsset =
+            final AssetEntity newAsset =
                 await (PhotoManager.editor.saveVideo(result, title: fileName));
             result.deleteSync();
             final newFile = await EnteFile.fromAsset(
               widget.file.deviceFolder ?? '',
-              newAsset!,
+              newAsset,
             );
 
             newFile.creationTime = widget.file.creationTime;

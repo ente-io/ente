@@ -28,8 +28,8 @@ class CollectionsFlexiGridViewWidget extends StatelessWidget {
     this.displayLimitCount = 10,
     this.shrinkWrap = false,
     this.tag = "",
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

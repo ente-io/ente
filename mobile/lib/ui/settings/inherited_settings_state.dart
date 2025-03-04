@@ -3,9 +3,9 @@ import 'package:flutter/widgets.dart';
 /// StatefulWidget that wraps InheritedSettingsState
 class SettingsStateContainer extends StatefulWidget {
   const SettingsStateContainer({
-    Key? key,
+    super.key,
     required this.child,
-  }) : super(key: key);
+  });
   final Widget child;
 
   @override
@@ -54,12 +54,12 @@ class InheritedSettingsState extends InheritedWidget {
   final void Function() decrement;
 
   const InheritedSettingsState({
-    Key? key,
+    super.key,
     required this.expandedSectionCount,
     required this.increment,
     required this.decrement,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   bool get isAnySectionExpanded => expandedSectionCount > 0;
 

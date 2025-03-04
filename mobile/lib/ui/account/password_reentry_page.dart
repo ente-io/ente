@@ -1,6 +1,7 @@
 import 'dart:async';
 import "dart:typed_data";
 
+import "package:ente_crypto/ente_crypto.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -8,18 +9,17 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/services/user_service.dart";
+import "package:photos/services/account/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/recovery_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
-import "package:photos/utils/crypto_util.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 
 class PasswordReentryPage extends StatefulWidget {
-  const PasswordReentryPage({Key? key}) : super(key: key);
+  const PasswordReentryPage({super.key});
 
   @override
   State<PasswordReentryPage> createState() => _PasswordReentryPageState();

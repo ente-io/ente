@@ -29,7 +29,7 @@ func (c *Controller) StartReplication() error {
 
 	workerCount := viper.GetInt("replication.file-data.worker-count")
 	if workerCount == 0 {
-		workerCount = 6
+		workerCount = 10
 	}
 	err := c.createTemporaryStorage()
 	if err != nil {

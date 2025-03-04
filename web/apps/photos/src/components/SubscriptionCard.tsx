@@ -1,12 +1,13 @@
 import { Overlay } from "@/base/components/containers";
 import type { ButtonishProps } from "@/base/components/mui";
+import { bytesInGB, formattedStorageByteSize } from "@/gallery/utils/units";
 import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
 import type { UserDetails } from "@/new/photos/services/user-details";
 import {
+    familyMemberStorageLimit,
     familyUsage,
     isPartOfFamilyWithOtherMembers,
 } from "@/new/photos/services/user-details";
-import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CircleIcon from "@mui/icons-material/Circle";
 import {
@@ -118,41 +119,62 @@ interface SubscriptionCardContentOverlayProps {
 
 export const SubscriptionCardContentOverlay: React.FC<
     SubscriptionCardContentOverlayProps
-> = ({ userDetails }) => (
-    <Overlay>
-        <Stack
-            sx={{
-                height: "100%",
-                justifyContent: "space-between",
-                padding: "20px 16px",
-            }}
-        >
-            {isPartOfFamilyWithOtherMembers(userDetails) ? (
-                <FamilySubscriptionCardContents userDetails={userDetails} />
-            ) : (
-                <IndividualSubscriptionCardContents userDetails={userDetails} />
-            )}
-        </Stack>
-    </Overlay>
-);
-
-const IndividualSubscriptionCardContents: React.FC<
-    SubscriptionCardContentOverlayProps
 > = ({ userDetails }) => {
-    const totalStorage =
-        userDetails.subscription.storage + userDetails.storageBonus;
+    const inFamily = isPartOfFamilyWithOtherMembers(userDetails);
+    const storageLimit = inFamily
+        ? familyMemberStorageLimit(userDetails)
+        : undefined;
 
     return (
-        <>
-            <StorageSection storage={totalStorage} usage={userDetails.usage} />
-            <IndividualUsageSection
-                usage={userDetails.usage}
-                fileCount={userDetails.fileCount}
-                storage={totalStorage}
-            />
-        </>
+        <Overlay>
+            <Stack
+                sx={{
+                    height: "100%",
+                    justifyContent: "space-between",
+                    padding: "20px 16px",
+                }}
+            >
+                {inFamily ? (
+                    storageLimit ? (
+                        <UserSubscriptionCardContents
+                            userDetails={userDetails}
+                            totalStorage={storageLimit}
+                        />
+                    ) : (
+                        <FamilySubscriptionCardContents
+                            userDetails={userDetails}
+                        />
+                    )
+                ) : (
+                    <UserSubscriptionCardContents
+                        userDetails={userDetails}
+                        totalStorage={
+                            userDetails.subscription.storage +
+                            userDetails.storageBonus
+                        }
+                    />
+                )}
+            </Stack>
+        </Overlay>
     );
 };
+
+type UserSubscriptionCardContentsProps = SubscriptionCardContentOverlayProps & {
+    totalStorage: number;
+};
+
+const UserSubscriptionCardContents: React.FC<
+    UserSubscriptionCardContentsProps
+> = ({ userDetails, totalStorage }) => (
+    <>
+        <StorageSection storage={totalStorage} usage={userDetails.usage} />
+        <IndividualUsageSection
+            usage={userDetails.usage}
+            fileCount={userDetails.fileCount}
+            storage={totalStorage}
+        />
+    </>
+);
 
 interface StorageSectionProps {
     usage: number;

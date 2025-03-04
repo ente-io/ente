@@ -1,4 +1,4 @@
-import { haveCredentialsInSession } from "@/base/session-store";
+import { haveCredentialsInSession } from "@/base/session";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { stashRedirect } from "../../services/redirect";

@@ -15,7 +15,9 @@ import {
 } from "@/base/components/RowButton";
 import { Titlebar } from "@/base/components/Titlebar";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import { sharedCryptoWorker } from "@/base/crypto";
+import { formattedDateTime } from "@/base/i18n-date";
 import log from "@/base/log";
 import { appendCollectionKeyToShareURL } from "@/gallery/services/share";
 import type {
@@ -27,13 +29,12 @@ import { COLLECTION_ROLE, type CollectionUser } from "@/media/collection";
 import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreated";
 import { avatarTextColor } from "@/new/photos/services/avatar";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
-import { AppContext, useAppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
-import { formatDateTime } from "@ente/shared/time/format";
 import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import BlockIcon from "@mui/icons-material/Block";
@@ -811,7 +812,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     onRootClose,
     peopleCount,
 }) => {
-    const { showLoadingBar, hideLoadingBar } = useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const galleryContext = useContext(GalleryContext);
 
     const [addParticipantView, setAddParticipantView] = useState(false);
@@ -1007,7 +1008,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     selectedParticipant,
     collectionUnshare,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
     const galleryContext = useContext(GalleryContext);
 
     const handleRootClose = () => {
@@ -1538,8 +1539,8 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                         isLinkExpired(publicShareProp?.validTill)
                             ? t("link_expired")
                             : publicShareProp?.validTill
-                              ? formatDateTime(
-                                    publicShareProp?.validTill / 1000,
+                              ? formattedDateTime(
+                                    publicShareProp.validTill / 1000,
                                 )
                               : t("never")
                     }
@@ -1710,7 +1711,7 @@ const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
     updatePublicShareURLHelper,
     collection,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const handleFileDownloadSetting = () => {
         if (publicShareProp.enableDownload) {
@@ -1758,7 +1759,7 @@ const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
     publicShareProp,
     updatePublicShareURLHelper,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
     const [changePasswordView, setChangePasswordView] = useState(false);
 
     const closeConfigurePassword = () => setChangePasswordView(false);

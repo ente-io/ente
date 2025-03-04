@@ -135,8 +135,12 @@ export const sidebar = [
                         link: "/photos/faq/hidden-and-archive",
                     },
                     {
-                        text: "Machine Learning",
-                        link: "/photos/faq/machine-learning",
+                        text: "Face recognition",
+                        link: "/photos/faq/face-recognition",
+                    },
+                    {
+                        text: "Video streaming",
+                        link: "/photos/faq/video-streaming",
                     },
                 ],
             },
@@ -262,6 +266,10 @@ export const sidebar = [
                     {
                         text: "Hosting Ente without Docker",
                         link: "/self-hosting/guides/standalone-ente",
+                    },
+                    {
+                        text: "Ente via Tailscale (Community)",
+                        link: "/self-hosting/guides/Tailscale.md",
                     },
                     {
                         text: "Configure CLI for Self Hosted Instance",

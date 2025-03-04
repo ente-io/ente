@@ -30,8 +30,8 @@ class LazyGridView extends StatefulWidget {
     this.shouldRecycle,
     this.photoGridSize, {
     this.limitSelectionToOne = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<LazyGridView> createState() => _LazyGridViewState();

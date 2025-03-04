@@ -4,8 +4,8 @@ import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
+import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/user_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -363,8 +363,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   List<User> _getSuggestedUser() {
     final Set<String> existingEmails = {};
-    for (final User? u in widget.collection.sharees ?? []) {
-      if (u != null && u.id != null && u.email.isNotEmpty) {
+    for (final User u in widget.collection.sharees) {
+      if (u.id != null && u.email.isNotEmpty) {
         existingEmails.add(u.email);
       }
     }

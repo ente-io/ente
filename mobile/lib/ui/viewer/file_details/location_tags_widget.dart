@@ -11,7 +11,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
@@ -183,8 +182,7 @@ class _InfoMapState extends State<InfoMap> {
   @override
   void initState() {
     super.initState();
-    _hasEnabledMap = userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mapEnabled);
+    _hasEnabledMap = flagService.mapEnabled;
     _fileLat = widget.file.location!.latitude!;
     _fileLng = widget.file.location!.longitude!;
 

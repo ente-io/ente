@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import "package:photos/l10n/l10n.dart";
-import 'package:photos/services/user_service.dart';
+import 'package:photos/services/account/user_service.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 
 class ChangeEmailDialog extends StatefulWidget {
-  const ChangeEmailDialog({Key? key}) : super(key: key);
+  const ChangeEmailDialog({super.key});
 
   @override
   State<ChangeEmailDialog> createState() => _ChangeEmailDialogState();

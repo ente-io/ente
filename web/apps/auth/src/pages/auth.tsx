@@ -8,9 +8,10 @@ import {
     OverflowMenu,
     OverflowMenuOption,
 } from "@/base/components/OverflowMenu";
+import { useBaseContext } from "@/base/context";
 import { isHTTP401Error } from "@/base/http";
 import log from "@/base/log";
-import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
+import { masterKeyFromSessionIfLoggedIn } from "@/base/session";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
@@ -28,10 +29,9 @@ import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
-import { useAppContext } from "types/context";
 
 const Page: React.FC = () => {
-    const { logout, showMiniDialog } = useAppContext();
+    const { logout, showMiniDialog } = useBaseContext();
 
     const router = useRouter();
     const [codes, setCodes] = useState<Code[]>([]);
@@ -57,7 +57,7 @@ const Page: React.FC = () => {
             setHasFetched(true);
         };
         void fetchCodes();
-    }, [router, showMiniDialog, logout]);
+    }, [router, logout, showMiniDialog]);
 
     const lcSearch = searchTerm.toLowerCase();
     const filteredCodes = codes.filter(
@@ -131,7 +131,7 @@ const Page: React.FC = () => {
 export default Page;
 
 const AuthNavbar: React.FC = () => {
-    const { logout } = useAppContext();
+    const { logout } = useBaseContext();
 
     return (
         <NavbarBase
@@ -217,12 +217,14 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
                     <Snackbar
                         open={openCopied}
                         message={t("copied")}
-                        ContentProps={{
-                            sx: (theme) => ({
-                                backgroundColor: theme.vars.palette.fill.faint,
-                                color: theme.vars.palette.primary.main,
-                                backdropFilter: "blur(10px)",
-                            }),
+                        slotProps={{
+                            content: {
+                                sx: {
+                                    backgroundColor: "fill.faint",
+                                    color: "primary.main",
+                                    backdropFilter: "blur(10px)",
+                                },
+                            },
                         }}
                     />
                 </ButtonBase>

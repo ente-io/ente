@@ -41,6 +41,7 @@ import {
     fsRm,
     fsRmdir,
     fsWriteFile,
+    fsWriteFileViaBackup,
 } from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
@@ -152,6 +153,12 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("fsWriteFile", (_, path: string, contents: string) =>
         fsWriteFile(path, contents),
+    );
+
+    ipcMain.handle(
+        "fsWriteFileViaBackup",
+        (_, path: string, contents: string) =>
+            fsWriteFileViaBackup(path, contents),
     );
 
     ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
