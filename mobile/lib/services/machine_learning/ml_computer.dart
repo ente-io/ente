@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:typed_data' show Uint8List;
 
 import "package:logging/logging.dart";
+import "package:ml_linalg/linalg.dart";
 import "package:photos/models/ml/face/box.dart";
+import "package:photos/models/ml/vector.dart";
 import "package:photos/services/isolate_functions.dart";
 import "package:photos/services/isolate_service.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
@@ -60,6 +62,19 @@ class MLComputer extends SuperIsolate {
       return textEmbedding;
     } catch (e, s) {
       _logger.severe("Could not run clip text in isolate", e, s);
+      rethrow;
+    }
+  }
+
+  Future<Map<int, double>> compareEmbeddings(List<EmbeddingVector> embeddings, Vector otherEmbedding) async {
+    try {
+      final fileIdToSimilarity = await runInIsolate(IsolateOperation.compareEmbeddings, {
+        "embeddings": embeddings.map((e) => e.toJsonString()).toList(),
+        "otherEmbedding": otherEmbedding.toList(),
+      }) as Map<int, double>;
+      return fileIdToSimilarity;
+    } catch (e, s) {
+      _logger.severe("Could not compare embeddings MLComputer isolate", e, s);
       rethrow;
     }
   }
