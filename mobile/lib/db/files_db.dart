@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import "package:photos/db/enum/conflict_algo.dart";
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file/file.dart';
@@ -15,7 +16,6 @@ import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
-import "package:photos/utils/sqlite_util.dart";
 import 'package:sqlite_async/sqlite_async.dart';
 
 class FilesDB {
@@ -519,10 +519,10 @@ class FilesDB {
         withoutIdParams,
       );
     }
-
     final duration = DateTime.now().difference(startTime);
     _logger.info(
-        "Batch insert of ${files.length} took ${duration.inMilliseconds}ms.");
+      "Batch insert of ${files.length} took ${duration.inMilliseconds}ms.",
+    );
   }
 
   Future<void> insert(EnteFile file) async {
