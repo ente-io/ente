@@ -21,6 +21,7 @@ import "package:photos/models/memories_cache.dart";
 import "package:photos/models/memory.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/ml/vector.dart";
 import "package:photos/models/people_memory.dart";
 import "package:photos/models/smart_memory.dart";
 import "package:photos/models/time_memory.dart";
@@ -30,6 +31,7 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
 
 class SmartMemoriesService {
@@ -260,8 +262,8 @@ class SmartMemoriesService {
 
       // Inside people loop, check for doingSomethingTogether
       if (isMeAssigned && meID != personID) {
-        final fileIdToClip =
-            await MLDataDB.instance.getClipVectorsForFileIDs(personFileIDs);
+        final vectors = await SemanticSearchService.instance
+            .getClipVectorsForFileIDs(personFileIDs);
         final activityFiles = <EnteFile>[];
         PeopleActivity lastActivity = PeopleActivity.values.first;
         activityLoop:
@@ -273,10 +275,11 @@ class SmartMemoriesService {
             _logger.severe("No vector for activity $activity");
             continue activityLoop;
           }
+          final similarities = await MLComputer.instance
+              .compareEmbeddings(vectors, activityVector);
           for (final fileID in personFileIDs) {
-            final clipVector = fileIdToClip[fileID];
-            if (clipVector == null) continue;
-            final similarity = activityVector.dot(clipVector.vector);
+            final similarity = similarities[fileID];
+            if (similarity == null) continue;
             if (similarity > _clipActivityQueryThreshold) {
               final file = allFileIdsToFile[fileID];
               if (file != null) {
@@ -1255,23 +1258,14 @@ class SmartMemoriesService {
       bucketLoop:
       for (final bucket in timeBuckets) {
         // Get X% most nostalgic photos
-        final nostalgiaScores = <int, double>{};
         final bucketFileIDs = bucket
             .map((memory) => memory.file.uploadedFileID!)
             .toSet()
             .toList();
-        final bucketFileIdToClip =
-            await MLDataDB.instance.getClipVectorsForFileIDs(bucketFileIDs);
-        for (final mem in bucket) {
-          final fileID = mem.file.uploadedFileID!;
-          final clip = bucketFileIdToClip[fileID];
-          if (clip == null) {
-            nostalgiaScores[fileID] = 0;
-            continue;
-          }
-          final score = clip.vector.dot(_clipPositiveTextVector!);
-          nostalgiaScores[fileID] = score;
-        }
+        final bucketVectors = await SemanticSearchService.instance
+            .getClipVectorsForFileIDs(bucketFileIDs);
+        final nostalgiaScores = await MLComputer.instance
+            .compareEmbeddings(bucketVectors, _clipPositiveTextVector!);
         final sortedNostalgia = bucket
           ..sort(
             (a, b) => nostalgiaScores[b.file.uploadedFileID!]!
@@ -1347,8 +1341,7 @@ class SmartMemoriesService {
         fileIdToFace.values.expand((x) => x.map((face) => face.faceID)).toSet();
     final faceIDsToPersonID =
         await MLDataDB.instance.getFaceIdToPersonIdForFaces(faceIDs);
-    final fileIdToClip =
-        await MLDataDB.instance.getClipVectorsForFileIDs(fileIDs);
+
     final allYears = safeMemories.map((e) {
       final creationTime =
           DateTime.fromMicrosecondsSinceEpoch(e.file.creationTime!);
@@ -1356,16 +1349,14 @@ class SmartMemoriesService {
     }).toSet();
 
     // Get clip scores for each file
-    final fileToScore = <int, double>{};
-    for (final mem in safeMemories) {
-      final clip = fileIdToClip[mem.file.uploadedFileID!];
-      if (clip == null) {
-        fileToScore[mem.file.uploadedFileID!] = 0;
-        continue;
+    final vectors =
+        await SemanticSearchService.instance.getClipVectorsForFileIDs(fileIDs);
+    final fileToScore = await MLComputer.instance
+        .compareEmbeddings(vectors, _clipPositiveTextVector!);
+    final fileIdToClip = <int, EmbeddingVector>{};
+      for (final vector in vectors) {
+        fileIdToClip[vector.fileID] = vector;
       }
-      final score = clip.vector.dot(_clipPositiveTextVector!);
-      fileToScore[mem.file.uploadedFileID!] = score;
-    }
 
     // Get face scores for each file
     final fileToFaceCount = <int, int>{};
