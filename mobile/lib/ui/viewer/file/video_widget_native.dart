@@ -178,9 +178,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   @override
   void dispose() {
     _subscription?.cancel();
-    _controller?.stop();
     _controller?.dispose();
-    _controller = null;
 
     //https://github.com/fluttercandies/flutter_photo_manager/blob/8afba2745ebaac6af8af75de9cbded9157bc2690/README.md#clear-caches
     if (_shouldClearCache) {
