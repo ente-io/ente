@@ -593,6 +593,12 @@ const MoreMenu = styled(Menu)`
 const MoreMenuItem = styled(MenuItem)`
     min-width: 190px;
 
+    /* MUI MenuItem default implementation has a minHeight of "48px" below the
+       "sm" breakpoint, and auto after it. We always want the same height, so
+       use an explicit padding to have minHeight "auto" also come out to 48px
+       (20px (icon or Typography height + 14 + 14) */
+    padding-block: 14px;
+
     gap: 1;
     justify-content: space-between;
     align-items: center;
