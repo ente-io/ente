@@ -14,7 +14,10 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 }
 
 import { isDesktop } from "@/base/app";
-import { type ModalVisibilityProps } from "@/base/components/utils/modal";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
 import { pt } from "@/base/i18n";
@@ -29,12 +32,15 @@ import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
+import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewerComponents";
 import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "@/new/photos/components/ImageEditorOverlay";
+import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Button, Menu, MenuItem, styled, Typography } from "@mui/material";
+import { t } from "i18next";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fileInfoExifForFile, updateItemDataAlt } from "./data-source";
 import {
@@ -125,6 +131,13 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onToggleFavorite?: (file: EnteFile) => Promise<void>;
     /**
+     * Called when the given {@link file} should be deleted.
+     *
+     * If this is not provided then the delete button will not be shown
+     * in the file actions.
+     */
+    onDeleteFile?: (file: EnteFile) => Promise<void>;
+    /**
      * Called when the user edits an image in the image editor and asks us to
      * save their edits as a copy.
      *
@@ -159,6 +172,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     allCollectionsNameByID,
     onTriggerSyncWithRemote,
     onToggleFavorite,
+    onDeleteFile,
     onSelectCollection,
     onSelectPerson,
     onSaveEditedImageCopy,
@@ -208,6 +222,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
+    const {
+        show: showConfirmDeleteFile,
+        props: confirmDeleteFileVisibilityProps,
+    } = useModalVisibility();
 
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
@@ -258,6 +276,25 @@ const FileViewer: React.FC<FileViewerProps> = ({
         });
     }, []);
 
+    const [handleConfirmDeleteFile, handleDeleteFile] = useMemo(() => {
+        const onConfirm = onDeleteFile
+            ? () => {
+                  handleMoreMenuClose();
+                  showConfirmDeleteFile();
+              }
+            : undefined;
+        return [onConfirm, onDeleteFile];
+    }, [onDeleteFile, showConfirmDeleteFile, handleMoreMenuClose]);
+
+    // const handleDeleteFile = async () => {
+    //     const file = fileToDelete!;
+    //     await moveToTrash([file]);
+    //     onMarkTempDeleted?.([file]);
+    //     updateItems(items.filter((item) => item.id !== file.id));
+    //     setFileToDelete(undefined);
+    //     needUpdate.current = true;
+    // };
+
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
             ? () => {
@@ -289,19 +326,26 @@ const FileViewer: React.FC<FileViewerProps> = ({
             const canModify =
                 isOwnFile && !isInTrashSection && !isInHiddenSection;
             const showFavorite = canModify;
-            const isEditableImage =
-                handleEditImage && canModify
-                    ? fileIsEditableImage(file)
-                    : undefined;
+            const showDelete =
+                !!handleConfirmDeleteFile && isOwnFile && !isInTrashSection;
+            const showEditImage =
+                !!handleEditImage && canModify && fileIsEditableImage(file);
 
             return {
                 fileID,
                 isOwnFile,
                 showFavorite,
-                isEditableImage,
+                showDelete,
+                showEditImage,
             };
         },
-        [user, isInTrashSection, isInHiddenSection, handleEditImage],
+        [
+            user,
+            isInTrashSection,
+            isInHiddenSection,
+            handleEditImage,
+            handleConfirmDeleteFile,
+        ],
     );
 
     const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
@@ -428,7 +472,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
                     list: { "aria-labelledby": moreButtonID },
                 }}
             >
-                {activeAnnotatedFile?.annotation.isEditableImage && (
+                {activeAnnotatedFile?.annotation.showDelete && (
+                    <MoreMenuItem onClick={showConfirmDeleteFile}>
+                        <Typography sx={{ fontWeight: "medium" }}>
+                            {/*TODO */ t("delete")}
+                        </Typography>
+                        <DeleteIcon />
+                    </MoreMenuItem>
+                )}
+                {activeAnnotatedFile?.annotation.showEditImage && (
                     <MoreMenuItem onClick={handleEditImage}>
                         <Typography sx={{ fontWeight: "medium" }}>
                             {/*TODO */ pt("Edit image")}
@@ -437,6 +489,13 @@ const FileViewer: React.FC<FileViewerProps> = ({
                     </MoreMenuItem>
                 )}
             </MoreMenu>
+            {/* TODO(PS): Fix imports */}
+            {handleDeleteFile && (
+                <ConfirmDeleteFileDialog
+                    {...confirmDeleteFileVisibilityProps}
+                    onConfirm={handleDeleteFile}
+                />
+            )}
             <ImageEditorOverlay
                 open={openImageEditor}
                 onClose={handleImageEditorClose}
