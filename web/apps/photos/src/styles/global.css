@@ -153,6 +153,14 @@ body {
     opacity: 0.85;
 }
 
+
+/* The ".pswp--ui-visible .pswp__hide-on-close" selector in PhotoSwipe's CSS
+   sets the opacity of the arrows to 1, which doesn't match the rest of the
+   controls (0.85). */
+.pswp-ente.pswp--ui-visible .pswp__hide-on-close.pswp__button--arrow {
+	opacity: 0.85;
+}
+
 .pswp-ente .pswp__error--active {
     display: initial;
 }
@@ -172,15 +180,17 @@ body {
 }
 
 .pswp-ente .pswp__caption {
-    color: white;
     position: absolute;
     bottom: 0px;
     right: 0;
     margin: 20px 24px;
     padding: 6px 16px;
     border-radius: 2px;
+    /* Same opacity as the other controls. */
+    color: rgba(255 255 255 / 0.85);
     background-color: rgba(0 0 0 / 0.2);
     backdrop-filter: blur(10px);
+    /* 4 lines max, ellipsis on overflow. */
     word-break: break-word;
     text-align: right;
     max-width: 375px;
