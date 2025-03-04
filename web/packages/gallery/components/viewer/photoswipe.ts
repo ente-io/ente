@@ -503,7 +503,6 @@ export class FileViewerPhotoSwipe {
             pswp.ui.registerElement({
                 name: "error",
                 order: 6,
-                // TODO(PS): Change color?
                 html: createPSRegisterElementIconHTML("error"),
                 onInit: (errorElement, pswp) => {
                     pswp.on("change", () => {
