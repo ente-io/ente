@@ -54,6 +54,10 @@ export interface FileViewerFileAnnotation {
      */
     showFavorite: boolean;
     /**
+     * `true` if the more menu action should be shown for this file.
+     */
+    showMore: boolean;
+    /**
      * `true` if the delete action should be shown for this file.
      */
     showDelete: boolean;
@@ -607,7 +611,7 @@ export class FileViewerPhotoSwipe {
                         pswp.on("change", () =>
                             showIf(
                                 buttonElement,
-                                !!currentFileAnnotation().isEditableImage,
+                                !!currentFileAnnotation().showMore,
                             ),
                         );
                     },
