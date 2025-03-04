@@ -5,7 +5,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/utils/toast_util.dart";
+import "package:photos/ui/notification/toast.dart";
 
 Future<bool> requestForMapEnable(BuildContext context) async {
   if (flagService.mapEnabled) {
