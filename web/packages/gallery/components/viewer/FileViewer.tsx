@@ -34,15 +34,7 @@ import {
     type ImageEditorOverlayProps,
 } from "@/new/photos/components/ImageEditorOverlay";
 import EditIcon from "@mui/icons-material/Edit";
-import {
-    Button,
-    ListItemText,
-    Menu,
-    MenuItem,
-    Stack,
-    styled,
-    Typography,
-} from "@mui/material";
+import { Button, Menu, MenuItem, styled, Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fileInfoExifForFile, updateItemDataAlt } from "./data-source";
 import {
@@ -437,44 +429,13 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 }}
             >
                 {activeAnnotatedFile?.annotation.isEditableImage && (
-                    <MenuItem onClick={handleEditImage}>
-                        <EditIcon fontSize="20px" />
-
-                        <ListItemText>
+                    <MoreMenuItem onClick={handleEditImage}>
+                        <Typography sx={{ fontWeight: "medium" }}>
                             {/*TODO */ pt("Edit image")}
-                        </ListItemText>
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.muted" }}
-                        >
-                            E
                         </Typography>
-                    </MenuItem>
+                        <EditIcon />
+                    </MoreMenuItem>
                 )}
-                <MenuItem sx={(theme) => ({})}>
-                    <Stack
-                        direction="row"
-                        sx={{
-                            gap: 1.5,
-                            alignItems: "center",
-                            // Fill our container.
-                            width: "100%",
-                            // MUI has responsive padding, use a static value instead.
-                            py: 1,
-                        }}
-                    >
-                        <EditIcon fontSize="20px" />
-                        <Typography sx={{ flex: 1, fontWeight: "medium" }}>
-                            {/*TODO */ pt("Edit image")}
-                        </Typography>
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.muted" }}
-                        >
-                            E
-                        </Typography>
-                    </Stack>
-                </MenuItem>
             </MoreMenu>
             <ImageEditorOverlay
                 open={openImageEditor}
@@ -499,19 +460,32 @@ const Container = styled("div")`
 
 const MoreMenu = styled(Menu)`
     & .MuiPaper-root {
-        background-color: #252525 /* theme.dark.background.paper2 */;
-        min-width: 220px;
+        background-color: #1b1b1b /* theme.dark.background.paper */;
     }
-    & .MuiMenuItem-root {
-        /* Same as other controls on the PhotoSwipe UI */
-        color: rgba(255 255 255 / 0.85);
-        &:hover {
-            /* Highlight on hover */
-            color: rgba(255 255 255 / 1);
-        }
-        .MuiSvgIcon-root {
-            font-size: 20px;
-        }
+    & .MuiList-root {
+        padding-block: 2px;
+    }
+`;
+
+const MoreMenuItem = styled(MenuItem)`
+    min-width: 190px;
+
+    gap: 1;
+    justify-content: space-between;
+    align-items: center;
+
+    /* Same as other controls on the PhotoSwipe UI */
+    color: rgba(255 255 255 / 0.85);
+    &:hover {
+        /* Highlight on hover */
+        color: rgba(255 255 255 / 1);
+        /* Disable the MUI default background color change on hover since it is
+           mode specific (we want this menu in a fixed dark mode). */
+        background-color: transparent;
+    }
+
+    .MuiSvgIcon-root {
+        font-size: 20px;
     }
 `;
 
