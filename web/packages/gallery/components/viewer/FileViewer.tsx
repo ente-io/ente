@@ -232,11 +232,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
     // Callbacks to be invoked (only once) the next time we get an update to the
     // `files` or `favoriteFileIDs` props.
     //
+    // The callback is passed the latest values of the `files` prop.
+    //
     // Both of those trace their way back to the same reducer, so they get
     // updated in tandem. When we delete files, only the `files` prop gets
     // updated, while when we toggle favoriets, only the `favoriteFileIDs` prop
     // gets updated.
-    const [, setOnNextFilesOrFavoritesUpdate] = useState<(() => void)[]>([]);
+    const [, setOnNextFilesOrFavoritesUpdate] = useState<
+        ((files: EnteFile[]) => void)[]
+    >([]);
 
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
@@ -245,9 +249,11 @@ const FileViewer: React.FC<FileViewerProps> = ({
      * Add a callback to be fired (only once) the next time we get an update to
      * the `files` prop.
      */
-    const awaitNextFilesOrFavoritesUpdate = useCallback((cb: () => void) => {
-        setOnNextFilesOrFavoritesUpdate((cbs) => cbs.concat(cb));
-    }, []);
+    const awaitNextFilesOrFavoritesUpdate = useCallback(
+        (cb: (files: EnteFile[]) => void) =>
+            setOnNextFilesOrFavoritesUpdate((cbs) => cbs.concat(cb)),
+        [],
+    );
 
     const handleClose = useCallback(() => {
         setNeedsSync((needSync) => {
@@ -316,20 +322,18 @@ const FileViewer: React.FC<FileViewerProps> = ({
         // happens as the last call in the `onDelete` implementation is a call
         // to a dispatcher, but we need to be careful about preserving this
         // assumption when changing `onDelete` implementation in the future.
-        awaitNextFilesOrFavoritesUpdate(() => {
-            // Refreshing the current slide after the current file has gone will
-            // show the subsequent slide (since that will move down to the current
-            // index). TODO: What if it's the last file?
-            psRef.current!.refreshCurrentSlideContent();
-
+        awaitNextFilesOrFavoritesUpdate((files: EnteFile[]) => {
             handleNeedsRemoteSync();
+            if (files.length) {
+                // Refreshing the current slide after the current file has gone
+                // will show the subsequent slide (since that would've now moved
+                // down to the current index).
+                psRef.current!.refreshCurrentSlideContent();
+            } else {
+                // If there are no more files left, close the viewer.
+                handleClose();
+            }
         });
-        // TODO: We currently have a setTimeout to ensure that the updated
-        // `files` prop has made its way to us delegate before we query for the
-        // status again.
-        //
-        // See: [Note: File viewer action setTimeout TODO]
-        // await new Promise((r) => setTimeout(r, 100));
     };
 
     const handleEditImage = useMemo(() => {
@@ -459,7 +463,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     // Notify the listeners, if any, for updates to files or favorites.
     useEffect(() => {
         setOnNextFilesOrFavoritesUpdate((cbs) => {
-            cbs.forEach((cb) => cb());
+            cbs.forEach((cb) => cb(files));
             return [];
         });
     }, [files, favoriteFileIDs]);
