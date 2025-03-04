@@ -39,6 +39,7 @@ import {
 } from "@/new/photos/components/ImageEditorOverlay";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { Button, Menu, MenuItem, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -283,6 +284,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleFileInfoClose = useCallback(() => setOpenFileInfo(false), []);
 
+    const handleDownload = useCallback(
+        (annotatedFile: FileViewerAnnotatedFile) => {
+            setActiveAnnotatedFile(annotatedFile);
+            console.log("TODO download", annotatedFile);
+        },
+        [],
+    );
+
     const handleMore = useCallback(
         (
             annotatedFile: FileViewerAnnotatedFile,
@@ -497,6 +506,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 onClose: handleClose,
                 onAnnotate: handleAnnotate,
                 onViewInfo: handleViewInfo,
+                onDownload: handleDownload,
                 onMore: handleMore,
             });
 
@@ -518,6 +528,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
         handleClose,
         handleAnnotate,
         handleViewInfo,
+        handleDownload,
         handleMore,
     ]);
 
@@ -568,6 +579,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
                             {/*TODO */ pt("Edit image")}
                         </Typography>
                         <EditIcon />
+                    </MoreMenuItem>
+                )}
+                {activeAnnotatedFile?.annotation.showDownload == "menu" && (
+                    <MoreMenuItem onClick={handleDownload}>
+                        <Typography sx={{ fontWeight: "medium" }}>
+                            {/*TODO */ t("download")}
+                        </Typography>
+                        <FileDownloadOutlinedIcon />
                     </MoreMenuItem>
                 )}
             </MoreMenu>
