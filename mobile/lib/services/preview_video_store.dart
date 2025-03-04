@@ -46,7 +46,7 @@ class PreviewVideoStore {
   LinkedHashMap<int, PreviewItem> get previews => _items;
   late Set<int> _failureFiles;
 
-  bool initSuccess = false;
+  bool _initSuccess = false;
 
   PreviewVideoStore._privateConstructor();
 
@@ -672,12 +672,12 @@ class PreviewVideoStore {
   }
 
   // generate stream for all files after cutoff date
-  Future<void> _putFilesForPreviewCreation() async {
+  Future<void> _putFilesForPreviewCreation([bool updateInit = false]) async {
     if (!isVideoStreamingEnabled || !await canUseHighBandwidth()) return;
 
     final cutoff = videoStreamingCutoff;
     if (cutoff == null) return;
-    initSuccess = true;
+    if (updateInit) _initSuccess = true;
 
     Map<int, String> failureFiles = {};
     try {
@@ -757,9 +757,9 @@ class PreviewVideoStore {
   }
 
   void queueFiles() {
-    if (!initSuccess) {
-      _putFilesForPreviewCreation().catchError((_) {
-        initSuccess = false;
+    if (!_initSuccess) {
+      _putFilesForPreviewCreation(true).catchError((_) {
+        _initSuccess = false;
       });
     }
   }
