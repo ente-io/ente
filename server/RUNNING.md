@@ -43,10 +43,10 @@ Or interact with the other services in the cluster, e.g. connect to the DB
 
 Or interact with the MinIO S3 API
 
-    AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=testtest \
-        aws s3 --endpoint-url http://localhost:3200 ls s3://test
+    AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=changeme1234 \
+        aws s3 --endpoint-url http://localhost:3200 ls s3://changeme
 
-Or open the MinIO dashboard at <http://localhost:3201> (user: test/password: testtest).
+Or open the MinIO dashboard at <http://localhost:3201> (user: changeme/password: changeme1234).
 
 > [!NOTE]
 >
