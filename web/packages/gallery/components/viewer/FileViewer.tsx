@@ -284,12 +284,21 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleFileInfoClose = useCallback(() => setOpenFileInfo(false), []);
 
-    const handleDownload = useCallback(
+    // The download action - either invoked directly (if the download option is
+    // shown in the more menu), or via `handleDownloadBarAction` (if the
+    // download option is shown in the PhotoSwipe bar).
+    const handleDownload = useCallback(() => {
+        console.log("TODO download");
+    }, []);
+
+    // Callback invoked when the download action is triggered by activating the
+    // download button in the PhotoSwipe bar.
+    const handleDownloadBarAction = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
             setActiveAnnotatedFile(annotatedFile);
-            console.log("TODO download", annotatedFile);
+            handleDownload();
         },
-        [],
+        [handleDownload],
     );
 
     const handleMore = useCallback(
@@ -506,7 +515,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 onClose: handleClose,
                 onAnnotate: handleAnnotate,
                 onViewInfo: handleViewInfo,
-                onDownload: handleDownload,
+                onDownload: handleDownloadBarAction,
                 onMore: handleMore,
             });
 
@@ -528,7 +537,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
         handleClose,
         handleAnnotate,
         handleViewInfo,
-        handleDownload,
+        handleDownloadBarAction,
         handleMore,
     ]);
 
