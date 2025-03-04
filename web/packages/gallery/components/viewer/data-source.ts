@@ -302,6 +302,19 @@ export const forgetFailedItemDataForFileID = (fileID: number) => {
 };
 
 /**
+ * Update the alt attribute of the {@link ItemData}, if any, associated with the
+ * given {@link EnteFile}.
+ *
+ * @param updatedFile The file whose caption was updated.
+ */
+export const updateItemDataAlt = (updatedFile: EnteFile) => {
+    const itemData = _state.itemDataByFileID.get(updatedFile.id);
+    if (itemData) {
+        itemData.alt = fileCaption(updatedFile);
+    }
+};
+
+/**
  * Forget item data for the all files whose fetch had failed.
  *
  * This is called when the user closes the file viewer so that we attempt a full
