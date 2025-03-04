@@ -534,11 +534,8 @@ const MoreMenuItem = styled(MenuItem)`
     /* Same as other controls on the PhotoSwipe UI */
     color: rgba(255 255 255 / 0.85);
     &:hover {
-        /* Highlight on hover */
         color: rgba(255 255 255 / 1);
-        /* Disable the MUI default background color change on hover since it is
-           mode specific (we want this menu in a fixed dark mode). */
-        background-color: transparent;
+        background-color: #252525 /* theme.dark.background.paper2 */;
     }
 
     .MuiSvgIcon-root {
