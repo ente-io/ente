@@ -10,6 +10,8 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/magic_cache_service.dart";
+import "package:photos/services/memories_cache_service.dart";
+import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/sync/trash_sync_service.dart";
 import "package:photos/services/update_service.dart";
@@ -106,6 +108,20 @@ MagicCacheService get magicCacheService {
     ServiceLocator.instance.prefs,
   );
   return _magicCacheService!;
+}
+
+MemoriesCacheService? _memoriesCacheService;
+MemoriesCacheService get memoriesCacheService {
+  _memoriesCacheService ??= MemoriesCacheService(
+    ServiceLocator.instance.prefs,
+  );
+  return _memoriesCacheService!;
+}
+
+SmartMemoriesService? _smartMemoriesService;
+SmartMemoriesService get smartMemoriesService {
+  _smartMemoriesService ??= SmartMemoriesService();
+  return _smartMemoriesService!;
 }
 
 BillingService? _billingService;
