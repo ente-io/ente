@@ -136,7 +136,7 @@ export type FileViewerProps = ModalVisibilityProps & {
      * If this is not provided then the delete button will not be shown
      * in the file actions.
      */
-    onDeleteFile?: (file: EnteFile) => Promise<void>;
+    onDelete?: (file: EnteFile) => Promise<void>;
     /**
      * Called when the user edits an image in the image editor and asks us to
      * save their edits as a copy.
@@ -172,7 +172,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     allCollectionsNameByID,
     onTriggerSyncWithRemote,
     onToggleFavorite,
-    onDeleteFile,
+    onDelete,
     onSelectCollection,
     onSelectPerson,
     onSaveEditedImageCopy,
@@ -222,10 +222,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
-    const {
-        show: showConfirmDeleteFile,
-        props: confirmDeleteFileVisibilityProps,
-    } = useModalVisibility();
+    const { show: showConfirmDelete, props: confirmDeleteVisibilityProps } =
+        useModalVisibility();
 
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
@@ -276,24 +274,24 @@ const FileViewer: React.FC<FileViewerProps> = ({
         });
     }, []);
 
-    const [handleConfirmDeleteFile, handleDeleteFile] = useMemo(() => {
-        const onConfirm = onDeleteFile
+    const handleConfirmDelete = useMemo(() => {
+        return onDelete
             ? () => {
                   handleMoreMenuClose();
-                  showConfirmDeleteFile();
+                  showConfirmDelete();
               }
             : undefined;
-        return [onConfirm, onDeleteFile];
-    }, [onDeleteFile, showConfirmDeleteFile, handleMoreMenuClose]);
+    }, [onDelete, showConfirmDelete, handleMoreMenuClose]);
 
-    // const handleDeleteFile = async () => {
-    //     const file = fileToDelete!;
-    //     await moveToTrash([file]);
-    //     onMarkTempDeleted?.([file]);
-    //     updateItems(items.filter((item) => item.id !== file.id));
-    //     setFileToDelete(undefined);
-    //     needUpdate.current = true;
-    // };
+    // Not memoized since it depends on the frequently changing
+    // `activeAnnotatedFile`.
+    const handleDelete = async () => {
+        const file = activeAnnotatedFile!.file;
+        await onDelete(file);
+        // TODO(PS): Update the viewer
+        //     updateItems(items.filter((item) => item.id !== file.id));
+        handleNeedsRemoteSync();
+    };
 
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
@@ -327,14 +325,16 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 isOwnFile && !isInTrashSection && !isInHiddenSection;
             const showFavorite = canModify;
             const showDelete =
-                !!handleConfirmDeleteFile && isOwnFile && !isInTrashSection;
+                !!handleConfirmDelete && isOwnFile && !isInTrashSection;
             const showEditImage =
                 !!handleEditImage && canModify && fileIsEditableImage(file);
+            const showMore = showDelete || showEditImage;
 
             return {
                 fileID,
                 isOwnFile,
                 showFavorite,
+                showMore,
                 showDelete,
                 showEditImage,
             };
@@ -344,7 +344,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             isInTrashSection,
             isInHiddenSection,
             handleEditImage,
-            handleConfirmDeleteFile,
+            handleConfirmDelete,
         ],
     );
 
@@ -473,7 +473,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 }}
             >
                 {activeAnnotatedFile?.annotation.showDelete && (
-                    <MoreMenuItem onClick={showConfirmDeleteFile}>
+                    <MoreMenuItem onClick={showConfirmDelete}>
                         <Typography sx={{ fontWeight: "medium" }}>
                             {/*TODO */ t("delete")}
                         </Typography>
@@ -490,12 +490,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 )}
             </MoreMenu>
             {/* TODO(PS): Fix imports */}
-            {handleDeleteFile && (
-                <ConfirmDeleteFileDialog
-                    {...confirmDeleteFileVisibilityProps}
-                    onConfirm={handleDeleteFile}
-                />
-            )}
+            <ConfirmDeleteFileDialog
+                {...confirmDeleteVisibilityProps}
+                onConfirm={handleDelete}
+            />
             <ImageEditorOverlay
                 open={openImageEditor}
                 onClose={handleImageEditorClose}

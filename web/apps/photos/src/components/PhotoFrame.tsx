@@ -14,7 +14,7 @@ import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { FileViewer } from "@/new/photos/components/FileViewerComponents";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
-import { TRASH_SECTION } from "@/new/photos/services/collection";
+import { moveToTrash, TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
 import { PhotoViewer } from "components/PhotoViewer";
 import { t } from "i18next";
@@ -271,7 +271,7 @@ const PhotoFrame = ({
     );
 
     const handleToggleFavorite = useMemo(() => {
-        return favoriteFileIDs
+        return favoriteFileIDs && onMarkUnsyncedFavoriteUpdate
             ? async (file: EnteFile) => {
                   const isFavorite = favoriteFileIDs!.has(file.id);
                   await (isFavorite ? removeFromFavorites : addToFavorites)(
@@ -282,6 +282,15 @@ const PhotoFrame = ({
               }
             : undefined;
     }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
+
+    const handleDelete = useMemo(() => {
+        return onMarkTempDeleted
+            ? async (file: EnteFile) => {
+                  await moveToTrash([file]);
+                  onMarkTempDeleted?.([file]);
+              }
+            : undefined;
+    }, [favoriteFileIDs, onMarkTempDeleted]);
 
     const handleSaveEditedImageCopy = useCallback(
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
@@ -575,6 +584,7 @@ const PhotoFrame = ({
                     isInTrashSection={activeCollectionID === TRASH_SECTION}
                     onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
                     onToggleFavorite={handleToggleFavorite}
+                    onDelete={handleDelete}
                     onSaveEditedImageCopy={handleSaveEditedImageCopy}
                     {...{
                         favoriteFileIDs,
