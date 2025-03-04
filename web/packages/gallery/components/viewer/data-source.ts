@@ -223,7 +223,8 @@ export const fileViewerDidClose = () => {
 };
 
 /**
- * Return the best available ItemData for rendering the given {@link file}.
+ * Return the best available {@link ItemData} for rendering the given
+ * {@link file}.
  *
  * If an entry does not exist for a particular file, then it is lazily added on
  * demand, and updated as we keep getting better data (thumbnail, original) for
