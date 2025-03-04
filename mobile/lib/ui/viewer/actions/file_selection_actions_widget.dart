@@ -320,11 +320,12 @@ class _FileSelectionActionsWidgetState
         ),
       );
     }
-    if (widget.type != GalleryType.sharedPublicCollection) {
+    if (flagService.internalUser &&
+        widget.type != GalleryType.sharedPublicCollection) {
       items.add(
         SelectionActionButton(
           icon: Icons.movie_creation_sharp,
-          labelText: "Video memory",
+          labelText: "Video Memory",
           onTap: _onCreateVideoMemoryClicked,
         ),
       );
