@@ -288,8 +288,17 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const handleDelete = async () => {
         const file = activeAnnotatedFile!.file;
         await onDelete(file);
-        // TODO(PS): Update the viewer
-        //     updateItems(items.filter((item) => item.id !== file.id));
+        // TODO: We currently have a setTimeout to ensure that the updated
+        // `files` prop has made its way to us delegate before we query for the
+        // status again.
+        //
+        // See: [Note: File viewer action setTimeout TODO]
+        await new Promise((r) => setTimeout(r, 100));
+        // Refreshing the current slide after the current file has gone will
+        // show the subsequent slide (since that will move down to the current
+        // index). TODO: What if it's the last file?
+        psRef.current!.refreshCurrentSlideContent();
+
         handleNeedsRemoteSync();
     };
 

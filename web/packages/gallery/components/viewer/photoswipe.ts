@@ -524,6 +524,8 @@ export class FileViewerPhotoSwipe {
                     this.pendingFavoriteUpdates.add(af.file.id);
                     buttonElement.disabled = true;
                     await delegate.toggleFavorite(af);
+                    // [Note: File viewer action setTimeout TODO]
+                    //
                     // TODO: This can be improved in two ways:
                     //
                     // 1. We currently have a setTimeout to ensure that the
@@ -537,8 +539,9 @@ export class FileViewerPhotoSwipe {
                     // 2. We reload the entire slide instead of just updating
                     //    the button state. This is because there are two
                     //    buttons, instead of a single button toggling between
-                    //    two states (e.g. like the zoom button). A single
-                    //    button can be achieved by moving the fill as a layer.
+                    //    two states (e.g. like the zoom button). This aspect is
+                    //    easier to improve: A single button can be achieved by
+                    //    moving the fill as a layer.
                     await new Promise((r) => setTimeout(r, 100));
                     this.pendingFavoriteUpdates.delete(af.file.id);
                     this.refreshCurrentSlideContent();
