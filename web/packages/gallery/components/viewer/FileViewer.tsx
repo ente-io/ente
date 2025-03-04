@@ -87,6 +87,10 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     initialIndex: number;
     /**
+     * If true then the viewer does not show controls for downloading the file.
+     */
+    disableDownload?: boolean;
+    /**
      * `true` when we are viewing files in the Trash.
      */
     isInTrashSection?: boolean;
@@ -94,10 +98,6 @@ export type FileViewerProps = ModalVisibilityProps & {
      * `true` when we are viewing files in the hidden section.
      */
     isInHiddenSection?: boolean;
-    /**
-     * If true then the viewer does not show controls for downloading the file.
-     */
-    disableDownload?: boolean;
     /**
      * File IDs of all the files that the user has marked as a favorite.
      *
@@ -168,9 +168,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
     user,
     files,
     initialIndex,
+    disableDownload,
     isInTrashSection,
     isInHiddenSection,
-    disableDownload,
     favoriteFileIDs,
     fileCollectionIDs,
     allCollectionsNameByID,
@@ -371,7 +371,21 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 !!handleConfirmDelete && isOwnFile && !isInTrashSection;
             const showEditImage =
                 !!handleEditImage && canModify && fileIsEditableImage(file);
-            const showMore = showDelete || showEditImage;
+
+            const showDownload = (() => {
+                if (disableDownload) return undefined;
+                if (user) {
+                    // Logged in users see the download option in the more menu.
+                    return "menu";
+                } else {
+                    // In shared albums, the download option is shown in the bar
+                    // buttons, in lieu of the favorite option.
+                    return "bar";
+                }
+            })();
+
+            const showMore =
+                showDelete || showEditImage || showDownload == "bar";
 
             return {
                 fileID,
@@ -379,11 +393,13 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 showFavorite,
                 showMore,
                 showDelete,
+                showDownload,
                 showEditImage,
             };
         },
         [
             user,
+            disableDownload,
             isInTrashSection,
             isInHiddenSection,
             handleEditImage,
