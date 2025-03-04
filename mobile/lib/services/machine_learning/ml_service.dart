@@ -140,6 +140,8 @@ class MLService {
       if (_mlControllerStatus == true) {
         // refresh discover section
         magicCacheService.updateCache(forced: force).ignore();
+        // refresh memories section
+        memoriesCacheService.updateCache(forced: force).ignore();
       }
       if (canFetch()) {
         await fetchAndIndexAllImages();
@@ -150,6 +152,8 @@ class MLService {
       if (_mlControllerStatus == true) {
         // refresh discover section
         magicCacheService.updateCache().ignore();
+        // refresh memories section
+        memoriesCacheService.updateCache(forced: force).ignore();
       }
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);

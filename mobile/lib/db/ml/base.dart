@@ -108,9 +108,6 @@ abstract class IMLDataDB<T> {
 
   Future<List<EmbeddingVector>> getAllClipVectors();
   Future<Map<int, int>> clipIndexedFileWithVersion();
-  Future<Map<int, EmbeddingVector>> getClipVectorsForFileIDs(
-    Iterable<int> fileIDs,
-  );
   Future<int> getClipIndexedFileCount({int minimumMlVersion});
   Future<void> putClip(List<ClipEmbedding> embeddings);
   Future<void> deleteClipEmbeddings(List<T> fileIDs);

@@ -1,5 +1,4 @@
 import "dart:convert";
-
 import "package:ml_linalg/vector.dart";
 
 class EmbeddingVector {
@@ -13,11 +12,25 @@ class EmbeddingVector {
     required List<double> embedding,
   }) : vector = Vector.fromList(embedding);
 
-  static Vector decodeEmbedding(String embedding) {
-    return Vector.fromList(List<double>.from(jsonDecode(embedding) as List));
+  static EmbeddingVector fromJsonString(String jsonString) {
+    return _fromJson(jsonDecode(jsonString) as Map<String, dynamic>);
   }
 
-  static String encodeEmbedding(Vector embedding) {
-    return jsonEncode(embedding.toList());
+  String toJsonString() {
+    return jsonEncode(_toJson());
+  }
+
+  Map<String, dynamic> _toJson() {
+    return {
+      "fileID": fileID,
+      "embedding": vector.toList(),
+    };
+  }
+
+  static EmbeddingVector _fromJson(Map<String, dynamic> json) {
+    return EmbeddingVector(
+      fileID: json["fileID"] as int,
+      embedding: List<double>.from(json["embedding"] as List),
+    );
   }
 }

@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:photos/models/memory.dart';
+import 'package:photos/models/memories/memory.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MemoriesDB {
