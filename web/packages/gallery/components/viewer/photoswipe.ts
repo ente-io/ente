@@ -67,6 +67,8 @@ export interface FileViewerFileAnnotation {
      * - When "bar", the action button is shown among the bar icons.
      *
      * - When "menu", the action is shown as a more menu entry.
+     *
+     * Note: "bar" should only be set if {@link haveUser} is also true.
      */
     showDownload: "bar" | "menu" | undefined;
     /**
@@ -262,6 +264,7 @@ export class FileViewerPhotoSwipe {
         onClose,
         onAnnotate,
         onViewInfo,
+        onDownload,
         onMore,
     }: FileViewerPhotoSwipeOptions) {
         this.opts = { disableDownload };
@@ -566,7 +569,7 @@ export class FileViewerPhotoSwipe {
                 // up being shown, so they can safely share the same order.
                 pswp.ui.registerElement({
                     name: "favorite",
-                    title: t("favorite_key"),
+                    title: t("favorite"),
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
@@ -578,7 +581,7 @@ export class FileViewerPhotoSwipe {
                 });
                 pswp.ui.registerElement({
                     name: "unfavorite",
-                    title: t("unfavorite_key"),
+                    title: t("unfavorite"),
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("unfavorite"),
@@ -586,6 +589,27 @@ export class FileViewerPhotoSwipe {
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
                             showFavoriteIf(buttonElement, true),
+                        ),
+                });
+            } else {
+                // When we don't have a user (i.e. in the context of public
+                // albums), the download button is shown (if enabled for that
+                // album) instead of the favorite button as the first action.
+                //
+                // It can thus also use the same order as fav/unfav.
+                pswp.ui.registerElement({
+                    name: "download",
+                    title: t("download"),
+                    order: 8,
+                    isButton: true,
+                    html: createPSRegisterElementIconHTML("download"),
+                    onClick: () => onDownload(currentAnnotatedFile()),
+                    onInit: (buttonElement) =>
+                        pswp.on("change", () =>
+                            showIf(
+                                buttonElement,
+                                currentFileAnnotation().showDownload == "bar",
+                            ),
                         ),
                 });
             }

@@ -403,7 +403,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             })();
 
             const showMore =
-                showDelete || showEditImage || showDownload == "bar";
+                showDelete || showEditImage || showDownload == "menu";
 
             return {
                 fileID,
