@@ -153,12 +153,22 @@ body {
     opacity: 0.85;
 }
 
+.pswp-ente .pswp__error .pswp__icn {
+    /* Use a warning color for the error icon */
+    fill: var(--mui-palette-fixed-golden);
+}
+
+.pswp-ente .pswp__error .pswp__icn-shadow {
+    /* Reduce the stroke from default (2px) to make it look better with the
+       golden icon outline */
+    stroke-width: 1px;
+}
 
 /* The ".pswp--ui-visible .pswp__hide-on-close" selector in PhotoSwipe's CSS
    sets the opacity of the arrows to 1, which doesn't match the rest of the
    controls (0.85). */
 .pswp-ente.pswp--ui-visible .pswp__hide-on-close.pswp__button--arrow {
-	opacity: 0.85;
+    opacity: 0.85;
 }
 
 .pswp-ente .pswp__error--active {
