@@ -23,7 +23,6 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/api/user/key_attributes.dart';
 import 'package:photos/models/api/user/key_gen_result.dart';
 import 'package:photos/models/api/user/private_key_attributes.dart';
-import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/home_widget_service.dart";
@@ -217,7 +216,6 @@ class Configuration {
       CollectionsService.instance.clearCache();
       FavoritesService.instance.clearCache();
       MemoriesService.instance.clearCache();
-      unawaited(memoriesCacheService.clearMemoriesCache());
       SearchService.instance.clearCache();
       PersonService.instance.clearCache();
       unawaited(HomeWidgetService.instance.clearHomeWidget());

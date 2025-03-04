@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:math";
 
 import "package:flutter/cupertino.dart";
@@ -151,6 +152,7 @@ class SearchService {
     _cachedFilesForSearch = null;
     _cachedFilesForHierarchicalSearch = null;
     _cachedHiddenFilesFuture = null;
+    unawaited(memoriesCacheService.clearMemoriesCache());
   }
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
