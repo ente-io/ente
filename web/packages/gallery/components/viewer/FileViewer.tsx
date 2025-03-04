@@ -128,6 +128,8 @@ export type FileViewerProps = ModalVisibilityProps & {
      * in the file actions.
      *
      * See also {@link favoriteFileIDs}.
+     *
+     * See also: [Note: File viewer update and dispatch]
      */
     onToggleFavorite?: (file: EnteFile) => Promise<void>;
     /**
@@ -135,6 +137,8 @@ export type FileViewerProps = ModalVisibilityProps & {
      *
      * If this is not provided then the delete button will not be shown
      * in the file actions.
+     *
+     * See also: [Note: File viewer update and dispatch]
      */
     onDelete?: (file: EnteFile) => Promise<void>;
     /**
@@ -226,8 +230,13 @@ const FileViewer: React.FC<FileViewerProps> = ({
         useModalVisibility();
 
     // Callbacks to be invoked (only once) the next time we get an update to the
-    // `files` prop.
-    const [, setOnNextFilesUpdate] = useState<(() => void)[]>([]);
+    // `files` or `favoriteFileIDs` props.
+    //
+    // Both of those trace their way back to the same reducer, so they get
+    // updated in tandem. When we delete files, only the `files` prop gets
+    // updated, while when we toggle favoriets, only the `favoriteFileIDs` prop
+    // gets updated.
+    const [, setOnNextFilesOrFavoritesUpdate] = useState<(() => void)[]>([]);
 
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
@@ -236,8 +245,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
      * Add a callback to be fired (only once) the next time we get an update to
      * the `files` prop.
      */
-    const awaitNextFilesUpdate = useCallback((cb: () => void) => {
-        setOnNextFilesUpdate((cbs) => cbs.concat(cb));
+    const awaitNextFilesOrFavoritesUpdate = useCallback((cb: () => void) => {
+        setOnNextFilesOrFavoritesUpdate((cbs) => cbs.concat(cb));
     }, []);
 
     const handleClose = useCallback(() => {
@@ -300,10 +309,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const handleDelete = async () => {
         const file = activeAnnotatedFile!.file;
         await onDelete(file);
-        // Be careful here. This works currently, deterministically, but it
-        // relies on the assumption that `onDelete` will asynchronously result
-        // in updates to the `files` prop.
-        awaitNextFilesUpdate(() => {
+        // [Note: File viewer update and dispatch]
+        //
+        // This relies on the assumption that `onDelete` will asynchronously
+        // result in updates to the `files` prop. Currently that indeed is what
+        // happens as the last call in the `onDelete` implementation is a call
+        // to a dispatcher, but we need to be careful about preserving this
+        // assumption when changing `onDelete` implementation in the future.
+        awaitNextFilesOrFavoritesUpdate(() => {
             // Refreshing the current slide after the current file has gone will
             // show the subsequent slide (since that will move down to the current
             // index). TODO: What if it's the last file?
@@ -408,11 +421,26 @@ const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const toggleFavorite = useCallback(
-        ({ file }: FileViewerAnnotatedFile) =>
-            onToggleFavorite!(file)
-                .then(handleNeedsRemoteSync)
-                .catch(onGenericError),
-        [onToggleFavorite, handleNeedsRemoteSync, onGenericError],
+        ({ file }: FileViewerAnnotatedFile) => {
+            return new Promise((resolve) => {
+                // See: [Note: File viewer update and dispatch]
+                onToggleFavorite!(file)
+                    .then(
+                        () => awaitNextFilesOrFavoritesUpdate(resolve),
+                        (e: unknown) => {
+                            onGenericError(e);
+                            resolve();
+                        },
+                    )
+                    .finally(handleNeedsRemoteSync);
+            });
+        },
+        [
+            onToggleFavorite,
+            onGenericError,
+            awaitNextFilesOrFavoritesUpdate,
+            handleNeedsRemoteSync,
+        ],
     );
 
     // Initial value of delegate.
@@ -428,13 +456,13 @@ const FileViewer: React.FC<FileViewerProps> = ({
         delegate.toggleFavorite = toggleFavorite;
     }, [getFiles, isFavorite, toggleFavorite]);
 
-    // Notify the listeners, if any, for updates to files.
+    // Notify the listeners, if any, for updates to files or favorites.
     useEffect(() => {
-        setOnNextFilesUpdate((cbs) => {
+        setOnNextFilesOrFavoritesUpdate((cbs) => {
             cbs.forEach((cb) => cb());
             return [];
         });
-    }, [files]);
+    }, [files, favoriteFileIDs]);
 
     useEffect(() => {
         if (open) {
