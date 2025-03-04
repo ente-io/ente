@@ -290,7 +290,7 @@ const PhotoFrame = ({
                   onMarkTempDeleted?.([file]);
               }
             : undefined;
-    }, [favoriteFileIDs, onMarkTempDeleted]);
+    }, [onMarkTempDeleted]);
 
     const handleSaveEditedImageCopy = useCallback(
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
