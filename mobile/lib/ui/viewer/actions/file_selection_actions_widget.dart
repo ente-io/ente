@@ -325,7 +325,7 @@ class _FileSelectionActionsWidgetState
       items.add(
         SelectionActionButton(
           icon: Icons.movie_creation_sharp,
-          labelText: "Video Memory",
+          labelText: "(i) Video Memory",
           onTap: _onCreateVideoMemoryClicked,
         ),
       );
