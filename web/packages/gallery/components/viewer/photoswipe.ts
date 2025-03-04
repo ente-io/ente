@@ -54,10 +54,14 @@ export interface FileViewerFileAnnotation {
      */
     showFavorite: boolean;
     /**
-     * `true` if this is an image which can be edited, and editing is possible,
-     * and the edit action should therefore be shown for this file.
+     * `true` if the delete action should be shown for this file.
      */
-    isEditableImage: boolean;
+    showDelete: boolean;
+    /**
+     * `true` if this is an image which can be edited, _and_ editing is
+     * possible, and the edit action should therefore be shown for this file.
+     */
+    showEditImage: boolean;
 }
 
 export interface FileViewerPhotoSwipeDelegate {
