@@ -180,6 +180,10 @@ body {
     transform: scale(0.85);
 }
 
+.pswp-ente .pswp__button--close .pswp__icn {
+    transform: scale(0.9);
+}
+
 .pswp-ente .pswp__button--arrow--prev .pswp__icn {
     transform: scale(0.8);
 }
