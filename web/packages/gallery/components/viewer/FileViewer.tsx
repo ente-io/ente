@@ -35,7 +35,7 @@ import {
 } from "@/new/photos/components/ImageEditorOverlay";
 import { Button, Menu, MenuItem, styled } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fileInfoExifForFile } from "./data-source";
+import { fileInfoExifForFile, updateItemDataAlt } from "./data-source";
 import {
     FileViewerPhotoSwipe,
     moreButtonID,
@@ -395,7 +395,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     ]);
 
     const handleUpdateCaption = useCallback((updatedFile: EnteFile) => {
-        console.log("TODO", updatedFile);
+        updateItemDataAlt(updatedFile);
         psRef.current!.refreshCurrentSlideContent();
     }, []);
 
