@@ -525,7 +525,6 @@
   "viewLargeFiles": "Fichiers volumineux",
   "viewLargeFilesDesc": "Affichez les fichiers qui consomment le plus de stockage.",
   "noDuplicates": "✨ Aucun doublon",
-  "youveNoDuplicateFilesThatCanBeCleared": "Vous n'avez aucun fichier dédupliqué pouvant être nettoyé",
   "success": "Succès",
   "rateUs": "Évaluez-nous",
   "remindToEmptyDeviceTrash": "Également vide \"récemment supprimé\" de \"Paramètres\" -> \"Stockage\" pour réclamer l'espace libéré",

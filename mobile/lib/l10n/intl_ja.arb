@@ -525,7 +525,6 @@
   "viewLargeFiles": "大きなファイル",
   "viewLargeFilesDesc": "最も多くのストレージを消費しているファイルを表示します。",
   "noDuplicates": "✨ 重複なし",
-  "youveNoDuplicateFilesThatCanBeCleared": "削除できる重複ファイルはありません",
   "success": "成功",
   "rateUs": "評価して下さい",
   "remindToEmptyDeviceTrash": "また、空き領域を取得するには、「設定」→「ストレージ」から「最近削除した項目」を空にします",

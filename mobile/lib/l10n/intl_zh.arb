@@ -525,7 +525,6 @@
   "viewLargeFiles": "大文件",
   "viewLargeFilesDesc": "查看占用存储空间最多的文件。",
   "noDuplicates": "✨ 没有重复内容",
-  "youveNoDuplicateFilesThatCanBeCleared": "您没有可以被清除的重复文件",
   "success": "成功",
   "rateUs": "给我们评分",
   "remindToEmptyDeviceTrash": "同时从“设置”->“存储”中清空“最近删除”以领取释放的空间",

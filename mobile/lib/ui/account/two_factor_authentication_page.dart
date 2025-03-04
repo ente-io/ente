@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
-import 'package:photos/services/user_service.dart';
+import 'package:photos/services/account/user_service.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
 import "package:pinput/pinput.dart";
 

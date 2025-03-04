@@ -499,7 +499,6 @@
   "appLockOfflineModeWarning": "Vous avez choisi de fonctionner sans sauvegardes. Si vous oubliez votre outil Applock, vous serez bloqué dans l'accès à vos données.",
   "duplicateCodes": "Codes dupliqués",
   "noDuplicates": "✨ Pas de doublons",
-  "youveNoDuplicateCodesThatCanBeCleared": "Vous n'avez aucun code en doublon pouvant être supprimé",
   "deduplicateCodes": "Codes dédupliqués",
   "deselectAll": "Tout désélectionner",
   "selectAll": "Tout sélectionner",

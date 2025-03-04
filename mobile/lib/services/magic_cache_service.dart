@@ -23,7 +23,6 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -203,8 +202,7 @@ class MagicCacheService {
     return _prefs.getInt(_lastMagicCacheUpdateTime) ?? 0;
   }
 
-  bool get enableDiscover =>
-      userRemoteFlagService.getCachedBoolValue(UserRemoteFlagService.mlEnabled);
+  bool get enableDiscover => flagService.hasGrantedMLConsent;
 
   void queueUpdate(String reason) {
     _pendingUpdateReason.add(reason);

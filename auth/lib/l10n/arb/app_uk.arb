@@ -497,7 +497,6 @@
   "appLockOfflineModeWarning": "Ви обрали продовжити без резервних копій. Якщо ви забудете свій пароль, доступ до ваших даних буде заблоковано.",
   "duplicateCodes": "Дублікати кодів",
   "noDuplicates": "✨ Немає дублікатів",
-  "youveNoDuplicateCodesThatCanBeCleared": "У вас немає дублікатів кодів, які можна очистити",
   "deduplicateCodes": "Дедуплікувати коди",
   "deselectAll": "Зняти виділення",
   "selectAll": "Вибрати все",

@@ -25,7 +25,6 @@ import {
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
-import { isDevBuild } from "@/base/env";
 import {
     getLocaleInUse,
     setLocaleInUse,
@@ -58,7 +57,7 @@ import {
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { isMLSupported } from "@/new/photos/services/ml";
 import {
-    isInternalUser,
+    isDevBuildAndUser,
     syncSettings,
     updateCFProxyDisabledPreference,
     updateMapEnabled,
@@ -1148,7 +1147,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         }
                         onClick={confirmViewLogs}
                     />
-                    {isInternalUser() && isDevBuild && (
+                    {isDevBuildAndUser() && (
                         <RowButton
                             variant="secondary"
                             label={

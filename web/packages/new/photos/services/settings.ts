@@ -8,6 +8,7 @@
 //
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
+import { isDevBuild } from "@/base/env";
 import { localUser } from "@/base/local-user";
 import log from "@/base/log";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
@@ -152,7 +153,7 @@ type FeatureFlags = z.infer<typeof FeatureFlags>;
 const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
     const settings = createDefaultSettings();
-    settings.isInternalUser = flags?.internalUser || isInternalUserViaEmail();
+    settings.isInternalUser = flags?.internalUser || false;
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     if (flags?.castUrl) settings.castURL = flags.castUrl;
@@ -185,19 +186,18 @@ const setSettingsSnapshot = (snapshot: Settings) => {
     _state.settingsListeners.forEach((l) => l());
 };
 
-const isInternalUserViaEmail = () => {
+/**
+ * Return `true` if this is a development build, and the current user is marked
+ * as an "development" user.
+ *
+ * Emails that end in "@ente.io" are considered as dev users.
+ */
+export const isDevBuildAndUser = () => isDevBuild && isDevUserViaEmail();
+
+const isDevUserViaEmail = () => {
     const user = localUser();
     return !!user?.email.endsWith("@ente.io");
 };
-
-/**
- * Return `true` if the current user is marked as an "internal" user.
- *
- * 1. Emails that end in `@ente.io` are considered as internal users.
- * 2. If the "internalUser" remote feature flag is set, the user is internal.
- * 3. Otherwise false.
- */
-export const isInternalUser = () => settingsSnapshot().isInternalUser;
 
 /**
  * Persist the user's map enabled preference both locally and on remote.
