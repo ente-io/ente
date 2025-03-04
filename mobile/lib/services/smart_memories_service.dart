@@ -1173,7 +1173,7 @@ class SmartMemoriesService {
       );
       final fillerMemory = FillerMemory(
         memories,
-        "TEST",
+        "filler",
         nowInMicroseconds,
         windowEnd,
       );
