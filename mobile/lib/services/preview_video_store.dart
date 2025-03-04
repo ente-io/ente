@@ -44,7 +44,7 @@ const _maxRetryCount = 3;
 class PreviewVideoStore {
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
   LinkedHashMap<int, PreviewItem> get previews => _items;
-  late Set<int> _failureFiles;
+  Set<int>? _failureFiles;
 
   bool _initSuccess = false;
 
@@ -375,12 +375,12 @@ class PreviewVideoStore {
 
   Future<void> _removeFromLocks(EnteFile enteFile) async {
     final bool isFailurePresent =
-        _failureFiles.contains(enteFile.uploadedFileID!);
+        _failureFiles?.contains(enteFile.uploadedFileID!) ?? false;
 
     if (isFailurePresent) {
       await UploadLocksDB.instance
           .deleteStreamUploadErrorEntry(enteFile.uploadedFileID!);
-      _failureFiles.remove(enteFile.uploadedFileID!);
+      _failureFiles?.remove(enteFile.uploadedFileID!);
     }
   }
 
@@ -407,7 +407,7 @@ class PreviewVideoStore {
       );
 
       final bool isFailurePresent =
-          _failureFiles.contains(enteFile.uploadedFileID!);
+          _failureFiles?.contains(enteFile.uploadedFileID!) ?? false;
 
       if (isFailurePresent) {
         UploadLocksDB.instance.updateStreamStatus(
@@ -419,7 +419,7 @@ class PreviewVideoStore {
           enteFile.uploadedFileID!,
           error.toString(),
         );
-        _failureFiles.add(enteFile.uploadedFileID!);
+        _failureFiles?.add(enteFile.uploadedFileID!);
       }
     }
   }
@@ -685,7 +685,7 @@ class PreviewVideoStore {
       _failureFiles = {...failureFiles.keys};
 
       // handle case when failures are already previewed
-      for (final failure in _failureFiles) {
+      for (final failure in _failureFiles!) {
         if (previews.containsKey(failure)) {
           UploadLocksDB.instance.deleteStreamUploadErrorEntry(failure).ignore();
         }
@@ -716,7 +716,8 @@ class PreviewVideoStore {
       final enteFile = allFiles[i];
       // elimination case for <=10 MB with H.264
       final (_, result, _) = await _checkFileForPreviewCreation(enteFile);
-      final isFailure = _failureFiles.contains(enteFile.uploadedFileID!);
+      final isFailure =
+          _failureFiles?.contains(enteFile.uploadedFileID!) ?? false;
 
       if (isFailure) {
         _items[enteFile.uploadedFileID!] = PreviewItem(
