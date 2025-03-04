@@ -154,8 +154,27 @@ export type FileInfoProps = ModalVisibilityProps & {
      * Used when {@link showCollections} is set.
      */
     allCollectionsNameByID?: Map<number, string>;
-    scheduleUpdate: () => void;
-    refreshPhotoswipe: () => void;
+    /**
+     * Called when the action on the file info drawer has changed some the
+     * metadata for some file, and we need to sync with remote to get our
+     * locally persisted file objects up to date.
+     *
+     * The sync is not performed immediately by the file info drawer to give
+     * faster feedback to the user, and to allow changes to multiple files to be
+     * batched together into a single sync when the file viewer is closed.
+     */
+    onNeedsRemoteSync: () => void;
+    /**
+     * Called when an action on the file info drawer change the caption of the
+     * given {@link EnteFile}.
+     *
+     * This hook allows the file viewer to update the caption it is displaying
+     * for the given file.
+     *
+     * @param updatedFile The updated file object, containing the updated
+     * caption.
+     */
+    onUpdateCaption: (updatedFile: EnteFile) => void;
     /**
      * Called when the user selects a collection from among the collections that
      * the file belongs to.
@@ -177,8 +196,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     showCollections,
     fileCollectionIDs,
     allCollectionsNameByID,
-    scheduleUpdate,
-    refreshPhotoswipe,
+    onNeedsRemoteSync,
+    onUpdateCaption,
     onSelectCollection,
     onSelectPerson,
 }) => {
@@ -240,13 +259,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     {...{
                         file,
                         allowEdits,
-                        scheduleUpdate,
-                        refreshPhotoswipe,
+                        onNeedsRemoteSync,
+                        onUpdateCaption,
                     }}
                 />
-                <CreationTime {...{ file, allowEdits, scheduleUpdate }} />
+                <CreationTime {...{ file, allowEdits, onNeedsRemoteSync }} />
                 <FileName
-                    {...{ file, annotatedExif, allowEdits, scheduleUpdate }}
+                    {...{ file, annotatedExif, allowEdits, onNeedsRemoteSync }}
                 />
 
                 {annotatedExif?.takenOnDevice && (
@@ -521,7 +540,7 @@ const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
 
 type CaptionProps = Pick<
     FileInfoProps,
-    "allowEdits" | "scheduleUpdate" | "refreshPhotoswipe"
+    "allowEdits" | "onNeedsRemoteSync" | "onUpdateCaption"
 > & {
     /* TODO(PS): This is DisplayFile, but that's meant to be removed */
     file: EnteFile & {
@@ -532,8 +551,8 @@ type CaptionProps = Pick<
 const Caption: React.FC<CaptionProps> = ({
     file,
     allowEdits,
-    scheduleUpdate,
-    refreshPhotoswipe,
+    onNeedsRemoteSync,
+    onUpdateCaption,
 }) => {
     const [isSaving, setIsSaving] = useState(false);
 
@@ -553,12 +572,12 @@ const Caption: React.FC<CaptionProps> = ({
                 updateExistingFilePubMetadata(file, updatedFile);
                 // @ts-ignore
                 file.title = file.pubMagicMetadata.data.caption;
+                onUpdateCaption(file);
             } catch (e) {
                 log.error("Failed to update caption", e);
                 setFieldError("caption", t("generic_error"));
             }
-            refreshPhotoswipe();
-            scheduleUpdate();
+            onNeedsRemoteSync();
             setIsSaving(false);
         },
     });
@@ -616,7 +635,7 @@ const CaptionForm = styled("form")(({ theme }) => ({
 
 type CreationTimeProps = Pick<
     FileInfoProps,
-    "allowEdits" | "scheduleUpdate"
+    "allowEdits" | "onNeedsRemoteSync"
 > & {
     file: EnteFile;
 };
@@ -624,7 +643,7 @@ type CreationTimeProps = Pick<
 const CreationTime: React.FC<CreationTimeProps> = ({
     file,
     allowEdits,
-    scheduleUpdate,
+    onNeedsRemoteSync,
 }) => {
     const { onGenericError } = useBaseContext();
 
@@ -665,7 +684,7 @@ const CreationTime: React.FC<CreationTimeProps> = ({
         } catch (e) {
             onGenericError(e);
         }
-        scheduleUpdate();
+        onNeedsRemoteSync();
         setIsSaving(false);
     };
 
@@ -695,7 +714,7 @@ const CreationTime: React.FC<CreationTimeProps> = ({
     );
 };
 
-type FileNameProps = Pick<FileInfoProps, "allowEdits" | "scheduleUpdate"> & {
+type FileNameProps = Pick<FileInfoProps, "allowEdits" | "onNeedsRemoteSync"> & {
     file: EnteFile;
     annotatedExif: AnnotatedExif | undefined;
 };
@@ -704,7 +723,7 @@ const FileName: React.FC<FileNameProps> = ({
     file,
     annotatedExif,
     allowEdits,
-    scheduleUpdate,
+    onNeedsRemoteSync,
 }) => {
     const { show: showRename, props: renameVisibilityProps } =
         useModalVisibility();
@@ -714,7 +733,7 @@ const FileName: React.FC<FileNameProps> = ({
     const handleRename = async (newFileName: string) => {
         const updatedFile = await changeFileName(file, newFileName);
         updateExistingFilePubMetadata(file, updatedFile);
-        scheduleUpdate();
+        onNeedsRemoteSync();
     };
 
     const icon =

@@ -1003,8 +1003,8 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 }
                 fileCollectionIDs={fileCollectionIDs}
                 allCollectionsNameByID={allCollectionsNameByID}
-                scheduleUpdate={scheduleUpdate}
-                refreshPhotoswipe={refreshPhotoswipe}
+                onNeedsRemoteSync={scheduleUpdate}
+                onUpdateCaption={refreshPhotoswipe}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
             />

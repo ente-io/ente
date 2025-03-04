@@ -303,7 +303,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
         [user, isInTrashSection, isInHiddenSection, handleEditImage],
     );
 
-    const handleScheduleUpdate = useCallback(() => setNeedsSync(true), []);
+    const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
 
     const handleSelectCollection = useCallback(
         (collectionID: number) => {
@@ -339,9 +339,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const toggleFavorite = useCallback(
         ({ file }: FileViewerAnnotatedFile) =>
             onToggleFavorite!(file)
-                .then(handleScheduleUpdate)
+                .then(handleNeedsRemoteSync)
                 .catch(onGenericError),
-        [onToggleFavorite, handleScheduleUpdate, onGenericError],
+        [onToggleFavorite, handleNeedsRemoteSync, onGenericError],
     );
 
     // Initial value of delegate.
@@ -394,7 +394,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
         handleMore,
     ]);
 
-    const handleRefreshPhotoswipe = useCallback(() => {
+    const handleUpdateCaption = useCallback((updatedFile: EnteFile) => {
+        console.log("TODO", updatedFile);
         psRef.current!.refreshCurrentSlideContent();
     }, []);
 
@@ -411,8 +412,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 allowEdits={!!activeAnnotatedFile?.annotation.isOwnFile}
                 allowMap={haveUser}
                 showCollections={haveUser}
-                scheduleUpdate={handleScheduleUpdate}
-                refreshPhotoswipe={handleRefreshPhotoswipe}
+                onNeedsRemoteSync={handleNeedsRemoteSync}
+                onUpdateCaption={handleUpdateCaption}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
                 {...{ fileCollectionIDs, allCollectionsNameByID }}
