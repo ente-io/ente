@@ -133,7 +133,7 @@ Future<dynamic> isolateFunction(
         final double similarity = embedding.vector.dot(otherEmbedding);
         result[embedding.fileID] = similarity;
       }
-      return Map.from(result);
+      return Map<int, double>.from(result);
 
     /// Cases for MLComputer end here
 
