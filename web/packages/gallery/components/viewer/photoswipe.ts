@@ -62,6 +62,14 @@ export interface FileViewerFileAnnotation {
      */
     showDelete: boolean;
     /**
+     * Set if the download action should be shown for this file.
+     *
+     * - When "bar", the action button is shown among the bar icons.
+     *
+     * - When "menu", the action is shown as a more menu entry.
+     */
+    showDownload: "bar" | "menu" | undefined;
+    /**
      * `true` if this is an image which can be edited, _and_ editing is
      * possible, and the edit action should therefore be shown for this file.
      */
