@@ -151,6 +151,10 @@ type FileViewerPhotoSwipeOptions = Pick<
      */
     onViewInfo: (annotatedFile: FileViewerAnnotatedFile) => void;
     /**
+     * Called when the user activates the download action on a file.
+     */
+    onDownload: (annotatedFile: FileViewerAnnotatedFile) => void;
+    /**
      * Called when the user activates the more action on a file.
      *
      * In addition to the file, callback is also passed a reference to the HTML
