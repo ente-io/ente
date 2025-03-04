@@ -539,7 +539,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 }}
             >
                 {activeAnnotatedFile?.annotation.showDelete && (
-                    <MoreMenuItem onClick={showConfirmDelete}>
+                    <MoreMenuItem onClick={handleConfirmDelete}>
                         <Typography sx={{ fontWeight: "medium" }}>
                             {/*TODO */ t("delete")}
                         </Typography>
