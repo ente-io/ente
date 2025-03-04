@@ -677,6 +677,7 @@ class PreviewVideoStore {
 
     final cutoff = videoStreamingCutoff;
     if (cutoff == null) return;
+    initSuccess = true;
 
     Map<int, String> failureFiles = {};
     try {
@@ -752,13 +753,14 @@ class PreviewVideoStore {
     // take first file and put it for stream generation
     final file = allFiles.removeAt(0);
     fileQueue.addAll(allFiles);
-    initSuccess = true;
-    await chunkAndUploadVideo(null, file);
+    chunkAndUploadVideo(null, file).ignore();
   }
 
   void queueFiles() {
     if (!initSuccess) {
-      _putFilesForPreviewCreation();
+      _putFilesForPreviewCreation().catchError((_) {
+        initSuccess = false;
+      });
     }
   }
 }

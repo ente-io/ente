@@ -47,7 +47,6 @@ class UploadLocksDB {
 
   static const _streamUploadErrorTable = (
     table: "stream_upload_error",
-    columnID: "id",
     columnUploadedFileID: "uploaded_file_id",
     columnErrorMessage: "error_message",
     columnLastAttemptedAt: "last_attempted_at",
@@ -129,8 +128,7 @@ class UploadLocksDB {
                 ''',
       '''
                 CREATE TABLE IF NOT EXISTS ${_streamUploadErrorTable.table} (
-                  ${_streamUploadErrorTable.columnID} INTEGER PRIMARY KEY,
-                  ${_streamUploadErrorTable.columnUploadedFileID} INTEGER NOT NULL,
+                  ${_streamUploadErrorTable.columnUploadedFileID} INTEGER PRIMARY KEY,
                   ${_streamUploadErrorTable.columnErrorMessage} TEXT NOT NULL,
                   ${_streamUploadErrorTable.columnLastAttemptedAt} INTEGER NOT NULL,
                   ${_streamUploadErrorTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL
