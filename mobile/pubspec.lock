@@ -1800,10 +1800,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_video_player
-      sha256: "5a56da17e6c359de8e8063281dc14c1f8a3f17d40220cdbb1fa69217a2dda8b2"
+      sha256: "571d2ddb9ce297a653ca69ced40e30135c6a59c5a9be9a38e3b370dd6e4bdb0e"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0-dev.3"
+    version: "3.0.0-dev.4"
   nested:
     dependency: transitive
     description:
@@ -2844,7 +2844,7 @@ packages:
       path: "."
       ref: HEAD
       resolved-ref: "1eeb18e2b1ce36bd8ca70178c0d4b485e9982257"
-      url: "https://github.com/prateekmedia/video_editor.git"
+      url: "https://github.com/ente-io/video_editor_fork.git"
     source: git
     version: "3.0.0"
   video_player:
