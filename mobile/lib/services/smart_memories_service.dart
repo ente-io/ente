@@ -94,7 +94,8 @@ class SmartMemoriesService {
       _logger.finest("All files length: ${allFiles.length}");
 
       // Trip memories
-      final tripMemories = await _getTripsResults(allFiles, now);
+      final tripMemories =
+          await _getTripsResults(allFiles, now, oldCache.tripsShownLogs);
       _deductUsedMemories(allFiles, tripMemories);
       memories.addAll(tripMemories);
       _logger.finest("All files length: ${allFiles.length}");
@@ -478,6 +479,7 @@ class SmartMemoriesService {
   Future<List<TripMemory>> _getTripsResults(
     Iterable<EnteFile> allFiles,
     DateTime currentTime,
+    List<TripsShownLog> shownTrips,
   ) async {
     final List<TripMemory> memoryResults = [];
     final Iterable<LocalEntity<LocationTag>> locationTagEntities =
@@ -856,17 +858,14 @@ class SmartMemoriesService {
     // Otherwise, if no trips happened in the current month,
     // look for the earliest upcoming trip in another month that has 3+ trips.
     else {
-      // TODO lau: make sure the same upcoming trip isn't shown multiple times over multiple months
       final sortedUpcomingMonths =
-          List<int>.generate(12, (i) => ((currentMonth + i) % 12) + 1);
+          List<int>.generate(6, (i) => ((currentMonth + i) % 12) + 1);
       checkUpcomingMonths:
       for (final month in sortedUpcomingMonths) {
         if (tripsByMonthYear.containsKey(month)) {
           final List<TripMemory> thatMonthTrips = [];
           for (final trips in tripsByMonthYear[month]!.values) {
-            for (final trip in trips) {
-              thatMonthTrips.add(trip);
-            }
+            thatMonthTrips.addAll(trips);
           }
           if (thatMonthTrips.length >= 3) {
             // take and use the third earliest trip
@@ -874,27 +873,41 @@ class SmartMemoriesService {
               (a, b) =>
                   a.averageCreationTime().compareTo(b.averageCreationTime()),
             );
-            final trip = thatMonthTrips[2];
-            final year =
-                DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime())
-                    .year;
-            final String? locationName = _tryFindLocationName(trip.memories);
-            String name = "Trip in $year";
-            if (locationName != null) {
-              name = "Trip to $locationName";
-            } else if (year == currentTime.year - 1) {
-              name = "Last year's trip";
+            checkPotentialTrips:
+            for (final trip in thatMonthTrips.sublist(2)) {
+              for (final shownTrip in shownTrips) {
+                final distance =
+                    calculateDistance(trip.location, shownTrip.location);
+                final shownTripDate = DateTime.fromMicrosecondsSinceEpoch(
+                  shownTrip.lastTimeShown,
+                );
+                final shownRecently =
+                    currentTime.difference(shownTripDate) < kTripShowTimeout;
+                if (distance < overlapRadius && shownRecently) {
+                  continue checkPotentialTrips;
+                }
+              }
+              final year = DateTime.fromMicrosecondsSinceEpoch(
+                trip.averageCreationTime(),
+              ).year;
+              final String? locationName = _tryFindLocationName(trip.memories);
+              String name = "Trip in $year";
+              if (locationName != null) {
+                name = "Trip to $locationName";
+              } else if (year == currentTime.year - 1) {
+                name = "Last year's trip";
+              }
+              final photoSelection = await _bestSelection(trip.memories);
+              memoryResults.add(
+                trip.copyWith(
+                  memories: photoSelection,
+                  title: name,
+                  firstDateToShow: nowInMicroseconds,
+                  lastDateToShow: windowEnd,
+                ),
+              );
+              break checkUpcomingMonths;
             }
-            final photoSelection = await _bestSelection(trip.memories);
-            memoryResults.add(
-              trip.copyWith(
-                memories: photoSelection,
-                title: name,
-                firstDateToShow: nowInMicroseconds,
-                lastDateToShow: windowEnd,
-              ),
-            );
-            break checkUpcomingMonths;
           }
         }
       }
