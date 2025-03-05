@@ -489,6 +489,10 @@ class SmartMemoriesService {
     final currentMonth = currentTime.month;
     final cutOffTime = currentTime.subtract(const Duration(days: 365));
 
+    const baseRadius = 0.6;
+    const tripRadius = 100.0;
+    const overlapRadius = 10.0;
+
     final Map<LocalEntity<LocationTag>, List<EnteFile>> tagToItemsMap = {};
     for (int i = 0; i < locationTagEntities.length; i++) {
       tagToItemsMap[locationTagEntities.elementAt(i)] = [];
@@ -525,7 +529,7 @@ class SmartMemoriesService {
         if (isFileInsideLocationTag(
           clusterLocation,
           file.location!,
-          0.6,
+          baseRadius,
         )) {
           cluster.$1.add(file);
           addedToExistingSmallCluster = true;
@@ -542,7 +546,7 @@ class SmartMemoriesService {
         if (isFileInsideLocationTag(
           clusterLocation,
           file.location!,
-          100.0,
+          tripRadius,
         )) {
           cluster.$1.add(file);
           addedToExistingWideCluster = true;
@@ -612,7 +616,7 @@ class SmartMemoriesService {
         if (isFileInsideLocationTag(
           baseLocation.location,
           location,
-          10.0,
+          overlapRadius,
         )) {
           tooClose = true;
           break;
@@ -622,7 +626,7 @@ class SmartMemoriesService {
         if (isFileInsideLocationTag(
           tag.item.centerPoint,
           location,
-          10.0,
+          overlapRadius,
         )) {
           tooClose = true;
           break;
