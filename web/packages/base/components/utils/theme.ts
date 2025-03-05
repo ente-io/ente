@@ -118,6 +118,16 @@ const getTheme = (appName: AppName): Theme => {
 const getColors = (appName: AppName) => ({
     ..._colors,
     ...{
+        fixed: {
+            ..._colors.fixed,
+            dark: {
+                background: _colors.dark.background,
+                text: _colors.dark.text,
+                divider: _colors.dark.stroke.faint,
+            },
+        },
+    },
+    ...{
         accent: appName == "auth" ? _colors.accentAuth : _colors.accentPhotos,
     },
 });

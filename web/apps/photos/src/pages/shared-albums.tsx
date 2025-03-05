@@ -124,8 +124,8 @@ export default function PublicCollectionGallery() {
     ] = useState<FilesDownloadProgressAttributes[]>([]);
 
     const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
-        (folderName, collectionID, isHidden) => {
-            const id = filesDownloadProgressAttributesList?.length ?? 0;
+        useCallback((folderName, collectionID, isHidden) => {
+            const id = Math.random();
             const updater: SetFilesDownloadProgressAttributes = (value) => {
                 setFilesDownloadProgressAttributesList((prev) => {
                     const attributes = prev?.find((attr) => attr.id === id);
@@ -154,7 +154,7 @@ export default function PublicCollectionGallery() {
                 downloadDirPath: null,
             });
             return updater;
-        };
+        }, []);
 
     const onAddPhotos = useMemo(() => {
         return publicCollection?.publicURLs?.[0]?.enableCollect
