@@ -41,6 +41,8 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
+import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
 import { Button, Menu, MenuItem, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, {
@@ -88,10 +90,6 @@ export interface FileViewerFileAnnotation {
      * Note: "bar" should only be set if {@link haveUser} is also true.
      */
     showDownload: "bar" | "menu" | undefined;
-    /**
-     * `true` if the more menu action should be shown for this file.
-     */
-    showMore: boolean;
     /**
      * `true` if the delete action should be shown for this file.
      */
@@ -308,6 +306,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
     const { show: showConfirmDelete, props: confirmDeleteVisibilityProps } =
         useModalVisibility();
 
@@ -517,18 +516,11 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 }
             })();
 
-            const showMore =
-                showDownload == "menu" ||
-                showDelete ||
-                showCopyImage ||
-                showEditImage;
-
             return {
                 fileID,
                 isOwnFile,
                 showFavorite,
                 showDownload,
-                showMore,
                 showDelete,
                 showCopyImage,
                 showEditImage,
@@ -602,6 +594,18 @@ const FileViewer: React.FC<FileViewerProps> = ({
         ],
     );
 
+    const updateFullscreenStatus = useCallback(() => {
+        setIsFullscreen(!!document.fullscreenElement);
+    }, []);
+
+    const toggleFullscreen = useCallback(() => {
+        void (
+            document.fullscreenElement
+                ? document.exitFullscreen()
+                : document.body.requestFullscreen()
+        ).then(updateFullscreenStatus);
+    }, [updateFullscreenStatus]);
+
     // Initial value of delegate.
     if (!delegateRef.current) {
         delegateRef.current = { getFiles, isFavorite, toggleFavorite };
@@ -667,6 +671,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
         psRef.current!.refreshCurrentSlideContent();
     }, []);
 
+    useEffect(updateFullscreenStatus, [updateFullscreenStatus]);
+
     log.debug(() => ["viewer", { action: "render", psRef: psRef.current }]);
 
     return (
@@ -731,11 +737,19 @@ const FileViewer: React.FC<FileViewerProps> = ({
                         <EditIcon />
                     </MoreMenuItem>
                 )}
-                <MoreMenuItem onClick={handleToggleFullscreen}>
+                <MoreMenuItem onClick={toggleFullscreen}>
                     <MoreMenuItemTitle>
-                        {/*TODO */ pt("Full screen")}
+                        {
+                            /*TODO */ isFullscreen
+                                ? pt("Exit full screen")
+                                : pt("Go full screen")
+                        }
                     </MoreMenuItemTitle>
-                    <EditIcon />
+                    {isFullscreen ? (
+                        <FullscreenExitOutlinedIcon />
+                    ) : (
+                        <FullscreenOutlinedIcon />
+                    )}
                 </MoreMenuItem>
             </MoreMenu>
             {/* TODO(PS): Fix imports */}
@@ -774,7 +788,7 @@ const MoreMenu = styled(Menu)`
 `;
 
 const MoreMenuItem = styled(MenuItem)`
-    min-width: 190px;
+    min-width: 210px;
 
     /* MUI MenuItem default implementation has a minHeight of "48px" below the
        "sm" breakpoint, and auto after it. We always want the same height, so
@@ -838,11 +852,3 @@ const createImagePNGBlob = async (imageURL: string) =>
         image.onerror = reject;
         image.src = imageURL;
     });
-
-/**
- * Toggle full screen mode.
- */
-const toggleFullscreen = () =>
-    document.fullscreenElement
-        ? document.exitFullscreen()
-        : document.body.requestFullscreen();
