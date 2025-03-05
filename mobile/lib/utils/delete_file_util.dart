@@ -328,6 +328,7 @@ Future<bool> deleteLocalFiles(
   BuildContext context,
   List<String> localIDs,
 ) async {
+  _logger.info("Trying to delete local files ");
   final List<String> deletedIDs = [];
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
@@ -391,16 +392,20 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
   BuildContext context,
   List<String> localIDs,
 ) async {
-  final files =
-      await FilesDB.instance.getLocalFiles(localIDs, dedupeByLocalID: true);
+  _logger.info(
+    "Trying to delete local files after removing already deleted IDs",
+  );
+
   final List<String> deletedIDs = [];
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
 
+  final dialog = createProgressDialog(context, "Loading...");
+  await dialog.show();
   try {
-    final dialog = createProgressDialog(context, "Loading...");
-    await dialog.show();
+    final files =
+        await FilesDB.instance.getLocalFiles(localIDs, dedupeByLocalID: true);
     for (final file in files) {
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
@@ -458,6 +463,7 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
     }
   } catch (e, s) {
     _logger.severe("Could not delete local files", e, s);
+    await dialog.hide();
     return false;
   }
 }
@@ -466,12 +472,14 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
 Future<bool> retryFreeUpSpaceAfterRemovingNonExistingAssets(
   BuildContext context,
 ) async {
-  _logger.info("Retrying free up space after removing non-existing assets");
-  try {
-    final dialog =
-        createProgressDialog(context, "Please wait, this will take a while...");
-    await dialog.show();
+  _logger.info(
+    "Retrying free up space after removing non-existing assets",
+  );
 
+  final dialog =
+      createProgressDialog(context, "Please wait, this will take a while...");
+  await dialog.show();
+  try {
     final stopwatch = Stopwatch()..start();
     final res = await PhotoManager.editor.android.removeAllNoExistsAsset();
     if (res == false) {
@@ -530,6 +538,7 @@ Future<bool> retryFreeUpSpaceAfterRemovingNonExistingAssets(
       return true;
     }
   } catch (e) {
+    await dialog.hide();
     return false;
   }
 }
