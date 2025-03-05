@@ -242,6 +242,7 @@ extension SectionTypeExtensions on SectionType {
 
       case SectionType.moment:
         if (flagService.internalUser) {
+          // TODO: lau: remove this whole smart memories and moment altogether
           return SearchService.instance.smartMemories(context, limit);
         }
         return SearchService.instance.getRandomMomentsSearchResults(context);

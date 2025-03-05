@@ -1193,7 +1193,13 @@ class SearchService {
     BuildContext context,
     int? limit,
   ) async {
-    final memories = await memoriesCacheService.getMemories(limit);
+    final fakeCache = MemoriesCache(
+      toShowMemories: [],
+      peopleShownLogs: [],
+      tripsShownLogs: [],
+    );
+    final memories =
+        await smartMemoriesService.calcMemories(DateTime.now(), fakeCache);
     final searchResults = <GenericSearchResult>[];
     for (final memory in memories) {
       final files = Memory.filesFromMemories(memory.memories);
