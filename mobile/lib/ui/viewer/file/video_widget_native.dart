@@ -328,13 +328,13 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                if (!widget.selectedPreview)
-                                  _VideoDescriptionAndSwitchToMediaKitButton(
-                                    file: widget.file,
-                                    showControls: _showControls,
-                                    elTooltipController: _elTooltipController,
-                                    controller: _controller,
-                                  ),
+                                _VideoDescriptionAndSwitchToMediaKitButton(
+                                  file: widget.file,
+                                  showControls: _showControls,
+                                  elTooltipController: _elTooltipController,
+                                  controller: _controller,
+                                  selectedPreview: widget.selectedPreview,
+                                ),
                                 ValueListenableBuilder(
                                   valueListenable: _showControls,
                                   builder: (context, value, _) {
@@ -736,12 +736,14 @@ class _VideoDescriptionAndSwitchToMediaKitButton extends StatelessWidget {
   final ValueNotifier<bool> showControls;
   final ElTooltipController elTooltipController;
   final NativeVideoPlayerController? controller;
+  final bool selectedPreview;
 
   const _VideoDescriptionAndSwitchToMediaKitButton({
     required this.file,
     required this.showControls,
     required this.elTooltipController,
     required this.controller,
+    required this.selectedPreview,
   });
 
   @override
@@ -777,7 +779,7 @@ class _VideoDescriptionAndSwitchToMediaKitButton extends StatelessWidget {
                 ),
               )
             : const SizedBox.shrink(),
-        Platform.isAndroid
+        Platform.isAndroid && !selectedPreview
             ? ValueListenableBuilder(
                 valueListenable: showControls,
                 builder: (context, value, _) {
