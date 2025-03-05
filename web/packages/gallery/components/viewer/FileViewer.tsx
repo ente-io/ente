@@ -43,7 +43,14 @@ import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
-import { Button, Menu, MenuItem, styled, Typography } from "@mui/material";
+import {
+    Button,
+    Dialog,
+    Menu,
+    MenuItem,
+    styled,
+    Typography,
+} from "@mui/material";
 import { t } from "i18next";
 import React, {
     useCallback,
@@ -603,12 +610,18 @@ const FileViewer: React.FC<FileViewerProps> = ({
     }, []);
 
     const handleToggleFullscreen = useCallback(() => {
+        handleMoreMenuClose();
         void (
             document.fullscreenElement
                 ? document.exitFullscreen()
                 : document.body.requestFullscreen()
         ).then(updateFullscreenStatus);
-    }, [updateFullscreenStatus]);
+    }, [handleMoreMenuClose, updateFullscreenStatus]);
+
+    const handleShortcuts = useCallback(() => {
+        handleMoreMenuClose();
+        showShortcuts();
+    }, [handleMoreMenuClose, showShortcuts]);
 
     // Initial value of delegate.
     if (!delegateRef.current) {
@@ -763,7 +776,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                         <FullscreenOutlinedIcon />
                     )}
                 </MoreMenuItem>
-                <MoreMenuItem onClick={showShortcuts} sx={{ mt: "2px" }}>
+                <MoreMenuItem onClick={handleShortcuts} sx={{ mt: "2px" }}>
                     <Typography sx={{ color: "fixed.dark.text.faint" }}>
                         {pt("Shortcuts")}
                     </Typography>
@@ -780,6 +793,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 file={activeAnnotatedFile?.file}
                 onSaveEditedCopy={handleSaveEditedCopy}
             />
+            <Shortcuts {...shortcutsVisibilityProps} />
         </Container>
     );
 };
@@ -838,9 +852,9 @@ const MoreMenuItemTitle: React.FC<React.PropsWithChildren> = ({ children }) => (
     <Typography sx={{ fontWeight: "medium" }}>{children}</Typography>
 );
 
-const MoreMenuItemMinorTitle: React.FC<React.PropsWithChildren> = ({
-    children,
-}) => <Typography sx={{ fontWeight: "medium" }}>{children}</Typography>;
+const Shortcuts: React.FC<ModalVisibilityProps> = (props) => (
+    <Dialog {...props}></Dialog>
+);
 
 const fileIsEditableImage = (file: EnteFile) => {
     // Only images are editable.
