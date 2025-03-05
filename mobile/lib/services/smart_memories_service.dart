@@ -496,12 +496,13 @@ class SmartMemoriesService {
     final List<(List<EnteFile>, Location)> smallRadiusClusters = [];
     final List<(List<EnteFile>, Location)> wideRadiusClusters = [];
     // Go through all files and cluster the ones not inside any location tag
+    allFilesLoop:
     for (EnteFile file in allFiles) {
       if (!file.hasLocation ||
           file.uploadedFileID == null ||
           !file.isOwner ||
           file.creationTime == null) {
-        continue;
+        continue allFilesLoop;
       }
       // Check if the file is inside any location tag
       bool hasLocationTag = false;
@@ -516,41 +517,40 @@ class SmartMemoriesService {
         }
       }
       // Cluster the files not inside any location tag (incremental clustering)
-      if (!hasLocationTag) {
-        // Small radius clustering for base locations
-        bool foundSmallCluster = false;
-        for (final cluster in smallRadiusClusters) {
-          final clusterLocation = cluster.$2;
-          if (isFileInsideLocationTag(
-            clusterLocation,
-            file.location!,
-            0.6,
-          )) {
-            cluster.$1.add(file);
-            foundSmallCluster = true;
-            break;
-          }
+      if (hasLocationTag) continue allFilesLoop;
+      // Small radius clustering for base locations
+      bool addedToExistingSmallCluster = false;
+      for (final cluster in smallRadiusClusters) {
+        final clusterLocation = cluster.$2;
+        if (isFileInsideLocationTag(
+          clusterLocation,
+          file.location!,
+          0.6,
+        )) {
+          cluster.$1.add(file);
+          addedToExistingSmallCluster = true;
+          break;
         }
-        if (!foundSmallCluster) {
-          smallRadiusClusters.add(([file], file.location!));
+      }
+      if (!addedToExistingSmallCluster) {
+        smallRadiusClusters.add(([file], file.location!));
+      }
+      // Wide radius clustering for trip locations
+      bool addedToExistingWideCluster = false;
+      for (final cluster in wideRadiusClusters) {
+        final clusterLocation = cluster.$2;
+        if (isFileInsideLocationTag(
+          clusterLocation,
+          file.location!,
+          100.0,
+        )) {
+          cluster.$1.add(file);
+          addedToExistingWideCluster = true;
+          break;
         }
-        // Wide radius clustering for trip locations
-        bool foundWideCluster = false;
-        for (final cluster in wideRadiusClusters) {
-          final clusterLocation = cluster.$2;
-          if (isFileInsideLocationTag(
-            clusterLocation,
-            file.location!,
-            100.0,
-          )) {
-            cluster.$1.add(file);
-            foundWideCluster = true;
-            break;
-          }
-        }
-        if (!foundWideCluster) {
-          wideRadiusClusters.add(([file], file.location!));
-        }
+      }
+      if (!addedToExistingWideCluster) {
+        wideRadiusClusters.add(([file], file.location!));
       }
     }
 
@@ -577,11 +577,11 @@ class SmartMemoriesService {
       final lastCreationTime = DateTime.fromMicrosecondsSinceEpoch(
         creationTimes.last,
       );
-      if (lastCreationTime.difference(firstCreationTime).inDays < 90) {
+      final daysRange = lastCreationTime.difference(firstCreationTime).inDays;
+      if (daysRange < 90) {
         continue;
       }
       // Check for a minimum average number of days photos are clicked in range
-      final daysRange = lastCreationTime.difference(firstCreationTime).inDays;
       if (uniqueDays.length < daysRange * 0.1) continue;
       // Check if it's a current or old base location
       final bool isCurrent = lastCreationTime.isAfter(
@@ -1354,9 +1354,9 @@ class SmartMemoriesService {
     final fileToScore = await MLComputer.instance
         .compareEmbeddings(vectors, _clipPositiveTextVector!);
     final fileIdToClip = <int, EmbeddingVector>{};
-      for (final vector in vectors) {
-        fileIdToClip[vector.fileID] = vector;
-      }
+    for (final vector in vectors) {
+      fileIdToClip[vector.fileID] = vector;
+    }
 
     // Get face scores for each file
     final fileToFaceCount = <int, int>{};
