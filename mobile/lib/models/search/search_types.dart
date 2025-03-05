@@ -242,7 +242,7 @@ extension SectionTypeExtensions on SectionType {
 
       case SectionType.moment:
         if (flagService.internalUser) {
-          return SearchService.instance.onThisDayOrWeekResults(context, limit);
+          return SearchService.instance.smartMemories(context, limit);
         }
         return SearchService.instance.getRandomMomentsSearchResults(context);
 

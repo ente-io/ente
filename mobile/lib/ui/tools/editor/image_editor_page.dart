@@ -22,11 +22,11 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/tools/editor/filtered_image.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/toast_util.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 

@@ -23,13 +23,13 @@ import "package:photos/services/local_authentication_service.dart";
 import "package:photos/services/preview_video_store.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
+import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
-import 'package:photos/utils/toast_util.dart';
 
 class FileAppBar extends StatefulWidget {
   final EnteFile file;

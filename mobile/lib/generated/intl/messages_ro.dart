@@ -60,9 +60,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m21(albumName) => "Link colaborativ creat pentru ${albumName}";
 
-  static String m22(count) =>
-      "${Intl.plural(count, zero: 'S-au adăugat 0 colaboratori', one: 'S-a adăugat 1 colaborator', few: 'S-au adăugat ${count} colaboratori', other: 'S-au adăugat ${count} de colaboratori')}";
-
   static String m23(email, numOfDays) =>
       "Sunteți pe cale să adăugați ${email} ca persoană de contact de încredere. Acesta va putea să vă recupereze contul dacă lipsiți timp de ${numOfDays} de zile.";
 
@@ -152,7 +149,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Vă rugăm să vorbiți cu asistența ${providerName} dacă ați fost taxat";
 
   static String m55(count) =>
-      "${Intl.plural(count, zero: '0 fotografii', one: '1 fotografie', few: '${count} fotografii', other: '${count} de fotografii')}";
+      "${Intl.plural(count, zero: '0 Fotografii', one: 'O Fotografie', other: '${count} Fotografii')}";
 
   static String m56(endDate) =>
       "Perioada de încercare gratuită valabilă până pe ${endDate}.\nUlterior, puteți opta pentru un plan plătit.";
@@ -256,9 +253,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m89(endDate) => "Valabil până pe ${endDate}";
 
   static String m90(email) => "Verificare ${email}";
-
-  static String m91(count) =>
-      "${Intl.plural(count, zero: 'S-au adăugat 0 observatori', one: 'S-a adăugat 1 observator', few: 'S-au adăugat ${count} observatori', other: 'S-au adăugat ${count} de observatori')}";
 
   static String m2(email) => "Am trimis un e-mail la <green>${email}</green>";
 
@@ -599,7 +593,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Colaboratorii pot adăuga fotografii și videoclipuri la albumul distribuit."),
-        "collaboratorsSuccessfullyAdded": m22,
         "collageLayout": MessageLookupByLibrary.simpleMessage("Aspect"),
         "collageSaved":
             MessageLookupByLibrary.simpleMessage("Colaj salvat în galerie"),
@@ -2005,7 +1998,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Vizualizați cheia de recuperare"),
         "viewer": MessageLookupByLibrary.simpleMessage("Observator"),
-        "viewersSuccessfullyAdded": m91,
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Vă rugăm să vizitați web.ente.io pentru a vă gestiona abonamentul"),
         "waitingForVerification":

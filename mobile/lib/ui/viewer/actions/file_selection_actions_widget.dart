@@ -26,6 +26,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/video_memory_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
@@ -35,6 +36,7 @@ import 'package:photos/ui/components/action_sheet_widget.dart';
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/sharing/show_images_prevew.dart";
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
@@ -45,7 +47,6 @@ import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
-import 'package:photos/utils/toast_util.dart';
 import "package:screenshot/screenshot.dart";
 
 class FileSelectionActionsWidget extends StatefulWidget {
@@ -86,6 +87,8 @@ class _FileSelectionActionsWidgetState
   Collection? _cachedCollectionForSharedLink;
   final GlobalKey shareButtonKey = GlobalKey();
   final GlobalKey sendLinkButtonKey = GlobalKey();
+  final StreamController<double> _progressController =
+      StreamController<double>();
 
   @override
   void initState() {
@@ -102,6 +105,7 @@ class _FileSelectionActionsWidgetState
 
   @override
   void dispose() {
+    _progressController.close();
     widget.selectedFiles.removeListener(_selectFileChangeListener);
     super.dispose();
   }
@@ -313,6 +317,16 @@ class _FileSelectionActionsWidgetState
           labelText: S.of(context).createCollage,
           onTap: _onCreateCollageClicked,
           shouldShow: showCollageOption,
+        ),
+      );
+    }
+    if (flagService.internalUser &&
+        widget.type != GalleryType.sharedPublicCollection) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.movie_creation_sharp,
+          labelText: "(i) Video Memory",
+          onTap: _onCreateVideoMemoryClicked,
         ),
       );
     }
@@ -647,6 +661,12 @@ class _FileSelectionActionsWidgetState
     if (result != null && result) {
       widget.selectedFiles.clearAll();
     }
+  }
+
+  Future<void> _onCreateVideoMemoryClicked() async {
+    final List<EnteFile> selectedFiles = widget.selectedFiles.files.toList();
+    await createSlideshow(context, selectedFiles);
+    widget.selectedFiles.clearAll();
   }
 
   Future<Uint8List> _createPlaceholder(

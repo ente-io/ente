@@ -12,7 +12,7 @@ import 'package:photos/models/device_collection.dart';
 import "package:photos/ui/collections/device/device_folder_item.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
-import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class DeviceFoldersGridView extends StatefulWidget {
   const DeviceFoldersGridView({

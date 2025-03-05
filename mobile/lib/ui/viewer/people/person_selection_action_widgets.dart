@@ -16,11 +16,11 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/person_contact_linking_util.dart";
-import "package:photos/utils/toast_util.dart";
 
 class PersonEntityWithThumbnailFile {
   final PersonEntity person;

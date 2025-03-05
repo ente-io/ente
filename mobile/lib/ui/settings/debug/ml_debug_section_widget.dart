@@ -16,10 +16,10 @@ import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/ml_util.dart";
-import 'package:photos/utils/toast_util.dart';
 
 class MLDebugSectionWidget extends StatefulWidget {
   const MLDebugSectionWidget({super.key});
@@ -274,6 +274,23 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               await magicCacheService.updateCache(forced: true);
             } catch (e, s) {
               logger.warning('Update discover failed', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Update memories",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await memoriesCacheService.updateCache(forced: true);
+            } catch (e, s) {
+              logger.warning('Update memories failed', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },

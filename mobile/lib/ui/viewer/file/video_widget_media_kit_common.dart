@@ -6,8 +6,8 @@ import "package:photos/models/file/file.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/preview_status_widget.dart";
-import "package:photos/utils/date_time_util.dart";
-import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/standalone/date_time.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class VideoWidget extends StatefulWidget {
   final EnteFile file;
@@ -15,6 +15,7 @@ class VideoWidget extends StatefulWidget {
   final Function(bool)? playbackCallback;
   final bool isFromMemories;
   final void Function() onStreamChange;
+  final bool isPreviewPlayer;
 
   const VideoWidget(
     this.file,
@@ -24,6 +25,7 @@ class VideoWidget extends StatefulWidget {
     required this.isFromMemories,
     // ignore: unused_element
     required this.onStreamChange,
+    required this.isPreviewPlayer,
   });
 
   @override
@@ -32,7 +34,7 @@ class VideoWidget extends StatefulWidget {
 
 class _VideoWidgetState extends State<VideoWidget> {
   final showControlsNotifier = ValueNotifier<bool>(true);
-  static const verticalMargin = 72.0;
+  static const double verticalMargin = 64;
   final _hideControlsDebouncer = Debouncer(
     const Duration(milliseconds: 2000),
   );
@@ -72,7 +74,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       if (widget.controller.player.state.playing) {
         _hideControlsDebouncer.run(() async {
           showControlsNotifier.value = false;
-          widget.playbackCallback?.call(false);
+          widget.playbackCallback?.call(true);
         });
       }
     }
@@ -152,7 +154,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                               PreviewStatusWidget(
                                 showControls: value,
                                 file: widget.file,
-                                isPreviewPlayer: true,
+                                isPreviewPlayer: widget.isPreviewPlayer,
                                 onStreamChange: widget.onStreamChange,
                               ),
                               SeekBarAndDuration(

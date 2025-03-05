@@ -26,13 +26,15 @@ import 'package:photos/models/upload_strategy.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
+import "package:photos/services/preview_video_store.dart";
 import "package:photos/services/remote_pull/collection_files.dart";
 import "package:photos/services/remote_pull/remote_pull.dart";
+import 'package:photos/services/sync/diff_fetcher.dart';
 import 'package:photos/services/sync/sync_service.dart';
-import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -133,6 +135,10 @@ class RemoteSyncService {
         await _prefs.setBool(_isFirstRemoteSyncDone, true);
         await syncDeviceCollectionFilesForUpload();
       }
+
+      FileDataService.instance.syncFDStatus().then((_) {
+        PreviewVideoStore.instance.queueFiles();
+      }).ignore();
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (filesToBeUploaded.isNotEmpty) {

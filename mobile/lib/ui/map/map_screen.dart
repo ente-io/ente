@@ -17,7 +17,7 @@ import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_isolate.dart";
 import "package:photos/ui/map/map_pull_up_gallery.dart";
 import "package:photos/ui/map/map_view.dart";
-import "package:photos/utils/toast_util.dart";
+import "package:photos/ui/notification/toast.dart";
 
 class MapScreen extends StatefulWidget {
   // Add a function parameter where the function returns a Future<List<File>>
