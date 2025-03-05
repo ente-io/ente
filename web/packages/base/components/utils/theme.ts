@@ -123,7 +123,7 @@ const getColors = (appName: AppName) => ({
             dark: {
                 background: _colors.dark.background,
                 text: _colors.dark.text,
-                divider: _colors.dark.stroke.faint
+                divider: _colors.dark.stroke.faint,
             },
         },
     },

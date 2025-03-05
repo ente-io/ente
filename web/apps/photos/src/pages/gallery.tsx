@@ -1072,10 +1072,10 @@ const Page: React.FC = () => {
                             files.length < 30 && !isInSearchMode
                         }
                         isInIncomingSharedCollection={
-                            collectionSummaries.get(activeCollectionID)
-                            ?.type == "incomingShareCollaborator" ||
-                            collectionSummaries.get(activeCollectionID)
-                            ?.type == "incomingShareViewer"
+                            collectionSummaries.get(activeCollectionID)?.type ==
+                                "incomingShareCollaborator" ||
+                            collectionSummaries.get(activeCollectionID)?.type ==
+                                "incomingShareViewer"
                         }
                         isInHiddenSection={barMode == "hidden-albums"}
                         setFilesDownloadProgressAttributesCreator={
