@@ -16,9 +16,9 @@ import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/growth/apply_code_screen.dart";
 import "package:photos/ui/growth/referral_code_widget.dart";
 import "package:photos/ui/growth/storage_details_screen.dart";
-import "package:photos/utils/data_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
+import "package:photos/utils/standalone/data.dart";
 import "package:tuple/tuple.dart";
 
 class ReferralScreen extends StatefulWidget {

@@ -19,8 +19,8 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/video_widget_media_kit_common.dart"
     as common;
-import "package:photos/utils/data_util.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/standalone/data.dart";
 
 class VideoWidgetMediaKitPreview extends StatefulWidget {
   final EnteFile file;

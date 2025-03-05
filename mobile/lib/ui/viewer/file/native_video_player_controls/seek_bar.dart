@@ -5,7 +5,7 @@ import "package:native_video_player/native_video_player.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class SeekBar extends StatefulWidget {
   final NativeVideoPlayerController controller;

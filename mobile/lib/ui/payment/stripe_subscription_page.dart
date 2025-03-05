@@ -28,8 +28,8 @@ import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import "package:photos/ui/payment/view_add_on_widget.dart";
 import "package:photos/ui/tabs/home_widget.dart";
-import "package:photos/utils/data_util.dart";
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/standalone/data.dart";
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 

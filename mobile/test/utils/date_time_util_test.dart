@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/utils/date_time_util.dart';
+import "package:photos/utils/standalone/date_time.dart";
 import 'package:test/test.dart';
 
 void main() {

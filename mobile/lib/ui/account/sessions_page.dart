@@ -8,8 +8,8 @@ import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/notification/toast.dart';
-import "package:photos/utils/date_time_util.dart";
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/standalone/date_time.dart";
 
 class SessionsPage extends StatefulWidget {
   const SessionsPage({super.key});

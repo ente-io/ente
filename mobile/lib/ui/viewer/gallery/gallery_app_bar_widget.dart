@@ -50,11 +50,11 @@ import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart
 import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
 import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_appbar.dart";
 import "package:photos/ui/viewer/location/edit_location_sheet.dart";
-import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import 'package:photos/utils/standalone/data.dart';
 import "package:uuid/uuid.dart";
 
 class GalleryAppBarWidget extends StatefulWidget {

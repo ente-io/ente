@@ -52,9 +52,9 @@ import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
-import 'package:photos/utils/date_time_util.dart';
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import 'package:photos/utils/standalone/date_time.dart';
 import 'package:tuple/tuple.dart';
 
 class SearchService {

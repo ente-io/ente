@@ -10,7 +10,7 @@ import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import "package:photos/utils/data_util.dart";
+import "package:photos/utils/standalone/data.dart";
 
 class ThumbnailPlaceHolder extends StatelessWidget {
   const ThumbnailPlaceHolder({super.key});

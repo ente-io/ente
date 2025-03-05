@@ -23,9 +23,9 @@ import "package:photos/ui/tools/debug/app_storage_viewer.dart";
 import "package:photos/ui/tools/deduplicate_page.dart";
 import "package:photos/ui/tools/free_space_page.dart";
 import "package:photos/ui/viewer/gallery/large_files_page.dart";
-import "package:photos/utils/data_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/navigation_util.dart';
+import "package:photos/utils/standalone/data.dart";
 
 class FreeUpSpaceOptionsScreen extends StatefulWidget {
   const FreeUpSpaceOptionsScreen({super.key});
