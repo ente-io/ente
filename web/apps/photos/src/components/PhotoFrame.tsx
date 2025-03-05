@@ -285,12 +285,11 @@ const PhotoFrame = ({
             : undefined;
     }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
 
-    // TODO(PS): Missing dep!
     const handleDownload = useCallback((file: EnteFile) => {
         const setSingleFileDownloadProgress =
             setFilesDownloadProgressAttributesCreator!(file.metadata.title);
         void downloadSingleFile(file, setSingleFileDownloadProgress);
-    }, []);
+    }, [setFilesDownloadProgressAttributesCreator]);
 
     const handleDelete = useMemo(() => {
         return onMarkTempDeleted

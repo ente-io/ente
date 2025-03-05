@@ -630,8 +630,8 @@ const Page: React.FC = () => {
     };
 
     const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
-        (folderName, collectionID, isHidden) => {
-            const id = filesDownloadProgressAttributesList?.length ?? 0;
+        useCallback((folderName, collectionID, isHidden) => {
+            const id = Math.random();
             const updater: SetFilesDownloadProgressAttributes = (value) => {
                 setFilesDownloadProgressAttributesList((prev) => {
                     const attributes = prev?.find((attr) => attr.id === id);
@@ -660,7 +660,7 @@ const Page: React.FC = () => {
                 downloadDirPath: null,
             });
             return updater;
-        };
+        }, []);
 
     const collectionOpsHelper =
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
