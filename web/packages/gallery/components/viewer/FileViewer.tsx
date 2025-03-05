@@ -43,7 +43,13 @@ import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { Button, Menu, MenuItem, styled, Typography } from "@mui/material";
 import { t } from "i18next";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { fileInfoExifForFile, updateItemDataAlt } from "./data-source";
 import {
     FileViewerPhotoSwipe,
@@ -606,33 +612,34 @@ const FileViewer: React.FC<FileViewerProps> = ({
             >
                 {activeAnnotatedFile?.annotation.showDownload == "menu" && (
                     <MoreMenuItem onClick={handleDownloadMenuAction}>
-                        <Typography sx={{ fontWeight: "medium" }}>
+                        <MoreMenuItemTitle>
                             {/*TODO */ t("download")}
-                        </Typography>
+                        </MoreMenuItemTitle>
                         <FileDownloadOutlinedIcon />
                     </MoreMenuItem>
                 )}
                 {activeAnnotatedFile?.annotation.showDelete && (
                     <MoreMenuItem onClick={handleConfirmDelete}>
-                        <Typography sx={{ fontWeight: "medium" }}>
+                        <MoreMenuItemTitle>
                             {/*TODO */ t("delete")}
-                        </Typography>
+                        </MoreMenuItemTitle>
                         <DeleteIcon />
                     </MoreMenuItem>
                 )}
                 {activeAnnotatedFile?.annotation.showCopyImage && (
                     <MoreMenuItem onClick={handleCopyImage}>
-                        <Typography sx={{ fontWeight: "medium" }}>
+                        <MoreMenuItemTitle>
                             {/*TODO */ pt("Copy image")}
-                        </Typography>
-                        <ContentCopyIcon />
+                        </MoreMenuItemTitle>
+                        {/* Tweak icon size to visually fit better with neighbours */}
+                        <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
                     </MoreMenuItem>
                 )}
                 {activeAnnotatedFile?.annotation.showEditImage && (
                     <MoreMenuItem onClick={handleEditImage}>
-                        <Typography sx={{ fontWeight: "medium" }}>
+                        <MoreMenuItemTitle>
                             {/*TODO */ pt("Edit image")}
-                        </Typography>
+                        </MoreMenuItemTitle>
                         <EditIcon />
                     </MoreMenuItem>
                 )}
@@ -697,6 +704,10 @@ const MoreMenuItem = styled(MenuItem)`
         font-size: 20px;
     }
 `;
+
+const MoreMenuItemTitle: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <Typography sx={{ fontWeight: "medium" }}>{children}</Typography>
+);
 
 const fileIsEditableImage = (file: EnteFile) => {
     // Only images are editable.
