@@ -284,22 +284,33 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleFileInfoClose = useCallback(() => setOpenFileInfo(false), []);
 
-    // The download action - either invoked directly (if the download option is
-    // shown in the more menu), or via `handleDownloadBarAction` (if the
+    // The download action itself - either invoked via the download option is
+    // shown in the more menu, or via `handleDownloadBarAction` (if the
     // download option is shown in the PhotoSwipe bar).
-    const handleDownload = useCallback(() => {
-        console.log("TODO download");
-    }, []);
+    const handleDownload = useCallback(
+        (annotatedFile: FileViewerAnnotatedFile) => {
+            console.log("TODO download", annotatedFile);
+        },
+        [],
+    );
 
     // Callback invoked when the download action is triggered by activating the
     // download button in the PhotoSwipe bar.
     const handleDownloadBarAction = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
             setActiveAnnotatedFile(annotatedFile);
-            handleDownload();
+            handleDownload(annotatedFile);
         },
         [handleDownload],
     );
+
+    // Callback invoked when the download action is triggered by activating the
+    // download menu item in the more menu.
+    //
+    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
+    const handleDownloadMenuAction = () => {
+        handleDownload(activeAnnotatedFile!);
+    };
 
     const handleMore = useCallback(
         (
@@ -396,7 +407,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                     // Logged in users see the download option in the more menu.
                     return "menu";
                 } else {
-                    // In shared albums, the download option is shown in the bar
+                    // In public albums, the download option is shown in the bar
                     // buttons, in lieu of the favorite option.
                     return "bar";
                 }
@@ -574,6 +585,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
                     list: { "aria-labelledby": moreButtonID },
                 }}
             >
+                {activeAnnotatedFile?.annotation.showDownload == "menu" && (
+                    <MoreMenuItem onClick={handleDownloadMenuAction}>
+                        <Typography sx={{ fontWeight: "medium" }}>
+                            {/*TODO */ t("download")}
+                        </Typography>
+                        <FileDownloadOutlinedIcon />
+                    </MoreMenuItem>
+                )}
                 {activeAnnotatedFile?.annotation.showDelete && (
                     <MoreMenuItem onClick={handleConfirmDelete}>
                         <Typography sx={{ fontWeight: "medium" }}>
@@ -588,14 +607,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
                             {/*TODO */ pt("Edit image")}
                         </Typography>
                         <EditIcon />
-                    </MoreMenuItem>
-                )}
-                {activeAnnotatedFile?.annotation.showDownload == "menu" && (
-                    <MoreMenuItem onClick={handleDownload}>
-                        <Typography sx={{ fontWeight: "medium" }}>
-                            {/*TODO */ t("download")}
-                        </Typography>
-                        <FileDownloadOutlinedIcon />
                     </MoreMenuItem>
                 )}
             </MoreMenu>
