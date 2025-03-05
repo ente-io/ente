@@ -3,7 +3,7 @@ import "package:intl/intl.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
-import "package:photos/utils/date_time_util.dart";
+import "package:photos/utils/standalone/date_time.dart";
 
 class BackedUpTimeItemWidget extends StatelessWidget {
   final EnteFile file;

@@ -9,7 +9,7 @@ import "package:photos/ui/map/map_gallery_tile.dart";
 import "package:photos/ui/map/map_gallery_tile_badge.dart";
 import "package:photos/ui/map/map_marker.dart";
 import "package:photos/ui/map/tile/layers.dart";
-import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class MapView extends StatefulWidget {
   final List<ImageMarker> imageMarkers;

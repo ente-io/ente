@@ -13,6 +13,7 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
+import "package:photos/ui/notification/toast.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
@@ -24,7 +25,6 @@ import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/toast_util.dart";
 
 class ClusterPage extends StatefulWidget {
   final List<EnteFile> searchResult;

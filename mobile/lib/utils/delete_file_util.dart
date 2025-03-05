@@ -27,10 +27,10 @@ import 'package:photos/ui/common/linear_progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/notification/toast.dart';
 import "package:photos/utils/device_info.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 final _logger = Logger("DeleteFileUtil");
 

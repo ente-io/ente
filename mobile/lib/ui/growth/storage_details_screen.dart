@@ -10,7 +10,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
-import "package:photos/utils/data_util.dart";
+import "package:photos/utils/standalone/data.dart";
 
 class StorageDetailsScreen extends StatefulWidget {
   final ReferralView referralView;

@@ -19,7 +19,7 @@ import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
-import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class HomeGalleryWidget extends StatefulWidget {
   final Widget? header;

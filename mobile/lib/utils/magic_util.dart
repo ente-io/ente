@@ -17,8 +17,8 @@ import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 final _logger = Logger('MagicUtil');
 

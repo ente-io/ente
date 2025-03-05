@@ -23,16 +23,16 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_button.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
 import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-import "package:photos/utils/date_time_util.dart";
-import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/toast_util.dart";
+import "package:photos/utils/standalone/date_time.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 import "package:visibility_detector/visibility_detector.dart";
 
 class VideoWidgetNative extends StatefulWidget {

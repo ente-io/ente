@@ -31,12 +31,12 @@ import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/gzip.dart";
 import "package:photos/utils/network_util.dart";
-import "package:photos/utils/toast_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 const _maxRetryCount = 3;

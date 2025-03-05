@@ -16,8 +16,8 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/toast_util.dart";
 
 final Logger _logger = Logger("MLUserDeveloperOptions");
 
