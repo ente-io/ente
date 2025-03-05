@@ -32,6 +32,7 @@ import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
+import { downloadSingleFile } from "utils/file";
 import { handleSelectCreator } from "utils/photoFrame";
 import { PhotoList } from "./PhotoList";
 import PreviewCard from "./pages/gallery/PreviewCard";
@@ -283,6 +284,13 @@ const PhotoFrame = ({
               }
             : undefined;
     }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
+
+    // TODO(PS): Missing dep!
+    const handleDownload = useCallback((file: EnteFile) => {
+        const setSingleFileDownloadProgress =
+            setFilesDownloadProgressAttributesCreator!(file.metadata.title);
+        void downloadSingleFile(file, setSingleFileDownloadProgress);
+    }, []);
 
     const handleDelete = useMemo(() => {
         return onMarkTempDeleted
@@ -586,6 +594,7 @@ const PhotoFrame = ({
                     isInTrashSection={activeCollectionID === TRASH_SECTION}
                     onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
                     onToggleFavorite={handleToggleFavorite}
+                    onDownload={handleDownload}
                     onDelete={handleDelete}
                     onSaveEditedImageCopy={handleSaveEditedImageCopy}
                     {...{

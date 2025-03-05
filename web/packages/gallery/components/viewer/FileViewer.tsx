@@ -134,10 +134,17 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onToggleFavorite?: (file: EnteFile) => Promise<void>;
     /**
+     * Called when the given {@link file} should be downloaded.
+     *
+     * If this is not provided then the download action will not be shown.
+     *
+     * See also: [Note: File viewer update and dispatch]
+     */
+    onDownload?: (file: EnteFile) => void;
+    /**
      * Called when the given {@link file} should be deleted.
      *
-     * If this is not provided then the delete button will not be shown
-     * in the file actions.
+     * If this is not provided then the delete action will not be shown.
      *
      * See also: [Note: File viewer update and dispatch]
      */
@@ -177,6 +184,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     allCollectionsNameByID,
     onTriggerSyncWithRemote,
     onToggleFavorite,
+    onDownload,
     onDelete,
     onSelectCollection,
     onSelectPerson,
@@ -284,24 +292,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleFileInfoClose = useCallback(() => setOpenFileInfo(false), []);
 
-    // The download action itself - either invoked via the download option is
-    // shown in the more menu, or via `handleDownloadBarAction` (if the
-    // download option is shown in the PhotoSwipe bar).
-    const handleDownload = useCallback(
-        (annotatedFile: FileViewerAnnotatedFile) => {
-            console.log("TODO download", annotatedFile);
-        },
-        [],
-    );
-
     // Callback invoked when the download action is triggered by activating the
     // download button in the PhotoSwipe bar.
     const handleDownloadBarAction = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
             setActiveAnnotatedFile(annotatedFile);
-            handleDownload(annotatedFile);
+            onDownload!(annotatedFile.file);
         },
-        [handleDownload],
+        [onDownload],
     );
 
     // Callback invoked when the download action is triggered by activating the
@@ -309,7 +307,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
     //
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleDownloadMenuAction = () => {
-        handleDownload(activeAnnotatedFile!);
+        handleMoreMenuClose();
+        onDownload!(activeAnnotatedFile!.file);
     };
 
     const handleMore = useCallback(
@@ -403,6 +402,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
             const showDownload = (() => {
                 if (disableDownload) return undefined;
+                if (!onDownload) return undefined;
                 if (user) {
                     // Logged in users see the download option in the more menu.
                     return "menu";
@@ -431,6 +431,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             disableDownload,
             isInTrashSection,
             isInHiddenSection,
+            onDownload,
             handleEditImage,
             handleConfirmDelete,
         ],
