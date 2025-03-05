@@ -37,6 +37,7 @@ import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "@/new/photos/components/ImageEditorOverlay";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
@@ -338,8 +339,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             : undefined;
     }, [onDelete, showConfirmDelete, handleMoreMenuClose]);
 
-    // Not memoized since it depends on the frequently changing
-    // `activeAnnotatedFile`.
+    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleDelete = async () => {
         const file = activeAnnotatedFile!.file;
         await onDelete(file);
@@ -362,6 +362,11 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 handleClose();
             }
         });
+    };
+
+    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
+    const handleCopyImage = () => {
+        console.log("TODO copy", activeAnnotatedFile!);
     };
 
     const handleEditImage = useMemo(() => {
@@ -388,10 +393,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleAnnotate = useCallback(
         (file: EnteFile): FileViewerFileAnnotation => {
-            log.debug(() => ["viewer", { action: "annotate", file }]);
-
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
+
             const canModify =
                 isOwnFile && !isInTrashSection && !isInHiddenSection;
             const showFavorite = canModify;
@@ -413,16 +417,30 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 }
             })();
 
+            const showCopyImage = (() => {
+                switch (file.metadata.fileType) {
+                    case FileType.image:
+                    case FileType.livePhoto:
+                        return true;
+                    default:
+                        return false;
+                }
+            })();
+
             const showMore =
-                showDelete || showEditImage || showDownload == "menu";
+                showDownload == "menu" ||
+                showDelete ||
+                showCopyImage ||
+                showEditImage;
 
             return {
                 fileID,
                 isOwnFile,
                 showFavorite,
+                showDownload,
                 showMore,
                 showDelete,
-                showDownload,
+                showCopyImage,
                 showEditImage,
             };
         },
@@ -600,6 +618,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
                             {/*TODO */ t("delete")}
                         </Typography>
                         <DeleteIcon />
+                    </MoreMenuItem>
+                )}
+                {activeAnnotatedFile?.annotation.showCopyImage && (
+                    <MoreMenuItem onClick={handleCopyImage}>
+                        <Typography sx={{ fontWeight: "medium" }}>
+                            {/*TODO */ pt("Copy image")}
+                        </Typography>
+                        <ContentCopyIcon />
                     </MoreMenuItem>
                 )}
                 {activeAnnotatedFile?.annotation.showEditImage && (

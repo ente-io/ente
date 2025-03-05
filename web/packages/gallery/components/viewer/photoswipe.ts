@@ -54,14 +54,6 @@ export interface FileViewerFileAnnotation {
      */
     showFavorite: boolean;
     /**
-     * `true` if the more menu action should be shown for this file.
-     */
-    showMore: boolean;
-    /**
-     * `true` if the delete action should be shown for this file.
-     */
-    showDelete: boolean;
-    /**
      * Set if the download action should be shown for this file.
      *
      * - When "bar", the action button is shown among the bar icons.
@@ -71,6 +63,18 @@ export interface FileViewerFileAnnotation {
      * Note: "bar" should only be set if {@link haveUser} is also true.
      */
     showDownload: "bar" | "menu" | undefined;
+    /**
+     * `true` if the more menu action should be shown for this file.
+     */
+    showMore: boolean;
+    /**
+     * `true` if the delete action should be shown for this file.
+     */
+    showDelete: boolean;
+    /**
+     * `true` if the copy image action should be shown for this file.
+     */
+    showCopyImage: boolean;
     /**
      * `true` if this is an image which can be edited, _and_ editing is
      * possible, and the edit action should therefore be shown for this file.
