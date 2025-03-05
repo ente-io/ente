@@ -483,6 +483,32 @@ export class FileViewerPhotoSwipe {
             onClose();
         });
 
+        const handleViewInfo = () => onViewInfo(currentAnnotatedFile());
+
+        let favoriteButtonElement: HTMLButtonElement | undefined;
+        let unfavoriteButtonElement: HTMLButtonElement | undefined;
+
+        const toggleFavorite = async () => {
+            const af = currentAnnotatedFile();
+            this.pendingFavoriteUpdates.add(af.file.id);
+            favoriteButtonElement.disabled = true;
+            unfavoriteButtonElement.disabled = true;
+            await delegate.toggleFavorite(af);
+            this.pendingFavoriteUpdates.delete(af.file.id);
+            // TODO: We reload the entire slide instead of just updating
+            // the button state. This is because there are two buttons,
+            // instead of a single button toggling between two states
+            // e.g. like the zoom button.
+            //
+            // To fix this, a single button can be achieved by moving
+            // the fill of the heart as a layer.
+            this.refreshCurrentSlideContent();
+        };
+
+        const handleToggleFavorite = () => void toggleFavorite();
+
+        const handleDownload = () => onDownload(currentAnnotatedFile());
+
         const showIf = (element: HTMLElement, condition: boolean) =>
             condition
                 ? element.classList.remove("pswp__hidden")
@@ -527,24 +553,6 @@ export class FileViewerPhotoSwipe {
             });
 
             if (haveUser) {
-                const toggleFavorite = async (
-                    buttonElement: HTMLButtonElement,
-                ) => {
-                    const af = currentAnnotatedFile();
-                    this.pendingFavoriteUpdates.add(af.file.id);
-                    buttonElement.disabled = true;
-                    await delegate.toggleFavorite(af);
-                    this.pendingFavoriteUpdates.delete(af.file.id);
-                    // TODO: We reload the entire slide instead of just updating
-                    // the button state. This is because there are two buttons,
-                    // instead of a single button toggling between two states
-                    // e.g. like the zoom button.
-                    //
-                    // To fix this, a single button can be achieved by moving
-                    // the fill of the heart as a layer.
-                    this.refreshCurrentSlideContent();
-                };
-
                 const showFavoriteIf = (
                     buttonElement: HTMLButtonElement,
                     value: boolean,
@@ -568,7 +576,7 @@ export class FileViewerPhotoSwipe {
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
-                    onClick: (e) => toggleFavorite(e.target),
+                    onClick: handleToggleFavorite,
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
                             showFavoriteIf(buttonElement, false),
@@ -580,7 +588,7 @@ export class FileViewerPhotoSwipe {
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("unfavorite"),
-                    onClick: (e) => toggleFavorite(e.target),
+                    onClick: handleToggleFavorite,
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
                             showFavoriteIf(buttonElement, true),
@@ -598,7 +606,7 @@ export class FileViewerPhotoSwipe {
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("download"),
-                    onClick: () => onDownload(currentAnnotatedFile()),
+                    onClick: handleDownload,
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
                             showIf(
@@ -615,7 +623,7 @@ export class FileViewerPhotoSwipe {
                 order: 9,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("info"),
-                onClick: () => onViewInfo(currentAnnotatedFile()),
+                onClick: handleViewInfo,
             });
 
             pswp.ui.registerElement({
@@ -676,7 +684,23 @@ export class FileViewerPhotoSwipe {
             return element;
         });
 
-        // Let our data source know.
+        pswp.on("keydown", (e, z) => {
+            const key = e.originalEvent.key ?? "";
+            const cb = (() => {
+                switch (key.toLowerCase()) {
+                    case "l":
+                        return handleToggleFavorite;
+                    case "d":
+                        return handleDownload;
+                    case "i":
+                        return handleViewInfo;
+                }
+                return undefined;
+            })();
+            cb?.();
+        });
+
+        // Let our data source know that we're about to open.
         fileViewerWillOpen();
 
         // Initializing PhotoSwipe adds it to the DOM as a dialog-like div with
