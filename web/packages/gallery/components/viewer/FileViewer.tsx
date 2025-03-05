@@ -43,14 +43,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
-import {
-    Button,
-    Divider,
-    Menu,
-    MenuItem,
-    styled,
-    Typography,
-} from "@mui/material";
+import { Button, Menu, MenuItem, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, {
     useCallback,
@@ -748,7 +741,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
                         <EditIcon />
                     </MoreMenuItem>
                 )}
-                <MoreMenuItem onClick={handleToggleFullscreen}>
+                <MoreMenuItem
+                    onClick={handleToggleFullscreen}
+                    divider
+                    sx={{
+                        borderColor: "fixed.dark.divider",
+                        /* 12px + 2px */
+                        pb: "14px",
+                    }}
+                >
                     <MoreMenuItemTitle>
                         {
                             /*TODO */ isFullscreen
@@ -762,11 +763,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
                         <FullscreenOutlinedIcon />
                     )}
                 </MoreMenuItem>
-                <Divider sx={{}} />
-                <MoreMenuItem onClick={showShortcuts}>
-                    <Typography
-                        sx={{ opacity: 0.7 /* theme.dark.background.paper2 */ }}
-                    >
+                <MoreMenuItem onClick={showShortcuts} sx={{ mt: "2px" }}>
+                    <Typography sx={{ color: "fixed.dark.text.faint" }}>
                         {pt("Shortcuts")}
                     </Typography>
                 </MoreMenuItem>

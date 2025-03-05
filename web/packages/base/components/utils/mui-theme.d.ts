@@ -145,8 +145,9 @@ declare module "@mui/material/styles" {
              * even when the app is in light mode.
              */
             dark: {
-                background: TypeBackground;
-                text: TypeText;
+                background: Omit<TypeBackground, "elevatedPaper">;
+                text: Omit<TypeText, "primary" | "secondary" | "disabled">;
+                divider: string;
             };
         };
         /**
