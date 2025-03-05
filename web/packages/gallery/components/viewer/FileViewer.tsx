@@ -56,10 +56,64 @@ import {
     moreButtonID,
     moreMenuID,
     resetMoreMenuButtonOnMenuClose,
-    type FileViewerAnnotatedFile,
-    type FileViewerFileAnnotation,
     type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
+
+/**
+ * Derived data for a file that is needed to display the file viewer controls
+ * etc associated with the file.
+ *
+ * This is recomputed on-demand each time the slide changes.
+ */
+export interface FileViewerFileAnnotation {
+    /**
+     * The id of the file whose annotation this is.
+     */
+    fileID: number;
+    /**
+     * `true` if this file is owned by the logged in user (if any).
+     */
+    isOwnFile: boolean;
+    /**
+     * `true` if the toggle favorite action should be shown for this file.
+     */
+    showFavorite: boolean;
+    /**
+     * Set if the download action should be shown for this file.
+     *
+     * - When "bar", the action button is shown among the bar icons.
+     *
+     * - When "menu", the action is shown as a more menu entry.
+     *
+     * Note: "bar" should only be set if {@link haveUser} is also true.
+     */
+    showDownload: "bar" | "menu" | undefined;
+    /**
+     * `true` if the more menu action should be shown for this file.
+     */
+    showMore: boolean;
+    /**
+     * `true` if the delete action should be shown for this file.
+     */
+    showDelete: boolean;
+    /**
+     * `true` if the copy image action should be shown for this file.
+     */
+    showCopyImage: boolean;
+    /**
+     * `true` if this is an image which can be edited, _and_ editing is
+     * possible, and the edit action should therefore be shown for this file.
+     */
+    showEditImage: boolean;
+}
+
+/**
+ * A file and its annotation, in a nice cosy box.
+ */
+export interface FileViewerAnnotatedFile {
+    file: EnteFile;
+    annotation: FileViewerFileAnnotation;
+}
 
 export type FileViewerProps = ModalVisibilityProps & {
     /**
