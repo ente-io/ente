@@ -23,6 +23,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
+import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/search/album_search_result.dart';
