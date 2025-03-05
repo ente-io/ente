@@ -55,6 +55,20 @@ class LocalSettings {
     }
   }
 
+  // getEstimatedInstallTimeInMs returns the time when the app was installed
+  // The time is stored in shared preferences and will be reset on logout
+  DateTime getInstallDateTime() {
+    if (_prefs.containsKey('ls.install_time')) {
+      return DateTime.fromMillisecondsSinceEpoch(
+        _prefs.getInt('ls.install_time')!,
+      );
+    } else {
+      final installTime = DateTime.now();
+      _prefs.setInt('ls.install_time', installTime.millisecondsSinceEpoch);
+      return installTime;
+    }
+  }
+
   Future<void> setRateUsShownCount(int value) async {
     await _prefs.setInt(kRateUsShownCount, value);
   }

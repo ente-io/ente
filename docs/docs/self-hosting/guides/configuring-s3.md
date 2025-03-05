@@ -54,19 +54,29 @@ The same principle applies if you're deploying to your custom domain.
 
 ## Replication 
 
-If you're wondering why there are 3 buckets on MinIO UI - that's because our 
-production instance uses these to perform [replication](https://ente.io/reliability/).
-
-In a self hosted Ente Instance replication is turned off by default.
-When replication is turned off, only the first bucket (`b2-eu-cen`) is used, 
-and you can ignore the other two. Use the `s3.hot_storage.primary` option 
-if you'd like to set one of the other predefined buckets as the primary bucket.
-
 > [!IMPORTANT]
 > As of now, Replication works only if all the 3 storage type 
 > needs are fulfilled (1 Hot, 1 Cold and 1 Glacier Storage).
 >
 > [Reference](https://github.com/ente-io/ente/discussions/3167#discussioncomment-10585970)
+
+If you're wondering why there are 3 buckets on MinIO UI - that's because our 
+production instance uses these to perform [replication](https://ente.io/reliability/).
+
+If you're also wondering about why the bucket names are specifically what they are, 
+it's because that is exactly what we are using on our production instance. 
+We use `b2-eu-cen` as hot, `wasabi-eu-central-2-v3` as cold (also the secondary hot) 
+and `scw-eu-fr-v3` as glacier storage. As of now, all of this is hardcoded. 
+Hence, the same hardcoded configuration is applied when you self host Ente.
+
+In a Self hosted Ente Instance replication is turned off by default.
+When replication is turned off, only the first bucket (`b2-eu-cen`) is used, 
+and the other two are ignored. Only the names here are specifically fixed, but 
+in the configuration body you can put any other keys. It does not have any relation 
+with `b2`, `wasabi` or even `scaleway`.
+
+Use the `s3.hot_storage.primary` option if you'd like to set one of the other 
+predefined buckets as the primary bucket.
 
 ## SSL Configuration 
 

@@ -7,6 +7,7 @@ Plan of action:
   and photos/FileInfo to deal with the @/new/photos imports here.
 */
 
+import { assertionFailed } from "@/base/assert";
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
 import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
@@ -199,6 +200,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     useEffect(() => {
         if (!file) return;
+        if (!isMLEnabled()) return;
 
         let didCancel = false;
 
@@ -225,6 +227,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         onSelectPerson?.(personID);
 
     if (!file) {
+        if (open) assertionFailed();
         return <></>;
     }
 
@@ -315,7 +318,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         )
                     }
                 />
-                {isMLEnabled() && annotatedFaces.length > 0 && (
+                {annotatedFaces.length > 0 && (
                     <InfoItem icon={<FaceRetouchingNaturalIcon />}>
                         <FilePeopleList
                             file={file}

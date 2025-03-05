@@ -217,12 +217,14 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
                     <Snackbar
                         open={openCopied}
                         message={t("copied")}
-                        ContentProps={{
-                            sx: (theme) => ({
-                                backgroundColor: theme.vars.palette.fill.faint,
-                                color: theme.vars.palette.primary.main,
-                                backdropFilter: "blur(10px)",
-                            }),
+                        slotProps={{
+                            content: {
+                                sx: {
+                                    backgroundColor: "fill.faint",
+                                    color: "primary.main",
+                                    backdropFilter: "blur(10px)",
+                                },
+                            },
                         }}
                     />
                 </ButtonBase>

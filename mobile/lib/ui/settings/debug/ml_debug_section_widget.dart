@@ -11,7 +11,6 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
-import "package:photos/services/user_remote_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -81,17 +80,12 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             },
           ),
           trailingWidget: ToggleSwitchWidget(
-            value: () => userRemoteFlagService
-                .getCachedBoolValue(UserRemoteFlagService.mlEnabled),
+            value: () => flagService.hasGrantedMLConsent,
             onChanged: () async {
               try {
-                final oldMlConsent = userRemoteFlagService
-                    .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
+                final oldMlConsent = flagService.hasGrantedMLConsent;
                 final mlConsent = !oldMlConsent;
-                await userRemoteFlagService.setBoolValue(
-                  UserRemoteFlagService.mlEnabled,
-                  mlConsent,
-                );
+                await flagService.setMLConsent(mlConsent);
                 logger.info('ML consent turned ${mlConsent ? 'on' : 'off'}');
                 if (!mlConsent) {
                   MLService.instance.pauseIndexingAndClustering();
@@ -280,6 +274,23 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               await magicCacheService.updateCache(forced: true);
             } catch (e, s) {
               logger.warning('Update discover failed', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Update memories",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await memoriesCacheService.updateCache(forced: true);
+            } catch (e, s) {
+              logger.warning('Update memories failed', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },

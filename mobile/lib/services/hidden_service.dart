@@ -12,12 +12,12 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';
+import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 extension HiddenService on CollectionsService {

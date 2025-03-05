@@ -80,28 +80,3 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
         throw e;
     }
 };
-
-export const deleteAccount = async (
-    challenge: string,
-    reason: string,
-    feedback: string,
-) => {
-    try {
-        const token = getToken();
-        if (!token) {
-            return;
-        }
-
-        await HTTPService.delete(
-            await apiURL("/users/delete"),
-            { challenge, reason, feedback },
-            null,
-            {
-                "X-Auth-Token": token,
-            },
-        );
-    } catch (e) {
-        log.error("deleteAccount api call failed", e);
-        throw e;
-    }
-};

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/opened_settings_event.dart';
 import 'package:photos/models/user_details.dart';
-import 'package:photos/services/user_service.dart';
+import 'package:photos/services/account/user_service.dart';
 
 class UserDetailsStateWidget extends StatefulWidget {
   final Widget child;

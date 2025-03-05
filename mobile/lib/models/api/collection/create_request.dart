@@ -1,5 +1,5 @@
+import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/collection/collection.dart';
-import 'package:photos/services/file_magic_service.dart';
 
 class CreateRequest {
   String encryptedKey;

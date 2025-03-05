@@ -29,6 +29,7 @@ import 'package:photos/models/api/collection/collection_file_item.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
@@ -37,9 +38,8 @@ import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/favorites_service.dart";
-import 'package:photos/services/file_magic_service.dart';
-import 'package:photos/services/local_sync_service.dart';
-import 'package:photos/services/remote_sync_service.dart';
+import 'package:photos/services/sync/local_sync_service.dart';
+import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/local_settings.dart";
@@ -666,6 +666,7 @@ class CollectionsService {
       ),
     );
     sync().ignore();
+    // not required once remote & local world are separate
     LocalSyncService.instance.syncAll().ignore();
   }
 

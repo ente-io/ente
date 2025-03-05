@@ -525,7 +525,6 @@
   "viewLargeFiles": "Archivos grandes",
   "viewLargeFilesDesc": "Ver los archivos que consumen la mayor cantidad de almacenamiento.",
   "noDuplicates": "✨ Sin duplicados",
-  "youveNoDuplicateFilesThatCanBeCleared": "No tienes archivos duplicados que puedan ser borrados",
   "success": "Éxito",
   "rateUs": "Califícanos",
   "remindToEmptyDeviceTrash": "También vacía \"Eliminado Recientemente\" de \"Configuración\" -> \"Almacenamiento\" para reclamar el espacio libre",

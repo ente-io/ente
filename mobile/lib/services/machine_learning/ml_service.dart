@@ -21,7 +21,6 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
-import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:photos/utils/ram_check_util.dart";
@@ -58,8 +57,7 @@ class MLService {
   /// Only call this function once at app startup, after that you can directly call [runAllML]
   Future<void> init() async {
     if (_isInitialized) return;
-    if (!userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) {
+    if (!flagService.hasGrantedMLConsent) {
       return;
     }
     _logger.info("init called");
@@ -74,8 +72,7 @@ class MLService {
 
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-      if (!userRemoteFlagService
-          .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) {
+      if (!flagService.hasGrantedMLConsent) {
         return;
       }
 
@@ -143,6 +140,8 @@ class MLService {
       if (_mlControllerStatus == true) {
         // refresh discover section
         magicCacheService.updateCache(forced: force).ignore();
+        // refresh memories section
+        memoriesCacheService.updateCache(forced: force).ignore();
       }
       if (canFetch()) {
         await fetchAndIndexAllImages();
@@ -153,6 +152,8 @@ class MLService {
       if (_mlControllerStatus == true) {
         // refresh discover section
         magicCacheService.updateCache().ignore();
+        // refresh memories section
+        memoriesCacheService.updateCache(forced: force).ignore();
       }
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);

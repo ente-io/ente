@@ -451,7 +451,6 @@
   "appLockOfflineModeWarning": "Du har valt att fortsätta utan säkerhetskopior. Om du glömmer ditt applås, kommer du att bli utelåst från att komma åt dina data.",
   "duplicateCodes": "Dubblettkoder",
   "noDuplicates": "✨ Inga dubbletter",
-  "youveNoDuplicateCodesThatCanBeCleared": "Du har inga dubblettkoder som kan rensas bort",
   "deduplicateCodes": "Deduplicera koder",
   "deselectAll": "Avmarkera alla",
   "selectAll": "Markera alla",

@@ -11,7 +11,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/billing/billing_plan.dart';
 import 'package:photos/models/api/billing/subscription.dart';
 import 'package:photos/models/user_details.dart';
-import 'package:photos/services/user_service.dart';
+import 'package:photos/services/account/user_service.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 

@@ -13,8 +13,8 @@ import "package:photos/models/ignored_file.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/hidden_service.dart";
 import "package:photos/services/ignored_files_service.dart";
-import "package:photos/services/remote_sync_service.dart";
-import "package:photos/services/sync_service.dart";
+import "package:photos/services/sync/remote_sync_service.dart";
+import "package:photos/services/sync/sync_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/utils/toast_util.dart";
 

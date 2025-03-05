@@ -8,6 +8,7 @@ import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
+import "package:photos/db/enum/conflict_algo.dart";
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
@@ -21,7 +22,6 @@ import "package:photos/services/ignored_files_service.dart";
 import 'package:photos/services/local/local_sync_util.dart';
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/photo_manager_util.dart";
-import "package:photos/utils/sqlite_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:tuple/tuple.dart';
@@ -38,10 +38,6 @@ class LocalSyncService {
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
   static const kPermissionStateKey = "permission_state";
-
-  // Adding `_2` as a suffic to pull files that were earlier ignored due to permission errors
-  // See https://github.com/CaiJingLong/flutter_photo_manager/issues/589
-  static const kInvalidFileIDsKey = "invalid_file_ids_2";
 
   LocalSyncService._privateConstructor();
 
@@ -79,7 +75,7 @@ class LocalSyncService {
     }
     _existingSync = Completer<void>();
     final int ownerID = Configuration.instance.getUserID()!;
-    
+
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
     // This is a fix for https://github.com/ente-io/ente/issues/4296
@@ -98,7 +94,8 @@ class LocalSyncService {
         );
       } else {
         // Load from 0 - 01.01.2010
-        Bus.instance.fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
+        Bus.instance
+            .fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
         var startTime = 0;
         var toYear = 2010;
         var toTime = DateTime(toYear).microsecondsSinceEpoch;
@@ -170,12 +167,11 @@ class LocalSyncService {
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs(ownerID);
     final Map<String, Set<String>> pathToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
-    final invalidIDs = _getInvalidFileIDs().toSet();
+
     final localDiffResult = await getDiffWithLocal(
       localAssets,
       existingLocalFileIDs,
       pathToLocalIDs,
-      invalidIDs,
     );
     bool hasAnyMappingChanged = false;
     if (localDiffResult.newPathToLocalIDs?.isNotEmpty ?? false) {
@@ -235,18 +231,6 @@ class LocalSyncService {
       error.reason.name,
     );
     await IgnoredFilesService.instance.cacheAndInsert([ignored]);
-  }
-
-  @Deprecated(
-    "remove usage after few releases as we will switch to ignored files. Keeping it now to clear the invalid file ids from shared prefs",
-  )
-  List<String> _getInvalidFileIDs() {
-    if (_prefs.containsKey(kInvalidFileIDsKey)) {
-      _prefs.remove(kInvalidFileIDsKey);
-      return <String>[];
-    } else {
-      return <String>[];
-    }
   }
 
   Lock getLock() {

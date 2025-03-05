@@ -52,6 +52,8 @@ class PersonData {
   String? avatarFaceID;
   List<ClusterInfo> assigned = List<ClusterInfo>.empty();
   List<String> rejectedFaceIDs = List<String>.empty();
+
+  /// string formatted in `yyyy-MM-dd`
   final String? birthDate;
 
   /// email should be always looked via userID as user might have changed

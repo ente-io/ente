@@ -499,7 +499,6 @@
   "appLockOfflineModeWarning": "您已选择继续而不备份。如果您忘记了应用锁，您将无法访问数据。",
   "duplicateCodes": "重复代码",
   "noDuplicates": "✨ 没有重复",
-  "youveNoDuplicateCodesThatCanBeCleared": "您没有可清除的重复代码",
   "deduplicateCodes": "删除重复代码",
   "deselectAll": "取消全选",
   "selectAll": "全选",

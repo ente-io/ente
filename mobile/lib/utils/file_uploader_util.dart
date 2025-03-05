@@ -17,13 +17,13 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
+import "package:photos/models/api/metadata.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
-import "package:photos/services/file_magic_service.dart";
 import "package:photos/utils/exif_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:uuid/uuid.dart";
@@ -31,7 +31,6 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 
 final _logger = Logger("FileUtil");
 const kMaximumThumbnailCompressionAttempts = 2;
-const kLivePhotoHashSeparator = ':';
 
 class MediaUploadData {
   final File? sourceFile;

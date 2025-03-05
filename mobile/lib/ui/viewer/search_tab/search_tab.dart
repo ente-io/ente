@@ -10,7 +10,6 @@ import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/states/all_sections_examples_state.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
@@ -119,9 +118,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   itemBuilder: (context, index) {
                     switch (searchTypes[index]) {
                       case SectionType.face:
-                        if (!userRemoteFlagService.getCachedBoolValue(
-                          UserRemoteFlagService.mlEnabled,
-                        )) {
+                        if (!flagService.hasGrantedMLConsent) {
                           return const SizedBox.shrink();
                         }
                         return PeopleSection(
