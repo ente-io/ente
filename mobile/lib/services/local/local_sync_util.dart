@@ -34,17 +34,26 @@ Future<Tuple2<List<LocalPathAsset>, List<EnteFile>>> getLocalPathAssetsAndFiles(
     if (assetsInPath.isEmpty) {
       result = const Tuple2({}, []);
     } else {
-      result = await Computer.shared().compute(
-        _getLocalIDsAndFilesFromAssets,
-        param: <String, dynamic>{
-          "pathEntity": pathEntity,
-          "fromTime": fromTime,
-          "alreadySeenLocalIDs": alreadySeenLocalIDs,
-          "assetList": assetsInPath,
-        },
-        taskName:
-            "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
-      );
+      try {
+        result = await Computer.shared().compute(
+          _getLocalIDsAndFilesFromAssets,
+          param: <String, dynamic>{
+            "pathEntity": pathEntity,
+            "fromTime": fromTime,
+            "alreadySeenLocalIDs": alreadySeenLocalIDs,
+            "assetList": assetsInPath,
+          },
+          taskName:
+              "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
+        );
+      } catch (e) {
+        _logger.severe("_getLocalIDsAndFilesFromAssets failed", e);
+        _logger.info(
+          "Failed for pathEntity: ${pathEntity.name}",
+        );
+        result = const Tuple2({}, []);
+      }
+
       alreadySeenLocalIDs.addAll(result.item1);
       uniqueFiles.addAll(result.item2);
     }
@@ -299,12 +308,8 @@ Future<Tuple2<Set<String>, List<EnteFile>>> _getLocalIDsAndFilesFromAssets(
         (fromTime / ~1000);
     if (!alreadySeenLocalIDs.contains(entity.id) &&
         assetCreatedOrUpdatedAfterGivenTime) {
-      try {
-        final file = await EnteFile.fromAsset(pathEntity.name, entity);
-        files.add(file);
-      } catch (e) {
-        _logger.severe(e);
-      }
+      final file = await EnteFile.fromAsset(pathEntity.name, entity);
+      files.add(file);
     }
   }
   return Tuple2(localIDs, files);
