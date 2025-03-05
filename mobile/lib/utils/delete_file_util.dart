@@ -13,6 +13,7 @@ import 'package:photos/events/files_updated_event.dart';
 import "package:photos/events/force_reload_trash_page_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/api/collection/trash_item_request.dart';
 import "package:photos/models/backup_status.dart";
 import 'package:photos/models/file/file.dart';
@@ -477,7 +478,7 @@ Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
   );
 
   final dialog =
-      createProgressDialog(context, "Please wait, this will take a while...");
+      createProgressDialog(context, context.l10n.pleaseWaitThisWillTakeAWhile);
   await dialog.show();
   try {
     final stopwatch = Stopwatch()..start();

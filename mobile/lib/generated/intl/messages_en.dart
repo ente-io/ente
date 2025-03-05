@@ -1400,6 +1400,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseWaitForSometimeBeforeRetrying":
             MessageLookupByLibrary.simpleMessage(
                 "Please wait for sometime before retrying"),
+        "pleaseWaitThisWillTakeAWhile": MessageLookupByLibrary.simpleMessage(
+            "Please wait, this will take a while."),
         "preparingLogs":
             MessageLookupByLibrary.simpleMessage("Preparing logs..."),
         "preserveMore": MessageLookupByLibrary.simpleMessage("Preserve more"),
