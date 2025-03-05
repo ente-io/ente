@@ -8,7 +8,7 @@ import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/services/user_service.dart";
+import "package:photos/services/account/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -24,10 +24,10 @@ class VerifyIdentifyDialog extends StatefulWidget {
   final bool self;
 
   VerifyIdentifyDialog({
-    Key? key,
+    super.key,
     required this.self,
     this.email = '',
-  }) : super(key: key) {
+  }) {
     if (!self && email.isEmpty) {
       throw ArgumentError("email cannot be empty when self is false");
     }

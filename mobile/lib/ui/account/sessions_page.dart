@@ -4,7 +4,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/user/sessions.dart';
-import 'package:photos/services/user_service.dart';
+import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/utils/date_time_util.dart";
@@ -12,7 +12,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class SessionsPage extends StatefulWidget {
-  const SessionsPage({Key? key}) : super(key: key);
+  const SessionsPage({super.key});
 
   @override
   State<SessionsPage> createState() => _SessionsPageState();

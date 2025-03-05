@@ -123,12 +123,10 @@ Future<LocalDiffResult> getDiffWithLocal(
   // current set of assets available on device
   Set<String> existingIDs, // localIDs of files already imported in app
   Map<String, Set<String>> pathToLocalIDs,
-  Set<String> invalidIDs,
 ) async {
   final Map<String, dynamic> args = <String, dynamic>{};
   args['assets'] = assets;
   args['existingIDs'] = existingIDs;
-  args['invalidIDs'] = invalidIDs;
   args['pathToLocalIDs'] = pathToLocalIDs;
   final LocalDiffResult diffResult = await Computer.shared().compute(
     _getLocalAssetsDiff,
@@ -147,7 +145,6 @@ Future<LocalDiffResult> getDiffWithLocal(
 LocalDiffResult _getLocalAssetsDiff(Map<String, dynamic> args) {
   final List<LocalPathAsset> onDeviceLocalPathAsset = args['assets'];
   final Set<String> existingIDs = args['existingIDs'];
-  final Set<String> invalidIDs = args['invalidIDs'];
   final Map<String, Set<String>> pathToLocalIDs = args['pathToLocalIDs'];
   final Map<String, Set<String>> newPathToLocalIDs = <String, Set<String>>{};
   final Map<String, Set<String>> removedPathToLocalIDs =
@@ -179,7 +176,6 @@ LocalDiffResult _getLocalAssetsDiff(Map<String, dynamic> args) {
     // End
 
     localPathAsset.localIDs.removeAll(existingIDs);
-    localPathAsset.localIDs.removeAll(invalidIDs);
     if (localPathAsset.localIDs.isNotEmpty) {
       unsyncedAssets.add(localPathAsset);
     }

@@ -2,16 +2,16 @@ import "dart:async";
 import 'dart:convert';
 
 import "package:dropdown_button2/dropdown_button2.dart";
+import 'package:ente_crypto/ente_crypto.dart';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/user/delete_account.dart';
-import 'package:photos/services/user_service.dart';
+import 'package:photos/services/account/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/toast_util.dart";
 

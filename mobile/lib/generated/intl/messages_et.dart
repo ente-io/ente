@@ -169,8 +169,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "oops": MessageLookupByLibrary.simpleMessage("Oih"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oih, midagi läks valesti"),
-        "orPickFromYourContacts":
-            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
         "password": MessageLookupByLibrary.simpleMessage("Parool"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("foto"),
         "pleaseTryAgain":

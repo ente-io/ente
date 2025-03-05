@@ -1,9 +1,9 @@
 import "dart:typed_data";
 
 import "package:computer/computer.dart";
+import "package:ente_crypto/ente_crypto.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/utils/crypto_util.dart";
 
 Uint8List getFileKey(EnteFile file) {
   final encryptedKey = CryptoUtil.base642bin(file.encryptedKey!);

@@ -42,13 +42,13 @@ import ExportInProgress from "./ExportInProgress";
 import ExportInit from "./ExportInit";
 
 type ExportProps = ModalVisibilityProps & {
-    collectionNameMap: Map<number, string>;
+    allCollectionsNameByID: Map<number, string>;
 };
 
 export const Export: React.FC<ExportProps> = ({
     open,
     onClose,
-    collectionNameMap,
+    allCollectionsNameByID,
 }) => {
     const { showMiniDialog } = useBaseContext();
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
@@ -202,7 +202,7 @@ export const Export: React.FC<ExportProps> = ({
                 lastExportTime={lastExportTime}
                 exportProgress={exportProgress}
                 pendingExports={pendingExports}
-                collectionNameMap={collectionNameMap}
+                allCollectionsNameByID={allCollectionsNameByID}
             />
         </Dialog>
     );
@@ -270,7 +270,7 @@ function ContinuousExport({ continuousExport, toggleContinuousExport }) {
     return (
         <SpaceBetweenFlex minHeight={"48px"}>
             <Typography sx={{ color: "text.muted" }}>
-                {t("CONTINUOUS_EXPORT")}
+                {t("sync_continuously")}
             </Typography>
             <Box>
                 <EnteSwitch
@@ -291,7 +291,7 @@ const ExportDynamicContent = ({
     lastExportTime,
     exportProgress,
     pendingExports,
-    collectionNameMap,
+    allCollectionsNameByID,
 }: {
     exportStage: ExportStage;
     startExport: (opts?: ExportOpts) => void;
@@ -300,7 +300,7 @@ const ExportDynamicContent = ({
     lastExportTime: number;
     exportProgress: ExportProgress;
     pendingExports: EnteFile[];
-    collectionNameMap: Map<number, string>;
+    allCollectionsNameByID: Map<number, string>;
 }) => {
     switch (exportStage) {
         case ExportStage.INIT:
@@ -326,7 +326,7 @@ const ExportDynamicContent = ({
                     onHide={onHide}
                     lastExportTime={lastExportTime}
                     pendingExports={pendingExports}
-                    collectionNameMap={collectionNameMap}
+                    allCollectionsNameByID={allCollectionsNameByID}
                     onResync={() => startExport({ resync: true })}
                 />
             );

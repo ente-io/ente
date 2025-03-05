@@ -499,7 +499,6 @@
   "appLockOfflineModeWarning": "バックアップなしで進むことを選択しました。アプリロックを忘れると、データにアクセスできなくなります。",
   "duplicateCodes": "重複コード",
   "noDuplicates": "✨ 重複なし",
-  "youveNoDuplicateCodesThatCanBeCleared": "削除できる重複コードはありません",
   "deduplicateCodes": "重複コード",
   "deselectAll": "すべての選択を解除",
   "selectAll": "すべて選択",

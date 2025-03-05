@@ -200,10 +200,10 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
 
 class DraggableHeader extends StatelessWidget {
   const DraggableHeader({
-    Key? key,
+    super.key,
     required this.scrollController,
     required this.bottomSheetDraggableAreaHeight,
-  }) : super(key: key);
+  });
   static const indicatorHeight = 4.0;
   final ScrollController scrollController;
   final double bottomSheetDraggableAreaHeight;

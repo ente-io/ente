@@ -348,14 +348,6 @@ export function isValidReplacementAlbum(
     );
 }
 
-export function getCollectionNameMap(
-    collections: Collection[],
-): Map<number, string> {
-    return new Map<number, string>(
-        collections.map((collection) => [collection.id, collection.name]),
-    );
-}
-
 export const getOrCreateAlbum = async (
     albumName: string,
     existingCollections: Collection[],

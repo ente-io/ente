@@ -6,17 +6,14 @@ import {
     TranslucentLoadingOverlay,
 } from "@/base/components/loaders";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import {
-    genericErrorDialogAttributes,
-    useAttributedMiniDialog,
-} from "@/base/components/utils/dialog";
+import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
 import {
     useIsRouteChangeInProgress,
     useSetupI18n,
     useSetupLogs,
 } from "@/base/components/utils/hooks-app";
 import { photosTheme } from "@/base/components/utils/theme";
-import { BaseContext } from "@/base/context";
+import { BaseContext, deriveBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { logStartupBanner } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
@@ -53,7 +50,7 @@ import { photosLogout } from "services/logout";
 
 import "photoswipe/dist/photoswipe.css";
 // TODO(PS): Note, auto hide only works with the new CSS.
-// import "../../../../packages/new/photos/components/ps5/dist/photoswipe.css";
+// import "../../../../packages/gallery/components/viewer/ps5/dist/photoswipe.css";
 
 import "styles/global.css";
 
@@ -146,20 +143,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         });
     }, []);
 
-    const onGenericError = useCallback((e: unknown) => {
-        log.error(e);
-        // The generic error handler is sometimes called in the context of
-        // actions that were initiated by a confirmation dialog action handler
-        // themselves, then we need to let the current one close.
-        //
-        // See: [Note: Chained MiniDialogs]
-        setTimeout(() => {
-            showMiniDialog(genericErrorDialogAttributes());
-        }, 0);
-    }, []);
-
     const baseContext = useMemo(
-        () => ({ logout, showMiniDialog }),
+        () => deriveBaseContext({ logout, showMiniDialog }),
         [logout, showMiniDialog],
     );
     const appContext = useMemo(
@@ -168,19 +153,14 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             hideLoadingBar,
             watchFolderView,
             setWatchFolderView,
-            showMiniDialog,
             showNotification,
-            onGenericError,
-            logout,
         }),
         [
             showLoadingBar,
             hideLoadingBar,
             watchFolderView,
-            showMiniDialog,
+            setWatchFolderView,
             showNotification,
-            onGenericError,
-            logout,
         ],
     );
 

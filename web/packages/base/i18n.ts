@@ -33,6 +33,7 @@ export const supportedLocales = [
     "lt-LT" /* Lithuanian */,
     "uk-UA" /* Ukrainian */,
     "vi-VN" /* Vietnamese */,
+    "ja-JP" /* Japanese */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -134,6 +135,8 @@ export const setupI18n = async () => {
         // Value is an epoch microsecond so that we can directly pass the
         // timestamps we get from our API responses. The formatter expects
         // milliseconds, so divide by 1000.
+        //
+        // See [Note: Remote timestamps are epoch microseconds].
         return (val) => formatter.format(val / 1000);
     });
 };
@@ -190,6 +193,8 @@ const closestSupportedLocale = (
             return "uk-UA";
         } else if (ls.startsWith("vi")) {
             return "vi-VN";
+        } else if (ls.startsWith("ja")) {
+            return "ja-JP";
         }
     }
 

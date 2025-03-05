@@ -6,7 +6,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/events/signed_in_event.dart';
-import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/sync/sync_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PushService {

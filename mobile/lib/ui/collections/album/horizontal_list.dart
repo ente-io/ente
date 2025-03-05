@@ -17,8 +17,8 @@ class AlbumHorizontalList extends StatefulWidget {
   const AlbumHorizontalList(
     this.collectionsFuture, {
     this.hasVerifiedLock,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<AlbumHorizontalList> createState() => _AlbumHorizontalListState();

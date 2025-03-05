@@ -39,15 +39,10 @@ export interface MergedSourceURL {
 }
 
 export interface GalleryContextType {
-    showPlanSelectorModal: () => void;
     setActiveCollectionID: (collectionID: number) => void;
-    /** Newer and almost equivalent alternative to setActiveCollectionID. */
-    onShowCollection: (collectionID: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setBlockingLoad: (value: boolean) => void;
     photoListHeader: TimeStampListItem;
-    openExportModal: () => void;
-    authenticateUser: (callback: () => void) => void;
     user: User;
     userIDToEmailMap: Map<number, string>;
     emailList: string[];

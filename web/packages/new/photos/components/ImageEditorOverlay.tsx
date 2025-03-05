@@ -62,7 +62,7 @@ import React, {
     type RefObject,
 } from "react";
 
-type ImageEditorOverlayProps = ModalVisibilityProps & {
+export type ImageEditorOverlayProps = ModalVisibilityProps & {
     /**
      * The (Ente) file to edit.
      */

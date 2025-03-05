@@ -499,7 +499,6 @@
   "appLockOfflineModeWarning": "백업 없이 진행하는 것을 선택하셨습니다. App 잠금 방법을 잊어버리신 경우, 데이터에 접근하실 수 없게 됩니다.",
   "duplicateCodes": "중복된 코드",
   "noDuplicates": "✨ 중복 없음",
-  "youveNoDuplicateCodesThatCanBeCleared": "지울 수 있는 중복 코드가 없습니다",
   "deduplicateCodes": "중복된 코드 제거",
   "deselectAll": "모두 선택 해제",
   "selectAll": "모두 선택",

@@ -29,6 +29,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/video_memory_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
@@ -90,6 +91,8 @@ class _FileSelectionActionsWidgetState
   Collection? _cachedCollectionForSharedLink;
   final GlobalKey shareButtonKey = GlobalKey();
   final GlobalKey sendLinkButtonKey = GlobalKey();
+  final StreamController<double> _progressController =
+      StreamController<double>();
 
   @override
   void initState() {
@@ -106,6 +109,7 @@ class _FileSelectionActionsWidgetState
 
   @override
   void dispose() {
+    _progressController.close();
     widget.selectedFiles.removeListener(_selectFileChangeListener);
     super.dispose();
   }
@@ -317,6 +321,16 @@ class _FileSelectionActionsWidgetState
           labelText: S.of(context).createCollage,
           onTap: _onCreateCollageClicked,
           shouldShow: showCollageOption,
+        ),
+      );
+    }
+    if (flagService.internalUser &&
+        widget.type != GalleryType.sharedPublicCollection) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.movie_creation_sharp,
+          labelText: "(i) Video Memory",
+          onTap: _onCreateVideoMemoryClicked,
         ),
       );
     }
@@ -752,6 +766,12 @@ class _FileSelectionActionsWidgetState
     if (result != null && result) {
       widget.selectedFiles.clearAll();
     }
+  }
+
+  Future<void> _onCreateVideoMemoryClicked() async {
+    final List<EnteFile> selectedFiles = widget.selectedFiles.files.toList();
+    await createSlideshow(context, selectedFiles);
+    widget.selectedFiles.clearAll();
   }
 
   Future<Uint8List> _createPlaceholder(

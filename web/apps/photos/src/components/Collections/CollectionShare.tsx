@@ -17,6 +17,7 @@ import { Titlebar } from "@/base/components/Titlebar";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { sharedCryptoWorker } from "@/base/crypto";
+import { formattedDateTime } from "@/base/i18n-date";
 import log from "@/base/log";
 import { appendCollectionKeyToShareURL } from "@/gallery/services/share";
 import type {
@@ -34,7 +35,6 @@ import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
-import { formatDateTime } from "@ente/shared/time/format";
 import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import BlockIcon from "@mui/icons-material/Block";
@@ -1539,8 +1539,8 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                         isLinkExpired(publicShareProp?.validTill)
                             ? t("link_expired")
                             : publicShareProp?.validTill
-                              ? formatDateTime(
-                                    publicShareProp?.validTill / 1000,
+                              ? formattedDateTime(
+                                    publicShareProp.validTill / 1000,
                                 )
                               : t("never")
                     }

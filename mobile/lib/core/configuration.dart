@@ -3,6 +3,7 @@ import 'dart:convert';
 import "dart:io";
 
 import 'package:bip39/bip39.dart' as bip39;
+import "package:ente_crypto/ente_crypto.dart";
 import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
@@ -12,7 +13,7 @@ import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/db/memories_db.dart';
+import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
@@ -29,8 +30,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
-import 'package:photos/services/sync_service.dart';
-import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
@@ -248,7 +248,7 @@ class Configuration {
     // decrypt the master key
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
     final derivedKeyResult = await CryptoUtil.deriveSensitiveKey(
-      utf8.encode(password) as Uint8List,
+      utf8.encode(password),
       kekSalt,
     );
     final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
@@ -294,7 +294,7 @@ class Configuration {
     // decrypt the master key
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
     final derivedKeyResult = await CryptoUtil.deriveSensitiveKey(
-      utf8.encode(password) as Uint8List,
+      utf8.encode(password),
       kekSalt,
     );
     final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
@@ -332,7 +332,7 @@ class Configuration {
     // Derive key-encryption-key from the entered password and existing
     // mem and ops limits
     keyEncryptionKey ??= await CryptoUtil.deriveKey(
-      utf8.encode(password) as Uint8List,
+      utf8.encode(password),
       CryptoUtil.base642bin(attributes.kekSalt),
       attributes.memLimit!,
       attributes.opsLimit!,

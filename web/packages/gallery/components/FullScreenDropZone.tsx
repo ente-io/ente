@@ -1,14 +1,11 @@
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton, Stack, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
-import type { DropzoneState } from "react-dropzone";
+import { type FileWithPath, useDropzone } from "react-dropzone";
 
 interface FullScreenDropZoneProps {
-    /**
-     * The `getRootProps` function returned by a call to {@link useDropzone}.
-     */
-    getDragAndDropRootProps: DropzoneState["getRootProps"];
     /**
      * Optional override to the message show to the user when a drag is in
      * progress.
@@ -16,6 +13,16 @@ interface FullScreenDropZoneProps {
      * Default: t("upload_dropzone_hint")
      */
     message?: string;
+    /**
+     * If `true`, then drag and drop functionality is disabled.
+     */
+    disabled?: boolean;
+    /**
+     * Callback invoked when the user drags and drops files.
+     *
+     * It will only be called if there is at least one file in {@link files}.
+     */
+    onDrop: (files: FileWithPath[]) => void;
 }
 
 /**
@@ -33,35 +40,82 @@ interface FullScreenDropZoneProps {
  */
 export const FullScreenDropZone: React.FC<
     React.PropsWithChildren<FullScreenDropZoneProps>
-> = ({ getDragAndDropRootProps, message, children }) => {
-    const [isDragActive, setIsDragActive] = useState(false);
+> = ({ message, disabled, onDrop, children }) => {
+    const {
+        // A function to call to get the props we should apply to the container,
+        getRootProps,
+        // ... the props we should apply to the <input> element,
+        getInputProps,
+    } = useDropzone({
+        noClick: true,
+        noKeyboard: true,
+        disabled,
+        onDrop(acceptedFiles) {
+            setIsDropPending(false);
+            // Invoked the `onDrop` callback only if there is at least 1 file.
+            if (acceptedFiles.length) {
+                // Create a regular array from the readonly array returned by
+                // dropzone.
+                onDrop([...acceptedFiles]);
+            }
+        },
+    });
 
-    const onDragEnter = useCallback(() => setIsDragActive(true), []);
-    const onDragLeave = useCallback(() => setIsDragActive(false), []);
+    const [isDragActive, setIsDragActive] = useState(false);
+    const [isDropPending, setIsDropPending] = useState(false);
+
+    const handleDragEnter = useCallback(() => {
+        setIsDragActive(true);
+    }, []);
+
+    const handleOverlayDrop = useCallback(() => {
+        setIsDropPending(true);
+        setIsDragActive(false);
+    }, []);
+
+    const handleDragLeave = useCallback(() => {
+        setIsDragActive(false);
+    }, []);
 
     useEffect(() => {
         const handleKeydown = (event: KeyboardEvent) => {
-            if (event.code == "Escape") onDragLeave();
+            if (event.code == "Escape" && !isDropPending) handleDragLeave();
         };
 
         window.addEventListener("keydown", handleKeydown);
         return () => window.removeEventListener("keydown", handleKeydown);
-    }, [onDragLeave]);
+    }, [isDropPending, handleDragLeave]);
 
     return (
-        <Stack sx={{ flex: 1 }} {...getDragAndDropRootProps({ onDragEnter })}>
-            {isDragActive && (
-                <DropZoneOverlay onDrop={onDragLeave} onDragLeave={onDragLeave}>
-                    <CloseButton onClick={onDragLeave}>
-                        <CloseIcon />
-                    </CloseButton>
-                    <Typography variant="h3">
-                        {message ?? t("upload_dropzone_hint")}
-                    </Typography>
-                </DropZoneOverlay>
-            )}
-            {children}
-        </Stack>
+        <>
+            <input {...getInputProps()} />
+            <Stack
+                sx={{ flex: 1 }}
+                {...getRootProps({ onDragEnter: handleDragEnter })}
+            >
+                {(isDragActive || isDropPending) && (
+                    <DropZoneOverlay
+                        onDrop={handleOverlayDrop}
+                        onDragLeave={handleDragLeave}
+                    >
+                        <CloseButton
+                            disabled={isDropPending}
+                            onClick={handleDragLeave}
+                        >
+                            <CloseIcon />
+                        </CloseButton>
+                        <Typography variant="h3">
+                            {isDropPending ? (
+                                <ActivityIndicator />
+                            ) : (
+                                (message ?? t("upload_dropzone_hint"))
+                            )}
+                        </Typography>
+                    </DropZoneOverlay>
+                )}
+                {children}
+            </Stack>
+        </>
     );
 };
 
@@ -80,6 +134,7 @@ const DropZoneOverlay = styled(Stack)(
     border-style: solid;
     border-color: ${theme.vars.palette.accent.light};
     background-color: ${theme.vars.palette.backdrop.base};
+    backdrop-filter: blur(10px);
     z-index: 2000; /* aboveFileViewerContentZ + delta */
 `,
 );

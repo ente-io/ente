@@ -205,7 +205,7 @@ func (c *Controller) ModifyMemberStorage(ctx context.Context, actorUserID int64,
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("can not limit admin storage"), "cannot modify admin storage limit")
 	}
 
-	if member.Status != ente.ACCEPTED && member.Status != ente.INVITED {
+	if member.Status != ente.ACCEPTED {
 		return stacktrace.Propagate(ente.ErrBadRequest, "user is not a part of family")
 	}
 

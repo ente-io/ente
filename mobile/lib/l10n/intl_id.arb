@@ -494,7 +494,6 @@
   "viewLargeFiles": "File berukuran besar",
   "viewLargeFilesDesc": "Tampilkan file yang paling besar mengonsumsi ruang penyimpanan.",
   "noDuplicates": "✨ Tak ada file duplikat",
-  "youveNoDuplicateFilesThatCanBeCleared": "Kamu tidak memiliki file duplikat yang dapat dihapus",
   "success": "Berhasil",
   "rateUs": "Beri kami nilai",
   "remindToEmptyDeviceTrash": "Kosongkan juga “Baru Dihapus” dari “Pengaturan” -> “Penyimpanan” untuk memperoleh ruang yang baru saja dibersihkan",
@@ -1131,6 +1130,5 @@
   "rotate": "Putar",
   "left": "Kiri",
   "right": "Kanan",
-  "whatsNew": "Hal yang baru",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "whatsNew": "Hal yang baru"
 }

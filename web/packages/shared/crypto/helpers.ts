@@ -1,6 +1,7 @@
 import { setRecoveryKey } from "@/accounts/services/user";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
+import { masterKeyFromSession } from "@/base/session";
 import {
     LS_KEYS,
     getData,
@@ -112,13 +113,12 @@ export const saveKeyInSessionStore = async (
     }
 };
 
-export async function encryptWithRecoveryKey(key: string) {
+export const encryptWithRecoveryKey = async (data: string) => {
     const cryptoWorker = await sharedCryptoWorker();
     const hexRecoveryKey = await getRecoveryKey();
     const recoveryKey = await cryptoWorker.fromHex(hexRecoveryKey);
-    const encryptedKey = await cryptoWorker.encryptToB64(key, recoveryKey);
-    return encryptedKey;
-}
+    return cryptoWorker.encryptBoxB64(data, recoveryKey);
+};
 
 export const getRecoveryKey = async () => {
     try {
@@ -181,3 +181,31 @@ async function createNewRecoveryKey() {
 
     return recoveryKey;
 }
+
+/**
+ * Decrypt the {@link encryptedChallenge} sent by remote during the delete
+ * account flow ({@link getAccountDeleteChallenge}), returning a value that can
+ * then directly be passed to the actual delete account request
+ * ({@link deleteAccount}).
+ */
+export const decryptDeleteAccountChallenge = async (
+    encryptedChallenge: string,
+) => {
+    const cryptoWorker = await sharedCryptoWorker();
+    const masterKey = await masterKeyFromSession();
+    const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+    const secretKey = await cryptoWorker.decryptBoxB64(
+        {
+            encryptedData: keyAttributes.encryptedSecretKey,
+            nonce: keyAttributes.secretKeyDecryptionNonce,
+        },
+        masterKey,
+    );
+    const b64DecryptedChallenge = await cryptoWorker.boxSealOpen(
+        encryptedChallenge,
+        keyAttributes.publicKey,
+        secretKey,
+    );
+    const utf8DecryptedChallenge = atob(b64DecryptedChallenge);
+    return utf8DecryptedChallenge;
+};

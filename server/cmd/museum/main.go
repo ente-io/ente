@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/collections"
 	"net/http"
 	"os"
 	"os/signal"
@@ -242,13 +243,14 @@ func main() {
 	)
 
 	usageController := &controller.UsageController{
-		BillingCtrl:      billingController,
-		StorageBonusCtrl: storageBonusCtrl,
-		UserCacheCtrl:    userCacheCtrl,
-		UsageRepo:        usageRepo,
-		UserRepo:         userRepo,
-		FamilyRepo:       familyRepo,
-		FileRepo:         fileRepo,
+		BillingCtrl:       billingController,
+		StorageBonusCtrl:  storageBonusCtrl,
+		UserCacheCtrl:     userCacheCtrl,
+		UsageRepo:         usageRepo,
+		UserRepo:          userRepo,
+		FamilyRepo:        familyRepo,
+		FileRepo:          fileRepo,
+		UploadResultCache: make(map[int64]bool),
 	}
 
 	accessCtrl := access.NewAccessController(collectionRepo, fileRepo)
@@ -305,7 +307,7 @@ func main() {
 		JwtSecret:             jwtSecretBytes,
 	}
 
-	collectionController := &controller.CollectionController{
+	collectionController := &collections.CollectionController{
 		CollectionRepo:       collectionRepo,
 		EmailCtrl:            emailNotificationCtrl,
 		AccessCtrl:           accessCtrl,
@@ -537,6 +539,7 @@ func main() {
 	//lint:ignore SA1019 Deprecated API will be removed in the future
 	privateAPI.GET("/collections", collectionHandler.Get)
 	privateAPI.GET("/collections/v2", collectionHandler.GetV2)
+	privateAPI.GET("/collections/v3", collectionHandler.GetWithLimit)
 	privateAPI.POST("/collections/share", collectionHandler.Share)
 	privateAPI.POST("/collections/join-link", collectionHandler.JoinLink)
 	privateAPI.POST("/collections/share-url", collectionHandler.ShareURL)
@@ -752,14 +755,7 @@ func main() {
 	pushHandler := &api.PushHandler{PushController: pushController}
 	privateAPI.POST("/push/token", pushHandler.AddToken)
 
-	embeddingController := embeddingCtrl.New(embeddingRepo, accessCtrl, objectCleanupController, s3Config, queueRepo, taskLockingRepo, fileRepo, collectionRepo, hostName)
-	embeddingHandler := &api.EmbeddingHandler{Controller: embeddingController}
-
-	privateAPI.PUT("/embeddings", embeddingHandler.InsertOrUpdate)
-	privateAPI.GET("/embeddings/diff", embeddingHandler.GetDiff)
-	privateAPI.GET("/embeddings/indexed-files", embeddingHandler.GetIndexedFiles)
-	privateAPI.POST("/embeddings/files", embeddingHandler.GetFilesEmbedding)
-	privateAPI.DELETE("/embeddings", embeddingHandler.DeleteAll)
+	embeddingController := embeddingCtrl.New(embeddingRepo, objectCleanupController, queueRepo, taskLockingRepo, fileRepo, hostName)
 
 	offerHandler := &api.OfferHandler{Controller: offerController}
 	publicAPI.GET("/offers/black-friday", offerHandler.GetBlackFridayOffers)

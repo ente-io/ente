@@ -7,7 +7,7 @@ import 'package:photos/db/memories_db.dart';
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/filters/important_items_filter.dart';
-import 'package:photos/models/memory.dart';
+import 'package:photos/models/memories/memory.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:shared_preferences/shared_preferences.dart";

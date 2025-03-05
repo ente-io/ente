@@ -19,7 +19,7 @@ import 'package:photos/ui/tools/debug/path_storage_viewer.dart';
 import 'package:photos/utils/directory_content.dart';
 
 class AppStorageViewer extends StatefulWidget {
-  const AppStorageViewer({Key? key}) : super(key: key);
+  const AppStorageViewer({super.key});
 
   @override
   State<AppStorageViewer> createState() => _AppStorageViewerState();

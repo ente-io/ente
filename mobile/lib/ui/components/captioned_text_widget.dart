@@ -15,8 +15,8 @@ class CaptionedTextWidget extends StatelessWidget {
     this.makeTextBold = false,
     this.textColor,
     this.subTitleColor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

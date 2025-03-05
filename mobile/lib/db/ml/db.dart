@@ -1196,22 +1196,6 @@ class MLDataDB extends IMLDataDB<int> {
     return _convertToVectors(results);
   }
 
-  @override
-  Future<Map<int, EmbeddingVector>> getClipVectorsForFileIDs(
-    Iterable<int> fileIDs,
-  ) async {
-    final db = await MLDataDB.instance.asyncDB;
-    final results = await db.getAll(
-      'SELECT * FROM $clipTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})',
-    );
-    final Map<int, EmbeddingVector> embeddings = {};
-    for (final result in results) {
-      final embedding = _getVectorFromRow(result);
-      embeddings[embedding.fileID] = embedding;
-    }
-    return embeddings;
-  }
-
   // Get indexed FileIDs
   @override
   Future<Map<int, int>> clipIndexedFileWithVersion() async {

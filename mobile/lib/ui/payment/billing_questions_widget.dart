@@ -8,8 +8,8 @@ import 'package:photos/ui/common/loading_widget.dart';
 
 class BillingQuestionsWidget extends StatelessWidget {
   const BillingQuestionsWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -62,9 +62,9 @@ class BillingQuestionsWidget extends StatelessWidget {
 
 class FaqWidget extends StatelessWidget {
   const FaqWidget({
-    Key? key,
+    super.key,
     required this.faq,
-  }) : super(key: key);
+  });
 
   final FaqItem? faq;
 

@@ -10,7 +10,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 class AppUpdateDialog extends StatefulWidget {
   final LatestVersionInfo? latestVersionInfo;
 
-  const AppUpdateDialog(this.latestVersionInfo, {Key? key}) : super(key: key);
+  const AppUpdateDialog(this.latestVersionInfo, {super.key});
 
   @override
   State<AppUpdateDialog> createState() => _AppUpdateDialogState();

@@ -10,7 +10,7 @@ import { t } from "i18next";
 interface Iprops {
     isOpen: boolean;
     onClose: () => void;
-    collectionNameMap: Map<number, string>;
+    allCollectionsNameByID: Map<number, string>;
     pendingExports: EnteFile[];
 }
 
@@ -36,7 +36,7 @@ const ExportPendingList = (props: Iprops) => {
                     />
                 </Box>
                 <ItemContainer>
-                    {`${props.collectionNameMap.get(file.collectionID)} / ${
+                    {`${props.allCollectionsNameByID.get(file.collectionID)} / ${
                         file.metadata.title
                     }`}
                 </ItemContainer>
@@ -45,7 +45,7 @@ const ExportPendingList = (props: Iprops) => {
     };
 
     const getItemTitle = (file: EnteFile) => {
-        return `${props.collectionNameMap.get(file.collectionID)} / ${
+        return `${props.allCollectionsNameByID.get(file.collectionID)} / ${
             file.metadata.title
         }`;
     };
@@ -59,7 +59,7 @@ const ExportPendingList = (props: Iprops) => {
             open={props.isOpen}
             onClose={props.onClose}
             paperMaxWidth="444px"
-            title={t("PENDING_ITEMS")}
+            title={t("pending_items")}
         >
             <ItemList
                 maxHeight={240}

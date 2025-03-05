@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:ente_crypto/ente_crypto.dart';
 import "package:fast_base58/fast_base58.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
@@ -18,7 +19,6 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import 'package:photos/ui/sharing/pickers/device_limit_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/link_expiry_picker_page.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -328,7 +328,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   Future<Map<String, dynamic>> _getEncryptedPassword(String pass) async {
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
     final result = await CryptoUtil.deriveInteractiveKey(
-      utf8.encode(pass) as Uint8List,
+      utf8.encode(pass),
       kekSalt,
     );
     return {

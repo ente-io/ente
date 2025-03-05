@@ -11,7 +11,7 @@ import {
 import { useBaseContext } from "@/base/context";
 import { isHTTP401Error } from "@/base/http";
 import log from "@/base/log";
-import { masterKeyFromSessionIfLoggedIn } from "@/base/session-store";
+import { masterKeyFromSessionIfLoggedIn } from "@/base/session";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
@@ -217,12 +217,14 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
                     <Snackbar
                         open={openCopied}
                         message={t("copied")}
-                        ContentProps={{
-                            sx: (theme) => ({
-                                backgroundColor: theme.vars.palette.fill.faint,
-                                color: theme.vars.palette.primary.main,
-                                backdropFilter: "blur(10px)",
-                            }),
+                        slotProps={{
+                            content: {
+                                sx: {
+                                    backgroundColor: "fill.faint",
+                                    color: "primary.main",
+                                    backdropFilter: "blur(10px)",
+                                },
+                            },
                         }}
                     />
                 </ButtonBase>

@@ -5,7 +5,7 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:photos/core/configuration.dart";
-import "package:photos/models/memory.dart";
+import "package:photos/models/memories/memory.dart";
 import "package:photos/services/memories_service.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -96,9 +96,9 @@ class FullScreenMemoryData extends InheritedWidget {
     required this.memories,
     required this.indexNotifier,
     required this.removeCurrentMemory,
-    required Widget child,
-    Key? key,
-  }) : super(child: child, key: key);
+    required super.child,
+    super.key,
+  });
 
   static FullScreenMemoryData? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<FullScreenMemoryData>();

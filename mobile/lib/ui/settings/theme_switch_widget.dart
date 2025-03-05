@@ -9,7 +9,7 @@ import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
-  const ThemeSwitchWidget({Key? key}) : super(key: key);
+  const ThemeSwitchWidget({super.key});
 
   @override
   State<ThemeSwitchWidget> createState() => _ThemeSwitchWidgetState();

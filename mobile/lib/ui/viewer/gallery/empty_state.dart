@@ -5,7 +5,7 @@ import "package:photos/generated/l10n.dart";
 class EmptyState extends StatelessWidget {
   final String? text;
 
-  const EmptyState({Key? key, this.text}) : super(key: key);
+  const EmptyState({super.key, this.text});
 
   @override
   Widget build(BuildContext context) {

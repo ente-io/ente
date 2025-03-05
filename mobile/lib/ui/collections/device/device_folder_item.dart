@@ -13,8 +13,8 @@ class DeviceFolderItem extends StatelessWidget {
     this.deviceCollection, {
     ///120 is default for the 'on device' scrollview in albums section
     this.sideOfThumbnail = 120,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -499,7 +499,7 @@
   "appLockOfflineModeWarning": "Wybrano kontynuowanie bez kopii zapasowych. Jeśli zapomnisz blokady aplikacji, utracisz dostęp do swoich danych.",
   "duplicateCodes": "Zduplikowane kody",
   "noDuplicates": "✨ Brak duplikatów",
-  "youveNoDuplicateCodesThatCanBeCleared": "Nie masz duplikatów kodów, które mogą być wyczyszczone",
+  "youveNoDuplicateCodesThatCanBeCleared": "Nie masz żadnych duplikatów kodów do usunięcia",
   "deduplicateCodes": "Deduplikuj kody",
   "deselectAll": "Odznacz wszystko",
   "selectAll": "Zaznacz wszystko",

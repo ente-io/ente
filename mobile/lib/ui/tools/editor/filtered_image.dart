@@ -9,8 +9,8 @@ class FilteredImage extends StatelessWidget {
     this.brightness,
     this.saturation,
     this.hue,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final double? brightness, saturation, hue;
   final Widget child;

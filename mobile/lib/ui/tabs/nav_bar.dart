@@ -6,7 +6,7 @@ import "package:photos/theme/effects.dart";
 
 class GNav extends StatefulWidget {
   const GNav({
-    Key? key,
+    super.key,
     this.tabs,
     this.selectedIndex = 0,
     this.onTabChange,
@@ -31,7 +31,7 @@ class GNav extends StatefulWidget {
     this.haptic,
     this.tabBackgroundGradient,
     this.mainAxisAlignment = MainAxisAlignment.spaceBetween,
-  }) : super(key: key);
+  });
 
   final List<GButton>? tabs;
   final int selectedIndex;
@@ -159,7 +159,7 @@ class GButton extends StatefulWidget {
   final String? semanticLabel;
 
   const GButton({
-    Key? key,
+    super.key,
     this.active,
     this.haptic,
     this.backgroundColor,
@@ -186,7 +186,7 @@ class GButton extends StatefulWidget {
     this.activeBorder,
     this.shadow,
     this.semanticLabel,
-  }) : super(key: key);
+  });
 
   @override
   State<GButton> createState() => _GButtonState();
@@ -229,7 +229,7 @@ class _GButtonState extends State<GButton> {
 
 class Button extends StatefulWidget {
   const Button({
-    Key? key,
+    super.key,
     this.icon,
     this.iconSize,
     this.leading,
@@ -252,7 +252,7 @@ class Button extends StatefulWidget {
     this.border,
     this.activeBorder,
     this.shadow,
-  }) : super(key: key);
+  });
 
   final IconData? icon;
   final double? iconSize;

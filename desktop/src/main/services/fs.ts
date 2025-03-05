@@ -24,6 +24,12 @@ export const fsReadTextFile = async (filePath: string) =>
 export const fsWriteFile = (path: string, contents: string) =>
     fs.writeFile(path, contents, { flush: true });
 
+export const fsWriteFileViaBackup = async (path: string, contents: string) => {
+    const backupPath = path + ".backup";
+    await fs.writeFile(backupPath, contents, { flush: true });
+    return fs.rename(backupPath, path);
+};
+
 export const fsIsDir = async (dirPath: string) => {
     if (!existsSync(dirPath)) return false;
     const stat = await fs.stat(dirPath);

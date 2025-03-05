@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/opened_settings_event.dart';
 import 'package:photos/models/user_details.dart';
-import 'package:photos/services/user_service.dart';
+import 'package:photos/services/account/user_service.dart';
 
 class UserDetailsStateWidget extends StatefulWidget {
   final Widget child;
 
   const UserDetailsStateWidget({
     required this.child,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<UserDetailsStateWidget> createState() => UserDetailsStateWidgetState();
@@ -65,12 +65,12 @@ class InheritedUserDetails extends InheritedWidget {
   final bool isCached;
 
   const InheritedUserDetails({
-    Key? key,
-    required Widget child,
+    super.key,
+    required super.child,
     required this.userDetails,
     required this.isCached,
     required this.userDetailsState,
-  }) : super(key: key, child: child);
+  });
 
   static InheritedUserDetails? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<InheritedUserDetails>();

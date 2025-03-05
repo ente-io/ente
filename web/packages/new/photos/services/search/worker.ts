@@ -1,10 +1,14 @@
 import { HTTPError } from "@/base/http";
+import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
-import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
+import {
+    fileCreationPhotoDate,
+    fileLocation,
+    filePublicMagicMetadata,
+} from "@/media/file-metadata";
 import { nullToUndefined } from "@/utils/transform";
-import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import type { Component } from "chrono-node";
 import * as chrono from "chrono-node";
 import { expose } from "comlink";
@@ -112,6 +116,8 @@ export class SearchWorker {
 }
 
 expose(SearchWorker);
+
+logUnhandledErrorsAndRejectionsInWorker();
 
 /**
  * @param s The normalized form of {@link searchString}.
@@ -380,7 +386,7 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
         case "date":
             return isDateComponentsMatch(
                 suggestion.dateComponents,
-                fileCreationPhotoDate(file, getPublicMagicMetadataSync(file)),
+                fileCreationPhotoDate(file, filePublicMagicMetadata(file)),
             );
 
         case "location": {

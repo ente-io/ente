@@ -1,5 +1,6 @@
 import "dart:convert";
 
+import "package:ente_crypto/ente_crypto.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -10,7 +11,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/user/key_attributes.dart";
 import "package:photos/models/api/user/set_keys_request.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
-import "package:photos/utils/crypto_util.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -325,7 +325,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
       // decrypt the master key
       final kekSalt = CryptoUtil.getSaltToDeriveKey();
       final derivedKeyResult = await CryptoUtil.deriveSensitiveKey(
-        utf8.encode(password) as Uint8List,
+        utf8.encode(password),
         kekSalt,
       );
       final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);

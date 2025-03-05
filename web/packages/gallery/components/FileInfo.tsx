@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* TODO: Audit this file
 Plan of action:
 - Move common components into FileInfoComponents.tsx
@@ -9,39 +6,45 @@ Plan of action:
 - Move the rest out to files in the apps themeselves: albums/SharedFileInfo
   and photos/FileInfo to deal with the @/new/photos imports here.
 */
-/* @ts-nocheck */
 
+import { assertionFailed } from "@/base/assert";
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
-import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import { SingleInputForm } from "@/base/components/SingleInputForm";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
-import { useModalVisibility } from "@/base/components/utils/modal";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { haveWindow } from "@/base/env";
 import { nameAndExtension } from "@/base/file-name";
+import { formattedDate, formattedTime } from "@/base/i18n-date";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
 import { CopyButton } from "@/gallery/components/FileInfoComponents";
+import { tagNumericValue, type RawExifTags } from "@/gallery/services/exif";
 import {
     changeCaption,
     changeFileName,
     updateExistingFilePubMetadata,
 } from "@/gallery/services/file";
+import { formattedByteSize } from "@/gallery/utils/units";
 import { type EnteFile } from "@/media/file";
-import type { ParsedMetadata } from "@/media/file-metadata";
 import {
     fileCreationPhotoDate,
     fileLocation,
+    filePublicMagicMetadata,
     updateRemotePublicMagicMetadata,
+    type ParsedMetadata,
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import { ChipButton } from "@/new/photos/components/mui/ChipButton";
+import { FileDateTimePicker } from "@/new/photos/components/FileDateTimePicker";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
-import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
@@ -51,20 +54,12 @@ import {
     aboveFileViewerContentZ,
     fileInfoDrawerZ,
 } from "@/new/photos/components/utils/z-index";
-import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
     getAnnotatedFacesForFile,
     isMLEnabled,
     type AnnotatedFaceID,
 } from "@/new/photos/services/ml";
 import { updateMapEnabled } from "@/new/photos/services/settings";
-import { formattedByteSize } from "@/new/photos/utils/units";
-import { FlexWrapper } from "@ente/shared/components/Container";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
-import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
-import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -78,80 +73,111 @@ import TextSnippetOutlinedIcon from "@mui/icons-material/TextSnippetOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import {
     Box,
+    Button,
     CircularProgress,
+    Dialog,
+    DialogContent,
+    DialogTitle,
     IconButton,
+    InputAdornment,
     Link,
     Stack,
     styled,
     TextField,
     Typography,
+    type ButtonProps,
     type DialogProps,
 } from "@mui/material";
-import { Formik } from "formik";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import * as Yup from "yup";
 
 // Re-uses images from ~leaflet package.
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
 import "leaflet/dist/leaflet.css";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unused-expressions
 haveWindow() && require("leaflet-defaulticon-compatibility");
 const leaflet = haveWindow()
     ? // eslint-disable-next-line @typescript-eslint/no-require-imports
       (require("leaflet") as typeof import("leaflet"))
     : null;
 
+/**
+ * Exif data for a file, in a form suitable for use by {@link FileInfo}.
+ *
+ * TODO: Indicate missing exif (e.g. videos) better, both in the data type, and
+ * in the UI (e.g. by omitting the entire row).
+ */
 export interface FileInfoExif {
     tags: RawExifTags | undefined;
     parsed: ParsedMetadata | undefined;
 }
 
-export interface FileInfoProps {
+export type FileInfoProps = ModalVisibilityProps & {
     /**
      * The file whose information we are showing.
      */
     file: EnteFile | undefined;
-    showInfo: boolean;
-    handleCloseInfo: () => void;
+    /**
+     * Exif information for {@link file}.
+     */
     exif: FileInfoExif | undefined;
     /**
-     * TODO: Rename and flip to allowEdits.
+     * If set, then controls to edit the file's metadata (name, date, caption)
+     * will be shown.
      */
-    shouldDisableEdits: boolean;
+    allowEdits?: boolean;
     /**
-     * If `true`, an inline map will be shown (if the user has enabled it) using
-     * the file's location.
+     * If set, then an inline map will be shown (if the user has enabled it)
+     * using the file's location.
      */
-    allowMap: boolean;
+    allowMap?: boolean;
+    /**
+     * If set, then a clickable chip will be shown for each collection that this
+     * file is a part of.
+     *
+     * Uses {@link fileCollectionIDs}, {@link allCollectionsNameByID} and
+     * {@link onSelectCollection}, so all of those props should also be set for
+     * this to have an effect.
+     */
+    showCollections?: boolean;
+    /**
+     * A map from file IDs to the IDs of the collections that they're a part of.
+     *
+     * Used when {@link showCollections} is set.
+     */
+    fileCollectionIDs?: Map<number, number[]>;
+    /**
+     * A map from collection IDs to their name.
+     *
+     * Used when {@link showCollections} is set.
+     */
+    allCollectionsNameByID?: Map<number, string>;
     scheduleUpdate: () => void;
     refreshPhotoswipe: () => void;
-    fileToCollectionsMap?: Map<number, number[]>;
-    collectionNameMap?: Map<number, string>;
-    showCollectionChips: boolean;
     /**
      * Called when the user selects a collection from among the collections that
      * the file belongs to.
      */
-    onSelectCollection: (collectionID: number) => void;
+    onSelectCollection?: (collectionID: number) => void;
     /**
      * Called when the user selects a person in the file info panel.
      */
-    onSelectPerson?: ((personID: string) => void) | undefined;
-}
+    onSelectPerson?: (personID: string) => void;
+};
 
 export const FileInfo: React.FC<FileInfoProps> = ({
+    open,
+    onClose,
     file,
-    shouldDisableEdits,
-    allowMap,
-    showInfo,
-    handleCloseInfo,
     exif,
+    allowEdits,
+    allowMap,
+    showCollections,
+    fileCollectionIDs,
+    allCollectionsNameByID,
     scheduleUpdate,
     refreshPhotoswipe,
-    fileToCollectionsMap,
-    collectionNameMap,
-    showCollectionChips,
     onSelectCollection,
     onSelectPerson,
 }) => {
@@ -159,41 +185,33 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     const { mapEnabled } = useSettingsSnapshot();
 
-    const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
-    const { show: showRawExif, props: rawExifVisibilityProps } =
-        useModalVisibility();
     const [annotatedFaces, setAnnotatedFaces] = useState<AnnotatedFaceID[]>([]);
 
-    const location = useMemo(() => {
-        if (file) {
-            const location = fileLocation(file);
-            if (location) return location;
-        }
-        return exif?.parsed?.location;
-    }, [file, exif]);
+    const { show: showRawExif, props: rawExifVisibilityProps } =
+        useModalVisibility();
+
+    const location = useMemo(
+        // Prefer the location in the EnteFile, then fall back to Exif.
+        () => (file ? fileLocation(file) : undefined) ?? exif?.parsed?.location,
+        [file, exif],
+    );
+
+    const annotatedExif = useMemo(() => annotateExif(exif), [exif]);
 
     useEffect(() => {
         if (!file) return;
+        if (!isMLEnabled()) return;
 
         let didCancel = false;
 
-        void (async () => {
-            const result = await getAnnotatedFacesForFile(file);
-            !didCancel && setAnnotatedFaces(result);
-        })();
+        void getAnnotatedFacesForFile(file).then(
+            (faces) => !didCancel && setAnnotatedFaces(faces),
+        );
 
         return () => {
             didCancel = true;
         };
     }, [file]);
-
-    useEffect(() => {
-        setExifInfo(parseExifInfo(exif));
-    }, [exif]);
-
-    if (!file) {
-        return <></>;
-    }
 
     const openEnableMapConfirmationDialog = () =>
         showMiniDialog(
@@ -208,39 +226,37 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     const handleSelectFace = ({ personID }: AnnotatedFaceID) =>
         onSelectPerson?.(personID);
 
+    if (!file) {
+        if (open) assertionFailed();
+        return <></>;
+    }
+
     return (
-        <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
-            <Titlebar onClose={handleCloseInfo} title={t("info")} backIsClose />
+        <FileInfoSidebar {...{ open, onClose }}>
+            <Titlebar onClose={onClose} title={t("info")} backIsClose />
             <Stack sx={{ pt: 1, pb: 3, gap: "20px" }}>
-                <RenderCaption
+                <Caption
                     {...{
                         file,
-                        shouldDisableEdits,
+                        allowEdits,
                         scheduleUpdate,
                         refreshPhotoswipe,
                     }}
                 />
-
-                <CreationTime
-                    {...{ file, shouldDisableEdits, scheduleUpdate }}
+                <CreationTime {...{ file, allowEdits, scheduleUpdate }} />
+                <FileName
+                    {...{ file, annotatedExif, allowEdits, scheduleUpdate }}
                 />
 
-                <RenderFileName
-                    {...{
-                        file,
-                        exifInfo: exifInfo,
-                        shouldDisableEdits,
-                        scheduleUpdate,
-                    }}
-                />
-
-                {exifInfo?.takenOnDevice && (
+                {annotatedExif?.takenOnDevice && (
                     <InfoItem
                         icon={<CameraOutlinedIcon />}
-                        title={exifInfo?.takenOnDevice}
-                        caption={
-                            <BasicDeviceCamera {...{ parsedExif: exifInfo }} />
-                        }
+                        title={annotatedExif.takenOnDevice}
+                        caption={createMultipartCaption(
+                            annotatedExif.fNumber,
+                            annotatedExif.exposureTime,
+                            annotatedExif.iso,
+                        )}
                     />
                 )}
 
@@ -302,7 +318,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         )
                     }
                 />
-                {isMLEnabled() && annotatedFaces.length > 0 && (
+                {annotatedFaces.length > 0 && (
                     <InfoItem icon={<FaceRetouchingNaturalIcon />}>
                         <FilePeopleList
                             file={file}
@@ -311,39 +327,23 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         />
                     </InfoItem>
                 )}
-                {showCollectionChips && collectionNameMap && (
-                    <InfoItem icon={<FolderOutlinedIcon />}>
-                        <Stack
-                            direction="row"
-                            sx={{
-                                gap: 1,
-                                flexWrap: "wrap",
-                                justifyContent: "flex-start",
-                                alignItems: "flex-start",
+                {showCollections &&
+                    fileCollectionIDs &&
+                    allCollectionsNameByID &&
+                    onSelectCollection && (
+                        <Albums
+                            {...{
+                                file,
+                                fileCollectionIDs,
+                                allCollectionsNameByID,
+                                onSelectCollection,
                             }}
-                        >
-                            {fileToCollectionsMap
-                                ?.get(file.id)
-                                ?.filter((collectionID) =>
-                                    collectionNameMap.has(collectionID),
-                                )
-                                ?.map((collectionID) => (
-                                    <ChipButton
-                                        key={collectionID}
-                                        onClick={() =>
-                                            onSelectCollection(collectionID)
-                                        }
-                                    >
-                                        {collectionNameMap.get(collectionID)}
-                                    </ChipButton>
-                                ))}
-                        </Stack>
-                    </InfoItem>
-                )}
+                        />
+                    )}
             </Stack>
             <RawExif
                 {...rawExifVisibilityProps}
-                onInfoClose={handleCloseInfo}
+                onInfoClose={onClose}
                 tags={exif?.tags}
                 fileName={file.metadata.title}
             />
@@ -355,7 +355,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
  * Some immediate fields of interest, in the form that we want to display on the
  * info panel for a file.
  */
-type ExifInfo = Required<FileInfoExif> & {
+type AnnotatedExif = Required<FileInfoExif> & {
     resolution?: string;
     megaPixels?: string;
     takenOnDevice?: string;
@@ -364,13 +364,13 @@ type ExifInfo = Required<FileInfoExif> & {
     iso?: string;
 };
 
-const parseExifInfo = (
+const annotateExif = (
     fileInfoExif: FileInfoExif | undefined,
-): ExifInfo | undefined => {
+): AnnotatedExif | undefined => {
     if (!fileInfoExif || !fileInfoExif.tags || !fileInfoExif.parsed)
         return undefined;
 
-    const info: ExifInfo = { ...fileInfoExif };
+    const info: AnnotatedExif = { ...fileInfoExif };
 
     const { width, height } = fileInfoExif.parsed;
     if (width && height) {
@@ -395,12 +395,22 @@ const parseExifInfo = (
         if (exif.ISOSpeedRatings)
             info.iso = `ISO${tagNumericValue(exif.ISOSpeedRatings)}`;
     }
+
     return info;
 };
 
 const FileInfoSidebar = styled(
     (props: Pick<DialogProps, "open" | "onClose" | "children">) => (
-        <SidebarDrawer {...props} anchor="right" />
+        <SidebarDrawer
+            {...props}
+            anchor="right"
+            // See: [Note: Overzealous Chrome? Complicated ARIA?], but this time
+            // with a different workaround.
+            //
+            // https://github.com/mui/material-ui/issues/43106#issuecomment-2514637251
+            disableRestoreFocus={true}
+            closeAfterTransition={true}
+        />
     ),
 )(({ theme }) => ({
     zIndex: fileInfoDrawerZ,
@@ -460,26 +470,22 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
         sx={{ alignItems: "flex-start", flex: 1, gap: "12px" }}
     >
         <InfoItemIconContainer>{icon}</InfoItemIconContainer>
-        <Box sx={{ flex: 1, mt: "4px" }}>
-            {children ? (
-                children
-            ) : (
-                <>
-                    <Typography sx={{ wordBreak: "break-all" }}>
-                        {title}
-                    </Typography>
-                    <Typography
-                        variant="small"
-                        {...(typeof caption == "string"
-                            ? {}
-                            : { component: "div" })}
-                        sx={{ color: "text.muted" }}
-                    >
-                        {caption}
-                    </Typography>
-                </>
-            )}
-        </Box>
+        {children ? (
+            <Box sx={{ flex: 1, mt: "4px" }}>{children}</Box>
+        ) : (
+            <Stack sx={{ flex: 1, mt: "4px", gap: "4px" }}>
+                <Typography sx={{ wordBreak: "break-all" }}>{title}</Typography>
+                <Typography
+                    variant="small"
+                    {...(typeof caption == "string"
+                        ? {}
+                        : { component: "div" })}
+                    sx={{ color: "text.muted" }}
+                >
+                    {caption}
+                </Typography>
+            </Stack>
+        )}
         {trailingButton}
     </Stack>
 );
@@ -512,362 +518,320 @@ const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
     </IconButton>
 );
 
-interface RenderCaptionFormValues {
-    caption: string;
-}
-
-function RenderCaption({
-    file,
-    scheduleUpdate,
-    refreshPhotoswipe,
-    shouldDisableEdits,
-}: {
-    shouldDisableEdits: boolean;
-    /* TODO: This is DisplayFile, but that's meant to be deprecated */
+type CaptionProps = Pick<
+    FileInfoProps,
+    "allowEdits" | "scheduleUpdate" | "refreshPhotoswipe"
+> & {
+    /* TODO(PS): This is DisplayFile, but that's meant to be removed */
     file: EnteFile & {
         title?: string;
     };
-    scheduleUpdate: () => void;
-    refreshPhotoswipe: () => void;
-}) {
-    const [caption, setCaption] = useState(
-        file?.pubMagicMetadata?.data.caption,
-    );
+};
 
-    const [loading, setLoading] = useState(false);
+const Caption: React.FC<CaptionProps> = ({
+    file,
+    allowEdits,
+    scheduleUpdate,
+    refreshPhotoswipe,
+}) => {
+    const [isSaving, setIsSaving] = useState(false);
 
-    const saveEdits = async (newCaption: string) => {
-        try {
-            if (file) {
-                if (caption === newCaption) {
-                    return;
-                }
-                setCaption(newCaption);
+    const caption = file.pubMagicMetadata?.data.caption ?? "";
 
+    const formik = useFormik<{ caption: string }>({
+        initialValues: { caption },
+        validate: ({ caption }) =>
+            caption.length > 5000
+                ? { caption: t("caption_character_limit") }
+                : {},
+        onSubmit: async ({ caption: newCaption }, { setFieldError }) => {
+            if (newCaption == caption) return;
+            setIsSaving(true);
+            try {
                 const updatedFile = await changeCaption(file, newCaption);
                 updateExistingFilePubMetadata(file, updatedFile);
                 // @ts-ignore
                 file.title = file.pubMagicMetadata.data.caption;
-                refreshPhotoswipe();
-                scheduleUpdate();
+            } catch (e) {
+                log.error("Failed to update caption", e);
+                setFieldError("caption", t("generic_error"));
             }
-        } catch (e) {
-            log.error("failed to update caption", e);
-        }
-    };
+            refreshPhotoswipe();
+            scheduleUpdate();
+            setIsSaving(false);
+        },
+    });
 
-    const onSubmit = async (values: RenderCaptionFormValues) => {
-        try {
-            setLoading(true);
-            await saveEdits(values.caption);
-        } finally {
-            setLoading(false);
-        }
-    };
-    if (!caption?.length && shouldDisableEdits) {
+    const { values, errors, handleChange, handleSubmit, resetForm } = formik;
+
+    if (!caption.length && !allowEdits) {
         return <></>;
     }
+
     return (
-        <Box sx={{ p: 1 }}>
-            <Formik<RenderCaptionFormValues>
-                // @ts-ignore
-                initialValues={{ caption }}
-                validationSchema={Yup.object().shape({
-                    caption: Yup.string().max(
-                        5000,
-                        t("caption_character_limit"),
-                    ),
-                })}
-                validateOnBlur={false}
-                onSubmit={onSubmit}
-            >
-                {({
-                    values,
-                    errors,
-                    handleChange,
-                    handleSubmit,
-                    resetForm,
-                }) => (
-                    <form noValidate onSubmit={handleSubmit}>
-                        <TextField
-                            hiddenLabel
-                            fullWidth
-                            id="caption"
-                            name="caption"
-                            type="text"
-                            multiline
-                            placeholder={t("caption_placeholder")}
-                            value={values.caption}
-                            onChange={handleChange("caption")}
-                            error={Boolean(errors.caption)}
-                            helperText={errors.caption}
-                            disabled={loading || shouldDisableEdits}
-                        />
-                        {values.caption !== caption && (
-                            <FlexWrapper justifyContent={"flex-end"}>
-                                <IconButton type="submit" disabled={loading}>
-                                    {loading ? (
-                                        <CircularProgress
-                                            size={"18px"}
-                                            color="inherit"
-                                        />
-                                    ) : (
-                                        <DoneIcon />
-                                    )}
-                                </IconButton>
-                                <IconButton
-                                    onClick={() =>
-                                        resetForm({
-                                            values: { caption: caption ?? "" },
-                                            touched: { caption: false },
-                                        })
-                                    }
-                                    disabled={loading}
-                                >
-                                    <CloseIcon />
-                                </IconButton>
-                            </FlexWrapper>
+        <CaptionForm onSubmit={handleSubmit}>
+            <TextField
+                id="caption"
+                name="caption"
+                type="text"
+                multiline
+                aria-label={t("description")}
+                hiddenLabel
+                fullWidth
+                placeholder={t("caption_placeholder")}
+                value={values.caption}
+                onChange={handleChange("caption")}
+                error={!!errors.caption}
+                helperText={errors.caption}
+                disabled={!allowEdits || isSaving}
+            />
+            {values.caption != caption && (
+                <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
+                    <IconButton
+                        type="submit"
+                        disabled={isSaving}
+                        // Prevent layout shift when we're showing progress.
+                        sx={{ minWidth: "48px" }}
+                    >
+                        {isSaving ? (
+                            <CircularProgress size="18px" color="inherit" />
+                        ) : (
+                            <DoneIcon />
                         )}
-                    </form>
-                )}
-            </Formik>
-        </Box>
-    );
-}
-
-interface CreationTimeProps {
-    file: EnteFile;
-    shouldDisableEdits: boolean;
-    scheduleUpdate: () => void;
-}
-
-const CreationTime: React.FC<CreationTimeProps> = ({
-    file,
-    shouldDisableEdits,
-    scheduleUpdate,
-}) => {
-    const [loading, setLoading] = useState(false);
-    const [isInEditMode, setIsInEditMode] = useState(false);
-
-    const openEditMode = () => setIsInEditMode(true);
-    const closeEditMode = () => setIsInEditMode(false);
-
-    const publicMagicMetadata = getPublicMagicMetadataSync(file);
-    const originalDate = fileCreationPhotoDate(file, publicMagicMetadata);
-
-    const saveEdits = async (pickedTime: ParsedMetadataDate) => {
-        try {
-            setLoading(true);
-            if (isInEditMode && file) {
-                // [Note: Don't modify offsetTime when editing date via picker]
-                //
-                // Use the updated date time (both in its canonical dateTime
-                // form, and also as in the epoch timestamp), but don't use the
-                // offset.
-                //
-                // The offset here will be the offset of the computer where this
-                // user is making this edit, not the offset of the place where
-                // the photo was taken. In a future iteration of the date time
-                // editor, we can provide functionality for the user to edit the
-                // associated offset, but right now it is not even surfaced, so
-                // don't also potentially overwrite it.
-                const { dateTime, timestamp } = pickedTime;
-                if (timestamp == originalDate.getTime()) {
-                    // Same as before.
-                    closeEditMode();
-                    return;
-                }
-
-                await updateRemotePublicMagicMetadata(file, {
-                    dateTime,
-                    editedTime: timestamp,
-                });
-
-                scheduleUpdate();
-            }
-        } catch (e) {
-            log.error("failed to update creationTime", e);
-        } finally {
-            closeEditMode();
-            setLoading(false);
-        }
-    };
-
-    return (
-        <>
-            <FlexWrapper>
-                <InfoItem
-                    icon={<CalendarTodayIcon />}
-                    title={formatDate(originalDate)}
-                    caption={formatTime(originalDate)}
-                    trailingButton={
-                        shouldDisableEdits || (
-                            <EditButton
-                                onClick={openEditMode}
-                                loading={loading}
-                            />
-                        )
-                    }
-                />
-                {isInEditMode && (
-                    <PhotoDateTimePicker
-                        initialValue={originalDate}
-                        disabled={loading}
-                        onAccept={saveEdits}
-                        onClose={closeEditMode}
-                    />
-                )}
-            </FlexWrapper>
-        </>
+                    </IconButton>
+                    <IconButton onClick={() => resetForm()} disabled={isSaving}>
+                        <CloseIcon />
+                    </IconButton>
+                </Stack>
+            )}
+        </CaptionForm>
     );
 };
 
-interface RenderFileNameProps {
-    file: EnteFile;
-    shouldDisableEdits: boolean;
-    exifInfo: ExifInfo | undefined;
-    scheduleUpdate: () => void;
-}
+const CaptionForm = styled("form")(({ theme }) => ({
+    padding: theme.spacing(1),
+}));
 
-const RenderFileName: React.FC<RenderFileNameProps> = ({
+type CreationTimeProps = Pick<
+    FileInfoProps,
+    "allowEdits" | "scheduleUpdate"
+> & {
+    file: EnteFile;
+};
+
+const CreationTime: React.FC<CreationTimeProps> = ({
     file,
-    shouldDisableEdits,
-    exifInfo,
+    allowEdits,
     scheduleUpdate,
 }) => {
-    const [isInEditMode, setIsInEditMode] = useState(false);
-    const openEditMode = () => setIsInEditMode(true);
-    const closeEditMode = () => setIsInEditMode(false);
-    const [fileName, setFileName] = useState<string>();
-    const [extension, setExtension] = useState<string>();
+    const { onGenericError } = useBaseContext();
 
-    useEffect(() => {
-        const [filename, extension] = nameAndExtension(file.metadata.title);
-        setFileName(filename);
-        setExtension(extension);
-    }, [file]);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const saveEdits = async (newFilename: string) => {
-        if (!file) return;
-        if (fileName === newFilename) {
-            closeEditMode();
+    const originalDate = fileCreationPhotoDate(
+        file,
+        filePublicMagicMetadata(file),
+    );
+
+    const saveEdits = async (pickedTime: ParsedMetadataDate) => {
+        setIsEditing(false);
+
+        const { dateTime, timestamp: editedTime } = pickedTime;
+        if (editedTime == originalDate.getTime()) {
+            // Same as before.
             return;
         }
-        setFileName(newFilename);
-        const newTitle = [newFilename, extension].join(".");
-        const updatedFile = await changeFileName(file, newTitle);
-        updateExistingFilePubMetadata(file, updatedFile);
+
+        setIsSaving(true);
+        try {
+            // [Note: Don't modify offsetTime when editing date via picker]
+            //
+            // Use the updated date time (both in its canonical dateTime form,
+            // and also as in the epoch timestamp), but don't use the offset.
+            //
+            // The offset here will be the offset of the computer where this
+            // user is making this edit, not the offset of the place where the
+            // photo was taken. In a future iteration of the date time editor,
+            // we can provide functionality for the user to edit the associated
+            // offset, but right now it is not even surfaced, so don't also
+            // potentially overwrite it.
+            await updateRemotePublicMagicMetadata(file, {
+                dateTime,
+                editedTime,
+            });
+        } catch (e) {
+            onGenericError(e);
+        }
         scheduleUpdate();
+        setIsSaving(false);
     };
 
     return (
         <>
             <InfoItem
-                icon={
-                    file.metadata.fileType === FileType.video ? (
-                        <VideocamOutlinedIcon />
-                    ) : (
-                        <PhotoOutlinedIcon />
+                icon={<CalendarTodayIcon />}
+                title={formattedDate(originalDate)}
+                caption={formattedTime(originalDate)}
+                trailingButton={
+                    allowEdits && (
+                        <EditButton
+                            onClick={() => setIsEditing(true)}
+                            loading={isSaving}
+                        />
                     )
                 }
-                title={[fileName, extension].join(".")}
-                caption={getCaption(file, exifInfo)}
+            />
+            {isEditing && (
+                <FileDateTimePicker
+                    initialValue={originalDate}
+                    onAccept={saveEdits}
+                    onDidClose={() => setIsEditing(false)}
+                />
+            )}
+        </>
+    );
+};
+
+type FileNameProps = Pick<FileInfoProps, "allowEdits" | "scheduleUpdate"> & {
+    file: EnteFile;
+    annotatedExif: AnnotatedExif | undefined;
+};
+
+const FileName: React.FC<FileNameProps> = ({
+    file,
+    annotatedExif,
+    allowEdits,
+    scheduleUpdate,
+}) => {
+    const { show: showRename, props: renameVisibilityProps } =
+        useModalVisibility();
+
+    const fileName = file.metadata.title;
+
+    const handleRename = async (newFileName: string) => {
+        const updatedFile = await changeFileName(file, newFileName);
+        updateExistingFilePubMetadata(file, updatedFile);
+        scheduleUpdate();
+    };
+
+    const icon =
+        file.metadata.fileType === FileType.video ? (
+            <VideocamOutlinedIcon />
+        ) : (
+            <PhotoOutlinedIcon />
+        );
+
+    const fileSize = file.info?.fileSize;
+    const caption = createMultipartCaption(
+        annotatedExif?.megaPixels,
+        annotatedExif?.resolution,
+        fileSize ? formattedByteSize(fileSize) : undefined,
+    );
+
+    return (
+        <>
+            <InfoItem
+                icon={icon}
+                title={fileName}
+                caption={caption}
                 trailingButton={
-                    shouldDisableEdits || <EditButton onClick={openEditMode} />
+                    allowEdits && <EditButton onClick={showRename} />
                 }
             />
-            <FileNameEditDialog
-                isInEditMode={isInEditMode}
-                closeEditMode={closeEditMode}
-                filename={fileName!}
-                extension={extension}
-                saveEdits={saveEdits}
+            <RenameFileDialog
+                {...renameVisibilityProps}
+                fileName={fileName}
+                onRename={handleRename}
             />
         </>
     );
 };
 
-const getCaption = (file: EnteFile, exifInfo: ExifInfo | undefined) => {
-    const megaPixels = exifInfo?.megaPixels;
-    const resolution = exifInfo?.resolution;
-    const fileSize = file.info?.fileSize;
+const createMultipartCaption = (
+    p1: string | undefined,
+    p2: string | undefined,
+    p3: string | undefined,
+) => (
+    <Stack direction="row" sx={{ gap: 1 }}>
+        {p1 && <div>{p1}</div>}
+        {p2 && <div>{p2}</div>}
+        {p3 && <div>{p3}</div>}
+    </Stack>
+);
 
-    const captionParts = [];
-    if (megaPixels) {
-        captionParts.push(megaPixels);
-    }
-    if (resolution) {
-        captionParts.push(resolution);
-    }
-    if (fileSize) {
-        captionParts.push(formattedByteSize(fileSize));
-    }
-    return (
-        <FlexWrapper gap={1}>
-            {captionParts.map((caption) => (
-                <Box key={caption}> {caption}</Box>
-            ))}
-        </FlexWrapper>
-    );
+type RenameFileDialogProps = ModalVisibilityProps & {
+    /**
+     * The current name of the file.
+     */
+    fileName: string;
+    /**
+     * Called when the user makes a change to the existing name and activates the
+     * rename button on the dialog.
+     *
+     * @param newFileName The changed name. The extension currently cannot be
+     * modified, but it is guaranteed the name component of {@link newFileName}
+     * will be different from that of the {@link fileName} prop of the dialog.
+     *
+     * Until the promise settles, the dialog will show an activity indicator. If
+     * the promise rejects, it will also show an error. If the promise is
+     * fulfilled, then the dialog will also be closed.
+     *
+     * The dialog will also be closed if the user activates the rename button
+     * without changing the name.
+     */
+    onRename: (newFileName: string) => Promise<void>;
 };
 
-interface FileNameEditDialogProps {
-    isInEditMode: boolean;
-    closeEditMode: () => void;
-    filename: string;
-    extension: string | undefined;
-    saveEdits: (name: string) => Promise<void>;
-}
-
-const FileNameEditDialog: React.FC<FileNameEditDialogProps> = ({
-    isInEditMode,
-    closeEditMode,
-    filename,
-    extension,
-    saveEdits,
+const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
+    open,
+    onClose,
+    fileName,
+    onRename,
 }) => {
-    const onSubmit: SingleInputFormProps["callback"] = async (
-        filename,
-        setFieldError,
-    ) => {
-        try {
-            await saveEdits(filename);
-            closeEditMode();
-        } catch (e) {
-            log.error(e);
-            setFieldError(t("generic_error_retry"));
+    const [name, extension] = nameAndExtension(fileName);
+
+    const handleSubmit = async (newName: string) => {
+        const newFileName = [newName, extension].filter((x) => !!x).join(".");
+        if (newFileName != fileName) {
+            await onRename(newFileName);
         }
+        onClose();
     };
-    return (
-        <TitledMiniDialog
-            sx={{ zIndex: aboveFileViewerContentZ }}
-            open={isInEditMode}
-            onClose={closeEditMode}
-            title={t("rename_file")}
-        >
-            <SingleInputForm
-                initialValue={filename}
-                callback={onSubmit}
-                placeholder={t("enter_file_name")}
-                buttonText={t("rename")}
-                fieldType="text"
-                caption={extension}
-                secondaryButtonAction={closeEditMode}
-                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
-            />
-        </TitledMiniDialog>
-    );
-};
 
-const BasicDeviceCamera: React.FC<{ parsedExif: ExifInfo }> = ({
-    parsedExif,
-}) => {
     return (
-        <FlexWrapper gap={1}>
-            <Box>{parsedExif.fNumber}</Box>
-            <Box>{parsedExif.exposureTime}</Box>
-            <Box>{parsedExif.iso}</Box>
-        </FlexWrapper>
+        <Dialog
+            {...{ open, onClose }}
+            sx={{ zIndex: aboveFileViewerContentZ }}
+            fullWidth
+            maxWidth="xs"
+        >
+            <DialogTitle sx={{ "&&&": { paddingBlock: "26px 0px" } }}>
+                {t("rename_file")}
+            </DialogTitle>
+            <DialogContent>
+                <SingleInputForm
+                    label={t("file_name")}
+                    placeholder={t("file_name")}
+                    autoFocus
+                    initialValue={name}
+                    submitButtonTitle={t("rename")}
+                    onSubmit={handleSubmit}
+                    onCancel={onClose}
+                    slotProps={{
+                        input: {
+                            // Align the adornment text to the input text.
+                            sx: { alignItems: "baseline" },
+                            endAdornment: extension && (
+                                <InputAdornment position="end">
+                                    {`.${extension}`}
+                                </InputAdornment>
+                            ),
+                        },
+                    }}
+                />
+            </DialogContent>
+        </Dialog>
     );
 };
 
@@ -1043,3 +1007,52 @@ const ExifItem = styled("div")`
     flex-direction: column;
     gap: 4px;
 `;
+
+type AlbumsProps = Required<
+    Pick<
+        FileInfoProps,
+        "fileCollectionIDs" | "allCollectionsNameByID" | "onSelectCollection"
+    >
+> & {
+    file: EnteFile;
+};
+
+const Albums: React.FC<AlbumsProps> = ({
+    file,
+    fileCollectionIDs,
+    allCollectionsNameByID,
+    onSelectCollection,
+}) => (
+    <InfoItem icon={<FolderOutlinedIcon />}>
+        <Stack
+            direction="row"
+            sx={{
+                gap: 1,
+                flexWrap: "wrap",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+            }}
+        >
+            {fileCollectionIDs
+                .get(file.id)
+                ?.filter((collectionID) =>
+                    allCollectionsNameByID.has(collectionID),
+                )
+                .map((collectionID) => (
+                    <ChipButton
+                        key={collectionID}
+                        onClick={() => onSelectCollection(collectionID)}
+                    >
+                        {allCollectionsNameByID.get(collectionID)}
+                    </ChipButton>
+                ))}
+        </Stack>
+    </InfoItem>
+);
+
+const ChipButton = styled((props: ButtonProps) => (
+    <Button color="secondary" {...props} />
+))(({ theme }) => ({
+    ...theme.typography.small,
+    padding: "8px",
+}));

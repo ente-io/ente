@@ -11,9 +11,9 @@ class GalleryContextState extends InheritedWidget {
     this.inSelectionMode = false,
     this.type = GroupType.day,
     required this.sortOrderAsc,
-    required Widget child,
-    Key? key,
-  }) : super(key: key, child: child);
+    required super.child,
+    super.key,
+  });
 
   static GalleryContextState? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<GalleryContextState>();
