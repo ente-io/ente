@@ -583,6 +583,14 @@ class SmartMemoriesService {
       }
       // Check for a minimum average number of days photos are clicked in range
       if (uniqueDays.length < daysRange * 0.1) continue;
+      // Check that there isn't a huge time gap somewhere in the range
+      final int gapThreshold = (daysRange * 0.6).round() * microSecondsInDay;
+      int maxGap = 0;
+      for (int i = 1; i < creationTimes.length; i++) {
+        final gap = creationTimes[i] - creationTimes[i - 1];
+        if (gap > maxGap) maxGap = gap;
+      }
+      if (maxGap > gapThreshold) continue;
       // Check if it's a current or old base location
       final bool isCurrent = lastCreationTime.isAfter(
         DateTime.now().subtract(
