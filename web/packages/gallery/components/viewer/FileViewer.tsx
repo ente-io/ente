@@ -50,7 +50,11 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { fileInfoExifForFile, updateItemDataAlt } from "./data-source";
+import {
+    fileInfoExifForFile,
+    originalImageBlobForFileID,
+    updateItemDataAlt,
+} from "./data-source";
 import {
     FileViewerPhotoSwipe,
     moreButtonID,
@@ -97,14 +101,16 @@ export interface FileViewerFileAnnotation {
      */
     showDelete: boolean;
     /**
-     * `true` if the copy image action should be shown for this file.
-     */
-    showCopyImage: boolean;
-    /**
      * `true` if this is an image which can be edited, _and_ editing is
      * possible, and the edit action should therefore be shown for this file.
      */
     showEditImage: boolean;
+    /**
+     * If there is a image associated with the file, then this will be that
+     * image's raw (original) data as a {@link Blob}, and the copy image action
+     * will be show for this file.
+     */
+    originalImageBlob?: Blob;
 }
 
 /**
@@ -427,6 +433,16 @@ const FileViewer: React.FC<FileViewerProps> = ({
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleCopyImage = () => {
         console.log("TODO copy", activeAnnotatedFile!);
+        const blob = activeAnnotatedFile!.annotation.originalImageBlob;
+        const newBlob = new Blob([blob], { type: "image/png" });
+        console.log("image/png");
+        void window.navigator.clipboard
+            .write([
+                new ClipboardItem({
+                    "image/png": newBlob,
+                }),
+            ])
+            .catch(onGenericError);
     };
 
     const handleEditImage = useMemo(() => {
@@ -477,15 +493,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 }
             })();
 
-            const showCopyImage = (() => {
-                switch (file.metadata.fileType) {
-                    case FileType.image:
-                    case FileType.livePhoto:
-                        return true;
-                    default:
-                        return false;
-                }
-            })();
+            const originalImageBlob = originalImageBlobForFileID(fileID);
+            const showCopyImage = !!originalImageBlob;
 
             const showMore =
                 showDownload == "menu" ||
@@ -500,8 +509,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 showDownload,
                 showMore,
                 showDelete,
-                showCopyImage,
                 showEditImage,
+                originalImageBlob,
             };
         },
         [
@@ -680,7 +689,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                         <DeleteIcon />
                     </MoreMenuItem>
                 )}
-                {activeAnnotatedFile?.annotation.showCopyImage && (
+                {activeAnnotatedFile?.annotation.originalImageBlob && (
                     <MoreMenuItem onClick={handleCopyImage}>
                         <MoreMenuItemTitle>
                             {/*TODO */ pt("Copy image")}
