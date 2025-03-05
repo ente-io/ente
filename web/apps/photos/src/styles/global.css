@@ -122,6 +122,13 @@ body {
     z-index: calc(var(--mui-zIndex-drawer) - 1);
 }
 
+/* Shift the top bar by a fraction of the desktop title bar, if any. The top bar
+   contents already have a decent top padding, so we don't need to shift by the
+   entire amount. See also: [Note: Customize the desktop title bar] */
+.pswp-ente .pswp__top-bar {
+    top: calc(env(titlebar-area-height, 0px) * 0.4);
+}
+
 /*
   Make the controllable video elements we render as custom PhotoSwipe content
   take up the entire container.

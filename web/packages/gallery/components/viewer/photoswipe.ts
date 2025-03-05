@@ -432,35 +432,47 @@ export class FileViewerPhotoSwipe {
             updateFileInfoExifIfNeeded(e.content.data),
         );
 
-        let el;
-        let listener;
         pswp.on("change", (e) => {
             const itemData = this.pswp.currSlide.content.data;
             updateFileInfoExifIfNeeded(itemData);
-
-            if (el && listener) {
-                el.removeEventListener("pause", listener);
-                el.removeEventListener("play", listener);
-                el.removeEventListener("ended", listener);
-                el = undefined;
-                listener = undefined;
-            }
-            if (itemData.fileType == FileType.video) {
-                setTimeout(() => {
-                    listener = (e) => {
-                        console.log(e);
-                    };
-                    // TODO:
-                    el = document.getElementsByTagName("video")[0];
-                    console.log(el);
-                    el.addEventListener("pause", listener);
-                    el.addEventListener("play", listener);
-                    el.addEventListener("ended", listener);
-                }, 3000);
-            }
         });
 
         pswp.on("contentDestroy", (e) => forgetExifForItemData(e.content.data));
+
+        // State needed to hide the caption when a video is playing.
+        let videoElement: HTMLVideoElement | undefined;
+        let onVideoPlayback: EventHandler | undefined;
+        let captionElementRef: HTMLElement | undefined;
+
+        pswp.on("change", (e) => {
+            const itemData = this.pswp.currSlide.content.data;
+
+            // Clear existing listeners, if any.
+            if (videoElement && onVideoPlayback) {
+                videoElement.removeEventListener("play", onVideoPlayback);
+                videoElement.removeEventListener("pause", onVideoPlayback);
+                videoElement.removeEventListener("ended", onVideoPlayback);
+                videoElement = undefined;
+                onVideoPlayback = undefined;
+            }
+
+            // Reset.
+            showIf(captionElementRef, true);
+
+            // Attach new listeners, if needed.
+            if (itemData.fileType == FileType.video) {
+                const contentElement = pswp.currSlide.content.element;
+                videoElement = contentElement.getElementsByTagName("video")[0];
+                if (videoElement) {
+                    onVideoPlayback = (e) => {
+                        showIf(captionElementRef, !!videoElement?.paused);
+                    };
+                    videoElement.addEventListener("play", onVideoPlayback);
+                    videoElement.addEventListener("pause", onVideoPlayback);
+                    videoElement.addEventListener("ended", onVideoPlayback);
+                }
+            }
+        });
 
         // The PhotoSwipe dialog has being closed and the animations have
         // completed.
@@ -645,7 +657,8 @@ export class FileViewerPhotoSwipe {
                 order: 30,
                 appendTo: "root",
                 tagName: "p",
-                onInit: (captionElement, pswp) =>
+                onInit: (captionElement, pswp) => {
+                    captionElementRef = captionElement;
                     pswp.on("change", () => {
                         const { fileType, alt } = pswp.currSlide.content.data;
                         captionElement.innerText = alt ?? "";
@@ -657,7 +670,8 @@ export class FileViewerPhotoSwipe {
                         // an ad-hoc value that looked okay-ish across browsers.
                         captionElement.style.bottom =
                             fileType === FileType.video ? "36px" : "0";
-                    }),
+                    });
+                },
             });
         });
 
