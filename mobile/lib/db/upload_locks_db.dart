@@ -45,6 +45,14 @@ class UploadLocksDB {
     columnPartStatus: "part_status",
   );
 
+  static const _streamUploadErrorTable = (
+    table: "stream_upload_error",
+    columnUploadedFileID: "uploaded_file_id",
+    columnErrorMessage: "error_message",
+    columnLastAttemptedAt: "last_attempted_at",
+    columnCreatedAt: "created_at",
+  );
+
   static final initializationScript = [
     ..._createUploadLocksTable(),
   ];
@@ -116,6 +124,14 @@ class UploadLocksDB {
                   ${_partsTable.columnPartETag} TEXT,
                   ${_partsTable.columnPartStatus} TEXT NOT NULL,
                   PRIMARY KEY (${_partsTable.columnObjectKey}, ${_partsTable.columnPartNumber})
+                )
+                ''',
+      '''
+                CREATE TABLE IF NOT EXISTS ${_streamUploadErrorTable.table} (
+                  ${_streamUploadErrorTable.columnUploadedFileID} INTEGER PRIMARY KEY,
+                  ${_streamUploadErrorTable.columnErrorMessage} TEXT NOT NULL,
+                  ${_streamUploadErrorTable.columnLastAttemptedAt} INTEGER NOT NULL,
+                  ${_streamUploadErrorTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL
                 )
                 ''',
     ];
@@ -289,6 +305,68 @@ class UploadLocksDB {
       encFileSize: encFileSize,
       partSize: row[_trackUploadTable.columnPartSize] as int,
     );
+  }
+
+  Future<void> appendStreamEntry(
+    int uploadedFileID,
+    String errorMessage,
+  ) async {
+    final db = await UploadLocksDB.instance.database;
+
+    await db.insert(
+      _streamUploadErrorTable.table,
+      {
+        _streamUploadErrorTable.columnUploadedFileID: uploadedFileID,
+        _streamUploadErrorTable.columnErrorMessage: errorMessage,
+        _streamUploadErrorTable.columnLastAttemptedAt:
+            DateTime.now().millisecondsSinceEpoch,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> updateStreamStatus(
+    int uploadedFileID,
+    String errorMessage,
+  ) async {
+    final db = await instance.database;
+    await db.update(
+      _streamUploadErrorTable.table,
+      {
+        _streamUploadErrorTable.columnErrorMessage: errorMessage,
+        _streamUploadErrorTable.columnLastAttemptedAt:
+            DateTime.now().millisecondsSinceEpoch,
+      },
+      where: '${_streamUploadErrorTable.columnUploadedFileID} = ?',
+      whereArgs: [uploadedFileID],
+    );
+  }
+
+  Future<int> deleteStreamUploadErrorEntry(int uploadedFileID) async {
+    final db = await instance.database;
+    return await db.delete(
+      _streamUploadErrorTable.table,
+      where: '${_streamUploadErrorTable.columnUploadedFileID} = ?',
+      whereArgs: [uploadedFileID],
+    );
+  }
+
+  Future<Map<int, String>> getStreamUploadError() {
+    return instance.database.then((db) async {
+      final rows = await db.query(
+        _streamUploadErrorTable.table,
+        columns: [
+          _streamUploadErrorTable.columnUploadedFileID,
+          _streamUploadErrorTable.columnErrorMessage,
+        ],
+      );
+      final map = <int, String>{};
+      for (final row in rows) {
+        map[row[_streamUploadErrorTable.columnUploadedFileID] as int] =
+            row[_streamUploadErrorTable.columnErrorMessage] as String;
+      }
+      return map;
+    });
   }
 
   Future<void> createTrackUploadsEntry(
