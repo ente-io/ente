@@ -14,6 +14,9 @@ if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
 }
 
 import { isDesktop } from "@/base/app";
+import { SpacedRow } from "@/base/components/containers";
+import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import {
     useModalVisibility,
     type ModalVisibilityProps,
@@ -46,8 +49,11 @@ import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
 import {
     Button,
     Dialog,
+    DialogContent,
+    DialogTitle,
     Menu,
     MenuItem,
+    Box,
     styled,
     Typography,
 } from "@mui/material";
@@ -766,8 +772,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
                     <MoreMenuItemTitle>
                         {
                             /*TODO */ isFullscreen
-                                ? pt("Exit full screen")
-                                : pt("Go full screen")
+                                ? pt("Exit fullscreen")
+                                : pt("Go fullscreen")
                         }
                     </MoreMenuItemTitle>
                     {isFullscreen ? (
@@ -852,8 +858,44 @@ const MoreMenuItemTitle: React.FC<React.PropsWithChildren> = ({ children }) => (
     <Typography sx={{ fontWeight: "medium" }}>{children}</Typography>
 );
 
-const Shortcuts: React.FC<ModalVisibilityProps> = (props) => (
-    <Dialog {...props}></Dialog>
+const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
+    <Dialog {...{ open, onClose }} fullWidth fullScreen={useIsSmallWidth()}>
+        <SpacedRow sx={{ pt: 2, px: 2.5 }}>
+            <DialogTitle>{pt("Shortcuts")}</DialogTitle>
+            <DialogCloseIconButton {...{ onClose }} />
+        </SpacedRow>
+        <ShortcutsContent sx={{ "&&": { pt: 2, pb: 5, px: 5 } }}>
+            <Shortcut action="Previous, Next" shortcut="←, →" />
+            <Shortcut action="Close" shortcut="Esc" />
+            <Shortcut action="Zoom" shortcut="Mouse scroll" />
+            <Shortcut action="Toggle favorite" shortcut="L" />
+            <Shortcut action="View info" shortcut="I" />
+            <Shortcut action="Download" shortcut="D" />
+            <Shortcut action="Delete" shortcut="Delete, Backspace" />
+            <Shortcut action="Copy as PNG" shortcut="^C, ⌘C" />
+            <Shortcut action="Toggle fullscreen" shortcut="F" />
+        </ShortcutsContent>
+    </Dialog>
+);
+
+const ShortcutsContent = styled(DialogContent)`
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+`;
+
+interface ShortcutProps {
+    action: string;
+    shortcut: string;
+}
+
+const Shortcut: React.FC<ShortcutProps> = ({ action, shortcut }) => (
+    <Box sx={{ display: "flex", gap: 2 }}>
+        <Typography sx={{ color: "text.muted", minWidth: "min(20ch, 40svw)" }}>
+            {action}
+        </Typography>
+        <Typography sx={{ fontWeight: "medium" }}>{shortcut}</Typography>
+    </Box>
 );
 
 const fileIsEditableImage = (file: EnteFile) => {
