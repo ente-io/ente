@@ -432,9 +432,32 @@ export class FileViewerPhotoSwipe {
             updateFileInfoExifIfNeeded(e.content.data),
         );
 
+        let el;
+        let listener;
         pswp.on("change", (e) => {
             const itemData = this.pswp.currSlide.content.data;
             updateFileInfoExifIfNeeded(itemData);
+
+            if (el && listener) {
+                el.removeEventListener("pause", listener);
+                el.removeEventListener("play", listener);
+                el.removeEventListener("ended", listener);
+                el = undefined;
+                listener = undefined;
+            }
+            if (itemData.fileType == FileType.video) {
+                setTimeout(() => {
+                    listener = (e) => {
+                        console.log(e);
+                    };
+                    // TODO:
+                    el = document.getElementsByTagName("video")[0];
+                    console.log(el);
+                    el.addEventListener("pause", listener);
+                    el.addEventListener("play", listener);
+                    el.addEventListener("ended", listener);
+                }, 3000);
+            }
         });
 
         pswp.on("contentDestroy", (e) => forgetExifForItemData(e.content.data));

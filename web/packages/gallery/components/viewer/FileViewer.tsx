@@ -435,6 +435,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleCopyImage = () => {
+        handleMoreMenuClose();
         // Safari does not copy if we do not call `navigator.clipboard.write`
         // synchronously within the click event handler, but it does supports
         // passing a promise in lieu of the blob.
