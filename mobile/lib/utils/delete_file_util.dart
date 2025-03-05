@@ -19,6 +19,7 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/files_split.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
+import "package:photos/services/files_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
@@ -327,6 +328,69 @@ Future<bool> deleteLocalFiles(
   BuildContext context,
   List<String> localIDs,
 ) async {
+  final List<String> deletedIDs = [];
+  final List<String> localAssetIDs = [];
+  final List<String> localSharedMediaIDs = [];
+  try {
+    for (String id in localIDs) {
+      if (id.startsWith(oldSharedMediaIdentifier) ||
+          id.startsWith(sharedMediaIdentifier)) {
+        localSharedMediaIDs.add(id);
+      } else {
+        localAssetIDs.add(id);
+      }
+    }
+    deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+
+    final bool shouldDeleteInBatches =
+        await isAndroidSDKVersionLowerThan(android11SDKINT);
+    if (shouldDeleteInBatches) {
+      _logger.info("Deleting in batches");
+      deletedIDs
+          .addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
+    } else {
+      _logger.info("Deleting in one shot");
+      deletedIDs
+          .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
+    }
+    // In IOS, the library returns no error and fail to delete any file is
+    // there's any shared file. As a stop-gap solution, we initiate deletion in
+    // batches. Similar in Android, for large number of files, we have observed
+    // that the library fails to delete any file. So, we initiate deletion in
+    // batches.
+    if (deletedIDs.isEmpty && Platform.isIOS) {
+      deletedIDs.addAll(
+        await _iosDeleteLocalFilesInBatchesFallback(context, localAssetIDs),
+      );
+    }
+
+    if (deletedIDs.isNotEmpty) {
+      final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
+      await FilesDB.instance.deleteLocalFiles(deletedIDs);
+      _logger.info(deletedFiles.length.toString() + " files deleted locally");
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
+      );
+      return true;
+    } else {
+      //On android 10, even if files were deleted, deletedIDs is empty.
+      //This is a workaround so that users are not shown an error message on
+      //android 10
+      if (!await isAndroidSDKVersionLowerThan(android11SDKINT)) {
+        return false;
+      }
+      return true;
+    }
+  } catch (e, s) {
+    _logger.severe("Could not delete local files", e, s);
+    return false;
+  }
+}
+
+Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
+  BuildContext context,
+  List<String> localIDs,
+) async {
   final files =
       await FilesDB.instance.getLocalFiles(localIDs, dedupeByLocalID: true);
   final List<String> deletedIDs = [];
@@ -388,7 +452,6 @@ Future<bool> deleteLocalFiles(
       //This is a workaround so that users are not shown an error message on
       //android 10
       if (!await isAndroidSDKVersionLowerThan(android11SDKINT)) {
-        showToast(context, S.of(context).couldNotFreeUpSpace);
         return false;
       }
       return true;
@@ -423,7 +486,7 @@ Future<bool> retryFreeUpSpaceAfterRemovingNonExistingAssets(
     final List<String> deletedIDs = [];
     final List<String> localAssetIDs = [];
     final List<String> localSharedMediaIDs = [];
-    status = await SyncService.instance.getBackupStatus();
+    status = await FilesService.instance.getBackupStatus();
 
     for (String localID in status.localIDs) {
       if (localID.startsWith(oldSharedMediaIdentifier) ||

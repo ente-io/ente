@@ -167,6 +167,14 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
 
   Future<void> _freeStorage(BackupStatus status) async {
     bool result = await deleteLocalFiles(context, status.localIDs);
+
+    if (result == false) {
+      result = await deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
+        context,
+        status.localIDs,
+      );
+    }
+
     if (result == false && Platform.isAndroid) {
       result = await retryFreeUpSpaceAfterRemovingNonExistingAssets(context);
     }
