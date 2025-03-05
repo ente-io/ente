@@ -43,7 +43,14 @@ import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
-import { Button, Menu, MenuItem, styled, Typography } from "@mui/material";
+import {
+    Button,
+    Divider,
+    Menu,
+    MenuItem,
+    styled,
+    Typography,
+} from "@mui/material";
 import { t } from "i18next";
 import React, {
     useCallback,
@@ -307,7 +314,11 @@ const FileViewer: React.FC<FileViewerProps> = ({
         useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+
     const { show: showConfirmDelete, props: confirmDeleteVisibilityProps } =
+        useModalVisibility();
+
+    const { show: showShortcuts, props: shortcutsVisibilityProps } =
         useModalVisibility();
 
     // Callbacks to be invoked (only once) the next time we get an update to the
@@ -598,7 +609,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
         setIsFullscreen(!!document.fullscreenElement);
     }, []);
 
-    const toggleFullscreen = useCallback(() => {
+    const handleToggleFullscreen = useCallback(() => {
         void (
             document.fullscreenElement
                 ? document.exitFullscreen()
@@ -721,7 +732,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                     activeImageURL && (
                         <MoreMenuItem onClick={handleCopyImage}>
                             <MoreMenuItemTitle>
-                                {/*TODO */ pt("Copy image")}
+                                {/*TODO */ pt("Copy as PNG")}
                             </MoreMenuItemTitle>
                             {/* Tweak icon size to visually fit better with neighbours */}
                             <ContentCopyIcon
@@ -737,7 +748,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                         <EditIcon />
                     </MoreMenuItem>
                 )}
-                <MoreMenuItem onClick={toggleFullscreen}>
+                <MoreMenuItem onClick={handleToggleFullscreen}>
                     <MoreMenuItemTitle>
                         {
                             /*TODO */ isFullscreen
@@ -750,6 +761,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
                     ) : (
                         <FullscreenOutlinedIcon />
                     )}
+                </MoreMenuItem>
+                <Divider sx={{}} />
+                <MoreMenuItem onClick={showShortcuts}>
+                    <Typography
+                        sx={{ opacity: 0.7 /* theme.dark.background.paper2 */ }}
+                    >
+                        {pt("Shortcuts")}
+                    </Typography>
                 </MoreMenuItem>
             </MoreMenu>
             {/* TODO(PS): Fix imports */}
@@ -778,16 +797,19 @@ const Container = styled("div")`
     }
 `;
 
-const MoreMenu = styled(Menu)`
+const MoreMenu = styled(Menu)(
+    ({ theme }) => `
     & .MuiPaper-root {
-        background-color: #1b1b1b /* theme.dark.background.paper */;
+        background-color: ${theme.vars.palette.fixed.dark.background.paper};
     }
     & .MuiList-root {
         padding-block: 2px;
     }
-`;
+`,
+);
 
-const MoreMenuItem = styled(MenuItem)`
+const MoreMenuItem = styled(MenuItem)(
+    ({ theme }) => `
     min-width: 210px;
 
     /* MUI MenuItem default implementation has a minHeight of "48px" below the
@@ -805,17 +827,22 @@ const MoreMenuItem = styled(MenuItem)`
     color: rgba(255 255 255 / 0.85);
     &:hover {
         color: rgba(255 255 255 / 1);
-        background-color: #252525 /* theme.dark.background.paper2 */;
+        background-color: ${theme.vars.palette.fixed.dark.background.paper2}
     }
 
     .MuiSvgIcon-root {
         font-size: 20px;
     }
-`;
+`,
+);
 
 const MoreMenuItemTitle: React.FC<React.PropsWithChildren> = ({ children }) => (
     <Typography sx={{ fontWeight: "medium" }}>{children}</Typography>
 );
+
+const MoreMenuItemMinorTitle: React.FC<React.PropsWithChildren> = ({
+    children,
+}) => <Typography sx={{ fontWeight: "medium" }}>{children}</Typography>;
 
 const fileIsEditableImage = (file: EnteFile) => {
     // Only images are editable.

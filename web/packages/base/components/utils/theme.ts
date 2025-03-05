@@ -151,6 +151,19 @@ const _colors = {
             light: "#ff6565",
         },
         switchOn: "#2eca45",
+        dark: {
+            // Duplicated from "dark" below.
+            background: {
+                default: "#000",
+                paper: "#1b1b1b",
+                paper2: "#252525",
+            },
+            text: {
+                base: "#fff",
+                muted: "rgba(255 255 255 / 0.70)",
+                faint: "rgba(255 255 255 / 0.50)",
+            },
+        },
     },
     light: {
         // Keep these solid.

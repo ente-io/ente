@@ -140,6 +140,14 @@ declare module "@mui/material/styles" {
              * The color of a switch when it is enabled.
              */
             switchOn: string;
+            /**
+             * A subset of the dark mode colors, fixed so that they don't change
+             * even when the app is in light mode.
+             */
+            dark: {
+                background: TypeBackground;
+                text: TypeText;
+            };
         };
         /**
          * MUI as of v6 does not allow customizing shadows easily. This is due
