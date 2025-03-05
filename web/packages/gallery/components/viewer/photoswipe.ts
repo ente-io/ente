@@ -73,6 +73,15 @@ export interface FileViewerPhotoSwipeDelegate {
      * > remain in the disabled state (until the file viewer is closed).
      */
     toggleFavorite: (annotatedFile: FileViewerAnnotatedFile) => Promise<void>;
+    /**
+     * Called when the user triggers a potential action using a keyboard
+     * shortcut.
+     *
+     * The caller does not check if the action is valid in the current context,
+     * so the delegate must validate and only then perform the action if it is
+     * appropriate.
+     */
+    performKeyAction: (action: "delete" | "copy" | "toggle-fullscreen") => void;
 }
 
 type FileViewerPhotoSwipeOptions = Pick<
@@ -507,7 +516,15 @@ export class FileViewerPhotoSwipe {
 
         const handleToggleFavorite = () => void toggleFavorite();
 
+        const handleToggleFavoriteIfEnabled = () => {
+            if (haveUser) handleToggleFavorite();
+        };
+
         const handleDownload = () => onDownload(currentAnnotatedFile());
+
+        const handleDownloadIfEnabled = () => {
+            if (!!currentFileAnnotation().showDownload) handleDownload();
+        };
 
         const showIf = (element: HTMLElement, condition: boolean) =>
             condition
@@ -684,16 +701,27 @@ export class FileViewerPhotoSwipe {
             return element;
         });
 
+        // Some actions routed via the delegate
+
+        const handleDelete = () => delegate.performKeyAction("delete");
+
+        const handleCopy = () => delegate.performKeyAction("copy");
+
+        const handleToggleFullscreen = () =>
+            delegate.performKeyAction("toggle-fullscreen");
+
         pswp.on("keydown", (e, z) => {
             const key = e.originalEvent.key ?? "";
             const cb = (() => {
                 switch (key.toLowerCase()) {
                     case "l":
-                        return handleToggleFavorite;
+                        return handleToggleFavoriteIfEnabled;
                     case "d":
-                        return handleDownload;
+                        return handleDownloadIfEnabled;
                     case "i":
                         return handleViewInfo;
+                    case "f":
+                        return handleToggleFullscreen;
                 }
                 return undefined;
             })();

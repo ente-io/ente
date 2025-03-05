@@ -396,7 +396,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     //
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleDownloadMenuAction = () => {
-        handleMoreMenuClose();
+        handleMoreMenuCloseIfNeeded();
         onDownload!(activeAnnotatedFile!.file);
     };
 
@@ -413,9 +413,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
         [],
     );
 
-    const handleMoreMenuClose = useCallback(() => {
+    const handleMoreMenuCloseIfNeeded = useCallback(() => {
         setMoreMenuAnchorEl((el) => {
-            resetMoreMenuButtonOnMenuClose(el);
+            if (el) resetMoreMenuButtonOnMenuClose(el);
             return null;
         });
     }, []);
@@ -423,11 +423,11 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const handleConfirmDelete = useMemo(() => {
         return onDelete
             ? () => {
-                  handleMoreMenuClose();
+                  handleMoreMenuCloseIfNeeded();
                   showConfirmDelete();
               }
             : undefined;
-    }, [onDelete, showConfirmDelete, handleMoreMenuClose]);
+    }, [onDelete, showConfirmDelete, handleMoreMenuCloseIfNeeded]);
 
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleDelete = async () => {
@@ -455,8 +455,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
     };
 
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
-    const handleCopyImage = () => {
-        handleMoreMenuClose();
+    const handleCopyImage = useCallback(() => {
+        handleMoreMenuCloseIfNeeded();
         // Safari does not copy if we do not call `navigator.clipboard.write`
         // synchronously within the click event handler, but it does supports
         // passing a promise in lieu of the blob.
@@ -467,16 +467,16 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 }),
             ])
             .catch(onGenericError);
-    };
+    }, [onGenericError, handleMoreMenuCloseIfNeeded, activeImageURL]);
 
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
             ? () => {
-                  handleMoreMenuClose();
+                  handleMoreMenuCloseIfNeeded();
                   setOpenImageEditor(true);
               }
             : undefined;
-    }, [onSaveEditedImageCopy, handleMoreMenuClose]);
+    }, [onSaveEditedImageCopy, handleMoreMenuCloseIfNeeded]);
 
     const handleImageEditorClose = useCallback(
         () => setOpenImageEditor(false),
@@ -616,22 +616,49 @@ const FileViewer: React.FC<FileViewerProps> = ({
     }, []);
 
     const handleToggleFullscreen = useCallback(() => {
-        handleMoreMenuClose();
+        handleMoreMenuCloseIfNeeded();
         void (
             document.fullscreenElement
                 ? document.exitFullscreen()
                 : document.body.requestFullscreen()
         ).then(updateFullscreenStatus);
-    }, [handleMoreMenuClose, updateFullscreenStatus]);
+    }, [handleMoreMenuCloseIfNeeded, updateFullscreenStatus]);
 
     const handleShortcuts = useCallback(() => {
-        handleMoreMenuClose();
+        handleMoreMenuCloseIfNeeded();
         showShortcuts();
-    }, [handleMoreMenuClose, showShortcuts]);
+    }, [handleMoreMenuCloseIfNeeded, showShortcuts]);
+
+    const performKeyAction = useCallback(
+        (action): FileViewerPhotoSwipeDelegate["performKeyAction"] => {
+            switch (action) {
+                case "delete":
+                    handleConfirmDelete?.();
+                    break;
+                case "copy":
+                    if (activeImageURL) handleCopyImage();
+                    break;
+                case "toggle-fullscreen":
+                    handleToggleFullscreen();
+                    break;
+            }
+        },
+        [
+            handleConfirmDelete,
+            activeImageURL,
+            handleCopyImage,
+            handleToggleFullscreen,
+        ],
+    );
 
     // Initial value of delegate.
     if (!delegateRef.current) {
-        delegateRef.current = { getFiles, isFavorite, toggleFavorite };
+        delegateRef.current = {
+            getFiles,
+            isFavorite,
+            toggleFavorite,
+            performKeyAction,
+        };
     }
 
     // Updates to delegate callbacks.
@@ -640,7 +667,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
         delegate.getFiles = getFiles;
         delegate.isFavorite = isFavorite;
         delegate.toggleFavorite = toggleFavorite;
-    }, [getFiles, isFavorite, toggleFavorite]);
+        delegate.performKeyAction = performKeyAction;
+    }, [getFiles, isFavorite, toggleFavorite, performKeyAction]);
 
     // Notify the listeners, if any, for updates to files or favorites.
     useEffect(() => {
@@ -717,7 +745,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             />
             <MoreMenu
                 open={!!moreMenuAnchorEl}
-                onClose={handleMoreMenuClose}
+                onClose={handleMoreMenuCloseIfNeeded}
                 anchorEl={moreMenuAnchorEl}
                 id={moreMenuID}
                 slotProps={{
