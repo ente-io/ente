@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
-import 'package:photos/models/memory.dart';
+import 'package:photos/models/memories/memory.dart';
+import "package:photos/models/memories/smart_memory.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/memories_service.dart';
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/home/memories/memory_cover_widget.dart';
@@ -55,6 +57,46 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     if (!MemoriesService.instance.showMemories) {
       return const SizedBox.shrink();
     }
+    if (memoriesCacheService.enableSmartMemories) {
+      return _smartMemories();
+    }
+    return _oldMemories();
+  }
+
+  Widget _smartMemories() {
+    return FutureBuilder<List<SmartMemory>>(
+      future: memoriesCacheService.getMemories(
+        null,
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.isEmpty) {
+          return _oldMemories();
+        }
+        if (snapshot.hasError || !snapshot.hasData) {
+          return SizedBox(
+            height: _maxHeight + 12 + 10,
+            child: const EnteLoadingWidget(),
+          );
+        } else {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 12,
+              ),
+              _buildSmartMemories(snapshot.data!),
+              const SizedBox(height: 10),
+            ],
+          ).animate().fadeIn(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOutCirc,
+              );
+        }
+      },
+    );
+  }
+
+  Widget _oldMemories() {
     return FutureBuilder<List<Memory>>(
       future: MemoriesService.instance.getMemories(),
       builder: (context, snapshot) {
@@ -82,6 +124,38 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
               );
         }
       },
+    );
+  }
+
+  Widget _buildSmartMemories(List<SmartMemory> memories) {
+    final collatedMemories =
+        memories.map((e) => (e.memories, e.title)).toList();
+
+    return SizedBox(
+      height: _maxHeight + MemoryCoverWidget.outerStrokeWidth * 2,
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        scrollDirection: Axis.horizontal,
+        controller: _controller,
+        itemCount: collatedMemories.length,
+        itemBuilder: (context, itemIndex) {
+          final maxScaleOffsetX =
+              _maxWidth + MemoryCoverWidget.horizontalPadding * 2;
+          final offsetOfItem =
+              (_maxWidth + MemoryCoverWidget.horizontalPadding * 2) * itemIndex;
+          return MemoryCoverWidget(
+            memories: collatedMemories[itemIndex].$1,
+            controller: _controller,
+            offsetOfItem: offsetOfItem,
+            maxHeight: _maxHeight,
+            maxWidth: _maxWidth,
+            maxScaleOffsetX: maxScaleOffsetX,
+            title: collatedMemories[itemIndex].$2,
+          );
+        },
+      ),
     );
   }
 

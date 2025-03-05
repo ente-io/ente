@@ -1,7 +1,9 @@
 import "dart:io" show File;
 import 'dart:typed_data' show Uint8List;
 
+import "package:ml_linalg/linalg.dart";
 import "package:photos/models/ml/face/box.dart";
+import "package:photos/models/ml/vector.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -32,8 +34,11 @@ enum IsolateOperation {
   /// [MLComputer]
   runClipText,
 
+  /// [MLComputer]
+  compareEmbeddings,
+
   /// [FaceClusteringService]
-  linearIncrementalClustering
+  linearIncrementalClustering,
 }
 
 /// WARNING: Only return primitives unless you know the method is only going
@@ -114,6 +119,21 @@ Future<dynamic> isolateFunction(
     case IsolateOperation.runClipText:
       final textEmbedding = await ClipTextEncoder.predict(args);
       return List<double>.from(textEmbedding, growable: false);
+
+    /// MLComputer
+    case IsolateOperation.compareEmbeddings:
+      final List<EmbeddingVector> embeddings =
+          (args['embeddings'] as List<String>)
+              .map((jsonString) => EmbeddingVector.fromJsonString(jsonString))
+              .toList();
+      final otherEmbedding =
+          Vector.fromList(args['otherEmbedding'] as List<double>);
+      final Map<int, double> result = {};
+      for (final embedding in embeddings) {
+        final double similarity = embedding.vector.dot(otherEmbedding);
+        result[embedding.fileID] = similarity;
+      }
+      return Map<int, double>.from(result);
 
     /// Cases for MLComputer end here
 

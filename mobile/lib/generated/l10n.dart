@@ -3863,10 +3863,10 @@ class S {
     );
   }
 
-  /// `You've no duplicate files that can be cleared`
+  /// `You don't have any duplicate files that can be cleared`
   String get youveNoDuplicateFilesThatCanBeCleared {
     return Intl.message(
-      'You\'ve no duplicate files that can be cleared',
+      'You don\'t have any duplicate files that can be cleared',
       name: 'youveNoDuplicateFilesThatCanBeCleared',
       desc: '',
       args: [],

@@ -959,9 +959,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "yourSubscriptionHasExpired":
             MessageLookupByLibrary.simpleMessage("פג תוקף המנוי שלך"),
         "yourSubscriptionWasUpdatedSuccessfully":
-            MessageLookupByLibrary.simpleMessage("המנוי שלך עודכן בהצלחה"),
-        "youveNoDuplicateFilesThatCanBeCleared":
-            MessageLookupByLibrary.simpleMessage(
-                "אין לך קבצים כפולים שניתן לנקות אותם")
+            MessageLookupByLibrary.simpleMessage("המנוי שלך עודכן בהצלחה")
       };
 }

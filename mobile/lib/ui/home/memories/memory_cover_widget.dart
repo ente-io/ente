@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/memory.dart";
+import "package:photos/models/memories/memory.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -19,6 +19,7 @@ class MemoryCoverWidget extends StatefulWidget {
   static const aspectRatio = 0.68;
   static const horizontalPadding = 2.5;
   final double maxScaleOffsetX;
+  final String? title;
 
   const MemoryCoverWidget({
     required this.memories,
@@ -27,6 +28,7 @@ class MemoryCoverWidget extends StatefulWidget {
     required this.maxHeight,
     required this.maxWidth,
     required this.maxScaleOffsetX,
+    this.title,
     super.key,
   });
 
@@ -45,7 +47,12 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
 
     final widthOfScreen = MediaQuery.sizeOf(context).width;
     final index = _getNextMemoryIndex();
-    final title = _getTitle(widget.memories[index]);
+    // TODO: lau: remove (I) from name when opening up the feature flag
+    final title = widget.title != null
+        ? widget.title! == "filler"
+            ? _getTitle(widget.memories[index]) + "(I)"
+            : widget.title! + "(I)"
+        : _getTitle(widget.memories[index]);
     final memory = widget.memories[index];
     final isSeen = memory.isSeen();
     final brightness =

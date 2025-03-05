@@ -68,7 +68,11 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
     if (hasUrl) {
       await _shareAlbumUrl();
     } else {
-      final bool result = await collectionActions.enableUrl(context, widget.c);
+      final bool result = await collectionActions.enableUrl(
+        context,
+        widget.c,
+        enableCollect: true,
+      );
       if (result) {
         await _shareAlbumUrl();
       } else {

@@ -2012,9 +2012,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Đăng ký của bạn đã được cập nhật thành công"),
         "yourVerificationCodeHasExpired": MessageLookupByLibrary.simpleMessage(
             "Mã xác minh của bạn đã hết hạn"),
-        "youveNoDuplicateFilesThatCanBeCleared":
-            MessageLookupByLibrary.simpleMessage(
-                "Bạn không có tệp trùng lặp nào có thể được xóa"),
         "youveNoFilesInThisAlbumThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage(
                 "Bạn không có tệp nào trong album này có thể bị xóa"),

@@ -18,6 +18,8 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
+const double earthRadius = 6371; // Earth's radius in kilometers
+
 class LocationService {
   final SharedPreferences prefs;
   final Logger _logger = Logger((LocationService).toString());
@@ -79,6 +81,19 @@ class LocationService {
       'end for query: $query  on ${allFiles.length} files, found '
       '${result.length} cities',
     );
+    return result;
+  }
+
+  /// WARNING: This method does not use computer, consider using [getFilesInCity] instead
+  Map<City, List<EnteFile>> getFilesInCitySync(
+    List<EnteFile> allFiles,
+  ) {
+    if (allFiles.isEmpty) reloadLocationDiscoverySection = true;
+    final result = getCityResults({
+      "query": '',
+      "cities": _cities,
+      "files": allFiles,
+    });
     return result;
   }
 
@@ -342,6 +357,26 @@ bool isFileInsideLocationTag(
     return true;
   }
   return false;
+}
+
+double calculateDistance(Location point1, Location point2) {
+  final lat1 = point1.latitude! * (pi / 180);
+  final lat2 = point2.latitude! * (pi / 180);
+  final long1 = point1.longitude! * (pi / 180);
+  final long2 = point2.longitude! * (pi / 180);
+
+  // Difference in latitude and longitude
+  final dLat = lat2 - lat1;
+  final dLong = long2 - long1;
+
+  // Haversine formula
+  final a = sin(dLat / 2) * sin(dLat / 2) +
+      cos(lat1) * cos(lat2) * sin(dLong / 2) * sin(dLong / 2);
+
+  // Angular distance in radians
+  final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+  return earthRadius * c; // Distance in kilometers
 }
 
 ///The area bounded by the location tag becomes more elliptical with increase

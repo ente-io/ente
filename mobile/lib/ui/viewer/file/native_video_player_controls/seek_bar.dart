@@ -2,7 +2,8 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:native_video_player/native_video_player.dart";
-import "package:photos/service_locator.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/seekbar_triggered_event.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/standalone/debouncer.dart";
@@ -19,11 +20,13 @@ class SeekBar extends StatefulWidget {
 
 class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
-  double _prevPositionFraction = 0.0;
   final _debouncer = Debouncer(
     const Duration(milliseconds: 100),
     executionInterval: const Duration(milliseconds: 325),
   );
+  StreamSubscription<void>? _eventsSubscription;
+  StreamSubscription<SeekbarTriggeredEvent>? _seekbarSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -33,11 +36,18 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
       value: 0,
     );
 
-    widget.controller.onPlaybackStatusChanged.addListener(
-      _onPlaybackStatusChanged,
-    );
-    widget.controller.onPlaybackPositionChanged.addListener(
-      _onPlaybackPositionChanged,
+    Future.microtask(() {
+      _seekbarSubscription =
+          Bus.instance.on<SeekbarTriggeredEvent>().listen((event) {
+        if (!mounted || _animationController.value == event.position) return;
+
+        _animationController.value = event.position.toDouble();
+        setState(() {});
+      });
+    });
+
+    _eventsSubscription = widget.controller.events.listen(
+      _listen,
     );
 
     _startMovingSeekbar();
@@ -45,13 +55,9 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    _seekbarSubscription?.cancel();
+    _eventsSubscription?.cancel();
     _animationController.dispose();
-    widget.controller.onPlaybackStatusChanged.removeListener(
-      _onPlaybackStatusChanged,
-    );
-    widget.controller.onPlaybackPositionChanged.removeListener(
-      _onPlaybackPositionChanged,
-    );
     _debouncer.cancelDebounceTimer();
     super.dispose();
   }
@@ -65,6 +71,7 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
         return SliderTheme(
           data: SliderTheme.of(context).copyWith(
             trackHeight: 1.0,
+            tickMarkShape: SliderTickMarkShape.noTickMark,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
             overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),
             activeTrackColor: colorScheme.primary300,
@@ -103,7 +110,8 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
   void _seekTo(double value) {
     _debouncer.run(() async {
       unawaited(
-        widget.controller.seekTo((value * widget.duration!).round()),
+        widget.controller
+            .seekTo((Duration(seconds: (value * widget.duration!).round()))),
       );
     });
   }
@@ -133,29 +141,35 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
     });
   }
 
+  void _listen(PlaybackEvent playerData) {
+    switch (playerData) {
+      case PlaybackStatusChangedEvent():
+        // Emitted when playback status changes (playing, paused, or stopped)
+        _onPlaybackStatusChanged();
+        break;
+      case PlaybackPositionChangedEvent():
+        // Emitted when playback position changes
+        _onPlaybackPositionChanged();
+        break;
+      case PlaybackEndedEvent():
+        _animationController.value = 0;
+      default:
+    }
+  }
+
   void _onPlaybackStatusChanged() {
-    if (widget.controller.playbackInfo?.status == PlaybackStatus.paused) {
+    if (widget.controller.playbackStatus == PlaybackStatus.paused) {
       _animationController.stop();
     }
   }
 
   void _onPlaybackPositionChanged() async {
-    if (widget.controller.playbackInfo?.status == PlaybackStatus.paused ||
-        (widget.controller.playbackInfo?.status == PlaybackStatus.stopped &&
-            widget.controller.playbackInfo?.positionFraction != 0)) {
+    if (widget.controller.playbackStatus == PlaybackStatus.paused ||
+        (widget.controller.playbackStatus == PlaybackStatus.stopped &&
+            widget.controller.playbackPosition.inSeconds != 0)) {
       return;
     }
-    final target = widget.controller.playbackInfo?.positionFraction ?? 0;
-
-    //To immediately set the position to 0 when the video ends
-    if (_prevPositionFraction == 1.0 && target == 0.0) {
-      setState(() {
-        _animationController.value = 0;
-      });
-      if (!localSettings.shouldLoopVideo()) {
-        return;
-      }
-    }
+    final target = widget.controller.playbackPosition.inMilliseconds;
 
     //There is a slight delay (around 350 ms) for the event being listened to
     //by this listener on the next target (target that comes after 0). Adding
@@ -164,22 +178,24 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
       await Future.delayed(const Duration(milliseconds: 450));
     }
 
+    final duration = widget.controller.videoInfo?.durationInMilliseconds;
+    final double fractionTarget =
+        duration == null || duration <= 0 ? 0 : target / duration;
+
     if (widget.duration != null) {
       unawaited(
         _animationController.animateTo(
-          target + (1 / widget.duration!),
+          fractionTarget + (1 / widget.duration!),
           duration: const Duration(seconds: 1),
         ),
       );
     } else {
       unawaited(
         _animationController.animateTo(
-          target,
+          fractionTarget,
           duration: const Duration(seconds: 1),
         ),
       );
     }
-
-    _prevPositionFraction = target;
   }
 }
