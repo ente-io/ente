@@ -435,20 +435,13 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleCopyImage = () => {
-        console.log("TODO copy", activeAnnotatedFile!);
-        // const blob = activeAnnotatedFile!.annotation.originalImageBlob;
-        const newBlob = new Promise((resolve) => {
-            void fetch(activeImageURL)
-                .then((res) => res.blob())
-                .then((blob) =>
-                    resolve(new Blob([blob], { type: "image/png" })),
-                );
-        });
-        console.log("image/png");
+        // Safari does not copy if we do not call `navigator.clipboard.write`
+        // synchronously within the click event handler, but it does supports
+        // passing a promise in lieu of the blob.
         void window.navigator.clipboard
             .write([
                 new ClipboardItem({
-                    "image/png": newBlob,
+                    "image/png": createImagePNGBlob(activeImageURL!),
                 }),
             ])
             .catch(onGenericError);
@@ -808,3 +801,21 @@ const fileIsEditableImage = (file: EnteFile) => {
     }
     return isRenderable;
 };
+
+/**
+ * Return a promise that resolves with a "image/png" blob derived from the given
+ * {@link imageURL} that can be written to the navigator's clipboard.
+ */
+const createImagePNGBlob = async (imageURL: string) =>
+    new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = image.width;
+            canvas.height = image.height;
+            canvas.getContext("2d").drawImage(image, 0, 0);
+            canvas.toBlob(resolve, "image/png");
+        };
+        image.onerror = reject;
+        image.src = imageURL;
+    });
