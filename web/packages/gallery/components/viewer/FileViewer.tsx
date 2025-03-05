@@ -47,13 +47,13 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
 import {
+    Box,
     Button,
     Dialog,
     DialogContent,
     DialogTitle,
     Menu,
     MenuItem,
-    Box,
     styled,
     Typography,
 } from "@mui/material";
@@ -859,7 +859,12 @@ const MoreMenuItemTitle: React.FC<React.PropsWithChildren> = ({ children }) => (
 );
 
 const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
-    <Dialog {...{ open, onClose }} fullWidth fullScreen={useIsSmallWidth()}>
+    <Dialog
+        {...{ open, onClose }}
+        fullWidth
+        fullScreen={useIsSmallWidth()}
+        slotProps={{ backdrop: { sx: { backdropFilter: "blur(30px)" } } }}
+    >
         <SpacedRow sx={{ pt: 2, px: 2.5 }}>
             <DialogTitle>{pt("Shortcuts")}</DialogTitle>
             <DialogCloseIconButton {...{ onClose }} />
