@@ -128,6 +128,32 @@ func (repo *UserRepository) GetAll(sinceTime int64, tillTime int64) ([]ente.User
 	return users, nil
 }
 
+// GetSubscribedUsers will return the list of all subscribed users
+func (repo *UserRepository) GetSubscribedUsers() ([]ente.User, error) {
+	rows, err := repo.DB.Query(`select s.user_id, u.encrypted_email, u.email_decryption_nonce, u.email_hash, s.created_at from subscriptions s inner join users u ON s.user_id = u.user_id;`)
+	if err != nil {
+		stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+	subscribedUsers := make([]ente.User, 0)
+	for rows.Next() {
+		var user ente.User
+		var encryptedEmail, nonce []byte
+
+		err := rows.Scan(&user.ID, &encryptedEmail, &nonce, &user.Hash, &user.CreationTime)
+		if err != nil {
+			return subscribedUsers, stacktrace.Propagate(err, "user scan failed")
+		}
+		email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		user.Email = email
+		subscribedUsers = append(subscribedUsers, user)
+	}
+	return subscribedUsers, nil
+}
+
 // GetUserUsageWithSubData will return current storage usage & basic information about subscription for given list
 // of users. It's primarily used for fetching storage utilisation for a family/group of users
 func (repo *UserRepository) GetUserUsageWithSubData(ctx context.Context, userIds []int64) ([]ente.UserUsageWithSubData, error) {
