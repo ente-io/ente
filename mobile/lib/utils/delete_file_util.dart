@@ -469,11 +469,11 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
 }
 
 /// Only to be used on Android
-Future<bool> retryFreeUpSpaceAfterRemovingNonExistingAssets(
+Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
   BuildContext context,
 ) async {
   _logger.info(
-    "Retrying free up space after removing non-existing assets",
+    "Retrying free up space after removing assets non-existing in disk",
   );
 
   final dialog =
