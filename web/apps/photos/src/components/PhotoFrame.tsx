@@ -146,6 +146,7 @@ export type PhotoFrameProps = Pick<
     enableDownload?: boolean;
     showAppDownloadBanner?: boolean;
     setIsPhotoSwipeOpen?: (value: boolean) => void;
+    isInIncomingSharedCollection?: boolean;
     isInHiddenSection?: boolean;
     setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
     selectable?: boolean;
@@ -171,6 +172,7 @@ const PhotoFrame = ({
     allCollectionsNameByID,
     showAppDownloadBanner,
     setIsPhotoSwipeOpen,
+    isInIncomingSharedCollection,
     isInHiddenSection,
     setFilesDownloadProgressAttributesCreator,
     selectable,
@@ -589,8 +591,9 @@ const PhotoFrame = ({
                     files={files}
                     initialIndex={currentIndex}
                     disableDownload={!enableDownload}
-                    isInHiddenSection={isInHiddenSection}
+                    isInIncomingSharedCollection={isInIncomingSharedCollection}
                     isInTrashSection={activeCollectionID === TRASH_SECTION}
+                    isInHiddenSection={isInHiddenSection}
                     onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
                     onToggleFavorite={handleToggleFavorite}
                     onDownload={handleDownload}

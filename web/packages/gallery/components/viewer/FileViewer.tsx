@@ -153,6 +153,10 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     disableDownload?: boolean;
     /**
+     * `true` when we are viewing files in an album that the user does not own.
+     */
+    isInIncomingSharedCollection?: boolean;
+    /**
      * `true` when we are viewing files in the Trash.
      */
     isInTrashSection?: boolean;
@@ -238,6 +242,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     files,
     initialIndex,
     disableDownload,
+    isInIncomingSharedCollection,
     isInTrashSection,
     isInHiddenSection,
     favoriteFileIDs,
@@ -477,9 +482,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
             const canModify =
                 isOwnFile && !isInTrashSection && !isInHiddenSection;
+
             const showFavorite = canModify;
+
             const showDelete =
-                !!handleConfirmDelete && isOwnFile && !isInTrashSection;
+                !!handleConfirmDelete &&
+                isOwnFile &&
+                !isInTrashSection &&
+                !isInIncomingSharedCollection;
+
             const showEditImage =
                 !!handleEditImage && canModify && fileIsEditableImage(file);
 
@@ -526,6 +537,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
         [
             user,
             disableDownload,
+            isInIncomingSharedCollection,
             isInTrashSection,
             isInHiddenSection,
             onDownload,
