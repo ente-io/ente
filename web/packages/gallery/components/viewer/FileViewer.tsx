@@ -731,6 +731,12 @@ const FileViewer: React.FC<FileViewerProps> = ({
                         <EditIcon />
                     </MoreMenuItem>
                 )}
+                <MoreMenuItem onClick={handleToggleFullscreen}>
+                    <MoreMenuItemTitle>
+                        {/*TODO */ pt("Full screen")}
+                    </MoreMenuItemTitle>
+                    <EditIcon />
+                </MoreMenuItem>
             </MoreMenu>
             {/* TODO(PS): Fix imports */}
             <ConfirmDeleteFileDialog
@@ -832,3 +838,11 @@ const createImagePNGBlob = async (imageURL: string) =>
         image.onerror = reject;
         image.src = imageURL;
     });
+
+/**
+ * Toggle full screen mode.
+ */
+const toggleFullscreen = () =>
+    document.fullscreenElement
+        ? document.exitFullscreen()
+        : document.body.requestFullscreen();
