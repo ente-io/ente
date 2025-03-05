@@ -302,13 +302,6 @@ export const forgetFailedItemDataForFileID = (fileID: number) => {
 };
 
 /**
- * Return the cached {@link originalImageBlob}, if any, from the
- * {@link ItemData} for the file with the given {@link fileID}.
- */
-export const originalImageBlobForFileID = (fileID: number) =>
-    _state.itemDataByFileID.get(fileID)?.originalImageBlob;
-
-/**
  * Update the alt attribute of the {@link ItemData}, if any, associated with the
  * given {@link EnteFile}.
  *

@@ -50,11 +50,7 @@ import React, {
     useRef,
     useState,
 } from "react";
-import {
-    fileInfoExifForFile,
-    originalImageBlobForFileID,
-    updateItemDataAlt,
-} from "./data-source";
+import { fileInfoExifForFile, updateItemDataAlt } from "./data-source";
 import {
     FileViewerPhotoSwipe,
     moreButtonID,
@@ -101,16 +97,14 @@ export interface FileViewerFileAnnotation {
      */
     showDelete: boolean;
     /**
+     * `true` if the copy image action should be shown for this file.
+     */
+    showCopyImage: boolean;
+    /**
      * `true` if this is an image which can be edited, _and_ editing is
      * possible, and the edit action should therefore be shown for this file.
      */
     showEditImage: boolean;
-    /**
-     * If there is a image associated with the file, then this will be that
-     * image's raw (original) data as a {@link Blob}, and the copy image action
-     * will be show for this file.
-     */
-    originalImageBlob?: Blob;
 }
 
 /**
@@ -298,6 +292,13 @@ const FileViewer: React.FC<FileViewerProps> = ({
         FileInfoExif | undefined
     >(undefined);
 
+    // With semantics similar to `activeAnnotatedFile`, this is the imageURL
+    // associated with the `activeAnnotatedFile`, if any. However, unlike
+    // `activeAnnotatedFile`, this is only set when the more menu is activated.
+    const [activeImageURL, setActiveImageURL] = useState<string | undefined>(
+        undefined,
+    );
+
     const [openFileInfo, setOpenFileInfo] = useState(false);
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
@@ -381,9 +382,11 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const handleMore = useCallback(
         (
             annotatedFile: FileViewerAnnotatedFile,
+            imageURL: string | undefined,
             buttonElement: HTMLElement,
         ) => {
             setActiveAnnotatedFile(annotatedFile);
+            setActiveImageURL(imageURL);
             setMoreMenuAnchorEl(buttonElement);
         },
         [],
@@ -433,8 +436,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleCopyImage = () => {
         console.log("TODO copy", activeAnnotatedFile!);
-        const blob = activeAnnotatedFile!.annotation.originalImageBlob;
-        const newBlob = new Blob([blob], { type: "image/png" });
+        // const blob = activeAnnotatedFile!.annotation.originalImageBlob;
+        const newBlob = new Promise((resolve) => {
+            void fetch(activeImageURL)
+                .then((res) => res.blob())
+                .then((blob) =>
+                    resolve(new Blob([blob], { type: "image/png" })),
+                );
+        });
         console.log("image/png");
         void window.navigator.clipboard
             .write([
@@ -493,8 +502,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 }
             })();
 
-            const originalImageBlob = originalImageBlobForFileID(fileID);
-            const showCopyImage = !!originalImageBlob;
+            const showCopyImage = (() => {
+                switch (file.metadata.fileType) {
+                    case FileType.image:
+                    case FileType.livePhoto:
+                        return true;
+                    default:
+                        return false;
+                }
+            })();
 
             const showMore =
                 showDownload == "menu" ||
@@ -509,8 +525,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 showDownload,
                 showMore,
                 showDelete,
+                showCopyImage,
                 showEditImage,
-                originalImageBlob,
             };
         },
         [
@@ -689,15 +705,18 @@ const FileViewer: React.FC<FileViewerProps> = ({
                         <DeleteIcon />
                     </MoreMenuItem>
                 )}
-                {activeAnnotatedFile?.annotation.originalImageBlob && (
-                    <MoreMenuItem onClick={handleCopyImage}>
-                        <MoreMenuItemTitle>
-                            {/*TODO */ pt("Copy image")}
-                        </MoreMenuItemTitle>
-                        {/* Tweak icon size to visually fit better with neighbours */}
-                        <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
-                    </MoreMenuItem>
-                )}
+                {activeAnnotatedFile?.annotation.showCopyImage &&
+                    activeImageURL && (
+                        <MoreMenuItem onClick={handleCopyImage}>
+                            <MoreMenuItemTitle>
+                                {/*TODO */ pt("Copy image")}
+                            </MoreMenuItemTitle>
+                            {/* Tweak icon size to visually fit better with neighbours */}
+                            <ContentCopyIcon
+                                sx={{ "&&": { fontSize: "18px" } }}
+                            />
+                        </MoreMenuItem>
+                    )}
                 {activeAnnotatedFile?.annotation.showEditImage && (
                     <MoreMenuItem onClick={handleEditImage}>
                         <MoreMenuItemTitle>

@@ -119,11 +119,19 @@ type FileViewerPhotoSwipeOptions = Pick<
     /**
      * Called when the user activates the more action on a file.
      *
-     * In addition to the file, callback is also passed a reference to the HTML
-     * DOM more button element.
+     * @param annotatedFile The current (annotated) file.
+     *
+     * @param imageURL If the current file has an associated non-thumbnail image
+     * that is being shown in the viewer, then this is set to the (object) URL
+     * of the image being shown. Specifically, this is the same as the
+     * {@link imageURL} attribute of the {@link ItemData} associated with the
+     * current file.
+     *
+     * @param buttonElement The more button DOM element.
      */
     onMore: (
         annotatedFile: FileViewerAnnotatedFile,
+        imageURL: string | undefined,
         buttonElement: HTMLElement,
     ) => void;
 };
@@ -598,7 +606,11 @@ export class FileViewerPhotoSwipe {
                         // See also: `resetMoreMenuButtonOnMenuClose`.
                         buttonElement.setAttribute("aria-controls", moreMenuID);
                         buttonElement.setAttribute("aria-expanded", true);
-                        onMore(currentAnnotatedFile(), buttonElement);
+                        onMore(
+                            currentAnnotatedFile(),
+                            pswp.currSlide.content.data.imageURL,
+                            buttonElement,
+                        );
                     },
                 });
             }
