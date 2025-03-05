@@ -6,7 +6,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/utils/debouncer.dart';
+import 'package:photos/utils/standalone/debouncer.dart';
 
 class ToggleSwitchWidget extends StatefulWidget {
   final BoolCallBack value;

@@ -16,7 +16,7 @@ import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/tools/debug/path_storage_viewer.dart';
-import 'package:photos/utils/directory_content.dart';
+import 'package:photos/utils/standalone/directory_content.dart';
 
 class AppStorageViewer extends StatefulWidget {
   const AppStorageViewer({super.key});

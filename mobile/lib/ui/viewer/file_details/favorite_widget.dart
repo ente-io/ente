@@ -8,7 +8,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/favorites_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/utils/toast_util.dart";
+import "package:photos/ui/notification/toast.dart";
 
 class FavoriteWidget extends StatefulWidget {
   final EnteFile file;

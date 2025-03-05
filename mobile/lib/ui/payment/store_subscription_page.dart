@@ -22,14 +22,14 @@ import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import "package:photos/ui/payment/view_add_on_widget.dart";
 import "package:photos/ui/tabs/home_widget.dart";
-import "package:photos/utils/data_util.dart";
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/toast_util.dart';
+import "package:photos/utils/standalone/data.dart";
 import 'package:url_launcher/url_launcher_string.dart';
 
 class StoreSubscriptionPage extends StatefulWidget {

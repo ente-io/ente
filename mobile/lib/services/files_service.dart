@@ -18,7 +18,7 @@ import "package:photos/services/ignored_files_service.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/standalone/date_time.dart';
 
 class FilesService {
   late Dio _enteDio;

@@ -18,9 +18,9 @@ import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
-import "package:photos/utils/date_time_util.dart";
-import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
+import "package:photos/utils/standalone/date_time.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 typedef GalleryLoader = Future<FileLoadResult> Function(

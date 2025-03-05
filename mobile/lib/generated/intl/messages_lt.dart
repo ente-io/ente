@@ -1777,9 +1777,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "yourSubscriptionHasExpired":
             MessageLookupByLibrary.simpleMessage("Jūsų prenumerata baigėsi."),
         "yourVerificationCodeHasExpired": MessageLookupByLibrary.simpleMessage(
-            "Jūsų patvirtinimo kodas nebegaliojantis."),
-        "youveNoDuplicateFilesThatCanBeCleared":
-            MessageLookupByLibrary.simpleMessage(
-                "Neturite dubliuotų failų, kuriuos būtų galima išvalyti.")
+            "Jūsų patvirtinimo kodas nebegaliojantis.")
       };
 }

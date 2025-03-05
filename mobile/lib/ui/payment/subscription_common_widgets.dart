@@ -8,7 +8,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import 'package:photos/ui/payment/billing_questions_widget.dart';
-import 'package:photos/utils/data_util.dart';
+import 'package:photos/utils/standalone/data.dart';
 
 class SubscriptionHeaderWidget extends StatefulWidget {
   final bool? isOnboarding;
@@ -281,7 +281,9 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                       switchOutCurve: Curves.easeInOutExpo,
                       child: Text(
                         key: ValueKey(_isYearly),
-                        _isYearly ? S.of(context).yearly : S.of(context).monthly,
+                        _isYearly
+                            ? S.of(context).yearly
+                            : S.of(context).monthly,
                         style: textTheme.body,
                       ),
                     ),
