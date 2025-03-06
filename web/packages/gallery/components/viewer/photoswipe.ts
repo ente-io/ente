@@ -303,7 +303,7 @@ export class FileViewerPhotoSwipe {
          * Apart from a date, this can also be:
          *
          * - "already-hidden" if controls have already been hidden, say by a
-         *   bgClickAction.
+         *   bgClickAction or our keyboard shortcut.
          *
          * - "auto-hidden" if controls were hidden by us because of inactivity.
          */
@@ -316,6 +316,8 @@ export class FileViewerPhotoSwipe {
             pswp.element.classList.add("pswp--ui-visible");
         const hideUIControls = () =>
             pswp.element.classList.remove("pswp--ui-visible");
+        const toggleUIControls = () =>
+            pswp.element.classList.toggle("pswp--ui-visible");
 
         // Return true if the current keyboard focus is on any of the UI
         // controls (e.g. as a result of user tabbing through them).
@@ -324,9 +326,9 @@ export class FileViewerPhotoSwipe {
             if (fv && !fv.classList.contains("pswp")) {
                 return true;
             }
-            // TODO(PS): Commented during testing
-            // return false;
-            return true;
+            return false;
+            // TODO(PS): Remove me
+            // return true;
         };
 
         // Provide data about slides to PhotoSwipe via callbacks
@@ -800,6 +802,9 @@ export class FileViewerPhotoSwipe {
                     case "d":
                         cb = panner(lkey);
                         break;
+                    case "h":
+                        cb = toggleUIControls;
+                        break;
                     case "l":
                         cb = handleToggleFavoriteIfEnabled;
                         break;
@@ -816,6 +821,11 @@ export class FileViewerPhotoSwipe {
             }
 
             cb?.();
+
+            // Undo auto hide when the user presses tab to move focus.
+            if (key == "Tab") {
+                if (lastActivityDate == "auto-hidden") showUIControls();
+            }
         });
 
         // Let our data source know that we're about to open.
@@ -828,15 +838,17 @@ export class FileViewerPhotoSwipe {
         autoHideCheckIntervalID = setInterval(() => {
             if (lastActivityDate == "already-hidden") return;
             if (lastActivityDate == "auto-hidden") return;
-            if (Date.now() - lastActivityDate.getTime() > 5000 /* ~5s */) {
-                if (areUIControlsVisible() && !isFocusedOnUIControl()) {
-                    hideUIControls();
-                    lastActivityDate = "auto-hidden";
+            if (Date.now() - lastActivityDate.getTime() > 9000 /* ~10s */) {
+                if (areUIControlsVisible()) {
+                    if (!isFocusedOnUIControl()) {
+                        hideUIControls();
+                        lastActivityDate = "auto-hidden";
+                    }
                 } else {
                     lastActivityDate = "already-hidden";
                 }
             }
-        }, 1500);
+        }, 3000);
     }
 
     /**

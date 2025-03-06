@@ -938,7 +938,10 @@ const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
             <Shortcut action="Previous, Next" shortcut="←, →" />
             <Shortcut action="Zoom" shortcut="Mouse scroll, Pinch" />
             <Shortcut action="Zoom preset" shortcut="Z, Tap inside image" />
-            <Shortcut action="Toggle controls" shortcut="Tap outside image" />
+            <Shortcut
+                action="Toggle controls"
+                shortcut="H, Tap outside image"
+            />
             <Shortcut action="Pan" shortcut="W / A / S / D, Drag" />
             <Shortcut action="Toggle favorite" shortcut="L" />
             <Shortcut action="View info" shortcut="I" />
