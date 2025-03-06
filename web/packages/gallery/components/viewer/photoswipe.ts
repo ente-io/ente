@@ -190,32 +190,6 @@ export class FileViewerPhotoSwipe {
      * The PhotoSwipe instance which we wrap.
      */
     private pswp: PhotoSwipe;
-    /**
-     * The options with which we were initialized.
-     */
-    private opts: Pick<FileViewerPhotoSwipeOptions, "disableDownload">;
-    /**
-     * An interval that invokes a periodic check of whether we should the hide
-     * controls if the user does not perform any pointer events for a while.
-     */
-    private autoHideCheckIntervalId: ReturnType<typeof setTimeout> | undefined;
-    /**
-     * The time the last activity occurred. Used in tandem with
-     * {@link autoHideCheckIntervalId} to implement the auto hiding of controls
-     * when the user stops moving the pointer for a while.
-     *
-     * Apart from a date, this can also be:
-     *
-     * - "already-hidden" if controls have already been hidden, say by a
-     *   bgClickAction.
-     *
-     * - "auto-hidden" if controls were hidden by us because of inactivity.
-     */
-    private lastActivityDate: Date | "auto-hidden" | "already-hidden";
-    /**
-     * IDs of files for which a there is a favorite update in progress.
-     */
-    private pendingFavoriteUpdates = new Set<number>();
 
     constructor({
         initialIndex,
@@ -228,9 +202,6 @@ export class FileViewerPhotoSwipe {
         onDownload,
         onMore,
     }: FileViewerPhotoSwipeOptions) {
-        this.opts = { disableDownload };
-        this.lastActivityDate = new Date();
-
         const pswp = new PhotoSwipe({
             // Opaque background.
             bgOpacity: 1,
@@ -316,6 +287,56 @@ export class FileViewerPhotoSwipe {
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
 
+        // Toggle controls infrastructure
+
+        /**
+         * An interval that invokes a periodic check of whether we should the hide
+         * controls if the user does not perform any pointer events for a while.
+         */
+        let autoHideCheckIntervalID: ReturnType<typeof setTimeout> | undefined;
+
+        /**
+         * The time the last activity occurred. Used in tandem with
+         * {@link autoHideCheckIntervalID} to implement the auto hiding of controls
+         * when the user stops moving the pointer for a while.
+         *
+         * Apart from a date, this can also be:
+         *
+         * - "already-hidden" if controls have already been hidden, say by a
+         *   bgClickAction.
+         *
+         * - "auto-hidden" if controls were hidden by us because of inactivity.
+         */
+        let lastActivityDate: Date | "auto-hidden" | "already-hidden" =
+            new Date();
+
+        const areUIControlsVisible = () =>
+            pswp.element.classList.contains("pswp--ui-visible");
+        const showUIControls = () =>
+            pswp.element.classList.add("pswp--ui-visible");
+        const hideUIControls = () =>
+            pswp.element.classList.add("pswp--ui-visible");
+
+        // Return true if the current keyboard focus is on any of the UI controls.
+        //
+        // By default, the pswp root element takes up the keyboard focus, so we
+        // check if the currently focused element is still the PhotoSwipe dialog
+        // (if so, this means we're not focused on a specific control).
+        //
+        // Otherwise, the user has focused (e.g. via the tab key on the
+        // keyboard) to a specific UI element.
+        const isFocusedOnUIControl = () => {
+            const isDefaultFocus = document
+                .querySelector(":focus-visible")
+                ?.classList.contains("pswp");
+            if (!isDefaultFocus) {
+                return false;
+            }
+            // TODO(PS): Commented during testing
+            // return true;
+            return false;
+        };
+
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
 
@@ -331,7 +352,6 @@ export class FileViewerPhotoSwipe {
 
             const { videoURL, ...rest } = itemData;
             if (itemData.fileType === FileType.video && videoURL) {
-                const disableDownload = !!this.opts.disableDownload;
                 itemData = {
                     ...rest,
                     html: videoHTML(videoURL, disableDownload),
@@ -340,8 +360,8 @@ export class FileViewerPhotoSwipe {
 
             log.debug(() => ["[viewer]", { index, itemData, file }]);
 
-            if (this.lastActivityDate != "already-hidden")
-                this.lastActivityDate = new Date();
+            if (lastActivityDate != "already-hidden")
+                lastActivityDate = new Date();
 
             return itemData;
         });
@@ -358,7 +378,9 @@ export class FileViewerPhotoSwipe {
             // There was a pointer event. We don't care which one, we just use
             // this as a hook to show the UI again (if needed), and update our
             // last activity date.
-            this.onPointerActivity();
+            if (lastActivityDate == "auto-hidden") showUIControls();
+            if (lastActivityDate != "already-hidden")
+                lastActivityDate = new Date();
             return preventPointerEvent;
         });
 
@@ -438,7 +460,7 @@ export class FileViewerPhotoSwipe {
         );
 
         pswp.on("change", (e) => {
-            const itemData = this.pswp.currSlide.content.data;
+            const itemData = pswp.currSlide.content.data;
             updateFileInfoExifIfNeeded(itemData);
         });
 
@@ -450,7 +472,7 @@ export class FileViewerPhotoSwipe {
         let captionElement: HTMLElement | undefined;
 
         pswp.on("change", (e) => {
-            const itemData = this.pswp.currSlide.content.data;
+            const itemData = pswp.currSlide.content.data;
 
             // Clear existing listeners, if any.
             if (videoElement && onVideoPlayback) {
@@ -482,7 +504,10 @@ export class FileViewerPhotoSwipe {
         // The PhotoSwipe dialog has being closed and the animations have
         // completed.
         pswp.on("destroy", () => {
-            this.clearAutoHideIntervalIfNeeded();
+            if (autoHideCheckIntervalID) {
+                clearInterval(autoHideCheckIntervalID);
+                autoHideCheckIntervalID = undefined;
+            }
             fileViewerDidClose();
             // Let our parent know that we have been closed.
             onClose();
@@ -493,13 +518,18 @@ export class FileViewerPhotoSwipe {
         let favoriteButtonElement: HTMLButtonElement | undefined;
         let unfavoriteButtonElement: HTMLButtonElement | undefined;
 
+        /**
+         * IDs of files for which a there is a favorite update in progress.
+         */
+        const pendingFavoriteUpdates = new Set<number>();
+
         const toggleFavorite = async () => {
             const af = currentAnnotatedFile();
-            this.pendingFavoriteUpdates.add(af.file.id);
+            pendingFavoriteUpdates.add(af.file.id);
             favoriteButtonElement.disabled = true;
             unfavoriteButtonElement.disabled = true;
             await delegate.toggleFavorite(af);
-            this.pendingFavoriteUpdates.delete(af.file.id);
+            pendingFavoriteUpdates.delete(af.file.id);
             // TODO: We reload the entire slide instead of just updating
             // the button state. This is because there are two buttons,
             // instead of a single button toggling between two states
@@ -576,7 +606,7 @@ export class FileViewerPhotoSwipe {
                         buttonElement,
                         af.annotation.showFavorite && isFavorite === value,
                     );
-                    buttonElement.disabled = this.pendingFavoriteUpdates.has(
+                    buttonElement.disabled = pendingFavoriteUpdates.has(
                         af.file.id,
                     );
                 };
@@ -803,9 +833,20 @@ export class FileViewerPhotoSwipe {
         // the class "pswp".
         pswp.init();
 
-        this.autoHideCheckIntervalId = setInterval(() => {
-            this.autoHideIfInactive();
-        }, 1000);
+        autoHideCheckIntervalID = setInterval(() => {
+            if (lastActivityDate == "already-hidden") return;
+            if (lastActivityDate == "auto-hidden") return;
+            if (Date.now() - lastActivityDate.getTime() > 5000 /* 5s */) {
+                if (areUIControlsVisible()) {
+                    if (!isFocusedOnUIControl()) {
+                        hideUIControls();
+                        lastActivityDate = "auto-hidden";
+                    }
+                } else {
+                    lastActivityDate = "already-hidden";
+                }
+            }
+        }, 2000);
     }
 
     /**
@@ -831,59 +872,6 @@ export class FileViewerPhotoSwipe {
      */
     refreshCurrentSlideContent() {
         this.pswp.refreshSlideContent(this.pswp.currIndex);
-    }
-
-    private clearAutoHideIntervalIfNeeded() {
-        if (this.autoHideCheckIntervalId) {
-            clearInterval(this.autoHideCheckIntervalId);
-            this.autoHideCheckIntervalId = undefined;
-        }
-    }
-
-    private onPointerActivity() {
-        if (this.lastActivityDate == "already-hidden") return;
-        if (this.lastActivityDate == "auto-hidden") this.showUIControls();
-        this.lastActivityDate = new Date();
-    }
-
-    private autoHideIfInactive() {
-        if (this.lastActivityDate == "already-hidden") return;
-        if (this.lastActivityDate == "auto-hidden") return;
-        if (Date.now() - this.lastActivityDate.getTime() > 5000 /* 5s */) {
-            if (this.areUIControlsVisible()) {
-                this.hideUIControlsIfNotFocused();
-                this.lastActivityDate = "auto-hidden";
-            } else {
-                this.lastActivityDate = "already-hidden";
-            }
-        }
-    }
-
-    private areUIControlsVisible() {
-        return this.pswp.element.classList.contains("pswp--ui-visible");
-    }
-
-    private showUIControls() {
-        this.pswp.element.classList.add("pswp--ui-visible");
-    }
-
-    private hideUIControlsIfNotFocused() {
-        // Check if the current keyboard focus is on any of the UI controls.
-        //
-        // By default, the pswp root element takes up the keyboard focus, so we
-        // check if the currently focused element is still the PhotoSwipe dialog
-        // (if so, this means we're not focused on a specific control).
-        const isDefaultFocus = document
-            .querySelector(":focus-visible")
-            ?.classList.contains("pswp");
-        if (!isDefaultFocus) {
-            // The user focused (e.g. via keyboard tabs) to a specific UI
-            // element. Skip auto hiding.
-            return;
-        }
-
-        // TODO(PS): Commented during testing
-        // this.pswp.element.classList.remove("pswp--ui-visible");
     }
 }
 
