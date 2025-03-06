@@ -87,7 +87,9 @@ export interface FileViewerPhotoSwipeDelegate {
      * so the delegate must validate and only then perform the action if it is
      * appropriate.
      */
-    performKeyAction: (action: "delete" | "copy" | "toggle-fullscreen") => void;
+    performKeyAction: (
+        action: "delete" | "copy" | "toggle-fullscreen" | "help",
+    ) => void;
 }
 
 type FileViewerPhotoSwipeOptions = Pick<
@@ -724,6 +726,8 @@ export class FileViewerPhotoSwipe {
         const handleToggleFullscreen = () =>
             delegate.performKeyAction("toggle-fullscreen");
 
+        const handleHelp = () => delegate.performKeyAction("help");
+
         pswp.on("keydown", (pswpEvent) => {
             // Ignore keyboard events when we do not have "focus".
             if (delegate.shouldIgnoreKeyboardEvent()) {
@@ -747,16 +751,24 @@ export class FileViewerPhotoSwipe {
             // since that should match the user's expectation.
 
             let cb: (() => void) | undefined;
-            if (e.shiftKey || e.altKey || e.metaKey || e.ctrlKey) {
-                // Ignore except using Ctrl/Cmd-C for copy.
-                if ((e.metaKey || e.ctrlKey) && lkey == "c") {
-                    cb = handleCopy;
-                }
+            if (e.shiftKey) {
+                // Ignore except "?" for help.
+                if (key == "?") cb = handleHelp;
+            } else if (e.altKey) {
+                // Ignore.
+            } else if (e.metaKey || e.ctrlKey) {
+                // Ignore except Ctrl/Cmd-C for copy
+                if (lkey == "c") cb = handleCopy;
             } else {
                 switch (key) {
                     case "Backspace":
                     case "Delete":
                         cb = handleDelete;
+                        break;
+                    // We check for "?"" both with an without shift, since some
+                    // keyboards might have it emittable without shift.
+                    case "?":
+                        cb = handleHelp;
                         break;
                 }
                 switch (lkey) {

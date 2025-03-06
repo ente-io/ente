@@ -662,12 +662,16 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 case "toggle-fullscreen":
                     handleToggleFullscreen();
                     break;
+                case "help":
+                    handleShortcuts();
+                    break;
             }
         },
         [
             handleConfirmDelete,
             handleCopyImage,
             handleToggleFullscreen,
+            handleShortcuts,
             activeAnnotatedFile,
             canCopyImage,
         ],
@@ -942,6 +946,7 @@ const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
             <Shortcut action="Delete" shortcut="Delete, Backspace" />
             <Shortcut action="Copy as PNG" shortcut="^C / ⌘C" />
             <Shortcut action="Toggle fullscreen" shortcut="F" />
+            <Shortcut action="Show shortcuts" shortcut="?" />
         </ShortcutsContent>
     </Dialog>
 );
