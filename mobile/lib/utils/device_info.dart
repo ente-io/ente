@@ -14,7 +14,7 @@ Future<bool> isAndroidSDKVersionLowerThan(int inputSDK) async {
   }
 }
 
-Future<String?> getDeviceName() async {
+Future<String?> getDeviceInfo() async {
   try {
     if (Platform.isIOS) {
       final IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
@@ -22,7 +22,7 @@ Future<String?> getDeviceName() async {
     } else if (Platform.isAndroid) {
       final AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
 
-      return "${androidInfo.brand} ${androidInfo.model}";
+      return "${androidInfo.brand} ${androidInfo.model} Android ${androidInfo.version.release}";
     } else {
       return "Not iOS or Android";
     }
