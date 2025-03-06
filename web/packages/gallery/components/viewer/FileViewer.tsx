@@ -704,6 +704,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
             };
         }
     }, [
+        // Be careful with adding new dependencies here, or changing the source
+        // of existing ones. If any of these dependencies change unnecessarily,
+        // then the file viewer will start getting reloaded even when it is
+        // already open.
         open,
         onClose,
         user,
@@ -906,9 +910,9 @@ const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
             <Shortcut action="Pan" shortcut="WASD, Drag" />
             <Shortcut action="Toggle favorite" shortcut="L" />
             <Shortcut action="View info" shortcut="I" />
-            <Shortcut action="Download" shortcut="^D, ⌘D" />
+            <Shortcut action="Download" shortcut="K" />
             <Shortcut action="Delete" shortcut="Delete, Backspace" />
-            <Shortcut action="Copy as PNG" shortcut="^C, ⌘C" />
+            <Shortcut action="Copy as PNG" shortcut="^C / ⌘C" />
             <Shortcut action="Toggle fullscreen" shortcut="F" />
         </ShortcutsContent>
     </Dialog>

@@ -451,7 +451,7 @@ export class FileViewerPhotoSwipe {
         // State needed to hide the caption when a video is playing.
         let videoElement: HTMLVideoElement | undefined;
         let onVideoPlayback: EventHandler | undefined;
-        let captionElementRef: HTMLElement | undefined;
+        let captionElement: HTMLElement | undefined;
 
         pswp.on("change", (e) => {
             const itemData = this.pswp.currSlide.content.data;
@@ -466,7 +466,7 @@ export class FileViewerPhotoSwipe {
             }
 
             // Reset.
-            showIf(captionElementRef, true);
+            showIf(captionElement, true);
 
             // Attach new listeners, if needed.
             if (itemData.fileType == FileType.video) {
@@ -474,7 +474,7 @@ export class FileViewerPhotoSwipe {
                 videoElement = contentElement.getElementsByTagName("video")[0];
                 if (videoElement) {
                     onVideoPlayback = (e) => {
-                        showIf(captionElementRef, !!videoElement?.paused);
+                        showIf(captionElement, !!videoElement?.paused);
                     };
                     videoElement.addEventListener("play", onVideoPlayback);
                     videoElement.addEventListener("pause", onVideoPlayback);
@@ -594,10 +594,12 @@ export class FileViewerPhotoSwipe {
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
                     onClick: handleToggleFavorite,
-                    onInit: (buttonElement) =>
+                    onInit: (buttonElement) => {
+                        favoriteButtonElement = buttonElement;
                         pswp.on("change", () =>
                             showFavoriteIf(buttonElement, false),
-                        ),
+                        );
+                    },
                 });
                 pswp.ui.registerElement({
                     name: "unfavorite",
@@ -606,10 +608,12 @@ export class FileViewerPhotoSwipe {
                     isButton: true,
                     html: createPSRegisterElementIconHTML("unfavorite"),
                     onClick: handleToggleFavorite,
-                    onInit: (buttonElement) =>
+                    onInit: (buttonElement) => {
+                        unfavoriteButtonElement = buttonElement;
                         pswp.on("change", () =>
                             showFavoriteIf(buttonElement, true),
-                        ),
+                        );
+                    },
                 });
             } else {
                 // When we don't have a user (i.e. in the context of public
@@ -674,18 +678,16 @@ export class FileViewerPhotoSwipe {
                 order: 30,
                 appendTo: "root",
                 tagName: "p",
-                onInit: (captionElement, pswp) => {
-                    captionElementRef = captionElement;
+                onInit: (element, pswp) => {
+                    captionElement = element;
                     pswp.on("change", () => {
                         const { fileType, alt } = pswp.currSlide.content.data;
-                        captionElement.innerText = alt ?? "";
-                        captionElement.style.visibility = alt
-                            ? "visible"
-                            : "hidden";
+                        element.innerText = alt ?? "";
+                        element.style.visibility = alt ? "visible" : "hidden";
                         // Add extra offset for video captions so that they do
                         // not overlap with the video controls. The constant is
                         // an ad-hoc value that looked okay-ish across browsers.
-                        captionElement.style.bottom =
+                        element.style.bottom =
                             fileType === FileType.video ? "36px" : "0";
                     });
                 },
@@ -708,13 +710,17 @@ export class FileViewerPhotoSwipe {
             const d = 80;
             switch (key) {
                 case "w":
-                    slide.pan.y -= d;
+                    slide.pan.y += d;
+                    break;
                 case "a":
                     slide.pan.x += d;
+                    break;
                 case "s":
-                    slide.pan.x += d;
+                    slide.pan.y -= d;
+                    break;
                 case "d":
-                    slide.pan.y += d;
+                    slide.pan.x -= d;
+                    break;
             }
             slide.panTo(slide.pan.x, slide.pan.y);
         };
@@ -734,17 +740,30 @@ export class FileViewerPhotoSwipe {
             // Even though we ignore shift, Caps lock might still be on.
             const key = e.key.toLowerCase();
 
+            console.log(
+                e,
+                key,
+                e.shiftKey,
+                e.altKey,
+                e.metaKey,
+                e.ctrlKey,
+                e.code,
+            );
+
+            // Keep the keybindings such that they don't use modifiers, because
+            // these are more likely to interfere with browser shortcuts.
+            //
+            // For example, Cmd-D adds a bookmark, which is why we don't use it
+            // for download.
+            //
+            // An exception is Ctrl/Cmd-C, which we intercept to copy the image
+            // since that should match the user's expectation.
+
             let cb: (() => void) | undefined;
-            if (e.shiftKey || e.altKey || e.metaKey) {
-                // ignore
-            } else if (e.ctrlKey) {
-                switch (key) {
-                    case "d":
-                        cb = handleDownloadIfEnabled;
-                        break;
-                    case "c":
-                        cb = handleCopy;
-                        break;
+            if (e.shiftKey || e.altKey || e.metaKey || e.ctrlKey) {
+                // Ignore except using Ctrl/Cmd-D for copy.
+                if ((e.metaKey || e.ctrlKey) && key == "c") {
+                    cb = handleCopy;
                 }
             } else {
                 switch (key) {
@@ -759,6 +778,13 @@ export class FileViewerPhotoSwipe {
                         break;
                     case "i":
                         cb = handleViewInfo;
+                        break;
+                    case "k":
+                        cb = handleDownloadIfEnabled;
+                        break;
+                    case "Backspace":
+                    case "Delete":
+                        cb = handleDelete;
                         break;
                     case "f":
                         cb = handleToggleFullscreen;
