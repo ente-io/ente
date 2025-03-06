@@ -504,7 +504,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               secret,
               display,
               isStreamCode ? Code.steamDigits : digits!,
-              _algorithm,
+              algorithm: _algorithm,
             )
           : widget.code!.copyWith(
               account: account,

@@ -107,7 +107,6 @@ Future<int?> _processBitwardenExportFile(
           secret,
           null,
           Code.steamDigits,
-          null,
         );
       } else {
         var issuer = item['name'] ?? '';
@@ -119,7 +118,6 @@ Future<int?> _processBitwardenExportFile(
           totp,
           null,
           Code.defaultDigits,
-          null,
         );
       }
       if (folderID != null && folderIdToName.containsKey(folderID)) {
