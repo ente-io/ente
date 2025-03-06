@@ -182,7 +182,12 @@ body {
     display: initial;
 }
 
-/* Scale the built in controls to better fit our requirements */
+/* Transfrom the built in controls to better fit our requirements */
+
+.pswp-ente .pswp__counter {
+  margin-inline-end: 6px;
+}
+
 .pswp-ente .pswp__button--zoom .pswp__icn {
     transform: scale(0.85);
 }

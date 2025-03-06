@@ -326,9 +326,9 @@ export class FileViewerPhotoSwipe {
             if (fv && !fv.classList.contains("pswp")) {
                 return true;
             }
-            return false;
             // TODO(PS): Remove me
-            // return true;
+            // return false;
+            return true;
         };
 
         // Provide data about slides to PhotoSwipe via callbacks
@@ -557,25 +557,27 @@ export class FileViewerPhotoSwipe {
         // https://photoswipe.com/adding-ui-elements/#uiregisterelement-api
         //
         // The "order" prop is used to position items. Some landmarks:
-        // - counter: 5
+        // - counter: 3 (default is 5)
+        // - zoom: 4 (default is 10).
         // - preloader: 7
-        // - zoom: 10
         // - close: 20
         pswp.on("uiRegister", () => {
             // Move the zoom button to the left so that it is in the same place
             // as the other items like preloader or the error indicator that
-            // come and go as files get loaded.
+            // come and go as files get loaded. Also modify the default orders
+            // so that there is more space for the error / live indicators.
             //
             // We cannot use the PhotoSwipe "uiElement" filter to modify the
             // order since that only allows us to edit the DOM element, not the
             // underlying UI element data.
-            pswp.ui.uiElementsData.find((e) => e.name == "zoom").order = 6;
+            pswp.ui.uiElementsData.find((e) => e.name == "counter").order = 3;
+            pswp.ui.uiElementsData.find((e) => e.name == "zoom").order = 4;
 
             // Register our custom elements...
 
             pswp.ui.registerElement({
                 name: "error",
-                order: 6,
+                order: 5,
                 html: createPSRegisterElementIconHTML("error"),
                 onInit: (errorElement, pswp) => {
                     pswp.on("change", () => {
@@ -586,6 +588,48 @@ export class FileViewerPhotoSwipe {
                             !!fetchFailed && !isContentLoading,
                         );
                     });
+                },
+            });
+
+            pswp.ui.registerElement({
+                name: "live",
+                // TODO(PS):
+                title: pt("Toggle live"),
+                // Safe to use the same order, since this will only be shown if
+                // there are no errors.
+                order: 5,
+                isButton: true,
+                html: createPSRegisterElementIconHTML("live"),
+                onInit: (buttonElement) => {
+                    // buttonElement.setAttribute("id", moreButtonID);
+                    // buttonElement.setAttribute("aria-haspopup", "true");
+                },
+                onClick: (e) => {
+                    // const buttonElement = e.target;
+                    // See also: `resetMoreMenuButtonOnMenuClose`.
+                    // buttonElement.setAttribute("aria-controls", moreMenuID);
+                    // buttonElement.setAttribute("aria-expanded", true);
+                    // onMore(buttonElement);
+                },
+            });
+
+            pswp.ui.registerElement({
+                name: "vol",
+                // TODO(PS):
+                title: pt("Toggle audio"),
+                order: 6,
+                isButton: true,
+                html: createPSRegisterElementIconHTML("vol"),
+                onInit: (buttonElement) => {
+                    // buttonElement.setAttribute("id", moreButtonID);
+                    // buttonElement.setAttribute("aria-haspopup", "true");
+                },
+                onClick: (e) => {
+                    // const buttonElement = e.target;
+                    // See also: `resetMoreMenuButtonOnMenuClose`.
+                    // buttonElement.setAttribute("aria-controls", moreMenuID);
+                    // buttonElement.setAttribute("aria-expanded", true);
+                    // onMore(buttonElement);
                 },
             });
 
@@ -744,7 +788,7 @@ export class FileViewerPhotoSwipe {
         const handleToggleUIControls = () => {
             toggleUIControls();
             lastActivityDate = new Date();
-        }
+        };
 
         // Some actions routed via the delegate
 
