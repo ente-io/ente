@@ -326,9 +326,7 @@ export class FileViewerPhotoSwipe {
             if (fv && !fv.classList.contains("pswp")) {
                 return true;
             }
-            // TODO(PS): Remove me
-            // return false;
-            return true;
+            return false;
         };
 
         // Provide data about slides to PhotoSwipe via callbacks
@@ -903,7 +901,11 @@ export class FileViewerPhotoSwipe {
             } else {
                 switch (key) {
                     case " ":
-                        cb = handleTogglePlaybackIfPossible;
+                        // Space activates controls when they're focused, so
+                        // only act on it if no specific control is focused.
+                        if (!isFocusedOnUIControl()) {
+                            cb = handleTogglePlaybackIfPossible;
+                        }
                         break;
                     case "Backspace":
                     case "Delete":
@@ -958,6 +960,8 @@ export class FileViewerPhotoSwipe {
         autoHideCheckIntervalID = setInterval(() => {
             if (lastActivityDate == "already-hidden") return;
             if (lastActivityDate == "auto-hidden") return;
+            // TODO(PS): Disable for now.
+            return;
             if (Date.now() - lastActivityDate.getTime() > 9000 /* ~10s */) {
                 if (areUIControlsVisible()) {
                     if (!isFocusedOnUIControl()) {
