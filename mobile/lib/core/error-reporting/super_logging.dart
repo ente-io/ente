@@ -201,8 +201,8 @@ class SuperLogging {
     }
 
     unawaited(
-      getDeviceName().then((name) {
-        $.info("Device name: $name");
+      getDeviceInfo().then((info) {
+        $.info("Device Info: $info");
       }),
     );
 
