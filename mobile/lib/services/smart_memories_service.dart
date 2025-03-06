@@ -34,6 +34,13 @@ import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
 
+class MemoriesResult {
+  final List<SmartMemory> memories;
+  final List<BaseLocation> baseLocations;
+
+  MemoriesResult(this.memories, this.baseLocations);
+}
+
 class SmartMemoriesService {
   final _logger = Logger("SmartMemoriesService");
   final _memoriesDB = MemoriesDB.instance;
@@ -73,7 +80,7 @@ class SmartMemoriesService {
   }
 
   // One general method to get all memories, which calls on internal methods for each separate memory type
-  Future<List<SmartMemory>> calcMemories(
+  Future<MemoriesResult> calcMemories(
     DateTime now,
     MemoriesCache oldCache,
   ) async {
@@ -94,7 +101,7 @@ class SmartMemoriesService {
       _logger.finest("All files length: ${allFiles.length}");
 
       // Trip memories
-      final tripMemories =
+      final (tripMemories, bases) =
           await _getTripsResults(allFiles, now, oldCache.tripsShownLogs);
       _deductUsedMemories(allFiles, tripMemories);
       memories.addAll(tripMemories);
@@ -109,10 +116,10 @@ class SmartMemoriesService {
       // Filler memories
       final fillerMemories = await _getFillerResults(allFiles, now);
       memories.addAll(fillerMemories);
-      return memories;
+      return MemoriesResult(memories, bases);
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
-      return [];
+      return MemoriesResult(<SmartMemory>[], <BaseLocation>[]);
     }
   }
 
@@ -476,7 +483,7 @@ class SmartMemoriesService {
     return memoryResults;
   }
 
-  Future<List<TripMemory>> _getTripsResults(
+  Future<(List<TripMemory>, List<BaseLocation>)> _getTripsResults(
     Iterable<EnteFile> allFiles,
     DateTime currentTime,
     List<TripsShownLog> shownTrips,
@@ -484,14 +491,13 @@ class SmartMemoriesService {
     final List<TripMemory> memoryResults = [];
     final Iterable<LocalEntity<LocationTag>> locationTagEntities =
         (await locationService.getLocationTags());
-    if (allFiles.isEmpty) return [];
+    if (allFiles.isEmpty) return (<TripMemory>[], <BaseLocation>[]);
     final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
     final windowEnd =
         currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
     final currentMonth = currentTime.month;
     final cutOffTime = currentTime.subtract(const Duration(days: 365));
 
-    const baseRadius = 0.6;
     const tripRadius = 100.0;
     const overlapRadius = 10.0;
 
@@ -767,26 +773,27 @@ class SmartMemoriesService {
     }
 
     // For now for testing let's just surface all base locations
-    for (final baseLocation in baseLocations) {
-      String name = "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
-      final String? locationName = _tryFindLocationName(
-        Memory.fromFiles(baseLocation.files, _seenTimes),
-        base: true,
-      );
-      if (locationName != null) {
-        name =
-            "$locationName (Base, ${baseLocation.isCurrentBase ? 'current' : 'old'})";
-      }
-      memoryResults.add(
-        TripMemory(
-          Memory.fromFiles(baseLocation.files, _seenTimes),
-          name,
-          0,
-          0,
-          baseLocation.location,
-        ),
-      );
-    }
+    // For now surface these on the location section TODO: lau: remove internal flag title
+    // for (final baseLocation in baseLocations) {
+    //   String name = "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
+    //   final String? locationName = _tryFindLocationName(
+    //     Memory.fromFiles(baseLocation.files, _seenTimes),
+    //     base: true,
+    //   );
+    //   if (locationName != null) {
+    //     name =
+    //         "$locationName (Base, ${baseLocation.isCurrentBase ? 'current' : 'old'})";
+    //   }
+    //   memoryResults.add(
+    //     TripMemory(
+    //       Memory.fromFiles(baseLocation.files, _seenTimes),
+    //       name,
+    //       0,
+    //       0,
+    //       baseLocation.location,
+    //     ),
+    //   );
+    // }
 
     // For now we surface the two most recent trips of current month, and if none, the earliest upcoming redundant trip
     // Group the trips per month and then year
@@ -912,7 +919,7 @@ class SmartMemoriesService {
         }
       }
     }
-    return memoryResults;
+    return (memoryResults, baseLocations);
   }
 
   Future<List<TimeMemory>> _onThisDayOrWeekResults(

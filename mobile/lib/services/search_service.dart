@@ -15,6 +15,7 @@ import "package:photos/db/ml/db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/models/base_location.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/file/extensions/file_props.dart";
@@ -23,7 +24,6 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
-import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/search/album_search_result.dart';
@@ -1049,6 +1049,42 @@ class SearchService {
           );
         }
       }
+      // Add the found base locations from the location/memories service
+      // TODO: lau: Add base location names
+      if (limit == null || tagSearchResults.length < limit) {
+        for (final BaseLocation base in locationService.baseLocations) {
+          final a = (baseRadius * scaleFactor(base.location.latitude!)) /
+              kilometersPerDegree;
+          const b = baseRadius / kilometersPerDegree;
+          tagSearchResults.add(
+            GenericSearchResult(
+              ResultType.location,
+              "Base",
+              base.files,
+              onResultTap: (ctx) {
+                showAddLocationSheet(
+                  ctx,
+                  base.location,
+                  name: "Base",
+                  radius: baseRadius,
+                );
+              },
+              hierarchicalSearchFilter: LocationFilter(
+                locationTag: LocationTag(
+                  name: "Base",
+                  radius: baseRadius,
+                  centerPoint: base.location,
+                  aSquare: a * a,
+                  bSquare: b * b,
+                ),
+                occurrence: kMostRelevantFilter,
+                matchedUploadedIDs: filesToUploadedFileIDs(base.files),
+              ),
+            ),
+          );
+        }
+      }
+
       if (limit == null || tagSearchResults.length < limit) {
         final results =
             await locationService.getFilesInCity(filesWithNoLocTag, '');
@@ -1194,15 +1230,12 @@ class SearchService {
     BuildContext context,
     int? limit,
   ) async {
-    final fakeCache = MemoriesCache(
-      toShowMemories: [],
-      peopleShownLogs: [],
-      tripsShownLogs: [],
-    );
-    final memories =
-        await smartMemoriesService.calcMemories(DateTime.now(), fakeCache);
+    final cache = await memoriesCacheService.debugCacheForTesting();
+    final memoriesResult =
+        await smartMemoriesService.calcMemories(DateTime.now(), cache);
+    locationService.baseLocations = memoriesResult.baseLocations;
     final searchResults = <GenericSearchResult>[];
-    for (final memory in memories) {
+    for (final memory in memoriesResult.memories) {
       final files = Memory.filesFromMemories(memory.memories);
       searchResults.add(
         GenericSearchResult(
