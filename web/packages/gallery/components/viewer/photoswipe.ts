@@ -701,6 +701,24 @@ export class FileViewerPhotoSwipe {
             return element;
         });
 
+        // Pan action handlers
+
+        const panner = (key: "w" | "a" | "s" | "d") => () => {
+            const slide = pswp.currSlide;
+            const d = 80;
+            switch (key) {
+                case "w":
+                    slide.pan.y -= d;
+                case "a":
+                    slide.pan.x += d;
+                case "s":
+                    slide.pan.x += d;
+                case "d":
+                    slide.pan.y += d;
+            }
+            slide.panTo(slide.pan.x, slide.pan.y);
+        };
+
         // Some actions routed via the delegate
 
         const handleDelete = () => delegate.performKeyAction("delete");
@@ -710,21 +728,44 @@ export class FileViewerPhotoSwipe {
         const handleToggleFullscreen = () =>
             delegate.performKeyAction("toggle-fullscreen");
 
-        pswp.on("keydown", (e, z) => {
-            const key = e.originalEvent.key ?? "";
-            const cb = (() => {
-                switch (key.toLowerCase()) {
-                    case "l":
-                        return handleToggleFavoriteIfEnabled;
+        pswp.on("keydown", (_e) => {
+            const e: KeyboardEvent = _e.originalEvent;
+
+            // Even though we ignore shift, Caps lock might still be on.
+            const key = e.key.toLowerCase();
+
+            let cb: (() => void) | undefined;
+            if (e.shiftKey || e.altKey || e.metaKey) {
+                // ignore
+            } else if (e.ctrlKey) {
+                switch (key) {
                     case "d":
-                        return handleDownloadIfEnabled;
-                    case "i":
-                        return handleViewInfo;
-                    case "f":
-                        return handleToggleFullscreen;
+                        cb = handleDownloadIfEnabled;
+                        break;
+                    case "c":
+                        cb = handleCopy;
+                        break;
                 }
-                return undefined;
-            })();
+            } else {
+                switch (key) {
+                    case "w":
+                    case "a":
+                    case "s":
+                    case "d":
+                        cb = panner(key);
+                        break;
+                    case "l":
+                        cb = handleToggleFavoriteIfEnabled;
+                        break;
+                    case "i":
+                        cb = handleViewInfo;
+                        break;
+                    case "f":
+                        cb = handleToggleFullscreen;
+                        break;
+                }
+            }
+
             cb?.();
         });
 
