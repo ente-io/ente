@@ -389,10 +389,6 @@ export class FileViewerPhotoSwipe {
         /**
          * Update the state of the given `videoElement` and the
          * `livePhotoToggleButtonElement` to reflect `livePhotoPlay`.
-         *
-         *  Note that "contentAppend" can get called both before, or after,
-         * "change", so we need to handle both potential sequences for the
-         * initial display of the video.
          */
         const livePhotoUpdatePlayback = (video: HTMLVideoElement) => {
             const button = livePhotoToggleButtonElement;
@@ -423,7 +419,7 @@ export class FileViewerPhotoSwipe {
         };
 
         pswp.on("contentAppend", (e) => {
-            const { fileType, videoURL } = e.content.data;
+            const { fileID, fileType, videoURL } = e.content.data;
             if (fileType !== FileType.livePhoto) return;
             if (!videoURL) return;
 
@@ -446,7 +442,14 @@ export class FileViewerPhotoSwipe {
             video.style.width = img.style.width;
             video.style.height = img.style.height;
 
-            livePhotoUpdatePlayback(video);
+            // "contentAppend" can get called both before, or after, "change",
+            // and we need to handle both potential sequences for the initial
+            // display of the video. Here we handle the case where "change" has
+            // already been called, but now "contentAppend" is happening.
+
+            if (pswp.currSlide.data.fileID == fileID) {
+                livePhotoUpdatePlayback(video);
+            }
         });
 
         /**
