@@ -564,7 +564,6 @@ export class FileViewerPhotoSwipe {
         const handleViewInfo = () => onViewInfo(currentAnnotatedFile());
 
         let favoriteButtonElement: HTMLButtonElement | undefined;
-        let unfavoriteButtonElement: HTMLButtonElement | undefined;
 
         /**
          * IDs of files for which a there is a favorite update in progress.
@@ -574,29 +573,32 @@ export class FileViewerPhotoSwipe {
         const toggleFavorite = async () => {
             const af = currentAnnotatedFile();
             pendingFavoriteUpdates.add(af.file.id);
-            favoriteButtonElement.disabled = true;
-            // unfavoriteButtonElement.disabled = true;
+            updateFavoriteButton();
             await delegate.toggleFavorite(af);
             pendingFavoriteUpdates.delete(af.file.id);
-            favoriteButtonElement.disabled = false;
-            // TODO: We reload the entire slide instead of just updating
-            // the button state. This is because there are two buttons,
-            // instead of a single button toggling between two states
-            // e.g. like the zoom button.
-            //
-            // To fix this, a single button can be achieved by moving
-            // the fill of the heart as a layer.
-            // this.refreshCurrentSlideContent();
             updateFavoriteButton();
         };
 
         const updateFavoriteButton = () => {
+            const button = favoriteButtonElement!;
+
             const af = currentAnnotatedFile();
-            const isFavorite = delegate.isFavorite(af);
-            const fill = document.getElementById("pswp__icn-favorite-fill")!;
-            console.log(fill, isFavorite);
-            fill.style.display = isFavorite ? "initial" : "none";
-            // if (fill) showIf(fill, isFavorite);
+            const showFavorite = af.annotation.showFavorite;
+            showIf(button, showFavorite);
+
+            if (!showFavorite) {
+                // Nothing more to do.
+                return;
+            }
+
+            // Update the button interactivity based on pending requests.
+            button.disabled = pendingFavoriteUpdates.has(af.file.id);
+
+            // Update the fill visibility based on the favorite status.
+            showIf(
+                document.getElementById("pswp__icn-favorite-fill")!,
+                delegate.isFavorite(af),
+            );
         };
 
         const handleToggleFavorite = () => void toggleFavorite();
@@ -703,67 +705,31 @@ export class FileViewerPhotoSwipe {
                 },
             });
 
+            // Only one of these two ("favorite" and "download") will end
+            // up being shown, so they can safely share the same order.
             if (haveUser) {
-                const showFavoriteIf = (
-                    buttonElement: HTMLButtonElement,
-                    value: boolean,
-                ) => {
-                    updateFavoriteButton();
-                    return;
-                    const af = currentAnnotatedFile();
-                    const isFavorite = delegate.isFavorite(af);
-                    showIf(
-                        buttonElement,
-                        af.annotation.showFavorite && isFavorite === value,
-                    );
-                    buttonElement.disabled = pendingFavoriteUpdates.has(
-                        af.file.id,
-                    );
-                };
-
-                // Only one of these two ("favorite" or "unfavorite") will end
-                // up being shown, so they can safely share the same order.
                 pswp.ui.registerElement({
                     name: "favorite",
                     title: pt("Favorite"),
                     order: 11,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
-                    onClick: handleToggleFavorite,
                     onInit: (buttonElement) => {
                         favoriteButtonElement = buttonElement;
-                        pswp.on("change", () =>
-                            showFavoriteIf(buttonElement, false),
-                        );
+                        pswp.on("change", updateFavoriteButton);
                     },
+                    onClick: handleToggleFavorite,
                 });
-                // pswp.ui.registerElement({
-                //     name: "unfavorite",
-                //     title: pt("Favorite"),
-                //     order: 11,
-                //     isButton: true,
-                //     html: createPSRegisterElementIconHTML("unfavorite"),
-                //     onClick: handleToggleFavorite,
-                //     onInit: (buttonElement) => {
-                //         unfavoriteButtonElement = buttonElement;
-                //         pswp.on("change", () =>
-                //             showFavoriteIf(buttonElement, true),
-                //         );
-                //     },
-                // });
             } else {
                 // When we don't have a user (i.e. in the context of public
                 // albums), the download button is shown (if enabled for that
                 // album) instead of the favorite button as the first action.
-                //
-                // It can thus also use the same order as fav/unfav.
                 pswp.ui.registerElement({
                     name: "download",
                     title: t("download"),
                     order: 11,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("download"),
-                    onClick: handleDownload,
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
                             showIf(
@@ -771,6 +737,7 @@ export class FileViewerPhotoSwipe {
                                 currentFileAnnotation().showDownload == "bar",
                             ),
                         ),
+                    onClick: handleDownload,
                 });
             }
 
