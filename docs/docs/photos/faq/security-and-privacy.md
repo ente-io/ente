@@ -58,14 +58,17 @@ in the unlikely event of a server breach, your data remains protected.
 
 ## Account Security
 
-### What happens if I forget my password?
+### What happens if I forget my password? {#account-recovery}
 
-You can reset your password using your recovery key that was provided to you
-during account creation. Please store this key securely, as it's your lifeline
-if you forget your password.
+If you are logged into Ente on any of your existing devices, you can use that
+device to reset your password and use your new password to log in.
 
-If you lose both your password and recovery key, we cannot recover your account
-or data due to our end-to-end encrypted architecture.
+If you are logged out of Ente on all your devices, you can reset your password
+using your recovery key that was provided to you during account creation.
+
+If you are logged out of Ente on all your devices and you have lost both your
+password and recovery key, we cannot recover your account or data due to our
+end-to-end encrypted architecture.
 
 If you wish to delete your account in such scenarios, please reach out to
 support@ente.io and we will help you out.
