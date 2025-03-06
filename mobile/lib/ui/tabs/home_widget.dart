@@ -176,7 +176,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         // Loading page will redirect to BackupFolderSelectionPage.
         // To avoid showing folder hook in middle during routing,
         // delay state refresh for home page
-        if (!LocalSyncService.instance.hasGrantedLimitedPermissions()) {
+        if (!permissionService.hasGrantedLimitedPermissions()) {
           delayInRefresh = const Duration(milliseconds: 250);
         }
         Future.delayed(

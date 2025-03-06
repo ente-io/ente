@@ -9,7 +9,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
@@ -169,10 +168,8 @@ class SyncService {
     return _lastSyncStatusEvent;
   }
 
-  Future<void> onPermissionGranted(PermissionState state) async {
-    _logger.info("Permission granted " + state.toString());
-    await _localSyncService.onPermissionGranted(state);
-    Bus.instance.fire(PermissionGrantedEvent());
+  Future<void> onPermissionGranted() async {
+    _localSyncService.registerChangeCallback();
     _doSync().ignore();
   }
 
