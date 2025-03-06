@@ -483,6 +483,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleAnnotate = useCallback(
         (file: EnteFile, itemData: ItemData): FileViewerAnnotatedFile => {
+            log.debug(() => ["viewer", { action: "annotate", file, itemData }]);
+
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
 

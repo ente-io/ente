@@ -378,6 +378,35 @@ export class FileViewerPhotoSwipe {
             return preventPointerEvent;
         });
 
+        /**
+         * Last state of the live photo playback toggle.
+         */
+        let livePhotoPlay = true;
+
+        /**
+         * The live photo playback toggle button element.
+         */
+        let livePhotoToggleButtonElement: HTMLButtonElement | undefined;
+
+        // Update the state of the given `videoElement` and the
+        // `livePhotoToggleButtonElement` to reflect `livePhotoPlay`.
+        //
+        // Note that "contentAppend" can get called both before, or after,
+        // "change", so we need to handle both potential sequences for the
+        // initial display of the video.
+
+        const livePhotoUpdatePlayback = (video: HTMLVideoElement) => {
+            if (livePhotoPlay) {
+                livePhotoToggleButtonElement?.classList.remove("pswp-ente-off");
+                video.play();
+                video.style.display = "initial";
+            } else {
+                livePhotoToggleButtonElement?.classList.add("pswp-ente-off");
+                video.pause();
+                video.style.display = "none";
+            }
+        };
+
         pswp.on("contentAppend", (e) => {
             const { fileType, videoURL } = e.content.data;
             if (fileType !== FileType.livePhoto) return;
@@ -401,6 +430,8 @@ export class FileViewerPhotoSwipe {
             // Size it to the underlying image.
             video.style.width = img.style.width;
             video.style.height = img.style.height;
+
+            livePhotoUpdatePlayback(video);
         });
 
         /**
@@ -411,11 +442,6 @@ export class FileViewerPhotoSwipe {
             slide.data.fileType == FileType.livePhoto
                 ? slide.container.getElementsByTagName("video")[0]
                 : undefined;
-
-        /**
-         * Last state of the live photo playback toggle.
-         */
-        let livePhotoPlay = true;
 
         pswp.on("imageSizeChange", ({ content, width, height }) => {
             const video = livePhotoVideoOnSlide(content.slide);
@@ -450,14 +476,6 @@ export class FileViewerPhotoSwipe {
             video?.pause();
         });
 
-        pswp.on("contentActivate", (e) => {
-            // Undo the effect of a previous "contentDeactivate" if it was
-            // displaying a live photo and the playback toggle is enabled.
-            if (livePhotoPlay) {
-                livePhotoVideoOnSlide(e.content?.slide)?.play();
-            }
-        });
-
         pswp.on("loadComplete", (e) =>
             updateFileInfoExifIfNeeded(e.content.data),
         );
@@ -471,7 +489,7 @@ export class FileViewerPhotoSwipe {
 
         // State needed to hide the caption when a video is playing on a file of
         // type video.
-        let vVideoElement: HTMLVideoElement | undefined;
+        let videoVideoEl: HTMLVideoElement | undefined;
         let onVideoPlayback: EventHandler | undefined;
         let captionElement: HTMLElement | undefined;
 
@@ -479,11 +497,11 @@ export class FileViewerPhotoSwipe {
             const itemData = pswp.currSlide.content.data;
 
             // Clear existing listeners, if any.
-            if (vVideoElement && onVideoPlayback) {
-                vVideoElement.removeEventListener("play", onVideoPlayback);
-                vVideoElement.removeEventListener("pause", onVideoPlayback);
-                vVideoElement.removeEventListener("ended", onVideoPlayback);
-                vVideoElement = undefined;
+            if (videoVideoEl && onVideoPlayback) {
+                videoVideoEl.removeEventListener("play", onVideoPlayback);
+                videoVideoEl.removeEventListener("pause", onVideoPlayback);
+                videoVideoEl.removeEventListener("ended", onVideoPlayback);
+                videoVideoEl = undefined;
                 onVideoPlayback = undefined;
             }
 
@@ -500,15 +518,15 @@ export class FileViewerPhotoSwipe {
                 // It works subsequently, which is why, e.g., we can use it to
                 // pause the video in "contentDeactivate".
                 const contentElement = pswp.currSlide.content.element;
-                vVideoElement = contentElement.getElementsByTagName("video")[0];
+                videoVideoEl = contentElement.getElementsByTagName("video")[0];
 
-                if (vVideoElement) {
+                if (videoVideoEl) {
                     onVideoPlayback = () =>
-                        showIf(captionElement, !!vVideoElement?.paused);
+                        showIf(captionElement, !!videoVideoEl?.paused);
 
-                    vVideoElement.addEventListener("play", onVideoPlayback);
-                    vVideoElement.addEventListener("pause", onVideoPlayback);
-                    vVideoElement.addEventListener("ended", onVideoPlayback);
+                    videoVideoEl.addEventListener("play", onVideoPlayback);
+                    videoVideoEl.addEventListener("pause", onVideoPlayback);
+                    videoVideoEl.addEventListener("ended", onVideoPlayback);
                 }
             }
         });
@@ -603,35 +621,25 @@ export class FileViewerPhotoSwipe {
                 isButton: true,
                 html: createPSRegisterElementIconHTML("live"),
                 onInit: (buttonElement) => {
+                    livePhotoToggleButtonElement = buttonElement;
                     pswp.on("change", () => {
-                        const videoElement = livePhotoVideoOnSlide(
-                            pswp.currSlide,
-                        );
-                        if (!videoElement) {
+                        const video = livePhotoVideoOnSlide(pswp.currSlide);
+                        if (!video) {
                             // Not a live photo, or its video hasn't loaded yet.
                             showIf(buttonElement, false);
                             return;
                         }
 
                         showIf(buttonElement, true);
-                        buttonElement.classList.toggle(
-                            "pswp-ente-off",
-                            livePhotoPlay,
-                        );
+                        livePhotoUpdatePlayback(video);
                     });
                 },
                 onClick: (e) => {
                     const buttonElement = e.target;
-                    const videoElement = livePhotoVideoOnSlide(pswp.currSlide)!;
+                    const video = livePhotoVideoOnSlide(pswp.currSlide)!;
 
                     livePhotoPlay = !livePhotoPlay;
-                    if (livePhotoPlay) {
-                        videoElement.play();
-                        buttonElement.classList.remove("pswp-ente-off");
-                    } else {
-                        videoElement.pause();
-                        buttonElement.classList.add("pswp-ente-off");
-                    }
+                    livePhotoUpdatePlayback(video);
                 },
             });
 
@@ -974,7 +982,7 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 `;
 
 const livePhotoVideoHTML = (videoURL: string) => `
-<video autoplay loop muted oncontextmenu="return false;">
+<video loop muted oncontextmenu="return false;">
   <source src="${videoURL}" />
 </video>
 `;
