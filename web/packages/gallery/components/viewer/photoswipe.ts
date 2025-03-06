@@ -388,20 +388,20 @@ export class FileViewerPhotoSwipe {
          */
         let livePhotoToggleButtonElement: HTMLButtonElement | undefined;
 
-        // Update the state of the given `videoElement` and the
-        // `livePhotoToggleButtonElement` to reflect `livePhotoPlay`.
-        //
-        // Note that "contentAppend" can get called both before, or after,
-        // "change", so we need to handle both potential sequences for the
-        // initial display of the video.
-
+        /**
+         * Update the state of the given `videoElement` and the
+         * `livePhotoToggleButtonElement` to reflect `livePhotoPlay`.
+         *
+         *  Note that "contentAppend" can get called both before, or after,
+         * "change", so we need to handle both potential sequences for the
+         * initial display of the video.
+         */
         const livePhotoUpdatePlayback = (video: HTMLVideoElement) => {
             const button = livePhotoToggleButtonElement;
+            if (button) showIf(button, true);
+
             if (livePhotoPlay) {
-                if (button) {
-                    showIf(button, true);
-                    button.classList.remove("pswp-ente-off");
-                }
+                button?.classList.remove("pswp-ente-off");
                 video.play();
                 video.style.display = "initial";
             } else {
@@ -409,6 +409,19 @@ export class FileViewerPhotoSwipe {
                 video.pause();
                 video.style.display = "none";
             }
+        };
+
+        /**
+         * Toggle the playback, if possible, of a live photo that's being shown
+         * on the current slide.
+         */
+        const livePhotoTogglePlaybackIfPossible = () => {
+            const buttonElement = livePhotoToggleButtonElement;
+            const video = livePhotoVideoOnSlide(pswp.currSlide);
+            if (!buttonElement || !video) return;
+
+            livePhotoPlay = !livePhotoPlay;
+            livePhotoUpdatePlayback(video);
         };
 
         pswp.on("contentAppend", (e) => {
@@ -637,13 +650,7 @@ export class FileViewerPhotoSwipe {
                         livePhotoUpdatePlayback(video);
                     });
                 },
-                onClick: (e) => {
-                    const buttonElement = e.target;
-                    const video = livePhotoVideoOnSlide(pswp.currSlide)!;
-
-                    livePhotoPlay = !livePhotoPlay;
-                    livePhotoUpdatePlayback(video);
-                },
+                onClick: livePhotoTogglePlaybackIfPossible,
             });
 
             pswp.ui.registerElement({
@@ -836,9 +843,19 @@ export class FileViewerPhotoSwipe {
             slide.panTo(slide.pan.x, slide.pan.y);
         };
 
+        // Actions we handle ourselves.
+
         const handleToggleUIControls = () => {
             toggleUIControls();
             lastActivityDate = new Date();
+        };
+
+        const handleTogglePlaybackIfPossible = () => {
+            switch (currentAnnotatedFile().itemData.fileType) {
+                case FileType.livePhoto:
+                    livePhotoTogglePlaybackIfPossible();
+                    return;
+            }
         };
 
         // Some actions routed via the delegate
@@ -885,6 +902,9 @@ export class FileViewerPhotoSwipe {
                 if (lkey == "c") cb = handleCopy;
             } else {
                 switch (key) {
+                    case " ":
+                        cb = handleTogglePlaybackIfPossible;
+                        break;
                     case "Backspace":
                     case "Delete":
                         cb = handleDelete;
