@@ -304,7 +304,7 @@ export class FileViewerPhotoSwipe {
 
         const currentAnnotatedFile = () => {
             const file = currentFile();
-            const annotatedFile = _currentAnnotatedFile;
+            let annotatedFile = _currentAnnotatedFile;
             if (!annotatedFile || annotatedFile.file.fileID != file.id) {
                 annotatedFile = onAnnotate(file, pswp.currSlide.content.data);
                 _currentAnnotatedFile = annotatedFile;
@@ -733,8 +733,9 @@ export class FileViewerPhotoSwipe {
 
             const e: KeyboardEvent = pswpEvent.originalEvent;
 
+            const key = e.key;
             // Even though we ignore shift, Caps lock might still be on.
-            const key = e.key.toLowerCase();
+            const lkey = e.key.toLowerCase();
 
             // Keep the keybindings such that they don't use modifiers, because
             // these are more likely to interfere with browser shortcuts.
@@ -747,17 +748,23 @@ export class FileViewerPhotoSwipe {
 
             let cb: (() => void) | undefined;
             if (e.shiftKey || e.altKey || e.metaKey || e.ctrlKey) {
-                // Ignore except using Ctrl/Cmd-D for copy.
-                if ((e.metaKey || e.ctrlKey) && key == "c") {
+                // Ignore except using Ctrl/Cmd-C for copy.
+                if ((e.metaKey || e.ctrlKey) && lkey == "c") {
                     cb = handleCopy;
                 }
             } else {
                 switch (key) {
+                    case "Backspace":
+                    case "Delete":
+                        cb = handleDelete;
+                        break;
+                }
+                switch (lkey) {
                     case "w":
                     case "a":
                     case "s":
                     case "d":
-                        cb = panner(key);
+                        cb = panner(lkey);
                         break;
                     case "l":
                         cb = handleToggleFavoriteIfEnabled;
@@ -767,10 +774,6 @@ export class FileViewerPhotoSwipe {
                         break;
                     case "k":
                         cb = handleDownloadIfEnabled;
-                        break;
-                    case "Backspace":
-                    case "Delete":
-                        cb = handleDelete;
                         break;
                     case "f":
                         cb = handleToggleFullscreen;

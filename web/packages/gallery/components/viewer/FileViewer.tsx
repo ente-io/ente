@@ -642,14 +642,22 @@ const FileViewer: React.FC<FileViewerProps> = ({
         openShortcuts,
     ]);
 
+    const canCopyImage = useCallback(
+        () =>
+            activeAnnotatedFile?.annotation.showCopyImage &&
+            activeAnnotatedFile.itemData.imageURL,
+        [activeAnnotatedFile],
+    );
+
     const performKeyAction = useCallback(
         (action): FileViewerPhotoSwipeDelegate["performKeyAction"] => {
             switch (action) {
                 case "delete":
-                    handleConfirmDelete?.();
+                    if (activeAnnotatedFile?.annotation.showDelete)
+                        handleConfirmDelete?.();
                     break;
                 case "copy":
-                    if (activeImageURL) handleCopyImage();
+                    if (canCopyImage()) handleCopyImage();
                     break;
                 case "toggle-fullscreen":
                     handleToggleFullscreen();
@@ -658,10 +666,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
         },
         [
             handleConfirmDelete,
-            activeAnnotatedFile,
-            activeImageURL,
             handleCopyImage,
             handleToggleFullscreen,
+            activeAnnotatedFile,
+            canCopyImage,
         ],
     );
 
@@ -794,18 +802,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
                         <DeleteIcon />
                     </MoreMenuItem>
                 )}
-                {activeAnnotatedFile?.annotation.showCopyImage &&
-                    activeImageURL && (
-                        <MoreMenuItem onClick={handleCopyImage}>
-                            <MoreMenuItemTitle>
-                                {/*TODO */ pt("Copy as PNG")}
-                            </MoreMenuItemTitle>
-                            {/* Tweak icon size to visually fit better with neighbours */}
-                            <ContentCopyIcon
-                                sx={{ "&&": { fontSize: "18px" } }}
-                            />
-                        </MoreMenuItem>
-                    )}
+                {canCopyImage() && (
+                    <MoreMenuItem onClick={handleCopyImage}>
+                        <MoreMenuItemTitle>
+                            {/*TODO */ pt("Copy as PNG")}
+                        </MoreMenuItemTitle>
+                        {/* Tweak icon size to visually fit better with neighbours */}
+                        <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
+                    </MoreMenuItem>
+                )}
                 {activeAnnotatedFile?.annotation.showEditImage && (
                     <MoreMenuItem onClick={handleEditImage}>
                         <MoreMenuItemTitle>
@@ -930,7 +935,7 @@ const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
             <Shortcut action="Zoom" shortcut="Mouse scroll, Pinch" />
             <Shortcut action="Zoom preset" shortcut="Z, Tap inside image" />
             <Shortcut action="Toggle controls" shortcut="Tap outside image" />
-            <Shortcut action="Pan" shortcut="WASD, Drag" />
+            <Shortcut action="Pan" shortcut="W / A / S / D, Drag" />
             <Shortcut action="Toggle favorite" shortcut="L" />
             <Shortcut action="View info" shortcut="I" />
             <Shortcut action="Download" shortcut="K" />
