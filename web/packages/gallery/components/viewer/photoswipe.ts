@@ -315,26 +315,18 @@ export class FileViewerPhotoSwipe {
         const showUIControls = () =>
             pswp.element.classList.add("pswp--ui-visible");
         const hideUIControls = () =>
-            pswp.element.classList.add("pswp--ui-visible");
+            pswp.element.classList.remove("pswp--ui-visible");
 
-        // Return true if the current keyboard focus is on any of the UI controls.
-        //
-        // By default, the pswp root element takes up the keyboard focus, so we
-        // check if the currently focused element is still the PhotoSwipe dialog
-        // (if so, this means we're not focused on a specific control).
-        //
-        // Otherwise, the user has focused (e.g. via the tab key on the
-        // keyboard) to a specific UI element.
+        // Return true if the current keyboard focus is on any of the UI
+        // controls (e.g. as a result of user tabbing through them).
         const isFocusedOnUIControl = () => {
-            const isDefaultFocus = document
-                .querySelector(":focus-visible")
-                ?.classList.contains("pswp");
-            if (!isDefaultFocus) {
-                return false;
+            const fv = document.querySelector(":focus-visible");
+            if (fv && !fv.classList.contains("pswp")) {
+                return true;
             }
             // TODO(PS): Commented during testing
-            // return true;
-            return false;
+            // return false;
+            return true;
         };
 
         // Provide data about slides to PhotoSwipe via callbacks
@@ -836,17 +828,15 @@ export class FileViewerPhotoSwipe {
         autoHideCheckIntervalID = setInterval(() => {
             if (lastActivityDate == "already-hidden") return;
             if (lastActivityDate == "auto-hidden") return;
-            if (Date.now() - lastActivityDate.getTime() > 5000 /* 5s */) {
-                if (areUIControlsVisible()) {
-                    if (!isFocusedOnUIControl()) {
-                        hideUIControls();
-                        lastActivityDate = "auto-hidden";
-                    }
+            if (Date.now() - lastActivityDate.getTime() > 5000 /* ~5s */) {
+                if (areUIControlsVisible() && !isFocusedOnUIControl()) {
+                    hideUIControls();
+                    lastActivityDate = "auto-hidden";
                 } else {
                     lastActivityDate = "already-hidden";
                 }
             }
-        }, 2000);
+        }, 1500);
     }
 
     /**
