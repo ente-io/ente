@@ -13,11 +13,9 @@ import {
     forgetFailedItemDataForFileID,
     itemDataForFile,
     updateFileInfoExifIfNeeded,
+    type ItemData,
 } from "./data-source";
-import {
-    type FileViewerAnnotatedFile,
-    type FileViewerFileAnnotation,
-} from "./FileViewer";
+import { type FileViewerAnnotatedFile } from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
 
 // TODO(PS): WIP gallery using upstream photoswipe
@@ -74,6 +72,14 @@ export interface FileViewerPhotoSwipeDelegate {
      */
     toggleFavorite: (annotatedFile: FileViewerAnnotatedFile) => Promise<void>;
     /**
+     * Called when there is a keydown event, and our PhotoSwipe instance wants
+     * to know if it should ignore it or handle it.
+     *
+     * The delegate should return true when, e.g., the file info dialog is
+     * being displayed.
+     */
+    shouldIgnoreKeyboardEvent: () => boolean;
+    /**
      * Called when the user triggers a potential action using a keyboard
      * shortcut.
      *
@@ -81,7 +87,9 @@ export interface FileViewerPhotoSwipeDelegate {
      * so the delegate must validate and only then perform the action if it is
      * appropriate.
      */
-    performKeyAction: (action: "delete" | "copy" | "toggle-fullscreen") => void;
+    performKeyAction: (
+        action: "delete" | "copy" | "toggle-fullscreen" | "help",
+    ) => void;
 }
 
 type FileViewerPhotoSwipeOptions = Pick<
@@ -115,8 +123,15 @@ type FileViewerPhotoSwipeOptions = Pick<
     /**
      * Called whenever the slide is initially displayed or changes, to obtain
      * various derived data for the file that is about to be displayed.
+     *
+     * @param file The current {@link EnteFile}. This is the same value as the
+     * corresponding value in the current index of {@link getFiles} returned by
+     * the delegate.
+     *
+     * @param itemData This is the best currently available {@link ItemData}
+     * corresponding to the current file.
      */
-    onAnnotate: (file: EnteFile) => FileViewerFileAnnotation;
+    onAnnotate: (file: EnteFile, itemData: ItemData) => FileViewerAnnotatedFile;
     /**
      * Called when the user activates the info action on a file.
      */
@@ -126,23 +141,11 @@ type FileViewerPhotoSwipeOptions = Pick<
      */
     onDownload: (annotatedFile: FileViewerAnnotatedFile) => void;
     /**
-     * Called when the user activates the more action on a file.
-     *
-     * @param annotatedFile The current (annotated) file.
-     *
-     * @param imageURL If the current file has an associated non-thumbnail image
-     * that is being shown in the viewer, then this is set to the (object) URL
-     * of the image being shown. Specifically, this is the same as the
-     * {@link imageURL} attribute of the {@link ItemData} associated with the
-     * current file.
+     * Called when the user activates the more action.
      *
      * @param buttonElement The more button DOM element.
      */
-    onMore: (
-        annotatedFile: FileViewerAnnotatedFile,
-        imageURL: string | undefined,
-        buttonElement: HTMLElement,
-    ) => void;
+    onMore: (buttonElement: HTMLElement) => void;
 };
 
 /**
@@ -187,43 +190,6 @@ export class FileViewerPhotoSwipe {
      * The PhotoSwipe instance which we wrap.
      */
     private pswp: PhotoSwipe;
-    /**
-     * The options with which we were initialized.
-     */
-    private opts: Pick<FileViewerPhotoSwipeOptions, "disableDownload">;
-    /**
-     * An interval that invokes a periodic check of whether we should the hide
-     * controls if the user does not perform any pointer events for a while.
-     */
-    private autoHideCheckIntervalId: ReturnType<typeof setTimeout> | undefined;
-    /**
-     * The time the last activity occurred. Used in tandem with
-     * {@link autoHideCheckIntervalId} to implement the auto hiding of controls
-     * when the user stops moving the pointer for a while.
-     *
-     * Apart from a date, this can also be:
-     *
-     * - "already-hidden" if controls have already been hidden, say by a
-     *   bgClickAction.
-     *
-     * - "auto-hidden" if controls were hidden by us because of inactivity.
-     */
-    private lastActivityDate: Date | "auto-hidden" | "already-hidden";
-    /**
-     * Derived data about the currently displayed file.
-     *
-     * This is recomputed on-demand (by using the {@link onAnnotate} callback)
-     * each time the slide changes, and cached until the next slide change.
-     *
-     * Instead of accessing this property directly, code should funnel through
-     * the `activeFileAnnotation` helper function defined in the constructor
-     * scope.
-     */
-    private activeFileAnnotation: FileViewerFileAnnotation | undefined;
-    /**
-     * IDs of files for which a there is a favorite update in progress.
-     */
-    private pendingFavoriteUpdates = new Set<number>();
 
     constructor({
         initialIndex,
@@ -236,9 +202,6 @@ export class FileViewerPhotoSwipe {
         onDownload,
         onMore,
     }: FileViewerPhotoSwipeOptions) {
-        this.opts = { disableDownload };
-        this.lastActivityDate = new Date();
-
         const pswp = new PhotoSwipe({
             // Opaque background.
             bgOpacity: 1,
@@ -285,40 +248,86 @@ export class FileViewerPhotoSwipe {
             // TODO(PS): padding option? for handling custom title bar.
             // TODO(PS): will we need this?
             mainClass: "pswp-ente",
-            // Translated variants
-            closeTitle: t("close_key"),
-            zoomTitle: t("zoom_in_out_key") /* TODO(PS): Add "(scroll)" */,
-            arrowPrevTitle: t("previous_key"),
-            arrowNextTitle: t("next_key"),
+            // TODO(PS): Translated variants
+            closeTitle: pt("Close"),
+            zoomTitle: pt("Zoom"),
+            arrowPrevTitle: pt("Previous"),
+            arrowNextTitle: pt("Next"),
             // TODO(PS): Move to translations (unpreviewable_file_notification).
-            errorMsg: "This file could not be previewed",
+            errorMsg: pt("This file could not be previewed"),
         });
 
         this.pswp = pswp;
 
         // Various helper routines to obtain the file at `currIndex`.
 
+        /**
+         * Derived data about the currently displayed file.
+         *
+         * This is recomputed on-demand (by using the {@link onAnnotate}
+         * callback) each time the slide changes, and cached until the next
+         * slide change.
+         *
+         * Instead of accessing this property directly, code should funnel
+         * through the `currentAnnotatedFile` helper function.
+         */
+        let _currentAnnotatedFile: FileViewerAnnotatedFile | undefined;
+
         const currentFile = () => delegate.getFiles()[pswp.currIndex]!;
 
         const currentAnnotatedFile = () => {
             const file = currentFile();
-            let annotation = this.activeFileAnnotation;
-            if (annotation?.fileID != file.id) {
-                annotation = onAnnotate(file);
-                this.activeFileAnnotation = annotation;
+            let annotatedFile = _currentAnnotatedFile;
+            if (!annotatedFile || annotatedFile.file.fileID != file.id) {
+                annotatedFile = onAnnotate(file, pswp.currSlide.content.data);
+                _currentAnnotatedFile = annotatedFile;
             }
-            return {
-                file,
-                // The above condition implies that annotation can never be
-                // undefined, but it doesn't seem to be enough to convince
-                // TypeScript. Writing the condition in a more unnatural way
-                // `(!(annotation && annotation?.fileID == file.id))` works, but
-                // instead we use a non-null assertion here.
-                annotation: annotation!,
-            };
+            return annotatedFile;
         };
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
+
+        // Toggle controls infrastructure
+
+        /**
+         * An interval that invokes a periodic check of whether we should the hide
+         * controls if the user does not perform any pointer events for a while.
+         */
+        let autoHideCheckIntervalID: ReturnType<typeof setTimeout> | undefined;
+
+        /**
+         * The time the last activity occurred. Used in tandem with
+         * {@link autoHideCheckIntervalID} to implement the auto hiding of controls
+         * when the user stops moving the pointer for a while.
+         *
+         * Apart from a date, this can also be:
+         *
+         * - "already-hidden" if controls have already been hidden, say by a
+         *   bgClickAction or our keyboard shortcut.
+         *
+         * - "auto-hidden" if controls were hidden by us because of inactivity.
+         */
+        let lastActivityDate: Date | "auto-hidden" | "already-hidden" =
+            new Date();
+
+        const areUIControlsVisible = () =>
+            pswp.element.classList.contains("pswp--ui-visible");
+        const showUIControls = () =>
+            pswp.element.classList.add("pswp--ui-visible");
+        const hideUIControls = () =>
+            pswp.element.classList.remove("pswp--ui-visible");
+        const toggleUIControls = () =>
+            pswp.element.classList.toggle("pswp--ui-visible");
+
+        // Return true if the current keyboard focus is on any of the UI
+        // controls (e.g. as a result of user tabbing through them).
+        const isFocusedOnUIControl = () => {
+            const fv = document.querySelector(":focus-visible");
+            if (fv && !fv.classList.contains("pswp")) {
+                return true;
+            }
+            return false;
+        };
 
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
@@ -335,7 +344,6 @@ export class FileViewerPhotoSwipe {
 
             const { videoURL, ...rest } = itemData;
             if (itemData.fileType === FileType.video && videoURL) {
-                const disableDownload = !!this.opts.disableDownload;
                 itemData = {
                     ...rest,
                     html: videoHTML(videoURL, disableDownload),
@@ -344,8 +352,8 @@ export class FileViewerPhotoSwipe {
 
             log.debug(() => ["[viewer]", { index, itemData, file }]);
 
-            if (this.lastActivityDate != "already-hidden")
-                this.lastActivityDate = new Date();
+            if (lastActivityDate != "already-hidden")
+                lastActivityDate = new Date();
 
             return itemData;
         });
@@ -362,12 +370,56 @@ export class FileViewerPhotoSwipe {
             // There was a pointer event. We don't care which one, we just use
             // this as a hook to show the UI again (if needed), and update our
             // last activity date.
-            this.onPointerActivity();
+            if (lastActivityDate == "auto-hidden") showUIControls();
+            if (lastActivityDate != "already-hidden")
+                lastActivityDate = new Date();
             return preventPointerEvent;
         });
 
+        /**
+         * Last state of the live photo playback toggle.
+         */
+        let livePhotoPlay = true;
+
+        /**
+         * The live photo playback toggle button element.
+         */
+        let livePhotoToggleButtonElement: HTMLButtonElement | undefined;
+
+        /**
+         * Update the state of the given `videoElement` and the
+         * `livePhotoToggleButtonElement` to reflect `livePhotoPlay`.
+         */
+        const livePhotoUpdatePlayback = (video: HTMLVideoElement) => {
+            const button = livePhotoToggleButtonElement;
+            if (button) showIf(button, true);
+
+            if (livePhotoPlay) {
+                button?.classList.remove("pswp-ente-off");
+                video.play();
+                video.style.display = "initial";
+            } else {
+                button?.classList.add("pswp-ente-off");
+                video.pause();
+                video.style.display = "none";
+            }
+        };
+
+        /**
+         * Toggle the playback, if possible, of a live photo that's being shown
+         * on the current slide.
+         */
+        const livePhotoTogglePlaybackIfPossible = () => {
+            const buttonElement = livePhotoToggleButtonElement;
+            const video = livePhotoVideoOnSlide(pswp.currSlide);
+            if (!buttonElement || !video) return;
+
+            livePhotoPlay = !livePhotoPlay;
+            livePhotoUpdatePlayback(video);
+        };
+
         pswp.on("contentAppend", (e) => {
-            const { fileType, videoURL } = e.content.data;
+            const { fileID, fileType, videoURL } = e.content.data;
             if (fileType !== FileType.livePhoto) return;
             if (!videoURL) return;
 
@@ -389,20 +441,35 @@ export class FileViewerPhotoSwipe {
             // Size it to the underlying image.
             video.style.width = img.style.width;
             video.style.height = img.style.height;
+
+            // "contentAppend" can get called both before, or after, "change",
+            // and we need to handle both potential sequences for the initial
+            // display of the video. Here we handle the case where "change" has
+            // already been called, but now "contentAppend" is happening.
+
+            if (pswp.currSlide.data.fileID == fileID) {
+                livePhotoUpdatePlayback(video);
+            }
         });
 
+        /**
+         * Helper function to extract the video element from a slide that is
+         * showing a live photo.
+         */
+        const livePhotoVideoOnSlide = (slide) =>
+            slide.data.fileType == FileType.livePhoto
+                ? slide.container.getElementsByTagName("video")[0]
+                : undefined;
+
         pswp.on("imageSizeChange", ({ content, width, height }) => {
-            if (content.data.fileType !== FileType.livePhoto) return;
-
-            // This slide is displaying a live photo. Resize the size of the
-            // video element to match that of the image.
-
-            const video =
-                content.slide.container.getElementsByTagName("video")[0];
+            const video = livePhotoVideoOnSlide(content.slide);
             if (!video) {
                 // We might have been called before "contentAppend".
                 return;
             }
+
+            // This slide is displaying a live photo. Resize the size of the
+            // video element to match that of the image.
 
             video.style.width = `${width}px`;
             video.style.height = `${height}px`;
@@ -427,58 +494,57 @@ export class FileViewerPhotoSwipe {
             video?.pause();
         });
 
-        pswp.on("contentActivate", (e) => {
-            // Undo the effect of a previous "contentDeactivate" if it was
-            // displaying a live photo.
-            if (e.content?.slide.data?.fileType === FileType.livePhoto) {
-                e.content?.slide?.container
-                    ?.getElementsByTagName("video")[0]
-                    ?.play();
-            }
-        });
-
         pswp.on("loadComplete", (e) =>
             updateFileInfoExifIfNeeded(e.content.data),
         );
 
         pswp.on("change", (e) => {
-            const itemData = this.pswp.currSlide.content.data;
+            const itemData = pswp.currSlide.content.data;
             updateFileInfoExifIfNeeded(itemData);
         });
 
         pswp.on("contentDestroy", (e) => forgetExifForItemData(e.content.data));
 
-        // State needed to hide the caption when a video is playing.
-        let videoElement: HTMLVideoElement | undefined;
+        // State needed to hide the caption when a video is playing on a file of
+        // type video.
+        let videoVideoEl: HTMLVideoElement | undefined;
         let onVideoPlayback: EventHandler | undefined;
-        let captionElementRef: HTMLElement | undefined;
+        let captionElement: HTMLElement | undefined;
 
         pswp.on("change", (e) => {
-            const itemData = this.pswp.currSlide.content.data;
+            const itemData = pswp.currSlide.content.data;
 
             // Clear existing listeners, if any.
-            if (videoElement && onVideoPlayback) {
-                videoElement.removeEventListener("play", onVideoPlayback);
-                videoElement.removeEventListener("pause", onVideoPlayback);
-                videoElement.removeEventListener("ended", onVideoPlayback);
-                videoElement = undefined;
+            if (videoVideoEl && onVideoPlayback) {
+                videoVideoEl.removeEventListener("play", onVideoPlayback);
+                videoVideoEl.removeEventListener("pause", onVideoPlayback);
+                videoVideoEl.removeEventListener("ended", onVideoPlayback);
+                videoVideoEl = undefined;
                 onVideoPlayback = undefined;
             }
 
             // Reset.
-            showIf(captionElementRef, true);
+            showIf(captionElement, true);
 
             // Attach new listeners, if needed.
             if (itemData.fileType == FileType.video) {
+                // We use content.element instead of container here because
+                // pswp.currSlide.container.getElementsByTagName("video") does
+                // not work for the first slide when we reach here during the
+                // initial "change".
+                //
+                // It works subsequently, which is why, e.g., we can use it to
+                // pause the video in "contentDeactivate".
                 const contentElement = pswp.currSlide.content.element;
-                videoElement = contentElement.getElementsByTagName("video")[0];
-                if (videoElement) {
-                    onVideoPlayback = (e) => {
-                        showIf(captionElementRef, !!videoElement?.paused);
-                    };
-                    videoElement.addEventListener("play", onVideoPlayback);
-                    videoElement.addEventListener("pause", onVideoPlayback);
-                    videoElement.addEventListener("ended", onVideoPlayback);
+                videoVideoEl = contentElement.getElementsByTagName("video")[0];
+
+                if (videoVideoEl) {
+                    onVideoPlayback = () =>
+                        showIf(captionElement, !!videoVideoEl?.paused);
+
+                    videoVideoEl.addEventListener("play", onVideoPlayback);
+                    videoVideoEl.addEventListener("pause", onVideoPlayback);
+                    videoVideoEl.addEventListener("ended", onVideoPlayback);
                 }
             }
         });
@@ -486,7 +552,10 @@ export class FileViewerPhotoSwipe {
         // The PhotoSwipe dialog has being closed and the animations have
         // completed.
         pswp.on("destroy", () => {
-            this.clearAutoHideIntervalIfNeeded();
+            if (autoHideCheckIntervalID) {
+                clearInterval(autoHideCheckIntervalID);
+                autoHideCheckIntervalID = undefined;
+            }
             fileViewerDidClose();
             // Let our parent know that we have been closed.
             onClose();
@@ -497,13 +566,19 @@ export class FileViewerPhotoSwipe {
         let favoriteButtonElement: HTMLButtonElement | undefined;
         let unfavoriteButtonElement: HTMLButtonElement | undefined;
 
+        /**
+         * IDs of files for which a there is a favorite update in progress.
+         */
+        const pendingFavoriteUpdates = new Set<number>();
+
         const toggleFavorite = async () => {
             const af = currentAnnotatedFile();
-            this.pendingFavoriteUpdates.add(af.file.id);
+            pendingFavoriteUpdates.add(af.file.id);
             favoriteButtonElement.disabled = true;
-            unfavoriteButtonElement.disabled = true;
+            // unfavoriteButtonElement.disabled = true;
             await delegate.toggleFavorite(af);
-            this.pendingFavoriteUpdates.delete(af.file.id);
+            pendingFavoriteUpdates.delete(af.file.id);
+            favoriteButtonElement.disabled = false;
             // TODO: We reload the entire slide instead of just updating
             // the button state. This is because there are two buttons,
             // instead of a single button toggling between two states
@@ -511,7 +586,17 @@ export class FileViewerPhotoSwipe {
             //
             // To fix this, a single button can be achieved by moving
             // the fill of the heart as a layer.
-            this.refreshCurrentSlideContent();
+            // this.refreshCurrentSlideContent();
+            updateFavoriteButton();
+        };
+
+        const updateFavoriteButton = () => {
+            const af = currentAnnotatedFile();
+            const isFavorite = delegate.isFavorite(af);
+            const fill = document.getElementById("pswp__icn-favorite-fill")!;
+            console.log(fill, isFavorite);
+            fill.style.display = isFavorite ? "initial" : "none";
+            // if (fill) showIf(fill, isFavorite);
         };
 
         const handleToggleFavorite = () => void toggleFavorite();
@@ -538,24 +623,73 @@ export class FileViewerPhotoSwipe {
         //
         // The "order" prop is used to position items. Some landmarks:
         // - counter: 5
-        // - preloader: 7
-        // - zoom: 10
+        // - zoom: 6 (default is 10)
+        // - preloader: 9 (default is 7)
         // - close: 20
         pswp.on("uiRegister", () => {
             // Move the zoom button to the left so that it is in the same place
             // as the other items like preloader or the error indicator that
-            // come and go as files get loaded.
+            // come and go as files get loaded. Also modify the default orders
+            // so that there is more space for the error / live indicators.
             //
             // We cannot use the PhotoSwipe "uiElement" filter to modify the
             // order since that only allows us to edit the DOM element, not the
             // underlying UI element data.
             pswp.ui.uiElementsData.find((e) => e.name == "zoom").order = 6;
+            pswp.ui.uiElementsData.find((e) => e.name == "preloader").order = 9;
 
             // Register our custom elements...
 
             pswp.ui.registerElement({
+                name: "live",
+                // TODO(PS):
+                title: pt("Toggle live"),
+                // Safe to use the same order, since this will only be shown if
+                // there are no errors.
+                order: 7,
+                isButton: true,
+                html: createPSRegisterElementIconHTML("live"),
+                onInit: (buttonElement) => {
+                    livePhotoToggleButtonElement = buttonElement;
+                    pswp.on("change", () => {
+                        const video = livePhotoVideoOnSlide(pswp.currSlide);
+                        if (!video) {
+                            // Not a live photo, or its video hasn't loaded yet.
+                            showIf(buttonElement, false);
+                            return;
+                        }
+
+                        livePhotoUpdatePlayback(video);
+                    });
+                },
+                onClick: livePhotoTogglePlaybackIfPossible,
+            });
+
+            pswp.ui.registerElement({
+                name: "vol",
+                // TODO(PS):
+                title: pt("Toggle audio"),
+                order: 8,
+                isButton: true,
+                html: createPSRegisterElementIconHTML("vol"),
+                onInit: (buttonElement) => {
+                    buttonElement.style.display = "none";
+
+                    // buttonElement.setAttribute("id", moreButtonID);
+                    // buttonElement.setAttribute("aria-haspopup", "true");
+                },
+                onClick: (e) => {
+                    // const buttonElement = e.target;
+                    // See also: `resetMoreMenuButtonOnMenuClose`.
+                    // buttonElement.setAttribute("aria-controls", moreMenuID);
+                    // buttonElement.setAttribute("aria-expanded", true);
+                    // onMore(buttonElement);
+                },
+            });
+
+            pswp.ui.registerElement({
                 name: "error",
-                order: 6,
+                order: 9,
                 html: createPSRegisterElementIconHTML("error"),
                 onInit: (errorElement, pswp) => {
                     pswp.on("change", () => {
@@ -574,13 +708,15 @@ export class FileViewerPhotoSwipe {
                     buttonElement: HTMLButtonElement,
                     value: boolean,
                 ) => {
+                    updateFavoriteButton();
+                    return;
                     const af = currentAnnotatedFile();
                     const isFavorite = delegate.isFavorite(af);
                     showIf(
                         buttonElement,
                         af.annotation.showFavorite && isFavorite === value,
                     );
-                    buttonElement.disabled = this.pendingFavoriteUpdates.has(
+                    buttonElement.disabled = pendingFavoriteUpdates.has(
                         af.file.id,
                     );
                 };
@@ -589,28 +725,32 @@ export class FileViewerPhotoSwipe {
                 // up being shown, so they can safely share the same order.
                 pswp.ui.registerElement({
                     name: "favorite",
-                    title: t("favorite"),
-                    order: 8,
+                    title: pt("Favorite"),
+                    order: 11,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
                     onClick: handleToggleFavorite,
-                    onInit: (buttonElement) =>
+                    onInit: (buttonElement) => {
+                        favoriteButtonElement = buttonElement;
                         pswp.on("change", () =>
                             showFavoriteIf(buttonElement, false),
-                        ),
+                        );
+                    },
                 });
-                pswp.ui.registerElement({
-                    name: "unfavorite",
-                    title: t("unfavorite"),
-                    order: 8,
-                    isButton: true,
-                    html: createPSRegisterElementIconHTML("unfavorite"),
-                    onClick: handleToggleFavorite,
-                    onInit: (buttonElement) =>
-                        pswp.on("change", () =>
-                            showFavoriteIf(buttonElement, true),
-                        ),
-                });
+                // pswp.ui.registerElement({
+                //     name: "unfavorite",
+                //     title: pt("Favorite"),
+                //     order: 11,
+                //     isButton: true,
+                //     html: createPSRegisterElementIconHTML("unfavorite"),
+                //     onClick: handleToggleFavorite,
+                //     onInit: (buttonElement) => {
+                //         unfavoriteButtonElement = buttonElement;
+                //         pswp.on("change", () =>
+                //             showFavoriteIf(buttonElement, true),
+                //         );
+                //     },
+                // });
             } else {
                 // When we don't have a user (i.e. in the context of public
                 // albums), the download button is shown (if enabled for that
@@ -620,7 +760,7 @@ export class FileViewerPhotoSwipe {
                 pswp.ui.registerElement({
                     name: "download",
                     title: t("download"),
-                    order: 8,
+                    order: 11,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("download"),
                     onClick: handleDownload,
@@ -637,7 +777,7 @@ export class FileViewerPhotoSwipe {
             pswp.ui.registerElement({
                 name: "info",
                 title: t("info"),
-                order: 9,
+                order: 13,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("info"),
                 onClick: handleViewInfo,
@@ -659,11 +799,7 @@ export class FileViewerPhotoSwipe {
                     // See also: `resetMoreMenuButtonOnMenuClose`.
                     buttonElement.setAttribute("aria-controls", moreMenuID);
                     buttonElement.setAttribute("aria-expanded", true);
-                    onMore(
-                        currentAnnotatedFile(),
-                        pswp.currSlide.content.data.imageURL,
-                        buttonElement,
-                    );
+                    onMore(buttonElement);
                 },
             });
 
@@ -674,18 +810,16 @@ export class FileViewerPhotoSwipe {
                 order: 30,
                 appendTo: "root",
                 tagName: "p",
-                onInit: (captionElement, pswp) => {
-                    captionElementRef = captionElement;
+                onInit: (element, pswp) => {
+                    captionElement = element;
                     pswp.on("change", () => {
                         const { fileType, alt } = pswp.currSlide.content.data;
-                        captionElement.innerText = alt ?? "";
-                        captionElement.style.visibility = alt
-                            ? "visible"
-                            : "hidden";
+                        element.innerText = alt ?? "";
+                        element.style.visibility = alt ? "visible" : "hidden";
                         // Add extra offset for video captions so that they do
                         // not overlap with the video controls. The constant is
                         // an ad-hoc value that looked okay-ish across browsers.
-                        captionElement.style.bottom =
+                        element.style.bottom =
                             fileType === FileType.video ? "36px" : "0";
                     });
                 },
@@ -701,6 +835,43 @@ export class FileViewerPhotoSwipe {
             return element;
         });
 
+        // Pan action handlers
+
+        const panner = (key: "w" | "a" | "s" | "d") => () => {
+            const slide = pswp.currSlide;
+            const d = 80;
+            switch (key) {
+                case "w":
+                    slide.pan.y += d;
+                    break;
+                case "a":
+                    slide.pan.x += d;
+                    break;
+                case "s":
+                    slide.pan.y -= d;
+                    break;
+                case "d":
+                    slide.pan.x -= d;
+                    break;
+            }
+            slide.panTo(slide.pan.x, slide.pan.y);
+        };
+
+        // Actions we handle ourselves.
+
+        const handleToggleUIControls = () => {
+            toggleUIControls();
+            lastActivityDate = new Date();
+        };
+
+        const handleTogglePlaybackIfPossible = () => {
+            switch (currentAnnotatedFile().itemData.fileType) {
+                case FileType.livePhoto:
+                    livePhotoTogglePlaybackIfPossible();
+                    return;
+            }
+        };
+
         // Some actions routed via the delegate
 
         const handleDelete = () => delegate.performKeyAction("delete");
@@ -710,22 +881,89 @@ export class FileViewerPhotoSwipe {
         const handleToggleFullscreen = () =>
             delegate.performKeyAction("toggle-fullscreen");
 
-        pswp.on("keydown", (e, z) => {
-            const key = e.originalEvent.key ?? "";
-            const cb = (() => {
-                switch (key.toLowerCase()) {
-                    case "l":
-                        return handleToggleFavoriteIfEnabled;
-                    case "d":
-                        return handleDownloadIfEnabled;
-                    case "i":
-                        return handleViewInfo;
-                    case "f":
-                        return handleToggleFullscreen;
+        const handleHelp = () => delegate.performKeyAction("help");
+
+        pswp.on("keydown", (pswpEvent) => {
+            // Ignore keyboard events when we do not have "focus".
+            if (delegate.shouldIgnoreKeyboardEvent()) {
+                pswpEvent.preventDefault();
+                return;
+            }
+
+            const e: KeyboardEvent = pswpEvent.originalEvent;
+
+            const key = e.key;
+            // Even though we ignore shift, Caps lock might still be on.
+            const lkey = e.key.toLowerCase();
+
+            // Keep the keybindings such that they don't use modifiers, because
+            // these are more likely to interfere with browser shortcuts.
+            //
+            // For example, Cmd-D adds a bookmark, which is why we don't use it
+            // for download.
+            //
+            // An exception is Ctrl/Cmd-C, which we intercept to copy the image
+            // since that should match the user's expectation.
+
+            let cb: (() => void) | undefined;
+            if (e.shiftKey) {
+                // Ignore except "?" for help.
+                if (key == "?") cb = handleHelp;
+            } else if (e.altKey) {
+                // Ignore.
+            } else if (e.metaKey || e.ctrlKey) {
+                // Ignore except Ctrl/Cmd-C for copy
+                if (lkey == "c") cb = handleCopy;
+            } else {
+                switch (key) {
+                    case " ":
+                        // Space activates controls when they're focused, so
+                        // only act on it if no specific control is focused.
+                        if (!isFocusedOnUIControl()) {
+                            cb = handleTogglePlaybackIfPossible;
+                        }
+                        break;
+                    case "Backspace":
+                    case "Delete":
+                        cb = handleDelete;
+                        break;
+                    // We check for "?"" both with an without shift, since some
+                    // keyboards might have it emittable without shift.
+                    case "?":
+                        cb = handleHelp;
+                        break;
                 }
-                return undefined;
-            })();
+                switch (lkey) {
+                    case "w":
+                    case "a":
+                    case "s":
+                    case "d":
+                        cb = panner(lkey);
+                        break;
+                    case "h":
+                        cb = handleToggleUIControls;
+                        break;
+                    case "l":
+                        cb = handleToggleFavoriteIfEnabled;
+                        break;
+                    case "i":
+                        cb = handleViewInfo;
+                        break;
+                    case "k":
+                        cb = handleDownloadIfEnabled;
+                        break;
+                    case "f":
+                        cb = handleToggleFullscreen;
+                        break;
+                }
+            }
+
             cb?.();
+
+            // Undo auto hide when the user presses tab to move focus.
+            if (key == "Tab") {
+                if (lastActivityDate == "auto-hidden") showUIControls();
+            }
         });
 
         // Let our data source know that we're about to open.
@@ -735,9 +973,22 @@ export class FileViewerPhotoSwipe {
         // the class "pswp".
         pswp.init();
 
-        this.autoHideCheckIntervalId = setInterval(() => {
-            this.autoHideIfInactive();
-        }, 1000);
+        autoHideCheckIntervalID = setInterval(() => {
+            if (lastActivityDate == "already-hidden") return;
+            if (lastActivityDate == "auto-hidden") return;
+            // TODO(PS): Disable for now.
+            return;
+            if (Date.now() - lastActivityDate.getTime() > 9000 /* ~10s */) {
+                if (areUIControlsVisible()) {
+                    if (!isFocusedOnUIControl()) {
+                        hideUIControls();
+                        lastActivityDate = "auto-hidden";
+                    }
+                } else {
+                    lastActivityDate = "already-hidden";
+                }
+            }
+        }, 3000);
     }
 
     /**
@@ -764,59 +1015,6 @@ export class FileViewerPhotoSwipe {
     refreshCurrentSlideContent() {
         this.pswp.refreshSlideContent(this.pswp.currIndex);
     }
-
-    private clearAutoHideIntervalIfNeeded() {
-        if (this.autoHideCheckIntervalId) {
-            clearInterval(this.autoHideCheckIntervalId);
-            this.autoHideCheckIntervalId = undefined;
-        }
-    }
-
-    private onPointerActivity() {
-        if (this.lastActivityDate == "already-hidden") return;
-        if (this.lastActivityDate == "auto-hidden") this.showUIControls();
-        this.lastActivityDate = new Date();
-    }
-
-    private autoHideIfInactive() {
-        if (this.lastActivityDate == "already-hidden") return;
-        if (this.lastActivityDate == "auto-hidden") return;
-        if (Date.now() - this.lastActivityDate.getTime() > 5000 /* 5s */) {
-            if (this.areUIControlsVisible()) {
-                this.hideUIControlsIfNotFocused();
-                this.lastActivityDate = "auto-hidden";
-            } else {
-                this.lastActivityDate = "already-hidden";
-            }
-        }
-    }
-
-    private areUIControlsVisible() {
-        return this.pswp.element.classList.contains("pswp--ui-visible");
-    }
-
-    private showUIControls() {
-        this.pswp.element.classList.add("pswp--ui-visible");
-    }
-
-    private hideUIControlsIfNotFocused() {
-        // Check if the current keyboard focus is on any of the UI controls.
-        //
-        // By default, the pswp root element takes up the keyboard focus, so we
-        // check if the currently focused element is still the PhotoSwipe dialog
-        // (if so, this means we're not focused on a specific control).
-        const isDefaultFocus = document
-            .querySelector(":focus-visible")
-            ?.classList.contains("pswp");
-        if (!isDefaultFocus) {
-            // The user focused (e.g. via keyboard tabs) to a specific UI
-            // element. Skip auto hiding.
-            return;
-        }
-
-        // TODO(PS): Commented during testing
-        // this.pswp.element.classList.remove("pswp--ui-visible");
-    }
 }
 
 const videoHTML = (url: string, disableDownload: boolean) => `
@@ -827,7 +1025,7 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 `;
 
 const livePhotoVideoHTML = (videoURL: string) => `
-<video autoplay loop muted oncontextmenu="return false;">
+<video loop muted oncontextmenu="return false;">
   <source src="${videoURL}" />
 </video>
 `;

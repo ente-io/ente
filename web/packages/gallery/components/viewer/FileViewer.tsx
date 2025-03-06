@@ -17,10 +17,7 @@ import { isDesktop } from "@/base/app";
 import { SpacedRow } from "@/base/components/containers";
 import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import {
-    useModalVisibility,
-    type ModalVisibilityProps,
-} from "@/base/components/utils/modal";
+import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
 import { pt } from "@/base/i18n";
@@ -65,7 +62,11 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { fileInfoExifForFile, updateItemDataAlt } from "./data-source";
+import {
+    fileInfoExifForFile,
+    updateItemDataAlt,
+    type ItemData,
+} from "./data-source";
 import {
     FileViewerPhotoSwipe,
     moreButtonID,
@@ -119,11 +120,12 @@ export interface FileViewerFileAnnotation {
 }
 
 /**
- * A file and its annotation, in a nice cosy box.
+ * A file, its annotation, and its item data, in a nice cosy box.
  */
 export interface FileViewerAnnotatedFile {
     file: EnteFile;
     annotation: FileViewerFileAnnotation;
+    itemData: ItemData;
 }
 
 export type FileViewerProps = ModalVisibilityProps & {
@@ -308,24 +310,14 @@ const FileViewer: React.FC<FileViewerProps> = ({
         FileInfoExif | undefined
     >(undefined);
 
-    // With semantics similar to `activeAnnotatedFile`, this is the imageURL
-    // associated with the `activeAnnotatedFile`, if any. However, unlike
-    // `activeAnnotatedFile`, this is only set when the more menu is activated.
-    const [activeImageURL, setActiveImageURL] = useState<string | undefined>(
-        undefined,
-    );
-
     const [openFileInfo, setOpenFileInfo] = useState(false);
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
+    const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+    const [openShortcuts, setOpenShortcuts] = useState(false);
+
     const [isFullscreen, setIsFullscreen] = useState(false);
-
-    const { show: showConfirmDelete, props: confirmDeleteVisibilityProps } =
-        useModalVisibility();
-
-    const { show: showShortcuts, props: shortcutsVisibilityProps } =
-        useModalVisibility();
 
     // Callbacks to be invoked (only once) the next time we get an update to the
     // `files` or `favoriteFileIDs` props.
@@ -359,16 +351,17 @@ const FileViewer: React.FC<FileViewerProps> = ({
             return false;
         });
         setOpenFileInfo(false);
-        setOpenImageEditor(false);
         // No need to `resetMoreMenuButtonOnMenuClose` since we're closing
         // anyway and it'll be removed from the DOM.
         setMoreMenuAnchorEl(null);
+        setOpenImageEditor(false);
+        setOpenConfirmDelete(false);
+        setOpenShortcuts(false);
         onClose();
     }, [onTriggerSyncWithRemote, onClose]);
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
-            setActiveAnnotatedFile(annotatedFile);
             setActiveFileExif(
                 fileInfoExifForFile(annotatedFile.file, (exif) =>
                     setActiveFileExif(exif),
@@ -385,7 +378,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
     // download button in the PhotoSwipe bar.
     const handleDownloadBarAction = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
-            setActiveAnnotatedFile(annotatedFile);
             onDownload!(annotatedFile.file);
         },
         [onDownload],
@@ -401,15 +393,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     };
 
     const handleMore = useCallback(
-        (
-            annotatedFile: FileViewerAnnotatedFile,
-            imageURL: string | undefined,
-            buttonElement: HTMLElement,
-        ) => {
-            setActiveAnnotatedFile(annotatedFile);
-            setActiveImageURL(imageURL);
-            setMoreMenuAnchorEl(buttonElement);
-        },
+        (buttonElement: HTMLElement) => setMoreMenuAnchorEl(buttonElement),
         [],
     );
 
@@ -424,10 +408,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
         return onDelete
             ? () => {
                   handleMoreMenuCloseIfNeeded();
-                  showConfirmDelete();
+                  setOpenConfirmDelete(true);
               }
             : undefined;
-    }, [onDelete, showConfirmDelete, handleMoreMenuCloseIfNeeded]);
+    }, [onDelete, handleMoreMenuCloseIfNeeded]);
+
+    const handleConfirmDeleteClose = useCallback(
+        () => setOpenConfirmDelete(false),
+        [],
+    );
 
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleDelete = async () => {
@@ -457,17 +446,18 @@ const FileViewer: React.FC<FileViewerProps> = ({
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleCopyImage = useCallback(() => {
         handleMoreMenuCloseIfNeeded();
+        const imageURL = activeAnnotatedFile?.itemData.imageURL;
         // Safari does not copy if we do not call `navigator.clipboard.write`
         // synchronously within the click event handler, but it does supports
         // passing a promise in lieu of the blob.
         void window.navigator.clipboard
             .write([
                 new ClipboardItem({
-                    "image/png": createImagePNGBlob(activeImageURL!),
+                    "image/png": createImagePNGBlob(imageURL!),
                 }),
             ])
             .catch(onGenericError);
-    }, [onGenericError, handleMoreMenuCloseIfNeeded, activeImageURL]);
+    }, [onGenericError, handleMoreMenuCloseIfNeeded, activeAnnotatedFile]);
 
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
@@ -492,7 +482,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const handleAnnotate = useCallback(
-        (file: EnteFile): FileViewerFileAnnotation => {
+        (file: EnteFile, itemData: ItemData): FileViewerAnnotatedFile => {
+            log.debug(() => ["viewer", { action: "annotate", file, itemData }]);
+
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
 
@@ -533,7 +525,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 }
             })();
 
-            return {
+            const annotation: FileViewerFileAnnotation = {
                 fileID,
                 isOwnFile,
                 showFavorite,
@@ -542,6 +534,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 showCopyImage,
                 showEditImage,
             };
+
+            const annotatedFile = { file, annotation, itemData };
+            setActiveAnnotatedFile(annotatedFile);
+            return annotatedFile;
         },
         [
             user,
@@ -626,28 +622,60 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleShortcuts = useCallback(() => {
         handleMoreMenuCloseIfNeeded();
-        showShortcuts();
-    }, [handleMoreMenuCloseIfNeeded, showShortcuts]);
+        setOpenShortcuts(true);
+    }, [handleMoreMenuCloseIfNeeded]);
+
+    const handleShortcutsClose = useCallback(() => setOpenShortcuts(false), []);
+
+    const shouldIgnoreKeyboardEvent = useCallback(() => {
+        // Don't handle keydowns if any of the modals are open.
+        return (
+            openFileInfo ||
+            !!moreMenuAnchorEl ||
+            openImageEditor ||
+            openConfirmDelete ||
+            openShortcuts
+        );
+    }, [
+        openFileInfo,
+        moreMenuAnchorEl,
+        openImageEditor,
+        openConfirmDelete,
+        openShortcuts,
+    ]);
+
+    const canCopyImage = useCallback(
+        () =>
+            activeAnnotatedFile?.annotation.showCopyImage &&
+            activeAnnotatedFile.itemData.imageURL,
+        [activeAnnotatedFile],
+    );
 
     const performKeyAction = useCallback(
         (action): FileViewerPhotoSwipeDelegate["performKeyAction"] => {
             switch (action) {
                 case "delete":
-                    handleConfirmDelete?.();
+                    if (activeAnnotatedFile?.annotation.showDelete)
+                        handleConfirmDelete?.();
                     break;
                 case "copy":
-                    if (activeImageURL) handleCopyImage();
+                    if (canCopyImage()) handleCopyImage();
                     break;
                 case "toggle-fullscreen":
                     handleToggleFullscreen();
+                    break;
+                case "help":
+                    handleShortcuts();
                     break;
             }
         },
         [
             handleConfirmDelete,
-            activeImageURL,
             handleCopyImage,
             handleToggleFullscreen,
+            handleShortcuts,
+            activeAnnotatedFile,
+            canCopyImage,
         ],
     );
 
@@ -657,6 +685,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             getFiles,
             isFavorite,
             toggleFavorite,
+            shouldIgnoreKeyboardEvent,
             performKeyAction,
         };
     }
@@ -667,8 +696,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
         delegate.getFiles = getFiles;
         delegate.isFavorite = isFavorite;
         delegate.toggleFavorite = toggleFavorite;
+        delegate.shouldIgnoreKeyboardEvent = shouldIgnoreKeyboardEvent;
         delegate.performKeyAction = performKeyAction;
-    }, [getFiles, isFavorite, toggleFavorite, performKeyAction]);
+    }, [
+        getFiles,
+        isFavorite,
+        toggleFavorite,
+        shouldIgnoreKeyboardEvent,
+        performKeyAction,
+    ]);
 
     // Notify the listeners, if any, for updates to files or favorites.
     useEffect(() => {
@@ -704,6 +740,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
             };
         }
     }, [
+        // Be careful with adding new dependencies here, or changing the source
+        // of existing ones. If any of these dependencies change unnecessarily,
+        // then the file viewer will start getting reloaded even when it is
+        // already open.
         open,
         onClose,
         user,
@@ -768,18 +808,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
                         <DeleteIcon />
                     </MoreMenuItem>
                 )}
-                {activeAnnotatedFile?.annotation.showCopyImage &&
-                    activeImageURL && (
-                        <MoreMenuItem onClick={handleCopyImage}>
-                            <MoreMenuItemTitle>
-                                {/*TODO */ pt("Copy as PNG")}
-                            </MoreMenuItemTitle>
-                            {/* Tweak icon size to visually fit better with neighbours */}
-                            <ContentCopyIcon
-                                sx={{ "&&": { fontSize: "18px" } }}
-                            />
-                        </MoreMenuItem>
-                    )}
+                {canCopyImage() && (
+                    <MoreMenuItem onClick={handleCopyImage}>
+                        <MoreMenuItemTitle>
+                            {/*TODO */ pt("Copy as PNG")}
+                        </MoreMenuItemTitle>
+                        {/* Tweak icon size to visually fit better with neighbours */}
+                        <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
+                    </MoreMenuItem>
+                )}
                 {activeAnnotatedFile?.annotation.showEditImage && (
                     <MoreMenuItem onClick={handleEditImage}>
                         <MoreMenuItemTitle>
@@ -818,7 +855,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
             </MoreMenu>
             {/* TODO(PS): Fix imports */}
             <ConfirmDeleteFileDialog
-                {...confirmDeleteVisibilityProps}
+                open={openConfirmDelete}
+                onClose={handleConfirmDeleteClose}
                 onConfirm={handleDelete}
             />
             <ImageEditorOverlay
@@ -827,7 +865,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 file={activeAnnotatedFile?.file}
                 onSaveEditedCopy={handleSaveEditedCopy}
             />
-            <Shortcuts {...shortcutsVisibilityProps} />
+            <Shortcuts open={openShortcuts} onClose={handleShortcutsClose} />
         </Container>
     );
 };
@@ -900,15 +938,21 @@ const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
         <ShortcutsContent sx={{ "&&": { pt: 2, pb: 5, px: 5 } }}>
             <Shortcut action="Close" shortcut="Esc" />
             <Shortcut action="Previous, Next" shortcut="←, →" />
-            <Shortcut action="Zoom" shortcut="Mouse scroll" />
+            <Shortcut action="Zoom" shortcut="Mouse scroll, Pinch" />
             <Shortcut action="Zoom preset" shortcut="Z, Tap inside image" />
-            <Shortcut action="Toggle controls" shortcut="Tap outside image" />
+            <Shortcut
+                action="Toggle controls"
+                shortcut="H, Tap outside image"
+            />
+            <Shortcut action="Pan" shortcut="W / A / S / D, Drag" />
+            <Shortcut action="Toggle live" shortcut="Space" />
             <Shortcut action="Toggle favorite" shortcut="L" />
             <Shortcut action="View info" shortcut="I" />
-            <Shortcut action="Download" shortcut="D" />
+            <Shortcut action="Download" shortcut="K" />
             <Shortcut action="Delete" shortcut="Delete, Backspace" />
-            <Shortcut action="Copy as PNG" shortcut="^C, ⌘C" />
+            <Shortcut action="Copy as PNG" shortcut="^C / ⌘C" />
             <Shortcut action="Toggle fullscreen" shortcut="F" />
+            <Shortcut action="Show shortcuts" shortcut="?" />
         </ShortcutsContent>
     </Dialog>
 );

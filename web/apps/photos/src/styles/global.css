@@ -181,9 +181,25 @@ body {
     display: initial;
 }
 
-/* Scale the built in controls to better fit our requirements */
+/* Transform the built in controls to better fit our requirements */
+
+.pswp-ente .pswp__counter {
+    margin-top: 17.5px;
+    margin-inline-start: 18px;
+    margin-inline-end: 9px;
+}
+
 .pswp-ente .pswp__button--zoom .pswp__icn {
+    top: 16px;
     transform: scale(0.85);
+}
+
+.pswp-ente .pswp__preloader {
+    transform: translate(-2px, 2px);
+}
+
+.pswp-ente .pswp__error {
+    transform: translate(-2px, 2px);
 }
 
 .pswp-ente .pswp__button--close .pswp__icn {
@@ -202,6 +218,45 @@ body {
     /* default is a horizontal flip, transform: scale(-1, 1); */
     transform: scale(-0.8, 0.8);
 }
+
+/* Toggleable live photo buttons */
+
+.pswp-ente button.pswp-ente-off .pswp__icn {
+    /* PhotoSwipe already uses the CSS opacity, so reduce the color's opacity */
+    fill: rgba(255 255 255 / 0.6);
+}
+
+/* Make the controls fit the top bar on mobile sized screens */
+@media (width < 450px) {
+    .pswp__button {
+        width: 44px;
+    }
+
+    .pswp-ente .pswp__counter {
+        margin-inline-start: 10px;
+        margin-inline-end: 0;
+    }
+
+    .pswp-ente .pswp__button--close {
+        margin-right: -2px;
+    }
+}
+
+@media (width < 350px) {
+    .pswp__button {
+        width: 42px;
+    }
+
+    .pswp-ente .pswp__counter {
+        margin-inline-start: 4px;
+    }
+
+    .pswp-ente .pswp__button--close {
+        margin-right: -4px;
+    }
+}
+
+/* 4 line caption */
 
 .pswp-ente .pswp__caption {
     position: absolute;
