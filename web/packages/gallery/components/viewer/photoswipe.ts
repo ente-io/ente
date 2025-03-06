@@ -403,14 +403,20 @@ export class FileViewerPhotoSwipe {
             video.style.height = img.style.height;
         });
 
+        /**
+         * Helper function to extract the video element from a slide that is
+         * showing a live photo.
+         */
+        const livePhotoVideoOnSlide = (slide) =>
+            slide.container.getElementsByTagName("video")[0];
+
         pswp.on("imageSizeChange", ({ content, width, height }) => {
             if (content.data.fileType !== FileType.livePhoto) return;
 
             // This slide is displaying a live photo. Resize the size of the
             // video element to match that of the image.
 
-            const video =
-                content.slide.container.getElementsByTagName("video")[0];
+            const video = livePhotoVideoOnSlide(content.slide);
             if (!video) {
                 // We might have been called before "contentAppend".
                 return;
@@ -461,7 +467,7 @@ export class FileViewerPhotoSwipe {
         pswp.on("contentDestroy", (e) => forgetExifForItemData(e.content.data));
 
         // State needed to hide the caption when a video is playing.
-        let videoElement: HTMLVideoElement | undefined;
+        let observedVideoEl: HTMLVideoElement | undefined;
         let onVideoPlayback: EventHandler | undefined;
         let captionElement: HTMLElement | undefined;
 
@@ -469,11 +475,11 @@ export class FileViewerPhotoSwipe {
             const itemData = pswp.currSlide.content.data;
 
             // Clear existing listeners, if any.
-            if (videoElement && onVideoPlayback) {
-                videoElement.removeEventListener("play", onVideoPlayback);
-                videoElement.removeEventListener("pause", onVideoPlayback);
-                videoElement.removeEventListener("ended", onVideoPlayback);
-                videoElement = undefined;
+            if (observedVideoEl && onVideoPlayback) {
+                observedVideoEl.removeEventListener("play", onVideoPlayback);
+                observedVideoEl.removeEventListener("pause", onVideoPlayback);
+                observedVideoEl.removeEventListener("ended", onVideoPlayback);
+                observedVideoEl = undefined;
                 onVideoPlayback = undefined;
             }
 
@@ -482,15 +488,24 @@ export class FileViewerPhotoSwipe {
 
             // Attach new listeners, if needed.
             if (itemData.fileType == FileType.video) {
+                // We use content.element instead of container here because
+                // pswp.currSlide.container.getElementsByTagName("video") does
+                // not work for the first slide when we reach here during the
+                // initial "change".
+                //
+                // It works subsequently, which is why, e.g., we can use it to
+                // pause the video in "contentDeactivate".
                 const contentElement = pswp.currSlide.content.element;
-                videoElement = contentElement.getElementsByTagName("video")[0];
-                if (videoElement) {
-                    onVideoPlayback = (e) => {
-                        showIf(captionElement, !!videoElement?.paused);
-                    };
-                    videoElement.addEventListener("play", onVideoPlayback);
-                    videoElement.addEventListener("pause", onVideoPlayback);
-                    videoElement.addEventListener("ended", onVideoPlayback);
+                observedVideoEl =
+                    contentElement.getElementsByTagName("video")[0];
+
+                if (observedVideoEl) {
+                    onVideoPlayback = () =>
+                        showIf(captionElement, !!observedVideoEl?.paused);
+
+                    observedVideoEl.addEventListener("play", onVideoPlayback);
+                    observedVideoEl.addEventListener("pause", onVideoPlayback);
+                    observedVideoEl.addEventListener("ended", onVideoPlayback);
                 }
             }
         });
