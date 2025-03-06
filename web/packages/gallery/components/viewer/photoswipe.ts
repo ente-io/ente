@@ -559,7 +559,7 @@ export class FileViewerPhotoSwipe {
         // The "order" prop is used to position items. Some landmarks:
         // - counter: 5
         // - zoom: 6 (default is 10)
-        // - preloader: 10 (default is 7)
+        // - preloader: 9 (default is 7)
         // - close: 20
         pswp.on("uiRegister", () => {
             // Move the zoom button to the left so that it is in the same place
@@ -571,7 +571,7 @@ export class FileViewerPhotoSwipe {
             // order since that only allows us to edit the DOM element, not the
             // underlying UI element data.
             pswp.ui.uiElementsData.find((e) => e.name == "zoom").order = 6;
-            pswp.ui.uiElementsData.find((e) => e.name == "preloader").order = 10;
+            pswp.ui.uiElementsData.find((e) => e.name == "preloader").order = 9;
 
             // Register our custom elements...
 
@@ -585,6 +585,17 @@ export class FileViewerPhotoSwipe {
                 isButton: true,
                 html: createPSRegisterElementIconHTML("live"),
                 onInit: (buttonElement) => {
+                    pswp.on("change", () => {
+                        const fileType =
+                            currentAnnotatedFile().itemData.fileType;
+
+                        if (fileType !== FileType.livePhoto) {
+                            showIf(buttonElement, false);
+                            return;
+                        }
+
+                        showIf(buttonElement, true);
+                    });
                     // buttonElement.style.display = "none";
                     // buttonElement.setAttribute("id", moreButtonID);
                     // buttonElement.setAttribute("aria-haspopup", "true");
@@ -606,7 +617,7 @@ export class FileViewerPhotoSwipe {
                 isButton: true,
                 html: createPSRegisterElementIconHTML("vol"),
                 onInit: (buttonElement) => {
-                    // buttonElement.style.display = "none";
+                    buttonElement.style.display = "none";
 
                     // buttonElement.setAttribute("id", moreButtonID);
                     // buttonElement.setAttribute("aria-haspopup", "true");
@@ -635,7 +646,6 @@ export class FileViewerPhotoSwipe {
                     });
                 },
             });
-
 
             if (haveUser) {
                 const showFavoriteIf = (
