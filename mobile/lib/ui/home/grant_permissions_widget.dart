@@ -147,12 +147,12 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   Future<void> onPermissionGranted(PermissionState state) async {
     _logger.info("Permission granted " + state.toString());
     await permissionService.onUpdatePermission(state);
-    await SyncService.instance.onPermissionGranted();
     if (state == PermissionState.limited) {
       // when limited permission is granted, by default mark all folders for
       // backup
       await Configuration.instance.setSelectAllFoldersForBackup(true);
     }
+    SyncService.instance.onPermissionGranted().ignore();
     Bus.instance.fire(PermissionGrantedEvent());
   }
 }

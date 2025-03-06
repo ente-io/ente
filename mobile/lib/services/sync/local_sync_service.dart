@@ -13,6 +13,7 @@ import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/events/permission_granted_event.dart";
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/file/file.dart';
@@ -48,7 +49,11 @@ class LocalSyncService {
       await PhotoManager.setIgnorePermissionCheck(true);
     }
     if (permissionService.hasGrantedPermissions()) {
-      registerChangeCallback();
+      _registerChangeCallback();
+    } else {
+      Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
+        _registerChangeCallback();
+      });
     }
   }
 
@@ -317,7 +322,7 @@ class LocalSyncService {
     }
   }
 
-  void registerChangeCallback() {
+  void _registerChangeCallback() {
     _changeCallbackDebouncer = Debouncer(const Duration(milliseconds: 500));
     // In case of iOS limit permission, this call back is fired immediately
     // after file selection dialog is dismissed.

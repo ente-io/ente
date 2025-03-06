@@ -169,7 +169,6 @@ class SyncService {
   }
 
   Future<void> onPermissionGranted() async {
-    _localSyncService.registerChangeCallback();
     _doSync().ignore();
   }
 
