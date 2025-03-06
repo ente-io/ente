@@ -13,6 +13,7 @@ import {
     forgetFailedItemDataForFileID,
     itemDataForFile,
     updateFileInfoExifIfNeeded,
+    type ItemData,
 } from "./data-source";
 import {
     type FileViewerAnnotatedFile,
@@ -123,8 +124,18 @@ type FileViewerPhotoSwipeOptions = Pick<
     /**
      * Called whenever the slide is initially displayed or changes, to obtain
      * various derived data for the file that is about to be displayed.
+     *
+     * @param file The current {@link EnteFile}. This is the same value as the
+     * corresponding value in the current index of {@link getFiles} returned by
+     * the delegate.
+     *
+     * @param itemData This is the best currently available {@link ItemData}
+     * corresponding to the current file.
      */
-    onAnnotate: (file: EnteFile) => FileViewerFileAnnotation;
+    onAnnotate: (
+        file: EnteFile,
+        itemData: ItemData,
+    ) => FileViewerFileAnnotation;
     /**
      * Called when the user activates the info action on a file.
      */
@@ -134,23 +145,11 @@ type FileViewerPhotoSwipeOptions = Pick<
      */
     onDownload: (annotatedFile: FileViewerAnnotatedFile) => void;
     /**
-     * Called when the user activates the more action on a file.
-     *
-     * @param annotatedFile The current (annotated) file.
-     *
-     * @param imageURL If the current file has an associated non-thumbnail image
-     * that is being shown in the viewer, then this is set to the (object) URL
-     * of the image being shown. Specifically, this is the same as the
-     * {@link imageURL} attribute of the {@link ItemData} associated with the
-     * current file.
+     * Called when the user activates the more action.
      *
      * @param buttonElement The more button DOM element.
      */
-    onMore: (
-        annotatedFile: FileViewerAnnotatedFile,
-        imageURL: string | undefined,
-        buttonElement: HTMLElement,
-    ) => void;
+    onMore: (buttonElement: HTMLElement) => void;
 };
 
 /**
@@ -224,7 +223,7 @@ export class FileViewerPhotoSwipe {
      * each time the slide changes, and cached until the next slide change.
      *
      * Instead of accessing this property directly, code should funnel through
-     * the `activeFileAnnotation` helper function defined in the constructor
+     * the `currentAnnotatedFile` helper function defined in the constructor
      * scope.
      */
     private activeFileAnnotation: FileViewerFileAnnotation | undefined;
@@ -312,7 +311,7 @@ export class FileViewerPhotoSwipe {
             const file = currentFile();
             let annotation = this.activeFileAnnotation;
             if (annotation?.fileID != file.id) {
-                annotation = onAnnotate(file);
+                annotation = onAnnotate(file, pswp.currSlide.content.data);
                 this.activeFileAnnotation = annotation;
             }
             return {
@@ -671,11 +670,7 @@ export class FileViewerPhotoSwipe {
                     // See also: `resetMoreMenuButtonOnMenuClose`.
                     buttonElement.setAttribute("aria-controls", moreMenuID);
                     buttonElement.setAttribute("aria-expanded", true);
-                    onMore(
-                        currentAnnotatedFile(),
-                        pswp.currSlide.content.data.imageURL,
-                        buttonElement,
-                    );
+                    onMore(buttonElement);
                 },
             });
 

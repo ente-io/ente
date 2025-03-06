@@ -62,7 +62,11 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { fileInfoExifForFile, updateItemDataAlt } from "./data-source";
+import {
+    fileInfoExifForFile,
+    updateItemDataAlt,
+    type ItemData,
+} from "./data-source";
 import {
     FileViewerPhotoSwipe,
     moreButtonID,
@@ -306,8 +310,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     >(undefined);
 
     // With semantics similar to `activeAnnotatedFile`, this is the imageURL
-    // associated with the `activeAnnotatedFile`, if any. However, unlike
-    // `activeAnnotatedFile`, this is only set when the more menu is activated.
+    // associated with the `activeAnnotatedFile`, if any.
     const [activeImageURL, setActiveImageURL] = useState<string | undefined>(
         undefined,
     );
@@ -364,7 +367,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
-            setActiveAnnotatedFile(annotatedFile);
             setActiveFileExif(
                 fileInfoExifForFile(annotatedFile.file, (exif) =>
                     setActiveFileExif(exif),
@@ -381,7 +383,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
     // download button in the PhotoSwipe bar.
     const handleDownloadBarAction = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
-            setActiveAnnotatedFile(annotatedFile);
             onDownload!(annotatedFile.file);
         },
         [onDownload],
@@ -397,15 +398,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     };
 
     const handleMore = useCallback(
-        (
-            annotatedFile: FileViewerAnnotatedFile,
-            imageURL: string | undefined,
-            buttonElement: HTMLElement,
-        ) => {
-            setActiveAnnotatedFile(annotatedFile);
-            setActiveImageURL(imageURL);
-            setMoreMenuAnchorEl(buttonElement);
-        },
+        (buttonElement: HTMLElement) => setMoreMenuAnchorEl(buttonElement),
         [],
     );
 
@@ -455,7 +448,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
         });
     };
 
-    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
+    // Not memoized since it uses the frequently changing `activeImageURL`.
     const handleCopyImage = useCallback(() => {
         handleMoreMenuCloseIfNeeded();
         // Safari does not copy if we do not call `navigator.clipboard.write`
@@ -493,7 +486,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const handleAnnotate = useCallback(
-        (file: EnteFile): FileViewerFileAnnotation => {
+        (file: EnteFile, itemData: ItemData): FileViewerFileAnnotation => {
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
 
@@ -534,7 +527,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 }
             })();
 
-            return {
+            const annotation: FileViewerFileAnnotation = {
                 fileID,
                 isOwnFile,
                 showFavorite,
@@ -543,6 +536,11 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 showCopyImage,
                 showEditImage,
             };
+
+            setActiveAnnotatedFile({ file, annotation });
+            setActiveImageURL(itemData.imageURL);
+
+            return annotation;
         },
         [
             user,
@@ -636,7 +634,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
         // Don't handle keydowns if any of the modals are open.
         return (
             openFileInfo ||
-            moreMenuAnchorEl ||
+            !!moreMenuAnchorEl ||
             openImageEditor ||
             openConfirmDelete ||
             openShortcuts
