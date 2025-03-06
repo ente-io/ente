@@ -51,7 +51,7 @@ Future<Tuple2<List<LocalPathAsset>, List<EnteFile>>> getLocalPathAssetsAndFiles(
         _logger.info(
           "Failed for pathEntity: ${pathEntity.name}",
         );
-        result = const Tuple2({}, []);
+        rethrow;
       }
 
       alreadySeenLocalIDs.addAll(result.item1);
