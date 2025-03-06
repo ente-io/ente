@@ -741,6 +741,11 @@ export class FileViewerPhotoSwipe {
             slide.panTo(slide.pan.x, slide.pan.y);
         };
 
+        const handleToggleUIControls = () => {
+            toggleUIControls();
+            lastActivityDate = new Date();
+        }
+
         // Some actions routed via the delegate
 
         const handleDelete = () => delegate.performKeyAction("delete");
@@ -803,7 +808,7 @@ export class FileViewerPhotoSwipe {
                         cb = panner(lkey);
                         break;
                     case "h":
-                        cb = toggleUIControls;
+                        cb = handleToggleUIControls;
                         break;
                     case "l":
                         cb = handleToggleFavoriteIfEnabled;
