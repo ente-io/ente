@@ -57,7 +57,7 @@ const RemoteLocationTagData = z.object({
         latitude: z.number(),
         longitude: z.number(),
     }),
-});
+}).passthrough();
 
 /**
  * A view of the location tag data suitable for use by the rest of the app.
@@ -75,7 +75,7 @@ export const savedLocationTags = (): Promise<LocationTag[]> =>
 const RemoteFaceCluster = z.object({
     id: z.string(),
     faces: z.string().array(),
-});
+}).passthrough();
 
 /**
  * Zod schema for the fields of interest in the cgroup that we get from remote.
@@ -88,7 +88,7 @@ const RemoteCGroupData = z.object({
     rejectedFaceIDs: z.array(z.string()).nullish().transform(nullishToEmpty),
     isHidden: z.boolean(),
     avatarFaceID: z.string().nullish().transform(nullToUndefined),
-});
+}).passthrough();
 
 /**
  * A "cgroup" user entity.
