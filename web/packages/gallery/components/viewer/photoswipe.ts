@@ -248,13 +248,13 @@ export class FileViewerPhotoSwipe {
             // TODO(PS): padding option? for handling custom title bar.
             // TODO(PS): will we need this?
             mainClass: "pswp-ente",
-            // Translated variants
-            closeTitle: t("close_key"),
-            zoomTitle: t("zoom_in_out_key") /* TODO(PS): Add "(scroll)" */,
-            arrowPrevTitle: t("previous_key"),
-            arrowNextTitle: t("next_key"),
+            // TODO(PS): Translated variants
+            closeTitle: pt("Close"),
+            zoomTitle: pt("Zoom"),
+            arrowPrevTitle: pt("Previous"),
+            arrowNextTitle: pt("Next"),
             // TODO(PS): Move to translations (unpreviewable_file_notification).
-            errorMsg: "This file could not be previewed",
+            errorMsg: pt("This file could not be previewed"),
         });
 
         this.pswp = pswp;
@@ -609,7 +609,7 @@ export class FileViewerPhotoSwipe {
                 // up being shown, so they can safely share the same order.
                 pswp.ui.registerElement({
                     name: "favorite",
-                    title: t("favorite"),
+                    title: pt("Favorite"),
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
@@ -623,7 +623,7 @@ export class FileViewerPhotoSwipe {
                 });
                 pswp.ui.registerElement({
                     name: "unfavorite",
-                    title: t("unfavorite"),
+                    title: pt("Favorite"),
                     order: 8,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("unfavorite"),
