@@ -13,7 +13,6 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/photo_manager_util.dart";
 import "package:styled_text/styled_text.dart";
 
 class GrantPermissionsWidget extends StatefulWidget {
@@ -110,7 +109,8 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           child: Text(S.of(context).grantPermission),
           onPressed: () async {
             try {
-              final state = await requestPhotoMangerPermissions();
+              final state =
+                  await permissionService.requestPhotoMangerPermissions();
               _logger.info("Permission state: $state");
               if (state == PermissionState.authorized ||
                   state == PermissionState.limited) {

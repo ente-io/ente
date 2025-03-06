@@ -8,6 +8,17 @@ class PermissionService {
   final _logger = Logger("PermissionService");
   final SharedPreferences _prefs;
   PermissionService(this._prefs);
+  Future<PermissionState> requestPhotoMangerPermissions() {
+    return PhotoManager.requestPermissionExtend(
+      requestOption: const PermissionRequestOption(
+        androidPermission: AndroidPermission(
+          type: RequestType.common,
+          mediaLocation: true,
+        ),
+      ),
+    );
+  }
+
 
   bool hasGrantedPermissions() {
     return _prefs.getBool(kHasGrantedPermissionsKey) ?? false;

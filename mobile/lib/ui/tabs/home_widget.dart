@@ -643,7 +643,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
-    if (!LocalSyncService.instance.hasGrantedPermissions()) {
+    if (!permissionService.hasGrantedPermissions()) {
       entityService.syncEntities().then((_) {
         PersonService.instance.resetEmailToPartialPersonDataCache();
       });
@@ -671,7 +671,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     _showShowBackupHook =
         !Configuration.instance.hasSelectedAnyBackupFolder() &&
-            !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
+            !permissionService.hasGrantedLimitedPermissions() &&
             CollectionsService.instance.getActiveCollections().isEmpty;
 
     return Stack(

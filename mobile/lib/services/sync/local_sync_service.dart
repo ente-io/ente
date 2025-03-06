@@ -21,7 +21,6 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/ignored_files_service.dart";
 import 'package:photos/services/local/local_sync_util.dart';
-import "package:photos/utils/photo_manager_util.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
@@ -59,7 +58,8 @@ class LocalSyncService {
       return;
     }
     if (Platform.isAndroid && AppLifecycleService.instance.isForeground) {
-      final permissionState = await requestPhotoMangerPermissions();
+      final permissionState =
+          await permissionService.requestPhotoMangerPermissions();
       if (permissionState != PermissionState.authorized) {
         _logger.severe(
           "sync requested with invalid permission",
