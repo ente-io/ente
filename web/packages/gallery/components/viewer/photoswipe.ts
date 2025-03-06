@@ -396,12 +396,16 @@ export class FileViewerPhotoSwipe {
         // initial display of the video.
 
         const livePhotoUpdatePlayback = (video: HTMLVideoElement) => {
+            const button = livePhotoToggleButtonElement;
             if (livePhotoPlay) {
-                livePhotoToggleButtonElement?.classList.remove("pswp-ente-off");
+                if (button) {
+                    showIf(button, true);
+                    button.classList.remove("pswp-ente-off");
+                }
                 video.play();
                 video.style.display = "initial";
             } else {
-                livePhotoToggleButtonElement?.classList.add("pswp-ente-off");
+                button?.classList.add("pswp-ente-off");
                 video.pause();
                 video.style.display = "none";
             }
@@ -630,7 +634,6 @@ export class FileViewerPhotoSwipe {
                             return;
                         }
 
-                        showIf(buttonElement, true);
                         livePhotoUpdatePlayback(video);
                     });
                 },
