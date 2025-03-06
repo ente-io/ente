@@ -15,10 +15,7 @@ import {
     updateFileInfoExifIfNeeded,
     type ItemData,
 } from "./data-source";
-import {
-    type FileViewerAnnotatedFile,
-    type FileViewerFileAnnotation,
-} from "./FileViewer";
+import { type FileViewerAnnotatedFile } from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
 
 // TODO(PS): WIP gallery using upstream photoswipe
@@ -132,10 +129,7 @@ type FileViewerPhotoSwipeOptions = Pick<
      * @param itemData This is the best currently available {@link ItemData}
      * corresponding to the current file.
      */
-    onAnnotate: (
-        file: EnteFile,
-        itemData: ItemData,
-    ) => FileViewerFileAnnotation;
+    onAnnotate: (file: EnteFile, itemData: ItemData) => FileViewerAnnotatedFile;
     /**
      * Called when the user activates the info action on a file.
      */
@@ -217,17 +211,6 @@ export class FileViewerPhotoSwipe {
      */
     private lastActivityDate: Date | "auto-hidden" | "already-hidden";
     /**
-     * Derived data about the currently displayed file.
-     *
-     * This is recomputed on-demand (by using the {@link onAnnotate} callback)
-     * each time the slide changes, and cached until the next slide change.
-     *
-     * Instead of accessing this property directly, code should funnel through
-     * the `currentAnnotatedFile` helper function defined in the constructor
-     * scope.
-     */
-    private activeFileAnnotation: FileViewerFileAnnotation | undefined;
-    /**
      * IDs of files for which a there is a favorite update in progress.
      */
     private pendingFavoriteUpdates = new Set<number>();
@@ -305,24 +288,28 @@ export class FileViewerPhotoSwipe {
 
         // Various helper routines to obtain the file at `currIndex`.
 
+        /**
+         * Derived data about the currently displayed file.
+         *
+         * This is recomputed on-demand (by using the {@link onAnnotate}
+         * callback) each time the slide changes, and cached until the next
+         * slide change.
+         *
+         * Instead of accessing this property directly, code should funnel
+         * through the `currentAnnotatedFile` helper function.
+         */
+        let _currentAnnotatedFile: FileViewerAnnotatedFile | undefined;
+
         const currentFile = () => delegate.getFiles()[pswp.currIndex]!;
 
         const currentAnnotatedFile = () => {
             const file = currentFile();
-            let annotation = this.activeFileAnnotation;
-            if (annotation?.fileID != file.id) {
-                annotation = onAnnotate(file, pswp.currSlide.content.data);
-                this.activeFileAnnotation = annotation;
+            const annotatedFile = _currentAnnotatedFile;
+            if (!annotatedFile || annotatedFile.file.fileID != file.id) {
+                annotatedFile = onAnnotate(file, pswp.currSlide.content.data);
+                _currentAnnotatedFile = annotatedFile;
             }
-            return {
-                file,
-                // The above condition implies that annotation can never be
-                // undefined, but it doesn't seem to be enough to convince
-                // TypeScript. Writing the condition in a more unnatural way
-                // `(!(annotation && annotation?.fileID == file.id))` works, but
-                // instead we use a non-null assertion here.
-                annotation: annotation!,
-            };
+            return annotatedFile;
         };
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;

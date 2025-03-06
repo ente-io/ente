@@ -120,11 +120,12 @@ export interface FileViewerFileAnnotation {
 }
 
 /**
- * A file and its annotation, in a nice cosy box.
+ * A file, its annotation, and its item data, in a nice cosy box.
  */
 export interface FileViewerAnnotatedFile {
     file: EnteFile;
     annotation: FileViewerFileAnnotation;
+    itemData: ItemData;
 }
 
 export type FileViewerProps = ModalVisibilityProps & {
@@ -309,12 +310,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
         FileInfoExif | undefined
     >(undefined);
 
-    // With semantics similar to `activeAnnotatedFile`, this is the imageURL
-    // associated with the `activeAnnotatedFile`, if any.
-    const [activeImageURL, setActiveImageURL] = useState<string | undefined>(
-        undefined,
-    );
-
     const [openFileInfo, setOpenFileInfo] = useState(false);
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
@@ -448,20 +443,21 @@ const FileViewer: React.FC<FileViewerProps> = ({
         });
     };
 
-    // Not memoized since it uses the frequently changing `activeImageURL`.
+    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleCopyImage = useCallback(() => {
         handleMoreMenuCloseIfNeeded();
+        const imageURL = activeAnnotatedFile?.itemData.imageURL;
         // Safari does not copy if we do not call `navigator.clipboard.write`
         // synchronously within the click event handler, but it does supports
         // passing a promise in lieu of the blob.
         void window.navigator.clipboard
             .write([
                 new ClipboardItem({
-                    "image/png": createImagePNGBlob(activeImageURL!),
+                    "image/png": createImagePNGBlob(imageURL!),
                 }),
             ])
             .catch(onGenericError);
-    }, [onGenericError, handleMoreMenuCloseIfNeeded, activeImageURL]);
+    }, [onGenericError, handleMoreMenuCloseIfNeeded, activeAnnotatedFile]);
 
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
@@ -486,7 +482,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const handleAnnotate = useCallback(
-        (file: EnteFile, itemData: ItemData): FileViewerFileAnnotation => {
+        (file: EnteFile, itemData: ItemData): FileViewerAnnotatedFile => {
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
 
@@ -537,10 +533,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 showEditImage,
             };
 
-            setActiveAnnotatedFile({ file, annotation });
-            setActiveImageURL(itemData.imageURL);
-
-            return annotation;
+            const annotatedFile = { file, annotation, itemData };
+            setActiveAnnotatedFile(annotatedFile);
+            return annotatedFile;
         },
         [
             user,
@@ -663,6 +658,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
         },
         [
             handleConfirmDelete,
+            activeAnnotatedFile,
             activeImageURL,
             handleCopyImage,
             handleToggleFullscreen,
