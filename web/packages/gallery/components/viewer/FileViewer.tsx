@@ -17,10 +17,7 @@ import { isDesktop } from "@/base/app";
 import { SpacedRow } from "@/base/components/containers";
 import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import {
-    useModalVisibility,
-    type ModalVisibilityProps,
-} from "@/base/components/utils/modal";
+import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
 import { pt } from "@/base/i18n";
@@ -319,13 +316,10 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
+    const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+    const [openShortcuts, setOpenShortcuts] = useState(false);
+
     const [isFullscreen, setIsFullscreen] = useState(false);
-
-    const { show: showConfirmDelete, props: confirmDeleteVisibilityProps } =
-        useModalVisibility();
-
-    const { show: showShortcuts, props: shortcutsVisibilityProps } =
-        useModalVisibility();
 
     // Callbacks to be invoked (only once) the next time we get an update to the
     // `files` or `favoriteFileIDs` props.
@@ -359,10 +353,12 @@ const FileViewer: React.FC<FileViewerProps> = ({
             return false;
         });
         setOpenFileInfo(false);
-        setOpenImageEditor(false);
         // No need to `resetMoreMenuButtonOnMenuClose` since we're closing
         // anyway and it'll be removed from the DOM.
         setMoreMenuAnchorEl(null);
+        setOpenImageEditor(false);
+        setOpenConfirmDelete(false);
+        setOpenShortcuts(false);
         onClose();
     }, [onTriggerSyncWithRemote, onClose]);
 
@@ -424,10 +420,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
         return onDelete
             ? () => {
                   handleMoreMenuCloseIfNeeded();
-                  showConfirmDelete();
+                  setOpenConfirmDelete(true);
               }
             : undefined;
-    }, [onDelete, showConfirmDelete, handleMoreMenuCloseIfNeeded]);
+    }, [onDelete, handleMoreMenuCloseIfNeeded]);
+
+    const handleConfirmDeleteClose = useCallback(
+        () => setOpenConfirmDelete(false),
+        [],
+    );
 
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleDelete = async () => {
@@ -626,8 +627,27 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleShortcuts = useCallback(() => {
         handleMoreMenuCloseIfNeeded();
-        showShortcuts();
-    }, [handleMoreMenuCloseIfNeeded, showShortcuts]);
+        setOpenShortcuts(true);
+    }, [handleMoreMenuCloseIfNeeded]);
+
+    const handleShortcutsClose = useCallback(() => setOpenShortcuts(false), []);
+
+    const shouldIgnoreKeyboardEvent = useCallback(() => {
+        // Don't handle keydowns if any of the modals are open.
+        return (
+            openFileInfo ||
+            moreMenuAnchorEl ||
+            openImageEditor ||
+            openConfirmDelete ||
+            openShortcuts
+        );
+    }, [
+        openFileInfo,
+        moreMenuAnchorEl,
+        openImageEditor,
+        openConfirmDelete,
+        openShortcuts,
+    ]);
 
     const performKeyAction = useCallback(
         (action): FileViewerPhotoSwipeDelegate["performKeyAction"] => {
@@ -657,6 +677,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
             getFiles,
             isFavorite,
             toggleFavorite,
+            shouldIgnoreKeyboardEvent,
             performKeyAction,
         };
     }
@@ -667,8 +688,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
         delegate.getFiles = getFiles;
         delegate.isFavorite = isFavorite;
         delegate.toggleFavorite = toggleFavorite;
+        delegate.shouldIgnoreKeyboardEvent = shouldIgnoreKeyboardEvent;
         delegate.performKeyAction = performKeyAction;
-    }, [getFiles, isFavorite, toggleFavorite, performKeyAction]);
+    }, [
+        getFiles,
+        isFavorite,
+        toggleFavorite,
+        shouldIgnoreKeyboardEvent,
+        performKeyAction,
+    ]);
 
     // Notify the listeners, if any, for updates to files or favorites.
     useEffect(() => {
@@ -822,7 +850,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
             </MoreMenu>
             {/* TODO(PS): Fix imports */}
             <ConfirmDeleteFileDialog
-                {...confirmDeleteVisibilityProps}
+                open={openConfirmDelete}
+                onClose={handleConfirmDeleteClose}
                 onConfirm={handleDelete}
             />
             <ImageEditorOverlay
@@ -831,7 +860,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 file={activeAnnotatedFile?.file}
                 onSaveEditedCopy={handleSaveEditedCopy}
             />
-            <Shortcuts {...shortcutsVisibilityProps} />
+            <Shortcuts open={openShortcuts} onClose={handleShortcutsClose} />
         </Container>
     );
 };

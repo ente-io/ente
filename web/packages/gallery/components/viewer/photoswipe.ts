@@ -74,6 +74,14 @@ export interface FileViewerPhotoSwipeDelegate {
      */
     toggleFavorite: (annotatedFile: FileViewerAnnotatedFile) => Promise<void>;
     /**
+     * Called when there is a keydown event, and our PhotoSwipe instance wants
+     * to know if it should ignore it or handle it.
+     *
+     * The delegate should return true when, e.g., the file info dialog is
+     * being displayed.
+     */
+    shouldIgnoreKeyboardEvent: () => boolean;
+    /**
      * Called when the user triggers a potential action using a keyboard
      * shortcut.
      *
@@ -734,21 +742,17 @@ export class FileViewerPhotoSwipe {
         const handleToggleFullscreen = () =>
             delegate.performKeyAction("toggle-fullscreen");
 
-        pswp.on("keydown", (_e) => {
-            const e: KeyboardEvent = _e.originalEvent;
+        pswp.on("keydown", (pswpEvent) => {
+            // Ignore keyboard events when we do not have "focus".
+            if (delegate.shouldIgnoreKeyboardEvent()) {
+                pswpEvent.preventDefault();
+                return;
+            }
+
+            const e: KeyboardEvent = pswpEvent.originalEvent;
 
             // Even though we ignore shift, Caps lock might still be on.
             const key = e.key.toLowerCase();
-
-            console.log(
-                e,
-                key,
-                e.shiftKey,
-                e.altKey,
-                e.metaKey,
-                e.ctrlKey,
-                e.code,
-            );
 
             // Keep the keybindings such that they don't use modifiers, because
             // these are more likely to interfere with browser shortcuts.
