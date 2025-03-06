@@ -557,9 +557,9 @@ export class FileViewerPhotoSwipe {
         // https://photoswipe.com/adding-ui-elements/#uiregisterelement-api
         //
         // The "order" prop is used to position items. Some landmarks:
-        // - counter: 3 (default is 5)
-        // - zoom: 4 (default is 10).
-        // - preloader: 7
+        // - counter: 5
+        // - zoom: 6 (default is 10)
+        // - preloader: 10 (default is 7)
         // - close: 20
         pswp.on("uiRegister", () => {
             // Move the zoom button to the left so that it is in the same place
@@ -570,26 +570,10 @@ export class FileViewerPhotoSwipe {
             // We cannot use the PhotoSwipe "uiElement" filter to modify the
             // order since that only allows us to edit the DOM element, not the
             // underlying UI element data.
-            pswp.ui.uiElementsData.find((e) => e.name == "counter").order = 3;
-            pswp.ui.uiElementsData.find((e) => e.name == "zoom").order = 4;
+            pswp.ui.uiElementsData.find((e) => e.name == "zoom").order = 6;
+            pswp.ui.uiElementsData.find((e) => e.name == "preloader").order = 10;
 
             // Register our custom elements...
-
-            pswp.ui.registerElement({
-                name: "error",
-                order: 5,
-                html: createPSRegisterElementIconHTML("error"),
-                onInit: (errorElement, pswp) => {
-                    pswp.on("change", () => {
-                        const { fetchFailed, isContentLoading } =
-                            pswp.currSlide.content.data;
-                        errorElement.classList.toggle(
-                            "pswp__error--active",
-                            !!fetchFailed && !isContentLoading,
-                        );
-                    });
-                },
-            });
 
             pswp.ui.registerElement({
                 name: "live",
@@ -597,10 +581,11 @@ export class FileViewerPhotoSwipe {
                 title: pt("Toggle live"),
                 // Safe to use the same order, since this will only be shown if
                 // there are no errors.
-                order: 5,
+                order: 7,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("live"),
                 onInit: (buttonElement) => {
+                    // buttonElement.style.display = "none";
                     // buttonElement.setAttribute("id", moreButtonID);
                     // buttonElement.setAttribute("aria-haspopup", "true");
                 },
@@ -617,10 +602,12 @@ export class FileViewerPhotoSwipe {
                 name: "vol",
                 // TODO(PS):
                 title: pt("Toggle audio"),
-                order: 6,
+                order: 8,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("vol"),
                 onInit: (buttonElement) => {
+                    // buttonElement.style.display = "none";
+
                     // buttonElement.setAttribute("id", moreButtonID);
                     // buttonElement.setAttribute("aria-haspopup", "true");
                 },
@@ -632,6 +619,23 @@ export class FileViewerPhotoSwipe {
                     // onMore(buttonElement);
                 },
             });
+
+            pswp.ui.registerElement({
+                name: "error",
+                order: 9,
+                html: createPSRegisterElementIconHTML("error"),
+                onInit: (errorElement, pswp) => {
+                    pswp.on("change", () => {
+                        const { fetchFailed, isContentLoading } =
+                            pswp.currSlide.content.data;
+                        errorElement.classList.toggle(
+                            "pswp__error--active",
+                            !!fetchFailed && !isContentLoading,
+                        );
+                    });
+                },
+            });
+
 
             if (haveUser) {
                 const showFavoriteIf = (
@@ -654,7 +658,7 @@ export class FileViewerPhotoSwipe {
                 pswp.ui.registerElement({
                     name: "favorite",
                     title: pt("Favorite"),
-                    order: 8,
+                    order: 11,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
                     onClick: handleToggleFavorite,
@@ -668,7 +672,7 @@ export class FileViewerPhotoSwipe {
                 pswp.ui.registerElement({
                     name: "unfavorite",
                     title: pt("Favorite"),
-                    order: 8,
+                    order: 11,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("unfavorite"),
                     onClick: handleToggleFavorite,
@@ -688,7 +692,7 @@ export class FileViewerPhotoSwipe {
                 pswp.ui.registerElement({
                     name: "download",
                     title: t("download"),
-                    order: 8,
+                    order: 11,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("download"),
                     onClick: handleDownload,
@@ -705,7 +709,7 @@ export class FileViewerPhotoSwipe {
             pswp.ui.registerElement({
                 name: "info",
                 title: t("info"),
-                order: 9,
+                order: 13,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("info"),
                 onClick: handleViewInfo,
