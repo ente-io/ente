@@ -594,18 +594,39 @@ export class FileViewerPhotoSwipe {
                             return;
                         }
 
+                        const containerElement = pswp.currSlide.container;
+                        const videoElement =
+                            containerElement.getElementsByTagName("video")[0];
+                        console.log(
+                            containerElement,
+                            videoElement,
+                            pswp.currSlide,
+                        );
+                        if (!videoElement) {
+                            // Video hasn't loaded yet.
+                            showIf(buttonElement, false);
+                            return;
+                        }
+
                         showIf(buttonElement, true);
+                        buttonElement.classList.remove("pswp-ente-off");
                     });
-                    // buttonElement.style.display = "none";
-                    // buttonElement.setAttribute("id", moreButtonID);
-                    // buttonElement.setAttribute("aria-haspopup", "true");
                 },
                 onClick: (e) => {
-                    // const buttonElement = e.target;
-                    // See also: `resetMoreMenuButtonOnMenuClose`.
-                    // buttonElement.setAttribute("aria-controls", moreMenuID);
-                    // buttonElement.setAttribute("aria-expanded", true);
-                    // onMore(buttonElement);
+                    const buttonElement = e.target;
+
+                    const containerElement = pswp.currSlide.container;
+                    const videoElement =
+                        containerElement.getElementsByTagName("video")[0];
+                    console.log(containerElement, videoElement, pswp.currSlide);
+
+                    if (videoElement.paused) {
+                        videoElement.play();
+                        buttonElement.classList.remove("pswp-ente-off");
+                    } else {
+                        videoElement.pause();
+                        buttonElement.classList.add("pswp-ente-off");
+                    }
                 },
             });
 

@@ -220,6 +220,15 @@ body {
     transform: scale(-0.8, 0.8);
 }
 
+/* Toggleable live photo buttons */
+
+.pswp-ente button.pswp-ente-off .pswp__icn {
+    /* PhotoSwipe already uses the CSS opacity, so reduce the color's opacity */
+    fill: rgba(255 255 255 / 0.6);
+}
+
+/* 4 line caption */
+
 .pswp-ente .pswp__caption {
     position: absolute;
     bottom: 0px;
