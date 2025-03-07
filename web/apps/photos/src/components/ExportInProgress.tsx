@@ -67,9 +67,7 @@ export default function ExportInProgress(props: Props) {
                                             />
                                         ),
                                     }}
-                                    values={{
-                                        progress: props.exportProgress,
-                                    }}
+                                    values={{ progress: props.exportProgress }}
                                 />
                             </Typography>
                         )}

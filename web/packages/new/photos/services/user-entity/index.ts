@@ -54,10 +54,7 @@ const RemoteLocationTagData = z
     .object({
         name: z.string(),
         radius: z.number(),
-        centerPoint: z.object({
-            latitude: z.number(),
-            longitude: z.number(),
-        }),
+        centerPoint: z.object({ latitude: z.number(), longitude: z.number() }),
     })
     .passthrough();
 
@@ -75,10 +72,7 @@ export const savedLocationTags = (): Promise<LocationTag[]> =>
     );
 
 const RemoteFaceCluster = z
-    .object({
-        id: z.string(),
-        faces: z.string().array(),
-    })
+    .object({ id: z.string(), faces: z.string().array() })
     .passthrough();
 
 /**

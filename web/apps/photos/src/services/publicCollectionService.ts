@@ -263,9 +263,7 @@ const getPublicFiles = async (
             }
             resp = await HTTPService.get(
                 await apiURL("/public-collection/diff"),
-                {
-                    sinceTime: time,
-                },
+                { sinceTime: time },
                 {
                     "X-Auth-Access-Token": token,
                     ...(passwordToken && {

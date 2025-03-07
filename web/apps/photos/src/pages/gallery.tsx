@@ -472,10 +472,7 @@ const Page: React.FC = () => {
             collectionID: activeCollectionID,
             context:
                 barMode == "people" && activePersonID
-                    ? {
-                          mode: "people" as const,
-                          personID: activePersonID,
-                      }
+                    ? { mode: "people" as const, personID: activePersonID }
                     : {
                           mode: barMode as "albums" | "hidden-albums",
                           collectionID: activeCollectionID!,
@@ -504,16 +501,10 @@ const Page: React.FC = () => {
         });
     };
 
-    const keyboardShortcutHandlerRef = useRef({
-        selectAll,
-        clearSelection,
-    });
+    const keyboardShortcutHandlerRef = useRef({ selectAll, clearSelection });
 
     useEffect(() => {
-        keyboardShortcutHandlerRef.current = {
-            selectAll,
-            clearSelection,
-        };
+        keyboardShortcutHandlerRef.current = { selectAll, clearSelection };
     }, [selectAll, clearSelection]);
 
     const showSessionExpiredDialog = useCallback(

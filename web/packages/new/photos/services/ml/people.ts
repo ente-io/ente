@@ -158,9 +158,7 @@ export type ClusterPerson = Exclude<Person, { type: "cgroup" }>;
 /**
  * A {@link Person} whose name is not empty.
  */
-export type NamedPerson = Person & {
-    name: string;
-};
+export type NamedPerson = Person & { name: string };
 
 /**
  * A face ID annotated with the {@link EnteFile} that contains it.

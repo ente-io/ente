@@ -166,9 +166,7 @@ const getEncryptedCollectionFiles = async (
         resp = await HTTPService.get(
             await apiURL("/cast/diff"),
             { sinceTime },
-            {
-                "X-Cast-Access-Token": castToken,
-            },
+            { "X-Cast-Access-Token": castToken },
         );
         const diff = resp.data.diff;
         files = files.concat(diff.filter((file: EnteFile) => !file.isDeleted));
@@ -328,9 +326,7 @@ const downloadFile = async (
                 ? `https://cast-albums.ente.io/preview/?fileID=${file.id}`
                 : `https://cast-albums.ente.io/download/?fileID=${file.id}`;
             return fetch(url, {
-                headers: {
-                    "X-Cast-Access-Token": castToken,
-                },
+                headers: { "X-Cast-Access-Token": castToken },
             });
         }
     };

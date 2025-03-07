@@ -22,9 +22,7 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
                 border: 0,
                 backgroundColor: theme.vars.palette.fixed.switchOn,
             },
-            "&.Mui-disabled + .MuiSwitch-track": {
-                opacity: 0.5,
-            },
+            "&.Mui-disabled + .MuiSwitch-track": { opacity: 0.5 },
         },
         "&.Mui-disabled .MuiSwitch-thumb": {
             color: theme.vars.palette.grey[600],
@@ -32,15 +30,9 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
                 color: theme.vars.palette.grey[100],
             }),
         },
-        "&.Mui-disabled + .MuiSwitch-track": {
-            opacity: 0.3,
-        },
+        "&.Mui-disabled + .MuiSwitch-track": { opacity: 0.3 },
     },
-    "& .MuiSwitch-thumb": {
-        boxSizing: "border-box",
-        width: 20,
-        height: 20,
-    },
+    "& .MuiSwitch-thumb": { boxSizing: "border-box", width: 20, height: 20 },
     "& .MuiSwitch-track": {
         borderRadius: 22 / 2,
         backgroundColor: theme.vars.palette.fill.muted,

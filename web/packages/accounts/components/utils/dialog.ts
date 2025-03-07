@@ -17,9 +17,6 @@ export const sessionExpiredDialogAttributes = (
     message: t("session_expired_message"),
     nonClosable: true,
     nonReplaceable: true,
-    continue: {
-        text: t("login"),
-        action: onLogin,
-    },
+    continue: { text: t("login"), action: onLogin },
     cancel: false,
 });

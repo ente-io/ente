@@ -91,11 +91,7 @@ export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
                        MUI is anyways intending to replace the TimeClock with a
                        DigitalTimePicker that has a better UX. */
                     layout: {
-                        sx: {
-                            ".MuiTimeClock-root": {
-                                minHeight: "336px",
-                            },
-                        },
+                        sx: { ".MuiTimeClock-root": { minHeight: "336px" } },
                     },
 
                     /* We also get opened from the info drawer in the photo

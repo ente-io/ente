@@ -1,6 +1,7 @@
 {
     "tabWidth": 4,
     "proseWrap": "always",
+    "objectWrap": "collapse",
     "plugins": [
         "prettier-plugin-organize-imports",
         "prettier-plugin-packagejson"

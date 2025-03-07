@@ -111,11 +111,7 @@ export const verifyEmail = async (
     const res = await fetch(await apiURL("/users/verify-email"), {
         method: "POST",
         headers: publicRequestHeaders(),
-        body: JSON.stringify({
-            email,
-            ott,
-            ...(source ? { source } : {}),
-        }),
+        body: JSON.stringify({ email, ott, ...(source ? { source } : {}) }),
     });
     ensureOk(res);
     // See: [Note: strict mode migration]
@@ -204,9 +200,7 @@ export const putAttributes = async (
         await apiURL("/users/attributes"),
         { keyAttributes },
         undefined,
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );
 
 /**
@@ -256,10 +250,7 @@ export const recoverTwoFactor = async (
 ) => {
     const resp = await HTTPService.get(
         await apiURL("/users/two-factor/recover"),
-        {
-            sessionID,
-            twoFactorType,
-        },
+        { sessionID, twoFactorType },
     );
     return resp.data as TwoFactorRecoveryResponse;
 };
@@ -271,11 +262,7 @@ export const removeTwoFactor = async (
 ) => {
     const resp = await HTTPService.post(
         await apiURL("/users/two-factor/remove"),
-        {
-            sessionID,
-            secret,
-            twoFactorType,
-        },
+        { sessionID, secret, twoFactorType },
     );
     return resp.data as TwoFactorVerificationResponse;
 };
@@ -283,14 +270,9 @@ export const removeTwoFactor = async (
 export const changeEmail = async (email: string, ott: string) => {
     await HTTPService.post(
         await apiURL("/users/change-email"),
-        {
-            email,
-            ott,
-        },
+        { email, ott },
         undefined,
-        {
-            "X-Auth-Token": getToken(),
-        },
+        { "X-Auth-Token": getToken() },
     );
 };
 
@@ -331,7 +313,5 @@ export const setRecoveryKey = async (token: string, recoveryKey: RecoveryKey) =>
         await apiURL("/users/recovery-key"),
         recoveryKey,
         undefined,
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );

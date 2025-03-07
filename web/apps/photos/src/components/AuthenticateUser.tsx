@@ -126,9 +126,6 @@ const passwordChangedElsewhereDialogAttributes = (
 ): MiniDialogAttributes => ({
     title: t("password_changed_elsewhere"),
     message: t("password_changed_elsewhere_message"),
-    continue: {
-        text: t("login"),
-        action: onLogin,
-    },
+    continue: { text: t("login"), action: onLogin },
     cancel: false,
 });

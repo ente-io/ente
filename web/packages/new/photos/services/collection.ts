@@ -255,9 +255,7 @@ export const deleteFromTrash = async (fileIDs: number[]) => {
             await fetch(await apiURL("/trash/delete"), {
                 method: "POST",
                 headers: await authenticatedRequestHeaders(),
-                body: JSON.stringify({
-                    fileIDs: batchIDs,
-                }),
+                body: JSON.stringify({ fileIDs: batchIDs }),
             }),
         );
     }

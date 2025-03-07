@@ -206,13 +206,9 @@ const PhotoFrame = ({
         const end = currentURL.hash.lastIndexOf("&");
         const hash = currentURL.hash.slice(1, end !== -1 ? end : undefined);
         if (open) {
-            router.push({
-                hash: hash + PHOTOSWIPE_HASH_SUFFIX,
-            });
+            router.push({ hash: hash + PHOTOSWIPE_HASH_SUFFIX });
         } else {
-            router.push({
-                hash: hash,
-            });
+            router.push({ hash: hash });
         }
     }, [open]);
 

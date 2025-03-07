@@ -306,11 +306,7 @@ const parseYearComponents = (s: string): LabelledSearchDateComponents[] => {
  */
 const RemoteWorldCities = z.object({
     data: z.array(
-        z.object({
-            city: z.string(),
-            lat: z.number(),
-            lng: z.number(),
-        }),
+        z.object({ city: z.string(), lat: z.number(), lng: z.number() }),
     ),
 });
 
