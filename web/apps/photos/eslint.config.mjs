@@ -2,7 +2,7 @@ import config from "@/build-config/eslintrc-next-app.mjs";
 
 export default [
     ...config,
-    { ignores: ["thirdparty", ".next-desktop"] },
+    { ignores: [".next-desktop"] },
     {
         rules: {
             /* TODO:
