@@ -3,6 +3,7 @@ import {
     logoutClearStateAgain,
 } from "@/accounts/services/logout";
 import log from "@/base/log";
+import { logoutFileViewerDataSource } from "@/gallery/components/viewer/data-source";
 import { downloadManager } from "@/gallery/services/download";
 import { resetUploadState } from "@/gallery/services/upload";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
@@ -11,7 +12,6 @@ import { logoutSettings } from "@/new/photos/services/settings";
 import { logoutUserDetails } from "@/new/photos/services/user-details";
 import exportService from "./export";
 import uploadManager from "./upload/uploadManager";
-import { logoutFileViewerDataSource } from "@/gallery/components/viewer/data-source";
 
 /**
  * Logout sequence for the photos app.
