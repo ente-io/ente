@@ -228,7 +228,9 @@ export class FileViewerPhotoSwipe {
             // Set the index within files that we should open to. Subsequent
             // updates to the index will be tracked by PhotoSwipe internally.
             index: initialIndex,
-            // TODO(PS): will we need this?
+            // Use "pswp-ente" as the main class name. Note that this is not
+            // necessary, we could've target the "pswp" class too in our CSS
+            // since we only have a single PhotoSwipe instance.
             mainClass: "pswp-ente",
             // TODO(PS): Translated variants
             closeTitle: pt("Close"),

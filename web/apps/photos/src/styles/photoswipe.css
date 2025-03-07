@@ -11,15 +11,6 @@
     top: calc(env(titlebar-area-height, 0px) * 0.4);
 }
 
-/*
-  Make the controllable video elements we render as custom PhotoSwipe content
-  take up the entire container.
- */
-.pswp-ente video[controls] {
-    width: 100%;
-    height: 100%;
-}
-
 .pswp-ente .pswp__preloader--active .pswp__icn {
     opacity: 0.4;
 }
@@ -112,7 +103,7 @@
 
 /* Make the controls fit the top bar on mobile sized screens */
 @media (width < 450px) {
-    .pswp__button {
+    .pswp-ente .pswp__button {
         width: 44px;
     }
 
@@ -127,7 +118,7 @@
 }
 
 @media (width < 350px) {
-    .pswp__button {
+    .pswp-ente .pswp__button {
         width: 42px;
     }
 
@@ -164,4 +155,13 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
     line-clamp: 4;
+}
+
+/*
+  Make the controllable video elements we render as custom PhotoSwipe content
+  take .pswp-ente up the entire container.
+ */
+.pswp-ente video[controls] {
+    width: 100%;
+    height: 100%;
 }
