@@ -112,7 +112,11 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
-  bool get sortByName => this != SectionType.face && this != SectionType.magic;
+  // TODO: lau: check if we should sort moment again
+  bool get sortByName =>
+      this != SectionType.face &&
+      this != SectionType.magic &&
+      this != SectionType.moment;
 
   bool get isEmptyCTAVisible {
     switch (this) {
