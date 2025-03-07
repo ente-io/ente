@@ -6,6 +6,7 @@ import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { t } from "i18next";
+import PhotoSwipe from "photoswipe";
 import {
     fileViewerDidClose,
     fileViewerWillOpen,
@@ -17,24 +18,6 @@ import {
 } from "./data-source";
 import { type FileViewerAnnotatedFile } from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
-
-// TODO(PS): WIP gallery using upstream photoswipe
-//
-// Needs (not committed yet):
-// yarn workspace gallery add photoswipe@^5.4.4
-// mv node_modules/photoswipe packages/new/photos/components/ps5
-
-if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
-    console.warn("Using WIP upstream photoswipe");
-} else {
-    throw new Error("Whoa");
-}
-
-let PhotoSwipe;
-if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
-    // TODO(PS): Comment me before merging into main.
-    // PhotoSwipe = require("./ps5/dist/photoswipe.esm.js").default;
-}
 
 export interface FileViewerPhotoSwipeDelegate {
     /**

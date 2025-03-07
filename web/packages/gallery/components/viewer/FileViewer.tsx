@@ -1,18 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 
-// TODO(PS): WIP gallery using upstream photoswipe
-//
-// Needs (not committed yet):
-// yarn workspace gallery add photoswipe@^5.4.4
-// mv node_modules/photoswipe packages/new/photos/components/ps5
-
-if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
-    console.warn("Using WIP upstream photoswipe");
-} else {
-    throw new Error("Whoa");
-}
-
 import { isDesktop } from "@/base/app";
 import { SpacedRow } from "@/base/components/containers";
 import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
@@ -248,7 +236,7 @@ export type FileViewerProps = ModalVisibilityProps & {
 /**
  * A PhotoSwipe based image and video viewer.
  */
-const FileViewer: React.FC<FileViewerProps> = ({
+export const FileViewer: React.FC<FileViewerProps> = ({
     open,
     onClose,
     user,
@@ -869,8 +857,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
         </Container>
     );
 };
-
-export default FileViewer;
 
 const Container = styled("div")`
     border: 1px solid red;
