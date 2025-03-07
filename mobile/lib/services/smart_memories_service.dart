@@ -372,10 +372,9 @@ class SmartMemoriesService {
     // Surface everything just for debug checking
     if (surfaceAll) {
       for (final personID in personToMemories.keys) {
-        for (final memoryType in PeopleMemoryType.values) {
-          if (personToMemories[personID]!.containsKey(memoryType)) {
-            memoryResults.add(personToMemories[personID]![memoryType]!);
-          }
+        final personMemories = personToMemories[personID]!;
+        for (final memoryType in personMemories.keys) {
+          memoryResults.add(personMemories[memoryType]!);
         }
       }
       return memoryResults;
