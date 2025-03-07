@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:math" show min, max;
 
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
@@ -9,6 +10,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -86,39 +88,48 @@ class SmartMemoriesService {
     bool debugSurfaceAll = false,
   }) async {
     try {
-      _logger.finest('calcMemories called with time: $now');
+      final TimeLogger t = TimeLogger(context: "calcMemories");
+      _logger.finest('calcMemories called with time: $now $t');
       await init();
       final List<SmartMemory> memories = [];
       final allFiles = Set<EnteFile>.from(
         await SearchService.instance.getAllFilesForSearch(),
       );
       _seenTimes = await _memoriesDB.getSeenTimes();
-      _logger.finest("All files length: ${allFiles.length}");
+      _logger.finest("All files length: ${allFiles.length} $t");
 
       final peopleMemories = await _getPeopleResults(
-          allFiles, now, oldCache.peopleShownLogs,
-          surfaceAll: debugSurfaceAll,);
+        allFiles,
+        now,
+        oldCache.peopleShownLogs,
+        surfaceAll: debugSurfaceAll,
+      );
       _deductUsedMemories(allFiles, peopleMemories);
       memories.addAll(peopleMemories);
-      _logger.finest("All files length: ${allFiles.length}");
+      _logger.finest("All files length after people: ${allFiles.length} $t");
 
       // Trip memories
       final (tripMemories, bases) = await _getTripsResults(
-          allFiles, now, oldCache.tripsShownLogs,
-          surfaceAll: debugSurfaceAll,);
+        allFiles,
+        now,
+        oldCache.tripsShownLogs,
+        surfaceAll: debugSurfaceAll,
+      );
       _deductUsedMemories(allFiles, tripMemories);
       memories.addAll(tripMemories);
-      _logger.finest("All files length: ${allFiles.length}");
+      _logger.finest("All files length after trips: ${allFiles.length} $t");
 
       // Time memories
       final timeMemories = await _onThisDayOrWeekResults(allFiles, now);
       _deductUsedMemories(allFiles, timeMemories);
       memories.addAll(timeMemories);
-      _logger.finest("All files length: ${allFiles.length}");
+      _logger.finest("All files length after time: ${allFiles.length} $t");
 
       // Filler memories
       final fillerMemories = await _getFillerResults(allFiles, now);
+      _deductUsedMemories(allFiles, fillerMemories);
       memories.addAll(fillerMemories);
+      _logger.finest("All files length after filler: ${allFiles.length} $t");
       return MemoriesResult(memories, bases);
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
@@ -143,6 +154,7 @@ class SmartMemoriesService {
     List<PeopleShownLog> shownPeople, {
     bool surfaceAll = false,
   }) async {
+    final w = (kDebugMode ? EnteWatch('getPeopleResults') : null)?..start();
     final List<PeopleMemory> memoryResults = [];
     if (allFiles.isEmpty) return [];
     final allFileIdsToFile = <int, EnteFile>{};
@@ -154,6 +166,7 @@ class SmartMemoriesService {
     final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
     final windowEnd =
         currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
+    w?.log('allFiles setup');
 
     // Get ordered list of important people (all named, from most to least files)
     final persons = await PersonService.instance.getPersons();
@@ -181,6 +194,7 @@ class SmartMemoriesService {
       final bFaces = personIdToFaceIDs[b]!.length;
       return bFaces.compareTo(aFaces);
     });
+    w?.log('orderedImportantPersonsID setup');
 
     // Check if the user has assignmed "me"
     String? meID;
@@ -191,6 +205,7 @@ class SmartMemoriesService {
         break;
       }
     }
+    w?.log('meID setup part 1');
     final bool isMeAssigned = meID != null;
     Map<int, List<Face>>? meFilesToFaces;
     if (isMeAssigned) {
@@ -199,6 +214,7 @@ class SmartMemoriesService {
         meFileIDs,
       );
     }
+    w?.log('meID setup part 2');
 
     // Loop through the people and find all memories
     final Map<String, Map<PeopleMemoryType, PeopleMemory>> personToMemories =
@@ -206,10 +222,12 @@ class SmartMemoriesService {
     for (final personID in orderedImportantPersonsID) {
       final personFileIDs = personIdToFileIDs[personID]!;
       final personName = personIdToPerson[personID]!.data.name;
+      w?.log('start with new person $personName');
       final Map<int, List<Face>> personFilesToFaces =
           await MLDataDB.instance.getFacesForFileIDs(
         personFileIDs,
       );
+      w?.log('personFilesToFaces setup');
       // Inside people loop, check for spotlight (Most likely every person will have a spotlight)
       final spotlightFiles = <EnteFile>[];
       for (final fileID in personFileIDs) {
@@ -240,6 +258,7 @@ class SmartMemoriesService {
             .putIfAbsent(personID, () => {})
             .putIfAbsent(PeopleMemoryType.spotlight, () => spotlightMemory);
       }
+      w?.log('spotlight setup');
 
       // Inside people loop, check for youAndThem
       if (isMeAssigned && meID != personID) {
@@ -270,12 +289,14 @@ class SmartMemoriesService {
               .putIfAbsent(personID, () => {})
               .putIfAbsent(PeopleMemoryType.youAndThem, () => youAndThemMemory);
         }
+        w?.log('youAndThem setup');
       }
 
       // Inside people loop, check for doingSomethingTogether
       if (isMeAssigned && meID != personID) {
         final vectors = await SemanticSearchService.instance
             .getClipVectorsForFileIDs(personFileIDs);
+        w?.log('getting clip vectors for doingSomethingTogether');
         final activityFiles = <EnteFile>[];
         PeopleActivity lastActivity = PeopleActivity.values.first;
         activityLoop:
@@ -289,6 +310,9 @@ class SmartMemoriesService {
           }
           final similarities = await MLComputer.instance
               .compareEmbeddings(vectors, activityVector);
+          w?.log(
+            'comparing embeddings for doingSomethingTogether and $activity',
+          );
           for (final fileID in personFileIDs) {
             final similarity = similarities[fileID];
             if (similarity == null) continue;
@@ -319,6 +343,7 @@ class SmartMemoriesService {
                 () => activityMemory,
               );
         }
+        w?.log('doingSomethingTogether setup');
       }
 
       // Inside people loop, check for lastTimeYouSawThem
@@ -367,6 +392,7 @@ class SmartMemoriesService {
               () => lastTimeMemory,
             );
       }
+      w?.log('lastTimeYouSawThem setup');
     }
 
     // Surface everything just for debug checking
@@ -446,6 +472,7 @@ class SmartMemoriesService {
         }
       }
     }
+    w?.log('relevancy setup');
 
     // Loop through the people (and memory types) and add based on rotation
     if (memoryResults.length >= 3) return memoryResults;
@@ -485,6 +512,7 @@ class SmartMemoriesService {
       }
       if (added > 0) break peopleRotationLoop;
     }
+    w?.log('rotation setup');
 
     return memoryResults;
   }
@@ -1285,6 +1313,7 @@ class SmartMemoriesService {
     int? prefferedSize,
   }) async {
     try {
+      final w = (kDebugMode ? EnteWatch('getPeopleResults') : null)?..start();
       final fileCount = memories.length;
       final int targetSize = prefferedSize ?? 10;
       if (fileCount <= targetSize) return memories;
@@ -1379,6 +1408,7 @@ class SmartMemoriesService {
       _logger.finest(
         'People memories selection done, returning ${finalSelection.length} memories',
       );
+      w?.log('People memories selection done');
       return finalSelection;
     } catch (e, s) {
       _logger.severe('Error in _bestSelectionPeople', e, s);
