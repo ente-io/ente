@@ -245,7 +245,6 @@ export class FileViewerPhotoSwipe {
             // Set the index within files that we should open to. Subsequent
             // updates to the index will be tracked by PhotoSwipe internally.
             index: initialIndex,
-            // TODO(PS): padding option? for handling custom title bar.
             // TODO(PS): will we need this?
             mainClass: "pswp-ente",
             // TODO(PS): Translated variants
@@ -686,8 +685,7 @@ export class FileViewerPhotoSwipe {
 
             pswp.ui.registerElement({
                 name: "live",
-                // TODO(PS):
-                title: pt("Toggle live"),
+                title: pt("Live"),
                 order: 7,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("live"),
@@ -708,8 +706,7 @@ export class FileViewerPhotoSwipe {
 
             pswp.ui.registerElement({
                 name: "vol",
-                // TODO(PS):
-                title: pt("Toggle audio"),
+                title: pt("Audio"),
                 order: 8,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("vol"),
@@ -728,7 +725,9 @@ export class FileViewerPhotoSwipe {
                 onClick: livePhotoToggleMuteIfPossible,
             });
 
-            // TODO(PS): Force convert button for videos
+            // TODO(PS): Add force convert button for videos? Or is that covered
+            // by upcoming streaming changes?
+
             pswp.ui.registerElement({
                 name: "error",
                 order: 9,
@@ -792,7 +791,6 @@ export class FileViewerPhotoSwipe {
 
             pswp.ui.registerElement({
                 name: "more",
-                // TODO(PS):
                 title: pt("More"),
                 order: 16,
                 isButton: true,
@@ -831,15 +829,6 @@ export class FileViewerPhotoSwipe {
                     });
                 },
             });
-        });
-
-        // Modify the default UI elements.
-        pswp.addFilter("uiElement", (element, data) => {
-            if (element.name == "preloader") {
-                // TODO(PS): Left as an example. For now, this is customized in
-                // the CSS.
-            }
-            return element;
         });
 
         // Pan action handlers
