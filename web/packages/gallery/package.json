@@ -10,6 +10,7 @@
         "exifreader": "^4.26.1",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.2",
+        "photoswipe": "^5.4.4",
         "react-dropzone": "14.2.10"
     },
     "devDependencies": {
