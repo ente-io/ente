@@ -11,6 +11,23 @@
     top: calc(env(titlebar-area-height, 0px) * 0.4);
 }
 
+/* The PhotoSwipe CSS already disables and re-enables pointer-events for hidden
+   UI elements, but for a reason that I didn't investigate more, that isn't
+   working, and the hidden buttons still remain clickable.
+
+   As a workaround, repeat the CSS, but with a higher specificity by including
+   the button selector */
+
+.pswp .pswp__hide-on-close button {
+    pointer-events: none;
+}
+
+.pswp--ui-visible .pswp__hide-on-close button {
+    pointer-events: auto;
+}
+
+/* Tweak the visual look of the preloader to match the rest of the elements */
+
 .pswp-ente .pswp__preloader--active .pswp__icn {
     opacity: 0.4;
 }
