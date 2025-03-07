@@ -386,12 +386,12 @@ export class FileViewerPhotoSwipe {
         let livePhotoMute = true;
 
         /**
-         * The live photo playback toggle button element.
+         * The live photo playback toggle DOM button element.
          */
         let livePhotoPlayButtonElement: HTMLButtonElement | undefined;
 
         /**
-         * The live photo muted toggle button element.
+         * The live photo muted toggle DOM button element.
          */
         let livePhotoMuteButtonElement: HTMLButtonElement | undefined;
 
@@ -545,10 +545,23 @@ export class FileViewerPhotoSwipe {
 
         pswp.on("contentDestroy", (e) => forgetExifForItemData(e.content.data));
 
-        // State needed to hide the caption when a video is playing on a file of
-        // type video.
+        /**
+         * If the current slide is showing a video, then the DOM video element
+         * showing that video.
+         */
         let videoVideoEl: HTMLVideoElement | undefined;
+
+        /**
+         * Callback attached to video playback events when showing video files.
+         *
+         * These are needed to hide the caption when a video is playing on a
+         * file of type video.
+         */
         let onVideoPlayback: EventHandler | undefined;
+
+        /**
+         * The DOM element showing the caption for the current file.
+         */
         let captionElement: HTMLElement | undefined;
 
         pswp.on("change", (e) => {
@@ -588,6 +601,32 @@ export class FileViewerPhotoSwipe {
                 }
             }
         });
+
+        /**
+         * Toggle the playback, if possible, of the video that's being shown on
+         * the current slide.
+         */
+        const videoTogglePlayIfPossible = () => {
+            const video = videoVideoEl;
+            if (!video) return;
+
+            if (video.paused || video.ended) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        };
+
+        /**
+         * Toggle the muted status, if possible, of the video that's being shown on
+         * the current slide.
+         */
+        const videoToggleMuteIfPossible = () => {
+            const video = videoVideoEl;
+            if (!video) return;
+
+            video.muted = !video.muted;
+        };
 
         // The PhotoSwipe dialog has being closed and the animations have
         // completed.
@@ -862,6 +901,9 @@ export class FileViewerPhotoSwipe {
 
         const handleTogglePlayIfPossible = () => {
             switch (currentAnnotatedFile().itemData.fileType) {
+                case FileType.video:
+                    videoTogglePlayIfPossible();
+                    return;
                 case FileType.livePhoto:
                     livePhotoTogglePlayIfPossible();
                     return;
@@ -870,6 +912,9 @@ export class FileViewerPhotoSwipe {
 
         const handleToggleMuteIfPossible = () => {
             switch (currentAnnotatedFile().itemData.fileType) {
+                case FileType.video:
+                    videoToggleMuteIfPossible();
+                    return;
                 case FileType.livePhoto:
                     livePhotoToggleMuteIfPossible();
                     return;
