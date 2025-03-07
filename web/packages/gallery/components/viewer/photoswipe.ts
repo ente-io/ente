@@ -1046,9 +1046,18 @@ export class FileViewerPhotoSwipe {
 
     /**
      * Reload the current slide, asking the data source for its data afresh.
+     *
+     * @param expectedFileCount The count of files that we expect to show after
+     * the refresh. If provided, this is used to (circle) go back to the first
+     * slide when the slide which we were at previously is not available anymore
+     * (e.g. when deleting the last file in a sequence).
      */
-    refreshCurrentSlideContent() {
-        this.pswp.refreshSlideContent(this.pswp.currIndex);
+    refreshCurrentSlideContent(expectedFileCount?: number) {
+        if (expectedFileCount && this.pswp.currIndex >= expectedFileCount) {
+            this.pswp.goTo(0);
+        } else {
+            this.pswp.refreshSlideContent(this.pswp.currIndex);
+        }
     }
 }
 
