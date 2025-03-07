@@ -1230,9 +1230,21 @@ class SearchService {
     BuildContext context,
     int? limit,
   ) async {
+    DateTime calcTime = DateTime.now();
+    // await two seconds to let new page load first
+    await Future.delayed(const Duration(seconds: 1));
+    if (limit == null) {
+      final DateTime? pickedTime = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(1900),
+        lastDate: DateTime(2100),
+      );
+      if (pickedTime != null) calcTime = pickedTime;
+    }
     final cache = await memoriesCacheService.debugCacheForTesting();
     final memoriesResult = await smartMemoriesService
-        .calcMemories(DateTime.now(), cache, debugSurfaceAll: true);
+        .calcMemories(calcTime, cache, debugSurfaceAll: true);
     locationService.baseLocations = memoriesResult.baseLocations;
     final searchResults = <GenericSearchResult>[];
     for (final memory in memoriesResult.memories) {
