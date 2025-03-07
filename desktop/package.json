@@ -8,11 +8,11 @@
     "main": "app/main.js",
     "scripts": {
         "build": "yarn build-renderer && yarn build-main",
-        "build:ci": "yarn build-renderer && tsc",
-        "build:quick": "yarn build-renderer && yarn build-main:quick",
         "build-main": "tsc && electron-builder",
         "build-main:quick": "tsc && electron-builder --dir --config.compression=store --config.mac.identity=null",
         "build-renderer": "cross-env-shell _ENTE_IS_DESKTOP=1 \"cd ../web && yarn install && yarn build:photos && cd ../desktop && shx rm -rf out && shx cp -r ../web/apps/photos/out out\"",
+        "build:ci": "yarn build-renderer && tsc",
+        "build:quick": "yarn build-renderer && yarn build-main:quick",
         "dev": "concurrently --kill-others --success first --names 'main,rndr' \"yarn dev-main\" \"yarn dev-renderer\"",
         "dev-main": "tsc && electron .",
         "dev-renderer": "cross-env-shell _ENTE_IS_DESKTOP=1 \"cd ../web && yarn install && yarn workspace photos next dev -p 3008\"",
