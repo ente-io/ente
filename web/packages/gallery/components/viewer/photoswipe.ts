@@ -690,6 +690,7 @@ export class FileViewerPhotoSwipe {
                 },
             });
 
+            // TODO(PS): Force convert button for videos
             pswp.ui.registerElement({
                 name: "error",
                 order: 9,

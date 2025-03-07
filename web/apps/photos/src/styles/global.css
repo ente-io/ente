@@ -185,9 +185,10 @@ body {
 /* Transform the built in controls to better fit our requirements */
 
 .pswp-ente .pswp__counter {
-    margin-top: 17.5px;
+    margin-top: 22.5px;
     margin-inline-start: 18px;
     margin-inline-end: 9px;
+    line-height: 20px;
 }
 
 .pswp-ente .pswp__button--zoom .pswp__icn {
