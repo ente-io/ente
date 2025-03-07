@@ -82,8 +82,9 @@ class SmartMemoriesService {
   // One general method to get all memories, which calls on internal methods for each separate memory type
   Future<MemoriesResult> calcMemories(
     DateTime now,
-    MemoriesCache oldCache,
-  ) async {
+    MemoriesCache oldCache, {
+    bool debugSurfaceAll = false,
+  }) async {
     try {
       _logger.finest('calcMemories called with time: $now');
       await init();
@@ -94,15 +95,17 @@ class SmartMemoriesService {
       _seenTimes = await _memoriesDB.getSeenTimes();
       _logger.finest("All files length: ${allFiles.length}");
 
-      final peopleMemories =
-          await _getPeopleResults(allFiles, now, oldCache.peopleShownLogs);
+      final peopleMemories = await _getPeopleResults(
+          allFiles, now, oldCache.peopleShownLogs,
+          surfaceAll: debugSurfaceAll,);
       _deductUsedMemories(allFiles, peopleMemories);
       memories.addAll(peopleMemories);
       _logger.finest("All files length: ${allFiles.length}");
 
       // Trip memories
-      final (tripMemories, bases) =
-          await _getTripsResults(allFiles, now, oldCache.tripsShownLogs);
+      final (tripMemories, bases) = await _getTripsResults(
+          allFiles, now, oldCache.tripsShownLogs,
+          surfaceAll: debugSurfaceAll,);
       _deductUsedMemories(allFiles, tripMemories);
       memories.addAll(tripMemories);
       _logger.finest("All files length: ${allFiles.length}");
@@ -137,8 +140,9 @@ class SmartMemoriesService {
   Future<List<PeopleMemory>> _getPeopleResults(
     Iterable<EnteFile> allFiles,
     DateTime currentTime,
-    List<PeopleShownLog> shownPeople,
-  ) async {
+    List<PeopleShownLog> shownPeople, {
+    bool surfaceAll = false,
+  }) async {
     final List<PeopleMemory> memoryResults = [];
     if (allFiles.isEmpty) return [];
     final allFileIdsToFile = <int, EnteFile>{};
@@ -365,14 +369,17 @@ class SmartMemoriesService {
       }
     }
 
-    // // Surface everything just for debug checking
-    // for (final personID in personToMemories.keys) {
-    //   for (final memoryType in PeopleMemoryType.values) {
-    //     if (personToMemories[personID]!.containsKey(memoryType)) {
-    //       memoryResults.add(personToMemories[personID]![memoryType]!);
-    //     }
-    //   }
-    // }
+    // Surface everything just for debug checking
+    if (surfaceAll) {
+      for (final personID in personToMemories.keys) {
+        for (final memoryType in PeopleMemoryType.values) {
+          if (personToMemories[personID]!.containsKey(memoryType)) {
+            memoryResults.add(personToMemories[personID]![memoryType]!);
+          }
+        }
+      }
+      return memoryResults;
+    }
 
     // Loop through the people and check if we should surface anything based on relevancy (bday, last met)
     personRelevancyLoop:
@@ -486,8 +493,9 @@ class SmartMemoriesService {
   Future<(List<TripMemory>, List<BaseLocation>)> _getTripsResults(
     Iterable<EnteFile> allFiles,
     DateTime currentTime,
-    List<TripsShownLog> shownTrips,
-  ) async {
+    List<TripsShownLog> shownTrips, {
+    bool surfaceAll = false,
+  }) async {
     final List<TripMemory> memoryResults = [];
     final Iterable<LocalEntity<LocationTag>> locationTagEntities =
         (await locationService.getLocationTags());
@@ -774,26 +782,51 @@ class SmartMemoriesService {
 
     // For now for testing let's just surface all base locations
     // For now surface these on the location section TODO: lau: remove internal flag title
-    // for (final baseLocation in baseLocations) {
-    //   String name = "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
-    //   final String? locationName = _tryFindLocationName(
-    //     Memory.fromFiles(baseLocation.files, _seenTimes),
-    //     base: true,
-    //   );
-    //   if (locationName != null) {
-    //     name =
-    //         "$locationName (Base, ${baseLocation.isCurrentBase ? 'current' : 'old'})";
-    //   }
-    //   memoryResults.add(
-    //     TripMemory(
-    //       Memory.fromFiles(baseLocation.files, _seenTimes),
-    //       name,
-    //       0,
-    //       0,
-    //       baseLocation.location,
-    //     ),
-    //   );
-    // }
+    if (surfaceAll) {
+      for (final baseLocation in baseLocations) {
+        String name =
+            "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
+        final String? locationName = _tryFindLocationName(
+          Memory.fromFiles(baseLocation.files, _seenTimes),
+          base: true,
+        );
+        if (locationName != null) {
+          name =
+              "$locationName (Base, ${baseLocation.isCurrentBase ? 'current' : 'old'})";
+        }
+        memoryResults.add(
+          TripMemory(
+            Memory.fromFiles(baseLocation.files, _seenTimes),
+            name,
+            nowInMicroseconds,
+            windowEnd,
+            baseLocation.location,
+          ),
+        );
+      }
+      for (final trip in validTrips) {
+        final year = DateTime.fromMicrosecondsSinceEpoch(
+          trip.averageCreationTime(),
+        ).year;
+        final String? locationName = _tryFindLocationName(trip.memories);
+        String name = "Trip in $year";
+        if (locationName != null) {
+          name = "Trip to $locationName";
+        } else if (year == currentTime.year - 1) {
+          name = "Last year's trip";
+        }
+        final photoSelection = await _bestSelection(trip.memories);
+        memoryResults.add(
+          trip.copyWith(
+            memories: photoSelection,
+            title: name,
+            firstDateToShow: nowInMicroseconds,
+            lastDateToShow: windowEnd,
+          ),
+        );
+      }
+      return (memoryResults, baseLocations);
+    }
 
     // For now we surface the two most recent trips of current month, and if none, the earliest upcoming redundant trip
     // Group the trips per month and then year

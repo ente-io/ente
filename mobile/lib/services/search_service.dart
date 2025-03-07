@@ -1231,8 +1231,8 @@ class SearchService {
     int? limit,
   ) async {
     final cache = await memoriesCacheService.debugCacheForTesting();
-    final memoriesResult =
-        await smartMemoriesService.calcMemories(DateTime.now(), cache);
+    final memoriesResult = await smartMemoriesService
+        .calcMemories(DateTime.now(), cache, debugSurfaceAll: true);
     locationService.baseLocations = memoriesResult.baseLocations;
     final searchResults = <GenericSearchResult>[];
     for (final memory in memoriesResult.memories) {
