@@ -363,10 +363,7 @@ export type GalleryAction =
           hiddenFiles: EnteFile[];
           trashedFiles: EnteFile[];
       }
-    | {
-          type: "setNormalCollections";
-          collections: Collection[];
-      }
+    | { type: "setNormalCollections"; collections: Collection[] }
     | {
           type: "setAllCollections";
           collections: Collection[];

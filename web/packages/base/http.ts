@@ -61,9 +61,7 @@ export const authenticatedPublicAlbumsRequestHeaders = ({
     accessTokenJWT,
 }: PublicAlbumsCredentials) => ({
     "X-Auth-Access-Token": accessToken,
-    ...(accessTokenJWT && {
-        "X-Auth-Access-Token-JWT": accessTokenJWT,
-    }),
+    ...(accessTokenJWT && { "X-Auth-Access-Token-JWT": accessTokenJWT }),
     "X-Client-Package": clientPackageName,
 });
 

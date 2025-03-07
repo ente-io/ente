@@ -521,13 +521,7 @@
     "advanced": "",
     "export_directory_does_not_exist": "",
     "export_directory_does_not_exist_message": "",
-    "storage_unit": {
-        "b": "",
-        "kb": "",
-        "mb": "",
-        "gb": "",
-        "tb": ""
-    },
+    "storage_unit": { "b": "", "kb": "", "mb": "", "gb": "", "tb": "" },
     "stop": "",
     "sync_continuously": "",
     "export_starting": "",

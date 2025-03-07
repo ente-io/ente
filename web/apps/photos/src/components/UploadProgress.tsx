@@ -245,10 +245,7 @@ const UploadProgressBar: React.FC = () => {
                 uploadPhase == "uploading") && (
                 <>
                     <LinearProgress
-                        sx={{
-                            height: "2px",
-                            backgroundColor: "transparent",
-                        }}
+                        sx={{ height: "2px", backgroundColor: "transparent" }}
                         variant="determinate"
                         value={percentComplete}
                     />
@@ -445,13 +442,7 @@ const SectionAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
 }));
 
 const SectionInfo: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <Typography
-        variant="small"
-        sx={{
-            color: "text.muted",
-            mb: 1,
-        }}
-    >
+    <Typography variant="small" sx={{ color: "text.muted", mb: 1 }}>
         {children}
     </Typography>
 );

@@ -57,9 +57,7 @@ export const updateFileMagicMetadata = async (
         reqBody,
         // @ts-ignore
         null,
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );
     return fileWithUpdatedMagicMetadataList.map(
         ({ file, updatedMagicMetadata }): EnteFile => ({
@@ -105,9 +103,7 @@ export const updateFilePublicMagicMetadata = async (
         reqBody,
         // @ts-ignore
         null,
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );
     return fileWithUpdatedPublicMagicMetadataList.map(
         ({ file, updatedPublicMagicMetadata }): EnteFile => ({

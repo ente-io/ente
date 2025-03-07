@@ -543,9 +543,7 @@ type CaptionProps = Pick<
     "allowEdits" | "onNeedsRemoteSync" | "onUpdateCaption"
 > & {
     /* TODO(PS): This is DisplayFile, but that's meant to be removed */
-    file: EnteFile & {
-        title?: string;
-    };
+    file: EnteFile & { title?: string };
 };
 
 const Caption: React.FC<CaptionProps> = ({
@@ -636,9 +634,7 @@ const CaptionForm = styled("form")(({ theme }) => ({
 type CreationTimeProps = Pick<
     FileInfoProps,
     "allowEdits" | "onNeedsRemoteSync"
-> & {
-    file: EnteFile;
-};
+> & { file: EnteFile };
 
 const CreationTime: React.FC<CreationTimeProps> = ({
     file,
@@ -888,11 +884,7 @@ const MapBox: React.FC<MapBoxProps> = ({
                 // @ts-ignore
                 const map = leaflet.map(mapContainer).setView(position, zoom);
                 // @ts-ignore
-                leaflet
-                    .tileLayer(urlTemplate, {
-                        attribution,
-                    })
-                    .addTo(map);
+                leaflet.tileLayer(urlTemplate, { attribution }).addTo(map);
                 // @ts-ignore
                 leaflet.marker(position).addTo(map).openPopup();
             }
@@ -1034,9 +1026,7 @@ type AlbumsProps = Required<
         FileInfoProps,
         "fileCollectionIDs" | "allCollectionsNameByID" | "onSelectCollection"
     >
-> & {
-    file: EnteFile;
-};
+> & { file: EnteFile };
 
 const Albums: React.FC<AlbumsProps> = ({
     file,
@@ -1073,7 +1063,4 @@ const Albums: React.FC<AlbumsProps> = ({
 
 const ChipButton = styled((props: ButtonProps) => (
     <Button color="secondary" {...props} />
-))(({ theme }) => ({
-    ...theme.typography.small,
-    padding: "8px",
-}));
+))(({ theme }) => ({ ...theme.typography.small, padding: "8px" }));

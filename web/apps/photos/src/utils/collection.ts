@@ -242,9 +242,7 @@ export const changeCollectionSortOrder = async (
 ) => {
     try {
         const updatedPublicMagicMetadataProps: CollectionPublicMagicMetadataProps =
-            {
-                asc,
-            };
+            { asc };
 
         const updatedPubMagicMetadata = await updateMagicMetadata(
             updatedPublicMagicMetadataProps,

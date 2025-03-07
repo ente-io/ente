@@ -116,13 +116,8 @@ export const getFiles = async (
             }
             resp = await HTTPService.get(
                 await apiURL("/collections/v2/diff"),
-                {
-                    collectionID: collection.id,
-                    sinceTime: time,
-                },
-                {
-                    "X-Auth-Token": token,
-                },
+                { collectionID: collection.id, sinceTime: time },
+                { "X-Auth-Token": token },
             );
 
             const newDecryptedFilesBatch = await Promise.all(

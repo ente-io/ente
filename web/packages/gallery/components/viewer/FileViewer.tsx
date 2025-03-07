@@ -771,9 +771,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handleMoreMenuCloseIfNeeded}
                 anchorEl={moreMenuAnchorEl}
                 id={moreMenuID}
-                slotProps={{
-                    list: { "aria-labelledby": moreButtonID },
-                }}
+                slotProps={{ list: { "aria-labelledby": moreButtonID } }}
             >
                 {activeAnnotatedFile?.annotation.showDownload == "menu" && (
                     <MoreMenuItem onClick={handleDownloadMenuAction}>

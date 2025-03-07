@@ -202,9 +202,7 @@ interface UsageStorage {
     storage: number;
 }
 
-type IndividualUsageSectionProps = UsageStorage & {
-    fileCount: number;
-};
+type IndividualUsageSectionProps = UsageStorage & { fileCount: number };
 
 const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     usage,

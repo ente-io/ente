@@ -104,12 +104,7 @@ const RemoteFaceIndex = z.object({
                     width: z.number(),
                     height: z.number(),
                 }),
-                landmarks: z.array(
-                    z.object({
-                        x: z.number(),
-                        y: z.number(),
-                    }),
-                ),
+                landmarks: z.array(z.object({ x: z.number(), y: z.number() })),
             }),
             score: z.number(),
             blur: z.number(),
