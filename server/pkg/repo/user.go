@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	t "time"
 
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
@@ -128,19 +129,22 @@ func (repo *UserRepository) GetAll(sinceTime int64, tillTime int64) ([]ente.User
 	return users, nil
 }
 
-// GetSubscribedUsers will return the list of all subscribed users
-func (repo *UserRepository) GetSubscribedUsers() ([]ente.User, error) {
-	rows, err := repo.DB.Query(`select s.user_id, u.encrypted_email, u.email_decryption_nonce, u.email_hash, s.created_at from subscriptions s inner join users u ON s.user_id = u.user_id;`)
+// GetSubscribedUsers will return the list of all subscribed.
+func (repo *UserRepository) GetSubscribedUsersWithoutFamily() ([]ente.User, error) {
+	rows, err := repo.DB.Query(`SELECT u.user_id, u.encrypted_email, u.email_decryption_nonce, u.email_hash, s.created_at FROM subscriptions 
+	s INNER JOIN users u ON s.user_id = u.user_id 
+	WHERE u.family_admin_id IS NULL AND s.product_id != 'free'`)
 	if err != nil {
-		stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
 	defer rows.Close()
 	subscribedUsers := make([]ente.User, 0)
 	for rows.Next() {
 		var user ente.User
 		var encryptedEmail, nonce []byte
+		var createdAt t.Time
 
-		err := rows.Scan(&user.ID, &encryptedEmail, &nonce, &user.Hash, &user.CreationTime)
+		err := rows.Scan(&user.ID, &encryptedEmail, &nonce, &user.Hash, &createdAt)
 		if err != nil {
 			return subscribedUsers, stacktrace.Propagate(err, "user scan failed")
 		}
