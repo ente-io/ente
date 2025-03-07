@@ -5,6 +5,7 @@ import "package:media_kit_video/media_kit_video.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/utils/standalone/date_time.dart";
 import "package:photos/utils/standalone/debouncer.dart";
@@ -191,6 +192,8 @@ class PlayPauseButtonMediaKit extends StatefulWidget {
 class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
   bool _isPlaying = true;
   late final StreamSubscription<bool>? isPlayingStreamSubscription;
+  late StreamSubscription<bool>? _bufferStateSubscription;
+  late var buffering = widget.controller?.player.state.buffering ?? true;
 
   @override
   void initState() {
@@ -202,16 +205,24 @@ class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
         _isPlaying = isPlaying;
       });
     });
+
+    _bufferStateSubscription =
+        widget.controller?.player.stream.buffering.listen(
+      (event) => setState(() => buffering = event),
+    );
   }
 
   @override
   void dispose() {
     isPlayingStreamSubscription?.cancel();
+    _bufferStateSubscription?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (buffering) return const EnteLoadingWidget();
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {

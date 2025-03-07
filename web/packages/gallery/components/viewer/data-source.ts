@@ -6,6 +6,7 @@ import {
 } from "@/gallery/services/download";
 import { extractRawExif, parseExif } from "@/gallery/services/exif";
 import type { EnteFile } from "@/media/file";
+import { fileCaption } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { ensureString } from "@/utils/ensure";
 
@@ -37,6 +38,15 @@ interface PhotoSwipeSlideData {
      * The height (in pixels) of the {@link src} image.
      */
     height?: number | undefined;
+    /**
+     * The alt text associated with the file.
+     *
+     * This will be set to the file's caption. PhotoSwipe will use it as the alt
+     * text when constructing img elements (if any) for this item. We will also
+     * use this for displaying the visible "caption" element atop the file (both
+     * images and video).
+     */
+    alt?: string;
 }
 
 /**
@@ -118,6 +128,19 @@ export type ItemData = PhotoSwipeSlideData & {
  */
 class FileViewerDataSourceState {
     /**
+     * Non-zero if a file viewer is currently open.
+     *
+     * This is a counter, but the file viewer data source has other many
+     * assumptions about only a single instance of PhotoSwipe being active at a
+     * time, so this could've been a boolean as well.
+     */
+    viewerCount = 0;
+    /**
+     * True if our state needs to be cleared the next time the file viewer is
+     * closed.
+     */
+    needsReset = false;
+    /**
      * The best data we have for a particular file (ID).
      */
     itemDataByFileID = new Map<number, ItemData>();
@@ -144,16 +167,64 @@ class FileViewerDataSourceState {
  */
 let _state = new FileViewerDataSourceState();
 
-/**
- * Clear any internal state maintained by the file viewer data source.
- */
-// TODO(PS): Call me during logout sequence once this is integrated.
-export const logoutFileViewerDataSource = () => {
+const resetState = () => {
     _state = new FileViewerDataSourceState();
 };
 
 /**
- * Return the best available ItemData for rendering the given {@link file}.
+ * Clear any internal state maintained by the file viewer data source.
+ */
+// TODO(PS): Call me during logout sequence once this is integrated.
+export const logoutFileViewerDataSource = resetState;
+
+/**
+ * Clear any internal state if possible. This is invoked when files have been
+ * updated on remote, and those changes synced locally.
+ *
+ * Because we also retain callbacks, clearing existing item data when the file
+ * viewer is open can lead to problematic edge cases. Thus, this function
+ * behaves in two different ways:
+ *
+ * - If the file viewer is already open, then we enqueue a reset for when it is
+ *   closed the next time.
+ *
+ * - Otherwise we immediately reset our state.
+ *
+ * See: [Note: Changes to underlying files when file viewer is open]
+ */
+export const resetFileViewerDataSourceOnClose = () => {
+    if (_state.viewerCount) {
+        _state.needsReset = true;
+    } else {
+        resetState();
+    }
+};
+
+/**
+ * Called by the file viewer whenever it is opened.
+ */
+export const fileViewerWillOpen = () => {
+    _state.viewerCount++;
+};
+
+/**
+ * Called by the file viewer whenever it has been closed.
+ */
+export const fileViewerDidClose = () => {
+    _state.viewerCount--;
+    if (_state.needsReset && _state.viewerCount == 0) {
+        // Reset everything.
+        resetState();
+    } else {
+        // Selectively clear.
+        forgetFailedItems();
+        forgetExif();
+    }
+};
+
+/**
+ * Return the best available {@link ItemData} for rendering the given
+ * {@link file}.
  *
  * If an entry does not exist for a particular file, then it is lazily added on
  * demand, and updated as we keep getting better data (thumbnail, original) for
@@ -231,12 +302,25 @@ export const forgetFailedItemDataForFileID = (fileID: number) => {
 };
 
 /**
+ * Update the alt attribute of the {@link ItemData}, if any, associated with the
+ * given {@link EnteFile}.
+ *
+ * @param updatedFile The file whose caption was updated.
+ */
+export const updateItemDataAlt = (updatedFile: EnteFile) => {
+    const itemData = _state.itemDataByFileID.get(updatedFile.id);
+    if (itemData) {
+        itemData.alt = fileCaption(updatedFile);
+    }
+};
+
+/**
  * Forget item data for the all files whose fetch had failed.
  *
  * This is called when the user closes the file viewer so that we attempt a full
  * retry when they reopen the viewer the next time.
  */
-export const forgetFailedItems = () =>
+const forgetFailedItems = () =>
     [..._state.itemDataByFileID.keys()].forEach(forgetFailedItemDataForFileID);
 
 const enqueueUpdates = async (file: EnteFile) => {
@@ -244,7 +328,16 @@ const enqueueUpdates = async (file: EnteFile) => {
     const fileType = file.metadata.fileType;
 
     const update = (itemData: Partial<ItemData>) => {
-        _state.itemDataByFileID.set(file.id, { ...itemData, fileType, fileID });
+        // Use the file's caption as its alt text (in addition to using it as
+        // the visible caption).
+        const alt = fileCaption(file);
+
+        _state.itemDataByFileID.set(file.id, {
+            ...itemData,
+            fileType,
+            fileID,
+            alt,
+        });
         _state.needsRefreshByFileID.get(file.id)?.();
     };
 

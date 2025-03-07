@@ -14,7 +14,7 @@ import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { FileViewer } from "@/new/photos/components/FileViewerComponents";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
-import { TRASH_SECTION } from "@/new/photos/services/collection";
+import { moveToTrash, TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
 import { PhotoViewer } from "components/PhotoViewer";
 import { t } from "i18next";
@@ -32,6 +32,7 @@ import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
+import { downloadSingleFile } from "utils/file";
 import { handleSelectCreator } from "utils/photoFrame";
 import { PhotoList } from "./PhotoList";
 import PreviewCard from "./pages/gallery/PreviewCard";
@@ -145,6 +146,7 @@ export type PhotoFrameProps = Pick<
     enableDownload?: boolean;
     showAppDownloadBanner?: boolean;
     setIsPhotoSwipeOpen?: (value: boolean) => void;
+    isInIncomingSharedCollection?: boolean;
     isInHiddenSection?: boolean;
     setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
     selectable?: boolean;
@@ -170,6 +172,7 @@ const PhotoFrame = ({
     allCollectionsNameByID,
     showAppDownloadBanner,
     setIsPhotoSwipeOpen,
+    isInIncomingSharedCollection,
     isInHiddenSection,
     setFilesDownloadProgressAttributesCreator,
     selectable,
@@ -271,17 +274,37 @@ const PhotoFrame = ({
     );
 
     const handleToggleFavorite = useMemo(() => {
-        return favoriteFileIDs
+        return favoriteFileIDs && onMarkUnsyncedFavoriteUpdate
             ? async (file: EnteFile) => {
                   const isFavorite = favoriteFileIDs!.has(file.id);
                   await (isFavorite ? removeFromFavorites : addToFavorites)(
                       file,
                       true,
                   );
+                  // See: [Note: File viewer update and dispatch]
                   onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
               }
             : undefined;
     }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
+
+    const handleDownload = useCallback(
+        (file: EnteFile) => {
+            const setSingleFileDownloadProgress =
+                setFilesDownloadProgressAttributesCreator!(file.metadata.title);
+            void downloadSingleFile(file, setSingleFileDownloadProgress);
+        },
+        [setFilesDownloadProgressAttributesCreator],
+    );
+
+    const handleDelete = useMemo(() => {
+        return onMarkTempDeleted
+            ? async (file: EnteFile) => {
+                  await moveToTrash([file]);
+                  // See: [Note: File viewer update and dispatch]
+                  onMarkTempDeleted?.([file]);
+              }
+            : undefined;
+    }, [onMarkTempDeleted]);
 
     const handleSaveEditedImageCopy = useCallback(
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
@@ -571,10 +594,13 @@ const PhotoFrame = ({
                     files={files}
                     initialIndex={currentIndex}
                     disableDownload={!enableDownload}
-                    isInHiddenSection={isInHiddenSection}
+                    isInIncomingSharedCollection={isInIncomingSharedCollection}
                     isInTrashSection={activeCollectionID === TRASH_SECTION}
+                    isInHiddenSection={isInHiddenSection}
                     onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
                     onToggleFavorite={handleToggleFavorite}
+                    onDownload={handleDownload}
+                    onDelete={handleDelete}
                     onSaveEditedImageCopy={handleSaveEditedImageCopy}
                     {...{
                         favoriteFileIDs,

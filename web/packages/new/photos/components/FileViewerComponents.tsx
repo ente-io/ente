@@ -16,6 +16,7 @@ import dynamic from "next/dynamic";
 const FV5 = dynamic(() => import("@/gallery/components/viewer/FileViewer"), {
     ssr: false,
 });
+
 const FVD = () => <></>;
 
 export const FileViewer: React.FC = (props) => {

@@ -855,3 +855,10 @@ export const fileLocation = (file: EnteFile): Location | undefined => {
 
     return { latitude, longitude };
 };
+
+/**
+ * Return the caption, aka "description", (if any) attached to the given
+ * {@link EnteFile}.
+ */
+export const fileCaption = (file: EnteFile): string | undefined =>
+    filePublicMagicMetadata(file)?.caption;

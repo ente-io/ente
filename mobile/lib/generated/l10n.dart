@@ -11230,6 +11230,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Please wait, this will take a while.`
+  String get pleaseWaitThisWillTakeAWhile {
+    return Intl.message(
+      'Please wait, this will take a while.',
+      name: 'pleaseWaitThisWillTakeAWhile',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

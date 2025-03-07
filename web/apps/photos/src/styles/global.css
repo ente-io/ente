@@ -121,6 +121,13 @@ body {
     z-index: calc(var(--mui-zIndex-drawer) - 1);
 }
 
+/* Shift the top bar by a fraction of the desktop title bar, if any. The top bar
+   contents already have a decent top padding, so we don't need to shift by the
+   entire amount. See also: [Note: Customize the desktop title bar] */
+.pswp-ente .pswp__top-bar {
+    top: calc(env(titlebar-area-height, 0px) * 0.4);
+}
+
 /*
   Make the controllable video elements we render as custom PhotoSwipe content
   take up the entire container.
@@ -152,6 +159,24 @@ body {
     opacity: 0.85;
 }
 
+.pswp-ente .pswp__error .pswp__icn {
+    /* Use a warning color for the error icon */
+    fill: var(--mui-palette-fixed-golden);
+}
+
+.pswp-ente .pswp__error .pswp__icn-shadow {
+    /* Reduce the stroke from default (2px) to make it look better with the
+       golden icon outline */
+    stroke-width: 1px;
+}
+
+/* The ".pswp--ui-visible .pswp__hide-on-close" selector in PhotoSwipe's CSS
+   sets the opacity of the arrows to 1, which doesn't match the rest of the
+   controls (0.85). */
+.pswp-ente.pswp--ui-visible .pswp__hide-on-close.pswp__button--arrow {
+    opacity: 0.85;
+}
+
 .pswp-ente .pswp__error--active {
     display: initial;
 }
@@ -161,6 +186,14 @@ body {
     transform: scale(0.85);
 }
 
+.pswp-ente .pswp__button--close .pswp__icn {
+    transform: translate(-6px, 0) scale(0.925);
+}
+
+.pswp-ente .pswp__button--close {
+    margin-right: 2px;
+}
+
 .pswp-ente .pswp__button--arrow--prev .pswp__icn {
     transform: scale(0.8);
 }
@@ -168,4 +201,28 @@ body {
 .pswp-ente .pswp__button--arrow--next .pswp__icn {
     /* default is a horizontal flip, transform: scale(-1, 1); */
     transform: scale(-0.8, 0.8);
+}
+
+.pswp-ente .pswp__caption {
+    position: absolute;
+    bottom: 0px;
+    right: 0;
+    margin: 20px 24px;
+    padding: 6px 16px;
+    border-radius: 2px;
+    /* Same opacity as the other controls. */
+    color: rgba(255 255 255 / 0.85);
+    background-color: rgba(0 0 0 / 0.2);
+    backdrop-filter: blur(10px);
+    /* 4 lines max, ellipsis on overflow. */
+    word-break: break-word;
+    text-align: right;
+    max-width: 375px;
+    max-height: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
 }

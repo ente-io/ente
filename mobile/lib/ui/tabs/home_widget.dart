@@ -176,7 +176,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         // Loading page will redirect to BackupFolderSelectionPage.
         // To avoid showing folder hook in middle during routing,
         // delay state refresh for home page
-        if (!LocalSyncService.instance.hasGrantedLimitedPermissions()) {
+        if (!permissionService.hasGrantedLimitedPermissions()) {
           delayInRefresh = const Duration(milliseconds: 250);
         }
         Future.delayed(
@@ -643,7 +643,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
-    if (!LocalSyncService.instance.hasGrantedPermissions()) {
+    if (!permissionService.hasGrantedPermissions()) {
       entityService.syncEntities().then((_) {
         PersonService.instance.resetEmailToPartialPersonDataCache();
       });
@@ -671,7 +671,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     _showShowBackupHook =
         !Configuration.instance.hasSelectedAnyBackupFolder() &&
-            !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
+            !permissionService.hasGrantedLimitedPermissions() &&
             CollectionsService.instance.getActiveCollections().isEmpty;
 
     return Stack(

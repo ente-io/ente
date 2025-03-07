@@ -59,3 +59,6 @@ then select the "Recover two-factor" option in the error message that gets
 shown. This will take you to a place where you can enter your Ente recovery key
 and login into your account. Now you can go to the _Passkey_ page to delete the
 lost passkey and/or add a new one.
+
+If you have lost access to both your passkey and recovery key, please reach out
+to [support@ente.io](mailto:support@ente.io) for help.
