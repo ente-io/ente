@@ -484,6 +484,12 @@ class DownloadManager {
                         controller.close();
                     } else {
                         // Save it for the next pull.
+
+                        // See: [Note: Revisit some Node.js types errors post 22
+                        // upgrade]
+                        //
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
                         leftoverBytes = data;
                     }
                 } while (!didEnqueue);
