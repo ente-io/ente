@@ -10,6 +10,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/api/entity/type.dart";
+import "package:photos/models/base_location.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
@@ -32,6 +33,8 @@ class LocationService {
   static const kCitiesRemotePath = "https://static.ente.io/world_cities.json";
 
   List<City> _cities = [];
+
+  List<BaseLocation> baseLocations = [];
 
   LocationService(this.prefs) {
     debugPrint('LocationService constructor');

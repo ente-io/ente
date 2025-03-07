@@ -140,26 +140,27 @@ class MemoriesCacheService {
       // calculate memories for this period and for the next period
       final now = DateTime.now();
       final next = now.add(kMemoriesUpdateFrequency);
-      final nowMemories =
-          await smartMemoriesService.calcMemories(now, newCache);
-      final nextMemories =
+      final nowResult = await smartMemoriesService.calcMemories(now, newCache);
+      final nextResult =
           await smartMemoriesService.calcMemories(next, newCache);
       w?.log("calculated new memories");
-      for (final nowMemory in nowMemories) {
+      for (final nowMemory in nowResult.memories) {
         newCache.toShowMemories
             .add(ToShowMemory.fromSmartMemory(nowMemory, now));
       }
-      for (final nextMemory in nextMemories) {
+      for (final nextMemory in nextResult.memories) {
         newCache.toShowMemories
             .add(ToShowMemory.fromSmartMemory(nextMemory, next));
       }
+      newCache.baseLocations.addAll(nowResult.baseLocations);
       w?.log("added memories to cache");
       final file = File(await _getCachePath());
       if (!file.existsSync()) {
         file.createSync(recursive: true);
       }
       _cachedMemories =
-          nowMemories.where((memory) => memory.shouldShowNow()).toList();
+          nowResult.memories.where((memory) => memory.shouldShowNow()).toList();
+      locationService.baseLocations = nowResult.baseLocations;
       await file.writeAsBytes(
         MemoriesCache.encodeToJsonString(newCache).codeUnits,
       );
@@ -174,8 +175,14 @@ class MemoriesCacheService {
     }
   }
 
+  /// WARNING: Use for testing only, TODO: lau: remove later
+  Future<MemoriesCache> debugCacheForTesting() async {
+    final oldCache = await _readCacheFromDisk();
+    final MemoriesCache newCache = _processOldCache(oldCache);
+    return newCache;
+  }
+
   MemoriesCache _processOldCache(MemoriesCache? oldCache) {
-    final List<ToShowMemory> toShowMemories = [];
     final List<PeopleShownLog> peopleShownLogs = [];
     final List<TripsShownLog> tripsShownLogs = [];
     if (oldCache != null) {
@@ -221,9 +228,10 @@ class MemoriesCacheService {
       }
     }
     return MemoriesCache(
-      toShowMemories: toShowMemories,
+      toShowMemories: [],
       peopleShownLogs: peopleShownLogs,
       tripsShownLogs: tripsShownLogs,
+      baseLocations: [],
     );
   }
 
@@ -259,6 +267,7 @@ class MemoriesCacheService {
           );
         }
       }
+      locationService.baseLocations = cache.baseLocations;
       _logger.info('Processing of disk cache memories done');
       return memories;
     } catch (e, s) {
@@ -294,8 +303,17 @@ class MemoriesCacheService {
       _logger.info("No memories cache found");
       return null;
     }
+    final allFiles = Set<EnteFile>.from(
+      await SearchService.instance.getAllFilesForSearch(),
+    );
+    final allFileIdsToFile = <int, EnteFile>{};
+    for (final file in allFiles) {
+      if (file.uploadedFileID != null) {
+        allFileIdsToFile[file.uploadedFileID!] = file;
+      }
+    }
     final jsonString = file.readAsStringSync();
-    return MemoriesCache.decodeFromJsonString(jsonString);
+    return MemoriesCache.decodeFromJsonString(jsonString, allFileIdsToFile);
   }
 
   Future<void> clearMemoriesCache() async {

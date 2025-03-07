@@ -15,6 +15,7 @@ import "package:photos/db/ml/db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/models/base_location.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/file/extensions/file_props.dart";
@@ -1048,6 +1049,42 @@ class SearchService {
           );
         }
       }
+      // Add the found base locations from the location/memories service
+      // TODO: lau: Add base location names
+      if (limit == null || tagSearchResults.length < limit) {
+        for (final BaseLocation base in locationService.baseLocations) {
+          final a = (baseRadius * scaleFactor(base.location.latitude!)) /
+              kilometersPerDegree;
+          const b = baseRadius / kilometersPerDegree;
+          tagSearchResults.add(
+            GenericSearchResult(
+              ResultType.location,
+              "Base",
+              base.files,
+              onResultTap: (ctx) {
+                showAddLocationSheet(
+                  ctx,
+                  base.location,
+                  name: "Base",
+                  radius: baseRadius,
+                );
+              },
+              hierarchicalSearchFilter: LocationFilter(
+                locationTag: LocationTag(
+                  name: "Base",
+                  radius: baseRadius,
+                  centerPoint: base.location,
+                  aSquare: a * a,
+                  bSquare: b * b,
+                ),
+                occurrence: kMostRelevantFilter,
+                matchedUploadedIDs: filesToUploadedFileIDs(base.files),
+              ),
+            ),
+          );
+        }
+      }
+
       if (limit == null || tagSearchResults.length < limit) {
         final results =
             await locationService.getFilesInCity(filesWithNoLocTag, '');
@@ -1193,9 +1230,24 @@ class SearchService {
     BuildContext context,
     int? limit,
   ) async {
-    final memories = await memoriesCacheService.getMemories(limit);
+    DateTime calcTime = DateTime.now();
+    // await two seconds to let new page load first
+    await Future.delayed(const Duration(seconds: 1));
+    if (limit == null) {
+      final DateTime? pickedTime = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(1900),
+        lastDate: DateTime(2100),
+      );
+      if (pickedTime != null) calcTime = pickedTime;
+    }
+    final cache = await memoriesCacheService.debugCacheForTesting();
+    final memoriesResult = await smartMemoriesService
+        .calcMemories(calcTime, cache, debugSurfaceAll: true);
+    locationService.baseLocations = memoriesResult.baseLocations;
     final searchResults = <GenericSearchResult>[];
-    for (final memory in memories) {
+    for (final memory in memoriesResult.memories) {
       final files = Memory.filesFromMemories(memory.memories);
       searchResults.add(
         GenericSearchResult(
