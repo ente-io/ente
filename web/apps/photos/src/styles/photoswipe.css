@@ -157,6 +157,12 @@
     line-clamp: 4;
 }
 
+/* Change the cursor on the thumbnail to the default arrow to indicate that it is
+   not interactable (PhotoSwipe by default shows the zoom out icon). */
+.pswp-ente .pswp__img {
+    cursor: auto;
+}
+
 /*
   Make the controllable video elements we render as custom PhotoSwipe content
   take .pswp-ente up the entire container.
