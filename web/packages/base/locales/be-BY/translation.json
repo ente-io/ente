@@ -57,7 +57,13 @@
     "add_photos_count": "",
     "select_photos": "Абраць фота",
     "FILE_UPLOAD": "",
-    "UPLOAD_STAGE_MESSAGE": { "0": "", "1": "", "3": "", "4": "", "5": "" },
+    "UPLOAD_STAGE_MESSAGE": {
+        "0": "",
+        "1": "",
+        "3": "",
+        "4": "",
+        "5": ""
+    },
     "FILE_NOT_UPLOADED_LIST": "",
     "initial_load_delay_warning": "",
     "no_account": "",
@@ -515,7 +521,13 @@
     "advanced": "",
     "export_directory_does_not_exist": "",
     "export_directory_does_not_exist_message": "",
-    "storage_unit": { "b": "", "kb": "", "mb": "", "gb": "", "tb": "" },
+    "storage_unit": {
+        "b": "",
+        "kb": "",
+        "mb": "",
+        "gb": "",
+        "tb": ""
+    },
     "stop": "",
     "sync_continuously": "",
     "export_starting": "",
