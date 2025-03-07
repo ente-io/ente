@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller/collections"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,6 +13,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/ente-io/museum/pkg/controller/collections"
 
 	"github.com/ente-io/museum/ente/base"
 	"github.com/ente-io/museum/pkg/controller/emergency"
@@ -990,6 +991,10 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 
 	schedule(c, "@every 24h", func() {
 		pushController.ClearExpiredTokens()
+	})
+
+	schedule(c, "@every 24h", func() {
+		emailNotificationCtrl.SendFamilyNudgeEmail()
 	})
 
 	scheduleAndRun(c, "@every 60m", func() {
