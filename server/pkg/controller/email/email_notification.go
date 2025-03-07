@@ -3,6 +3,7 @@ package email
 import (
 	"fmt"
 	"strconv"
+	t "time"
 
 	"github.com/avct/uasurfer"
 	"github.com/ente-io/museum/ente"
@@ -10,6 +11,8 @@ import (
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ente-io/stacktrace"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -46,6 +49,7 @@ type EmailNotificationController struct {
 	LockController                     *lock.LockController
 	NotificationHistoryRepo            *repo.NotificationHistoryRepository
 	isSendingStorageLimitExceededMails bool
+	FamilyRepo                         *repo.FamilyRepository
 }
 
 func (c *EmailNotificationController) OnFirstFileUpload(userID int64, userAgent string) {
@@ -200,4 +204,51 @@ func (c *EmailNotificationController) SendStorageLimitExceededMails() {
 
 func (c *EmailNotificationController) setStorageLimitExceededMailerJobStatus(isSending bool) {
 	c.isSendingStorageLimitExceededMails = isSending
+}
+
+func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
+	subscribedUsers, subUsersErr := c.UserRepo.GetSubscribedUsersWithoutFamily()
+	if subUsersErr != nil {
+		stacktrace.Propagate(subUsersErr, "Failed to get subscribers")
+	}
+
+	batchSize := 100
+	totalSubUsers := len(subscribedUsers)
+	logrus.Println(totalSubUsers)
+
+	for i := 0; i < totalSubUsers; i++ {
+		end := i + batchSize
+		if end > totalSubUsers {
+			end = totalSubUsers
+		}
+		if i > end {
+			break
+		}
+
+		batchUsers := subscribedUsers[i:end]
+		logrus.Println(batchUsers)
+		for _, user := range batchUsers {
+			isFamilyAdmin, err := c.UserRepo.GetFamilyAdminID(user.ID)
+			if err != nil {
+				return stacktrace.Propagate(err, "User is a family admin")
+			}
+			if isFamilyAdmin != nil {
+				break
+			}
+
+			thirtyDays := 30 * t.Second
+			creationTime := t.Unix(0, user.CreationTime)
+			timeSinceCreation := t.Since(creationTime)
+
+			if timeSinceCreation >= thirtyDays {
+				go func(userEmails []string) {
+					err := email.SendTemplatedEmail(userEmails, "team@ente.io", "team@ente.io", SubscriptionCancelledSubject, SubscriptionCancelledTemplate, nil, nil)
+					if err != nil {
+						log.Error("Failed to send family nudge email: ", err)
+					}
+				}([]string{user.Email})
+			}
+		}
+	}
+	return nil
 }
