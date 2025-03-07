@@ -423,7 +423,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 // Refreshing the current slide after the current file has gone
                 // will show the subsequent slide (since that would've now moved
                 // down to the current index).
-                psRef.current!.refreshCurrentSlideContent();
+                //
+                // However, we might've been the last slide, in which case we
+                // need to go back one slide first. To determine this, also pass
+                // the expected count of files to our PhotoSwipe wrapper.
+                psRef.current!.refreshCurrentSlideContent(files.length);
             } else {
                 // If there are no more files left, close the viewer.
                 handleClose();
