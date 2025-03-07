@@ -12,13 +12,13 @@ import { useModalVisibility } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
+import { resetFileViewerDataSourceOnClose } from "@/gallery/components/viewer/data-source";
 import { type Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "@/new/photos/components/CollectionSelector";
-import { resetFileViewerDataSourceOnClose } from "@/new/photos/components/FileViewerComponents-temp";
 import { PlanSelector } from "@/new/photos/components/PlanSelector";
 import {
     SearchBar,
@@ -570,7 +570,6 @@ const Page: React.FC = () => {
                 );
                 if (didUpdateNormalFiles || didUpdateHiddenFiles) {
                     exportService.onLocalFilesUpdated();
-                    // TODO(PS): Use direct one
                     resetFileViewerDataSourceOnClose();
                 }
                 // syncWithRemote is called with the force flag set to true before

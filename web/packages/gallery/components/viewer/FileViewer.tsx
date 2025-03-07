@@ -1,17 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-
-// TODO(PS): WIP gallery using upstream photoswipe
-//
-// Needs (not committed yet):
-// yarn workspace gallery add photoswipe@^5.4.4
-// mv node_modules/photoswipe packages/new/photos/components/ps5
-
-if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
-    console.warn("Using WIP upstream photoswipe");
-} else {
-    throw new Error("Whoa");
-}
+// TODO(PS): ^
 
 import { isDesktop } from "@/base/app";
 import { SpacedRow } from "@/base/components/containers";
@@ -45,7 +34,6 @@ import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlin
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
 import {
     Box,
-    Button,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -248,7 +236,7 @@ export type FileViewerProps = ModalVisibilityProps & {
 /**
  * A PhotoSwipe based image and video viewer.
  */
-const FileViewer: React.FC<FileViewerProps> = ({
+export const FileViewer: React.FC<FileViewerProps> = ({
     open,
     onClose,
     user,
@@ -483,8 +471,6 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleAnnotate = useCallback(
         (file: EnteFile, itemData: ItemData): FileViewerAnnotatedFile => {
-            log.debug(() => ["viewer", { action: "annotate", file, itemData }]);
-
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
 
@@ -717,7 +703,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
     useEffect(() => {
         if (open) {
             // We're open. Create psRef. This will show the file viewer dialog.
-            log.debug(() => ["viewer", { action: "open" }]);
+            log.debug(() => "Opening file viewer");
 
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
@@ -735,7 +721,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
             return () => {
                 // Close dialog in the effect callback.
-                log.debug(() => ["viewer", { action: "close" }]);
+                log.debug(() => "Closing file viewer");
                 pswp.closeIfNeeded();
             };
         }
@@ -764,11 +750,8 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     useEffect(updateFullscreenStatus, [updateFullscreenStatus]);
 
-    log.debug(() => ["viewer", { action: "render", psRef: psRef.current }]);
-
     return (
-        <Container>
-            <Button>Test</Button>
+        <>
             <FileInfo
                 open={openFileInfo}
                 onClose={handleFileInfoClose}
@@ -866,20 +849,9 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 onSaveEditedCopy={handleSaveEditedCopy}
             />
             <Shortcuts open={openShortcuts} onClose={handleShortcutsClose} />
-        </Container>
+        </>
     );
 };
-
-export default FileViewer;
-
-const Container = styled("div")`
-    border: 1px solid red;
-
-    #test-gallery {
-        border: 1px solid red;
-        min-height: 10px;
-    }
-`;
 
 const MoreMenu = styled(Menu)(
     ({ theme }) => `
