@@ -626,7 +626,7 @@ export class FileViewerPhotoSwipe {
         // The "order" prop is used to position items. Some landmarks:
         // - counter: 5
         // - zoom: 6 (default is 10)
-        // - preloader: 9 (default is 7)
+        // - preloader: 10 (default is 7)
         // - close: 20
         pswp.on("uiRegister", () => {
             // Move the zoom button to the left so that it is in the same place
@@ -638,7 +638,8 @@ export class FileViewerPhotoSwipe {
             // order since that only allows us to edit the DOM element, not the
             // underlying UI element data.
             pswp.ui.uiElementsData.find((e) => e.name == "zoom").order = 6;
-            pswp.ui.uiElementsData.find((e) => e.name == "preloader").order = 9;
+            pswp.ui.uiElementsData.find((e) => e.name == "preloader").order =
+                10;
 
             // Register our custom elements...
 
