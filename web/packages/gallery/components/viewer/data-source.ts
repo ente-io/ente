@@ -410,7 +410,11 @@ const enqueueUpdates = async (file: EnteFile) => {
                 // For these reasons, we resolve with the video first, then
                 // resolve with the image.
                 const videoURL = await livePhotoSourceURLs.video();
-                update({ videoURL });
+                update({
+                    videoURL,
+                    isContentLoading: true,
+                    isContentZoomable: false,
+                });
                 const imageURL = ensureString(
                     await livePhotoSourceURLs.image(),
                 );
