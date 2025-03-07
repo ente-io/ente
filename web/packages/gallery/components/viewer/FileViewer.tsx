@@ -946,6 +946,7 @@ const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
             />
             <Shortcut action="Pan" shortcut="W / A / S / D, Drag" />
             <Shortcut action="Toggle live" shortcut="Space" />
+            <Shortcut action="Toggle audio" shortcut="M" />
             <Shortcut action="Toggle favorite" shortcut="L" />
             <Shortcut action="View info" shortcut="I" />
             <Shortcut action="Download" shortcut="K" />

@@ -382,16 +382,26 @@ export class FileViewerPhotoSwipe {
         let livePhotoPlay = true;
 
         /**
-         * The live photo playback toggle button element.
+         * Last state of the live photo muted toggle.
          */
-        let livePhotoToggleButtonElement: HTMLButtonElement | undefined;
+        let livePhotoMute = true;
 
         /**
-         * Update the state of the given `videoElement` and the
-         * `livePhotoToggleButtonElement` to reflect `livePhotoPlay`.
+         * The live photo playback toggle button element.
          */
-        const livePhotoUpdatePlayback = (video: HTMLVideoElement) => {
-            const button = livePhotoToggleButtonElement;
+        let livePhotoPlayButtonElement: HTMLButtonElement | undefined;
+
+        /**
+         * The live photo muted toggle button element.
+         */
+        let livePhotoMuteButtonElement: HTMLButtonElement | undefined;
+
+        /**
+         * Update the state of the given {@link videoElement} and the
+         * {@link livePhotoPlayButtonElement} to reflect {@link livePhotoPlay}.
+         */
+        const livePhotoUpdatePlay = (video: HTMLVideoElement) => {
+            const button = livePhotoPlayButtonElement;
             if (button) showIf(button, true);
 
             if (livePhotoPlay) {
@@ -406,16 +416,46 @@ export class FileViewerPhotoSwipe {
         };
 
         /**
+         * Update the state of the given {@link videoElement} and the
+         * {@link livePhotoMuteButtonElement} to reflect {@link livePhotoMute}.
+         */
+        const livePhotoUpdateMute = (video: HTMLVideoElement) => {
+            const button = livePhotoMuteButtonElement;
+            if (button) showIf(button, true);
+
+            if (livePhotoMute) {
+                button?.classList.add("pswp-ente-off");
+                video.muted = true;
+            } else {
+                button?.classList.remove("pswp-ente-off");
+                video.muted = false;
+            }
+        };
+
+        /**
          * Toggle the playback, if possible, of a live photo that's being shown
          * on the current slide.
          */
-        const livePhotoTogglePlaybackIfPossible = () => {
-            const buttonElement = livePhotoToggleButtonElement;
+        const livePhotoTogglePlayIfPossible = () => {
+            const buttonElement = livePhotoPlayButtonElement;
             const video = livePhotoVideoOnSlide(pswp.currSlide);
             if (!buttonElement || !video) return;
 
             livePhotoPlay = !livePhotoPlay;
-            livePhotoUpdatePlayback(video);
+            livePhotoUpdatePlay(video);
+        };
+
+        /**
+         * Toggle the muted status, if possible, of a live photo that's being shown
+         * on the current slide.
+         */
+        const livePhotoToggleMuteIfPossible = () => {
+            const buttonElement = livePhotoMuteButtonElement;
+            const video = livePhotoVideoOnSlide(pswp.currSlide);
+            if (!buttonElement || !video) return;
+
+            livePhotoMute = !livePhotoMute;
+            livePhotoUpdateMute(video);
         };
 
         pswp.on("contentAppend", (e) => {
@@ -448,7 +488,8 @@ export class FileViewerPhotoSwipe {
             // already been called, but now "contentAppend" is happening.
 
             if (pswp.currSlide.data.fileID == fileID) {
-                livePhotoUpdatePlayback(video);
+                livePhotoUpdatePlay(video);
+                livePhotoUpdateMute(video);
             }
         });
 
@@ -647,25 +688,22 @@ export class FileViewerPhotoSwipe {
                 name: "live",
                 // TODO(PS):
                 title: pt("Toggle live"),
-                // Safe to use the same order, since this will only be shown if
-                // there are no errors.
                 order: 7,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("live"),
                 onInit: (buttonElement) => {
-                    livePhotoToggleButtonElement = buttonElement;
+                    livePhotoPlayButtonElement = buttonElement;
                     pswp.on("change", () => {
                         const video = livePhotoVideoOnSlide(pswp.currSlide);
-                        if (!video) {
+                        if (video) {
+                            livePhotoUpdatePlay(video);
+                        } else {
                             // Not a live photo, or its video hasn't loaded yet.
                             showIf(buttonElement, false);
-                            return;
                         }
-
-                        livePhotoUpdatePlayback(video);
                     });
                 },
-                onClick: livePhotoTogglePlaybackIfPossible,
+                onClick: livePhotoTogglePlayIfPossible,
             });
 
             pswp.ui.registerElement({
@@ -676,18 +714,18 @@ export class FileViewerPhotoSwipe {
                 isButton: true,
                 html: createPSRegisterElementIconHTML("vol"),
                 onInit: (buttonElement) => {
-                    buttonElement.style.display = "none";
-
-                    // buttonElement.setAttribute("id", moreButtonID);
-                    // buttonElement.setAttribute("aria-haspopup", "true");
+                    livePhotoMuteButtonElement = buttonElement;
+                    pswp.on("change", () => {
+                        const video = livePhotoVideoOnSlide(pswp.currSlide);
+                        if (video) {
+                            livePhotoUpdateMute(video);
+                        } else {
+                            // Not a live photo, or its video hasn't loaded yet.
+                            showIf(buttonElement, false);
+                        }
+                    });
                 },
-                onClick: (e) => {
-                    // const buttonElement = e.target;
-                    // See also: `resetMoreMenuButtonOnMenuClose`.
-                    // buttonElement.setAttribute("aria-controls", moreMenuID);
-                    // buttonElement.setAttribute("aria-expanded", true);
-                    // onMore(buttonElement);
-                },
+                onClick: livePhotoToggleMuteIfPossible,
             });
 
             // TODO(PS): Force convert button for videos
@@ -833,10 +871,18 @@ export class FileViewerPhotoSwipe {
             lastActivityDate = new Date();
         };
 
-        const handleTogglePlaybackIfPossible = () => {
+        const handleTogglePlayIfPossible = () => {
             switch (currentAnnotatedFile().itemData.fileType) {
                 case FileType.livePhoto:
-                    livePhotoTogglePlaybackIfPossible();
+                    livePhotoTogglePlayIfPossible();
+                    return;
+            }
+        };
+
+        const handleToggleMuteIfPossible = () => {
+            switch (currentAnnotatedFile().itemData.fileType) {
+                case FileType.livePhoto:
+                    livePhotoToggleMuteIfPossible();
                     return;
             }
         };
@@ -889,7 +935,7 @@ export class FileViewerPhotoSwipe {
                         // Space activates controls when they're focused, so
                         // only act on it if no specific control is focused.
                         if (!isFocusedOnUIControl()) {
-                            cb = handleTogglePlaybackIfPossible;
+                            cb = handleTogglePlayIfPossible;
                         }
                         break;
                     case "Backspace":
@@ -911,6 +957,9 @@ export class FileViewerPhotoSwipe {
                         break;
                     case "h":
                         cb = handleToggleUIControls;
+                        break;
+                    case "m":
+                        cb = handleToggleMuteIfPossible;
                         break;
                     case "l":
                         cb = handleToggleFavoriteIfEnabled;
