@@ -245,7 +245,6 @@ export class FileViewerPhotoSwipe {
             // Set the index within files that we should open to. Subsequent
             // updates to the index will be tracked by PhotoSwipe internally.
             index: initialIndex,
-            // TODO(PS): padding option? for handling custom title bar.
             // TODO(PS): will we need this?
             mainClass: "pswp-ente",
             // TODO(PS): Translated variants
@@ -382,16 +381,26 @@ export class FileViewerPhotoSwipe {
         let livePhotoPlay = true;
 
         /**
-         * The live photo playback toggle button element.
+         * Last state of the live photo muted toggle.
          */
-        let livePhotoToggleButtonElement: HTMLButtonElement | undefined;
+        let livePhotoMute = true;
 
         /**
-         * Update the state of the given `videoElement` and the
-         * `livePhotoToggleButtonElement` to reflect `livePhotoPlay`.
+         * The live photo playback toggle DOM button element.
          */
-        const livePhotoUpdatePlayback = (video: HTMLVideoElement) => {
-            const button = livePhotoToggleButtonElement;
+        let livePhotoPlayButtonElement: HTMLButtonElement | undefined;
+
+        /**
+         * The live photo muted toggle DOM button element.
+         */
+        let livePhotoMuteButtonElement: HTMLButtonElement | undefined;
+
+        /**
+         * Update the state of the given {@link videoElement} and the
+         * {@link livePhotoPlayButtonElement} to reflect {@link livePhotoPlay}.
+         */
+        const livePhotoUpdatePlay = (video: HTMLVideoElement) => {
+            const button = livePhotoPlayButtonElement;
             if (button) showIf(button, true);
 
             if (livePhotoPlay) {
@@ -406,16 +415,46 @@ export class FileViewerPhotoSwipe {
         };
 
         /**
+         * Update the state of the given {@link videoElement} and the
+         * {@link livePhotoMuteButtonElement} to reflect {@link livePhotoMute}.
+         */
+        const livePhotoUpdateMute = (video: HTMLVideoElement) => {
+            const button = livePhotoMuteButtonElement;
+            if (button) showIf(button, true);
+
+            if (livePhotoMute) {
+                button?.classList.add("pswp-ente-off");
+                video.muted = true;
+            } else {
+                button?.classList.remove("pswp-ente-off");
+                video.muted = false;
+            }
+        };
+
+        /**
          * Toggle the playback, if possible, of a live photo that's being shown
          * on the current slide.
          */
-        const livePhotoTogglePlaybackIfPossible = () => {
-            const buttonElement = livePhotoToggleButtonElement;
+        const livePhotoTogglePlayIfPossible = () => {
+            const buttonElement = livePhotoPlayButtonElement;
             const video = livePhotoVideoOnSlide(pswp.currSlide);
             if (!buttonElement || !video) return;
 
             livePhotoPlay = !livePhotoPlay;
-            livePhotoUpdatePlayback(video);
+            livePhotoUpdatePlay(video);
+        };
+
+        /**
+         * Toggle the muted status, if possible, of a live photo that's being shown
+         * on the current slide.
+         */
+        const livePhotoToggleMuteIfPossible = () => {
+            const buttonElement = livePhotoMuteButtonElement;
+            const video = livePhotoVideoOnSlide(pswp.currSlide);
+            if (!buttonElement || !video) return;
+
+            livePhotoMute = !livePhotoMute;
+            livePhotoUpdateMute(video);
         };
 
         pswp.on("contentAppend", (e) => {
@@ -448,7 +487,8 @@ export class FileViewerPhotoSwipe {
             // already been called, but now "contentAppend" is happening.
 
             if (pswp.currSlide.data.fileID == fileID) {
-                livePhotoUpdatePlayback(video);
+                livePhotoUpdatePlay(video);
+                livePhotoUpdateMute(video);
             }
         });
 
@@ -505,10 +545,23 @@ export class FileViewerPhotoSwipe {
 
         pswp.on("contentDestroy", (e) => forgetExifForItemData(e.content.data));
 
-        // State needed to hide the caption when a video is playing on a file of
-        // type video.
+        /**
+         * If the current slide is showing a video, then the DOM video element
+         * showing that video.
+         */
         let videoVideoEl: HTMLVideoElement | undefined;
+
+        /**
+         * Callback attached to video playback events when showing video files.
+         *
+         * These are needed to hide the caption when a video is playing on a
+         * file of type video.
+         */
         let onVideoPlayback: EventHandler | undefined;
+
+        /**
+         * The DOM element showing the caption for the current file.
+         */
         let captionElement: HTMLElement | undefined;
 
         pswp.on("change", (e) => {
@@ -549,6 +602,32 @@ export class FileViewerPhotoSwipe {
             }
         });
 
+        /**
+         * Toggle the playback, if possible, of the video that's being shown on
+         * the current slide.
+         */
+        const videoTogglePlayIfPossible = () => {
+            const video = videoVideoEl;
+            if (!video) return;
+
+            if (video.paused || video.ended) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        };
+
+        /**
+         * Toggle the muted status, if possible, of the video that's being shown on
+         * the current slide.
+         */
+        const videoToggleMuteIfPossible = () => {
+            const video = videoVideoEl;
+            if (!video) return;
+
+            video.muted = !video.muted;
+        };
+
         // The PhotoSwipe dialog has being closed and the animations have
         // completed.
         pswp.on("destroy", () => {
@@ -564,7 +643,6 @@ export class FileViewerPhotoSwipe {
         const handleViewInfo = () => onViewInfo(currentAnnotatedFile());
 
         let favoriteButtonElement: HTMLButtonElement | undefined;
-        let unfavoriteButtonElement: HTMLButtonElement | undefined;
 
         /**
          * IDs of files for which a there is a favorite update in progress.
@@ -574,29 +652,32 @@ export class FileViewerPhotoSwipe {
         const toggleFavorite = async () => {
             const af = currentAnnotatedFile();
             pendingFavoriteUpdates.add(af.file.id);
-            favoriteButtonElement.disabled = true;
-            // unfavoriteButtonElement.disabled = true;
+            updateFavoriteButton();
             await delegate.toggleFavorite(af);
             pendingFavoriteUpdates.delete(af.file.id);
-            favoriteButtonElement.disabled = false;
-            // TODO: We reload the entire slide instead of just updating
-            // the button state. This is because there are two buttons,
-            // instead of a single button toggling between two states
-            // e.g. like the zoom button.
-            //
-            // To fix this, a single button can be achieved by moving
-            // the fill of the heart as a layer.
-            // this.refreshCurrentSlideContent();
             updateFavoriteButton();
         };
 
         const updateFavoriteButton = () => {
+            const button = favoriteButtonElement!;
+
             const af = currentAnnotatedFile();
-            const isFavorite = delegate.isFavorite(af);
-            const fill = document.getElementById("pswp__icn-favorite-fill")!;
-            console.log(fill, isFavorite);
-            fill.style.display = isFavorite ? "initial" : "none";
-            // if (fill) showIf(fill, isFavorite);
+            const showFavorite = af.annotation.showFavorite;
+            showIf(button, showFavorite);
+
+            if (!showFavorite) {
+                // Nothing more to do.
+                return;
+            }
+
+            // Update the button interactivity based on pending requests.
+            button.disabled = pendingFavoriteUpdates.has(af.file.id);
+
+            // Update the fill visibility based on the favorite status.
+            showIf(
+                document.getElementById("pswp__icn-favorite-fill")!,
+                delegate.isFavorite(af),
+            );
         };
 
         const handleToggleFavorite = () => void toggleFavorite();
@@ -624,7 +705,7 @@ export class FileViewerPhotoSwipe {
         // The "order" prop is used to position items. Some landmarks:
         // - counter: 5
         // - zoom: 6 (default is 10)
-        // - preloader: 9 (default is 7)
+        // - preloader: 10 (default is 7)
         // - close: 20
         pswp.on("uiRegister", () => {
             // Move the zoom button to the left so that it is in the same place
@@ -636,56 +717,55 @@ export class FileViewerPhotoSwipe {
             // order since that only allows us to edit the DOM element, not the
             // underlying UI element data.
             pswp.ui.uiElementsData.find((e) => e.name == "zoom").order = 6;
-            pswp.ui.uiElementsData.find((e) => e.name == "preloader").order = 9;
+            pswp.ui.uiElementsData.find((e) => e.name == "preloader").order =
+                10;
 
             // Register our custom elements...
 
             pswp.ui.registerElement({
                 name: "live",
-                // TODO(PS):
-                title: pt("Toggle live"),
-                // Safe to use the same order, since this will only be shown if
-                // there are no errors.
+                title: pt("Live"),
                 order: 7,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("live"),
                 onInit: (buttonElement) => {
-                    livePhotoToggleButtonElement = buttonElement;
+                    livePhotoPlayButtonElement = buttonElement;
                     pswp.on("change", () => {
                         const video = livePhotoVideoOnSlide(pswp.currSlide);
-                        if (!video) {
+                        if (video) {
+                            livePhotoUpdatePlay(video);
+                        } else {
                             // Not a live photo, or its video hasn't loaded yet.
                             showIf(buttonElement, false);
-                            return;
                         }
-
-                        livePhotoUpdatePlayback(video);
                     });
                 },
-                onClick: livePhotoTogglePlaybackIfPossible,
+                onClick: livePhotoTogglePlayIfPossible,
             });
 
             pswp.ui.registerElement({
                 name: "vol",
-                // TODO(PS):
-                title: pt("Toggle audio"),
+                title: pt("Audio"),
                 order: 8,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("vol"),
                 onInit: (buttonElement) => {
-                    buttonElement.style.display = "none";
-
-                    // buttonElement.setAttribute("id", moreButtonID);
-                    // buttonElement.setAttribute("aria-haspopup", "true");
+                    livePhotoMuteButtonElement = buttonElement;
+                    pswp.on("change", () => {
+                        const video = livePhotoVideoOnSlide(pswp.currSlide);
+                        if (video) {
+                            livePhotoUpdateMute(video);
+                        } else {
+                            // Not a live photo, or its video hasn't loaded yet.
+                            showIf(buttonElement, false);
+                        }
+                    });
                 },
-                onClick: (e) => {
-                    // const buttonElement = e.target;
-                    // See also: `resetMoreMenuButtonOnMenuClose`.
-                    // buttonElement.setAttribute("aria-controls", moreMenuID);
-                    // buttonElement.setAttribute("aria-expanded", true);
-                    // onMore(buttonElement);
-                },
+                onClick: livePhotoToggleMuteIfPossible,
             });
+
+            // TODO(PS): Add force convert button for videos? Or is that covered
+            // by upcoming streaming changes?
 
             pswp.ui.registerElement({
                 name: "error",
@@ -703,67 +783,31 @@ export class FileViewerPhotoSwipe {
                 },
             });
 
+            // Only one of these two ("favorite" and "download") will end
+            // up being shown, so they can safely share the same order.
             if (haveUser) {
-                const showFavoriteIf = (
-                    buttonElement: HTMLButtonElement,
-                    value: boolean,
-                ) => {
-                    updateFavoriteButton();
-                    return;
-                    const af = currentAnnotatedFile();
-                    const isFavorite = delegate.isFavorite(af);
-                    showIf(
-                        buttonElement,
-                        af.annotation.showFavorite && isFavorite === value,
-                    );
-                    buttonElement.disabled = pendingFavoriteUpdates.has(
-                        af.file.id,
-                    );
-                };
-
-                // Only one of these two ("favorite" or "unfavorite") will end
-                // up being shown, so they can safely share the same order.
                 pswp.ui.registerElement({
                     name: "favorite",
                     title: pt("Favorite"),
                     order: 11,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
-                    onClick: handleToggleFavorite,
                     onInit: (buttonElement) => {
                         favoriteButtonElement = buttonElement;
-                        pswp.on("change", () =>
-                            showFavoriteIf(buttonElement, false),
-                        );
+                        pswp.on("change", updateFavoriteButton);
                     },
+                    onClick: handleToggleFavorite,
                 });
-                // pswp.ui.registerElement({
-                //     name: "unfavorite",
-                //     title: pt("Favorite"),
-                //     order: 11,
-                //     isButton: true,
-                //     html: createPSRegisterElementIconHTML("unfavorite"),
-                //     onClick: handleToggleFavorite,
-                //     onInit: (buttonElement) => {
-                //         unfavoriteButtonElement = buttonElement;
-                //         pswp.on("change", () =>
-                //             showFavoriteIf(buttonElement, true),
-                //         );
-                //     },
-                // });
             } else {
                 // When we don't have a user (i.e. in the context of public
                 // albums), the download button is shown (if enabled for that
                 // album) instead of the favorite button as the first action.
-                //
-                // It can thus also use the same order as fav/unfav.
                 pswp.ui.registerElement({
                     name: "download",
                     title: t("download"),
                     order: 11,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("download"),
-                    onClick: handleDownload,
                     onInit: (buttonElement) =>
                         pswp.on("change", () =>
                             showIf(
@@ -771,6 +815,7 @@ export class FileViewerPhotoSwipe {
                                 currentFileAnnotation().showDownload == "bar",
                             ),
                         ),
+                    onClick: handleDownload,
                 });
             }
 
@@ -785,7 +830,6 @@ export class FileViewerPhotoSwipe {
 
             pswp.ui.registerElement({
                 name: "more",
-                // TODO(PS):
                 title: pt("More"),
                 order: 16,
                 isButton: true,
@@ -826,15 +870,6 @@ export class FileViewerPhotoSwipe {
             });
         });
 
-        // Modify the default UI elements.
-        pswp.addFilter("uiElement", (element, data) => {
-            if (element.name == "preloader") {
-                // TODO(PS): Left as an example. For now, this is customized in
-                // the CSS.
-            }
-            return element;
-        });
-
         // Pan action handlers
 
         const panner = (key: "w" | "a" | "s" | "d") => () => {
@@ -864,10 +899,24 @@ export class FileViewerPhotoSwipe {
             lastActivityDate = new Date();
         };
 
-        const handleTogglePlaybackIfPossible = () => {
+        const handleTogglePlayIfPossible = () => {
             switch (currentAnnotatedFile().itemData.fileType) {
+                case FileType.video:
+                    videoTogglePlayIfPossible();
+                    return;
                 case FileType.livePhoto:
-                    livePhotoTogglePlaybackIfPossible();
+                    livePhotoTogglePlayIfPossible();
+                    return;
+            }
+        };
+
+        const handleToggleMuteIfPossible = () => {
+            switch (currentAnnotatedFile().itemData.fileType) {
+                case FileType.video:
+                    videoToggleMuteIfPossible();
+                    return;
+                case FileType.livePhoto:
+                    livePhotoToggleMuteIfPossible();
                     return;
             }
         };
@@ -920,7 +969,7 @@ export class FileViewerPhotoSwipe {
                         // Space activates controls when they're focused, so
                         // only act on it if no specific control is focused.
                         if (!isFocusedOnUIControl()) {
-                            cb = handleTogglePlaybackIfPossible;
+                            cb = handleTogglePlayIfPossible;
                         }
                         break;
                     case "Backspace":
@@ -942,6 +991,9 @@ export class FileViewerPhotoSwipe {
                         break;
                     case "h":
                         cb = handleToggleUIControls;
+                        break;
+                    case "m":
+                        cb = handleToggleMuteIfPossible;
                         break;
                     case "l":
                         cb = handleToggleFavoriteIfEnabled;

@@ -260,7 +260,7 @@ export const fileViewerDidClose = () => {
  * - For images and videos, this will be the single original.
  *
  * - For live photos, this will also be a two step process, first fetching the
- *   original image, then again the video component.
+ *   video component, then fetching the image component.
  *
  * At this point, the data for this file will be considered final, and
  * subsequent calls for the same file will return this same value unless it is
@@ -400,19 +400,32 @@ const enqueueUpdates = async (file: EnteFile) => {
                     await downloadManager.renderableSourceURLs(file);
                 const livePhotoSourceURLs =
                     sourceURLs.url as LivePhotoSourceURL;
+                // The image component of a live photo usually is an HEIC file,
+                // which cannot be displayed natively by browsers and needs a
+                // conversion, which is slow on web (faster on desktop). We
+                // already have both components available since they're part of
+                // the same zip. And in the UI, the first (default) interaction
+                // is to loop the live video.
+                //
+                // For these reasons, we resolve with the video first, then
+                // resolve with the image.
+                const videoURL = await livePhotoSourceURLs.video();
+                update({
+                    videoURL,
+                    isContentLoading: true,
+                    isContentZoomable: false,
+                });
                 const imageURL = ensureString(
                     await livePhotoSourceURLs.image(),
                 );
                 const originalImageBlob =
                     livePhotoSourceURLs.originalImageBlob()!;
-                const imageData = {
+                update({
                     ...(await withDimensions(imageURL)),
                     imageURL,
                     originalImageBlob,
-                };
-                update(imageData);
-                const videoURL = await livePhotoSourceURLs.video();
-                update({ ...imageData, videoURL });
+                    videoURL,
+                });
                 break;
             }
         }
