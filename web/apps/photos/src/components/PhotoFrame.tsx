@@ -450,8 +450,6 @@ const PhotoFrame = ({
             </AutoSizer>
             <FileViewer
                 {...fileViewerVisibilityProps}
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                /* @ts-ignore TODO(PS): test */
                 user={galleryContext.user ?? undefined}
                 files={files}
                 initialIndex={currentIndex}

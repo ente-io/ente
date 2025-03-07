@@ -11,6 +11,7 @@ import { logoutSettings } from "@/new/photos/services/settings";
 import { logoutUserDetails } from "@/new/photos/services/user-details";
 import exportService from "./export";
 import uploadManager from "./upload/uploadManager";
+import { logoutFileViewerDataSource } from "@/gallery/components/viewer/data-source";
 
 /**
  * Logout sequence for the photos app.
@@ -76,6 +77,12 @@ export const photosLogout = async () => {
         logoutSearch();
     } catch (e) {
         ignoreError("Search", e);
+    }
+
+    try {
+        logoutFileViewerDataSource();
+    } catch (e) {
+        ignoreError("File viewer", e);
     }
 
     // - Desktop

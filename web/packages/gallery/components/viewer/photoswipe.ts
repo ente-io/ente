@@ -1,8 +1,8 @@
 /* eslint-disable */
 // @ts-nocheck
+// TODO(PS): ^
 
 import { pt } from "@/base/i18n";
-import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { t } from "i18next";
@@ -331,8 +331,6 @@ export class FileViewerPhotoSwipe {
                     html: videoHTML(videoURL, disableDownload),
                 };
             }
-
-            log.debug(() => ["[viewer]", { index, itemData, file }]);
 
             if (lastActivityDate != "already-hidden")
                 lastActivityDate = new Date();

@@ -174,7 +174,6 @@ const resetState = () => {
 /**
  * Clear any internal state maintained by the file viewer data source.
  */
-// TODO(PS): Call me during logout sequence once this is integrated.
 export const logoutFileViewerDataSource = resetState;
 
 /**
@@ -390,7 +389,6 @@ const enqueueUpdates = async (file: EnteFile) => {
             case FileType.video: {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                // TODO(PS):
                 update({ videoURL: sourceURLs.url as string });
                 break;
             }
