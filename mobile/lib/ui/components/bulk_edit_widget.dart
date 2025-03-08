@@ -76,9 +76,130 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
                 setState(() {});
               },
             ),
+          if (!showSingleOrShiftChoice)
+            OldDateAndTimeWidget(
+              dateTime: startDate,
+              selectDate: singleSelected,
+              onPressedDate: () {},
+              onPressedTime: () {},
+            ),
 
           // Bottom indicator line
           const SizedBox(height: 48),
+        ],
+      ),
+    );
+  }
+}
+
+class OldDateAndTimeWidget extends StatelessWidget {
+  const OldDateAndTimeWidget({
+    super.key,
+    required this.dateTime,
+    required this.selectDate,
+    required this.onPressedDate,
+    required this.onPressedTime,
+  });
+
+  final DateTime dateTime;
+  final bool selectDate;
+
+  final Function() onPressedDate;
+  final Function() onPressedTime;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final locale = Localizations.localeOf(context);
+    final String date = DateFormat.yMMMd(locale.languageCode).format(dateTime);
+    final String time = DateFormat.Hm(locale.languageCode).format(dateTime);
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              selectDate
+                  ? "Select one date and time for all"
+                  : "Select start of range",
+              style: TextStyle(
+                color: colorScheme.textBase,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              selectDate
+                  ? "This will make the date and time of all selected photos the same."
+                  : "This is the first in the group. Other selected photos will automatically shift based on this new date",
+              style: TextStyle(
+                color: colorScheme.textFaint,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            decoration: BoxDecoration(
+              color: colorScheme.backgroundElevated2,
+              border: Border.all(
+                color: colorScheme.strokeFaint,
+                width: 0.5,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: Icon(
+                    Icons.calendar_today_outlined,
+                    color: colorScheme.textBase,
+                  ),
+                  title: Text(
+                    date,
+                    style: TextStyle(
+                      color: colorScheme.textBase,
+                      fontSize: 16,
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: colorScheme.strokeMuted,
+                  ),
+                  onTap: () => onPressedDate(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Divider(
+                    color: colorScheme.blurStrokeFaint,
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.access_time_outlined,
+                    color: colorScheme.textBase,
+                  ),
+                  title: Text(
+                    time,
+                    style: TextStyle(
+                      color: colorScheme.textBase,
+                      fontSize: 16,
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: colorScheme.strokeMuted,
+                  ),
+                  onTap: () => onPressedTime(),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
