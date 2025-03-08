@@ -62,7 +62,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
     }
 
     late DateTime? dateWithTimeResult;
-    if (_showAmPmTimePicker(locale)) {
+    if (showAmPmTimePicker(locale)) {
       dateWithTimeResult = await DatePickerBdaya.showTime12hPicker(
         context,
         showTitleActions: true,
@@ -88,39 +88,6 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
         widget.file.creationTime = dateWithTimeResult.microsecondsSinceEpoch;
         setState(() {});
       }
-    }
-  }
-
-  bool _showAmPmTimePicker(Locale locale) {
-    return locale.languageCode == "en" ||
-        locale.languageCode == "es" ||
-        locale.languageCode == "pt";
-  }
-
-  LocaleType getFromLocalString(Locale locale) {
-    switch (locale.languageCode) {
-      case "en":
-        return LocaleType.en;
-      case "es":
-        return LocaleType.es;
-      case "de":
-        return LocaleType.de;
-      case "fr":
-        return LocaleType.fr;
-      case "it":
-        return LocaleType.it;
-      case "nl":
-        return LocaleType.nl;
-      case "pt":
-        return LocaleType.pt;
-      case "ru":
-        return LocaleType.ru;
-      case "tr":
-        return LocaleType.tr;
-      case "zh":
-        return LocaleType.zh;
-      default:
-        return LocaleType.en;
     }
   }
 }
