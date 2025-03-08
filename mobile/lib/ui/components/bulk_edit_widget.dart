@@ -4,7 +4,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
-class BulkEditDateBottomSheet extends StatelessWidget {
+class BulkEditDateBottomSheet extends StatefulWidget {
   final Iterable<EnteFile> enteFiles;
 
   const BulkEditDateBottomSheet({
@@ -13,17 +13,28 @@ class BulkEditDateBottomSheet extends StatelessWidget {
   });
 
   @override
+  State<BulkEditDateBottomSheet> createState() =>
+      _BulkEditDateBottomSheetState();
+}
+
+class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
+  // Single date or shift date
+  bool showSingleOrShiftChoice = true;
+  bool singleSelected = true;
+
+  @override
   Widget build(BuildContext context) {
-    final photoCount = enteFiles.length;
+    final photoCount = widget.enteFiles.length;
     if (photoCount == 0) {
       return const SizedBox.shrink();
     }
     final colorScheme = getEnteColorScheme(context);
-    final firstFileTime =
-        DateTime.fromMicrosecondsSinceEpoch(enteFiles.first.creationTime!);
+    final firstFileTime = DateTime.fromMicrosecondsSinceEpoch(
+      widget.enteFiles.first.creationTime!,
+    );
     DateTime startDate = firstFileTime;
     DateTime endDate = firstFileTime;
-    for (final file in enteFiles) {
+    for (final file in widget.enteFiles) {
       if (file.creationTime == null) {
         continue;
       }
@@ -48,18 +59,23 @@ class BulkEditDateBottomSheet extends StatelessWidget {
         children: [
           // Photo count and date range section
           PhotoDateHeaderWidget(
-            enteFiles: enteFiles,
+            enteFiles: widget.enteFiles,
             startDate: startDate,
             endDate: endDate,
           ),
-          SelectDateOrShiftWidget(
-            onSelectOneDate: () {
-              Navigator.pop(context);
-            },
-            onShiftDates: () {
-              Navigator.pop(context);
-            },
-          ),
+          if (showSingleOrShiftChoice)
+            SelectDateOrShiftWidget(
+              onSelectOneDate: () {
+                showSingleOrShiftChoice = false;
+                singleSelected = true;
+                setState(() {});
+              },
+              onShiftDates: () {
+                showSingleOrShiftChoice = false;
+                singleSelected = false;
+                setState(() {});
+              },
+            ),
 
           // Bottom indicator line
           const SizedBox(height: 48),
