@@ -406,16 +406,8 @@ class _FileSelectionActionsWidgetState
           await showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            builder: (context) => PhotoDateSelectionBottomSheet(
+            builder: (context) => BulkEditDateBottomSheet(
               enteFiles: widget.selectedFiles.files,
-              onSelectOneDate: (selected) {
-                Navigator.pop(context);
-                // Handle select one date action
-              },
-              onShiftDates: (selected) {
-                Navigator.pop(context);
-                // Handle shift dates action
-              },
             ),
           );
         },
