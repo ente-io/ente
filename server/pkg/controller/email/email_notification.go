@@ -42,6 +42,10 @@ const (
 
 	LoginSuccessSubject  = "New login to your Ente account"
 	LoginSuccessTemplate = "on_login.html"
+
+	FamilyNudgeEmailTemplate = "family_nudge.html"
+	FamilyNudgeSubject       = "Invite your Family!"
+	FamilyNudgeTemplateID    = "family_nudge"
 )
 
 type EmailNotificationController struct {
@@ -221,10 +225,6 @@ func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 		if end > totalSubUsers {
 			end = totalSubUsers
 		}
-		if i > end {
-			break
-		}
-
 		batchUsers := subscribedUsers[i:end]
 		logrus.Println(batchUsers)
 		for _, user := range batchUsers {
@@ -241,12 +241,24 @@ func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 			timeSinceCreation := t.Since(creationTime)
 
 			if timeSinceCreation >= thirtyDays {
-				go func(userEmails []string) {
-					err := email.SendTemplatedEmail(userEmails, "team@ente.io", "team@ente.io", SubscriptionCancelledSubject, SubscriptionCancelledTemplate, nil, nil)
-					if err != nil {
-						log.Error("Failed to send family nudge email: ", err)
-					}
-				}([]string{user.Email})
+				lastNudgeSent, err := c.NotificationHistoryRepo.GetLastNotificationTime(user.ID, FilesCollectedTemplateID)
+				if err != nil {
+					log.Error("Failed to set Notification History")
+				}
+
+				if lastNudgeSent == 0 {
+					go func(userEmails []string) {
+						err := email.SendTemplatedEmail(userEmails, "team@ente.io", "team@ente.io", SubscriptionCancelledSubject, SubscriptionCancelledTemplate, nil, nil)
+						if err != nil {
+							log.Error("Failed to send family nudge email: ", err)
+						} else {
+							err := c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FilesCollectedTemplateID)
+							if err != nil {
+								log.Error("Failed to set Family Nudge Notification History")
+							}
+						}
+					}([]string{user.Email})
+				}
 			}
 		}
 	}
