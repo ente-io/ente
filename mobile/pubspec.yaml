@@ -85,7 +85,7 @@ dependencies:
   flutter_email_sender: ^7.0.0
   flutter_image_compress: ^2.4.0
   flutter_inappwebview: ^6.1.4
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.3
   flutter_local_notifications: ^17.2.2
   flutter_localizations:
     sdk: flutter
