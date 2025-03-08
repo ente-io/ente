@@ -1,0 +1,7 @@
+flutter_launcher_icons:
+  android: "icon_green"
+  ios: "IconGreen"
+  remove_alpha_ios: true
+  image_path: "assets/launcher_icon/icon-green.png"
+  # image_path: "assets/launcher_icon/icon-dark.png"
+  # image_path: "assets/launcher_icon/icon-light.png"
