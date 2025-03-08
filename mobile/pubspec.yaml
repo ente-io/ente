@@ -85,7 +85,7 @@ dependencies:
   flutter_email_sender: ^7.0.0
   flutter_image_compress: ^2.4.0
   flutter_inappwebview: ^6.1.4
-  flutter_launcher_icons: ^0.14.3
+  flutter_launcher_icons: ^0.13.1
   flutter_local_notifications: ^17.2.2
   flutter_localizations:
     sdk: flutter
@@ -269,11 +269,20 @@ dev_dependencies:
   test: ^1.22.0
 
 flutter_icons:
-  android: "launcher_icon"
   adaptive_icon_foreground: "assets/launcher_icon/ente-icon-foreground.png"
   adaptive_icon_background: "#ffffff"
-  ios: true
-  image_path: "assets/icon-light.png"
+
+  # android: "icon_green"
+  # ios: "IconGreen"
+  # image_path: "assets/launcher_icon/icon-green.png"
+
+  # android: "icon_dark"
+  # ios: "IconDark"
+  # image_path: "assets/launcher_icon/icon-dark.png"
+  
+  android: "icon_light"
+  ios: "IconLight"
+  image_path: "assets/launcher_icon/icon-light.png"
 
 flutter_native_splash:
   color: "#ffffff"

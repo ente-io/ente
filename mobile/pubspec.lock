@@ -925,10 +925,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_launcher_icons
-      sha256: bfa04787c85d80ecb3f8777bde5fc10c3de809240c48fa061a2c2bf15ea5211c
+      sha256: "526faf84284b86a4cb36d20a5e45147747b7563d921373d4ee0559c54fcdbcea"
       url: "https://pub.dev"
     source: hosted
-    version: "0.14.3"
+    version: "0.13.1"
   flutter_lints:
     dependency: "direct dev"
     description:

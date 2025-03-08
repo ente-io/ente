@@ -3,7 +3,7 @@
     package="io.ente.photos">
     <application android:name="${applicationName}"
         android:label="@string/app_name"
-        android:icon="@mipmap/launcher_icon"
+        android:icon="@mipmap/icon_light"
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
         android:allowBackup="false"
