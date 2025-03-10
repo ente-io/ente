@@ -756,6 +756,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.5.2"
+  flutter_app_icon_changer:
+    dependency: "direct main"
+    description:
+      name: flutter_app_icon_changer
+      sha256: f8123ea8bf9f7b5e305cf071b3cd5d28cd53606e6374fe6087ae1bd6d849a525
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1"
   flutter_cache_manager:
     dependency: "direct main"
     description:
