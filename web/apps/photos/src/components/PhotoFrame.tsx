@@ -343,33 +343,6 @@ const PhotoFrame = ({
         />
     );
 
-    /* TODO(PS):
-    const forceConvertItem = async (
-        instance: PhotoSwipe<PhotoSwipe.Options>,
-        index: number,
-        item: DisplayFile,
-    ) => {
-        updateThumbnail(instance, index, item, item.msrc, true);
-
-        try {
-            log.info(
-                `[${item.id}] new file getConvertedVideo request ${item.metadata.title}}`,
-            );
-            fetching[item.id] = true;
-
-            const srcURL = await downloadManager.renderableSourceURLs(item, {
-                forceConvert: true,
-            });
-
-            updateSource(instance, index, item, srcURL, true);
-        } catch (e) {
-            log.error("getConvertedVideo failed get src url failed", e);
-            fetching[item.id] = false;
-            // no-op
-        }
-    };
-    */
-
     return (
         <Container>
             <AutoSizer>
