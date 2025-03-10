@@ -55,7 +55,10 @@ export async function updateMagicMetadata<T>(
     }
 
     if (typeof originalMagicMetadata?.data === "string") {
-        // TODO: Is this even used?
+        // TODO: When converting this (and other parses of magic metadata) to
+        // use zod, remember to use passthrough.
+        //
+        // See: [Note: Use passthrough for metadata Zod schemas]
         // @ts-expect-error TODO: Need to use zod here.
         originalMagicMetadata.data = await cryptoWorker.decryptMetadataJSON({
             encryptedDataB64: originalMagicMetadata.data,

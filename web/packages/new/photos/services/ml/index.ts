@@ -739,11 +739,7 @@ export const addCGroup = async (name: string, cluster: FaceCluster) => {
     const masterKey = await masterKeyFromSession();
     const id = await addUserEntity(
         "cgroup",
-        {
-            name,
-            assigned: [cluster],
-            isHidden: false,
-        },
+        { name, assigned: [cluster], isHidden: false },
         masterKey,
     );
     await mlSync();
@@ -843,11 +839,7 @@ export const ignoreCluster = async (cluster: FaceCluster) => {
     const masterKey = await masterKeyFromSession();
     await addUserEntity(
         "cgroup",
-        {
-            name: "",
-            assigned: [cluster],
-            isHidden: true,
-        },
+        { name: "", assigned: [cluster], isHidden: true },
         masterKey,
     );
     return mlSync();

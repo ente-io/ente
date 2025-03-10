@@ -12,6 +12,7 @@ import { useModalVisibility } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
+import { resetFileViewerDataSourceOnClose } from "@/gallery/components/viewer/data-source";
 import { type Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
@@ -471,10 +472,7 @@ const Page: React.FC = () => {
             collectionID: activeCollectionID,
             context:
                 barMode == "people" && activePersonID
-                    ? {
-                          mode: "people" as const,
-                          personID: activePersonID,
-                      }
+                    ? { mode: "people" as const, personID: activePersonID }
                     : {
                           mode: barMode as "albums" | "hidden-albums",
                           collectionID: activeCollectionID!,
@@ -503,16 +501,10 @@ const Page: React.FC = () => {
         });
     };
 
-    const keyboardShortcutHandlerRef = useRef({
-        selectAll,
-        clearSelection,
-    });
+    const keyboardShortcutHandlerRef = useRef({ selectAll, clearSelection });
 
     useEffect(() => {
-        keyboardShortcutHandlerRef.current = {
-            selectAll,
-            clearSelection,
-        };
+        keyboardShortcutHandlerRef.current = { selectAll, clearSelection };
     }, [selectAll, clearSelection]);
 
     const showSessionExpiredDialog = useCallback(
@@ -564,11 +556,13 @@ const Page: React.FC = () => {
                     (hiddenFiles) =>
                         dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
                 );
-                if (didUpdateNormalFiles || didUpdateHiddenFiles)
-                    exportService.onLocalFilesUpdated();
                 await syncTrash(allCollections, (trashedFiles: EnteFile[]) =>
                     dispatch({ type: "setTrashedFiles", trashedFiles }),
                 );
+                if (didUpdateNormalFiles || didUpdateHiddenFiles) {
+                    exportService.onLocalFilesUpdated();
+                    resetFileViewerDataSourceOnClose();
+                }
                 // syncWithRemote is called with the force flag set to true before
                 // doing an upload. So it is possible, say when resuming a pending
                 // upload, that we get two syncWithRemotes happening in parallel.
@@ -626,8 +620,8 @@ const Page: React.FC = () => {
     };
 
     const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
-        (folderName, collectionID, isHidden) => {
-            const id = filesDownloadProgressAttributesList?.length ?? 0;
+        useCallback((folderName, collectionID, isHidden) => {
+            const id = Math.random();
             const updater: SetFilesDownloadProgressAttributes = (value) => {
                 setFilesDownloadProgressAttributesList((prev) => {
                     const attributes = prev?.find((attr) => attr.id === id);
@@ -656,7 +650,7 @@ const Page: React.FC = () => {
                 downloadDirPath: null,
             });
             return updater;
-        };
+        }, []);
 
     const collectionOpsHelper =
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
@@ -1066,6 +1060,12 @@ const Page: React.FC = () => {
                         allCollectionsNameByID={state.allCollectionsNameByID}
                         showAppDownloadBanner={
                             files.length < 30 && !isInSearchMode
+                        }
+                        isInIncomingSharedCollection={
+                            collectionSummaries.get(activeCollectionID)?.type ==
+                                "incomingShareCollaborator" ||
+                            collectionSummaries.get(activeCollectionID)?.type ==
+                                "incomingShareViewer"
                         }
                         isInHiddenSection={barMode == "hidden-albums"}
                         setFilesDownloadProgressAttributesCreator={

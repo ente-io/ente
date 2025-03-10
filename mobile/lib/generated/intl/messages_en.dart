@@ -1400,6 +1400,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseWaitForSometimeBeforeRetrying":
             MessageLookupByLibrary.simpleMessage(
                 "Please wait for sometime before retrying"),
+        "pleaseWaitThisWillTakeAWhile": MessageLookupByLibrary.simpleMessage(
+            "Please wait, this will take a while."),
         "preparingLogs":
             MessageLookupByLibrary.simpleMessage("Preparing logs..."),
         "preserveMore": MessageLookupByLibrary.simpleMessage("Preserve more"),
@@ -2031,7 +2033,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Your verification code has expired"),
         "youveNoDuplicateFilesThatCanBeCleared":
             MessageLookupByLibrary.simpleMessage(
-                "You\'ve no duplicate files that can be cleared"),
+                "You don\'t have any duplicate files that can be cleared"),
         "youveNoFilesInThisAlbumThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage(
                 "You\'ve no files in this album that can be deleted"),

@@ -124,8 +124,8 @@ export default function PublicCollectionGallery() {
     ] = useState<FilesDownloadProgressAttributes[]>([]);
 
     const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
-        (folderName, collectionID, isHidden) => {
-            const id = filesDownloadProgressAttributesList?.length ?? 0;
+        useCallback((folderName, collectionID, isHidden) => {
+            const id = Math.random();
             const updater: SetFilesDownloadProgressAttributes = (value) => {
                 setFilesDownloadProgressAttributesList((prev) => {
                     const attributes = prev?.find((attr) => attr.id === id);
@@ -154,7 +154,7 @@ export default function PublicCollectionGallery() {
                 downloadDirPath: null,
             });
             return updater;
-        };
+        }, []);
 
     const onAddPhotos = useMemo(() => {
         return publicCollection?.publicURLs?.[0]?.enableCollect
@@ -194,9 +194,7 @@ export default function PublicCollectionGallery() {
                     search: currentURL.search,
                     hash: currentURL.hash,
                 },
-                {
-                    shallow: true,
-                },
+                { shallow: true },
             );
         }
         const main = async () => {
@@ -538,9 +536,7 @@ export default function PublicCollectionGallery() {
                     closeUploadTypeSelector={closeUploadTypeSelectorView}
                     showSessionExpiredMessage={showPublicLinkExpiredMessage}
                     uploadTypeSelectorIntent="collect"
-                    {...{
-                        dragAndDropFiles,
-                    }}
+                    {...{ dragAndDropFiles }}
                 />
                 <FilesDownloadProgress
                     attributesList={filesDownloadProgressAttributesList}
@@ -555,9 +551,7 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
     // Remove the excess space at the top.
     svg: { verticalAlign: "middle" },
     color: theme.vars.palette.text.base,
-    ":hover": {
-        color: theme.vars.palette.accent.main,
-    },
+    ":hover": { color: theme.vars.palette.accent.main },
 }));
 
 const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {

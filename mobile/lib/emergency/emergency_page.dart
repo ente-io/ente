@@ -23,9 +23,9 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/notification_widget.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/toast_util.dart";
 
 class EmergencyPage extends StatefulWidget {
   const EmergencyPage({

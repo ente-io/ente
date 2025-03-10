@@ -247,12 +247,7 @@ const registerPrivilegedSchemes = () => {
                 corsEnabled: true,
             },
         },
-        {
-            scheme: "stream",
-            privileges: {
-                supportFetchAPI: true,
-            },
-        },
+        { scheme: "stream", privileges: { supportFetchAPI: true } },
     ]);
 };
 

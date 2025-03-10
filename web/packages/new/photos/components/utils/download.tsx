@@ -8,10 +8,7 @@ import { t } from "i18next";
 export const downloadAppDialogAttributes = (): MiniDialogAttributes => ({
     title: t("download_app"),
     message: t("download_app_message"),
-    continue: {
-        text: t("download"),
-        action: downloadApp,
-    },
+    continue: { text: t("download"), action: downloadApp },
 });
 
 const downloadApp = () => openURL("https://ente.io/download/desktop");
@@ -39,10 +36,7 @@ export const updateAvailableForDownloadDialogAttributes = ({
     title: t("update_available"),
     message: t("update_available_message"),
     icon: <AutoAwesomeOutlinedIcon />,
-    continue: {
-        text: t("download_and_install"),
-        action: downloadApp,
-    },
+    continue: { text: t("download_and_install"), action: downloadApp },
     cancel: {
         text: t("ignore_this_version"),
         action: () => ensureElectron().skipAppUpdate(version),

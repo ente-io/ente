@@ -723,14 +723,8 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
                     "aria-labelledby": "collection-files-sort",
                 },
             }}
-            anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-            }}
-            transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-            }}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
         >
             <OverflowMenuOption onClick={handleDescClick}>
                 {t("newest_first")}

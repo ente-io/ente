@@ -238,9 +238,7 @@ const FeedbackInput: React.FC<FeedbackInputProps> = ({
                 borderRadius: "8px",
                 padding: "12px",
                 ".MuiInputBase-formControl": {
-                    "::before, ::after": {
-                        borderBottom: "none !important",
-                    },
+                    "::before, ::after": { borderBottom: "none !important" },
                 },
             }}
         />

@@ -10,7 +10,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/ui/common/gradient_button.dart';
-import 'package:photos/utils/toast_util.dart';
+import 'package:photos/ui/notification/toast.dart';
 import "package:share_plus/share_plus.dart";
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 

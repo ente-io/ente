@@ -6,8 +6,8 @@ import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
-import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/magic_util.dart";
+import "package:photos/utils/standalone/date_time.dart";
 
 class CreationTimeItem extends StatefulWidget {
   final EnteFile file;

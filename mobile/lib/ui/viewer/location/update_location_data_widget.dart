@@ -13,7 +13,7 @@ import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/map/map_button.dart";
 import "package:photos/ui/map/tile/layers.dart";
-import "package:photos/utils/toast_util.dart";
+import "package:photos/ui/notification/toast.dart";
 
 class UpdateLocationDataWidget extends StatefulWidget {
   final List<EnteFile> files;

@@ -171,12 +171,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
         const offsetX = (parentBounds.width - canvasBounds.width) / 2;
         const offsetY = (parentBounds.height - canvasBounds.height) / 2;
 
-        return {
-            offsetY,
-            offsetX,
-            canvasBounds,
-            parentBounds,
-        };
+        return { offsetY, offsetX, canvasBounds, parentBounds };
     };
 
     const handleDragStart: React.MouseEventHandler = (e) => {
@@ -233,11 +228,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                     canvasBounds.height - prev.y + offsetY,
                 );
 
-                return {
-                    ...prev,
-                    width: newWidth,
-                    height: newHeight,
-                };
+                return { ...prev, width: newWidth, height: newHeight };
             });
         } else {
             setCropBox((prev) => {
@@ -254,11 +245,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                     Math.min(newY, offsetY + canvasBounds.height - prev.height),
                 );
 
-                return {
-                    ...prev,
-                    x: newX,
-                    y: newY,
-                };
+                return { ...prev, x: newX, y: newY };
             });
             setStartX(e.pageX);
             setStartY(e.pageY);
@@ -543,13 +530,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
             }}
             open
         >
-            <Box
-                sx={{
-                    padding: "1rem",
-                    width: "100%",
-                    height: "100%",
-                }}
-            >
+            <Box sx={{ padding: "1rem", width: "100%", height: "100%" }}>
                 <Stack
                     direction="row"
                     sx={{
@@ -618,9 +599,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                             />
                             <canvas
                                 ref={originalSizeCanvasRef}
-                                style={{
-                                    display: "none",
-                                }}
+                                style={{ display: "none" }}
                             />
 
                             {currentTab === "crop" && (
@@ -665,10 +644,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                 </Stack>
                 <Stack
                     direction="row"
-                    sx={{
-                        gap: "0.5rem",
-                        marginBottom: "1rem",
-                    }}
+                    sx={{ gap: "0.5rem", marginBottom: "1rem" }}
                 >
                     <Tabs
                         value={currentTab}
@@ -750,11 +726,7 @@ const confirmEditorCloseDialogAttributes = (
 ): MiniDialogAttributes => ({
     title: t("confirm_editor_close"),
     message: t("confirm_editor_close_message"),
-    continue: {
-        text: t("close"),
-        color: "critical",
-        action: onConfirm,
-    },
+    continue: { text: t("close"), color: "critical", action: onConfirm },
 });
 
 /**
@@ -932,12 +904,7 @@ const getCropRegionArgs = (
     const x2 = x1 + cropBoxRect.width * displayScale;
     const y2 = y1 + cropBoxRect.height * displayScale;
 
-    return {
-        x1,
-        x2,
-        y1,
-        y2,
-    };
+    return { x1, x2, y1, y2 };
 };
 
 interface FreehandCropRegionProps {
@@ -1052,21 +1019,9 @@ const CropOverlayRegionTemplate = styled("div")({
 });
 
 const presetAspectRatios = [
-    {
-        width: 16,
-        height: 9,
-        icon: <CropSquareIcon />,
-    },
-    {
-        width: 3,
-        height: 2,
-        icon: <Crop32Icon />,
-    },
-    {
-        width: 16,
-        height: 10,
-        icon: <Crop169Icon />,
-    },
+    { width: 16, height: 9, icon: <CropSquareIcon /> },
+    { width: 3, height: 2, icon: <Crop32Icon /> },
+    { width: 16, height: 10, icon: <Crop169Icon /> },
 ];
 
 const TransformMenu: React.FC<CommonMenuProps> = ({
@@ -1355,12 +1310,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                 step={10}
                 valueLabelDisplay="auto"
                 value={props.brightness}
-                marks={[
-                    {
-                        value: 100,
-                        label: "100%",
-                    },
-                ]}
+                marks={[{ value: 100, label: "100%" }]}
                 onChange={(_, value) => {
                     props.setBrightness(value as number);
                 }}
@@ -1376,12 +1326,7 @@ const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
                 onChange={(_, value) => {
                     props.setContrast(value as number);
                 }}
-                marks={[
-                    {
-                        value: 100,
-                        label: "100%",
-                    },
-                ]}
+                marks={[{ value: 100, label: "100%" }]}
             />
             <RowButtonGroupTitle>{t("blur")}</RowButtonGroupTitle>
             <Slider

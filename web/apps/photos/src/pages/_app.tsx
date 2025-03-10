@@ -49,10 +49,8 @@ import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 
 import "photoswipe/dist/photoswipe.css";
-// TODO(PS): Note, auto hide only works with the new CSS.
-// import "../../../../packages/gallery/components/viewer/ps5/dist/photoswipe.css";
-
 import "styles/global.css";
+import "styles/photoswipe.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();

@@ -1,19 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-
-// TODO(PS): WIP gallery using upstream photoswipe
-//
-// Needs (not committed yet):
-// yarn workspace gallery add photoswipe@^5.4.4
-// mv node_modules/photoswipe packages/new/photos/components/ps5
-
-if (process.env.NEXT_PUBLIC_ENTE_WIP_PS5) {
-    console.warn("Using WIP upstream photoswipe");
-} else {
-    throw new Error("Whoa");
-}
+// TODO(PS): ^
 
 import { isDesktop } from "@/base/app";
+import { SpacedRow } from "@/base/components/containers";
+import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
@@ -29,22 +21,100 @@ import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
+import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewerComponents";
 import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "@/new/photos/components/ImageEditorOverlay";
-import { Button, Menu, MenuItem, styled } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fileInfoExifForFile } from "./data-source";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
+import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
+import {
+    Box,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    Menu,
+    MenuItem,
+    styled,
+    Typography,
+} from "@mui/material";
+import { t } from "i18next";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import {
+    fileInfoExifForFile,
+    updateItemDataAlt,
+    type ItemData,
+} from "./data-source";
 import {
     FileViewerPhotoSwipe,
     moreButtonID,
     moreMenuID,
     resetMoreMenuButtonOnMenuClose,
-    type FileViewerAnnotatedFile,
-    type FileViewerFileAnnotation,
     type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
+
+/**
+ * Derived data for a file that is needed to display the file viewer controls
+ * etc associated with the file.
+ *
+ * This is recomputed on-demand each time the slide changes.
+ */
+export interface FileViewerFileAnnotation {
+    /**
+     * The id of the file whose annotation this is.
+     */
+    fileID: number;
+    /**
+     * `true` if this file is owned by the logged in user (if any).
+     */
+    isOwnFile: boolean;
+    /**
+     * `true` if the toggle favorite action should be shown for this file.
+     */
+    showFavorite: boolean;
+    /**
+     * Set if the download action should be shown for this file.
+     *
+     * - When "bar", the action button is shown among the bar icons.
+     *
+     * - When "menu", the action is shown as a more menu entry.
+     *
+     * Note: "bar" should only be set if {@link haveUser} is also true.
+     */
+    showDownload: "bar" | "menu" | undefined;
+    /**
+     * `true` if the delete action should be shown for this file.
+     */
+    showDelete: boolean;
+    /**
+     * `true` if the copy image action should be shown for this file.
+     */
+    showCopyImage: boolean;
+    /**
+     * `true` if this is an image which can be edited, _and_ editing is
+     * possible, and the edit action should therefore be shown for this file.
+     */
+    showEditImage: boolean;
+}
+
+/**
+ * A file, its annotation, and its item data, in a nice cosy box.
+ */
+export interface FileViewerAnnotatedFile {
+    file: EnteFile;
+    annotation: FileViewerFileAnnotation;
+    itemData: ItemData;
+}
 
 export type FileViewerProps = ModalVisibilityProps & {
     /**
@@ -80,6 +150,14 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     initialIndex: number;
     /**
+     * If true then the viewer does not show controls for downloading the file.
+     */
+    disableDownload?: boolean;
+    /**
+     * `true` when we are viewing files in an album that the user does not own.
+     */
+    isInIncomingSharedCollection?: boolean;
+    /**
      * `true` when we are viewing files in the Trash.
      */
     isInTrashSection?: boolean;
@@ -87,10 +165,6 @@ export type FileViewerProps = ModalVisibilityProps & {
      * `true` when we are viewing files in the hidden section.
      */
     isInHiddenSection?: boolean;
-    /**
-     * If true then the viewer does not show controls for downloading the file.
-     */
-    disableDownload?: boolean;
     /**
      * File IDs of all the files that the user has marked as a favorite.
      *
@@ -121,8 +195,26 @@ export type FileViewerProps = ModalVisibilityProps & {
      * in the file actions.
      *
      * See also {@link favoriteFileIDs}.
+     *
+     * See also: [Note: File viewer update and dispatch]
      */
     onToggleFavorite?: (file: EnteFile) => Promise<void>;
+    /**
+     * Called when the given {@link file} should be downloaded.
+     *
+     * If this is not provided then the download action will not be shown.
+     *
+     * See also: [Note: File viewer update and dispatch]
+     */
+    onDownload?: (file: EnteFile) => void;
+    /**
+     * Called when the given {@link file} should be deleted.
+     *
+     * If this is not provided then the delete action will not be shown.
+     *
+     * See also: [Note: File viewer update and dispatch]
+     */
+    onDelete?: (file: EnteFile) => Promise<void>;
     /**
      * Called when the user edits an image in the image editor and asks us to
      * save their edits as a copy.
@@ -144,20 +236,23 @@ export type FileViewerProps = ModalVisibilityProps & {
 /**
  * A PhotoSwipe based image and video viewer.
  */
-const FileViewer: React.FC<FileViewerProps> = ({
+export const FileViewer: React.FC<FileViewerProps> = ({
     open,
     onClose,
     user,
     files,
     initialIndex,
+    disableDownload,
+    isInIncomingSharedCollection,
     isInTrashSection,
     isInHiddenSection,
-    disableDownload,
     favoriteFileIDs,
     fileCollectionIDs,
     allCollectionsNameByID,
     onTriggerSyncWithRemote,
     onToggleFavorite,
+    onDownload,
+    onDelete,
     onSelectCollection,
     onSelectPerson,
     onSaveEditedImageCopy,
@@ -207,27 +302,54 @@ const FileViewer: React.FC<FileViewerProps> = ({
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
+    const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+    const [openShortcuts, setOpenShortcuts] = useState(false);
+
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    // Callbacks to be invoked (only once) the next time we get an update to the
+    // `files` or `favoriteFileIDs` props.
+    //
+    // The callback is passed the latest values of the `files` prop.
+    //
+    // Both of those trace their way back to the same reducer, so they get
+    // updated in tandem. When we delete files, only the `files` prop gets
+    // updated, while when we toggle favoriets, only the `favoriteFileIDs` prop
+    // gets updated.
+    const [, setOnNextFilesOrFavoritesUpdate] = useState<
+        ((files: EnteFile[]) => void)[]
+    >([]);
 
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
 
+    /**
+     * Add a callback to be fired (only once) the next time we get an update to
+     * the `files` prop.
+     */
+    const awaitNextFilesOrFavoritesUpdate = useCallback(
+        (cb: (files: EnteFile[]) => void) =>
+            setOnNextFilesOrFavoritesUpdate((cbs) => cbs.concat(cb)),
+        [],
+    );
+
     const handleClose = useCallback(() => {
         setNeedsSync((needSync) => {
-            console.log("needs sync", needSync);
             if (needSync) onTriggerSyncWithRemote?.();
             return false;
         });
         setOpenFileInfo(false);
-        setOpenImageEditor(false);
         // No need to `resetMoreMenuButtonOnMenuClose` since we're closing
         // anyway and it'll be removed from the DOM.
         setMoreMenuAnchorEl(null);
+        setOpenImageEditor(false);
+        setOpenConfirmDelete(false);
+        setOpenShortcuts(false);
         onClose();
     }, [onTriggerSyncWithRemote, onClose]);
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
-            setActiveAnnotatedFile(annotatedFile);
             setActiveFileExif(
                 fileInfoExifForFile(annotatedFile.file, (exif) =>
                     setActiveFileExif(exif),
@@ -240,32 +362,103 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleFileInfoClose = useCallback(() => setOpenFileInfo(false), []);
 
-    const handleMore = useCallback(
-        (
-            annotatedFile: FileViewerAnnotatedFile,
-            buttonElement: HTMLElement,
-        ) => {
-            setActiveAnnotatedFile(annotatedFile);
-            setMoreMenuAnchorEl(buttonElement);
+    // Callback invoked when the download action is triggered by activating the
+    // download button in the PhotoSwipe bar.
+    const handleDownloadBarAction = useCallback(
+        (annotatedFile: FileViewerAnnotatedFile) => {
+            onDownload!(annotatedFile.file);
         },
+        [onDownload],
+    );
+
+    // Callback invoked when the download action is triggered by activating the
+    // download menu item in the more menu.
+    //
+    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
+    const handleDownloadMenuAction = () => {
+        handleMoreMenuCloseIfNeeded();
+        onDownload!(activeAnnotatedFile!.file);
+    };
+
+    const handleMore = useCallback(
+        (buttonElement: HTMLElement) => setMoreMenuAnchorEl(buttonElement),
         [],
     );
 
-    const handleMoreMenuClose = useCallback(() => {
+    const handleMoreMenuCloseIfNeeded = useCallback(() => {
         setMoreMenuAnchorEl((el) => {
-            resetMoreMenuButtonOnMenuClose(el);
+            if (el) resetMoreMenuButtonOnMenuClose(el);
             return null;
         });
     }, []);
 
+    const handleConfirmDelete = useMemo(() => {
+        return onDelete
+            ? () => {
+                  handleMoreMenuCloseIfNeeded();
+                  setOpenConfirmDelete(true);
+              }
+            : undefined;
+    }, [onDelete, handleMoreMenuCloseIfNeeded]);
+
+    const handleConfirmDeleteClose = useCallback(
+        () => setOpenConfirmDelete(false),
+        [],
+    );
+
+    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
+    const handleDelete = async () => {
+        const file = activeAnnotatedFile!.file;
+        await onDelete(file);
+        // [Note: File viewer update and dispatch]
+        //
+        // This relies on the assumption that `onDelete` will asynchronously
+        // result in updates to the `files` prop. Currently that indeed is what
+        // happens as the last call in the `onDelete` implementation is a call
+        // to a dispatcher, but we need to be careful about preserving this
+        // assumption when changing `onDelete` implementation in the future.
+        awaitNextFilesOrFavoritesUpdate((files: EnteFile[]) => {
+            handleNeedsRemoteSync();
+            if (files.length) {
+                // Refreshing the current slide after the current file has gone
+                // will show the subsequent slide (since that would've now moved
+                // down to the current index).
+                //
+                // However, we might've been the last slide, in which case we
+                // need to go back one slide first. To determine this, also pass
+                // the expected count of files to our PhotoSwipe wrapper.
+                psRef.current!.refreshCurrentSlideContent(files.length);
+            } else {
+                // If there are no more files left, close the viewer.
+                handleClose();
+            }
+        });
+    };
+
+    // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
+    const handleCopyImage = useCallback(() => {
+        handleMoreMenuCloseIfNeeded();
+        const imageURL = activeAnnotatedFile?.itemData.imageURL;
+        // Safari does not copy if we do not call `navigator.clipboard.write`
+        // synchronously within the click event handler, but it does supports
+        // passing a promise in lieu of the blob.
+        void window.navigator.clipboard
+            .write([
+                new ClipboardItem({
+                    "image/png": createImagePNGBlob(imageURL!),
+                }),
+            ])
+            .catch(onGenericError);
+    }, [onGenericError, handleMoreMenuCloseIfNeeded, activeAnnotatedFile]);
+
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
             ? () => {
-                  handleMoreMenuClose();
+                  handleMoreMenuCloseIfNeeded();
                   setOpenImageEditor(true);
               }
             : undefined;
-    }, [onSaveEditedImageCopy, handleMoreMenuClose]);
+    }, [onSaveEditedImageCopy, handleMoreMenuCloseIfNeeded]);
 
     const handleImageEditorClose = useCallback(
         () => setOpenImageEditor(false),
@@ -281,23 +474,74 @@ const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const handleAnnotate = useCallback(
-        (file: EnteFile): FileViewerFileAnnotation => {
-            log.debug(() => ["viewer", { action: "annotate", file }]);
+        (file: EnteFile, itemData: ItemData): FileViewerAnnotatedFile => {
             const fileID = file.id;
             const isOwnFile = file.ownerID == user?.id;
+
             const canModify =
                 isOwnFile && !isInTrashSection && !isInHiddenSection;
+
             const showFavorite = canModify;
-            const isEditableImage =
-                handleEditImage && canModify
-                    ? fileIsEditableImage(file)
-                    : undefined;
-            return { fileID, isOwnFile, showFavorite, isEditableImage };
+
+            const showDelete =
+                !!handleConfirmDelete &&
+                isOwnFile &&
+                !isInTrashSection &&
+                !isInIncomingSharedCollection;
+
+            const showEditImage =
+                !!handleEditImage && canModify && fileIsEditableImage(file);
+
+            const showDownload = (() => {
+                if (disableDownload) return undefined;
+                if (!onDownload) return undefined;
+                if (user) {
+                    // Logged in users see the download option in the more menu.
+                    return "menu";
+                } else {
+                    // In public albums, the download option is shown in the bar
+                    // buttons, in lieu of the favorite option.
+                    return "bar";
+                }
+            })();
+
+            const showCopyImage = (() => {
+                switch (file.metadata.fileType) {
+                    case FileType.image:
+                    case FileType.livePhoto:
+                        return true;
+                    default:
+                        return false;
+                }
+            })();
+
+            const annotation: FileViewerFileAnnotation = {
+                fileID,
+                isOwnFile,
+                showFavorite,
+                showDownload,
+                showDelete,
+                showCopyImage,
+                showEditImage,
+            };
+
+            const annotatedFile = { file, annotation, itemData };
+            setActiveAnnotatedFile(annotatedFile);
+            return annotatedFile;
         },
-        [user, isInTrashSection, isInHiddenSection, handleEditImage],
+        [
+            user,
+            disableDownload,
+            isInIncomingSharedCollection,
+            isInTrashSection,
+            isInHiddenSection,
+            onDownload,
+            handleEditImage,
+            handleConfirmDelete,
+        ],
     );
 
-    const handleScheduleUpdate = useCallback(() => setNeedsSync(true), []);
+    const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
 
     const handleSelectCollection = useCallback(
         (collectionID: number) => {
@@ -331,16 +575,109 @@ const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const toggleFavorite = useCallback(
-        ({ file }: FileViewerAnnotatedFile) =>
-            onToggleFavorite!(file)
-                .then(handleScheduleUpdate)
-                .catch(onGenericError),
-        [onToggleFavorite, handleScheduleUpdate, onGenericError],
+        ({ file }: FileViewerAnnotatedFile) => {
+            return new Promise((resolve) => {
+                // See: [Note: File viewer update and dispatch]
+                onToggleFavorite!(file)
+                    .then(
+                        () => awaitNextFilesOrFavoritesUpdate(resolve),
+                        (e: unknown) => {
+                            onGenericError(e);
+                            resolve();
+                        },
+                    )
+                    .finally(handleNeedsRemoteSync);
+            });
+        },
+        [
+            onToggleFavorite,
+            onGenericError,
+            awaitNextFilesOrFavoritesUpdate,
+            handleNeedsRemoteSync,
+        ],
+    );
+
+    const updateFullscreenStatus = useCallback(() => {
+        setIsFullscreen(!!document.fullscreenElement);
+    }, []);
+
+    const handleToggleFullscreen = useCallback(() => {
+        handleMoreMenuCloseIfNeeded();
+        void (
+            document.fullscreenElement
+                ? document.exitFullscreen()
+                : document.body.requestFullscreen()
+        ).then(updateFullscreenStatus);
+    }, [handleMoreMenuCloseIfNeeded, updateFullscreenStatus]);
+
+    const handleShortcuts = useCallback(() => {
+        handleMoreMenuCloseIfNeeded();
+        setOpenShortcuts(true);
+    }, [handleMoreMenuCloseIfNeeded]);
+
+    const handleShortcutsClose = useCallback(() => setOpenShortcuts(false), []);
+
+    const shouldIgnoreKeyboardEvent = useCallback(() => {
+        // Don't handle keydowns if any of the modals are open.
+        return (
+            openFileInfo ||
+            !!moreMenuAnchorEl ||
+            openImageEditor ||
+            openConfirmDelete ||
+            openShortcuts
+        );
+    }, [
+        openFileInfo,
+        moreMenuAnchorEl,
+        openImageEditor,
+        openConfirmDelete,
+        openShortcuts,
+    ]);
+
+    const canCopyImage = useCallback(
+        () =>
+            activeAnnotatedFile?.annotation.showCopyImage &&
+            activeAnnotatedFile.itemData.imageURL,
+        [activeAnnotatedFile],
+    );
+
+    const performKeyAction = useCallback(
+        (action): FileViewerPhotoSwipeDelegate["performKeyAction"] => {
+            switch (action) {
+                case "delete":
+                    if (activeAnnotatedFile?.annotation.showDelete)
+                        handleConfirmDelete?.();
+                    break;
+                case "copy":
+                    if (canCopyImage()) handleCopyImage();
+                    break;
+                case "toggle-fullscreen":
+                    handleToggleFullscreen();
+                    break;
+                case "help":
+                    handleShortcuts();
+                    break;
+            }
+        },
+        [
+            handleConfirmDelete,
+            handleCopyImage,
+            handleToggleFullscreen,
+            handleShortcuts,
+            activeAnnotatedFile,
+            canCopyImage,
+        ],
     );
 
     // Initial value of delegate.
     if (!delegateRef.current) {
-        delegateRef.current = { getFiles, isFavorite, toggleFavorite };
+        delegateRef.current = {
+            getFiles,
+            isFavorite,
+            toggleFavorite,
+            shouldIgnoreKeyboardEvent,
+            performKeyAction,
+        };
     }
 
     // Updates to delegate callbacks.
@@ -349,12 +686,28 @@ const FileViewer: React.FC<FileViewerProps> = ({
         delegate.getFiles = getFiles;
         delegate.isFavorite = isFavorite;
         delegate.toggleFavorite = toggleFavorite;
-    }, [getFiles, isFavorite, toggleFavorite]);
+        delegate.shouldIgnoreKeyboardEvent = shouldIgnoreKeyboardEvent;
+        delegate.performKeyAction = performKeyAction;
+    }, [
+        getFiles,
+        isFavorite,
+        toggleFavorite,
+        shouldIgnoreKeyboardEvent,
+        performKeyAction,
+    ]);
+
+    // Notify the listeners, if any, for updates to files or favorites.
+    useEffect(() => {
+        setOnNextFilesOrFavoritesUpdate((cbs) => {
+            cbs.forEach((cb) => cb(files));
+            return [];
+        });
+    }, [files, favoriteFileIDs]);
 
     useEffect(() => {
         if (open) {
             // We're open. Create psRef. This will show the file viewer dialog.
-            log.debug(() => ["viewer", { action: "open" }]);
+            log.debug(() => "Opening file viewer");
 
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
@@ -364,6 +717,7 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 onClose: handleClose,
                 onAnnotate: handleAnnotate,
                 onViewInfo: handleViewInfo,
+                onDownload: handleDownloadBarAction,
                 onMore: handleMore,
             });
 
@@ -371,11 +725,15 @@ const FileViewer: React.FC<FileViewerProps> = ({
 
             return () => {
                 // Close dialog in the effect callback.
-                log.debug(() => ["viewer", { action: "close" }]);
+                log.debug(() => "Closing file viewer");
                 pswp.closeIfNeeded();
             };
         }
     }, [
+        // Be careful with adding new dependencies here, or changing the source
+        // of existing ones. If any of these dependencies change unnecessarily,
+        // then the file viewer will start getting reloaded even when it is
+        // already open.
         open,
         onClose,
         user,
@@ -385,18 +743,19 @@ const FileViewer: React.FC<FileViewerProps> = ({
         handleClose,
         handleAnnotate,
         handleViewInfo,
+        handleDownloadBarAction,
         handleMore,
     ]);
 
-    const handleRefreshPhotoswipe = useCallback(() => {
+    const handleUpdateCaption = useCallback((updatedFile: EnteFile) => {
+        updateItemDataAlt(updatedFile);
         psRef.current!.refreshCurrentSlideContent();
     }, []);
 
-    log.debug(() => ["viewer", { action: "render", psRef: psRef.current }]);
+    useEffect(updateFullscreenStatus, [updateFullscreenStatus]);
 
     return (
-        <Container>
-            <Button>Test</Button>
+        <>
             <FileInfo
                 open={openFileInfo}
                 onClose={handleFileInfoClose}
@@ -405,47 +764,193 @@ const FileViewer: React.FC<FileViewerProps> = ({
                 allowEdits={!!activeAnnotatedFile?.annotation.isOwnFile}
                 allowMap={haveUser}
                 showCollections={haveUser}
-                scheduleUpdate={handleScheduleUpdate}
-                refreshPhotoswipe={handleRefreshPhotoswipe}
+                onNeedsRemoteSync={handleNeedsRemoteSync}
+                onUpdateCaption={handleUpdateCaption}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
                 {...{ fileCollectionIDs, allCollectionsNameByID }}
             />
-            <Menu
+            <MoreMenu
                 open={!!moreMenuAnchorEl}
-                onClose={handleMoreMenuClose}
+                onClose={handleMoreMenuCloseIfNeeded}
                 anchorEl={moreMenuAnchorEl}
                 id={moreMenuID}
-                slotProps={{
-                    list: { "aria-labelledby": moreButtonID },
-                }}
+                slotProps={{ list: { "aria-labelledby": moreButtonID } }}
             >
-                {activeAnnotatedFile?.annotation.isEditableImage && (
-                    <MenuItem onClick={handleEditImage}>
-                        {/*TODO */ pt("Edit image")}
-                    </MenuItem>
+                {activeAnnotatedFile?.annotation.showDownload == "menu" && (
+                    <MoreMenuItem onClick={handleDownloadMenuAction}>
+                        <MoreMenuItemTitle>
+                            {/*TODO */ t("download")}
+                        </MoreMenuItemTitle>
+                        <FileDownloadOutlinedIcon />
+                    </MoreMenuItem>
                 )}
-            </Menu>
+                {activeAnnotatedFile?.annotation.showDelete && (
+                    <MoreMenuItem onClick={handleConfirmDelete}>
+                        <MoreMenuItemTitle>
+                            {/*TODO */ t("delete")}
+                        </MoreMenuItemTitle>
+                        <DeleteIcon />
+                    </MoreMenuItem>
+                )}
+                {canCopyImage() && (
+                    <MoreMenuItem onClick={handleCopyImage}>
+                        <MoreMenuItemTitle>
+                            {/*TODO */ pt("Copy as PNG")}
+                        </MoreMenuItemTitle>
+                        {/* Tweak icon size to visually fit better with neighbours */}
+                        <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
+                    </MoreMenuItem>
+                )}
+                {activeAnnotatedFile?.annotation.showEditImage && (
+                    <MoreMenuItem onClick={handleEditImage}>
+                        <MoreMenuItemTitle>
+                            {/*TODO */ pt("Edit image")}
+                        </MoreMenuItemTitle>
+                        <EditIcon />
+                    </MoreMenuItem>
+                )}
+                <MoreMenuItem
+                    onClick={handleToggleFullscreen}
+                    divider
+                    sx={{
+                        borderColor: "fixed.dark.divider",
+                        /* 12px + 2px */
+                        pb: "14px",
+                    }}
+                >
+                    <MoreMenuItemTitle>
+                        {
+                            /*TODO */ isFullscreen
+                                ? pt("Exit fullscreen")
+                                : pt("Go fullscreen")
+                        }
+                    </MoreMenuItemTitle>
+                    {isFullscreen ? (
+                        <FullscreenExitOutlinedIcon />
+                    ) : (
+                        <FullscreenOutlinedIcon />
+                    )}
+                </MoreMenuItem>
+                <MoreMenuItem onClick={handleShortcuts} sx={{ mt: "2px" }}>
+                    <Typography sx={{ color: "fixed.dark.text.faint" }}>
+                        {pt("Shortcuts")}
+                    </Typography>
+                </MoreMenuItem>
+            </MoreMenu>
+            {/* TODO(PS): Fix imports */}
+            <ConfirmDeleteFileDialog
+                open={openConfirmDelete}
+                onClose={handleConfirmDeleteClose}
+                onConfirm={handleDelete}
+            />
             <ImageEditorOverlay
                 open={openImageEditor}
                 onClose={handleImageEditorClose}
                 file={activeAnnotatedFile?.file}
                 onSaveEditedCopy={handleSaveEditedCopy}
             />
-        </Container>
+            <Shortcuts open={openShortcuts} onClose={handleShortcutsClose} />
+        </>
     );
 };
 
-export default FileViewer;
-
-const Container = styled("div")`
-    border: 1px solid red;
-
-    #test-gallery {
-        border: 1px solid red;
-        min-height: 10px;
+const MoreMenu = styled(Menu)(
+    ({ theme }) => `
+    & .MuiPaper-root {
+        background-color: ${theme.vars.palette.fixed.dark.background.paper};
     }
+    & .MuiList-root {
+        padding-block: 2px;
+    }
+`,
+);
+
+const MoreMenuItem = styled(MenuItem)(
+    ({ theme }) => `
+    min-width: 210px;
+
+    /* MUI MenuItem default implementation has a minHeight of "48px" below the
+       "sm" breakpoint, and auto after it. We always want the same height, so
+       set minHeight auto and use an explicit padding always to come out to 44px
+       (20px (icon or Typography height + 12 + 12) */
+    padding-block: 12px;
+    min-height: auto;
+
+    gap: 1;
+    justify-content: space-between;
+    align-items: center;
+
+    /* Same as other controls on the PhotoSwipe UI */
+    color: rgba(255 255 255 / 0.85);
+    &:hover {
+        color: rgba(255 255 255 / 1);
+        background-color: ${theme.vars.palette.fixed.dark.background.paper2}
+    }
+
+    .MuiSvgIcon-root {
+        font-size: 20px;
+    }
+`,
+);
+
+const MoreMenuItemTitle: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <Typography sx={{ fontWeight: "medium" }}>{children}</Typography>
+);
+
+const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
+    <Dialog
+        {...{ open, onClose }}
+        fullWidth
+        fullScreen={useIsSmallWidth()}
+        slotProps={{ backdrop: { sx: { backdropFilter: "blur(30px)" } } }}
+    >
+        <SpacedRow sx={{ pt: 2, px: 2.5 }}>
+            <DialogTitle>{pt("Shortcuts")}</DialogTitle>
+            <DialogCloseIconButton {...{ onClose }} />
+        </SpacedRow>
+        <ShortcutsContent sx={{ "&&": { pt: 2, pb: 5, px: 5 } }}>
+            <Shortcut action="Close" shortcut="Esc" />
+            <Shortcut action="Previous, Next" shortcut="←, →" />
+            <Shortcut action="Zoom" shortcut="Mouse scroll, Pinch" />
+            <Shortcut action="Zoom preset" shortcut="Z, Tap inside image" />
+            <Shortcut
+                action="Toggle controls"
+                shortcut="H, Tap outside image"
+            />
+            <Shortcut action="Pan" shortcut="W A S D, Drag" />
+            <Shortcut action="Toggle live" shortcut="Space" />
+            <Shortcut action="Toggle audio" shortcut="M" />
+            <Shortcut action="Toggle favorite" shortcut="L" />
+            <Shortcut action="View info" shortcut="I" />
+            <Shortcut action="Download" shortcut="K" />
+            <Shortcut action="Delete" shortcut="Delete, Backspace" />
+            <Shortcut action="Copy as PNG" shortcut="^C / ⌘C" />
+            <Shortcut action="Toggle fullscreen" shortcut="F" />
+            <Shortcut action="Show shortcuts" shortcut="?" />
+        </ShortcutsContent>
+    </Dialog>
+);
+
+const ShortcutsContent = styled(DialogContent)`
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 `;
+
+interface ShortcutProps {
+    action: string;
+    shortcut: string;
+}
+
+const Shortcut: React.FC<ShortcutProps> = ({ action, shortcut }) => (
+    <Box sx={{ display: "flex", gap: 2 }}>
+        <Typography sx={{ color: "text.muted", minWidth: "min(20ch, 40svw)" }}>
+            {action}
+        </Typography>
+        <Typography sx={{ fontWeight: "medium" }}>{shortcut}</Typography>
+    </Box>
+);
 
 const fileIsEditableImage = (file: EnteFile) => {
     // Only images are editable.
@@ -464,3 +969,21 @@ const fileIsEditableImage = (file: EnteFile) => {
     }
     return isRenderable;
 };
+
+/**
+ * Return a promise that resolves with a "image/png" blob derived from the given
+ * {@link imageURL} that can be written to the navigator's clipboard.
+ */
+const createImagePNGBlob = async (imageURL: string) =>
+    new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = image.width;
+            canvas.height = image.height;
+            canvas.getContext("2d").drawImage(image, 0, 0);
+            canvas.toBlob(resolve, "image/png");
+        };
+        image.onerror = reject;
+        image.src = imageURL;
+    });

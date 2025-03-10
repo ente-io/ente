@@ -46,10 +46,7 @@ export interface TimeStampListItem {
     items?: EnteFile[];
     itemStartIndex?: number;
     date?: string;
-    dates?: {
-        date: string;
-        span: number;
-    }[];
+    dates?: { date: string; span: number }[];
     groups?: number[];
     item?: any;
     id?: string;
@@ -113,9 +110,7 @@ function getShrinkRatio(width: number, columns: number) {
 
 const ListContainer = styled(Box, {
     shouldForwardProp: (propName) => propName != "gridTemplateColumns",
-})<{
-    gridTemplateColumns: string;
-}>`
+})<{ gridTemplateColumns: string }>`
     display: grid;
     grid-template-columns: ${(props) => props.gridTemplateColumns};
     grid-column-gap: ${GAP_BTW_TILES}px;
@@ -154,9 +149,7 @@ const FooterContainer = styled(ListItemContainer)`
 
 const AlbumFooterContainer = styled(ListItemContainer, {
     shouldForwardProp: (propName) => propName != "hasReferral",
-})<{
-    hasReferral: boolean;
-}>`
+})<{ hasReferral: boolean }>`
     margin-top: 48px;
     margin-bottom: ${({ hasReferral }) => (!hasReferral ? `10px` : "0px")};
     text-align: center;
@@ -185,9 +178,7 @@ const NothingContainer = styled(ListItemContainer)`
 type Props = Pick<PhotoFrameProps, "mode" | "modePlus"> & {
     height: number;
     width: number;
-    displayFiles: (EnteFile & {
-        timelineDateString?: string;
-    })[];
+    displayFiles: (EnteFile & { timelineDateString?: string })[];
     showAppDownloadBanner: boolean;
     getThumbnail: (
         file: EnteFile,
@@ -217,12 +208,7 @@ const createItemData = memoize(
             timeStampListItem: TimeStampListItem,
             isScrolling?: boolean,
         ) => React.JSX.Element,
-    ): ItemData => ({
-        timeStampList,
-        columns,
-        shrinkRatio,
-        renderListItem,
-    }),
+    ): ItemData => ({ timeStampList, columns, shrinkRatio, renderListItem }),
 );
 const PhotoListRow = React.memo(
     ({

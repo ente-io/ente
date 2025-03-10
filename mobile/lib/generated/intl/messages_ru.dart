@@ -1942,9 +1942,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Ваша подписка успешно обновлена"),
         "yourVerificationCodeHasExpired": MessageLookupByLibrary.simpleMessage(
             "Срок действия вашего проверочного кода истек"),
-        "youveNoDuplicateFilesThatCanBeCleared":
-            MessageLookupByLibrary.simpleMessage(
-                "У вас нет дубликатов файлов, которые можно очистить"),
         "youveNoFilesInThisAlbumThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage(
                 "В этом альбоме нет файлов, которые можно удалить"),

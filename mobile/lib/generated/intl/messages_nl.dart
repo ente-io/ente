@@ -2115,9 +2115,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Uw abonnement is succesvol bijgewerkt"),
         "yourVerificationCodeHasExpired": MessageLookupByLibrary.simpleMessage(
             "Uw verificatiecode is verlopen"),
-        "youveNoDuplicateFilesThatCanBeCleared":
-            MessageLookupByLibrary.simpleMessage(
-                "Je hebt geen dubbele bestanden die kunnen worden gewist"),
         "youveNoFilesInThisAlbumThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage(
                 "Je hebt geen bestanden in dit album die verwijderd kunnen worden"),

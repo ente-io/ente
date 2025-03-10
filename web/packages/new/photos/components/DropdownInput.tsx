@@ -81,23 +81,17 @@ export const DropdownInput = <T extends string>({
                             whiteSpace: "normal",
                         },
                         // Make the selected item pop out by using color.
-                        "&&& > .Mui-selected": {
-                            color: "text.base",
-                        },
+                        "&&& > .Mui-selected": { color: "text.base" },
                     },
                 },
             },
         }}
         sx={{
             // Remove the border in the quiescent state.
-            ".MuiOutlinedInput-notchedOutline": {
-                borderColor: "transparent",
-            },
+            ".MuiOutlinedInput-notchedOutline": { borderColor: "transparent" },
             // Give the default appearance a background fill, similar to our
             // text inputs.
-            ".MuiSelect-select": {
-                backgroundColor: "fill.faint",
-            },
+            ".MuiSelect-select": { backgroundColor: "fill.faint" },
         }}
     >
         {options.map(({ value, label }) => (

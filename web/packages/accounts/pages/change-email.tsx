@@ -153,9 +153,7 @@ const ChangeEmailForm: React.FC = () => {
                                 autoFocus
                                 disabled={loading}
                                 slotProps={{
-                                    input: {
-                                        readOnly: ottInputVisible,
-                                    },
+                                    input: { readOnly: ottInputVisible },
                                 }}
                             />
                             {ottInputVisible && (

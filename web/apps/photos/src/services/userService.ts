@@ -16,9 +16,7 @@ export const getPublicKey = async (email: string) => {
     const resp = await HTTPService.get(
         await apiURL("/users/public-key"),
         { email },
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );
     return resp.data.publicKey;
 };
@@ -28,9 +26,7 @@ export const isTokenValid = async (token: string) => {
         const resp = await HTTPService.get(
             await apiURL("/users/session-validity/v2"),
             null,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
         try {
             if (resp.data[HAS_SET_KEYS] === undefined) {
@@ -70,9 +66,7 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
         const resp = await HTTPService.get(
             await apiURL("/users/details/v2"),
             null,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
         return resp.data;
     } catch (e) {

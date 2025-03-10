@@ -35,10 +35,7 @@ const Page: React.FC = () => {
             encryptedTwoFactorSecret,
             twoFactorSecretDecryptionNonce,
         });
-        await setLSUser({
-            ...getData(LS_KEYS.USER),
-            isTwoFactorEnabled: true,
-        });
+        await setLSUser({ ...getData(LS_KEYS.USER), isTwoFactorEnabled: true });
         await router.push(appHomeRoute);
     };
 

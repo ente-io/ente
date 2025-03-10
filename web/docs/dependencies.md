@@ -219,6 +219,9 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 
 ## Photos app specific
 
+- [PhotoSwipe](https://photoswipe.com) provides the base image viewer on top of
+  which we've built our file viewer.
+
 - [react-dropzone](https://github.com/react-dropzone/react-dropzone/) is a React
   hook to create a drag-and-drop input zone. Note that we pin to the last
   version in the 14.2 series, since if we use 14.3 onwards (I tested till

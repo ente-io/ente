@@ -148,13 +148,7 @@ export interface MiniDialogAttributes {
      * The object form allows providing both the button title and the action
      * handler (synchronous). The dialog is always closed on clicks.
      */
-    cancel?:
-        | string
-        | false
-        | {
-              text: string;
-              action: () => void;
-          };
+    cancel?: string | false | { text: string; action: () => void };
     /** The direction in which the buttons are stacked. Default is "column". */
     buttonDirection?: "row" | "column";
 }
@@ -277,11 +271,7 @@ export const AttributedMiniDialog: React.FC<
             {...{ open, sx }}
             onClose={handleClose}
             fullWidth
-            slotProps={{
-                paper: {
-                    sx: { maxWidth: "360px" },
-                },
-            }}
+            slotProps={{ paper: { sx: { maxWidth: "360px" } } }}
         >
             {(attributes.icon ?? attributes.title) ? (
                 <Stack
@@ -323,9 +313,7 @@ export const AttributedMiniDialog: React.FC<
                         component={
                             typeof attributes.message == "string" ? "p" : "div"
                         }
-                        sx={{
-                            color: "text.muted",
-                        }}
+                        sx={{ color: "text.muted" }}
                     >
                         {attributes.message}
                     </Typography>
@@ -387,9 +375,7 @@ export const TitledMiniDialog: React.FC<
         {...{ open, sx }}
         onClose={onClose}
         fullWidth
-        slotProps={{
-            paper: { sx: { maxWidth: paperMaxWidth ?? "360px" } },
-        }}
+        slotProps={{ paper: { sx: { maxWidth: paperMaxWidth ?? "360px" } } }}
     >
         <DialogTitle sx={{ "&&&": { paddingBlock: "24px 16px" } }}>
             {title}

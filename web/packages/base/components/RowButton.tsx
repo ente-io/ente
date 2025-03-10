@@ -30,10 +30,7 @@ export const RowButtonGroupTitle: React.FC<
             px: "8px",
             py: "6px",
             gap: "8px",
-            "& > svg": {
-                fontSize: "17px",
-                color: "stroke.muted",
-            },
+            "& > svg": { fontSize: "17px", color: "stroke.muted" },
         }}
     >
         {icon && icon}
@@ -278,17 +275,13 @@ const RowButtonRoot = styled(FocusVisibleButton, {
     padding: 0,
     // Set the size of the any icons (SvgIcon instances) provided to us to make
     // them fit with the Typography within the button's content.
-    "& .MuiSvgIcon-root": {
-        fontSize: "20px",
-    },
+    "& .MuiSvgIcon-root": { fontSize: "20px" },
     variants: [
         {
             props: { rbVariant: "primary" },
             style: {
                 backgroundColor: theme.vars.palette.fill.faint,
-                "&:hover": {
-                    backgroundColor: theme.vars.palette.fill.muted,
-                },
+                "&:hover": { backgroundColor: theme.vars.palette.fill.muted },
             },
         },
         {
