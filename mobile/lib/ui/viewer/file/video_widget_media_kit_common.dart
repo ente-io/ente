@@ -303,7 +303,9 @@ class SeekBarAndDuration extends StatelessWidget {
                         file.caption!,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: getEnteTextTheme(context).mini,
+                        style: getEnteTextTheme(context)
+                            .mini
+                            .copyWith(color: textBaseDark),
                       ),
                     ),
                   )

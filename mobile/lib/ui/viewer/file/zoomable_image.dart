@@ -15,6 +15,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/states/detail_page_state.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -219,7 +220,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
                                       widget.photo.caption!,
                                       maxLines: 3,
                                       overflow: TextOverflow.ellipsis,
-                                      style: getEnteTextTheme(context).mini,
+                                      style: getEnteTextTheme(context)
+                                          .mini
+                                          .copyWith(
+                                            color: textBaseDark,
+                                          ),
                                     ),
                                   ),
                                 ],
