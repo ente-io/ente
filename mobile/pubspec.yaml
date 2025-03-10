@@ -271,7 +271,7 @@ dev_dependencies:
 
 flutter_icons:
   adaptive_icon_foreground: "assets/launcher_icon/icon-foreground.png"
-  adaptive_icon_background: "#ffffff"
+  adaptive_icon_background: "#08C225"
 
   # android: "icon_green"
   # ios: "IconGreen"
