@@ -1399,8 +1399,6 @@
   "enableMachineLearningBanner": "Activați învățarea automată pentru a folosi căutarea magică și recunoașterea facială",
   "searchDiscoverEmptySection": "Imaginile vor fi afișate aici odată ce procesarea și sincronizarea este completă",
   "searchPersonsEmptySection": "Persoanele vor fi afișate aici odată ce procesarea și sincronizarea este completă",
-
-
   "accountIsAlreadyConfigured": "Contul este deja configurat.",
   "sessionIdMismatch": "Nepotrivire ID sesiune",
   "@sessionIdMismatch": {
@@ -1466,7 +1464,7 @@
   },
   "currentlyRunning": "rulează în prezent",
   "ignored": "ignorat",
-  "photosCount": "{count, plural, =0 {0 Fotografii} =1 {O Fotografie} other {{count} Fotografii}}",
+  "photosCount": "{count, plural, =0 {Curând} =1 {O zi} other {{count} de zile}}",
   "@photosCount": {
     "placeholders": {
       "count": {
