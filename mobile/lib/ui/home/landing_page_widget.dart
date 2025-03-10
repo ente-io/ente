@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dots_indicator/dots_indicator.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:flutter_app_icon_changer/flutter_app_icon_changer.dart";
 import "package:launcher_icon_switcher/launcher_icon_switcher.dart";
 import "package:logging/logging.dart";
 import "package:photos/app.dart";
@@ -20,6 +21,7 @@ import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import "package:photos/ui/home/custom_icons.dart";
 import 'package:photos/ui/payment/subscription.dart';
 import "package:photos/ui/settings/developer_settings_page.dart";
 import "package:photos/ui/settings/developer_settings_widget.dart";
@@ -258,7 +260,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   Future<void> _changeIcon() async {
     Logger("Icon").info("Initializing");
     await LauncherIconSwitcher()
-        .initialize(['IconLight', 'IconDark', 'IconGreen'], 'IconLight');
+        .initialize(['IconLight', 'IconDark', 'IconGreen'], 'IconGreen');
     Logger("Icon").info("Initialized");
     final currentIcon = await LauncherIconSwitcher().getCurrentIcon();
     Logger("Icon").info("Current Icon: " + currentIcon);
@@ -270,6 +272,32 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       await LauncherIconSwitcher().setIcon('IconLight');
     }
     Logger("Icon").info("Changed");
+  }
+
+  Future<void> _changeIcon2() async {
+    try {
+      Logger("Icon").info("Initializing");
+      final iconChanger = FlutterAppIconChangerPlugin(
+        iconsSet: CustomIcons.list,
+      );
+      Logger("Icon").info("Initialized");
+      final currentIcon = await iconChanger.getCurrentIcon() ?? "none";
+      Logger("Icon").info("Current Icon: " + currentIcon);
+      final isSupported = await iconChanger.isSupported();
+      Logger("Icon").info("Supported: " + isSupported.toString());
+      if (currentIcon == CustomIcons.list[0].androidIcon) {
+        await iconChanger.changeIcon(CustomIcons.list[1].androidIcon);
+      } else if (currentIcon == CustomIcons.list[1].androidIcon) {
+        await iconChanger.changeIcon(CustomIcons.list[2].androidIcon);
+      } else {
+        await iconChanger.changeIcon(CustomIcons.list[0].androidIcon);
+      }
+      final newIcon = await iconChanger.getCurrentIcon() ?? "none";
+      Logger("Icon").info("App icon changed to " + newIcon);
+      return;
+    } catch (e, s) {
+      Logger("Icon").severe(e, s);
+    }
   }
 
   void _navigateToSignInPage() {
