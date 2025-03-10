@@ -771,133 +771,85 @@ class _VideoDescriptionAndSwitchToMediaKitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: Platform.isAndroid
-          ? MainAxisAlignment.spaceBetween
-          : MainAxisAlignment.center,
-      children: [
-        // file.caption?.isNotEmpty ?? false
-        false
-            ? Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
-                  child: ValueListenableBuilder(
-                    valueListenable: showControls,
-                    builder: (context, value, _) {
-                      return AnimatedOpacity(
-                        duration: const Duration(milliseconds: 200),
-                        curve: Curves.easeInQuad,
-                        opacity: value ? 1 : 0,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.1),
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(4),
-                            ),
-                          ),
-                          width: double.infinity,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0,
-                                  horizontal: 8.0,
-                                ),
-                                child: Text(
-                                  file.caption!,
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: getEnteTextTheme(context).mini,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              )
-            : const SizedBox.shrink(),
-        Platform.isAndroid && !selectedPreview
-            ? ValueListenableBuilder(
-                valueListenable: showControls,
-                builder: (context, value, _) {
-                  return IgnorePointer(
-                    ignoring: !value,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInQuad,
-                      opacity: value ? 1 : 0,
-                      child: ElTooltip(
-                        padding: const EdgeInsets.all(12),
-                        distance: 4,
-                        controller: elTooltipController,
-                        content: GestureDetector(
-                          onLongPress: () {
-                            Bus.instance.fire(
-                              UseMediaKitForVideo(),
-                            );
-                            HapticFeedback.vibrate();
+    return Platform.isAndroid && !selectedPreview
+        ? Align(
+            alignment: Alignment.centerRight,
+            child: ValueListenableBuilder(
+              valueListenable: showControls,
+              builder: (context, value, _) {
+                return IgnorePointer(
+                  ignoring: !value,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInQuad,
+                    opacity: value ? 1 : 0,
+                    child: ElTooltip(
+                      padding: const EdgeInsets.all(12),
+                      distance: 4,
+                      controller: elTooltipController,
+                      content: GestureDetector(
+                        onLongPress: () {
+                          Bus.instance.fire(
+                            UseMediaKitForVideo(),
+                          );
+                          HapticFeedback.vibrate();
+                          elTooltipController.hide();
+                        },
+                        child: Text(S.of(context).useDifferentPlayerInfo),
+                      ),
+                      position: ElTooltipPosition.topEnd,
+                      color: backgroundElevatedDark,
+                      appearAnimationDuration: const Duration(
+                        milliseconds: 200,
+                      ),
+                      disappearAnimationDuration: const Duration(
+                        milliseconds: 200,
+                      ),
+                      child: GestureDetector(
+                        onTap: () {
+                          if (elTooltipController.value ==
+                              ElTooltipStatus.hidden) {
+                            elTooltipController.show();
+                          } else {
                             elTooltipController.hide();
-                          },
-                          child: Text(S.of(context).useDifferentPlayerInfo),
-                        ),
-                        position: ElTooltipPosition.topEnd,
-                        color: backgroundElevatedDark,
-                        appearAnimationDuration: const Duration(
-                          milliseconds: 200,
-                        ),
-                        disappearAnimationDuration: const Duration(
-                          milliseconds: 200,
-                        ),
-                        child: GestureDetector(
-                          onTap: () {
-                            if (elTooltipController.value ==
-                                ElTooltipStatus.hidden) {
-                              elTooltipController.show();
-                            } else {
-                              elTooltipController.hide();
-                            }
-                            controller?.pause();
-                          },
-                          behavior: HitTestBehavior.translucent,
-                          onLongPress: () {
-                            Bus.instance.fire(
-                              UseMediaKitForVideo(),
-                            );
-                            HapticFeedback.vibrate();
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 0, 0, 4),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              child: Stack(
-                                alignment: Alignment.bottomRight,
-                                children: [
-                                  Icon(
-                                    Icons.play_arrow_outlined,
-                                    size: 24,
-                                    color: Colors.white.withOpacity(0.2),
-                                  ),
-                                  Icon(
-                                    Icons.question_mark_rounded,
-                                    size: 10,
-                                    color: Colors.white.withOpacity(0.2),
-                                  ),
-                                ],
-                              ),
+                          }
+                          controller?.pause();
+                        },
+                        behavior: HitTestBehavior.translucent,
+                        onLongPress: () {
+                          Bus.instance.fire(
+                            UseMediaKitForVideo(),
+                          );
+                          HapticFeedback.vibrate();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 0, 4),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            child: Stack(
+                              alignment: Alignment.bottomRight,
+                              children: [
+                                Icon(
+                                  Icons.play_arrow_outlined,
+                                  size: 24,
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
+                                Icon(
+                                  Icons.question_mark_rounded,
+                                  size: 10,
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
                     ),
-                  );
-                },
-              )
-            : const SizedBox.shrink(),
-      ],
-    );
+                  ),
+                );
+              },
+            ),
+          )
+        : const SizedBox.shrink();
   }
 }
