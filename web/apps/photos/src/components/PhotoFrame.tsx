@@ -310,16 +310,16 @@ const PhotoFrame = ({
     };
 
     const getThumbnail = (
-        item: DisplayFile,
+        { file }: FileListAnnotatedFile,
         index: number,
         isScrolling: boolean,
     ) => (
         <PreviewCard
-            key={`tile-${item.id}-selected-${selected[item.id] ?? false}`}
-            file={item}
+            key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
+            file={file}
             onClick={() => handleThumbnailClick(index)}
             selectable={selectable}
-            onSelect={handleSelect(item, index)}
+            onSelect={handleSelect(file, index)}
             selected={
                 (!mode
                     ? selected.collectionID === activeCollectionID
@@ -327,7 +327,7 @@ const PhotoFrame = ({
                       (selected.context.mode == "people"
                           ? selected.context.personID == activePersonID
                           : selected.context.collectionID ==
-                            activeCollectionID)) && selected[item.id]
+                            activeCollectionID)) && selected[file.id]
             }
             selectOnClick={selected.count > 0}
             onHover={onHoverOver(index)}
@@ -339,7 +339,7 @@ const PhotoFrame = ({
             }
             activeCollectionID={activeCollectionID}
             showPlaceholder={isScrolling}
-            isFav={favoriteFileIDs?.has(item.id)}
+            isFav={favoriteFileIDs?.has(file.id)}
         />
     );
 

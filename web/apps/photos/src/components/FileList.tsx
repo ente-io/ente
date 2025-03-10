@@ -43,7 +43,7 @@ export enum ITEM_TYPE {
 
 export interface TimeStampListItem {
     itemType: ITEM_TYPE;
-    items?: EnteFile[];
+    items?: FileListAnnotatedFile[];
     itemStartIndex?: number;
     date?: string;
     dates?: { date: string; span: number }[];
@@ -194,7 +194,7 @@ type FileListProps = Pick<PhotoFrameProps, "mode" | "modePlus"> & {
     annotatedFiles: FileListAnnotatedFile[];
     showAppDownloadBanner: boolean;
     getThumbnail: (
-        file: EnteFile,
+        file: FileListAnnotatedFile,
         index: number,
         isScrolling?: boolean,
     ) => React.JSX.Element;
@@ -428,11 +428,11 @@ export const FileList: React.FC<FileListProps> = ({
             if (
                 !currentDate ||
                 !isSameDay(
-                    new Date(item.metadata.creationTime / 1000),
+                    new Date(item.file.metadata.creationTime / 1000),
                     new Date(currentDate),
                 )
             ) {
-                currentDate = item.metadata.creationTime / 1000;
+                currentDate = item.file.metadata.creationTime / 1000;
 
                 timeStampList.push({
                     itemType: ITEM_TYPE.TIME,
@@ -461,7 +461,7 @@ export const FileList: React.FC<FileListProps> = ({
 
     const noGrouping = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = columns;
-        displayFiles.forEach((item, index) => {
+        annotatedFiles.forEach((item, index) => {
             if (listItemIndex < columns) {
                 timeStampList[timeStampList.length - 1].items.push(item);
                 listItemIndex++;
@@ -726,8 +726,8 @@ export const FileList: React.FC<FileListProps> = ({
     const generateKey = (index) => {
         switch (timeStampList[index].itemType) {
             case ITEM_TYPE.FILE:
-                return `${timeStampList[index].items[0].id}-${
-                    timeStampList[index].items.slice(-1)[0].id
+                return `${timeStampList[index].items[0].file.id}-${
+                    timeStampList[index].items.slice(-1)[0].file.id
                 }`;
             default:
                 return `${timeStampList[index].id}-${index}`;
@@ -738,15 +738,15 @@ export const FileList: React.FC<FileListProps> = ({
         // Nothing to do here if nothing is selected.
         if (!galleryContext.selectedFile) return;
 
-        const notSelectedFiles = (displayFiles ?? []).filter(
-            (item) => !galleryContext.selectedFile[item.id],
+        const notSelectedFiles = (annotatedFiles ?? []).filter(
+            (item) => !galleryContext.selectedFile[item.file.id],
         );
 
         const unselectedDates = new Set(
             notSelectedFiles.map((item) => item.timelineDateString),
         ); // to get file's date which were manually unselected
 
-        const localSelectedFiles = (displayFiles ?? []).filter(
+        const localSelectedFiles = (annotatedFiles ?? []).filter(
             // to get files which were manually selected
             (item) => !unselectedDates.has(item.timelineDateString),
         );
@@ -787,11 +787,11 @@ export const FileList: React.FC<FileListProps> = ({
         }
         setCheckedTimelineDateStrings(next);
 
-        const filesOnADay = displayFiles?.filter(
+        const filesOnADay = annotatedFiles?.filter(
             (item) => item.timelineDateString === date,
         ); // all files on a checked/unchecked day
 
-        handleSelect(filesOnADay)(isDateSelected);
+        handleSelect(filesOnADay.map((af) => af.file))(isDateSelected);
     };
 
     const renderListItem = (
@@ -860,7 +860,7 @@ export const FileList: React.FC<FileListProps> = ({
                         ret.splice(
                             sum,
                             0,
-                            <div key={`${listItem.items[0].id}-gap-${i}`} />,
+                            <div key={`${listItem.items[0].file.id}-gap-${i}`} />,
                         );
                         sum += 1;
                     }
