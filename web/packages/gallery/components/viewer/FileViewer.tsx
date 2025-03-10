@@ -4,7 +4,11 @@
 
 import { isDesktop } from "@/base/app";
 import { SpacedRow } from "@/base/components/containers";
+import { InlineErrorIndicator } from "@/base/components/ErrorIndicator";
+import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
@@ -21,7 +25,6 @@ import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewerComponents";
 import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
@@ -39,8 +42,10 @@ import {
     DialogTitle,
     Menu,
     MenuItem,
+    Stack,
     styled,
     Typography,
+    type ModalProps,
 } from "@mui/material";
 import { t } from "i18next";
 import React, {
@@ -838,7 +843,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     </Typography>
                 </MoreMenuItem>
             </MoreMenu>
-            {/* TODO(PS): Fix imports */}
             <ConfirmDeleteFileDialog
                 open={openConfirmDelete}
                 onClose={handleConfirmDeleteClose}
@@ -897,6 +901,93 @@ const MoreMenuItem = styled(MenuItem)(
 const MoreMenuItemTitle: React.FC<React.PropsWithChildren> = ({ children }) => (
     <Typography sx={{ fontWeight: "medium" }}>{children}</Typography>
 );
+
+type ConfirmDeleteFileDialogProps = ModalVisibilityProps & {
+    /**
+     * Called when the user confirms the deletion.
+     *
+     * The delete button will show an activity indicator until this async
+     * operation completes.
+     */
+    onConfirm: () => Promise<void>;
+};
+
+/**
+ * A bespoke variant of AttributedMiniDialog for use by the delete file
+ * confirmation prompt that we show in the file viewer.
+ *
+ * - It auto focuses the primary action.
+ * - It uses a lighter backdrop in light mode.
+ */
+const ConfirmDeleteFileDialog: React.FC<ConfirmDeleteFileDialogProps> = ({
+    open,
+    onClose,
+    onConfirm,
+}) => {
+    const [phase, setPhase] = useState<"loading" | "failed" | undefined>();
+
+    const resetPhaseAndClose = () => {
+        setPhase(undefined);
+        onClose();
+    };
+
+    const handleClick = async () => {
+        setPhase("loading");
+        try {
+            await onConfirm();
+            resetPhaseAndClose();
+        } catch (e) {
+            log.error(e);
+            setPhase("failed");
+        }
+    };
+
+    const handleClose: ModalProps["onClose"] = (_, reason) => {
+        // Ignore backdrop clicks when we're processing the user request.
+        if (reason == "backdropClick" && phase == "loading") return;
+        resetPhaseAndClose();
+    };
+
+    return (
+        <TitledMiniDialog
+            open={open}
+            onClose={handleClose}
+            title={t("trash_file_title")}
+            sx={(theme) => ({
+                // See: [Note: Lighter backdrop for overlays on photo viewer]
+                ...theme.applyStyles("light", {
+                    ".MuiBackdrop-root": {
+                        backgroundColor: theme.vars.palette.backdrop.faint,
+                    },
+                }),
+            })}
+        >
+            <Typography sx={{ color: "text.muted" }}>
+                {t("trash_file_message")}
+            </Typography>
+            <Stack sx={{ pt: 3, gap: 1 }}>
+                {phase == "failed" && <InlineErrorIndicator />}
+                <LoadingButton
+                    loading={phase == "loading"}
+                    fullWidth
+                    color="critical"
+                    autoFocus
+                    onClick={handleClick}
+                >
+                    {t("move_to_trash")}
+                </LoadingButton>
+                <FocusVisibleButton
+                    fullWidth
+                    color="secondary"
+                    disabled={phase == "loading"}
+                    onClick={resetPhaseAndClose}
+                >
+                    {t("cancel")}
+                </FocusVisibleButton>
+            </Stack>
+        </TitledMiniDialog>
+    );
+};
 
 const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
     <Dialog

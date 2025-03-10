@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* TODO: Audit this file
-Plan of action:
-- Move common components into FileInfoComponents.tsx
-
-- Move the rest out to files in the apps themeselves: albums/SharedFileInfo
-  and photos/FileInfo to deal with the @/new/photos imports here.
+/* TODO: Split this file to deal with the @/new/photos imports.
+1. Move common components into FileInfoComponents.tsx
+2. Move the rest out to files in the apps themeselves:
+   - albums/SharedFileInfo
+  -  photos/FileInfo
 */
 
 import { assertionFailed } from "@/base/assert";
