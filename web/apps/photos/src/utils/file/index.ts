@@ -20,7 +20,6 @@ import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { deleteFromTrash, moveToTrash } from "@/new/photos/services/collection";
 import { safeFileName } from "@/new/photos/utils/native-fs";
-import { withTimeout } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
@@ -338,39 +337,6 @@ export const getUserOwnedFiles = (files: EnteFile[]) => {
         throw Error("user missing");
     }
     return files.filter((file) => file.ownerID === user.id);
-};
-
-// doesn't work on firefox
-export const copyFileToClipboard = async (fileURL: string) => {
-    const canvas = document.createElement("canvas");
-    const canvasCTX = canvas.getContext("2d");
-    const image = new Image();
-
-    const blobPromise = new Promise<Blob>((resolve, reject) => {
-        try {
-            image.setAttribute("src", fileURL);
-            image.onload = () => {
-                canvas.width = image.width;
-                canvas.height = image.height;
-                canvasCTX.drawImage(image, 0, 0, image.width, image.height);
-                canvas.toBlob(
-                    (blob) => {
-                        resolve(blob);
-                    },
-                    "image/png",
-                    1,
-                );
-            };
-        } catch (e) {
-            log.error("Failed to copy to clipboard", e);
-            reject(e);
-        }
-    });
-
-    const blob = await withTimeout(blobPromise, 30 * 1000);
-
-    const { ClipboardItem } = window;
-    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
 };
 
 export function getPersonalFiles(
