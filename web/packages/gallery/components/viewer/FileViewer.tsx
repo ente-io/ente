@@ -737,6 +737,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 log.debug(() => "Closing file viewer");
                 pswp.closeIfNeeded();
             };
+        } else {
+            return undefined;
         }
     }, [
         // Be careful with adding new dependencies here, or changing the source

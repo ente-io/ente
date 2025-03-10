@@ -38,7 +38,7 @@ export interface FileViewerPhotoSwipeDelegate {
      * user.
      *
      * The toggle favorite button will not be shown for the file if
-     * this callback returns `undefined`. Otherwise the return value determines
+     * this callback returns `undefined`. Otherwise the return value determines
      * the toggle state of the toggle favorite button for the file.
      */
     isFavorite: (annotatedFile: FileViewerAnnotatedFile) => boolean | undefined;
@@ -266,7 +266,8 @@ export class FileViewerPhotoSwipe {
          * non-null assertion (the PhotoSwipe dialog shouldn't be visible if
          * there are no slides left).
          */
-        const asItemData = (slideData: SlideData | undefined) =>slideData! as ItemData;
+        const asItemData = (slideData: SlideData | undefined) =>
+            slideData! as ItemData;
 
         const currSlideData = () => asItemData(pswp.currSlide?.data);
 
@@ -301,7 +302,7 @@ export class FileViewerPhotoSwipe {
             if (itemData.fileType === FileType.video && videoURL) {
                 itemData = {
                     ...rest,
-                    html: videoHTML(videoURL, disableDownload),
+                    html: videoHTML(videoURL, !!disableDownload),
                 };
             }
 
@@ -329,12 +330,12 @@ export class FileViewerPhotoSwipe {
         /**
          * The live photo playback toggle DOM button element.
          */
-        let livePhotoPlayButtonElement: HTMLButtonElement | undefined;
+        let livePhotoPlayButtonElement: HTMLElement | undefined;
 
         /**
          * The live photo muted toggle DOM button element.
          */
-        let livePhotoMuteButtonElement: HTMLButtonElement | undefined;
+        let livePhotoMuteButtonElement: HTMLElement | undefined;
 
         /**
          * Update the state of the given {@link videoElement} and the
@@ -399,18 +400,18 @@ export class FileViewerPhotoSwipe {
         };
 
         pswp.on("contentAppend", (e) => {
-            const { fileID, fileType, videoURL } = e.content.data;
+            const { fileID, fileType, videoURL } = asItemData(e.content.data);
             if (fileType !== FileType.livePhoto) return;
             if (!videoURL) return;
 
             // This slide is displaying a live photo. Append a video element to
             // show its video part.
 
-            const img = e.content.element;
+            const img = e.content.element!;
             const video = createElementFromHTMLString(
                 livePhotoVideoHTML(videoURL),
-            );
-            const container = e.content.slide.container;
+            ) as HTMLVideoElement;
+            const container = e.content.slide!.container;
             container.style = "position: relative";
             container.appendChild(video);
             // Set z-index to 1 to keep it on top, and set pointer-events to
@@ -427,7 +428,7 @@ export class FileViewerPhotoSwipe {
             // display of the video. Here we handle the case where "change" has
             // already been called, but now "contentAppend" is happening.
 
-            if (pswp.currSlide.data.fileID == fileID) {
+            if (currSlideData().fileID == fileID) {
                 livePhotoUpdatePlay(video);
                 livePhotoUpdateMute(video);
             }
@@ -465,26 +466,28 @@ export class FileViewerPhotoSwipe {
             //   more than 2 slides and then back, or if they reopen the viewer.
             //
             // See: [Note: File viewer error handling]
-            const fileID = e.content?.data?.fileID;
+            const fileID = asItemData(e.content.data).fileID;
             if (fileID) forgetFailedItemDataForFileID(fileID);
 
             // Pause the video element, if any, when we move away from the
             // slide.
             const video =
-                e.content?.slide?.container?.getElementsByTagName("video")[0];
+                e.content.slide?.container.getElementsByTagName("video")[0];
             video?.pause();
         });
 
         pswp.on("loadComplete", (e) =>
-            updateFileInfoExifIfNeeded(e.content.data),
+            updateFileInfoExifIfNeeded(asItemData(e.content.data)),
         );
 
-        pswp.on("change", () => {
-            const itemData = pswp.currSlide.content.data;
-            updateFileInfoExifIfNeeded(itemData);
-        });
+        pswp.on(
+            "change",
+            () => void updateFileInfoExifIfNeeded(currSlideData()),
+        );
 
-        pswp.on("contentDestroy", (e) => forgetExifForItemData(e.content.data));
+        pswp.on("contentDestroy", (e) =>
+            forgetExifForItemData(asItemData(e.content.data)),
+        );
 
         /**
          * If the current slide is showing a video, then the DOM video element
@@ -498,15 +501,15 @@ export class FileViewerPhotoSwipe {
          * These are needed to hide the caption when a video is playing on a
          * file of type video.
          */
-        let onVideoPlayback: EventHandler | undefined;
+        let onVideoPlayback: (() => void) | undefined;
 
         /**
          * The DOM element showing the caption for the current file.
          */
         let captionElement: HTMLElement | undefined;
 
-        pswp.on("change", (e) => {
-            const itemData = pswp.currSlide.content.data;
+        pswp.on("change", () => {
+            const itemData = currSlideData();
 
             // Clear existing listeners, if any.
             if (videoVideoEl && onVideoPlayback) {
@@ -518,7 +521,7 @@ export class FileViewerPhotoSwipe {
             }
 
             // Reset.
-            showIf(captionElement, true);
+            showIf(captionElement!, true);
 
             // Attach new listeners, if needed.
             if (itemData.fileType == FileType.video) {
@@ -529,12 +532,12 @@ export class FileViewerPhotoSwipe {
                 //
                 // It works subsequently, which is why, e.g., we can use it to
                 // pause the video in "contentDeactivate".
-                const contentElement = pswp.currSlide.content.element;
-                videoVideoEl = contentElement.getElementsByTagName("video")[0];
+                const contentElement = pswp.currSlide?.content.element;
+                videoVideoEl = contentElement?.getElementsByTagName("video")[0];
 
                 if (videoVideoEl) {
                     onVideoPlayback = () =>
-                        showIf(captionElement, !!videoVideoEl?.paused);
+                        showIf(captionElement!, !!videoVideoEl?.paused);
 
                     videoVideoEl.addEventListener("play", onVideoPlayback);
                     videoVideoEl.addEventListener("pause", onVideoPlayback);
@@ -552,7 +555,7 @@ export class FileViewerPhotoSwipe {
             if (!video) return;
 
             if (video.paused || video.ended) {
-                video.play();
+                void video.play();
             } else {
                 video.pause();
             }
@@ -613,7 +616,7 @@ export class FileViewerPhotoSwipe {
             // Update the fill visibility based on the favorite status.
             showIf(
                 document.getElementById("pswp__icn-favorite-fill")!,
-                delegate.isFavorite(af),
+                !!delegate.isFavorite(af),
             );
         };
 
@@ -626,7 +629,7 @@ export class FileViewerPhotoSwipe {
         const handleDownload = () => onDownload(currentAnnotatedFile());
 
         const handleDownloadIfEnabled = () => {
-            if (!!currentFileAnnotation().showDownload) handleDownload();
+            if (currentFileAnnotation().showDownload) handleDownload();
         };
 
         const showIf = (element: HTMLElement, condition: boolean) =>
@@ -712,7 +715,7 @@ export class FileViewerPhotoSwipe {
                 onInit: (errorElement, pswp) => {
                     pswp.on("change", () => {
                         const { fetchFailed, isContentLoading } =
-                            pswp.currSlide.content.data;
+                            currSlideData();
                         errorElement.classList.toggle(
                             "pswp__error--active",
                             !!fetchFailed && !isContentLoading,
@@ -731,7 +734,10 @@ export class FileViewerPhotoSwipe {
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
                     onInit: (buttonElement) => {
-                        favoriteButtonElement = buttonElement;
+                        favoriteButtonElement =
+                            // The cast should be safe (unless there is a
+                            // PhotoSwipe bug) since we set isButton to true.
+                            buttonElement as HTMLButtonElement;
                         pswp.on("change", updateFavoriteButton);
                     },
                     onClick: handleToggleFavorite,
@@ -794,7 +800,7 @@ export class FileViewerPhotoSwipe {
                 onInit: (element, pswp) => {
                     captionElement = element;
                     pswp.on("change", () => {
-                        const { fileType, alt } = pswp.currSlide.content.data;
+                        const { fileType, alt } = currSlideData();
                         element.innerText = alt ?? "";
                         element.style.visibility = alt ? "visible" : "hidden";
                         // Add extra offset for video captions so that they do
@@ -1021,7 +1027,7 @@ const createElementFromHTMLString = (htmlString: string) => {
     // Excess whitespace causes excess DOM nodes, causing our firstChild to not
     // be what we wanted them to be.
     template.innerHTML = htmlString.trim();
-    return template.content.firstChild;
+    return template.content.firstChild!;
 };
 
 /**

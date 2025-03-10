@@ -47,6 +47,11 @@ interface PhotoSwipeSlideData {
      * images and video).
      */
     alt?: string;
+    /**
+     * The HTML (string) contents of the slide, if we don't wish for it to show
+     * an image.
+     */
+    html?: string | undefined;
 }
 
 /**
