@@ -867,7 +867,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     onSaveEditedCopy={handleSaveEditedCopy}
                 />
             )}
-            <Shortcuts open={openShortcuts} onClose={handleShortcutsClose} />
+            <Shortcuts
+                open={openShortcuts}
+                onClose={handleShortcutsClose}
+                {...{ disableDownload, haveUser }}
+            />
         </>
     );
 };
@@ -1002,7 +1006,20 @@ const ConfirmDeleteFileDialog: React.FC<ConfirmDeleteFileDialogProps> = ({
     );
 };
 
-const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
+type ShortcutsProps = ModalVisibilityProps &
+    Pick<FileViewerProps, "disableDownload"> & {
+        /**
+         * `true` if we're running in a context where there is a logged in user.
+         */
+        haveUser: boolean;
+    };
+
+const Shortcuts: React.FC<ShortcutsProps> = ({
+    open,
+    onClose,
+    disableDownload,
+    haveUser,
+}) => (
     <Dialog
         {...{ open, onClose }}
         fullWidth
@@ -1025,11 +1042,15 @@ const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
             <Shortcut action="Pan" shortcut="W A S D, Drag" />
             <Shortcut action="Toggle live" shortcut="Space" />
             <Shortcut action="Toggle audio" shortcut="M" />
-            <Shortcut action="Toggle favorite" shortcut="L" />
+            {haveUser && <Shortcut action="Toggle favorite" shortcut="L" />}
             <Shortcut action="View info" shortcut="I" />
-            <Shortcut action="Download" shortcut="K" />
-            <Shortcut action="Delete" shortcut="Delete, Backspace" />
-            <Shortcut action="Copy as PNG" shortcut="^C / ⌘C" />
+            {!disableDownload && <Shortcut action="Download" shortcut="K" />}
+            {haveUser && (
+                <Shortcut action="Delete" shortcut="Delete, Backspace" />
+            )}
+            {!disableDownload && (
+                <Shortcut action="Copy as PNG" shortcut="^C / ⌘C" />
+            )}
             <Shortcut action="Toggle fullscreen" shortcut="F" />
             <Shortcut action="Show shortcuts" shortcut="?" />
         </ShortcutsContent>
