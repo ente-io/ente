@@ -961,6 +961,10 @@
       "title": "RuneMate"
     },
     {
+      "title": "RuneScape Wiki",
+      "slug": "runescape_wiki"
+    },
+    {
       "title": "Rust Language Forum",
       "slug": "rust_language_forum",
       "hex": "000000"
