@@ -860,7 +860,9 @@ export const FileList: React.FC<FileListProps> = ({
                         ret.splice(
                             sum,
                             0,
-                            <div key={`${listItem.items[0].file.id}-gap-${i}`} />,
+                            <div
+                                key={`${listItem.items[0].file.id}-gap-${i}`}
+                            />,
                         );
                         sum += 1;
                     }

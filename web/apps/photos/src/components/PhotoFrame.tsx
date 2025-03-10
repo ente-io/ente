@@ -370,10 +370,6 @@ const PhotoFrame = ({
     };
     */
 
-    if (!files.length) {
-        return <></>;
-    }
-
     return (
         <Container>
             <AutoSizer>
