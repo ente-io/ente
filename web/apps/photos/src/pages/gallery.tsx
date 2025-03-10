@@ -187,7 +187,7 @@ const Page: React.FC = () => {
     const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
         [],
     );
-    const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
+    const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
 
     const syncInProgress = useRef(false);
     const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
@@ -462,7 +462,7 @@ const Page: React.FC = () => {
             fixCreationTimeVisibilityProps.open ||
             exportVisibilityProps.open ||
             authenticateUserVisibilityProps.open ||
-            isPhotoSwipeOpen
+            isFileViewerOpen
         ) {
             return;
         }
@@ -1054,7 +1054,6 @@ const Page: React.FC = () => {
                         setSelected={setSelected}
                         selected={selected}
                         favoriteFileIDs={state.favoriteFileIDs}
-                        setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
                         enableDownload={true}
@@ -1078,6 +1077,7 @@ const Page: React.FC = () => {
                             handleMarkUnsyncedFavoriteUpdate
                         }
                         onMarkTempDeleted={handleMarkTempDeleted}
+                        onSetOpenFileViewer={setIsFileViewerOpen}
                         onSyncWithRemote={handleSyncWithRemote}
                         onSelectCollection={handleSelectCollection}
                         onSelectPerson={handleSelectPerson}

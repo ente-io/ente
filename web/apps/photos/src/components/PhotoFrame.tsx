@@ -1,4 +1,3 @@
-import { useModalVisibility } from "@/base/components/utils/modal";
 import { isSameDay } from "@/base/date";
 import { formattedDate } from "@/base/i18n-date";
 import log from "@/base/log";
@@ -12,7 +11,6 @@ import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { moveToTrash, TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
 import { t } from "i18next";
-import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -42,8 +40,6 @@ const Container = styled("div")`
         cursor: pointer;
     }
 `;
-
-const PHOTOSWIPE_HASH_SUFFIX = "&opened";
 
 /**
  * An {@link EnteFile} augmented with various in-memory state used for
@@ -138,11 +134,14 @@ export type PhotoFrameProps = Pick<
     activePersonID?: string | undefined;
     enableDownload?: boolean;
     showAppDownloadBanner?: boolean;
-    setIsPhotoSwipeOpen?: (value: boolean) => void;
     isInIncomingSharedCollection?: boolean;
     isInHiddenSection?: boolean;
     setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
     selectable?: boolean;
+    /**
+     * Called when the visibility of the file viewer dialog changes.
+     */
+    onSetOpenFileViewer?: (open: boolean) => void;
     onSyncWithRemote: () => Promise<void>;
 };
 
@@ -164,27 +163,22 @@ const PhotoFrame = ({
     fileCollectionIDs,
     allCollectionsNameByID,
     showAppDownloadBanner,
-    setIsPhotoSwipeOpen,
     isInIncomingSharedCollection,
     isInHiddenSection,
     setFilesDownloadProgressAttributesCreator,
     selectable,
+    onSetOpenFileViewer,
     onSyncWithRemote,
     onSelectCollection,
     onSelectPerson,
 }: PhotoFrameProps) => {
-    const [open, setOpen] = useState(false);
-    const [currentIndex, setCurrentIndex] = useState<number>(0);
-
     const galleryContext = useContext(GalleryContext);
+
+    const [openFileViewer, setOpenFileViewer] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
-    const router = useRouter();
-
-    const { show: showFileViewer, props: fileViewerVisibilityProps } =
-        useModalVisibility();
-
     const [displayFiles, setDisplayFiles] = useState<DisplayFile[] | undefined>(
         undefined,
     );
@@ -201,57 +195,16 @@ const PhotoFrame = ({
         setDisplayFiles(result);
     }, [files]);
 
-    useEffect(() => {
-        const currentURL = new URL(window.location.href);
-        const end = currentURL.hash.lastIndexOf("&");
-        const hash = currentURL.hash.slice(1, end !== -1 ? end : undefined);
-        if (open) {
-            router.push({ hash: hash + PHOTOSWIPE_HASH_SUFFIX });
-        } else {
-            router.push({ hash: hash });
-        }
-    }, [open]);
-
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Shift") {
-                setIsShiftKeyPressed(true);
-            }
-        };
-        const handleKeyUp = (e: KeyboardEvent) => {
-            if (e.key === "Shift") {
-                setIsShiftKeyPressed(false);
-            }
-        };
-        document.addEventListener("keydown", handleKeyDown, false);
-        document.addEventListener("keyup", handleKeyUp, false);
-
-        router.events.on("hashChangeComplete", (url: string) => {
-            const start = url.indexOf("#");
-            const hash = url.slice(start !== -1 ? start : url.length);
-            const shouldPhotoSwipeBeOpened = hash.endsWith(
-                PHOTOSWIPE_HASH_SUFFIX,
-            );
-            if (shouldPhotoSwipeBeOpened) {
-                setIsPhotoSwipeOpen?.(true);
-                setOpen(true);
-            } else {
-                setIsPhotoSwipeOpen?.(false);
-                setOpen(false);
-            }
-        });
-
-        return () => {
-            document.removeEventListener("keydown", handleKeyDown, false);
-            document.removeEventListener("keyup", handleKeyUp, false);
-        };
+    const handleThumbnailClick = useCallback((index: number) => {
+        setCurrentIndex(index);
+        setOpenFileViewer(true);
+        onSetOpenFileViewer(true);
     }, []);
 
-    useEffect(() => {
-        if (selected.count === 0) {
-            setRangeStart(null);
-        }
-    }, [selected]);
+    const handleCloseFileViewer = useCallback(() => {
+        onSetOpenFileViewer(false);
+        setOpenFileViewer(false);
+    }, []);
 
     const handleTriggerSyncWithRemote = useCallback(
         () => void onSyncWithRemote(),
@@ -300,6 +253,34 @@ const PhotoFrame = ({
         [],
     );
 
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Shift") {
+                setIsShiftKeyPressed(true);
+            }
+        };
+
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === "Shift") {
+                setIsShiftKeyPressed(false);
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("keyup", handleKeyUp);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+            document.removeEventListener("keyup", handleKeyUp);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (selected.count === 0) {
+            setRangeStart(null);
+        }
+    }, [selected]);
+
     if (!displayFiles) {
         return <div />;
     }
@@ -323,11 +304,6 @@ const PhotoFrame = ({
             updateDisplayFileThumbnail(file, url);
             return true;
         };
-
-    const onThumbnailClick = (index: number) => () => {
-        setCurrentIndex(index);
-        showFileViewer();
-    };
 
     const handleSelect = handleSelectCreator(
         setSelected,
@@ -374,7 +350,7 @@ const PhotoFrame = ({
             key={`tile-${item.id}-selected-${selected[item.id] ?? false}`}
             file={item}
             updateURL={updateThumbURL(index)}
-            onClick={onThumbnailClick(index)}
+            onClick={() => handleThumbnailClick(index)}
             selectable={selectable}
             onSelect={handleSelect(item, index)}
             selected={
@@ -445,7 +421,8 @@ const PhotoFrame = ({
                 )}
             </AutoSizer>
             <FileViewer
-                {...fileViewerVisibilityProps}
+                open={openFileViewer}
+                onClose={handleCloseFileViewer}
                 user={galleryContext.user ?? undefined}
                 files={files}
                 initialIndex={currentIndex}
