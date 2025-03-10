@@ -357,6 +357,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                             showControls: _showControls,
                                             isSeeking: _isSeeking,
                                             position: position,
+                                            caption: widget.file.caption,
                                           )
                                         : const SizedBox();
                                   },
@@ -644,6 +645,7 @@ class _SeekBarAndDuration extends StatelessWidget {
   final ValueNotifier<bool> showControls;
   final ValueNotifier<bool> isSeeking;
   final int position;
+  final String? caption;
 
   const _SeekBarAndDuration({
     required this.controller,
@@ -651,6 +653,7 @@ class _SeekBarAndDuration extends StatelessWidget {
     required this.showControls,
     required this.isSeeking,
     required this.position,
+    required this.caption,
   });
 
   @override
@@ -691,34 +694,54 @@ class _SeekBarAndDuration extends StatelessWidget {
                     width: 1,
                   ),
                 ),
-                child: Row(
+                child: Column(
                   children: [
-                    AnimatedSize(
-                      duration: const Duration(
-                        seconds: 5,
-                      ),
-                      curve: Curves.easeInOut,
-                      child: Text(
-                        secondsToDuration(position ~/ 1000),
-                        style: getEnteTextTheme(
-                          context,
-                        ).mini.copyWith(
-                              color: textBaseDark,
+                    caption != null && caption!.isNotEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              0,
+                              8,
+                              0,
+                              12,
                             ),
-                      ),
-                    ),
-                    Expanded(
-                      child: SeekBar(
-                        controller!,
-                        durationToSeconds(duration),
-                        isSeeking,
-                      ),
-                    ),
-                    Text(
-                      duration ?? "0:00",
-                      style: getEnteTextTheme(context).mini.copyWith(
-                            color: textBaseDark,
+                            child: Text(
+                              caption!,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                              style: getEnteTextTheme(context).mini,
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                    Row(
+                      children: [
+                        AnimatedSize(
+                          duration: const Duration(
+                            seconds: 5,
                           ),
+                          curve: Curves.easeInOut,
+                          child: Text(
+                            secondsToDuration(position ~/ 1000),
+                            style: getEnteTextTheme(
+                              context,
+                            ).mini.copyWith(
+                                  color: textBaseDark,
+                                ),
+                          ),
+                        ),
+                        Expanded(
+                          child: SeekBar(
+                            controller!,
+                            durationToSeconds(duration),
+                            isSeeking,
+                          ),
+                        ),
+                        Text(
+                          duration ?? "0:00",
+                          style: getEnteTextTheme(context).mini.copyWith(
+                                color: textBaseDark,
+                              ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -753,29 +776,47 @@ class _VideoDescriptionAndSwitchToMediaKitButton extends StatelessWidget {
           ? MainAxisAlignment.spaceBetween
           : MainAxisAlignment.center,
       children: [
-        file.caption?.isNotEmpty ?? false
+        // file.caption?.isNotEmpty ?? false
+        false
             ? Expanded(
-                child: ValueListenableBuilder(
-                  valueListenable: showControls,
-                  builder: (context, value, _) {
-                    return AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInQuad,
-                      opacity: value ? 1 : 0,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                        child: Text(
-                          file.caption!,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: getEnteTextTheme(context)
-                              .mini
-                              .copyWith(color: textBaseDark),
-                          textAlign: TextAlign.center,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8, left: 8, right: 8),
+                  child: ValueListenableBuilder(
+                    valueListenable: showControls,
+                    builder: (context, value, _) {
+                      return AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeInQuad,
+                        opacity: value ? 1 : 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.1),
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(4),
+                            ),
+                          ),
+                          width: double.infinity,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0,
+                                  horizontal: 8.0,
+                                ),
+                                child: Text(
+                                  file.caption!,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: getEnteTextTheme(context).mini,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               )
             : const SizedBox.shrink(),

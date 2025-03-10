@@ -13,6 +13,7 @@ import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
@@ -167,7 +168,40 @@ class _ZoomableImageState extends State<ZoomableImage> {
                 };
     return GestureDetector(
       onVerticalDragUpdate: verticalDragCallback,
-      child: content,
+      child: widget.photo.caption?.isNotEmpty ?? false
+          ? Stack(
+              clipBehavior: Clip.none,
+              children: [
+                content,
+                Positioned(
+                  bottom: 72 + MediaQuery.of(context).padding.bottom,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    color: Colors.black.withOpacity(0.1),
+                    width: double.infinity,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 4.0,
+                            horizontal: 8.0,
+                          ),
+                          child: Text(
+                            widget.photo.caption!,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: getEnteTextTheme(context).mini,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : content,
     );
   }
 
