@@ -623,6 +623,14 @@
       "slug": "login_gov"
     },
     {
+      "title": "Luma",
+      "slug": "Luma",
+      "altNames": [
+        "luma",
+        "lu.ma"
+      ]
+    },
+    {
       "title": "Marketplace.tf",
       "slug": "marketplacedottf"
     },
