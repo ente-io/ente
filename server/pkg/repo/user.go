@@ -312,15 +312,15 @@ func (repo *UserRepository) GetPublicKey(userID int64) (string, error) {
 
 // GetUsersWithIndividualPlanWhoHaveExceededStorageQuota returns list of users who have consumed their storage quota
 // and they are not part of any family plan
-func (repo *UserRepository) GetUsersWithIndividualPlanWhoHaveExceededStorageQuota() ([]ente.User, error) {
+func (repo *UserRepository) GetUsersWithExceedingStorages(percentageThreshold int64) ([]ente.User, error) {
 	rows, err := repo.DB.Query(`
 		SELECT users.user_id, users.encrypted_email, users.email_decryption_nonce, users.email_hash, usage.storage_consumed, subscriptions.storage
 		FROM users 
 		INNER JOIN usage 
 		ON users.user_id = usage.user_id 
 		INNER JOIN subscriptions 
-		ON users.user_id = subscriptions.user_id AND usage.storage_consumed > subscriptions.storage AND users.encrypted_email IS NOT NULL AND users.family_admin_id IS NULL;
-	`)
+		ON users.user_id = subscriptions.user_id AND usage.storage_consumed >= (subscriptions.storage * $1 / 100.0) AND users.encrypted_email IS NOT NULL AND users.family_admin_id IS NULL;
+		}`, percentageThreshold)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -342,22 +342,35 @@ func (repo *UserRepository) GetUsersWithIndividualPlanWhoHaveExceededStorageQuot
 		if strings.EqualFold(user.Hash, fmt.Sprintf(DELETED_EMAIL_HASH_FORMAT, &user.ID)) || len(encryptedEmail) == 0 {
 			continue
 		}
+
 		if refBonusStorage, ok := refBonus[user.ID]; ok {
 			addOnBonusStorage := addOnBonus[user.ID]
 			// cap usable ref bonus to the subscription storage + addOnBonus
 			if refBonusStorage > (subStorage + addOnBonusStorage) {
 				refBonusStorage = subStorage + addOnBonusStorage
 			}
-			if (storageConsumed) <= (subStorage + refBonusStorage + addOnBonusStorage) {
-				continue
+			totalStorage := refBonusStorage + subStorage + addOnBonusStorage
+
+			if percentageThreshold == 90 {
+				if storageConsumed >= (totalStorage*90/100) && storageConsumed < (totalStorage) {
+					email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+					if err != nil {
+						return users, stacktrace.Propagate(err, "")
+					}
+					user.Email = email
+					users = append(users, user)
+				}
+			} else {
+				if (storageConsumed) > totalStorage {
+					email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+					if err != nil {
+						return users, stacktrace.Propagate(err, "")
+					}
+					user.Email = email
+					users = append(users, user)
+				}
 			}
 		}
-		email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
-		if err != nil {
-			return users, stacktrace.Propagate(err, "")
-		}
-		user.Email = email
-		users = append(users, user)
 	}
 	return users, nil
 }
