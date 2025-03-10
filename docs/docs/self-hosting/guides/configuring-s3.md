@@ -54,6 +54,9 @@ The same principle applies if you're deploying to your custom domain.
 
 ## Replication 
 
+![Replication](/replication.png)
+<p align="center">Community contributed diagram of Ente's Replication Process</p>
+
 > [!IMPORTANT]
 > As of now, Replication works only if all the 3 storage type 
 > needs are fulfilled (1 Hot, 1 Cold and 1 Glacier Storage).
