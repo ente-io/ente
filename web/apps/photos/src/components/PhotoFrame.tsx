@@ -190,11 +190,11 @@ const PhotoFrame = ({
     const handleThumbnailClick = useCallback((index: number) => {
         setCurrentIndex(index);
         setOpenFileViewer(true);
-        onSetOpenFileViewer(true);
+        onSetOpenFileViewer?.(true);
     }, []);
 
     const handleCloseFileViewer = useCallback(() => {
-        onSetOpenFileViewer(false);
+        onSetOpenFileViewer?.(false);
         setOpenFileViewer(false);
     }, []);
 
