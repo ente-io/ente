@@ -5,6 +5,7 @@ import "package:media_kit_video/media_kit_video.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/utils/standalone/date_time.dart";
@@ -140,7 +141,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                               SeekBarAndDuration(
                                 controller: widget.controller,
                                 isSeekingNotifier: _isSeekingNotifier,
-                                caption: widget.file.caption,
+                                file: widget.file,
                               ),
                             ],
                           ),
@@ -252,13 +253,13 @@ class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
 class SeekBarAndDuration extends StatelessWidget {
   final VideoController? controller;
   final ValueNotifier<bool> isSeekingNotifier;
-  final String? caption;
+  final EnteFile file;
 
   const SeekBarAndDuration({
     super.key,
     required this.controller,
     required this.isSeekingNotifier,
-    required this.caption,
+    required this.file,
   });
 
   @override
@@ -286,7 +287,7 @@ class SeekBarAndDuration extends StatelessWidget {
         ),
         child: Column(
           children: [
-            caption != null && caption!.isNotEmpty
+            file.caption != null && file.caption!.isNotEmpty
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(
                       0,
@@ -294,11 +295,16 @@ class SeekBarAndDuration extends StatelessWidget {
                       0,
                       12,
                     ),
-                    child: Text(
-                      caption!,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: getEnteTextTheme(context).mini,
+                    child: GestureDetector(
+                      onTap: () {
+                        showDetailsSheet(context, file);
+                      },
+                      child: Text(
+                        file.caption!,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: getEnteTextTheme(context).mini,
+                      ),
                     ),
                   )
                 : const SizedBox.shrink(),

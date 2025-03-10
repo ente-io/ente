@@ -370,7 +370,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                             showControls: _showControls,
                                             isSeeking: _isSeeking,
                                             position: position,
-                                            caption: widget.file.caption,
+                                            file: widget.file,
                                           )
                                         : const SizedBox();
                                   },
@@ -658,7 +658,7 @@ class _SeekBarAndDuration extends StatelessWidget {
   final ValueNotifier<bool> showControls;
   final ValueNotifier<bool> isSeeking;
   final int position;
-  final String? caption;
+  final EnteFile file;
 
   const _SeekBarAndDuration({
     required this.controller,
@@ -666,7 +666,7 @@ class _SeekBarAndDuration extends StatelessWidget {
     required this.showControls,
     required this.isSeeking,
     required this.position,
-    required this.caption,
+    required this.file,
   });
 
   @override
@@ -709,7 +709,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    caption != null && caption!.isNotEmpty
+                    file.caption != null && file.caption!.isNotEmpty
                         ? Padding(
                             padding: const EdgeInsets.fromLTRB(
                               0,
@@ -717,11 +717,16 @@ class _SeekBarAndDuration extends StatelessWidget {
                               0,
                               12,
                             ),
-                            child: Text(
-                              caption!,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                              style: getEnteTextTheme(context).mini,
+                            child: GestureDetector(
+                              onTap: () {
+                                showDetailsSheet(context, file);
+                              },
+                              child: Text(
+                                file.caption!,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: getEnteTextTheme(context).mini,
+                              ),
                             ),
                           )
                         : const SizedBox.shrink(),

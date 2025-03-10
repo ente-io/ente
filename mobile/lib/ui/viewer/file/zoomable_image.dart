@@ -198,25 +198,33 @@ class _ZoomableImageState extends State<ZoomableImage> {
                       return AnimatedOpacity(
                         opacity: doNotShowCaption ? 0.0 : 1.0,
                         duration: const Duration(milliseconds: 200),
-                        child: Container(
-                          color: Colors.black.withOpacity(0.1),
-                          width: double.infinity,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4.0,
-                                  horizontal: 8.0,
-                                ),
-                                child: Text(
-                                  widget.photo.caption!,
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: getEnteTextTheme(context).mini,
-                                ),
+                        child: IgnorePointer(
+                          ignoring: doNotShowCaption,
+                          child: GestureDetector(
+                            onTap: () {
+                              showDetailsSheet(context, widget.photo);
+                            },
+                            child: Container(
+                              color: Colors.black.withOpacity(0.1),
+                              width: double.infinity,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0,
+                                      horizontal: 8.0,
+                                    ),
+                                    child: Text(
+                                      widget.photo.caption!,
+                                      maxLines: 3,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: getEnteTextTheme(context).mini,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       );
