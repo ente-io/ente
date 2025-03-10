@@ -1,3 +1,4 @@
+import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import "package:photos/models/file/file.dart";
@@ -22,6 +23,11 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
   bool showSingleOrShiftChoice = true;
   bool singleSelected = true;
 
+  bool selectingDate = false;
+  bool selectingTime = false;
+
+  DateTime? selectedDate;
+
   @override
   Widget build(BuildContext context) {
     final photoCount = widget.enteFiles.length;
@@ -34,6 +40,7 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
     );
     DateTime startDate = firstFileTime;
     DateTime endDate = firstFileTime;
+    DateTime maxDate = DateTime.now();
     for (final file in widget.enteFiles) {
       if (file.creationTime == null) {
         continue;
@@ -76,16 +83,209 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
                 setState(() {});
               },
             ),
-          if (!showSingleOrShiftChoice)
+          if (!showSingleOrShiftChoice && !selectingDate && !selectingTime)
             OldDateAndTimeWidget(
               dateTime: startDate,
               selectDate: singleSelected,
-              onPressedDate: () {},
-              onPressedTime: () {},
+              onPressedDate: () {
+                selectingDate = true;
+                selectingTime = false;
+                setState(() {});
+              },
+              onPressedTime: () {
+                selectingDate = false;
+                selectingTime = true;
+                setState(() {});
+              },
             ),
-
+          if (selectingDate || selectingTime)
+            DateTimePickerWidget(
+              (DateTime dateTime) {
+                selectedDate = dateTime;
+                selectingDate = false;
+                selectingTime = false;
+                setState(() {});
+              },
+              startDate,
+              maxDate,
+              startWithTime: selectingTime,
+            ),
           // Bottom indicator line
           const SizedBox(height: 48),
+        ],
+      ),
+    );
+  }
+}
+
+class DateTimePickerWidget extends StatefulWidget {
+  final Function(DateTime) onDateTimeSelected;
+  final DateTime initialDateTime;
+  final DateTime maxDateTime;
+  final bool startWithTime;
+
+  const DateTimePickerWidget(
+    this.onDateTimeSelected,
+    this.initialDateTime,
+    this.maxDateTime, {
+    this.startWithTime = false,
+    super.key,
+  });
+
+  @override
+  State<DateTimePickerWidget> createState() => _DateTimePickerWidgetState();
+}
+
+class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
+  late DateTime _selectedDateTime;
+  bool _showTimePicker = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _showTimePicker = widget.startWithTime;
+    _selectedDateTime = widget.initialDateTime;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return Container(
+      color: colorScheme.backgroundElevated,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                _showTimePicker ? "Select time" : "Select date",
+                style: TextStyle(
+                  color: colorScheme.textBase,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+
+          // Date/Time Picker
+          Container(
+            height: 220,
+            decoration: BoxDecoration(
+              color: Colors.grey[900],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            child: CupertinoTheme(
+              data: CupertinoThemeData(
+                brightness: Brightness.dark,
+                textTheme: CupertinoTextThemeData(
+                  dateTimePickerTextStyle: TextStyle(
+                    color: colorScheme.textBase,
+                    fontSize: 22,
+                  ),
+                ),
+              ),
+              child: CupertinoDatePicker(
+                key: ValueKey(_showTimePicker),
+                mode: _showTimePicker
+                    ? CupertinoDatePickerMode.time
+                    : CupertinoDatePickerMode.date,
+                initialDateTime: _selectedDateTime,
+                minimumDate: DateTime(1800),
+                // Use the maxDateTime parameter if provided, otherwise default to 2023
+                maximumDate: widget.maxDateTime,
+                use24hFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+                onDateTimeChanged: (DateTime newDateTime) {
+                  setState(() {
+                    if (_showTimePicker) {
+                      // Keep the date but update the time
+                      _selectedDateTime = DateTime(
+                        _selectedDateTime.year,
+                        _selectedDateTime.month,
+                        _selectedDateTime.day,
+                        newDateTime.hour,
+                        newDateTime.minute,
+                      );
+                    } else {
+                      // Keep the time but update the date
+                      _selectedDateTime = DateTime(
+                        newDateTime.year,
+                        newDateTime.month,
+                        newDateTime.day,
+                        _selectedDateTime.hour,
+                        _selectedDateTime.minute,
+                      );
+                    }
+
+                    // Ensure the selected date doesn't exceed maxDateTime
+                    if (_selectedDateTime.isAfter(widget.maxDateTime)) {
+                      _selectedDateTime = widget.maxDateTime;
+                    }
+                  });
+                },
+              ),
+            ),
+          ),
+
+          // Buttons
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Cancel Button
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: Text(
+                    _showTimePicker ? "Previous" : "Cancel",
+                    style: TextStyle(
+                      color: colorScheme.textBase,
+                      fontSize: 12,
+                    ),
+                  ),
+                  onPressed: () {
+                    if (_showTimePicker) {
+                      // Go back to date picker
+                      setState(() {
+                        _showTimePicker = false;
+                      });
+                    } else {
+                      // Cancel the whole operation
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+
+                // Next/Done Button
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: Text(
+                    _showTimePicker ? "Done" : "Next",
+                    style: TextStyle(
+                      color: colorScheme.primary700,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onPressed: () {
+                    if (_showTimePicker) {
+                      // We're done, call the callback
+                      widget.onDateTimeSelected(_selectedDateTime);
+                    } else {
+                      // Move to time picker
+                      setState(() {
+                        _showTimePicker = true;
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
