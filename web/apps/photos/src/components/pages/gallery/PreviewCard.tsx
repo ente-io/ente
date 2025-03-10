@@ -4,7 +4,7 @@ import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
 import { enteFileDeletionDate } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import { GAP_BTW_TILES } from "@/new/photos/components/PhotoList";
+import { GAP_BTW_TILES } from "@/new/photos/components/FileList";
 import {
     LoadingThumbnail,
     StaticThumbnail,

@@ -23,7 +23,7 @@ import {
 } from "types/gallery";
 import { downloadSingleFile } from "utils/file";
 import { handleSelectCreator } from "utils/photoFrame";
-import { PhotoList, type FileListAnnotatedFile } from "./PhotoList";
+import { FileList, type FileListAnnotatedFile } from "./FileList";
 import PreviewCard from "./pages/gallery/PreviewCard";
 
 const Container = styled("div")`
@@ -178,12 +178,14 @@ const PhotoFrame = ({
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
 
-    const annotatedFileListFiles = useMemo((): FileListAnnotatedFile[] => {
-        return files.map((file) => ({
-            file,
-            timelineDateString: fileTimelineDateString(file),
-        }));
-    }, [files]);
+    const annotatedFiles = useMemo(
+        (): FileListAnnotatedFile[] =>
+            files.map((file) => ({
+                file,
+                timelineDateString: fileTimelineDateString(file),
+            })),
+        [files],
+    );
 
     const handleThumbnailClick = useCallback((index: number) => {
         setCurrentIndex(index);
@@ -294,17 +296,16 @@ const PhotoFrame = ({
                 (index - i) * direction >= 0;
                 i += direction
             ) {
-                checked =
-                    checked && !!selected[annotatedFileListFiles[i].file.id];
+                checked = checked && !!selected[annotatedFiles[i].file.id];
             }
             for (
                 let i = rangeStart;
                 (index - i) * direction > 0;
                 i += direction
             ) {
-                handleSelect(annotatedFileListFiles[i].file)(!checked);
+                handleSelect(annotatedFiles[i].file)(!checked);
             }
-            handleSelect(annotatedFileListFiles[index].file, index)(!checked);
+            handleSelect(annotatedFiles[index].file, index)(!checked);
         }
     };
 
@@ -369,7 +370,7 @@ const PhotoFrame = ({
     };
     */
 
-    if (!annotatedFileListFiles.length) {
+    if (!files.length) {
         return <></>;
     }
 
@@ -377,13 +378,13 @@ const PhotoFrame = ({
         <Container>
             <AutoSizer>
                 {({ height, width }) => (
-                    <PhotoList
+                    <FileList
                         width={width}
                         height={height}
                         getThumbnail={getThumbnail}
                         mode={mode}
                         modePlus={modePlus}
-                        annotatedFiles={annotatedFileListFiles}
+                        annotatedFiles={annotatedFiles}
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePersonID}
                         showAppDownloadBanner={showAppDownloadBanner}

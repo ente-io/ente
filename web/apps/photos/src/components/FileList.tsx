@@ -6,7 +6,7 @@ import {
     IMAGE_CONTAINER_MAX_HEIGHT,
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
-} from "@/new/photos/components/PhotoList";
+} from "@/new/photos/components/FileList";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
 import type { PhotoFrameProps } from "components/PhotoFrame";
@@ -188,7 +188,7 @@ export interface FileListAnnotatedFile {
     timelineDateString: string;
 }
 
-type Props = Pick<PhotoFrameProps, "mode" | "modePlus"> & {
+type FileListProps = Pick<PhotoFrameProps, "mode" | "modePlus"> & {
     height: number;
     width: number;
     annotatedFiles: FileListAnnotatedFile[];
@@ -248,10 +248,7 @@ const PhotoListRow = React.memo(
     areEqual,
 );
 
-/**
- * TODO: Rename me to FileList.
- */
-export function PhotoList({
+export const FileList: React.FC<FileListProps> = ({
     height,
     width,
     mode,
@@ -261,7 +258,7 @@ export function PhotoList({
     getThumbnail,
     activeCollectionID,
     activePersonID,
-}: Props) {
+}) => {
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
@@ -918,4 +915,4 @@ export function PhotoList({
             {PhotoListRow}
         </List>
     );
-}
+};
