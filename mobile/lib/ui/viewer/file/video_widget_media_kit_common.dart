@@ -44,6 +44,7 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   void initState() {
+    super.initState();
     _isPlayingStreamSubscription =
         widget.controller.player.stream.playing.listen((isPlaying) {
       if (isPlaying && !_isSeekingNotifier.value) {
@@ -55,7 +56,6 @@ class _VideoWidgetState extends State<VideoWidget> {
     });
 
     _isSeekingNotifier.addListener(isSeekingListener);
-    super.initState();
   }
 
   @override
@@ -131,27 +131,6 @@ class _VideoWidgetState extends State<VideoWidget> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              widget.file.caption != null
-                                  ? Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        16,
-                                        12,
-                                        16,
-                                        8,
-                                      ),
-                                      child: Text(
-                                        widget.file.caption!,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                        style: getEnteTextTheme(context)
-                                            .mini
-                                            .copyWith(
-                                              color: textBaseDark,
-                                            ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    )
-                                  : const SizedBox.shrink(),
                               PreviewStatusWidget(
                                 showControls: value,
                                 file: widget.file,
@@ -161,6 +140,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                               SeekBarAndDuration(
                                 controller: widget.controller,
                                 isSeekingNotifier: _isSeekingNotifier,
+                                caption: widget.file.caption,
                               ),
                             ],
                           ),
@@ -272,11 +252,13 @@ class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
 class SeekBarAndDuration extends StatelessWidget {
   final VideoController? controller;
   final ValueNotifier<bool> isSeekingNotifier;
+  final String? caption;
 
   const SeekBarAndDuration({
     super.key,
     required this.controller,
     required this.isSeekingNotifier,
+    required this.caption,
   });
 
   @override
@@ -302,46 +284,66 @@ class SeekBarAndDuration extends StatelessWidget {
             width: 1,
           ),
         ),
-        child: Row(
+        child: Column(
           children: [
-            StreamBuilder(
-              stream: controller?.player.stream.position,
-              builder: (context, snapshot) {
-                if (snapshot.data == null) {
-                  return Text(
-                    "0:00",
-                    style: getEnteTextTheme(
-                      context,
-                    ).mini.copyWith(
-                          color: textBaseDark,
-                        ),
-                  );
-                }
-                return Text(
-                  secondsToDuration(snapshot.data!.inSeconds),
+            caption != null && caption!.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      0,
+                      8,
+                      0,
+                      12,
+                    ),
+                    child: Text(
+                      caption!,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: getEnteTextTheme(context).mini,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+            Row(
+              children: [
+                StreamBuilder(
+                  stream: controller?.player.stream.position,
+                  builder: (context, snapshot) {
+                    if (snapshot.data == null) {
+                      return Text(
+                        "0:00",
+                        style: getEnteTextTheme(
+                          context,
+                        ).mini.copyWith(
+                              color: textBaseDark,
+                            ),
+                      );
+                    }
+                    return Text(
+                      secondsToDuration(snapshot.data!.inSeconds),
+                      style: getEnteTextTheme(
+                        context,
+                      ).mini.copyWith(
+                            color: textBaseDark,
+                          ),
+                    );
+                  },
+                ),
+                Expanded(
+                  child: SeekBar(
+                    controller!,
+                    isSeekingNotifier,
+                  ),
+                ),
+                Text(
+                  _secondsToDuration(
+                    controller!.player.state.duration.inSeconds,
+                  ),
                   style: getEnteTextTheme(
                     context,
                   ).mini.copyWith(
                         color: textBaseDark,
                       ),
-                );
-              },
-            ),
-            Expanded(
-              child: SeekBar(
-                controller!,
-                isSeekingNotifier,
-              ),
-            ),
-            Text(
-              _secondsToDuration(
-                controller!.player.state.duration.inSeconds,
-              ),
-              style: getEnteTextTheme(
-                context,
-              ).mini.copyWith(
-                    color: textBaseDark,
-                  ),
+                ),
+              ],
             ),
           ],
         ),
