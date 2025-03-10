@@ -259,17 +259,18 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 
   Future<void> _changeIcon() async {
     Logger("Icon").info("Initializing");
-    await LauncherIconSwitcher()
+    final iconChanger = LauncherIconSwitcher();
+    await iconChanger
         .initialize(['IconLight', 'IconDark', 'IconGreen'], 'IconGreen');
     Logger("Icon").info("Initialized");
-    final currentIcon = await LauncherIconSwitcher().getCurrentIcon();
+    final currentIcon = await iconChanger.getCurrentIcon();
     Logger("Icon").info("Current Icon: " + currentIcon);
     if (currentIcon == 'IconLight') {
-      await LauncherIconSwitcher().setIcon('IconDark');
+      await iconChanger.setIcon('IconDark');
     } else if (currentIcon == 'IconDark') {
-      await LauncherIconSwitcher().setIcon('IconGreen');
+      await iconChanger.setIcon('IconGreen');
     } else {
-      await LauncherIconSwitcher().setIcon('IconLight');
+      await iconChanger.setIcon('IconLight');
     }
     Logger("Icon").info("Changed");
   }
