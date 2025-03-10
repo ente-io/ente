@@ -52,10 +52,6 @@ import {
 } from "@/new/photos/components/utils/dialog";
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import {
-    aboveFileViewerContentZ,
-    fileInfoDrawerZ,
-} from "@/new/photos/components/utils/z-index";
-import {
     getAnnotatedFacesForFile,
     isMLEnabled,
     type AnnotatedFaceID,
@@ -433,7 +429,6 @@ const FileInfoSidebar = styled(
         />
     ),
 )(({ theme }) => ({
-    zIndex: fileInfoDrawerZ,
     // [Note: Lighter backdrop for overlays on photo viewer]
     //
     // The default backdrop color we use for the drawer in light mode is too
@@ -817,12 +812,7 @@ const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
     };
 
     return (
-        <Dialog
-            {...{ open, onClose }}
-            sx={{ zIndex: aboveFileViewerContentZ }}
-            fullWidth
-            maxWidth="xs"
-        >
+        <Dialog {...{ open, onClose }} fullWidth maxWidth="xs">
             <DialogTitle sx={{ "&&&": { paddingBlock: "26px 0px" } }}>
                 {t("rename_file")}
             </DialogTitle>

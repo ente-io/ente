@@ -153,7 +153,7 @@ export interface MiniDialogAttributes {
     buttonDirection?: "row" | "column";
 }
 
-type MiniDialogProps = Pick<DialogProps, "open" | "sx"> & {
+type MiniDialogProps = Pick<DialogProps, "open"> & {
     onClose: () => void;
     attributes?: MiniDialogAttributes;
 };
@@ -168,7 +168,7 @@ type MiniDialogProps = Pick<DialogProps, "open" | "sx"> & {
  */
 export const AttributedMiniDialog: React.FC<
     React.PropsWithChildren<MiniDialogProps>
-> = ({ open, onClose, sx, attributes, children }) => {
+> = ({ open, onClose, attributes, children }) => {
     const [phase, setPhase] = useState<
         "loading" | "secondary-loading" | "failed" | undefined
     >();
@@ -268,7 +268,7 @@ export const AttributedMiniDialog: React.FC<
 
     return (
         <Dialog
-            {...{ open, sx }}
+            {...{ open }}
             onClose={handleClose}
             fullWidth
             slotProps={{ paper: { sx: { maxWidth: "360px" } } }}

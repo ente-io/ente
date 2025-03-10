@@ -7,7 +7,6 @@ import log from "@/base/log";
 import { Stack, Typography, type ModalProps } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
-import { aboveFileViewerContentZ } from "./utils/z-index";
 
 type ConfirmDeleteFileDialogProps = ModalVisibilityProps & {
     /**
@@ -59,7 +58,6 @@ export const ConfirmDeleteFileDialog: React.FC<
             onClose={handleClose}
             title={t("trash_file_title")}
             sx={(theme) => ({
-                zIndex: aboveFileViewerContentZ,
                 // See: [Note: Lighter backdrop for overlays on photo viewer]
                 ...theme.applyStyles("light", {
                     ".MuiBackdrop-root": {
