@@ -759,14 +759,18 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     useEffect(updateFullscreenStatus, [updateFullscreenStatus]);
 
+    if (!activeAnnotatedFile) {
+        return <></>;
+    }
+
     return (
         <>
             <FileInfo
                 open={openFileInfo}
                 onClose={handleFileInfoClose}
-                file={activeAnnotatedFile?.file}
+                file={activeAnnotatedFile.file}
                 exif={activeFileExif}
-                allowEdits={!!activeAnnotatedFile?.annotation.isOwnFile}
+                allowEdits={!!activeAnnotatedFile.annotation.isOwnFile}
                 allowMap={haveUser}
                 showCollections={haveUser}
                 onNeedsRemoteSync={handleNeedsRemoteSync}
@@ -782,7 +786,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 id={moreMenuID}
                 slotProps={{ list: { "aria-labelledby": moreButtonID } }}
             >
-                {activeAnnotatedFile?.annotation.showDownload == "menu" && (
+                {activeAnnotatedFile.annotation.showDownload == "menu" && (
                     <MoreMenuItem onClick={handleDownloadMenuAction}>
                         <MoreMenuItemTitle>
                             {/*TODO */ t("download")}
@@ -790,7 +794,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <FileDownloadOutlinedIcon />
                     </MoreMenuItem>
                 )}
-                {activeAnnotatedFile?.annotation.showDelete && (
+                {activeAnnotatedFile.annotation.showDelete && (
                     <MoreMenuItem onClick={handleConfirmDelete}>
                         <MoreMenuItemTitle>
                             {/*TODO */ t("delete")}
@@ -807,7 +811,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
                     </MoreMenuItem>
                 )}
-                {activeAnnotatedFile?.annotation.showEditImage && (
+                {activeAnnotatedFile.annotation.showEditImage && (
                     <MoreMenuItem onClick={handleEditImage}>
                         <MoreMenuItemTitle>
                             {/*TODO */ pt("Edit image")}
@@ -851,7 +855,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             <ImageEditorOverlay
                 open={openImageEditor}
                 onClose={handleImageEditorClose}
-                file={activeAnnotatedFile?.file}
+                file={activeAnnotatedFile.file}
                 onSaveEditedCopy={handleSaveEditedCopy}
             />
             <Shortcuts open={openShortcuts} onClose={handleShortcutsClose} />
@@ -1072,7 +1076,7 @@ const createImagePNGBlob = async (imageURL: string) =>
             const canvas = document.createElement("canvas");
             canvas.width = image.width;
             canvas.height = image.height;
-            canvas.getContext("2d").drawImage(image, 0, 0);
+            canvas.getContext("2d")!.drawImage(image, 0, 0);
             canvas.toBlob(resolve, "image/png");
         };
         image.onerror = reject;

@@ -113,7 +113,7 @@ export type FileInfoProps = ModalVisibilityProps & {
     /**
      * The file whose information we are showing.
      */
-    file: EnteFile | undefined;
+    file: EnteFile;
     /**
      * Exif information for {@link file}.
      */
@@ -240,11 +240,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     const handleSelectFace = ({ personID }: AnnotatedFaceID) =>
         onSelectPerson?.(personID);
-
-    if (!file) {
-        if (open) assertionFailed();
-        return <></>;
-    }
 
     return (
         <FileInfoSidebar {...{ open, onClose }}>
