@@ -175,10 +175,23 @@ const NothingContainer = styled(ListItemContainer)`
     justify-content: center;
 `;
 
+export interface FileListAnnotatedFile {
+    file: EnteFile;
+    /**
+     * The date string using with the associated {@link file} should be shown in
+     * the timeline.
+     *
+     * This for used for grouping files: all files which have the same
+     * {@link timelineDateString} are grouped together into a section titled
+     * with that {@link timelineDateString}.
+     */
+    timelineDateString: string;
+}
+
 type Props = Pick<PhotoFrameProps, "mode" | "modePlus"> & {
     height: number;
     width: number;
-    displayFiles: (EnteFile & { timelineDateString?: string })[];
+    annotatedFiles: FileListAnnotatedFile[];
     showAppDownloadBanner: boolean;
     getThumbnail: (
         file: EnteFile,
@@ -243,7 +256,7 @@ export function PhotoList({
     width,
     mode,
     modePlus,
-    displayFiles,
+    annotatedFiles,
     showAppDownloadBanner,
     getThumbnail,
     activeCollectionID,
@@ -338,7 +351,7 @@ export function PhotoList({
     }, [
         width,
         height,
-        displayFiles,
+        annotatedFiles,
         galleryContext.photoListHeader,
         publicCollectionGalleryContext.photoListHeader,
         galleryContext.isClipSearchResult,
@@ -414,7 +427,7 @@ export function PhotoList({
     const groupByTime = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;
         let currentDate;
-        displayFiles.forEach((item, index) => {
+        annotatedFiles.forEach((item, index) => {
             if (
                 !currentDate ||
                 !isSameDay(

@@ -1,12 +1,10 @@
 import { isSameDay } from "@/base/date";
 import { formattedDate } from "@/base/i18n-date";
-import log from "@/base/log";
 import type { FileInfoProps } from "@/gallery/components/FileInfo";
 import { FileViewer } from "@/gallery/components/viewer/FileViewer";
 import { type RenderableSourceURLs } from "@/gallery/services/download";
 import type { Collection } from "@/media/collection";
 import { EnteFile } from "@/media/file";
-import { FileType } from "@/media/file-type";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { moveToTrash, TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
@@ -25,7 +23,7 @@ import {
 } from "types/gallery";
 import { downloadSingleFile } from "utils/file";
 import { handleSelectCreator } from "utils/photoFrame";
-import { PhotoList } from "./PhotoList";
+import { PhotoList, type FileListAnnotatedFile } from "./PhotoList";
 import PreviewCard from "./pages/gallery/PreviewCard";
 
 const Container = styled("div")`
@@ -179,20 +177,12 @@ const PhotoFrame = ({
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
-    const [displayFiles, setDisplayFiles] = useState<DisplayFile[] | undefined>(
-        undefined,
-    );
 
-    useEffect(() => {
-        // TODO(PS): Audit
-        const result = files.map((file) => ({
-            ...file,
-            w: window.innerWidth,
-            h: window.innerHeight,
-            title: file.pubMagicMetadata?.data.caption,
+    const annotatedFileListFiles = useMemo((): FileListAnnotatedFile[] => {
+        return files.map((file) => ({
+            file,
             timelineDateString: fileTimelineDateString(file),
         }));
-        setDisplayFiles(result);
     }, [files]);
 
     const handleThumbnailClick = useCallback((index: number) => {
@@ -281,30 +271,6 @@ const PhotoFrame = ({
         }
     }, [selected]);
 
-    if (!displayFiles) {
-        return <div />;
-    }
-
-    // Return a (curried) function which will return true if the URL was updated
-    // (for the given params), and false otherwise.
-    const updateThumbURL =
-        (index: number) => (id: number, url: string, forceUpdate?: boolean) => {
-            const file = displayFiles[index];
-            // This is to prevent outdated call from updating the wrong file.
-            if (file.id !== id) {
-                log.info(
-                    `Ignoring stale updateThumbURL for display file at index ${index} (file ID ${file.id}, expected ${id})`,
-                );
-                throw Error("Update URL file id mismatch");
-            }
-            if (file.msrc && !forceUpdate) {
-                return false;
-            }
-            // TODO(PS): Audit
-            updateDisplayFileThumbnail(file, url);
-            return true;
-        };
-
     const handleSelect = handleSelectCreator(
         setSelected,
         mode,
@@ -328,16 +294,17 @@ const PhotoFrame = ({
                 (index - i) * direction >= 0;
                 i += direction
             ) {
-                checked = checked && !!selected[displayFiles[i].id];
+                checked =
+                    checked && !!selected[annotatedFileListFiles[i].file.id];
             }
             for (
                 let i = rangeStart;
                 (index - i) * direction > 0;
                 i += direction
             ) {
-                handleSelect(displayFiles[i])(!checked);
+                handleSelect(annotatedFileListFiles[i].file)(!checked);
             }
-            handleSelect(displayFiles[index], index)(!checked);
+            handleSelect(annotatedFileListFiles[index].file, index)(!checked);
         }
     };
 
@@ -349,7 +316,6 @@ const PhotoFrame = ({
         <PreviewCard
             key={`tile-${item.id}-selected-${selected[item.id] ?? false}`}
             file={item}
-            updateURL={updateThumbURL(index)}
             onClick={() => handleThumbnailClick(index)}
             selectable={selectable}
             onSelect={handleSelect(item, index)}
@@ -403,6 +369,10 @@ const PhotoFrame = ({
     };
     */
 
+    if (!annotatedFileListFiles.length) {
+        return <></>;
+    }
+
     return (
         <Container>
             <AutoSizer>
@@ -413,7 +383,7 @@ const PhotoFrame = ({
                         getThumbnail={getThumbnail}
                         mode={mode}
                         modePlus={modePlus}
-                        displayFiles={displayFiles}
+                        annotatedFiles={annotatedFileListFiles}
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePersonID}
                         showAppDownloadBanner={showAppDownloadBanner}
@@ -448,24 +418,6 @@ const PhotoFrame = ({
 };
 
 export default PhotoFrame;
-
-const updateDisplayFileThumbnail = (file: DisplayFile, url: string) => {
-    file.w = window.innerWidth;
-    file.h = window.innerHeight;
-    file.msrc = url;
-    file.canForceConvert = false;
-    file.isSourceLoaded = false;
-    file.conversionFailed = false;
-    if (file.metadata.fileType === FileType.image) {
-        file.src = url;
-    } else {
-        file.html = `
-            <div class = 'pswp-item-container'>
-                <img src="${url}"/>
-            </div>
-            `;
-    }
-};
 
 /**
  * See: [Note: Timeline date string]
