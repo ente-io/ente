@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:dots_indicator/dots_indicator.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:launcher_icon_switcher/launcher_icon_switcher.dart";
+import "package:logging/logging.dart";
 import "package:photos/app.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -155,7 +157,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                   key: const ValueKey("signInButton"),
                   style:
                       Theme.of(context).colorScheme.optionalActionButtonStyle,
-                  onPressed: _navigateToSignInPage,
+                  onPressed: _changeIcon,
                   child: Text(
                     S.of(context).existingUser,
                     style: const TextStyle(
@@ -251,6 +253,23 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         },
       ),
     );
+  }
+
+  Future<void> _changeIcon() async {
+    Logger("Icon").info("Initializing");
+    await LauncherIconSwitcher()
+        .initialize(['IconLight', 'IconDark', 'IconGreen'], 'IconLight');
+    Logger("Icon").info("Initialized");
+    final currentIcon = await LauncherIconSwitcher().getCurrentIcon();
+    Logger("Icon").info("Current Icon: " + currentIcon);
+    if (currentIcon == 'IconLight') {
+      await LauncherIconSwitcher().setIcon('IconDark');
+    } else if (currentIcon == 'IconDark') {
+      await LauncherIconSwitcher().setIcon('IconGreen');
+    } else {
+      await LauncherIconSwitcher().setIcon('IconLight');
+    }
+    Logger("Icon").info("Changed");
   }
 
   void _navigateToSignInPage() {

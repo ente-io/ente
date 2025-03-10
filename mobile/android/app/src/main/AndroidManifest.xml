@@ -15,7 +15,6 @@
             android:exported="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
-            android:enabled="false"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -87,9 +86,9 @@
 
         </activity>
         <activity-alias
-            android:name=".IconLight"
-            android:icon="@mipmap/icon-light"
-            android:enabled="true"
+            android:name="${applicationId}.IconLight"
+            android:icon="@mipmap/icon_light"
+            android:enabled="false"
             android:exported="true"
             android:targetActivity=".MainActivity">
             <intent-filter>
@@ -98,8 +97,9 @@
             </intent-filter>
         </activity-alias>
         <activity-alias
-            android:name=".IconDark"
-            android:icon="@mipmap/icon-dark"
+            android:name="${applicationId}.IconDark"
+            android:icon="@mipmap/icon_light"
+            android:enabled="false"
             android:exported="true"
             android:targetActivity=".MainActivity">
             <intent-filter>
@@ -108,8 +108,9 @@
             </intent-filter>
         </activity-alias>
         <activity-alias
-            android:name=".IconGreen"
-            android:icon="@mipmap/icon-green"
+            android:name="${applicationId}.IconGreen"
+            android:icon="@mipmap/icon_light"
+            android:enabled="false"
             android:exported="true"
             android:targetActivity=".MainActivity">
             <intent-filter>
