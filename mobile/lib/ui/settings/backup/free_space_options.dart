@@ -7,7 +7,7 @@ import "package:photos/models/backup_status.dart";
 import "package:photos/models/duplicate_files.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/deduplication_service.dart";
-import "package:photos/services/sync_service.dart";
+import "package:photos/services/files_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -18,14 +18,14 @@ import "package:photos/ui/components/menu_section_description_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/tools/debug/app_storage_viewer.dart";
 import "package:photos/ui/tools/deduplicate_page.dart";
 import "package:photos/ui/tools/free_space_page.dart";
 import "package:photos/ui/viewer/gallery/large_files_page.dart";
-import "package:photos/utils/data_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/navigation_util.dart';
-import "package:photos/utils/toast_util.dart";
+import "package:photos/utils/standalone/data.dart";
 
 class FreeUpSpaceOptionsScreen extends StatefulWidget {
   const FreeUpSpaceOptionsScreen({super.key});
@@ -93,7 +93,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                   onTap: () async {
                                     BackupStatus status;
                                     try {
-                                      status = await SyncService.instance
+                                      status = await FilesService.instance
                                           .getBackupStatus();
                                     } catch (e) {
                                       await showGenericErrorDialog(

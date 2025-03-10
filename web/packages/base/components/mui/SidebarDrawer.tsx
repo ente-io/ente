@@ -23,16 +23,23 @@ import React from "react";
  * It also does some trickery with a sticky opaque bar to ensure that the
  * content scrolls below our inline title bar on desktop.
  */
-export const SidebarDrawer: React.FC<DrawerProps> = ({ children, ...rest }) => (
+export const SidebarDrawer: React.FC<DrawerProps> = ({
+    slotProps,
+    children,
+    ...rest
+}) => (
     <Drawer
         {...rest}
-        PaperProps={{
-            sx: {
-                maxWidth: "375px",
-                width: "100%",
-                scrollbarWidth: "thin",
-                // Need to increase specificity to override inherited padding.
-                "&&": { padding: 0 },
+        slotProps={{
+            ...(slotProps ?? {}),
+            paper: {
+                sx: {
+                    maxWidth: "375px",
+                    width: "100%",
+                    scrollbarWidth: "thin",
+                    // Need to increase specificity to override inherited padding.
+                    "&&": { padding: 0 },
+                },
             },
         }}
     >

@@ -6,7 +6,7 @@ import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/photo_manager_util.dart";

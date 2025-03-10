@@ -14,9 +14,9 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/files_split.dart';
 import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/metadata/common_keys.dart";
+import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
-import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
@@ -25,12 +25,12 @@ import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/payment/subscription.dart';
-import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
-import 'package:photos/utils/toast_util.dart';
+import 'package:photos/utils/standalone/date_time.dart';
 import "package:styled_text/styled_text.dart";
 
 class CollectionActions {
@@ -340,7 +340,7 @@ class CollectionActions {
   ) async {
     final textTheme = getEnteTextTheme(bContext);
     final currentUserID = Configuration.instance.getUserID()!;
-    if (collection.owner!.id != currentUserID) {
+    if (collection.owner.id != currentUserID) {
       throw AssertionError("Can not delete album owned by others");
     }
     if (collection.hasSharees) {
@@ -495,7 +495,7 @@ class CollectionActions {
     bool isHidden = false,
   }) async {
     final int currentUserID = Configuration.instance.getUserID()!;
-    final isCollectionOwner = collection.owner!.id == currentUserID;
+    final isCollectionOwner = collection.owner.id == currentUserID;
     final FilesSplit split = FilesSplit.split(
       files,
       Configuration.instance.getUserID()!,
@@ -631,7 +631,7 @@ class CollectionActions {
     if (targetCollection == null ||
         (CollectionType.uncategorized == targetCollection.type ||
             targetCollection.type == CollectionType.favorites) ||
-        targetCollection.owner!.id != userID) {
+        targetCollection.owner.id != userID) {
       return false;
     }
     return true;

@@ -170,7 +170,7 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
     return faceThumbnails;
   } catch (e, s) {
     _logger.severe(
-      'Error generating face thumbnails. cropImage problematic input argument: ${faceBoxes[i]}',
+      'Error generating face thumbnails. cropImage problematic input argument: ${i}th facebox: ${faceBoxes[i].toString()}',
       e,
       s,
     );

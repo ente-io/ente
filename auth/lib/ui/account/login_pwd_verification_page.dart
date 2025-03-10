@@ -113,7 +113,7 @@ class _LoginPasswordVerificationPageState
         );
       } else {
         _logger.severe('API failure during SRP login', e, s);
-        if (e.type == DioExceptionType.unknown) {
+        if (e.type == DioExceptionType.connectionError) {
           await _showContactSupportDialog(
             context,
             context.l10n.noInternetConnection,

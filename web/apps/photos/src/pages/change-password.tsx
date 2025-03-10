@@ -1,3 +1,1 @@
-import Page from "@/accounts/pages/change-password";
-
-export default Page;
+export { default } from "@/accounts/pages/change-password";

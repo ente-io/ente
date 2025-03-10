@@ -216,7 +216,7 @@ Future<Map<String, Uint8List>?> _getFaceCrops(
     faceBoxes,
   );
   final Map<String, Uint8List> result = {};
-  for (int i = 0; i < faceIds.length; i++) {
+  for (int i = 0; i < faceCrop.length; i++) {
     result[faceIds[i]] = faceCrop[i];
   }
   return result;

@@ -1,12 +1,12 @@
 import { basename } from "@/base/file-name";
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import { downloadManager } from "@/gallery/services/download";
+import type { UploadItem } from "@/gallery/services/upload";
 import { renderableImageBlob } from "@/gallery/utils/convert";
 import { readStream } from "@/gallery/utils/native-stream";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import type { UploadItem } from "../upload/types";
 
 /**
  * An image bitmap and its RGBA data.

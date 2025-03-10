@@ -1,6 +1,6 @@
+import { useBaseContext } from "@/base/context";
 import { Notification } from "@/new/photos/components/Notification";
 import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
-import { useAppContext } from "@/new/photos/types/context";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext } from "react";
@@ -57,7 +57,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
     attributesList,
     setAttributesList,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
     const galleryContext = useContext(GalleryContext);
 
     if (!attributesList) {

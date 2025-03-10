@@ -499,10 +499,16 @@
   "appLockOfflineModeWarning": "Has elegido proceder sin copia de seguridad. Si olvidas el código de desbloqueo de la aplicación, se bloqueará el acceso a sus datos.",
   "duplicateCodes": "Duplicar códigos",
   "noDuplicates": "✨ No hay duplicados",
-  "youveNoDuplicateCodesThatCanBeCleared": "No tienes códigos duplicados que se puedan borrar",
   "deduplicateCodes": "Desduplicar códigos",
   "deselectAll": "Deseleccionar todo",
   "selectAll": "Seleccionar todo",
   "deleteDuplicates": "Eliminar duplicados",
-  "plainHTML": "HTML plano"
+  "plainHTML": "HTML plano",
+  "tellUsWhatYouThink": "Cuéntanos cuál es su opinión",
+  "dropReview": "Danos una reseña en la App/Play Store",
+  "supportEnte": "Apoya a <bold-green>ente</bold-green>",
+  "giveUsAStarOnGithub": "Danos una estrella en GitHub",
+  "free5GB": "5 GB gratis en <bold-green>ente</bold-green> Fotos",
+  "freeStorageOffer": "10% de descuento en <bold-green>ente</bold-green> fotos",
+  "freeStorageOfferDescription": "Usa el cupón \"AUTH\" para obtener un 10% de descuento en el primer año"
 }

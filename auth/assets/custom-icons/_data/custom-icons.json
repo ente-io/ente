@@ -36,8 +36,17 @@
       "title": "Amazon"
     },
     {
+      "title": "Ankama",
+      "slug": "ankama"
+    },
+    {
       "title": "Anycoin Direct",
       "slug": "anycoindirect"
+    },
+     {
+      "title": "Aruba",
+      "slug": "aruba",
+      "hex": "ef8a33"
     },
     {
       "title": "AscendEX"
@@ -200,6 +209,10 @@
       "title": "Bugzilla"
     },
     {
+      "title": "ButterflyMX",
+      "slug": "butterflymx"
+    },
+    {
       "title": "Bybit"
     },
     {
@@ -298,6 +311,9 @@
       "title": "Discourse"
     },
     {
+      "title": "Deloitte"
+    },
+    {
       "title": "DMarket"
     },
     {
@@ -353,6 +369,14 @@
       "title": "Estateguru"
     },
     {
+      "title": "EVEOnline",
+      "slug": "eve_online",
+      "altNames": [
+        "EVE Online"
+      ],
+      "hex": "858585"
+    },
+    {
       "title": "Fastmail"
     },
     {
@@ -377,7 +401,15 @@
       "title": "ForUsAll"
     },
     {
+      "title": "FreeTaxUSA",
+      "slug": "freetaxusa"
+    },
+    {
       "title": "G2A"
+    },
+    {
+      "title": "Gate.io",
+      "slug": "gateio.svg"
     },
     {
       "title": "GitHub"
@@ -717,7 +749,8 @@
     {
       "title": "nintendo",
       "altNames": [
-        "任天堂"
+        "任天堂",
+        "Nintendo Account"
       ]
     },
     {
@@ -733,6 +766,15 @@
     },
     {
       "title": "Notesnook"
+    },
+    {
+      "title": "NoIp",
+      "slug": "noip",
+      "altNames": [
+        "No IP",
+        "No-IP",
+        "noip.com"
+      ]
     },
     {
       "title": "Notion"
@@ -760,6 +802,11 @@
       "altNames": [
         "欧易"
       ]
+    },
+     {
+      "title": "OnShape",
+      "slug": "onshape",
+      "hex": "7abb5e"
     },
     {
       "title": "Parqet",
@@ -815,6 +862,13 @@
       ]
     },
     {
+      "title": "Prey Project",
+      "slug": "prey_project",
+      "altNames": [
+        "PreyProject"
+      ]
+    },
+    {
       "title": "Privacy Guides",
       "slug": "privacyguides"
     },
@@ -858,6 +912,11 @@
       "title": "RealMe",
       "slug": "realme"
     },
+     {
+      "title": "RealVNC",
+      "slug": "realvnc",
+      "hex": "488aec"
+    },
     {
       "title": "Registro br",
       "slug": "registro_br",
@@ -900,6 +959,10 @@
     },
     {
       "title": "Samsung"
+    },
+    {
+      "title": "Seafile",
+      "slug": "seafile"
     },
     {
       "title": "Sendgrid"
@@ -1139,6 +1202,9 @@
       "title": "Wolvesville"
     },
     {
+      "title": "Workflowy"
+    },
+    {
       "title": "WorkOS",
       "altNames": [
         "Work OS"
@@ -1179,6 +1245,12 @@
     },
     {
       "title": "Zoom"
+    },
+    {
+      "title": "BingX"
+    },
+    {
+      "title": "CoinSpot"
     }
   ]
 }

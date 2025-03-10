@@ -73,17 +73,17 @@ export const DropdownInput = <T extends string>({
                     // maxWidth to 0 forces element widths to equal minWidth.
                     sx: { maxWidth: 0 },
                 },
-            },
-            MenuListProps: {
-                sx: {
-                    backgroundColor: "background.paper2",
-                    ".MuiMenuItem-root": {
-                        color: "text.faint",
-                        whiteSpace: "normal",
-                    },
-                    // Make the selected item pop out by using color.
-                    "&&& > .Mui-selected": {
-                        color: "text.base",
+                list: {
+                    sx: {
+                        backgroundColor: "background.paper2",
+                        ".MuiMenuItem-root": {
+                            color: "text.faint",
+                            whiteSpace: "normal",
+                        },
+                        // Make the selected item pop out by using color.
+                        "&&& > .Mui-selected": {
+                            color: "text.base",
+                        },
                     },
                 },
             },

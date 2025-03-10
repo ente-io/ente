@@ -13,21 +13,25 @@ import 'package:photos/events/files_updated_event.dart';
 import "package:photos/events/force_reload_trash_page_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
+import 'package:photos/models/api/collection/trash_item_request.dart';
+import "package:photos/models/backup_status.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/files_split.dart";
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/models/trash_item_request.dart';
 import "package:photos/service_locator.dart";
-import 'package:photos/services/remote_sync_service.dart';
-import 'package:photos/services/sync_service.dart';
+import "package:photos/services/files_service.dart";
+import "package:photos/services/sync/local_sync_service.dart";
+import 'package:photos/services/sync/remote_sync_service.dart';
+import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/notification/toast.dart';
 import "package:photos/utils/device_info.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 final _logger = Logger("DeleteFileUtil");
 
@@ -325,6 +329,7 @@ Future<bool> deleteLocalFiles(
   BuildContext context,
   List<String> localIDs,
 ) async {
+  _logger.info("Trying to delete local files ");
   final List<String> deletedIDs = [];
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
@@ -374,14 +379,167 @@ Future<bool> deleteLocalFiles(
       //This is a workaround so that users are not shown an error message on
       //android 10
       if (!await isAndroidSDKVersionLowerThan(android11SDKINT)) {
-        showToast(context, S.of(context).couldNotFreeUpSpace);
         return false;
       }
       return true;
     }
   } catch (e, s) {
     _logger.severe("Could not delete local files", e, s);
-    showToast(context, S.of(context).couldNotFreeUpSpace);
+    return false;
+  }
+}
+
+Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
+  BuildContext context,
+  List<String> localIDs,
+) async {
+  _logger.info(
+    "Trying to delete local files after removing already deleted IDs",
+  );
+
+  final List<String> deletedIDs = [];
+  final List<String> localAssetIDs = [];
+  final List<String> localSharedMediaIDs = [];
+  final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
+
+  final dialog = createProgressDialog(context, "Loading...");
+  await dialog.show();
+  try {
+    final files =
+        await FilesDB.instance.getLocalFiles(localIDs, dedupeByLocalID: true);
+    for (final file in files) {
+      if (!(await _localFileExist(file))) {
+        _logger.warning("Already deleted " + file.toString());
+        alreadyDeletedIDs.add(file.localID!);
+      } else if (file.localID!.startsWith(oldSharedMediaIdentifier) ||
+          file.localID!.startsWith(sharedMediaIdentifier)) {
+        localSharedMediaIDs.add(file.localID!);
+      } else {
+        localAssetIDs.add(file.localID!);
+      }
+    }
+    deletedIDs.addAll(alreadyDeletedIDs);
+    deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+
+    await dialog.hide();
+
+    final bool shouldDeleteInBatches =
+        await isAndroidSDKVersionLowerThan(android11SDKINT);
+    if (shouldDeleteInBatches) {
+      _logger.info("Deleting in batches");
+      deletedIDs
+          .addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
+    } else {
+      _logger.info("Deleting in one shot");
+      deletedIDs
+          .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
+    }
+    // In IOS, the library returns no error and fail to delete any file is
+    // there's any shared file. As a stop-gap solution, we initiate deletion in
+    // batches. Similar in Android, for large number of files, we have observed
+    // that the library fails to delete any file. So, we initiate deletion in
+    // batches.
+    if (deletedIDs.isEmpty && Platform.isIOS) {
+      deletedIDs.addAll(
+        await _iosDeleteLocalFilesInBatchesFallback(context, localAssetIDs),
+      );
+    }
+
+    if (deletedIDs.isNotEmpty) {
+      final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
+      await FilesDB.instance.deleteLocalFiles(deletedIDs);
+      _logger.info(deletedFiles.length.toString() + " files deleted locally");
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
+      );
+      return true;
+    } else {
+      //On android 10, even if files were deleted, deletedIDs is empty.
+      //This is a workaround so that users are not shown an error message on
+      //android 10
+      if (!await isAndroidSDKVersionLowerThan(android11SDKINT)) {
+        return false;
+      }
+      return true;
+    }
+  } catch (e, s) {
+    _logger.severe("Could not delete local files", e, s);
+    await dialog.hide();
+    return false;
+  }
+}
+
+/// Only to be used on Android
+Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
+  BuildContext context,
+) async {
+  _logger.info(
+    "Retrying free up space after removing assets non-existing in disk",
+  );
+
+  final dialog =
+      createProgressDialog(context, context.l10n.pleaseWaitThisWillTakeAWhile);
+  await dialog.show();
+  try {
+    final stopwatch = Stopwatch()..start();
+    final res = await PhotoManager.editor.android.removeAllNoExistsAsset();
+    if (res == false) {
+      _logger.warning("Failed to remove non-existing assets");
+    }
+    _logger.info(
+      "removeAllNoExistsAsset took: ${stopwatch.elapsedMilliseconds}ms",
+    );
+    await LocalSyncService.instance.sync();
+
+    late final BackupStatus status;
+    final List<String> deletedIDs = [];
+    final List<String> localAssetIDs = [];
+    final List<String> localSharedMediaIDs = [];
+    status = await FilesService.instance.getBackupStatus();
+
+    for (String localID in status.localIDs) {
+      if (localID.startsWith(oldSharedMediaIdentifier) ||
+          localID.startsWith(sharedMediaIdentifier)) {
+        localSharedMediaIDs.add(localID);
+      } else {
+        localAssetIDs.add(localID);
+      }
+    }
+    deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+
+    await dialog.hide();
+
+    final bool shouldDeleteInBatches =
+        await isAndroidSDKVersionLowerThan(android11SDKINT);
+    if (shouldDeleteInBatches) {
+      _logger.info("Deleting in batches");
+      deletedIDs
+          .addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
+    } else {
+      _logger.info("Deleting in one shot");
+      deletedIDs
+          .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
+    }
+
+    if (deletedIDs.isNotEmpty) {
+      final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
+      await FilesDB.instance.deleteLocalFiles(deletedIDs);
+      _logger.info(deletedFiles.length.toString() + " files deleted locally");
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
+      );
+      return true;
+    } else {
+      //On android 10, even if files were deleted, deletedIDs is empty.
+      //This is a workaround so that users are not shown an error message on
+      //android 10
+      if (!await isAndroidSDKVersionLowerThan(android11SDKINT)) {
+        return false;
+      }
+      return true;
+    }
+  } catch (e) {
+    await dialog.hide();
     return false;
   }
 }

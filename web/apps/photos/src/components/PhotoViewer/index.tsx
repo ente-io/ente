@@ -9,14 +9,17 @@ import {
 } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
+import { FileInfo, type FileInfoExif } from "@/gallery/components/FileInfo";
 import { downloadManager } from "@/gallery/services/download";
+import { extractRawExif, parseExif } from "@/gallery/services/exif";
+import type { Collection } from "@/media/collection";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewer";
+import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewerComponents";
+import { ImageEditorOverlay } from "@/new/photos/components/ImageEditorOverlay";
 import { moveToTrash } from "@/new/photos/services/collection";
-import { extractRawExif, parseExif } from "@/new/photos/services/exif";
-import { AppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -61,6 +64,7 @@ import {
     addToFavorites,
     removeFromFavorites,
 } from "services/collectionService";
+import uploadManager from "services/upload/uploadManager";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     copyFileToClipboard,
@@ -68,12 +72,16 @@ import {
     getFileFromURL,
 } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
-import { ImageEditorOverlay } from "./ImageEditorOverlay";
 
 export type PhotoViewerProps = Pick<
     PhotoFrameProps,
-    "favoriteFileIDs" | "markUnsyncedFavoriteUpdate" | "markTempDeleted"
+    | "favoriteFileIDs"
+    | "onMarkUnsyncedFavoriteUpdate"
+    | "onMarkTempDeleted"
+    | "fileCollectionIDs"
+    | "allCollectionsNameByID"
+    | "onSelectCollection"
+    | "onSelectPerson"
 > & {
     /**
      * The PhotoViewer is shown when this is `true`.
@@ -99,9 +107,6 @@ export type PhotoViewerProps = Pick<
     isInHiddenSection: boolean;
     enableDownload: boolean;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-    fileToCollectionsMap: Map<number, number[]>;
-    collectionNameMap: Map<number, string>;
-    onSelectPerson?: FileInfoProps["onSelectPerson"];
 };
 
 /**
@@ -127,18 +132,19 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     gettingData,
     forceConvertItem,
     favoriteFileIDs,
-    markUnsyncedFavoriteUpdate,
-    markTempDeleted,
+    onMarkUnsyncedFavoriteUpdate,
+    onMarkTempDeleted,
     isTrashCollection,
     isInHiddenSection,
     enableDownload,
     setFilesDownloadProgressAttributesCreator,
-    fileToCollectionsMap,
-    collectionNameMap,
+    fileCollectionIDs,
+    allCollectionsNameByID,
+    onSelectCollection,
     onSelectPerson,
 }) => {
+    const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const galleryContext = useContext(GalleryContext);
-    const { showLoadingBar, hideLoadingBar } = useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
@@ -384,7 +390,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         const extension = lowercaseExtension(file.metadata.title);
         // Assume it is supported.
         let isSupported = true;
-        if (needsJPEGConversion(extension)) {
+        if (extension && needsJPEGConversion(extension)) {
             // See if the file is on the whitelist of extensions that we know
             // will not be directly renderable.
             if (!isDesktop) {
@@ -505,16 +511,16 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         const isFavorite = favoriteFileIDs!.has(file.id);
 
         if (!isFavorite) {
-            markUnsyncedFavoriteUpdate(file.id, true);
+            onMarkUnsyncedFavoriteUpdate(file.id, true);
             void addToFavorites(file).catch((e: unknown) => {
                 log.error("Failed to add favorite", e);
-                markUnsyncedFavoriteUpdate(file.id, undefined);
+                onMarkUnsyncedFavoriteUpdate(file.id, undefined);
             });
         } else {
-            markUnsyncedFavoriteUpdate(file.id, false);
+            onMarkUnsyncedFavoriteUpdate(file.id, false);
             void removeFromFavorites(file).catch((e: unknown) => {
                 log.error("Failed to remove favorite", e);
-                markUnsyncedFavoriteUpdate(file.id, undefined);
+                onMarkUnsyncedFavoriteUpdate(file.id, undefined);
             });
         }
 
@@ -532,7 +538,7 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
     const handleDeleteFile = async () => {
         const file = fileToDelete!;
         await moveToTrash([file]);
-        markTempDeleted?.([file]);
+        onMarkTempDeleted?.([file]);
         updateItems(items.filter((item) => item.id !== file.id));
         setFileToDelete(undefined);
         needUpdate.current = true;
@@ -650,6 +656,18 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
         setShowImageEditorOverlay(false);
     };
 
+    const handleSaveEditedCopy = (
+        editedFile: File,
+        collection: Collection,
+        enteFile: EnteFile,
+    ) => {
+        uploadManager.prepareForNewUpload();
+        uploadManager.showUploadProgressDialog();
+        uploadManager.uploadFile(editedFile, collection, enteFile);
+        handleCloseEditor();
+        handleClose();
+    };
+
     const downloadFileHelper = async (file: EnteFile) => {
         if (
             file &&
@@ -716,6 +734,18 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
             );
         }
     };
+
+    const handleSelectCollection = (collectionID: number) => {
+        onSelectCollection(collectionID);
+        handleClose();
+    };
+
+    const handleSelectPerson = onSelectPerson
+        ? (personID: string) => {
+              onSelectPerson(personID);
+              handleClose();
+          }
+        : undefined;
 
     const handleForceConvert = () =>
         forceConvertItem(
@@ -962,26 +992,27 @@ export const PhotoViewer: React.FC<PhotoViewerProps> = ({
                 onConfirm={handleDeleteFile}
             />
             <FileInfo
-                showInfo={showInfo}
-                handleCloseInfo={handleCloseInfo}
-                closePhotoViewer={handleClose}
+                open={showInfo}
+                onClose={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}
                 exif={exif?.value}
-                shouldDisableEdits={!isOwnFile}
-                showCollectionChips={
+                allowEdits={isOwnFile}
+                allowMap={!publicCollectionGalleryContext.credentials}
+                showCollections={
                     !isTrashCollection && isOwnFile && !isInHiddenSection
                 }
-                scheduleUpdate={scheduleUpdate}
-                refreshPhotoswipe={refreshPhotoswipe}
-                fileToCollectionsMap={fileToCollectionsMap}
-                collectionNameMap={collectionNameMap}
-                onSelectPerson={onSelectPerson}
+                fileCollectionIDs={fileCollectionIDs}
+                allCollectionsNameByID={allCollectionsNameByID}
+                onNeedsRemoteSync={scheduleUpdate}
+                onUpdateCaption={refreshPhotoswipe}
+                onSelectCollection={handleSelectCollection}
+                onSelectPerson={handleSelectPerson}
             />
             <ImageEditorOverlay
-                show={showImageEditorOverlay}
-                file={photoSwipe?.currItem as EnteFile}
+                open={showImageEditorOverlay}
                 onClose={handleCloseEditor}
-                closePhotoViewer={handleClose}
+                file={photoSwipe?.currItem as EnteFile}
+                onSaveEditedCopy={handleSaveEditedCopy}
             />
         </>
     );

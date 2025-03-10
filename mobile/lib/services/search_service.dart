@@ -1,10 +1,10 @@
+import "dart:async";
 import "dart:math";
 
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
-import "package:ml_linalg/linalg.dart";
 import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/data/holidays.dart';
@@ -23,6 +23,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
+import "package:photos/models/memories/memory.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
@@ -36,24 +37,22 @@ import "package:photos/models/search/hierarchical/top_level_generic_filter.dart"
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/machine_learning/ml_computer.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
-import "package:photos/services/user_remote_flag_service.dart";
-import "package:photos/services/user_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
-import 'package:photos/utils/date_time_util.dart';
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import 'package:photos/utils/standalone/date_time.dart';
 import 'package:tuple/tuple.dart';
 
 class SearchService {
@@ -153,6 +152,7 @@ class SearchService {
     _cachedFilesForSearch = null;
     _cachedFilesForHierarchicalSearch = null;
     _cachedHiddenFilesFuture = null;
+    unawaited(memoriesCacheService.clearMemoriesCache());
   }
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
@@ -247,8 +247,7 @@ class SearchService {
   Future<List<GenericSearchResult>> getMagicSectionResults(
     BuildContext context,
   ) async {
-    if (userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) {
+    if (flagService.hasGrantedMLConsent) {
       return magicCacheService.getMagicGenericSearchResult(context);
     } else {
       return <GenericSearchResult>[];
@@ -1189,440 +1188,31 @@ class SearchService {
     return searchResults;
   }
 
-  Future<List<GenericSearchResult>> onThisDayOrWeekResults(
+  /// For debug purposes only, don't use this in production!
+  Future<List<GenericSearchResult>> smartMemories(
     BuildContext context,
     int? limit,
   ) async {
-    final List<GenericSearchResult> searchResults = [];
-    final allFiles = await getAllFilesForSearch();
-    if (allFiles.isEmpty) return [];
-
-    final currentTime = DateTime.now().toLocal();
-    final currentDayMonth = currentTime.month * 100 + currentTime.day;
-    final currentWeek = _getWeekNumber(currentTime);
-    final currentMonth = currentTime.month;
-    final cutOffTime = currentTime.subtract(const Duration(days: 365));
-    final averageDailyPhotos = allFiles.length / 365;
-    final significantDayThreshold = averageDailyPhotos * 0.25;
-    final significantWeekThreshold = averageDailyPhotos * 0.40;
-
-    // Group files by day-month and year
-    final dayMonthYearGroups = <int, Map<int, List<EnteFile>>>{};
-
-    for (final file in allFiles) {
-      if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
-
-      final creationTime =
-          DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-      final dayMonth = creationTime.month * 100 + creationTime.day;
-      final year = creationTime.year;
-
-      dayMonthYearGroups
-          .putIfAbsent(dayMonth, () => {})
-          .putIfAbsent(year, () => [])
-          .add(file);
-    }
-
-    // Process each nearby day-month to find significant days
-    for (final dayMonth in dayMonthYearGroups.keys) {
-      final dayDiff = dayMonth - currentDayMonth;
-      if (dayDiff < 0 || dayDiff > 2) continue;
-      // TODO: lau: this doesn't cover month changes properly
-
-      final yearGroups = dayMonthYearGroups[dayMonth]!;
-      final significantDays = yearGroups.entries
-          .where((e) => e.value.length > significantDayThreshold)
-          .map((e) => e.key)
-          .toList();
-
-      if (significantDays.length >= 3) {
-        // Combine all years for this day-month
-        final date =
-            DateTime(currentTime.year, dayMonth ~/ 100, dayMonth % 100);
-        final allPhotos = yearGroups.values.expand((x) => x).toList();
-        final photoSelection = await _bestSelection(allPhotos);
-
-        searchResults.add(
-          GenericSearchResult(
-            ResultType.event,
-            "${DateFormat('MMMM d').format(date)} through the years",
-            photoSelection,
-            hierarchicalSearchFilter: TopLevelGenericFilter(
-              filterName: DateFormat('MMMM d').format(date),
-              occurrence: kMostRelevantFilter,
-              filterResultType: ResultType.event,
-              matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
-              filterIcon: Icons.event_outlined,
-            ),
+    final memories = await memoriesCacheService.getMemories(limit);
+    final searchResults = <GenericSearchResult>[];
+    for (final memory in memories) {
+      final files = Memory.filesFromMemories(memory.memories);
+      searchResults.add(
+        GenericSearchResult(
+          ResultType.event,
+          memory.title,
+          files,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: memory.title,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.event,
+            matchedUploadedIDs: filesToUploadedFileIDs(files),
+            filterIcon: Icons.event_outlined,
           ),
-        );
-      } else {
-        // Individual entries for significant years
-        for (final year in significantDays) {
-          final date = DateTime(year, dayMonth ~/ 100, dayMonth % 100);
-          final files = yearGroups[year]!;
-          final photoSelection = await _bestSelection(files);
-          String name =
-              DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
-                  .format(date);
-          if (date.day == currentTime.day && date.month == currentTime.month) {
-            name = "This day, ${currentTime.year - date.year} years back";
-          }
-
-          searchResults.add(
-            GenericSearchResult(
-              ResultType.event,
-              name,
-              photoSelection,
-              hierarchicalSearchFilter: TopLevelGenericFilter(
-                filterName: name,
-                occurrence: kMostRelevantFilter,
-                filterResultType: ResultType.event,
-                matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
-                filterIcon: Icons.event_outlined,
-              ),
-            ),
-          );
-        }
-      }
-
-      if (limit != null && searchResults.length >= limit) return searchResults;
-    }
-
-    // process to find significant weeks (only if there are no significant days)
-    if (searchResults.isEmpty) {
-      // Group files by week and year
-      final currentWeekYearGroups = <int, List<EnteFile>>{};
-      for (final file in allFiles) {
-        if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
-
-        final creationTime =
-            DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-        final week = _getWeekNumber(creationTime);
-        if (week != currentWeek) continue;
-        final year = creationTime.year;
-
-        currentWeekYearGroups.putIfAbsent(year, () => []).add(file);
-      }
-
-      // Process the week and see if it's significant
-      if (currentWeekYearGroups.isNotEmpty) {
-        final significantWeeks = currentWeekYearGroups.entries
-            .where((e) => e.value.length > significantWeekThreshold)
-            .map((e) => e.key)
-            .toList();
-        if (significantWeeks.length >= 3) {
-          // Combine all years for this week
-          final allPhotos =
-              currentWeekYearGroups.values.expand((x) => x).toList();
-          final photoSelection = await _bestSelection(allPhotos);
-
-          searchResults.add(
-            GenericSearchResult(
-              ResultType.event,
-              "This week through the years",
-              photoSelection,
-              hierarchicalSearchFilter: TopLevelGenericFilter(
-                filterName: "Week $currentWeek",
-                occurrence: kMostRelevantFilter,
-                filterResultType: ResultType.event,
-                matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
-                filterIcon: Icons.event_outlined,
-              ),
-            ),
-          );
-        } else {
-          // Individual entries for significant years
-          for (final year in significantWeeks) {
-            final date = DateTime(year, 1, 1).add(
-              Duration(days: (currentWeek - 1) * 7),
-            );
-            final files = currentWeekYearGroups[year]!;
-            final photoSelection = await _bestSelection(files);
-            final name =
-                "This week, ${currentTime.year - date.year} years back";
-
-            searchResults.add(
-              GenericSearchResult(
-                ResultType.event,
-                name,
-                photoSelection,
-                hierarchicalSearchFilter: TopLevelGenericFilter(
-                  filterName: name,
-                  occurrence: kMostRelevantFilter,
-                  filterResultType: ResultType.event,
-                  matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
-                  filterIcon: Icons.event_outlined,
-                ),
-              ),
-            );
-          }
-        }
-      }
-    }
-
-    if (limit != null && searchResults.length >= limit) return searchResults;
-
-    // process to find fillers (months)
-    const wantedMemories = 3;
-    final neededMemories = wantedMemories - searchResults.length;
-    if (neededMemories <= 0) return searchResults;
-    const monthSelectionSize = 20;
-
-    // Group files by month and year
-    final currentMonthYearGroups = <int, List<EnteFile>>{};
-    for (final file in allFiles) {
-      if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
-
-      final creationTime =
-          DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-      final month = creationTime.month;
-      if (month != currentMonth) continue;
-      final year = creationTime.year;
-
-      currentMonthYearGroups.putIfAbsent(year, () => []).add(file);
-    }
-
-    // Add the largest two months plus the month through the years
-    final sortedYearsForCurrentMonth = currentMonthYearGroups.keys.toList()
-      ..sort(
-        (a, b) => currentMonthYearGroups[b]!.length.compareTo(
-              currentMonthYearGroups[a]!.length,
-            ),
-      );
-    if (neededMemories > 1) {
-      for (int i = neededMemories; i > 1; i--) {
-        if (sortedYearsForCurrentMonth.isEmpty) break;
-        final year = sortedYearsForCurrentMonth.removeAt(0);
-        final monthYearFiles = currentMonthYearGroups[year]!;
-        final photoSelection = await _bestSelection(
-          monthYearFiles,
-          prefferedSize: monthSelectionSize,
-        );
-        final monthName =
-            DateFormat.MMMM(Localizations.localeOf(context).languageCode)
-                .format(DateTime(year, currentMonth));
-        final name = monthName + ", ${currentTime.year - year} years back";
-        searchResults.add(
-          GenericSearchResult(
-            ResultType.event,
-            name,
-            photoSelection,
-            hierarchicalSearchFilter: TopLevelGenericFilter(
-              filterName: name,
-              occurrence: kMostRelevantFilter,
-              filterResultType: ResultType.event,
-              matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
-              filterIcon: Icons.event_outlined,
-            ),
-          ),
-        );
-      }
-    }
-    // Show the month through the remaining years
-    if (sortedYearsForCurrentMonth.isEmpty) return searchResults;
-    final allPhotos = sortedYearsForCurrentMonth
-        .expand((year) => currentMonthYearGroups[year]!)
-        .toList();
-    final photoSelection =
-        await _bestSelection(allPhotos, prefferedSize: monthSelectionSize);
-    final monthName =
-        DateFormat.MMMM(Localizations.localeOf(context).languageCode)
-            .format(DateTime(currentTime.year, currentMonth));
-    final name = monthName + " through the years";
-    searchResults.add(
-      GenericSearchResult(
-        ResultType.event,
-        name,
-        photoSelection,
-        hierarchicalSearchFilter: TopLevelGenericFilter(
-          filterName: name,
-          occurrence: kMostRelevantFilter,
-          filterResultType: ResultType.event,
-          matchedUploadedIDs: filesToUploadedFileIDs(photoSelection),
-          filterIcon: Icons.event_outlined,
         ),
-      ),
-    );
-
+      );
+    }
     return searchResults;
-  }
-
-  int _getWeekNumber(DateTime date) {
-    // Get day of year (1-366)
-    final int dayOfYear = int.parse(DateFormat('D').format(date));
-    // Integer division by 7 and add 1 to start from week 1
-    return ((dayOfYear - 1) ~/ 7) + 1;
-  }
-
-  /// Returns the best selection of files from the given list.
-  /// Makes sure that the selection is not more than [prefferedSize] or 10 files,
-  /// and that each year of the original list is represented.
-  Future<List<EnteFile>> _bestSelection(
-    List<EnteFile> files, {
-    int? prefferedSize,
-  }) async {
-    final fileCount = files.length;
-    int targetSize = prefferedSize ?? 10;
-    if (fileCount <= targetSize) return files;
-    final safeFiles =
-        files.where((file) => file.uploadedFileID != null).toList();
-    final safeCount = safeFiles.length;
-    final fileIDs = safeFiles.map((e) => e.uploadedFileID!).toSet();
-    final fileIdToFace = await MLDataDB.instance.getFacesForFileIDs(fileIDs);
-    final faceIDs =
-        fileIdToFace.values.expand((x) => x.map((face) => face.faceID)).toSet();
-    final faceIDsToPersonID =
-        await MLDataDB.instance.getFaceIdToPersonIdForFaces(faceIDs);
-    final fileIdToClip =
-        await MLDataDB.instance.getClipVectorsForFileIDs(fileIDs);
-    final allYears = safeFiles.map((e) {
-      final creationTime = DateTime.fromMicrosecondsSinceEpoch(e.creationTime!);
-      return creationTime.year;
-    }).toSet();
-
-    // Get clip scores for each file
-    const query =
-        'Photo of a precious memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
-    // TODO: lau: optimize this later so we don't keep computing embedding
-    final textEmbedding = await MLComputer.instance.runClipText(query);
-    final textVector = Vector.fromList(textEmbedding);
-    const clipThreshold = 0.75;
-    final fileToScore = <int, double>{};
-    for (final file in safeFiles) {
-      final clip = fileIdToClip[file.uploadedFileID!];
-      if (clip == null) {
-        fileToScore[file.uploadedFileID!] = 0;
-        continue;
-      }
-      final score = clip.vector.dot(textVector);
-      fileToScore[file.uploadedFileID!] = score;
-    }
-
-    // Get face scores for each file
-    final fileToFaceCount = <int, int>{};
-    for (final file in safeFiles) {
-      final fileID = file.uploadedFileID!;
-      fileToFaceCount[fileID] = 0;
-      final faces = fileIdToFace[fileID];
-      if (faces == null || faces.isEmpty) {
-        continue;
-      }
-      for (final face in faces) {
-        if (faceIDsToPersonID.containsKey(face.faceID)) {
-          fileToFaceCount[fileID] = fileToFaceCount[fileID]! + 10;
-        } else {
-          fileToFaceCount[fileID] = fileToFaceCount[fileID]! + 1;
-        }
-      }
-    }
-
-    final filteredFiles = <EnteFile>[];
-    if (allYears.length <= 1) {
-      // TODO: lau: eventually this sorting might have to be replaced with some scoring system
-      // sort first on clip embeddings score (descending)
-      safeFiles.sort(
-        (a, b) => fileToScore[b.uploadedFileID!]!
-            .compareTo(fileToScore[a.uploadedFileID!]!),
-      );
-      // then sort on faces (descending), heavily prioritizing named faces
-      safeFiles.sort(
-        (a, b) => fileToFaceCount[b.uploadedFileID!]!
-            .compareTo(fileToFaceCount[a.uploadedFileID!]!),
-      );
-
-      // then filter out similar images as much as possible
-      filteredFiles.add(safeFiles.first);
-      int skipped = 0;
-      filesLoop:
-      for (final file in safeFiles.sublist(1)) {
-        if (filteredFiles.length >= targetSize) break;
-        final clip = fileIdToClip[file.uploadedFileID!];
-        if (clip != null && (safeCount - skipped) > targetSize) {
-          for (final filteredFile in filteredFiles) {
-            final fClip = fileIdToClip[filteredFile.uploadedFileID!];
-            if (fClip == null) continue;
-            final similarity = clip.vector.dot(fClip.vector);
-            if (similarity > clipThreshold) {
-              skipped++;
-              continue filesLoop;
-            }
-          }
-        }
-        filteredFiles.add(file);
-      }
-    } else {
-      // Multiple years, each represented and roughly equally distributed
-      if (prefferedSize == null && (allYears.length * 2) > 10) {
-        targetSize = allYears.length * 3;
-        if (safeCount < targetSize) return safeFiles;
-      }
-
-      // Group files by year and sort each year's list by CLIP then face count
-      final yearToFiles = <int, List<EnteFile>>{};
-      for (final file in safeFiles) {
-        final creationTime =
-            DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-        final year = creationTime.year;
-        yearToFiles.putIfAbsent(year, () => []).add(file);
-      }
-
-      for (final year in yearToFiles.keys) {
-        final yearFiles = yearToFiles[year]!;
-        // sort first on clip embeddings score (descending)
-        yearFiles.sort(
-          (a, b) => fileToScore[b.uploadedFileID!]!
-              .compareTo(fileToScore[a.uploadedFileID!]!),
-        );
-        // then sort on faces (descending), heavily prioritizing named faces
-        yearFiles.sort(
-          (a, b) => fileToFaceCount[b.uploadedFileID!]!
-              .compareTo(fileToFaceCount[a.uploadedFileID!]!),
-        );
-      }
-
-      // Then join the years together one by one and filter similar images
-      final years = yearToFiles.keys.toList()
-        ..sort((a, b) => b.compareTo(a)); // Recent years first
-      int round = 0;
-      int skipped = 0;
-      whileLoop:
-      while (filteredFiles.length + skipped < safeCount) {
-        yearLoop:
-        for (final year in years) {
-          final yearFiles = yearToFiles[year]!;
-          if (yearFiles.isEmpty) continue;
-          final newFile = yearFiles.removeAt(0);
-          if (round != 0 && (safeCount - skipped) > targetSize) {
-            // check for filtering
-            final clip = fileIdToClip[newFile.uploadedFileID!];
-            if (clip != null) {
-              for (final filteredFile in filteredFiles) {
-                final fClip = fileIdToClip[filteredFile.uploadedFileID!];
-                if (fClip == null) continue;
-                final similarity = clip.vector.dot(fClip.vector);
-                if (similarity > clipThreshold) {
-                  skipped++;
-                  continue yearLoop;
-                }
-              }
-            }
-          }
-          filteredFiles.add(newFile);
-          if (filteredFiles.length >= targetSize ||
-              filteredFiles.length + skipped >= safeCount) {
-            break whileLoop;
-          }
-        }
-        round++;
-        // Extra safety to prevent infinite loops
-        if (round > safeCount) break;
-      }
-    }
-
-    // Order the final selection chronologically
-    filteredFiles.sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
-    return filteredFiles;
   }
 
   Future<GenericSearchResult?> getRandomDateResults(

@@ -1,4 +1,5 @@
 import { SpacedRow } from "@/base/components/containers";
+import { useBaseContext } from "@/base/context";
 import type { Collection } from "@/media/collection";
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
@@ -7,7 +8,6 @@ import {
     ARCHIVE_SECTION,
     TRASH_SECTION,
 } from "@/new/photos/services/collection";
-import { useAppContext } from "@/new/photos/types/context";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
 import ArchiveIcon from "@mui/icons-material/ArchiveOutlined";
@@ -48,6 +48,27 @@ interface Props {
     activeCollectionID: number;
     isFavoriteCollection: boolean;
     isUncategorizedCollection: boolean;
+    /**
+     * TODO: Need to implement delete-equivalent from shared albums.
+     *
+     * Notes:
+     *
+     * - Delete action should not be enabled  3 selected (0 Yours). There should
+     *   be separate remove action.
+     *
+     * - On remove, if the file and collection both belong to current user, we
+     *   just use move api to existing or uncat collection.
+     *
+     * - Otherwise, we call /collections/v3/remove-files (when collection and
+     *   file belong to different users).
+     *
+     * - Album owner can remove files of all other users from their collection.
+     *   Particiapant (viewer/collaborator) can only remove files that belong to
+     *   them.
+     *
+     * Also note that that user cannot delete files that are not owned by the
+     * user, even if they are in an album owned by the user.
+     */
     isIncomingSharedCollection: boolean;
     isInSearchMode: boolean;
     selectedCollection: Collection;
@@ -71,7 +92,7 @@ const SelectedFileOptions = ({
     isInSearchMode,
     isInHiddenSection,
 }: Props) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const peopleMode = barMode == "people";
 

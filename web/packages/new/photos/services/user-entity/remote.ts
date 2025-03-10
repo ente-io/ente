@@ -83,7 +83,7 @@ const RemoteUserEntityChange = z.object({
      */
     isDeleted: z.boolean(),
     /**
-     * Epoch milliseconds when this entity was last updated.
+     * Epoch microseconds when this entity was last updated.
      *
      * This value is suitable for being passed as the `sinceTime` in the diff
      * requests to implement pagination.
@@ -97,7 +97,7 @@ const RemoteUserEntityChange = z.object({
  *
  * @param type The type of the entities to fetch.
  *
- * @param sinceTime Epoch milliseconds. This is used to ask remote to provide us
+ * @param sinceTime Epoch microseconds. This is used to ask remote to provide us
  * only entities whose {@link updatedAt} is more than the given value. Set this
  * to zero to start from the beginning.
  *

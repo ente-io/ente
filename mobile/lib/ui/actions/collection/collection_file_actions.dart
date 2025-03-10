@@ -14,16 +14,16 @@ import "package:photos/services/collections_service.dart";
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/hidden_service.dart";
 import "package:photos/services/ignored_files_service.dart";
-import "package:photos/services/remote_sync_service.dart";
+import "package:photos/services/sync/remote_sync_service.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_uploader.dart";
 import "package:photos/utils/share_util.dart";
-import 'package:photos/utils/toast_util.dart';
 import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
 extension CollectionFileActions on CollectionActions {
@@ -147,7 +147,7 @@ extension CollectionFileActions on CollectionActions {
         // Newly created collection might not be cached
         final Collection? c =
             CollectionsService.instance.getCollectionByID(collectionID);
-        if (c != null && c.owner!.id != currentUserID) {
+        if (c != null && c.owner.id != currentUserID) {
           if (!showProgressDialog) {
             dialog = createProgressDialog(
               context,

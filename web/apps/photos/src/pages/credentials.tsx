@@ -1,6 +1,1 @@
-import Page_ from "@/accounts/pages/credentials";
-import { useAppContext } from "@/new/photos/types/context";
-
-const Page = () => <Page_ appContext={useAppContext()} />;
-
-export default Page;
+export { default } from "@/accounts/pages/credentials";

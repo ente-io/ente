@@ -2,7 +2,11 @@ import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { type Location } from "@/base/types";
-import { type EnteFile, type FilePublicMagicMetadata } from "@/media/file";
+import {
+    fileLogID,
+    type EnteFile,
+    type FilePublicMagicMetadata,
+} from "@/media/file";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { mergeMetadata1 } from "./file";
@@ -289,6 +293,27 @@ const PublicMagicMetadata = z
         editedTime: z.number().optional(),
     })
     .passthrough();
+
+/**
+ * Return the public magic metadata for an {@link EnteFile}.
+ *
+ * We are not expected to be in a scenario where the file gets to the UI without
+ * having its public magic metadata decrypted, so this function is a sanity
+ * check and should be a no-op in usually. It'll throw if it finds its
+ * assumptions broken. Once the types have been refactored this entire
+ * check/cast shouldn't be needed, and this should become a trivial accessor.
+ */
+export const filePublicMagicMetadata = (file: EnteFile) => {
+    if (!file.pubMagicMetadata) return undefined;
+    if (typeof file.pubMagicMetadata.data == "string") {
+        throw new Error(
+            `Public magic metadata for ${fileLogID(file)} had not been decrypted even when the file reached the UI layer`,
+        );
+    }
+    // This cast is unavoidable in the current setup. We need to refactor the
+    // types so that this cast in not needed.
+    return file.pubMagicMetadata.data as PublicMagicMetadata;
+};
 
 /**
  * Return the hash of the file by reading it from its metadata.
@@ -830,3 +855,10 @@ export const fileLocation = (file: EnteFile): Location | undefined => {
 
     return { latitude, longitude };
 };
+
+/**
+ * Return the caption, aka "description", (if any) attached to the given
+ * {@link EnteFile}.
+ */
+export const fileCaption = (file: EnteFile): string | undefined =>
+    filePublicMagicMetadata(file)?.caption;

@@ -4,6 +4,7 @@ import 'dart:io';
 import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
 import "package:computer/computer.dart";
+import 'package:ente_crypto/ente_crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
@@ -26,13 +27,13 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
-import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
@@ -40,18 +41,16 @@ import 'package:photos/services/memories_service.dart';
 import "package:photos/services/notification_service.dart";
 // import 'package:photos/services/push_service.dart';
 import "package:photos/services/preview_video_store.dart";
-import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
-import "package:photos/services/sync_service.dart";
-import "package:photos/services/user_service.dart";
+import 'package:photos/services/sync/local_sync_service.dart';
+import 'package:photos/services/sync/remote_sync_service.dart';
+import "package:photos/services/sync/sync_service.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
-import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
-import "package:video_player_media_kit/video_player_media_kit.dart";
 
 final _logger = Logger("main");
 
@@ -236,10 +235,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
 
     ServiceLocator.instance
         .init(preferences, NetworkClient.instance.enteDio, packageInfo);
-
-    if (!isBackground && flagService.internalUser) {
-      VideoPlayerMediaKit.ensureInitialized(iOS: true);
-    }
 
     _logger.info("UserService init $tlog");
     await UserService.instance.init();

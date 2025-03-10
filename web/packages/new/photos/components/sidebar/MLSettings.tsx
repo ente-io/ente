@@ -6,6 +6,7 @@ import {
     SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
+import { useBaseContext } from "@/base/context";
 import { disableML, enableML, type MLStatus } from "@/new/photos/services/ml";
 import {
     Box,
@@ -15,14 +16,12 @@ import {
     FormControlLabel,
     FormGroup,
     Link,
-    Paper,
     Stack,
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { useAppContext } from "../../types/context";
 import { openURL } from "../../utils/web";
 import { useMLStatusSnapshot } from "../utils/use-snapshot";
 import { useWrapAsyncOperation } from "../utils/use-wrap-async";
@@ -240,7 +239,7 @@ interface ManageMLProps {
 }
 
 const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
 
@@ -264,7 +263,7 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
     }
 
     // Show processed as percentages instead of potentially confusing counts.
-    const processed = `${Math.round((100 * nSyncedFiles) / nTotalFiles)}%`;
+    const processed = `${nTotalFiles ? Math.round((100 * nSyncedFiles) / nTotalFiles) : 100}%`;
 
     const confirmDisableML = () =>
         showMiniDialog({
@@ -288,43 +287,42 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
                     />
                 </RowButtonGroup>
             </Stack>
-            <Paper variant="outlined">
-                <Stack>
-                    <Stack
-                        direction="row"
-                        sx={{
-                            gap: 2,
-                            px: 2,
-                            pt: 1,
-                            pb: 2,
-                            justifyContent: "space-between",
-                        }}
-                    >
-                        <Typography sx={{ color: "text.faint" }}>
-                            {t("indexing")}
-                        </Typography>
-                        <Typography>{status}</Typography>
-                    </Stack>
-                    <Divider sx={{ marginInlineStart: 2 }} />
-                    <Stack
-                        direction="row"
-                        sx={{
-                            gap: 2,
-                            px: 2,
-                            pt: 2,
-                            pb: 1,
-                            justifyContent: "space-between",
-                        }}
-                    >
-                        <Typography sx={{ color: "text.faint" }}>
-                            {t("processed")}
-                        </Typography>
-                        <Typography sx={{ textAlign: "right" }}>
-                            {processed}
-                        </Typography>
-                    </Stack>
+
+            <Stack>
+                <Stack
+                    direction="row"
+                    sx={{
+                        gap: 2,
+                        px: 2,
+                        pt: 1,
+                        pb: 2,
+                        justifyContent: "space-between",
+                    }}
+                >
+                    <Typography sx={{ color: "text.faint" }}>
+                        {t("indexing")}
+                    </Typography>
+                    <Typography>{status}</Typography>
                 </Stack>
-            </Paper>
+                <Divider sx={{ mx: 1.5 }} />
+                <Stack
+                    direction="row"
+                    sx={{
+                        gap: 2,
+                        px: 2,
+                        pt: 2,
+                        pb: 1,
+                        justifyContent: "space-between",
+                    }}
+                >
+                    <Typography sx={{ color: "text.faint" }}>
+                        {t("processed")}
+                    </Typography>
+                    <Typography sx={{ textAlign: "right" }}>
+                        {processed}
+                    </Typography>
+                </Stack>
+            </Stack>
         </Stack>
     );
 };

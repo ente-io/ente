@@ -1,16 +1,16 @@
 import 'dart:async';
 
+import 'package:ente_crypto/ente_crypto.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/services.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/services/user_service.dart';
+import 'package:photos/services/account/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
-import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/toast_util.dart';
 import "package:pinput/pinput.dart";
 
 class TwoFactorSetupPage extends StatefulWidget {
@@ -22,8 +22,8 @@ class TwoFactorSetupPage extends StatefulWidget {
     this.secretCode,
     this.qrCode,
     this.completer, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<TwoFactorSetupPage> createState() => _TwoFactorSetupPageState();

@@ -9,7 +9,7 @@ import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/typedefs.dart";
-import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class LocationTagStateProvider extends StatefulWidget {
   final LocalEntity<LocationTag>? locationTagEntity;

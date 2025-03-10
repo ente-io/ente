@@ -4,16 +4,17 @@ import "package:ente_cast_normal/ente_cast_normal.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/gateways/entity_gw.dart";
-import "package:photos/services/billing_service.dart";
+import "package:photos/services/account/billing_service.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/magic_cache_service.dart";
+import "package:photos/services/memories_cache_service.dart";
+import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
-import "package:photos/services/trash_sync_service.dart";
+import "package:photos/services/sync/trash_sync_service.dart";
 import "package:photos/services/update_service.dart";
-import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -101,21 +102,26 @@ LocationService get locationService {
   return _locationService!;
 }
 
-UserRemoteFlagService? _userRemoteFlagService;
-UserRemoteFlagService get userRemoteFlagService {
-  _userRemoteFlagService ??= UserRemoteFlagService(
-    ServiceLocator.instance.enteDio,
-    ServiceLocator.instance.prefs,
-  );
-  return _userRemoteFlagService!;
-}
-
 MagicCacheService? _magicCacheService;
 MagicCacheService get magicCacheService {
   _magicCacheService ??= MagicCacheService(
     ServiceLocator.instance.prefs,
   );
   return _magicCacheService!;
+}
+
+MemoriesCacheService? _memoriesCacheService;
+MemoriesCacheService get memoriesCacheService {
+  _memoriesCacheService ??= MemoriesCacheService(
+    ServiceLocator.instance.prefs,
+  );
+  return _memoriesCacheService!;
+}
+
+SmartMemoriesService? _smartMemoriesService;
+SmartMemoriesService get smartMemoriesService {
+  _smartMemoriesService ??= SmartMemoriesService();
+  return _smartMemoriesService!;
 }
 
 BillingService? _billingService;

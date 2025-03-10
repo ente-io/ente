@@ -34,17 +34,26 @@ Future<Tuple2<List<LocalPathAsset>, List<EnteFile>>> getLocalPathAssetsAndFiles(
     if (assetsInPath.isEmpty) {
       result = const Tuple2({}, []);
     } else {
-      result = await Computer.shared().compute(
-        _getLocalIDsAndFilesFromAssets,
-        param: <String, dynamic>{
-          "pathEntity": pathEntity,
-          "fromTime": fromTime,
-          "alreadySeenLocalIDs": alreadySeenLocalIDs,
-          "assetList": assetsInPath,
-        },
-        taskName:
-            "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
-      );
+      try {
+        result = await Computer.shared().compute(
+          _getLocalIDsAndFilesFromAssets,
+          param: <String, dynamic>{
+            "pathEntity": pathEntity,
+            "fromTime": fromTime,
+            "alreadySeenLocalIDs": alreadySeenLocalIDs,
+            "assetList": assetsInPath,
+          },
+          taskName:
+              "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
+        );
+      } catch (e) {
+        _logger.severe("_getLocalIDsAndFilesFromAssets failed", e);
+        _logger.info(
+          "Failed for pathEntity: ${pathEntity.name}",
+        );
+        rethrow;
+      }
+
       alreadySeenLocalIDs.addAll(result.item1);
       uniqueFiles.addAll(result.item2);
     }
@@ -123,12 +132,10 @@ Future<LocalDiffResult> getDiffWithLocal(
   // current set of assets available on device
   Set<String> existingIDs, // localIDs of files already imported in app
   Map<String, Set<String>> pathToLocalIDs,
-  Set<String> invalidIDs,
 ) async {
   final Map<String, dynamic> args = <String, dynamic>{};
   args['assets'] = assets;
   args['existingIDs'] = existingIDs;
-  args['invalidIDs'] = invalidIDs;
   args['pathToLocalIDs'] = pathToLocalIDs;
   final LocalDiffResult diffResult = await Computer.shared().compute(
     _getLocalAssetsDiff,
@@ -147,7 +154,6 @@ Future<LocalDiffResult> getDiffWithLocal(
 LocalDiffResult _getLocalAssetsDiff(Map<String, dynamic> args) {
   final List<LocalPathAsset> onDeviceLocalPathAsset = args['assets'];
   final Set<String> existingIDs = args['existingIDs'];
-  final Set<String> invalidIDs = args['invalidIDs'];
   final Map<String, Set<String>> pathToLocalIDs = args['pathToLocalIDs'];
   final Map<String, Set<String>> newPathToLocalIDs = <String, Set<String>>{};
   final Map<String, Set<String>> removedPathToLocalIDs =
@@ -179,7 +185,6 @@ LocalDiffResult _getLocalAssetsDiff(Map<String, dynamic> args) {
     // End
 
     localPathAsset.localIDs.removeAll(existingIDs);
-    localPathAsset.localIDs.removeAll(invalidIDs);
     if (localPathAsset.localIDs.isNotEmpty) {
       unsyncedAssets.add(localPathAsset);
     }
@@ -303,12 +308,8 @@ Future<Tuple2<Set<String>, List<EnteFile>>> _getLocalIDsAndFilesFromAssets(
         (fromTime / ~1000);
     if (!alreadySeenLocalIDs.contains(entity.id) &&
         assetCreatedOrUpdatedAfterGivenTime) {
-      try {
-        final file = await EnteFile.fromAsset(pathEntity.name, entity);
-        files.add(file);
-      } catch (e) {
-        _logger.severe(e);
-      }
+      final file = await EnteFile.fromAsset(pathEntity.name, entity);
+      files.add(file);
     }
   }
   return Tuple2(localIDs, files);

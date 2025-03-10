@@ -13,7 +13,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
-import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 import 'package:tuple/tuple.dart';
 
 enum AvatarType { small, mini, tiny, extra }
@@ -80,7 +80,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
             );
             if (person != null) {
               _faceThumbnail =
-                  await PersonService.instance.getRecentFileOfPerson(person);
+                  await PersonService.instance.getThumbnailFileOfPerson(person);
             }
             return person?.remoteID;
           });
@@ -117,18 +117,25 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
                   if (snapshot.hasData) {
                     final personID = snapshot.data as String;
                     return ClipOval(
-                      child: PersonFaceWidget(
-                        _faceThumbnail!,
-                        personId: personID,
-                        onErrorCallback: () {
-                          if (mounted) {
-                            setState(() {
-                              _personID = null;
-                              _faceThumbnail = null;
-                            });
-                          }
-                        },
-                      ),
+                      child: _faceThumbnail == null
+                          ? _FirstLetterCircularAvatar(
+                              user: widget.user,
+                              currentUserID: widget.currentUserID,
+                              thumbnailView: widget.thumbnailView,
+                              type: widget.type,
+                            )
+                          : PersonFaceWidget(
+                              _faceThumbnail!,
+                              personId: personID,
+                              onErrorCallback: () {
+                                if (mounted) {
+                                  setState(() {
+                                    _personID = null;
+                                    _faceThumbnail = null;
+                                  });
+                                }
+                              },
+                            ),
                     );
                   } else if (snapshot.hasError) {
                     _logger.severe("Error loading personID", snapshot.error);

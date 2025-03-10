@@ -19,9 +19,9 @@ import type {
 } from "@/accounts/services/srp-remote";
 import { getSRPAttributes } from "@/accounts/services/srp-remote";
 import { putAttributes, sendOTT, verifyEmail } from "@/accounts/services/user";
-import type { PageProps } from "@/accounts/types/page";
 import { LinkButton } from "@/base/components/LinkButton";
 import { LoadingIndicator } from "@/base/components/loaders";
+import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -47,8 +47,8 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
-const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout, showMiniDialog } = appContext;
+const Page: React.FC = () => {
+    const { logout, showMiniDialog } = useBaseContext();
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
@@ -74,7 +74,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
         };
         void main();
-    }, []);
+    }, [router]);
 
     const onSubmit: SingleInputFormProps["callback"] = async (
         ott,

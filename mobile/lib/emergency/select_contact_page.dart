@@ -6,8 +6,8 @@ import "package:photos/emergency/emergency_service.dart";
 import "package:photos/emergency/model.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/user_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -322,22 +322,20 @@ class _AddContactPage extends State<AddContactPage> {
     final int ownerID = Configuration.instance.getUserID()!;
     existingEmails.add(Configuration.instance.getEmail()!);
     for (final c in CollectionsService.instance.getActiveCollections()) {
-      if (c.owner?.id == ownerID) {
-        for (final User? u in c.sharees ?? []) {
-          if (u != null &&
-              u.id != null &&
+      if (c.owner.id == ownerID) {
+        for (final User u in c.sharees) {
+          if (u.id != null &&
               u.email.isNotEmpty &&
               !existingEmails.contains(u.email)) {
             existingEmails.add(u.email);
             suggestedUsers.add(u);
           }
         }
-      } else if (c.owner != null &&
-          c.owner!.id != null &&
-          c.owner!.email.isNotEmpty &&
-          !existingEmails.contains(c.owner!.email)) {
-        existingEmails.add(c.owner!.email);
-        suggestedUsers.add(c.owner!);
+      } else if (c.owner.id != null &&
+          c.owner.email.isNotEmpty &&
+          !existingEmails.contains(c.owner.email)) {
+        existingEmails.add(c.owner.email);
+        suggestedUsers.add(c.owner);
       }
     }
     final cachedUserDetails = UserService.instance.getCachedUserDetails();

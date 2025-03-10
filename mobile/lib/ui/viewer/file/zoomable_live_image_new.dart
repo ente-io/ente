@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
 import 'package:motion_photos/motion_photos.dart';
+import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -13,10 +14,9 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
-import "package:photos/services/local_file_update_service.dart";
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/viewer/file/zoomable_image.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class ZoomableLiveImageNew extends StatefulWidget {
   final EnteFile enteFile;
@@ -57,9 +57,6 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
     _logger.info(
       'initState for ${_enteFile.generatedID} with tag ${_enteFile.tag} and name ${_enteFile.displayName}',
     );
-    if (_enteFile.isLivePhoto && _enteFile.isUploaded) {
-      LocalFileUpdateService.instance.checkLivePhoto(_enteFile).ignore();
-    }
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
@@ -202,6 +199,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
           ).ignore();
         }
         return motionPhoto.getMotionVideoFile(
+          await getTemporaryDirectory(),
           index: index,
         );
       } else if (_enteFile.isMotionPhoto && _enteFile.canEditMetaInfo) {

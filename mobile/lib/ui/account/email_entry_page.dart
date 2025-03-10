@@ -5,12 +5,12 @@ import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/services/user_service.dart';
+import 'package:photos/services/account/user_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/toast_util.dart";
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 import "package:styled_text/styled_text.dart";
 

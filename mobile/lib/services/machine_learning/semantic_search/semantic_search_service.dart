@@ -21,7 +21,6 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
-import "package:photos/services/user_remote_flag_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
@@ -48,8 +47,7 @@ class SemanticSearchService {
       _logger.info("Initialized already");
       return;
     }
-    final hasGivenConsent = userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
+    final hasGivenConsent = flagService.hasGrantedMLConsent;
     if (!hasGivenConsent) return;
 
     _logger.info("init called");
@@ -57,7 +55,7 @@ class SemanticSearchService {
 
     // call getClipEmbeddings after 5 seconds
     Future.delayed(const Duration(seconds: 5), () async {
-      await getClipVectors();
+      await _getClipVectors();
     });
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
       _cachedImageEmbeddingVectors = null;
@@ -67,9 +65,7 @@ class SemanticSearchService {
   }
 
   bool isMagicSearchEnabledAndReady() {
-    return userRemoteFlagService
-            .getCachedBoolValue(UserRemoteFlagService.mlEnabled) &&
-        _textModelIsLoaded;
+    return flagService.hasGrantedMLConsent && _textModelIsLoaded;
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
@@ -78,7 +74,7 @@ class SemanticSearchService {
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
-          "ML global consent: ${userRemoteFlagService.getCachedBoolValue(UserRemoteFlagService.mlEnabled)}, loaded: $_textModelIsLoaded ",
+          "ML global consent: ${flagService.hasGrantedMLConsent}, loaded: $_textModelIsLoaded ",
         );
       }
       return (query, <EnteFile>[]);
@@ -112,7 +108,20 @@ class SemanticSearchService {
     _logger.info("Indexes cleared");
   }
 
-  Future<List<EmbeddingVector>> getClipVectors() async {
+  Future<List<EmbeddingVector>> getClipVectorsForFileIDs(
+    Iterable<int> fileIDs,
+  ) async {
+    final embeddings = await _getClipVectors();
+    final result = <EmbeddingVector>[];
+    for (final embedding in embeddings) {
+      if (fileIDs.contains(embedding.fileID)) {
+        result.add(embedding);
+      }
+    }
+    return result;
+  }
+
+  Future<List<EmbeddingVector>> _getClipVectors() async {
     if (_cachedImageEmbeddingVectors != null) {
       return _cachedImageEmbeddingVectors!;
     }
@@ -245,7 +254,7 @@ class SemanticSearchService {
     double? minimumSimilarity,
   }) async {
     final startTime = DateTime.now();
-    final imageEmbeddings = await getClipVectors();
+    final imageEmbeddings = await _getClipVectors();
     final List<QueryResult> queryResults = await _computer.compute(
       computeBulkSimilarities,
       param: {

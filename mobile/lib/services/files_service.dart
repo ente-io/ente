@@ -5,9 +5,11 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
+import "package:photos/db/device_files_db.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/extensions/list.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/backup_status.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/metadata/file_magic.dart";
@@ -16,7 +18,7 @@ import "package:photos/services/ignored_files_service.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/standalone/date_time.dart';
 
 class FilesService {
   late Dio _enteDio;
@@ -68,6 +70,39 @@ class FilesService {
     for (final batch in batchedFiles) {
       final Map<int, int> uploadIdToSize = await getFilesSizeFromInfo(batch);
       await _filesDB.updateSizeForUploadIDs(uploadIdToSize);
+    }
+  }
+
+  Future<BackupStatus> getBackupStatus({String? pathID}) async {
+    BackedUpFileIDs ids;
+    final bool hasMigratedSize = await FilesService.instance.hasMigratedSizes();
+    if (pathID == null) {
+      ids = await FilesDB.instance.getBackedUpIDs();
+    } else {
+      ids = await FilesDB.instance.getBackedUpForDeviceCollection(
+        pathID,
+        Configuration.instance.getUserID()!,
+      );
+    }
+    late int size;
+    if (hasMigratedSize) {
+      size = ids.localSize;
+    } else {
+      size = await _getFileSize(ids.uploadedIDs);
+    }
+    return BackupStatus(ids.localIDs, size);
+  }
+
+  Future<int> _getFileSize(List<int> fileIDs) async {
+    try {
+      final response = await _enteDio.post(
+        "/files/size",
+        data: {"fileIDs": fileIDs},
+      );
+      return response.data["size"];
+    } catch (e) {
+      _logger.severe(e);
+      rethrow;
     }
   }
 

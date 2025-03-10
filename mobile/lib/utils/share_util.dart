@@ -14,10 +14,10 @@ import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/ui/sharing/show_images_prevew.dart";
-import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/standalone/date_time.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import "package:screenshot/screenshot.dart";
 import 'package:share_plus/share_plus.dart';
@@ -47,12 +47,6 @@ Future<void> share(
       pathFutures.add(
         getFile(file, isOrigin: true).then((fetchedFile) => fetchedFile?.path),
       );
-      if (file.fileType == FileType.livePhoto) {
-        pathFutures.add(
-          getFile(file, liveVideo: true)
-              .then((fetchedFile) => fetchedFile?.path),
-        );
-      }
     }
     final paths = await Future.wait(pathFutures);
     await dialog.hide();
@@ -165,9 +159,9 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
     enteFile.fileType =
         media.type == SharedMediaType.image ? FileType.image : FileType.video;
     if (enteFile.fileType == FileType.image) {
-      final exifTime = await getCreationTimeFromEXIF(ioFile, null);
-      if (exifTime != null) {
-        enteFile.creationTime = exifTime.microsecondsSinceEpoch;
+      final dateResult = await tryParseExifDateTime(ioFile, null);
+      if (dateResult != null && dateResult.time != null) {
+        enteFile.creationTime = dateResult.time!.microsecondsSinceEpoch;
       }
     } else if (enteFile.fileType == FileType.video) {
       enteFile.duration = (media.duration ?? 0) ~/ 1000;

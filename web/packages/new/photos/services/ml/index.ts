@@ -6,16 +6,16 @@ import { isDesktop } from "@/base/app";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
-import { masterKeyFromSession } from "@/base/session-store";
+import { masterKeyFromSession } from "@/base/session";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import type { UploadItem } from "@/gallery/services/upload";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
-import type { UploadItem } from "../upload/types";
 import {
     addUserEntity,
     pullUserEntities,
@@ -25,7 +25,12 @@ import {
 import { deleteUserEntity } from "../user-entity/remote";
 import type { FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
-import { clearMLDB, getIndexableAndIndexedCounts, savedFaceIndex } from "./db";
+import {
+    clearMLDB,
+    getIndexableAndIndexedCounts,
+    resetFailedFileStatuses,
+    savedFaceIndex,
+} from "./db";
 import {
     _applyPersonSuggestionUpdates,
     filterNamedPeople,
@@ -96,6 +101,12 @@ class MLState {
      * empty array even if the snapshot is pending its first sync.
      */
     peopleStateSnapshot: PeopleState | undefined;
+
+    /**
+     * `true` if a reset has been requested via
+     * {@link retryIndexingFailuresIfNeeded}.
+     */
+    needsResetFailures = false;
 
     /**
      * In flight face crop regeneration promises indexed by the IDs of the files
@@ -295,6 +306,30 @@ const updateIsMLEnabledRemote = (enabled: boolean) =>
     updateRemoteFlag(mlRemoteKey, enabled);
 
 /**
+ * Reset failures so that indexing is attempted again.
+ *
+ * When indexing of some individual files fails for non-retriable reasons, we
+ * mark those as failures locally.
+ *
+ * See: [Note: Transient and permanent indexing failures].
+ *
+ * Sometimes we might wish to reattempt these though (e.g. when adding support
+ * for more file formats).
+ *
+ * In such cases, this function can be called early on (during an app version
+ * upgrade) to set an in-memory flag which tell us that before attemepting a
+ * sync, we should reset existing failed statii.
+ *
+ * Since this is not a critical operation, we only keep this as an in-memory
+ * flag, failure to honor this will not have permanent repercussions (e.g. the
+ * file would eventually get indexed on mobile, or during logout / login, or
+ * during the next time an reattempt is made).
+ */
+export const retryIndexingFailuresIfNeeded = () => {
+    _state.needsResetFailures = true;
+};
+
+/**
  * Sync the ML status with remote.
  *
  * This is called an at early point in the global sync sequence, without waiting
@@ -330,13 +365,20 @@ export const mlSync = async () => {
     if (_state.isSyncing) return;
     _state.isSyncing = true;
 
+    if (_state.needsResetFailures) {
+        // CAS. See documentation for retryIndexingFailures why swapping the
+        // flag before performing the operation is fine.
+        _state.needsResetFailures = false;
+        await resetFailedFileStatuses();
+    }
+
     // Dependency order for the sync
     //
     //     files -> faces -> cgroups -> clusters -> people
     //
 
     // Fetch indexes, or index locally if needed.
-    await (await worker()).index();
+    await worker().then((w) => w.index());
 
     await updateClustersAndPeople();
 
@@ -612,6 +654,8 @@ export interface AnnotatedFaceID {
 export const getAnnotatedFacesForFile = async (
     file: EnteFile,
 ): Promise<AnnotatedFaceID[]> => {
+    if (!isMLEnabled()) return [];
+
     const index = await savedFaceIndex(file.id);
     if (!index) return [];
 

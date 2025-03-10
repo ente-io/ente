@@ -4,12 +4,12 @@ import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
-import "package:photos/services/sync_service.dart";
+import "package:photos/services/sync/sync_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/toast_util.dart";
 import "package:widgets_to_image/widgets_to_image.dart";
 
 class SaveCollageButton extends StatelessWidget {

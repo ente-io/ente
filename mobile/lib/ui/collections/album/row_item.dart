@@ -41,7 +41,7 @@ class AlbumRowItemWidget extends StatelessWidget {
     final Widget? linkIcon = c.hasLink && isOwner
         ? Icon(
             Icons.link,
-            color: c.publicURLs!.first!.isExpired ? warning500 : strokeBaseDark,
+            color: c.publicURLs.first.isExpired ? warning500 : strokeBaseDark,
           )
         : null;
     return GestureDetector(
@@ -115,7 +115,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                                 bottom: 8.0,
                               ),
                               child: UserAvatarWidget(
-                                c.owner!,
+                                c.owner,
                                 thumbnailView: true,
                               ),
                             ),

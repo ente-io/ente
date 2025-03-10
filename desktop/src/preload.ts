@@ -178,6 +178,9 @@ const fsReadTextFile = (path: string) =>
 const fsWriteFile = (path: string, contents: string) =>
     ipcRenderer.invoke("fsWriteFile", path, contents);
 
+const fsWriteFileViaBackup = (path: string, contents: string) =>
+    ipcRenderer.invoke("fsWriteFileViaBackup", path, contents);
+
 const fsIsDir = (dirPath: string) => ipcRenderer.invoke("fsIsDir", dirPath);
 
 // - Conversion
@@ -373,6 +376,7 @@ contextBridge.exposeInMainWorld("electron", {
         rm: fsRm,
         readTextFile: fsReadTextFile,
         writeFile: fsWriteFile,
+        writeFileViaBackup: fsWriteFileViaBackup,
         isDir: fsIsDir,
         findFiles: fsFindFiles,
     },

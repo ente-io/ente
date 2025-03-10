@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
+import 'package:ente_crypto/ente_crypto.dart';
 import "package:fast_base58/fast_base58.dart";
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
@@ -24,11 +25,12 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/extensions/list.dart';
 import 'package:photos/extensions/stop_watch.dart';
 import "package:photos/generated/l10n.dart";
+import 'package:photos/models/api/collection/collection_file_item.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/collection/collection.dart';
-import 'package:photos/models/collection/collection_file_item.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/files_split.dart";
@@ -36,10 +38,8 @@ import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/favorites_service.dart";
-import 'package:photos/services/file_magic_service.dart';
-import 'package:photos/services/local_sync_service.dart';
-import 'package:photos/services/remote_sync_service.dart';
-import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/services/sync/local_sync_service.dart';
+import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/local_settings.dart";
@@ -139,7 +139,7 @@ class CollectionsService {
         }
       }
       // remove reference for incoming collections when unshared/deleted
-      if (collection.isDeleted && ownerID != collection.owner?.id) {
+      if (collection.isDeleted && ownerID != collection.owner.id) {
         await _db.deleteCollection(collection.id);
       } else {
         // keep entry for deletedCollection as collectionKey may be used during
@@ -394,7 +394,7 @@ class CollectionsService {
     final List<Collection> collections =
         getCollectionsForUI(includedShared: true);
     for (final c in collections) {
-      if (c.owner!.id == Configuration.instance.getUserID()) {
+      if (c.owner.id == Configuration.instance.getUserID()) {
         if (c.hasSharees || c.hasLink && !c.isQuickLinkCollection()) {
           outgoing.add(c);
         } else if (c.isQuickLinkCollection()) {
@@ -472,8 +472,8 @@ class CollectionsService {
     if (collectionID != null) {
       final Collection? collection = getCollectionByID(collectionID);
       if (collection != null) {
-        if (collection.owner?.id == userID) {
-          _cachedUserIdToUser[userID] = collection.owner!;
+        if (collection.owner.id == userID) {
+          _cachedUserIdToUser[userID] = collection.owner;
         } else {
           final matchingUser = collection.getSharees().firstWhereOrNull(
                 (u) => u.id == userID,
@@ -553,7 +553,7 @@ class CollectionsService {
       unawaited(_db.insert([_collectionIDToCollections[collectionID]!]));
       RemoteSyncService.instance.sync(silently: true).ignore();
       return sharees;
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
@@ -641,7 +641,7 @@ class CollectionsService {
       } else {
         await _handleCollectionDeletion(collection);
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null) {
         debugPrint("Error " + e.response!.toString());
       }
@@ -666,6 +666,7 @@ class CollectionsService {
       ),
     );
     sync().ignore();
+    // not required once remote & local world are separate
     LocalSyncService.instance.syncAll().ignore();
   }
 
@@ -698,7 +699,7 @@ class CollectionsService {
     );
     final encryptedKey = CryptoUtil.base642bin(collection.encryptedKey);
     Uint8List? collectionKey;
-    if (collection.owner?.id == _config.getUserID()) {
+    if (collection.owner.id == _config.getUserID()) {
       // If the collection is owned by the user, decrypt with the master key
       if (_config.getKey() == null) {
         // Possible during AppStore account migration, where SecureStorage
@@ -730,7 +731,7 @@ class CollectionsService {
         await updateMagicMetadata(collection, {"subType": 0});
       }
       final encryptedName = CryptoUtil.encryptSync(
-        utf8.encode(newName) as Uint8List,
+        utf8.encode(newName),
         getCollectionKey(collection.id),
       );
       await _enteDio.post(
@@ -767,7 +768,7 @@ class CollectionsService {
   ) async {
     final int ownerID = Configuration.instance.getUserID()!;
     try {
-      if (collection.owner?.id != ownerID) {
+      if (collection.owner.id != ownerID) {
         throw AssertionError("cannot modify albums not owned by you");
       }
       // read the existing magic metadata and apply new updates to existing data
@@ -781,7 +782,7 @@ class CollectionsService {
 
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        utf8.encode(jsonEncode(jsonToUpdate)),
         key,
       );
       // for required field, the json validator on golang doesn't treat 0 as valid
@@ -798,7 +799,7 @@ class CollectionsService {
       );
       await _enteDio.put(
         "/collections/magic-metadata",
-        data: params,
+        data: params.toJson(),
       );
       // update the local information so that it's reflected on UI
       collection.mMdEncodedJson = jsonEncode(jsonToUpdate);
@@ -808,7 +809,7 @@ class CollectionsService {
 
       // trigger sync to fetch the latest collection state from server
       sync().ignore();
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 409) {
         _logger.severe('collection magic data out of sync');
         sync().ignore();
@@ -826,7 +827,7 @@ class CollectionsService {
   ) async {
     final int ownerID = Configuration.instance.getUserID()!;
     try {
-      if (collection.owner?.id != ownerID) {
+      if (collection.owner.id != ownerID) {
         throw AssertionError("cannot modify albums not owned by you");
       }
       // read the existing magic metadata and apply new updates to existing data
@@ -840,7 +841,7 @@ class CollectionsService {
 
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        utf8.encode(jsonEncode(jsonToUpdate)),
         key,
       );
       // for required field, the json validator on golang doesn't treat 0 as valid
@@ -857,7 +858,7 @@ class CollectionsService {
       );
       await _enteDio.put(
         "/collections/public-magic-metadata",
-        data: params,
+        data: params.toJson(),
       );
       // update the local information so that it's reflected on UI
       collection.mMdPubEncodedJson = jsonEncode(jsonToUpdate);
@@ -867,7 +868,7 @@ class CollectionsService {
       _cacheLocalPathAndCollection(collection);
       // trigger sync to fetch the latest collection state from server
       sync().ignore();
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 409) {
         _logger.severe('collection magic data out of sync');
         sync().ignore();
@@ -885,7 +886,7 @@ class CollectionsService {
   ) async {
     final int ownerID = Configuration.instance.getUserID()!;
     try {
-      if (collection.owner?.id == ownerID) {
+      if (collection.owner.id == ownerID) {
         throw AssertionError("cannot modify sharee settings for albums owned "
             "by you");
       }
@@ -900,7 +901,7 @@ class CollectionsService {
 
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
-        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        utf8.encode(jsonEncode(jsonToUpdate)),
         key,
       );
       // for required field, the json validator on golang doesn't treat 0 as valid
@@ -917,7 +918,7 @@ class CollectionsService {
       );
       await _enteDio.put(
         "/collections/sharee-magic-metadata",
-        data: params,
+        data: params.toJson(),
       );
       // update the local information so that it's reflected on UI
       collection.sharedMmdJson = jsonEncode(jsonToUpdate);
@@ -927,7 +928,7 @@ class CollectionsService {
       _cacheLocalPathAndCollection(collection);
       // trigger sync to fetch the latest collection state from server
       sync().ignore();
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 409) {
         _logger.severe('collection magic data out of sync');
         sync().ignore();
@@ -952,13 +953,13 @@ class CollectionsService {
           "enableJoin": true,
         },
       );
-      collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
+      collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
         CollectionUpdatedEvent(collection.id, <EnteFile>[], "shareUrL"),
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
@@ -980,14 +981,14 @@ class CollectionsService {
         data: json.encode(prop),
       );
       // remove existing url information
-      collection.publicURLs?.clear();
-      collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
+      collection.publicURLs.clear();
+      collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
         CollectionUpdatedEvent(collection.id, <EnteFile>[], "updateUrl"),
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
@@ -1003,7 +1004,7 @@ class CollectionsService {
       await _enteDio.delete(
         "/collections/share-url/" + collection.id.toString(),
       );
-      collection.publicURLs?.clear();
+      collection.publicURLs.clear();
       await _db.insert(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
@@ -1013,7 +1014,7 @@ class CollectionsService {
           "disableShareUrl",
         ),
       );
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       _logger.info(e);
       rethrow;
     }
@@ -1038,7 +1039,7 @@ class CollectionsService {
       return collections;
     } catch (e, s) {
       _logger.warning(e, s);
-      if (e is DioError && e.response?.statusCode == 401) {
+      if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
       rethrow;
@@ -1091,7 +1092,7 @@ class CollectionsService {
     } catch (e, s) {
       _logger.warning(e, s);
       _logger.severe("Failed to fetch public collection");
-      if (e is DioError && e.response?.statusCode == 410) {
+      if (e is DioException && e.response?.statusCode == 410) {
         await showInfoDialog(
           context,
           title: S.of(context).linkExpired,
@@ -1100,7 +1101,7 @@ class CollectionsService {
         throw UnauthorizedError();
       }
       await showGenericErrorDialog(context: context, error: e);
-      if (e is DioError && e.response?.statusCode == 401) {
+      if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
       rethrow;
@@ -1271,7 +1272,7 @@ class CollectionsService {
     final encryptedKeyData =
         CryptoUtil.encryptSync(collectionKey, _config.getKey()!);
     final encryptedName = CryptoUtil.encryptSync(
-      utf8.encode(albumName) as Uint8List,
+      utf8.encode(albumName),
       collectionKey,
     );
     final collection = await createAndCacheCollection(
@@ -1300,7 +1301,7 @@ class CollectionsService {
       _cacheLocalPathAndCollection(collection);
       return collection;
     } catch (e) {
-      if (e is DioError && e.response?.statusCode == 401) {
+      if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
       _logger.severe('failed to fetch collection: $collectionID', e);
@@ -1321,7 +1322,7 @@ class CollectionsService {
     final encryptedKeyData =
         CryptoUtil.encryptSync(collectionKey, _config.getKey()!);
     final encryptedPath =
-        CryptoUtil.encryptSync(utf8.encode(path) as Uint8List, collectionKey);
+        CryptoUtil.encryptSync(utf8.encode(path), collectionKey);
     final collection = await createAndCacheCollection(
       CreateRequest(
         encryptedKey: CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),

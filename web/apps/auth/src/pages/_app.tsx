@@ -13,13 +13,10 @@ import {
     useSetupLogs,
 } from "@/base/components/utils/hooks-app";
 import { authTheme } from "@/base/components/utils/theme";
+import { BaseContext, deriveBaseContext } from "@/base/context";
 import { logStartupBanner } from "@/base/log-web";
 import HTTPService from "@ente/shared/network/HTTPService";
-import {
-    LS_KEYS,
-    getData,
-    migrateKVToken,
-} from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
@@ -27,7 +24,6 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo } from "react";
-import { AppContext } from "types/context";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
@@ -38,7 +34,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER) as User | undefined | null;
-        void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
     }, []);
@@ -47,37 +42,30 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         void accountLogout().then(() => window.location.replace("/"));
     }, []);
 
-    const appContext = useMemo(
-        () => ({
-            logout,
-            showMiniDialog,
-        }),
+    const baseContext = useMemo(
+        () => deriveBaseContext({ logout, showMiniDialog }),
         [logout, showMiniDialog],
     );
 
     const title = isI18nReady ? t("title_auth") : staticAppTitle;
 
     return (
-        <>
+        <ThemeProvider theme={authTheme}>
             <CustomHead {...{ title }} />
+            <CssBaseline enableColorScheme />
+            <AttributedMiniDialog {...miniDialogProps} />
 
-            <ThemeProvider theme={authTheme}>
-                <CssBaseline enableColorScheme />
-
-                <AttributedMiniDialog {...miniDialogProps} />
-
-                <AppContext.Provider value={appContext}>
-                    {!isI18nReady ? (
-                        <LoadingIndicator />
-                    ) : (
-                        <>
-                            {isChangingRoute && <TranslucentLoadingOverlay />}
-                            <Component {...pageProps} />
-                        </>
-                    )}
-                </AppContext.Provider>
-            </ThemeProvider>
-        </>
+            <BaseContext value={baseContext}>
+                {!isI18nReady ? (
+                    <LoadingIndicator />
+                ) : (
+                    <>
+                        {isChangingRoute && <TranslucentLoadingOverlay />}
+                        <Component {...pageProps} />
+                    </>
+                )}
+            </BaseContext>
+        </ThemeProvider>
     );
 };
 

@@ -1,6 +1,8 @@
 import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import { UpdateMagicMetadataRequest } from "@/gallery/services/file";
+import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
 import {
     Collection,
     CollectionMagicMetadata,
@@ -35,7 +37,6 @@ import {
     groupFilesByCollectionID,
     sortFiles,
 } from "@/new/photos/services/files";
-import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import type { FamilyData } from "@/new/photos/services/user-details";
 import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -48,7 +49,6 @@ import {
     isQuickLinkCollection,
     isValidMoveTarget,
 } from "utils/collection";
-import { UpdateMagicMetadataRequest } from "./fileService";
 import { getPublicKey } from "./userService";
 
 const UNCATEGORIZED_COLLECTION_NAME = "Uncategorized";
@@ -139,11 +139,17 @@ export const createFavoritesCollection = () => {
     return createCollection(FAVORITE_COLLECTION_NAME, CollectionType.favorites);
 };
 
-export const addToFavorites = async (file: EnteFile) => {
-    await addMultipleToFavorites([file]);
+export const addToFavorites = async (
+    file: EnteFile,
+    disableOldWorkaround?: boolean,
+) => {
+    await addMultipleToFavorites([file], disableOldWorkaround);
 };
 
-export const addMultipleToFavorites = async (files: EnteFile[]) => {
+export const addMultipleToFavorites = async (
+    files: EnteFile[],
+    disableOldWorkaround?: boolean,
+) => {
     try {
         let favCollection = await getFavCollection();
         if (!favCollection) {
@@ -152,10 +158,19 @@ export const addMultipleToFavorites = async (files: EnteFile[]) => {
         await addToCollection(favCollection, files);
     } catch (e) {
         log.error("failed to add to favorite", e);
+        // Old code swallowed the error here. This isn't good, but to
+        // avoid changing existing behaviour only new code will set the
+        // disableOldWorkaround flag to instead rethrow it.
+        //
+        // TODO: Migrate old code, remove this flag, always throw.
+        if (disableOldWorkaround) throw e;
     }
 };
 
-export const removeFromFavorites = async (file: EnteFile) => {
+export const removeFromFavorites = async (
+    file: EnteFile,
+    disableOldWorkaround?: boolean,
+) => {
     try {
         const favCollection = await getFavCollection();
         if (!favCollection) {
@@ -164,6 +179,8 @@ export const removeFromFavorites = async (file: EnteFile) => {
         await removeFromCollection(favCollection.id, [file]);
     } catch (e) {
         log.error("remove from favorite failed", e);
+        // TODO: See disableOldWorkaround in addMultipleToFavorites.
+        if (disableOldWorkaround) throw e;
     }
 };
 

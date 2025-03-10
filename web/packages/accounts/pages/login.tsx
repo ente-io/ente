@@ -20,7 +20,7 @@ const Page: React.FC = () => {
             void router.push(PAGES.VERIFY);
         }
         setLoading(false);
-    }, []);
+    }, [router]);
 
     const onSignUp = () => void router.push(PAGES.SIGNUP);
 

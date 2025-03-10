@@ -2,6 +2,7 @@ import { sharedCryptoWorker } from "@/base/crypto";
 import { dateFromEpochMicroseconds } from "@/base/date";
 import log from "@/base/log";
 import { type Metadata, ItemVisibility } from "./file-metadata";
+import { FileType } from "./file-type";
 
 // TODO: Audit this file.
 
@@ -66,11 +67,11 @@ export type EncryptedMagicMetadata = MagicMetadataCore<string>;
 
 export interface EncryptedEnteFile {
     /**
-     * The file's ID.
+     * The file's globally unique ID.
      *
-     * The file's ID is a integer assigned by remote that is unique across all
-     * files stored by an Ente instance. That is, the file ID is a global unique
-     * identifier for this {@link EnteFile}.
+     * The file's ID is a integer assigned by remote as the identifier for an
+     * {@link EnteFile} when it is created. It is globally unique across all
+     * files stored by an Ente instance, and is not scoped to the current user.
      */
     id: number;
     /**
@@ -405,11 +406,18 @@ export const mergeMetadata1 = (file: EnteFile): EnteFile => {
         }
     }
 
-    // In a very rare cases (have found only one so far, a very old file in
+    // In very rare cases (have found only one so far, a very old file in
     // Vishnu's account, uploaded by an initial dev version of Ente) the photo
     // has no modification time. Gracefully handle such cases.
     if (!file.metadata.modificationTime)
         file.metadata.modificationTime = file.metadata.creationTime;
+
+    // In very rare cases (again, some files shared with Vishnu's account,
+    // uploaded by dev builds) the photo might not have a file type. Gracefully
+    // handle these too. The file ID threshold is an arbitrary cutoff so that
+    // this graceful handling does not mask new issues.
+    if (!file.metadata.fileType && file.id < 100000000)
+        file.metadata.fileType = FileType.image;
 
     return file;
 };

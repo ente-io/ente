@@ -1,17 +1,16 @@
 import "dart:io";
 
 import "package:dio/dio.dart";
+import "package:ente_crypto/ente_crypto.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/upload_locks_db.dart";
-import "package:photos/models/encryption_result.dart";
 import "package:photos/module/upload/model/multipart.dart";
 import "package:photos/module/upload/model/xml.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/utils/crypto_util.dart";
 
 class MultiPartUploader {
   final Dio _enteDio;
@@ -66,17 +65,12 @@ class MultiPartUploader {
 
   Future<MultipartUploadURLs> getMultipartUploadURLs(int count) async {
     try {
-      assert(
-        _featureFlagService.internalUser,
-        "Multipart upload should not be enabled for external users.",
-      );
       final response = await _enteDio.get(
         "/files/multipart-upload-urls",
         queryParameters: {
           "count": count,
         },
       );
-
       return MultipartUploadURLs.fromMap(response.data);
     } on Exception catch (e) {
       _logger.severe('failed to get multipart url', e);
@@ -132,7 +126,7 @@ class MultiPartUploader {
       // upload individual parts and get their etags
       try {
         etags = await _uploadParts(multipartInfo, encryptedFile);
-      } on DioError catch (e) {
+      } on DioException catch (e) {
         if (e.response?.statusCode == 404) {
           _logger.severe(
             "Multipart upload not found for key ${multipartInfo.urls.objectKey}",
@@ -157,7 +151,7 @@ class MultiPartUploader {
           etags,
           multipartInfo.urls.completeURL,
         );
-      } on DioError catch (e) {
+      } on DioException catch (e) {
         if (e.response?.statusCode == 404) {
           _logger.severe(
             "Multipart upload not found for key ${multipartInfo.urls.objectKey}",

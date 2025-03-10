@@ -3,7 +3,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/user_service.dart";
+import "package:photos/services/account/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/common/web_page.dart";
@@ -16,9 +16,9 @@ import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/growth/apply_code_screen.dart";
 import "package:photos/ui/growth/referral_code_widget.dart";
 import "package:photos/ui/growth/storage_details_screen.dart";
-import "package:photos/utils/data_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
+import "package:photos/utils/standalone/data.dart";
 import "package:tuple/tuple.dart";
 
 class ReferralScreen extends StatefulWidget {

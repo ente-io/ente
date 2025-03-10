@@ -27,8 +27,8 @@ class CollectionListPage extends StatefulWidget {
     this.appTitle,
     this.initialScrollOffset,
     this.tag = "",
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<CollectionListPage> createState() => _CollectionListPageState();

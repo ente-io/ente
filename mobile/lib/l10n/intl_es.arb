@@ -525,7 +525,6 @@
   "viewLargeFiles": "Archivos grandes",
   "viewLargeFilesDesc": "Ver los archivos que consumen la mayor cantidad de almacenamiento.",
   "noDuplicates": "✨ Sin duplicados",
-  "youveNoDuplicateFilesThatCanBeCleared": "No tienes archivos duplicados que puedan ser borrados",
   "success": "Éxito",
   "rateUs": "Califícanos",
   "remindToEmptyDeviceTrash": "También vacía \"Eliminado Recientemente\" de \"Configuración\" -> \"Almacenamiento\" para reclamar el espacio libre",
@@ -965,6 +964,14 @@
   "syncStopped": "Sincronización detenida",
   "syncProgress": "{completed}/{total} recuerdos conservados",
   "uploadingMultipleMemories": "Preservando {count} memorias...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "Preservando 1 memoria...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1593,5 +1600,78 @@
   "linkEmail": "Vincular correo electrónico",
   "link": "Enlace",
   "noEnteAccountExclamation": "¡No existe una cuenta de Ente!",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "orPickFromYourContacts": "o elige de entre tus contactos",
+  "emailDoesNotHaveEnteAccount": "{email} no tiene una cuenta de Ente.",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (Yo)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignMe": "Reasignar \"Yo\"",
+  "me": "Yo",
+  "linkEmailToContactBannerCaption": "para compartir más rápido",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "Selecciona persona a vincular",
+  "linkPersonToEmail": "Enlazar persona a {email}",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "linkPersonToEmailConfirmation": "Esto enlazará a {personName} a {email}",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "Selecciona tu cara",
+  "reassigningLoading": "Reasignando...",
+  "reassignedToName": "Te has reasignado a {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "¿Guardar cambios antes de salir?",
+  "dontSave": "No guardar",
+  "thisIsMeExclamation": "¡Este soy yo!",
+  "linkPerson": "Vincular persona",
+  "linkPersonCaption": "para una mejor experiencia compartida",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "Transmisión de vídeo",
+  "processingVideos": "Procesando vídeos",
+  "streamDetails": "Detalles de la transmisión",
+  "processing": "Procesando",
+  "queued": "En cola",
+  "ineligible": "Inelegible",
+  "failed": "Fallido",
+  "playStream": "Reproducir transmisión",
+  "playOriginal": "Reproducir original",
+  "joinAlbumConfirmationDialogBody": "Unirse a un álbum hará visible tu correo electrónico a sus participantes."
 }

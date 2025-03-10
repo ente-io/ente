@@ -12,6 +12,7 @@ import {
 } from "@/base/components/RowButton";
 import { SpacedRow } from "@/base/components/containers";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawer,
@@ -19,8 +20,11 @@ import {
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import { useModalVisibility } from "@/base/components/utils/modal";
-import { isDevBuild } from "@/base/env";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
+import { useBaseContext } from "@/base/context";
 import {
     getLocaleInUse,
     setLocaleInUse,
@@ -32,8 +36,8 @@ import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { downloadString } from "@/base/utils/web";
+import { DeleteAccount } from "@/new/photos/components/DeleteAccount";
 import { DropdownInput } from "@/new/photos/components/DropdownInput";
-import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { MLSettings } from "@/new/photos/components/sidebar/MLSettings";
 import { TwoFactorSettings } from "@/new/photos/components/sidebar/TwoFactorSettings";
 import {
@@ -53,7 +57,7 @@ import {
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { isMLSupported } from "@/new/photos/services/ml";
 import {
-    isInternalUser,
+    isDevBuildAndUser,
     syncSettings,
     updateCFProxyDisabledPreference,
     updateMapEnabled,
@@ -75,7 +79,7 @@ import {
     userDetailsAddOnBonuses,
     type UserDetails,
 } from "@/new/photos/services/user-details";
-import { AppContext, useAppContext } from "@/new/photos/types/context";
+import { usePhotosAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import {
     FlexWrapper,
@@ -105,7 +109,6 @@ import {
     useColorScheme,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import DeleteAccountModal from "components/DeleteAccountModal";
 import { WatchFolder } from "components/WatchFolder";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -124,27 +127,51 @@ import exportService from "services/export";
 import { testUpload } from "../../tests/upload.test";
 import { SubscriptionCard } from "./SubscriptionCard";
 
-interface SidebarProps {
+type SidebarProps = ModalVisibilityProps & {
+    /**
+     * The latest UI collections.
+     *
+     * These are used to obtain data about the uncategorized, hidden and other
+     * items shown in the shortcut section within the sidebar.
+     */
     collectionSummaries: CollectionSummaries;
-    sidebarView: boolean;
-    closeSidebar: () => void;
-}
+    /**
+     * Called when the plan selection modal should be shown.
+     */
+    onShowPlanSelector: () => void;
+    /**
+     * Called when the export dialog should be shown.
+     */
+    onShowExport: () => void;
+    /**
+     * Called when the user should be authenticated again.
+     *
+     * This will be invoked before sensitive actions, and the action will only
+     * proceed if the promise returned by this function is fulfilled.
+     */
+    onAuthenticateUser: () => Promise<void>;
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({
+    open,
+    onClose,
     collectionSummaries,
-    sidebarView,
-    closeSidebar,
+    onShowPlanSelector,
+    onShowExport,
+    onAuthenticateUser,
 }) => (
-    <RootSidebarDrawer open={sidebarView} onClose={closeSidebar}>
-        <HeaderSection closeSidebar={closeSidebar} />
-        <UserDetailsSection sidebarView={sidebarView} />
+    <RootSidebarDrawer open={open} onClose={onClose}>
+        <HeaderSection onCloseSidebar={onClose} />
+        <UserDetailsSection sidebarOpen={open} {...{ onShowPlanSelector }} />
         <Stack sx={{ gap: 0.5, mb: 3 }}>
             <ShortcutSection
-                closeSidebar={closeSidebar}
+                onCloseSidebar={onClose}
                 collectionSummaries={collectionSummaries}
             />
-            <UtilitySection closeSidebar={closeSidebar} />
-            <HelpSection closeSidebar={closeSidebar} />
+            <UtilitySection
+                onCloseSidebar={onClose}
+                {...{ onShowExport, onAuthenticateUser }}
+            />
             <Divider sx={{ my: "2px" }} />
             <ExitSection />
             <InfoSection />
@@ -158,33 +185,31 @@ const RootSidebarDrawer = styled(SidebarDrawer)(({ theme }) => ({
     },
 }));
 
-interface HeaderSectionProps {
-    closeSidebar: () => void;
+interface SectionProps {
+    onCloseSidebar: SidebarProps["onClose"];
 }
 
-const HeaderSection: React.FC<HeaderSectionProps> = ({ closeSidebar }) => {
-    return (
-        <SpacedRow sx={{ my: "4px 4px", pl: "12px" }}>
-            <EnteLogo />
-            <IconButton
-                aria-label={t("close")}
-                onClick={closeSidebar}
-                color="secondary"
-            >
-                <CloseIcon fontSize="small" />
-            </IconButton>
-        </SpacedRow>
-    );
+const HeaderSection: React.FC<SectionProps> = ({ onCloseSidebar }) => (
+    <SpacedRow sx={{ my: "4px 4px", pl: "12px" }}>
+        <EnteLogo />
+        <IconButton
+            aria-label={t("close")}
+            onClick={onCloseSidebar}
+            color="secondary"
+        >
+            <CloseIcon fontSize="small" />
+        </IconButton>
+    </SpacedRow>
+);
+
+type UserDetailsSectionProps = Pick<SidebarProps, "onShowPlanSelector"> & {
+    sidebarOpen: boolean;
 };
 
-interface UserDetailsSectionProps {
-    sidebarView: boolean;
-}
-
 const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
-    sidebarView,
+    sidebarOpen,
+    onShowPlanSelector,
 }) => {
-    const galleryContext = useContext(GalleryContext);
     const userDetails = useUserDetailsSnapshot();
     const [memberSubscriptionManageView, setMemberSubscriptionManageView] =
         useState(false);
@@ -195,8 +220,8 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
         setMemberSubscriptionManageView(false);
 
     useEffect(() => {
-        if (sidebarView) void syncUserDetails();
-    }, [sidebarView]);
+        if (sidebarOpen) void syncUserDetails();
+    }, [sidebarOpen]);
 
     const isNonAdminFamilyMember = useMemo(
         () =>
@@ -217,7 +242,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
             ) {
                 redirectToCustomerPortal();
             } else {
-                galleryContext.showPlanSelectorModal();
+                onShowPlanSelector();
             }
         }
     };
@@ -238,7 +263,9 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                     onClick={handleSubscriptionCardClick}
                 />
                 {userDetails && (
-                    <SubscriptionStatus userDetails={userDetails} />
+                    <SubscriptionStatus
+                        {...{ userDetails, onShowPlanSelector }}
+                    />
                 )}
             </Box>
             {isNonAdminFamilyMember && (
@@ -252,15 +279,14 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     );
 };
 
-interface SubscriptionStatusProps {
+type SubscriptionStatusProps = Pick<SidebarProps, "onShowPlanSelector"> & {
     userDetails: UserDetails;
-}
+};
 
 const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     userDetails,
+    onShowPlanSelector,
 }) => {
-    const { showPlanSelectorModal } = useContext(GalleryContext);
-
     const hasAMessage = useMemo(() => {
         if (isPartOfFamily(userDetails) && !isFamilyAdmin(userDetails)) {
             return false;
@@ -280,7 +306,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
 
             if (isSubscriptionActive(userDetails.subscription)) {
                 if (hasExceededStorageQuota(userDetails)) {
-                    showPlanSelectorModal();
+                    onShowPlanSelector();
                 }
             } else {
                 if (
@@ -289,7 +315,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                 ) {
                     redirectToCustomerPortal();
                 } else {
-                    showPlanSelectorModal();
+                    onShowPlanSelector();
                 }
             }
         };
@@ -354,7 +380,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
 };
 
 function MemberSubscriptionManage({ open, userDetails, onClose }) {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
     const fullScreen = useIsSmallWidth();
 
     const confirmLeaveFamily = () =>
@@ -415,13 +441,12 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
     );
 }
 
-interface ShortcutSectionProps {
-    closeSidebar: () => void;
-    collectionSummaries: CollectionSummaries;
-}
+type ShortcutSectionProps = SectionProps & {
+    collectionSummaries: SidebarProps["collectionSummaries"];
+};
 
 const ShortcutSection: React.FC<ShortcutSectionProps> = ({
-    closeSidebar,
+    onCloseSidebar,
     collectionSummaries,
 }) => {
     const galleryContext = useContext(GalleryContext);
@@ -429,35 +454,31 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
         useState<number>();
 
     useEffect(() => {
-        const main = async () => {
-            const unCategorizedCollection = await getUncategorizedCollection();
-            if (unCategorizedCollection) {
-                setUncategorizedCollectionID(unCategorizedCollection.id);
-            } else {
-                setUncategorizedCollectionID(DUMMY_UNCATEGORIZED_COLLECTION);
-            }
-        };
-        main();
+        void getUncategorizedCollection().then((uncat) =>
+            setUncategorizedCollectionID(
+                uncat?.id ?? DUMMY_UNCATEGORIZED_COLLECTION,
+            ),
+        );
     }, []);
 
     const openUncategorizedSection = () => {
         galleryContext.setActiveCollectionID(uncategorizedCollectionId);
-        closeSidebar();
+        onCloseSidebar();
     };
 
     const openTrashSection = () => {
         galleryContext.setActiveCollectionID(TRASH_SECTION);
-        closeSidebar();
+        onCloseSidebar();
     };
 
     const openArchiveSection = () => {
         galleryContext.setActiveCollectionID(ARCHIVE_SECTION);
-        closeSidebar();
+        onCloseSidebar();
     };
 
     const openHiddenSection = () => {
         galleryContext.openHiddenSection(() => {
-            closeSidebar();
+            onCloseSidebar();
         });
     };
 
@@ -504,11 +525,20 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
     );
 };
 
-const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
-    closeSidebar,
+type UtilitySectionProps = SectionProps &
+    Pick<SidebarProps, "onShowExport" | "onAuthenticateUser">;
+
+const UtilitySection: React.FC<UtilitySectionProps> = ({
+    onCloseSidebar,
+    onShowExport,
+    onAuthenticateUser,
 }) => {
+    const { showMiniDialog } = useBaseContext();
+    const { watchFolderView, setWatchFolderView } = usePhotosAppContext();
+
     const router = useRouter();
-    const { watchFolderView, setWatchFolderView } = useAppContext();
+
+    const { show: showHelp, props: helpVisibilityProps } = useModalVisibility();
 
     const { show: showAccount, props: accountVisibilityProps } =
         useModalVisibility();
@@ -519,6 +549,11 @@ const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
     const handleCloseWatchFolder = () => setWatchFolderView(false);
 
     const handleDeduplicate = () => router.push("/duplicates");
+
+    const handleExport = () =>
+        isDesktop
+            ? onShowExport()
+            : showMiniDialog(downloadAppDialogAttributes());
 
     return (
         <>
@@ -544,39 +579,9 @@ const UtilitySection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
                 label={t("preferences")}
                 onClick={showPreferences}
             />
-            {isDesktop && (
-                <WatchFolder
-                    open={watchFolderView}
-                    onClose={handleCloseWatchFolder}
-                />
-            )}
-            <Account {...accountVisibilityProps} onRootClose={closeSidebar} />
-            <Preferences
-                {...preferencesVisibilityProps}
-                onRootClose={closeSidebar}
-            />
-        </>
-    );
-};
-
-const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
-    closeSidebar,
-}) => {
-    const { showMiniDialog } = useContext(AppContext);
-    const { openExportModal } = useContext(GalleryContext);
-
-    const { show: showHelp, props: helpVisibilityProps } = useModalVisibility();
-
-    const handleExport = () =>
-        isDesktop
-            ? openExportModal()
-            : showMiniDialog(downloadAppDialogAttributes());
-
-    return (
-        <>
             <RowButton
                 variant="secondary"
-                label={t("Help")}
+                label={t("help")}
                 onClick={showHelp}
             />
             <RowButton
@@ -589,13 +594,28 @@ const HelpSection: React.FC<Pick<SidebarProps, "closeSidebar">> = ({
                 }
                 onClick={handleExport}
             />
-            <Help {...helpVisibilityProps} onRootClose={closeSidebar} />
+            <Help {...helpVisibilityProps} onRootClose={onCloseSidebar} />
+            {isDesktop && (
+                <WatchFolder
+                    open={watchFolderView}
+                    onClose={handleCloseWatchFolder}
+                />
+            )}
+            <Account
+                {...accountVisibilityProps}
+                onRootClose={onCloseSidebar}
+                {...{ onAuthenticateUser }}
+            />
+            <Preferences
+                {...preferencesVisibilityProps}
+                onRootClose={onCloseSidebar}
+            />
         </>
     );
 };
 
 const ExitSection: React.FC = () => {
-    const { showMiniDialog, logout } = useContext(AppContext);
+    const { logout, showMiniDialog } = useBaseContext();
 
     const handleLogout = () =>
         showMiniDialog({
@@ -643,12 +663,15 @@ const InfoSection: React.FC = () => {
     );
 };
 
-const Account: React.FC<NestedSidebarDrawerVisibilityProps> = ({
+type AccountProps = NestedSidebarDrawerVisibilityProps &
+    Pick<SidebarProps, "onAuthenticateUser">;
+const Account: React.FC<AccountProps> = ({
     open,
     onClose,
     onRootClose,
+    onAuthenticateUser,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const router = useRouter();
 
@@ -731,7 +754,10 @@ const Account: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 {...twoFactorVisibilityProps}
                 onRootClose={onRootClose}
             />
-            <DeleteAccountModal {...deleteAccountVisibilityProps} />
+            <DeleteAccount
+                {...deleteAccountVisibilityProps}
+                {...{ onAuthenticateUser }}
+            />
         </NestedSidebarDrawer>
     );
 };
@@ -876,6 +902,8 @@ const localeName = (locale: SupportedLocale) => {
             return "Українська";
         case "vi-VN":
             return "Tiếng Việt";
+        case "ja-JP":
+            return "日本語";
     }
 };
 
@@ -908,7 +936,7 @@ const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const { mapEnabled } = useSettingsSnapshot();
 
@@ -1033,7 +1061,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog } = useBaseContext();
 
     const handleRootClose = () => {
         onClose();
@@ -1119,7 +1147,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         }
                         onClick={confirmViewLogs}
                     />
-                    {isInternalUser() && isDevBuild && (
+                    {isDevBuildAndUser() && (
                         <RowButton
                             variant="secondary"
                             label={

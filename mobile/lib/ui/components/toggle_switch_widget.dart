@@ -6,7 +6,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/utils/debouncer.dart';
+import 'package:photos/utils/standalone/debouncer.dart';
 
 class ToggleSwitchWidget extends StatefulWidget {
   final BoolCallBack value;
@@ -14,8 +14,8 @@ class ToggleSwitchWidget extends StatefulWidget {
   const ToggleSwitchWidget({
     required this.value,
     required this.onChanged,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ToggleSwitchWidget> createState() => _ToggleSwitchWidgetState();
@@ -58,7 +58,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                     activeTrackColor: enteColorScheme.primary500,
                     activeColor: Colors.white,
                     inactiveThumbColor: enteColorScheme.primary500,
-                    trackOutlineColor: MaterialStateColor.resolveWith(
+                    trackOutlineColor: WidgetStateColor.resolveWith(
                       (states) => enteColorScheme.primary500,
                     ),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

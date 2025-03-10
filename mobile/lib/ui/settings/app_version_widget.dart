@@ -4,8 +4,8 @@ import "package:photos/generated/l10n.dart";
 
 class AppVersionWidget extends StatefulWidget {
   const AppVersionWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<AppVersionWidget> createState() => _AppVersionWidgetState();

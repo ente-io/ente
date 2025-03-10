@@ -2,6 +2,7 @@ import 'dart:async';
 import "dart:convert";
 import "dart:io";
 
+import "package:ente_crypto/ente_crypto.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -33,13 +34,14 @@ import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
+import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/notification_service.dart";
-import "package:photos/services/remote_sync_service.dart";
-import 'package:photos/services/user_service.dart';
+import "package:photos/services/sync/diff_fetcher.dart";
+import 'package:photos/services/sync/local_sync_service.dart';
+import "package:photos/services/sync/remote_sync_service.dart";
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/effects.dart";
@@ -66,9 +68,7 @@ import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 import 'package:photos/ui/viewer/search_tab/search_tab.dart';
 import "package:photos/utils/collection_util.dart";
-import "package:photos/utils/crypto_util.dart";
 import 'package:photos/utils/dialog_util.dart';
-import "package:photos/utils/diff_fetcher.dart";
 import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
@@ -275,7 +275,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       final existingCollection =
           CollectionsService.instance.getCollectionByID(collection.id);
 
-      if (collection.owner!.id! == Configuration.instance.getUserID() ||
+      if (collection.isOwner(Configuration.instance.getUserID() ?? -1) ||
           (existingCollection != null && !existingCollection.isDeleted)) {
         await routeToPage(
           context,
@@ -286,8 +286,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         return;
       }
       final dialog = createProgressDialog(context, "Loading...");
-      final publicUrl = collection.publicURLs![0];
-      if (!publicUrl!.enableDownload) {
+      final publicUrl = collection.publicURLs[0];
+      if (!publicUrl.enableDownload) {
         await showErrorDialog(
           context,
           context.l10n.canNotOpenTitle,

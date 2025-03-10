@@ -16,14 +16,15 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/person_contact_linking_util.dart";
-import "package:photos/utils/toast_util.dart";
 
 class PersonEntityWithThumbnailFile {
   final PersonEntity person;
-  final EnteFile thumbnailFile;
+  final EnteFile? thumbnailFile;
 
   const PersonEntityWithThumbnailFile(
     this.person,
@@ -61,7 +62,8 @@ class _LinkContactToPersonSelectionPageState
             (person.data.isHidden || person.data.isIgnored)) {
           continue;
         }
-        final file = await PersonService.instance.getRecentFileOfPerson(person);
+        final file =
+            await PersonService.instance.getThumbnailFileOfPerson(person);
         result.add(PersonEntityWithThumbnailFile(person, file));
       }
       return result;
@@ -70,6 +72,7 @@ class _LinkContactToPersonSelectionPageState
 
   @override
   Widget build(BuildContext context) {
+    _logger.info("Building LinkContactToPersonSelectionPage");
     final smallFontSize = getEnteTextTheme(context).small.fontSize!;
     final textScaleFactor =
         MediaQuery.textScalerOf(context).scale(smallFontSize) / smallFontSize;
@@ -88,6 +91,11 @@ class _LinkContactToPersonSelectionPageState
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: EnteLoadingWidget());
           } else if (snapshot.hasError) {
+            _logger.severe(
+              "Failed to load _personEntitiesWithThumnailFile",
+              snapshot.error,
+              snapshot.stackTrace,
+            );
             return const Center(child: Icon(Icons.error_outline_rounded));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text(S.of(context).noResultsFound + '.'));
@@ -229,7 +237,8 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
             (person.data.isHidden || person.data.isIgnored)) {
           continue;
         }
-        final file = await PersonService.instance.getRecentFileOfPerson(person);
+        final file =
+            await PersonService.instance.getThumbnailFileOfPerson(person);
         result.add(PersonEntityWithThumbnailFile(person, file));
       }
       return result;
@@ -238,6 +247,7 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    _logger.info("Building ReassignMeSelectionPage");
     final smallFontSize = getEnteTextTheme(context).small.fontSize!;
     final textScaleFactor =
         MediaQuery.textScalerOf(context).scale(smallFontSize) / smallFontSize;
@@ -256,6 +266,11 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: EnteLoadingWidget());
           } else if (snapshot.hasError) {
+            _logger.severe(
+              "Failed to load _personEntitiesWithThumnailFile",
+              snapshot.error,
+              snapshot.stackTrace,
+            );
             return const Center(child: Icon(Icons.error_outline_rounded));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text(S.of(context).noResultsFound + '.'));
@@ -410,11 +425,14 @@ class _RoundedPersonFaceWidget extends StatelessWidget {
                         ),
                       ),
                     ),
-                    child: PersonFaceWidget(
-                      personEntitiesWithThumbnailFile.thumbnailFile,
-                      personId: personEntitiesWithThumbnailFile.person.remoteID,
-                      useFullFile: true,
-                    ),
+                    child: personEntitiesWithThumbnailFile.thumbnailFile == null
+                        ? const NoThumbnailWidget(addBorder: false)
+                        : PersonFaceWidget(
+                            personEntitiesWithThumbnailFile.thumbnailFile!,
+                            personId:
+                                personEntitiesWithThumbnailFile.person.remoteID,
+                            useFullFile: true,
+                          ),
                   ),
                 ),
               ),

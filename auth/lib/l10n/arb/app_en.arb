@@ -499,7 +499,7 @@
   "appLockOfflineModeWarning": "You have chosen to proceed without backups. If you forget your applock, you will be locked out from accessing your data.",
   "duplicateCodes": "Duplicate codes",
   "noDuplicates": "✨ No duplicates",
-  "youveNoDuplicateCodesThatCanBeCleared": "You've no duplicate codes that can be cleared",
+  "youveNoDuplicateCodesThatCanBeCleared": "You don't have any duplicate codes that can be cleared",
   "deduplicateCodes": "Deduplicate codes",
   "deselectAll": "Deselect all",
   "selectAll": "Select all",

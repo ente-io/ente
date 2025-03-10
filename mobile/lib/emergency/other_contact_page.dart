@@ -7,7 +7,7 @@ import "package:photos/emergency/model.dart";
 import "package:photos/emergency/recover_others_account.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/key_attributes.dart";
+import "package:photos/models/api/user/key_attributes.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
@@ -17,9 +17,9 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/menu_section_title.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
-import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/standalone/date_time.dart";
 
 // OtherContactPage is used to start recovery process for other user's account
 // Based on the state of the contact & recovery session, it will show

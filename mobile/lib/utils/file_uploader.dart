@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
+import 'package:ente_crypto/ente_crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import "package:path/path.dart";
@@ -23,28 +24,27 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/main.dart';
+import "package:photos/models/api/metadata.dart";
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
-import 'package:photos/models/encryption_result.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
-import 'package:photos/models/upload_url.dart';
 import "package:photos/models/user_details.dart";
+import 'package:photos/module/upload/model/upload_url.dart';
 import "package:photos/module/upload/service/multipart.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/file_magic_service.dart";
-import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/preview_video_store.dart";
-import 'package:photos/services/sync_service.dart';
-import "package:photos/services/user_service.dart";
-import 'package:photos/utils/crypto_util.dart';
-import 'package:photos/utils/data_util.dart';
+import 'package:photos/services/sync/local_sync_service.dart';
+import 'package:photos/services/sync/sync_service.dart';
+import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/network_util.dart";
+import 'package:photos/utils/standalone/data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
@@ -82,7 +82,6 @@ class FileUploader {
   int _uploadCounter = 0;
   int _videoUploadCounter = 0;
   late ProcessType _processType;
-  late bool _isBackground;
   late SharedPreferences _prefs;
 
   // _hasInitiatedForceUpload is used to track if user attempted force upload
@@ -104,7 +103,6 @@ class FileUploader {
 
   Future<void> init(SharedPreferences preferences, bool isBackground) async {
     _prefs = preferences;
-    _isBackground = isBackground;
     _processType =
         isBackground ? ProcessType.background : ProcessType.foreground;
     final currentTime = DateTime.now().microsecondsSinceEpoch;
@@ -538,7 +536,7 @@ class FileUploader {
 
     MediaUploadData? mediaUploadData;
     try {
-      mediaUploadData = await getUploadDataFromEnteFile(file);
+      mediaUploadData = await getUploadDataFromEnteFile(file, parseExif: true);
     } catch (e) {
       // This additional try catch block is added because for resumable upload,
       // we need to compute the hash before the next step. Previously, this
@@ -730,8 +728,13 @@ class FileUploader {
           encThumbSize,
         );
       }
+      final ParsedExifDateTime? exifTime = await tryParseExifDateTime(
+        null,
+        mediaUploadData.exifData,
+      );
+      final metadata =
+          await file.getMetadataForUpload(mediaUploadData, exifTime);
 
-      final metadata = await file.getMetadataForUpload(mediaUploadData);
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
         fileAttributes.key!,
@@ -747,6 +750,12 @@ class FileUploader {
           CryptoUtil.bin2base64(encryptedMetadataResult.header!);
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
+      }
+      final stillLocked =
+          await _uploadLocks.isLocked(lockKey, _processType.toString());
+      if (!stillLocked) {
+        _logger.warning('file ${file.tag} report paused is missing');
+        throw LockFreedError();
       }
 
       EnteFile remoteFile;
@@ -773,22 +782,9 @@ class FileUploader {
             CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
         final keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
-        final Map<String, dynamic> pubMetadata = {};
+        final Map<String, dynamic> pubMetadata =
+            _buildPublicMagicData(mediaUploadData, exifTime);
         MetadataRequest? pubMetadataRequest;
-        if ((mediaUploadData.height ?? 0) != 0 &&
-            (mediaUploadData.width ?? 0) != 0) {
-          pubMetadata[heightKey] = mediaUploadData.height;
-          pubMetadata[widthKey] = mediaUploadData.width;
-          pubMetadata[mediaTypeKey] =
-              mediaUploadData.isPanorama == true ? 1 : 0;
-        }
-        if (mediaUploadData.motionPhotoStartIndex != null) {
-          pubMetadata[motionVideoIndexKey] =
-              mediaUploadData.motionPhotoStartIndex;
-        }
-        if (mediaUploadData.thumbnail == null) {
-          pubMetadata[noThumbKey] = true;
-        }
         if (pubMetadata.isNotEmpty) {
           pubMetadataRequest = await getPubMetadataRequest(
             file,
@@ -823,14 +819,12 @@ class FileUploader {
       }
       await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
 
-      if (!_isBackground) {
-        Bus.instance.fire(
-          LocalPhotosUpdatedEvent(
-            [remoteFile],
-            source: "downloadComplete",
-          ),
-        );
-      }
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          [remoteFile],
+          source: "uploadCompleted",
+        ),
+      );
       _logger.info("File upload complete for " + remoteFile.toString());
       uploadCompleted = true;
       Bus.instance.fire(FileUploadedEvent(remoteFile));
@@ -872,8 +866,36 @@ class FileUploader {
     }
   }
 
+  Map<String, dynamic> _buildPublicMagicData(
+    MediaUploadData mediaUploadData,
+    ParsedExifDateTime? exifTime,
+  ) {
+    final Map<String, dynamic> pubMetadata = {};
+    if ((mediaUploadData.height ?? 0) != 0 &&
+        (mediaUploadData.width ?? 0) != 0) {
+      pubMetadata[heightKey] = mediaUploadData.height;
+      pubMetadata[widthKey] = mediaUploadData.width;
+      pubMetadata[mediaTypeKey] = mediaUploadData.isPanorama == true ? 1 : 0;
+    }
+    if (mediaUploadData.motionPhotoStartIndex != null) {
+      pubMetadata[motionVideoIndexKey] = mediaUploadData.motionPhotoStartIndex;
+    }
+    if (mediaUploadData.thumbnail == null) {
+      pubMetadata[noThumbKey] = true;
+    }
+    if (exifTime != null) {
+      if (exifTime.dateTime != null) {
+        pubMetadata[dateTimeKey] = exifTime.dateTime;
+      }
+      if (exifTime.offsetTime != null) {
+        pubMetadata[offsetTimeKey] = exifTime.offsetTime;
+      }
+    }
+    return pubMetadata;
+  }
+
   bool isPutOrUpdateFileError(Object e) {
-    if (e is DioError) {
+    if (e is DioException) {
       return e.requestOptions.path.contains("/files") ||
           e.requestOptions.path.contains("/files/update");
     }
@@ -1168,13 +1190,16 @@ class FileUploader {
       file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
-    } on DioError catch (e) {
-      if (e.response?.statusCode == 413) {
+    } on DioException catch (e) {
+      final int statusCode = e.response?.statusCode ?? -1;
+      if (statusCode == 413) {
         throw FileTooLargeForPlanError();
-      } else if (e.response?.statusCode == 426) {
+      } else if (statusCode == 426) {
         _onStorageLimitExceeded();
-      } else if (attempt < kMaximumUploadAttempts) {
-        _logger.info("Upload file failed, will retry in 3 seconds");
+      } else if (attempt < kMaximumUploadAttempts && statusCode == -1) {
+        // retry when DioException contains no response/status code
+        _logger
+            .info("Upload file (${file.tag}) failed, will retry in 3 seconds");
         await Future.delayed(const Duration(seconds: 3));
         return _uploadFile(
           file,
@@ -1193,6 +1218,8 @@ class FileUploader {
           attempt: attempt + 1,
           pubMetadata: pubMetadata,
         );
+      } else {
+        _logger.severe("Failed to upload file ${file.tag}", e);
       }
       rethrow;
     }
@@ -1236,11 +1263,13 @@ class FileUploader {
       file.thumbnailDecryptionHeader = thumbnailDecryptionHeader;
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
-    } on DioError catch (e) {
-      if (e.response?.statusCode == 426) {
+    } on DioException catch (e) {
+      final int statusCode = e.response?.statusCode ?? -1;
+      if (statusCode == 426) {
         _onStorageLimitExceeded();
-      } else if (attempt < kMaximumUploadAttempts) {
-        _logger.info("Update file failed, will retry in 3 seconds");
+      } else if (attempt < kMaximumUploadAttempts && statusCode == -1) {
+        _logger
+            .info("Update file (${file.tag}) failed, will retry in 3 seconds");
         await Future.delayed(const Duration(seconds: 3));
         return _updateFile(
           file,
@@ -1254,6 +1283,8 @@ class FileUploader {
           metadataDecryptionHeader,
           attempt: attempt + 1,
         );
+      } else {
+        _logger.severe("Failed to update file ${file.tag}", e);
       }
       rethrow;
     }
@@ -1292,7 +1323,7 @@ class FileUploader {
             .map((e) => UploadURL.fromMap(e))
             .toList();
         _uploadURLs.addAll(urls);
-      } on DioError catch (e, s) {
+      } on DioException catch (e, s) {
         if (e.response != null) {
           if (e.response!.statusCode == 402) {
             final error = NoActiveSubscriptionError();
@@ -1342,8 +1373,8 @@ class FileUploader {
       );
 
       return uploadURL.objectKey;
-    } on DioError catch (e) {
-      if (e.message.startsWith("HttpException: Content size")) {
+    } on DioException catch (e) {
+      if (e.message?.startsWith("HttpException: Content size") ?? false) {
         rethrow;
       } else if (attempt < kMaximumUploadAttempts) {
         _logger.info("Upload failed for $fileName, retrying");

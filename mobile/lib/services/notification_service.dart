@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import "package:logging/logging.dart";
-import "package:photos/services/remote_sync_service.dart";
+import "package:photos/services/sync/remote_sync_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class NotificationService {

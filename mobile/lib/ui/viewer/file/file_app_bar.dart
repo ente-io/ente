@@ -23,26 +23,23 @@ import "package:photos/services/local_authentication_service.dart";
 import "package:photos/services/preview_video_store.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
-import 'package:photos/ui/viewer/file/custom_app_bar.dart';
+import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
-import 'package:photos/utils/toast_util.dart';
 
 class FileAppBar extends StatefulWidget {
   final EnteFile file;
   final Function(EnteFile) onFileRemoved;
-  final double height;
   final bool shouldShowActions;
   final ValueNotifier<bool> enableFullScreenNotifier;
 
   const FileAppBar(
     this.file,
     this.onFileRemoved,
-    this.height,
     this.shouldShowActions, {
     required this.enableFullScreenNotifier,
     super.key,
@@ -98,8 +95,9 @@ class FileAppBarState extends State<FileAppBar> {
 
     final isTrashedFile = widget.file is TrashFile;
     final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
-    return CustomAppBar(
-      ValueListenableBuilder(
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(kToolbarHeight),
+      child: ValueListenableBuilder(
         valueListenable: widget.enableFullScreenNotifier,
         builder: (context, bool isFullScreen, child) {
           return IgnorePointer(
@@ -124,32 +122,33 @@ class FileAppBarState extends State<FileAppBar> {
               stops: const [0, 0.2, 1],
             ),
           ),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
-            switchInCurve: Curves.easeInOut,
-            switchOutCurve: Curves.easeInOut,
-            child: AppBar(
-              clipBehavior: Clip.none,
-              key: ValueKey(isGuestView),
-              iconTheme: const IconThemeData(
-                color: Colors.white,
-              ), //same for both themes
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  isGuestView
-                      ? _requestAuthentication()
-                      : Navigator.of(context).pop();
-                },
+          child: SafeArea(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              switchInCurve: Curves.easeInOut,
+              switchOutCurve: Curves.easeInOut,
+              child: AppBar(
+                clipBehavior: Clip.none,
+                key: ValueKey(isGuestView),
+                iconTheme: const IconThemeData(
+                  color: Colors.white,
+                ), //same for both themes
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    isGuestView
+                        ? _requestAuthentication()
+                        : Navigator.of(context).pop();
+                  },
+                ),
+                actions: shouldShowActions && !isGuestView ? _actions : [],
+                elevation: 0,
+                backgroundColor: const Color(0x00000000),
               ),
-              actions: shouldShowActions && !isGuestView ? _actions : [],
-              elevation: 0,
-              backgroundColor: const Color(0x00000000),
             ),
           ),
         ),
       ),
-      Size.fromHeight(Platform.isAndroid ? 84 : 96),
     );
   }
 
@@ -179,10 +178,7 @@ class FileAppBarState extends State<FileAppBar> {
     }
     if (!isFileHidden && isFileUploaded) {
       _actions.add(
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: FavoriteWidget(widget.file),
-        ),
+        Center(child: FavoriteWidget(widget.file)),
       );
     }
     if (!isFileUploaded) {

@@ -1,7 +1,7 @@
 name: onnx_dart
 description: "A new Flutter plugin project."
 version: 0.0.1
-homepage: http://ente.io
+homepage: https://ente.io
 
 environment:
   sdk: '>=3.4.3 <4.0.0'

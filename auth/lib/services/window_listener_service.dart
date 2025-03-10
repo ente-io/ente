@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WindowListenerService {
-  static const double minWindowHeight = 320.0;
+  static const double minWindowHeight = 600.0;
   static const double minWindowWidth = 800.0;
   static const double maxWindowHeight = 8192.0;
   static const double maxWindowWidth = 8192.0;

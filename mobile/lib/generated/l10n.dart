@@ -3863,10 +3863,10 @@ class S {
     );
   }
 
-  /// `You've no duplicate files that can be cleared`
+  /// `You don't have any duplicate files that can be cleared`
   String get youveNoDuplicateFilesThatCanBeCleared {
     return Intl.message(
-      'You\'ve no duplicate files that can be cleared',
+      'You don\'t have any duplicate files that can be cleared',
       name: 'youveNoDuplicateFilesThatCanBeCleared',
       desc: '',
       args: [],
@@ -11226,6 +11226,16 @@ class S {
     return Intl.message(
       'Joining an album will make your email visible to its participants.',
       name: 'joinAlbumConfirmationDialogBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please wait, this will take a while.`
+  String get pleaseWaitThisWillTakeAWhile {
+    return Intl.message(
+      'Please wait, this will take a while.',
+      name: 'pleaseWaitThisWillTakeAWhile',
       desc: '',
       args: [],
     );

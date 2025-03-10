@@ -144,6 +144,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
                   ),
                   onPressed: () {
                     String errorMessage = "";
+                    bool isPreview = false;
                     if (widget.item.error is Exception) {
                       final Exception ex = widget.item.error as Exception;
                       errorMessage = "Error: " +
@@ -154,10 +155,11 @@ class _BackupItemCardState extends State<BackupItemCard> {
                       errorMessage = widget.item.error.toString();
                     } else if (widget.preview?.error != null) {
                       errorMessage = widget.preview!.error!.toString();
+                      isPreview = true;
                     }
                     showErrorDialog(
                       context,
-                      'Upload failed',
+                      isPreview ? "Preview upload ailed" : 'Upload failed',
                       errorMessage,
                     );
                   },

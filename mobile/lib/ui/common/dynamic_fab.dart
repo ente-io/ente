@@ -10,12 +10,12 @@ class DynamicFAB extends StatelessWidget {
   final Function? onPressedFunction;
 
   const DynamicFAB({
-    Key? key,
+    super.key,
     this.isKeypadOpen,
     this.buttonText,
     this.isFormValid,
     this.onPressedFunction,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class DynamicFAB extends StatelessWidget {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).colorScheme.background,
+              color: Theme.of(context).colorScheme.surface,
               spreadRadius: 200,
               blurRadius: 100,
               offset: const Offset(0, 230),

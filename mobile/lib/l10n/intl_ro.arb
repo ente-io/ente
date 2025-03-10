@@ -22,7 +22,7 @@
   "deleteReason1": "Lipsește o funcție cheie de care am nevoie",
   "deleteReason2": "Aplicația sau o anumită funcție nu se comportă așa cum cred eu că ar trebui",
   "deleteReason3": "Am găsit un alt serviciu care îmi place mai mult",
-  "deleteReason4": "Motivul meu nu este listat",
+  "deleteReason4": "Motivul meu nu apare",
   "sendEmail": "Trimiteți e-mail",
   "deleteRequestSLAText": "Solicitarea dvs. va fi procesată în 72 de ore.",
   "deleteEmailRequest": "Vă rugăm să trimiteți un e-mail la <warning>account-deletion@ente.io</warning> de pe adresa dvs. de e-mail înregistrată.",
@@ -525,7 +525,6 @@
   "viewLargeFiles": "Fișiere mari",
   "viewLargeFilesDesc": "Vizualizați fișierele care consumă cel mai mult spațiu.",
   "noDuplicates": "✨ Fără dubluri",
-  "youveNoDuplicateFilesThatCanBeCleared": "Nu aveți dubluri care pot fi șterse",
   "success": "Succes",
   "rateUs": "Evaluați-ne",
   "remindToEmptyDeviceTrash": "De asemenea, goliți dosarul „Șterse recent” din „Setări” -> „Spațiu” pentru a recupera spațiul eliberat",
@@ -965,6 +964,14 @@
   "syncStopped": "Sincronizare oprită",
   "syncProgress": "{completed}/{total} amintiri salvate",
   "uploadingMultipleMemories": "Se salvează {count} amintiri...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "uploadingSingleMemory": "Se salvează o amintire...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1392,26 +1399,8 @@
   "enableMachineLearningBanner": "Activați învățarea automată pentru a folosi căutarea magică și recunoașterea facială",
   "searchDiscoverEmptySection": "Imaginile vor fi afișate aici odată ce procesarea și sincronizarea este completă",
   "searchPersonsEmptySection": "Persoanele vor fi afișate aici odată ce procesarea și sincronizarea este completă",
-  "viewersSuccessfullyAdded": "{count, plural, few {S-au adăugat {count} observatori}=0 {S-au adăugat 0 observatori} =1 {S-a adăugat 1 observator} other {S-au adăugat {count} de observatori}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, few {S-au adăugat {count} colaboratori}=0 {S-au adăugat 0 colaboratori} =1 {S-a adăugat 1 colaborator} other {S-au adăugat {count} de colaboratori}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
+
+
   "accountIsAlreadyConfigured": "Contul este deja configurat.",
   "sessionIdMismatch": "Nepotrivire ID sesiune",
   "@sessionIdMismatch": {
@@ -1477,7 +1466,7 @@
   },
   "currentlyRunning": "rulează în prezent",
   "ignored": "ignorat",
-  "photosCount": "{count, plural, few {{count} fotografii}=0 {0 fotografii} =1 {1 fotografie} other {{count} de fotografii}}",
+  "photosCount": "{count, plural, =0 {0 Fotografii} =1 {O Fotografie} other {{count} Fotografii}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1589,6 +1578,5 @@
   "joinAlbum": "Alăturați-vă albumului",
   "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
   "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
-  "join": "Alăturare",
-  "orPickFromYourContacts": "or pick from your contacts"
+  "join": "Alăturare"
 }

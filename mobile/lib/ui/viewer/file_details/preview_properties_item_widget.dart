@@ -6,7 +6,7 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/services/preview_video_store.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
-import "package:photos/utils/data_util.dart";
+import "package:photos/utils/standalone/data.dart";
 
 class PreviewPropertiesItemWidget extends StatefulWidget {
   final EnteFile file;

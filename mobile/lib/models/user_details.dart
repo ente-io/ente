@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import "package:photos/models/api/billing/subscription.dart";
 import "package:photos/models/api/storage_bonus/bonus.dart";
-import 'package:photos/models/file/file_type.dart';
-import 'package:photos/models/subscription.dart';
 
 class UserDetails {
   final String email;
@@ -52,6 +51,10 @@ class UserDetails {
   }
 
   int getFreeStorage() {
+    final int? memberLimit = familyMemberStorageLimit();
+    if (memberLimit != null) {
+      return max(memberLimit - usage, 0);
+    }
     return max(getTotalStorage() - getFamilyOrPersonalUsage(), 0);
   }
 
@@ -60,6 +63,17 @@ class UserDetails {
   int getTotalStorage() {
     return (isPartOfFamily() ? familyData!.storage : subscription.storage) +
         storageBonus;
+  }
+
+  // return the member storage limit if user is part of family and the admin
+  // has set the storage limit for the user.
+  int? familyMemberStorageLimit() {
+    if (isPartOfFamily()) {
+      final FamilyMember? currentUserMember = familyData!.members!
+          .firstWhereOrNull((element) => element.email.trim() == email.trim());
+      return currentUserMember?.storageLimit;
+    }
+    return null;
   }
 
   // This is the total storage for which user has paid for.
@@ -107,12 +121,14 @@ class FamilyMember {
   final int usage;
   final String id;
   final bool isAdmin;
+  final int? storageLimit;
 
   FamilyMember(
     this.email,
     this.usage,
     this.id,
     this.isAdmin,
+    this.storageLimit,
   );
 
   factory FamilyMember.fromMap(Map<String, dynamic> map) {
@@ -121,6 +137,7 @@ class FamilyMember {
       map['usage'] as int,
       map['id'] as String,
       map['isAdmin'] as bool,
+      map['storageLimit'] as int?,
     );
   }
 
@@ -130,6 +147,7 @@ class FamilyMember {
       'usage': usage,
       'id': id,
       'isAdmin': isAdmin,
+      'storageLimit': storageLimit,
     };
   }
 
@@ -189,6 +207,10 @@ class FamilyData {
     return members!.map((e) => e.usage).toList().sum;
   }
 
+  FamilyMember? getMemberByID(String id) {
+    return members!.firstWhereOrNull((element) => element.id == id);
+  }
+
   static fromMap(Map<String, dynamic>? map) {
     if (map == null) return null;
     assert(map['members'] != null && map['members'].length >= 0);
@@ -214,20 +236,4 @@ class FamilyData {
 
   factory FamilyData.fromJson(String source) =>
       FamilyData.fromMap(json.decode(source));
-}
-
-class FilesCount {
-  final Map<FileType, int> filesCount;
-  FilesCount(this.filesCount);
-
-  int get total =>
-      images + videos + livePhotos + (filesCount[getInt(FileType.other)] ?? 0);
-
-  int get photos => images + livePhotos;
-
-  int get images => filesCount[FileType.image] ?? 0;
-
-  int get videos => filesCount[FileType.video] ?? 0;
-
-  int get livePhotos => filesCount[FileType.livePhoto] ?? 0;
 }

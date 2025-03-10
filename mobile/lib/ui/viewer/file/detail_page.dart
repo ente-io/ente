@@ -17,6 +17,7 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/tools/editor/image_editor_page.dart';
 import "package:photos/ui/tools/editor/video_editor_page.dart";
 import "package:photos/ui/viewer/file/file_app_bar.dart";
@@ -28,7 +29,6 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/thumbnail_util.dart";
-import 'package:photos/utils/toast_util.dart';
 
 enum DetailPageMode {
   minimalistic,
@@ -65,7 +65,7 @@ class DetailPageConfiguration {
 class DetailPage extends StatefulWidget {
   final DetailPageConfiguration config;
 
-  const DetailPage(this.config, {key}) : super(key: key);
+  const DetailPage(this.config, {super.key});
 
   @override
   State<DetailPage> createState() => _DetailPageState();
@@ -156,7 +156,6 @@ class _DetailPageState extends State<DetailPage> {
               return FileAppBar(
                 _files![selectedIndex],
                 _onFileRemoved,
-                100,
                 widget.config.mode == DetailPageMode.full,
                 enableFullScreenNotifier: _enableFullScreenNotifier,
               );

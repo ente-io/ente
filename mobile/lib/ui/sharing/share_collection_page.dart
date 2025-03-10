@@ -14,6 +14,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
+import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/sharing/add_participant_page.dart";
 import 'package:photos/ui/sharing/album_participants_page.dart';
 import "package:photos/ui/sharing/album_share_info_widget.dart";
@@ -22,7 +23,6 @@ import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class ShareCollectionPage extends StatefulWidget {
   final Collection collection;
@@ -61,7 +61,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    _sharees = widget.collection.sharees ?? [];
+    _sharees = widget.collection.sharees;
     final bool hasUrl = widget.collection.hasLink;
     final children = <Widget>[];
     children.add(
@@ -136,7 +136,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     }
 
     final bool hasExpired =
-        widget.collection.publicURLs?.firstOrNull?.isExpired ?? false;
+        widget.collection.publicURLs.firstOrNull?.isExpired ?? false;
     children.addAll([
       const SizedBox(
         height: 24,
@@ -166,7 +166,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           CollectionsService.instance.getCollectionKey(widget.collection.id),
         );
         final String url =
-            "${widget.collection.publicURLs!.first!.url}#$collectionKey";
+            "${widget.collection.publicURLs.first.url}#$collectionKey";
         children.addAll(
           [
             MenuItemWidget(

@@ -20,201 +20,254 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ja';
 
-  static String m9(count) =>
-      "${Intl.plural(count, zero: '共同編集者を追加', one: '共同編集者を追加', other: '共同編集者を追加')}";
+  static String m9(title) => "${title} (私)";
 
   static String m10(count) =>
+      "${Intl.plural(count, zero: '共同編集者を追加', one: '共同編集者を追加', other: '共同編集者を追加')}";
+
+  static String m11(count) =>
       "${Intl.plural(count, one: '項目を追加', other: '項目を追加')}";
 
-  static String m11(storageAmount, endDate) =>
+  static String m12(storageAmount, endDate) =>
       "あなたの ${storageAmount} アドオンは ${endDate} まで有効です";
 
-  static String m12(count) =>
+  static String m13(count) =>
       "${Intl.plural(count, zero: 'ビューアーを追加', one: 'ビューアーを追加', other: 'ビューアーを追加')}";
 
-  static String m13(emailOrName) => "${emailOrName} が追加";
+  static String m14(emailOrName) => "${emailOrName} が追加";
 
-  static String m14(albumName) => "${albumName} に追加しました";
+  static String m15(albumName) => "${albumName} に追加しました";
 
-  static String m15(count) =>
+  static String m16(count) =>
       "${Intl.plural(count, zero: '参加者なし', one: '1 参加者', other: '${count} 参加者')}";
 
-  static String m16(versionValue) => "バージョン: ${versionValue}";
+  static String m17(versionValue) => "バージョン: ${versionValue}";
 
-  static String m17(freeAmount, storageUnit) =>
+  static String m18(freeAmount, storageUnit) =>
       "${freeAmount} ${storageUnit} 無料";
 
-  static String m18(paymentProvider) =>
+  static String m19(paymentProvider) =>
       "まず${paymentProvider} から既存のサブスクリプションをキャンセルしてください";
 
   static String m3(user) =>
       "${user} は写真をアルバムに追加できなくなります\n\n※${user} が追加した写真は今後も${user} が削除できます";
 
-  static String m19(isFamilyMember, storageAmountInGb) =>
+  static String m20(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
             'true': '家族は ${storageAmountInGb} GB 受け取っています',
             'false': 'あなたは ${storageAmountInGb} GB 受け取っています',
             'other': 'あなたは ${storageAmountInGb} GB受け取っています',
           })}";
 
-  static String m20(albumName) => "${albumName} のコラボレーションリンクを生成しました";
+  static String m21(albumName) => "${albumName} のコラボレーションリンクを生成しました";
 
-  static String m23(familyAdminEmail) =>
+  static String m22(count) =>
+      "${Intl.plural(count, zero: '${count}人のコラボレーターを追加', one: '${count}人のコラボレーターを追加', other: '${count}人のコラボレーターを追加')}";
+
+  static String m23(email, numOfDays) =>
+      "${email} を信頼する連絡先として追加しようとしています。 ${numOfDays} 日間あなたの利用がなくなった場合、アカウントを復旧することができるようになります。";
+
+  static String m24(familyAdminEmail) =>
       "サブスクリプションを管理するには、 <green>${familyAdminEmail}</green> に連絡してください";
 
-  static String m24(provider) =>
+  static String m25(provider) =>
       "${provider} サブスクリプションを管理するには、support@ente.io までご連絡ください。";
 
-  static String m25(endpoint) => "${endpoint} に接続しました";
+  static String m26(endpoint) => "${endpoint} に接続しました";
 
-  static String m26(count) =>
+  static String m27(count) =>
       "${Intl.plural(count, one: '${count} 個の項目を削除', other: '${count} 個の項目を削除')}";
 
-  static String m27(currentlyDeleting, totalCount) =>
+  static String m28(currentlyDeleting, totalCount) =>
       "${currentlyDeleting} / ${totalCount} を削除中";
 
-  static String m28(albumName) => "\"${albumName}\" にアクセスするための公開リンクが削除されます。";
+  static String m29(albumName) => "\"${albumName}\" にアクセスするための公開リンクが削除されます。";
 
-  static String m29(supportEmail) =>
+  static String m30(supportEmail) =>
       "あなたの登録したメールアドレスから${supportEmail} にメールを送ってください";
 
-  static String m30(count, storageSaved) =>
+  static String m31(count, storageSaved) =>
       "お掃除しました ${Intl.plural(count, one: '${count} 個の重複ファイル', other: '${count} 個の重複ファイル')}, (${storageSaved}が開放されます！)";
 
-  static String m31(count, formattedSize) =>
+  static String m32(count, formattedSize) =>
       "${count} 個のファイル、それぞれ${formattedSize}";
 
-  static String m32(newEmail) => "メールアドレスが ${newEmail} に変更されました";
+  static String m33(newEmail) => "メールアドレスが ${newEmail} に変更されました";
 
-  static String m33(email) =>
+  static String m34(email) => "${email} は Ente アカウントを持っていません。";
+
+  static String m35(email) =>
       "${email} はEnteアカウントを持っていません。\n\n写真を共有するために「招待」を送信してください。";
 
-  static String m34(text) => "${text} の写真が見つかりました";
+  static String m36(text) => "${text} の写真が見つかりました";
 
-  static String m35(count, formattedNumber) =>
+  static String m37(count, formattedNumber) =>
       "${Intl.plural(count, other: '${formattedNumber} 個のファイル')} が安全にバックアップされました";
 
-  static String m36(count, formattedNumber) =>
+  static String m38(count, formattedNumber) =>
       "${Intl.plural(count, other: '${formattedNumber} ファイル')} が安全にバックアップされました";
 
   static String m4(storageAmountInGB) =>
       "誰かが有料プランにサインアップしてコードを適用する度に ${storageAmountInGB} GB";
 
-  static String m37(endDate) => "無料トライアルは${endDate} までです";
+  static String m39(endDate) => "無料トライアルは${endDate} までです";
 
-  static String m38(count) =>
+  static String m40(count) =>
       "あなたが有効なサブスクリプションを持っている限りEnte上の ${Intl.plural(count, other: 'それらに')} アクセスできます";
 
-  static String m39(sizeInMBorGB) => "${sizeInMBorGB} を解放する";
+  static String m41(sizeInMBorGB) => "${sizeInMBorGB} を解放する";
 
-  static String m40(count, formattedSize) =>
+  static String m42(count, formattedSize) =>
       "${Intl.plural(count, other: 'デバイスから削除して${formattedSize} 解放することができます')}";
 
-  static String m41(currentlyProcessing, totalCount) =>
+  static String m43(currentlyProcessing, totalCount) =>
       "${currentlyProcessing} / ${totalCount} を処理中";
 
-  static String m42(count) => "${Intl.plural(count, other: '${count}個のアイテム')}";
+  static String m44(count) => "${Intl.plural(count, other: '${count}個のアイテム')}";
 
-  static String m44(expiryTime) => "リンクは ${expiryTime} に期限切れになります";
+  static String m45(email) => "${email} があなたを信頼する連絡先として招待しました";
+
+  static String m46(expiryTime) => "リンクは ${expiryTime} に期限切れになります";
+
+  static String m47(email) => "この人物を ${email}に紐づけ";
+
+  static String m48(personName, email) => "${personName} を ${email} に紐づけします";
 
   static String m5(count, formattedCount) =>
       "${Intl.plural(count, zero: '思い出なし', one: '${formattedCount} 思い出', other: '${formattedCount} 思い出')}";
 
-  static String m45(count) =>
+  static String m49(count) =>
       "${Intl.plural(count, one: '項目を移動', other: '項目を移動')}";
 
-  static String m46(albumName) => "${albumName} に移動しました";
+  static String m50(albumName) => "${albumName} に移動しました";
 
-  static String m48(name) => "${name} ではありませんか？";
+  static String m51(personName) => "${personName} の候補はありません";
 
-  static String m49(familyAdminEmail) =>
+  static String m52(name) => "${name} ではありませんか？";
+
+  static String m53(familyAdminEmail) =>
       "コードを変更するには、 ${familyAdminEmail} までご連絡ください。";
 
   static String m0(passwordStrengthValue) =>
       "パスワードの長さ: ${passwordStrengthValue}";
 
-  static String m50(providerName) => "請求された場合は、 ${providerName} のサポートに連絡してください";
+  static String m54(providerName) => "請求された場合は、 ${providerName} のサポートに連絡してください";
 
-  static String m52(endDate) =>
+  static String m55(count) =>
+      "${Intl.plural(count, zero: '0枚の写真', one: '1枚の写真', other: '${count} 枚の写真')}";
+
+  static String m56(endDate) =>
       "${endDate} まで無料トライアルが有効です。\nその後、有料プランを選択することができます。";
 
-  static String m53(toEmail) => "${toEmail} にメールでご連絡ください";
+  static String m57(toEmail) => "${toEmail} にメールでご連絡ください";
 
-  static String m54(toEmail) => "ログを以下のアドレスに送信してください \n${toEmail}";
+  static String m58(toEmail) => "ログを以下のアドレスに送信してください \n${toEmail}";
 
-  static String m55(folderName) => "${folderName} を処理中...";
+  static String m59(folderName) => "${folderName} を処理中...";
 
-  static String m56(storeName) => "${storeName} で評価";
+  static String m60(storeName) => "${storeName} で評価";
 
-  static String m60(storageInGB) => "3. お二人とも ${storageInGB} GB*を無料で手に入ります。";
+  static String m61(name) => "あなたを ${name} に紐づけました";
 
-  static String m61(userEmail) =>
+  static String m62(days, email) =>
+      "${days} 日後にアカウントにアクセスできます。通知は ${email}に送信されます。";
+
+  static String m63(email) => "${email}のアカウントを復元できるようになりました。新しいパスワードを設定してください。";
+
+  static String m64(email) => "${email} はあなたのアカウントを復元しようとしています。";
+
+  static String m65(storageInGB) => "3. お二人とも ${storageInGB} GB*を無料で手に入ります。";
+
+  static String m66(userEmail) =>
       "${userEmail} はこの共有アルバムから退出します\n\n${userEmail} が追加した写真もアルバムから削除されます";
 
-  static String m62(endDate) => "サブスクリプションは ${endDate} に更新します";
+  static String m67(endDate) => "サブスクリプションは ${endDate} に更新します";
 
-  static String m63(count) =>
+  static String m68(count) =>
       "${Intl.plural(count, one: '${count} 個の結果', other: '${count} 個の結果')}";
+
+  static String m69(snapshotLength, searchLength) =>
+      "セクションの長さの不一致: ${snapshotLength} != ${searchLength}";
 
   static String m6(count) => "${count} 個を選択";
 
-  static String m65(count, yourCount) => "${count} 個選択中（${yourCount} あなた）";
+  static String m70(count, yourCount) => "${count} 個選択中（${yourCount} あなた）";
 
-  static String m66(verificationID) => "私の確認ID: ente.ioの ${verificationID}";
+  static String m71(verificationID) => "私の確認ID: ente.ioの ${verificationID}";
 
   static String m7(verificationID) =>
       "これがあなたのente.io確認用IDであることを確認できますか？ ${verificationID}";
 
-  static String m67(referralCode, referralStorageInGB) =>
+  static String m72(referralCode, referralStorageInGB) =>
       "リフェラルコード: ${referralCode}\n\n設定→一般→リフェラルで使うことで${referralStorageInGB}が無料になります(あなたが有料プランに加入したあと)。\n\nhttps://ente.io";
 
-  static String m68(numberOfPeople) =>
+  static String m73(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: '誰かと共有しましょう', one: '1人と共有されています', other: '${numberOfPeople} 人と共有されています')}";
 
-  static String m69(emailIDs) => "${emailIDs} と共有中";
+  static String m74(emailIDs) => "${emailIDs} と共有中";
 
-  static String m70(fileType) => "${fileType} はEnteから削除されます。";
+  static String m75(fileType) => "${fileType} はEnteから削除されます。";
 
-  static String m71(fileType) => "この ${fileType} はEnteとお使いのデバイスの両方にあります。";
+  static String m76(fileType) => "この ${fileType} はEnteとお使いのデバイスの両方にあります。";
 
-  static String m72(fileType) => "${fileType} はEnteから削除されます。";
+  static String m77(fileType) => "${fileType} はEnteから削除されます。";
 
   static String m1(storageAmountInGB) => "${storageAmountInGB} GB";
 
-  static String m73(
+  static String m78(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "${usedAmount} ${usedStorageUnit} / ${totalAmount} ${totalStorageUnit} 使用";
 
-  static String m74(id) =>
+  static String m79(id) =>
       "あなたの ${id} はすでに別のEnteアカウントにリンクされています。\nこのアカウントであなたの ${id} を使用したい場合は、サポートにお問い合わせください。";
 
-  static String m75(endDate) => "サブスクリプションは ${endDate} でキャンセルされます";
+  static String m80(endDate) => "サブスクリプションは ${endDate} でキャンセルされます";
 
-  static String m76(completed, total) => "${completed}/${total} のメモリが保存されました";
+  static String m81(completed, total) => "${completed}/${total} のメモリが保存されました";
+
+  static String m82(ignoreReason) =>
+      "アップロードするにはタップしてください。 以下の理由のためアップロードは現在無視されています: ${ignoreReason}";
 
   static String m8(storageAmountInGB) => "紹介者も ${storageAmountInGB} GB を得ます";
 
-  static String m78(email) => "これは ${email} の確認用ID";
+  static String m83(email) => "これは ${email} の確認用ID";
 
-  static String m83(count) => "${count} メモリを保存しています...";
+  static String m84(count) =>
+      "${Intl.plural(count, zero: '', one: '1日', other: '${count} 日')}";
 
-  static String m84(endDate) => "${endDate} まで";
+  static String m85(email) => "あなたは ${email}から信頼する連絡先になってもらうよう、お願いされています。";
 
-  static String m85(email) => "${email} を確認";
+  static String m86(galleryType) =>
+      "このギャラリーのタイプ ${galleryType} は名前の変更には対応していません";
+
+  static String m87(ignoreReason) => "以下の理由によりアップロードは無視されます: ${ignoreReason}";
+
+  static String m88(count) => "${count} メモリを保存しています...";
+
+  static String m89(endDate) => "${endDate} まで";
+
+  static String m90(email) => "${email} を確認";
+
+  static String m91(count) =>
+      "${Intl.plural(count, zero: '${count}人のビューアーを追加', one: '${count}人のビューアーを追加', other: '${count}人のビューアーを追加')}";
 
   static String m2(email) => "<green>${email}</green>にメールを送りました";
 
-  static String m87(count) =>
+  static String m92(count) =>
       "${Intl.plural(count, one: '${count} 年前', other: '${count} 年前')}";
 
-  static String m88(storageSaved) => "${storageSaved} を解放しました";
+  static String m93(storageSaved) => "${storageSaved} を解放しました";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "aNewVersionOfEnteIsAvailable":
             MessageLookupByLibrary.simpleMessage("Enteの新しいバージョンが利用可能です。"),
         "about": MessageLookupByLibrary.simpleMessage("このアプリについて"),
+        "acceptTrustInvite": MessageLookupByLibrary.simpleMessage("招待を受け入れる"),
         "account": MessageLookupByLibrary.simpleMessage("アカウント"),
+        "accountIsAlreadyConfigured":
+            MessageLookupByLibrary.simpleMessage("アカウントが既に設定されています"),
+        "accountOwnerPersonAppbarTitle": m9,
         "accountWelcomeBack": MessageLookupByLibrary.simpleMessage("おかえりなさい！"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "もしパスワードを忘れたら、自身のデータを失うことを理解しました"),
@@ -223,9 +276,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "addAName": MessageLookupByLibrary.simpleMessage("名前を追加"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage("新しいEメールアドレスを追加"),
         "addCollaborator": MessageLookupByLibrary.simpleMessage("コラボレーターを追加"),
-        "addCollaborators": m9,
+        "addCollaborators": m10,
+        "addFiles": MessageLookupByLibrary.simpleMessage("ファイルを追加"),
         "addFromDevice": MessageLookupByLibrary.simpleMessage("デバイスから追加"),
-        "addItem": m10,
+        "addItem": m11,
         "addLocation": MessageLookupByLibrary.simpleMessage("位置情報を追加"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("追加"),
         "addMore": MessageLookupByLibrary.simpleMessage("さらに追加"),
@@ -235,19 +289,20 @@ class MessageLookup extends MessageLookupByLibrary {
         "addNew": MessageLookupByLibrary.simpleMessage("新規追加"),
         "addNewPerson": MessageLookupByLibrary.simpleMessage("新しい人物を追加"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage("アドオンの詳細"),
-        "addOnValidTill": m11,
+        "addOnValidTill": m12,
         "addOns": MessageLookupByLibrary.simpleMessage("アドオン"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("写真を追加"),
         "addSelected": MessageLookupByLibrary.simpleMessage("選んだものをアルバムに追加"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("アルバムに追加"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("Enteに追加"),
         "addToHiddenAlbum": MessageLookupByLibrary.simpleMessage("非表示アルバムに追加"),
+        "addTrustedContact": MessageLookupByLibrary.simpleMessage("信頼する連絡先を追加"),
         "addViewer": MessageLookupByLibrary.simpleMessage("ビューアーを追加"),
-        "addViewers": m12,
+        "addViewers": m13,
         "addYourPhotosNow": MessageLookupByLibrary.simpleMessage("写真を今すぐ追加する"),
         "addedAs": MessageLookupByLibrary.simpleMessage("追加:"),
-        "addedBy": m13,
-        "addedSuccessfullyTo": m14,
+        "addedBy": m14,
+        "addedSuccessfullyTo": m15,
         "addingToFavorites":
             MessageLookupByLibrary.simpleMessage("お気に入りに追加しています..."),
         "advanced": MessageLookupByLibrary.simpleMessage("詳細"),
@@ -258,19 +313,27 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Week": MessageLookupByLibrary.simpleMessage("1週間後"),
         "after1Year": MessageLookupByLibrary.simpleMessage("1年後"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("所有者"),
-        "albumParticipantsCount": m15,
+        "albumParticipantsCount": m16,
         "albumTitle": MessageLookupByLibrary.simpleMessage("アルバムタイトル"),
         "albumUpdated": MessageLookupByLibrary.simpleMessage("アルバムが更新されました"),
         "albums": MessageLookupByLibrary.simpleMessage("アルバム"),
         "allClear": MessageLookupByLibrary.simpleMessage("✨ オールクリア"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("すべての思い出が保存されました"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "この人のグループ化がリセットされ、この人かもしれない写真への提案もなくなります"),
+        "allow": MessageLookupByLibrary.simpleMessage("許可"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "リンクを持つ人が共有アルバムに写真を追加できるようにします。"),
         "allowAddingPhotos": MessageLookupByLibrary.simpleMessage("写真の追加を許可"),
+        "allowAppToOpenSharedAlbumLinks":
+            MessageLookupByLibrary.simpleMessage("共有アルバムリンクを開くことをアプリに許可する"),
         "allowDownloads": MessageLookupByLibrary.simpleMessage("ダウンロードを許可"),
         "allowPeopleToAddPhotos":
             MessageLookupByLibrary.simpleMessage("写真の追加をメンバーに許可する"),
+        "allowPermBody": MessageLookupByLibrary.simpleMessage(
+            "Enteがライブラリを表示およびバックアップできるように、端末の設定から写真へのアクセスを許可してください。"),
+        "allowPermTitle": MessageLookupByLibrary.simpleMessage("写真へのアクセスを許可"),
         "androidBiometricHint": MessageLookupByLibrary.simpleMessage("本人確認を行う"),
         "androidBiometricNotRecognized":
             MessageLookupByLibrary.simpleMessage("認識できません。再試行してください。"),
@@ -290,7 +353,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "appLock": MessageLookupByLibrary.simpleMessage("アプリのロック"),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "デバイスのデフォルトのロック画面と、カスタムロック画面のどちらを利用しますか？"),
-        "appVersion": m16,
+        "appVersion": m17,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("適用"),
         "applyCodeTitle": MessageLookupByLibrary.simpleMessage("コードを適用"),
@@ -311,6 +374,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("本当にログアウトしてよろしいですか？"),
         "areYouSureYouWantToRenew":
             MessageLookupByLibrary.simpleMessage("更新してもよろしいですか？"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage("この人を忘れてもよろしいですね？"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "サブスクリプションはキャンセルされました。理由を教えていただけますか？"),
         "askDeleteReason":
@@ -330,8 +395,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("2段階認証を設定するには認証してください"),
         "authToInitiateAccountDeletion":
             MessageLookupByLibrary.simpleMessage("アカウントの削除をするためには認証が必要です"),
+        "authToManageLegacy":
+            MessageLookupByLibrary.simpleMessage("信頼する連絡先を管理するために認証してください"),
         "authToViewPasskey":
             MessageLookupByLibrary.simpleMessage("パスキーを表示するには認証してください"),
+        "authToViewTrashedFiles":
+            MessageLookupByLibrary.simpleMessage("削除したファイルを閲覧するには認証が必要です"),
         "authToViewYourActiveSessions":
             MessageLookupByLibrary.simpleMessage("アクティブなセッションを表示するためには認証が必要です"),
         "authToViewYourHiddenFiles":
@@ -358,11 +427,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoPairDesc": MessageLookupByLibrary.simpleMessage(
             "自動ペアリングは Chromecast に対応しているデバイスでのみ動作します。"),
         "available": MessageLookupByLibrary.simpleMessage("ご利用可能"),
-        "availableStorageSpace": m17,
+        "availableStorageSpace": m18,
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("バックアップされたフォルダ"),
         "backup": MessageLookupByLibrary.simpleMessage("バックアップ"),
         "backupFailed": MessageLookupByLibrary.simpleMessage("バックアップ失敗"),
+        "backupFile": MessageLookupByLibrary.simpleMessage("バックアップファイル"),
         "backupOverMobileData":
             MessageLookupByLibrary.simpleMessage("モバイルデータを使ってバックアップ"),
         "backupSettings": MessageLookupByLibrary.simpleMessage("バックアップ設定"),
@@ -375,6 +445,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "blog": MessageLookupByLibrary.simpleMessage("ブログ"),
         "cachedData": MessageLookupByLibrary.simpleMessage("キャッシュデータ"),
         "calculating": MessageLookupByLibrary.simpleMessage("計算中..."),
+        "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
+            "申し訳ありません。このアルバムをアプリで開くことができませんでした。"),
+        "canNotOpenTitle": MessageLookupByLibrary.simpleMessage("このアルバムは開けません"),
         "canNotUploadToAlbumsOwnedByOthers":
             MessageLookupByLibrary.simpleMessage("他の人が作ったアルバムにはアップロードできません"),
         "canOnlyCreateLinkForFilesOwnedByYou":
@@ -382,12 +455,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "canOnlyRemoveFilesOwnedByYou":
             MessageLookupByLibrary.simpleMessage("あなたが所有しているファイルのみを削除できます"),
         "cancel": MessageLookupByLibrary.simpleMessage("キャンセル"),
-        "cancelOtherSubscription": m18,
+        "cancelAccountRecovery":
+            MessageLookupByLibrary.simpleMessage("リカバリをキャンセル"),
+        "cancelAccountRecoveryBody":
+            MessageLookupByLibrary.simpleMessage("リカバリをキャンセルしてもよろしいですか？"),
+        "cancelOtherSubscription": m19,
         "cancelSubscription":
             MessageLookupByLibrary.simpleMessage("サブスクリプションをキャンセル"),
         "cannotAddMorePhotosAfterBecomingViewer": m3,
         "cannotDeleteSharedFiles":
             MessageLookupByLibrary.simpleMessage("共有ファイルは削除できません"),
+        "castAlbum": MessageLookupByLibrary.simpleMessage("アルバムをキャスト"),
         "castIPMismatchBody":
             MessageLookupByLibrary.simpleMessage("TVと同じネットワーク上にいることを確認してください。"),
         "castIPMismatchTitle":
@@ -399,6 +477,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeEmail": MessageLookupByLibrary.simpleMessage("Eメールを変更"),
         "changeLocationOfSelectedItems":
             MessageLookupByLibrary.simpleMessage("選択したアイテムの位置を変更しますか？"),
+        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
+            "私たちは、失敗と待機中を含む、Enteにアップロードされたすべてのファイルのログを追加しました。"),
+        "changeLogBackupStatusTitle":
+            MessageLookupByLibrary.simpleMessage("バックアップ ステータス"),
+        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
+            "IDカード、メモなどの写真をお探しですか？検索タブに移動し、ディスカバーを確認してください。 \\n\\n機械学習を有効にしている場合にのみ利用できます。"),
+        "changeLogDiscoverTitle":
+            MessageLookupByLibrary.simpleMessage("ディスカバー"),
+        "changeLogMagicSearchImprovementContent":
+            MessageLookupByLibrary.simpleMessage(
+                "マジック検索が改善しました。もう、あなたが探しているものを見つけるのを待つ必要はありません。"),
+        "changeLogMagicSearchImprovementTitle":
+            MessageLookupByLibrary.simpleMessage("マジック検索の改善"),
         "changePassword": MessageLookupByLibrary.simpleMessage("パスワードを変更"),
         "changePasswordTitle": MessageLookupByLibrary.simpleMessage("パスワードを変更"),
         "changePermissions": MessageLookupByLibrary.simpleMessage("権限を変更する"),
@@ -409,11 +500,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "メールボックスを確認してEメールの所有を証明してください(見つからない場合は、スパムの中も確認してください)"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("ステータスの確認"),
         "checking": MessageLookupByLibrary.simpleMessage("確認中…"),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("モデルを確認しています..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("無料のストレージを受け取る"),
         "claimMore": MessageLookupByLibrary.simpleMessage("もっと！"),
         "claimed": MessageLookupByLibrary.simpleMessage("受け取り済"),
-        "claimedStorageSoFar": m19,
+        "claimedStorageSoFar": m20,
         "cleanUncategorized":
             MessageLookupByLibrary.simpleMessage("未分類のクリーンアップ"),
         "cleanUncategorizedDescription": MessageLookupByLibrary.simpleMessage(
@@ -438,11 +531,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "collabLinkSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Enteアプリやアカウントを持っていない人にも、共有アルバムに写真を追加したり表示したりできるリンクを作成します。"),
         "collaborativeLink": MessageLookupByLibrary.simpleMessage("共同作業リンク"),
-        "collaborativeLinkCreatedFor": m20,
+        "collaborativeLinkCreatedFor": m21,
         "collaborator": MessageLookupByLibrary.simpleMessage("コラボレーター"),
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "コラボレーターは共有アルバムに写真やビデオを追加できます。"),
+        "collaboratorsSuccessfullyAdded": m22,
         "collageLayout": MessageLookupByLibrary.simpleMessage("レイアウト"),
         "collageSaved":
             MessageLookupByLibrary.simpleMessage("コラージュをギャラリーに保存しました"),
@@ -459,6 +553,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("2 要素認証を無効にしてよろしいですか。"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("アカウント削除の確認"),
+        "confirmAddingTrustedContact": m23,
         "confirmDeletePrompt":
             MessageLookupByLibrary.simpleMessage("はい、アカウントとすべてのアプリのデータを削除します"),
         "confirmPassword": MessageLookupByLibrary.simpleMessage("パスワードを確認"),
@@ -468,9 +563,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirmYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("リカバリーキーを確認"),
         "connectToDevice": MessageLookupByLibrary.simpleMessage("デバイスに接続"),
-        "contactFamilyAdmin": m23,
+        "contactFamilyAdmin": m24,
         "contactSupport": MessageLookupByLibrary.simpleMessage("お問い合わせ"),
-        "contactToManageSubscription": m24,
+        "contactToManageSubscription": m25,
         "contacts": MessageLookupByLibrary.simpleMessage("連絡先"),
         "contents": MessageLookupByLibrary.simpleMessage("内容"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("つづける"),
@@ -505,11 +600,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("重要なアップデートがあります"),
         "crop": MessageLookupByLibrary.simpleMessage("クロップ"),
         "currentUsageIs": MessageLookupByLibrary.simpleMessage("現在の使用状況 "),
+        "currentlyRunning": MessageLookupByLibrary.simpleMessage("現在実行中"),
         "custom": MessageLookupByLibrary.simpleMessage("カスタム"),
-        "customEndpoint": m25,
+        "customEndpoint": m26,
         "darkTheme": MessageLookupByLibrary.simpleMessage("ダーク"),
         "dayToday": MessageLookupByLibrary.simpleMessage("今日"),
         "dayYesterday": MessageLookupByLibrary.simpleMessage("昨日"),
+        "declineTrustInvite": MessageLookupByLibrary.simpleMessage("招待を拒否する"),
         "decrypting": MessageLookupByLibrary.simpleMessage("復号しています"),
         "decryptingVideo": MessageLookupByLibrary.simpleMessage("ビデオの復号化中..."),
         "deduplicateFiles": MessageLookupByLibrary.simpleMessage("重複ファイル"),
@@ -535,10 +632,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteFromBoth": MessageLookupByLibrary.simpleMessage("両方から削除"),
         "deleteFromDevice": MessageLookupByLibrary.simpleMessage("デバイスから削除"),
         "deleteFromEnte": MessageLookupByLibrary.simpleMessage("Enteから削除"),
-        "deleteItemCount": m26,
+        "deleteItemCount": m27,
         "deleteLocation": MessageLookupByLibrary.simpleMessage("位置情報を削除"),
         "deletePhotos": MessageLookupByLibrary.simpleMessage("写真を削除"),
-        "deleteProgress": m27,
+        "deleteProgress": m28,
         "deleteReason1": MessageLookupByLibrary.simpleMessage("いちばん必要な機能がない"),
         "deleteReason2":
             MessageLookupByLibrary.simpleMessage("アプリや特定の機能が想定通りに動かない"),
@@ -570,22 +667,22 @@ class MessageLookup extends MessageLookupByLibrary {
             "ビューアーはスクリーンショットを撮ったり、外部ツールを使用して写真のコピーを保存したりすることができます"),
         "disableDownloadWarningTitle":
             MessageLookupByLibrary.simpleMessage("ご注意ください"),
-        "disableLinkMessage": m28,
+        "disableLinkMessage": m29,
         "disableTwofactor": MessageLookupByLibrary.simpleMessage("2段階認証を無効にする"),
         "disablingTwofactorAuthentication":
             MessageLookupByLibrary.simpleMessage("2要素認証を無効にしています..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
-        "discover": MessageLookupByLibrary.simpleMessage("ディスカバー"),
+        "discover": MessageLookupByLibrary.simpleMessage("新たな発見"),
         "discover_babies": MessageLookupByLibrary.simpleMessage("赤ちゃん"),
         "discover_celebrations": MessageLookupByLibrary.simpleMessage("お祝い"),
         "discover_food": MessageLookupByLibrary.simpleMessage("食べ物"),
         "discover_greenery": MessageLookupByLibrary.simpleMessage("自然"),
         "discover_hills": MessageLookupByLibrary.simpleMessage("丘"),
-        "discover_identity": MessageLookupByLibrary.simpleMessage("アイデンティティ"),
+        "discover_identity": MessageLookupByLibrary.simpleMessage("身分証"),
         "discover_memes": MessageLookupByLibrary.simpleMessage("ミーム"),
         "discover_notes": MessageLookupByLibrary.simpleMessage("メモ"),
         "discover_pets": MessageLookupByLibrary.simpleMessage("ペット"),
-        "discover_receipts": MessageLookupByLibrary.simpleMessage("領収書"),
+        "discover_receipts": MessageLookupByLibrary.simpleMessage("レシート"),
         "discover_screenshots":
             MessageLookupByLibrary.simpleMessage("スクリーンショット"),
         "discover_selfies": MessageLookupByLibrary.simpleMessage("セルフィー"),
@@ -600,14 +697,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "doYouWantToDiscardTheEditsYouHaveMade":
             MessageLookupByLibrary.simpleMessage("編集を破棄しますか？"),
         "done": MessageLookupByLibrary.simpleMessage("完了"),
+        "dontSave": MessageLookupByLibrary.simpleMessage("保存しない"),
         "doubleYourStorage":
             MessageLookupByLibrary.simpleMessage("ストレージを倍にしよう"),
         "download": MessageLookupByLibrary.simpleMessage("ダウンロード"),
         "downloadFailed": MessageLookupByLibrary.simpleMessage("ダウンロード失敗"),
         "downloading": MessageLookupByLibrary.simpleMessage("ダウンロード中…"),
-        "dropSupportEmail": m29,
-        "duplicateFileCountWithStorageSaved": m30,
-        "duplicateItemsGroup": m31,
+        "dropSupportEmail": m30,
+        "duplicateFileCountWithStorageSaved": m31,
+        "duplicateItemsGroup": m32,
         "edit": MessageLookupByLibrary.simpleMessage("編集"),
         "editLocation": MessageLookupByLibrary.simpleMessage("位置情報を編集"),
         "editLocationTagTitle": MessageLookupByLibrary.simpleMessage("位置情報を編集"),
@@ -617,16 +715,24 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("位置情報の編集はEnteでのみ表示されます"),
         "eligible": MessageLookupByLibrary.simpleMessage("対象となる"),
         "email": MessageLookupByLibrary.simpleMessage("Eメール"),
-        "emailChangedTo": m32,
-        "emailNoEnteAccount": m33,
+        "emailAlreadyRegistered":
+            MessageLookupByLibrary.simpleMessage("このメールアドレスはすでに登録されています。"),
+        "emailChangedTo": m33,
+        "emailDoesNotHaveEnteAccount": m34,
+        "emailNoEnteAccount": m35,
+        "emailNotRegistered":
+            MessageLookupByLibrary.simpleMessage("このメールアドレスはまだ登録されていません。"),
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("メール確認"),
         "emailYourLogs": MessageLookupByLibrary.simpleMessage("ログをメールで送信"),
+        "emergencyContacts": MessageLookupByLibrary.simpleMessage("緊急連絡先"),
         "empty": MessageLookupByLibrary.simpleMessage("空"),
         "emptyTrash": MessageLookupByLibrary.simpleMessage("ゴミ箱を空にしますか？"),
         "enable": MessageLookupByLibrary.simpleMessage("有効化"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Enteは顔認識、マジック検索、その他の高度な検索機能のため、あなたのデバイス上で機械学習をしています"),
+        "enableMachineLearningBanner":
+            MessageLookupByLibrary.simpleMessage("マジック検索と顔認識のため、機械学習を有効にする"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("マップを有効にする"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "世界地図上にあなたの写真を表示します。\n\n地図はOpenStreetMapを利用しており、あなたの写真の位置情報が外部に共有されることはありません。\n\nこの機能は設定から無効にすることができます"),
@@ -685,20 +791,29 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportYourData": MessageLookupByLibrary.simpleMessage("データをエクスポート"),
         "extraPhotosFound":
             MessageLookupByLibrary.simpleMessage("追加の写真が見つかりました"),
-        "extraPhotosFoundFor": m34,
+        "extraPhotosFoundFor": m36,
+        "faceNotClusteredYet":
+            MessageLookupByLibrary.simpleMessage("顔がまだ集まっていません。後で戻ってきてください"),
         "faceRecognition": MessageLookupByLibrary.simpleMessage("顔認識"),
         "faces": MessageLookupByLibrary.simpleMessage("顔"),
+        "failed": MessageLookupByLibrary.simpleMessage("失敗"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("コードを適用できませんでした"),
         "failedToCancel": MessageLookupByLibrary.simpleMessage("キャンセルに失敗しました"),
         "failedToDownloadVideo":
             MessageLookupByLibrary.simpleMessage("ビデオをダウンロードできませんでした"),
+        "failedToFetchActiveSessions":
+            MessageLookupByLibrary.simpleMessage("アクティブなセッションの取得に失敗しました"),
         "failedToFetchOriginalForEdit":
             MessageLookupByLibrary.simpleMessage("編集前の状態の取得に失敗しました"),
         "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(
             "紹介の詳細を取得できません。後でもう一度お試しください。"),
         "failedToLoadAlbums":
             MessageLookupByLibrary.simpleMessage("アルバムの読み込みに失敗しました"),
+        "failedToPlayVideo":
+            MessageLookupByLibrary.simpleMessage("動画の再生に失敗しました"),
+        "failedToRefreshStripeSubscription":
+            MessageLookupByLibrary.simpleMessage("サブスクリプションの更新に失敗しました"),
         "failedToRenew": MessageLookupByLibrary.simpleMessage("更新に失敗しました"),
         "failedToVerifyPaymentStatus":
             MessageLookupByLibrary.simpleMessage("支払ステータスの確認に失敗しました"),
@@ -710,15 +825,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "faqs": MessageLookupByLibrary.simpleMessage("よくある質問"),
         "favorite": MessageLookupByLibrary.simpleMessage("お気に入り"),
         "feedback": MessageLookupByLibrary.simpleMessage("フィードバック"),
+        "file": MessageLookupByLibrary.simpleMessage("ファイル"),
         "fileFailedToSaveToGallery":
             MessageLookupByLibrary.simpleMessage("ギャラリーへの保存に失敗しました"),
         "fileInfoAddDescHint": MessageLookupByLibrary.simpleMessage("説明を追加..."),
+        "fileNotUploadedYet":
+            MessageLookupByLibrary.simpleMessage("ファイルがまだアップロードされていません"),
         "fileSavedToGallery":
             MessageLookupByLibrary.simpleMessage("ファイルをギャラリーに保存しました"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("ファイルの種類"),
         "fileTypesAndNames": MessageLookupByLibrary.simpleMessage("ファイルの種類と名前"),
-        "filesBackedUpFromDevice": m35,
-        "filesBackedUpInAlbum": m36,
+        "filesBackedUpFromDevice": m37,
+        "filesBackedUpInAlbum": m38,
         "filesDeleted": MessageLookupByLibrary.simpleMessage("削除されたファイル"),
         "filesSavedToGallery":
             MessageLookupByLibrary.simpleMessage("ギャラリーに保存されたファイル"),
@@ -733,21 +851,22 @@ class MessageLookup extends MessageLookupByLibrary {
         "freeStorageUsable":
             MessageLookupByLibrary.simpleMessage("無料のストレージが利用可能です"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("無料トライアル"),
-        "freeTrialValidTill": m37,
-        "freeUpAccessPostDelete": m38,
-        "freeUpAmount": m39,
+        "freeTrialValidTill": m39,
+        "freeUpAccessPostDelete": m40,
+        "freeUpAmount": m41,
         "freeUpDeviceSpace":
             MessageLookupByLibrary.simpleMessage("デバイスの空き領域を解放する"),
         "freeUpDeviceSpaceDesc": MessageLookupByLibrary.simpleMessage(
             "すでにバックアップされているファイルを消去して、デバイスの容量を空けます。"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("スペースを解放する"),
-        "freeUpSpaceSaving": m40,
+        "freeUpSpaceSaving": m42,
+        "gallery": MessageLookupByLibrary.simpleMessage("ギャラリー"),
         "galleryMemoryLimitInfo":
             MessageLookupByLibrary.simpleMessage("ギャラリーに表示されるメモリは最大1000個までです"),
         "general": MessageLookupByLibrary.simpleMessage("設定"),
         "generatingEncryptionKeys":
             MessageLookupByLibrary.simpleMessage("暗号化鍵を生成しています"),
-        "genericProgress": m41,
+        "genericProgress": m43,
         "goToSettings": MessageLookupByLibrary.simpleMessage("設定に移動"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "grantFullAccessPrompt": MessageLookupByLibrary.simpleMessage(
@@ -770,6 +889,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "アプリ画面を非表示にし、スクリーンショットを無効にします"),
         "hideContentDescriptionIos":
             MessageLookupByLibrary.simpleMessage("アプリ切り替え時に、アプリの画面を非表示にします"),
+        "hideSharedItemsFromHomeGallery":
+            MessageLookupByLibrary.simpleMessage("ホームギャラリーから共有された写真等を非表示"),
         "hiding": MessageLookupByLibrary.simpleMessage("非表示にしています"),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("OSM Franceでホスト"),
@@ -782,8 +903,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "生体認証が無効化されています。画面をロック・ロック解除して生体認証を有効化してください。"),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("OK"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("無視する"),
+        "ignored": MessageLookupByLibrary.simpleMessage("無視された"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
             "このアルバムの一部のファイルは、以前にEnteから削除されたため、あえてアップロード時に無視されます"),
+        "imageNotAnalyzed":
+            MessageLookupByLibrary.simpleMessage("画像が分析されていません"),
         "immediately": MessageLookupByLibrary.simpleMessage("すぐに"),
         "importing": MessageLookupByLibrary.simpleMessage("インポート中..."),
         "incorrectCode": MessageLookupByLibrary.simpleMessage("誤ったコード"),
@@ -798,6 +922,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "indexedItems": MessageLookupByLibrary.simpleMessage("処理済みの項目"),
         "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
             "インデックス作成は一時停止されています。デバイスの準備ができたら自動的に再開します。"),
+        "ineligible": MessageLookupByLibrary.simpleMessage("対象外"),
+        "info": MessageLookupByLibrary.simpleMessage("情報"),
         "insecureDevice": MessageLookupByLibrary.simpleMessage("安全でないデバイス"),
         "installManually": MessageLookupByLibrary.simpleMessage("手動でインストール"),
         "invalidEmailAddress":
@@ -816,11 +942,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "問題が発生したようです。しばらくしてから再試行してください。エラーが解決しない場合は、サポートチームにお問い合わせください。"),
-        "itemCount": m42,
+        "itemCount": m44,
         "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion":
             MessageLookupByLibrary.simpleMessage("完全に削除されるまでの日数が項目に表示されます"),
         "itemsWillBeRemovedFromAlbum":
             MessageLookupByLibrary.simpleMessage("選択したアイテムはこのアルバムから削除されます"),
+        "join": MessageLookupByLibrary.simpleMessage("参加する"),
+        "joinAlbum": MessageLookupByLibrary.simpleMessage("アルバムに参加"),
+        "joinAlbumConfirmationDialogBody": MessageLookupByLibrary.simpleMessage(
+            "アルバムに参加すると、参加者にメールアドレスが公開されます。"),
+        "joinAlbumSubtext":
+            MessageLookupByLibrary.simpleMessage("写真を表示したり、追加したりするために"),
+        "joinAlbumSubtextViewer":
+            MessageLookupByLibrary.simpleMessage("これを共有アルバムに追加するために"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Discordに参加"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("写真を残す"),
         "kiloMeterUnit": MessageLookupByLibrary.simpleMessage("km"),
@@ -834,17 +968,33 @@ class MessageLookup extends MessageLookupByLibrary {
         "leaveSharedAlbum":
             MessageLookupByLibrary.simpleMessage("共有アルバムを抜けてよいですか？"),
         "left": MessageLookupByLibrary.simpleMessage("左"),
+        "legacy": MessageLookupByLibrary.simpleMessage("レガシー"),
+        "legacyAccounts": MessageLookupByLibrary.simpleMessage("レガシーアカウント"),
+        "legacyInvite": m45,
+        "legacyPageDesc": MessageLookupByLibrary.simpleMessage(
+            "レガシーでは、信頼できる連絡先が不在時(あなたが亡くなった時など)にアカウントにアクセスできます。"),
+        "legacyPageDesc2": MessageLookupByLibrary.simpleMessage(
+            "信頼できる連絡先はアカウントの回復を開始することができます。30日以内にあなたが拒否しない場合は、その信頼する人がパスワードをリセットしてあなたのアカウントにアクセスできるようになります。"),
         "light": MessageLookupByLibrary.simpleMessage("ライト"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("ライト"),
+        "link": MessageLookupByLibrary.simpleMessage("リンク"),
         "linkCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("リンクをクリップボードにコピーしました"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("デバイスの制限"),
+        "linkEmail": MessageLookupByLibrary.simpleMessage("メールアドレスをリンクする"),
+        "linkEmailToContactBannerCaption":
+            MessageLookupByLibrary.simpleMessage("共有を高速化するために"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("有効"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("期限切れ"),
-        "linkExpiresOn": m44,
+        "linkExpiresOn": m46,
         "linkExpiry": MessageLookupByLibrary.simpleMessage("リンクの期限切れ"),
         "linkHasExpired": MessageLookupByLibrary.simpleMessage("リンクは期限切れです"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("なし"),
+        "linkPerson": MessageLookupByLibrary.simpleMessage("人を紐づけ"),
+        "linkPersonCaption":
+            MessageLookupByLibrary.simpleMessage("良い経験を分かち合うために"),
+        "linkPersonToEmail": m47,
+        "linkPersonToEmailConfirmation": m48,
         "livePhotos": MessageLookupByLibrary.simpleMessage("ライブフォト"),
         "loadMessage1":
             MessageLookupByLibrary.simpleMessage("サブスクリプションを家族と共有できます"),
@@ -891,6 +1041,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "セッションの有効期限が切れました。再度ログインしてください。"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "「ログイン」をクリックすることで、<u-terms>利用規約</u-terms>と<u-policy>プライバシーポリシー</u-policy>に同意します"),
+        "loginWithTOTP": MessageLookupByLibrary.simpleMessage("TOTPでログイン"),
         "logout": MessageLookupByLibrary.simpleMessage("ログアウト"),
         "logsDialogBody": MessageLookupByLibrary.simpleMessage(
             "これにより、問題のデバッグに役立つログが送信されます。 特定のファイルの問題を追跡するために、ファイル名が含まれることに注意してください。"),
@@ -907,6 +1058,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "magicSearchHint": MessageLookupByLibrary.simpleMessage(
             "マジック検索では、「花」、「赤い車」、「本人確認書類」などの写真に写っているもので検索できます。"),
         "manage": MessageLookupByLibrary.simpleMessage("管理"),
+        "manageDeviceStorage":
+            MessageLookupByLibrary.simpleMessage("端末のキャッシュを管理"),
+        "manageDeviceStorageDesc":
+            MessageLookupByLibrary.simpleMessage("端末上のキャッシュを確認・削除"),
         "manageFamily": MessageLookupByLibrary.simpleMessage("ファミリーの管理"),
         "manageLink": MessageLookupByLibrary.simpleMessage("リンクを管理"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("管理"),
@@ -918,6 +1073,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "maps": MessageLookupByLibrary.simpleMessage("地図"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
+        "me": MessageLookupByLibrary.simpleMessage("自分"),
         "memoryCount": m5,
         "merchandise": MessageLookupByLibrary.simpleMessage("グッズ"),
         "mergeWithExisting": MessageLookupByLibrary.simpleMessage("既存の人物とまとめる"),
@@ -937,15 +1093,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "moderateStrength": MessageLookupByLibrary.simpleMessage("普通のパスワード"),
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage("クエリを変更するか、以下のように検索してみてください"),
-        "moments": MessageLookupByLibrary.simpleMessage("モーメント"),
+        "moments": MessageLookupByLibrary.simpleMessage("日々の瞬間"),
+        "month": MessageLookupByLibrary.simpleMessage("月"),
         "monthly": MessageLookupByLibrary.simpleMessage("月額"),
         "moreDetails": MessageLookupByLibrary.simpleMessage("さらに詳細を表示"),
         "mostRecent": MessageLookupByLibrary.simpleMessage("新しい順"),
         "mostRelevant": MessageLookupByLibrary.simpleMessage("関連度順"),
-        "moveItem": m45,
+        "moveItem": m49,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("アルバムに移動"),
         "moveToHiddenAlbum": MessageLookupByLibrary.simpleMessage("隠しアルバムに移動"),
-        "movedSuccessfullyTo": m46,
+        "movedSuccessfullyTo": m50,
         "movedToTrash": MessageLookupByLibrary.simpleMessage("ごみ箱へ移動"),
         "movingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("アルバムにファイルを移動中"),
@@ -957,6 +1114,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Enteに接続できませんでした。ネットワーク設定を確認し、エラーが解決しない場合はサポートにお問い合わせください。"),
         "never": MessageLookupByLibrary.simpleMessage("なし"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("新しいアルバム"),
+        "newLocation": MessageLookupByLibrary.simpleMessage("新しいロケーション"),
         "newPerson": MessageLookupByLibrary.simpleMessage("新しい人物"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Enteを初めて使用する"),
         "newest": MessageLookupByLibrary.simpleMessage("新しい順"),
@@ -969,7 +1127,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "noDeviceThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage("削除できるファイルがありません"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ 重複なし"),
+        "noEnteAccountExclamation":
+            MessageLookupByLibrary.simpleMessage("アカウントがありません！"),
         "noExifData": MessageLookupByLibrary.simpleMessage("EXIFデータはありません"),
+        "noFacesFound": MessageLookupByLibrary.simpleMessage("顔が見つかりません"),
         "noHiddenPhotosOrVideos":
             MessageLookupByLibrary.simpleMessage("非表示の写真やビデオはありません"),
         "noImagesWithLocation":
@@ -987,9 +1148,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("該当なし"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("一致する結果が見つかりませんでした"),
+        "noSuggestionsForPerson": m51,
         "noSystemLockFound":
             MessageLookupByLibrary.simpleMessage("システムロックが見つかりませんでした"),
-        "notPersonLabel": m48,
+        "notPersonLabel": m52,
         "nothingSharedWithYouYet":
             MessageLookupByLibrary.simpleMessage("あなたに共有されたものはありません"),
         "nothingToSeeHere":
@@ -998,13 +1160,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "onDevice": MessageLookupByLibrary.simpleMessage("デバイス上"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
-            "<branding>Ente</branding>で保管"),
-        "onlyFamilyAdminCanChangeCode": m49,
+            "<branding>Ente</branding>が保管"),
+        "onlyFamilyAdminCanChangeCode": m53,
+        "onlyThem": MessageLookupByLibrary.simpleMessage("それらのみ"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
         "oopsCouldNotSaveEdits":
             MessageLookupByLibrary.simpleMessage("編集を保存できませんでした"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("問題が発生しました"),
+        "openAlbumInBrowser":
+            MessageLookupByLibrary.simpleMessage("ブラウザでアルバムを開く"),
+        "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
+            "このアルバムに写真を追加するには、Webアプリを使用してください"),
+        "openFile": MessageLookupByLibrary.simpleMessage("ファイルを開く"),
         "openSettings": MessageLookupByLibrary.simpleMessage("設定を開く"),
         "openTheItem": MessageLookupByLibrary.simpleMessage("• アイテムを開く"),
         "openstreetmapContributors":
@@ -1016,7 +1184,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("または既存のものを選択"),
         "orPickFromYourContacts":
-            MessageLookupByLibrary.simpleMessage("or pick from your contacts"),
+            MessageLookupByLibrary.simpleMessage("または連絡先から選択"),
         "pair": MessageLookupByLibrary.simpleMessage("ペアリング"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("PINを使ってペアリングする"),
         "pairingComplete": MessageLookupByLibrary.simpleMessage("ペアリング完了"),
@@ -1038,7 +1206,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "paymentFailed": MessageLookupByLibrary.simpleMessage("支払いに失敗しました"),
         "paymentFailedMessage": MessageLookupByLibrary.simpleMessage(
             "残念ながらお支払いに失敗しました。サポートにお問い合わせください。お手伝いします！"),
-        "paymentFailedTalkToProvider": m50,
+        "paymentFailedTalkToProvider": m54,
         "pendingItems": MessageLookupByLibrary.simpleMessage("処理待ちの項目"),
         "pendingSync": MessageLookupByLibrary.simpleMessage("同期を保留中"),
         "people": MessageLookupByLibrary.simpleMessage("人物"),
@@ -1056,11 +1224,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "photos": MessageLookupByLibrary.simpleMessage("写真"),
         "photosAddedByYouWillBeRemovedFromTheAlbum":
             MessageLookupByLibrary.simpleMessage("あなたの追加した写真はこのアルバムから削除されます"),
+        "photosCount": m55,
         "pickCenterPoint": MessageLookupByLibrary.simpleMessage("中心点を選択"),
         "pinAlbum": MessageLookupByLibrary.simpleMessage("アルバムをピンする"),
         "pinLock": MessageLookupByLibrary.simpleMessage("PINロック"),
         "playOnTv": MessageLookupByLibrary.simpleMessage("TVでアルバムを再生"),
-        "playStoreFreeTrialValidTill": m52,
+        "playOriginal": MessageLookupByLibrary.simpleMessage("元動画を再生"),
+        "playStoreFreeTrialValidTill": m56,
+        "playStream": MessageLookupByLibrary.simpleMessage("再生"),
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStoreサブスクリプション"),
         "pleaseCheckYourInternetConnectionAndTryAgain":
@@ -1070,13 +1241,13 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Support@ente.ioにお問い合わせください、お手伝いいたします。"),
         "pleaseContactSupportIfTheProblemPersists":
             MessageLookupByLibrary.simpleMessage("問題が解決しない場合はサポートにお問い合わせください"),
-        "pleaseEmailUsAt": m53,
+        "pleaseEmailUsAt": m57,
         "pleaseGrantPermissions":
             MessageLookupByLibrary.simpleMessage("権限を付与してください"),
         "pleaseLoginAgain": MessageLookupByLibrary.simpleMessage("もう一度試してください"),
         "pleaseSelectQuickLinksToRemove":
             MessageLookupByLibrary.simpleMessage("削除するクイックリンクを選択してください"),
-        "pleaseSendTheLogsTo": m54,
+        "pleaseSendTheLogsTo": m58,
         "pleaseTryAgain": MessageLookupByLibrary.simpleMessage("もう一度試してください"),
         "pleaseVerifyTheCodeYouHaveEntered":
             MessageLookupByLibrary.simpleMessage("入力したコードを確認してください"),
@@ -1096,20 +1267,32 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("プライバシーポリシー"),
         "privateBackups": MessageLookupByLibrary.simpleMessage("プライベートバックアップ"),
         "privateSharing": MessageLookupByLibrary.simpleMessage("プライベート共有"),
-        "processingImport": m55,
+        "proceed": MessageLookupByLibrary.simpleMessage("続行"),
+        "processed": MessageLookupByLibrary.simpleMessage("処理完了"),
+        "processing": MessageLookupByLibrary.simpleMessage("処理中"),
+        "processingImport": m59,
+        "processingVideos": MessageLookupByLibrary.simpleMessage("動画を処理中"),
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("公開リンクが作成されました"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("公開リンクを有効にしました"),
+        "queued": MessageLookupByLibrary.simpleMessage("処理待ち"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("クイックリンク"),
         "radius": MessageLookupByLibrary.simpleMessage("半径"),
         "raiseTicket": MessageLookupByLibrary.simpleMessage("サポートを受ける"),
         "rateTheApp": MessageLookupByLibrary.simpleMessage("アプリを評価"),
         "rateUs": MessageLookupByLibrary.simpleMessage("評価して下さい"),
-        "rateUsOnStore": m56,
+        "rateUsOnStore": m60,
+        "reassignMe": MessageLookupByLibrary.simpleMessage("\"自分\" を再割り当て"),
+        "reassignedToName": m61,
+        "reassigningLoading": MessageLookupByLibrary.simpleMessage("再割り当て中..."),
         "recover": MessageLookupByLibrary.simpleMessage("復元"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("アカウントを復元"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("復元"),
+        "recoveryAccount": MessageLookupByLibrary.simpleMessage("アカウントを復元"),
+        "recoveryInitiated":
+            MessageLookupByLibrary.simpleMessage("リカバリが開始されました"),
+        "recoveryInitiatedDesc": m62,
         "recoveryKey": MessageLookupByLibrary.simpleMessage("リカバリーキー"),
         "recoveryKeyCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("リカバリーキーはクリップボードにコピーされました"),
@@ -1123,8 +1306,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("リカバリキーが確認されました"),
         "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
             "パスワードを忘れた場合、リカバリーキーは写真を復元するための唯一の方法になります。なお、設定 > アカウント でリカバリーキーを確認することができます。\n \n\nここにリカバリーキーを入力して、正しく保存できていることを確認してください。"),
+        "recoveryReady": m63,
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("復元に成功しました！"),
+        "recoveryWarning": MessageLookupByLibrary.simpleMessage(
+            "信頼する連絡先の持ち主があなたのアカウントにアクセスしようとしています"),
+        "recoveryWarningBody": m64,
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
             "このデバイスではパスワードを確認する能力が足りません。\n\n恐れ入りますが、リカバリーキーを入力してパスワードを再生成する必要があります。"),
         "recreatePasswordTitle":
@@ -1138,10 +1325,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "referralStep1":
             MessageLookupByLibrary.simpleMessage("1. このコードを友達に贈りましょう"),
         "referralStep2": MessageLookupByLibrary.simpleMessage("2. 友達が有料プランに登録"),
-        "referralStep3": m60,
+        "referralStep3": m65,
         "referrals": MessageLookupByLibrary.simpleMessage("リフェラル"),
         "referralsAreCurrentlyPaused":
             MessageLookupByLibrary.simpleMessage("リフェラルは現在一時停止しています"),
+        "rejectRecovery": MessageLookupByLibrary.simpleMessage("リカバリを拒否する"),
         "remindToEmptyDeviceTrash": MessageLookupByLibrary.simpleMessage(
             "また、空き領域を取得するには、「設定」→「ストレージ」から「最近削除した項目」を空にします"),
         "remindToEmptyEnteTrash": MessageLookupByLibrary.simpleMessage(
@@ -1159,9 +1347,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("アルバムから削除しますか？"),
         "removeFromFavorite":
             MessageLookupByLibrary.simpleMessage("お気に入りリストから外す"),
+        "removeInvite": MessageLookupByLibrary.simpleMessage("招待を削除"),
         "removeLink": MessageLookupByLibrary.simpleMessage("リンクを削除"),
         "removeParticipant": MessageLookupByLibrary.simpleMessage("参加者を削除"),
-        "removeParticipantBody": m61,
+        "removeParticipantBody": m66,
         "removePersonLabel": MessageLookupByLibrary.simpleMessage("人名を削除"),
         "removePublicLink": MessageLookupByLibrary.simpleMessage("公開リンクを削除"),
         "removePublicLinks": MessageLookupByLibrary.simpleMessage("公開リンクを削除"),
@@ -1169,6 +1358,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "削除したアイテムのいくつかは他の人によって追加されました。あなたはそれらへのアクセスを失います"),
         "removeWithQuestionMark":
             MessageLookupByLibrary.simpleMessage("削除しますか?"),
+        "removeYourselfAsTrustedContact":
+            MessageLookupByLibrary.simpleMessage("あなた自身を信頼できる連絡先から削除"),
         "removingFromFavorites":
             MessageLookupByLibrary.simpleMessage("お気に入りから削除しています..."),
         "rename": MessageLookupByLibrary.simpleMessage("名前変更"),
@@ -1176,7 +1367,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "renameFile": MessageLookupByLibrary.simpleMessage("ファイル名を変更"),
         "renewSubscription":
             MessageLookupByLibrary.simpleMessage("サブスクリプションの更新"),
-        "renewsOn": m62,
+        "renewsOn": m67,
         "reportABug": MessageLookupByLibrary.simpleMessage("バグを報告"),
         "reportBug": MessageLookupByLibrary.simpleMessage("バグを報告"),
         "resendEmail": MessageLookupByLibrary.simpleMessage("メールを再送信"),
@@ -1184,6 +1375,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("アップロード時に無視されるファイルをリセット"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("パスワードをリセット"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("削除"),
         "resetToDefault": MessageLookupByLibrary.simpleMessage("初期設定にリセット"),
         "restore": MessageLookupByLibrary.simpleMessage("復元"),
         "restoreToAlbum": MessageLookupByLibrary.simpleMessage("アルバムに戻す"),
@@ -1200,6 +1392,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight": MessageLookupByLibrary.simpleMessage("右に回転"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("保管されています"),
         "save": MessageLookupByLibrary.simpleMessage("保存"),
+        "saveChangesBeforeLeavingQuestion":
+            MessageLookupByLibrary.simpleMessage("その前に変更を保存しますか？"),
         "saveCollage": MessageLookupByLibrary.simpleMessage("コラージュを保存"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("コピーを保存"),
         "saveKey": MessageLookupByLibrary.simpleMessage("キーを保存"),
@@ -1221,6 +1415,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "写真情報に \"#trip\" のように説明を追加すれば、ここで簡単に見つけることができます"),
         "searchDatesEmptySection":
             MessageLookupByLibrary.simpleMessage("日付、月または年で検索"),
+        "searchDiscoverEmptySection":
+            MessageLookupByLibrary.simpleMessage("処理と同期が完了すると、画像がここに表示されます"),
         "searchFaceEmptySection":
             MessageLookupByLibrary.simpleMessage("学習が完了すると、ここに人が表示されます"),
         "searchFileTypesAndNamesEmptySection":
@@ -1235,20 +1431,30 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("当時の直近で撮影された写真をグループ化"),
         "searchPeopleEmptySection":
             MessageLookupByLibrary.simpleMessage("友達を招待すると、共有される写真はここから閲覧できます"),
-        "searchResultCount": m63,
+        "searchPersonsEmptySection":
+            MessageLookupByLibrary.simpleMessage("処理と同期が完了すると、ここに人々が表示されます"),
+        "searchResultCount": m68,
+        "searchSectionsLengthMismatch": m69,
         "security": MessageLookupByLibrary.simpleMessage("セキュリティ"),
+        "seePublicAlbumLinksInApp":
+            MessageLookupByLibrary.simpleMessage("アプリ内で公開アルバムのリンクを見る"),
         "selectALocation": MessageLookupByLibrary.simpleMessage("場所を選択"),
         "selectALocationFirst":
             MessageLookupByLibrary.simpleMessage("先に場所を選択してください"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("アルバムを選択"),
         "selectAll": MessageLookupByLibrary.simpleMessage("全て選択"),
+        "selectAllShort": MessageLookupByLibrary.simpleMessage("すべて"),
+        "selectCoverPhoto": MessageLookupByLibrary.simpleMessage("カバー写真を選択"),
         "selectFoldersForBackup":
             MessageLookupByLibrary.simpleMessage("バックアップするフォルダを選択"),
         "selectItemsToAdd":
             MessageLookupByLibrary.simpleMessage("追加するアイテムを選んでください"),
         "selectLanguage": MessageLookupByLibrary.simpleMessage("言語を選ぶ"),
+        "selectMailApp": MessageLookupByLibrary.simpleMessage("メールアプリを選択"),
         "selectMorePhotos": MessageLookupByLibrary.simpleMessage("さらに写真を選択"),
+        "selectPersonToLink": MessageLookupByLibrary.simpleMessage("リンクする人を選択"),
         "selectReason": MessageLookupByLibrary.simpleMessage(""),
+        "selectYourFace": MessageLookupByLibrary.simpleMessage("あなたの顔を選択"),
         "selectYourPlan": MessageLookupByLibrary.simpleMessage("プランを選びましょう"),
         "selectedFilesAreNotOnEnte":
             MessageLookupByLibrary.simpleMessage("選択したファイルはEnte上にありません"),
@@ -1258,13 +1464,15 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "選択したアイテムはすべてのアルバムから削除され、ゴミ箱に移動されます。"),
         "selectedPhotos": m6,
-        "selectedPhotosWithYours": m65,
+        "selectedPhotosWithYours": m70,
         "send": MessageLookupByLibrary.simpleMessage("送信"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("メールを送信する"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("招待を送る"),
         "sendLink": MessageLookupByLibrary.simpleMessage("リンクを送信"),
         "serverEndpoint": MessageLookupByLibrary.simpleMessage("サーバーエンドポイント"),
         "sessionExpired": MessageLookupByLibrary.simpleMessage("セッション切れ"),
+        "sessionIdMismatch":
+            MessageLookupByLibrary.simpleMessage("セッションIDが一致しません"),
         "setAPassword": MessageLookupByLibrary.simpleMessage("パスワードを設定"),
         "setAs": MessageLookupByLibrary.simpleMessage("設定："),
         "setCover": MessageLookupByLibrary.simpleMessage("カバー画像をセット"),
@@ -1280,16 +1488,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("アルバムを開いて右上のシェアボタンをタップ"),
         "shareAnAlbumNow": MessageLookupByLibrary.simpleMessage("アルバムを共有"),
         "shareLink": MessageLookupByLibrary.simpleMessage("リンクの共有"),
-        "shareMyVerificationID": m66,
+        "shareMyVerificationID": m71,
         "shareOnlyWithThePeopleYouWant":
             MessageLookupByLibrary.simpleMessage("選んだ人と共有します"),
         "shareTextConfirmOthersVerificationID": m7,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Enteをダウンロードして、写真や動画の共有を簡単に！\n\nhttps://ente.io"),
-        "shareTextReferralCode": m67,
+        "shareTextReferralCode": m72,
         "shareWithNonenteUsers":
             MessageLookupByLibrary.simpleMessage("Enteを使っていない人に共有"),
-        "shareWithPeopleSectionTitle": m68,
+        "shareWithPeopleSectionTitle": m73,
         "shareYourFirstAlbum":
             MessageLookupByLibrary.simpleMessage("アルバムの共有をしてみましょう"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
@@ -1300,7 +1508,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("新しい共有写真"),
         "sharedPhotoNotificationsExplanation":
             MessageLookupByLibrary.simpleMessage("誰かが写真を共有アルバムに追加した時に通知を受け取る"),
-        "sharedWith": m69,
+        "sharedWith": m74,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("あなたと共有されたアルバム"),
         "sharedWithYou": MessageLookupByLibrary.simpleMessage("あなたと共有されています"),
         "sharing": MessageLookupByLibrary.simpleMessage("共有中..."),
@@ -1314,11 +1522,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("他のデバイスからサインアウトする"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "<u-terms>利用規約</u-terms>と<u-policy>プライバシーポリシー</u-policy>に同意します"),
-        "singleFileDeleteFromDevice": m70,
+        "singleFileDeleteFromDevice": m75,
         "singleFileDeleteHighlight":
             MessageLookupByLibrary.simpleMessage("全てのアルバムから削除されます。"),
-        "singleFileInBothLocalAndRemote": m71,
-        "singleFileInRemoteOnly": m72,
+        "singleFileInBothLocalAndRemote": m76,
+        "singleFileInRemoteOnly": m77,
         "skip": MessageLookupByLibrary.simpleMessage("スキップ"),
         "social": MessageLookupByLibrary.simpleMessage("SNS"),
         "someItemsAreInBothEnteAndYourDevice":
@@ -1349,6 +1557,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("新しい順"),
         "sortOldestFirst": MessageLookupByLibrary.simpleMessage("古い順"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("成功✨"),
+        "startAccountRecoveryTitle":
+            MessageLookupByLibrary.simpleMessage("リカバリを開始"),
         "startBackup": MessageLookupByLibrary.simpleMessage("バックアップを開始"),
         "status": MessageLookupByLibrary.simpleMessage("ステータス"),
         "stopCastingBody": MessageLookupByLibrary.simpleMessage("キャストを停止しますか？"),
@@ -1359,10 +1569,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageInGB": m1,
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("ストレージの上限を超えました"),
-        "storageUsageInfo": m73,
+        "storageUsageInfo": m78,
+        "streamDetails": MessageLookupByLibrary.simpleMessage("動画の詳細"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("強いパスワード"),
-        "subAlreadyLinkedErrMessage": m74,
-        "subWillBeCancelledOn": m75,
+        "subAlreadyLinkedErrMessage": m79,
+        "subWillBeCancelledOn": m80,
         "subscribe": MessageLookupByLibrary.simpleMessage("サブスクライブ"),
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
             "共有を有効にするには、有料サブスクリプションが必要です。"),
@@ -1376,13 +1587,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "successfullyUnhid": MessageLookupByLibrary.simpleMessage("非表示を解除しました"),
         "suggestFeatures": MessageLookupByLibrary.simpleMessage("機能を提案"),
         "support": MessageLookupByLibrary.simpleMessage("サポート"),
-        "syncProgress": m76,
+        "syncProgress": m81,
         "syncStopped": MessageLookupByLibrary.simpleMessage("同期が停止しました"),
         "syncing": MessageLookupByLibrary.simpleMessage("同期中..."),
         "systemTheme": MessageLookupByLibrary.simpleMessage("システム"),
         "tapToCopy": MessageLookupByLibrary.simpleMessage("タップしてコピー"),
         "tapToEnterCode": MessageLookupByLibrary.simpleMessage("タップしてコードを入力"),
         "tapToUnlock": MessageLookupByLibrary.simpleMessage("タップして解除"),
+        "tapToUpload": MessageLookupByLibrary.simpleMessage("タップしてアップロード"),
+        "tapToUploadIsIgnoredDue": m82,
         "tempErrorContactSupportIfPersists": MessageLookupByLibrary.simpleMessage(
             "問題が発生したようです。しばらくしてから再試行してください。エラーが解決しない場合は、サポートチームにお問い合わせください。"),
         "terminate": MessageLookupByLibrary.simpleMessage("終了させる"),
@@ -1394,6 +1607,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ありがとうございます！"),
         "theDownloadCouldNotBeCompleted":
             MessageLookupByLibrary.simpleMessage("ダウンロードを完了できませんでした"),
+        "theLinkYouAreTryingToAccessHasExpired":
+            MessageLookupByLibrary.simpleMessage("アクセスしようとしているリンクの期限が切れています。"),
         "theRecoveryKeyYouEnteredIsIncorrect":
             MessageLookupByLibrary.simpleMessage("入力したリカバリーキーが間違っています"),
         "theme": MessageLookupByLibrary.simpleMessage("テーマ"),
@@ -1415,7 +1630,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("このメールアドレスはすでに使用されています。"),
         "thisImageHasNoExifData":
             MessageLookupByLibrary.simpleMessage("この画像にEXIFデータはありません"),
-        "thisIsPersonVerificationId": m78,
+        "thisIsMeExclamation": MessageLookupByLibrary.simpleMessage("これは私です"),
+        "thisIsPersonVerificationId": m83,
         "thisIsYourVerificationId":
             MessageLookupByLibrary.simpleMessage("これはあなたの認証IDです"),
         "thisWillLogYouOutOfTheFollowingDevice":
@@ -1438,7 +1654,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "total": MessageLookupByLibrary.simpleMessage("合計"),
         "totalSize": MessageLookupByLibrary.simpleMessage("合計サイズ"),
         "trash": MessageLookupByLibrary.simpleMessage("ゴミ箱"),
+        "trashDaysLeft": m84,
         "trim": MessageLookupByLibrary.simpleMessage("トリミング"),
+        "trustedContacts": MessageLookupByLibrary.simpleMessage("信頼する連絡先"),
+        "trustedInviteBody": m85,
         "tryAgain": MessageLookupByLibrary.simpleMessage("もう一度試してください"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "バックアップをオンにすると、このデバイスフォルダに追加されたファイルは自動的にEnteにアップロードされます。"),
@@ -1453,6 +1672,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "twofactorAuthenticationSuccessfullyReset":
             MessageLookupByLibrary.simpleMessage("2段階認証をリセットしました"),
         "twofactorSetup": MessageLookupByLibrary.simpleMessage("2段階認証のセットアップ"),
+        "typeOfGallerGallerytypeIsNotSupportedForRename": m86,
         "unarchive": MessageLookupByLibrary.simpleMessage("アーカイブ解除"),
         "unarchiveAlbum": MessageLookupByLibrary.simpleMessage("アルバムのアーカイブ解除"),
         "unarchiving": MessageLookupByLibrary.simpleMessage("アーカイブを解除中..."),
@@ -1472,9 +1692,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "updatingFolderSelection":
             MessageLookupByLibrary.simpleMessage("フォルダの選択を更新しています..."),
         "upgrade": MessageLookupByLibrary.simpleMessage("アップグレード"),
+        "uploadIsIgnoredDueToIgnorereason": m87,
         "uploadingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("アルバムにファイルをアップロード中"),
-        "uploadingMultipleMemories": m83,
+        "uploadingMultipleMemories": m88,
         "uploadingSingleMemory":
             MessageLookupByLibrary.simpleMessage("1メモリを保存しています..."),
         "upto50OffUntil4thDec":
@@ -1482,19 +1703,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "使用可能なストレージは現在のプランによって制限されています。プランをアップグレードすると、あなたが手に入れたストレージが自動的に使用可能になります。"),
         "useAsCover": MessageLookupByLibrary.simpleMessage("カバー写真として使用"),
+        "useDifferentPlayerInfo": MessageLookupByLibrary.simpleMessage(
+            "この動画の再生に問題がありますか？別のプレイヤーを試すには、ここを長押ししてください。"),
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "公開リンクを使用する(Enteを利用しない人と共有できます)"),
         "useRecoveryKey": MessageLookupByLibrary.simpleMessage("リカバリーキーを使用"),
         "useSelectedPhoto": MessageLookupByLibrary.simpleMessage("選択した写真を使用"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("使用済み領域"),
-        "validTill": m84,
+        "validTill": m89,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("確認に失敗しました、再試行してください"),
         "verificationId": MessageLookupByLibrary.simpleMessage("確認用ID"),
         "verify": MessageLookupByLibrary.simpleMessage("確認"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Eメールの確認"),
-        "verifyEmailID": m85,
+        "verifyEmailID": m90,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("確認"),
         "verifyPasskey": MessageLookupByLibrary.simpleMessage("パスキーを確認"),
         "verifyPassword": MessageLookupByLibrary.simpleMessage("パスワードの確認"),
@@ -1503,6 +1726,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("リカバリキーを確認中..."),
         "videoInfo": MessageLookupByLibrary.simpleMessage("ビデオ情報"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("ビデオ"),
+        "videoStreaming": MessageLookupByLibrary.simpleMessage("動画ストリーミング"),
         "videos": MessageLookupByLibrary.simpleMessage("ビデオ"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("アクティブなセッションを表示"),
@@ -1516,11 +1740,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewLogs": MessageLookupByLibrary.simpleMessage("ログを表示"),
         "viewRecoveryKey": MessageLookupByLibrary.simpleMessage("リカバリキーを表示"),
         "viewer": MessageLookupByLibrary.simpleMessage("ビューアー"),
+        "viewersSuccessfullyAdded": m91,
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "サブスクリプションを管理するにはweb.ente.ioをご覧ください"),
         "waitingForVerification":
             MessageLookupByLibrary.simpleMessage("確認を待っています..."),
         "waitingForWifi": MessageLookupByLibrary.simpleMessage("WiFi を待っています"),
+        "warning": MessageLookupByLibrary.simpleMessage("警告"),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("私たちはオープンソースです！"),
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
@@ -1530,8 +1756,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "weakStrength": MessageLookupByLibrary.simpleMessage("弱いパスワード"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("おかえりなさい！"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("最新情報"),
+        "whyAddTrustContact":
+            MessageLookupByLibrary.simpleMessage("信頼する連絡先は、データの復旧が必要な際に役立ちます。"),
+        "yearShort": MessageLookupByLibrary.simpleMessage("年"),
         "yearly": MessageLookupByLibrary.simpleMessage("年額"),
-        "yearsAgo": m87,
+        "yearsAgo": m92,
         "yes": MessageLookupByLibrary.simpleMessage("はい"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("キャンセル"),
         "yesConvertToViewer":
@@ -1542,6 +1771,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesLogout": MessageLookupByLibrary.simpleMessage("はい、ログアウトします"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("削除"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("はい、更新する"),
+        "yesResetPerson": MessageLookupByLibrary.simpleMessage("リセット"),
         "you": MessageLookupByLibrary.simpleMessage("あなた"),
         "youAreOnAFamilyPlan":
             MessageLookupByLibrary.simpleMessage("ファミリープランに入会しています！"),
@@ -1559,7 +1789,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("自分自身と共有することはできません"),
         "youDontHaveAnyArchivedItems":
             MessageLookupByLibrary.simpleMessage("アーカイブした項目はありません"),
-        "youHaveSuccessfullyFreedUp": m88,
+        "youHaveSuccessfullyFreedUp": m93,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("アカウントは削除されました"),
         "yourMap": MessageLookupByLibrary.simpleMessage("あなたの地図"),
@@ -1577,8 +1807,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("サブスクリプションが更新されました"),
         "yourVerificationCodeHasExpired":
             MessageLookupByLibrary.simpleMessage("確認用コードが失効しました"),
-        "youveNoDuplicateFilesThatCanBeCleared":
-            MessageLookupByLibrary.simpleMessage("削除できる重複ファイルはありません"),
         "youveNoFilesInThisAlbumThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage("このアルバムには消すファイルがありません"),
         "zoomOutToSeePhotos":

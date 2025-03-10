@@ -15,7 +15,7 @@ class GradientButton extends StatelessWidget {
   final double paddingValue;
 
   const GradientButton({
-    Key? key,
+    super.key,
     this.linearGradientColors = const [
       Color(0xFF2CD267),
       Color(0xFF1DB954),
@@ -24,7 +24,7 @@ class GradientButton extends StatelessWidget {
     this.text = '',
     this.iconData,
     this.paddingValue = 0.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
