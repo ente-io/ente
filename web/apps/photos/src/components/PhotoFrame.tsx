@@ -10,7 +10,7 @@ import { moveToTrash, TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
     addToFavorites,
@@ -22,9 +22,7 @@ import {
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import { downloadSingleFile } from "utils/file";
-import { handleSelectCreator } from "utils/photoFrame";
 import { FileList, type FileListAnnotatedFile } from "./FileList";
-import PreviewCard from "./pages/gallery/PreviewCard";
 
 const Container = styled("div")`
     display: block;
@@ -93,6 +91,7 @@ export type PhotoFrameProps = Pick<
      */
     modePlus?: GalleryBarMode | "search";
     files: EnteFile[];
+    selectable?: boolean;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
@@ -135,7 +134,6 @@ export type PhotoFrameProps = Pick<
     isInIncomingSharedCollection?: boolean;
     isInHiddenSection?: boolean;
     setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
-    selectable?: boolean;
     /**
      * Called when the visibility of the file viewer dialog changes.
      */
@@ -150,8 +148,9 @@ const PhotoFrame = ({
     mode,
     modePlus,
     files,
-    setSelected,
+    selectable,
     selected,
+    setSelected,
     favoriteFileIDs,
     onMarkUnsyncedFavoriteUpdate,
     onMarkTempDeleted,
@@ -164,7 +163,6 @@ const PhotoFrame = ({
     isInIncomingSharedCollection,
     isInHiddenSection,
     setFilesDownloadProgressAttributesCreator,
-    selectable,
     onSetOpenFileViewer,
     onSyncWithRemote,
     onSelectCollection,
@@ -174,9 +172,6 @@ const PhotoFrame = ({
 
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [rangeStart, setRangeStart] = useState(null);
-    const [currentHover, setCurrentHover] = useState(null);
-    const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
 
     const annotatedFiles = useMemo(
         (): FileListAnnotatedFile[] =>
@@ -245,118 +240,24 @@ const PhotoFrame = ({
         [],
     );
 
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Shift") {
-                setIsShiftKeyPressed(true);
-            }
-        };
-
-        const handleKeyUp = (e: KeyboardEvent) => {
-            if (e.key === "Shift") {
-                setIsShiftKeyPressed(false);
-            }
-        };
-
-        document.addEventListener("keydown", handleKeyDown);
-        document.addEventListener("keyup", handleKeyUp);
-
-        return () => {
-            document.removeEventListener("keydown", handleKeyDown);
-            document.removeEventListener("keyup", handleKeyUp);
-        };
-    }, []);
-
-    useEffect(() => {
-        if (selected.count === 0) {
-            setRangeStart(null);
-        }
-    }, [selected]);
-
-    const handleSelect = handleSelectCreator(
-        setSelected,
-        mode,
-        galleryContext.user?.id,
-        activeCollectionID,
-        activePersonID,
-        setRangeStart,
-    );
-
-    const onHoverOver = (index: number) => () => {
-        setCurrentHover(index);
-    };
-
-    const handleRangeSelect = (index: number) => () => {
-        if (typeof rangeStart !== "undefined" && rangeStart !== index) {
-            const direction =
-                (index - rangeStart) / Math.abs(index - rangeStart);
-            let checked = true;
-            for (
-                let i = rangeStart;
-                (index - i) * direction >= 0;
-                i += direction
-            ) {
-                checked = checked && !!selected[annotatedFiles[i].file.id];
-            }
-            for (
-                let i = rangeStart;
-                (index - i) * direction > 0;
-                i += direction
-            ) {
-                handleSelect(annotatedFiles[i].file)(!checked);
-            }
-            handleSelect(annotatedFiles[index].file, index)(!checked);
-        }
-    };
-
-    const getThumbnail = (
-        { file }: FileListAnnotatedFile,
-        index: number,
-        isScrolling: boolean,
-    ) => (
-        <PreviewCard
-            key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
-            file={file}
-            onClick={() => handleThumbnailClick(index)}
-            selectable={selectable}
-            onSelect={handleSelect(file, index)}
-            selected={
-                (!mode
-                    ? selected.collectionID === activeCollectionID
-                    : mode == selected.context?.mode &&
-                      (selected.context.mode == "people"
-                          ? selected.context.personID == activePersonID
-                          : selected.context.collectionID ==
-                            activeCollectionID)) && selected[file.id]
-            }
-            selectOnClick={selected.count > 0}
-            onHover={onHoverOver(index)}
-            onRangeSelect={handleRangeSelect(index)}
-            isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
-            isInsSelectRange={
-                (index >= rangeStart && index <= currentHover) ||
-                (index >= currentHover && index <= rangeStart)
-            }
-            activeCollectionID={activeCollectionID}
-            showPlaceholder={isScrolling}
-            isFav={favoriteFileIDs?.has(file.id)}
-        />
-    );
-
     return (
         <Container>
             <AutoSizer>
                 {({ height, width }) => (
                     <FileList
-                        width={width}
-                        height={height}
-                        getThumbnail={getThumbnail}
-                        mode={mode}
-                        modePlus={modePlus}
-                        annotatedFiles={annotatedFiles}
-                        activeCollectionID={activeCollectionID}
-                        activePersonID={activePersonID}
-                        showAppDownloadBanner={showAppDownloadBanner}
+                        {...{
+                            mode,
+                            modePlus,
+                            selectable,
+                            selected,
+                            setSelected,
+                            activeCollectionID,
+                            activePersonID,
+                            showAppDownloadBanner,
+                            favoriteFileIDs,
+                        }}
+                        {...{ width, height, annotatedFiles }}
+                        onItemClick={handleThumbnailClick}
                     />
                 )}
             </AutoSizer>

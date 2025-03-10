@@ -20,8 +20,12 @@ import {
     ListChildComponentProps,
     areEqual,
 } from "react-window";
-import { handleSelectCreatorMulti } from "utils/photoFrame";
+import {
+    handleSelectCreator,
+    handleSelectCreatorMulti,
+} from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
+import PreviewCard from "./pages/gallery/PreviewCard";
 
 export const DATE_CONTAINER_HEIGHT = 48;
 export const SPACE_BTW_DATES = 44;
@@ -188,18 +192,28 @@ export interface FileListAnnotatedFile {
     timelineDateString: string;
 }
 
-type FileListProps = Pick<PhotoFrameProps, "mode" | "modePlus"> & {
+type FileListProps = Pick<
+    PhotoFrameProps,
+    | "mode"
+    | "modePlus"
+    | "selectable"
+    | "selected"
+    | "setSelected"
+    | "favoriteFileIDs"
+> & {
     height: number;
     width: number;
     annotatedFiles: FileListAnnotatedFile[];
     showAppDownloadBanner: boolean;
-    getThumbnail: (
-        file: FileListAnnotatedFile,
-        index: number,
-        isScrolling?: boolean,
-    ) => React.JSX.Element;
     activeCollectionID: number;
     activePersonID?: string;
+    /**
+     * Called when the user activates the thumbnail at the given {@link index}.
+     *
+     * This corresponding file would be at the corresponding index of
+     * {@link annotatedFiles}.
+     */
+    onItemClick: (index: number) => void;
 };
 
 interface ItemData {
@@ -223,6 +237,7 @@ const createItemData = memoize(
         ) => React.JSX.Element,
     ): ItemData => ({ timeStampList, columns, shrinkRatio, renderListItem }),
 );
+
 const PhotoListRow = React.memo(
     ({
         index,
@@ -255,9 +270,13 @@ export const FileList: React.FC<FileListProps> = ({
     modePlus,
     annotatedFiles,
     showAppDownloadBanner,
-    getThumbnail,
+    selectable,
+    selected,
+    setSelected,
     activeCollectionID,
     activePersonID,
+    favoriteFileIDs,
+    onItemClick,
 }) => {
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
@@ -274,6 +293,10 @@ export const FileList: React.FC<FileListProps> = ({
     // See: [Note: Timeline date string]
     const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
         useState(new Set());
+
+    const [rangeStart, setRangeStart] = useState(null);
+    const [currentHover, setCurrentHover] = useState(null);
+    const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
 
     const fittableColumns = getFractionFittableColumns(width);
     let columns = Math.floor(fittableColumns);
@@ -767,7 +790,7 @@ export const FileList: React.FC<FileListProps> = ({
         });
     }, [galleryContext.selectedFile]);
 
-    const handleSelect = handleSelectCreatorMulti(
+    const handleSelectMulti = handleSelectCreatorMulti(
         galleryContext.setSelectedFiles,
         mode,
         galleryContext?.user?.id,
@@ -791,8 +814,106 @@ export const FileList: React.FC<FileListProps> = ({
             (item) => item.timelineDateString === date,
         ); // all files on a checked/unchecked day
 
-        handleSelect(filesOnADay.map((af) => af.file))(isDateSelected);
+        handleSelectMulti(filesOnADay.map((af) => af.file))(isDateSelected);
     };
+
+    const handleSelect = handleSelectCreator(
+        setSelected,
+        mode,
+        galleryContext.user?.id,
+        activeCollectionID,
+        activePersonID,
+        setRangeStart,
+    );
+
+    const onHoverOver = (index: number) => () => {
+        setCurrentHover(index);
+    };
+
+    const handleRangeSelect = (index: number) => () => {
+        if (typeof rangeStart !== "undefined" && rangeStart !== index) {
+            const direction =
+                (index - rangeStart) / Math.abs(index - rangeStart);
+            let checked = true;
+            for (
+                let i = rangeStart;
+                (index - i) * direction >= 0;
+                i += direction
+            ) {
+                checked = checked && !!selected[annotatedFiles[i].file.id];
+            }
+            for (
+                let i = rangeStart;
+                (index - i) * direction > 0;
+                i += direction
+            ) {
+                handleSelect(annotatedFiles[i].file)(!checked);
+            }
+            handleSelect(annotatedFiles[index].file, index)(!checked);
+        }
+    };
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Shift") {
+                setIsShiftKeyPressed(true);
+            }
+        };
+
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === "Shift") {
+                setIsShiftKeyPressed(false);
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("keyup", handleKeyUp);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+            document.removeEventListener("keyup", handleKeyUp);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (selected.count === 0) {
+            setRangeStart(null);
+        }
+    }, [selected]);
+
+    const getThumbnail = (
+        { file }: FileListAnnotatedFile,
+        index: number,
+        isScrolling: boolean,
+    ) => (
+        <PreviewCard
+            key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
+            file={file}
+            onClick={() => onItemClick(index)}
+            selectable={selectable}
+            onSelect={handleSelect(file, index)}
+            selected={
+                (!mode
+                    ? selected.collectionID === activeCollectionID
+                    : mode == selected.context?.mode &&
+                      (selected.context.mode == "people"
+                          ? selected.context.personID == activePersonID
+                          : selected.context.collectionID ==
+                            activeCollectionID)) && selected[file.id]
+            }
+            selectOnClick={selected.count > 0}
+            onHover={onHoverOver(index)}
+            onRangeSelect={handleRangeSelect(index)}
+            isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
+            isInsSelectRange={
+                (index >= rangeStart && index <= currentHover) ||
+                (index >= currentHover && index <= rangeStart)
+            }
+            activeCollectionID={activeCollectionID}
+            showPlaceholder={isScrolling}
+            isFav={favoriteFileIDs?.has(file.id)}
+        />
+    );
 
     const renderListItem = (
         listItem: TimeStampListItem,
