@@ -6,7 +6,7 @@ import {
     IMAGE_CONTAINER_MAX_HEIGHT,
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
-} from "@/new/photos/components/PhotoList";
+} from "@/new/photos/components/FileList";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
 import type { PhotoFrameProps } from "components/PhotoFrame";
@@ -20,8 +20,12 @@ import {
     ListChildComponentProps,
     areEqual,
 } from "react-window";
-import { handleSelectCreatorMulti } from "utils/photoFrame";
+import {
+    handleSelectCreator,
+    handleSelectCreatorMulti,
+} from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
+import PreviewCard from "./pages/gallery/PreviewCard";
 
 export const DATE_CONTAINER_HEIGHT = 48;
 export const SPACE_BTW_DATES = 44;
@@ -43,7 +47,7 @@ export enum ITEM_TYPE {
 
 export interface TimeStampListItem {
     itemType: ITEM_TYPE;
-    items?: EnteFile[];
+    items?: FileListAnnotatedFile[];
     itemStartIndex?: number;
     date?: string;
     dates?: { date: string; span: number }[];
@@ -175,18 +179,41 @@ const NothingContainer = styled(ListItemContainer)`
     justify-content: center;
 `;
 
-type Props = Pick<PhotoFrameProps, "mode" | "modePlus"> & {
+export interface FileListAnnotatedFile {
+    file: EnteFile;
+    /**
+     * The date string using with the associated {@link file} should be shown in
+     * the timeline.
+     *
+     * This for used for grouping files: all files which have the same
+     * {@link timelineDateString} are grouped together into a section titled
+     * with that {@link timelineDateString}.
+     */
+    timelineDateString: string;
+}
+
+type FileListProps = Pick<
+    PhotoFrameProps,
+    | "mode"
+    | "modePlus"
+    | "selectable"
+    | "selected"
+    | "setSelected"
+    | "favoriteFileIDs"
+> & {
     height: number;
     width: number;
-    displayFiles: (EnteFile & { timelineDateString?: string })[];
+    annotatedFiles: FileListAnnotatedFile[];
     showAppDownloadBanner: boolean;
-    getThumbnail: (
-        file: EnteFile,
-        index: number,
-        isScrolling?: boolean,
-    ) => React.JSX.Element;
     activeCollectionID: number;
     activePersonID?: string;
+    /**
+     * Called when the user activates the thumbnail at the given {@link index}.
+     *
+     * This corresponding file would be at the corresponding index of
+     * {@link annotatedFiles}.
+     */
+    onItemClick: (index: number) => void;
 };
 
 interface ItemData {
@@ -210,6 +237,7 @@ const createItemData = memoize(
         ) => React.JSX.Element,
     ): ItemData => ({ timeStampList, columns, shrinkRatio, renderListItem }),
 );
+
 const PhotoListRow = React.memo(
     ({
         index,
@@ -235,20 +263,21 @@ const PhotoListRow = React.memo(
     areEqual,
 );
 
-/**
- * TODO: Rename me to FileList.
- */
-export function PhotoList({
+export const FileList: React.FC<FileListProps> = ({
     height,
     width,
     mode,
     modePlus,
-    displayFiles,
+    annotatedFiles,
     showAppDownloadBanner,
-    getThumbnail,
+    selectable,
+    selected,
+    setSelected,
     activeCollectionID,
     activePersonID,
-}: Props) {
+    favoriteFileIDs,
+    onItemClick,
+}) => {
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
@@ -264,6 +293,10 @@ export function PhotoList({
     // See: [Note: Timeline date string]
     const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
         useState(new Set());
+
+    const [rangeStart, setRangeStart] = useState(null);
+    const [currentHover, setCurrentHover] = useState(null);
+    const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
 
     const fittableColumns = getFractionFittableColumns(width);
     let columns = Math.floor(fittableColumns);
@@ -338,7 +371,7 @@ export function PhotoList({
     }, [
         width,
         height,
-        displayFiles,
+        annotatedFiles,
         galleryContext.photoListHeader,
         publicCollectionGalleryContext.photoListHeader,
         galleryContext.isClipSearchResult,
@@ -414,15 +447,15 @@ export function PhotoList({
     const groupByTime = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;
         let currentDate;
-        displayFiles.forEach((item, index) => {
+        annotatedFiles.forEach((item, index) => {
             if (
                 !currentDate ||
                 !isSameDay(
-                    new Date(item.metadata.creationTime / 1000),
+                    new Date(item.file.metadata.creationTime / 1000),
                     new Date(currentDate),
                 )
             ) {
-                currentDate = item.metadata.creationTime / 1000;
+                currentDate = item.file.metadata.creationTime / 1000;
 
                 timeStampList.push({
                     itemType: ITEM_TYPE.TIME,
@@ -451,7 +484,7 @@ export function PhotoList({
 
     const noGrouping = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = columns;
-        displayFiles.forEach((item, index) => {
+        annotatedFiles.forEach((item, index) => {
             if (listItemIndex < columns) {
                 timeStampList[timeStampList.length - 1].items.push(item);
                 listItemIndex++;
@@ -716,8 +749,8 @@ export function PhotoList({
     const generateKey = (index) => {
         switch (timeStampList[index].itemType) {
             case ITEM_TYPE.FILE:
-                return `${timeStampList[index].items[0].id}-${
-                    timeStampList[index].items.slice(-1)[0].id
+                return `${timeStampList[index].items[0].file.id}-${
+                    timeStampList[index].items.slice(-1)[0].file.id
                 }`;
             default:
                 return `${timeStampList[index].id}-${index}`;
@@ -728,15 +761,15 @@ export function PhotoList({
         // Nothing to do here if nothing is selected.
         if (!galleryContext.selectedFile) return;
 
-        const notSelectedFiles = (displayFiles ?? []).filter(
-            (item) => !galleryContext.selectedFile[item.id],
+        const notSelectedFiles = (annotatedFiles ?? []).filter(
+            (item) => !galleryContext.selectedFile[item.file.id],
         );
 
         const unselectedDates = new Set(
             notSelectedFiles.map((item) => item.timelineDateString),
         ); // to get file's date which were manually unselected
 
-        const localSelectedFiles = (displayFiles ?? []).filter(
+        const localSelectedFiles = (annotatedFiles ?? []).filter(
             // to get files which were manually selected
             (item) => !unselectedDates.has(item.timelineDateString),
         );
@@ -757,7 +790,7 @@ export function PhotoList({
         });
     }, [galleryContext.selectedFile]);
 
-    const handleSelect = handleSelectCreatorMulti(
+    const handleSelectMulti = handleSelectCreatorMulti(
         galleryContext.setSelectedFiles,
         mode,
         galleryContext?.user?.id,
@@ -777,12 +810,110 @@ export function PhotoList({
         }
         setCheckedTimelineDateStrings(next);
 
-        const filesOnADay = displayFiles?.filter(
+        const filesOnADay = annotatedFiles?.filter(
             (item) => item.timelineDateString === date,
         ); // all files on a checked/unchecked day
 
-        handleSelect(filesOnADay)(isDateSelected);
+        handleSelectMulti(filesOnADay.map((af) => af.file))(isDateSelected);
     };
+
+    const handleSelect = handleSelectCreator(
+        setSelected,
+        mode,
+        galleryContext.user?.id,
+        activeCollectionID,
+        activePersonID,
+        setRangeStart,
+    );
+
+    const onHoverOver = (index: number) => () => {
+        setCurrentHover(index);
+    };
+
+    const handleRangeSelect = (index: number) => () => {
+        if (typeof rangeStart !== "undefined" && rangeStart !== index) {
+            const direction =
+                (index - rangeStart) / Math.abs(index - rangeStart);
+            let checked = true;
+            for (
+                let i = rangeStart;
+                (index - i) * direction >= 0;
+                i += direction
+            ) {
+                checked = checked && !!selected[annotatedFiles[i].file.id];
+            }
+            for (
+                let i = rangeStart;
+                (index - i) * direction > 0;
+                i += direction
+            ) {
+                handleSelect(annotatedFiles[i].file)(!checked);
+            }
+            handleSelect(annotatedFiles[index].file, index)(!checked);
+        }
+    };
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Shift") {
+                setIsShiftKeyPressed(true);
+            }
+        };
+
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === "Shift") {
+                setIsShiftKeyPressed(false);
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("keyup", handleKeyUp);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+            document.removeEventListener("keyup", handleKeyUp);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (selected.count === 0) {
+            setRangeStart(null);
+        }
+    }, [selected]);
+
+    const getThumbnail = (
+        { file }: FileListAnnotatedFile,
+        index: number,
+        isScrolling: boolean,
+    ) => (
+        <PreviewCard
+            key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
+            file={file}
+            onClick={() => onItemClick(index)}
+            selectable={selectable}
+            onSelect={handleSelect(file, index)}
+            selected={
+                (!mode
+                    ? selected.collectionID === activeCollectionID
+                    : mode == selected.context?.mode &&
+                      (selected.context.mode == "people"
+                          ? selected.context.personID == activePersonID
+                          : selected.context.collectionID ==
+                            activeCollectionID)) && selected[file.id]
+            }
+            selectOnClick={selected.count > 0}
+            onHover={onHoverOver(index)}
+            onRangeSelect={handleRangeSelect(index)}
+            isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
+            isInsSelectRange={
+                (index >= rangeStart && index <= currentHover) ||
+                (index >= currentHover && index <= rangeStart)
+            }
+            activeCollectionID={activeCollectionID}
+            showPlaceholder={isScrolling}
+            isFav={favoriteFileIDs?.has(file.id)}
+        />
+    );
 
     const renderListItem = (
         listItem: TimeStampListItem,
@@ -850,7 +981,9 @@ export function PhotoList({
                         ret.splice(
                             sum,
                             0,
-                            <div key={`${listItem.items[0].id}-gap-${i}`} />,
+                            <div
+                                key={`${listItem.items[0].file.id}-gap-${i}`}
+                            />,
                         );
                         sum += 1;
                     }
@@ -905,4 +1038,4 @@ export function PhotoList({
             {PhotoListRow}
         </List>
     );
-}
+};

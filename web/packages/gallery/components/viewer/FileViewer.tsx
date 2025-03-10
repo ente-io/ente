@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
-// TODO(PS): ^
-
 import { isDesktop } from "@/base/app";
 import { SpacedRow } from "@/base/components/containers";
+import { InlineErrorIndicator } from "@/base/components/ErrorIndicator";
+import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
@@ -21,7 +21,6 @@ import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import { ConfirmDeleteFileDialog } from "@/new/photos/components/FileViewerComponents";
 import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
@@ -39,8 +38,10 @@ import {
     DialogTitle,
     Menu,
     MenuItem,
+    Stack,
     styled,
     Typography,
+    type ModalProps,
 } from "@mui/material";
 import { t } from "i18next";
 import React, {
@@ -409,7 +410,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleDelete = async () => {
         const file = activeAnnotatedFile!.file;
-        await onDelete(file);
+        await onDelete!(file);
         // [Note: File viewer update and dispatch]
         //
         // This relies on the assumption that `onDelete` will asynchronously
@@ -465,13 +466,18 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [],
     );
 
-    const handleSaveEditedCopy = useCallback(
-        (editedFile: File, collection: Collection, enteFile: EnteFile) => {
-            onSaveEditedImageCopy(editedFile, collection, enteFile);
-            handleClose();
-        },
-        [onSaveEditedImageCopy, handleClose],
-    );
+    const handleSaveEditedCopy = useMemo(() => {
+        return onSaveEditedImageCopy
+            ? (
+                  editedFile: File,
+                  collection: Collection,
+                  enteFile: EnteFile,
+              ) => {
+                  onSaveEditedImageCopy(editedFile, collection, enteFile);
+                  handleClose();
+              }
+            : undefined;
+    }, [onSaveEditedImageCopy, handleClose]);
 
     const handleAnnotate = useCallback(
         (file: EnteFile, itemData: ItemData): FileViewerAnnotatedFile => {
@@ -506,6 +512,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             })();
 
             const showCopyImage = (() => {
+                if (disableDownload) return false;
                 switch (file.metadata.fileType) {
                     case FileType.image:
                     case FileType.livePhoto:
@@ -543,13 +550,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
 
-    const handleSelectCollection = useCallback(
-        (collectionID: number) => {
-            onSelectCollection(collectionID);
-            handleClose();
-        },
-        [onSelectCollection, handleClose],
-    );
+    const handleSelectCollection = useMemo(() => {
+        return onSelectCollection
+            ? (collectionID: number) => {
+                  onSelectCollection(collectionID);
+                  handleClose();
+              }
+            : undefined;
+    }, [onSelectCollection, handleClose]);
 
     const handleSelectPerson = useMemo(() => {
         return onSelectPerson
@@ -576,11 +584,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const toggleFavorite = useCallback(
         ({ file }: FileViewerAnnotatedFile) => {
-            return new Promise((resolve) => {
+            return new Promise<void>((resolve) => {
                 // See: [Note: File viewer update and dispatch]
                 onToggleFavorite!(file)
                     .then(
-                        () => awaitNextFilesOrFavoritesUpdate(resolve),
+                        () => awaitNextFilesOrFavoritesUpdate(() => resolve()),
                         (e: unknown) => {
                             onGenericError(e);
                             resolve();
@@ -641,8 +649,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [activeAnnotatedFile],
     );
 
-    const performKeyAction = useCallback(
-        (action): FileViewerPhotoSwipeDelegate["performKeyAction"] => {
+    const performKeyAction = useCallback<
+        FileViewerPhotoSwipeDelegate["performKeyAction"]
+    >(
+        (action) => {
             switch (action) {
                 case "delete":
                     if (activeAnnotatedFile?.annotation.showDelete)
@@ -728,6 +738,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 log.debug(() => "Closing file viewer");
                 pswp.closeIfNeeded();
             };
+        } else {
+            return undefined;
         }
     }, [
         // Be careful with adding new dependencies here, or changing the source
@@ -754,14 +766,18 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     useEffect(updateFullscreenStatus, [updateFullscreenStatus]);
 
+    if (!activeAnnotatedFile) {
+        return <></>;
+    }
+
     return (
         <>
             <FileInfo
                 open={openFileInfo}
                 onClose={handleFileInfoClose}
-                file={activeAnnotatedFile?.file}
+                file={activeAnnotatedFile.file}
                 exif={activeFileExif}
-                allowEdits={!!activeAnnotatedFile?.annotation.isOwnFile}
+                allowEdits={!!activeAnnotatedFile.annotation.isOwnFile}
                 allowMap={haveUser}
                 showCollections={haveUser}
                 onNeedsRemoteSync={handleNeedsRemoteSync}
@@ -777,7 +793,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 id={moreMenuID}
                 slotProps={{ list: { "aria-labelledby": moreButtonID } }}
             >
-                {activeAnnotatedFile?.annotation.showDownload == "menu" && (
+                {activeAnnotatedFile.annotation.showDownload == "menu" && (
                     <MoreMenuItem onClick={handleDownloadMenuAction}>
                         <MoreMenuItemTitle>
                             {/*TODO */ t("download")}
@@ -785,7 +801,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <FileDownloadOutlinedIcon />
                     </MoreMenuItem>
                 )}
-                {activeAnnotatedFile?.annotation.showDelete && (
+                {activeAnnotatedFile.annotation.showDelete && (
                     <MoreMenuItem onClick={handleConfirmDelete}>
                         <MoreMenuItemTitle>
                             {/*TODO */ t("delete")}
@@ -802,7 +818,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
                     </MoreMenuItem>
                 )}
-                {activeAnnotatedFile?.annotation.showEditImage && (
+                {activeAnnotatedFile.annotation.showEditImage && (
                     <MoreMenuItem onClick={handleEditImage}>
                         <MoreMenuItemTitle>
                             {/*TODO */ pt("Edit image")}
@@ -838,19 +854,24 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     </Typography>
                 </MoreMenuItem>
             </MoreMenu>
-            {/* TODO(PS): Fix imports */}
             <ConfirmDeleteFileDialog
                 open={openConfirmDelete}
                 onClose={handleConfirmDeleteClose}
                 onConfirm={handleDelete}
             />
-            <ImageEditorOverlay
-                open={openImageEditor}
-                onClose={handleImageEditorClose}
-                file={activeAnnotatedFile?.file}
-                onSaveEditedCopy={handleSaveEditedCopy}
+            {handleSaveEditedCopy && (
+                <ImageEditorOverlay
+                    open={openImageEditor}
+                    onClose={handleImageEditorClose}
+                    file={activeAnnotatedFile.file}
+                    onSaveEditedCopy={handleSaveEditedCopy}
+                />
+            )}
+            <Shortcuts
+                open={openShortcuts}
+                onClose={handleShortcutsClose}
+                {...{ disableDownload, haveUser }}
             />
-            <Shortcuts open={openShortcuts} onClose={handleShortcutsClose} />
         </>
     );
 };
@@ -898,7 +919,107 @@ const MoreMenuItemTitle: React.FC<React.PropsWithChildren> = ({ children }) => (
     <Typography sx={{ fontWeight: "medium" }}>{children}</Typography>
 );
 
-const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
+type ConfirmDeleteFileDialogProps = ModalVisibilityProps & {
+    /**
+     * Called when the user confirms the deletion.
+     *
+     * The delete button will show an activity indicator until this async
+     * operation completes.
+     */
+    onConfirm: () => Promise<void>;
+};
+
+/**
+ * A bespoke variant of AttributedMiniDialog for use by the delete file
+ * confirmation prompt that we show in the file viewer.
+ *
+ * - It auto focuses the primary action.
+ * - It uses a lighter backdrop in light mode.
+ */
+const ConfirmDeleteFileDialog: React.FC<ConfirmDeleteFileDialogProps> = ({
+    open,
+    onClose,
+    onConfirm,
+}) => {
+    const [phase, setPhase] = useState<"loading" | "failed" | undefined>();
+
+    const resetPhaseAndClose = () => {
+        setPhase(undefined);
+        onClose();
+    };
+
+    const handleClick = async () => {
+        setPhase("loading");
+        try {
+            await onConfirm();
+            resetPhaseAndClose();
+        } catch (e) {
+            log.error(e);
+            setPhase("failed");
+        }
+    };
+
+    const handleClose: ModalProps["onClose"] = (_, reason) => {
+        // Ignore backdrop clicks when we're processing the user request.
+        if (reason == "backdropClick" && phase == "loading") return;
+        resetPhaseAndClose();
+    };
+
+    return (
+        <TitledMiniDialog
+            open={open}
+            onClose={handleClose}
+            title={t("trash_file_title")}
+            sx={(theme) => ({
+                // See: [Note: Lighter backdrop for overlays on photo viewer]
+                ...theme.applyStyles("light", {
+                    ".MuiBackdrop-root": {
+                        backgroundColor: theme.vars.palette.backdrop.faint,
+                    },
+                }),
+            })}
+        >
+            <Typography sx={{ color: "text.muted" }}>
+                {t("trash_file_message")}
+            </Typography>
+            <Stack sx={{ pt: 3, gap: 1 }}>
+                {phase == "failed" && <InlineErrorIndicator />}
+                <LoadingButton
+                    loading={phase == "loading"}
+                    fullWidth
+                    color="critical"
+                    autoFocus
+                    onClick={handleClick}
+                >
+                    {t("move_to_trash")}
+                </LoadingButton>
+                <FocusVisibleButton
+                    fullWidth
+                    color="secondary"
+                    disabled={phase == "loading"}
+                    onClick={resetPhaseAndClose}
+                >
+                    {t("cancel")}
+                </FocusVisibleButton>
+            </Stack>
+        </TitledMiniDialog>
+    );
+};
+
+type ShortcutsProps = ModalVisibilityProps &
+    Pick<FileViewerProps, "disableDownload"> & {
+        /**
+         * `true` if we're running in a context where there is a logged in user.
+         */
+        haveUser: boolean;
+    };
+
+const Shortcuts: React.FC<ShortcutsProps> = ({
+    open,
+    onClose,
+    disableDownload,
+    haveUser,
+}) => (
     <Dialog
         {...{ open, onClose }}
         fullWidth
@@ -921,11 +1042,15 @@ const Shortcuts: React.FC<ModalVisibilityProps> = ({ open, onClose }) => (
             <Shortcut action="Pan" shortcut="W A S D, Drag" />
             <Shortcut action="Toggle live" shortcut="Space" />
             <Shortcut action="Toggle audio" shortcut="M" />
-            <Shortcut action="Toggle favorite" shortcut="L" />
+            {haveUser && <Shortcut action="Toggle favorite" shortcut="L" />}
             <Shortcut action="View info" shortcut="I" />
-            <Shortcut action="Download" shortcut="K" />
-            <Shortcut action="Delete" shortcut="Delete, Backspace" />
-            <Shortcut action="Copy as PNG" shortcut="^C / ⌘C" />
+            {!disableDownload && <Shortcut action="Download" shortcut="K" />}
+            {haveUser && (
+                <Shortcut action="Delete" shortcut="Delete, Backspace" />
+            )}
+            {!disableDownload && (
+                <Shortcut action="Copy as PNG" shortcut="^C / ⌘C" />
+            )}
             <Shortcut action="Toggle fullscreen" shortcut="F" />
             <Shortcut action="Show shortcuts" shortcut="?" />
         </ShortcutsContent>
@@ -974,15 +1099,19 @@ const fileIsEditableImage = (file: EnteFile) => {
  * Return a promise that resolves with a "image/png" blob derived from the given
  * {@link imageURL} that can be written to the navigator's clipboard.
  */
-const createImagePNGBlob = async (imageURL: string) =>
+const createImagePNGBlob = async (imageURL: string): Promise<Blob> =>
     new Promise((resolve, reject) => {
         const image = new Image();
         image.onload = () => {
             const canvas = document.createElement("canvas");
             canvas.width = image.width;
             canvas.height = image.height;
-            canvas.getContext("2d").drawImage(image, 0, 0);
-            canvas.toBlob(resolve, "image/png");
+            canvas.getContext("2d")!.drawImage(image, 0, 0);
+            canvas.toBlob(
+                (blob) =>
+                    blob ? resolve(blob) : reject(new Error("toBlob failed")),
+                "image/png",
+            );
         };
         image.onerror = reject;
         image.src = imageURL;

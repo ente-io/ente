@@ -51,12 +51,12 @@ import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import { ITEM_TYPE, TimeStampListItem } from "components/FileList";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
 import PhotoFrame from "components/PhotoFrame";
-import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { Upload } from "components/Upload";
 import { t } from "i18next";
 import { useRouter } from "next/router";

@@ -6,7 +6,7 @@ import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortO
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
-} from "@/new/photos/components/PhotoList";
+} from "@/new/photos/components/FileList";
 import {
     BarItemTile,
     ItemCard,

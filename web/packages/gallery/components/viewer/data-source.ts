@@ -47,6 +47,11 @@ interface PhotoSwipeSlideData {
      * images and video).
      */
     alt?: string;
+    /**
+     * The HTML (string) contents of the slide, if we don't wish for it to show
+     * an image.
+     */
+    html?: string | undefined;
 }
 
 /**
@@ -354,7 +359,9 @@ const enqueueUpdates = async (file: EnteFile) => {
         // While the types don't reflect it, it is safe to use the ! (null
         // assertion) here since renderableThumbnailURL can throw but will not
         // return undefined by default.
-        const thumbnailData = await withDimensions(ensureString(thumbnailURL));
+        const thumbnailData = await withDimensionsIfPossible(
+            ensureString(thumbnailURL),
+        );
         update({
             ...thumbnailData,
             isContentLoading: true,
@@ -381,7 +388,7 @@ const enqueueUpdates = async (file: EnteFile) => {
                     await downloadManager.renderableSourceURLs(file);
                 const imageURL = ensureString(sourceURLs.url);
                 const originalImageBlob = sourceURLs.originalImageBlob!;
-                const itemData = await withDimensions(imageURL);
+                const itemData = await withDimensionsIfPossible(imageURL);
                 update({ ...itemData, imageURL, originalImageBlob });
                 break;
             }
@@ -419,7 +426,7 @@ const enqueueUpdates = async (file: EnteFile) => {
                 const originalImageBlob =
                     livePhotoSourceURLs.originalImageBlob()!;
                 update({
-                    ...(await withDimensions(imageURL)),
+                    ...(await withDimensionsIfPossible(imageURL)),
                     imageURL,
                     originalImageBlob,
                     videoURL,
@@ -452,12 +459,19 @@ const enqueueUpdates = async (file: EnteFile) => {
 };
 
 /**
- * Take a image URL, determine its dimensions using browser APIs, and return the URL
- * and its dimensions in a form that can directly be passed to PhotoSwipe as
- * {@link ItemData}.
+ * Take a image URL, determine its dimensions using browser APIs if possible,
+ * and return the URL and its dimensions in a form that can directly be passed
+ * to PhotoSwipe as {@link ItemData}.
+ *
+ * If the dimensions cannot be extracted (i.e., the browser was not able to load
+ * the image), then PhotoSwipe itself will also not likely be able to render it,
+ * but we still return the {@link imageURL} back so that PhotoSwipe can show the
+ * appropriate error when trying to render it.
  */
-const withDimensions = (imageURL: string): Promise<Partial<ItemData>> =>
-    new Promise((resolve, reject) => {
+const withDimensionsIfPossible = (
+    imageURL: string,
+): Promise<Partial<ItemData>> =>
+    new Promise((resolve) => {
         const image = new Image();
         image.onload = () =>
             resolve({
@@ -465,7 +479,7 @@ const withDimensions = (imageURL: string): Promise<Partial<ItemData>> =>
                 width: image.naturalWidth,
                 height: image.naturalHeight,
             });
-        image.onerror = reject;
+        image.onerror = () => resolve({ src: imageURL });
         image.src = imageURL;
     });
 

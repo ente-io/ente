@@ -95,6 +95,7 @@ import CollectionNamer, {
 } from "components/Collections/CollectionNamer";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { Export } from "components/Export";
+import { ITEM_TYPE, TimeStampListItem } from "components/FileList";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
@@ -102,7 +103,6 @@ import {
 import { FixCreationTime } from "components/FixCreationTime";
 import GalleryEmptyState from "components/GalleryEmptyState";
 import PhotoFrame from "components/PhotoFrame";
-import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { Sidebar } from "components/Sidebar";
 import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
@@ -187,7 +187,7 @@ const Page: React.FC = () => {
     const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
         [],
     );
-    const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
+    const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
 
     const syncInProgress = useRef(false);
     const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
@@ -435,14 +435,19 @@ const Page: React.FC = () => {
     }, [state.isRecomputingSearchResults, state.pendingSearchSuggestions]);
 
     const selectAll = (e: KeyboardEvent) => {
-        // Ignore CTRL/CMD + a if the user is typing in a text field.
+        // Don't intercept Ctrl/Cmd + a if the user is typing in a text field.
         if (
             e.target instanceof HTMLInputElement ||
             e.target instanceof HTMLTextAreaElement
         ) {
             return;
         }
-        // Ignore select all if:
+
+        // Prevent the browser's default select all handling (selecting all the
+        // text in the gallery).
+        e.preventDefault();
+
+        // Don't select all if:
         if (
             // - We haven't fetched the user yet;
             !user ||
@@ -457,13 +462,10 @@ const Page: React.FC = () => {
             fixCreationTimeVisibilityProps.open ||
             exportVisibilityProps.open ||
             authenticateUserVisibilityProps.open ||
-            isPhotoSwipeOpen
+            isFileViewerOpen
         ) {
             return;
         }
-
-        // Prevent the browser's default select all handling.
-        e.preventDefault();
 
         // Create a selection with everything based on the current context.
         const selected = {
@@ -1052,7 +1054,6 @@ const Page: React.FC = () => {
                         setSelected={setSelected}
                         selected={selected}
                         favoriteFileIDs={state.favoriteFileIDs}
-                        setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
                         enableDownload={true}
@@ -1076,6 +1077,7 @@ const Page: React.FC = () => {
                             handleMarkUnsyncedFavoriteUpdate
                         }
                         onMarkTempDeleted={handleMarkTempDeleted}
+                        onSetOpenFileViewer={setIsFileViewerOpen}
                         onSyncWithRemote={handleSyncWithRemote}
                         onSelectCollection={handleSelectCollection}
                         onSelectPerson={handleSelectPerson}

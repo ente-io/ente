@@ -22,7 +22,6 @@ import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import type { Collection } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
-import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { getLocalCollections } from "@/new/photos/services/collections";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -525,8 +524,8 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
         <Backdrop
             sx={{
                 backgroundColor: "background.default" /* Opaque */,
-                zIndex: aboveFileViewerContentZ,
                 width: "100%",
+                zIndex: "var(--mui-zIndex-modal)",
             }}
             open
         >
