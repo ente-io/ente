@@ -6,6 +6,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/utils/magic_util.dart";
 
 class BulkEditDateBottomSheet extends StatefulWidget {
   final Iterable<EnteFile> enteFiles;
@@ -134,6 +135,12 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
                   labelText: "Confirm",
                   buttonSize: ButtonSize.large,
                   onTap: () async {
+                    await _editDates(
+                      context,
+                      widget.enteFiles,
+                      selectedDate,
+                      singleSelected ? null : startDate,
+                    );
                     Navigator.of(context).pop();
                   },
                 ),
@@ -160,11 +167,29 @@ Future<void> _editDates(
   BuildContext context,
   Iterable<EnteFile> enteFiles,
   DateTime newDate,
-  bool shiftDates,
+  DateTime? firstDateForShift,
 ) async {
-  // for (final file in enteFiles) {
-  //   await file.updateCreationTime(newDate);
-  // }
+  if (firstDateForShift != null) {
+    final firstDateDiff = newDate.difference(firstDateForShift);
+    for (final file in enteFiles) {
+      if (file.creationTime == null) {
+        continue;
+      }
+      final fileTime = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+      final newTime = fileTime.add(firstDateDiff);
+      await editTime(
+        context,
+        [file],
+        newTime.microsecondsSinceEpoch,
+      );
+    }
+  } else {
+    await editTime(
+      context,
+      enteFiles.toList(),
+      newDate.microsecondsSinceEpoch,
+    );
+  }
 }
 
 class DateTimePickerWidget extends StatefulWidget {
