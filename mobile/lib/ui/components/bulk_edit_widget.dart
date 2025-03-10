@@ -108,6 +108,9 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
               dateTime: selectedDate,
               selectDate: selectSingleDate,
               singleFile: photoCount == 1,
+              newRangeEnd: selectedDate != startDate
+                  ? endDate.add(selectedDate.difference(startDate))
+                  : null,
               onPressedDate: () {
                 selectingDate = true;
                 selectingTime = false;
@@ -382,11 +385,13 @@ class DateAndTimeWidget extends StatelessWidget {
     required this.onPressedDate,
     required this.onPressedTime,
     required this.singleFile,
+    required this.newRangeEnd,
   });
 
   final DateTime dateTime;
   final bool selectDate;
   final bool singleFile;
+  final DateTime? newRangeEnd;
 
   final Function() onPressedDate;
   final Function() onPressedTime;
@@ -486,6 +491,77 @@ class DateAndTimeWidget extends StatelessWidget {
               ],
             ),
           ),
+          if (newRangeEnd != null) const SizedBox(height: 16),
+          if (newRangeEnd != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "New range",
+                style: TextStyle(
+                  color: colorScheme.textBase,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          if (newRangeEnd != null) const SizedBox(height: 8),
+          if (newRangeEnd != null)
+            Container(
+              decoration: BoxDecoration(
+                color: colorScheme.backgroundElevated2,
+                border: Border.all(
+                  color: colorScheme.strokeFaint,
+                  width: 0.5,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(
+                        Icons.calendar_today_outlined,
+                        color: colorScheme.textBase,
+                      ),
+                    ),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _formatDate(dateTime),
+                            style: TextStyle(
+                              color: colorScheme.textFaint,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              "-",
+                              style: TextStyle(
+                                color: colorScheme.textFaint,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            _formatDate(newRangeEnd!),
+                            style: TextStyle(
+                              color: colorScheme.textFaint,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (newRangeEnd != null) const SizedBox(height: 8),
         ],
       ),
     );
