@@ -435,14 +435,19 @@ const Page: React.FC = () => {
     }, [state.isRecomputingSearchResults, state.pendingSearchSuggestions]);
 
     const selectAll = (e: KeyboardEvent) => {
-        // Ignore CTRL/CMD + a if the user is typing in a text field.
+        // Don't intercept Ctrl/Cmd + a if the user is typing in a text field.
         if (
             e.target instanceof HTMLInputElement ||
             e.target instanceof HTMLTextAreaElement
         ) {
             return;
         }
-        // Ignore select all if:
+
+        // Prevent the browser's default select all handling (selecting all the
+        // text in the gallery).
+        e.preventDefault();
+
+        // Don't select all if:
         if (
             // - We haven't fetched the user yet;
             !user ||
@@ -461,9 +466,6 @@ const Page: React.FC = () => {
         ) {
             return;
         }
-
-        // Prevent the browser's default select all handling.
-        e.preventDefault();
 
         // Create a selection with everything based on the current context.
         const selected = {
