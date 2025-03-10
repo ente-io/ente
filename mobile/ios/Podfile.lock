@@ -54,6 +54,8 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 8.0)
     - nanopb (~> 3.30910.0)
   - Flutter (1.0.0)
+  - flutter_app_icon_changer (0.0.1):
+    - Flutter
   - flutter_email_sender (0.0.1):
     - Flutter
   - flutter_image_compress_common (1.0.0):
@@ -256,6 +258,7 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
+  - flutter_app_icon_changer (from `.symlinks/plugins/flutter_app_icon_changer/ios`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
   - flutter_image_compress_common (from `.symlinks/plugins/flutter_image_compress_common/ios`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
@@ -348,6 +351,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_messaging/ios"
   Flutter:
     :path: Flutter
+  flutter_app_icon_changer:
+    :path: ".symlinks/plugins/flutter_app_icon_changer/ios"
   flutter_email_sender:
     :path: ".symlinks/plugins/flutter_email_sender/ios"
   flutter_image_compress_common:
@@ -459,6 +464,7 @@ SPEC CHECKSUMS:
   FirebaseInstallations: 6c963bd2a86aca0481eef4f48f5a4df783ae5917
   FirebaseMessaging: 487b634ccdf6f7b7ff180fdcb2a9935490f764e8
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_app_icon_changer: e633ce623d36db4dd63c01e4b63fc8a5d44ed48d
   flutter_email_sender: e03bdda7637bcd3539bfe718fddd980e9508efaa
   flutter_image_compress_common: ec1d45c362c9d30a3f6a0426c297f47c52007e3e
   flutter_inappwebview_ios: 6f63631e2c62a7c350263b13fa5427aedefe81d4

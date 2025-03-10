@@ -295,6 +295,7 @@
 				"${BUILT_PRODUCTS_DIR}/dart_ui_isolate/dart_ui_isolate.framework",
 				"${BUILT_PRODUCTS_DIR}/device_info_plus/device_info_plus.framework",
 				"${BUILT_PRODUCTS_DIR}/file_saver/file_saver.framework",
+				"${BUILT_PRODUCTS_DIR}/flutter_app_icon_changer/flutter_app_icon_changer.framework",
 				"${BUILT_PRODUCTS_DIR}/flutter_email_sender/flutter_email_sender.framework",
 				"${BUILT_PRODUCTS_DIR}/flutter_image_compress_common/flutter_image_compress_common.framework",
 				"${BUILT_PRODUCTS_DIR}/flutter_inappwebview_ios/flutter_inappwebview_ios.framework",
@@ -390,6 +391,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/dart_ui_isolate.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/device_info_plus.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/file_saver.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/flutter_app_icon_changer.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/flutter_email_sender.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/flutter_image_compress_common.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/flutter_inappwebview_ios.framework",
@@ -649,7 +651,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = IconLight;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -714,9 +716,9 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				"ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk= IconLight;
-				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk= IconLight;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = IconLight;
+				"ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=*]" = "IconLight IconDark IconGreen";
+				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=*]" = IconLight;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
