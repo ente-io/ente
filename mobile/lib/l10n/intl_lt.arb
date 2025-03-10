@@ -524,6 +524,7 @@
   "removeDuplicatesDesc": "Peržiūrėkite ir pašalinkite failus, kurie yra tiksliai dublikatai.",
   "viewLargeFiles": "Dideli failai",
   "noDuplicates": "✨ Dublikatų nėra",
+  "youveNoDuplicateFilesThatCanBeCleared": "Neturite dubliuotų failų, kuriuos būtų galima išvalyti.",
   "success": "Sėkmė",
   "rateUs": "Vertinti mus",
   "remindToEmptyDeviceTrash": "Taip pat ištuštinkite Neseniai ištrinti iš Nustatymai -> Saugykla, kad atlaisvintumėte vietos.",
