@@ -347,12 +347,35 @@ export class FileViewerPhotoSwipe {
 
             if (livePhotoPlay) {
                 button?.classList.remove("pswp-ente-off");
-                void video.play();
+                void abortablePlayVideo(video);
                 video.style.display = "initial";
             } else {
                 button?.classList.add("pswp-ente-off");
                 video.pause();
                 video.style.display = "none";
+            }
+        };
+
+        /**
+         * A wrapper over video.play that prevents Chrome from spamming the
+         * console with errors about interrupted plays when scrolling through
+         * files fast by keeping arrow keys pressed.
+         */
+        const abortablePlayVideo = async (videoElement: HTMLVideoElement) => {
+            try {
+                await videoElement.play();
+            } catch (e) {
+                if (
+                    e instanceof Error &&
+                    e.name == "AbortError" &&
+                    e.message.startsWith(
+                        "The play() request was interrupted by a call to pause().",
+                    )
+                ) {
+                    // Ignore.
+                } else {
+                    throw e;
+                }
             }
         };
 
