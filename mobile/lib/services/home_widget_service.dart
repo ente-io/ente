@@ -1,3 +1,4 @@
+import "dart:io";
 import "dart:math";
 
 import "package:figma_squircle/figma_squircle.dart";
@@ -5,11 +6,13 @@ import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import 'package:home_widget/home_widget.dart' as hw;
 import "package:logging/logging.dart";
+import "package:path_provider/path_provider.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/favorites_service.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
@@ -26,12 +29,27 @@ class HomeWidgetService {
   static final HomeWidgetService instance =
       HomeWidgetService._privateConstructor();
 
-  Future<void> initHomeWidget() async {
+  Future<void> initHomeWidget(bool isBackground) async {
+    if (isBackground) {
+      _logger.warning("app is running in background");
+      return;
+    }
+    if (Platform.isIOS) {
+      await hw.HomeWidget.setAppGroupId(iOSGroupID);
+      Future.delayed(const Duration(seconds: 4), lockAndLoadMemories);
+      return;
+    }
+
+    final homeWidgetCount = await HomeWidgetService.instance.countHomeWidgets();
+    if (homeWidgetCount == 0) {
+      _logger.warning("no home widget active");
+      return;
+    }
     final isLoggedIn = Configuration.instance.isLoggedIn();
 
     if (!isLoggedIn) {
       await clearHomeWidget();
-      _logger.info("user not logged in");
+      _logger.warning("user not logged in");
       return;
     }
 
@@ -39,12 +57,11 @@ class HomeWidgetService {
         await FavoritesService.instance.getFavoriteCollectionID();
     if (collectionID == null) {
       await clearHomeWidget();
-      _logger.info("Favorite collection not found");
+      _logger.warning("Favorite collection not found");
       return;
     }
 
     try {
-      await hw.HomeWidget.setAppGroupId(iOSGroupID);
       final res = await FilesDB.instance.getFilesInCollection(
         collectionID,
         galleryLoadStartTime,
@@ -54,17 +71,6 @@ class HomeWidgetService {
       final previousGeneratedId =
           await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
 
-      if (res.files.length == 1 &&
-          res.files[0].generatedID == previousGeneratedId) {
-        _logger
-            .info("Only one image found and it's the same as the previous one");
-        return;
-      }
-      if (res.files.isEmpty) {
-        await clearHomeWidget();
-        _logger.info("No images found");
-        return;
-      }
       final files = res.files.where(
         (element) =>
             element.generatedID != previousGeneratedId &&
@@ -73,14 +79,17 @@ class HomeWidgetService {
 
       if (files.isEmpty) {
         await clearHomeWidget();
-        _logger.info("No images found");
+        _logger.warning("No new images found");
         return;
       }
 
       final randomNumber = Random().nextInt(files.length);
       final randomFile = files.elementAt(randomNumber);
       final fullImage = await getFileFromServer(randomFile);
-      if (fullImage == null) throw Exception("File not found");
+      if (fullImage == null) {
+        _logger.warning("Can't fetch file");
+        return;
+      }
 
       final image = await decodeImageFromList(await fullImage.readAsBytes());
       final width = image.width.toDouble();
@@ -150,8 +159,8 @@ class HomeWidgetService {
       _logger.info(
         ">>> SlideshowWidget image rendered with size $cacheWidth x $cacheHeight",
       );
-    } catch (e) {
-      _logger.severe("Error rendering widget", e);
+    } catch (e, sT) {
+      _logger.severe("Error rendering widget", e, sT);
     }
   }
 
@@ -226,5 +235,52 @@ class HomeWidgetService {
       DetailPageConfiguration(List.unmodifiable([res]), 0, "collection"),
     );
     routeToPage(context, page, forceCustomPageRoute: true).ignore();
+  }
+
+  Future<void> lockAndLoadMemories() async {
+    final memories = await memoriesCacheService.getMemories(100);
+    if (memories.isEmpty) {
+      return;
+    }
+
+    // flatten the list to list of ente files
+    final files = memories
+        .map((e) => e.memories.map((e) => e.file))
+        .expand((element) => element)
+        .where((element) => element.fileType == FileType.image)
+        .toList();
+
+    // save the file to prefix
+    final directory = await getApplicationDocumentsDirectory();
+    final prefix = "${directory.path}/memories";
+    var length = files.length;
+
+    Directory(prefix).createSync(recursive: true);
+
+    for (final file in files.asMap().entries) {
+      try {
+        final localFile = await getFileFromServer(file.value);
+        localFile?.copySync(prefix + "/${file.key}.jpg");
+      } catch (_, __) {
+        _logger.warning("Failed to save file", _, __);
+        length--;
+      }
+    }
+
+    if (length == 0) {
+      return;
+    }
+
+    _logger.info(">>> SlideshowWidget params doing");
+    await hw.HomeWidget.saveWidgetData<String>("memoryPrefix", prefix);
+    await hw.HomeWidget.saveWidgetData<int>("totalMemories", length);
+
+    await hw.HomeWidget.updateWidget(
+      name: 'SlideshowWidgetProvider',
+      androidName: 'SlideshowWidgetProvider',
+      qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
+      iOSName: 'SlideshowWidget',
+    );
+    _logger.info(">>> SlideshowWidget params done");
   }
 }
