@@ -259,7 +259,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
           Container(
             height: 220,
             decoration: BoxDecoration(
-              color: Colors.grey[900],
+              color: colorScheme.backgroundElevated2,
               borderRadius: BorderRadius.circular(12),
             ),
             margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -280,7 +280,6 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                     : CupertinoDatePickerMode.date,
                 initialDateTime: _selectedDateTime,
                 minimumDate: DateTime(1800),
-                // Use the maxDateTime parameter if provided, otherwise default to 2023
                 maximumDate: widget.maxDateTime,
                 use24hFormat: MediaQuery.of(context).alwaysUse24HourFormat,
                 onDateTimeChanged: (DateTime newDateTime) {
