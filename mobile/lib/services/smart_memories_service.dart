@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:math" show min, max;
 
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
@@ -9,6 +10,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -33,6 +35,13 @@ import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
+
+class MemoriesResult {
+  final List<SmartMemory> memories;
+  final List<BaseLocation> baseLocations;
+
+  MemoriesResult(this.memories, this.baseLocations);
+}
 
 class SmartMemoriesService {
   final _logger = Logger("SmartMemoriesService");
@@ -73,45 +82,58 @@ class SmartMemoriesService {
   }
 
   // One general method to get all memories, which calls on internal methods for each separate memory type
-  Future<List<SmartMemory>> calcMemories(
+  Future<MemoriesResult> calcMemories(
     DateTime now,
-    MemoriesCache oldCache,
-  ) async {
+    MemoriesCache oldCache, {
+    bool debugSurfaceAll = false,
+  }) async {
     try {
-      _logger.finest('calcMemories called with time: $now');
+      final TimeLogger t = TimeLogger(context: "calcMemories");
+      _logger.finest('calcMemories called with time: $now $t');
       await init();
       final List<SmartMemory> memories = [];
       final allFiles = Set<EnteFile>.from(
         await SearchService.instance.getAllFilesForSearch(),
       );
       _seenTimes = await _memoriesDB.getSeenTimes();
-      _logger.finest("All files length: ${allFiles.length}");
+      _logger.finest("All files length: ${allFiles.length} $t");
 
-      final peopleMemories =
-          await _getPeopleResults(allFiles, now, oldCache.peopleShownLogs);
+      final peopleMemories = await _getPeopleResults(
+        allFiles,
+        now,
+        oldCache.peopleShownLogs,
+        surfaceAll: debugSurfaceAll,
+      );
       _deductUsedMemories(allFiles, peopleMemories);
       memories.addAll(peopleMemories);
-      _logger.finest("All files length: ${allFiles.length}");
+      _logger.finest("All files length after people: ${allFiles.length} $t");
 
       // Trip memories
-      final tripMemories = await _getTripsResults(allFiles, now);
+      final (tripMemories, bases) = await _getTripsResults(
+        allFiles,
+        now,
+        oldCache.tripsShownLogs,
+        surfaceAll: debugSurfaceAll,
+      );
       _deductUsedMemories(allFiles, tripMemories);
       memories.addAll(tripMemories);
-      _logger.finest("All files length: ${allFiles.length}");
+      _logger.finest("All files length after trips: ${allFiles.length} $t");
 
       // Time memories
       final timeMemories = await _onThisDayOrWeekResults(allFiles, now);
       _deductUsedMemories(allFiles, timeMemories);
       memories.addAll(timeMemories);
-      _logger.finest("All files length: ${allFiles.length}");
+      _logger.finest("All files length after time: ${allFiles.length} $t");
 
       // Filler memories
       final fillerMemories = await _getFillerResults(allFiles, now);
+      _deductUsedMemories(allFiles, fillerMemories);
       memories.addAll(fillerMemories);
-      return memories;
+      _logger.finest("All files length after filler: ${allFiles.length} $t");
+      return MemoriesResult(memories, bases);
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
-      return [];
+      return MemoriesResult(<SmartMemory>[], <BaseLocation>[]);
     }
   }
 
@@ -129,8 +151,10 @@ class SmartMemoriesService {
   Future<List<PeopleMemory>> _getPeopleResults(
     Iterable<EnteFile> allFiles,
     DateTime currentTime,
-    List<PeopleShownLog> shownPeople,
-  ) async {
+    List<PeopleShownLog> shownPeople, {
+    bool surfaceAll = false,
+  }) async {
+    final w = (kDebugMode ? EnteWatch('getPeopleResults') : null)?..start();
     final List<PeopleMemory> memoryResults = [];
     if (allFiles.isEmpty) return [];
     final allFileIdsToFile = <int, EnteFile>{};
@@ -142,6 +166,7 @@ class SmartMemoriesService {
     final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
     final windowEnd =
         currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
+    w?.log('allFiles setup');
 
     // Get ordered list of important people (all named, from most to least files)
     final persons = await PersonService.instance.getPersons();
@@ -169,6 +194,7 @@ class SmartMemoriesService {
       final bFaces = personIdToFaceIDs[b]!.length;
       return bFaces.compareTo(aFaces);
     });
+    w?.log('orderedImportantPersonsID setup');
 
     // Check if the user has assignmed "me"
     String? meID;
@@ -179,6 +205,7 @@ class SmartMemoriesService {
         break;
       }
     }
+    w?.log('meID setup part 1');
     final bool isMeAssigned = meID != null;
     Map<int, List<Face>>? meFilesToFaces;
     if (isMeAssigned) {
@@ -187,6 +214,7 @@ class SmartMemoriesService {
         meFileIDs,
       );
     }
+    w?.log('meID setup part 2');
 
     // Loop through the people and find all memories
     final Map<String, Map<PeopleMemoryType, PeopleMemory>> personToMemories =
@@ -194,10 +222,12 @@ class SmartMemoriesService {
     for (final personID in orderedImportantPersonsID) {
       final personFileIDs = personIdToFileIDs[personID]!;
       final personName = personIdToPerson[personID]!.data.name;
+      w?.log('start with new person $personName');
       final Map<int, List<Face>> personFilesToFaces =
           await MLDataDB.instance.getFacesForFileIDs(
         personFileIDs,
       );
+      w?.log('personFilesToFaces setup');
       // Inside people loop, check for spotlight (Most likely every person will have a spotlight)
       final spotlightFiles = <EnteFile>[];
       for (final fileID in personFileIDs) {
@@ -228,6 +258,7 @@ class SmartMemoriesService {
             .putIfAbsent(personID, () => {})
             .putIfAbsent(PeopleMemoryType.spotlight, () => spotlightMemory);
       }
+      w?.log('spotlight setup');
 
       // Inside people loop, check for youAndThem
       if (isMeAssigned && meID != personID) {
@@ -258,12 +289,14 @@ class SmartMemoriesService {
               .putIfAbsent(personID, () => {})
               .putIfAbsent(PeopleMemoryType.youAndThem, () => youAndThemMemory);
         }
+        w?.log('youAndThem setup');
       }
 
       // Inside people loop, check for doingSomethingTogether
       if (isMeAssigned && meID != personID) {
         final vectors = await SemanticSearchService.instance
             .getClipVectorsForFileIDs(personFileIDs);
+        w?.log('getting clip vectors for doingSomethingTogether');
         final activityFiles = <EnteFile>[];
         PeopleActivity lastActivity = PeopleActivity.values.first;
         activityLoop:
@@ -277,6 +310,9 @@ class SmartMemoriesService {
           }
           final similarities = await MLComputer.instance
               .compareEmbeddings(vectors, activityVector);
+          w?.log(
+            'comparing embeddings for doingSomethingTogether and $activity',
+          );
           for (final fileID in personFileIDs) {
             final similarity = similarities[fileID];
             if (similarity == null) continue;
@@ -307,6 +343,7 @@ class SmartMemoriesService {
                 () => activityMemory,
               );
         }
+        w?.log('doingSomethingTogether setup');
       }
 
       // Inside people loop, check for lastTimeYouSawThem
@@ -355,16 +392,19 @@ class SmartMemoriesService {
               () => lastTimeMemory,
             );
       }
+      w?.log('lastTimeYouSawThem setup');
     }
 
-    // // Surface everything just for debug checking
-    // for (final personID in personToMemories.keys) {
-    //   for (final memoryType in PeopleMemoryType.values) {
-    //     if (personToMemories[personID]!.containsKey(memoryType)) {
-    //       memoryResults.add(personToMemories[personID]![memoryType]!);
-    //     }
-    //   }
-    // }
+    // Surface everything just for debug checking
+    if (surfaceAll) {
+      for (final personID in personToMemories.keys) {
+        final personMemories = personToMemories[personID]!;
+        for (final memoryType in personMemories.keys) {
+          memoryResults.add(personMemories[memoryType]!);
+        }
+      }
+      return memoryResults;
+    }
 
     // Loop through the people and check if we should surface anything based on relevancy (bday, last met)
     personRelevancyLoop:
@@ -432,6 +472,7 @@ class SmartMemoriesService {
         }
       }
     }
+    w?.log('relevancy setup');
 
     // Loop through the people (and memory types) and add based on rotation
     if (memoryResults.length >= 3) return memoryResults;
@@ -471,23 +512,29 @@ class SmartMemoriesService {
       }
       if (added > 0) break peopleRotationLoop;
     }
+    w?.log('rotation setup');
 
     return memoryResults;
   }
 
-  Future<List<TripMemory>> _getTripsResults(
+  Future<(List<TripMemory>, List<BaseLocation>)> _getTripsResults(
     Iterable<EnteFile> allFiles,
     DateTime currentTime,
-  ) async {
+    List<TripsShownLog> shownTrips, {
+    bool surfaceAll = false,
+  }) async {
     final List<TripMemory> memoryResults = [];
     final Iterable<LocalEntity<LocationTag>> locationTagEntities =
         (await locationService.getLocationTags());
-    if (allFiles.isEmpty) return [];
+    if (allFiles.isEmpty) return (<TripMemory>[], <BaseLocation>[]);
     final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
     final windowEnd =
         currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
     final currentMonth = currentTime.month;
     final cutOffTime = currentTime.subtract(const Duration(days: 365));
+
+    const tripRadius = 100.0;
+    const overlapRadius = 10.0;
 
     final Map<LocalEntity<LocationTag>, List<EnteFile>> tagToItemsMap = {};
     for (int i = 0; i < locationTagEntities.length; i++) {
@@ -496,12 +543,13 @@ class SmartMemoriesService {
     final List<(List<EnteFile>, Location)> smallRadiusClusters = [];
     final List<(List<EnteFile>, Location)> wideRadiusClusters = [];
     // Go through all files and cluster the ones not inside any location tag
+    allFilesLoop:
     for (EnteFile file in allFiles) {
       if (!file.hasLocation ||
           file.uploadedFileID == null ||
           !file.isOwner ||
           file.creationTime == null) {
-        continue;
+        continue allFilesLoop;
       }
       // Check if the file is inside any location tag
       bool hasLocationTag = false;
@@ -516,41 +564,40 @@ class SmartMemoriesService {
         }
       }
       // Cluster the files not inside any location tag (incremental clustering)
-      if (!hasLocationTag) {
-        // Small radius clustering for base locations
-        bool foundSmallCluster = false;
-        for (final cluster in smallRadiusClusters) {
-          final clusterLocation = cluster.$2;
-          if (isFileInsideLocationTag(
-            clusterLocation,
-            file.location!,
-            0.6,
-          )) {
-            cluster.$1.add(file);
-            foundSmallCluster = true;
-            break;
-          }
+      if (hasLocationTag) continue allFilesLoop;
+      // Small radius clustering for base locations
+      bool addedToExistingSmallCluster = false;
+      for (final cluster in smallRadiusClusters) {
+        final clusterLocation = cluster.$2;
+        if (isFileInsideLocationTag(
+          clusterLocation,
+          file.location!,
+          baseRadius,
+        )) {
+          cluster.$1.add(file);
+          addedToExistingSmallCluster = true;
+          break;
         }
-        if (!foundSmallCluster) {
-          smallRadiusClusters.add(([file], file.location!));
+      }
+      if (!addedToExistingSmallCluster) {
+        smallRadiusClusters.add(([file], file.location!));
+      }
+      // Wide radius clustering for trip locations
+      bool addedToExistingWideCluster = false;
+      for (final cluster in wideRadiusClusters) {
+        final clusterLocation = cluster.$2;
+        if (isFileInsideLocationTag(
+          clusterLocation,
+          file.location!,
+          tripRadius,
+        )) {
+          cluster.$1.add(file);
+          addedToExistingWideCluster = true;
+          break;
         }
-        // Wide radius clustering for trip locations
-        bool foundWideCluster = false;
-        for (final cluster in wideRadiusClusters) {
-          final clusterLocation = cluster.$2;
-          if (isFileInsideLocationTag(
-            clusterLocation,
-            file.location!,
-            100.0,
-          )) {
-            cluster.$1.add(file);
-            foundWideCluster = true;
-            break;
-          }
-        }
-        if (!foundWideCluster) {
-          wideRadiusClusters.add(([file], file.location!));
-        }
+      }
+      if (!addedToExistingWideCluster) {
+        wideRadiusClusters.add(([file], file.location!));
       }
     }
 
@@ -577,12 +624,20 @@ class SmartMemoriesService {
       final lastCreationTime = DateTime.fromMicrosecondsSinceEpoch(
         creationTimes.last,
       );
-      if (lastCreationTime.difference(firstCreationTime).inDays < 90) {
+      final daysRange = lastCreationTime.difference(firstCreationTime).inDays;
+      if (daysRange < 90) {
         continue;
       }
       // Check for a minimum average number of days photos are clicked in range
-      final daysRange = lastCreationTime.difference(firstCreationTime).inDays;
       if (uniqueDays.length < daysRange * 0.1) continue;
+      // Check that there isn't a huge time gap somewhere in the range
+      final int gapThreshold = (daysRange * 0.6).round() * microSecondsInDay;
+      int maxGap = 0;
+      for (int i = 1; i < creationTimes.length; i++) {
+        final gap = creationTimes[i] - creationTimes[i - 1];
+        if (gap > maxGap) maxGap = gap;
+      }
+      if (maxGap > gapThreshold) continue;
       // Check if it's a current or old base location
       final bool isCurrent = lastCreationTime.isAfter(
         DateTime.now().subtract(
@@ -604,7 +659,7 @@ class SmartMemoriesService {
         if (isFileInsideLocationTag(
           baseLocation.location,
           location,
-          10.0,
+          overlapRadius,
         )) {
           tooClose = true;
           break;
@@ -614,7 +669,7 @@ class SmartMemoriesService {
         if (isFileInsideLocationTag(
           tag.item.centerPoint,
           location,
-          10.0,
+          overlapRadius,
         )) {
           tooClose = true;
           break;
@@ -753,25 +808,51 @@ class SmartMemoriesService {
     }
 
     // For now for testing let's just surface all base locations
-    for (final baseLocation in baseLocations) {
-      String name = "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
-      final String? locationName = _tryFindLocationName(
-        Memory.fromFiles(baseLocation.files, _seenTimes),
-        base: true,
-      );
-      if (locationName != null) {
-        name =
-            "$locationName (Base, ${baseLocation.isCurrentBase ? 'current' : 'old'})";
-      }
-      memoryResults.add(
-        TripMemory(
+    // For now surface these on the location section TODO: lau: remove internal flag title
+    if (surfaceAll) {
+      for (final baseLocation in baseLocations) {
+        String name =
+            "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
+        final String? locationName = _tryFindLocationName(
           Memory.fromFiles(baseLocation.files, _seenTimes),
-          name,
-          0,
-          0,
-          baseLocation.location,
-        ),
-      );
+          base: true,
+        );
+        if (locationName != null) {
+          name =
+              "$locationName (Base, ${baseLocation.isCurrentBase ? 'current' : 'old'})";
+        }
+        memoryResults.add(
+          TripMemory(
+            Memory.fromFiles(baseLocation.files, _seenTimes),
+            name,
+            nowInMicroseconds,
+            windowEnd,
+            baseLocation.location,
+          ),
+        );
+      }
+      for (final trip in validTrips) {
+        final year = DateTime.fromMicrosecondsSinceEpoch(
+          trip.averageCreationTime(),
+        ).year;
+        final String? locationName = _tryFindLocationName(trip.memories);
+        String name = "Trip in $year";
+        if (locationName != null) {
+          name = "Trip to $locationName";
+        } else if (year == currentTime.year - 1) {
+          name = "Last year's trip";
+        }
+        final photoSelection = await _bestSelection(trip.memories);
+        memoryResults.add(
+          trip.copyWith(
+            memories: photoSelection,
+            title: name,
+            firstDateToShow: nowInMicroseconds,
+            lastDateToShow: windowEnd,
+          ),
+        );
+      }
+      return (memoryResults, baseLocations);
     }
 
     // For now we surface the two most recent trips of current month, and if none, the earliest upcoming redundant trip
@@ -844,17 +925,14 @@ class SmartMemoriesService {
     // Otherwise, if no trips happened in the current month,
     // look for the earliest upcoming trip in another month that has 3+ trips.
     else {
-      // TODO lau: make sure the same upcoming trip isn't shown multiple times over multiple months
       final sortedUpcomingMonths =
-          List<int>.generate(12, (i) => ((currentMonth + i) % 12) + 1);
+          List<int>.generate(6, (i) => ((currentMonth + i) % 12) + 1);
       checkUpcomingMonths:
       for (final month in sortedUpcomingMonths) {
         if (tripsByMonthYear.containsKey(month)) {
           final List<TripMemory> thatMonthTrips = [];
           for (final trips in tripsByMonthYear[month]!.values) {
-            for (final trip in trips) {
-              thatMonthTrips.add(trip);
-            }
+            thatMonthTrips.addAll(trips);
           }
           if (thatMonthTrips.length >= 3) {
             // take and use the third earliest trip
@@ -862,32 +940,46 @@ class SmartMemoriesService {
               (a, b) =>
                   a.averageCreationTime().compareTo(b.averageCreationTime()),
             );
-            final trip = thatMonthTrips[2];
-            final year =
-                DateTime.fromMicrosecondsSinceEpoch(trip.averageCreationTime())
-                    .year;
-            final String? locationName = _tryFindLocationName(trip.memories);
-            String name = "Trip in $year";
-            if (locationName != null) {
-              name = "Trip to $locationName";
-            } else if (year == currentTime.year - 1) {
-              name = "Last year's trip";
+            checkPotentialTrips:
+            for (final trip in thatMonthTrips.sublist(2)) {
+              for (final shownTrip in shownTrips) {
+                final distance =
+                    calculateDistance(trip.location, shownTrip.location);
+                final shownTripDate = DateTime.fromMicrosecondsSinceEpoch(
+                  shownTrip.lastTimeShown,
+                );
+                final shownRecently =
+                    currentTime.difference(shownTripDate) < kTripShowTimeout;
+                if (distance < overlapRadius && shownRecently) {
+                  continue checkPotentialTrips;
+                }
+              }
+              final year = DateTime.fromMicrosecondsSinceEpoch(
+                trip.averageCreationTime(),
+              ).year;
+              final String? locationName = _tryFindLocationName(trip.memories);
+              String name = "Trip in $year";
+              if (locationName != null) {
+                name = "Trip to $locationName";
+              } else if (year == currentTime.year - 1) {
+                name = "Last year's trip";
+              }
+              final photoSelection = await _bestSelection(trip.memories);
+              memoryResults.add(
+                trip.copyWith(
+                  memories: photoSelection,
+                  title: name,
+                  firstDateToShow: nowInMicroseconds,
+                  lastDateToShow: windowEnd,
+                ),
+              );
+              break checkUpcomingMonths;
             }
-            final photoSelection = await _bestSelection(trip.memories);
-            memoryResults.add(
-              trip.copyWith(
-                memories: photoSelection,
-                title: name,
-                firstDateToShow: nowInMicroseconds,
-                lastDateToShow: windowEnd,
-              ),
-            );
-            break checkUpcomingMonths;
           }
         }
       }
     }
-    return memoryResults;
+    return (memoryResults, baseLocations);
   }
 
   Future<List<TimeMemory>> _onThisDayOrWeekResults(
@@ -1221,6 +1313,7 @@ class SmartMemoriesService {
     int? prefferedSize,
   }) async {
     try {
+      final w = (kDebugMode ? EnteWatch('getPeopleResults') : null)?..start();
       final fileCount = memories.length;
       final int targetSize = prefferedSize ?? 10;
       if (fileCount <= targetSize) return memories;
@@ -1315,6 +1408,7 @@ class SmartMemoriesService {
       _logger.finest(
         'People memories selection done, returning ${finalSelection.length} memories',
       );
+      w?.log('People memories selection done');
       return finalSelection;
     } catch (e, s) {
       _logger.severe('Error in _bestSelectionPeople', e, s);
@@ -1354,9 +1448,9 @@ class SmartMemoriesService {
     final fileToScore = await MLComputer.instance
         .compareEmbeddings(vectors, _clipPositiveTextVector!);
     final fileIdToClip = <int, EmbeddingVector>{};
-      for (final vector in vectors) {
-        fileIdToClip[vector.fileID] = vector;
-      }
+    for (final vector in vectors) {
+      fileIdToClip[vector.fileID] = vector;
+    }
 
     // Get face scores for each file
     final fileToFaceCount = <int, int>{};

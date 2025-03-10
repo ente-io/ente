@@ -380,6 +380,14 @@
       "title": "Fastmail"
     },
     {
+      "title": "Federal Student Aid",
+      "slug": "federal_student_aid",
+      "altNames": [
+        "FSA",
+        "FAFSA"
+      ]
+    },
+    {
       "title": "Fidelity",
       "slug": "fidelity",
       "altNames": [
@@ -957,6 +965,10 @@
     },
     {
       "title": "RuneMate"
+    },
+    {
+      "title": "RuneScape Wiki",
+      "slug": "runescape_wiki"
     },
     {
       "title": "Rust Language Forum",
