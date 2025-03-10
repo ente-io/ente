@@ -380,6 +380,14 @@
       "title": "Fastmail"
     },
     {
+      "title": "Federal Student Aid",
+      "slug": "federal_student_aid",
+      "altNames": [
+        "FSA",
+        "FAFSA"
+      ]
+    },
+    {
       "title": "Fidelity",
       "slug": "fidelity",
       "altNames": [
