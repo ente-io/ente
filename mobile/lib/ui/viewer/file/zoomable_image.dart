@@ -9,6 +9,7 @@ import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/models/file/extensions/file_props.dart";
@@ -57,6 +58,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
   final _scaleStateController = PhotoViewScaleStateController();
+  late final StreamSubscription<FileCaptionUpdatedEvent>
+      _captionUpdatedSubscription;
 
   @override
   void initState() {
@@ -72,12 +75,22 @@ class _ZoomableImageState extends State<ZoomableImage> {
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
+
+    _captionUpdatedSubscription =
+        Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
+      if (event.fileGeneratedID == _photo.generatedID) {
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     _photoViewController.dispose();
     _scaleStateController.dispose();
+    _captionUpdatedSubscription.cancel();
     super.dispose();
   }
 
@@ -175,7 +188,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
               children: [
                 content,
                 Positioned(
-                  bottom: 72 + MediaQuery.of(context).padding.bottom,
+                  bottom: 72 + MediaQuery.paddingOf(context).bottom,
                   left: 0,
                   right: 0,
                   child: ValueListenableBuilder<bool>(

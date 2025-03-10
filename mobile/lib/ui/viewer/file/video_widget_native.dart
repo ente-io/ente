@@ -8,6 +8,7 @@ import "package:logging/logging.dart";
 import "package:native_video_player/native_video_player.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
 import "package:photos/events/seekbar_triggered_event.dart";
@@ -80,6 +81,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   final _elTooltipController = ElTooltipController();
   StreamSubscription<PlaybackEvent>? _subscription;
   StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
+  late final StreamSubscription<FileCaptionUpdatedEvent>
+      _captionUpdatedSubscription;
   int position = 0;
 
   @override
@@ -112,6 +115,15 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         loadPreview(update: true);
       } else {
         loadOriginal(update: true);
+      }
+    });
+
+    _captionUpdatedSubscription =
+        Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
+      if (event.fileGeneratedID == widget.file.generatedID) {
+        if (mounted) {
+          setState(() {});
+        }
       }
     });
   }
@@ -207,6 +219,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _isSeeking.dispose();
     _debouncer.cancelDebounceTimer();
     _elTooltipController.dispose();
+    _captionUpdatedSubscription.cancel();
     super.dispose();
   }
 
