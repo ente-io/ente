@@ -24,7 +24,7 @@ class BulkEditDateBottomSheet extends StatefulWidget {
 class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
   // Single date or shift date
   bool showSingleOrShiftChoice = true;
-  bool singleSelected = true;
+  bool selectSingleDate = true;
 
   bool selectingDate = false;
   bool selectingTime = false;
@@ -64,6 +64,10 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
     }
     final colorScheme = getEnteColorScheme(context);
     DateTime maxDate = DateTime.now();
+    if (!selectSingleDate) {
+      final maxForward = DateTime.now().difference(endDate);
+      maxDate = startDate.add(maxForward);
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -86,12 +90,12 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
             SelectDateOrShiftWidget(
               onSelectOneDate: () {
                 showSingleOrShiftChoice = false;
-                singleSelected = true;
+                selectSingleDate = true;
                 setState(() {});
               },
               onShiftDates: () {
                 showSingleOrShiftChoice = false;
-                singleSelected = false;
+                selectSingleDate = false;
                 setState(() {});
               },
             ),
@@ -99,7 +103,7 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
             DateAndTimeWidget(
               key: ValueKey(selectedDate.toString()),
               dateTime: selectedDate,
-              selectDate: singleSelected,
+              selectDate: selectSingleDate,
               onPressedDate: () {
                 selectingDate = true;
                 selectingTime = false;
@@ -139,7 +143,7 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
                       context,
                       widget.enteFiles,
                       selectedDate,
-                      singleSelected ? null : startDate,
+                      selectSingleDate ? null : startDate,
                     );
                     Navigator.of(context).pop();
                   },
