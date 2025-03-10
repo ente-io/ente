@@ -512,6 +512,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             })();
 
             const showCopyImage = (() => {
+                if (disableDownload) return false;
                 switch (file.metadata.fileType) {
                     case FileType.image:
                     case FileType.livePhoto:
