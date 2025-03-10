@@ -61,6 +61,9 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
     final photoCount = widget.enteFiles.length;
     if (photoCount == 0) {
       return const SizedBox.shrink();
+    } else if (photoCount == 1) {
+      showSingleOrShiftChoice = false;
+      selectSingleDate = true;
     }
     final colorScheme = getEnteColorScheme(context);
     DateTime maxDate = DateTime.now();
@@ -104,6 +107,7 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
               key: ValueKey(selectedDate.toString()),
               dateTime: selectedDate,
               selectDate: selectSingleDate,
+              singleFile: photoCount == 1,
               onPressedDate: () {
                 selectingDate = true;
                 selectingTime = false;
@@ -377,10 +381,12 @@ class DateAndTimeWidget extends StatelessWidget {
     required this.selectDate,
     required this.onPressedDate,
     required this.onPressedTime,
+    required this.singleFile,
   });
 
   final DateTime dateTime;
   final bool selectDate;
+  final bool singleFile;
 
   final Function() onPressedDate;
   final Function() onPressedTime;
@@ -395,32 +401,34 @@ class DateAndTimeWidget extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              selectDate
-                  ? "Select one date and time for all"
-                  : "Select start of range",
-              style: TextStyle(
-                color: colorScheme.textBase,
-                fontSize: 16,
+          if (!singleFile)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                selectDate
+                    ? "Select one date and time for all"
+                    : "Select start of range",
+                style: TextStyle(
+                  color: colorScheme.textBase,
+                  fontSize: 16,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              selectDate
-                  ? "This will make the date and time of all selected photos the same."
-                  : "This is the first in the group. Other selected photos will automatically shift based on this new date",
-              style: TextStyle(
-                color: colorScheme.textFaint,
-                fontSize: 12,
+          if (!singleFile) const SizedBox(height: 8),
+          if (!singleFile)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                selectDate
+                    ? "This will make the date and time of all selected photos the same."
+                    : "This is the first in the group. Other selected photos will automatically shift based on this new date",
+                style: TextStyle(
+                  color: colorScheme.textFaint,
+                  fontSize: 12,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
+          if (!singleFile) const SizedBox(height: 16),
           Container(
             decoration: BoxDecoration(
               color: colorScheme.backgroundElevated2,
@@ -593,12 +601,10 @@ class PhotoDateHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final photoCount = enteFiles.length;
-    if (photoCount == 0) {
-      return const SizedBox.shrink();
-    }
     final colorScheme = getEnteColorScheme(context);
-    if (photoCount == 0) {
-      return const SizedBox.shrink();
+    bool multipleFiles = true;
+    if (photoCount == 1) {
+      multipleFiles = false;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -615,50 +621,78 @@ class PhotoDateHeaderWidget extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           // Photo count and date info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "$photoCount photos",
-                  style: TextStyle(
-                    color: colorScheme.textBase,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      _formatDate(startDate),
-                      style: TextStyle(
-                        color: colorScheme.textMuted,
-                        fontSize: 12,
+          multipleFiles
+              ? Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "$photoCount photos",
+                        style: TextStyle(
+                          color: colorScheme.textBase,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        "-",
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Text(
+                            _formatDate(startDate),
+                            style: TextStyle(
+                              color: colorScheme.textMuted,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              "-",
+                              style: TextStyle(
+                                color: colorScheme.textMuted,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            _formatDate(endDate),
+                            style: TextStyle(
+                              color: colorScheme.textMuted,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                )
+              : Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          enteFiles.first.displayName,
+                          style: TextStyle(
+                            color: colorScheme.textBase,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "${DateFormat('EEE, dd MMM yyyy').format(startDate)} · ${DateFormat('h:mm a').format(startDate)}",
                         style: TextStyle(
                           color: colorScheme.textMuted,
                           fontSize: 12,
                         ),
                       ),
-                    ),
-                    Text(
-                      _formatDate(endDate),
-                      style: TextStyle(
-                        color: colorScheme.textMuted,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -666,5 +700,5 @@ class PhotoDateHeaderWidget extends StatelessWidget {
 }
 
 String _formatDate(DateTime date) {
-  return "Sat, ${DateFormat('dd MMM yyyy').format(date)}\n${DateFormat('h:mm a').format(date)}";
+  return "${DateFormat('EEE, dd MMM yyyy').format(date)}\n${DateFormat('h:mm a').format(date)}";
 }
