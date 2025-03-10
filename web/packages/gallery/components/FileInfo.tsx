@@ -6,7 +6,6 @@
   -  photos/FileInfo
 */
 
-import { assertionFailed } from "@/base/assert";
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
 import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
@@ -207,14 +206,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     const location = useMemo(
         // Prefer the location in the EnteFile, then fall back to Exif.
-        () => (file ? fileLocation(file) : undefined) ?? exif?.parsed?.location,
+        () => fileLocation(file) ?? exif?.parsed?.location,
         [file, exif],
     );
 
     const annotatedExif = useMemo(() => annotateExif(exif), [exif]);
 
     useEffect(() => {
-        if (!file) return;
         if (!isMLEnabled()) return;
 
         let didCancel = false;
@@ -529,11 +527,8 @@ const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
 
 type CaptionProps = Pick<
     FileInfoProps,
-    "allowEdits" | "onNeedsRemoteSync" | "onUpdateCaption"
-> & {
-    /* TODO(PS): This is DisplayFile, but that's meant to be removed */
-    file: EnteFile & { title?: string };
-};
+    "file" | "allowEdits" | "onNeedsRemoteSync" | "onUpdateCaption"
+>;
 
 const Caption: React.FC<CaptionProps> = ({
     file,
@@ -557,8 +552,6 @@ const Caption: React.FC<CaptionProps> = ({
             try {
                 const updatedFile = await changeCaption(file, newCaption);
                 updateExistingFilePubMetadata(file, updatedFile);
-                // @ts-ignore
-                file.title = file.pubMagicMetadata.data.caption;
                 onUpdateCaption(file);
             } catch (e) {
                 log.error("Failed to update caption", e);

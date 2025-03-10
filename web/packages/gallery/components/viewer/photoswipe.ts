@@ -271,48 +271,6 @@ export class FileViewerPhotoSwipe {
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
 
-        // Toggle controls infrastructure
-
-        /**
-         * An interval that invokes a periodic check of whether we should the hide
-         * controls if the user does not perform any pointer events for a while.
-         */
-        let autoHideCheckIntervalID: ReturnType<typeof setTimeout> | undefined;
-
-        /**
-         * The time the last activity occurred. Used in tandem with
-         * {@link autoHideCheckIntervalID} to implement the auto hiding of controls
-         * when the user stops moving the pointer for a while.
-         *
-         * Apart from a date, this can also be:
-         *
-         * - "already-hidden" if controls have already been hidden, say by a
-         *   bgClickAction or our keyboard shortcut.
-         *
-         * - "auto-hidden" if controls were hidden by us because of inactivity.
-         */
-        let lastActivityDate: Date | "auto-hidden" | "already-hidden" =
-            new Date();
-
-        const areUIControlsVisible = () =>
-            pswp.element.classList.contains("pswp--ui-visible");
-        const showUIControls = () =>
-            pswp.element.classList.add("pswp--ui-visible");
-        const hideUIControls = () =>
-            pswp.element.classList.remove("pswp--ui-visible");
-        const toggleUIControls = () =>
-            pswp.element.classList.toggle("pswp--ui-visible");
-
-        // Return true if the current keyboard focus is on any of the UI
-        // controls (e.g. as a result of user tabbing through them).
-        const isFocusedOnUIControl = () => {
-            const fv = document.querySelector(":focus-visible");
-            if (fv && !fv.classList.contains("pswp")) {
-                return true;
-            }
-            return false;
-        };
-
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
 
@@ -334,9 +292,6 @@ export class FileViewerPhotoSwipe {
                 };
             }
 
-            if (lastActivityDate != "already-hidden")
-                lastActivityDate = new Date();
-
             return itemData;
         });
 
@@ -346,16 +301,6 @@ export class FileViewerPhotoSwipe {
 
         pswp.addFilter("isContentZoomable", (isZoomable, content) => {
             return content.data.isContentZoomable ?? isZoomable;
-        });
-
-        pswp.addFilter("preventPointerEvent", (preventPointerEvent) => {
-            // There was a pointer event. We don't care which one, we just use
-            // this as a hook to show the UI again (if needed), and update our
-            // last activity date.
-            if (lastActivityDate == "auto-hidden") showUIControls();
-            if (lastActivityDate != "already-hidden")
-                lastActivityDate = new Date();
-            return preventPointerEvent;
         });
 
         /**
@@ -614,10 +559,6 @@ export class FileViewerPhotoSwipe {
         // The PhotoSwipe dialog has being closed and the animations have
         // completed.
         pswp.on("destroy", () => {
-            if (autoHideCheckIntervalID) {
-                clearInterval(autoHideCheckIntervalID);
-                autoHideCheckIntervalID = undefined;
-            }
             fileViewerDidClose();
             // Let our parent know that we have been closed.
             onClose();
@@ -877,11 +818,6 @@ export class FileViewerPhotoSwipe {
 
         // Actions we handle ourselves.
 
-        const handleToggleUIControls = () => {
-            toggleUIControls();
-            lastActivityDate = new Date();
-        };
-
         const handleTogglePlayIfPossible = () => {
             switch (currentAnnotatedFile().itemData.fileType) {
                 case FileType.video:
@@ -902,6 +838,21 @@ export class FileViewerPhotoSwipe {
                     livePhotoToggleMuteIfPossible();
                     return;
             }
+        };
+
+        // Toggle controls infrastructure
+
+        const handleToggleUIControls = () =>
+            pswp.element.classList.toggle("pswp--ui-visible");
+
+        // Return true if the current keyboard focus is on any of the UI
+        // controls (e.g. as a result of user tabbing through them).
+        const isFocusedOnUIControl = () => {
+            const fv = document.querySelector(":focus-visible");
+            if (fv && !fv.classList.contains("pswp")) {
+                return true;
+            }
+            return false;
         };
 
         // Some actions routed via the delegate
@@ -994,11 +945,6 @@ export class FileViewerPhotoSwipe {
             }
 
             cb?.();
-
-            // Undo auto hide when the user presses tab to move focus.
-            if (key == "Tab") {
-                if (lastActivityDate == "auto-hidden") showUIControls();
-            }
         });
 
         // Let our data source know that we're about to open.
@@ -1007,23 +953,6 @@ export class FileViewerPhotoSwipe {
         // Initializing PhotoSwipe adds it to the DOM as a dialog-like div with
         // the class "pswp".
         pswp.init();
-
-        autoHideCheckIntervalID = setInterval(() => {
-            if (lastActivityDate == "already-hidden") return;
-            if (lastActivityDate == "auto-hidden") return;
-            // TODO(PS): Disable for now.
-            return;
-            if (Date.now() - lastActivityDate.getTime() > 9000 /* ~10s */) {
-                if (areUIControlsVisible()) {
-                    if (!isFocusedOnUIControl()) {
-                        hideUIControls();
-                        lastActivityDate = "auto-hidden";
-                    }
-                } else {
-                    lastActivityDate = "already-hidden";
-                }
-            }
-        }, 3000);
     }
 
     /**
