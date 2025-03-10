@@ -1,12 +1,8 @@
-/* eslint-disable */
-// @ts-nocheck
-// TODO(PS): ^
-
 import { pt } from "@/base/i18n";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { t } from "i18next";
-import PhotoSwipe from "photoswipe";
+import PhotoSwipe, { type SlideData } from "photoswipe";
 import {
     fileViewerDidClose,
     fileViewerWillOpen,
@@ -16,7 +12,10 @@ import {
     updateFileInfoExifIfNeeded,
     type ItemData,
 } from "./data-source";
-import { type FileViewerAnnotatedFile } from "./FileViewer";
+import {
+    type FileViewerAnnotatedFile,
+    type FileViewerProps,
+} from "./FileViewer";
 import { createPSRegisterElementIconHTML } from "./icons";
 
 export interface FileViewerPhotoSwipeDelegate {
@@ -257,13 +256,27 @@ export class FileViewerPhotoSwipe {
          */
         let _currentAnnotatedFile: FileViewerAnnotatedFile | undefined;
 
+        /**
+         * Non-null assert and casted the given {@link SlideData} as
+         * {@link ItemData}.
+         *
+         * PhotoSwipe types specify currSlide.data to be of type `SlideData`,
+         * but in our case these are {@link ItemData} instances which the type
+         * doesn't reflect. So this is a method to consolidate the cast and
+         * non-null assertion (the PhotoSwipe dialog shouldn't be visible if
+         * there are no slides left).
+         */
+        const asItemData = (slideData: SlideData | undefined) =>slideData! as ItemData;
+
+        const currSlideData = () => asItemData(pswp.currSlide?.data);
+
         const currentFile = () => delegate.getFiles()[pswp.currIndex]!;
 
         const currentAnnotatedFile = () => {
             const file = currentFile();
             let annotatedFile = _currentAnnotatedFile;
-            if (!annotatedFile || annotatedFile.file.fileID != file.id) {
-                annotatedFile = onAnnotate(file, pswp.currSlide.content.data);
+            if (!annotatedFile || annotatedFile.file.id != file.id) {
+                annotatedFile = onAnnotate(file, currSlideData());
                 _currentAnnotatedFile = annotatedFile;
             }
             return annotatedFile;
@@ -296,11 +309,11 @@ export class FileViewerPhotoSwipe {
         });
 
         pswp.addFilter("isContentLoading", (isLoading, content) => {
-            return content.data.isContentLoading ?? isLoading;
+            return asItemData(content.data).isContentLoading ?? isLoading;
         });
 
         pswp.addFilter("isContentZoomable", (isZoomable, content) => {
-            return content.data.isContentZoomable ?? isZoomable;
+            return asItemData(content.data).isContentZoomable ?? isZoomable;
         });
 
         /**
@@ -333,7 +346,7 @@ export class FileViewerPhotoSwipe {
 
             if (livePhotoPlay) {
                 button?.classList.remove("pswp-ente-off");
-                video.play();
+                void video.play();
                 video.style.display = "initial";
             } else {
                 button?.classList.add("pswp-ente-off");
@@ -424,9 +437,9 @@ export class FileViewerPhotoSwipe {
          * Helper function to extract the video element from a slide that is
          * showing a live photo.
          */
-        const livePhotoVideoOnSlide = (slide) =>
-            slide.data.fileType == FileType.livePhoto
-                ? slide.container.getElementsByTagName("video")[0]
+        const livePhotoVideoOnSlide = (slide: typeof pswp.currSlide) =>
+            asItemData(slide?.data).fileType == FileType.livePhoto
+                ? slide?.container.getElementsByTagName("video")[0]
                 : undefined;
 
         pswp.on("imageSizeChange", ({ content, width, height }) => {
@@ -466,7 +479,7 @@ export class FileViewerPhotoSwipe {
             updateFileInfoExifIfNeeded(e.content.data),
         );
 
-        pswp.on("change", (e) => {
+        pswp.on("change", () => {
             const itemData = pswp.currSlide.content.data;
             updateFileInfoExifIfNeeded(itemData);
         });
@@ -632,6 +645,8 @@ export class FileViewerPhotoSwipe {
         // - preloader: 10 (default is 7)
         // - close: 20
         pswp.on("uiRegister", () => {
+            const ui = pswp.ui!;
+
             // Move the zoom button to the left so that it is in the same place
             // as the other items like preloader or the error indicator that
             // come and go as files get loaded. Also modify the default orders
@@ -640,13 +655,12 @@ export class FileViewerPhotoSwipe {
             // We cannot use the PhotoSwipe "uiElement" filter to modify the
             // order since that only allows us to edit the DOM element, not the
             // underlying UI element data.
-            pswp.ui.uiElementsData.find((e) => e.name == "zoom").order = 6;
-            pswp.ui.uiElementsData.find((e) => e.name == "preloader").order =
-                10;
+            ui.uiElementsData.find((e) => e.name == "zoom")!.order = 6;
+            ui.uiElementsData.find((e) => e.name == "preloader")!.order = 10;
 
             // Register our custom elements...
 
-            pswp.ui.registerElement({
+            ui.registerElement({
                 name: "live",
                 title: pt("Live"),
                 order: 7,
@@ -667,7 +681,7 @@ export class FileViewerPhotoSwipe {
                 onClick: livePhotoTogglePlayIfPossible,
             });
 
-            pswp.ui.registerElement({
+            ui.registerElement({
                 name: "vol",
                 title: pt("Audio"),
                 order: 8,
@@ -691,7 +705,7 @@ export class FileViewerPhotoSwipe {
             // TODO(PS): Add force convert button for videos? Or is that covered
             // by upcoming streaming changes?
 
-            pswp.ui.registerElement({
+            ui.registerElement({
                 name: "error",
                 order: 9,
                 html: createPSRegisterElementIconHTML("error"),
@@ -710,7 +724,7 @@ export class FileViewerPhotoSwipe {
             // Only one of these two ("favorite" and "download") will end
             // up being shown, so they can safely share the same order.
             if (haveUser) {
-                pswp.ui.registerElement({
+                ui.registerElement({
                     name: "favorite",
                     title: pt("Favorite"),
                     order: 11,
@@ -726,7 +740,7 @@ export class FileViewerPhotoSwipe {
                 // When we don't have a user (i.e. in the context of public
                 // albums), the download button is shown (if enabled for that
                 // album) instead of the favorite button as the first action.
-                pswp.ui.registerElement({
+                ui.registerElement({
                     name: "download",
                     title: t("download"),
                     order: 11,
@@ -743,7 +757,7 @@ export class FileViewerPhotoSwipe {
                 });
             }
 
-            pswp.ui.registerElement({
+            ui.registerElement({
                 name: "info",
                 title: t("info"),
                 order: 13,
@@ -752,7 +766,7 @@ export class FileViewerPhotoSwipe {
                 onClick: handleViewInfo,
             });
 
-            pswp.ui.registerElement({
+            ui.registerElement({
                 name: "more",
                 title: pt("More"),
                 order: 16,
@@ -762,16 +776,15 @@ export class FileViewerPhotoSwipe {
                     buttonElement.setAttribute("id", moreButtonID);
                     buttonElement.setAttribute("aria-haspopup", "true");
                 },
-                onClick: (e) => {
-                    const buttonElement = e.target;
+                onClick: (_, buttonElement) => {
                     // See also: `resetMoreMenuButtonOnMenuClose`.
                     buttonElement.setAttribute("aria-controls", moreMenuID);
-                    buttonElement.setAttribute("aria-expanded", true);
+                    buttonElement.setAttribute("aria-expanded", "true");
                     onMore(buttonElement);
                 },
             });
 
-            pswp.ui.registerElement({
+            ui.registerElement({
                 name: "caption",
                 // Arbitrary order towards the end (it doesn't matter anyways
                 // since we're absolutely positioned).
@@ -797,7 +810,7 @@ export class FileViewerPhotoSwipe {
         // Pan action handlers
 
         const panner = (key: "w" | "a" | "s" | "d") => () => {
-            const slide = pswp.currSlide;
+            const slide = pswp.currSlide!;
             const d = 80;
             switch (key) {
                 case "w":
@@ -843,7 +856,7 @@ export class FileViewerPhotoSwipe {
         // Toggle controls infrastructure
 
         const handleToggleUIControls = () =>
-            pswp.element.classList.toggle("pswp--ui-visible");
+            pswp.element!.classList.toggle("pswp--ui-visible");
 
         // Return true if the current keyboard focus is on any of the UI
         // controls (e.g. as a result of user tabbing through them).
