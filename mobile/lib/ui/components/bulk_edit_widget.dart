@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import "package:photos/models/file/file.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 class BulkEditDateBottomSheet extends StatefulWidget {
@@ -26,21 +28,18 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
   bool selectingDate = false;
   bool selectingTime = false;
 
-  DateTime? selectedDate;
+  late DateTime selectedDate;
+  late DateTime startDate;
+  late DateTime endDate;
 
   @override
-  Widget build(BuildContext context) {
-    final photoCount = widget.enteFiles.length;
-    if (photoCount == 0) {
-      return const SizedBox.shrink();
-    }
-    final colorScheme = getEnteColorScheme(context);
+  void initState() {
+    super.initState();
     final firstFileTime = DateTime.fromMicrosecondsSinceEpoch(
       widget.enteFiles.first.creationTime!,
     );
-    DateTime startDate = firstFileTime;
-    DateTime endDate = firstFileTime;
-    DateTime maxDate = DateTime.now();
+    startDate = firstFileTime;
+    endDate = firstFileTime;
     for (final file in widget.enteFiles) {
       if (file.creationTime == null) {
         continue;
@@ -53,6 +52,18 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
         endDate = fileTime;
       }
     }
+    selectedDate = startDate;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final photoCount = widget.enteFiles.length;
+    if (photoCount == 0) {
+      return const SizedBox.shrink();
+    }
+    final colorScheme = getEnteColorScheme(context);
+    DateTime maxDate = DateTime.now();
+
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.backgroundElevated,
@@ -84,8 +95,9 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
               },
             ),
           if (!showSingleOrShiftChoice && !selectingDate && !selectingTime)
-            OldDateAndTimeWidget(
-              dateTime: startDate,
+            DateAndTimeWidget(
+              key: ValueKey(selectedDate.toString()),
+              dateTime: selectedDate,
               selectDate: singleSelected,
               onPressedDate: () {
                 selectingDate = true;
@@ -106,9 +118,35 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
                 selectingTime = false;
                 setState(() {});
               },
-              startDate,
+              selectedDate,
               maxDate,
               startWithTime: selectingTime,
+            ),
+          if (!showSingleOrShiftChoice &&
+              !selectingDate &&
+              !selectingTime &&
+              selectedDate != startDate)
+            Column(
+              children: [
+                const SizedBox(height: 16),
+                ButtonWidget(
+                  buttonType: ButtonType.primary,
+                  labelText: "Confirm",
+                  buttonSize: ButtonSize.large,
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                const SizedBox(height: 8),
+                ButtonWidget(
+                  buttonType: ButtonType.neutral,
+                  labelText: "Cancel",
+                  buttonSize: ButtonSize.large,
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
             ),
           // Bottom indicator line
           const SizedBox(height: 48),
@@ -116,6 +154,17 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
       ),
     );
   }
+}
+
+Future<void> _editDates(
+  BuildContext context,
+  Iterable<EnteFile> enteFiles,
+  DateTime newDate,
+  bool shiftDates,
+) async {
+  // for (final file in enteFiles) {
+  //   await file.updateCreationTime(newDate);
+  // }
 }
 
 class DateTimePickerWidget extends StatefulWidget {
@@ -292,8 +341,8 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
   }
 }
 
-class OldDateAndTimeWidget extends StatelessWidget {
-  const OldDateAndTimeWidget({
+class DateAndTimeWidget extends StatelessWidget {
+  const DateAndTimeWidget({
     super.key,
     required this.dateTime,
     required this.selectDate,
