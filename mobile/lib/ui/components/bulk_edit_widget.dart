@@ -83,95 +83,98 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
           topRight: Radius.circular(12),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Photo count and date range section
-          PhotoDateHeaderWidget(
-            enteFiles: widget.enteFiles,
-            startDate: startDate,
-            endDate: endDate,
-          ),
-          if (showSingleOrShiftChoice)
-            SelectDateOrShiftWidget(
-              onSelectOneDate: () {
-                showSingleOrShiftChoice = false;
-                selectSingleDate = true;
-                setState(() {});
-              },
-              onShiftDates: () {
-                showSingleOrShiftChoice = false;
-                selectSingleDate = false;
-                setState(() {});
-              },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Photo count and date range section
+            PhotoDateHeaderWidget(
+              enteFiles: widget.enteFiles,
+              startDate: startDate,
+              endDate: endDate,
             ),
-          if (!showSingleOrShiftChoice && !selectingDate && !selectingTime)
-            DateAndTimeWidget(
-              key: ValueKey(selectedDate.toString()),
-              dateTime: selectedDate,
-              selectDate: selectSingleDate,
-              singleFile: photoCount == 1,
-              newRangeEnd: (selectedDate != startDate && !selectSingleDate)
-                  ? endDate.add(selectedDate.difference(startDate))
-                  : null,
-              onPressedDate: () {
-                selectingDate = true;
-                selectingTime = false;
-                setState(() {});
-              },
-              onPressedTime: () {
-                selectingDate = false;
-                selectingTime = true;
-                setState(() {});
-              },
-            ),
-          if (selectingDate || selectingTime)
-            DateTimePickerWidget(
-              (DateTime dateTime) {
-                selectedDate = dateTime;
-                selectingDate = false;
-                selectingTime = false;
-                setState(() {});
-              },
-              selectedDate,
-              maxDate,
-              startWithTime: selectingTime,
-            ),
-          if (!showSingleOrShiftChoice &&
-              !selectingDate &&
-              !selectingTime &&
-              selectedDate != startDate)
-            Column(
-              children: [
-                const SizedBox(height: 16),
-                ButtonWidget(
-                  buttonType: ButtonType.primary,
-                  labelText: "Confirm",
-                  buttonSize: ButtonSize.large,
-                  onTap: () async {
-                    await _editDates(
-                      context,
-                      widget.enteFiles,
-                      selectedDate,
-                      selectSingleDate ? null : startDate,
-                    );
-                    Navigator.of(context).pop();
-                  },
-                ),
-                const SizedBox(height: 8),
-                ButtonWidget(
-                  buttonType: ButtonType.neutral,
-                  labelText: "Cancel",
-                  buttonSize: ButtonSize.large,
-                  onTap: () async {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            ),
-          // Bottom indicator line
-          const SizedBox(height: 48),
-        ],
+            if (showSingleOrShiftChoice)
+              SelectDateOrShiftWidget(
+                onSelectOneDate: () {
+                  showSingleOrShiftChoice = false;
+                  selectSingleDate = true;
+                  setState(() {});
+                },
+                onShiftDates: () {
+                  showSingleOrShiftChoice = false;
+                  selectSingleDate = false;
+                  setState(() {});
+                },
+              ),
+            if (!showSingleOrShiftChoice && !selectingDate && !selectingTime)
+              DateAndTimeWidget(
+                key: ValueKey(selectedDate.toString()),
+                dateTime: selectedDate,
+                selectDate: selectSingleDate,
+                singleFile: photoCount == 1,
+                newRangeEnd: (selectedDate != startDate && !selectSingleDate)
+                    ? endDate.add(selectedDate.difference(startDate))
+                    : null,
+                onPressedDate: () {
+                  selectingDate = true;
+                  selectingTime = false;
+                  setState(() {});
+                },
+                onPressedTime: () {
+                  selectingDate = false;
+                  selectingTime = true;
+                  setState(() {});
+                },
+              ),
+            if (selectingDate || selectingTime)
+              DateTimePickerWidget(
+                (DateTime dateTime) {
+                  selectedDate = dateTime;
+                  selectingDate = false;
+                  selectingTime = false;
+                  setState(() {});
+                },
+                selectedDate,
+                maxDate,
+                startWithTime: selectingTime,
+              ),
+            if (!showSingleOrShiftChoice &&
+                !selectingDate &&
+                !selectingTime &&
+                selectedDate != startDate)
+              Column(
+                children: [
+                  const SizedBox(height: 16),
+                  ButtonWidget(
+                    buttonType: ButtonType.primary,
+                    labelText: "Confirm",
+                    buttonSize: ButtonSize.large,
+                    onTap: () async {
+                      await _editDates(
+                        context,
+                        widget.enteFiles,
+                        selectedDate,
+                        selectSingleDate ? null : startDate,
+                      );
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  ButtonWidget(
+                    buttonType: ButtonType.neutral,
+                    labelText: "Cancel",
+                    buttonSize: ButtonSize.large,
+                    onTap: () async {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            // Bottom indicator line
+            const SizedBox(height: 48),
+          ],
+        ),
       ),
     );
   }
@@ -245,7 +248,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
         children: [
           // Header
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -265,7 +268,6 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
               color: colorScheme.backgroundElevated2,
               borderRadius: BorderRadius.circular(12),
             ),
-            margin: const EdgeInsets.symmetric(horizontal: 16),
             child: CupertinoTheme(
               data: CupertinoThemeData(
                 brightness: Brightness.dark,
@@ -319,8 +321,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
 
           // Buttons
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding: const EdgeInsets.symmetric(vertical: 12.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -331,7 +332,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                     _showTimePicker ? "Previous" : "Cancel",
                     style: TextStyle(
                       color: colorScheme.textBase,
-                      fontSize: 12,
+                      fontSize: 14,
                     ),
                   ),
                   onPressed: () {
@@ -354,7 +355,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                     _showTimePicker ? "Done" : "Next",
                     style: TextStyle(
                       color: colorScheme.primary700,
-                      fontSize: 12,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -405,7 +406,7 @@ class DateAndTimeWidget extends StatelessWidget {
     final String date = DateFormat.yMMMd(locale.languageCode).format(dateTime);
     final String time = DateFormat.Hm(locale.languageCode).format(dateTime);
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: [
           if (!singleFile)
@@ -584,7 +585,7 @@ class SelectDateOrShiftWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Container(
         decoration: BoxDecoration(
           color: colorScheme.backgroundElevated2,
@@ -686,7 +687,7 @@ class PhotoDateHeaderWidget extends StatelessWidget {
       multipleFiles = false;
     }
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           // Thumbnail
