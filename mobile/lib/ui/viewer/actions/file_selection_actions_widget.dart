@@ -4,17 +4,14 @@ import 'package:fast_base58/fast_base58.dart';
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart";
 import "package:local_auth/local_auth.dart";
 import "package:logging/logging.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
-import "package:photos/ente_theme_data.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
@@ -394,25 +391,26 @@ class _FileSelectionActionsWidgetState
       );
     }
 
-    // test bulk edit ui widget TODO: lau: merge with bulk edit date later on
-    items.add(
-      SelectionActionButton(
-        shouldShow: widget.selectedFiles.files.every(
-          (element) => (element.ownerID == currentUserID),
+    if (widget.type.showBulkEditTime()) {
+      items.add(
+        SelectionActionButton(
+          shouldShow: widget.selectedFiles.files.every(
+            (element) => (element.ownerID == currentUserID),
+          ),
+          labelText: "Edit time", // S.of(context).edit,
+          icon: Icons.edit_calendar_outlined,
+          onTap: () async {
+            await showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) => BulkEditDateBottomSheet(
+                enteFiles: widget.selectedFiles.files,
+              ),
+            );
+          },
         ),
-        labelText: "test edit date",
-        icon: Icons.edit_calendar_outlined,
-        onTap: () async {
-          await showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (context) => BulkEditDateBottomSheet(
-              enteFiles: widget.selectedFiles.files,
-            ),
-          );
-        },
-      ),
-    );
+      );
+    }
 
     if (widget.type.showEditLocation()) {
       items.add(
@@ -459,79 +457,6 @@ class _FileSelectionActionsWidgetState
                 );
               },
             );
-          },
-        ),
-      );
-    }
-
-    if (widget.type.showBulkEditTime()) {
-      items.add(
-        SelectionActionButton(
-          shouldShow: widget.selectedFiles.files.every(
-            (element) => (element.ownerID == currentUserID),
-          ),
-          labelText: "Edit time", // S.of(context).edit,
-          icon: Icons.edit_calendar_outlined,
-          onTap: () async {
-            final files = widget.selectedFiles.files;
-            DateTime startingTime = DateTime.now();
-            if (files.length == 1 && files.first.creationTime != null) {
-              startingTime = DateTime.fromMicrosecondsSinceEpoch(
-                files.first.creationTime!,
-              );
-            } else if (files.length > 1) {
-              final List<int> creationTimes = files
-                  .where((file) => file.creationTime != null)
-                  .map((file) => file.creationTime!)
-                  .toList();
-              creationTimes.sort();
-              if (creationTimes.isNotEmpty) {
-                startingTime = DateTime.fromMicrosecondsSinceEpoch(
-                  creationTimes.last,
-                );
-              }
-            }
-            final Locale locale = (await getLocale())!;
-            final localeType = getFromLocalString(locale);
-            final dateResult = await DatePickerBdaya.showDatePicker(
-              context,
-              minTime: DateTime(1800, 1, 1),
-              maxTime: DateTime.now(),
-              currentTime: startingTime,
-              locale: localeType,
-              theme: Theme.of(context).colorScheme.dateTimePickertheme,
-            );
-            if (dateResult == null) {
-              return;
-            }
-
-            late DateTime? dateWithTimeResult;
-            if (showAmPmTimePicker(locale)) {
-              dateWithTimeResult = await DatePickerBdaya.showTime12hPicker(
-                context,
-                showTitleActions: true,
-                currentTime: dateResult,
-                locale: localeType,
-                theme: Theme.of(context).colorScheme.dateTimePickertheme,
-              );
-            } else {
-              dateWithTimeResult = await DatePickerBdaya.showTimePicker(
-                context,
-                showTitleActions: true,
-                currentTime: dateResult,
-                locale: localeType,
-                theme: Theme.of(context).colorScheme.dateTimePickertheme,
-              );
-            }
-            if (dateWithTimeResult != null) {
-              if (await editTime(
-                context,
-                files.toList(),
-                dateWithTimeResult.microsecondsSinceEpoch,
-              )) {
-                setState(() {});
-              }
-            }
           },
         ),
       );
