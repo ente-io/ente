@@ -23,8 +23,8 @@ class BulkEditDateBottomSheet extends StatefulWidget {
 
 class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
   // Single date or shift date
-  bool showSingleOrShiftChoice = true;
-  bool selectSingleDate = true;
+  bool showSingleOrShiftChoice = false;
+  bool selectSingleDate = false;
 
   bool selectingDate = false;
   bool selectingTime = false;
@@ -36,6 +36,11 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
   @override
   void initState() {
     super.initState();
+    if (widget.enteFiles.length == 1) {
+      selectSingleDate = true;
+    } else if (widget.enteFiles.length > 1) {
+      showSingleOrShiftChoice = true;
+    }
     final firstFileTime = DateTime.fromMicrosecondsSinceEpoch(
       widget.enteFiles.first.creationTime!,
     );
@@ -61,10 +66,8 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
     final photoCount = widget.enteFiles.length;
     if (photoCount == 0) {
       return const SizedBox.shrink();
-    } else if (photoCount == 1) {
-      showSingleOrShiftChoice = false;
-      selectSingleDate = true;
     }
+
     final colorScheme = getEnteColorScheme(context);
     DateTime maxDate = DateTime.now();
     if (!selectSingleDate) {
@@ -108,7 +111,7 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
               dateTime: selectedDate,
               selectDate: selectSingleDate,
               singleFile: photoCount == 1,
-              newRangeEnd: selectedDate != startDate
+              newRangeEnd: (selectedDate != startDate && !selectSingleDate)
                   ? endDate.add(selectedDate.difference(startDate))
                   : null,
               onPressedDate: () {
