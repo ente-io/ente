@@ -1,7 +1,7 @@
 import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
-import { EnteLogo } from "@/base/components/EnteLogo";
+import { EnteLogo, EnteLogoBox } from "@/base/components/EnteLogo";
 import { LinkButton } from "@/base/components/LinkButton";
 import {
     RowButton,
@@ -189,9 +189,9 @@ interface SectionProps {
 
 const HeaderSection: React.FC<SectionProps> = ({ onCloseSidebar }) => (
     <SpacedRow sx={{ mt: "6px", pl: "12px" }}>
-        <SansLineHeight>
+        <EnteLogoBox>
             <EnteLogo height={16} />
-        </SansLineHeight>
+        </EnteLogoBox>
         <IconButton
             aria-label={t("close")}
             onClick={onCloseSidebar}
@@ -201,17 +201,6 @@ const HeaderSection: React.FC<SectionProps> = ({ onCloseSidebar }) => (
         </IconButton>
     </SpacedRow>
 );
-
-/**
- * Reset the line height to vertically center the contents.
- *
- * By default, the line height causes the SVG to have an extra space at the
- * bottom. Removing it allows the SVG contents to be centered on their own
- * measure within our containing box.
- */
-const SansLineHeight = styled("span")`
-    line-height: 0;
-`;
 
 type UserDetailsSectionProps = Pick<SidebarProps, "onShowPlanSelector"> & {
     sidebarOpen: boolean;
