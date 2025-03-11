@@ -39,7 +39,7 @@ In brief,
   in the input box. 
 
 - Incase, if you want to remove any storage limit from a members account, you 
-  can click on the "Remove Limit" and they can upload photos without any limitt. 
+  can click on the "Remove Limit" and they can upload photos without any limit. 
 
 ## FAQ
 
