@@ -294,6 +294,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                 minimumDate: DateTime(1800),
                 maximumDate: widget.maxDateTime,
                 use24hFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+                showDayOfWeek: true,
                 onDateTimeChanged: (DateTime newDateTime) {
                   setState(() {
                     if (_showTimePicker) {
