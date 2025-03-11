@@ -188,8 +188,10 @@ interface SectionProps {
 }
 
 const HeaderSection: React.FC<SectionProps> = ({ onCloseSidebar }) => (
-    <SpacedRow sx={{ my: "4px 4px", pl: "12px" }}>
-        <EnteLogo />
+    <SpacedRow sx={{ mt: "6px", pl: "12px" }}>
+        <SansLineHeight>
+            <EnteLogo height={16} />
+        </SansLineHeight>
         <IconButton
             aria-label={t("close")}
             onClick={onCloseSidebar}
@@ -199,6 +201,17 @@ const HeaderSection: React.FC<SectionProps> = ({ onCloseSidebar }) => (
         </IconButton>
     </SpacedRow>
 );
+
+/**
+ * Reset the line height to vertically center the contents.
+ *
+ * By default, the line height causes the SVG to have an extra space at the
+ * bottom. Removing it allows the SVG contents to be centered on their own
+ * measure within our containing box.
+ */
+const SansLineHeight = styled("span")`
+    line-height: 0;
+`;
 
 type UserDetailsSectionProps = Pick<SidebarProps, "onShowPlanSelector"> & {
     sidebarOpen: boolean;
@@ -247,7 +260,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
 
     return (
         <>
-            <Box sx={{ px: 0.5, mt: 2, pb: 1.5, mb: 1 }}>
+            <Box sx={{ px: 0.5, mt: 1.5, pb: 1.5, mb: 1 }}>
                 <Typography sx={{ px: 1, pb: 1, color: "text.muted" }}>
                     {userDetails ? (
                         userDetails.email
