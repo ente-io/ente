@@ -24,6 +24,13 @@ logUnhandledErrorsAndRejectionsInWorker();
 
 const heicToJPEG = async (heicBlob: Blob): Promise<Blob> => {
     const buffer = new Uint8Array(await heicBlob.arrayBuffer());
+    // [Note: Revisit some Node.js types errors post 22 upgrade]
+    //
+    // Going beyond "typescript" "5.6.3" we start seeing a type error here. This
+    // is possibly fixed in the newer Node.js types, but we're at 20 currently.
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const result = await HeicConvert({ buffer, format: "JPEG" });
     const convertedData = new Uint8Array(result);
     return new Blob([convertedData], { type: "image/jpeg" });

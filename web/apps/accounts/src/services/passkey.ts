@@ -139,9 +139,7 @@ interface BeginPasskeyRegistrationResponse {
      * Options that should be passed to `navigator.credential.create` when
      * creating the new {@link Credential}.
      */
-    options: {
-        publicKey: PublicKeyCredentialCreationOptions;
-    };
+    options: { publicKey: PublicKeyCredentialCreationOptions };
 }
 
 const beginPasskeyRegistration = async (token: string) => {
@@ -299,11 +297,7 @@ const finishPasskeyRegistration = async ({
             // anyways for transmission, we can just reuse the same string.
             rawId: credential.id,
             type: credential.type,
-            response: {
-                attestationObject,
-                clientDataJSON,
-                transports,
-            },
+            response: { attestationObject, clientDataJSON, transports },
         }),
     });
     ensureOk(res);
@@ -379,9 +373,7 @@ export interface BeginPasskeyAuthenticationResponse {
      * Options that should be passed to `navigator.credential.get` to obtain the
      * attested {@link Credential}.
      */
-    options: {
-        publicKey: PublicKeyCredentialRequestOptions;
-    };
+    options: { publicKey: PublicKeyCredentialRequestOptions };
 }
 
 /**

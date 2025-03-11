@@ -253,10 +253,7 @@ export const syncUserDetails = async () => {
 
     if (!hasMatchingEmail) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        await setLSUser({
-            ...getData(LS_KEYS.USER),
-            email: userDetails.email,
-        });
+        await setLSUser({ ...getData(LS_KEYS.USER), email: userDetails.email });
         throw new Error("Email in local storage did not match user details");
     }
 };

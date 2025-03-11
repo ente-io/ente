@@ -112,8 +112,9 @@ class Code {
     String issuer,
     String secret,
     CodeDisplay? display,
-    int digits,
-  ) {
+    int digits, {
+    Algorithm algorithm = Algorithm.sha1,
+  }) {
     final String encodedIssuer = Uri.encodeQueryComponent(issuer);
     return Code(
       account,
@@ -121,10 +122,10 @@ class Code {
       digits,
       defaultPeriod,
       secret,
-      Algorithm.sha1,
+      algorithm,
       type,
       0,
-      "otpauth://${type.name}/$issuer:$account?algorithm=SHA1&digits=$digits&issuer=$encodedIssuer&period=30&secret=$secret",
+      "otpauth://${type.name}/$issuer:$account?algorithm=${algorithm.name.toUpperCase()}&digits=$digits&issuer=$encodedIssuer&period=30&secret=$secret",
       display: display ?? CodeDisplay(),
     );
   }

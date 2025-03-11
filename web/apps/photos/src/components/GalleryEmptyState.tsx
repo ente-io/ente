@@ -54,12 +54,7 @@ export default function GalleryEmptyState({ openUploader }) {
                     color="accent"
                     onClick={() => openUploader("upload")}
                     disabled={!uploadManager.shouldAllowNewUpload()}
-                    sx={{
-                        mt: 1.5,
-                        p: 1,
-                        width: 320,
-                        borderRadius: 0.5,
-                    }}
+                    sx={{ mt: 1.5, p: 1, width: 320, borderRadius: 0.5 }}
                 >
                     <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
                         <AddPhotoAlternateIcon />
@@ -74,12 +69,7 @@ export default function GalleryEmptyState({ openUploader }) {
                     }}
                     onClick={() => openUploader("import")}
                     disabled={!uploadManager.shouldAllowNewUpload()}
-                    sx={{
-                        mt: 1.5,
-                        p: 1,
-                        width: 320,
-                        borderRadius: 0.5,
-                    }}
+                    sx={{ mt: 1.5, p: 1, width: 320, borderRadius: 0.5 }}
                 >
                     <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
                         <FolderIcon />

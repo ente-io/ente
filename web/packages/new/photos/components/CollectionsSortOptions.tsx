@@ -73,9 +73,7 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
 type SortByOptionProps = Pick<
     CollectionsSortOptionsProps,
     "activeSortBy" | "onChangeSortBy"
-> & {
-    sortBy: CollectionsSortBy;
-};
+> & { sortBy: CollectionsSortBy };
 
 const SortByOption: React.FC<React.PropsWithChildren<SortByOptionProps>> = ({
     sortBy,

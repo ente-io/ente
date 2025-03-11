@@ -24,10 +24,10 @@
         "lint-fix": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --write --log-level warn .\" \"yarn workspaces run eslint --fix\" \"yarn workspaces run tsc\""
     },
     "devDependencies": {
-        "concurrently": "^9.1.1",
-        "eslint": "^9.17.0",
-        "prettier": "^3.4.2",
-        "typescript": "5.6.3"
+        "concurrently": "^9.1.2",
+        "eslint": "^9.21.0",
+        "prettier": "^3.5.3",
+        "typescript": "^5.8.2"
     },
     "packageManager": "yarn@1.22.22"
 }

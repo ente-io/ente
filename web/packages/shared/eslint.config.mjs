@@ -2,9 +2,7 @@ import config from "@/build-config/eslintrc-react.mjs";
 
 export default [
     ...config,
-    {
-        ignores: ["next/utils/headers.js"],
-    },
+    { ignores: ["next/utils/headers.js"] },
     {
         rules: {
             /* TODO:

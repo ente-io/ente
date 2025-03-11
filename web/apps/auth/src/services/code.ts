@@ -290,9 +290,7 @@ export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
         }
 
         case "steam": {
-            const steam = new Steam({
-                secret: code.secret,
-            });
+            const steam = new Steam({ secret: code.secret });
             otp = steam.generate();
             nextOTP = steam.generate({
                 timestamp: Date.now() + code.period * 1000,

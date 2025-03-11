@@ -58,9 +58,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     ...rest
 }) => {
     const formik = useFormik({
-        initialValues: {
-            value: initialValue ?? "",
-        },
+        initialValues: { value: initialValue ?? "" },
         onSubmit: async (values, { setFieldError }) => {
             const value = values.value;
             if (!value) {

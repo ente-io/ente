@@ -8,10 +8,7 @@ export default function useWindowSize() {
     const [windowSize, setWindowSize] = useState<{
         width: number;
         height: number;
-    }>({
-        width: undefined,
-        height: undefined,
-    });
+    }>({ width: undefined, height: undefined });
 
     useEffect(() => {
         // Handler to call on window resize

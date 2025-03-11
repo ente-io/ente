@@ -33,7 +33,6 @@ After cloning the main repository with
 git clone https://github.com/ente-io/ente.git
 # Or git clone git@github.com:ente-io/ente.git
 cd ente
-git submodule update --init --recursive
 ```
 
 Create a `compose.yaml` file at the root of the project with the following

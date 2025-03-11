@@ -96,12 +96,7 @@ const saveCredentialsAndNavigateTo = async (
     //   user is signing into an existing account).
     const { keyAttributes, encryptedToken, token, id } = decodedResponse;
 
-    await setLSUser({
-        ...getData(LS_KEYS.USER),
-        token,
-        encryptedToken,
-        id,
-    });
+    await setLSUser({ ...getData(LS_KEYS.USER), token, encryptedToken, id });
     setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
 
     return unstashRedirect() ?? PAGES.CREDENTIALS;

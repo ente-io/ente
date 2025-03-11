@@ -399,10 +399,7 @@ class DownloadManager {
             );
 
             const decrypted = await decryptStreamBytes(
-                {
-                    encryptedData,
-                    decryptionHeader: file.file.decryptionHeader,
-                },
+                { encryptedData, decryptionHeader: file.file.decryptionHeader },
                 file.key,
             );
             return new Response(decrypted).body;
@@ -484,6 +481,12 @@ class DownloadManager {
                         controller.close();
                     } else {
                         // Save it for the next pull.
+
+                        // See: [Note: Revisit some Node.js types errors post 22
+                        // upgrade]
+                        //
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
                         leftoverBytes = data;
                     }
                 } while (!didEnqueue);
@@ -647,13 +650,7 @@ const createRenderableSourceURLs = async (
     // TODO: Can we remove this non-null assertion and reflect it in the types?
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return {
-        url: url!,
-        originalImageBlob,
-        type,
-        mimeType,
-        canForceConvert,
-    };
+    return { url: url!, originalImageBlob, type, mimeType, canForceConvert };
 };
 
 async function getRenderableLivePhotoURL(
@@ -720,9 +717,7 @@ const photos_downloadThumbnail = async (file: EnteFile) => {
             const params = new URLSearchParams({ token });
             return fetch(
                 `${customOrigin}/files/preview/${file.id}?${params.toString()}`,
-                {
-                    headers: publicRequestHeaders(),
-                },
+                { headers: publicRequestHeaders() },
             );
         } else {
             return fetch(`https://thumbnails.ente.io/?fileID=${file.id}`, {
@@ -779,9 +774,7 @@ const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
             const params = new URLSearchParams({ token });
             return fetch(
                 `${customOrigin}/files/download/${file.id}?${params.toString()}`,
-                {
-                    headers: publicRequestHeaders(),
-                },
+                { headers: publicRequestHeaders() },
             );
         } else {
             return fetch(`https://files.ente.io/?fileID=${file.id}`, {
@@ -813,9 +806,7 @@ const publicAlbums_downloadThumbnail = async (
             });
             return fetch(
                 `${customOrigin}/public-collection/files/preview/${file.id}?${params.toString()}`,
-                {
-                    headers: publicRequestHeaders(),
-                },
+                { headers: publicRequestHeaders() },
             );
         } else {
             return fetch(

@@ -1,6 +1,5 @@
 import { useBaseContext } from "@/base/context";
 import { Notification } from "@/new/photos/components/Notification";
-import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext } from "react";
@@ -118,10 +117,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                 <Notification
                     key={attributes.id}
                     horizontal="left"
-                    sx={{
-                        "&&": { bottom: `${index * 80 + 20}px` },
-                        zIndex: aboveFileViewerContentZ,
-                    }}
+                    sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
                     open={isFilesDownloadStarted(attributes)}
                     onClose={handleClose(attributes)}
                     keepOpenOnClick

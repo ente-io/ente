@@ -112,7 +112,11 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
-  bool get sortByName => this != SectionType.face && this != SectionType.magic;
+  // TODO: lau: check if we should sort moment again
+  bool get sortByName =>
+      this != SectionType.face &&
+      this != SectionType.magic &&
+      this != SectionType.moment;
 
   bool get isEmptyCTAVisible {
     switch (this) {
@@ -242,6 +246,7 @@ extension SectionTypeExtensions on SectionType {
 
       case SectionType.moment:
         if (flagService.internalUser) {
+          // TODO: lau: remove this whole smart memories and moment altogether
           return SearchService.instance.smartMemories(context, limit);
         }
         return SearchService.instance.getRandomMomentsSearchResults(context);

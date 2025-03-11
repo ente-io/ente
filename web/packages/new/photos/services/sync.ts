@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
+import { resetFileViewerDataSourceOnClose } from "@/gallery/components/viewer/data-source";
 import { isHiddenCollection } from "@/new/photos/services/collection";
 import {
     getAllLatestCollections,
@@ -9,7 +10,6 @@ import { isMLSupported, mlStatusSync, mlSync } from "@/new/photos/services/ml";
 import { searchDataSync } from "@/new/photos/services/search";
 import { syncSettings } from "@/new/photos/services/settings";
 import { splitByPredicate } from "@/utils/array";
-import { resetFileViewerDataSourceOnClose } from "../components/FileViewerComponents-temp";
 
 /**
  * Part 1 of {@link sync}. See TODO below for why this is split.
@@ -77,9 +77,9 @@ export const syncFilesAndCollections = async () => {
     );
     await syncTrash(allCollections, () => {});
     if (didUpdateNormalFiles || didUpdateHiddenFiles) {
-        // TODO:
+        // TODO: Ok for now since we're only called by deduper, but still needs
+        // fixing instead of a hidden gotcha.
         // exportService.onLocalFilesUpdated();
-        // TODO(PS): Use direct one
-        await resetFileViewerDataSourceOnClose();
+        resetFileViewerDataSourceOnClose();
     }
 };

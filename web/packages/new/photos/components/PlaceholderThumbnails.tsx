@@ -33,10 +33,7 @@ export const StaticThumbnail: React.FC<StaticThumbnailProps> = ({
             borderStyle: "solid",
             borderColor: "stroke.faint",
             borderRadius: "4px",
-            "& > svg": {
-                color: "stroke.muted",
-                fontSize: "50px",
-            },
+            "& > svg": { color: "stroke.muted", fontSize: "50px" },
         }}
     >
         {fileType != FileType.video ? (

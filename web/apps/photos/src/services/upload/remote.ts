@@ -26,9 +26,7 @@ const ObjectUploadURL = z.object({
 
 export type ObjectUploadURL = z.infer<typeof ObjectUploadURL>;
 
-const ObjectUploadURLResponse = z.object({
-    urls: ObjectUploadURL.array(),
-});
+const ObjectUploadURLResponse = z.object({ urls: ObjectUploadURL.array() });
 
 export class PhotosUploadHttpClient {
     async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
@@ -88,9 +86,7 @@ export class PhotosUploadHttpClient {
             }
             const response = await HTTPService.get(
                 await apiURL("/files/multipart-upload-urls"),
-                {
-                    count,
-                },
+                { count },
                 { "X-Auth-Token": token },
             );
 
@@ -139,9 +135,7 @@ export class PhotosUploadHttpClient {
                     `${origin}/file-upload`,
                     file,
                     null,
-                    {
-                        "UPLOAD-URL": fileUploadURL.url,
-                    },
+                    { "UPLOAD-URL": fileUploadURL.url },
                     progressTracker,
                 ),
             );
@@ -196,9 +190,7 @@ export class PhotosUploadHttpClient {
                     `${origin}/multipart-upload`,
                     filePart,
                     null,
-                    {
-                        "UPLOAD-URL": partUploadURL,
-                    },
+                    { "UPLOAD-URL": partUploadURL },
                     progressTracker,
                 );
                 if (!resp?.data?.etag) {
@@ -238,10 +230,7 @@ export class PhotosUploadHttpClient {
                     `${origin}/multipart-complete`,
                     reqBody,
                     null,
-                    {
-                        "content-type": "text/xml",
-                        "UPLOAD-URL": completeURL,
-                    },
+                    { "content-type": "text/xml", "UPLOAD-URL": completeURL },
                 ),
             );
         } catch (e) {
@@ -315,9 +304,7 @@ export class PublicUploadHttpClient {
             }
             const response = await HTTPService.get(
                 await apiURL("/public-collection/multipart-upload-urls"),
-                {
-                    count,
-                },
+                { count },
                 {
                     "X-Auth-Access-Token": token,
                     ...(passwordToken && {

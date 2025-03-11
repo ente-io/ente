@@ -163,9 +163,7 @@ const getCollections = async (
     try {
         const resp = await HTTPService.get(
             await apiURL("/collections/v2"),
-            {
-                sinceTime,
-            },
+            { sinceTime },
             { "X-Auth-Token": token },
         );
         const decryptedCollections: Collection[] = await Promise.all(
@@ -387,12 +385,8 @@ export const updateTrash = async (
             }
             resp = await HTTPService.get(
                 await apiURL("/trash/v2/diff"),
-                {
-                    sinceTime: time,
-                },
-                {
-                    "X-Auth-Token": token,
-                },
+                { sinceTime: time },
+                { "X-Auth-Token": token },
             );
             // #Perf: This can be optimized by running the decryption in parallel
             for (const trashItem of resp.data.diff as EncryptedTrashItem[]) {
@@ -447,9 +441,7 @@ export const emptyTrash = async () => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             null,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
     } catch (e) {
         log.error("empty trash failed", e);

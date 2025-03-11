@@ -299,10 +299,7 @@ export const encryptBlob = async (
         null,
         sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL,
     );
-    return {
-        encryptedData: pushResult,
-        decryptionHeader: header,
-    };
+    return { encryptedData: pushResult, decryptionHeader: header };
 };
 
 /**
@@ -412,10 +409,7 @@ export const initChunkEncryption = async (key: BytesOrB64) => {
     const keyBytes = await bytes(key);
     const { state, header } =
         sodium.crypto_secretstream_xchacha20poly1305_init_push(keyBytes);
-    return {
-        decryptionHeader: await toB64(header),
-        pushState: state,
-    };
+    return { decryptionHeader: await toB64(header), pushState: state };
 };
 
 /**
@@ -806,11 +800,7 @@ export const deriveSensitiveKey = async (passphrase: string, salt: string) => {
     while (memLimit > minMemLimit) {
         try {
             const key = await deriveKey(passphrase, salt, opsLimit, memLimit);
-            return {
-                key,
-                opsLimit,
-                memLimit,
-            };
+            return { key, opsLimit, memLimit };
         } catch {
             opsLimit *= 2;
             memLimit /= 2;

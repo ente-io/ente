@@ -87,26 +87,16 @@ export const AllAlbums: React.FC<AllAlbums> = ({
 export const AllCollectionMobileBreakpoint = 559;
 
 const AllAlbumsDialog = styled(Dialog)(({ theme }) => ({
-    "& .MuiDialog-container": {
-        justifyContent: "flex-end",
-    },
-    "& .MuiPaper-root": {
-        maxWidth: "494px",
-    },
+    "& .MuiDialog-container": { justifyContent: "flex-end" },
+    "& .MuiPaper-root": { maxWidth: "494px" },
     "& .MuiDialogTitle-root": {
         padding: theme.spacing(2),
         paddingRight: theme.spacing(1),
     },
-    "& .MuiDialogContent-root": {
-        padding: theme.spacing(2),
-    },
+    "& .MuiDialogContent-root": { padding: theme.spacing(2) },
     [theme.breakpoints.down(AllCollectionMobileBreakpoint)]: {
-        "& .MuiPaper-root": {
-            width: "324px",
-        },
-        "& .MuiDialogContent-root": {
-            padding: 6,
-        },
+        "& .MuiPaper-root": { width: "324px" },
+        "& .MuiDialogContent-root": { padding: 6 },
     },
 }));
 

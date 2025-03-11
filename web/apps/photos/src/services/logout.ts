@@ -3,6 +3,7 @@ import {
     logoutClearStateAgain,
 } from "@/accounts/services/logout";
 import log from "@/base/log";
+import { logoutFileViewerDataSource } from "@/gallery/components/viewer/data-source";
 import { downloadManager } from "@/gallery/services/download";
 import { resetUploadState } from "@/gallery/services/upload";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
@@ -76,6 +77,12 @@ export const photosLogout = async () => {
         logoutSearch();
     } catch (e) {
         ignoreError("Search", e);
+    }
+
+    try {
+        logoutFileViewerDataSource();
+    } catch (e) {
+        ignoreError("File viewer", e);
     }
 
     // - Desktop

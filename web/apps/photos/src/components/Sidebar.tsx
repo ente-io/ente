@@ -180,9 +180,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 );
 
 const RootSidebarDrawer = styled(SidebarDrawer)(({ theme }) => ({
-    "& .MuiPaper-root": {
-        padding: theme.spacing(1.5),
-    },
+    "& .MuiPaper-root": { padding: theme.spacing(1.5) },
 }));
 
 interface SectionProps {
@@ -342,9 +340,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
             message = (
                 <Trans
                     i18nKey={"subscription_info_expired"}
-                    components={{
-                        a: <LinkButton onClick={handleClick} />,
-                    }}
+                    components={{ a: <LinkButton onClick={handleClick} /> }}
                 />
             );
         }
@@ -354,9 +350,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         message = (
             <Trans
                 i18nKey={"subscription_info_storage_quota_exceeded"}
-                components={{
-                    a: <LinkButton onClick={handleClick} />,
-                }}
+                components={{ a: <LinkButton onClick={handleClick} /> }}
             />
         );
     }
@@ -368,10 +362,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
             <Typography
                 variant="small"
                 onClick={handleClick && handleClick}
-                sx={{
-                    color: "text.muted",
-                    cursor: handleClick && "pointer",
-                }}
+                sx={{ color: "text.muted", cursor: handleClick && "pointer" }}
             >
                 {message}
             </Typography>
@@ -1081,10 +1072,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         showMiniDialog({
             title: t("view_logs"),
             message: <Trans i18nKey={"view_logs_message"} />,
-            continue: {
-                text: t("view_logs"),
-                action: viewLogs,
-            },
+            continue: { text: t("view_logs"), action: viewLogs },
         });
 
     const viewLogs = () => {

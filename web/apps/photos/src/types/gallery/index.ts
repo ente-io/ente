@@ -1,7 +1,7 @@
 import { type SelectionContext } from "@/new/photos/components/gallery";
 import type { User } from "@ente/shared/user/types";
+import { TimeStampListItem } from "components/FileList";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
-import { TimeStampListItem } from "components/PhotoList";
 
 export interface SelectedState {
     [k: number]: boolean;

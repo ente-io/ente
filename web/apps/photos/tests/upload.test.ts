@@ -25,10 +25,7 @@ const DATE_TIME_PARSING_TEST_FILE_NAMES = [
         fileName: "2022-02-18 16.00.12-DCMX.png",
         expectedDateTime: "2022-02-18 16:00:12",
     },
-    {
-        fileName: "20221107_231730",
-        expectedDateTime: "2022-11-07 23:17:30",
-    },
+    { fileName: "20221107_231730", expectedDateTime: "2022-11-07 23:17:30" },
     {
         fileName: "2020-11-01 02.31.02",
         expectedDateTime: "2020-11-01 02:31:02",

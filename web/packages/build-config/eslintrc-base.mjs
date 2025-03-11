@@ -14,28 +14,20 @@ export default tseslint.config(
                 tsconfigRootDir: import.meta.dirname,
             },
         },
-        linterOptions: {
-            reportUnusedDisableDirectives: "error",
-        },
+        linterOptions: { reportUnusedDisableDirectives: "error" },
     },
-    {
-        ignores: ["eslint.config.mjs"],
-    },
+    { ignores: ["eslint.config.mjs"] },
     {
         rules: {
             // Allow numbers to be used in template literals.
             "@typescript-eslint/restrict-template-expressions": [
                 "error",
-                {
-                    allowNumber: true,
-                },
+                { allowNumber: true },
             ],
             // Allow void expressions as the entire body of an arrow function.
             "@typescript-eslint/no-confusing-void-expression": [
                 "error",
-                {
-                    ignoreArrowShorthand: true,
-                },
+                { ignoreArrowShorthand: true },
             ],
             // Allow async functions to be passed as JSX attributes expected to
             // be functions that return void (typically onFoo event handlers).
@@ -44,12 +36,7 @@ export default tseslint.config(
             // Promise handlers.
             "@typescript-eslint/no-misused-promises": [
                 "error",
-                {
-                    checksVoidReturn: {
-                        arguments: false,
-                        attributes: false,
-                    },
-                },
+                { checksVoidReturn: { arguments: false, attributes: false } },
             ],
             // Allow force unwrapping potentially optional values.
             //
