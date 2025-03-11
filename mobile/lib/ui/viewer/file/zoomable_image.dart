@@ -216,15 +216,21 @@ class _ZoomableImageState extends State<ZoomableImage> {
                                       vertical: 4.0,
                                       horizontal: 8.0,
                                     ),
-                                    child: Text(
-                                      widget.photo.caption!,
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: getEnteTextTheme(context)
-                                          .mini
-                                          .copyWith(
-                                            color: textBaseDark,
-                                          ),
+                                    child: SizedBox(
+                                      width:
+                                          MediaQuery.sizeOf(context).width - 16,
+                                      child: Center(
+                                        child: Text(
+                                          widget.photo.caption!,
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: getEnteTextTheme(context)
+                                              .mini
+                                              .copyWith(
+                                                color: textBaseDark,
+                                              ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
