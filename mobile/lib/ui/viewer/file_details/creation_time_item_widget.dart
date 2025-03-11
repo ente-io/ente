@@ -5,6 +5,7 @@ import "package:photos/ente_theme_data.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/bulk_edit_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/magic_util.dart";
@@ -47,6 +48,21 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
   }
 
   void _showDateTimePicker(EnteFile file) async {
+    final DateTime? newDate = await showModalBottomSheet<DateTime?>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => BulkEditDateBottomSheet(
+        enteFiles: [file],
+        showHeader: false,
+      ),
+    );
+    if (newDate != null) {
+      widget.file.creationTime = newDate.microsecondsSinceEpoch;
+      setState(() {});
+    }
+  }
+
+  void _showDateTimePickerOLD(EnteFile file) async {
     final Locale locale = (await getLocale())!;
     final localeType = getFromLocalString(locale);
     final dateResult = await DatePickerBdaya.showDatePicker(

@@ -160,13 +160,13 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
                     labelText: S.of(context).confirm,
                     buttonSize: ButtonSize.large,
                     onTap: () async {
-                      await _editDates(
+                      final newDate = await _editDates(
                         context,
                         widget.enteFiles,
                         selectedDate,
                         selectSingleDate ? null : startDate,
                       );
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(newDate);
                     },
                   ),
                   const SizedBox(height: 8),
@@ -175,7 +175,7 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
                     labelText: S.of(context).cancel,
                     buttonSize: ButtonSize.large,
                     onTap: () async {
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(null);
                     },
                   ),
                 ],
@@ -189,7 +189,7 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
   }
 }
 
-Future<void> _editDates(
+Future<DateTime> _editDates(
   BuildContext context,
   Iterable<EnteFile> enteFiles,
   DateTime newDate,
@@ -216,6 +216,7 @@ Future<void> _editDates(
       newDate.microsecondsSinceEpoch,
     );
   }
+  return newDate;
 }
 
 class DateTimePickerWidget extends StatefulWidget {
