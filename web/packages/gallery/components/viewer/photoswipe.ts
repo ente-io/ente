@@ -231,8 +231,7 @@ export class FileViewerPhotoSwipe {
             // necessary, we could've target the "pswp" class too in our CSS
             // since we only have a single PhotoSwipe instance.
             mainClass: "pswp-ente",
-            // TODO(PS): Translated variants
-            closeTitle: pt("Close"),
+            closeTitle: t("close"),
             zoomTitle: pt("Zoom"),
             arrowPrevTitle: pt("Previous"),
             arrowNextTitle: pt("Next"),
