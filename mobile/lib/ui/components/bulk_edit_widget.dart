@@ -1,6 +1,7 @@
 import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -153,7 +154,7 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
                   const SizedBox(height: 16),
                   ButtonWidget(
                     buttonType: ButtonType.primary,
-                    labelText: "Confirm",
+                    labelText: S.of(context).confirm,
                     buttonSize: ButtonSize.large,
                     onTap: () async {
                       await _editDates(
@@ -168,7 +169,7 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
                   const SizedBox(height: 8),
                   ButtonWidget(
                     buttonType: ButtonType.neutral,
-                    labelText: "Cancel",
+                    labelText: S.of(context).cancel,
                     buttonSize: ButtonSize.large,
                     onTap: () async {
                       Navigator.of(context).pop();
@@ -259,7 +260,9 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                _showTimePicker ? "Select time" : "Select date",
+                _showTimePicker
+                    ? S.of(context).selectTime
+                    : S.of(context).selectDate,
                 style: TextStyle(
                   color: colorScheme.textBase,
                   fontSize: 16,
@@ -337,7 +340,9 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   child: Text(
-                    _showTimePicker ? "Previous" : "Cancel",
+                    _showTimePicker
+                        ? S.of(context).previous
+                        : S.of(context).cancel,
                     style: TextStyle(
                       color: colorScheme.textBase,
                       fontSize: 14,
@@ -359,7 +364,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   child: Text(
-                    _showTimePicker ? "Done" : "Next",
+                    _showTimePicker ? S.of(context).done : S.of(context).next,
                     style: TextStyle(
                       color: colorScheme.primary700,
                       fontSize: 14,
@@ -421,8 +426,8 @@ class DateAndTimeWidget extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 selectDate
-                    ? "Select one date and time for all"
-                    : "Select start of range",
+                    ? S.of(context).selectOneDateAndTimeForAll
+                    : S.of(context).selectStartOfRange,
                 style: TextStyle(
                   color: colorScheme.textBase,
                   fontSize: 16,
@@ -435,8 +440,8 @@ class DateAndTimeWidget extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 selectDate
-                    ? "This will make the date and time of all selected photos the same."
-                    : "This is the first in the group. Other selected photos will automatically shift based on this new date",
+                    ? S.of(context).thisWillMakeTheDateAndTimeOfAllSelected
+                    : S.of(context).allWillShiftRangeBasedOnFirst,
                 style: TextStyle(
                   color: colorScheme.textFaint,
                   fontSize: 12,
@@ -506,7 +511,7 @@ class DateAndTimeWidget extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                "New range",
+                S.of(context).newRange,
                 style: TextStyle(
                   color: colorScheme.textBase,
                   fontSize: 12,
@@ -612,14 +617,14 @@ class SelectDateOrShiftWidget extends StatelessWidget {
                 color: colorScheme.textBase,
               ),
               title: Text(
-                "Select one date and time",
+                S.of(context).selectOneDateAndTime,
                 style: TextStyle(
                   color: colorScheme.textBase,
                   fontSize: 16,
                 ),
               ),
               subtitle: Text(
-                "Move selected photos to one date",
+                S.of(context).moveSelectedPhotosToOneDate,
                 style: TextStyle(
                   color: colorScheme.textFaint,
                   fontSize: 12,
@@ -644,14 +649,14 @@ class SelectDateOrShiftWidget extends StatelessWidget {
                 color: colorScheme.textBase,
               ),
               title: Text(
-                "Shift dates and time",
+                S.of(context).shiftDatesAndTime,
                 style: TextStyle(
                   color: colorScheme.textBase,
                   fontSize: 16,
                 ),
               ),
               subtitle: Text(
-                "Photos keep relative time difference",
+                S.of(context).photosKeepRelativeTimeDifference,
                 style: TextStyle(
                   color: colorScheme.textFaint,
                   fontSize: 12,
@@ -712,7 +717,7 @@ class PhotoDateHeaderWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "$photoCount photos",
+                        S.of(context).photosCount(photoCount),
                         style: TextStyle(
                           color: colorScheme.textBase,
                           fontSize: 18,
@@ -772,7 +777,7 @@ class PhotoDateHeaderWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "${DateFormat('EEE, dd MMM yyyy').format(startDate)} · ${DateFormat.Hm(locale.languageCode).format(startDate)}",
+                        "${DateFormat.yMEd(locale.languageCode).format(startDate)} · ${DateFormat.Hm(locale.languageCode).format(startDate)}",
                         style: TextStyle(
                           color: colorScheme.textMuted,
                           fontSize: 12,
@@ -788,5 +793,5 @@ class PhotoDateHeaderWidget extends StatelessWidget {
 }
 
 String _formatDate(DateTime date, Locale locale) {
-  return "${DateFormat('EEE, dd MMM yyyy').format(date)}\n${DateFormat.Hm(locale.languageCode).format(date)}";
+  return "${DateFormat.yMEd(locale.languageCode).format(date)}\n${DateFormat.Hm(locale.languageCode).format(date)}";
 }

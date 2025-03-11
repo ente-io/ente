@@ -397,7 +397,7 @@ class _FileSelectionActionsWidgetState
           shouldShow: widget.selectedFiles.files.every(
             (element) => (element.ownerID == currentUserID),
           ),
-          labelText: "Edit time", // S.of(context).edit,
+          labelText: S.of(context).editTime,
           icon: Icons.edit_calendar_outlined,
           onTap: () async {
             await showModalBottomSheet(
