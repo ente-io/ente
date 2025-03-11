@@ -30,14 +30,36 @@ class LocalDBMigration {
       modification_time INTEGER NOT NULL,
       latitude REAL,
       longitude REAL,
+      PRIMARY KEY (id, hash),
+      FOREIGN KEY (id) REFERENCES assets (id) ON DELETE CASCADE
+    );
+    ''',
+    '''
+    CREATE TABLE device_path (
+      path_id TEXT NOT NULL,
+      hash TEXT NOT NULL,
+      creation_time INTEGER NOT NULL,
+      modification_time INTEGER NOT NULL,
+      latitude REAL,
+      longitude REAL,
       PRIMARY KEY (id, hash)
+    );
+    ''',
+    '''
+    CREATE TABLE device_path_assets (
+      path_id TEXT NOT NULL,
+      asset_id TEXT NOT NULL,
+      PRIMARY KEY (path_id, asset_id),
+      FOREIGN KEY (path_id) REFERENCES device_path (path_id) ON DELETE CASCADE,
+      FOREIGN KEY (asset_id) REFERENCES assets (id) ON DELETE CASCADE
     );
     ''',
     '''
     CREATE TABLE queue (
       id TEXT NOT NULL,
       name TEXT NOT NULL,
-      PRIMARY KEY (id, name)
+      PRIMARY KEY (id, name),
+      FOREIGN KEY (id) REFERENCES assets (id) ON DELETE CASCADE
     )
     ''',
   ];
