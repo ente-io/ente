@@ -754,15 +754,18 @@ class PhotoDateHeaderWidget extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          enteFiles.first.displayName,
-                          style: TextStyle(
-                            color: colorScheme.textBase,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                      Padding(
+                        padding: const EdgeInsets.only(right: 40),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            enteFiles.first.displayName,
+                            style: TextStyle(
+                              color: colorScheme.textBase,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
