@@ -605,6 +605,11 @@
       "title": "Letterboxd"
     },
     {
+      "title": "LinkedIn",
+      "slug": "linkedin",
+      "hex": "2596be"
+    },
+    {
       "title": "Linux.Do",
       "slug": "linux_do",
       "altNames": [
