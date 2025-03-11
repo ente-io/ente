@@ -135,6 +135,11 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
                   selectingTime = false;
                   setState(() {});
                 },
+                () {
+                  selectingDate = false;
+                  selectingTime = false;
+                  setState(() {});
+                },
                 selectedDate,
                 maxDate,
                 startWithTime: selectingTime,
@@ -211,12 +216,14 @@ Future<void> _editDates(
 
 class DateTimePickerWidget extends StatefulWidget {
   final Function(DateTime) onDateTimeSelected;
+  final Function() onCancel;
   final DateTime initialDateTime;
   final DateTime maxDateTime;
   final bool startWithTime;
 
   const DateTimePickerWidget(
     this.onDateTimeSelected,
+    this.onCancel,
     this.initialDateTime,
     this.maxDateTime, {
     this.startWithTime = false,
@@ -342,8 +349,7 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                         _showTimePicker = false;
                       });
                     } else {
-                      // Cancel the whole operation
-                      Navigator.of(context).pop();
+                      widget.onCancel();
                     }
                   },
                 ),
@@ -467,11 +473,11 @@ class DateAndTimeWidget extends StatelessWidget {
                   ),
                   onTap: () => onPressedDate(),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Divider(
-                    color: colorScheme.blurStrokeFaint,
-                  ),
+                Divider(
+                  color: colorScheme.blurStrokeFaint,
+                  indent: 16,
+                  endIndent: 16,
+                  height: 0.5,
                 ),
                 ListTile(
                   leading: Icon(
@@ -624,14 +630,12 @@ class SelectDateOrShiftWidget extends StatelessWidget {
               ),
               onTap: () => onSelectOneDate(),
             ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Divider(
-                color: colorScheme.blurStrokeFaint,
-              ),
+            Divider(
+              color: colorScheme.blurStrokeFaint,
+              indent: 16,
+              endIndent: 16,
+              height: 0.5,
             ),
-
             // Shift dates option
             ListTile(
               leading: Icon(
