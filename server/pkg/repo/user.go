@@ -319,8 +319,8 @@ func (repo *UserRepository) GetUsersWithExceedingStorages(percentageThreshold in
 		INNER JOIN usage 
 		ON users.user_id = usage.user_id 
 		INNER JOIN subscriptions 
-		ON users.user_id = subscriptions.user_id AND usage.storage_consumed >= (subscriptions.storage * $1 / 100.0) AND users.encrypted_email IS NOT NULL AND users.family_admin_id IS NULL;
-		}`, percentageThreshold)
+		ON users.user_id = subscriptions.user_id AND usage.storage_consumed >= (subscriptions.storage * $1 / 100.0) AND users.encrypted_email is not null AND users.family_admin_id is NULL;
+		`, percentageThreshold)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}

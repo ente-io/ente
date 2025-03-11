@@ -980,9 +980,8 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		_ = castDb.DeleteUnclaimedCodes(context.Background(), timeUtil.MicrosecondsBeforeMinutes(60))
 		dataCleanupCtrl.DeleteDataCron()
 	})
-
 	schedule(c, "@every 24h", func() {
-		emailNotificationCtrl.SendStorageLimitExceededMails()
+		emailNotificationCtrl.SendStorageAlerts()
 	})
 
 	schedule(c, "@every 1m", func() {
@@ -1003,6 +1002,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 	})
 
 	c.Start()
+	log.Infoln(c.Entry(17).Next)
 }
 
 func cors() gin.HandlerFunc {

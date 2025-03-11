@@ -166,7 +166,7 @@ func (c *EmailNotificationController) OnSubscriptionCancelled(userID int64) {
 	}
 }
 
-func (c *EmailNotificationController) SendStorageLimitExceededMails() {
+func (c *EmailNotificationController) SendStorageAlerts() {
 	if c.isSendingStorageLimitExceededMails {
 		log.Info("Skipping sending storage limit exceeded mails as another instance is still running")
 		return
@@ -179,30 +179,59 @@ func (c *EmailNotificationController) SendStorageLimitExceededMails() {
 		return
 	}
 	defer c.LockController.ReleaseLock(StorageLimitExceededMailLock)
-	users, err := c.UserRepo.GetUsersWithIndividualPlanWhoHaveExceededStorageQuota()
-	if err != nil {
-		log.Error("Error while fetching user list", err)
-		return
+
+	// Notifs struct gets the list of both the users who have consumed
+	// 90% storage and 100% of their subcriptions. Then, it ranges through
+	// the slices of the both the users and inside this for loop, users from
+	// both the slices are separately looped. This was done to avoid
+	// duplication of a lot of code if both the users were ranged inside a loop
+	// separately.
+	notifs := []struct {
+		getListofSubscribers func() ([]ente.User, error)
+		template             string
+		subject              string
+	}{
+		{
+			getListofSubscribers: func() ([]ente.User, error) {
+				return c.UserRepo.GetUsersWithExceedingStorages(90)
+			},
+			template: StorageLimitExceededTemplate,
+			subject:  StorageLimitExceededTemplate,
+		},
+		{
+			getListofSubscribers: func() ([]ente.User, error) {
+				return c.UserRepo.GetUsersWithExceedingStorages(100)
+			},
+			template: StorageLimitExceededTemplate,
+			subject:  StorageLimitExceededSubject,
+		},
 	}
-	for _, u := range users {
-		lastNotificationTime, err := c.NotificationHistoryRepo.GetLastNotificationTime(u.ID, StorageLimitExceededTemplateID)
-		logger := log.WithFields(log.Fields{
-			"user_id": u.ID,
-		})
+	for _, notification := range notifs {
+		users, err := notification.getListofSubscribers()
 		if err != nil {
-			logger.Error("Could not fetch last notification time", err)
+			log.WithError(err).Error("Failed to get list of users")
 			continue
 		}
-		if lastNotificationTime > 0 {
-			continue
+		for _, u := range users {
+			lastNotificationTime, err := c.NotificationHistoryRepo.GetLastNotificationTime(u.ID, StorageLimitExceededTemplateID)
+			logger := log.WithFields(log.Fields{
+				"user_id": u.ID,
+			})
+			if err != nil {
+				logger.Error("Could not fetch last notification time", err)
+				continue
+			}
+			if lastNotificationTime > 0 {
+				continue
+			}
+			logger.Info("Alerting about storage limit exceeded")
+			err = email.SendTemplatedEmail([]string{u.Email}, "team@ente.io", "team@ente.io", notification.subject, notification.template, nil, nil)
+			if err != nil {
+				logger.Info("Error notifying", err)
+				continue
+			}
+			c.NotificationHistoryRepo.SetLastNotificationTimeToNow(u.ID, StorageLimitExceededTemplateID)
 		}
-		logger.Info("Alerting about storage limit exceeded")
-		err = email.SendTemplatedEmail([]string{u.Email}, "team@ente.io", "team@ente.io", StorageLimitExceededSubject, StorageLimitExceededTemplate, nil, nil)
-		if err != nil {
-			logger.Info("Error notifying", err)
-			continue
-		}
-		c.NotificationHistoryRepo.SetLastNotificationTimeToNow(u.ID, StorageLimitExceededTemplateID)
 	}
 }
 
@@ -213,14 +242,14 @@ func (c *EmailNotificationController) setStorageLimitExceededMailerJobStatus(isS
 func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 	subscribedUsers, subUsersErr := c.UserRepo.GetSubscribedUsersWithoutFamily()
 	if subUsersErr != nil {
-		stacktrace.Propagate(subUsersErr, "Failed to get subscribers")
+		return stacktrace.Propagate(subUsersErr, "Failed to get subscribers")
 	}
 
 	batchSize := 100
 	totalSubUsers := len(subscribedUsers)
 	logrus.Println(totalSubUsers)
 
-	for i := 0; i < totalSubUsers; i++ {
+	for i := range totalSubUsers {
 		end := i + batchSize
 		if end > totalSubUsers {
 			end = totalSubUsers
@@ -236,7 +265,7 @@ func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 				break
 			}
 
-			thirtyDays := 30 * t.Second
+			thirtyDays := 30 * 24 * t.Hour
 			creationTime := t.Unix(0, user.CreationTime)
 			timeSinceCreation := t.Since(creationTime)
 
