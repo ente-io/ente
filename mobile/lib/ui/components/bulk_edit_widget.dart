@@ -11,10 +11,12 @@ import "package:photos/utils/magic_util.dart";
 
 class BulkEditDateBottomSheet extends StatefulWidget {
   final Iterable<EnteFile> enteFiles;
+  final bool showHeader;
 
   const BulkEditDateBottomSheet({
     super.key,
     required this.enteFiles,
+    this.showHeader = true,
   });
 
   @override
@@ -90,11 +92,12 @@ class _BulkEditDateBottomSheetState extends State<BulkEditDateBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Photo count and date range section
-            PhotoDateHeaderWidget(
-              enteFiles: widget.enteFiles,
-              startDate: startDate,
-              endDate: endDate,
-            ),
+            if (widget.showHeader)
+              PhotoDateHeaderWidget(
+                enteFiles: widget.enteFiles,
+                startDate: startDate,
+                endDate: endDate,
+              ),
             if (showSingleOrShiftChoice)
               SelectDateOrShiftWidget(
                 onSelectOneDate: () {
