@@ -88,9 +88,7 @@ type FormProps = ContentsProps & {
 
 const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
     const form = useFormik({
-        initialValues: {
-            apiOrigin: initialAPIOrigin,
-        },
+        initialValues: { apiOrigin: initialAPIOrigin },
         validate: ({ apiOrigin }) => {
             try {
                 // The expression is not unused, it is used to validate the URL.
@@ -223,6 +221,4 @@ const updateAPIOrigin = async (origin: string) => {
     await setKV("apiOrigin", origin);
 };
 
-const PingResponse = z.object({
-    message: z.enum(["pong"]),
-});
+const PingResponse = z.object({ message: z.enum(["pong"]) });

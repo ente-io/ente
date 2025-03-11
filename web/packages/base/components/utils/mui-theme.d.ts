@@ -90,12 +90,7 @@ declare module "@mui/material/styles" {
          * corresponding strengths of "text.*" and "fill.*", and an extra
          * "fainter" variant for ad-hoc uses.
          */
-        stroke: {
-            base: string;
-            muted: string;
-            faint: string;
-            fainter: string;
-        };
+        stroke: { base: string; muted: string; faint: string; fainter: string };
         /**
          * Neutral transparent colors for filling small areas like icon or
          * button backgrounds.
@@ -121,11 +116,7 @@ declare module "@mui/material/styles" {
          *
          * These change with the color scheme.
          */
-        backdrop: {
-            base: string;
-            muted: string;
-            faint: string;
-        };
+        backdrop: { base: string; muted: string; faint: string };
         /**
          * Various ad-hoc fixed colors used by our designs.
          *

@@ -195,12 +195,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                             </FocusVisibleButton>
                         )}
                         <LoadingButton
-                            sx={{
-                                "&&&": {
-                                    mt: 2,
-                                    ...buttonSx,
-                                },
-                            }}
+                            sx={{ "&&&": { mt: 2, ...buttonSx } }}
                             fullWidth
                             variant="contained"
                             color="accent"

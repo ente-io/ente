@@ -237,11 +237,9 @@ Future<bool> editFileCaption(
       caption,
       showDoneToast: false,
     );
+
     return true;
   } catch (e) {
-    if (context != null) {
-      showShortToast(context, S.of(context).somethingWentWrong);
-    }
     return false;
   }
 }

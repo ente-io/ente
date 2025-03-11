@@ -2,6 +2,8 @@
 
 ## v1.7.11 (Unreleased)
 
+- Improved file viewer.
+- Improved live photo experience.
 - .
 
 ## v1.7.10

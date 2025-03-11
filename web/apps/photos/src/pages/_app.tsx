@@ -24,7 +24,6 @@ import {
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
-import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migration";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
@@ -49,10 +48,8 @@ import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 
 import "photoswipe/dist/photoswipe.css";
-// TODO(PS): Note, auto hide only works with the new CSS.
-// import "../../../../packages/gallery/components/viewer/ps5/dist/photoswipe.css";
-
 import "styles/global.css";
+import "styles/photoswipe.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
@@ -170,13 +167,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         <ThemeProvider theme={photosTheme}>
             <CustomHead {...{ title }} />
             <CssBaseline enableColorScheme />
+
             <ThemedLoadingBar ref={loadingBarRef} />
-
-            <AttributedMiniDialog
-                sx={{ zIndex: aboveFileViewerContentZ }}
-                {...miniDialogProps}
-            />
-
+            <AttributedMiniDialog {...miniDialogProps} />
             <Notification {...notificationProps} />
 
             {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}

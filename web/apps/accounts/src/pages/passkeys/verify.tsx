@@ -127,12 +127,7 @@ const Page = () => {
             return;
         }
 
-        return {
-            redirectURL,
-            passkeySessionID,
-            clientPackage,
-            beginResponse,
-        };
+        return { redirectURL, passkeySessionID, clientPackage, beginResponse };
     }, []);
 
     /**

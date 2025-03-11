@@ -7,9 +7,9 @@
         "@/gallery": "*",
         "@/utils": "*",
         "@ente/shared": "*",
-        "@mui/material": "^6.4.6",
-        "@mui/system": "^6.4.6",
-        "@mui/x-date-pickers": "^7.27.1",
+        "@mui/material": "^6.4.7",
+        "@mui/system": "^6.4.7",
+        "@mui/x-date-pickers": "^7.27.3",
         "dayjs": "^1.11.13",
         "react": "^19.0.0",
         "react-dom": "^19.0.0"

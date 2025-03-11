@@ -375,9 +375,7 @@ export const updateCollectionMagicMetadata = async (
         await apiURL("/collections/magic-metadata"),
         reqBody,
         null,
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );
     const updatedCollection: Collection = {
         ...collection,
@@ -415,9 +413,7 @@ export const updateSharedCollectionMagicMetadata = async (
         await apiURL("/collections/sharee-magic-metadata"),
         reqBody,
         null,
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );
     const updatedCollection: Collection = {
         ...collection,
@@ -455,9 +451,7 @@ export const updatePublicCollectionMagicMetadata = async (
         await apiURL("/collections/public-magic-metadata"),
         reqBody,
         null,
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );
     const updatedCollection: Collection = {
         ...collection,
@@ -490,9 +484,7 @@ export const renameCollection = async (
         await apiURL("/collections/rename"),
         collectionRenameRequest,
         null,
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );
 };
 
@@ -519,9 +511,7 @@ export const shareCollection = async (
             await apiURL("/collections/share"),
             shareCollectionRequest,
             null,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
     } catch (e) {
         log.error("share collection failed ", e);
@@ -543,9 +533,7 @@ export const unshareCollection = async (
             await apiURL("/collections/unshare"),
             shareCollectionRequest,
             null,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
     } catch (e) {
         log.error("unshare collection failed ", e);
@@ -565,9 +553,7 @@ export const createShareableURL = async (collection: Collection) => {
             await apiURL("/collections/share-url"),
             createPublicAccessTokenRequest,
             null,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
         return resp.data.result as PublicURL;
     } catch (e) {
@@ -586,9 +572,7 @@ export const deleteShareableURL = async (collection: Collection) => {
             await apiURL(`/collections/share-url/${collection.id}`),
             null,
             null,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
     } catch (e) {
         log.error("deleteShareableURL failed ", e);
@@ -608,9 +592,7 @@ export const updateShareableURL = async (
             await apiURL("/collections/share-url"),
             request,
             null,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
         return res.data.result as PublicURL;
     } catch (e) {

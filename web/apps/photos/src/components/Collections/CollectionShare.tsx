@@ -558,10 +558,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                             ? t("add_viewers")
                             : t("add_collaborators")
                     }
-                    submitButtonProps={{
-                        size: "large",
-                        sx: { mt: 1, mb: 2 },
-                    }}
+                    submitButtonProps={{ size: "large", sx: { mt: 1, mb: 2 } }}
                     disableAutoFocus
                 />
             </Stack>
@@ -1074,9 +1071,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
             message: (
                 <Trans
                     i18nKey="remove_participant_message"
-                    values={{
-                        selectedEmail: selectedParticipant.email,
-                    }}
+                    values={{ selectedEmail: selectedParticipant.email }}
                 />
             ),
             continue: {
@@ -1258,13 +1253,9 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     return (
         <>
             <Stack>
-                <Typography
-                    variant="small"
-                    sx={{ color: "text.muted", padding: 1 }}
-                >
-                    <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
+                <RowButtonGroupTitle icon={<PublicIcon />}>
                     {t("public_link_enabled")}
-                </Typography>
+                </RowButtonGroupTitle>
                 <RowButtonGroup>
                     {isLinkExpired(publicShareProp.validTill) ? (
                         <RowButton
@@ -1853,9 +1844,7 @@ function PublicLinkSetPassword({
                 // We're being shown within the sidebar drawer, and also the
                 // content of this dialog is lesser than what a normal dialog
                 // contains. Use a bespoke padding.
-                paper: {
-                    sx: { "&&": { padding: "4px" } },
-                },
+                paper: { sx: { "&&": { padding: "4px" } } },
             }}
             sx={{ position: "absolute" }}
             maxWidth={"sm"}

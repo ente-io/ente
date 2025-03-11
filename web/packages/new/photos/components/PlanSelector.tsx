@@ -95,9 +95,7 @@ export const PlanSelector: React.FC<PlanSelectorProps> = ({
                 // Since the styling is trivial and used only infrequently, for
                 // now we copy paste it. If it gets needed more often, we can
                 // also make it into a palette var.
-                backdrop: {
-                    sx: { backdropFilter: "blur(30px) opacity(95%)" },
-                },
+                backdrop: { sx: { backdropFilter: "blur(30px) opacity(95%)" } },
             }}
         >
             <PlanSelectorCard {...{ onClose, setLoading }} />
@@ -355,10 +353,7 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
 type PaidSubscriptionPlanSelectorCardProps = Omit<
     FreeSubscriptionPlanSelectorCardProps,
     "subscription"
-> & {
-    subscription: Subscription;
-    usage: number;
-};
+> & { subscription: Subscription; usage: number };
 
 const PaidSubscriptionPlanSelectorCard: React.FC<
     React.PropsWithChildren<PaidSubscriptionPlanSelectorCardProps>
@@ -612,12 +607,8 @@ const DisabledPlanButton = styled((props: ButtonProps) => (
 const ActivePlanButton = styled((props: ButtonProps) => (
     <Button color="accent" {...props} endIcon={<ArrowForwardIcon />} />
 ))(() => ({
-    ".MuiButton-endIcon": {
-        transition: "transform .2s ease-in-out",
-    },
-    "&:hover .MuiButton-endIcon": {
-        transform: "translateX(4px)",
-    },
+    ".MuiButton-endIcon": { transition: "transform .2s ease-in-out" },
+    "&:hover .MuiButton-endIcon": { transform: "translateX(4px)" },
 }));
 
 interface FreePlanRowProps {
@@ -670,10 +661,7 @@ const AddOnBonusRows: React.FC<AddOnBonusRowsProps> = ({ addOnBonuses }) => (
 type ManageSubscriptionProps = Pick<
     PlanSelectorProps,
     "onClose" | "setLoading"
-> & {
-    subscription: Subscription;
-    hasAddOnBonus: boolean;
-};
+> & { subscription: Subscription; hasAddOnBonus: boolean };
 
 function ManageSubscription({
     onClose,

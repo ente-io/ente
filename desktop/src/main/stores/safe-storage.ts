@@ -5,9 +5,7 @@ interface SafeStorageStore {
 }
 
 const safeStorageSchema: Schema<SafeStorageStore> = {
-    encryptionKey: {
-        type: "string",
-    },
+    encryptionKey: { type: "string" },
 };
 
 export const safeStorageStore = new Store({

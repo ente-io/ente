@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/keyboard/keyboard_oveylay.dart';
 import 'package:photos/ui/components/keyboard/keyboard_top_button.dart';
+import "package:photos/ui/notification/toast.dart";
 import 'package:photos/utils/magic_util.dart';
 
 class FileCaptionReadyOnly extends StatelessWidget {
@@ -71,18 +74,19 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
 
   @override
   void initState() {
+    super.initState();
     _focusNode.addListener(_focusNodeListener);
     editedCaption = widget.file.caption;
     if (editedCaption != null && editedCaption!.isNotEmpty) {
       hintText = editedCaption!;
     }
-    super.initState();
   }
 
   @override
   void dispose() {
     if (editedCaption != null) {
-      editFileCaption(null, widget.file, editedCaption!);
+      editFileCaption(null, widget.file, editedCaption!)
+          .then((isSuccess) => _onEditFileFinish(isSuccess));
     }
     _textController.dispose();
     _focusNode.removeListener(_focusNodeListener);
@@ -148,7 +152,8 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   Future<void> _onDoneClick(BuildContext context) async {
     if (editedCaption != null) {
       final isSuccesful =
-          await editFileCaption(context, widget.file, editedCaption!);
+          await editFileCaption(context, widget.file, editedCaption!)
+              .then((isSuccess) => _onEditFileFinish(isSuccess));
       if (isSuccesful) {
         if (mounted) {
           Navigator.pop(context);
@@ -183,6 +188,17 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       KeyboardOverlay.showOverlay(context, keyboardTopButtons!);
     } else {
       KeyboardOverlay.removeOverlay();
+    }
+  }
+
+  bool _onEditFileFinish(bool isSuccess) {
+    if (isSuccess) {
+      widget.file.pubMagicMetadata?.caption = editedCaption;
+      Bus.instance.fire(FileCaptionUpdatedEvent(widget.file.generatedID!));
+      return true;
+    } else {
+      showShortToast(context, S.of(context).somethingWentWrong);
+      return false;
     }
   }
 }

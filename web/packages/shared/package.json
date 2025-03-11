@@ -4,7 +4,7 @@
     "private": true,
     "dependencies": {
         "@/base": "*",
-        "axios": "^1.6.7"
+        "axios": "^1.8.2"
     },
     "devDependencies": {
         "@/build-config": "*"

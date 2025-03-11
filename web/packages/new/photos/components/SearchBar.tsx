@@ -1,4 +1,5 @@
 import { assertionFailed } from "@/base/assert";
+import { EnteLogo } from "@/base/components/EnteLogo";
 import type { ButtonishProps } from "@/base/components/mui";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
@@ -120,7 +121,21 @@ interface MobileSearchAreaProps {
 }
 
 const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
-    <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
+    <Stack direction="row" sx={{ alignItems: "center" }}>
+        <Box
+            sx={{
+                alignItems: "center",
+                // Move to the center.
+                mx: "auto",
+                // Offset on the left by the size of the search icon to make it
+                // look visually centered.
+                pl: "48px",
+                // Remove extra vertical space for truer vertical centering.
+                lineHeight: 0,
+            }}
+        >
+            <EnteLogo height={15} />
+        </Box>
         <IconButton onClick={onSearch}>
             <SearchIcon />
         </IconButton>
@@ -289,16 +304,12 @@ const createSelectStyles = (
         ...style,
         padding: 0,
         backgroundColor: "transparent !important",
-        "& :hover": {
-            cursor: "pointer",
-        },
+        "& :hover": { cursor: "pointer" },
         // Elevate the focused option further.
         "& .option-contents": isFocused
             ? { backgroundColor: theme.vars.palette.fill.fainter }
             : {},
-        "&:last-child .MuiDivider-root": {
-            display: "none",
-        },
+        "&:last-child .MuiDivider-root": { display: "none" },
     }),
     placeholder: (style) => ({
         ...style,

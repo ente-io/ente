@@ -146,9 +146,7 @@ export const isPasskeyRecoveryEnabled = async () => {
         const resp = await HTTPService.get(
             await apiURL("/users/two-factor/recovery-status"),
             {},
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
 
         if (typeof resp.data === "undefined") {
@@ -172,15 +170,9 @@ const configurePasskeyRecovery = async (
 
         const resp = await HTTPService.post(
             await apiURL("/users/two-factor/passkeys/configure-recovery"),
-            {
-                secret,
-                userSecretCipher,
-                userSecretNonce,
-            },
+            { secret, userSecretCipher, userSecretNonce },
             undefined,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
 
         if (typeof resp.data === "undefined") {
@@ -273,11 +265,7 @@ export const saveCredentialsAndNavigateTo = async (
     // /passkeys/finish page.
     const { id, encryptedToken, keyAttributes } = response;
 
-    await setLSUser({
-        ...getData(LS_KEYS.USER),
-        encryptedToken,
-        id,
-    });
+    await setLSUser({ ...getData(LS_KEYS.USER), encryptedToken, id });
     setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
 
     return unstashRedirect() ?? "/credentials";

@@ -56,10 +56,7 @@ export const UploaderNameInput: React.FC<UploaderNameInput> = ({
             <Box
                 sx={(theme) => ({
                     padding: "24px 16px 0px 16px",
-                    svg: {
-                        width: "44px",
-                        height: "44px",
-                    },
+                    svg: { width: "44px", height: "44px" },
                     color: theme.vars.palette.stroke.muted,
                 })}
             >

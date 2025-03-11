@@ -385,11 +385,7 @@ class FolderWatcher {
 
         log.debug(() => [
             "watch/allFileUploadsDone",
-            JSON.stringify({
-                uploadItemsWithCollection,
-                collections,
-                watch,
-            }),
+            JSON.stringify({ uploadItemsWithCollection, collections, watch }),
         ]);
 
         const { syncedFiles, ignoredFiles } = this.deduceSyncedAndIgnored(
@@ -548,9 +544,7 @@ interface WatchEvent {
  * {@link action}, {@link folderPath} and {@link collectionName}. This allows us
  * to process all the affected {@link filePaths} in one shot.
  */
-type ClubbedWatchEvent = Omit<WatchEvent, "filePath"> & {
-    filePaths: string[];
-};
+type ClubbedWatchEvent = Omit<WatchEvent, "filePath"> & { filePaths: string[] };
 
 /**
  * Determine which events we need to process to synchronize the watched on-disk

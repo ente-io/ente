@@ -4,7 +4,7 @@ import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
 import { enteFileDeletionDate } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import { GAP_BTW_TILES } from "@/new/photos/components/PhotoList";
+import { GAP_BTW_TILES } from "@/new/photos/components/FileList";
 import {
     LoadingThumbnail,
     StaticThumbnail,
@@ -22,9 +22,8 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { shouldShowAvatar } from "utils/file";
 import Avatar from "./Avatar";
 
-interface IProps {
+interface PreviewCardProps {
     file: DisplayFile;
-    updateURL: (id: number, url: string) => void;
     onClick: () => void;
     selectable: boolean;
     selected: boolean;
@@ -200,7 +199,21 @@ const Cont = styled("div")<{ disabled: boolean }>`
     border-radius: 4px;
 `;
 
-export default function PreviewCard(props: IProps) {
+export default function PreviewCard({
+    file,
+    onClick,
+    selectable,
+    selected,
+    onSelect,
+    selectOnClick,
+    onHover,
+    onRangeSelect,
+    isRangeSelectActive,
+    isInsSelectRange,
+    isFav,
+    activeCollectionID,
+    showPlaceholder,
+}: PreviewCardProps) {
     const galleryContext = useContext(GalleryContext);
 
     const longPressCallback = () => {
@@ -208,21 +221,6 @@ export default function PreviewCard(props: IProps) {
     };
 
     const longPress = useLongPress(longPressCallback, 500);
-
-    const {
-        file,
-        onClick,
-        updateURL,
-        selectable,
-        selected,
-        onSelect,
-        selectOnClick,
-        onHover,
-        onRangeSelect,
-        isRangeSelectActive,
-        isInsSelectRange,
-        isFav,
-    } = props;
 
     const [imgSrc, setImgSrc] = useState<string>(file.msrc);
 
@@ -243,21 +241,20 @@ export default function PreviewCard(props: IProps) {
                 const url: string =
                     await downloadManager.renderableThumbnailURL(
                         file,
-                        props.showPlaceholder,
+                        showPlaceholder,
                     );
 
                 if (!isMounted.current || !url) {
                     return;
                 }
                 setImgSrc(url);
-                updateURL(file.id, url);
             } catch (e) {
                 log.error("preview card useEffect failed", e);
                 // no-op
             }
         };
         main();
-    }, [props.showPlaceholder]);
+    }, [showPlaceholder]);
 
     const handleClick = () => {
         if (selectOnClick) {
@@ -340,7 +337,7 @@ export default function PreviewCard(props: IProps) {
                 <InSelectRangeOverlay />
             )}
 
-            {props?.activeCollectionID === TRASH_SECTION && file.isTrashed && (
+            {activeCollectionID === TRASH_SECTION && file.isTrashed && (
                 <TileBottomTextOverlay>
                     <Typography variant="small">
                         {formattedDateRelative(enteFileDeletionDate(file))}

@@ -106,9 +106,7 @@ interface UploadCancelStatus {
 }
 
 class UploadCancelService {
-    private shouldUploadBeCancelled: UploadCancelStatus = {
-        value: false,
-    };
+    private shouldUploadBeCancelled: UploadCancelStatus = { value: false };
 
     reset() {
         this.shouldUploadBeCancelled.value = false;
@@ -297,10 +295,7 @@ class UIService {
 function convertInProgressUploadsToList(inProgressUploads) {
     return [...inProgressUploads.entries()].map(
         ([localFileID, progress]) =>
-            ({
-                localFileID,
-                progress,
-            }) as InProgressUpload,
+            ({ localFileID, progress }) as InProgressUpload,
     );
 }
 
@@ -907,18 +902,12 @@ const clusterLivePhotos = async (
             });
             index += 2;
         } else {
-            result.push({
-                ...f,
-                isLivePhoto: false,
-            });
+            result.push({ ...f, isLivePhoto: false });
             index += 1;
         }
     }
     if (index === items.length - 1) {
-        result.push({
-            ...items[index],
-            isLivePhoto: false,
-        });
+        result.push({ ...items[index], isLivePhoto: false });
     }
     return result;
 };

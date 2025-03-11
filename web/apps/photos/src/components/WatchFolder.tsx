@@ -251,11 +251,7 @@ const EntryHeading: React.FC<EntryHeadingProps> = ({ watch }) => {
     return (
         <Stack
             direction="row"
-            sx={{
-                gap: 1,
-                alignItems: "center",
-                justifyContent: "flex-start",
-            }}
+            sx={{ gap: 1, alignItems: "center", justifyContent: "flex-start" }}
         >
             <Typography sx={{ flex: 1 }}>{basename(folderPath)}</Typography>
             {watcher.isSyncingFolder(folderPath) && (

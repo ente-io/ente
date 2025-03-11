@@ -45,9 +45,7 @@ export const LinkButtonUndecorated: React.FC<
             textDecoration: "none",
             color: "text.muted",
             fontWeight: "medium",
-            "&:hover": {
-                color: "accent.main",
-            },
+            "&:hover": { color: "accent.main" },
         }}
         {...{ onClick }}
     >

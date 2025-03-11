@@ -247,9 +247,7 @@ export const computeCLIPImageEmbedding = async (
 ) => {
     const session = await cachedCLIPImageSession();
     const inputArray = new Uint8Array(input.buffer);
-    const feeds = {
-        input: new ort.Tensor("uint8", inputArray, inputShape),
-    };
+    const feeds = { input: new ort.Tensor("uint8", inputArray, inputShape) };
     const t = Date.now();
     const results = await session.run(feeds);
     log.debugString(`ONNX/CLIP image embedding took ${Date.now() - t} ms`);
@@ -292,9 +290,7 @@ export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
     const session = sessionOrSkip;
     const tokenizer = getTokenizer();
     const tokenizedText = Int32Array.from(tokenizer.encodeForCLIP(text));
-    const feeds = {
-        input: new ort.Tensor("int32", tokenizedText, [1, 77]),
-    };
+    const feeds = { input: new ort.Tensor("int32", tokenizedText, [1, 77]) };
 
     const t = Date.now();
     const results = await session.run(feeds);
@@ -316,9 +312,7 @@ export const detectFaces = async (
 ) => {
     const session = await cachedFaceDetectionSession();
     const inputArray = new Uint8Array(input.buffer);
-    const feeds = {
-        input: new ort.Tensor("uint8", inputArray, inputShape),
-    };
+    const feeds = { input: new ort.Tensor("uint8", inputArray, inputShape) };
     const t = Date.now();
     const results = await session.run(feeds);
     log.debugString(`ONNX/YOLO face detection took ${Date.now() - t} ms`);

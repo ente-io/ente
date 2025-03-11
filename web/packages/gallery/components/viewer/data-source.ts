@@ -47,6 +47,11 @@ interface PhotoSwipeSlideData {
      * images and video).
      */
     alt?: string;
+    /**
+     * The HTML (string) contents of the slide, if we don't wish for it to show
+     * an image.
+     */
+    html?: string | undefined;
 }
 
 /**
@@ -174,7 +179,6 @@ const resetState = () => {
 /**
  * Clear any internal state maintained by the file viewer data source.
  */
-// TODO(PS): Call me during logout sequence once this is integrated.
 export const logoutFileViewerDataSource = resetState;
 
 /**
@@ -260,7 +264,7 @@ export const fileViewerDidClose = () => {
  * - For images and videos, this will be the single original.
  *
  * - For live photos, this will also be a two step process, first fetching the
- *   original image, then again the video component.
+ *   video component, then fetching the image component.
  *
  * At this point, the data for this file will be considered final, and
  * subsequent calls for the same file will return this same value unless it is
@@ -355,7 +359,9 @@ const enqueueUpdates = async (file: EnteFile) => {
         // While the types don't reflect it, it is safe to use the ! (null
         // assertion) here since renderableThumbnailURL can throw but will not
         // return undefined by default.
-        const thumbnailData = await withDimensions(ensureString(thumbnailURL));
+        const thumbnailData = await withDimensionsIfPossible(
+            ensureString(thumbnailURL),
+        );
         update({
             ...thumbnailData,
             isContentLoading: true,
@@ -382,7 +388,7 @@ const enqueueUpdates = async (file: EnteFile) => {
                     await downloadManager.renderableSourceURLs(file);
                 const imageURL = ensureString(sourceURLs.url);
                 const originalImageBlob = sourceURLs.originalImageBlob!;
-                const itemData = await withDimensions(imageURL);
+                const itemData = await withDimensionsIfPossible(imageURL);
                 update({ ...itemData, imageURL, originalImageBlob });
                 break;
             }
@@ -390,7 +396,6 @@ const enqueueUpdates = async (file: EnteFile) => {
             case FileType.video: {
                 const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                // TODO(PS):
                 update({ videoURL: sourceURLs.url as string });
                 break;
             }
@@ -400,19 +405,32 @@ const enqueueUpdates = async (file: EnteFile) => {
                     await downloadManager.renderableSourceURLs(file);
                 const livePhotoSourceURLs =
                     sourceURLs.url as LivePhotoSourceURL;
+                // The image component of a live photo usually is an HEIC file,
+                // which cannot be displayed natively by browsers and needs a
+                // conversion, which is slow on web (faster on desktop). We
+                // already have both components available since they're part of
+                // the same zip. And in the UI, the first (default) interaction
+                // is to loop the live video.
+                //
+                // For these reasons, we resolve with the video first, then
+                // resolve with the image.
+                const videoURL = await livePhotoSourceURLs.video();
+                update({
+                    videoURL,
+                    isContentLoading: true,
+                    isContentZoomable: false,
+                });
                 const imageURL = ensureString(
                     await livePhotoSourceURLs.image(),
                 );
                 const originalImageBlob =
                     livePhotoSourceURLs.originalImageBlob()!;
-                const imageData = {
-                    ...(await withDimensions(imageURL)),
+                update({
+                    ...(await withDimensionsIfPossible(imageURL)),
                     imageURL,
                     originalImageBlob,
-                };
-                update(imageData);
-                const videoURL = await livePhotoSourceURLs.video();
-                update({ ...imageData, videoURL });
+                    videoURL,
+                });
                 break;
             }
         }
@@ -441,12 +459,19 @@ const enqueueUpdates = async (file: EnteFile) => {
 };
 
 /**
- * Take a image URL, determine its dimensions using browser APIs, and return the URL
- * and its dimensions in a form that can directly be passed to PhotoSwipe as
- * {@link ItemData}.
+ * Take a image URL, determine its dimensions using browser APIs if possible,
+ * and return the URL and its dimensions in a form that can directly be passed
+ * to PhotoSwipe as {@link ItemData}.
+ *
+ * If the dimensions cannot be extracted (i.e., the browser was not able to load
+ * the image), then PhotoSwipe itself will also not likely be able to render it,
+ * but we still return the {@link imageURL} back so that PhotoSwipe can show the
+ * appropriate error when trying to render it.
  */
-const withDimensions = (imageURL: string): Promise<Partial<ItemData>> =>
-    new Promise((resolve, reject) => {
+const withDimensionsIfPossible = (
+    imageURL: string,
+): Promise<Partial<ItemData>> =>
+    new Promise((resolve) => {
         const image = new Image();
         image.onload = () =>
             resolve({
@@ -454,7 +479,7 @@ const withDimensions = (imageURL: string): Promise<Partial<ItemData>> =>
                 width: image.naturalWidth,
                 height: image.naturalHeight,
             });
-        image.onerror = reject;
+        image.onerror = () => resolve({ src: imageURL });
         image.src = imageURL;
     });
 
