@@ -77,7 +77,7 @@
     "download_key": "Download (D)",
     "copy_key": "Copy as PNG (Ctrl/Cmd - C)",
     "toggle_fullscreen_key": "Toggle fullscreen (F)",
-    "zoom_in_out_key": "Zoom in/out",
+    "zoom": "Zoom",
     "previous_key": "Previous (←)",
     "next_key": "Next (→)",
     "title_photos": "Ente Photos",

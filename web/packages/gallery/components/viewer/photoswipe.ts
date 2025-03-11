@@ -232,7 +232,7 @@ export class FileViewerPhotoSwipe {
             // since we only have a single PhotoSwipe instance.
             mainClass: "pswp-ente",
             closeTitle: t("close"),
-            zoomTitle: pt("Zoom"),
+            zoomTitle: t("zoom"),
             arrowPrevTitle: pt("Previous"),
             arrowNextTitle: pt("Next"),
             // TODO(PS): Move to translations (unpreviewable_file_notification).
