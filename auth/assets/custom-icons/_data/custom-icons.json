@@ -11,6 +11,13 @@
       "title": "3Commas"
     },
     {
+      "title": "Autodesk",
+      "slug": "autodesk",
+      "altNames": [
+        "Autodesk Account"
+      ]
+    },
+    {
       "title": "Addy.io",
       "slug": "addy_io"
     },
