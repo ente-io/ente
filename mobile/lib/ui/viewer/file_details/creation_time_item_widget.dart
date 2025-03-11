@@ -1,14 +1,10 @@
 import "package:flutter/material.dart";
-import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart";
 import "package:intl/intl.dart";
-import "package:photos/ente_theme_data.dart";
-import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/bulk_edit_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/utils/date_time_util.dart";
-import "package:photos/utils/magic_util.dart";
 
 class CreationTimeItem extends StatefulWidget {
   final EnteFile file;
@@ -59,51 +55,6 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
     if (newDate != null) {
       widget.file.creationTime = newDate.microsecondsSinceEpoch;
       setState(() {});
-    }
-  }
-
-  void _showDateTimePickerOLD(EnteFile file) async {
-    final Locale locale = (await getLocale())!;
-    final localeType = getFromLocalString(locale);
-    final dateResult = await DatePickerBdaya.showDatePicker(
-      context,
-      minTime: DateTime(1800, 1, 1),
-      maxTime: DateTime.now(),
-      currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime!),
-      locale: localeType,
-      theme: Theme.of(context).colorScheme.dateTimePickertheme,
-    );
-    if (dateResult == null) {
-      return;
-    }
-
-    late DateTime? dateWithTimeResult;
-    if (showAmPmTimePicker(locale)) {
-      dateWithTimeResult = await DatePickerBdaya.showTime12hPicker(
-        context,
-        showTitleActions: true,
-        currentTime: dateResult,
-        locale: localeType,
-        theme: Theme.of(context).colorScheme.dateTimePickertheme,
-      );
-    } else {
-      dateWithTimeResult = await DatePickerBdaya.showTimePicker(
-        context,
-        showTitleActions: true,
-        currentTime: dateResult,
-        locale: localeType,
-        theme: Theme.of(context).colorScheme.dateTimePickertheme,
-      );
-    }
-    if (dateWithTimeResult != null) {
-      if (await editTime(
-        context,
-        List.of([widget.file]),
-        dateWithTimeResult.microsecondsSinceEpoch,
-      )) {
-        widget.file.creationTime = dateWithTimeResult.microsecondsSinceEpoch;
-        setState(() {});
-      }
     }
   }
 }
