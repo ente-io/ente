@@ -124,12 +124,11 @@ const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
     <Stack direction="row" sx={{ alignItems: "center" }}>
         <Box
             sx={{
-                alignItems: "center",
                 // Move to the center.
                 mx: "auto",
-                // Offset on the left by the size of the search icon to make it
-                // look visually centered.
-                pl: "48px",
+                // Offset on the left by the visual size of the search icon to
+                // make it look visually centered.
+                pl: "24px",
                 // Remove extra vertical space for truer vertical centering.
                 lineHeight: 0,
             }}
