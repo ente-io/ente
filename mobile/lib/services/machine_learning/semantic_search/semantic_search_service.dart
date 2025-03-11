@@ -198,18 +198,32 @@ class SemanticSearchService {
     return results;
   }
 
-  Future<List<int>> getMatchingFileIDs(
-    String query,
-    double minimumSimilarity,
+  Future<Map<String, List<int>>> getMatchingFileIDs(
+    Map<String, double> queryToScore,
   ) async {
-    final textEmbedding = await _getTextEmbedding(query);
+    final textEmbeddings = <String, List<double>>{};
+    final minimumSimilarityMap = <String, double>{};
+    for (final entry in queryToScore.entries) {
+      final query = entry.key;
+      final score = entry.value;
+      final textEmbedding = await _getTextEmbedding(query);
+      textEmbeddings[query] = textEmbedding;
+      minimumSimilarityMap[query] = score;
+    }
+
     final queryResults = await _getSimilarities(
-      {query: textEmbedding},
-      minimumSimilarityMap: {query: minimumSimilarity},
+      textEmbeddings,
+      minimumSimilarityMap: minimumSimilarityMap,
     );
-    final result = <int>[];
-    for (final r in queryResults.values.first) {
-      result.add(r.id);
+    final result = <String, List<int>>{};
+    for (final entry in queryResults.entries) {
+      final query = entry.key;
+      final queryResult = entry.value;
+      final fileIDs = <int>[];
+      for (final result in queryResult) {
+        fileIDs.add(result.id);
+      }
+      result[query] = fileIDs;
     }
     return result;
   }
