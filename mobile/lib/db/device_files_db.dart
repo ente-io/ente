@@ -8,7 +8,7 @@ import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/upload_strategy.dart';
-import 'package:photos/services/local/local_sync_util.dart';
+import "package:photos/services/sync/import/model.dart";
 import 'package:sqflite/sqlite_api.dart';
 import 'package:tuple/tuple.dart';
 
