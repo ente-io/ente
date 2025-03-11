@@ -213,9 +213,9 @@ class GalleryState extends State<Gallery> {
     if (event.source == 'uploadCompleted') {
       final Map<int, EnteFile> genIDToUploadedFiles = {};
       for (int i = 0; i < event.updatedFiles.length; i++) {
+        // matching happens on generatedID and localID
         if (event.updatedFiles[i].generatedID == null) {
-          shouldReloadFromDB = true;
-          break;
+          return true;
         }
         genIDToUploadedFiles[event.updatedFiles[i].generatedID!] =
             event.updatedFiles[i];
@@ -254,14 +254,15 @@ class GalleryState extends State<Gallery> {
     }
     final Map<int, EnteFile> genIDToUploadedFiles = {};
     for (int i = 0; i < event.updatedFiles.length; i++) {
+      // the file should have generatedID, localID and should not be uploaded for
+      // following logic to work
       if (event.updatedFiles[i].generatedID == null ||
           event.updatedFiles[i].localID == null ||
           event.updatedFiles[i].isUploaded) {
         _logger.warning(
           "Invalid file in updatedFiles: ${event.updatedFiles[i].localID} ${event.updatedFiles[i].generatedID} ${event.updatedFiles[i].isUploaded}",
         );
-        shouldReloadFromDB = true;
-        break;
+        return shouldReloadFromDB;
       }
       genIDToUploadedFiles[event.updatedFiles[i].generatedID!] =
           event.updatedFiles[i];
