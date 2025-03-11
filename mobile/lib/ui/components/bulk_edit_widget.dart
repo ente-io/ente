@@ -530,7 +530,7 @@ class DateAndTimeWidget extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            _formatDate(dateTime),
+                            _formatDate(dateTime, locale),
                             style: TextStyle(
                               color: colorScheme.textFaint,
                               fontSize: 12,
@@ -547,7 +547,7 @@ class DateAndTimeWidget extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            _formatDate(newRangeEnd!),
+                            _formatDate(newRangeEnd!, locale),
                             style: TextStyle(
                               color: colorScheme.textFaint,
                               fontSize: 12,
@@ -677,6 +677,7 @@ class PhotoDateHeaderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final photoCount = enteFiles.length;
     final colorScheme = getEnteColorScheme(context);
+    final locale = Localizations.localeOf(context);
     bool multipleFiles = true;
     if (photoCount == 1) {
       multipleFiles = false;
@@ -713,7 +714,7 @@ class PhotoDateHeaderWidget extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            _formatDate(startDate),
+                            _formatDate(startDate, locale),
                             style: TextStyle(
                               color: colorScheme.textMuted,
                               fontSize: 12,
@@ -730,7 +731,7 @@ class PhotoDateHeaderWidget extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            _formatDate(endDate),
+                            _formatDate(endDate, locale),
                             style: TextStyle(
                               color: colorScheme.textMuted,
                               fontSize: 12,
@@ -759,7 +760,7 @@ class PhotoDateHeaderWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "${DateFormat('EEE, dd MMM yyyy').format(startDate)} · ${DateFormat('h:mm a').format(startDate)}",
+                        "${DateFormat('EEE, dd MMM yyyy').format(startDate)} · ${DateFormat.Hm(locale.languageCode).format(startDate)}",
                         style: TextStyle(
                           color: colorScheme.textMuted,
                           fontSize: 12,
@@ -774,6 +775,6 @@ class PhotoDateHeaderWidget extends StatelessWidget {
   }
 }
 
-String _formatDate(DateTime date) {
-  return "${DateFormat('EEE, dd MMM yyyy').format(date)}\n${DateFormat('h:mm a').format(date)}";
+String _formatDate(DateTime date, Locale locale) {
+  return "${DateFormat('EEE, dd MMM yyyy').format(date)}\n${DateFormat.Hm(locale.languageCode).format(date)}";
 }
