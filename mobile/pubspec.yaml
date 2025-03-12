@@ -309,6 +309,7 @@ flutter:
     - assets/
     - assets/video-editor/
     - assets/icons/
+    - assets/launcher_icon/
   fonts:
     - family: Inter
       fonts:
