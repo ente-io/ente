@@ -414,9 +414,8 @@ export type GalleryAction =
     | {
           type: "markPendingVisibilityUpdate";
           fileID: number;
-          // Passing undefined clears any existing entry; passing "pending" adds
-          // one.
-          visibility: "pending" | undefined;
+          // Passing `true` adds an entry, and `false` clears any existing one.
+          mark: boolean;
       }
     | {
           type: "markUnsyncedVisibilityUpdate";
@@ -877,10 +876,10 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             const pendingVisibilityUpdates = new Set(
                 state.pendingVisibilityUpdates,
             );
-            if (action.visibility === undefined) {
-                pendingVisibilityUpdates.delete(action.fileID);
-            } else {
+            if (action.mark) {
                 pendingVisibilityUpdates.add(action.fileID);
+            } else {
+                pendingVisibilityUpdates.delete(action.fileID);
             }
             // Skipping a call to stateByUpdatingFilteredFiles since it
             // currently doesn't depend on pendingVisibilityUpdates.

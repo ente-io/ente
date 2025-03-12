@@ -808,16 +808,27 @@ const Page: React.FC = () => {
             dispatch({
                 type: "markPendingVisibilityUpdate",
                 fileID,
-                visibility: "pending",
+                mark: true,
             });
 
-            await changeFilesVisibility(files, visibility);
-            // See: [Note: File viewer update and dispatch]
-            dispatch({
-                type: "markUnsyncedVisibilityUpdate",
-                fileID,
-                visibility,
-            });
+            try {
+                await changeFilesVisibility(files, visibility);
+                // See: [Note: File viewer update and dispatch]
+                dispatch({
+                    type: "markUnsyncedVisibilityUpdate",
+                    fileID,
+                    visibility,
+                });
+            } catch (e) {
+                // Clean pending requests on error (on success,
+                // "markUnsyncedVisibilityUpdate" will do it for us).
+                dispatch({
+                    type: "markPendingVisibilityUpdate",
+                    fileID,
+                    mark: false,
+                });
+                throw e;
+            }
         },
         [],
     );
