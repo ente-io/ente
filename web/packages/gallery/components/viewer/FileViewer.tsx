@@ -543,8 +543,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     "image/png": createImagePNGBlob(imageURL!),
                 }),
             ])
+            .then(() => showNotification(t("copied")))
             .catch(onGenericError);
-    }, [onGenericError, handleMoreMenuCloseIfNeeded, activeAnnotatedFile]);
+    }, [
+        onGenericError,
+        handleMoreMenuCloseIfNeeded,
+        showNotification,
+        activeAnnotatedFile,
+    ]);
 
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
@@ -786,6 +792,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             : ItemVisibility.archived,
                     )
                         .then(() => {
+                            showNotification(t("done"));
                             refreshSlideAfterDeleteOrArchive(file.id);
                         })
                         .catch(onGenericError);
@@ -798,6 +805,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             unsyncedVisibilityUpdates,
             onFileVisibilityUpdate,
             onGenericError,
+            showNotification,
             refreshSlideAfterDeleteOrArchive,
             handleMoreMenuCloseIfNeeded,
             activeAnnotatedFile,
@@ -813,16 +821,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         handleConfirmDelete?.();
                     break;
                 case "toggle-archive":
-                    if (!isPendingToggleArchive) {
-                        toggleArchived?.();
-                        showNotification(pt("Updating..."));
-                    }
+                    if (!isPendingToggleArchive) toggleArchived?.();
                     break;
                 case "copy":
-                    if (canCopyImage()) {
-                        handleCopyImage();
-                        showNotification(pt("copied"));
-                    }
+                    if (canCopyImage()) handleCopyImage();
                     break;
                 case "toggle-fullscreen":
                     handleToggleFullscreen();
@@ -937,22 +939,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     return (
         <>
-            <Snackbar
-                open={!!notificationMessage}
-                onClose={handleNotificationClose}
-                autoHideDuration={1500}
-                message={notificationMessage}
-                slotProps={{
-                    content: {
-                        sx: {
-                            bgcolor: "fill.faint",
-                            color: "primary.main",
-                            backdropFilter: "blur(10px)",
-                        },
-                    },
-                }}
-            />
-
             <FileInfo
                 open={openFileInfo}
                 onClose={handleFileInfoClose}
@@ -1042,6 +1028,20 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     </Typography>
                 </MoreMenuItem>
             </MoreMenu>
+            <Snackbar
+                open={!!notificationMessage}
+                onClose={handleNotificationClose}
+                autoHideDuration={2000}
+                message={notificationMessage}
+                slotProps={{
+                    content: {
+                        sx: {
+                            bgcolor: "fixed.dark.background.paper2",
+                            color: "fixed.dark.text.base",
+                        },
+                    },
+                }}
+            />
             <ConfirmDeleteFileDialog
                 open={openConfirmDelete}
                 onClose={handleConfirmDeleteClose}
