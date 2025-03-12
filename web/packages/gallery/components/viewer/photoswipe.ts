@@ -69,7 +69,12 @@ export interface FileViewerPhotoSwipeDelegate {
      * appropriate.
      */
     performKeyAction: (
-        action: "delete" | "copy" | "toggle-fullscreen" | "help",
+        action:
+            | "delete"
+            | "toggle-archive"
+            | "copy"
+            | "toggle-fullscreen"
+            | "help",
     ) => void;
 }
 
@@ -895,6 +900,9 @@ export class FileViewerPhotoSwipe {
 
         const handleDelete = () => delegate.performKeyAction("delete");
 
+        const handleToggleArchive = () =>
+            delegate.performKeyAction("toggle-archive");
+
         const handleCopy = () => delegate.performKeyAction("copy");
 
         const handleToggleFullscreen = () =>
@@ -973,6 +981,9 @@ export class FileViewerPhotoSwipe {
                         break;
                     case "k":
                         cb = handleDownloadIfEnabled;
+                        break;
+                    case "x":
+                        cb = handleToggleArchive;
                         break;
                     case "f":
                         cb = handleToggleFullscreen;
