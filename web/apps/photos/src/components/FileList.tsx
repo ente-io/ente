@@ -7,9 +7,9 @@ import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
 } from "@/new/photos/components/FileList";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
-import type { FileListWithViewerProps } from "components/FileListWithViewer";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -20,6 +20,7 @@ import {
     ListChildComponentProps,
     areEqual,
 } from "react-window";
+import { SelectedState } from "types/gallery";
 import {
     handleSelectCreator,
     handleSelectCreatorMulti,
@@ -59,126 +60,6 @@ export interface TimeStampListItem {
     fileCount?: number;
 }
 
-const ListItem = styled("div")`
-    display: flex;
-    justify-content: center;
-`;
-
-const getTemplateColumns = (
-    columns: number,
-    shrinkRatio: number,
-    groups?: number[],
-): string => {
-    if (groups) {
-        // need to confirm why this was there
-        // const sum = groups.reduce((acc, item) => acc + item, 0);
-        // if (sum < columns) {
-        //     groups[groups.length - 1] += columns - sum;
-        // }
-        return groups
-            .map(
-                (x) =>
-                    `repeat(${x}, ${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`,
-            )
-            .join(` ${SPACE_BTW_DATES}px `);
-    } else {
-        return `repeat(${columns},${
-            IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio
-        }px)`;
-    }
-};
-
-function getFractionFittableColumns(width: number): number {
-    return (
-        (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
-        (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES)
-    );
-}
-
-function getGapFromScreenEdge(width: number) {
-    if (width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH) {
-        return 24;
-    } else {
-        return 4;
-    }
-}
-
-function getShrinkRatio(width: number, columns: number) {
-    return (
-        (width -
-            2 * getGapFromScreenEdge(width) -
-            (columns - 1) * GAP_BTW_TILES) /
-        (columns * IMAGE_CONTAINER_MAX_WIDTH)
-    );
-}
-
-const ListContainer = styled(Box, {
-    shouldForwardProp: (propName) => propName != "gridTemplateColumns",
-})<{ gridTemplateColumns: string }>`
-    display: grid;
-    grid-template-columns: ${(props) => props.gridTemplateColumns};
-    grid-column-gap: ${GAP_BTW_TILES}px;
-    width: 100%;
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        padding: 0 4px;
-    }
-`;
-
-const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
-    grid-column: span ${(props) => props.span};
-`;
-
-const DateContainer = styled(ListItemContainer)(
-    ({ theme }) => `
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    height: ${DATE_CONTAINER_HEIGHT}px;
-    color: ${theme.vars.palette.text.muted};
-`,
-);
-
-const FooterContainer = styled(ListItemContainer)`
-    margin-bottom: 0.75rem;
-    @media (max-width: 540px) {
-        font-size: 12px;
-        margin-bottom: 0.5rem;
-    }
-    text-align: center;
-    justify-content: center;
-    align-items: flex-end;
-    margin-top: calc(2rem + 20px);
-`;
-
-const AlbumFooterContainer = styled(ListItemContainer, {
-    shouldForwardProp: (propName) => propName != "hasReferral",
-})<{ hasReferral: boolean }>`
-    margin-top: 48px;
-    margin-bottom: ${({ hasReferral }) => (!hasReferral ? `10px` : "0px")};
-    text-align: center;
-    justify-content: center;
-`;
-
-const FullStretchContainer = styled("div")(
-    ({ theme }) => `
-    margin: 0 -24px;
-    width: calc(100% + 46px);
-    left: -24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        margin: 0 -4px;
-        width: calc(100% + 6px);
-        left: -4px;
-    }
-    background-color: ${theme.vars.palette.accent.main};
-`,
-);
-
-const NothingContainer = styled(ListItemContainer)`
-    text-align: center;
-    justify-content: center;
-`;
-
 export interface FileListAnnotatedFile {
     file: EnteFile;
     /**
@@ -192,21 +73,39 @@ export interface FileListAnnotatedFile {
     timelineDateString: string;
 }
 
-type FileListProps = Pick<
-    FileListWithViewerProps,
-    | "mode"
-    | "modePlus"
-    | "selectable"
-    | "selected"
-    | "setSelected"
-    | "favoriteFileIDs"
-> & {
+export interface FileListProps {
+    /** The height we should occupy (needed since the list is virtualized). */
     height: number;
+    /** The width we should occupy.*/
     width: number;
+    /**
+     * The files to show, annotated with cached precomputed properties that are
+     * frequently needed by the {@link FileList}.
+     */
     annotatedFiles: FileListAnnotatedFile[];
-    showAppDownloadBanner: boolean;
+    mode?: GalleryBarMode;
+    /**
+     * This is an experimental prop, to see if we can merge the separate
+     * "isInSearchMode" state kept by the gallery to be instead provided as a
+     * another mode in which the gallery operates.
+     */
+    modePlus?: GalleryBarMode | "search";
+    showAppDownloadBanner?: boolean;
+    selectable?: boolean;
+    setSelected: (
+        selected: SelectedState | ((selected: SelectedState) => SelectedState),
+    ) => void;
+    selected: SelectedState;
+    /** This will be set if mode is not "people". */
     activeCollectionID: number;
-    activePersonID?: string;
+    /** This will be set if mode is "people". */
+    activePersonID?: string | undefined;
+    /**
+     * File IDs of all the files that the user has marked as a favorite.
+     *
+     * Not set in the context of the shared albums app.
+     */
+    favoriteFileIDs?: Set<number>;
     /**
      * Called when the user activates the thumbnail at the given {@link index}.
      *
@@ -214,55 +113,11 @@ type FileListProps = Pick<
      * {@link annotatedFiles}.
      */
     onItemClick: (index: number) => void;
-};
-
-interface ItemData {
-    timeStampList: TimeStampListItem[];
-    columns: number;
-    shrinkRatio: number;
-    renderListItem: (
-        timeStampListItem: TimeStampListItem,
-        isScrolling?: boolean,
-    ) => React.JSX.Element;
 }
 
-const createItemData = memoize(
-    (
-        timeStampList: TimeStampListItem[],
-        columns: number,
-        shrinkRatio: number,
-        renderListItem: (
-            timeStampListItem: TimeStampListItem,
-            isScrolling?: boolean,
-        ) => React.JSX.Element,
-    ): ItemData => ({ timeStampList, columns, shrinkRatio, renderListItem }),
-);
-
-const PhotoListRow = React.memo(
-    ({
-        index,
-        style,
-        isScrolling,
-        data,
-    }: ListChildComponentProps<ItemData>) => {
-        const { timeStampList, columns, shrinkRatio, renderListItem } = data;
-        return (
-            <ListItem style={style}>
-                <ListContainer
-                    gridTemplateColumns={getTemplateColumns(
-                        columns,
-                        shrinkRatio,
-                        timeStampList[index].groups,
-                    )}
-                >
-                    {renderListItem(timeStampList[index], isScrolling)}
-                </ListContainer>
-            </ListItem>
-        );
-    },
-    areEqual,
-);
-
+/**
+ * A virtualized list of files, each represented by their thumbnail.
+ */
 export const FileList: React.FC<FileListProps> = ({
     height,
     width,
@@ -1039,3 +894,170 @@ export const FileList: React.FC<FileListProps> = ({
         </List>
     );
 };
+
+const ListItem = styled("div")`
+    display: flex;
+    justify-content: center;
+`;
+
+const getTemplateColumns = (
+    columns: number,
+    shrinkRatio: number,
+    groups?: number[],
+): string => {
+    if (groups) {
+        // need to confirm why this was there
+        // const sum = groups.reduce((acc, item) => acc + item, 0);
+        // if (sum < columns) {
+        //     groups[groups.length - 1] += columns - sum;
+        // }
+        return groups
+            .map(
+                (x) =>
+                    `repeat(${x}, ${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`,
+            )
+            .join(` ${SPACE_BTW_DATES}px `);
+    } else {
+        return `repeat(${columns},${
+            IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio
+        }px)`;
+    }
+};
+
+function getFractionFittableColumns(width: number): number {
+    return (
+        (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
+        (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES)
+    );
+}
+
+function getGapFromScreenEdge(width: number) {
+    if (width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH) {
+        return 24;
+    } else {
+        return 4;
+    }
+}
+
+function getShrinkRatio(width: number, columns: number) {
+    return (
+        (width -
+            2 * getGapFromScreenEdge(width) -
+            (columns - 1) * GAP_BTW_TILES) /
+        (columns * IMAGE_CONTAINER_MAX_WIDTH)
+    );
+}
+
+const ListContainer = styled(Box, {
+    shouldForwardProp: (propName) => propName != "gridTemplateColumns",
+})<{ gridTemplateColumns: string }>`
+    display: grid;
+    grid-template-columns: ${(props) => props.gridTemplateColumns};
+    grid-column-gap: ${GAP_BTW_TILES}px;
+    width: 100%;
+    padding: 0 24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        padding: 0 4px;
+    }
+`;
+
+const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
+    grid-column: span ${(props) => props.span};
+`;
+
+const DateContainer = styled(ListItemContainer)(
+    ({ theme }) => `
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: ${DATE_CONTAINER_HEIGHT}px;
+    color: ${theme.vars.palette.text.muted};
+`,
+);
+
+const FooterContainer = styled(ListItemContainer)`
+    margin-bottom: 0.75rem;
+    @media (max-width: 540px) {
+        font-size: 12px;
+        margin-bottom: 0.5rem;
+    }
+    text-align: center;
+    justify-content: center;
+    align-items: flex-end;
+    margin-top: calc(2rem + 20px);
+`;
+
+const AlbumFooterContainer = styled(ListItemContainer, {
+    shouldForwardProp: (propName) => propName != "hasReferral",
+})<{ hasReferral: boolean }>`
+    margin-top: 48px;
+    margin-bottom: ${({ hasReferral }) => (!hasReferral ? `10px` : "0px")};
+    text-align: center;
+    justify-content: center;
+`;
+
+const FullStretchContainer = styled("div")(
+    ({ theme }) => `
+    margin: 0 -24px;
+    width: calc(100% + 46px);
+    left: -24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        margin: 0 -4px;
+        width: calc(100% + 6px);
+        left: -4px;
+    }
+    background-color: ${theme.vars.palette.accent.main};
+`,
+);
+
+const NothingContainer = styled(ListItemContainer)`
+    text-align: center;
+    justify-content: center;
+`;
+
+interface ItemData {
+    timeStampList: TimeStampListItem[];
+    columns: number;
+    shrinkRatio: number;
+    renderListItem: (
+        timeStampListItem: TimeStampListItem,
+        isScrolling?: boolean,
+    ) => React.JSX.Element;
+}
+
+const createItemData = memoize(
+    (
+        timeStampList: TimeStampListItem[],
+        columns: number,
+        shrinkRatio: number,
+        renderListItem: (
+            timeStampListItem: TimeStampListItem,
+            isScrolling?: boolean,
+        ) => React.JSX.Element,
+    ): ItemData => ({ timeStampList, columns, shrinkRatio, renderListItem }),
+);
+
+const PhotoListRow = React.memo(
+    ({
+        index,
+        style,
+        isScrolling,
+        data,
+    }: ListChildComponentProps<ItemData>) => {
+        const { timeStampList, columns, shrinkRatio, renderListItem } = data;
+        return (
+            <ListItem style={style}>
+                <ListContainer
+                    gridTemplateColumns={getTemplateColumns(
+                        columns,
+                        shrinkRatio,
+                        timeStampList[index].groups,
+                    )}
+                >
+                    {renderListItem(timeStampList[index], isScrolling)}
+                </ListContainer>
+            </ListItem>
+        );
+    },
+    areEqual,
+);
