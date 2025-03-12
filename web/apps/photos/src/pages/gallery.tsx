@@ -15,6 +15,7 @@ import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
 import { resetFileViewerDataSourceOnClose } from "@/gallery/components/viewer/data-source";
 import { type Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
+import type { ItemVisibility } from "@/media/file-metadata";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -131,7 +132,12 @@ import {
     getSelectedCollection,
     handleCollectionOps,
 } from "utils/collection";
-import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
+import {
+    FILE_OPS_TYPE,
+    changeFilesVisibility,
+    getSelectedFiles,
+    handleFileOps,
+} from "utils/file";
 
 const defaultGalleryContext: GalleryContextType = {
     setActiveCollectionID: () => null,
@@ -797,6 +803,24 @@ const Page: React.FC = () => {
         });
     };
 
+    const handleFileViewerVisibilityUpdate = useCallback(
+        async (fileID: number, visibility: ItemVisibility) => {
+            dispatch({
+                type: "markPendingVisibilityUpdate",
+                fileID,
+                visibility: "pending",
+            });
+
+            await changeFilesVisibility(files, visibility);
+            dispatch({
+                type: "markUnsyncedVisibilityUpdate",
+                fileID,
+                visibility,
+            });
+        },
+        [],
+    );
+
     const handleMarkUnsyncedFavoriteUpdate = useCallback(
         (fileID: number, isFavorite: boolean) =>
             dispatch({
@@ -1070,10 +1094,14 @@ const Page: React.FC = () => {
                                 "incomingShareViewer"
                         }
                         isInHiddenSection={barMode == "hidden-albums"}
+                        archivedCollectionIDs={state.archivedCollectionIDs}
+                        archivedFileIDs={state.archivedFileIDs}
+                        pendingVisibilityUpdates={state.pendingVisibilityUpdates}
                         favoriteFileIDs={state.favoriteFileIDs}
                         setFilesDownloadProgressAttributesCreator={
                             setFilesDownloadProgressAttributesCreator
                         }
+                        onVisibilityUpdate={handleFileViewerVisibilityUpdate}
                         onMarkUnsyncedFavoriteUpdate={
                             handleMarkUnsyncedFavoriteUpdate
                         }
