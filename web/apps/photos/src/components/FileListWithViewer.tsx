@@ -10,8 +10,7 @@ import { EnteFile } from "@/media/file";
 import { moveToTrash, TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
     addToFavorites,
@@ -25,19 +24,6 @@ import {
     type FileListAnnotatedFile,
     type FileListProps,
 } from "./FileList";
-
-const Container = styled("div")`
-    display: block;
-    flex: 1;
-    width: 100%;
-    flex-wrap: wrap;
-    margin: 0 auto;
-    overflow: hidden;
-    .pswp-thumbnail {
-        display: inline-block;
-        cursor: pointer;
-    }
-`;
 
 /**
  * An {@link EnteFile} augmented with various in-memory state used for
@@ -130,6 +116,7 @@ export type FileListWithViewerProps = {
 > &
     Pick<
         FileViewerProps,
+        | "user"
         | "isInIncomingSharedCollection"
         | "isInHiddenSection"
         | "fileCollectionIDs"
@@ -146,6 +133,7 @@ export type FileListWithViewerProps = {
 export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     mode,
     modePlus,
+    user,
     files,
     enableDownload,
     showAppDownloadBanner,
@@ -167,8 +155,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onSelectCollection,
     onSelectPerson,
 }) => {
-    const galleryContext = useContext(GalleryContext);
-
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -263,11 +249,11 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
             <FileViewer
                 open={openFileViewer}
                 onClose={handleCloseFileViewer}
-                user={galleryContext.user ?? undefined}
                 initialIndex={currentIndex}
                 disableDownload={!enableDownload}
                 isInTrashSection={activeCollectionID === TRASH_SECTION}
                 {...{
+                    user,
                     files,
                     isInHiddenSection,
                     isInIncomingSharedCollection,
@@ -286,6 +272,19 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         </Container>
     );
 };
+
+const Container = styled("div")`
+    display: block;
+    flex: 1;
+    width: 100%;
+    flex-wrap: wrap;
+    margin: 0 auto;
+    overflow: hidden;
+    .pswp-thumbnail {
+        display: inline-block;
+        cursor: pointer;
+    }
+`;
 
 /**
  * See: [Note: Timeline date string]

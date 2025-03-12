@@ -511,17 +511,17 @@ export default function PublicCollectionGallery() {
 
                 <FileListWithViewer
                     files={publicFiles}
-                    onSyncWithRemote={handleSyncWithRemote}
-                    setSelected={setSelected}
-                    selected={selected}
-                    activeCollectionID={ALL_SECTION}
                     enableDownload={downloadEnabled}
+                    selectable={downloadEnabled}
+                    selected={selected}
+                    setSelected={setSelected}
+                    activeCollectionID={ALL_SECTION}
                     fileCollectionIDs={undefined}
                     allCollectionsNameByID={undefined}
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
-                    selectable={downloadEnabled}
+                    onSyncWithRemote={handleSyncWithRemote}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 <Upload
