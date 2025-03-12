@@ -1047,9 +1047,11 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
             <Shortcut action="Toggle audio" shortcut="M" />
             {haveUser && <Shortcut action="Toggle favorite" shortcut="L" />}
             <Shortcut action="View info" shortcut="I" />
-            {!disableDownload && <Shortcut action="Download" shortcut="K" />}
+            {!disableDownload && (
+                <Shortcut action={t("download")} shortcut="K" />
+            )}
             {haveUser && (
-                <Shortcut action="Delete" shortcut="Delete, Backspace" />
+                <Shortcut action={t("delete")} shortcut="Delete, Backspace" />
             )}
             {!disableDownload && (
                 <Shortcut action="Copy as PNG" shortcut="^C / ⌘C" />
