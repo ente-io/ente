@@ -9,22 +9,9 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 
 enum AppIcon {
-  iconLight(
-    "The light icon",
-    "IconLight",
-    "assets/launcher_icon/icon-light.png",
-  ),
-  iconDark(
-    "The dark icon",
-    "IconDark",
-    "assets/launcher_icon/icon-dark.png",
-  ),
-  iconGreen(
-    "The green icon",
-    "IconGreen",
-    "assets/launcher_icon/icon-green.png",
-  ),
-  ;
+  iconGreen("Default", "IconGreen", "assets/launcher_icon/icon-green.png"),
+  iconLight("Light", "IconLight", "assets/launcher_icon/icon-light.png"),
+  iconDark("Dark", "IconDark", "assets/launcher_icon/icon-dark.png");
 
   final String name;
   final String id;
@@ -40,20 +27,22 @@ class AppIconSelectionScreen extends StatefulWidget {
 }
 
 class _AppIconSelectionScreenState extends State<AppIconSelectionScreen> {
-  bool _ready = false;
   final _logger = Logger("_AppIconSelectionScreenState");
-  final _currentSelectionNotifier = ValueNotifier("Unassigned");
+  final _iconSwitcher = LauncherIconSwitcher();
+  String? _currentIcon;
 
   @override
   void initState() {
     super.initState();
-    LauncherIconSwitcher()
-        .initialize(["IconGreen", "IconDark", "IconLight"], "IconGreen");
-    LauncherIconSwitcher().getCurrentIcon().then(
-      (value) {
-        _currentSelectionNotifier.value = value;
+    _iconSwitcher.initialize(
+      AppIcon.values.map((e) => e.id).toList(),
+      AppIcon.iconGreen.id,
+    );
+    _iconSwitcher.getCurrentIcon().then(
+      (icon) {
+        _logger.info("Current icon is " + icon);
         setState(() {
-          _ready = true;
+          _currentIcon = icon;
         });
       },
     ).onError(
@@ -78,6 +67,9 @@ class _AppIconSelectionScreenState extends State<AppIconSelectionScreen> {
                 icon: Icons.close_outlined,
                 iconButtonType: IconButtonType.secondary,
                 onTap: () {
+                  // TODO: Implement Navigator.popUntil, else if we move the
+                  // screen to a different route, the button will not work as
+                  // expected
                   Navigator.pop(context);
                   Navigator.pop(context);
                   Navigator.pop(context);
@@ -85,15 +77,22 @@ class _AppIconSelectionScreenState extends State<AppIconSelectionScreen> {
               ),
             ],
           ),
-          _ready
+          _currentIcon != null
               ? SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (delegateBuildContext, index) {
+                        final icon = AppIcon.values[index];
+                        final isCurrentIcon = icon.id == _currentIcon;
                         return _AppIconTile(
-                          AppIcon.values[index],
-                          currentSelection: _currentSelectionNotifier,
+                          icon,
+                          isCurrentIcon,
+                          () {
+                            if (!isCurrentIcon) {
+                              _changeIcon(icon.id);
+                            }
+                          },
                         );
                       },
                       childCount: AppIcon.values.length,
@@ -109,50 +108,26 @@ class _AppIconSelectionScreenState extends State<AppIconSelectionScreen> {
       ),
     );
   }
+
+  Future<void> _changeIcon(String icon) async {
+    try {
+      _logger.info("Changing icon to " + icon);
+      await _iconSwitcher.setIcon(icon);
+      _logger.info("Icon changed to " + icon);
+      setState(() {
+        _currentIcon = icon;
+      });
+    } catch (error, stackTrace) {
+      _logger.severe("Error changing icon", error, stackTrace);
+    }
+  }
 }
 
-class _AppIconTile extends StatefulWidget {
+class _AppIconTile extends StatelessWidget {
   final AppIcon appIcon;
-  final ValueNotifier<String> currentSelection;
-  const _AppIconTile(this.appIcon, {required this.currentSelection});
-
-  @override
-  State<_AppIconTile> createState() => _AppIconTileState();
-}
-
-class _AppIconTileState extends State<_AppIconTile> {
-  bool _isSelection = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.currentSelection.value == widget.appIcon.id) {
-      _isSelection = true;
-    }
-    widget.currentSelection.addListener(
-      currentStateListener,
-    );
-  }
-
-  @override
-  void dispose() {
-    widget.currentSelection.removeListener(
-      currentStateListener,
-    );
-    super.dispose();
-  }
-
-  void currentStateListener() {
-    final pervSelectionState = _isSelection;
-    if (widget.currentSelection.value == widget.appIcon.id) {
-      _isSelection = true;
-    } else {
-      _isSelection = false;
-    }
-    if (pervSelectionState != _isSelection) {
-      setState(() {});
-    }
-  }
+  final bool isSelected;
+  final Function() onSelect;
+  const _AppIconTile(this.appIcon, this.isSelected, this.onSelect);
 
   @override
   Widget build(BuildContext context) {
@@ -160,8 +135,7 @@ class _AppIconTileState extends State<_AppIconTile> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: GestureDetector(
         onTap: () {
-          // LauncherIconSwitcher().setIcon(widget.appIcon.id);
-          widget.currentSelection.value = widget.appIcon.id;
+          onSelect();
         },
         child: Container(
           decoration: BoxDecoration(
@@ -174,14 +148,13 @@ class _AppIconTileState extends State<_AppIconTile> {
           child: Row(
             children: [
               Radio(
-                value: _isSelection,
+                value: isSelected,
                 groupValue: true,
                 onChanged: (_) {
-                  // LauncherIconSwitcher().setIcon(widget.appIcon.id);
-                  widget.currentSelection.value = widget.appIcon.id;
+                  // do nothing
                 },
                 fillColor: WidgetStateProperty.resolveWith<Color>((states) {
-                  if (_isSelection) {
+                  if (isSelected) {
                     return getEnteColorScheme(context).primary700;
                   } else {
                     return getEnteColorScheme(context).fillMuted;
@@ -204,7 +177,7 @@ class _AppIconTileState extends State<_AppIconTile> {
                         width: 60,
                         height: 60,
                         image: AssetImage(
-                          widget.appIcon.path,
+                          appIcon.path,
                         ),
                       ),
                     ),
@@ -214,9 +187,9 @@ class _AppIconTileState extends State<_AppIconTile> {
                       switchInCurve: Curves.easeOutQuart,
                       switchOutCurve: Curves.easeInQuart,
                       child: Text(
-                        key: ValueKey(_isSelection),
-                        widget.appIcon.name,
-                        style: _isSelection
+                        key: ValueKey(isSelected),
+                        appIcon.name,
+                        style: isSelected
                             ? getEnteTextTheme(context).bodyBold
                             : getEnteTextTheme(context).bodyFaint,
                       ),
