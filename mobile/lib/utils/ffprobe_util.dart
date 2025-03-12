@@ -49,7 +49,7 @@ class FFProbeUtil {
 
     final streams = props[streamsKey];
     if (streams is List) {
-      streams.forEach((stream) {
+      for (var stream in streams) {
         if (stream is Map) {
           _normalizeGroup(stream);
 
@@ -88,7 +88,7 @@ class FFProbeUtil {
             stream[FFProbeKeys.streamType] = MediaStreamTypes.metadata;
           }
         }
-      });
+      }
     }
     return props;
   }
@@ -114,7 +114,7 @@ class FFProbeUtil {
       stream.addAll(tags);
     }
 
-    <String>{
+    for (var key in <String>{
       FFProbeKeys.codecProfileId,
       FFProbeKeys.rFrameRate,
       'bits_per_sample',
@@ -125,7 +125,7 @@ class FFProbeUtil {
       'start_pts',
       'start_time',
       'vendor_id',
-    }.forEach((key) {
+    }) {
       final value = stream[key];
       switch (value) {
         case final num v:
@@ -140,6 +140,6 @@ class FFProbeUtil {
             stream.remove(key);
           }
       }
-    });
+    }
   }
 }

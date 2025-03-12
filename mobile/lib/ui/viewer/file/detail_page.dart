@@ -139,7 +139,7 @@ class _DetailPageState extends State<DetailPage> {
     return InheritedDetailPageState(
       child: PopScope(
         canPop: !isGuestView,
-        onPopInvoked: (didPop) async {
+        onPopInvokedWithResult: (didPop, _) async {
           if (isGuestView) {
             final authenticated = await _requestAuthentication();
             if (authenticated) {
