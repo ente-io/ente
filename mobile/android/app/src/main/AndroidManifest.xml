@@ -17,8 +17,7 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -88,7 +87,7 @@
         <activity-alias
             android:name="${applicationId}.IconLight"
             android:icon="@mipmap/icon_light"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true"
             android:targetActivity=".MainActivity">
             <intent-filter>
