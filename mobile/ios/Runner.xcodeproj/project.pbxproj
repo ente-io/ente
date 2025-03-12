@@ -78,6 +78,7 @@
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A78E51A260432466D4C456A9 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		BB097BB5EB0EEB41344338D2 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
+		CE93A9062D808893005CD942 /* SlideshowWidgetExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SlideshowWidgetExtensionDebug.entitlements; sourceTree = "<group>"; };
 		CEE6BE6F2D7AE7FD00E4048B /* SlideshowWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SlideshowWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CEE6BE822D7AE8C700E4048B /* SlideshowWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SlideshowWidgetExtension.entitlements; sourceTree = "<group>"; };
 		DA8D6672273BBB59007651D4 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
@@ -134,6 +135,7 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
+				CE93A9062D808893005CD942 /* SlideshowWidgetExtensionDebug.entitlements */,
 				CEE6BE822D7AE8C700E4048B /* SlideshowWidgetExtension.entitlements */,
 				2772189F270F596900FFE3CC /* GoogleService-Info.plist */,
 				9740EEB11CF90186004384FC /* Flutter */,
@@ -943,6 +945,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = SlideshowWidgetExtensionDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
