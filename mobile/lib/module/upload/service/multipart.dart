@@ -65,17 +65,12 @@ class MultiPartUploader {
 
   Future<MultipartUploadURLs> getMultipartUploadURLs(int count) async {
     try {
-      assert(
-        _featureFlagService.internalUser,
-        "Multipart upload should not be enabled for external users.",
-      );
       final response = await _enteDio.get(
         "/files/multipart-upload-urls",
         queryParameters: {
           "count": count,
         },
       );
-
       return MultipartUploadURLs.fromMap(response.data);
     } on Exception catch (e) {
       _logger.severe('failed to get multipart url', e);

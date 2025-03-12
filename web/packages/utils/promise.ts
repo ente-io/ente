@@ -153,10 +153,7 @@ export const retryAsyncOperation = async <T>(
  * the order which they are added.
  */
 export class PromiseQueue<T> {
-    private q: {
-        task: () => Promise<T>;
-        handlers: unknown;
-    }[] = [];
+    private q: { task: () => Promise<T>; handlers: unknown }[] = [];
 
     /**
      * Add a promise to the queue, and return a new promise that will resolve to

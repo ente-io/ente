@@ -11231,6 +11231,16 @@ class S {
     );
   }
 
+  /// `Please wait, this will take a while.`
+  String get pleaseWaitThisWillTakeAWhile {
+    return Intl.message(
+      'Please wait, this will take a while.',
+      name: 'pleaseWaitThisWillTakeAWhile',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Edit time`
   String get editTime {
     return Intl.message(

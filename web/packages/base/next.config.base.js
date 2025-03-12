@@ -31,10 +31,7 @@ const gitSHA = (() => {
             ? "git rev-parse --short HEAD 2> NUL || cd ."
             : "git rev-parse --short HEAD 2>/dev/null || true";
     const result = cp
-        .execSync(command, {
-            cwd: __dirname,
-            encoding: "utf8",
-        })
+        .execSync(command, { cwd: __dirname, encoding: "utf8" })
         .trimEnd();
     // Convert empty strings (e.g. when the `|| true` part of the above execSync
     // comes into play) to undefined.
@@ -108,20 +105,13 @@ const nextConfig = {
     // 15.2, the Next.js folks have made this a persistent "branding" indicator
     // that gets in the way and needs to be disabled.
     devIndicators: false,
-    compiler: {
-        emotion: true,
-    },
+    compiler: { emotion: true },
     // Use Next.js to transpile our internal packages before bundling them.
     transpilePackages: ["@/base", "@/utils", "@/new"],
 
     // Add environment variables to the JavaScript bundle. They will be
     // available as `process.env.varName` to our code.
-    env: {
-        gitSHA,
-        appName,
-        isDesktop,
-        desktopAppVersion,
-    },
+    env: { gitSHA, appName, isDesktop, desktopAppVersion },
 
     // Ask Next to use a separate dist directory for the desktop during
     // development. This allows us run dev servers simulataneously for both web

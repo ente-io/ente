@@ -380,6 +380,14 @@
       "title": "Fastmail"
     },
     {
+      "title": "Federal Student Aid",
+      "slug": "federal_student_aid",
+      "altNames": [
+        "FSA",
+        "FAFSA"
+      ]
+    },
+    {
       "title": "Fidelity",
       "slug": "fidelity",
       "altNames": [
@@ -482,6 +490,9 @@
     {
       "title": "IceDrive",
       "slug": "ice_drive"
+    },
+    {
+      "title": "ICONOMI"
     },
     {
       "title": "ID.me",
@@ -594,6 +605,11 @@
       "title": "Letterboxd"
     },
     {
+      "title": "LinkedIn",
+      "slug": "linkedin",
+      "hex": "2596be"
+    },
+    {
       "title": "Linux.Do",
       "slug": "linux_do",
       "altNames": [
@@ -613,6 +629,14 @@
     {
       "title": "Login.gov",
       "slug": "login_gov"
+    },
+    {
+      "title": "Luma",
+      "slug": "luma",
+      "altNames": [
+        "luma",
+        "lu.ma"
+      ]
     },
     {
       "title": "Marketplace.tf",
@@ -642,6 +666,9 @@
         "MercadoLibre",
         "MercadoLivre"
       ]
+    },
+    {
+      "title": "MEXC"
     },
     {
       "title": "microsoft"
@@ -951,6 +978,10 @@
     },
     {
       "title": "RuneMate"
+    },
+    {
+      "title": "RuneScape Wiki",
+      "slug": "runescape_wiki"
     },
     {
       "title": "Rust Language Forum",

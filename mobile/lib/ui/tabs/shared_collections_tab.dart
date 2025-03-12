@@ -20,8 +20,8 @@ import "package:photos/ui/tabs/shared/empty_state.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
 import "package:photos/ui/viewer/gallery/collect_photos_card_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
-import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class SharedCollectionsTab extends StatefulWidget {
   const SharedCollectionsTab({super.key});

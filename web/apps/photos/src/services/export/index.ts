@@ -1430,11 +1430,7 @@ const getFileMetadataExportPath = (
 export const getLivePhotoExportName = (
     imageExportName: string,
     videoExportName: string,
-) =>
-    JSON.stringify({
-        image: imageExportName,
-        video: videoExportName,
-    });
+) => JSON.stringify({ image: imageExportName, video: videoExportName });
 
 export const isLivePhotoExportName = (exportName: string) => {
     try {

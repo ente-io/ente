@@ -20,10 +20,10 @@ import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_uploader.dart";
 import "package:photos/utils/share_util.dart";
-import 'package:photos/utils/toast_util.dart';
 import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
 extension CollectionFileActions on CollectionActions {

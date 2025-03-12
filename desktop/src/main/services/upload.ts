@@ -84,11 +84,7 @@ export const pendingUploads = async (): Promise<PendingUploads | undefined> => {
 
     if (filePaths.length == 0 && zipItems.length == 0) return undefined;
 
-    return {
-        collectionName,
-        filePaths,
-        zipItems,
-    };
+    return { collectionName, filePaths, zipItems };
 };
 
 /**

@@ -7,6 +7,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_import_progress.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/services/sync/import/model.dart";
 import 'package:tuple/tuple.dart';
 
 final _logger = Logger("FileSyncUtil");
@@ -34,17 +35,26 @@ Future<Tuple2<List<LocalPathAsset>, List<EnteFile>>> getLocalPathAssetsAndFiles(
     if (assetsInPath.isEmpty) {
       result = const Tuple2({}, []);
     } else {
-      result = await Computer.shared().compute(
-        _getLocalIDsAndFilesFromAssets,
-        param: <String, dynamic>{
-          "pathEntity": pathEntity,
-          "fromTime": fromTime,
-          "alreadySeenLocalIDs": alreadySeenLocalIDs,
-          "assetList": assetsInPath,
-        },
-        taskName:
-            "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
-      );
+      try {
+        result = await Computer.shared().compute(
+          _getLocalIDsAndFilesFromAssets,
+          param: <String, dynamic>{
+            "pathEntity": pathEntity,
+            "fromTime": fromTime,
+            "alreadySeenLocalIDs": alreadySeenLocalIDs,
+            "assetList": assetsInPath,
+          },
+          taskName:
+              "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
+        );
+      } catch (e) {
+        _logger.severe("_getLocalIDsAndFilesFromAssets failed", e);
+        _logger.info(
+          "Failed for pathEntity: ${pathEntity.name}",
+        );
+        rethrow;
+      }
+
       alreadySeenLocalIDs.addAll(result.item1);
       uniqueFiles.addAll(result.item2);
     }
@@ -116,99 +126,6 @@ Future<List<LocalPathAsset>> getAllLocalAssets() async {
     );
   }
   return localPathAssets;
-}
-
-Future<LocalDiffResult> getDiffWithLocal(
-  List<LocalPathAsset> assets,
-  // current set of assets available on device
-  Set<String> existingIDs, // localIDs of files already imported in app
-  Map<String, Set<String>> pathToLocalIDs,
-) async {
-  final Map<String, dynamic> args = <String, dynamic>{};
-  args['assets'] = assets;
-  args['existingIDs'] = existingIDs;
-  args['pathToLocalIDs'] = pathToLocalIDs;
-  final LocalDiffResult diffResult = await Computer.shared().compute(
-    _getLocalAssetsDiff,
-    param: args,
-    taskName: "getLocalAssetsDiff",
-  );
-  if (diffResult.localPathAssets != null) {
-    diffResult.uniqueLocalFiles =
-        await _convertLocalAssetsToUniqueFiles(diffResult.localPathAssets!);
-  }
-  return diffResult;
-}
-
-// _getLocalAssetsDiff compares local db with the file system and compute
-// the files which needs to be added or removed from device collection.
-LocalDiffResult _getLocalAssetsDiff(Map<String, dynamic> args) {
-  final List<LocalPathAsset> onDeviceLocalPathAsset = args['assets'];
-  final Set<String> existingIDs = args['existingIDs'];
-  final Map<String, Set<String>> pathToLocalIDs = args['pathToLocalIDs'];
-  final Map<String, Set<String>> newPathToLocalIDs = <String, Set<String>>{};
-  final Map<String, Set<String>> removedPathToLocalIDs =
-      <String, Set<String>>{};
-  final List<LocalPathAsset> unsyncedAssets = [];
-
-  for (final localPathAsset in onDeviceLocalPathAsset) {
-    final String pathID = localPathAsset.pathID;
-    // Start identifying pathID to localID mapping changes which needs to be
-    // synced
-    final Set<String> candidateLocalIDsForRemoval =
-        pathToLocalIDs[pathID] ?? <String>{};
-    final Set<String> missingLocalIDsInPath = <String>{};
-    for (final String localID in localPathAsset.localIDs) {
-      if (candidateLocalIDsForRemoval.contains(localID)) {
-        // remove the localID after checking. Any pending existing ID indicates
-        // the the local file was removed from the path.
-        candidateLocalIDsForRemoval.remove(localID);
-      } else {
-        missingLocalIDsInPath.add(localID);
-      }
-    }
-    if (candidateLocalIDsForRemoval.isNotEmpty) {
-      removedPathToLocalIDs[pathID] = candidateLocalIDsForRemoval;
-    }
-    if (missingLocalIDsInPath.isNotEmpty) {
-      newPathToLocalIDs[pathID] = missingLocalIDsInPath;
-    }
-    // End
-
-    localPathAsset.localIDs.removeAll(existingIDs);
-    if (localPathAsset.localIDs.isNotEmpty) {
-      unsyncedAssets.add(localPathAsset);
-    }
-  }
-  return LocalDiffResult(
-    localPathAssets: unsyncedAssets,
-    newPathToLocalIDs: newPathToLocalIDs,
-    deletePathToLocalIDs: removedPathToLocalIDs,
-  );
-}
-
-Future<List<EnteFile>> _convertLocalAssetsToUniqueFiles(
-  List<LocalPathAsset> assets,
-) async {
-  final Set<String> alreadySeenLocalIDs = <String>{};
-  final List<EnteFile> files = [];
-  for (LocalPathAsset localPathAsset in assets) {
-    final String localPathName = localPathAsset.pathName;
-    for (final String localID in localPathAsset.localIDs) {
-      if (!alreadySeenLocalIDs.contains(localID)) {
-        final assetEntity = await AssetEntity.fromId(localID);
-        if (assetEntity == null) {
-          _logger.warning('Failed to fetch asset with id $localID');
-          continue;
-        }
-        files.add(
-          await EnteFile.fromAsset(localPathName, assetEntity),
-        );
-        alreadySeenLocalIDs.add(localID);
-      }
-    }
-  }
-  return files;
 }
 
 /// returns a list of AssetPathEntity with relevant filter operations.
@@ -299,46 +216,9 @@ Future<Tuple2<Set<String>, List<EnteFile>>> _getLocalIDsAndFilesFromAssets(
         (fromTime / ~1000);
     if (!alreadySeenLocalIDs.contains(entity.id) &&
         assetCreatedOrUpdatedAfterGivenTime) {
-      try {
-        final file = await EnteFile.fromAsset(pathEntity.name, entity);
-        files.add(file);
-      } catch (e) {
-        _logger.severe(e);
-      }
+      final file = await EnteFile.fromAsset(pathEntity.name, entity);
+      files.add(file);
     }
   }
   return Tuple2(localIDs, files);
-}
-
-class LocalPathAsset {
-  final Set<String> localIDs;
-  final String pathID;
-  final String pathName;
-
-  LocalPathAsset({
-    required this.localIDs,
-    required this.pathName,
-    required this.pathID,
-  });
-}
-
-class LocalDiffResult {
-  // unique localPath Assets.
-  final List<LocalPathAsset>? localPathAssets;
-
-  // set of File object created from localPathAssets
-  List<EnteFile>? uniqueLocalFiles;
-
-  // newPathToLocalIDs represents new entries which needs to be synced to
-  // the local db
-  final Map<String, Set<String>>? newPathToLocalIDs;
-
-  final Map<String, Set<String>>? deletePathToLocalIDs;
-
-  LocalDiffResult({
-    this.uniqueLocalFiles,
-    this.localPathAssets,
-    this.newPathToLocalIDs,
-    this.deletePathToLocalIDs,
-  });
 }

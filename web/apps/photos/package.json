@@ -11,14 +11,13 @@
         "@ente/shared": "*",
         "chrono-node": "^2.7.8",
         "debounce": "^2.2.0",
-        "localforage": "^1.9.0",
+        "localforage": "^1.10.0",
         "memoize-one": "^6.0.0",
         "ml-matrix": "^6.12.0",
         "p-debounce": "^4.0.0",
-        "photoswipe": "file:./thirdparty/photoswipe",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
-        "react-select": "^5.10.0",
+        "react-select": "^5.10.1",
         "react-top-loading-bar": "^3.0.2",
         "react-virtualized-auto-sizer": "^1.0.25",
         "react-window": "^1.8.11",
@@ -29,9 +28,8 @@
     "devDependencies": {
         "@/build-config": "*",
         "@types/node": "^20",
-        "@types/photoswipe": "^4.1.1",
-        "@types/react": "^19.0.8",
-        "@types/react-dom": "^19.0.3",
+        "@types/react": "^19.0.10",
+        "@types/react-dom": "^19.0.4",
         "@types/react-virtualized-auto-sizer": "^1.0.4",
         "@types/react-window": "^1.8.8"
     }

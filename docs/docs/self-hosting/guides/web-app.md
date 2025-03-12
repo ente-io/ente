@@ -12,13 +12,12 @@ The getting started instructions mention using `yarn dev` (which is an alias of
 
 >[!IMPORTANT]
 > Please note that Ente's Web App supports the Yarn version 1.22.xx or 1.22.22 specifically.
-> Make sure to install the right version or modify your yarn installation to meet the requirements. 
+> Make sure to install the right version or modify your yarn installation to meet the requirements.
 > The user might end up into unknown version and dependency related errors if yarn
 > is on different version.
 
 ```sh
 cd ente/web
-git submodule update --init --recursive
 yarn install
 NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev:photos
 ```
@@ -163,7 +162,7 @@ npm install pm2@latest
 Copy the below contents to a file called `ecosystem.config.js` inside the
 `ente/web` directory.
 
-```js 
+```js
 module.exports = {
   apps: [
     {
@@ -212,16 +211,16 @@ pm2 start
 pm2 logs all
 ```
 
-## Configure App Endpoints 
+## Configure App Endpoints
 
-> [!NOTE] 
+> [!NOTE]
 > Previously, this was dependent on the env variables `NEXT_ENTE_PUBLIC_ACCOUNTS_ENDPOINT`
 > and etc. Please check the below documentation to update your setup configurations
 
 You can configure the web endpoints for the other apps including Accounts, Albums
-Family and Cast in your `museum.yaml` configuration file. Checkout 
+Family and Cast in your `museum.yaml` configuration file. Checkout
 [`local.yaml`](https://github.com/ente-io/ente/blob/543411254b2bb55bd00a0e515dcafa12d12d3b35/server/configurations/local.yaml#L76-L89)
-to configure the endpoints. Make sure to setup up your DNS Records accordingly to the 
+to configure the endpoints. Make sure to setup up your DNS Records accordingly to the
 similar URL's you set up in `museum.yaml`.
 
 Next part is to configure the web server.

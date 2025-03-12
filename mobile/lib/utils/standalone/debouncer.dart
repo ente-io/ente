@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import "package:photos/models/typedefs.dart";
 
 ///Do not forget to cancel the debounce's timer using [cancelDebounceTimer]
 ///when the debouncer is no longer needed
@@ -21,7 +20,7 @@ class Debouncer {
 
   final Stopwatch _stopwatch = Stopwatch();
 
-  void run(FutureVoidCallback fn) {
+  void run(Future<void> Function() fn) {
     if (leading && !isActive()) {
       _stopwatch.stop();
       _stopwatch.reset();

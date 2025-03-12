@@ -11,8 +11,8 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/user/key_attributes.dart";
 import "package:photos/models/api/user/set_keys_request.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class RecoverOthersAccount extends StatefulWidget {
   final String recoveryKey;

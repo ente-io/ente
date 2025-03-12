@@ -1409,7 +1409,8 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {}=0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
+
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1484,7 +1485,7 @@
   },
   "currentlyRunning": "läuft gerade",
   "ignored": "ignoriert",
-  "photosCount": "{count, plural, one {}=0 {0 Fotos} =1 {1 Foto} other {{count} Fotos}}",
+  "photosCount": "{count, plural, =0 {0 Fotos} =1 {1 Foto} other {{count} Fotos}}",
   "@photosCount": {
     "placeholders": {
       "count": {

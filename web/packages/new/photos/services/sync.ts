@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
+import { resetFileViewerDataSourceOnClose } from "@/gallery/components/viewer/data-source";
 import { isHiddenCollection } from "@/new/photos/services/collection";
 import {
     getAllLatestCollections,
@@ -62,17 +63,23 @@ export const syncFilesAndCollections = async () => {
         allCollections,
         isHiddenCollection,
     );
-    await syncFiles(
+    const didUpdateNormalFiles = await syncFiles(
         "normal",
         normalCollections,
         () => {},
         () => {},
     );
-    await syncFiles(
+    const didUpdateHiddenFiles = await syncFiles(
         "hidden",
         hiddenCollections,
         () => {},
         () => {},
     );
     await syncTrash(allCollections, () => {});
+    if (didUpdateNormalFiles || didUpdateHiddenFiles) {
+        // TODO: Ok for now since we're only called by deduper, but still needs
+        // fixing instead of a hidden gotcha.
+        // exportService.onLocalFilesUpdated();
+        resetFileViewerDataSourceOnClose();
+    }
 };

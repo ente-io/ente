@@ -1,7 +1,7 @@
 import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
-import { EnteLogo } from "@/base/components/EnteLogo";
+import { EnteLogo, EnteLogoBox } from "@/base/components/EnteLogo";
 import { LinkButton } from "@/base/components/LinkButton";
 import {
     RowButton,
@@ -180,9 +180,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 );
 
 const RootSidebarDrawer = styled(SidebarDrawer)(({ theme }) => ({
-    "& .MuiPaper-root": {
-        padding: theme.spacing(1.5),
-    },
+    "& .MuiPaper-root": { padding: theme.spacing(1.5) },
 }));
 
 interface SectionProps {
@@ -190,8 +188,10 @@ interface SectionProps {
 }
 
 const HeaderSection: React.FC<SectionProps> = ({ onCloseSidebar }) => (
-    <SpacedRow sx={{ my: "4px 4px", pl: "12px" }}>
-        <EnteLogo />
+    <SpacedRow sx={{ mt: "6px", pl: "12px" }}>
+        <EnteLogoBox>
+            <EnteLogo height={16} />
+        </EnteLogoBox>
         <IconButton
             aria-label={t("close")}
             onClick={onCloseSidebar}
@@ -249,7 +249,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
 
     return (
         <>
-            <Box sx={{ px: 0.5, mt: 2, pb: 1.5, mb: 1 }}>
+            <Box sx={{ px: 0.5, mt: 1.5, pb: 1.5, mb: 1 }}>
                 <Typography sx={{ px: 1, pb: 1, color: "text.muted" }}>
                     {userDetails ? (
                         userDetails.email
@@ -342,9 +342,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
             message = (
                 <Trans
                     i18nKey={"subscription_info_expired"}
-                    components={{
-                        a: <LinkButton onClick={handleClick} />,
-                    }}
+                    components={{ a: <LinkButton onClick={handleClick} /> }}
                 />
             );
         }
@@ -354,9 +352,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         message = (
             <Trans
                 i18nKey={"subscription_info_storage_quota_exceeded"}
-                components={{
-                    a: <LinkButton onClick={handleClick} />,
-                }}
+                components={{ a: <LinkButton onClick={handleClick} /> }}
             />
         );
     }
@@ -368,10 +364,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
             <Typography
                 variant="small"
                 onClick={handleClick && handleClick}
-                sx={{
-                    color: "text.muted",
-                    cursor: handleClick && "pointer",
-                }}
+                sx={{ color: "text.muted", cursor: handleClick && "pointer" }}
             >
                 {message}
             </Typography>
@@ -1081,10 +1074,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         showMiniDialog({
             title: t("view_logs"),
             message: <Trans i18nKey={"view_logs_message"} />,
-            continue: {
-                text: t("view_logs"),
-                action: viewLogs,
-            },
+            continue: { text: t("view_logs"), action: viewLogs },
         });
 
     const viewLogs = () => {

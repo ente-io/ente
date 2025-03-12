@@ -215,9 +215,7 @@ const TappableContainer: React.FC<
             sx={[
                 {
                     bgcolor: "background.paper2",
-                    "@media (width <= 1024px)": {
-                        flexDirection: "column",
-                    },
+                    "@media (width <= 1024px)": { flexDirection: "column" },
                 },
                 (theme) =>
                     theme.applyStyles("dark", {

@@ -296,14 +296,8 @@ interface EncryptedFilePieces {
         encryptedData: Uint8Array | EncryptedFileStream;
         decryptionHeader: string;
     };
-    thumbnail: {
-        encryptedData: Uint8Array;
-        decryptionHeader: string;
-    };
-    metadata: {
-        encryptedDataB64: string;
-        decryptionHeaderB64: string;
-    };
+    thumbnail: { encryptedData: Uint8Array; decryptionHeader: string };
+    metadata: { encryptedDataB64: string; decryptionHeaderB64: string };
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
@@ -1166,10 +1160,7 @@ const readLivePhoto = async (
         hasStaticThumbnail,
     } = await withThumbnail(
         livePhotoAssets.image,
-        {
-            extension: fileTypeInfo.imageType,
-            fileType: FileType.image,
-        },
+        { extension: fileTypeInfo.imageType, fileType: FileType.image },
         await readUploadItem(livePhotoAssets.image),
     );
     const videoFileStreamOrData = await readUploadItem(livePhotoAssets.video);

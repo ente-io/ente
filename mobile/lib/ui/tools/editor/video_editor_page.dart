@@ -13,6 +13,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/services/sync/sync_service.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/tools/editor/export_video_service.dart";
 import 'package:photos/ui/tools/editor/video_crop_page.dart';
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
@@ -24,7 +25,6 @@ import "package:photos/ui/tools/editor/video_trim_page.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/toast_util.dart";
 import "package:video_editor/video_editor.dart";
 
 class VideoEditorPage extends StatefulWidget {

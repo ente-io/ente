@@ -39,6 +39,7 @@ import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/notification_service.dart";
+import "package:photos/services/sync/diff_fetcher.dart";
 import 'package:photos/services/sync/local_sync_service.dart';
 import "package:photos/services/sync/remote_sync_service.dart";
 import 'package:photos/states/user_details_state.dart';
@@ -68,7 +69,6 @@ import "package:photos/ui/viewer/search/search_widget.dart";
 import 'package:photos/ui/viewer/search_tab/search_tab.dart';
 import "package:photos/utils/collection_util.dart";
 import 'package:photos/utils/dialog_util.dart';
-import "package:photos/utils/diff_fetcher.dart";
 import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
@@ -176,7 +176,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         // Loading page will redirect to BackupFolderSelectionPage.
         // To avoid showing folder hook in middle during routing,
         // delay state refresh for home page
-        if (!LocalSyncService.instance.hasGrantedLimitedPermissions()) {
+        if (!permissionService.hasGrantedLimitedPermissions()) {
           delayInRefresh = const Duration(milliseconds: 250);
         }
         Future.delayed(
@@ -643,7 +643,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
-    if (!LocalSyncService.instance.hasGrantedPermissions()) {
+    if (!permissionService.hasGrantedPermissions()) {
       entityService.syncEntities().then((_) {
         PersonService.instance.resetEmailToPartialPersonDataCache();
       });
@@ -671,7 +671,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     _showShowBackupHook =
         !Configuration.instance.hasSelectedAnyBackupFolder() &&
-            !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
+            !permissionService.hasGrantedLimitedPermissions() &&
             CollectionsService.instance.getActiveCollections().isEmpty;
 
     return Stack(

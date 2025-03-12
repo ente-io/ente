@@ -1399,26 +1399,8 @@
   "enableMachineLearningBanner": "Activați învățarea automată pentru a folosi căutarea magică și recunoașterea facială",
   "searchDiscoverEmptySection": "Imaginile vor fi afișate aici odată ce procesarea și sincronizarea este completă",
   "searchPersonsEmptySection": "Persoanele vor fi afișate aici odată ce procesarea și sincronizarea este completă",
-  "viewersSuccessfullyAdded": "{count, plural, one {} few {S-au adăugat {count} observatori}=0 {S-au adăugat 0 observatori} =1 {S-a adăugat 1 observator} other {S-au adăugat {count} de observatori}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {} few {S-au adăugat {count} colaboratori}=0 {S-au adăugat 0 colaboratori} =1 {S-a adăugat 1 colaborator} other {S-au adăugat {count} de colaboratori}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
+
+
   "accountIsAlreadyConfigured": "Contul este deja configurat.",
   "sessionIdMismatch": "Nepotrivire ID sesiune",
   "@sessionIdMismatch": {
@@ -1484,7 +1466,7 @@
   },
   "currentlyRunning": "rulează în prezent",
   "ignored": "ignorat",
-  "photosCount": "{count, plural, one {} few {{count} fotografii}=0 {0 fotografii} =1 {1 fotografie} other {{count} de fotografii}}",
+  "photosCount": "{count, plural, =0 {0 Fotografii} =1 {O Fotografie} other {{count} Fotografii}}",
   "@photosCount": {
     "placeholders": {
       "count": {

@@ -87,28 +87,20 @@ class HTTPService {
     /**
      * header object to be append to all api calls.
      */
-    private headers: IHTTPHeaders = {
-        "content-type": "application/json",
-    };
+    private headers: IHTTPHeaders = { "content-type": "application/json" };
 
     /**
      * Sets the headers to the given object.
      */
     public setHeaders(headers: IHTTPHeaders) {
-        this.headers = {
-            ...this.headers,
-            ...headers,
-        };
+        this.headers = { ...this.headers, ...headers };
     }
 
     /**
      * Adds a header to list of headers.
      */
     public appendHeader(key: string, value: string) {
-        this.headers = {
-            ...this.headers,
-            [key]: value,
-        };
+        this.headers = { ...this.headers, [key]: value };
     }
 
     /**
@@ -155,12 +147,7 @@ class HTTPService {
         customConfig?: any,
     ) {
         return this.request(
-            {
-                headers,
-                method: "GET",
-                params,
-                url,
-            },
+            { headers, method: "GET", params, url },
             customConfig,
         );
     }
@@ -176,13 +163,7 @@ class HTTPService {
         customConfig?: any,
     ) {
         return this.request(
-            {
-                data,
-                headers,
-                method: "POST",
-                params,
-                url,
-            },
+            { data, headers, method: "POST", params, url },
             customConfig,
         );
     }
@@ -198,13 +179,7 @@ class HTTPService {
         customConfig?: any,
     ) {
         return this.request(
-            {
-                data,
-                headers,
-                method: "PATCH",
-                params,
-                url,
-            },
+            { data, headers, method: "PATCH", params, url },
             customConfig,
         );
     }
@@ -220,13 +195,7 @@ class HTTPService {
         customConfig?: any,
     ) {
         return this.request(
-            {
-                data,
-                headers,
-                method: "PUT",
-                params,
-                url,
-            },
+            { data, headers, method: "PUT", params, url },
             customConfig,
         );
     }
@@ -242,13 +211,7 @@ class HTTPService {
         customConfig?: any,
     ) {
         return this.request(
-            {
-                data,
-                headers,
-                method: "DELETE",
-                params,
-                url,
-            },
+            { data, headers, method: "DELETE", params, url },
             customConfig,
         );
     }

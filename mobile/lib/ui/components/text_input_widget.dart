@@ -5,8 +5,8 @@ import 'package:photos/models/execution_states.dart';
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/utils/debouncer.dart';
 import 'package:photos/utils/separators_util.dart';
+import 'package:photos/utils/standalone/debouncer.dart';
 
 ///To show wrong password state, throw an exception with the message
 ///"Incorrect password" in onSubmit.

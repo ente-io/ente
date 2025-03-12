@@ -19,10 +19,10 @@ import "package:photos/models/ignored_file.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
-import "package:photos/utils/data_util.dart";
-import "package:photos/utils/fake_progress.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/standalone/data.dart";
+import "package:photos/utils/standalone/fake_progress.dart";
 
 final _logger = Logger("file_download_util");
 

@@ -150,9 +150,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
             message: (
                 <Trans
                     i18nKey={"no_two_factor_recovery_key_message"}
-                    components={{
-                        a: <Link href="mailto:support@ente.io" />,
-                    }}
+                    components={{ a: <Link href="mailto:support@ente.io" /> }}
                     values={{ emailID: "support@ente.io" }}
                 />
             ),

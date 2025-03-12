@@ -90,12 +90,7 @@ declare module "@mui/material/styles" {
          * corresponding strengths of "text.*" and "fill.*", and an extra
          * "fainter" variant for ad-hoc uses.
          */
-        stroke: {
-            base: string;
-            muted: string;
-            faint: string;
-            fainter: string;
-        };
+        stroke: { base: string; muted: string; faint: string; fainter: string };
         /**
          * Neutral transparent colors for filling small areas like icon or
          * button backgrounds.
@@ -121,11 +116,7 @@ declare module "@mui/material/styles" {
          *
          * These change with the color scheme.
          */
-        backdrop: {
-            base: string;
-            muted: string;
-            faint: string;
-        };
+        backdrop: { base: string; muted: string; faint: string };
         /**
          * Various ad-hoc fixed colors used by our designs.
          *
@@ -140,6 +131,15 @@ declare module "@mui/material/styles" {
              * The color of a switch when it is enabled.
              */
             switchOn: string;
+            /**
+             * A subset of the dark mode colors, fixed so that they don't change
+             * even when the app is in light mode.
+             */
+            dark: {
+                background: Omit<TypeBackground, "elevatedPaper">;
+                text: Omit<TypeText, "primary" | "secondary" | "disabled">;
+                divider: string;
+            };
         };
         /**
          * MUI as of v6 does not allow customizing shadows easily. This is due

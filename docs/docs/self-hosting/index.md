@@ -49,7 +49,6 @@ Then in a separate terminal, you can run (e.g) the web client
 
 ```sh
 cd ente/web
-git submodule update --init --recursive
 yarn install
 NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev
 ```
