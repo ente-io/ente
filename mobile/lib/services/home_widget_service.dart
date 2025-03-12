@@ -3,7 +3,6 @@ import "dart:math";
 
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
-import "package:flutter/scheduler.dart";
 import 'package:home_widget/home_widget.dart' as hw;
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
