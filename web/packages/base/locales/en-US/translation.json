@@ -587,6 +587,7 @@
     "image": "Image",
     "video": "Video",
     "live_photo": "Live photo",
+    "live": "Live",
     "edit_image": "Edit image",
     "photo_editor": "Photo editor",
     "confirm_editor_close": "Are you sure you want to close the editor?",

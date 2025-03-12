@@ -687,7 +687,7 @@ export class FileViewerPhotoSwipe {
 
             ui.registerElement({
                 name: "live",
-                title: pt("Live"),
+                title: t("live"),
                 order: 7,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("live"),
