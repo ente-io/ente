@@ -197,23 +197,30 @@ Future<DateTime> _editDates(
 ) async {
   if (firstDateForShift != null) {
     final firstDateDiff = newDate.difference(firstDateForShift);
+    final filesToNewDates = <EnteFile, int>{};
     for (final file in enteFiles) {
       if (file.creationTime == null) {
         continue;
       }
       final fileTime = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
       final newTime = fileTime.add(firstDateDiff);
-      await editTime(
-        context,
-        [file],
-        newTime.microsecondsSinceEpoch,
-      );
+      filesToNewDates[file] = newTime.microsecondsSinceEpoch;
     }
-  } else {
     await editTime(
       context,
-      enteFiles.toList(),
-      newDate.microsecondsSinceEpoch,
+      filesToNewDates,
+    );
+  } else {
+    final filesToNewDates = <EnteFile, int>{};
+    for (final file in enteFiles) {
+      if (file.creationTime == null) {
+        continue;
+      }
+      filesToNewDates[file] = newDate.microsecondsSinceEpoch;
+    }
+    await editTime(
+      context,
+      filesToNewDates,
     );
   }
   return newDate;
