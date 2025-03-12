@@ -116,3 +116,15 @@ clicking on "Your map" under "Locations" on the search screen.
 ## How to reset my password if I lost it?
 
 On the login page, enter your email and click on Forgot Password. Then, enter your recovery key and create a new password.
+
+ # iOS Album Backup and Organization in Ente
+
+ ### How does Ente handle photos that are part of multiple iOS albums?
+When you select multiple albums for backup, Ente prioritizes uploading each photo to the album with the fewest photos. This means a photo will only be uploaded once, even if it exists in multiple albums on your device. If you create new albums on your device after the initial backup, those photos may not appear in the corresponding Ente album if they were already uploaded to a different album.
+
+
+### Why don’t all photos from a new iOS album appear in the corresponding Ente album?
+If you create a new album on your device after the initial backup, the photos in that album may have already been uploaded to another album in Ente. To fix this, go to the "On Device" album in Ente, select all photos, and manually add them to the corresponding album in Ente.
+
+### What happens if I reorganize my photos in the iOS Photos app after backing up?
+Reorganizing photos in the iOS Photos app (e.g., moving photos to new albums) won’t automatically reflect in Ente. You’ll need to manually add those photos to the corresponding albums in Ente to maintain consistency.
