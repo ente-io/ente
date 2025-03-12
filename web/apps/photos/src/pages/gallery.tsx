@@ -96,13 +96,13 @@ import CollectionNamer, {
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { Export } from "components/Export";
 import { ITEM_TYPE, TimeStampListItem } from "components/FileList";
+import {FileListWithViewer} from "components/FileListWithViewer";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
 import GalleryEmptyState from "components/GalleryEmptyState";
-import PhotoFrame from "components/PhotoFrame";
 import { Sidebar } from "components/Sidebar";
 import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
@@ -1047,7 +1047,7 @@ const Page: React.FC = () => {
                   !state.view.activePerson ? (
                     <PeopleEmptyState />
                 ) : (
-                    <PhotoFrame
+                    <FileListWithViewer
                         mode={barMode}
                         modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredFiles}

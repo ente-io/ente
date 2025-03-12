@@ -16,7 +16,7 @@ import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { styled, Typography } from "@mui/material";
-import type { DisplayFile } from "components/PhotoFrame";
+import type { DisplayFile } from "components/FileListWithViewer";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { shouldShowAvatar } from "utils/file";

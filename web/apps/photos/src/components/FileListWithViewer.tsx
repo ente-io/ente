@@ -76,7 +76,7 @@ export type DisplayFile = EnteFile & {
     timelineDateString?: string;
 };
 
-export type PhotoFrameProps = Pick<
+export type FileListWithViewerProps = Pick<
     FileInfoProps,
     | "fileCollectionIDs"
     | "allCollectionsNameByID"
@@ -142,9 +142,10 @@ export type PhotoFrameProps = Pick<
 };
 
 /**
- * TODO: Rename me to FileListWithViewer (or Gallery?)
+ * A list of files (represented by their thumbnails), alongwith the viewer that
+ * opens on activating the thumbnail.
  */
-const PhotoFrame = ({
+export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     mode,
     modePlus,
     files,
@@ -167,7 +168,7 @@ const PhotoFrame = ({
     onSyncWithRemote,
     onSelectCollection,
     onSelectPerson,
-}: PhotoFrameProps) => {
+}) => {
     const galleryContext = useContext(GalleryContext);
 
     const [openFileViewer, setOpenFileViewer] = useState(false);
@@ -287,8 +288,6 @@ const PhotoFrame = ({
         </Container>
     );
 };
-
-export default PhotoFrame;
 
 /**
  * See: [Note: Timeline date string]

@@ -9,7 +9,7 @@ import {
 } from "@/new/photos/components/FileList";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
-import type { PhotoFrameProps } from "components/PhotoFrame";
+import type { FileListWithViewerProps } from "components/FileListWithViewer";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -193,7 +193,7 @@ export interface FileListAnnotatedFile {
 }
 
 type FileListProps = Pick<
-    PhotoFrameProps,
+    FileListWithViewerProps,
     | "mode"
     | "modePlus"
     | "selectable"
@@ -545,7 +545,7 @@ export const FileList: React.FC<FileListProps> = ({
         } else {
             footerHeight = FOOTER_HEIGHT;
         }
-        const photoFrameHeight = (() => {
+        const fileListHeight = (() => {
             let sum = 0;
             const getCurrentItemSize = getItemSize(timeStampList);
             for (let i = 0; i < timeStampList.length; i++) {
@@ -559,7 +559,7 @@ export const FileList: React.FC<FileListProps> = ({
         return {
             itemType: ITEM_TYPE.OTHER,
             item: <></>,
-            height: Math.max(height - photoFrameHeight - footerHeight, 0),
+            height: Math.max(height - fileListHeight - footerHeight, 0),
         };
     };
 
