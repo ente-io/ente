@@ -708,7 +708,7 @@ export class FileViewerPhotoSwipe {
 
             ui.registerElement({
                 name: "vol",
-                title: pt("Audio"),
+                title: t("audio"),
                 order: 8,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("vol"),
@@ -751,7 +751,7 @@ export class FileViewerPhotoSwipe {
             if (haveUser) {
                 ui.registerElement({
                     name: "favorite",
-                    title: pt("Favorite"),
+                    title: t("favorite"),
                     order: 11,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
@@ -796,7 +796,7 @@ export class FileViewerPhotoSwipe {
 
             ui.registerElement({
                 name: "more",
-                title: pt("More"),
+                title: t("more"),
                 order: 16,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("more"),
