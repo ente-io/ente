@@ -34,11 +34,11 @@ import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
-import "package:photos/ui/components/bulk_edit_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/sharing/show_images_prevew.dart";
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
+import "package:photos/ui/viewer/date/edit_date_sheet.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
 import 'package:photos/utils/delete_file_util.dart';
@@ -400,12 +400,9 @@ class _FileSelectionActionsWidgetState
           labelText: S.of(context).editTime,
           icon: Icons.edit_calendar_outlined,
           onTap: () async {
-            final newDate = await showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              builder: (context) => BulkEditDateBottomSheet(
-                enteFiles: widget.selectedFiles.files,
-              ),
+            final newDate = await showEditDateSheet(
+              context,
+              widget.selectedFiles.files,
             );
             if (newDate != null) {
               widget.selectedFiles.clearAll();

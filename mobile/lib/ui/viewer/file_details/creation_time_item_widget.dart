@@ -2,8 +2,8 @@ import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/bulk_edit_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
+import "package:photos/ui/viewer/date/edit_date_sheet.dart";
 import "package:photos/utils/date_time_util.dart";
 
 class CreationTimeItem extends StatefulWidget {
@@ -44,13 +44,10 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
   }
 
   void _showDateTimePicker(EnteFile file) async {
-    final DateTime? newDate = await showModalBottomSheet<DateTime?>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => BulkEditDateBottomSheet(
-        enteFiles: [file],
-        showHeader: false,
-      ),
+    final DateTime? newDate = await showEditDateSheet(
+      context,
+      [file],
+      showHeader: false,
     );
     if (newDate != null) {
       widget.file.creationTime = newDate.microsecondsSinceEpoch;
