@@ -237,6 +237,34 @@ export interface GalleryState {
      */
     tempHiddenFileIDs: Set<number>;
     /**
+     * File (IDs) for which there is currently an in-flight archive / unarchive
+     * operation trigged via the file viewer.
+     *
+     * See also {@link unsyncedVisibilityUpdates}.
+     */
+    pendingVisibilityUpdates: Set<number>;
+    /**
+     * Transient updates to the visibility of files whose archive state has been
+     * toggled by the user in the file viewer, and on remote, but whose effects
+     * on remote have not yet been synced back to our local DB.
+     *
+     * Each entry from a file ID to `ItemVisibility.archived` (if the file
+     * should be considered as archived) or `ItemVisibility.visible` (if a file
+     * that was previously archived has now been unarchived).
+     *
+     * If the remote request succeeds, we still need to sync the files and
+     * collections in our local DB with the remote state, but that happens in a
+     * batch when the user exits the viewer. So until that point, these updates
+     * remain in this unsynced updates map.
+     *
+     * Once the remote file and collection sync completes, we can clear this map
+     * since thereafter the synced files themselves will reflect the latest
+     * visibility state.
+     *
+     * See also {@link pendingVisibilityUpdates}.
+     */
+    unsyncedVisibilityUpdates: Map<number, ItemVisibility>;
+    /**
      * Transient updates to the favorite status of files that have just been
      * toggled by the user in the file viewer, and on remote, but whose effects
      * on remote have not yet been synced back to our local DB.
@@ -262,25 +290,6 @@ export interface GalleryState {
      * reflect the correct state on remote too.
      */
     unsyncedFavoriteUpdates: Map<number, boolean>;
-    /**
-     * Transient updates to the visibility of files whose archive state has been
-     * toggled by the user in the file viewer, and on remote, but whose effects
-     * on remote have not yet been synced back to our local DB.
-     *
-     * Each is from a file ID to "pending" (if the remote update is in-flight),
-     * `ItemVisibility.archived` (if the file should be considered as archived)
-     * or `ItemVisibility.visible` (if a file that was previously archived
-     * has now been unarchived).
-     *
-     * If the remote request succeeds, we still need to sync the files and
-     * collections in our local DB with the remote state, but that happens in a
-     * batch when the user exits the viewer. So until that point, these updates
-     * remain in this in-flight updates map.
-     *
-     * Once the remote file + collection sync completes, we can clear this map
-     * since now the newly synced files themselves will reflect the latest state.
-     */
-    unsyncedVisibilityUpdates: Map<number, "pending" | ItemVisibility>;
 
     /*--<  State that underlies transient UI state  >--*/
 
@@ -403,18 +412,25 @@ export type GalleryAction =
     | { type: "markTempHidden"; files: EnteFile[] }
     | { type: "clearTempHidden" }
     | {
-          type: "markUnsyncedFavoriteUpdate";
+          type: "markPendingVisibilityUpdate";
           fileID: number;
-          // Passing undefined clears any existing entry, concrete values add or
-          // update one.
-          isFavorite: boolean | undefined;
+          // Passing undefined clears any existing entry; passing "pending" adds
+          // one.
+          visibility: "pending" | undefined;
       }
     | {
           type: "markUnsyncedVisibilityUpdate";
           fileID: number;
           // Passing undefined clears any existing entry, concrete values add or
           // update one.
-          visibility: "pending" | ItemVisibility | undefined;
+          visibility: ItemVisibility | undefined;
+      }
+    | {
+          type: "markUnsyncedFavoriteUpdate";
+          fileID: number;
+          // Passing undefined clears any existing entry, concrete values add or
+          // update one.
+          isFavorite: boolean | undefined;
       }
     | { type: "clearUnsyncedState" }
     | { type: "showAll" }
@@ -451,8 +467,9 @@ const initialGalleryState: GalleryState = {
     hiddenCollectionSummaries: new Map(),
     tempDeletedFileIDs: new Set(),
     tempHiddenFileIDs: new Set(),
-    unsyncedFavoriteUpdates: new Map(),
+    pendingVisibilityUpdates: new Set(),
     unsyncedVisibilityUpdates: new Map(),
+    unsyncedFavoriteUpdates: new Map(),
     selectedCollectionSummaryID: undefined,
     selectedPersonID: undefined,
     extraVisiblePerson: undefined,
@@ -856,26 +873,18 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 tempHiddenFileIDs: new Set(),
             });
 
-        case "markUnsyncedFavoriteUpdate": {
-            const unsyncedFavoriteUpdates = new Map(
-                state.unsyncedFavoriteUpdates,
+        case "markPendingVisibilityUpdate": {
+            const pendingVisibilityUpdates = new Set(
+                state.pendingVisibilityUpdates,
             );
-            if (action.isFavorite === undefined) {
-                unsyncedFavoriteUpdates.delete(action.fileID);
+            if (action.visibility === undefined) {
+                pendingVisibilityUpdates.delete(action.fileID);
             } else {
-                unsyncedFavoriteUpdates.set(action.fileID, action.isFavorite);
+                pendingVisibilityUpdates.add(action.fileID);
             }
             // Skipping a call to stateByUpdatingFilteredFiles since it
-            // currently doesn't depend on favorites.
-            return {
-                ...state,
-                favoriteFileIDs: deriveFavoriteFileIDs(
-                    state.collections,
-                    state.files,
-                    unsyncedFavoriteUpdates,
-                ),
-                unsyncedFavoriteUpdates,
-            };
+            // currently doesn't depend on pendingVisibilityUpdates.
+            return { ...state, pendingVisibilityUpdates };
         }
 
         case "markUnsyncedVisibilityUpdate": {
@@ -898,10 +907,34 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             });
         }
 
+        case "markUnsyncedFavoriteUpdate": {
+            const unsyncedFavoriteUpdates = new Map(
+                state.unsyncedFavoriteUpdates,
+            );
+            if (action.isFavorite === undefined) {
+                unsyncedFavoriteUpdates.delete(action.fileID);
+            } else {
+                unsyncedFavoriteUpdates.set(action.fileID, action.isFavorite);
+            }
+            // Skipping a call to stateByUpdatingFilteredFiles since it
+            // currently doesn't depend on favorites.
+            return {
+                ...state,
+                favoriteFileIDs: deriveFavoriteFileIDs(
+                    state.collections,
+                    state.files,
+                    unsyncedFavoriteUpdates,
+                ),
+                unsyncedFavoriteUpdates,
+            };
+        }
+
         case "clearUnsyncedState": {
-            const unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"] =
-                new Map();
+            const pendingVisibilityUpdates: GalleryState["pendingVisibilityUpdates"] =
+                new Set();
             const unsyncedVisibilityUpdates: GalleryState["unsyncedVisibilityUpdates"] =
+                new Map();
+            const unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"] =
                 new Map();
             return stateByUpdatingFilteredFiles({
                 ...state,
@@ -917,8 +950,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
                 tempDeletedFileIDs: new Set(),
                 tempHiddenFileIDs: new Set(),
-                unsyncedFavoriteUpdates,
+                pendingVisibilityUpdates,
                 unsyncedVisibilityUpdates,
+                unsyncedFavoriteUpdates,
             });
         }
 
