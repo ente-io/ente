@@ -61,7 +61,7 @@ final class IconGreen extends CustomIcon {
   IconGreen()
       : super(
           iOSIcon: 'IconGreen',
-          androidIcon: 'IconGreen',
+          androidIcon: 'MainActivity',
           previewPath: 'assets/icons/icon2.png',
           isDefaultIcon: true,
         );

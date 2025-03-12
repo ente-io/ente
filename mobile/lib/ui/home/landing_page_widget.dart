@@ -261,7 +261,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     Logger("Icon").info("Initializing");
     final iconChanger = LauncherIconSwitcher();
     await iconChanger
-        .initialize(['IconLight', 'IconDark', 'IconGreen'], 'IconGreen');
+        .initialize(['IconLight', 'IconDark', 'IconGreen'], 'IconLight');
     Logger("Icon").info("Initialized");
     final currentIcon = await iconChanger.getCurrentIcon();
     Logger("Icon").info("Current Icon: " + currentIcon);
@@ -281,8 +281,12 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       final iconChanger = FlutterAppIconChangerPlugin(
         iconsSet: CustomIcons.list,
       );
+      final defaultIcon = CustomIcons.list.firstWhere(
+        (element) => element.isDefaultIcon,
+      );
       Logger("Icon").info("Initialized");
-      final currentIcon = await iconChanger.getCurrentIcon() ?? "none";
+      final currentIcon =
+          await iconChanger.getCurrentIcon() ?? defaultIcon.androidIcon;
       Logger("Icon").info("Current Icon: " + currentIcon);
       final isSupported = await iconChanger.isSupported();
       Logger("Icon").info("Supported: " + isSupported.toString());
@@ -293,7 +297,8 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       } else {
         await iconChanger.changeIcon(CustomIcons.list[0].androidIcon);
       }
-      final newIcon = await iconChanger.getCurrentIcon() ?? "none";
+      final newIcon =
+          await iconChanger.getCurrentIcon() ?? defaultIcon.androidIcon;
       Logger("Icon").info("App icon changed to " + newIcon);
       return;
     } catch (e, s) {
