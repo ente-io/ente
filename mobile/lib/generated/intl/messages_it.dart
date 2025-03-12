@@ -20,8 +20,6 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'it';
 
-  static String m9(title) => "${title} (Io)";
-
   static String m10(title) => "${title} (Io)";
 
   static String m11(count) =>
@@ -132,9 +130,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "${email} ti ha invitato a essere un contatto fidato";
 
   static String m47(expiryTime) => "Il link scadrà il ${expiryTime}";
-  static String m46(expiryTime) => "Il link scadrà il ${expiryTime}";
-
-  static String m47(email) => "Collega persona a ${email}";
 
   static String m48(email) => "Collega persona a ${email}";
 
@@ -174,9 +169,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m60(folderName) => "Elaborando ${folderName}...";
 
   static String m61(storeName) => "Valutaci su ${storeName}";
-  static String m60(storeName) => "Valutaci su ${storeName}";
-
-  static String m61(name) => "Riassegnato a ${name}";
 
   static String m62(name) => "Riassegnato a ${name}";
 
@@ -287,7 +279,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "accountIsAlreadyConfigured": MessageLookupByLibrary.simpleMessage(
             "L\'account è già configurato."),
         "accountOwnerPersonAppbarTitle": m10,
-        "accountOwnerPersonAppbarTitle": m9,
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Bentornato!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
@@ -832,12 +823,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "emailNoEnteAccount": m36,
         "emailNotRegistered":
             MessageLookupByLibrary.simpleMessage("Email non registrata."),
-        "emailAlreadyRegistered":
-            MessageLookupByLibrary.simpleMessage("Email già registrata."),
-        "emailChangedTo": m33,
-        "emailNoEnteAccount": m35,
-        "emailNotRegistered":
-            MessageLookupByLibrary.simpleMessage("Email non registrata."),
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("Verifica Email"),
         "emailYourLogs": MessageLookupByLibrary.simpleMessage(
@@ -1138,10 +1123,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkPersonCaption": MessageLookupByLibrary.simpleMessage(
             "per una migliore esperienza di condivisione"),
         "linkPersonToEmail": m48,
-        "linkPerson": MessageLookupByLibrary.simpleMessage("Collega persona"),
-        "linkPersonCaption": MessageLookupByLibrary.simpleMessage(
-            "per una migliore esperienza di condivisione"),
-        "linkPersonToEmail": m47,
         "livePhotos": MessageLookupByLibrary.simpleMessage("Live Photo"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Puoi condividere il tuo abbonamento con la tua famiglia"),
@@ -1233,8 +1214,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "me": MessageLookupByLibrary.simpleMessage("Io"),
         "memoryCount": m6,
-        "me": MessageLookupByLibrary.simpleMessage("Io"),
-        "memoryCount": m5,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Unisci con esistente"),
@@ -1470,9 +1449,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "processingImport": m60,
         "processingVideos":
             MessageLookupByLibrary.simpleMessage("Elaborando video"),
-        "processingImport": m59,
-        "processingVideos":
-            MessageLookupByLibrary.simpleMessage("Elaborando video"),
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Link pubblico creato"),
         "publicLinkEnabled":
@@ -1486,11 +1462,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "rateUsOnStore": m61,
         "reassignMe": MessageLookupByLibrary.simpleMessage("Riassegna \"Io\""),
         "reassignedToName": m62,
-        "reassigningLoading":
-            MessageLookupByLibrary.simpleMessage("Riassegnando..."),
-        "rateUsOnStore": m60,
-        "reassignMe": MessageLookupByLibrary.simpleMessage("Riassegna \"Io\""),
-        "reassignedToName": m61,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Riassegnando..."),
         "recover": MessageLookupByLibrary.simpleMessage("Recupera"),
@@ -1686,8 +1657,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Select one date and time"),
         "selectOneDateAndTimeForAll": MessageLookupByLibrary.simpleMessage(
             "Select one date and time for all"),
-        "selectPersonToLink": MessageLookupByLibrary.simpleMessage(
-            "Seleziona persona da collegare"),
         "selectPersonToLink": MessageLookupByLibrary.simpleMessage(
             "Seleziona persona da collegare"),
         "selectReason":
@@ -1907,9 +1876,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsMeExclamation":
             MessageLookupByLibrary.simpleMessage("Questo sono io!"),
         "thisIsPersonVerificationId": m84,
-        "thisIsMeExclamation":
-            MessageLookupByLibrary.simpleMessage("Questo sono io!"),
-        "thisIsPersonVerificationId": m83,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "Questo è il tuo ID di verifica"),
         "thisWillLogYouOutOfTheFollowingDevice":

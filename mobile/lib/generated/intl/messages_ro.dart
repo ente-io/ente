@@ -60,7 +60,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m22(albumName) => "Link colaborativ creat pentru ${albumName}";
 
-  static String m23(email, numOfDays) =>
+  static String m24(email, numOfDays) =>
       "Sunteți pe cale să adăugați ${email} ca persoană de contact de încredere. Acesta va putea să vă recupereze contul dacă lipsiți timp de ${numOfDays} de zile.";
 
   static String m25(familyAdminEmail) =>
@@ -148,10 +148,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m55(providerName) =>
       "Vă rugăm să vorbiți cu asistența ${providerName} dacă ați fost taxat";
 
-  static String m55(count) =>
+  static String m1(count) => "\$photoCount photos";
+
+  static String m56(count) =>
       "${Intl.plural(count, zero: '0 Fotografii', one: 'O Fotografie', other: '${count} Fotografii')}";
 
-  static String m56(endDate) =>
+  static String m57(endDate) =>
       "Perioada de încercare gratuită valabilă până pe ${endDate}.\nUlterior, puteți opta pentru un plan plătit.";
 
   static String m58(toEmail) =>
@@ -254,9 +256,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m91(email) => "Verificare ${email}";
 
-  static String m2(email) => "Am trimis un e-mail la <green>${email}</green>";
+  static String m3(email) => "Am trimis un e-mail la <green>${email}</green>";
 
-  static String m92(count) =>
+  static String m93(count) =>
       "${Intl.plural(count, one: 'acum ${count} an', few: 'acum ${count} ani', other: 'acum ${count} de ani')}";
 
   static String m94(storageSaved) => "Ați eliberat cu succes ${storageSaved}!";
