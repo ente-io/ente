@@ -233,8 +233,8 @@ export class FileViewerPhotoSwipe {
             mainClass: "pswp-ente",
             closeTitle: t("close"),
             zoomTitle: t("zoom"),
-            arrowPrevTitle: pt("Previous"),
-            arrowNextTitle: pt("Next"),
+            arrowPrevTitle: t("previous"),
+            arrowNextTitle: t("next"),
             // TODO(PS): Move to translations (unpreviewable_file_notification).
             errorMsg: pt("This file could not be previewed"),
         });

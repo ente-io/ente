@@ -9,7 +9,7 @@ import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
-import { formattedListJoin, pt, ut } from "@/base/i18n";
+import { formattedListJoin, ut } from "@/base/i18n";
 import type { LocalUser } from "@/base/local-user";
 import log from "@/base/log";
 import {
@@ -795,24 +795,20 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             >
                 {activeAnnotatedFile.annotation.showDownload == "menu" && (
                     <MoreMenuItem onClick={handleDownloadMenuAction}>
-                        <MoreMenuItemTitle>
-                            {/*TODO */ t("download")}
-                        </MoreMenuItemTitle>
+                        <MoreMenuItemTitle>{t("download")}</MoreMenuItemTitle>
                         <FileDownloadOutlinedIcon />
                     </MoreMenuItem>
                 )}
                 {activeAnnotatedFile.annotation.showDelete && (
                     <MoreMenuItem onClick={handleConfirmDelete}>
-                        <MoreMenuItemTitle>
-                            {/*TODO */ t("delete")}
-                        </MoreMenuItemTitle>
+                        <MoreMenuItemTitle>{t("delete")}</MoreMenuItemTitle>
                         <DeleteIcon />
                     </MoreMenuItem>
                 )}
                 {canCopyImage() && (
                     <MoreMenuItem onClick={handleCopyImage}>
                         <MoreMenuItemTitle>
-                            {/*TODO */ pt("Copy as PNG")}
+                            {t("copy_as_png")}
                         </MoreMenuItemTitle>
                         {/* Tweak icon size to visually fit better with neighbours */}
                         <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
@@ -820,9 +816,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 )}
                 {activeAnnotatedFile.annotation.showEditImage && (
                     <MoreMenuItem onClick={handleEditImage}>
-                        <MoreMenuItemTitle>
-                            {/*TODO */ pt("Edit image")}
-                        </MoreMenuItemTitle>
+                        <MoreMenuItemTitle>{t("edit_image")}</MoreMenuItemTitle>
                         <EditIcon />
                     </MoreMenuItem>
                 )}
@@ -836,11 +830,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     }}
                 >
                     <MoreMenuItemTitle>
-                        {
-                            /*TODO */ isFullscreen
-                                ? pt("Exit fullscreen")
-                                : pt("Go fullscreen")
-                        }
+                        {isFullscreen
+                            ? t("exit_fullscreen")
+                            : t("go_fullscreen")}
                     </MoreMenuItemTitle>
                     {isFullscreen ? (
                         <FullscreenExitOutlinedIcon />
@@ -850,7 +842,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 </MoreMenuItem>
                 <MoreMenuItem onClick={handleShortcuts} sx={{ mt: "2px" }}>
                     <Typography sx={{ color: "fixed.dark.text.faint" }}>
-                        {pt("Shortcuts")}
+                        {t("shortcuts")}
                     </Typography>
                 </MoreMenuItem>
             </MoreMenu>
@@ -1027,7 +1019,7 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
         slotProps={{ backdrop: { sx: { backdropFilter: "blur(30px)" } } }}
     >
         <SpacedRow sx={{ pt: 2, px: 2.5 }}>
-            <DialogTitle>{pt("Shortcuts")}</DialogTitle>
+            <DialogTitle>{t("shortcuts")}</DialogTitle>
             <DialogCloseIconButton {...{ onClose }} />
         </SpacedRow>
         <ShortcutsContent sx={{ "&&": { pt: 2, pb: 5, px: 5 } }}>
