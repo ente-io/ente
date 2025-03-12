@@ -1034,30 +1034,47 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
             <Shortcut action={t("close")} shortcut={ut("Esc")} />
             <Shortcut
                 action={formattedListJoin([t("previous"), t("next")])}
-                shortcut="←, →"
+                shortcut={formattedListJoin([ut("←"), ut("→")])}
             />
-            <Shortcut action={t("zoom")} shortcut="Mouse scroll, Pinch" />
-            <Shortcut action="Zoom preset" shortcut="Z, Tap inside image" />
             <Shortcut
-                action="Toggle controls"
-                shortcut="H, Tap outside image"
+                action={t("zoom")}
+                shortcut={formattedListJoin([t("mouse_scroll"), t("pinch")])}
             />
-            <Shortcut action="Pan" shortcut="W A S D, Drag" />
-            <Shortcut action="Toggle live" shortcut="Space" />
-            <Shortcut action="Toggle audio" shortcut="M" />
-            {haveUser && <Shortcut action="Toggle favorite" shortcut="L" />}
-            <Shortcut action="View info" shortcut="I" />
+            <Shortcut
+                action={t("zoom_preset")}
+                shortcut={formattedListJoin([ut("Z"), t("tap_inside_image")])}
+            />
+            <Shortcut
+                action={t("toggle_controls")}
+                shortcut={formattedListJoin([ut("H"), t("tap_outside_image")])}
+            />
+            <Shortcut
+                action={t("pan")}
+                shortcut={formattedListJoin([ut("W A S D"), t("drag")])}
+            />
+            <Shortcut action={t("toggle_live")} shortcut={ut("Space")} />
+            <Shortcut action={t("toggle_audio")} shortcut={ut("M")} />
+            {haveUser && (
+                <Shortcut action="Toggle favorite" shortcut={ut("L")} />
+            )}
+            <Shortcut action={t("view_info")} shortcut={ut("I")} />
             {!disableDownload && (
-                <Shortcut action={t("download")} shortcut="K" />
+                <Shortcut action={t("download")} shortcut={ut("K")} />
             )}
             {haveUser && (
-                <Shortcut action={t("delete")} shortcut="Delete, Backspace" />
+                <Shortcut
+                    action={t("delete")}
+                    shortcut={formattedListJoin([
+                        ut("Delete"),
+                        ut("Backspace"),
+                    ])}
+                />
             )}
             {!disableDownload && (
-                <Shortcut action={t("copy_as_png")} shortcut="^C / ⌘C" />
+                <Shortcut action={t("copy_as_png")} shortcut={ut("^C / ⌘C")} />
             )}
-            <Shortcut action={t("toggle_fullscreen")} shortcut="F" />
-            <Shortcut action={t("show_shortcuts")} shortcut="?" />
+            <Shortcut action={t("toggle_fullscreen")} shortcut={ut("F")} />
+            <Shortcut action={t("show_shortcuts")} shortcut={ut("?")} />
         </ShortcutsContent>
     </Dialog>
 );
