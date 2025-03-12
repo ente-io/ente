@@ -563,7 +563,7 @@
     "oldest_first": "Más antiguos primero",
     "pin_album": "Anclar álbum",
     "unpin_album": "Desanclar álbum",
-    "unpreviewable_file_notification": "Este archivo no puede ser previsualizado. Haga clic aquí para descargar el original.",
+    "unpreviewable_file_message": "Este archivo no puede ser previsualizado",
     "download_complete": "Descarga completada",
     "downloading_album": "Descargando {{name}}",
     "download_failed": "Error al descargar",

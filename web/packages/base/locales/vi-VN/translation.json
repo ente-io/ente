@@ -563,7 +563,7 @@
     "oldest_first": "Cũ nhất trước",
     "pin_album": "Ghim album",
     "unpin_album": "Bỏ ghim album",
-    "unpreviewable_file_notification": "Tệp này không thể được xem trước. Nhấp vào đây để tải xuống bản gốc.",
+    "unpreviewable_file_message": "Tệp này không thể được xem trước",
     "download_complete": "Tải xuống hoàn tất",
     "downloading_album": "Đang tải xuống {{name}}",
     "download_failed": "Tải xuống thất bại",

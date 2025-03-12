@@ -563,7 +563,7 @@
     "oldest_first": "Mais antigo primeiro",
     "pin_album": "Fixar álbum",
     "unpin_album": "Desafixar álbum",
-    "unpreviewable_file_notification": "Este arquivo não pôde ser pré-visualizado. Clique aqui para baixar o original.",
+    "unpreviewable_file_message": "Este arquivo não pôde ser pré-visualizado",
     "download_complete": "Download concluído",
     "downloading_album": "Fazendo download de {{name}}",
     "download_failed": "Falhou ao baixar",

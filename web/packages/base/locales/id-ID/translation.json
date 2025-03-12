@@ -562,7 +562,7 @@
     "oldest_first": "",
     "pin_album": "",
     "unpin_album": "",
-    "unpreviewable_file_notification": "",
+    "unpreviewable_file_message": "",
     "download_complete": "Selesai mengunduh",
     "downloading_album": "Mengunduh {{name}}",
     "download_failed": "Gagal mengunduh",

@@ -563,7 +563,7 @@
     "oldest_first": "Od najstarszych",
     "pin_album": "Przypnij album",
     "unpin_album": "Odepnij album",
-    "unpreviewable_file_notification": "Ten plik nie mógł zostać podglądnięty. Kliknij tutaj, aby pobrać oryginał.",
+    "unpreviewable_file_message": "Ten plik nie mógł zostać podglądnięty",
     "download_complete": "Pobieranie zakończone",
     "downloading_album": "Pobieranie {{name}}",
     "download_failed": "Pobieranie nie powiodło się",

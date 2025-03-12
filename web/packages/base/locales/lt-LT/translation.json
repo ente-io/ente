@@ -563,7 +563,7 @@
     "oldest_first": "Seniausią pirmiausiai",
     "pin_album": "Prisegti albumą",
     "unpin_album": "Atsegti albumą",
-    "unpreviewable_file_notification": "Šio failo nepavyko peržiūrėti. Spustelėkite čia, jei norite atsisiųsti originalą.",
+    "unpreviewable_file_message": "Šio failo nepavyko peržiūrėti",
     "download_complete": "Atsisiuntimas baigtas",
     "downloading_album": "Atsisiunčiama {{name}}",
     "download_failed": "Atsisiuntimas nepavyko.",

@@ -575,7 +575,7 @@
     "oldest_first": "Oldest first",
     "pin_album": "Pin album",
     "unpin_album": "Unpin album",
-    "unpreviewable_file_notification": "This file could not be previewed. Click here to download the original.",
+    "unpreviewable_file_message": "This file could not be previewed",
     "download_complete": "Download complete",
     "downloading_album": "Downloading {{name}}",
     "download_failed": "Download failed",

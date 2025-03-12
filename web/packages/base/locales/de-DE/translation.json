@@ -563,7 +563,7 @@
     "oldest_first": "Älteste zuerst",
     "pin_album": "Album anheften",
     "unpin_album": "Album lösen",
-    "unpreviewable_file_notification": "Diese Datei konnte nicht in der Vorschau angezeigt werden. Klicken Sie hier, um das Original herunterzuladen.",
+    "unpreviewable_file_message": "Diese Datei konnte nicht in der Vorschau angezeigt werden",
     "download_complete": "Download abgeschlossen",
     "downloading_album": "Lade {{name}} herunter",
     "download_failed": "Herunterladen fehlgeschlagen",

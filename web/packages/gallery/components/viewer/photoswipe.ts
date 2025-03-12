@@ -1,4 +1,3 @@
-import { pt } from "@/base/i18n";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { t } from "i18next";
@@ -235,8 +234,7 @@ export class FileViewerPhotoSwipe {
             zoomTitle: t("zoom"),
             arrowPrevTitle: t("previous"),
             arrowNextTitle: t("next"),
-            // TODO(PS): Move to translations (unpreviewable_file_notification).
-            errorMsg: pt("This file could not be previewed"),
+            errorMsg: t("unpreviewable_file_message"),
         });
 
         this.pswp = pswp;
@@ -726,9 +724,6 @@ export class FileViewerPhotoSwipe {
                 },
                 onClick: livePhotoToggleMuteIfPossible,
             });
-
-            // TODO(PS): Add force convert button for videos? Or is that covered
-            // by upcoming streaming changes?
 
             ui.registerElement({
                 name: "error",

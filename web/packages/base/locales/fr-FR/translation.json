@@ -563,7 +563,7 @@
     "oldest_first": "Plus ancien en premier",
     "pin_album": "Épingler l'album",
     "unpin_album": "Désépingler l'album",
-    "unpreviewable_file_notification": "Ce fichier n'a pas pu être aperçu. Cliquez ici pour télécharger l'original.",
+    "unpreviewable_file_message": "Ce fichier n'a pas pu être aperçu",
     "download_complete": "Téléchargement terminé",
     "downloading_album": "Téléchargement de {{name}}",
     "download_failed": "Échec du téléchargement",

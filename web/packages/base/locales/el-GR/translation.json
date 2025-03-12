@@ -563,7 +563,7 @@
     "oldest_first": "",
     "pin_album": "",
     "unpin_album": "Ξεκαρφίτσωμα άλμπουμ",
-    "unpreviewable_file_notification": "",
+    "unpreviewable_file_message": "",
     "download_complete": "Η λήψη ολοκληρώθηκε",
     "downloading_album": "Λήψη {{name}}",
     "download_failed": "Η λήψη απέτυχε",

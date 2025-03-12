@@ -563,7 +563,7 @@
     "oldest_first": "古い順",
     "pin_album": "アルバムをピン留め",
     "unpin_album": "アルバムのピン留めを解除",
-    "unpreviewable_file_notification": "このファイルはプレビューできませんでした。オリジナルをダウンロードするにはここをクリックしてください。",
+    "unpreviewable_file_message": "このファイルはプレビューできませんでした",
     "download_complete": "ダウンロード完了",
     "downloading_album": "{{name}} をダウンロード中",
     "download_failed": "ダウンロードに失敗しました",

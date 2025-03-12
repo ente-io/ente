@@ -562,7 +562,7 @@
     "oldest_first": "Dal più vecchio",
     "pin_album": "Fissa l'album",
     "unpin_album": "Sblocca album",
-    "unpreviewable_file_notification": "Impossibile visualizzare l'anteprima di questo file. Clicca qui per scaricare l'originale.",
+    "unpreviewable_file_message": "Impossibile visualizzare l'anteprima di questo file",
     "download_complete": "Download completato",
     "downloading_album": "Download {{name}}",
     "download_failed": "Download fallito",
