@@ -10,6 +10,7 @@ import {
 } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
 import { mergeMetadata } from "@/media/file";
+import { ItemVisibility } from "@/media/file-metadata";
 import {
     createCollectionNameByID,
     isHiddenCollection,
@@ -42,7 +43,6 @@ import {
 import type { PeopleState, Person } from "../../services/ml/people";
 import type { SearchSuggestion } from "../../services/search/types";
 import type { FamilyData } from "../../services/user-details";
-import type { ItemVisibility } from "@/media/file-metadata";
 
 /**
  * Specifies what the bar at the top of the gallery is displaying currently.
@@ -173,6 +173,8 @@ export interface GalleryState {
     hiddenFileIDs: Set<number>;
     /**
      * File IDs of the files that the user has archived.
+     *
+     * Includes the effects of {@link unsyncedVisibilityUpdates}.
      *
      * Files can be individually archived (which is a file level property), or
      * archived by virtue of being placed in an archived album (which is a
@@ -407,6 +409,13 @@ export type GalleryAction =
           // update one.
           isFavorite: boolean | undefined;
       }
+    | {
+          type: "markUnsyncedVisibilityUpdate";
+          fileID: number;
+          // Passing undefined clears any existing entry, concrete values add or
+          // update one.
+          visibility: "pending" | ItemVisibility | undefined;
+      }
     | { type: "clearUnsyncedState" }
     | { type: "showAll" }
     | { type: "showHidden" }
@@ -473,6 +482,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             const archivedFileIDs = deriveArchivedFileIDs(
                 archivedCollectionIDs,
                 action.files,
+                state.unsyncedVisibilityUpdates,
             );
             const view = {
                 type: "albums" as const,
@@ -525,6 +535,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             const archivedFileIDs = deriveArchivedFileIDs(
                 archivedCollectionIDs,
                 state.files,
+                state.unsyncedVisibilityUpdates,
             );
             const collectionSummaries = deriveCollectionSummaries(
                 state.user!,
@@ -579,6 +590,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             const archivedFileIDs = deriveArchivedFileIDs(
                 archivedCollectionIDs,
                 state.files,
+                state.unsyncedVisibilityUpdates,
             );
             const collectionSummaries = deriveCollectionSummaries(
                 state.user!,
@@ -649,6 +661,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 archivedFileIDs: deriveArchivedFileIDs(
                     state.archivedCollectionIDs,
                     files,
+                    state.unsyncedVisibilityUpdates,
                 ),
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     state.collections,
@@ -684,6 +697,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 archivedFileIDs: deriveArchivedFileIDs(
                     state.archivedCollectionIDs,
                     files,
+                    state.unsyncedVisibilityUpdates,
                 ),
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     state.collections,
@@ -715,6 +729,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 archivedFileIDs: deriveArchivedFileIDs(
                     state.archivedCollectionIDs,
                     files,
+                    state.unsyncedVisibilityUpdates,
                 ),
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     state.collections,
@@ -863,10 +878,38 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             };
         }
 
-        case "clearUnsyncedState": {
-            const unsyncedFavoriteUpdates = new Map<number, boolean>();
+        case "markUnsyncedVisibilityUpdate": {
+            const unsyncedVisibilityUpdates = new Map(
+                state.unsyncedVisibilityUpdates,
+            );
+            if (action.visibility === undefined) {
+                unsyncedVisibilityUpdates.delete(action.fileID);
+            } else {
+                unsyncedVisibilityUpdates.set(action.fileID, action.visibility);
+            }
             return stateByUpdatingFilteredFiles({
                 ...state,
+                archivedFileIDs: deriveArchivedFileIDs(
+                    state.archivedCollectionIDs,
+                    state.files,
+                    unsyncedVisibilityUpdates,
+                ),
+                unsyncedVisibilityUpdates,
+            });
+        }
+
+        case "clearUnsyncedState": {
+            const unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"] =
+                new Map();
+            const unsyncedVisibilityUpdates: GalleryState["unsyncedVisibilityUpdates"] =
+                new Map();
+            return stateByUpdatingFilteredFiles({
+                ...state,
+                archivedFileIDs: deriveArchivedFileIDs(
+                    state.archivedCollectionIDs,
+                    state.files,
+                    unsyncedVisibilityUpdates,
+                ),
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     state.collections,
                     state.files,
@@ -875,6 +918,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 tempDeletedFileIDs: new Set(),
                 tempHiddenFileIDs: new Set(),
                 unsyncedFavoriteUpdates,
+                unsyncedVisibilityUpdates,
             });
         }
 
@@ -1073,14 +1117,18 @@ const deriveHiddenFileIDs = (hiddenFiles: EnteFile[]) =>
 const deriveArchivedFileIDs = (
     archivedCollectionIDs: Set<number>,
     files: EnteFile[],
+    unsyncedVisibilityUpdates: GalleryState["unsyncedVisibilityUpdates"],
 ) =>
     new Set(
         files
-            .filter(
-                (file) =>
-                    isArchivedFile(file) ||
-                    archivedCollectionIDs.has(file.collectionID),
-            )
+            .filter((file) => {
+                const uv = unsyncedVisibilityUpdates.get(file.id);
+                return (
+                    (isArchivedFile(file) && uv !== ItemVisibility.visible) ||
+                    archivedCollectionIDs.has(file.collectionID) ||
+                    uv == ItemVisibility.archived
+                );
+            })
             .map((f) => f.id),
     );
 
