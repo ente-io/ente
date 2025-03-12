@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import "package:logging/logging.dart";
 
 class PreloadImage {
+  static final _logger = Logger((PreloadImage).toString());
   static Future<void> loadImage(ImageProvider provider) {
     final config = ImageConfiguration(
       bundle: rootBundle,
@@ -18,13 +20,14 @@ class PreloadImage {
 
     listener = ImageStreamListener(
       (ImageInfo image, bool sync) {
-        debugPrint("Image ${image.debugLabel} finished loading");
+        _logger.info("Image ${image.debugLabel} finished loading");
         completer.complete();
         stream.removeListener(listener);
       },
       onError: (dynamic exception, StackTrace? stackTrace) {
         completer.complete();
         stream.removeListener(listener);
+        _logger.warning("Image failed to load");
         FlutterError.reportError(
           FlutterErrorDetails(
             context: ErrorDescription('image failed to load'),

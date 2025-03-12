@@ -1,7 +1,7 @@
+import "dart:convert";
 import "dart:io";
 import "dart:math";
 
-import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import 'package:home_widget/home_widget.dart' as hw;
 import "package:logging/logging.dart";
@@ -18,7 +18,6 @@ import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/preload_util.dart";
 
 class HomeWidgetService {
   final Logger _logger = Logger((HomeWidgetService).toString());
@@ -144,30 +143,10 @@ class HomeWidgetService {
       cacheWidth = 1024;
       cacheHeight = 1024;
     }
-    final Image img = Image.file(
-      fullImage,
-      fit: BoxFit.cover,
-      cacheWidth: cacheWidth,
-      cacheHeight: cacheHeight,
-    );
 
-    await PreloadImage.loadImage(img.image);
-
-    final widget = ClipSmoothRect(
-      radius: SmoothBorderRadius(cornerRadius: 32, cornerSmoothing: 1),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          image: DecorationImage(image: img.image, fit: BoxFit.cover),
-        ),
-      ),
-    );
-
-    await hw.HomeWidget.renderFlutterWidget(
-      widget,
-      logicalSize: Size(size, size),
-      key: key,
+    await hw.HomeWidget.saveWidgetData(
+      key,
+      base64Encode(await fullImage.readAsBytes()),
     );
 
     return (
