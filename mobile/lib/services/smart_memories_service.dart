@@ -15,9 +15,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
-import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/memories/filler_memory.dart";
 import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
@@ -524,8 +522,6 @@ class SmartMemoriesService {
     bool surfaceAll = false,
   }) async {
     final List<TripMemory> memoryResults = [];
-    final Iterable<LocalEntity<LocationTag>> locationTagEntities =
-        (await locationService.getLocationTags());
     if (allFiles.isEmpty) return (<TripMemory>[], <BaseLocation>[]);
     final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
     final windowEnd =
@@ -536,13 +532,9 @@ class SmartMemoriesService {
     const tripRadius = 100.0;
     const overlapRadius = 10.0;
 
-    final Map<LocalEntity<LocationTag>, List<EnteFile>> tagToItemsMap = {};
-    for (int i = 0; i < locationTagEntities.length; i++) {
-      tagToItemsMap[locationTagEntities.elementAt(i)] = [];
-    }
     final List<(List<EnteFile>, Location)> smallRadiusClusters = [];
     final List<(List<EnteFile>, Location)> wideRadiusClusters = [];
-    // Go through all files and cluster the ones not inside any location tag
+    // Go through all files and cluster (incremental clustering)
     allFilesLoop:
     for (EnteFile file in allFiles) {
       if (!file.hasLocation ||
@@ -551,20 +543,6 @@ class SmartMemoriesService {
           file.creationTime == null) {
         continue allFilesLoop;
       }
-      // Check if the file is inside any location tag
-      bool hasLocationTag = false;
-      for (LocalEntity<LocationTag> tag in tagToItemsMap.keys) {
-        if (isFileInsideLocationTag(
-          tag.item.centerPoint,
-          file.location!,
-          tag.item.radius,
-        )) {
-          hasLocationTag = true;
-          tagToItemsMap[tag]!.add(file);
-        }
-      }
-      // Cluster the files not inside any location tag (incremental clustering)
-      if (hasLocationTag) continue allFilesLoop;
       // Small radius clustering for base locations
       bool addedToExistingSmallCluster = false;
       for (final cluster in smallRadiusClusters) {
@@ -654,28 +632,15 @@ class SmartMemoriesService {
       final files = cluster.$1;
       final location = cluster.$2;
       // Check that it's at least 10km away from any base or tag location
-      bool tooClose = false;
       for (final baseLocation in baseLocations) {
         if (isFileInsideLocationTag(
           baseLocation.location,
           location,
           overlapRadius,
         )) {
-          tooClose = true;
-          break;
+          continue clusteredLocations;
         }
       }
-      for (final tag in tagToItemsMap.keys) {
-        if (isFileInsideLocationTag(
-          tag.item.centerPoint,
-          location,
-          overlapRadius,
-        )) {
-          tooClose = true;
-          break;
-        }
-      }
-      if (tooClose) continue clusteredLocations;
 
       // Check that the photos are distributed over a short time range (2-30 days) or multiple short time ranges only
       files.sort((a, b) => a.creationTime!.compareTo(b.creationTime!));
