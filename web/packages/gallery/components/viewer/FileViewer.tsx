@@ -374,6 +374,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [],
     );
 
+    const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
+
     const handleClose = useCallback(() => {
         setNeedsSync((needSync) => {
             if (needSync) onTriggerSyncWithRemote?.();
@@ -447,33 +449,69 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [],
     );
 
+    const refreshSlideAfterDeleteOrArchive = useCallback(
+        (expectedFileID?: number) => {
+            // [Note: File viewer update and dispatch]
+            //
+            // This relies on the assumption that `onDelete` or
+            // `onFileVisibilityUpdate` will asynchronously result in updates to
+            // the `files` prop.
+            //
+            // Currently that indeed is what happens as the last call in the
+            // `onDelete` and `onFileVisibilityUpdate` implementations are calls
+            // to a (useReducer) dispatcher, but we need to be careful about
+            // preserving this assumption if changing their implementation in
+            // the future.
+            awaitNextFilesOrFavoritesUpdate((files: EnteFile[]) => {
+                handleNeedsRemoteSync();
+                if (files.length) {
+                    // We might've been provided an expectedFileID. If so, only
+                    // do the reload if it is no longer present in the files
+                    // array.
+                    //
+                    // There are 3 cases:
+                    //
+                    // - On file deletion: expectedFileID is not provided.
+                    //
+                    // - On file archive when we're in the all section:
+                    //   expectedFileID is provided, and will not be present in
+                    //   the updated files array after update. In such cases, we
+                    //   want to behave like delete (move to the next slide).
+                    //
+                    // - On other types of file archive: expectedFileID is
+                    //   provided, but it'll still be present in the updated
+                    //   files array, and in such cases we don't want to reload
+                    //   the current slide.
+                    if (
+                        expectedFileID &&
+                        files.find(({ id }) => id == expectedFileID)
+                    ) {
+                        // Do nothing.
+                    } else {
+                        // Refreshing the current slide after the current file
+                        // has gone will show the subsequent slide (since that
+                        // would've now moved down to the current index).
+                        //
+                        // However, we might've been the last slide, in which
+                        // case we need to go back one slide first. To determine
+                        // this, also pass the expected count of files to our
+                        // PhotoSwipe wrapper.
+                        psRef.current!.refreshCurrentSlideContent(files.length);
+                    }
+                } else {
+                    // If there are no more files left, close the viewer.
+                    handleClose();
+                }
+            });
+        },
+        [awaitNextFilesOrFavoritesUpdate, handleNeedsRemoteSync, handleClose],
+    );
+
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleDelete = async () => {
         const file = activeAnnotatedFile!.file;
         await onDelete!(file);
-        // [Note: File viewer update and dispatch]
-        //
-        // This relies on the assumption that `onDelete` will asynchronously
-        // result in updates to the `files` prop. Currently that indeed is what
-        // happens as the last call in the `onDelete` implementation is a call
-        // to a dispatcher, but we need to be careful about preserving this
-        // assumption when changing `onDelete` implementation in the future.
-        awaitNextFilesOrFavoritesUpdate((files: EnteFile[]) => {
-            handleNeedsRemoteSync();
-            if (files.length) {
-                // Refreshing the current slide after the current file has gone
-                // will show the subsequent slide (since that would've now moved
-                // down to the current index).
-                //
-                // However, we might've been the last slide, in which case we
-                // need to go back one slide first. To determine this, also pass
-                // the expected count of files to our PhotoSwipe wrapper.
-                psRef.current!.refreshCurrentSlideContent(files.length);
-            } else {
-                // If there are no more files left, close the viewer.
-                handleClose();
-            }
-        });
+        refreshSlideAfterDeleteOrArchive();
     };
 
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
@@ -590,8 +628,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             handleConfirmDelete,
         ],
     );
-
-    const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
 
     const handleSelectCollection = useMemo(() => {
         return onSelectCollection
@@ -725,13 +761,19 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
                 isPendingToggleArchive = pendingVisibilityUpdates.has(file.id);
 
-                toggleArchived = () =>
+                toggleArchived = () => {
+                    handleMoreMenuCloseIfNeeded();
                     void onFileVisibilityUpdate(
                         file.id,
                         isArchived
                             ? ItemVisibility.visible
                             : ItemVisibility.archived,
-                    );
+                    )
+                        .then(() => {
+                            refreshSlideAfterDeleteOrArchive(file.id);
+                        })
+                        .catch(onGenericError);
+                };
             }
 
             return { isArchived, isPendingToggleArchive, toggleArchived };
@@ -739,6 +781,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             pendingVisibilityUpdates,
             unsyncedVisibilityUpdates,
             onFileVisibilityUpdate,
+            onGenericError,
+            refreshSlideAfterDeleteOrArchive,
+            handleMoreMenuCloseIfNeeded,
             activeAnnotatedFile,
         ]);
 
