@@ -86,9 +86,20 @@
 
         </activity>
         <activity-alias
+            android:name="${applicationId}.IconGreen"
+            android:icon="@mipmap/icon_green"
+            android:enabled="true"
+            android:exported="true"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
             android:name="${applicationId}.IconLight"
             android:icon="@mipmap/icon_light"
-            android:enabled="true"
+            android:enabled="false"
             android:exported="true"
             android:targetActivity=".MainActivity">
             <intent-filter>
@@ -108,8 +119,8 @@
             </intent-filter>
         </activity-alias>
         <activity-alias
-            android:name="${applicationId}.IconGreen"
-            android:icon="@mipmap/icon_green"
+            android:name="${applicationId}.IconOG"
+            android:icon="@mipmap/icon_og"
             android:enabled="false"
             android:exported="true"
             android:targetActivity=".MainActivity">

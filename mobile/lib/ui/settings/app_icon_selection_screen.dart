@@ -11,7 +11,8 @@ import "package:photos/ui/components/title_bar_widget.dart";
 enum AppIcon {
   iconGreen("Default", "IconGreen", "assets/launcher_icon/icon-green.png"),
   iconLight("Light", "IconLight", "assets/launcher_icon/icon-light.png"),
-  iconDark("Dark", "IconDark", "assets/launcher_icon/icon-dark.png");
+  iconDark("Dark", "IconDark", "assets/launcher_icon/icon-dark.png"),
+  iconOG("OG", "IconOG", "assets/launcher_icon/icon-og.png");
 
   final String name;
   final String id;
