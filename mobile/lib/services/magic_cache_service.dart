@@ -393,14 +393,17 @@ class MagicCacheService {
   Future<List<MagicCache>> _nonEmptyMagicResults(
     List<Prompt> magicPromptsData,
   ) async {
+    final TimeLogger t = TimeLogger();
     final results = <MagicCache>[];
     final List<int> matchCount = [];
+    final Map<String, double> queryToScore = {};
     for (Prompt prompt in magicPromptsData) {
-      final fileUploadedIDs =
-          await SemanticSearchService.instance.getMatchingFileIDs(
-        prompt.query,
-        prompt.minScore,
-      );
+      queryToScore[prompt.query] = prompt.minScore;
+    }
+    final clipResults =
+        await SemanticSearchService.instance.getMatchingFileIDs(queryToScore);
+    for (Prompt prompt in magicPromptsData) {
+      final List<int> fileUploadedIDs = clipResults[prompt.query] ?? [];
       if (fileUploadedIDs.isNotEmpty) {
         results.add(
           MagicCache(prompt.title, fileUploadedIDs),
@@ -408,7 +411,7 @@ class MagicCacheService {
       }
       matchCount.add(fileUploadedIDs.length);
     }
-    _logger.info('magic result count $matchCount');
+    _logger.info('magic result count $matchCount $t');
     return results;
   }
 }
