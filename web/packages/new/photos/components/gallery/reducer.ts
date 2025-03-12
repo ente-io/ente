@@ -42,6 +42,7 @@ import {
 import type { PeopleState, Person } from "../../services/ml/people";
 import type { SearchSuggestion } from "../../services/search/types";
 import type { FamilyData } from "../../services/user-details";
+import type { ItemVisibility } from "@/media/file-metadata";
 
 /**
  * Specifies what the bar at the top of the gallery is displaying currently.
@@ -234,9 +235,9 @@ export interface GalleryState {
      */
     tempHiddenFileIDs: Set<number>;
     /**
-     * Updates to the favorite status of files that have just been toggled by
-     * the user in the file viewer, but whose effects on remote have not been
-     * yet synced back to our local DB.
+     * Transient updates to the favorite status of files that have just been
+     * toggled by the user in the file viewer, and on remote, but whose effects
+     * on remote have not yet been synced back to our local DB.
      *
      * Each entry is from a file ID to `true` (if that file should be considered
      * as part of the favorites) or `false` (if that file should not be
@@ -259,6 +260,25 @@ export interface GalleryState {
      * reflect the correct state on remote too.
      */
     unsyncedFavoriteUpdates: Map<number, boolean>;
+    /**
+     * Transient updates to the visibility of files whose archive state has been
+     * toggled by the user in the file viewer, and on remote, but whose effects
+     * on remote have not yet been synced back to our local DB.
+     *
+     * Each is from a file ID to "pending" (if the remote update is in-flight),
+     * `ItemVisibility.archived` (if the file should be considered as archived)
+     * or `ItemVisibility.visible` (if a file that was previously archived
+     * has now been unarchived).
+     *
+     * If the remote request succeeds, we still need to sync the files and
+     * collections in our local DB with the remote state, but that happens in a
+     * batch when the user exits the viewer. So until that point, these updates
+     * remain in this in-flight updates map.
+     *
+     * Once the remote file + collection sync completes, we can clear this map
+     * since now the newly synced files themselves will reflect the latest state.
+     */
+    unsyncedVisibilityUpdates: Map<number, "pending" | ItemVisibility>;
 
     /*--<  State that underlies transient UI state  >--*/
 
@@ -423,6 +443,7 @@ const initialGalleryState: GalleryState = {
     tempDeletedFileIDs: new Set(),
     tempHiddenFileIDs: new Set(),
     unsyncedFavoriteUpdates: new Map(),
+    unsyncedVisibilityUpdates: new Map(),
     selectedCollectionSummaryID: undefined,
     selectedPersonID: undefined,
     extraVisiblePerson: undefined,
