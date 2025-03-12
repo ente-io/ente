@@ -4,7 +4,6 @@ import {
     FileViewer,
     type FileViewerProps,
 } from "@/gallery/components/viewer/FileViewer";
-import { type RenderableSourceURLs } from "@/gallery/services/download";
 import type { Collection } from "@/media/collection";
 import { EnteFile } from "@/media/file";
 import { moveToTrash, TRASH_SECTION } from "@/new/photos/services/collection";
@@ -24,45 +23,6 @@ import {
     type FileListAnnotatedFile,
     type FileListProps,
 } from "./FileList";
-
-/**
- * An {@link EnteFile} augmented with various in-memory state used for
- * displaying it in the photo viewer.
- */
-export type DisplayFile = EnteFile & {
-    src?: string;
-    srcURLs?: RenderableSourceURLs;
-    /**
-     * An object URL corresponding to the image portion, if any, associated with
-     * the {@link DisplayFile}.
-     *
-     * - For images, this will be the object URL of the renderable image itself.
-     * - For live photos, this will be the object URL of the image portion of
-     *   the live photo.
-     * - For videos, this will not be defined.
-     */
-    associatedImageURL?: string | undefined;
-    msrc?: string;
-    html?: string;
-    w?: number;
-    h?: number;
-    title?: string;
-    isSourceLoaded?: boolean;
-    conversionFailed?: boolean;
-    canForceConvert?: boolean;
-    /**
-     * [Note: Timeline date string]
-     *
-     * The timeline date string is a formatted date string under which a
-     * particular file should be grouped in the gallery listing. e.g. "Today",
-     * "Yesterday", "Fri, 21 Feb" etc.
-     *
-     * All files which have the same timelineDateString will be grouped under a
-     * single section in the gallery listing, prefixed by the timelineDateString
-     * itself, and a checkbox to select all files on that date.
-     */
-    timelineDateString?: string;
-};
 
 export type FileListWithViewerProps = {
     /**
@@ -276,7 +236,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
 const Container = styled("div")`
     flex: 1;
     width: 100%;
-
 `;
 
 /**

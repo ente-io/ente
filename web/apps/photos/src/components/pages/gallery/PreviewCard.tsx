@@ -1,8 +1,7 @@
 import { Overlay } from "@/base/components/containers";
 import { formattedDateRelative } from "@/base/i18n-date";
-import log from "@/base/log";
 import { downloadManager } from "@/gallery/services/download";
-import { enteFileDeletionDate } from "@/media/file";
+import { enteFileDeletionDate, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { GAP_BTW_TILES } from "@/new/photos/components/FileList";
 import {
@@ -16,14 +15,13 @@ import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { styled, Typography } from "@mui/material";
-import type { DisplayFile } from "components/FileListWithViewer";
 import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { shouldShowAvatar } from "utils/file";
 import Avatar from "./Avatar";
 
 interface PreviewCardProps {
-    file: DisplayFile;
+    file: EnteFile;
     onClick: () => void;
     selectable: boolean;
     selected: boolean;
@@ -216,45 +214,21 @@ export default function PreviewCard({
 }: PreviewCardProps) {
     const galleryContext = useContext(GalleryContext);
 
-    const longPressCallback = () => {
-        onSelect(!selected);
-    };
+    const [imageURL, setImageURL] = useState<string | undefined>(undefined);
 
-    const longPress = useLongPress(longPressCallback, 500);
-
-    const [imgSrc, setImgSrc] = useState<string>(file.msrc);
-
-    const isMounted = useRef(true);
+    const longPress = useLongPress(() => onSelect(!selected), 500);
 
     useEffect(() => {
+        let didCancel = false;
+
+        void downloadManager
+            .renderableThumbnailURL(file, showPlaceholder)
+            .then((url) => !didCancel && setImageURL(url));
+
         return () => {
-            isMounted.current = false;
+            didCancel = true;
         };
-    }, []);
-
-    useEffect(() => {
-        const main = async () => {
-            try {
-                if (file.msrc) {
-                    return;
-                }
-                const url: string =
-                    await downloadManager.renderableThumbnailURL(
-                        file,
-                        showPlaceholder,
-                    );
-
-                if (!isMounted.current || !url) {
-                    return;
-                }
-                setImgSrc(url);
-            } catch (e) {
-                log.error("preview card useEffect failed", e);
-                // no-op
-            }
-        };
-        main();
-    }, [showPlaceholder]);
+    }, [file, showPlaceholder]);
 
     const handleClick = () => {
         if (selectOnClick) {
@@ -263,7 +237,7 @@ export default function PreviewCard({
             } else {
                 onSelect(!selected);
             }
-        } else if (file?.msrc || imgSrc) {
+        } else if (imageURL) {
             onClick?.();
         }
     };
@@ -287,7 +261,7 @@ export default function PreviewCard({
             key={`thumb-${file.id}}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
-            disabled={!file?.msrc && !imgSrc}
+            disabled={!imageURL}
             {...(selectable ? longPress : {})}
         >
             {selectable && (
@@ -301,8 +275,8 @@ export default function PreviewCard({
             )}
             {file.metadata.hasStaticThumbnail ? (
                 <StaticThumbnail fileType={file.metadata.fileType} />
-            ) : imgSrc ? (
-                <img src={imgSrc} />
+            ) : imageURL ? (
+                <img src={imageURL} />
             ) : (
                 <LoadingThumbnail />
             )}

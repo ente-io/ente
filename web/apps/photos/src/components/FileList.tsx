@@ -66,9 +66,15 @@ export interface FileListAnnotatedFile {
      * The date string using with the associated {@link file} should be shown in
      * the timeline.
      *
-     * This for used for grouping files: all files which have the same
-     * {@link timelineDateString} are grouped together into a section titled
-     * with that {@link timelineDateString}.
+     * [Note: Timeline date string]
+     *
+     * The timeline date string is a formatted date string under which a
+     * particular file should be grouped in the gallery listing. e.g. "Today",
+     * "Yesterday", "Fri, 21 Feb" etc.
+     *
+     * All files which have the same timelineDateString will be grouped under a
+     * single section in the gallery listing, prefixed by the timelineDateString
+     * itself, and a checkbox to select all files on that date.
      */
     timelineDateString: string;
 }
