@@ -1,4 +1,3 @@
-import { pt } from "@/base/i18n";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { t } from "i18next";
@@ -231,13 +230,11 @@ export class FileViewerPhotoSwipe {
             // necessary, we could've target the "pswp" class too in our CSS
             // since we only have a single PhotoSwipe instance.
             mainClass: "pswp-ente",
-            // TODO(PS): Translated variants
-            closeTitle: pt("Close"),
-            zoomTitle: pt("Zoom"),
-            arrowPrevTitle: pt("Previous"),
-            arrowNextTitle: pt("Next"),
-            // TODO(PS): Move to translations (unpreviewable_file_notification).
-            errorMsg: pt("This file could not be previewed"),
+            closeTitle: t("close"),
+            zoomTitle: t("zoom"),
+            arrowPrevTitle: t("previous"),
+            arrowNextTitle: t("next"),
+            errorMsg: t("unpreviewable_file_message"),
         });
 
         this.pswp = pswp;
@@ -688,7 +685,7 @@ export class FileViewerPhotoSwipe {
 
             ui.registerElement({
                 name: "live",
-                title: pt("Live"),
+                title: t("live"),
                 order: 7,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("live"),
@@ -709,7 +706,7 @@ export class FileViewerPhotoSwipe {
 
             ui.registerElement({
                 name: "vol",
-                title: pt("Audio"),
+                title: t("audio"),
                 order: 8,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("vol"),
@@ -727,9 +724,6 @@ export class FileViewerPhotoSwipe {
                 },
                 onClick: livePhotoToggleMuteIfPossible,
             });
-
-            // TODO(PS): Add force convert button for videos? Or is that covered
-            // by upcoming streaming changes?
 
             ui.registerElement({
                 name: "error",
@@ -752,7 +746,7 @@ export class FileViewerPhotoSwipe {
             if (haveUser) {
                 ui.registerElement({
                     name: "favorite",
-                    title: pt("Favorite"),
+                    title: t("favorite"),
                     order: 11,
                     isButton: true,
                     html: createPSRegisterElementIconHTML("favorite"),
@@ -797,7 +791,7 @@ export class FileViewerPhotoSwipe {
 
             ui.registerElement({
                 name: "more",
-                title: pt("More"),
+                title: t("more"),
                 order: 16,
                 isButton: true,
                 html: createPSRegisterElementIconHTML("more"),
