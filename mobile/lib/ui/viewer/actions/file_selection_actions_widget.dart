@@ -400,13 +400,16 @@ class _FileSelectionActionsWidgetState
           labelText: S.of(context).editTime,
           icon: Icons.edit_calendar_outlined,
           onTap: () async {
-            await showModalBottomSheet(
+            final newDate = await showModalBottomSheet(
               context: context,
               isScrollControlled: true,
               builder: (context) => BulkEditDateBottomSheet(
                 enteFiles: widget.selectedFiles.files,
               ),
             );
+            if (newDate != null) {
+              widget.selectedFiles.clearAll();
+            }
           },
         ),
       );
