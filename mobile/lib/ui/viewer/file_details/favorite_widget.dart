@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:like_button/like_button.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -100,6 +101,11 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
                   setState(() {
                     _isLoading = false; // Add this line
                   });
+
+                  if (isLiked) {
+                    unawaited(HapticFeedback.mediumImpact());
+                  }
+
                   return hasError ? oldValue : isLiked;
                 },
                 likeBuilder: (isLiked) {
