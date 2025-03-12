@@ -274,16 +274,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
 };
 
 const Container = styled("div")`
-    display: block;
     flex: 1;
     width: 100%;
-    flex-wrap: wrap;
-    margin: 0 auto;
-    overflow: hidden;
-    .pswp-thumbnail {
-        display: inline-block;
-        cursor: pointer;
-    }
+
 `;
 
 /**
