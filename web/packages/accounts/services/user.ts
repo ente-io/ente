@@ -16,12 +16,15 @@ export interface UserVerificationResponse {
     encryptedToken?: string | undefined;
     token?: string;
     twoFactorSessionID?: string | undefined;
+    passkeySessionID?: string | undefined;
     /**
      * Base URL for the accounts app where we should redirect to for passkey
      * verification.
+     *
+     * This will only be set if the user has setup a passkey (i.e., whenever
+     * {@link passkeySessionID} is defined).
      */
-    accountsUrl: string;
-    passkeySessionID?: string | undefined;
+    accountsUrl: string | undefined;
     /**
      * If both passkeys and TOTP based two factors are enabled, then {@link
      * twoFactorSessionIDV2} will be set to the TOTP session ID instead of
@@ -158,11 +161,11 @@ export const EmailOrSRPAuthorizationResponse = z.object({
     keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
     encryptedToken: z.string().nullish().transform(nullToUndefined),
     token: z.string().nullish().transform(nullToUndefined),
+    twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
     passkeySessionID: z.string().nullish().transform(nullToUndefined),
     // Base URL for the accounts app where we should redirect to for passkey
     // verification.
-    accountsUrl: z.string(),
-    twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
+    accountsUrl: z.string().nullish().transform(nullToUndefined),
     // TwoFactorSessionIDV2 is only set if user has both passkey and two factor
     // enabled. This is to ensure older clients keep using passkey flow when
     // both are set. It is intended to be removed once all clients starts

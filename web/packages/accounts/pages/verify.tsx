@@ -111,7 +111,7 @@ const Page: React.FC = () => {
                 // generated, so it has a functional impact we need.
                 setIsFirstLogin(true);
                 const url = passkeyVerificationRedirectURL(
-                    accountsUrl,
+                    accountsUrl!,
                     passkeySessionID,
                 );
                 setPasskeyVerificationData({ passkeySessionID, url });
