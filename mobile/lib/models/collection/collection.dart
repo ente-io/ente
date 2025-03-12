@@ -60,6 +60,7 @@ class Collection {
 
   set sharedMagicMetadata(ShareeMagicMetadata? val) => _sharedMmd = val;
 
+  // ignore: deprecated_member_use_from_same_package
   String get displayName => decryptedName ?? name ?? "Unnamed Album";
 
   // set the value for both name and decryptedName till we finish migration
