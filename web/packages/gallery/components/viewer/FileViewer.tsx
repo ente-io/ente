@@ -9,7 +9,7 @@ import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
-import { formattedListJoin, ut } from "@/base/i18n";
+import { formattedListJoin, pt, ut } from "@/base/i18n";
 import type { LocalUser } from "@/base/local-user";
 import log from "@/base/log";
 import {
@@ -743,6 +743,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     if (activeAnnotatedFile?.annotation.showDelete)
                         handleConfirmDelete?.();
                     break;
+                case "toggle-archive":
+                    toggleArchived?.();
+                    break;
                 case "copy":
                     if (canCopyImage()) handleCopyImage();
                     break;
@@ -760,6 +763,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             handleToggleFullscreen,
             handleShortcuts,
             activeAnnotatedFile,
+            toggleArchived,
             canCopyImage,
         ],
     );
@@ -1148,6 +1152,12 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
             <Shortcut action={t("toggle_audio")} shortcut={ut("M")} />
             {haveUser && (
                 <Shortcut action={t("toggle_favorite")} shortcut={ut("L")} />
+            )}
+            {haveUser && (
+                <Shortcut
+                    action={/*TODO*/ pt("Toggle archive")}
+                    shortcut={ut("X")}
+                />
             )}
             <Shortcut action={t("view_info")} shortcut={ut("I")} />
             {!disableDownload && (
