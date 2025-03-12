@@ -1054,10 +1054,10 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
                 <Shortcut action={t("delete")} shortcut="Delete, Backspace" />
             )}
             {!disableDownload && (
-                <Shortcut action="Copy as PNG" shortcut="^C / ⌘C" />
+                <Shortcut action={t("copy_as_png")} shortcut="^C / ⌘C" />
             )}
-            <Shortcut action="Toggle fullscreen" shortcut="F" />
-            <Shortcut action="Show shortcuts" shortcut="?" />
+            <Shortcut action={t("toggle_fullscreen")} shortcut="F" />
+            <Shortcut action={t("show_shortcuts")} shortcut="?" />
         </ShortcutsContent>
     </Dialog>
 );
