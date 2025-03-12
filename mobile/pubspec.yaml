@@ -270,21 +270,47 @@ dev_dependencies:
   json_serializable: ^6.6.1
   test: ^1.22.0
 
-flutter_icons:
-  adaptive_icon_foreground: "assets/launcher_icon/icon-foreground.png"
-  adaptive_icon_background: "#08C225"
+# ------------------------------
+# ICONs
+# ------------------------------
+# Run `dart run flutter_launcher_icons` after un-commenting one of the sections
+# (Adaptive icons or Non adaptive icons) within the `flutter_icons` section. You
+# may have to update the `icon_X.xml` generated within `res/minimap-*` folder.
+# Sample commit for adding an icon:
+# https://github.com/ente-io/ente/commit/40ae8d91c359447fc2cf6672bfa754c5cc7a6af1
 
+# flutter_icons:
+  # ADAPTIVE ICONS
+
+  # 1. e + heart
+  # adaptive_icon_foreground: "assets/launcher_icon/icon-foreground.png"
+  # adaptive_icon_background: "#08C225"
+
+  # 2. og
+  # adaptive_icon_foreground: "assets/launcher_icon/icon-og-foreground.png"
+  # adaptive_icon_background: "#ffffff"
+
+  # NON ADAPTIVE ICONS
+  
+  # 1. Icon Green
   # android: "icon_green"
   # ios: "IconGreen"
   # image_path: "assets/launcher_icon/icon-green.png"
 
+  # 2. Icon Dark
   # android: "icon_dark"
   # ios: "IconDark"
   # image_path: "assets/launcher_icon/icon-dark.png"
   
-  android: "icon_light"
-  ios: "IconLight"
-  image_path: "assets/launcher_icon/icon-light.png"
+  # 3. Icon Light
+  # android: "icon_light"
+  # ios: "IconLight"
+  # image_path: "assets/launcher_icon/icon-light.png"
+
+  # 4. Icon OG
+  # android: "icon_og"
+  # ios: "IconOG"
+  # image_path: "assets/launcher_icon/icon-og.png"
 
 flutter_native_splash:
   color: "#ffffff"
