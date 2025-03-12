@@ -172,10 +172,41 @@ Future<bool> editTime(
   Map<EnteFile, int> filesToEditedTimes,
 ) async {
   try {
-    final filesToKeyAndValue = filesToEditedTimes.map(
-      (file, editedTime) => MapEntry(file, (editTimeKey, editedTime)),
-    );
-    await _bulkUpdatePublicMetadata(context, filesToKeyAndValue);
+    final files = filesToEditedTimes.keys
+        .where((file) => file.uploadedFileID != null)
+        .toList();
+    if (files.isEmpty) {
+      _logger.severe('No files to edit time for');
+      return false;
+    }
+    final fileIdToTimeUpdate = <int, Map<String, dynamic>>{};
+    for (final entry in filesToEditedTimes.entries) {
+      final file = entry.key;
+      if (file.uploadedFileID == null) continue;
+      final editedTime = entry.value;
+      fileIdToTimeUpdate[file.uploadedFileID!] = {editTimeKey: editedTime};
+    }
+
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    await dialog.show();
+    try {
+      await FileMagicService.instance.updatePublicMagicMetadata(
+        files,
+        null,
+        metadataUpdateMap: fileIdToTimeUpdate,
+      );
+      if (_shouldReloadGallery(editTimeKey)) {
+        Bus.instance.fire(
+          ForceReloadHomeGalleryEvent("FileMetadataChange-$editTimeKey"),
+        );
+      }
+      showShortToast(context, S.of(context).done);
+      await dialog.hide();
+    } catch (e, s) {
+      _logger.severe("failed to update times $fileIdToTimeUpdate", e, s);
+      await dialog.hide();
+      rethrow;
+    }
     return true;
   } catch (e) {
     showShortToast(context, S.of(context).somethingWentWrong);
@@ -238,62 +269,6 @@ Future<bool> editFileCaption(
     return true;
   } catch (e) {
     return false;
-  }
-}
-
-Future<void> _bulkUpdatePublicMetadata(
-  BuildContext? context,
-  Map<EnteFile, (String, dynamic)> filesToKeyAndValue, {
-  bool showDoneToast = true,
-  bool showProgressDialogs = true,
-}) async {
-  if (filesToKeyAndValue.isEmpty) {
-    return;
-  }
-  ProgressDialog? dialog;
-  if (context != null && showProgressDialogs) {
-    dialog = createProgressDialog(context, S.of(context).pleaseWait);
-    await dialog.show();
-  }
-
-  final Set<String> keys = {};
-  final Map<(String, dynamic), List<EnteFile>> updateToFiles = {};
-  for (final entry in filesToKeyAndValue.entries) {
-    final file = entry.key;
-    final update = entry.value;
-    if (updateToFiles.containsKey(update)) {
-      updateToFiles[update]!.add(file);
-    } else {
-      updateToFiles[update] = [file];
-    }
-    keys.add(update.$1);
-  }
-  try {
-    for (final entry in updateToFiles.entries) {
-      final update = entry.key;
-      final files = entry.value;
-      await FileMagicService.instance
-          .updatePublicMagicMetadata(files, {update.$1: update.$2});
-    }
-    if (context != null) {
-      if (showDoneToast) {
-        showShortToast(context, S.of(context).done);
-      }
-      await dialog?.hide();
-    }
-
-    for (final String key in keys) {
-      if (_shouldReloadGallery(key)) {
-        Bus.instance
-            .fire(ForceReloadHomeGalleryEvent("FileMetadataChange-$key"));
-      }
-    }
-  } catch (e, s) {
-    _logger.severe("failed to update one of ${updateToFiles.keys}", e, s);
-    if (context != null) {
-      await dialog?.hide();
-    }
-    rethrow;
   }
 }
 
