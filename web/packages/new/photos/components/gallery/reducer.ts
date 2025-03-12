@@ -891,11 +891,20 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             const unsyncedVisibilityUpdates = new Map(
                 state.unsyncedVisibilityUpdates,
             );
+
+            // Remove any pending updates for this file.
+            let pendingVisibilityUpdates = state.pendingVisibilityUpdates;
+            if (pendingVisibilityUpdates.has(action.fileID)) {
+                pendingVisibilityUpdates = new Set(pendingVisibilityUpdates);
+                pendingVisibilityUpdates.delete(action.fileID);
+            }
+
             if (action.visibility === undefined) {
                 unsyncedVisibilityUpdates.delete(action.fileID);
             } else {
                 unsyncedVisibilityUpdates.set(action.fileID, action.visibility);
             }
+
             return stateByUpdatingFilteredFiles({
                 ...state,
                 archivedFileIDs: deriveArchivedFileIDs(
@@ -903,6 +912,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.files,
                     unsyncedVisibilityUpdates,
                 ),
+                pendingVisibilityUpdates,
                 unsyncedVisibilityUpdates,
             });
         }
