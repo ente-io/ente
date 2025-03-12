@@ -18,7 +18,7 @@ import {
     type FileInfoProps,
 } from "@/gallery/components/FileInfo";
 import type { Collection } from "@/media/collection";
-import type { ItemVisibility } from "@/media/file-metadata";
+import { ItemVisibility } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
@@ -26,6 +26,7 @@ import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "@/new/photos/components/ImageEditorOverlay";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -118,16 +119,28 @@ export interface FileViewerAnnotatedFile {
 }
 
 /**
- * File IDs of all the collections and files that the user has archived, and for
- * which an toggle is pending, and a callback to trigger the toggle.
+ * File IDs of for which an update is pending, effects on previous toggles that
+ * in this file viewer session, and a callback to trigger the toggle.
  *
  * The toggle archived button will shown in the file actions of the file viewer
- * only if all four of these props are specified.
+ * only if all three of these props are specified.
  */
 export interface FileViewerToggleArchiveButtonProps {
-    archivedCollectionIDs?: Set<number>;
-    archivedFileIDs?: Set<number>;
+    /**
+     * File IDs of for which an update of its visibility is pending.
+     */
     pendingVisibilityUpdates?: Set<number>;
+    /**
+     * Effects of previous visibility togles made in this file viewer session.
+     *
+     * These changes have already been reflected on remote, but we haven't yet
+     * done a sync to update our local DB (the sync will happen in a batch when
+     * the file viewer is closed).
+     */
+    unsyncedVisibilityUpdates?: Map<number, ItemVisibility>;
+    /**
+     * Update the {@link visibility} of the file with the given {@link fileID}.
+     */
     onFileVisibilityUpdate?: (
         fileID: number,
         visibility: ItemVisibility,
@@ -253,7 +266,7 @@ export type FileViewerProps = ModalVisibilityProps & {
     FileViewerToggleArchiveButtonProps;
 
 /**
- * A PhotoSwipe based image and video viewer.
+ * A PhotoSwipe based image, live photo and video viewer.
  */
 export const FileViewer: React.FC<FileViewerProps> = ({
     open,
@@ -266,12 +279,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     isInTrashSection,
     isInHiddenSection,
     favoriteFileIDs,
+    pendingVisibilityUpdates,
+    unsyncedVisibilityUpdates,
     fileCollectionIDs,
     allCollectionsNameByID,
     onTriggerSyncWithRemote,
     onToggleFavorite,
     onDownload,
     onDelete,
+    onFileVisibilityUpdate,
     onSelectCollection,
     onSelectPerson,
     onSaveEditedImageCopy,
@@ -670,6 +686,40 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [activeAnnotatedFile],
     );
 
+    const activeItemVisibility = useMemo(() => {
+        if (
+            !pendingVisibilityUpdates ||
+            !unsyncedVisibilityUpdates ||
+            !onFileVisibilityUpdate
+        ) {
+            return undefined;
+        }
+
+        const file = activeAnnotatedFile?.file;
+        if (!file) return undefined;
+
+        if (pendingVisibilityUpdates.has(file.id)) {
+            return "pending";
+        }
+
+        switch (
+            unsyncedVisibilityUpdates.get(file.id) ??
+            file.magicMetadata.data.visibility
+        ) {
+            case ItemVisibility.visible:
+                return "visible";
+            case ItemVisibility.archived:
+                return "archived";
+            default:
+                return undefined;
+        }
+    }, [
+        pendingVisibilityUpdates,
+        unsyncedVisibilityUpdates,
+        onFileVisibilityUpdate,
+        activeAnnotatedFile,
+    ]);
+
     const performKeyAction = useCallback<
         FileViewerPhotoSwipeDelegate["performKeyAction"]
     >(
@@ -824,6 +874,12 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     <MoreMenuItem onClick={handleConfirmDelete}>
                         <MoreMenuItemTitle>{t("delete")}</MoreMenuItemTitle>
                         <DeleteIcon />
+                    </MoreMenuItem>
+                )}
+                {activeItemVisibility == "visible" && (
+                    <MoreMenuItem onClick={handleConfirmDelete} disabled>
+                        <MoreMenuItemTitle>{t("archive")}</MoreMenuItemTitle>
+                        <ArchiveOutlinedIcon />
                     </MoreMenuItem>
                 )}
                 {canCopyImage() && (
