@@ -245,7 +245,7 @@ const Page: React.FC = () => {
                     });
                     stashRedirect("/");
                     const url = passkeyVerificationRedirectURL(
-                        accountsUrl,
+                        accountsUrl!,
                         passkeySessionID,
                     );
                     setPasskeyVerificationData({ passkeySessionID, url });
