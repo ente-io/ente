@@ -101,6 +101,10 @@ export interface FileViewerFileAnnotation {
      */
     showDelete: boolean;
     /**
+     * `true` if the toggle archive action should be shown for this file.
+     */
+    showArchive: boolean;
+    /**
      * `true` if the copy image action should be shown for this file.
      */
     showCopyImage: boolean;
@@ -525,6 +529,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             const showFavorite = canModify;
 
+            const showArchive = canModify;
+
             const showDelete =
                 !!handleConfirmDelete &&
                 isOwnFile &&
@@ -564,6 +570,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 showFavorite,
                 showDownload,
                 showDelete,
+                showArchive,
                 showCopyImage,
                 showEditImage,
             };
@@ -697,10 +704,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const file = activeAnnotatedFile?.file;
 
             if (
-                file &&
                 pendingVisibilityUpdates &&
                 unsyncedVisibilityUpdates &&
-                onFileVisibilityUpdate
+                onFileVisibilityUpdate &&
+                file &&
+                activeAnnotatedFile.annotation.showArchive
             ) {
                 switch (
                     unsyncedVisibilityUpdates.get(file.id) ??
@@ -744,7 +752,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         handleConfirmDelete?.();
                     break;
                 case "toggle-archive":
-                    toggleArchived?.();
+                    if (!isPendingToggleArchive) toggleArchived?.();
                     break;
                 case "copy":
                     if (canCopyImage()) handleCopyImage();
@@ -763,6 +771,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             handleToggleFullscreen,
             handleShortcuts,
             activeAnnotatedFile,
+            isPendingToggleArchive,
             toggleArchived,
             canCopyImage,
         ],
@@ -1153,12 +1162,6 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
             {haveUser && (
                 <Shortcut action={t("toggle_favorite")} shortcut={ut("L")} />
             )}
-            {haveUser && (
-                <Shortcut
-                    action={/*TODO*/ pt("Toggle archive")}
-                    shortcut={ut("X")}
-                />
-            )}
             <Shortcut action={t("view_info")} shortcut={ut("I")} />
             {!disableDownload && (
                 <Shortcut action={t("download")} shortcut={ut("K")} />
@@ -1170,6 +1173,12 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
                         ut("Delete"),
                         ut("Backspace"),
                     ])}
+                />
+            )}
+            {haveUser && (
+                <Shortcut
+                    action={/*TODO*/ pt("Toggle archive")}
+                    shortcut={ut("X")}
                 />
             )}
             {!disableDownload && (
