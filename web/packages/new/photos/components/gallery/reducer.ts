@@ -1149,7 +1149,7 @@ const deriveHiddenFileIDs = (hiddenFiles: EnteFile[]) =>
  * Compute archived file IDs from their dependencies.
  */
 const deriveArchivedFileIDs = (
-    archivedCollectionIDs: Set<number>,
+    archivedCollectionIDs: GalleryState["archivedCollectionIDs"],
     files: EnteFile[],
     unsyncedVisibilityUpdates: GalleryState["unsyncedVisibilityUpdates"],
 ) =>
