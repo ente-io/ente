@@ -53,6 +53,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { fileVisibility } from "../../services/magic-metadata";
 import {
     fileInfoExifForFile,
     updateItemDataAlt,
@@ -687,11 +688,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [activeAnnotatedFile],
     );
 
-    const { visibility, isPendingVisibility, toggleVisibility } =
+    const { isArchived, isPendingToggleArchive, toggleArchived } =
         useMemo(() => {
-            let visibility: "visible" | "archived" | undefined;
-            let isPendingVisibility: boolean | undefined;
-            let toggleVisibility: (() => void) | undefined;
+            let isArchived: boolean | undefined;
+            let isPendingToggleArchive: boolean | undefined;
+            let toggleArchived: (() => void) | undefined;
 
             const file = activeAnnotatedFile?.file;
 
@@ -703,30 +704,29 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             ) {
                 switch (
                     unsyncedVisibilityUpdates.get(file.id) ??
-                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                    file.magicMetadata?.data?.visibility
+                    fileVisibility(file)
                 ) {
                     case undefined:
                     case ItemVisibility.visible:
-                        visibility = "visible";
+                        isArchived = false;
                         break;
                     case ItemVisibility.archived:
-                        visibility = "archived";
+                        isArchived = true;
                         break;
                 }
 
-                isPendingVisibility = pendingVisibilityUpdates.has(file.id);
+                isPendingToggleArchive = pendingVisibilityUpdates.has(file.id);
 
-                toggleVisibility = () =>
+                toggleArchived = () =>
                     void onFileVisibilityUpdate(
                         file.id,
-                        visibility == "archived"
+                        isArchived
                             ? ItemVisibility.visible
                             : ItemVisibility.archived,
                     );
             }
 
-            return { visibility, isPendingVisibility, toggleVisibility };
+            return { isArchived, isPendingToggleArchive, toggleArchived };
         }, [
             pendingVisibilityUpdates,
             unsyncedVisibilityUpdates,
@@ -890,17 +890,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <DeleteIcon />
                     </MoreMenuItem>
                 )}
-                {visibility && (
+                {isArchived !== undefined && (
                     <MoreMenuItem
-                        onClick={toggleVisibility}
-                        disabled={isPendingVisibility}
+                        onClick={toggleArchived}
+                        disabled={isPendingToggleArchive}
                     >
                         <MoreMenuItemTitle>
-                            {visibility == "archived"
-                                ? t("unarchive")
-                                : t("archive")}
+                            {isArchived ? t("unarchive") : t("archive")}
                         </MoreMenuItemTitle>
-                        {visibility == "archived" ? (
+                        {isArchived ? (
                             <UnArchiveIcon />
                         ) : (
                             <ArchiveOutlinedIcon />

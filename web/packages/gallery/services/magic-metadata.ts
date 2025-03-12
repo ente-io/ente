@@ -3,15 +3,41 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { Collection } from "@/media/collection";
-import type { EnteFile, MagicMetadataCore } from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
+import { fileLogID, type EnteFile, type MagicMetadataCore } from "@/media/file";
+import {
+    ItemVisibility,
+    type PrivateMagicMetadata,
+} from "@/media/file-metadata";
 
-export function isArchivedFile(item: EnteFile): boolean {
-    if (!item || !item.magicMetadata || !item.magicMetadata.data) {
-        return false;
+/**
+ * Return the magic metadata for an {@link EnteFile}.
+ *
+ * We are not expected to be in a scenario where the file gets to the UI without
+ * having its magic metadata decrypted, so this function is a sanity
+ * check and should be a no-op in usually. It'll throw if it finds its
+ * assumptions broken. Once the types have been refactored this entire
+ * check/cast shouldn't be needed, and this should become a trivial accessor.
+ */
+export const fileMagicMetadata = (file: EnteFile) => {
+    if (!file.magicMetadata) return undefined;
+    if (typeof file.magicMetadata.data == "string") {
+        throw new Error(
+            `Magic metadata for ${fileLogID(file)} had not been decrypted even when the file reached the UI layer`,
+        );
     }
-    return item.magicMetadata.data.visibility === ItemVisibility.archived;
-}
+    // This cast is unavoidable in the current setup. We need to refactor the
+    // types so that this cast in not needed.
+    return file.magicMetadata.data as PrivateMagicMetadata;
+};
+
+/**
+ * Return the {@link ItemVisibility} for the given {@link file}.
+ */
+export const fileVisibility = (file: EnteFile) =>
+    fileMagicMetadata(file)?.visibility;
+
+export const isArchivedFile = (item: EnteFile) =>
+    fileVisibility(item) === ItemVisibility.archived;
 
 export const isArchivedCollection = (item: Collection) => {
     if (!item) {
