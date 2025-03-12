@@ -81,10 +81,6 @@ android {
             dimension "default"
             applicationIdSuffix ".dev"
         }
-        face {
-            dimension "default"
-            applicationIdSuffix ".face"
-        }
         playstore {
             dimension "default"
         }
