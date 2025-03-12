@@ -812,6 +812,7 @@ const Page: React.FC = () => {
             });
 
             await changeFilesVisibility(files, visibility);
+            // See: [Note: File viewer update and dispatch]
             dispatch({
                 type: "markUnsyncedVisibilityUpdate",
                 fileID,
