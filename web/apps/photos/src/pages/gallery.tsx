@@ -1094,10 +1094,11 @@ const Page: React.FC = () => {
                                 "incomingShareViewer"
                         }
                         isInHiddenSection={barMode == "hidden-albums"}
-                        archivedCollectionIDs={state.archivedCollectionIDs}
-                        archivedFileIDs={state.archivedFileIDs}
                         pendingVisibilityUpdates={
                             state.pendingVisibilityUpdates
+                        }
+                        unsyncedVisibilityUpdates={
+                            state.unsyncedVisibilityUpdates
                         }
                         favoriteFileIDs={state.favoriteFileIDs}
                         setFilesDownloadProgressAttributesCreator={
