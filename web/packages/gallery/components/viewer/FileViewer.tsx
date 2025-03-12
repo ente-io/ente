@@ -40,6 +40,7 @@ import {
     DialogTitle,
     Menu,
     MenuItem,
+    Snackbar,
     Stack,
     styled,
     Typography,
@@ -346,6 +347,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
     const [openShortcuts, setOpenShortcuts] = useState(false);
 
+    const [notificationMessage, setNotificationMessage] = useState<
+        string | undefined
+    >(undefined);
+
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     // Callbacks to be invoked (only once) the next time we get an update to the
@@ -376,6 +381,16 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
 
+    const showNotification = useCallback(
+        (message: string) => setNotificationMessage(message),
+        [],
+    );
+
+    const handleNotificationClose = useCallback(
+        () => setNotificationMessage(undefined),
+        [],
+    );
+
     const handleClose = useCallback(() => {
         setNeedsSync((needSync) => {
             if (needSync) onTriggerSyncWithRemote?.();
@@ -388,8 +403,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         setOpenImageEditor(false);
         setOpenConfirmDelete(false);
         setOpenShortcuts(false);
+        handleNotificationClose();
         onClose();
-    }, [onTriggerSyncWithRemote, onClose]);
+    }, [onTriggerSyncWithRemote, handleNotificationClose, onClose]);
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
@@ -797,10 +813,16 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         handleConfirmDelete?.();
                     break;
                 case "toggle-archive":
-                    if (!isPendingToggleArchive) toggleArchived?.();
+                    if (!isPendingToggleArchive) {
+                        toggleArchived?.();
+                        showNotification(pt("Updating..."));
+                    }
                     break;
                 case "copy":
-                    if (canCopyImage()) handleCopyImage();
+                    if (canCopyImage()) {
+                        handleCopyImage();
+                        showNotification(pt("copied"));
+                    }
                     break;
                 case "toggle-fullscreen":
                     handleToggleFullscreen();
@@ -915,6 +937,22 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     return (
         <>
+            <Snackbar
+                open={!!notificationMessage}
+                onClose={handleNotificationClose}
+                autoHideDuration={1500}
+                message={notificationMessage}
+                slotProps={{
+                    content: {
+                        sx: {
+                            bgcolor: "fill.faint",
+                            color: "primary.main",
+                            backdropFilter: "blur(10px)",
+                        },
+                    },
+                }}
+            />
+
             <FileInfo
                 open={openFileInfo}
                 onClose={handleFileInfoClose}
