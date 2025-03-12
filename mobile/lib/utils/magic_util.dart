@@ -169,16 +169,44 @@ Future<void> changeCoverPhoto(
 
 Future<bool> editTime(
   BuildContext context,
-  List<EnteFile> files,
-  int editedTime,
+  Map<EnteFile, int> filesToEditedTimes,
 ) async {
   try {
-    await _updatePublicMetadata(
-      context,
-      files,
-      editTimeKey,
-      editedTime,
-    );
+    final files = filesToEditedTimes.keys
+        .where((file) => file.uploadedFileID != null)
+        .toList();
+    if (files.isEmpty) {
+      _logger.severe('No files to edit time for');
+      return false;
+    }
+    final fileIdToTimeUpdate = <int, Map<String, dynamic>>{};
+    for (final entry in filesToEditedTimes.entries) {
+      final file = entry.key;
+      if (file.uploadedFileID == null) continue;
+      final editedTime = entry.value;
+      fileIdToTimeUpdate[file.uploadedFileID!] = {editTimeKey: editedTime};
+    }
+
+    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    await dialog.show();
+    try {
+      await FileMagicService.instance.updatePublicMagicMetadata(
+        files,
+        null,
+        metadataUpdateMap: fileIdToTimeUpdate,
+      );
+      if (_shouldReloadGallery(editTimeKey)) {
+        Bus.instance.fire(
+          ForceReloadHomeGalleryEvent("FileMetadataChange-$editTimeKey"),
+        );
+      }
+      showShortToast(context, S.of(context).done);
+      await dialog.hide();
+    } catch (e, s) {
+      _logger.severe("failed to update times $fileIdToTimeUpdate", e, s);
+      await dialog.hide();
+      rethrow;
+    }
     return true;
   } catch (e) {
     showShortToast(context, S.of(context).somethingWentWrong);

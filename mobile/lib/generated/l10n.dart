@@ -11240,6 +11240,149 @@ class S {
       args: [],
     );
   }
+
+  /// `Edit time`
+  String get editTime {
+    return Intl.message(
+      'Edit time',
+      name: 'editTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select time`
+  String get selectTime {
+    return Intl.message(
+      'Select time',
+      name: 'selectTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select date`
+  String get selectDate {
+    return Intl.message(
+      'Select date',
+      name: 'selectDate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Previous`
+  String get previous {
+    return Intl.message(
+      'Previous',
+      name: 'previous',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select one date and time for all`
+  String get selectOneDateAndTimeForAll {
+    return Intl.message(
+      'Select one date and time for all',
+      name: 'selectOneDateAndTimeForAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select start of range`
+  String get selectStartOfRange {
+    return Intl.message(
+      'Select start of range',
+      name: 'selectStartOfRange',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will make the date and time of all selected photos the same.`
+  String get thisWillMakeTheDateAndTimeOfAllSelected {
+    return Intl.message(
+      'This will make the date and time of all selected photos the same.',
+      name: 'thisWillMakeTheDateAndTimeOfAllSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This is the first in the group. Other selected photos will automatically shift based on this new date`
+  String get allWillShiftRangeBasedOnFirst {
+    return Intl.message(
+      'This is the first in the group. Other selected photos will automatically shift based on this new date',
+      name: 'allWillShiftRangeBasedOnFirst',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New range`
+  String get newRange {
+    return Intl.message(
+      'New range',
+      name: 'newRange',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select one date and time`
+  String get selectOneDateAndTime {
+    return Intl.message(
+      'Select one date and time',
+      name: 'selectOneDateAndTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Move selected photos to one date`
+  String get moveSelectedPhotosToOneDate {
+    return Intl.message(
+      'Move selected photos to one date',
+      name: 'moveSelectedPhotosToOneDate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shift dates and time`
+  String get shiftDatesAndTime {
+    return Intl.message(
+      'Shift dates and time',
+      name: 'shiftDatesAndTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Photos keep relative time difference`
+  String get photosKeepRelativeTimeDifference {
+    return Intl.message(
+      'Photos keep relative time difference',
+      name: 'photosKeepRelativeTimeDifference',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =0 {No photos} =1 {1 photo} other {{count} photos}}`
+  String photocountPhotos(int count) {
+    return Intl.plural(
+      count,
+      zero: 'No photos',
+      one: '1 photo',
+      other: '$count photos',
+      name: 'photocountPhotos',
+      desc: '',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
