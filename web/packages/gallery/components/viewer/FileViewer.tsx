@@ -32,7 +32,6 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
 import {
-    Box,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -1025,7 +1024,7 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
             <DialogTitle>{t("shortcuts")}</DialogTitle>
             <DialogCloseIconButton {...{ onClose }} />
         </SpacedRow>
-        <ShortcutsContent sx={{ "&&": { pt: 2, pb: 5, px: 5 } }}>
+        <ShortcutsContent>
             <Shortcut action={t("close")} shortcut={ut("Esc")} />
             <Shortcut
                 action={formattedListJoin([t("previous"), t("next")])}
@@ -1074,10 +1073,17 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
     </Dialog>
 );
 
-const ShortcutsContent = styled(DialogContent)`
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+const ShortcutsContent: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <DialogContent sx={{ "&&": { pt: 1, pb: 5, px: 5 } }}>
+        <ShortcutsTable>
+            <tbody>{children}</tbody>
+        </ShortcutsTable>
+    </DialogContent>
+);
+
+const ShortcutsTable = styled("table")`
+    border-collapse: separate;
+    border-spacing: 0 14px;
 `;
 
 interface ShortcutProps {
@@ -1086,12 +1092,18 @@ interface ShortcutProps {
 }
 
 const Shortcut: React.FC<ShortcutProps> = ({ action, shortcut }) => (
-    <Box sx={{ display: "flex", gap: 2 }}>
-        <Typography sx={{ color: "text.muted", minWidth: "min(20ch, 40svw)" }}>
+    <tr>
+        <Typography
+            component="td"
+            sx={{ color: "text.muted", width: "min(20ch, 40svw)" }}
+        >
             {action}
         </Typography>
-        <Typography sx={{ fontWeight: "medium" }}>{shortcut}</Typography>
-    </Box>
+
+        <Typography component="td" sx={{ fontWeight: "medium" }}>
+            {shortcut}
+        </Typography>
+    </tr>
 );
 
 const fileIsEditableImage = (file: EnteFile) => {
