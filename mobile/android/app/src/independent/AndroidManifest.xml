@@ -1,6 +1,7 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="io.ente.photos">
-
+    
     <!-- Adding the following block to prevent the app from having multiple
     launcher entries. We can remove this along with the `LAUNCHER` category from
     main/AndroidManifest.xml once
@@ -20,6 +21,4 @@
             </intent-filter>
         </activity>
     </application>
-
-    <uses-permission android:name="com.android.vending.BILLING"  tools:node="remove"/>
 </manifest>
