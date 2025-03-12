@@ -9,7 +9,7 @@ import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
-import { pt, ut } from "@/base/i18n";
+import { formattedListJoin, pt, ut } from "@/base/i18n";
 import type { LocalUser } from "@/base/local-user";
 import log from "@/base/log";
 import {
@@ -1032,7 +1032,10 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
         </SpacedRow>
         <ShortcutsContent sx={{ "&&": { pt: 2, pb: 5, px: 5 } }}>
             <Shortcut action={t("close")} shortcut={ut("Esc")} />
-            <Shortcut action="Previous, Next" shortcut="←, →" />
+            <Shortcut
+                action={formattedListJoin([t("previous"), t("next")])}
+                shortcut="←, →"
+            />
             <Shortcut action={t("zoom")} shortcut="Mouse scroll, Pinch" />
             <Shortcut action="Zoom preset" shortcut="Z, Tap inside image" />
             <Shortcut
