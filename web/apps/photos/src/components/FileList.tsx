@@ -1,15 +1,30 @@
 import { assertionFailed } from "@/base/assert";
+import { Overlay } from "@/base/components/containers";
 import { isSameDay } from "@/base/date";
-import { EnteFile } from "@/media/file";
+import { formattedDateRelative } from "@/base/i18n-date";
+import { downloadManager } from "@/gallery/services/download";
+import { EnteFile, enteFileDeletionDate } from "@/media/file";
+import { FileType } from "@/media/file-type";
 import {
     GAP_BTW_TILES,
     IMAGE_CONTAINER_MAX_HEIGHT,
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
 } from "@/new/photos/components/FileList";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
+import {
+    LoadingThumbnail,
+    StaticThumbnail,
+} from "@/new/photos/components/PlaceholderThumbnails";
+import { TileBottomTextOverlay } from "@/new/photos/components/Tiles";
+import { TRASH_SECTION } from "@/new/photos/services/collection";
 import { FlexWrapper } from "@ente/shared/components/Container";
+import useLongPress from "@ente/shared/hooks/useLongPress";
+import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
-import type { PhotoFrameProps } from "components/PhotoFrame";
+import Avatar from "components/pages/gallery/Avatar";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -20,12 +35,13 @@ import {
     ListChildComponentProps,
     areEqual,
 } from "react-window";
+import { SelectedState } from "types/gallery";
+import { shouldShowAvatar } from "utils/file";
 import {
     handleSelectCreator,
     handleSelectCreatorMulti,
 } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import PreviewCard from "./pages/gallery/PreviewCard";
 
 export const DATE_CONTAINER_HEIGHT = 48;
 export const SPACE_BTW_DATES = 44;
@@ -59,154 +75,58 @@ export interface TimeStampListItem {
     fileCount?: number;
 }
 
-const ListItem = styled("div")`
-    display: flex;
-    justify-content: center;
-`;
-
-const getTemplateColumns = (
-    columns: number,
-    shrinkRatio: number,
-    groups?: number[],
-): string => {
-    if (groups) {
-        // need to confirm why this was there
-        // const sum = groups.reduce((acc, item) => acc + item, 0);
-        // if (sum < columns) {
-        //     groups[groups.length - 1] += columns - sum;
-        // }
-        return groups
-            .map(
-                (x) =>
-                    `repeat(${x}, ${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`,
-            )
-            .join(` ${SPACE_BTW_DATES}px `);
-    } else {
-        return `repeat(${columns},${
-            IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio
-        }px)`;
-    }
-};
-
-function getFractionFittableColumns(width: number): number {
-    return (
-        (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
-        (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES)
-    );
-}
-
-function getGapFromScreenEdge(width: number) {
-    if (width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH) {
-        return 24;
-    } else {
-        return 4;
-    }
-}
-
-function getShrinkRatio(width: number, columns: number) {
-    return (
-        (width -
-            2 * getGapFromScreenEdge(width) -
-            (columns - 1) * GAP_BTW_TILES) /
-        (columns * IMAGE_CONTAINER_MAX_WIDTH)
-    );
-}
-
-const ListContainer = styled(Box, {
-    shouldForwardProp: (propName) => propName != "gridTemplateColumns",
-})<{ gridTemplateColumns: string }>`
-    display: grid;
-    grid-template-columns: ${(props) => props.gridTemplateColumns};
-    grid-column-gap: ${GAP_BTW_TILES}px;
-    width: 100%;
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        padding: 0 4px;
-    }
-`;
-
-const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
-    grid-column: span ${(props) => props.span};
-`;
-
-const DateContainer = styled(ListItemContainer)(
-    ({ theme }) => `
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    height: ${DATE_CONTAINER_HEIGHT}px;
-    color: ${theme.vars.palette.text.muted};
-`,
-);
-
-const FooterContainer = styled(ListItemContainer)`
-    margin-bottom: 0.75rem;
-    @media (max-width: 540px) {
-        font-size: 12px;
-        margin-bottom: 0.5rem;
-    }
-    text-align: center;
-    justify-content: center;
-    align-items: flex-end;
-    margin-top: calc(2rem + 20px);
-`;
-
-const AlbumFooterContainer = styled(ListItemContainer, {
-    shouldForwardProp: (propName) => propName != "hasReferral",
-})<{ hasReferral: boolean }>`
-    margin-top: 48px;
-    margin-bottom: ${({ hasReferral }) => (!hasReferral ? `10px` : "0px")};
-    text-align: center;
-    justify-content: center;
-`;
-
-const FullStretchContainer = styled("div")(
-    ({ theme }) => `
-    margin: 0 -24px;
-    width: calc(100% + 46px);
-    left: -24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        margin: 0 -4px;
-        width: calc(100% + 6px);
-        left: -4px;
-    }
-    background-color: ${theme.vars.palette.accent.main};
-`,
-);
-
-const NothingContainer = styled(ListItemContainer)`
-    text-align: center;
-    justify-content: center;
-`;
-
 export interface FileListAnnotatedFile {
     file: EnteFile;
     /**
      * The date string using with the associated {@link file} should be shown in
      * the timeline.
      *
-     * This for used for grouping files: all files which have the same
-     * {@link timelineDateString} are grouped together into a section titled
-     * with that {@link timelineDateString}.
+     * [Note: Timeline date string]
+     *
+     * The timeline date string is a formatted date string under which a
+     * particular file should be grouped in the gallery listing. e.g. "Today",
+     * "Yesterday", "Fri, 21 Feb" etc.
+     *
+     * All files which have the same timelineDateString will be grouped under a
+     * single section in the gallery listing, prefixed by the timelineDateString
+     * itself, and a checkbox to select all files on that date.
      */
     timelineDateString: string;
 }
 
-type FileListProps = Pick<
-    PhotoFrameProps,
-    | "mode"
-    | "modePlus"
-    | "selectable"
-    | "selected"
-    | "setSelected"
-    | "favoriteFileIDs"
-> & {
+export interface FileListProps {
+    /** The height we should occupy (needed since the list is virtualized). */
     height: number;
+    /** The width we should occupy.*/
     width: number;
+    /**
+     * The files to show, annotated with cached precomputed properties that are
+     * frequently needed by the {@link FileList}.
+     */
     annotatedFiles: FileListAnnotatedFile[];
-    showAppDownloadBanner: boolean;
+    mode?: GalleryBarMode;
+    /**
+     * This is an experimental prop, to see if we can merge the separate
+     * "isInSearchMode" state kept by the gallery to be instead provided as a
+     * another mode in which the gallery operates.
+     */
+    modePlus?: GalleryBarMode | "search";
+    showAppDownloadBanner?: boolean;
+    selectable?: boolean;
+    setSelected: (
+        selected: SelectedState | ((selected: SelectedState) => SelectedState),
+    ) => void;
+    selected: SelectedState;
+    /** This will be set if mode is not "people". */
     activeCollectionID: number;
-    activePersonID?: string;
+    /** This will be set if mode is "people". */
+    activePersonID?: string | undefined;
+    /**
+     * File IDs of all the files that the user has marked as a favorite.
+     *
+     * Not set in the context of the shared albums app.
+     */
+    favoriteFileIDs?: Set<number>;
     /**
      * Called when the user activates the thumbnail at the given {@link index}.
      *
@@ -214,55 +134,11 @@ type FileListProps = Pick<
      * {@link annotatedFiles}.
      */
     onItemClick: (index: number) => void;
-};
-
-interface ItemData {
-    timeStampList: TimeStampListItem[];
-    columns: number;
-    shrinkRatio: number;
-    renderListItem: (
-        timeStampListItem: TimeStampListItem,
-        isScrolling?: boolean,
-    ) => React.JSX.Element;
 }
 
-const createItemData = memoize(
-    (
-        timeStampList: TimeStampListItem[],
-        columns: number,
-        shrinkRatio: number,
-        renderListItem: (
-            timeStampListItem: TimeStampListItem,
-            isScrolling?: boolean,
-        ) => React.JSX.Element,
-    ): ItemData => ({ timeStampList, columns, shrinkRatio, renderListItem }),
-);
-
-const PhotoListRow = React.memo(
-    ({
-        index,
-        style,
-        isScrolling,
-        data,
-    }: ListChildComponentProps<ItemData>) => {
-        const { timeStampList, columns, shrinkRatio, renderListItem } = data;
-        return (
-            <ListItem style={style}>
-                <ListContainer
-                    gridTemplateColumns={getTemplateColumns(
-                        columns,
-                        shrinkRatio,
-                        timeStampList[index].groups,
-                    )}
-                >
-                    {renderListItem(timeStampList[index], isScrolling)}
-                </ListContainer>
-            </ListItem>
-        );
-    },
-    areEqual,
-);
-
+/**
+ * A virtualized list of files, each represented by their thumbnail.
+ */
 export const FileList: React.FC<FileListProps> = ({
     height,
     width,
@@ -545,7 +421,7 @@ export const FileList: React.FC<FileListProps> = ({
         } else {
             footerHeight = FOOTER_HEIGHT;
         }
-        const photoFrameHeight = (() => {
+        const fileListHeight = (() => {
             let sum = 0;
             const getCurrentItemSize = getItemSize(timeStampList);
             for (let i = 0; i < timeStampList.length; i++) {
@@ -559,7 +435,7 @@ export const FileList: React.FC<FileListProps> = ({
         return {
             itemType: ITEM_TYPE.OTHER,
             item: <></>,
-            height: Math.max(height - photoFrameHeight - footerHeight, 0),
+            height: Math.max(height - fileListHeight - footerHeight, 0),
         };
     };
 
@@ -886,7 +762,7 @@ export const FileList: React.FC<FileListProps> = ({
         index: number,
         isScrolling: boolean,
     ) => (
-        <PreviewCard
+        <FileThumbnail
             key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
             file={file}
             onClick={() => onItemClick(index)}
@@ -1039,3 +915,472 @@ export const FileList: React.FC<FileListProps> = ({
         </List>
     );
 };
+
+const ListItem = styled("div")`
+    display: flex;
+    justify-content: center;
+`;
+
+const getTemplateColumns = (
+    columns: number,
+    shrinkRatio: number,
+    groups?: number[],
+): string => {
+    if (groups) {
+        // need to confirm why this was there
+        // const sum = groups.reduce((acc, item) => acc + item, 0);
+        // if (sum < columns) {
+        //     groups[groups.length - 1] += columns - sum;
+        // }
+        return groups
+            .map(
+                (x) =>
+                    `repeat(${x}, ${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`,
+            )
+            .join(` ${SPACE_BTW_DATES}px `);
+    } else {
+        return `repeat(${columns},${
+            IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio
+        }px)`;
+    }
+};
+
+function getFractionFittableColumns(width: number): number {
+    return (
+        (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
+        (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES)
+    );
+}
+
+function getGapFromScreenEdge(width: number) {
+    if (width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH) {
+        return 24;
+    } else {
+        return 4;
+    }
+}
+
+function getShrinkRatio(width: number, columns: number) {
+    return (
+        (width -
+            2 * getGapFromScreenEdge(width) -
+            (columns - 1) * GAP_BTW_TILES) /
+        (columns * IMAGE_CONTAINER_MAX_WIDTH)
+    );
+}
+
+const ListContainer = styled(Box, {
+    shouldForwardProp: (propName) => propName != "gridTemplateColumns",
+})<{ gridTemplateColumns: string }>`
+    display: grid;
+    grid-template-columns: ${(props) => props.gridTemplateColumns};
+    grid-column-gap: ${GAP_BTW_TILES}px;
+    width: 100%;
+    padding: 0 24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        padding: 0 4px;
+    }
+`;
+
+const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
+    grid-column: span ${(props) => props.span};
+`;
+
+const DateContainer = styled(ListItemContainer)(
+    ({ theme }) => `
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: ${DATE_CONTAINER_HEIGHT}px;
+    color: ${theme.vars.palette.text.muted};
+`,
+);
+
+const FooterContainer = styled(ListItemContainer)`
+    margin-bottom: 0.75rem;
+    @media (max-width: 540px) {
+        font-size: 12px;
+        margin-bottom: 0.5rem;
+    }
+    text-align: center;
+    justify-content: center;
+    align-items: flex-end;
+    margin-top: calc(2rem + 20px);
+`;
+
+const AlbumFooterContainer = styled(ListItemContainer, {
+    shouldForwardProp: (propName) => propName != "hasReferral",
+})<{ hasReferral: boolean }>`
+    margin-top: 48px;
+    margin-bottom: ${({ hasReferral }) => (!hasReferral ? `10px` : "0px")};
+    text-align: center;
+    justify-content: center;
+`;
+
+const FullStretchContainer = styled("div")(
+    ({ theme }) => `
+    margin: 0 -24px;
+    width: calc(100% + 46px);
+    left: -24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        margin: 0 -4px;
+        width: calc(100% + 6px);
+        left: -4px;
+    }
+    background-color: ${theme.vars.palette.accent.main};
+`,
+);
+
+const NothingContainer = styled(ListItemContainer)`
+    text-align: center;
+    justify-content: center;
+`;
+
+interface ItemData {
+    timeStampList: TimeStampListItem[];
+    columns: number;
+    shrinkRatio: number;
+    renderListItem: (
+        timeStampListItem: TimeStampListItem,
+        isScrolling?: boolean,
+    ) => React.JSX.Element;
+}
+
+const createItemData = memoize(
+    (
+        timeStampList: TimeStampListItem[],
+        columns: number,
+        shrinkRatio: number,
+        renderListItem: (
+            timeStampListItem: TimeStampListItem,
+            isScrolling?: boolean,
+        ) => React.JSX.Element,
+    ): ItemData => ({ timeStampList, columns, shrinkRatio, renderListItem }),
+);
+
+const PhotoListRow = React.memo(
+    ({
+        index,
+        style,
+        isScrolling,
+        data,
+    }: ListChildComponentProps<ItemData>) => {
+        const { timeStampList, columns, shrinkRatio, renderListItem } = data;
+        return (
+            <ListItem style={style}>
+                <ListContainer
+                    gridTemplateColumns={getTemplateColumns(
+                        columns,
+                        shrinkRatio,
+                        timeStampList[index].groups,
+                    )}
+                >
+                    {renderListItem(timeStampList[index], isScrolling)}
+                </ListContainer>
+            </ListItem>
+        );
+    },
+    areEqual,
+);
+
+interface FileThumbnailProps {
+    file: EnteFile;
+    onClick: () => void;
+    selectable: boolean;
+    selected: boolean;
+    onSelect: (checked: boolean) => void;
+    onHover: () => void;
+    onRangeSelect: () => void;
+    isRangeSelectActive: boolean;
+    selectOnClick: boolean;
+    isInsSelectRange: boolean;
+    activeCollectionID: number;
+    showPlaceholder: boolean;
+    isFav: boolean;
+}
+
+const FileThumbnail: React.FC<FileThumbnailProps> = ({
+    file,
+    onClick,
+    selectable,
+    selected,
+    onSelect,
+    selectOnClick,
+    onHover,
+    onRangeSelect,
+    isRangeSelectActive,
+    isInsSelectRange,
+    isFav,
+    activeCollectionID,
+    showPlaceholder,
+}) => {
+    const galleryContext = useContext(GalleryContext);
+
+    const [imageURL, setImageURL] = useState<string | undefined>(undefined);
+
+    const longPress = useLongPress(() => onSelect(!selected), 500);
+
+    useEffect(() => {
+        let didCancel = false;
+
+        void downloadManager
+            .renderableThumbnailURL(file, showPlaceholder)
+            .then((url) => !didCancel && setImageURL(url));
+
+        return () => {
+            didCancel = true;
+        };
+    }, [file, showPlaceholder]);
+
+    const handleClick = () => {
+        if (selectOnClick) {
+            if (isRangeSelectActive) {
+                onRangeSelect();
+            } else {
+                onSelect(!selected);
+            }
+        } else if (imageURL) {
+            onClick?.();
+        }
+    };
+
+    const handleSelect: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+        if (isRangeSelectActive) {
+            onRangeSelect?.();
+        } else {
+            onSelect(e.target.checked);
+        }
+    };
+
+    const handleHover = () => {
+        if (isRangeSelectActive) {
+            onHover();
+        }
+    };
+
+    return (
+        <FileThumbnail_
+            key={`thumb-${file.id}}`}
+            onClick={handleClick}
+            onMouseEnter={handleHover}
+            disabled={!imageURL}
+            {...(selectable ? longPress : {})}
+        >
+            {selectable && (
+                <Check
+                    type="checkbox"
+                    checked={selected}
+                    onChange={handleSelect}
+                    $active={isRangeSelectActive && isInsSelectRange}
+                    onClick={(e) => e.stopPropagation()}
+                />
+            )}
+            {file.metadata.hasStaticThumbnail ? (
+                <StaticThumbnail fileType={file.metadata.fileType} />
+            ) : imageURL ? (
+                <img src={imageURL} />
+            ) : (
+                <LoadingThumbnail />
+            )}
+            {file.metadata.fileType === FileType.livePhoto ? (
+                <FileTypeIndicatorOverlay>
+                    <AlbumOutlinedIcon />
+                </FileTypeIndicatorOverlay>
+            ) : (
+                file.metadata.fileType === FileType.video && (
+                    <FileTypeIndicatorOverlay>
+                        <PlayCircleOutlineOutlinedIcon />
+                    </FileTypeIndicatorOverlay>
+                )
+            )}
+            {selected && <SelectedOverlay />}
+            {shouldShowAvatar(file, galleryContext.user) && (
+                <AvatarOverlay>
+                    <Avatar file={file} />
+                </AvatarOverlay>
+            )}
+            {isFav && (
+                <FavoriteOverlay>
+                    <FavoriteRoundedIcon />
+                </FavoriteOverlay>
+            )}
+
+            <HoverOverlay
+                className="preview-card-hover-overlay"
+                checked={selected}
+            />
+            {isRangeSelectActive && isInsSelectRange && (
+                <InSelectRangeOverlay />
+            )}
+
+            {activeCollectionID === TRASH_SECTION && file.isTrashed && (
+                <TileBottomTextOverlay>
+                    <Typography variant="small">
+                        {formattedDateRelative(enteFileDeletionDate(file))}
+                    </Typography>
+                </TileBottomTextOverlay>
+            )}
+        </FileThumbnail_>
+    );
+};
+
+const FileThumbnail_ = styled("div")<{ disabled: boolean }>`
+    display: flex;
+    width: fit-content;
+    margin-bottom: ${GAP_BTW_TILES}px;
+    min-width: 100%;
+    overflow: hidden;
+    position: relative;
+    flex: 1;
+    cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+    user-select: none;
+    & > img {
+        object-fit: cover;
+        max-width: 100%;
+        min-height: 100%;
+        flex: 1;
+        pointer-events: none;
+    }
+
+    &:hover {
+        input[type="checkbox"] {
+            visibility: visible;
+            opacity: 0.5;
+        }
+
+        .preview-card-hover-overlay {
+            opacity: 1;
+        }
+    }
+
+    border-radius: 4px;
+`;
+
+const Check = styled("input")<{ $active: boolean }>(
+    ({ theme, $active }) => `
+    appearance: none;
+    position: absolute;
+    /* Increase z-index in stacking order to capture clicks */
+    z-index: 1;
+    left: 0;
+    outline: none;
+    cursor: pointer;
+    @media (pointer: coarse) {
+        pointer-events: none;
+    }
+
+    &::before {
+        content: "";
+        width: 19px;
+        height: 19px;
+        background-color: #ddd;
+        display: inline-block;
+        border-radius: 50%;
+        vertical-align: bottom;
+        margin: 6px 6px;
+        transition: background-color 0.3s ease;
+        pointer-events: inherit;
+
+    }
+    &::after {
+        content: "";
+        position: absolute;
+        width: 5px;
+        height: 11px;
+        border-right: 2px solid #333;
+        border-bottom: 2px solid #333;
+        transition: transform 0.3s ease;
+        pointer-events: inherit;
+        transform: translate(-18px, 9px) rotate(45deg);
+    }
+
+    /* checkmark background (filled circle) */
+    &:checked::before {
+        content: "";
+        background-color: ${theme.vars.palette.accent.main};
+        border-color: ${theme.vars.palette.accent.main};
+        color: white;
+    }
+    /* checkmark foreground (tick) */
+    &:checked::after {
+        content: "";
+        border-right: 2px solid #ddd;
+        border-bottom: 2px solid #ddd;
+    }
+    visibility: hidden;
+    ${$active && "visibility: visible; opacity: 0.5;"};
+    &:checked {
+        visibility: visible;
+        opacity: 1 !important;
+    }
+`,
+);
+
+const HoverOverlay = styled("div")<{ checked: boolean }>`
+    opacity: 0;
+    left: 0;
+    top: 0;
+    outline: none;
+    height: 40%;
+    width: 100%;
+    position: absolute;
+    ${(props) =>
+        !props.checked &&
+        "background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))"};
+`;
+
+/**
+ * An overlay showing the avatars of the person who shared the item, at the top
+ * right.
+ */
+const AvatarOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding: 5px;
+`;
+
+/**
+ * An overlay showing the favorite icon at bottom left.
+ */
+const FavoriteOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding: 5px;
+    color: white;
+    opacity: 0.6;
+`;
+
+/**
+ * An overlay with a gradient, showing the file type indicator (e.g. live photo,
+ * video) at the bottom right.
+ */
+const FileTypeIndicatorOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 5px;
+    color: white;
+    background: linear-gradient(
+        315deg,
+        rgba(0 0 0 / 0.14) 0%,
+        rgba(0 0 0 / 0.05) 30%,
+        transparent 50%
+    );
+`;
+
+const InSelectRangeOverlay = styled(Overlay)(
+    ({ theme }) => `
+    outline: none;
+    background: ${theme.vars.palette.accent.main};
+    opacity: 0.14;
+`,
+);
+
+const SelectedOverlay = styled(Overlay)(
+    ({ theme }) => `
+    border: 2px solid ${theme.vars.palette.accent.main};
+    border-radius: 4px;
+`,
+);

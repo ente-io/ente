@@ -9,7 +9,7 @@ import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
-import { pt } from "@/base/i18n";
+import { formattedListJoin, ut } from "@/base/i18n";
 import type { LocalUser } from "@/base/local-user";
 import log from "@/base/log";
 import {
@@ -32,7 +32,6 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
 import {
-    Box,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -625,6 +624,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleShortcutsClose = useCallback(() => setOpenShortcuts(false), []);
 
+    // TODO: Unused translation t("convert") - can be removed post the upcoming
+    // streaming changes as they'll provides the equiv.
+
     const shouldIgnoreKeyboardEvent = useCallback(() => {
         // Don't handle keydowns if any of the modals are open.
         return (
@@ -795,24 +797,20 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             >
                 {activeAnnotatedFile.annotation.showDownload == "menu" && (
                     <MoreMenuItem onClick={handleDownloadMenuAction}>
-                        <MoreMenuItemTitle>
-                            {/*TODO */ t("download")}
-                        </MoreMenuItemTitle>
+                        <MoreMenuItemTitle>{t("download")}</MoreMenuItemTitle>
                         <FileDownloadOutlinedIcon />
                     </MoreMenuItem>
                 )}
                 {activeAnnotatedFile.annotation.showDelete && (
                     <MoreMenuItem onClick={handleConfirmDelete}>
-                        <MoreMenuItemTitle>
-                            {/*TODO */ t("delete")}
-                        </MoreMenuItemTitle>
+                        <MoreMenuItemTitle>{t("delete")}</MoreMenuItemTitle>
                         <DeleteIcon />
                     </MoreMenuItem>
                 )}
                 {canCopyImage() && (
                     <MoreMenuItem onClick={handleCopyImage}>
                         <MoreMenuItemTitle>
-                            {/*TODO */ pt("Copy as PNG")}
+                            {t("copy_as_png")}
                         </MoreMenuItemTitle>
                         {/* Tweak icon size to visually fit better with neighbours */}
                         <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
@@ -820,9 +818,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 )}
                 {activeAnnotatedFile.annotation.showEditImage && (
                     <MoreMenuItem onClick={handleEditImage}>
-                        <MoreMenuItemTitle>
-                            {/*TODO */ pt("Edit image")}
-                        </MoreMenuItemTitle>
+                        <MoreMenuItemTitle>{t("edit_image")}</MoreMenuItemTitle>
                         <EditIcon />
                     </MoreMenuItem>
                 )}
@@ -836,11 +832,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     }}
                 >
                     <MoreMenuItemTitle>
-                        {
-                            /*TODO */ isFullscreen
-                                ? pt("Exit fullscreen")
-                                : pt("Go fullscreen")
-                        }
+                        {isFullscreen
+                            ? t("exit_fullscreen")
+                            : t("go_fullscreen")}
                     </MoreMenuItemTitle>
                     {isFullscreen ? (
                         <FullscreenExitOutlinedIcon />
@@ -850,7 +844,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 </MoreMenuItem>
                 <MoreMenuItem onClick={handleShortcuts} sx={{ mt: "2px" }}>
                     <Typography sx={{ color: "fixed.dark.text.faint" }}>
-                        {pt("Shortcuts")}
+                        {t("shortcuts")}
                     </Typography>
                 </MoreMenuItem>
             </MoreMenu>
@@ -1027,40 +1021,69 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
         slotProps={{ backdrop: { sx: { backdropFilter: "blur(30px)" } } }}
     >
         <SpacedRow sx={{ pt: 2, px: 2.5 }}>
-            <DialogTitle>{pt("Shortcuts")}</DialogTitle>
+            <DialogTitle>{t("shortcuts")}</DialogTitle>
             <DialogCloseIconButton {...{ onClose }} />
         </SpacedRow>
-        <ShortcutsContent sx={{ "&&": { pt: 2, pb: 5, px: 5 } }}>
-            <Shortcut action="Close" shortcut="Esc" />
-            <Shortcut action="Previous, Next" shortcut="←, →" />
-            <Shortcut action="Zoom" shortcut="Mouse scroll, Pinch" />
-            <Shortcut action="Zoom preset" shortcut="Z, Tap inside image" />
+        <ShortcutsContent>
+            <Shortcut action={t("close")} shortcut={ut("Esc")} />
             <Shortcut
-                action="Toggle controls"
-                shortcut="H, Tap outside image"
+                action={formattedListJoin([t("previous"), t("next")])}
+                shortcut={formattedListJoin([ut("←"), ut("→")])}
             />
-            <Shortcut action="Pan" shortcut="W A S D, Drag" />
-            <Shortcut action="Toggle live" shortcut="Space" />
-            <Shortcut action="Toggle audio" shortcut="M" />
-            {haveUser && <Shortcut action="Toggle favorite" shortcut="L" />}
-            <Shortcut action="View info" shortcut="I" />
-            {!disableDownload && <Shortcut action="Download" shortcut="K" />}
+            <Shortcut
+                action={t("zoom")}
+                shortcut={formattedListJoin([t("mouse_scroll"), t("pinch")])}
+            />
+            <Shortcut
+                action={t("zoom_preset")}
+                shortcut={formattedListJoin([ut("Z"), t("tap_inside_image")])}
+            />
+            <Shortcut
+                action={t("toggle_controls")}
+                shortcut={formattedListJoin([ut("H"), t("tap_outside_image")])}
+            />
+            <Shortcut
+                action={t("pan")}
+                shortcut={formattedListJoin([ut("W A S D"), t("drag")])}
+            />
+            <Shortcut action={t("toggle_live")} shortcut={ut("Space")} />
+            <Shortcut action={t("toggle_audio")} shortcut={ut("M")} />
             {haveUser && (
-                <Shortcut action="Delete" shortcut="Delete, Backspace" />
+                <Shortcut action={t("toggle_favorite")} shortcut={ut("L")} />
+            )}
+            <Shortcut action={t("view_info")} shortcut={ut("I")} />
+            {!disableDownload && (
+                <Shortcut action={t("download")} shortcut={ut("K")} />
+            )}
+            {haveUser && (
+                <Shortcut
+                    action={t("delete")}
+                    shortcut={formattedListJoin([
+                        ut("Delete"),
+                        ut("Backspace"),
+                    ])}
+                />
             )}
             {!disableDownload && (
-                <Shortcut action="Copy as PNG" shortcut="^C / ⌘C" />
+                <Shortcut action={t("copy_as_png")} shortcut={ut("^C / ⌘C")} />
             )}
-            <Shortcut action="Toggle fullscreen" shortcut="F" />
-            <Shortcut action="Show shortcuts" shortcut="?" />
+            <Shortcut action={t("toggle_fullscreen")} shortcut={ut("F")} />
+            <Shortcut action={t("show_shortcuts")} shortcut={ut("?")} />
         </ShortcutsContent>
     </Dialog>
 );
 
-const ShortcutsContent = styled(DialogContent)`
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+const ShortcutsContent: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <DialogContent sx={{ "&&": { pt: 1, pb: 5, px: 5 } }}>
+        <ShortcutsTable>
+            <tbody>{children}</tbody>
+        </ShortcutsTable>
+    </DialogContent>
+);
+
+const ShortcutsTable = styled("table")`
+    border-collapse: separate;
+    border-spacing: 0 14px;
 `;
 
 interface ShortcutProps {
@@ -1069,12 +1092,18 @@ interface ShortcutProps {
 }
 
 const Shortcut: React.FC<ShortcutProps> = ({ action, shortcut }) => (
-    <Box sx={{ display: "flex", gap: 2 }}>
-        <Typography sx={{ color: "text.muted", minWidth: "min(20ch, 40svw)" }}>
+    <tr>
+        <Typography
+            component="td"
+            sx={{ color: "text.muted", width: "min(20ch, 40svw)" }}
+        >
             {action}
         </Typography>
-        <Typography sx={{ fontWeight: "medium" }}>{shortcut}</Typography>
-    </Box>
+
+        <Typography component="td" sx={{ fontWeight: "medium" }}>
+            {shortcut}
+        </Typography>
+    </tr>
 );
 
 const fileIsEditableImage = (file: EnteFile) => {

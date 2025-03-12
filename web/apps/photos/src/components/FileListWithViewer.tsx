@@ -1,107 +1,35 @@
 import { isSameDay } from "@/base/date";
 import { formattedDate } from "@/base/i18n-date";
-import type { FileInfoProps } from "@/gallery/components/FileInfo";
-import { FileViewer } from "@/gallery/components/viewer/FileViewer";
-import { type RenderableSourceURLs } from "@/gallery/services/download";
+import {
+    FileViewer,
+    type FileViewerProps,
+} from "@/gallery/components/viewer/FileViewer";
 import type { Collection } from "@/media/collection";
 import { EnteFile } from "@/media/file";
-import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { moveToTrash, TRASH_SECTION } from "@/new/photos/services/collection";
 import { styled } from "@mui/material";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
     addToFavorites,
     removeFromFavorites,
 } from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
-import {
-    SelectedState,
-    SetFilesDownloadProgressAttributesCreator,
-} from "types/gallery";
+import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { downloadSingleFile } from "utils/file";
-import { FileList, type FileListAnnotatedFile } from "./FileList";
+import {
+    FileList,
+    type FileListAnnotatedFile,
+    type FileListProps,
+} from "./FileList";
 
-const Container = styled("div")`
-    display: block;
-    flex: 1;
-    width: 100%;
-    flex-wrap: wrap;
-    margin: 0 auto;
-    overflow: hidden;
-    .pswp-thumbnail {
-        display: inline-block;
-        cursor: pointer;
-    }
-`;
-
-/**
- * An {@link EnteFile} augmented with various in-memory state used for
- * displaying it in the photo viewer.
- */
-export type DisplayFile = EnteFile & {
-    src?: string;
-    srcURLs?: RenderableSourceURLs;
+export type FileListWithViewerProps = {
     /**
-     * An object URL corresponding to the image portion, if any, associated with
-     * the {@link DisplayFile}.
-     *
-     * - For images, this will be the object URL of the renderable image itself.
-     * - For live photos, this will be the object URL of the image portion of
-     *   the live photo.
-     * - For videos, this will not be defined.
+     * The list of files to show.
      */
-    associatedImageURL?: string | undefined;
-    msrc?: string;
-    html?: string;
-    w?: number;
-    h?: number;
-    title?: string;
-    isSourceLoaded?: boolean;
-    conversionFailed?: boolean;
-    canForceConvert?: boolean;
-    /**
-     * [Note: Timeline date string]
-     *
-     * The timeline date string is a formatted date string under which a
-     * particular file should be grouped in the gallery listing. e.g. "Today",
-     * "Yesterday", "Fri, 21 Feb" etc.
-     *
-     * All files which have the same timelineDateString will be grouped under a
-     * single section in the gallery listing, prefixed by the timelineDateString
-     * itself, and a checkbox to select all files on that date.
-     */
-    timelineDateString?: string;
-};
-
-export type PhotoFrameProps = Pick<
-    FileInfoProps,
-    | "fileCollectionIDs"
-    | "allCollectionsNameByID"
-    | "onSelectCollection"
-    | "onSelectPerson"
-> & {
-    mode?: GalleryBarMode;
-    /**
-     * This is an experimental prop, to see if we can merge the separate
-     * "isInSearchMode" state kept by the gallery to be instead provided as a
-     * another mode in which the gallery operates.
-     */
-    modePlus?: GalleryBarMode | "search";
     files: EnteFile[];
-    selectable?: boolean;
-    setSelected: (
-        selected: SelectedState | ((selected: SelectedState) => SelectedState),
-    ) => void;
-    selected: SelectedState;
-    /**
-     * File IDs of all the files that the user has marked as a favorite.
-     *
-     * Not set in the context of the shared albums app.
-     */
-    favoriteFileIDs?: Set<number>;
+    enableDownload?: boolean;
     /**
      * Called when the component wants to update the in-memory, unsynced,
      * favorite status of a file.
@@ -125,51 +53,68 @@ export type PhotoFrameProps = Pick<
      * Not set in the context of the shared albums app.
      */
     onMarkTempDeleted?: (files: EnteFile[]) => void;
-    /** This will be set if mode is not "people". */
-    activeCollectionID: number;
-    /** This will be set if mode is "people". */
-    activePersonID?: string | undefined;
-    enableDownload?: boolean;
-    showAppDownloadBanner?: boolean;
-    isInIncomingSharedCollection?: boolean;
-    isInHiddenSection?: boolean;
     setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
     /**
      * Called when the visibility of the file viewer dialog changes.
      */
     onSetOpenFileViewer?: (open: boolean) => void;
+    /**
+     * Called when an action in the file viewer requires us to sync with remote.
+     */
     onSyncWithRemote: () => Promise<void>;
-};
+} & Pick<
+    FileListProps,
+    | "mode"
+    | "modePlus"
+    | "showAppDownloadBanner"
+    | "selectable"
+    | "selected"
+    | "setSelected"
+    | "activeCollectionID"
+    | "activePersonID"
+    | "favoriteFileIDs"
+> &
+    Pick<
+        FileViewerProps,
+        | "user"
+        | "isInIncomingSharedCollection"
+        | "isInHiddenSection"
+        | "fileCollectionIDs"
+        | "allCollectionsNameByID"
+        | "onSelectCollection"
+        | "onSelectPerson"
+    >;
 
 /**
- * TODO: Rename me to FileListWithViewer (or Gallery?)
+ * A list of files (represented by their thumbnails), along with a file viewer
+ * that opens on activating the thumbnail (and also allows the user to navigate
+ * through this list of files).
  */
-const PhotoFrame = ({
+export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     mode,
     modePlus,
+    user,
     files,
+    enableDownload,
+    showAppDownloadBanner,
     selectable,
     selected,
     setSelected,
-    favoriteFileIDs,
-    onMarkUnsyncedFavoriteUpdate,
-    onMarkTempDeleted,
     activeCollectionID,
     activePersonID,
-    enableDownload,
-    fileCollectionIDs,
-    allCollectionsNameByID,
-    showAppDownloadBanner,
+    favoriteFileIDs,
     isInIncomingSharedCollection,
     isInHiddenSection,
+    fileCollectionIDs,
+    allCollectionsNameByID,
     setFilesDownloadProgressAttributesCreator,
+    onMarkUnsyncedFavoriteUpdate,
+    onMarkTempDeleted,
     onSetOpenFileViewer,
     onSyncWithRemote,
     onSelectCollection,
     onSelectPerson,
-}: PhotoFrameProps) => {
-    const galleryContext = useContext(GalleryContext);
-
+}) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -245,18 +190,18 @@ const PhotoFrame = ({
             <AutoSizer>
                 {({ height, width }) => (
                     <FileList
+                        {...{ width, height, annotatedFiles }}
                         {...{
                             mode,
                             modePlus,
+                            showAppDownloadBanner,
                             selectable,
                             selected,
                             setSelected,
                             activeCollectionID,
                             activePersonID,
-                            showAppDownloadBanner,
                             favoriteFileIDs,
                         }}
-                        {...{ width, height, annotatedFiles }}
                         onItemClick={handleThumbnailClick}
                     />
                 )}
@@ -264,31 +209,34 @@ const PhotoFrame = ({
             <FileViewer
                 open={openFileViewer}
                 onClose={handleCloseFileViewer}
-                user={galleryContext.user ?? undefined}
-                files={files}
                 initialIndex={currentIndex}
                 disableDownload={!enableDownload}
-                isInIncomingSharedCollection={isInIncomingSharedCollection}
                 isInTrashSection={activeCollectionID === TRASH_SECTION}
-                isInHiddenSection={isInHiddenSection}
-                onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
-                onToggleFavorite={handleToggleFavorite}
-                onDownload={handleDownload}
-                onDelete={handleDelete}
-                onSaveEditedImageCopy={handleSaveEditedImageCopy}
                 {...{
+                    user,
+                    files,
+                    isInHiddenSection,
+                    isInIncomingSharedCollection,
                     favoriteFileIDs,
                     fileCollectionIDs,
                     allCollectionsNameByID,
                     onSelectCollection,
                     onSelectPerson,
                 }}
+                onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
+                onToggleFavorite={handleToggleFavorite}
+                onDownload={handleDownload}
+                onDelete={handleDelete}
+                onSaveEditedImageCopy={handleSaveEditedImageCopy}
             />
         </Container>
     );
 };
 
-export default PhotoFrame;
+const Container = styled("div")`
+    flex: 1;
+    width: 100%;
+`;
 
 /**
  * See: [Note: Timeline date string]
