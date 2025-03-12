@@ -154,9 +154,6 @@ class HomeWidgetService {
 
     await PreloadImage.loadImage(img.image);
 
-    final platformBrightness =
-        SchedulerBinding.instance.platformDispatcher.platformBrightness;
-
     final widget = ClipSmoothRect(
       radius: SmoothBorderRadius(cornerRadius: 32, cornerSmoothing: 1),
       child: Container(
