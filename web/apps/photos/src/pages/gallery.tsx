@@ -803,7 +803,7 @@ const Page: React.FC = () => {
         });
     };
 
-    const handleFileViewerVisibilityUpdate = useCallback(
+    const handleFileViewerFileVisibilityUpdate = useCallback(
         async (fileID: number, visibility: ItemVisibility) => {
             dispatch({
                 type: "markPendingVisibilityUpdate",
@@ -1096,12 +1096,16 @@ const Page: React.FC = () => {
                         isInHiddenSection={barMode == "hidden-albums"}
                         archivedCollectionIDs={state.archivedCollectionIDs}
                         archivedFileIDs={state.archivedFileIDs}
-                        pendingVisibilityUpdates={state.pendingVisibilityUpdates}
+                        pendingVisibilityUpdates={
+                            state.pendingVisibilityUpdates
+                        }
                         favoriteFileIDs={state.favoriteFileIDs}
                         setFilesDownloadProgressAttributesCreator={
                             setFilesDownloadProgressAttributesCreator
                         }
-                        onVisibilityUpdate={handleFileViewerVisibilityUpdate}
+                        onFileVisibilityUpdate={
+                            handleFileViewerFileVisibilityUpdate
+                        }
                         onMarkUnsyncedFavoriteUpdate={
                             handleMarkUnsyncedFavoriteUpdate
                         }

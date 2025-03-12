@@ -3,6 +3,7 @@ import { formattedDate } from "@/base/i18n-date";
 import {
     FileViewer,
     type FileViewerProps,
+    type FileViewerToggleArchiveButtonProps,
 } from "@/gallery/components/viewer/FileViewer";
 import type { Collection } from "@/media/collection";
 import { EnteFile } from "@/media/file";
@@ -83,7 +84,8 @@ export type FileListWithViewerProps = {
         | "allCollectionsNameByID"
         | "onSelectCollection"
         | "onSelectPerson"
-    >;
+    > &
+    FileViewerToggleArchiveButtonProps;
 
 /**
  * A list of files (represented by their thumbnails), along with a file viewer
@@ -107,7 +109,11 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     isInHiddenSection,
     fileCollectionIDs,
     allCollectionsNameByID,
+    archivedCollectionIDs,
+    archivedFileIDs,
+    pendingVisibilityUpdates,
     setFilesDownloadProgressAttributesCreator,
+    onFileVisibilityUpdate,
     onMarkUnsyncedFavoriteUpdate,
     onMarkTempDeleted,
     onSetOpenFileViewer,
@@ -176,15 +182,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
             : undefined;
     }, [onMarkTempDeleted]);
 
-    const handleToggleArchive = useMemo(() => {
-        // TODO(AR):
-        return favoriteFileIDs
-            ? (file: EnteFile) => {
-                  console.log("toggle archive", file);
-              }
-            : undefined;
-    }, [favoriteFileIDs]);
-
     const handleSaveEditedImageCopy = useCallback(
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
             uploadManager.prepareForNewUpload();
@@ -229,6 +226,10 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     favoriteFileIDs,
                     fileCollectionIDs,
                     allCollectionsNameByID,
+                    archivedCollectionIDs,
+                    archivedFileIDs,
+                    pendingVisibilityUpdates,
+                    onFileVisibilityUpdate,
                     onSelectCollection,
                     onSelectPerson,
                 }}

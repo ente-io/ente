@@ -18,6 +18,7 @@ import {
     type FileInfoProps,
 } from "@/gallery/components/FileInfo";
 import type { Collection } from "@/media/collection";
+import type { ItemVisibility } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
@@ -114,6 +115,23 @@ export interface FileViewerAnnotatedFile {
     file: EnteFile;
     annotation: FileViewerFileAnnotation;
     itemData: ItemData;
+}
+
+/**
+ * File IDs of all the collections and files that the user has archived, and for
+ * which an toggle is pending, and a callback to trigger the toggle.
+ *
+ * The toggle archived button will shown in the file actions of the file viewer
+ * only if all four of these props are specified.
+ */
+export interface FileViewerToggleArchiveButtonProps {
+    archivedCollectionIDs?: Set<number>;
+    archivedFileIDs?: Set<number>;
+    pendingVisibilityUpdates?: Set<number>;
+    onFileVisibilityUpdate?: (
+        fileID: number,
+        visibility: ItemVisibility,
+    ) => Promise<void>;
 }
 
 export type FileViewerProps = ModalVisibilityProps & {
@@ -231,7 +249,8 @@ export type FileViewerProps = ModalVisibilityProps & {
         | "allCollectionsNameByID"
         | "onSelectCollection"
         | "onSelectPerson"
-    >;
+    > &
+    FileViewerToggleArchiveButtonProps;
 
 /**
  * A PhotoSwipe based image and video viewer.
