@@ -33,6 +33,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
+import UnArchiveIcon from "@mui/icons-material/Unarchive";
 import {
     Dialog,
     DialogContent,
@@ -686,39 +687,52 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [activeAnnotatedFile],
     );
 
-    const activeItemVisibility = useMemo(() => {
-        if (
-            !pendingVisibilityUpdates ||
-            !unsyncedVisibilityUpdates ||
-            !onFileVisibilityUpdate
-        ) {
-            return undefined;
-        }
+    const { visibility, isPendingVisibility, toggleVisibility } =
+        useMemo(() => {
+            let visibility: "visible" | "archived" | undefined;
+            let isPendingVisibility: boolean | undefined;
+            let toggleVisibility: (() => void) | undefined;
 
-        const file = activeAnnotatedFile?.file;
-        if (!file) return undefined;
+            const file = activeAnnotatedFile?.file;
 
-        if (pendingVisibilityUpdates.has(file.id)) {
-            return "pending";
-        }
+            if (
+                file &&
+                pendingVisibilityUpdates &&
+                unsyncedVisibilityUpdates &&
+                onFileVisibilityUpdate
+            ) {
+                switch (
+                    unsyncedVisibilityUpdates.get(file.id) ??
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                    file.magicMetadata?.data?.visibility
+                ) {
+                    case undefined:
+                    case ItemVisibility.visible:
+                        visibility = "visible";
+                        break;
+                    case ItemVisibility.archived:
+                        visibility = "archived";
+                        break;
+                }
 
-        switch (
-            unsyncedVisibilityUpdates.get(file.id) ??
-            file.magicMetadata.data.visibility
-        ) {
-            case ItemVisibility.visible:
-                return "visible";
-            case ItemVisibility.archived:
-                return "archived";
-            default:
-                return undefined;
-        }
-    }, [
-        pendingVisibilityUpdates,
-        unsyncedVisibilityUpdates,
-        onFileVisibilityUpdate,
-        activeAnnotatedFile,
-    ]);
+                isPendingVisibility = pendingVisibilityUpdates.has(file.id);
+
+                toggleVisibility = () =>
+                    void onFileVisibilityUpdate(
+                        file.id,
+                        visibility == "archived"
+                            ? ItemVisibility.visible
+                            : ItemVisibility.archived,
+                    );
+            }
+
+            return { visibility, isPendingVisibility, toggleVisibility };
+        }, [
+            pendingVisibilityUpdates,
+            unsyncedVisibilityUpdates,
+            onFileVisibilityUpdate,
+            activeAnnotatedFile,
+        ]);
 
     const performKeyAction = useCallback<
         FileViewerPhotoSwipeDelegate["performKeyAction"]
@@ -876,10 +890,21 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <DeleteIcon />
                     </MoreMenuItem>
                 )}
-                {activeItemVisibility == "visible" && (
-                    <MoreMenuItem onClick={handleConfirmDelete} disabled>
-                        <MoreMenuItemTitle>{t("archive")}</MoreMenuItemTitle>
-                        <ArchiveOutlinedIcon />
+                {visibility && (
+                    <MoreMenuItem
+                        onClick={toggleVisibility}
+                        disabled={isPendingVisibility}
+                    >
+                        <MoreMenuItemTitle>
+                            {visibility == "archived"
+                                ? t("unarchive")
+                                : t("archive")}
+                        </MoreMenuItemTitle>
+                        {visibility == "archived" ? (
+                            <UnArchiveIcon />
+                        ) : (
+                            <ArchiveOutlinedIcon />
+                        )}
                     </MoreMenuItem>
                 )}
                 {canCopyImage() && (
