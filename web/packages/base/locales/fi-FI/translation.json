@@ -95,7 +95,7 @@
     "selected_and_yours_count": "{{selected, number}} valittu {{yours, number}} omaasi",
     "delete": "Poista",
     "delete_key": "Poista (DEL)",
-    "favorite": "Lisää suosikkeihin",
+    "favorite": "",
     "favorite_key": "Lisää suosikkeihin (L)",
     "unfavorite_key": "Poista suosikeista (L)",
     "convert": "Muunna",

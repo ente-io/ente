@@ -95,7 +95,7 @@
     "selected_and_yours_count": "{{selected, number}} выбрано {{yours, number}} твой",
     "delete": "Удалить",
     "delete_key": "Удалить (DEL)",
-    "favorite": "Добавить в избранное",
+    "favorite": "",
     "favorite_key": "Добавить в избранное (L)",
     "unfavorite_key": "Неблагоприятный фактор (L)",
     "convert": "Преобразовать",

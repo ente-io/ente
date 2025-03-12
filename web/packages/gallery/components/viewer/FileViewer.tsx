@@ -1055,7 +1055,7 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
             <Shortcut action={t("toggle_live")} shortcut={ut("Space")} />
             <Shortcut action={t("toggle_audio")} shortcut={ut("M")} />
             {haveUser && (
-                <Shortcut action="Toggle favorite" shortcut={ut("L")} />
+                <Shortcut action={t("toggle_favorite")} shortcut={ut("L")} />
             )}
             <Shortcut action={t("view_info")} shortcut={ut("I")} />
             {!disableDownload && (
