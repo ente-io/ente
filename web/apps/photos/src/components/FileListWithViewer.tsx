@@ -176,6 +176,15 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
             : undefined;
     }, [onMarkTempDeleted]);
 
+    const handleToggleArchive = useMemo(() => {
+        // TODO(AR):
+        return favoriteFileIDs
+            ? (file: EnteFile) => {
+                  console.log("toggle archive", file);
+              }
+            : undefined;
+    }, [favoriteFileIDs]);
+
     const handleSaveEditedImageCopy = useCallback(
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
             uploadManager.prepareForNewUpload();
