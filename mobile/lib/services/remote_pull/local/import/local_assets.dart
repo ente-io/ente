@@ -13,61 +13,44 @@ const ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
 const assetFetchPageSize = 2000;
 
 Future<List<LocalPathAssets>> getAssetPathAndEntities(
-  int fromTime,
-  int toTime,
+  int fromTimeInMicroSec,
+  int toTimeInMicroSec,
 ) async {
   final pathEntities = await _getGalleryList(
-    updateFromTime: fromTime,
-    updateToTime: toTime,
+    updateFromTimeInMicroSec: fromTimeInMicroSec,
+    updateToTimeInMicroSec: toTimeInMicroSec,
   );
   final List<LocalPathAssets> localPathAssets = [];
   for (AssetPathEntity pathEntity in pathEntities) {
     final List<AssetEntity> assetsInPath = await _getAllAssetLists(pathEntity);
-    late List<AssetEntity> result;
-    if (assetsInPath.isEmpty) {
-      result = [];
-    } else {
-      try {
-        result = await Computer.shared().compute(
-          _getLocalIDsAndFilesFromAssets,
-          param: <String, dynamic>{
-            "pathEntity": pathEntity,
-            "fromTime": fromTime,
-          },
-          taskName:
-              "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
-        );
-      } catch (e) {
-        _logger.severe("_getLocalIDsAndFilesFromAssets failed", e);
-        _logger.info(
-          "Failed for pathEntity: ${pathEntity.name}",
-        );
-        rethrow;
-      }
+    try {
+      final List<AssetEntity> result = assetsInPath.isEmpty
+          ? []
+          : await Computer.shared().compute(
+              _getLocalIDsAndFilesFromAssets,
+              param: <String, dynamic>{
+                "assetList": assetsInPath,
+                "fromTimeInMicroSec": fromTimeInMicroSec,
+              },
+              taskName:
+                  "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
+            );
+      localPathAssets.add(
+        LocalPathAssets(path: pathEntity, assets: result),
+      );
+    } catch (e) {
+      _logger.severe("_getLocalIDsAndFilesFromAssets failed", e);
+      _logger.info(
+        "Failed for pathEntity: ${pathEntity.name}",
+      );
+      rethrow;
     }
-    localPathAssets.add(
-      LocalPathAssets(path: pathEntity, assets: result),
-    );
   }
   return localPathAssets;
 }
 
 Future<List<LocalPathAssets>> getAllLocalAssets() async {
-  final filterOptionGroup = FilterOptionGroup();
-  filterOptionGroup.setOption(
-    AssetType.image,
-    const FilterOption(sizeConstraint: ignoreSizeConstraint),
-  );
-  filterOptionGroup.setOption(
-    AssetType.video,
-    const FilterOption(sizeConstraint: ignoreSizeConstraint),
-  );
-  filterOptionGroup.createTimeCond = DateTimeCond.def().copyWith(ignore: true);
-  final assetPaths = await PhotoManager.getAssetPathList(
-    hasAll: !Platform.isAndroid,
-    type: RequestType.common,
-    filterOption: filterOptionGroup,
-  );
+  final List<AssetPathEntity> assetPaths = await _getGalleryList();
   final List<LocalPathAssets> localPathAssets = [];
   for (final assetPath in assetPaths) {
     final List<AssetEntity> assets = await _getAllAssetLists(assetPath);
@@ -85,8 +68,8 @@ Future<List<LocalPathAssets>> getAllLocalAssets() async {
 /// [needTitle] impacts the performance for fetching the actual [AssetEntity]
 /// in iOS. Same is true for [containsModifiedPath]
 Future<List<AssetPathEntity>> _getGalleryList({
-  final int? updateFromTime,
-  final int? updateToTime,
+  final int? updateFromTimeInMicroSec,
+  final int? updateToTimeInMicroSec,
   final bool containsModifiedPath = false,
   // in iOS fetching the AssetEntity title impacts performance
   final bool needsTitle = true,
@@ -106,11 +89,15 @@ Future<List<AssetPathEntity>> _getGalleryList({
     filterOptionGroup.addOrderOption(orderOption);
   }
 
-  if (updateFromTime != null && updateToTime != null) {
+  if (updateFromTimeInMicroSec != null && updateToTimeInMicroSec != null) {
     filterOptionGroup.updateTimeCond = DateTimeCond(
-      min: DateTime.fromMillisecondsSinceEpoch(updateFromTime ~/ 1000),
-      max: DateTime.fromMillisecondsSinceEpoch(updateToTime ~/ 1000),
+      min:
+          DateTime.fromMillisecondsSinceEpoch(updateFromTimeInMicroSec ~/ 1000),
+      max: DateTime.fromMillisecondsSinceEpoch(updateToTimeInMicroSec ~/ 1000),
     );
+  } else {
+    filterOptionGroup.createTimeCond =
+        DateTimeCond.def().copyWith(ignore: true);
   }
   filterOptionGroup.containsPathModified = containsModifiedPath;
   final galleryList = await PhotoManager.getAssetPathList(
@@ -155,7 +142,7 @@ Future<List<AssetEntity>> _getLocalIDsAndFilesFromAssets(
   Map<String, dynamic> args,
 ) async {
   final assetList = args["assetList"];
-  final fromTime = args["fromTime"];
+  final fromTime = args["fromTimeInMicroSec"];
   final List<AssetEntity> filteredAssets = [];
   for (AssetEntity entity in assetList) {
     final bool assetCreatedOrUpdatedAfterGivenTime = max(
