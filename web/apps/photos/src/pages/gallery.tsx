@@ -520,6 +520,19 @@ const Page: React.FC = () => {
         [showMiniDialog, logout],
     );
 
+    // [Note: Visual feedback to acknowledge user actions]
+    //
+    // In some infrequent cases, we want to acknowledge some user action (e.g.
+    // pressing a keyboard shortcut which doesn't have an immediate on-screen
+    // impact). In these cases, we tickle the loading bar at the top to
+    // acknowledge that their action.
+    //
+    // TODO: Move to the new "GalleryContext"?
+    const handleVisualFeedback = useCallback(() => {
+        showLoadingBar();
+        setTimeout(hideLoadingBar, 0);
+    }, [showLoadingBar, hideLoadingBar]);
+
     const handleSyncWithRemote = useCallback(
         async (force = false, silent = false) => {
             if (!navigator.onLine) return;
@@ -1125,6 +1138,7 @@ const Page: React.FC = () => {
                         onMarkTempDeleted={handleMarkTempDeleted}
                         onSetOpenFileViewer={setIsFileViewerOpen}
                         onSyncWithRemote={handleSyncWithRemote}
+                        onVisualFeedback={handleVisualFeedback}
                         onSelectCollection={handleSelectCollection}
                         onSelectPerson={handleSelectPerson}
                     />

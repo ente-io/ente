@@ -226,6 +226,13 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onTriggerSyncWithRemote?: () => void;
     /**
+     * Called when the user performs an action which does not otherwise have any
+     * immediate visual impact, to acknowledge it.
+     *
+     * See: [Note: Visual feedback to acknowledge user actions]
+     */
+    onVisualFeedback: () => void;
+    /**
      * Called when the favorite status of given {@link file} should be toggled
      * from its current value.
      *
@@ -291,6 +298,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     fileCollectionIDs,
     allCollectionsNameByID,
     onTriggerSyncWithRemote,
+    onVisualFeedback,
     onToggleFavorite,
     onDownload,
     onDelete,
