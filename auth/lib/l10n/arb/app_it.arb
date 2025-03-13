@@ -499,6 +499,7 @@
   "appLockOfflineModeWarning": "Hai scelto di procedere senza backup. Se dimentichi il tuo codice di blocco dell'app, non potrai più accedere ai tuoi dati.",
   "duplicateCodes": "Codici duplicati",
   "noDuplicates": "✨ Nessun doppione",
+  "youveNoDuplicateCodesThatCanBeCleared": "Non ci sono codici duplicati che possono essere cancellati",
   "deduplicateCodes": "Codici deduplicati",
   "deselectAll": "Deselezionare tutti",
   "selectAll": "Seleziona tutti",

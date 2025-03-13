@@ -1,4 +1,3 @@
-import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DoneIcon from "@mui/icons-material/Done";
 import { IconButton, Tooltip, type SvgIconProps } from "@mui/material";
@@ -28,12 +27,7 @@ export const CopyButton: React.FC<CopyButtonProps> = ({ text, size }) => {
     const Icon = copied ? DoneIcon : ContentCopyIcon;
 
     return (
-        <Tooltip
-            arrow
-            open={copied}
-            title={t("copied")}
-            slotProps={{ popper: { sx: { zIndex: aboveFileViewerContentZ } } }}
-        >
+        <Tooltip arrow open={copied} title={t("copied")}>
             <IconButton onClick={handleClick} color="secondary">
                 <Icon fontSize={size} />
             </IconButton>

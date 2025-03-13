@@ -107,7 +107,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                 return locationInDMS != null
                     ? ConstrainedBox(
                         constraints: BoxConstraints(
-                          minWidth: 80 * MediaQuery.textScaleFactorOf(context),
+                          minWidth: MediaQuery.textScalerOf(context).scale(80),
                         ),
                         child: Column(
                           children: [

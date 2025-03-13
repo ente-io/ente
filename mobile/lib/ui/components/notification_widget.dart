@@ -43,7 +43,7 @@ class NotificationWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     EnteTextTheme textTheme = getEnteTextTheme(context);
-    TextStyle _mainTextStyle = mainTextStyle ?? darkTextTheme.bodyBold;
+    TextStyle mainTextStyle = this.mainTextStyle ?? darkTextTheme.bodyBold;
     TextStyle subTextStyle = darkTextTheme.miniMuted;
     LinearGradient? backgroundGradient;
     Color? backgroundColor;
@@ -56,7 +56,7 @@ class NotificationWidget extends StatelessWidget {
       case NotificationType.banner:
         textTheme = getEnteTextTheme(context);
         backgroundColor = colorScheme.backgroundElevated2;
-        _mainTextStyle = textTheme.bodyBold;
+        mainTextStyle = textTheme.bodyBold;
         subTextStyle = textTheme.miniMuted;
         strokeColorScheme = colorScheme;
         boxShadow = [
@@ -86,7 +86,7 @@ class NotificationWidget extends StatelessWidget {
         break;
       case NotificationType.notice:
         backgroundColor = colorScheme.backgroundElevated2;
-        _mainTextStyle = textTheme.bodyBold;
+        mainTextStyle = textTheme.bodyBold;
         subTextStyle = textTheme.miniMuted;
         strokeColorScheme = colorScheme;
         boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
@@ -147,7 +147,7 @@ class NotificationWidget extends StatelessWidget {
                     children: [
                       Text(
                         text,
-                        style: _mainTextStyle,
+                        style: mainTextStyle,
                         textAlign: TextAlign.left,
                       ),
                       subText != null

@@ -21,7 +21,9 @@ import "package:photos/models/ignored_file.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/ignored_files_service.dart";
-import 'package:photos/services/local/local_sync_util.dart';
+import "package:photos/services/sync/import/diff.dart";
+import "package:photos/services/sync/import/local_assets.dart";
+import "package:photos/services/sync/import/model.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
@@ -172,7 +174,7 @@ class LocalSyncService {
     final Map<String, Set<String>> pathToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
 
-    final localDiffResult = await getDiffWithLocal(
+    final localDiffResult = await getDiffFromExistingImport(
       localAssets,
       existingLocalFileIDs,
       pathToLocalIDs,
@@ -207,7 +209,7 @@ class LocalSyncService {
     if (hasAnyMappingChanged || hasUnsyncedFiles) {
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
-          localDiffResult.uniqueLocalFiles,
+          localDiffResult.uniqueLocalFiles ?? [],
           source: "syncAllChange",
         ),
       );

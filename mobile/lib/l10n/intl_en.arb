@@ -1622,7 +1622,7 @@
   },
   "reassignMe": "Reassign \"Me\"",
   "me": "Me",
-  "linkEmailToContactBannerCaption" : "for faster sharing",
+  "linkEmailToContactBannerCaption": "for faster sharing",
   "@linkEmailToContactBannerCaption": {
     "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
@@ -1631,7 +1631,7 @@
   "@linkPersonToEmail": {
     "placeholders": {
       "email": {
-        "type": "String"  
+        "type": "String"
       }
     }
   },
@@ -1674,6 +1674,28 @@
   "failed": "Failed",
   "playStream": "Play stream",
   "playOriginal": "Play original",
-  "joinAlbumConfirmationDialogBody" : "Joining an album will make your email visible to its participants.",
-  "pleaseWaitThisWillTakeAWhile": "Please wait, this will take a while."
+  "joinAlbumConfirmationDialogBody": "Joining an album will make your email visible to its participants.",
+  "pleaseWaitThisWillTakeAWhile": "Please wait, this will take a while.",
+  "editTime": "Edit time",
+  "selectTime": "Select time",
+  "selectDate": "Select date",
+  "previous": "Previous",
+  "selectOneDateAndTimeForAll": "Select one date and time for all",
+  "selectStartOfRange": "Select start of range",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
+  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
+  "newRange": "New range",
+  "selectOneDateAndTime": "Select one date and time",
+  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
+  "shiftDatesAndTime": "Shift dates and time",
+  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
+  "photocountPhotos": "{count, plural, =0 {No photos} =1 {1 photo} other {{count} photos}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  }
 }

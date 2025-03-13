@@ -1,5 +1,7 @@
 import "dart:convert";
 
+import "package:photos/models/base_location.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
@@ -20,18 +22,29 @@ class MemoriesCache {
   final List<ToShowMemory> toShowMemories;
   final List<PeopleShownLog> peopleShownLogs;
   final List<TripsShownLog> tripsShownLogs;
+  final List<BaseLocation> baseLocations;
 
   MemoriesCache({
     required this.toShowMemories,
     required this.peopleShownLogs,
     required this.tripsShownLogs,
+    required this.baseLocations,
   });
 
-  factory MemoriesCache.fromJson(Map<String, dynamic> json) {
+  factory MemoriesCache.fromJson(
+    Map<String, dynamic> json,
+    Map<int, EnteFile> filesMap,
+  ) {
     return MemoriesCache(
       toShowMemories: ToShowMemory.decodeJsonToList(json['toShowMemories']),
       peopleShownLogs: PeopleShownLog.decodeJsonToList(json['peopleShownLogs']),
       tripsShownLogs: TripsShownLog.decodeJsonToList(json['tripsShownLogs']),
+      baseLocations: json['baseLocations'] != null
+          ? BaseLocation.decodeJsonToList(
+              json['baseLocations'],
+              filesMap,
+            )
+          : [],
     );
   }
 
@@ -40,6 +53,7 @@ class MemoriesCache {
       'toShowMemories': ToShowMemory.encodeListToJson(toShowMemories),
       'peopleShownLogs': PeopleShownLog.encodeListToJson(peopleShownLogs),
       'tripsShownLogs': TripsShownLog.encodeListToJson(tripsShownLogs),
+      'baseLocations': BaseLocation.encodeListToJson(baseLocations),
     };
   }
 
@@ -47,8 +61,11 @@ class MemoriesCache {
     return jsonEncode(cache.toJson());
   }
 
-  static MemoriesCache decodeFromJsonString(String jsonString) {
-    return MemoriesCache.fromJson(jsonDecode(jsonString));
+  static MemoriesCache decodeFromJsonString(
+    String jsonString,
+    Map<int, EnteFile> filesMap,
+  ) {
+    return MemoriesCache.fromJson(jsonDecode(jsonString), filesMap);
   }
 }
 

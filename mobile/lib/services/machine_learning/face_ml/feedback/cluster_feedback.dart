@@ -616,8 +616,7 @@ class ClusterFeedbackService<T> {
           await mlDataDB.getFaceEmbeddingsForCluster(clusterID);
       personEmbeddingsProto.addAll(embeddings);
     }
-    final List<Uint8List> sampledEmbeddingsProto =
-        _randomSampleWithoutReplacement(
+    final sampledEmbeddingsProto = _randomSampleWithoutReplacement(
       personEmbeddingsProto,
       sampleSize,
     );
@@ -848,8 +847,8 @@ class ClusterFeedbackService<T> {
     );
   }
 
-  List<T> _randomSampleWithoutReplacement<T>(
-    Iterable<T> embeddings,
+  List<S> _randomSampleWithoutReplacement<S>(
+    Iterable<S> embeddings,
     int sampleSize,
   ) {
     final random = Random();
@@ -860,13 +859,13 @@ class ClusterFeedbackService<T> {
 
     // If sampleSize is more than half the list size, shuffle and take first sampleSize elements
     if (sampleSize > embeddings.length / 2) {
-      final List<T> shuffled = List<T>.from(embeddings)..shuffle(random);
+      final List<S> shuffled = List<S>.from(embeddings)..shuffle(random);
       return shuffled.take(sampleSize).toList(growable: false);
     }
 
     // Otherwise, use the set-based method for efficiency
     final selectedIndices = <int>{};
-    final sampledEmbeddings = <T>[];
+    final sampledEmbeddings = <S>[];
     while (sampledEmbeddings.length < sampleSize) {
       final int index = random.nextInt(embeddings.length);
       if (!selectedIndices.contains(index)) {

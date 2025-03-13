@@ -88,7 +88,7 @@ func parsePricingFile(fileName string) ente.BillingPlansPerCountry {
 	}
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		logrus.Errorf("Error reading file %s: %v\n", filePath, err)
+		logrus.Errorf("Skipping payment configuration, pricing data unavailable in config: %v\n", err)
 		return nil
 	}
 

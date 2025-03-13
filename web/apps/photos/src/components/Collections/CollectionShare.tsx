@@ -1253,13 +1253,9 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     return (
         <>
             <Stack>
-                <Typography
-                    variant="small"
-                    sx={{ color: "text.muted", padding: 1 }}
-                >
-                    <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
+                <RowButtonGroupTitle icon={<PublicIcon />}>
                     {t("public_link_enabled")}
-                </Typography>
+                </RowButtonGroupTitle>
                 <RowButtonGroup>
                     {isLinkExpired(publicShareProp.validTill) ? (
                         <RowButton

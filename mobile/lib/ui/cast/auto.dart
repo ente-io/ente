@@ -12,10 +12,10 @@ class AutoCastDialog extends StatefulWidget {
   // async method that takes string as input
   // and returns void
   final void Function(String) onConnect;
-  AutoCastDialog(
+  const AutoCastDialog(
     this.onConnect, {
     super.key,
-  }) {}
+  });
 
   @override
   State<AutoCastDialog> createState() => _AutoCastDialogState();

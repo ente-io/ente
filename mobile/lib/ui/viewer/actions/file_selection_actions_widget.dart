@@ -39,6 +39,7 @@ import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/sharing/show_images_prevew.dart";
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
+import "package:photos/ui/viewer/date/edit_date_sheet.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
 import 'package:photos/utils/delete_file_util.dart';
@@ -386,6 +387,27 @@ class _FileSelectionActionsWidgetState
           icon: Icons.delete_forever_outlined,
           labelText: S.of(context).permanentlyDelete,
           onTap: _permanentlyDelete,
+        ),
+      );
+    }
+
+    if (widget.type.showBulkEditTime()) {
+      items.add(
+        SelectionActionButton(
+          shouldShow: widget.selectedFiles.files.every(
+            (element) => (element.ownerID == currentUserID),
+          ),
+          labelText: S.of(context).editTime,
+          icon: Icons.edit_calendar_outlined,
+          onTap: () async {
+            final newDate = await showEditDateSheet(
+              context,
+              widget.selectedFiles.files,
+            );
+            if (newDate != null) {
+              widget.selectedFiles.clearAll();
+            }
+          },
         ),
       );
     }

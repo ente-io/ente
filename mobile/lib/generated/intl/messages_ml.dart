@@ -20,11 +20,15 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ml';
 
+  static String m1(count) => "\$photoCount photos";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("വീണ്ടും സ്വാഗതം!"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("ഉടമ"),
+        "allWillShiftRangeBasedOnFirst": MessageLookupByLibrary.simpleMessage(
+            "This is the first in the group. Other selected photos will automatically shift based on this new date"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "അക്കൗണ്ട് ഉപേക്ഷിക്കുവാൻ പ്രധാന കാരണമെന്താണ്?"),
         "available": MessageLookupByLibrary.simpleMessage("ലഭ്യമാണ്"),
@@ -55,6 +59,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteReason4":
             MessageLookupByLibrary.simpleMessage("എന്റെ കാരണം ഉൾകൊണ്ടിട്ടില്ല"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("പിന്നീട് ചെയ്യുക"),
+        "editTime": MessageLookupByLibrary.simpleMessage("Edit time"),
         "email": MessageLookupByLibrary.simpleMessage("ഇമെയിൽ"),
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("ഇമെയിൽ ദൃഢീകരണം"),
@@ -83,7 +88,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("മേട്രിക്സ്"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("ഇടത്തരം"),
         "monthly": MessageLookupByLibrary.simpleMessage("പ്രതിമാസം"),
+        "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
+            "Move selected photos to one date"),
         "name": MessageLookupByLibrary.simpleMessage("പേര്"),
+        "newRange": MessageLookupByLibrary.simpleMessage("New range"),
         "no": MessageLookupByLibrary.simpleMessage("വേണ്ട"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("ഒന്നുമില്ല"),
         "nothingToSeeHere":
@@ -91,8 +99,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("ശരി"),
         "oops": MessageLookupByLibrary.simpleMessage("അയ്യോ"),
         "password": MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി"),
+        "photocountPhotos": m1,
+        "photosKeepRelativeTimeDifference":
+            MessageLookupByLibrary.simpleMessage(
+                "Photos keep relative time difference"),
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("ദയവായി വീണ്ടും ശ്രമിക്കുക"),
+        "previous": MessageLookupByLibrary.simpleMessage("Previous"),
         "privacy": MessageLookupByLibrary.simpleMessage("സ്വകാര്യത"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("സ്വകാര്യതാനയം"),
@@ -104,8 +117,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "reddit": MessageLookupByLibrary.simpleMessage("റെഡ്ഡിറ്റ്"),
         "retry": MessageLookupByLibrary.simpleMessage("പുനശ്രമിക്കുക"),
         "security": MessageLookupByLibrary.simpleMessage("സുരക്ഷ"),
+        "selectDate": MessageLookupByLibrary.simpleMessage("Select date"),
+        "selectOneDateAndTime":
+            MessageLookupByLibrary.simpleMessage("Select one date and time"),
+        "selectOneDateAndTimeForAll": MessageLookupByLibrary.simpleMessage(
+            "Select one date and time for all"),
         "selectReason":
             MessageLookupByLibrary.simpleMessage("കാരണം തിരഞ്ഞെടുക്കൂ"),
+        "selectStartOfRange":
+            MessageLookupByLibrary.simpleMessage("Select start of range"),
+        "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
         "send": MessageLookupByLibrary.simpleMessage("അയക്കുക"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ഇമെയിൽ അയക്കുക"),
         "setupComplete":
@@ -114,6 +135,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedByMe": MessageLookupByLibrary.simpleMessage("ഞാനാൽ പങ്കിട്ടവ"),
         "sharedWithMe":
             MessageLookupByLibrary.simpleMessage("എന്നോട് പങ്കിട്ടവ"),
+        "shiftDatesAndTime":
+            MessageLookupByLibrary.simpleMessage("Shift dates and time"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "എന്തോ കുഴപ്പം സംഭവിച്ചു, ദയവായി വീണ്ടും ശ്രമിക്കുക"),
@@ -129,6 +152,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("നിബന്ധനകൾ"),
         "thankYou": MessageLookupByLibrary.simpleMessage("നന്ദി"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("ഈ ഉപകരണം"),
+        "thisWillMakeTheDateAndTimeOfAllSelected":
+            MessageLookupByLibrary.simpleMessage(
+                "This will make the date and time of all selected photos the same."),
         "verify": MessageLookupByLibrary.simpleMessage("ഉറപ്പിക്കുക"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("ഇമെയിൽ ദൃഢീകരിക്കുക"),

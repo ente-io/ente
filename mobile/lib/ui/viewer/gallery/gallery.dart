@@ -134,37 +134,14 @@ class GalleryState extends State<Gallery> {
       _reloadEventSubscription = widget.reloadEvent!.listen((event) async {
         bool shouldReloadFromDB = true;
         if (event.source == 'uploadCompleted') {
-          final Map<int, EnteFile> genIDToUploadedFiles = {};
-          for (int i = 0; i < event.updatedFiles.length; i++) {
-            if (event.updatedFiles[i].generatedID == null) {
-              shouldReloadFromDB = true;
-              break;
-            }
-            genIDToUploadedFiles[event.updatedFiles[i].generatedID!] =
-                event.updatedFiles[i];
-          }
-          for (int i = 0; i < _allGalleryFiles.length; i++) {
-            final file = _allGalleryFiles[i];
-            if (file.generatedID == null) {
-              continue;
-            }
-            final updateFile = genIDToUploadedFiles[file.generatedID!];
-            if (updateFile != null &&
-                updateFile.localID == file.localID &&
-                areFromSameDay(
-                  updateFile.creationTime ?? 0,
-                  file.creationTime ?? 0,
-                )) {
-              _allGalleryFiles[i] = updateFile;
-              genIDToUploadedFiles.remove(file.generatedID!);
-            }
-          }
-          shouldReloadFromDB = genIDToUploadedFiles.isNotEmpty;
+          shouldReloadFromDB = _shouldReloadOnUploadCompleted(event);
+        } else if (event.source == 'fileMissingLocal') {
+          shouldReloadFromDB = _shouldReloadOnFileMissingLocal(event);
         }
         if (!shouldReloadFromDB) {
           final bool hasCalledSetState = _onFilesLoaded(_allGalleryFiles);
           _logger.info(
-            'Skip softRefresh from DB, processed updated in memory with setStateReload $hasCalledSetState',
+            'Skip softRefresh from DB on ${event.reason}, processed updated in memory with setStateReload $hasCalledSetState',
           );
           return;
         }
@@ -229,6 +206,90 @@ class GalleryState extends State<Gallery> {
     if (!hasReloaded && mounted) {
       setState(() {});
     }
+  }
+
+  bool _shouldReloadOnUploadCompleted(FilesUpdatedEvent event) {
+    bool shouldReloadFromDB = true;
+    if (event.source == 'uploadCompleted') {
+      final Map<int, EnteFile> genIDToUploadedFiles = {};
+      for (int i = 0; i < event.updatedFiles.length; i++) {
+        // matching happens on generatedID and localID
+        if (event.updatedFiles[i].generatedID == null) {
+          return true;
+        }
+        genIDToUploadedFiles[event.updatedFiles[i].generatedID!] =
+            event.updatedFiles[i];
+      }
+      for (int i = 0; i < _allGalleryFiles.length; i++) {
+        final file = _allGalleryFiles[i];
+        if (file.generatedID == null) {
+          continue;
+        }
+        final updateFile = genIDToUploadedFiles[file.generatedID!];
+        if (updateFile != null &&
+            updateFile.localID == file.localID &&
+            areFromSameDay(
+              updateFile.creationTime ?? 0,
+              file.creationTime ?? 0,
+            )) {
+          _allGalleryFiles[i] = updateFile;
+          genIDToUploadedFiles.remove(file.generatedID!);
+        }
+      }
+      shouldReloadFromDB = genIDToUploadedFiles.isNotEmpty;
+    }
+    return shouldReloadFromDB;
+  }
+
+  // Handle event when an local file was already uploaded and we have now
+  // added localID link link to the remote file
+  bool _shouldReloadOnFileMissingLocal(FilesUpdatedEvent event) {
+    bool shouldReloadFromDB = true;
+    if (event.source != 'fileMissingLocal' ||
+        event.type != EventType.deletedFromEverywhere) {
+      _logger.warning(
+        "Invalid event source or type for fileMissingLocal: ${event.source} ${event.type}",
+      );
+      return true;
+    }
+    final Map<int, EnteFile> genIDToUploadedFiles = {};
+    for (int i = 0; i < event.updatedFiles.length; i++) {
+      // the file should have generatedID, localID and should not be uploaded for
+      // following logic to work
+      if (event.updatedFiles[i].generatedID == null ||
+          event.updatedFiles[i].localID == null ||
+          event.updatedFiles[i].isUploaded) {
+        _logger.warning(
+          "Invalid file in updatedFiles: ${event.updatedFiles[i].localID} ${event.updatedFiles[i].generatedID} ${event.updatedFiles[i].isUploaded}",
+        );
+        return shouldReloadFromDB;
+      }
+      genIDToUploadedFiles[event.updatedFiles[i].generatedID!] =
+          event.updatedFiles[i];
+    }
+    final List<EnteFile> newAllGalleryFiles = [];
+    for (int i = 0; i < _allGalleryFiles.length; i++) {
+      final file = _allGalleryFiles[i];
+      if (file.generatedID == null) {
+        newAllGalleryFiles.add(file);
+        continue;
+      }
+      final updateFile = genIDToUploadedFiles[file.generatedID!];
+      if (updateFile != null &&
+          areFromSameDay(
+            updateFile.creationTime ?? 0,
+            file.creationTime ?? 0,
+          )) {
+        genIDToUploadedFiles.remove(file.generatedID!);
+      } else {
+        newAllGalleryFiles.add(file);
+      }
+    }
+    shouldReloadFromDB = genIDToUploadedFiles.isNotEmpty;
+    if (!shouldReloadFromDB) {
+      _allGalleryFiles = newAllGalleryFiles;
+    }
+    return shouldReloadFromDB;
   }
 
   // group files into multiple groups and returns `true` if it resulted in a

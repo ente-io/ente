@@ -147,11 +147,13 @@ class SemanticSearchService {
     }
     final textEmbedding = await _getTextEmbedding(query);
 
-    final queryResults = await _getSimilarities(
-      textEmbedding,
-      minimumSimilarity: similarityThreshold,
+    final similarityResults = await _getSimilarities(
+      {query: textEmbedding},
+      minimumSimilarityMap: {
+        query: similarityThreshold ?? kMinimumSimilarityThreshold,
+      },
     );
-
+    final queryResults = similarityResults[query]!;
     // print query for top ten scores
     for (int i = 0; i < min(10, queryResults.length); i++) {
       final result = queryResults[i];
@@ -196,18 +198,32 @@ class SemanticSearchService {
     return results;
   }
 
-  Future<List<int>> getMatchingFileIDs(
-    String query,
-    double minimumSimilarity,
+  Future<Map<String, List<int>>> getMatchingFileIDs(
+    Map<String, double> queryToScore,
   ) async {
-    final textEmbedding = await _getTextEmbedding(query);
+    final textEmbeddings = <String, List<double>>{};
+    final minimumSimilarityMap = <String, double>{};
+    for (final entry in queryToScore.entries) {
+      final query = entry.key;
+      final score = entry.value;
+      final textEmbedding = await _getTextEmbedding(query);
+      textEmbeddings[query] = textEmbedding;
+      minimumSimilarityMap[query] = score;
+    }
+
     final queryResults = await _getSimilarities(
-      textEmbedding,
-      minimumSimilarity: minimumSimilarity,
+      textEmbeddings,
+      minimumSimilarityMap: minimumSimilarityMap,
     );
-    final result = <int>[];
-    for (final r in queryResults) {
-      result.add(r.id);
+    final result = <String, List<int>>{};
+    for (final entry in queryResults.entries) {
+      final query = entry.key;
+      final queryResult = entry.value;
+      final fileIDs = <int>[];
+      for (final result in queryResult) {
+        fileIDs.add(result.id);
+      }
+      result[query] = fileIDs;
     }
     return result;
   }
@@ -249,24 +265,25 @@ class SemanticSearchService {
     return textEmbedding;
   }
 
-  Future<List<QueryResult>> _getSimilarities(
-    List<double> textEmbedding, {
-    double? minimumSimilarity,
+  Future<Map<String, List<QueryResult>>> _getSimilarities(
+    Map<String, List<double>> textQueryToEmbeddingMap, {
+    required Map<String, double> minimumSimilarityMap,
   }) async {
     final startTime = DateTime.now();
     final imageEmbeddings = await _getClipVectors();
-    final List<QueryResult> queryResults = await _computer.compute(
+    final Map<String, List<QueryResult>> queryResults = await _computer
+        .compute<Map<String, dynamic>, Map<String, List<QueryResult>>>(
       computeBulkSimilarities,
       param: {
         "imageEmbeddings": imageEmbeddings,
-        "textEmbedding": textEmbedding,
-        "minimumSimilarity": minimumSimilarity,
+        "textQueryToEmbeddingMap": textQueryToEmbeddingMap,
+        "minimumSimilarityMap": minimumSimilarityMap,
       },
       taskName: "computeBulkSimilarities",
     );
     final endTime = DateTime.now();
     _logger.info(
-      "computingSimilarities took: " +
+      "computingSimilarities took for ${textQueryToEmbeddingMap.length} queries " +
           (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
               .toString() +
           "ms",
@@ -293,39 +310,44 @@ class SemanticSearchService {
   }
 }
 
-List<QueryResult> computeBulkSimilarities(Map args) {
-  final queryResults = <QueryResult>[];
+Map<String, List<QueryResult>> computeBulkSimilarities(Map args) {
   final imageEmbeddings = args["imageEmbeddings"] as List<EmbeddingVector>;
-  final textEmbedding = args["textEmbedding"] as List<double>;
-  final minimumSimilarity = args["minimumSimilarity"] ??
-      SemanticSearchService.kMinimumSimilarityThreshold;
-
-  final Vector textVector = Vector.fromList(textEmbedding);
-  if (!kDebugMode) {
-    for (final imageEmbedding in imageEmbeddings) {
-      final similarity = imageEmbedding.vector.dot(textVector);
-      if (similarity >= minimumSimilarity) {
-        queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
+  final textEmbedding =
+      args["textQueryToEmbeddingMap"] as Map<String, List<double>>;
+  final minimumSimilarityMap =
+      args["minimumSimilarityMap"] as Map<String, double>;
+  final result = <String, List<QueryResult>>{};
+  for (final MapEntry<String, List<double>> entry in textEmbedding.entries) {
+    final query = entry.key;
+    final textVector = Vector.fromList(entry.value);
+    final minimumSimilarity = minimumSimilarityMap[query]!;
+    final queryResults = <QueryResult>[];
+    if (!kDebugMode) {
+      for (final imageEmbedding in imageEmbeddings) {
+        final similarity = imageEmbedding.vector.dot(textVector);
+        if (similarity >= minimumSimilarity) {
+          queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
+        }
+      }
+    } else {
+      double bestScore = 0.0;
+      for (final imageEmbedding in imageEmbeddings) {
+        final similarity = imageEmbedding.vector.dot(textVector);
+        if (similarity >= minimumSimilarity) {
+          queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
+        }
+        if (similarity > bestScore) {
+          bestScore = similarity;
+        }
+      }
+      if (kDebugMode && queryResults.isEmpty) {
+        dev.log("No results found for query with best score: $bestScore");
       }
     }
-  } else {
-    double bestScore = 0.0;
-    for (final imageEmbedding in imageEmbeddings) {
-      final similarity = imageEmbedding.vector.dot(textVector);
-      if (similarity >= minimumSimilarity) {
-        queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
-      }
-      if (similarity > bestScore) {
-        bestScore = similarity;
-      }
-    }
-    if (kDebugMode && queryResults.isEmpty) {
-      dev.log("No results found for query with best score: $bestScore");
-    }
+    queryResults.sort((first, second) => second.score.compareTo(first.score));
+    result[query] = queryResults;
   }
-
-  queryResults.sort((first, second) => second.score.compareTo(first.score));
-  return queryResults;
+  return result;
 }
 
 class QueryResult {

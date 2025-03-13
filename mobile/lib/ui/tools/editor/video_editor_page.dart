@@ -99,7 +99,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, _) {
         if (!didPop) {
           if (_isExporting.value) {
             return;

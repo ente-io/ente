@@ -1673,5 +1673,19 @@
   "failed": "失敗",
   "playStream": "再生",
   "playOriginal": "元動画を再生",
-  "joinAlbumConfirmationDialogBody": "アルバムに参加すると、参加者にメールアドレスが公開されます。"
+  "joinAlbumConfirmationDialogBody": "アルバムに参加すると、参加者にメールアドレスが公開されます。",
+  "editTime": "Edit time",
+  "selectTime": "Select time",
+  "selectDate": "Select date",
+  "previous": "Previous",
+  "selectOneDateAndTimeForAll": "Select one date and time for all",
+  "selectStartOfRange": "Select start of range",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
+  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
+  "newRange": "New range",
+  "selectOneDateAndTime": "Select one date and time",
+  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
+  "shiftDatesAndTime": "Shift dates and time",
+  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
+  "photocountPhotos": "$photoCount photos"
 }

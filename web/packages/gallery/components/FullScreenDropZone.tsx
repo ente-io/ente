@@ -135,7 +135,9 @@ const DropZoneOverlay = styled(Stack)(
     border-color: ${theme.vars.palette.accent.light};
     background-color: ${theme.vars.palette.backdrop.base};
     backdrop-filter: blur(10px);
-    z-index: 2000; /* aboveFileViewerContentZ + delta */
+    /* Above the highest possible MUI z-index, that of the MUI tooltip
+       See: https://mui.com/material-ui/customization/default-theme/ */
+    z-index: calc(var(--mui-zIndex-tooltip) + 1);
 `,
 );
 

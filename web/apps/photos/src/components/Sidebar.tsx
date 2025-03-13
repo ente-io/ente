@@ -1,7 +1,7 @@
 import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
-import { EnteLogo } from "@/base/components/EnteLogo";
+import { EnteLogo, EnteLogoBox } from "@/base/components/EnteLogo";
 import { LinkButton } from "@/base/components/LinkButton";
 import {
     RowButton,
@@ -188,8 +188,10 @@ interface SectionProps {
 }
 
 const HeaderSection: React.FC<SectionProps> = ({ onCloseSidebar }) => (
-    <SpacedRow sx={{ my: "4px 4px", pl: "12px" }}>
-        <EnteLogo />
+    <SpacedRow sx={{ mt: "6px", pl: "12px" }}>
+        <EnteLogoBox>
+            <EnteLogo height={16} />
+        </EnteLogoBox>
         <IconButton
             aria-label={t("close")}
             onClick={onCloseSidebar}
@@ -247,7 +249,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
 
     return (
         <>
-            <Box sx={{ px: 0.5, mt: 2, pb: 1.5, mb: 1 }}>
+            <Box sx={{ px: 0.5, mt: 1.5, pb: 1.5, mb: 1 }}>
                 <Typography sx={{ px: 1, pb: 1, color: "text.muted" }}>
                     {userDetails ? (
                         userDetails.email
