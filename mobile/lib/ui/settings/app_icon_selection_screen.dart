@@ -2,6 +2,7 @@ import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:launcher_icon_switcher/launcher_icon_switcher.dart";
 import "package:logging/logging.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -60,8 +61,8 @@ class _AppIconSelectionScreenState extends State<AppIconSelectionScreen> {
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
-            flexibleSpaceTitle: const TitleBarTitleWidget(
-              title: "App Icon",
+            flexibleSpaceTitle: TitleBarTitleWidget(
+              title: context.l10n.appIcon,
             ),
             actionIcons: [
               IconButtonWidget(

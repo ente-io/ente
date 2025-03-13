@@ -11383,6 +11383,16 @@ class S {
       args: [count],
     );
   }
+
+  /// `App icon`
+  String get appIcon {
+    return Intl.message(
+      'App icon',
+      name: 'appIcon',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
