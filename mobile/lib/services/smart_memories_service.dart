@@ -13,7 +13,6 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
-import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/memories/filler_memory.dart";
@@ -90,14 +89,27 @@ class SmartMemoriesService {
       _logger.finest('calcMemories called with time: $now $t');
       await init();
       final List<SmartMemory> memories = [];
-      final allFiles = Set<EnteFile>.from(
+
+      final allFilesFromSearchService = Set<EnteFile>.from(
         await SearchService.instance.getAllFilesForSearch(),
       );
+      final Set<EnteFile> allFiles = {};
+      for (final file in allFilesFromSearchService) {
+        if (file.uploadedFileID != null && file.creationTime != null) {
+          allFiles.add(file);
+        }
+      }
+      final allFileIdsToFile = <int, EnteFile>{};
+      for (final file in allFiles) {
+        allFileIdsToFile[file.uploadedFileID!] = file;
+      }
+
       _seenTimes = await _memoriesDB.getSeenTimes();
       _logger.finest("All files length: ${allFiles.length} $t");
 
       final peopleMemories = await _getPeopleResults(
         allFiles,
+        allFileIdsToFile,
         now,
         oldCache.peopleShownLogs,
         surfaceAll: debugSurfaceAll,
@@ -157,6 +169,7 @@ class SmartMemoriesService {
 
   Future<List<PeopleMemory>> _getPeopleResults(
     Iterable<EnteFile> allFiles,
+    Map<int, EnteFile> allFileIdsToFile,
     DateTime currentTime,
     List<PeopleShownLog> shownPeople, {
     bool surfaceAll = false,
@@ -164,12 +177,6 @@ class SmartMemoriesService {
     final w = (kDebugMode ? EnteWatch('getPeopleResults') : null)?..start();
     final List<PeopleMemory> memoryResults = [];
     if (allFiles.isEmpty) return [];
-    final allFileIdsToFile = <int, EnteFile>{};
-    for (final file in allFiles) {
-      if (file.uploadedFileID != null) {
-        allFileIdsToFile[file.uploadedFileID!] = file;
-      }
-    }
     final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
     final windowEnd =
         currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
@@ -544,14 +551,8 @@ class SmartMemoriesService {
     final List<(List<EnteFile>, Location)> smallRadiusClusters = [];
     final List<(List<EnteFile>, Location)> wideRadiusClusters = [];
     // Go through all files and cluster (incremental clustering)
-    allFilesLoop:
     for (EnteFile file in allFiles) {
-      if (!file.hasLocation ||
-          file.uploadedFileID == null ||
-          !file.isOwner ||
-          file.creationTime == null) {
-        continue allFilesLoop;
-      }
+      if (!file.hasLocation) continue;
       // Small radius clustering for base locations
       bool addedToExistingSmallCluster = false;
       for (final cluster in smallRadiusClusters) {
@@ -1207,8 +1208,7 @@ class SmartMemoriesService {
 
     final Map<int, List<Memory>> yearsAgoToMemories = {};
     for (final file in allFiles) {
-      if (file.creationTime == null ||
-          file.creationTime! > cutOffTime.microsecondsSinceEpoch) {
+      if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) {
         continue;
       }
       final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
@@ -1291,13 +1291,10 @@ class SmartMemoriesService {
       final fileCount = memories.length;
       final int targetSize = prefferedSize ?? 10;
       if (fileCount <= targetSize) return memories;
-      final safeMemories = memories
-          .where((memory) => memory.file.uploadedFileID != null)
-          .toList();
 
       // Sort by time
       final sortedTimeMemories = <Memory>[];
-      for (final memory in safeMemories) {
+      for (final memory in memories) {
         if (memory.file.creationTime != null) {
           sortedTimeMemories.add(memory);
         }
@@ -1400,17 +1397,14 @@ class SmartMemoriesService {
     final fileCount = memories.length;
     int targetSize = prefferedSize ?? 10;
     if (fileCount <= targetSize) return memories;
-    final safeMemories =
-        memories.where((memory) => memory.file.uploadedFileID != null).toList();
-    final safeCount = safeMemories.length;
-    final fileIDs = safeMemories.map((e) => e.file.uploadedFileID!).toSet();
+    final fileIDs = memories.map((e) => e.file.uploadedFileID!).toSet();
     final fileIdToFace = await MLDataDB.instance.getFacesForFileIDs(fileIDs);
     final faceIDs =
         fileIdToFace.values.expand((x) => x.map((face) => face.faceID)).toSet();
     final faceIDsToPersonID =
         await MLDataDB.instance.getFaceIdToPersonIdForFaces(faceIDs);
 
-    final allYears = safeMemories.map((e) {
+    final allYears = memories.map((e) {
       final creationTime =
           DateTime.fromMicrosecondsSinceEpoch(e.file.creationTime!);
       return creationTime.year;
@@ -1428,7 +1422,7 @@ class SmartMemoriesService {
 
     // Get face scores for each file
     final fileToFaceCount = <int, int>{};
-    for (final mem in safeMemories) {
+    for (final mem in memories) {
       final fileID = mem.file.uploadedFileID!;
       fileToFaceCount[fileID] = 0;
       final faces = fileIdToFace[fileID];
@@ -1448,24 +1442,24 @@ class SmartMemoriesService {
     if (allYears.length <= 1) {
       // TODO: lau: eventually this sorting might have to be replaced with some scoring system
       // sort first on clip embeddings score (descending)
-      safeMemories.sort(
+      memories.sort(
         (a, b) => fileToScore[b.file.uploadedFileID!]!
             .compareTo(fileToScore[a.file.uploadedFileID!]!),
       );
       // then sort on faces (descending), heavily prioritizing named faces
-      safeMemories.sort(
+      memories.sort(
         (a, b) => fileToFaceCount[b.file.uploadedFileID!]!
             .compareTo(fileToFaceCount[a.file.uploadedFileID!]!),
       );
 
       // then filter out similar images as much as possible
-      filteredMemories.add(safeMemories.first);
+      filteredMemories.add(memories.first);
       int skipped = 0;
       filesLoop:
-      for (final mem in safeMemories.sublist(1)) {
+      for (final mem in memories.sublist(1)) {
         if (filteredMemories.length >= targetSize) break;
         final clip = fileIdToClip[mem.file.uploadedFileID!];
-        if (clip != null && (safeCount - skipped) > targetSize) {
+        if (clip != null && (fileCount - skipped) > targetSize) {
           for (final filteredMem in filteredMemories) {
             final fClip = fileIdToClip[filteredMem.file.uploadedFileID!];
             if (fClip == null) continue;
@@ -1482,16 +1476,16 @@ class SmartMemoriesService {
       // Multiple years, each represented and roughly equally distributed
       if (prefferedSize == null && (allYears.length * 2) > 10) {
         targetSize = allYears.length * 3;
-        if (safeCount < targetSize) return safeMemories;
+        if (fileCount < targetSize) return memories;
       }
 
       // Group files by year and sort each year's list by CLIP then face count
       final yearToFiles = <int, List<Memory>>{};
-      for (final safeMem in safeMemories) {
+      for (final mem in memories) {
         final creationTime =
-            DateTime.fromMicrosecondsSinceEpoch(safeMem.file.creationTime!);
+            DateTime.fromMicrosecondsSinceEpoch(mem.file.creationTime!);
         final year = creationTime.year;
-        yearToFiles.putIfAbsent(year, () => []).add(safeMem);
+        yearToFiles.putIfAbsent(year, () => []).add(mem);
       }
 
       for (final year in yearToFiles.keys) {
@@ -1514,13 +1508,13 @@ class SmartMemoriesService {
       int round = 0;
       int skipped = 0;
       whileLoop:
-      while (filteredMemories.length + skipped < safeCount) {
+      while (filteredMemories.length + skipped < fileCount) {
         yearLoop:
         for (final year in years) {
           final yearFiles = yearToFiles[year]!;
           if (yearFiles.isEmpty) continue;
           final newMem = yearFiles.removeAt(0);
-          if (round != 0 && (safeCount - skipped) > targetSize) {
+          if (round != 0 && (fileCount - skipped) > targetSize) {
             // check for filtering
             final clip = fileIdToClip[newMem.file.uploadedFileID!];
             if (clip != null) {
@@ -1537,13 +1531,13 @@ class SmartMemoriesService {
           }
           filteredMemories.add(newMem);
           if (filteredMemories.length >= targetSize ||
-              filteredMemories.length + skipped >= safeCount) {
+              filteredMemories.length + skipped >= fileCount) {
             break whileLoop;
           }
         }
         round++;
         // Extra safety to prevent infinite loops
-        if (round > safeCount) break;
+        if (round > fileCount) break;
       }
     }
 
