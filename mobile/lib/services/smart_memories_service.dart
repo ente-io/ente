@@ -135,6 +135,15 @@ class SmartMemoriesService {
     }
   }
 
+  Future<List<FillerMemory>> calcFillerResults() async {
+    final now = DateTime.now();
+    final allFiles = Set<EnteFile>.from(
+      await SearchService.instance.getAllFilesForSearch(),
+    );
+    final fillerMemories = await _getFillerResults(allFiles, now);
+    return fillerMemories;
+  }
+
   void _deductUsedMemories(
     Set<EnteFile> files,
     List<SmartMemory> memories,
