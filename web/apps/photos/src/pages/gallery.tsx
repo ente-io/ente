@@ -15,7 +15,10 @@ import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
 import { resetFileViewerDataSourceOnClose } from "@/gallery/components/viewer/data-source";
 import { type Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
-import type { ItemVisibility } from "@/media/file-metadata";
+import {
+    updateRemotePrivateMagicMetadata,
+    type ItemVisibility,
+} from "@/media/file-metadata";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -132,12 +135,7 @@ import {
     getSelectedCollection,
     handleCollectionOps,
 } from "utils/collection";
-import {
-    FILE_OPS_TYPE,
-    changeFilesVisibility,
-    getSelectedFiles,
-    handleFileOps,
-} from "utils/file";
+import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
 
 const defaultGalleryContext: GalleryContextType = {
     setActiveCollectionID: () => null,
@@ -817,7 +815,8 @@ const Page: React.FC = () => {
     };
 
     const handleFileViewerFileVisibilityUpdate = useCallback(
-        async (fileID: number, visibility: ItemVisibility) => {
+        async (file: EnteFile, visibility: ItemVisibility) => {
+            const fileID = file.id;
             dispatch({
                 type: "markPendingVisibilityUpdate",
                 fileID,
@@ -825,7 +824,10 @@ const Page: React.FC = () => {
             });
 
             try {
-                await changeFilesVisibility(files, visibility);
+                updateRemotePrivateMagicMetadata(file, { visibility });
+                // TODO(AR): Need to trigger a "lite" sync (or update that
+                // particular file in the reducer state in some other way).
+
                 // See: [Note: File viewer update and dispatch]
                 dispatch({
                     type: "markUnsyncedVisibilityUpdate",
