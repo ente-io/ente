@@ -144,10 +144,10 @@ export interface FileViewerToggleArchiveButtonProps {
      */
     unsyncedVisibilityUpdates?: Map<number, ItemVisibility>;
     /**
-     * Update the {@link visibility} of the file with the given {@link fileID}.
+     * Update the {@link visibility} of the given {@link file}.
      */
     onFileVisibilityUpdate?: (
-        fileID: number,
+        file: EnteFile,
         visibility: ItemVisibility,
     ) => Promise<void>;
 }
@@ -464,36 +464,57 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             // `onFileVisibilityUpdate` will asynchronously result in updates to
             // the `files` prop.
             //
-            // Currently that indeed is what happens as the last call in the
-            // `onDelete` and `onFileVisibilityUpdate` implementations are calls
-            // to a (useReducer) dispatcher, but we need to be careful about
-            // preserving this assumption if changing their implementation in
-            // the future.
+            // Currently that is indeed what happens because the last call in
+            // the `onDelete` and `onFileVisibilityUpdate` implementations are
+            // calls to a (useReducer) dispatcher, but we need to be careful
+            // about preserving this assumption when changing their
+            // implementation in the future.
             awaitNextFilesOrFavoritesUpdate((files: EnteFile[]) => {
                 handleNeedsRemoteSync();
+                // We might've been provided an expectedFileID. If so, only do
+                // the reload if it is no longer present in the files array.
+                //
+                // There are 3 cases:
+                //
+                // 1. On file deletion: expectedFileID is not provided.
+                //
+                // 2. On file archive when we're in the all section:
+                //    expectedFileID is provided, and will not be present in the
+                //    updated files array after update. In such cases, we want
+                //    to behave like delete (move to the next slide).
+                //
+                // 3. On other types of file archive: expectedFileID is
+                //    provided, but it'll still be present in the updated files
+                //    array, and in such cases we don't want to reload the
+                //    current slide. Instead, we only modify the file attribute
+                //    of the currentAnnotatedFile (if appropriate).
                 if (files.length) {
-                    // We might've been provided an expectedFileID. If so, only
-                    // do the reload if it is no longer present in the files
-                    // array.
-                    //
-                    // There are 3 cases:
-                    //
-                    // - On file deletion: expectedFileID is not provided.
-                    //
-                    // - On file archive when we're in the all section:
-                    //   expectedFileID is provided, and will not be present in
-                    //   the updated files array after update. In such cases, we
-                    //   want to behave like delete (move to the next slide).
-                    //
-                    // - On other types of file archive: expectedFileID is
-                    //   provided, but it'll still be present in the updated
-                    //   files array, and in such cases we don't want to reload
-                    //   the current slide.
-                    if (
-                        expectedFileID &&
-                        files.find(({ id }) => id == expectedFileID)
-                    ) {
-                        // Do nothing.
+                    const updatedFile = expectedFileID
+                        ? files.find(({ id }) => id == expectedFileID)
+                        : undefined;
+                    if (updatedFile) {
+                        setActiveAnnotatedFile((activeAnnotatedFile) => {
+                            // Modify the file attribute of activeAnnotatedFile
+                            // if we're still showing a slide with a file that
+                            // has the same ID as the one we expected to modify.
+                            //
+                            // In the case of delete, this code will not run,
+                            // and in the case of toggling archive, none of the
+                            // other attributes of activeAnnotatedFile currently
+                            // depend on the archive status change, so this is
+                            // safe. But it is still on the kludgy side, and
+                            // might need care with future changes.
+                            //
+                            // (We don't do a full refresh since that would
+                            // cause the user to lose their pan / zoom etc)
+                            if (
+                                activeAnnotatedFile &&
+                                activeAnnotatedFile.file.id == expectedFileID
+                            ) {
+                                activeAnnotatedFile.file = updatedFile;
+                            }
+                            return activeAnnotatedFile;
+                        });
                     } else {
                         // Refreshing the current slide after the current file
                         // has gone will show the subsequent slide (since that
@@ -771,7 +792,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 toggleArchived = () => {
                     handleMoreMenuCloseIfNeeded();
                     void onFileVisibilityUpdate(
-                        file.id,
+                        file,
                         isArchived
                             ? ItemVisibility.visible
                             : ItemVisibility.archived,
