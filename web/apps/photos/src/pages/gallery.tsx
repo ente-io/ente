@@ -824,19 +824,24 @@ const Page: React.FC = () => {
             });
 
             try {
-                updateRemotePrivateMagicMetadata(file, { visibility });
-                // TODO(AR): Need to trigger a "lite" sync (or update that
-                // particular file in the reducer state in some other way).
+                const privateMagicMetadata =
+                    await updateRemotePrivateMagicMetadata(file, {
+                        visibility,
+                    });
+                // TODO: Trigger a "lite" sync? (or update that particular file
+                // in the reducer state in some other way).
 
+                // Keep this as the last operation on the happy path.
+                //
                 // See: [Note: File viewer update and dispatch]
                 dispatch({
-                    type: "markUnsyncedVisibilityUpdate",
+                    type: "unsyncedPrivateMagicMetadataUpdate",
                     fileID,
-                    visibility,
+                    privateMagicMetadata,
                 });
             } catch (e) {
                 // Clean pending requests on error (on success,
-                // "markUnsyncedVisibilityUpdate" will do it for us).
+                // "unsyncedPrivateMagicMetadataUpdate" will do it for us).
                 dispatch({
                     type: "markPendingVisibilityUpdate",
                     fileID,
