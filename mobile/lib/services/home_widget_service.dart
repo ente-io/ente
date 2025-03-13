@@ -1,10 +1,12 @@
-import "dart:convert";
 import "dart:io";
 import "dart:math";
 
 import "package:flutter/material.dart";
 import 'package:home_widget/home_widget.dart' as hw;
+import "package:image/image.dart" as img;
 import "package:logging/logging.dart";
+import "package:path_provider/path_provider.dart";
+import "package:path_provider_foundation/path_provider_foundation.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
@@ -129,30 +131,39 @@ class HomeWidgetService {
     final image = await decodeImageFromList(await fullImage.readAsBytes());
     final width = image.width.toDouble();
     final height = image.height.toDouble();
-    final size = min(min(width, height), 200.0);
+    final ogSize = Size(width, height);
+
+    final size = min(min(width, height), 1024.0);
     final aspectRatio = width / height;
-    late final int cacheWidth;
-    late final int cacheHeight;
+
+    late final double cacheWidth;
+    late final double cacheHeight;
     if (aspectRatio > 1) {
-      cacheWidth = 1024;
-      cacheHeight = (1024 / aspectRatio).round();
+      cacheWidth = size;
+      cacheHeight = (size / aspectRatio);
     } else if (aspectRatio < 1) {
-      cacheHeight = 1024;
-      cacheWidth = (1024 * aspectRatio).round();
+      cacheHeight = size;
+      cacheWidth = (size * aspectRatio);
     } else {
-      cacheWidth = 1024;
-      cacheHeight = 1024;
+      cacheWidth = size;
+      cacheHeight = size;
+    }
+
+    final cacheSize = Size(cacheWidth, cacheHeight);
+
+    final result = await captureFile(randomFile, cacheSize, ogSize, key);
+
+    if (result == null) {
+      _logger.warning("Can't capture file");
+      return null;
     }
 
     await hw.HomeWidget.saveWidgetData(
       key,
-      base64Encode(await fullImage.readAsBytes()),
+      result.path,
     );
 
-    return (
-      Size(width, height),
-      Size(cacheWidth.toDouble(), cacheHeight.toDouble())
-    );
+    return (ogSize, cacheSize);
   }
 
   Future<int> countHomeWidgets() async {
@@ -181,6 +192,39 @@ class HomeWidgetService {
       null,
     );
     _logger.info(">>> SlideshowWidget cleared");
+  }
+
+  Future<File?> captureFile(
+    EnteFile file,
+    Size size,
+    Size ogSize,
+    String key,
+  ) async {
+    final ogFile = await getFile(file);
+
+    if (ogFile == null) {
+      return null;
+    }
+
+    try {
+      final dir = await imagePath();
+      final String path = '$dir/$key.png';
+
+      final File file = File(path);
+      file.createSync(recursive: true);
+      final image = img.decodeImage(ogFile.readAsBytesSync());
+      final resizedImage = img.copyResize(
+        image!,
+        width: size.width.toInt(),
+        height: size.height.toInt(),
+      );
+      await file.writeAsBytes(img.encodePng(resizedImage));
+      return file;
+    } catch (_, __) {
+      _logger.severe("Failed to save the capture", _, __);
+    }
+
+    return null;
   }
 
   Future<void> onLaunchFromWidget(Uri? uri, BuildContext context) async {
@@ -264,13 +308,36 @@ class HomeWidgetService {
         .toList();
   }
 
+  Future<String> imagePath() async {
+    String? directory;
+    // coverage:ignore-start
+    if (Platform.isIOS) {
+      final PathProviderFoundation provider = PathProviderFoundation();
+
+      directory = await provider.getContainerPath(
+        appGroupIdentifier: iOSGroupID,
+      );
+    } else {
+      // coverage:ignore-end
+      directory = (await getApplicationSupportDirectory()).path;
+    }
+
+    if (directory == null) {
+      throw "Directory is null";
+    }
+
+    final String path = '$directory/home_widget';
+
+    return path;
+  }
+
   Future<void> lockAndLoadMemories() async {
     final files = await getFiles(false);
 
     int index = 0;
 
     for (final file in files) {
-      final value = await _renderFile(file, "memory_$index").catchError(
+      final value = await _renderFile(file, "slideshow_$index").catchError(
         (e, sT) {
           _logger.severe("Error rendering widget", e, sT);
           return null;
@@ -287,7 +354,7 @@ class HomeWidgetService {
     }
 
     _logger.info(">>> SlideshowWidget params doing");
-    await hw.HomeWidget.saveWidgetData<int>("totalMemories", index);
+    await hw.HomeWidget.saveWidgetData<int>("totalSet", index);
 
     await hw.HomeWidget.updateWidget(
       name: 'SlideshowWidgetProvider',

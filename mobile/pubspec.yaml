@@ -155,6 +155,7 @@ dependencies:
   password_strength: ^0.2.0
   path: #dart
   path_provider: ^2.1.1
+  path_provider_foundation: ^2.4.1
   pedantic: ^1.9.2
   permission_handler: ^11.0.1
   photo_manager: ^3.5.3
