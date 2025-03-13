@@ -13,36 +13,53 @@ class LocalDBMigration {
       durationMicroSec INTEGER NOT NULL,
       orientation INTEGER NOT NULL,
       isFavorite INTEGER NOT NULL,
-      title TEXT,
+      title TEXT NOT NULL,
       relative_path TEXT,
       createdAtMicroSec INTEGER NOT NULL,
       modifiedAtMicroSec INTEGER NOT NULL,
       mime_type TEXT,
       latitude REAL,
-      longitude REAL,
+      longitude REAL
     );
     ''',
     '''
     CREATE TABLE metadata (
-      id TEXT NOT NULL,
+      id TEXT PRIMARY_KEY,
       hash TEXT NOT NULL,
       creation_time INTEGER NOT NULL,
       modification_time INTEGER NOT NULL,
       latitude REAL,
       longitude REAL,
-      PRIMARY KEY (id, hash),
+      PRIMARY KEY (id),
       FOREIGN KEY (id) REFERENCES assets (id) ON DELETE CASCADE
     );
     ''',
     '''
+    CREATE TABLE old_hash (
+     id TEXT NOT NULL,
+     hash TEXT NOT NULL,
+     created_at INTEGER NOT NULL,
+     PRIMARY KEY (id, hash),
+     FOREIGN KEY (id) REFERENCES assets (id) ON DELETE CASCADE
+    ); 
+  ''',
+    '''
+    CREATE TRIGGER update_old_hash
+    AFTER UPDATE OF hash ON metadata
+    FOR EACH ROW
+        WHEN OLD.hash != NEW.hash AND NEW.hash IS NOT NULL
+          BEGIN
+            INSERT OR REPLACE INTO old_hash (id, hash, created_at) 
+            VALUES (OLD.id, OLD.hash, strftime('%s', 'now'));
+           END;
+    ''',
+    '''
     CREATE TABLE device_path (
-      path_id TEXT NOT NULL,
-      hash TEXT NOT NULL,
-      creation_time INTEGER NOT NULL,
-      modification_time INTEGER NOT NULL,
-      latitude REAL,
-      longitude REAL,
-      PRIMARY KEY (id, hash)
+      path_id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      album_type INTEGER NOT NULL,
+      ios_album_type INTEGER,
+      ios_album_subtype INTEGER
     );
     ''',
     '''

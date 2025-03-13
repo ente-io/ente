@@ -3,6 +3,7 @@ import "package:ente_cast/ente_cast.dart";
 import "package:ente_cast_normal/ente_cast_normal.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:package_info_plus/package_info_plus.dart";
+import "package:photos/db/local/db.dart";
 import "package:photos/db/remote/db.dart";
 import "package:photos/gateways/entity_gw.dart";
 import "package:photos/services/account/billing_service.dart";
@@ -151,8 +152,15 @@ PermissionService get permissionService {
   _permissionService ??= PermissionService(ServiceLocator.instance.prefs);
   return _permissionService!;
 }
+
 RemoteDB? _remoteDB;
 RemoteDB get remoteDB {
   _remoteDB ??= RemoteDB();
   return _remoteDB!;
+}
+
+LocalDB? _localDB;
+LocalDB get localDB {
+  _localDB ??= LocalDB();
+  return _localDB!;
 }
