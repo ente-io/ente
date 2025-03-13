@@ -152,7 +152,7 @@ class _AppIconTile extends StatelessWidget {
                 value: isSelected,
                 groupValue: true,
                 onChanged: (_) {
-                  // do nothing
+                  onSelect();
                 },
                 fillColor: WidgetStateProperty.resolveWith<Color>((states) {
                   if (isSelected) {
