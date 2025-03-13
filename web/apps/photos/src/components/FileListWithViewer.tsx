@@ -82,6 +82,7 @@ export type FileListWithViewerProps = {
         | "isInHiddenSection"
         | "fileCollectionIDs"
         | "allCollectionsNameByID"
+        | "onVisualFeedback"
         | "onSelectCollection"
         | "onSelectPerson"
     > &
@@ -117,6 +118,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onMarkTempDeleted,
     onSetOpenFileViewer,
     onSyncWithRemote,
+    onVisualFeedback,
     onSelectCollection,
     onSelectPerson,
 }) => {
@@ -227,6 +229,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     allCollectionsNameByID,
                     pendingVisibilityUpdates,
                     unsyncedVisibilityUpdates,
+                    onVisualFeedback,
                     onFileVisibilityUpdate,
                     onSelectCollection,
                     onSelectPerson,
