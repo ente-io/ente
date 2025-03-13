@@ -40,7 +40,6 @@ import {
     DialogTitle,
     Menu,
     MenuItem,
-    Snackbar,
     Stack,
     styled,
     Typography,
@@ -355,10 +354,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
     const [openShortcuts, setOpenShortcuts] = useState(false);
 
-    const [notificationMessage, setNotificationMessage] = useState<
-        string | undefined
-    >(undefined);
-
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     // Callbacks to be invoked (only once) the next time we get an update to the
@@ -389,16 +384,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
 
-    const showNotification = useCallback(
-        (message: string) => setNotificationMessage(message),
-        [],
-    );
-
-    const handleNotificationClose = useCallback(
-        () => setNotificationMessage(undefined),
-        [],
-    );
-
     const handleClose = useCallback(() => {
         setNeedsSync((needSync) => {
             if (needSync) onTriggerSyncWithRemote?.();
@@ -411,9 +396,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         setOpenImageEditor(false);
         setOpenConfirmDelete(false);
         setOpenShortcuts(false);
-        handleNotificationClose();
         onClose();
-    }, [onTriggerSyncWithRemote, handleNotificationClose, onClose]);
+    }, [onTriggerSyncWithRemote, onClose]);
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
@@ -551,14 +535,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     "image/png": createImagePNGBlob(imageURL!),
                 }),
             ])
-            .then(() => showNotification(t("copied")))
             .catch(onGenericError);
-    }, [
-        onGenericError,
-        handleMoreMenuCloseIfNeeded,
-        showNotification,
-        activeAnnotatedFile,
-    ]);
+    }, [onGenericError, handleMoreMenuCloseIfNeeded, activeAnnotatedFile]);
 
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
@@ -799,10 +777,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             ? ItemVisibility.visible
                             : ItemVisibility.archived,
                     )
-                        .then(() => {
-                            showNotification(t("done"));
-                            refreshSlideAfterDeleteOrArchive(file.id);
-                        })
+                        .then(() => refreshSlideAfterDeleteOrArchive(file.id))
                         .catch(onGenericError);
                 };
             }
@@ -813,7 +788,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             unsyncedVisibilityUpdates,
             onFileVisibilityUpdate,
             onGenericError,
-            showNotification,
             refreshSlideAfterDeleteOrArchive,
             handleMoreMenuCloseIfNeeded,
             activeAnnotatedFile,
@@ -829,7 +803,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         handleConfirmDelete?.();
                     break;
                 case "toggle-archive":
-                    if (!isPendingToggleArchive) toggleArchived?.();
+                    if (!isPendingToggleArchive) {
+                        // Provide extra visual feedback when the toggle archive
+                        // action is invoked via a keyboard shortcut since there
+                        // is no corresponding screen control visible (the more
+                        // menu might not be visible).
+                        onVisualFeedback();
+                        toggleArchived?.();
+                    }
                     break;
                 case "copy":
                     if (canCopyImage()) handleCopyImage();
@@ -843,6 +824,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             }
         },
         [
+            onVisualFeedback,
             handleConfirmDelete,
             handleCopyImage,
             handleToggleFullscreen,
@@ -1036,20 +1018,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     </Typography>
                 </MoreMenuItem>
             </MoreMenu>
-            <Snackbar
-                open={!!notificationMessage}
-                onClose={handleNotificationClose}
-                autoHideDuration={2000}
-                message={notificationMessage}
-                slotProps={{
-                    content: {
-                        sx: {
-                            bgcolor: "fixed.dark.background.paper2",
-                            color: "fixed.dark.text.base",
-                        },
-                    },
-                }}
-            />
             <ConfirmDeleteFileDialog
                 open={openConfirmDelete}
                 onClose={handleConfirmDeleteClose}
