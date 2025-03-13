@@ -1,120 +1,110 @@
 import "package:computer/computer.dart";
-import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
-import "package:photos/models/file/file.dart";
-import "package:photos/services/sync/import/model.dart";
+import "package:photos/services/remote_pull/local/import/model.dart";
 
 class LocalDiffResult {
-  // unique localPath Assets.
-  final List<LocalPathAsset>? localPathAssets;
+  // List of assets that are present on device but missing in app.
+  // unique on the basis of assetEntity.id
+  final List<AssetEntity>? missingAssetsInApp;
 
-  // set of File object created from localPathAssets
-  List<EnteFile>? uniqueLocalFiles;
+  // Set of ids that are present inside app, but missing on the device
+  final Set<String> extraAssetIDsInApp;
 
-  // newPathToLocalIDs represents new entries which needs to be synced to
-  // the local db
-  final Map<String, Set<String>>? newPathToLocalIDs;
-
-  final Map<String, Set<String>>? deletePathToLocalIDs;
+  final Set<String> extraPathIDsInApp;
+  // map of path to localIDs which needs to be updated in the local db
+  // the localIDs contains list of all assets that are present in the device's path
+  final Map<String, Set<String>> updatePathToLocalIDs;
 
   LocalDiffResult({
-    this.uniqueLocalFiles,
-    this.localPathAssets,
-    this.newPathToLocalIDs,
-    this.deletePathToLocalIDs,
+    this.missingAssetsInApp,
+    this.extraAssetIDsInApp = const {},
+    this.updatePathToLocalIDs = const {},
+    this.extraPathIDsInApp = const {},
   });
 }
 
 Future<LocalDiffResult> getDiffFromExistingImport(
-  List<LocalPathAsset> assets,
+  List<LocalPathAssets> allOnDeviceAssets,
   // current set of assets available on device
-  Set<String> existingIDs, // localIDs of files already imported in app
-  Map<String, Set<String>> pathToLocalIDs,
+  Set<String> inAppAssetIDs, // localIDs of files already imported in app
+  Map<String, Set<String>> inAppPathToLocalIDs,
 ) async {
   final Map<String, dynamic> args = <String, dynamic>{};
-  args['assets'] = assets;
-  args['existingIDs'] = existingIDs;
-  args['pathToLocalIDs'] = pathToLocalIDs;
+  args['allOnDeviceAssets'] = allOnDeviceAssets;
+  args['inAppAssetIDs'] = inAppAssetIDs;
+  args['inAppPathToLocalIDs'] = inAppPathToLocalIDs;
   final LocalDiffResult diffResult = await Computer.shared().compute(
     _getLocalAssetsDiff,
     param: args,
     taskName: "getLocalAssetsDiff",
   );
-  if (diffResult.localPathAssets != null) {
-    diffResult.uniqueLocalFiles =
-        await _convertLocalAssetsToUniqueFiles(diffResult.localPathAssets!);
-  }
   return diffResult;
-}
-
-Future<List<EnteFile>> _convertLocalAssetsToUniqueFiles(
-  List<LocalPathAsset> assets,
-) async {
-  final Set<String> alreadySeenLocalIDs = <String>{};
-  final List<EnteFile> files = [];
-  for (LocalPathAsset localPathAsset in assets) {
-    final String localPathName = localPathAsset.pathName;
-    for (final String localID in localPathAsset.localIDs) {
-      if (!alreadySeenLocalIDs.contains(localID)) {
-        final assetEntity = await AssetEntity.fromId(localID);
-        if (assetEntity == null) {
-          Logger("_convertLocalAssetsToUniqueFiles")
-              .warning('Failed to fetch asset with id $localID');
-          continue;
-        }
-        files.add(
-          await EnteFile.fromAsset(localPathName, assetEntity),
-        );
-        alreadySeenLocalIDs.add(localID);
-      }
-    }
-  }
-  return files;
 }
 
 // _getLocalAssetsDiff compares local db with the file system and compute
 // the files which needs to be added or removed from device collection.
 LocalDiffResult _getLocalAssetsDiff(Map<String, dynamic> args) {
-  final List<LocalPathAsset> onDeviceLocalPathAsset = args['assets'];
-  final Set<String> existingIDs = args['existingIDs'];
-  final Map<String, Set<String>> pathToLocalIDs = args['pathToLocalIDs'];
-  final Map<String, Set<String>> newPathToLocalIDs = <String, Set<String>>{};
-  final Map<String, Set<String>> removedPathToLocalIDs =
-      <String, Set<String>>{};
-  final List<LocalPathAsset> unsyncedAssets = [];
+  final List<LocalPathAssets> onDeviceLocalPathAsset =
+      args['allOnDeviceAssets'];
+  final Set<String> inAppAssetIDs = args['inAppAssetIDs'];
+  final Map<String, Set<String>> inAppPathToLocalIDs =
+      args['inAppPathToLocalIDs'];
 
-  for (final localPathAsset in onDeviceLocalPathAsset) {
-    final String pathID = localPathAsset.pathID;
-    // Start identifying pathID to localID mapping changes which needs to be
-    // synced
-    final Set<String> candidateLocalIDsForRemoval =
-        pathToLocalIDs[pathID] ?? <String>{};
-    final Set<String> missingLocalIDsInPath = <String>{};
-    for (final String localID in localPathAsset.localIDs) {
-      if (candidateLocalIDsForRemoval.contains(localID)) {
-        // remove the localID after checking. Any pending existing ID indicates
-        // the the local file was removed from the path.
-        candidateLocalIDsForRemoval.remove(localID);
-      } else {
-        missingLocalIDsInPath.add(localID);
+  // Step 1: Build onDevicePathToLocalIDs and missingAssetsInApp
+  final Set<String> onDeviceAssetIDs = {};
+  final Map<String, Set<String>> onDevicePathToLocalIDs = {};
+  final Map<String, AssetEntity> uniqueMissingAssetsInApp = {};
+
+  for (var diff in onDeviceLocalPathAsset) {
+    final String pathID = diff.path.id;
+    final Set<String> localIDs = {};
+    for (var asset in diff.assets) {
+      localIDs.add(asset.id);
+      onDeviceAssetIDs.add(asset.id);
+      // Track missing assets uniquely by id
+      if (!inAppAssetIDs.contains(asset.id)) {
+        uniqueMissingAssetsInApp[asset.id] = asset;
       }
     }
-    if (candidateLocalIDsForRemoval.isNotEmpty) {
-      removedPathToLocalIDs[pathID] = candidateLocalIDsForRemoval;
-    }
-    if (missingLocalIDsInPath.isNotEmpty) {
-      newPathToLocalIDs[pathID] = missingLocalIDsInPath;
-    }
-    // End
+    onDevicePathToLocalIDs[pathID] = localIDs;
+  }
 
-    localPathAsset.localIDs.removeAll(existingIDs);
-    if (localPathAsset.localIDs.isNotEmpty) {
-      unsyncedAssets.add(localPathAsset);
+  final Set<String> extraAssetIDsInApp = {};
+  final Set<String> extraPathIDsInApp = {};
+  final Map<String, Set<String>> updatePathToLocalIDs = {};
+
+  // Step 2: Find assets that exist in the app but not on device
+  for (var assetID in inAppAssetIDs) {
+    if (!onDeviceAssetIDs.contains(assetID)) {
+      extraAssetIDsInApp.add(assetID);
     }
   }
+
+  // Step 3: Find paths that exist in the app but not on device
+  // and determine which paths need updates
+  for (var entry in inAppPathToLocalIDs.entries) {
+    final String pathID = entry.key;
+    final Set<String> inAppLocalIDs = entry.value;
+
+    if (!onDevicePathToLocalIDs.containsKey(pathID)) {
+      // Path exists in app but not on device
+      extraPathIDsInApp.add(pathID);
+    } else {
+      // Path exists in both, check if the assets differ
+      final Set<String> onDeviceLocalIDs = onDevicePathToLocalIDs[pathID]!;
+
+      // Simplified comparison: check if sets have same size and same elements
+      if (inAppLocalIDs.length != onDeviceLocalIDs.length ||
+          !inAppLocalIDs.containsAll(onDeviceLocalIDs)) {
+        updatePathToLocalIDs[pathID] = onDeviceLocalIDs;
+      }
+    }
+  }
+
   return LocalDiffResult(
-    localPathAssets: unsyncedAssets,
-    newPathToLocalIDs: newPathToLocalIDs,
-    deletePathToLocalIDs: removedPathToLocalIDs,
+    missingAssetsInApp: uniqueMissingAssetsInApp.values.toList(),
+    extraAssetIDsInApp: extraAssetIDsInApp,
+    extraPathIDsInApp: extraPathIDsInApp,
+    updatePathToLocalIDs: updatePathToLocalIDs,
   );
 }

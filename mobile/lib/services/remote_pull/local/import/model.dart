@@ -1,11 +1,8 @@
-class LocalPathAsset {
-  final Set<String> localIDs;
-  final String pathID;
-  final String pathName;
+import "package:photo_manager/photo_manager.dart";
 
-  LocalPathAsset({
-    required this.localIDs,
-    required this.pathName,
-    required this.pathID,
-  });
+class LocalPathAssets {
+  final AssetPathEntity path;
+  final List<AssetEntity> assets;
+
+  LocalPathAssets({required this.path, required this.assets});
 }

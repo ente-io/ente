@@ -110,6 +110,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
         child: PhotoView(
           key: ValueKey(_loadedFinalImage),
           imageProvider: _imageProvider,
+          filterQuality: FilterQuality.medium,
           controller: _photoViewController,
           scaleStateController: _scaleStateController,
           scaleStateChangedCallback: _scaleStateChangedCallback,

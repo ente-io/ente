@@ -6,15 +6,13 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_import_progress.dart';
-import 'package:photos/models/file/file.dart';
-import "package:photos/services/sync/import/model.dart";
-import 'package:tuple/tuple.dart';
+import "package:photos/services/remote_pull/local/import/model.dart";
 
 final _logger = Logger("FileSyncUtil");
 const ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
 const assetFetchPageSize = 2000;
 
-Future<Tuple2<List<LocalPathAsset>, List<EnteFile>>> getLocalPathAssetsAndFiles(
+Future<List<LocalPathAssets>> getAssetPathAndEntities(
   int fromTime,
   int toTime,
 ) async {
@@ -22,18 +20,12 @@ Future<Tuple2<List<LocalPathAsset>, List<EnteFile>>> getLocalPathAssetsAndFiles(
     updateFromTime: fromTime,
     updateToTime: toTime,
   );
-  final List<LocalPathAsset> localPathAssets = [];
-
-  // alreadySeenLocalIDs is used to track and ignore file with particular
-  // localID if it's already present in another album. This only impacts iOS
-  // devices where a file can belong to multiple
-  final Set<String> alreadySeenLocalIDs = {};
-  final List<EnteFile> uniqueFiles = [];
+  final List<LocalPathAssets> localPathAssets = [];
   for (AssetPathEntity pathEntity in pathEntities) {
     final List<AssetEntity> assetsInPath = await _getAllAssetLists(pathEntity);
-    late Tuple2<Set<String>, List<EnteFile>> result;
+    late List<AssetEntity> result;
     if (assetsInPath.isEmpty) {
-      result = const Tuple2({}, []);
+      result = [];
     } else {
       try {
         result = await Computer.shared().compute(
@@ -41,8 +33,6 @@ Future<Tuple2<List<LocalPathAsset>, List<EnteFile>>> getLocalPathAssetsAndFiles(
           param: <String, dynamic>{
             "pathEntity": pathEntity,
             "fromTime": fromTime,
-            "alreadySeenLocalIDs": alreadySeenLocalIDs,
-            "assetList": assetsInPath,
           },
           taskName:
               "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
@@ -54,48 +44,15 @@ Future<Tuple2<List<LocalPathAsset>, List<EnteFile>>> getLocalPathAssetsAndFiles(
         );
         rethrow;
       }
-
-      alreadySeenLocalIDs.addAll(result.item1);
-      uniqueFiles.addAll(result.item2);
     }
     localPathAssets.add(
-      LocalPathAsset(
-        localIDs: result.item1,
-        pathName: pathEntity.name,
-        pathID: pathEntity.id,
-      ),
+      LocalPathAssets(path: pathEntity, assets: result),
     );
   }
-  return Tuple2(localPathAssets, uniqueFiles);
+  return localPathAssets;
 }
 
-// getDeviceFolderWithCountAndLatestFile returns a tuple of AssetPathEntity and
-// latest file's localID in the assetPath, along with modifiedPath time and
-// total count of assets in a Asset Path.
-// We use this result to update the latest thumbnail for deviceFolder and
-// identify (in future) which AssetPath needs to be re-synced again.
-Future<List<Tuple2<AssetPathEntity, String>>>
-    getDeviceFolderWithCountAndCoverID() async {
-  final List<Tuple2<AssetPathEntity, String>> result = [];
-  final pathEntities = await _getGalleryList(
-    needsTitle: false,
-    containsModifiedPath: true,
-    orderOption:
-        const OrderOption(type: OrderOptionType.createDate, asc: false),
-  );
-  for (AssetPathEntity pathEntity in pathEntities) {
-    final latestEntity = await pathEntity.getAssetListPaged(
-      page: 0,
-      size: 1,
-    );
-    final String localCoverID =
-        latestEntity.isEmpty ? '' : latestEntity.first.id;
-    result.add(Tuple2(pathEntity, localCoverID));
-  }
-  return result;
-}
-
-Future<List<LocalPathAsset>> getAllLocalAssets() async {
+Future<List<LocalPathAssets>> getAllLocalAssets() async {
   final filterOptionGroup = FilterOptionGroup();
   filterOptionGroup.setOption(
     AssetType.image,
@@ -111,17 +68,13 @@ Future<List<LocalPathAsset>> getAllLocalAssets() async {
     type: RequestType.common,
     filterOption: filterOptionGroup,
   );
-  final List<LocalPathAsset> localPathAssets = [];
+  final List<LocalPathAssets> localPathAssets = [];
   for (final assetPath in assetPaths) {
-    final Set<String> localIDs = <String>{};
-    for (final asset in await _getAllAssetLists(assetPath)) {
-      localIDs.add(asset.id);
-    }
+    final List<AssetEntity> assets = await _getAllAssetLists(assetPath);
     localPathAssets.add(
-      LocalPathAsset(
-        localIDs: localIDs,
-        pathName: assetPath.name,
-        pathID: assetPath.id,
+      LocalPathAssets(
+        path: assetPath,
+        assets: assets,
       ),
     );
   }
@@ -198,27 +151,21 @@ Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
 
 // review: do we need to run this inside compute, after making File.FromAsset
 // sync. If yes, update the method documentation with reason.
-Future<Tuple2<Set<String>, List<EnteFile>>> _getLocalIDsAndFilesFromAssets(
+Future<List<AssetEntity>> _getLocalIDsAndFilesFromAssets(
   Map<String, dynamic> args,
 ) async {
-  final pathEntity = args["pathEntity"] as AssetPathEntity;
   final assetList = args["assetList"];
   final fromTime = args["fromTime"];
-  final alreadySeenLocalIDs = args["alreadySeenLocalIDs"] as Set<String>;
-  final List<EnteFile> files = [];
-  final Set<String> localIDs = {};
+  final List<AssetEntity> filteredAssets = [];
   for (AssetEntity entity in assetList) {
-    localIDs.add(entity.id);
     final bool assetCreatedOrUpdatedAfterGivenTime = max(
           entity.createDateTime.millisecondsSinceEpoch,
           entity.modifiedDateTime.millisecondsSinceEpoch,
         ) >=
         (fromTime / ~1000);
-    if (!alreadySeenLocalIDs.contains(entity.id) &&
-        assetCreatedOrUpdatedAfterGivenTime) {
-      final file = await EnteFile.fromAsset(pathEntity.name, entity);
-      files.add(file);
+    if (assetCreatedOrUpdatedAfterGivenTime) {
+      filteredAssets.add(entity);
     }
   }
-  return Tuple2(localIDs, files);
+  return filteredAssets;
 }
