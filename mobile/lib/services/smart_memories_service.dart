@@ -89,20 +89,7 @@ class SmartMemoriesService {
       _logger.finest('calcMemories called with time: $now $t');
       await init();
       final List<SmartMemory> memories = [];
-
-      final allFilesFromSearchService = Set<EnteFile>.from(
-        await SearchService.instance.getAllFilesForSearch(),
-      );
-      final Set<EnteFile> allFiles = {};
-      for (final file in allFilesFromSearchService) {
-        if (file.uploadedFileID != null && file.creationTime != null) {
-          allFiles.add(file);
-        }
-      }
-      final allFileIdsToFile = <int, EnteFile>{};
-      for (final file in allFiles) {
-        allFileIdsToFile[file.uploadedFileID!] = file;
-      }
+      final (allFiles, allFileIdsToFile) = await _getFilesAndMapForMemories();
 
       _seenTimes = await _memoriesDB.getSeenTimes();
       _logger.finest("All files length: ${allFiles.length} $t");
@@ -147,11 +134,27 @@ class SmartMemoriesService {
     }
   }
 
-  Future<List<FillerMemory>> calcFillerResults() async {
-    final now = DateTime.now();
-    final allFiles = Set<EnteFile>.from(
+  Future<(Set<EnteFile>, Map<int, EnteFile>)>
+      _getFilesAndMapForMemories() async {
+    final allFilesFromSearchService = Set<EnteFile>.from(
       await SearchService.instance.getAllFilesForSearch(),
     );
+    final Set<EnteFile> allFiles = {};
+    for (final file in allFilesFromSearchService) {
+      if (file.uploadedFileID != null && file.creationTime != null) {
+        allFiles.add(file);
+      }
+    }
+    final allFileIdsToFile = <int, EnteFile>{};
+    for (final file in allFiles) {
+      allFileIdsToFile[file.uploadedFileID!] = file;
+    }
+    return (allFiles, allFileIdsToFile);
+  }
+
+  Future<List<FillerMemory>> calcFillerResults() async {
+    final now = DateTime.now();
+    final (allFiles, _) = await _getFilesAndMapForMemories();
     final fillerMemories = await _getFillerResults(allFiles, now);
     return fillerMemories;
   }
