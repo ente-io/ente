@@ -185,7 +185,7 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 	// both the slices are separately looped. This was done to avoid
 	// duplication of a lot of code if both the users were ranged inside a loop
 	// separately.
-	notifs := []struct {
+	storageAlertGroups := []struct {
 		getListofSubscribers func() ([]ente.User, error)
 		template             string
 		subject              string
@@ -205,8 +205,8 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 			subject:  StorageLimitExceededSubject,
 		},
 	}
-	for _, notification := range notifs {
-		users, err := notification.getListofSubscribers()
+	for _, alertGroup := range storageAlertGroups {
+		users, err := alertGroup.getListofSubscribers()
 		if err != nil {
 			log.WithError(err).Error("Failed to get list of users")
 			continue
@@ -222,7 +222,7 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 			}
 			if lastNotificationTime == 0 {
 				logger.Info("Alerting about storage limit exceeded")
-				err = email.SendTemplatedEmail([]string{u.Email}, "team@ente.io", "team@ente.io", notification.subject, notification.template, nil, nil)
+				err = email.SendTemplatedEmail([]string{u.Email}, "team@ente.io", "team@ente.io", alertGroup.subject, alertGroup.template, nil, nil)
 				if err != nil {
 					logger.Info("Error notifying", err)
 					continue
