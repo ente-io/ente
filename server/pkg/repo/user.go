@@ -342,33 +342,36 @@ func (repo *UserRepository) GetUsersWithExceedingStorages(percentageThreshold in
 		if strings.EqualFold(user.Hash, fmt.Sprintf(DELETED_EMAIL_HASH_FORMAT, &user.ID)) || len(encryptedEmail) == 0 {
 			continue
 		}
+		refBonusStorage := int64(0)
+		addOnBonusStorage := int64(0)
 
-		if refBonusStorage, ok := refBonus[user.ID]; ok {
+		if bonus, ok := refBonus[user.ID]; ok {
+			refBonusStorage = bonus
 			addOnBonusStorage := addOnBonus[user.ID]
 			// cap usable ref bonus to the subscription storage + addOnBonus
 			if refBonusStorage > (subStorage + addOnBonusStorage) {
 				refBonusStorage = subStorage + addOnBonusStorage
 			}
-			totalStorage := refBonusStorage + subStorage + addOnBonusStorage
+		}
 
-			if percentageThreshold == 90 {
-				if storageConsumed >= (totalStorage*90/100) && storageConsumed < (totalStorage) {
-					email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
-					if err != nil {
-						return users, stacktrace.Propagate(err, "")
-					}
-					user.Email = email
-					users = append(users, user)
+		totalStorage := refBonusStorage + subStorage + addOnBonusStorage
+		if percentageThreshold == 90 {
+			if storageConsumed >= (totalStorage*90/100) && storageConsumed < (totalStorage) {
+				email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+				if err != nil {
+					return users, stacktrace.Propagate(err, "")
 				}
-			} else {
-				if (storageConsumed) > totalStorage {
-					email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
-					if err != nil {
-						return users, stacktrace.Propagate(err, "")
-					}
-					user.Email = email
-					users = append(users, user)
+				user.Email = email
+				users = append(users, user)
+			}
+		} else {
+			if (storageConsumed) > totalStorage {
+				email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+				if err != nil {
+					return users, stacktrace.Propagate(err, "")
 				}
+				user.Email = email
+				users = append(users, user)
 			}
 		}
 	}
