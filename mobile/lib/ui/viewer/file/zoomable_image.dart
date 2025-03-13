@@ -111,6 +111,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
           key: ValueKey(_loadedFinalImage),
           imageProvider: _imageProvider,
           controller: _photoViewController,
+          filterQuality: FilterQuality.high,
           scaleStateController: _scaleStateController,
           scaleStateChangedCallback: _scaleStateChangedCallback,
           minScale: widget.shouldCover
