@@ -828,8 +828,14 @@ const Page: React.FC = () => {
                     await updateRemotePrivateMagicMetadata(file, {
                         visibility,
                     });
-                // TODO: Trigger a "lite" sync? (or update that particular file
-                // in the reducer state in some other way).
+                // TODO(AR): Trigger a "lite" sync? (or update that particular
+                // file in the reducer state in some other way).
+
+                dispatch({
+                    type: "markPendingVisibilityUpdate",
+                    fileID,
+                    mark: false,
+                });
 
                 // Keep this as the last operation on the happy path.
                 //
@@ -840,8 +846,6 @@ const Page: React.FC = () => {
                     privateMagicMetadata,
                 });
             } catch (e) {
-                // Clean pending requests on error (on success,
-                // "unsyncedPrivateMagicMetadataUpdate" will do it for us).
                 dispatch({
                     type: "markPendingVisibilityUpdate",
                     fileID,
