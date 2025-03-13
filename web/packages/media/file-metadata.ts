@@ -441,8 +441,39 @@ export const fileCreationPhotoDate = (
  * @param file The {@link EnteFile} whose public magic metadata we want to
  * update.
  *
- * @param metadataUpdates A subset of {@link PrivateMagicMetadata} containing the
- * fields that we want to add or update.
+ * @param metadataUpdates A subset of {@link PrivateMagicMetadata} containing
+ * the fields that we want to add or update.
+ *
+ * [Note: Interactive updates to file metadata]
+ *
+ * This function updates the magic metadata on remote, but and also modifies the
+ * provided {@link EnteFile} object in place with the updated values, but it
+ * does not update the state of the local databases.
+ *
+ * The caller needs to ensure that we subsequently sync with remote to fetch the
+ * updates as part of the diff and update the {@link EnteFile} that is persisted
+ * in our local db.
+ *
+ * A full sync requires multiple API calls, which can cause a slow experience
+ * for interactive operations (e.g. archiving a file), which is why this
+ * function does not immediately perform the sync but instead expects an delayed
+ * sync in the background without waiting for it to complete.
+ *
+ * Returning a modified in-memory object is essential, because in particular the
+ * metadatas (See: [Note: Metadatum]) contain a version field that is
+ * incremented for each change. So if we were not to update the version, and if
+ * the user were to perform another operation on that file before the
+ * asynchronous remote sync completes, the client will send a stale version of
+ * the metadata, and remote will reject the update.
+ *
+ * The overall sequence is thus:
+ *
+ * 1. This function modifies the remote metadata.
+ *
+ * 2. It returns a file object with the updates reflected in it.
+ *
+ * 3. The caller (eventually) triggers a remote sync in the background, but
+ *    meanwhile uses this updated file object for future operations.
  */
 export const updateRemotePrivateMagicMetadata = async (
     file: EnteFile,
@@ -467,13 +498,7 @@ export const updateRemotePrivateMagicMetadata = async (
 /**
  * Update the public magic metadata associated with a file on remote.
  *
- * This function updates the public magic metadata on remote, and as a
- * convenience also modifies the provided {@link EnteFile} object in place with
- * the updated values, but it does not update the state of the local databases.
- *
- * The caller needs to ensure that we subsequently sync with remote to fetch the
- * updates as part of the diff and update the {@link EnteFile} that is persisted
- * in our local db.
+ * See: [Note: Interactive updates to file metadata]
  *
  * @param file The {@link EnteFile} whose public magic metadata we want to
  * update.
