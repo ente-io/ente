@@ -12,7 +12,6 @@ import (
 	"github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -68,7 +67,7 @@ func (c *EmailNotificationController) OnFirstFileUpload(userID int64, userAgent 
 	}
 	err = email.SendTemplatedEmail([]string{user.Email}, "team@ente.io", "team@ente.io", FirstUploadEmailSubject, template, nil, nil)
 	if err != nil {
-		log.Error("Error sending first upload email ", err)
+		log.Error("Error sending first upload email", err)
 	}
 }
 
@@ -221,16 +220,15 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 				logger.Error("Could not fetch last notification time", err)
 				continue
 			}
-			if lastNotificationTime > 0 {
-				continue
+			if lastNotificationTime == 0 {
+				logger.Info("Alerting about storage limit exceeded")
+				err = email.SendTemplatedEmail([]string{u.Email}, "team@ente.io", "team@ente.io", notification.subject, notification.template, nil, nil)
+				if err != nil {
+					logger.Info("Error notifying", err)
+					continue
+				}
+				c.NotificationHistoryRepo.SetLastNotificationTimeToNow(u.ID, StorageLimitExceededTemplateID)
 			}
-			logger.Info("Alerting about storage limit exceeded")
-			err = email.SendTemplatedEmail([]string{u.Email}, "team@ente.io", "team@ente.io", notification.subject, notification.template, nil, nil)
-			if err != nil {
-				logger.Info("Error notifying", err)
-				continue
-			}
-			c.NotificationHistoryRepo.SetLastNotificationTimeToNow(u.ID, StorageLimitExceededTemplateID)
 		}
 	}
 }
@@ -247,7 +245,6 @@ func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 
 	batchSize := 100
 	totalSubUsers := len(subscribedUsers)
-	logrus.Println(totalSubUsers)
 
 	for i := range totalSubUsers {
 		end := i + batchSize
@@ -255,7 +252,6 @@ func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 			end = totalSubUsers
 		}
 		batchUsers := subscribedUsers[i:end]
-		logrus.Println(batchUsers)
 		for _, user := range batchUsers {
 			isFamilyAdmin, err := c.UserRepo.GetFamilyAdminID(user.ID)
 			if err != nil {
@@ -280,13 +276,9 @@ func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 						err := email.SendTemplatedEmail(userEmails, "team@ente.io", "team@ente.io", SubscriptionCancelledSubject, SubscriptionCancelledTemplate, nil, nil)
 						if err != nil {
 							log.Error("Failed to send family nudge email: ", err)
-						} else {
-							err := c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FilesCollectedTemplateID)
-							if err != nil {
-								log.Error("Failed to set Family Nudge Notification History")
-							}
 						}
 					}([]string{user.Email})
+					c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FilesCollectedTemplateID)
 				}
 			}
 		}
