@@ -445,46 +445,47 @@ export const fileCreationPhotoDate = (
  * @param metadataUpdates A subset of {@link PrivateMagicMetadata} containing
  * the fields that we want to add or update.
  *
- * @returns An updated {@link EnteFile} objct that incorporates the metadata
- * updates. This is effectively what we would get if we to ask the remote for
- * the latest file for this ID, except we don't do an actual sync and instead
- * apply the changes on it piecemeal.
+ * @returns An updated {@link PrivateMagicMetadata} object containing the
+ * (decrypted) metadata updates we just made. This is effectively what we would
+ * get if we to ask the remote for the latest file for this ID, except we don't
+ * do an actual sync and instead reconstruct it piecemeal.
  *
  * [Note: Interactive updates to file metadata]
  *
- * This function updates the magic metadata on remote, but and also modifies the
- * provided {@link EnteFile} object in place with the updated values, but it
- * does not update the state of the local databases.
+ * This function updates the magic metadata on remote, and returns a magic
+ * metadata object with the updated (and decrypted) values, but it does not
+ * update the state of the file objects in our databases.
  *
  * The caller needs to ensure that we subsequently sync with remote to fetch the
  * updates as part of the diff and update the {@link EnteFile} that is persisted
  * in our local db.
  *
- * A full sync requires multiple API calls, which can cause a slow experience
- * for interactive operations (e.g. archiving a file), which is why this
- * function does not immediately perform the sync but instead expects an delayed
- * sync in the background without waiting for it to complete.
+ * This partial update approach is used because a full sync requires multiple
+ * API calls, which can cause a slow experience for interactive operations (e.g.
+ * archiving a file). So this function does not immediately perform the sync,
+ * but instead expects the caller to arrange for an eventual delayed sync in the
+ * background without waiting for it to complete.
  *
- * Returning a modified in-memory object is essential, because in particular the
- * metadatas (See: [Note: Metadatum]) contain a version field that is
- * incremented for each change. So if we were not to update the version, and if
- * the user were to perform another operation on that file before the
- * asynchronous remote sync completes, the client will send a stale version of
- * the metadata, and remote will reject the update.
+ * Returning a modified in-memory object is essential because in addition to the
+ * updated metadata itself, the metadatum (See: [Note: Metadatum]) contain a
+ * version field that is incremented for each change. So if we were not to
+ * update the version, and if the user were to perform another operation on that
+ * file before the asynchronous remote sync completes, the client will send a
+ * stale version of the metadata, and remote will reject the update.
  *
  * The overall sequence is thus:
  *
  * 1. This function modifies the remote metadata.
  *
- * 2. It returns a file object with the updates reflected in it.
+ * 2. It returns a metadata object with the updates reflected in it.
  *
  * 3. The caller (eventually) triggers a remote sync in the background, but
- *    meanwhile uses this updated file object for future operations.
+ *    meanwhile uses this updated metadata.
  */
 export const updateRemotePrivateMagicMetadata = async (
     file: EnteFile,
     metadataUpdates: Partial<PrivateMagicMetadata>,
-): Promise<EnteFile> => {
+): Promise<FileMagicMetadata> => {
     const existingMetadata = filePrivateMagicMetadata(file);
 
     const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };
@@ -506,16 +507,14 @@ export const updateRemotePrivateMagicMetadata = async (
 
     // Use the updated envelope we sent as a starting point for the metadata we
     // will use for the updated file.
-    const magicMetadata = updatedEnvelope as FileMagicMetadata;
+    const updatedMagicMetadata = updatedEnvelope as FileMagicMetadata;
     // The correct version will come in the updated EnteFile we get in the
     // response of the /diff. Temporarily bump it to reflect our latest edit.
-    magicMetadata.version = metadataVersion + 1;
+    updatedMagicMetadata.version = metadataVersion + 1;
     // Set the contents (data) to the updated metadata contents we just PUT.
-    magicMetadata.data = updatedMetadata;
+    updatedMagicMetadata.data = updatedMetadata;
 
-    // Return a new EnteFile object with its metadata set to incorporate the
-    // updates we just applied to remote.
-    return { ...file, magicMetadata };
+    return updatedMagicMetadata;
 };
 
 /**
