@@ -6,6 +6,7 @@ import {
     fileLogID,
     type EnteFile,
     type FileMagicMetadata,
+    type FilePrivateMagicMetadata,
     type FilePublicMagicMetadata,
 } from "@/media/file";
 import { nullToUndefined } from "@/utils/transform";
@@ -485,7 +486,7 @@ export const fileCreationPhotoDate = (
 export const updateRemotePrivateMagicMetadata = async (
     file: EnteFile,
     metadataUpdates: Partial<PrivateMagicMetadata>,
-): Promise<FileMagicMetadata> => {
+): Promise<FilePrivateMagicMetadata> => {
     const existingMetadata = filePrivateMagicMetadata(file);
 
     const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };

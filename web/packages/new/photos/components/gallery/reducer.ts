@@ -7,7 +7,7 @@ import {
     CollectionType,
     type Collection,
 } from "@/media/collection";
-import type { EnteFile } from "@/media/file";
+import type { EnteFile, FilePrivateMagicMetadata } from "@/media/file";
 import { mergeMetadata } from "@/media/file";
 import { isArchivedFile, ItemVisibility } from "@/media/file-metadata";
 import {
@@ -239,30 +239,22 @@ export interface GalleryState {
      * File (IDs) for which there is currently an in-flight archive / unarchive
      * operation trigged via the file viewer.
      *
-     * See also {@link unsyncedVisibilityUpdates}.
+     * See also {@link unsyncedPrivateMagicMetadataUpdates}.
      */
     pendingVisibilityUpdates: Set<number>;
     /**
-     * Transient updates to the visibility of files whose archive state has been
-     * toggled by the user in the file viewer, and on remote, but whose effects
-     * on remote have not yet been synced back to our local DB.
+     * Updates to file magic metadata (triggered by some interactive user
+     * action) that have already been made to applied to remote, but whose
+     * effects on remote have not yet been synced back to our local DB.
      *
-     * Each entry from a file ID to `ItemVisibility.archived` (if the file
-     * should be considered as archived) or `ItemVisibility.visible` (if a file
-     * that was previously archived has now been unarchived).
+     * Each entry from a file ID to the magic metadata that should be used for
+     * that file instead of what we get from our local DB.
      *
-     * If the remote request succeeds, we still need to sync the files and
-     * collections in our local DB with the remote state, but that happens in a
-     * batch when the user exits the viewer. So until that point, these updates
-     * remain in this unsynced updates map.
-     *
-     * Once the remote file and collection sync completes, we can clear this map
-     * since thereafter the synced files themselves will reflect the latest
-     * visibility state.
-     *
-     * See also {@link pendingVisibilityUpdates}.
+     * The next time a sync with remote completes, we clear this map since
+     * thereafter the synced files themselves will reflect the latest magic
+     * metadata.
      */
-    unsyncedVisibilityUpdates: Map<number, ItemVisibility>;
+    unsyncedPrivateMagicMetadataUpdates: Map<number, FilePrivateMagicMetadata>;
     /**
      * Transient updates to the favorite status of files that have just been
      * toggled by the user in the file viewer, and on remote, but whose effects
@@ -417,11 +409,9 @@ export type GalleryAction =
           mark: boolean;
       }
     | {
-          type: "markUnsyncedVisibilityUpdate";
+          type: "unsyncedPrivateMagicMetadataUpdate";
           fileID: number;
-          // Passing undefined clears any existing entry, concrete values add or
-          // update one.
-          visibility: ItemVisibility | undefined;
+          privateMagicMetadata: FilePrivateMagicMetadata;
       }
     | {
           type: "markUnsyncedFavoriteUpdate";
@@ -466,7 +456,7 @@ const initialGalleryState: GalleryState = {
     tempDeletedFileIDs: new Set(),
     tempHiddenFileIDs: new Set(),
     pendingVisibilityUpdates: new Set(),
-    unsyncedVisibilityUpdates: new Map(),
+    unsyncedPrivateMagicMetadataUpdates: new Map(),
     unsyncedFavoriteUpdates: new Map(),
     selectedCollectionSummaryID: undefined,
     selectedPersonID: undefined,
