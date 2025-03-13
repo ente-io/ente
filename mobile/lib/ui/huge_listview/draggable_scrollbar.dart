@@ -179,8 +179,8 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
     setState(() => isDragging = false);
   }
 
-  void keyHandler(RawKeyEvent value) {
-    if (value.runtimeType == RawKeyDownEvent) {
+  void keyHandler(KeyEvent value) {
+    if (value.runtimeType == KeyDownEvent) {
       if (value.logicalKey == LogicalKeyboardKey.arrowDown) {
         onDragUpdate(
           DragUpdateDetails(

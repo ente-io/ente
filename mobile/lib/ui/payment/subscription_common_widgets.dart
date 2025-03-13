@@ -117,7 +117,7 @@ class ValidityWidget extends StatelessWidget {
             ),
           const SizedBox(height: 8),
           if (addOnBonus.isNotEmpty)
-            ...addOnBonus.map((bonus) => AddOnBonusValidity(bonus)).toList(),
+            ...addOnBonus.map((bonus) => AddOnBonusValidity(bonus)),
         ],
       ),
     );

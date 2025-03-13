@@ -581,7 +581,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     return UserDetailsStateWidget(
       child: PopScope(
         canPop: false,
-        onPopInvoked: (didPop) async {
+        onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
           if (_selectedTabIndex == 0) {
             if (_selectedFiles.files.isNotEmpty) {

@@ -98,7 +98,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         ? _body()
         : PopScope(
             canPop: false,
-            onPopInvoked: (didPop) {
+            onPopInvokedWithResult: (didPop, _) {
               if (!didPop) {
                 if (widget.selectedFiles.files.isEmpty) {
                   Navigator.of(context).pop();

@@ -216,7 +216,7 @@ String _buildFFmpegCommand(
     command.write(
       '[$i:v]scale=$scaledWidth:$scaledHeight:force_original_aspect_ratio=decrease,'
       'pad=$screenWidth:$screenHeight:(ow-iw)/2:(oh-ih)/2,'
-      'zoompan=z=\'zoom+0.001\':x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':d=150:s=${screenWidth}x${screenHeight}:fps=60[v$i];',
+      'zoompan=z=\'zoom+0.001\':x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':d=150:s=${screenWidth}x$screenHeight:fps=60[v$i];',
     );
   }
 

@@ -3,6 +3,7 @@ import "dart:io";
 
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+// ignore: implementation_imports
 import "package:motion_photos/src/xmp_extractor.dart";
 import "package:panorama/panorama.dart";
 import "package:photos/generated/l10n.dart";

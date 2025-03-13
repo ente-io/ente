@@ -95,6 +95,7 @@ class CollectionsService {
     for (final collection in collections) {
       // using deprecated method because the path is stored in encrypted
       // format in the DB
+      // ignore: deprecated_member_use_from_same_package
       final r = _cacheCollectionAttributes(collection);
       collectionsToInsert.add(r);
     }

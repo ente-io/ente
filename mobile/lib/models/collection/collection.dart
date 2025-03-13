@@ -45,10 +45,12 @@ class Collection {
 
   set sharedMagicMetadata(ShareeMagicMetadata? val) => _sharedMmd = val;
 
+// ignore: deprecated_member_use_from_same_package
   String get displayName =>
       name ?? (isDeleted == true ? 'Delete album' : "Unnamed Album");
 
   void setName(String newName) {
+    // ignore: deprecated_member_use_from_same_package
     name = newName;
   }
 

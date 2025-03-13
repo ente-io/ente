@@ -1393,26 +1393,6 @@
   "enableMachineLearningBanner": "Увімкніть машинне навчання для магічного пошуку та розпізнавання облич",
   "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення оброблення та синхронізації",
   "searchPersonsEmptySection": "Люди будуть показані тут після завершення оброблення та синхронізації",
-  "viewersSuccessfullyAdded": "{count, plural, one {} few {Додано {count} користувача} many {Додано {count} користувачів}=0 {Додано 0 користувачів} =1 {Додано 1 користувач} other {Додано {count} користувачів}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {} few {Додано {count} співаторів} many {Додано {count} співаторів}=0 {Додано 0 співавторів} =1 {Додано 1 співавтор} other {Додано {count} співавторів}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
   "accountIsAlreadyConfigured": "Обліковий запис уже налаштовано.",
   "sessionIdMismatch": "Невідповідність ідентифікатора сеансу",
   "@sessionIdMismatch": {
@@ -1478,15 +1458,6 @@
   },
   "currentlyRunning": "зараз працює",
   "ignored": "ігнорується",
-  "photosCount": "{count, plural, one {} few {{count} фото} many {{count} фото}=0 {0 фото} =1 {1 фото} other {{count} фото}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Файл",
   "searchSectionsLengthMismatch": "Невідповідність довжини розділів: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1584,5 +1555,19 @@
   },
   "legacyInvite": "{email} запросив вас стати довіреною особою",
   "authToManageLegacy": "Авторизуйтесь, щоби керувати довіреними контактами",
-  "useDifferentPlayerInfo": "Виникли проблеми з відтворенням цього відео? Натисніть і утримуйте тут, щоб спробувати інший плеєр."
+  "useDifferentPlayerInfo": "Виникли проблеми з відтворенням цього відео? Натисніть і утримуйте тут, щоб спробувати інший плеєр.",
+  "editTime": "Edit time",
+  "selectTime": "Select time",
+  "selectDate": "Select date",
+  "previous": "Previous",
+  "selectOneDateAndTimeForAll": "Select one date and time for all",
+  "selectStartOfRange": "Select start of range",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
+  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
+  "newRange": "New range",
+  "selectOneDateAndTime": "Select one date and time",
+  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
+  "shiftDatesAndTime": "Shift dates and time",
+  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
+  "photocountPhotos": "$photoCount photos"
 }
