@@ -5,6 +5,7 @@ import { type Location } from "@/base/types";
 import {
     fileLogID,
     type EnteFile,
+    type FileMagicMetadata,
     type FilePublicMagicMetadata,
 } from "@/media/file";
 import { nullToUndefined } from "@/utils/transform";
@@ -444,6 +445,11 @@ export const fileCreationPhotoDate = (
  * @param metadataUpdates A subset of {@link PrivateMagicMetadata} containing
  * the fields that we want to add or update.
  *
+ * @returns An updated {@link EnteFile} objct that incorporates the metadata
+ * updates. This is effectively what we would get if we to ask the remote for
+ * the latest file for this ID, except we don't do an actual sync and instead
+ * apply the changes on it piecemeal.
+ *
  * [Note: Interactive updates to file metadata]
  *
  * This function updates the magic metadata on remote, but and also modifies the
@@ -478,7 +484,7 @@ export const fileCreationPhotoDate = (
 export const updateRemotePrivateMagicMetadata = async (
     file: EnteFile,
     metadataUpdates: Partial<PrivateMagicMetadata>,
-) => {
+): Promise<EnteFile> => {
     const existingMetadata = filePrivateMagicMetadata(file);
 
     const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };
@@ -492,7 +498,24 @@ export const updateRemotePrivateMagicMetadata = async (
         metadataVersion,
     );
 
-    return putFilesPrivateMagicMetadata(updateRequest);
+    const updatedEnvelope = updateRequest.metadataList[0]!.magicMetadata;
+
+    await putFilesPrivateMagicMetadata(updateRequest);
+
+    // See: [Note: Interactive updates to file metadata]
+
+    // Use the updated envelope we sent as a starting point for the metadata we
+    // will use for the updated file.
+    const magicMetadata = updatedEnvelope as FileMagicMetadata;
+    // The correct version will come in the updated EnteFile we get in the
+    // response of the /diff. Temporarily bump it to reflect our latest edit.
+    magicMetadata.version = metadataVersion + 1;
+    // Set the contents (data) to the updated metadata contents we just PUT.
+    magicMetadata.data = updatedMetadata;
+
+    // Return a new EnteFile object with its metadata set to incorporate the
+    // updates we just applied to remote.
+    return { ...file, magicMetadata };
 };
 
 /**
