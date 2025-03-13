@@ -55,7 +55,7 @@ class SemanticSearchService {
 
     // call getClipEmbeddings after 5 seconds
     Future.delayed(const Duration(seconds: 5), () async {
-      await _getClipVectors();
+      await getClipVectors();
     });
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
       _cachedImageEmbeddingVectors = null;
@@ -108,20 +108,7 @@ class SemanticSearchService {
     _logger.info("Indexes cleared");
   }
 
-  Future<List<EmbeddingVector>> getClipVectorsForFileIDs(
-    Iterable<int> fileIDs,
-  ) async {
-    final embeddings = await _getClipVectors();
-    final result = <EmbeddingVector>[];
-    for (final embedding in embeddings) {
-      if (fileIDs.contains(embedding.fileID)) {
-        result.add(embedding);
-      }
-    }
-    return result;
-  }
-
-  Future<List<EmbeddingVector>> _getClipVectors() async {
+  Future<List<EmbeddingVector>> getClipVectors() async {
     if (_cachedImageEmbeddingVectors != null) {
       return _cachedImageEmbeddingVectors!;
     }
@@ -270,7 +257,7 @@ class SemanticSearchService {
     required Map<String, double> minimumSimilarityMap,
   }) async {
     final startTime = DateTime.now();
-    final imageEmbeddings = await _getClipVectors();
+    final imageEmbeddings = await getClipVectors();
     final Map<String, List<QueryResult>> queryResults = await _computer
         .compute<Map<String, dynamic>, Map<String, List<QueryResult>>>(
       computeBulkSimilarities,

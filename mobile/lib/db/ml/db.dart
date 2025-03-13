@@ -14,6 +14,7 @@ import "package:photos/events/embedding_updated_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
@@ -412,24 +413,23 @@ class MLDataDB extends IMLDataDB<int> {
     return maps.map((e) => mapRowToFace(e)).toList();
   }
 
-  Future<Map<int, List<Face>>> getFacesForFileIDs(
-    Iterable<int> fileUploadIDs,
-  ) async {
+  @override
+  Future<Map<int, List<FaceWithoutEmbedding>>>
+      getFileIDsToFacesWithoutEmbedding() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       '''
-      SELECT * FROM $facesTable
-      WHERE $fileIDColumn IN (${fileUploadIDs.map((id) => "'$id'").join(",")})
+      SELECT $faceIDColumn, $fileIDColumn, $faceScore, $faceDetectionColumn, $faceBlur FROM $facesTable
     ''',
     );
     if (maps.isEmpty) {
       return {};
     }
-    final result = <int, List<Face>>{};
+    final result = <int, List<FaceWithoutEmbedding>>{};
     for (final map in maps) {
-      final face = mapRowToFace(map);
+      final face = mapRowToFaceWithoutEmbedding(map);
       final fileID = map[fileIDColumn] as int;
-      result.putIfAbsent(fileID, () => <Face>[]).add(face);
+      result.putIfAbsent(fileID, () => <FaceWithoutEmbedding>[]).add(face);
     }
     return result;
   }

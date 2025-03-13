@@ -22,7 +22,7 @@ import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/time_memory.dart";
 import "package:photos/models/memories/trip_memory.dart";
-import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/service_locator.dart";
@@ -32,6 +32,14 @@ import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
+
+Vector? _clipPositiveTextVector;
+const String clipPositiveQuery =
+    'Photo of a precious and nostalgic memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
+
+final Map<PeopleActivity, Vector> _clipPeopleActivityVectors = {};
+
+final logger = Logger("SmartMemoriesServiceStatic");
 
 class MemoriesResult {
   final List<SmartMemory> memories;
@@ -46,15 +54,6 @@ class SmartMemoriesService {
 
   bool _isInit = false;
 
-  Locale? _locale;
-  late Map<int, int> _seenTimes;
-
-  Vector? _clipPositiveTextVector;
-  static const String clipPositiveQuery =
-      'Photo of a precious and nostalgic memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
-
-  final Map<PeopleActivity, Vector> _clipPeopleActivityVectors = {};
-
   static const _clipSimilarImageThreshold = 0.75;
   static const _clipActivityQueryThreshold = 0.25;
 
@@ -64,13 +63,11 @@ class SmartMemoriesService {
 
   Future<void> init() async {
     if (_isInit) return;
-    _locale = await getLocale();
-
     _clipPositiveTextVector ??= Vector.fromList(
       await MLComputer.instance.runClipText(clipPositiveQuery),
     );
     for (final peopleActivity in PeopleActivity.values) {
-      _clipPeopleActivityVectors[peopleActivity] = Vector.fromList(
+      _clipPeopleActivityVectors[peopleActivity] ??= Vector.fromList(
         await MLComputer.instance.runClipText(activityQuery(peopleActivity)),
       );
     }
@@ -88,50 +85,61 @@ class SmartMemoriesService {
       final TimeLogger t = TimeLogger(context: "calcMemories");
       _logger.finest('calcMemories called with time: $now $t');
       await init();
-      final List<SmartMemory> memories = [];
-      final (allFiles, allFileIdsToFile) = await _getFilesAndMapForMemories();
 
-      _seenTimes = await _memoriesDB.getSeenTimes();
+      final (allFiles, allFileIdsToFile) = await _getFilesAndMapForMemories();
       _logger.finest("All files length: ${allFiles.length} $t");
 
-      final peopleMemories = await _getPeopleResults(
-        allFiles,
-        allFileIdsToFile,
-        now,
-        oldCache.peopleShownLogs,
-        surfaceAll: debugSurfaceAll,
+      final seenTimes = await _memoriesDB.getSeenTimes();
+      _logger.finest('seenTimes has ${seenTimes.length} entries $t');
+
+      final persons = await PersonService.instance.getPersons();
+      _logger.finest('gotten all ${persons.length} persons $t');
+
+      final currentUserEmail = Configuration.instance.getEmail();
+      _logger.finest('currentUserEmail: $currentUserEmail $t');
+
+      final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces =
+          await MLDataDB.instance.getFileIDsToFacesWithoutEmbedding();
+      _logger.finest('fileIdToFaces has ${fileIdToFaces.length} entries $t');
+
+      final allImageEmbeddings =
+          await SemanticSearchService.instance.getClipVectors();
+      _logger.finest(
+        'allImageEmbeddings has ${allImageEmbeddings.length} entries $t',
       );
-      _deductUsedMemories(allFiles, peopleMemories);
-      memories.addAll(peopleMemories);
-      _logger.finest("All files length after people: ${allFiles.length} $t");
 
-      // Trip memories
-      final (tripMemories, bases) = await _getTripsResults(
-        allFiles,
-        now,
-        oldCache.tripsShownLogs,
-        surfaceAll: debugSurfaceAll,
-      );
-      _deductUsedMemories(allFiles, tripMemories);
-      memories.addAll(tripMemories);
-      _logger.finest("All files length after trips: ${allFiles.length} $t");
+      final locale = await getLocale();
 
-      // Time memories
-      final timeMemories = await _onThisDayOrWeekResults(allFiles, now);
-      _deductUsedMemories(allFiles, timeMemories);
-      memories.addAll(timeMemories);
-      _logger.finest("All files length after time: ${allFiles.length} $t");
-
-      // Filler memories
-      final fillerMemories = await _getFillerResults(allFiles, now);
-      _deductUsedMemories(allFiles, fillerMemories);
-      memories.addAll(fillerMemories);
-      _logger.finest("All files length after filler: ${allFiles.length} $t");
-      return MemoriesResult(memories, bases);
+      final memoriesResult = await _allMemoriesCalculations(<String, dynamic>{
+        "allFiles": allFiles,
+        "allFileIdsToFile": allFileIdsToFile,
+        "now": now,
+        "oldCache": oldCache,
+        "debugSurfaceAll": debugSurfaceAll,
+        "seenTimes": seenTimes,
+        "persons": persons,
+        "currentUserEmail": currentUserEmail,
+        "fileIdToFaces": fileIdToFaces,
+        "locale": locale,
+        "allImageEmbeddings": allImageEmbeddings,
+      });
+      return memoriesResult;
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
       return MemoriesResult(<SmartMemory>[], <BaseLocation>[]);
     }
+  }
+
+  static List<EmbeddingVector> _getEmbeddingsForFileIDs(
+    Map<int, EmbeddingVector> fileIDToImageEmbedding,
+    Set<int> fileIDs,
+  ) {
+    final List<EmbeddingVector> embeddings = [];
+    for (final fileID in fileIDs) {
+      final embedding = fileIDToImageEmbedding[fileID];
+      if (embedding != null) embeddings.add(embedding);
+    }
+    return embeddings;
   }
 
   Future<(Set<EnteFile>, Map<int, EnteFile>)>
@@ -152,14 +160,106 @@ class SmartMemoriesService {
     return (allFiles, allFileIdsToFile);
   }
 
+  static Future<MemoriesResult> _allMemoriesCalculations(
+    Map<String, dynamic> args,
+  ) async {
+    final TimeLogger t = TimeLogger(context: "_allMemoriesCalculations");
+    // Arguments: direct data
+    final Set<EnteFile> allFiles = args["allFiles"];
+    final Map<int, EnteFile> allFileIdsToFile = args["allFileIdsToFile"];
+    final DateTime now = args["now"];
+    final MemoriesCache oldCache = args["oldCache"];
+    final bool debugSurfaceAll = args["debugSurfaceAll"] ?? false;
+    final Map<int, int> seenTimes = args["seenTimes"];
+    final List<PersonEntity> persons = args["persons"];
+    final String? currentUserEmail = args["currentUserEmail"];
+    final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces =
+        args["fileIdToFaces"];
+    final List<EmbeddingVector> allImageEmbeddings = args["allImageEmbeddings"];
+    final Locale? locale = args["locale"];
+    logger.finest('All arguments (direct data) unwrapped $t');
+
+    final Map<String, String> faceIDsToPersonID = {};
+    for (final person in persons) {
+      for (final cluster in person.data.assigned) {
+        for (final faceID in cluster.faces) {
+          faceIDsToPersonID[faceID] = person.remoteID;
+        }
+      }
+    }
+    final Map<int, EmbeddingVector> fileIDToImageEmbedding = {};
+    for (final embedding in allImageEmbeddings) {
+      fileIDToImageEmbedding[embedding.fileID] = embedding;
+    }
+    logger.finest('arguments from indirect data calculated $t');
+
+    final List<SmartMemory> memories = [];
+
+    // People memories
+    final peopleMemories = await _getPeopleResults(
+      allFiles,
+      allFileIdsToFile,
+      now,
+      oldCache.peopleShownLogs,
+      surfaceAll: debugSurfaceAll,
+      seenTimes: seenTimes,
+      persons: persons,
+      currentUserEmail: currentUserEmail,
+      fileIdToFaces: fileIdToFaces,
+      fileIDToImageEmbedding: fileIDToImageEmbedding,
+    );
+    _deductUsedMemories(allFiles, peopleMemories);
+    memories.addAll(peopleMemories);
+    logger.finest("All files length after people: ${allFiles.length} $t");
+
+    // Trip memories
+    final (tripMemories, bases) = await _getTripsResults(
+      allFiles,
+      now,
+      oldCache.tripsShownLogs,
+      surfaceAll: debugSurfaceAll,
+      seenTimes: seenTimes,
+      fileIdToFaces: fileIdToFaces,
+      faceIDsToPersonID: faceIDsToPersonID,
+      fileIDToImageEmbedding: fileIDToImageEmbedding,
+    );
+    _deductUsedMemories(allFiles, tripMemories);
+    memories.addAll(tripMemories);
+    logger.finest("All files length after trips: ${allFiles.length} $t");
+
+    // Time memories
+    final timeMemories = await _onThisDayOrWeekResults(
+      allFiles,
+      now,
+      seenTimes: seenTimes,
+      fileIdToFaces: fileIdToFaces,
+      faceIDsToPersonID: faceIDsToPersonID,
+      fileIDToImageEmbedding: fileIDToImageEmbedding,
+      locale: locale,
+    );
+    _deductUsedMemories(allFiles, timeMemories);
+    memories.addAll(timeMemories);
+    logger.finest("All files length after time: ${allFiles.length} $t");
+
+    // Filler memories
+    final fillerMemories =
+        await _getFillerResults(allFiles, now, seenTimes: seenTimes);
+    _deductUsedMemories(allFiles, fillerMemories);
+    memories.addAll(fillerMemories);
+    logger.finest("All files length after filler: ${allFiles.length} $t");
+    return MemoriesResult(memories, bases);
+  }
+
   Future<List<FillerMemory>> calcFillerResults() async {
     final now = DateTime.now();
     final (allFiles, _) = await _getFilesAndMapForMemories();
-    final fillerMemories = await _getFillerResults(allFiles, now);
+    final seenTimes = await _memoriesDB.getSeenTimes();
+    final fillerMemories =
+        await _getFillerResults(allFiles, now, seenTimes: seenTimes);
     return fillerMemories;
   }
 
-  void _deductUsedMemories(
+  static void _deductUsedMemories(
     Set<EnteFile> files,
     List<SmartMemory> memories,
   ) {
@@ -170,12 +270,17 @@ class SmartMemoriesService {
     files.removeAll(usedFiles);
   }
 
-  Future<List<PeopleMemory>> _getPeopleResults(
+  static Future<List<PeopleMemory>> _getPeopleResults(
     Iterable<EnteFile> allFiles,
     Map<int, EnteFile> allFileIdsToFile,
     DateTime currentTime,
     List<PeopleShownLog> shownPeople, {
     bool surfaceAll = false,
+    required Map<int, int> seenTimes,
+    required List<PersonEntity> persons,
+    String? currentUserEmail,
+    required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
+    required Map<int, EmbeddingVector> fileIDToImageEmbedding,
   }) async {
     final w = (kDebugMode ? EnteWatch('getPeopleResults') : null)?..start();
     final List<PeopleMemory> memoryResults = [];
@@ -186,7 +291,6 @@ class SmartMemoriesService {
     w?.log('allFiles setup');
 
     // Get ordered list of important people (all named, from most to least files)
-    final persons = await PersonService.instance.getPersons();
     if (persons.length < 5) return []; // Stop if not enough named persons
     final personIdToPerson = <String, PersonEntity>{};
     final personIdToFaceIDs = <String, Set<String>>{};
@@ -215,23 +319,15 @@ class SmartMemoriesService {
 
     // Check if the user has assignmed "me"
     String? meID;
-    final currentUserEmail = Configuration.instance.getEmail();
     for (final personEntity in persons) {
       if (personEntity.data.email == currentUserEmail) {
         meID = personEntity.remoteID;
         break;
       }
     }
-    w?.log('meID setup part 1');
     final bool isMeAssigned = meID != null;
-    Map<int, List<Face>>? meFilesToFaces;
-    if (isMeAssigned) {
-      final meFileIDs = personIdToFileIDs[meID]!;
-      meFilesToFaces = await MLDataDB.instance.getFacesForFileIDs(
-        meFileIDs,
-      );
-    }
-    w?.log('meID setup part 2');
+    Set<int>? meFileIDs;
+    if (isMeAssigned) meFileIDs = personIdToFileIDs[meID]!;
 
     // Loop through the people and find all memories
     final Map<String, Map<PeopleMemoryType, PeopleMemory>> personToMemories =
@@ -240,15 +336,11 @@ class SmartMemoriesService {
       final personFileIDs = personIdToFileIDs[personID]!;
       final personName = personIdToPerson[personID]!.data.name;
       w?.log('start with new person $personName');
-      final Map<int, List<Face>> personFilesToFaces =
-          await MLDataDB.instance.getFacesForFileIDs(
-        personFileIDs,
-      );
       w?.log('personFilesToFaces setup');
       // Inside people loop, check for spotlight (Most likely every person will have a spotlight)
       final spotlightFiles = <EnteFile>[];
       for (final fileID in personFileIDs) {
-        final int personsPresent = personFilesToFaces[fileID]?.length ?? 10;
+        final int personsPresent = fileIdToFaces[fileID]?.length ?? 10;
         if (personsPresent > 1) continue;
         final file = allFileIdsToFile[fileID];
         if (file != null) {
@@ -261,7 +353,8 @@ class SmartMemoriesService {
           title = "Spotlight on yourself";
         }
         final selectSpotlightMemories = await _bestSelectionPeople(
-          spotlightFiles.map((f) => Memory.fromFile(f, _seenTimes)).toList(),
+          spotlightFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
+          fileIDToImageEmbedding: fileIDToImageEmbedding,
         );
         final spotlightMemory = PeopleMemory(
           selectSpotlightMemories,
@@ -281,9 +374,9 @@ class SmartMemoriesService {
       if (isMeAssigned && meID != personID) {
         final youAndThemFiles = <EnteFile>[];
         for (final fileID in personFileIDs) {
-          final meFaces = meFilesToFaces![fileID];
-          final personFaces = personFilesToFaces[fileID] ?? [];
-          if (meFaces == null || personFaces.length != 2) continue;
+          final bool mePresent = meFileIDs!.contains(fileID);
+          final personFaces = fileIdToFaces[fileID] ?? [];
+          if (mePresent || personFaces.length != 2) continue;
           final file = allFileIdsToFile[fileID];
           if (file != null) {
             youAndThemFiles.add(file);
@@ -292,7 +385,8 @@ class SmartMemoriesService {
         if (youAndThemFiles.length > 5) {
           final String title = "You and $personName";
           final selectYouAndThemMemories = await _bestSelectionPeople(
-            youAndThemFiles.map((f) => Memory.fromFile(f, _seenTimes)).toList(),
+            youAndThemFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
+            fileIDToImageEmbedding: fileIDToImageEmbedding,
           );
           final youAndThemMemory = PeopleMemory(
             selectYouAndThemMemories,
@@ -311,8 +405,10 @@ class SmartMemoriesService {
 
       // Inside people loop, check for doingSomethingTogether
       if (isMeAssigned && meID != personID) {
-        final vectors = await SemanticSearchService.instance
-            .getClipVectorsForFileIDs(personFileIDs);
+        final vectors = _getEmbeddingsForFileIDs(
+          fileIDToImageEmbedding,
+          personFileIDs,
+        );
         w?.log('getting clip vectors for doingSomethingTogether');
         final activityFiles = <EnteFile>[];
         PeopleActivity lastActivity = PeopleActivity.values.first;
@@ -322,11 +418,14 @@ class SmartMemoriesService {
           lastActivity = activity;
           final Vector? activityVector = _clipPeopleActivityVectors[activity];
           if (activityVector == null) {
-            _logger.severe("No vector for activity $activity");
+            logger.severe("No vector for activity $activity");
             continue activityLoop;
           }
-          final similarities = await MLComputer.instance
-              .compareEmbeddings(vectors, activityVector);
+          final Map<int, double> similarities = {};
+          for (final embedding in vectors) {
+            similarities[embedding.fileID] =
+                embedding.vector.dot(activityVector);
+          }
           w?.log(
             'comparing embeddings for doingSomethingTogether and $activity',
           );
@@ -345,7 +444,8 @@ class SmartMemoriesService {
         if (activityFiles.length > 5) {
           final String title = activityTitle(lastActivity, personName);
           final selectActivityMemories = await _bestSelectionPeople(
-            activityFiles.map((f) => Memory.fromFile(f, _seenTimes)).toList(),
+            activityFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
+            fileIDToImageEmbedding: fileIDToImageEmbedding,
           );
           final activityMemory = PeopleMemory(
             selectActivityMemories,
@@ -395,7 +495,7 @@ class SmartMemoriesService {
         final String title = "Last time with $personName";
         final lastTimeMemory = PeopleMemory(
           lastTimeYouSawThemFiles
-              .map((f) => Memory.fromFile(f, _seenTimes))
+              .map((f) => Memory.fromFile(f, seenTimes))
               .toList(),
           title,
           nowInMicroseconds,
@@ -534,11 +634,15 @@ class SmartMemoriesService {
     return memoryResults;
   }
 
-  Future<(List<TripMemory>, List<BaseLocation>)> _getTripsResults(
+  static Future<(List<TripMemory>, List<BaseLocation>)> _getTripsResults(
     Iterable<EnteFile> allFiles,
     DateTime currentTime,
     List<TripsShownLog> shownTrips, {
     bool surfaceAll = false,
+    required Map<int, int> seenTimes,
+    required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
+    required Map<String, String> faceIDsToPersonID,
+    required Map<int, EmbeddingVector> fileIDToImageEmbedding,
   }) async {
     final List<TripMemory> memoryResults = [];
     if (allFiles.isEmpty) return (<TripMemory>[], <BaseLocation>[]);
@@ -685,7 +789,7 @@ class SmartMemoriesService {
               TripMemory(
                 Memory.fromFiles(
                   currentBlockFiles,
-                  _seenTimes,
+                  seenTimes,
                 ),
                 'Trip1',
                 0,
@@ -713,7 +817,7 @@ class SmartMemoriesService {
       if (lastBlockDuration >= 2 && lastBlockDuration <= 30) {
         tripLocations.add(
           TripMemory(
-            Memory.fromFiles(currentBlockFiles, _seenTimes),
+            Memory.fromFiles(currentBlockFiles, seenTimes),
             'Trip2',
             0,
             0,
@@ -757,7 +861,7 @@ class SmartMemoriesService {
             lastCreationTime:
                 max(otherTrip.lastCreationTime!, trip.lastCreationTime!),
           );
-          _logger.finest('Merged two trip locations');
+          logger.finest('Merged two trip locations');
           merged = true;
           break;
         }
@@ -792,7 +896,7 @@ class SmartMemoriesService {
         String name =
             "Base (${baseLocation.isCurrentBase ? 'current' : 'old'})";
         final String? locationName = _tryFindLocationName(
-          Memory.fromFiles(baseLocation.files, _seenTimes),
+          Memory.fromFiles(baseLocation.files, seenTimes),
           base: true,
         );
         if (locationName != null) {
@@ -801,7 +905,7 @@ class SmartMemoriesService {
         }
         memoryResults.add(
           TripMemory(
-            Memory.fromFiles(baseLocation.files, _seenTimes),
+            Memory.fromFiles(baseLocation.files, seenTimes),
             name,
             nowInMicroseconds,
             windowEnd,
@@ -820,7 +924,12 @@ class SmartMemoriesService {
         } else if (year == currentTime.year - 1) {
           name = "Last year's trip";
         }
-        final photoSelection = await _bestSelection(trip.memories);
+        final photoSelection = await _bestSelection(
+          trip.memories,
+          fileIdToFaces: fileIdToFaces,
+          faceIDsToPersonID: faceIDsToPersonID,
+          fileIDToImageEmbedding: fileIDToImageEmbedding,
+        );
         memoryResults.add(
           trip.copyWith(
             memories: photoSelection,
@@ -873,7 +982,12 @@ class SmartMemoriesService {
         } else if (year == currentTime.year - 1) {
           name = "Last year's trip";
         }
-        final photoSelection = await _bestSelection(trip.memories);
+        final photoSelection = await _bestSelection(
+          trip.memories,
+          fileIdToFaces: fileIdToFaces,
+          faceIDsToPersonID: faceIDsToPersonID,
+          fileIDToImageEmbedding: fileIDToImageEmbedding,
+        );
         final firstCreationDate = DateTime.fromMicrosecondsSinceEpoch(
           trip.firstCreationTime!,
         );
@@ -942,7 +1056,12 @@ class SmartMemoriesService {
               } else if (year == currentTime.year - 1) {
                 name = "Last year's trip";
               }
-              final photoSelection = await _bestSelection(trip.memories);
+              final photoSelection = await _bestSelection(
+                trip.memories,
+                fileIdToFaces: fileIdToFaces,
+                faceIDsToPersonID: faceIDsToPersonID,
+                fileIDToImageEmbedding: fileIDToImageEmbedding,
+              );
               memoryResults.add(
                 trip.copyWith(
                   memories: photoSelection,
@@ -960,10 +1079,15 @@ class SmartMemoriesService {
     return (memoryResults, baseLocations);
   }
 
-  Future<List<TimeMemory>> _onThisDayOrWeekResults(
+  static Future<List<TimeMemory>> _onThisDayOrWeekResults(
     Iterable<EnteFile> allFiles,
-    DateTime currentTime,
-  ) async {
+    DateTime currentTime, {
+    required Map<int, int> seenTimes,
+    required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
+    required Map<String, String> faceIDsToPersonID,
+    required Map<int, EmbeddingVector> fileIDToImageEmbedding,
+    required Locale? locale,
+  }) async {
     final List<TimeMemory> memoryResult = [];
     if (allFiles.isEmpty) return [];
 
@@ -990,7 +1114,7 @@ class SmartMemoriesService {
       dayMonthYearGroups
           .putIfAbsent(dayMonth, () => {})
           .putIfAbsent(year, () => [])
-          .add(Memory.fromFile(file, _seenTimes));
+          .add(Memory.fromFile(file, seenTimes));
     }
 
     // Process each nearby day-month to find significant days
@@ -1010,7 +1134,12 @@ class SmartMemoriesService {
         final date =
             DateTime(currentTime.year, dayMonth ~/ 100, dayMonth % 100);
         final allPhotos = yearGroups.values.expand((x) => x).toList();
-        final photoSelection = await _bestSelection(allPhotos);
+        final photoSelection = await _bestSelection(
+          allPhotos,
+          fileIdToFaces: fileIdToFaces,
+          faceIDsToPersonID: faceIDsToPersonID,
+          fileIDToImageEmbedding: fileIDToImageEmbedding,
+        );
 
         memoryResult.add(
           TimeMemory(
@@ -1027,8 +1156,13 @@ class SmartMemoriesService {
           final showDate =
               DateTime(currentYear, dayMonth ~/ 100, dayMonth % 100);
           final files = yearGroups[year]!;
-          final photoSelection = await _bestSelection(files);
-          String name = DateFormat.yMMMd(_locale?.languageCode).format(date);
+          final photoSelection = await _bestSelection(
+            files,
+            fileIdToFaces: fileIdToFaces,
+            faceIDsToPersonID: faceIDsToPersonID,
+            fileIDToImageEmbedding: fileIDToImageEmbedding,
+          );
+          String name = DateFormat.yMMMd(locale?.languageCode).format(date);
           memoryResult.add(
             TimeMemory(
               photoSelection,
@@ -1065,7 +1199,7 @@ class SmartMemoriesService {
 
         currentWeekYearGroups
             .putIfAbsent(year, () => [])
-            .add(Memory.fromFile(file, _seenTimes));
+            .add(Memory.fromFile(file, seenTimes));
       }
 
       // Process the week and see if it's significant
@@ -1078,7 +1212,12 @@ class SmartMemoriesService {
           // Combine all years for this week
           final allPhotos =
               currentWeekYearGroups.values.expand((x) => x).toList();
-          final photoSelection = await _bestSelection(allPhotos);
+          final photoSelection = await _bestSelection(
+            allPhotos,
+            fileIdToFaces: fileIdToFaces,
+            faceIDsToPersonID: faceIDsToPersonID,
+            fileIDToImageEmbedding: fileIDToImageEmbedding,
+          );
           const name = "This week through the years";
           memoryResult.add(
             TimeMemory(
@@ -1095,7 +1234,12 @@ class SmartMemoriesService {
               Duration(days: (currentWeek - 1) * 7),
             );
             final files = currentWeekYearGroups[year]!;
-            final photoSelection = await _bestSelection(files);
+            final photoSelection = await _bestSelection(
+              files,
+              fileIdToFaces: fileIdToFaces,
+              faceIDsToPersonID: faceIDsToPersonID,
+              fileIDToImageEmbedding: fileIDToImageEmbedding,
+            );
             final name =
                 "This week, ${currentTime.year - date.year} years back";
 
@@ -1133,7 +1277,7 @@ class SmartMemoriesService {
 
       currentMonthYearGroups
           .putIfAbsent(year, () => [])
-          .add(Memory.fromFile(file, _seenTimes));
+          .add(Memory.fromFile(file, seenTimes));
     }
 
     // Add the largest two months plus the month through the years
@@ -1151,8 +1295,11 @@ class SmartMemoriesService {
         final photoSelection = await _bestSelection(
           monthYearFiles,
           prefferedSize: monthSelectionSize,
+          fileIdToFaces: fileIdToFaces,
+          faceIDsToPersonID: faceIDsToPersonID,
+          fileIDToImageEmbedding: fileIDToImageEmbedding,
         );
-        final monthName = DateFormat.MMMM(_locale?.languageCode)
+        final monthName = DateFormat.MMMM(locale?.languageCode)
             .format(DateTime(year, currentMonth));
         final daysLeftInMonth = DateTime(currentYear, currentMonth + 1, 0).day -
             currentTime.day +
@@ -1175,9 +1322,14 @@ class SmartMemoriesService {
     final allPhotos = sortedYearsForCurrentMonth
         .expand((year) => currentMonthYearGroups[year]!)
         .toList();
-    final photoSelection =
-        await _bestSelection(allPhotos, prefferedSize: monthSelectionSize);
-    final monthName = DateFormat.MMMM(_locale?.languageCode)
+    final photoSelection = await _bestSelection(
+      allPhotos,
+      prefferedSize: monthSelectionSize,
+      fileIdToFaces: fileIdToFaces,
+      faceIDsToPersonID: faceIDsToPersonID,
+      fileIDToImageEmbedding: fileIDToImageEmbedding,
+    );
+    final monthName = DateFormat.MMMM(locale?.languageCode)
         .format(DateTime(currentTime.year, currentMonth));
     final daysLeftInMonth =
         DateTime(currentYear, currentMonth + 1, 0).day - currentTime.day + 1;
@@ -1194,10 +1346,11 @@ class SmartMemoriesService {
     return memoryResult;
   }
 
-  Future<List<FillerMemory>> _getFillerResults(
+  static Future<List<FillerMemory>> _getFillerResults(
     Iterable<EnteFile> allFiles,
-    DateTime currentTime,
-  ) async {
+    DateTime currentTime, {
+    required Map<int, int> seenTimes,
+  }) async {
     final List<FillerMemory> memoryResults = [];
     if (allFiles.isEmpty) return [];
     final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
@@ -1221,7 +1374,7 @@ class SmartMemoriesService {
         final yearsAgo = currentYear - fileDate.year;
         yearsAgoToMemories
             .putIfAbsent(yearsAgo, () => [])
-            .add(Memory.fromFile(file, _seenTimes));
+            .add(Memory.fromFile(file, seenTimes));
       } else if (almostYearEnd) {
         final altDiff = fileDate.copyWith(year: currentYear + 1).difference(
               currentTime,
@@ -1230,7 +1383,7 @@ class SmartMemoriesService {
           final yearsAgo = currentYear - fileDate.year + 1;
           yearsAgoToMemories
               .putIfAbsent(yearsAgo, () => [])
-              .add(Memory.fromFile(file, _seenTimes));
+              .add(Memory.fromFile(file, seenTimes));
         }
       }
     }
@@ -1252,14 +1405,14 @@ class SmartMemoriesService {
   }
 
   /// TODO: lau: replace this by just taking next 7 days
-  int _getWeekNumber(DateTime date) {
+  static int _getWeekNumber(DateTime date) {
     // Get day of year (1-366)
     final int dayOfYear = int.parse(DateFormat('D').format(date));
     // Integer division by 7 and add 1 to start from week 1
     return ((dayOfYear - 1) ~/ 7) + 1;
   }
 
-  String? _tryFindLocationName(
+  static String? _tryFindLocationName(
     List<Memory> memories, {
     bool base = false,
   }) {
@@ -1285,9 +1438,10 @@ class SmartMemoriesService {
   /// - Distribution of photos over time
   /// - Nostalgia score of photos
   /// - Distribution of photos over locations
-  Future<List<Memory>> _bestSelectionPeople(
+  static Future<List<Memory>> _bestSelectionPeople(
     List<Memory> memories, {
     int? prefferedSize,
+    required Map<int, EmbeddingVector> fileIDToImageEmbedding,
   }) async {
     try {
       final w = (kDebugMode ? EnteWatch('getPeopleResults') : null)?..start();
@@ -1325,14 +1479,17 @@ class SmartMemoriesService {
       bucketLoop:
       for (final bucket in timeBuckets) {
         // Get X% most nostalgic photos
-        final bucketFileIDs = bucket
-            .map((memory) => memory.file.uploadedFileID!)
-            .toSet()
-            .toList();
-        final bucketVectors = await SemanticSearchService.instance
-            .getClipVectorsForFileIDs(bucketFileIDs);
-        final nostalgiaScores = await MLComputer.instance
-            .compareEmbeddings(bucketVectors, _clipPositiveTextVector!);
+        final bucketFileIDs =
+            bucket.map((memory) => memory.file.uploadedFileID!).toSet().toSet();
+        final bucketVectors = _getEmbeddingsForFileIDs(
+          fileIDToImageEmbedding,
+          bucketFileIDs,
+        );
+        final Map<int, double> nostalgiaScores = {};
+        for (final embedding in bucketVectors) {
+          nostalgiaScores[embedding.fileID] =
+              embedding.vector.dot(_clipPositiveTextVector!);
+        }
         final sortedNostalgia = bucket
           ..sort(
             (a, b) => nostalgiaScores[b.file.uploadedFileID!]!
@@ -1343,7 +1500,7 @@ class SmartMemoriesService {
             .toList();
 
         if (mostNostalgic.isEmpty) {
-          _logger.severe('No nostalgic photos in bucket');
+          logger.severe('No nostalgic photos in bucket');
         }
 
         // If no selection yet, take the most nostalgic photo
@@ -1379,13 +1536,13 @@ class SmartMemoriesService {
       finalSelection
           .sort((a, b) => b.file.creationTime!.compareTo(a.file.creationTime!));
 
-      _logger.finest(
+      logger.finest(
         'People memories selection done, returning ${finalSelection.length} memories',
       );
       w?.log('People memories selection done');
       return finalSelection;
     } catch (e, s) {
-      _logger.severe('Error in _bestSelectionPeople', e, s);
+      logger.severe('Error in _bestSelectionPeople', e, s);
       return [];
     }
   }
@@ -1393,19 +1550,17 @@ class SmartMemoriesService {
   /// Returns the best selection of files from the given list, for time and trip memories.
   /// Makes sure that the selection is not more than [prefferedSize] or 10 files,
   /// and that each year of the original list is represented.
-  Future<List<Memory>> _bestSelection(
+  static Future<List<Memory>> _bestSelection(
     List<Memory> memories, {
     int? prefferedSize,
+    required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
+    required Map<String, String> faceIDsToPersonID,
+    required Map<int, EmbeddingVector> fileIDToImageEmbedding,
   }) async {
     final fileCount = memories.length;
     int targetSize = prefferedSize ?? 10;
     if (fileCount <= targetSize) return memories;
     final fileIDs = memories.map((e) => e.file.uploadedFileID!).toSet();
-    final fileIdToFace = await MLDataDB.instance.getFacesForFileIDs(fileIDs);
-    final faceIDs =
-        fileIdToFace.values.expand((x) => x.map((face) => face.faceID)).toSet();
-    final faceIDsToPersonID =
-        await MLDataDB.instance.getFaceIdToPersonIdForFaces(faceIDs);
 
     final allYears = memories.map((e) {
       final creationTime =
@@ -1414,10 +1569,15 @@ class SmartMemoriesService {
     }).toSet();
 
     // Get clip scores for each file
-    final vectors =
-        await SemanticSearchService.instance.getClipVectorsForFileIDs(fileIDs);
-    final fileToScore = await MLComputer.instance
-        .compareEmbeddings(vectors, _clipPositiveTextVector!);
+    final vectors = _getEmbeddingsForFileIDs(
+      fileIDToImageEmbedding,
+      fileIDs,
+    );
+    final Map<int, double> fileToScore = {};
+    for (final embedding in vectors) {
+      fileToScore[embedding.fileID] =
+          embedding.vector.dot(_clipPositiveTextVector!);
+    }
     final fileIdToClip = <int, EmbeddingVector>{};
     for (final vector in vectors) {
       fileIdToClip[vector.fileID] = vector;
@@ -1428,7 +1588,7 @@ class SmartMemoriesService {
     for (final mem in memories) {
       final fileID = mem.file.uploadedFileID!;
       fileToFaceCount[fileID] = 0;
-      final faces = fileIdToFace[fileID];
+      final faces = fileIdToFaces[fileID];
       if (faces == null || faces.isEmpty) {
         continue;
       }
