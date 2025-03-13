@@ -209,7 +209,7 @@ class LocalSyncService {
     if (hasAnyMappingChanged || hasUnsyncedFiles) {
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
-          localDiffResult.uniqueLocalFiles,
+          localDiffResult.uniqueLocalFiles ?? [],
           source: "syncAllChange",
         ),
       );

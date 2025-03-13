@@ -11,10 +11,13 @@ class ExpandedMenuWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    textScaleFactor < 1.0 ? textScaleFactor = 1.0 : null;
+    final textScaler = MediaQuery.of(context).textScaler;
     //20 is height of font and 28 is total whitespace (top+bottom)
-    final double itemHeight = (20.0 * textScaleFactor) + 28.0;
+    var scaledHeight = textScaler.scale(20);
+    if (scaledHeight < 20) {
+      scaledHeight = 20;
+    }
+    final double itemHeight = scaledHeight + 28.0;
     const double whiteSpaceBetweenSections = 16.0;
     const double dividerHeightBetweenItems = 1.0;
     double numberOfDividers = 0.0;
