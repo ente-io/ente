@@ -1485,6 +1485,8 @@ class SmartMemoriesService {
           fileIDToImageEmbedding,
           bucketFileIDs,
         );
+        final bool littleEmbeddings =
+            bucketVectors.length < bucket.length * 0.5;
         final Map<int, double> nostalgiaScores = {};
         for (final embedding in bucketVectors) {
           nostalgiaScores[embedding.fileID] =
@@ -1492,12 +1494,17 @@ class SmartMemoriesService {
         }
         final sortedNostalgia = bucket
           ..sort(
-            (a, b) => nostalgiaScores[b.file.uploadedFileID!]!
-                .compareTo(nostalgiaScores[a.file.uploadedFileID!]!),
+            (a, b) => (nostalgiaScores[b.file.uploadedFileID!] ?? 0.0)
+                .compareTo((nostalgiaScores[a.file.uploadedFileID!] ?? 0.0)),
           );
-        final mostNostalgic = sortedNostalgia
-            .take((max(bucket.length * 0.3, 1)).toInt())
-            .toList();
+        late List<Memory> mostNostalgic;
+        if (littleEmbeddings) {
+          mostNostalgic = sortedNostalgia;
+        } else {
+          mostNostalgic = sortedNostalgia
+              .take((max(bucket.length * 0.3, 1)).toInt())
+              .toList();
+        }
 
         if (mostNostalgic.isEmpty) {
           logger.severe('No nostalgic photos in bucket');
@@ -1578,10 +1585,6 @@ class SmartMemoriesService {
       fileToScore[embedding.fileID] =
           embedding.vector.dot(_clipPositiveTextVector!);
     }
-    final fileIdToClip = <int, EmbeddingVector>{};
-    for (final vector in vectors) {
-      fileIdToClip[vector.fileID] = vector;
-    }
 
     // Get face scores for each file
     final fileToFaceCount = <int, int>{};
@@ -1606,8 +1609,8 @@ class SmartMemoriesService {
       // TODO: lau: eventually this sorting might have to be replaced with some scoring system
       // sort first on clip embeddings score (descending)
       memories.sort(
-        (a, b) => fileToScore[b.file.uploadedFileID!]!
-            .compareTo(fileToScore[a.file.uploadedFileID!]!),
+        (a, b) => (fileToScore[b.file.uploadedFileID!] ?? 0.0)
+            .compareTo((fileToScore[a.file.uploadedFileID!] ?? 0.0)),
       );
       // then sort on faces (descending), heavily prioritizing named faces
       memories.sort(
@@ -1621,10 +1624,11 @@ class SmartMemoriesService {
       filesLoop:
       for (final mem in memories.sublist(1)) {
         if (filteredMemories.length >= targetSize) break;
-        final clip = fileIdToClip[mem.file.uploadedFileID!];
+        final clip = fileIDToImageEmbedding[mem.file.uploadedFileID!];
         if (clip != null && (fileCount - skipped) > targetSize) {
           for (final filteredMem in filteredMemories) {
-            final fClip = fileIdToClip[filteredMem.file.uploadedFileID!];
+            final fClip =
+                fileIDToImageEmbedding[filteredMem.file.uploadedFileID!];
             if (fClip == null) continue;
             final similarity = clip.vector.dot(fClip.vector);
             if (similarity > _clipSimilarImageThreshold) {
@@ -1655,8 +1659,8 @@ class SmartMemoriesService {
         final yearFiles = yearToFiles[year]!;
         // sort first on clip embeddings score (descending)
         yearFiles.sort(
-          (a, b) => fileToScore[b.file.uploadedFileID!]!
-              .compareTo(fileToScore[a.file.uploadedFileID!]!),
+          (a, b) => (fileToScore[b.file.uploadedFileID!] ?? 0.0)
+              .compareTo((fileToScore[a.file.uploadedFileID!] ?? 0.0)),
         );
         // then sort on faces (descending), heavily prioritizing named faces
         yearFiles.sort(
@@ -1679,10 +1683,11 @@ class SmartMemoriesService {
           final newMem = yearFiles.removeAt(0);
           if (round != 0 && (fileCount - skipped) > targetSize) {
             // check for filtering
-            final clip = fileIdToClip[newMem.file.uploadedFileID!];
+            final clip = fileIDToImageEmbedding[newMem.file.uploadedFileID!];
             if (clip != null) {
               for (final filteredMem in filteredMemories) {
-                final fClip = fileIdToClip[filteredMem.file.uploadedFileID!];
+                final fClip =
+                    fileIDToImageEmbedding[filteredMem.file.uploadedFileID!];
                 if (fClip == null) continue;
                 final similarity = clip.vector.dot(fClip.vector);
                 if (similarity > _clipSimilarImageThreshold) {
