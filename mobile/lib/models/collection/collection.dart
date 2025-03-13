@@ -12,6 +12,7 @@ class Collection {
   final int id;
   final User owner;
   final String encryptedKey;
+  // keyDecryptionNonce will be empty string for collections shared with the user
   final String keyDecryptionNonce;
   String? name;
   final CollectionType type;
@@ -79,7 +80,9 @@ class Collection {
       id: collection.id,
       owner: collection.owner,
       encryptedKey: collection.encryptedKey,
-      keyDecryptionNonce: collection.keyDecryptionNonce!,
+      // note: keyDecryptionNonce will be null in case of collections
+      // shared with the user
+      keyDecryptionNonce: collection.keyDecryptionNonce ?? '',
       name: collection.displayName,
       type: collection.type,
       sharees: collection.sharees,
