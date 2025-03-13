@@ -1,6 +1,5 @@
 import {
     isArchivedCollection,
-    isArchivedFile,
     isPinnedCollection,
 } from "@/gallery/services/magic-metadata";
 import {
@@ -10,7 +9,7 @@ import {
 } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
 import { mergeMetadata } from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
+import { isArchivedFile, ItemVisibility } from "@/media/file-metadata";
 import {
     createCollectionNameByID,
     isHiddenCollection,

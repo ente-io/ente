@@ -18,7 +18,7 @@ import {
     type FileInfoProps,
 } from "@/gallery/components/FileInfo";
 import type { Collection } from "@/media/collection";
-import { ItemVisibility } from "@/media/file-metadata";
+import { fileVisibility, ItemVisibility } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
@@ -53,7 +53,6 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { fileVisibility } from "../../services/magic-metadata";
 import {
     fileInfoExifForFile,
     updateItemDataAlt,
