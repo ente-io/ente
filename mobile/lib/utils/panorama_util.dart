@@ -1,3 +1,4 @@
+// ignore: implementation_imports
 import "package:motion_photos/src/xmp_extractor.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";

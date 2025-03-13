@@ -23,7 +23,8 @@ class User {
       role != null && role?.toUpperCase() == 'COLLABORATOR';
 
   Map<String, dynamic> toMap() {
-    return {'id': id, 'email': email, 'name': name, 'role': role};
+    // ignore: deprecated_member_use_from_same_package
+    return {'id': id, 'email': email, 'name': name, "role": role};
   }
 
   static fromMap(Map<String, dynamic>? map) {

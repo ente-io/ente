@@ -168,7 +168,6 @@ dependencies:
       url: https://github.com/ente-io/privacy_screen.git
       ref: pb/FIX-obsolete-android-plugin
   protobuf: ^3.1.0
-  provider: ^6.0.0
   quiver: ^3.0.1
   receive_sharing_intent: # update source if there is any update
     git:
@@ -259,6 +258,8 @@ flutter_intl:
 
 dev_dependencies:
   build_runner: ^2.4.7
+  flutter_driver:
+    sdk: flutter
   flutter_lints: ^3.0.1
   flutter_test:
     sdk: flutter

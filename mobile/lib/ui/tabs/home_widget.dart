@@ -446,53 +446,57 @@ class _HomeWidgetState extends State<HomeWidget> {
           return;
         }
 
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              actions: [
-                const SizedBox(height: 24),
-                ButtonWidget(
-                  labelText: S.of(context).openFile,
-                  buttonType: ButtonType.primary,
-                  onTap: () async {
-                    Navigator.of(context).pop(true);
+        if (value.isNotEmpty &&
+            (value[0].mimeType == "image/*" ||
+                value[0].mimeType == "video/*")) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                actions: [
+                  const SizedBox(height: 24),
+                  ButtonWidget(
+                    labelText: S.of(context).openFile,
+                    buttonType: ButtonType.primary,
+                    onTap: () async {
+                      Navigator.of(context).pop(true);
+                    },
+                  ),
+                  const SizedBox(
+                    height: 12,
+                  ),
+                  ButtonWidget(
+                    buttonType: ButtonType.secondary,
+                    labelText: S.of(context).backupFile,
+                    onTap: () async {
+                      Navigator.of(context).pop(false);
+                    },
+                  ),
+                ],
+              );
+            },
+          ).then((shouldOpenFile) {
+            if (shouldOpenFile) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) {
+                    return FileViewer(
+                      sharedMediaFile: value[0],
+                    );
                   },
                 ),
-                const SizedBox(
-                  height: 12,
-                ),
-                ButtonWidget(
-                  buttonType: ButtonType.secondary,
-                  labelText: S.of(context).backupFile,
-                  onTap: () async {
-                    Navigator.of(context).pop(false);
-                  },
-                ),
-              ],
-            );
-          },
-        ).then((shouldOpenFile) {
-          if (shouldOpenFile) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) {
-                  return FileViewer(
-                    sharedMediaFile: value[0],
-                  );
-                },
-              ),
-            );
-          } else {
-            if (mounted) {
-              setState(() {
-                _shouldRenderCreateCollectionSheet = true;
-                _sharedFiles = value;
-              });
+              );
+            } else {
+              if (mounted) {
+                setState(() {
+                  _shouldRenderCreateCollectionSheet = true;
+                  _sharedFiles = value;
+                });
+              }
             }
-          }
-        });
+          });
+        }
       },
       onError: (err) {
         _logger.severe("getIntentDataStream error: $err");
@@ -581,7 +585,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     return UserDetailsStateWidget(
       child: PopScope(
         canPop: false,
-        onPopInvoked: (didPop) async {
+        onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
           if (_selectedTabIndex == 0) {
             if (_selectedFiles.files.isNotEmpty) {
