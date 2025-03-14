@@ -314,7 +314,7 @@ class HomeWidgetService {
   }
 
   Future<void> lockAndLoadMemories() async {
-    final files = await getFiles(fetchMemory: false);
+    final files = await getFiles(fetchMemory: true);
 
     int index = 0;
 
