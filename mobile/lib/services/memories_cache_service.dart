@@ -216,23 +216,9 @@ class MemoriesCacheService {
       for (final oldMemory in oldCache.toShowMemories) {
         if (oldMemory.isOld) {
           if (oldMemory.type == MemoryType.people) {
-            if (!peopleShownLogs.any(
-              (person) =>
-                  (person.personID == oldMemory.personID) &&
-                  (person.peopleMemoryType == oldMemory.peopleMemoryType),
-            )) {
               peopleShownLogs.add(PeopleShownLog.fromOldCacheMemory(oldMemory));
-            }
           } else if (oldMemory.type == MemoryType.trips) {
-            if (!tripsShownLogs.any(
-              (trip) => isFileInsideLocationTag(
-                oldMemory.location!,
-                trip.location,
-                10.0,
-              ),
-            )) {
               tripsShownLogs.add(TripsShownLog.fromOldCacheMemory(oldMemory));
-            }
           }
         }
       }
