@@ -73,9 +73,9 @@ class LocalImportService {
       final syncTime = DateTime.now().microsecondsSinceEpoch;
       final Set<String> inAppAssetIds = await localDB.getAssetsIDs();
       _log.info("${inAppAssetIds.length} assets in app $tl");
-      final IncrementalDiffWithOnDevice diff =
-          await _deviceAssetsService.incrementalDiffWithOnDevice(
+      final diff = await _deviceAssetsService.incrementalDiffWithOnDevice(
         inAppAssetIds,
+        tl,
         fromTimeInMs: _prefs.getInt(lastLocalDBSyncTime) ?? 0,
         toTimeInMs: syncTime,
       );
@@ -90,7 +90,6 @@ class LocalImportService {
         _log.info("incrementalSync completed $tl");
       }
     });
-
     _existingSync?.complete();
     _existingSync = null;
   }

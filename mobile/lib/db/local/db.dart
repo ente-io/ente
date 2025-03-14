@@ -4,6 +4,7 @@ import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/db/local/migration.dart";
 import "package:photos/log/devlog.dart";
+import "package:photos/services/remote_pull/local/import/model.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 class LocalDB {
@@ -22,6 +23,8 @@ class LocalDB {
     _sqliteDB = database;
     devLog("LocalDB init complete $path");
   }
+
+  Future<void> storeIncrementalDiff(IncrementalDiffWithOnDevice diff) async {}
 
   Future<Set<String>> getAssetsIDs() async {
     final result = await _sqliteDB.execute("SELECT id FROM assets");

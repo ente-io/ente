@@ -20,7 +20,7 @@ class DeviceAssetsService {
     required int fromTimeInMs,
     required int toTimeInMs,
   }) async {
-    final newOrUpdatedDevicePaths = await getDevicePathAssets(
+    final newOrUpdatedDevicePaths = await _getDevicePathAssets(
       fromTimeInMs: fromTimeInMs,
       toTimeInMs: toTimeInMs,
     );
@@ -46,7 +46,7 @@ class DeviceAssetsService {
     Map<String, Set<String>> inAppPathToLocalIDs,
     TimeLogger tL,
   ) async {
-    final allOnDeviceAssets = await getDevicePathAssets();
+    final allOnDeviceAssets = await _getDevicePathAssets();
     final String logMsg = "fetched allDeviceAssets $tL";
     final r = await Computer.shared()
         .compute<FullDiffReqParams, FullDiffWithOnDevice>(
@@ -62,7 +62,7 @@ class DeviceAssetsService {
     return r;
   }
 
-  Future<List<DevicePathAssets>> getDevicePathAssets({
+  Future<List<DevicePathAssets>> _getDevicePathAssets({
     int? fromTimeInMs,
     int? toTimeInMs,
   }) async {
@@ -226,19 +226,38 @@ class DeviceAssetsService {
   Future<IncrementalDiffWithOnDevice> _computeIncrementalDiffWithOnDevice(
     IncrementalDiffReqParams req,
   ) async {
-    final assetList = args["assetList"];
-    final fromTimeInMs = args["fromTimeInMs"];
-    final List<AssetEntity> filteredAssets = [];
-    for (AssetEntity entity in assetList) {
-      final bool assetCreatedOrUpdatedAfterGivenTime = max(
-            entity.createDateTime.millisecondsSinceEpoch,
-            entity.modifiedDateTime.millisecondsSinceEpoch,
-          ) >=
-          (fromTimeInMs);
-      if (assetCreatedOrUpdatedAfterGivenTime) {
-        filteredAssets.add(entity);
+    final List<AssetPathEntity> addedOrModifiedPaths = [];
+    final List<AssetEntity> addedOrModifiedAssets = [];
+    final Set<String> processedAssetIds = {};
+    final Set<String> updatedInAppAssetIds = {};
+    final Map<String, Set<String>> newOrUpdatedPathToLocalIDs = {};
+    final int fromInSec = req.fromTimeInMs ~/ 1000;
+    for (final DevicePathAssets pathAssets in req.newOrUpdatedLocalPaths) {
+      final String pathID = pathAssets.path.id;
+      final Set<String> localIDs = {};
+      for (final AssetEntity asset in pathAssets.assets) {
+        final String assetID = asset.id;
+        localIDs.add(assetID);
+        if (processedAssetIds.contains(assetID) ||
+            max(asset.createDateSecond ?? 0, asset.modifiedDateSecond ?? 0) <
+                fromInSec) {
+          continue;
+        }
+
+        processedAssetIds.add(assetID);
+        addedOrModifiedAssets.add(asset);
+        if (req.inAppAssetIDs.contains(assetID)) {
+          updatedInAppAssetIds.add(assetID);
+        }
       }
+
+      newOrUpdatedPathToLocalIDs[pathID] = localIDs;
     }
-    return filteredAssets;
+    return IncrementalDiffWithOnDevice(
+      addedOrModifiedPaths,
+      newOrUpdatedPathToLocalIDs,
+      addedOrModifiedAssets,
+      updatedInAppAssetIds,
+    );
   }
 }
