@@ -167,8 +167,8 @@ class HomeWidgetService {
     final Image img = Image.file(
       ogFile,
       fit: BoxFit.cover,
-      cacheWidth: ogSize.width.toInt(),
-      cacheHeight: ogSize.height.toInt(),
+      cacheWidth: size.width.toInt(),
+      cacheHeight: size.height.toInt(),
     );
 
     await PreloadImage.loadImage(img.image);
@@ -179,8 +179,8 @@ class HomeWidgetService {
     final widget = ClipSmoothRect(
       radius: SmoothBorderRadius(cornerRadius: 32, cornerSmoothing: 1),
       child: Container(
-        width: ogSize.width,
-        height: ogSize.height,
+        width: minSize,
+        height: minSize,
         decoration: BoxDecoration(
           color: platformBrightness == Brightness.light
               ? const Color.fromRGBO(251, 251, 251, 1)
