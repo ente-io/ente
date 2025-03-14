@@ -69,14 +69,16 @@ class RemoteDB {
         collectionFileValues.add(item.collectionFileRowValues());
         fileValues.add(item.fileItem.rowValues());
       }
-      await _sqliteDB.executeBatch(
-        'INSERT OR REPLACE INTO collection_files ($collectionFilesColumns) values(?, ?, ?, ?, ?, ?, ?)',
-        collectionFileValues,
-      );
-      await _sqliteDB.executeBatch(
-        'INSERT OR REPLACE INTO files ($filesColumns) values(?, ?, ?, ?, ?, ?, ?, ?)',
-        fileValues,
-      );
+      await Future.wait([
+        _sqliteDB.executeBatch(
+          'INSERT OR REPLACE INTO collection_files ($collectionFilesColumns) values(?, ?, ?, ?, ?, ?, ?)',
+          collectionFileValues,
+        ),
+        _sqliteDB.executeBatch(
+          'INSERT OR REPLACE INTO files ($filesColumns) values(?, ?, ?, ?, ?, ?, ?, ?)',
+          fileValues,
+        ),
+      ]);
     });
     debugPrint(
       '$runtimeType insertCollectionFilesDiff complete in ${stopwatch.elapsed.inMilliseconds}ms for ${collections.length}',
