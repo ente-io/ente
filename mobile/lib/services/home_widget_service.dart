@@ -1,7 +1,9 @@
 import "dart:io";
 import "dart:math";
 
+import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
+import "package:flutter/scheduler.dart";
 import 'package:home_widget/home_widget.dart' as hw;
 import "package:image/image.dart" as img;
 import "package:logging/logging.dart";
@@ -10,16 +12,12 @@ import "package:path_provider_foundation/path_provider_foundation.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/collections_service.dart";
 import "package:photos/services/favorites_service.dart";
-import "package:photos/ui/viewer/file/detail_page.dart";
-import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/preload_util.dart";
 
 class HomeWidgetService {
   final Logger _logger = Logger((HomeWidgetService).toString());
@@ -29,7 +27,7 @@ class HomeWidgetService {
   static final HomeWidgetService instance =
       HomeWidgetService._privateConstructor();
 
-  Future<void> initHomeWidget(bool isBackground) async {
+  Future<void> initHomeWidget(bool isBackground, [bool syncIt = false]) async {
     if (isBackground) {
       _logger.warning("app is running in background");
       return;
@@ -49,76 +47,30 @@ class HomeWidgetService {
       return;
     }
 
-    if (Platform.isIOS) {
-      Future.delayed(const Duration(seconds: 4), lockAndLoadMemories);
-      return;
-    }
-
-    final collectionID =
-        await FavoritesService.instance.getFavoriteCollectionID();
-    if (collectionID == null) {
-      await clearHomeWidget();
-      _logger.warning("Favorite collection not found");
-      return;
-    }
-
-    try {
-      final res = await FilesDB.instance.getFilesInCollection(
-        collectionID,
-        galleryLoadStartTime,
-        galleryLoadEndTime,
-      );
-
-      final previousGeneratedId =
-          await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
-
-      final files = res.files.where(
-        (element) =>
-            element.generatedID != previousGeneratedId &&
-            element.fileType == FileType.image,
-      );
-
-      if (files.isEmpty) {
-        await clearHomeWidget();
-        _logger.warning("No new images found");
-        return;
-      }
-
-      final randomNumber = Random().nextInt(files.length);
-      final randomFile = files.elementAt(randomNumber);
-
-      final value = await _renderFile(randomFile, "slideshow");
+    if (syncIt) {
+      final value = await hw.HomeWidget.getWidgetData<int>("totalSet");
       if (value == null) {
+        _logger.warning("no home widget active");
         return;
       }
-
-      final width = value.$1.width;
-      final height = value.$1.height;
-      final cacheWidth = value.$2.width;
-      final cacheHeight = value.$2.height;
-
-      if (randomFile.generatedID != null) {
-        await hw.HomeWidget.saveWidgetData<int>(
-          "home_widget_last_img",
-          randomFile.generatedID!,
-        );
-      }
-
+      await hw.HomeWidget.saveWidgetData("totalSet", 0);
       await hw.HomeWidget.updateWidget(
         name: 'SlideshowWidgetProvider',
         androidName: 'SlideshowWidgetProvider',
         qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
         iOSName: 'SlideshowWidget',
       );
-      _logger.info(
-        ">>> OG size of SlideshowWidget image: $width x $height",
+      await hw.HomeWidget.saveWidgetData("totalSet", value);
+      await hw.HomeWidget.updateWidget(
+        name: 'SlideshowWidgetProvider',
+        androidName: 'SlideshowWidgetProvider',
+        qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
+        iOSName: 'SlideshowWidget',
       );
-      _logger.info(
-        ">>> SlideshowWidget image rendered with size $cacheWidth x $cacheHeight",
-      );
-    } catch (e, sT) {
-      _logger.severe("Error rendering widget", e, sT);
+      return;
     }
+
+    await lockAndLoadMemories();
   }
 
   Future<(Size, Size)?> _renderFile(EnteFile randomFile, String key) async {
@@ -150,6 +102,11 @@ class HomeWidgetService {
     }
 
     final cacheSize = Size(cacheWidth, cacheHeight);
+
+    if (Platform.isAndroid) {
+      await captureFile2(randomFile, cacheSize, ogSize, key);
+      return (ogSize, cacheSize);
+    }
 
     final result = await captureFile(randomFile, cacheSize, ogSize, key);
 
@@ -194,6 +151,52 @@ class HomeWidgetService {
     _logger.info(">>> SlideshowWidget cleared");
   }
 
+  Future captureFile2(
+    EnteFile file,
+    Size size,
+    Size ogSize,
+    String key,
+  ) async {
+    final ogFile = await getFile(file);
+
+    if (ogFile == null) {
+      return null;
+    }
+
+    final minSize = min(size.width, size.height);
+    final Image img = Image.file(
+      ogFile,
+      fit: BoxFit.cover,
+      cacheWidth: ogSize.width.toInt(),
+      cacheHeight: ogSize.height.toInt(),
+    );
+
+    await PreloadImage.loadImage(img.image);
+
+    final platformBrightness =
+        SchedulerBinding.instance.platformDispatcher.platformBrightness;
+
+    final widget = ClipSmoothRect(
+      radius: SmoothBorderRadius(cornerRadius: 32, cornerSmoothing: 1),
+      child: Container(
+        width: ogSize.width,
+        height: ogSize.height,
+        decoration: BoxDecoration(
+          color: platformBrightness == Brightness.light
+              ? const Color.fromRGBO(251, 251, 251, 1)
+              : const Color.fromRGBO(27, 27, 27, 1),
+          image: DecorationImage(image: img.image, fit: BoxFit.cover),
+        ),
+      ),
+    );
+    await hw.HomeWidget.renderFlutterWidget(
+      widget,
+      logicalSize: Size(minSize, minSize),
+      key: key,
+    );
+    return;
+  }
+
   Future<File?> captureFile(
     EnteFile file,
     Size size,
@@ -230,46 +233,16 @@ class HomeWidgetService {
   Future<void> onLaunchFromWidget(Uri? uri, BuildContext context) async {
     if (uri == null) return;
 
-    final collectionID =
-        await FavoritesService.instance.getFavoriteCollectionID();
-    if (collectionID == null) {
-      return;
-    }
+    // final res = previousGeneratedId != null
+    //     ? await FilesDB.instance.getFile(
+    //         previousGeneratedId,
+    //       )
+    //     : null;
 
-    final collection = CollectionsService.instance.getCollectionByID(
-      collectionID,
-    );
-    if (collection == null) {
-      return;
-    }
-
-    final thumbnail = await CollectionsService.instance.getCover(collection);
-
-    final previousGeneratedId =
-        await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
-
-    final res = previousGeneratedId != null
-        ? await FilesDB.instance.getFile(
-            previousGeneratedId,
-          )
-        : null;
-
-    routeToPage(
-      context,
-      CollectionPage(
-        CollectionWithThumbnail(
-          collection,
-          thumbnail,
-        ),
-      ),
-    ).ignore();
-
-    if (res == null) return;
-
-    final page = DetailPage(
-      DetailPageConfiguration(List.unmodifiable([res]), 0, "collection"),
-    );
-    routeToPage(context, page, forceCustomPageRoute: true).ignore();
+    // final page = DetailPage(
+    //   DetailPageConfiguration(List.unmodifiable([res]), 0, "collection"),
+    // );
+    // routeToPage(context, page, forceCustomPageRoute: true).ignore();
   }
 
   Future<List<EnteFile>> getFiles({required bool fetchMemory}) async {
@@ -332,7 +305,7 @@ class HomeWidgetService {
   }
 
   Future<void> lockAndLoadMemories() async {
-    final files = await getFiles(fetchMemory: true);
+    final files = await getFiles(fetchMemory: false);
 
     int index = 0;
 
