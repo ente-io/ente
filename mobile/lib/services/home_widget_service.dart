@@ -4,6 +4,7 @@ import "dart:math";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
+import "package:fluttertoast/fluttertoast.dart";
 import 'package:home_widget/home_widget.dart' as hw;
 import "package:image/image.dart" as img;
 import "package:logging/logging.dart";
@@ -18,6 +19,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/favorites_service.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/preload_util.dart";
+import "package:photos/utils/thumbnail_util.dart";
 
 class HomeWidgetService {
   final Logger _logger = Logger((HomeWidgetService).toString());
@@ -78,33 +80,35 @@ class HomeWidgetService {
     final height = image.height.toDouble();
     final ogSize = Size(width, height);
 
-    final size = min(min(width, height), 1024.0);
-    final aspectRatio = width / height;
+    // final size = min(min(width, height), 1024.0);
+    // final aspectRatio = width / height;
 
-    late final double cacheWidth;
-    late final double cacheHeight;
-    if (aspectRatio > 1) {
-      cacheWidth = size;
-      cacheHeight = (size / aspectRatio);
-    } else if (aspectRatio < 1) {
-      cacheHeight = size;
-      cacheWidth = (size * aspectRatio);
-    } else {
-      cacheWidth = size;
-      cacheHeight = size;
-    }
+    // late final double cacheWidth;
+    // late final double cacheHeight;
+    // if (aspectRatio > 1) {
+    //   cacheWidth = size;
+    //   cacheHeight = (size / aspectRatio);
+    // } else if (aspectRatio < 1) {
+    //   cacheHeight = size;
+    //   cacheWidth = (size * aspectRatio);
+    // } else {
+    //   cacheWidth = size;
+    //   cacheHeight = size;
+    // }
 
-    final cacheSize = Size(cacheWidth, cacheHeight);
+    // final cacheSize = Size(cacheWidth, cacheHeight);
 
-    if (Platform.isAndroid) {
-      await captureFile2(randomFile, cacheSize, ogSize, key);
-      return (ogSize, cacheSize);
-    }
+    // if (Platform.isIOS) {
+    //   await captureFile2(randomFile, cacheSize, ogSize, key);
+    //   return (ogSize, cacheSize);
+    // }
 
-    final result = await captureFile(randomFile, cacheSize, ogSize, key);
+    // final result = await captureFile(randomFile, cacheSize, ogSize, key);
 
+    const size = 512.0;
+    final result = await captureFile3(randomFile, ogSize, key);
     if (result == null) {
-      _logger.warning("Can't capture file");
+      _logger.warning("Can't capture file ${randomFile.displayName}");
       return null;
     }
 
@@ -113,7 +117,7 @@ class HomeWidgetService {
       result.path,
     );
 
-    return (ogSize, cacheSize);
+    return (ogSize, const Size(size, size));
   }
 
   Future<int> countHomeWidgets() async {
@@ -212,6 +216,28 @@ class HomeWidgetService {
     return null;
   }
 
+  Future<File?> captureFile3(
+    EnteFile ogFile,
+    Size ogSize,
+    String key,
+  ) async {
+    try {
+      final dir = await imagePath();
+      final String path = '$dir/$key.png';
+
+      final File file = File(path);
+      file.createSync(recursive: true);
+      final thumbnail = await getThumbnail(ogFile);
+      if (thumbnail == null) return null;
+      await file.writeAsBytes(thumbnail);
+      return file;
+    } catch (_, __) {
+      _logger.severe("Failed to save the capture", _, __);
+    }
+
+    return null;
+  }
+
   Future<void> onLaunchFromWidget(Uri? uri, BuildContext context) async {
     if (uri == null) return;
 
@@ -256,6 +282,7 @@ class HomeWidgetService {
       collectionID,
       galleryLoadStartTime,
       galleryLoadEndTime,
+      limit: 100,
     );
 
     return res.files
@@ -300,6 +327,24 @@ class HomeWidgetService {
       );
 
       if (value != null) {
+        await hw.HomeWidget.saveWidgetData<int>("totalSet", index);
+        if (index == 1 || index % 10 == 0) {
+          await Fluttertoast.showToast(
+            msg: "[i] SlideshowWidget updated",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.black,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          await hw.HomeWidget.updateWidget(
+            name: 'SlideshowWidgetProvider',
+            androidName: 'SlideshowWidgetProvider',
+            qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
+            iOSName: 'SlideshowWidget',
+          );
+        }
         index++;
       }
     }
@@ -309,7 +354,6 @@ class HomeWidgetService {
     }
 
     _logger.info(">>> SlideshowWidget params doing");
-    await hw.HomeWidget.saveWidgetData<int>("totalSet", index);
 
     await hw.HomeWidget.updateWidget(
       name: 'SlideshowWidgetProvider',
@@ -318,5 +362,16 @@ class HomeWidgetService {
       iOSName: 'SlideshowWidget',
     );
     _logger.info(">>> SlideshowWidget params done");
+    if (flagService.internalUser) {
+      await Fluttertoast.showToast(
+        msg: "[i] SlideshowWidget updated",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
 }
