@@ -1461,24 +1461,24 @@ class SmartMemoriesService {
       // then filter out similar images as much as possible
       if (safeMemories.isNotEmpty) {
         filteredMemories.add(safeMemories.first);
-      }
-      int skipped = 0;
-      filesLoop:
-      for (final mem in safeMemories.sublist(1)) {
-        if (filteredMemories.length >= targetSize) break;
-        final clip = fileIdToClip[mem.file.uploadedFileID!];
-        if (clip != null && (safeCount - skipped) > targetSize) {
-          for (final filteredMem in filteredMemories) {
-            final fClip = fileIdToClip[filteredMem.file.uploadedFileID!];
-            if (fClip == null) continue;
-            final similarity = clip.vector.dot(fClip.vector);
-            if (similarity > _clipSimilarImageThreshold) {
-              skipped++;
-              continue filesLoop;
+        int skipped = 0;
+        filesLoop:
+        for (final mem in safeMemories.sublist(1)) {
+          if (filteredMemories.length >= targetSize) break;
+          final clip = fileIdToClip[mem.file.uploadedFileID!];
+          if (clip != null && (safeCount - skipped) > targetSize) {
+            for (final filteredMem in filteredMemories) {
+              final fClip = fileIdToClip[filteredMem.file.uploadedFileID!];
+              if (fClip == null) continue;
+              final similarity = clip.vector.dot(fClip.vector);
+              if (similarity > _clipSimilarImageThreshold) {
+                skipped++;
+                continue filesLoop;
+              }
             }
           }
+          filteredMemories.add(mem);
         }
-        filteredMemories.add(mem);
       }
     } else {
       // Multiple years, each represented and roughly equally distributed
