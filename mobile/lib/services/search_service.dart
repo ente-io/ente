@@ -15,7 +15,6 @@ import "package:photos/db/ml/db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
-import "package:photos/models/base_location.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/file/extensions/file_props.dart";
@@ -1052,39 +1051,39 @@ class SearchService {
       }
       // Add the found base locations from the location/memories service
       // TODO: lau: Add base location names
-      if (limit == null || tagSearchResults.length < limit) {
-        for (final BaseLocation base in locationService.baseLocations) {
-          final a = (baseRadius * scaleFactor(base.location.latitude!)) /
-              kilometersPerDegree;
-          const b = baseRadius / kilometersPerDegree;
-          tagSearchResults.add(
-            GenericSearchResult(
-              ResultType.location,
-              "Base",
-              base.files,
-              onResultTap: (ctx) {
-                showAddLocationSheet(
-                  ctx,
-                  base.location,
-                  name: "Base",
-                  radius: baseRadius,
-                );
-              },
-              hierarchicalSearchFilter: LocationFilter(
-                locationTag: LocationTag(
-                  name: "Base",
-                  radius: baseRadius,
-                  centerPoint: base.location,
-                  aSquare: a * a,
-                  bSquare: b * b,
-                ),
-                occurrence: kMostRelevantFilter,
-                matchedUploadedIDs: filesToUploadedFileIDs(base.files),
-              ),
-            ),
-          );
-        }
-      }
+      // if (limit == null || tagSearchResults.length < limit) {
+      //   for (final BaseLocation base in locationService.baseLocations) {
+      //     final a = (baseRadius * scaleFactor(base.location.latitude!)) /
+      //         kilometersPerDegree;
+      //     const b = baseRadius / kilometersPerDegree;
+      //     tagSearchResults.add(
+      //       GenericSearchResult(
+      //         ResultType.location,
+      //         "Base",
+      //         base.files,
+      //         onResultTap: (ctx) {
+      //           showAddLocationSheet(
+      //             ctx,
+      //             base.location,
+      //             name: "Base",
+      //             radius: baseRadius,
+      //           );
+      //         },
+      //         hierarchicalSearchFilter: LocationFilter(
+      //           locationTag: LocationTag(
+      //             name: "Base",
+      //             radius: baseRadius,
+      //             centerPoint: base.location,
+      //             aSquare: a * a,
+      //             bSquare: b * b,
+      //           ),
+      //           occurrence: kMostRelevantFilter,
+      //           matchedUploadedIDs: filesToUploadedFileIDs(base.files),
+      //         ),
+      //       ),
+      //     );
+      //   }
+      // }
 
       if (limit == null || tagSearchResults.length < limit) {
         final results =
