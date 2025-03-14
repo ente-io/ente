@@ -447,15 +447,15 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock_plus/ios"
 
 SPEC CHECKSUMS:
-  background_fetch: 39f11371c0dce04b001c4bfd5e782bcccb0a85e2
-  battery_info: b6c551049266af31556b93c9d9b9452cfec0219f
-  connectivity_plus: 2a701ffec2c0ae28a48cf7540e279787e77c447d
-  cupertino_http: 947a233f40cfea55167a49f2facc18434ea117ba
-  dart_ui_isolate: d5bcda83ca4b04f129d70eb90110b7a567aece14
-  device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
-  ffmpeg-kit-ios-full-gpl: 80adc341962e55ef709e36baa8ed9a70cf4ea62b
-  ffmpeg_kit_flutter_full_gpl: 8d15c14c0c3aba616fac04fe44b3d27d02e3c330
-  file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
+  background_fetch: 94b36ee293e82972852dba8ede1fbcd3bd3d9d57
+  battery_info: 83f3aae7be2fccefab1d2bf06b8aa96f11c8bcdd
+  connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
+  cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
+  dart_ui_isolate: 46f6714abe6891313267153ef6f9748d8ecfcab1
+  device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
+  ffmpeg-kit-ios-full-gpl: 78f81da9b8c14f62f5013dd90f0c9c80bd720140
+  ffmpeg_kit_flutter_full_gpl: ce18b888487c05c46ed252cd2e7956812f2e3bd1
+  file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
   Firebase: d80354ed7f6df5f9aca55e9eb47cc4b634735eaf
   firebase_core: 6cbed78b4f298ed103a9fd034e6dbc846320480f
   firebase_messaging: 5e0adf2eb18b0ee59aa0c109314c091a0497ecac
