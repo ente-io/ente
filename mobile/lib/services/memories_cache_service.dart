@@ -82,8 +82,7 @@ class MemoriesCacheService {
     return _prefs.getBool(_showAnyMemoryKey) ?? true;
   }
 
-  bool get enableSmartMemories =>
-      flagService.showSmartMemories && flagService.hasGrantedMLConsent;
+  bool get enableSmartMemories => flagService.hasGrantedMLConsent;
 
   void _checkIfTimeToUpdateCache() {
     if (!enableSmartMemories) {
