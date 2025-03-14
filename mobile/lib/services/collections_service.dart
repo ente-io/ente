@@ -89,6 +89,8 @@ class CollectionsService {
   Future<void> init(SharedPreferences preferences) async {
     _prefs = preferences;
     await remoteDB.init();
+    // todo: neeraj move it to local sync service
+    await localDB.init();
 
     final collections = await _db.getAllCollections();
     final List<Collection> collectionsToInsert = [];
@@ -1323,6 +1325,7 @@ class CollectionsService {
     if (collection.canLinkToDevicePath(_config.getUserID()!)) {
       collection.decryptedPath = (_decryptCollectionPath(collection));
     }
+    if (!collection.isOwner(_config.getUserID()!)) {}
     return Collection.fromOldCollection(collection);
   }
 

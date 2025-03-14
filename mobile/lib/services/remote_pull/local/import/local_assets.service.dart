@@ -12,46 +12,15 @@ class LocalAssetsService {
   final _logger = Logger("LocalAssetsService");
   static const ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
   static const assetFetchPageSize = 2000;
-  Future<List<LocalPathAssets>> getAssetPathAndEntities(
-    int fromTimeInMicroSec,
-    int toTimeInMicroSec,
-  ) async {
-    final pathEntities = await _getGalleryList(
-      updateFromTimeInMicroSec: fromTimeInMicroSec,
-      updateToTimeInMicroSec: toTimeInMicroSec,
-    );
-    final List<LocalPathAssets> localPathAssets = [];
-    for (AssetPathEntity pathEntity in pathEntities) {
-      final List<AssetEntity> assetsInPath =
-          await _getAllAssetLists(pathEntity);
-      try {
-        final List<AssetEntity> result = assetsInPath.isEmpty
-            ? []
-            : await Computer.shared().compute(
-                _getLocalIDsAndFilesFromAssets,
-                param: <String, dynamic>{
-                  "assetList": assetsInPath,
-                  "fromTimeInMicroSec": fromTimeInMicroSec,
-                },
-                taskName:
-                    "getLocalPathAssetsAndFiles-${pathEntity.name}-count-${assetsInPath.length}",
-              );
-        localPathAssets.add(
-          LocalPathAssets(path: pathEntity, assets: result),
-        );
-      } catch (e) {
-        _logger.severe("_getLocalIDsAndFilesFromAssets failed", e);
-        _logger.info(
-          "Failed for pathEntity: ${pathEntity.name}",
-        );
-        rethrow;
-      }
-    }
-    return localPathAssets;
-  }
 
-  Future<List<LocalPathAssets>> getAllLocalAssets() async {
-    final List<AssetPathEntity> assetPaths = await _getGalleryList();
+  Future<List<LocalPathAssets>> getLocalAssets({
+    int? fromTimeInMs,
+    int? toTimeInMs,
+  }) async {
+    final List<AssetPathEntity> assetPaths = await _getGalleryList(
+      updateFromTimeInMs: fromTimeInMs,
+      updateToTimeInMs: toTimeInMs,
+    );
     final List<LocalPathAssets> localPathAssets = [];
     for (final assetPath in assetPaths) {
       final List<AssetEntity> assets = await _getAllAssetLists(assetPath);
@@ -65,12 +34,29 @@ class LocalAssetsService {
     return localPathAssets;
   }
 
+  Future<FullDiffWithOnDevice> computeFullDiffWithOnDevice(
+    List<LocalPathAssets> allOnDeviceAssets,
+    // current set of assets available on device
+    Set<String> inAppAssetIDs, // localIDs of files already imported in app
+    Map<String, Set<String>> inAppPathToLocalIDs,
+  ) async {
+    return Computer.shared().compute<FullDiffReqParams, FullDiffWithOnDevice>(
+      _computeFullDiffWithOnDevice,
+      param: FullDiffReqParams(
+        allOnDeviceAssets,
+        inAppAssetIDs,
+        inAppPathToLocalIDs,
+      ),
+      taskName: "getLocalAssetsDiff",
+    );
+  }
+
   /// returns a list of AssetPathEntity with relevant filter operations.
   /// [needTitle] impacts the performance for fetching the actual [AssetEntity]
   /// in iOS. Same is true for [containsModifiedPath]
   Future<List<AssetPathEntity>> _getGalleryList({
-    final int? updateFromTimeInMicroSec,
-    final int? updateToTimeInMicroSec,
+    final int? updateFromTimeInMs,
+    final int? updateToTimeInMs,
     final bool containsModifiedPath = false,
     // in iOS fetching the AssetEntity title impacts performance
     final bool needsTitle = true,
@@ -89,13 +75,10 @@ class LocalAssetsService {
     if (orderOption != null) {
       filterOptionGroup.addOrderOption(orderOption);
     }
-    if (updateFromTimeInMicroSec != null && updateToTimeInMicroSec != null) {
+    if (updateFromTimeInMs != null && updateToTimeInMs != null) {
       filterOptionGroup.updateTimeCond = DateTimeCond(
-        min: DateTime.fromMillisecondsSinceEpoch(
-          updateFromTimeInMicroSec ~/ 1000,
-        ),
-        max:
-            DateTime.fromMillisecondsSinceEpoch(updateToTimeInMicroSec ~/ 1000),
+        min: DateTime.fromMillisecondsSinceEpoch(updateFromTimeInMs),
+        max: DateTime.fromMillisecondsSinceEpoch(updateToTimeInMs),
       );
     } else {
       filterOptionGroup.createTimeCond =
@@ -140,28 +123,14 @@ class LocalAssetsService {
     return result;
   }
 
-  Future<LocalDiffResult> getDiffFromExistingImport(
-    List<LocalPathAssets> allOnDeviceAssets,
-    // current set of assets available on device
-    Set<String> inAppAssetIDs, // localIDs of files already imported in app
-    Map<String, Set<String>> inAppPathToLocalIDs,
-  ) async {
-    final LocalDiffResult diffResult =
-        await Computer.shared().compute<_DiffParams, LocalDiffResult>(
-      _getLocalAssetsDiff,
-      param: _DiffParams(allOnDeviceAssets, inAppAssetIDs, inAppPathToLocalIDs),
-      taskName: "getLocalAssetsDiff",
-    );
-    return diffResult;
-  }
-
 // _getLocalAssetsDiff compares local db with the file system and compute
 // the files which needs to be added or removed from device collection.
-  LocalDiffResult _getLocalAssetsDiff(_DiffParams diffParams) {
+  static FullDiffWithOnDevice _computeFullDiffWithOnDevice(
+    FullDiffReqParams diffParams,
+  ) {
     final Set<String> inAppAssetIDs = diffParams.inAppAssetIDs;
     final Map<String, Set<String>> inAppPathToLocalIDs =
         diffParams.inAppPathToLocalIDs;
-
     // Step 1: Build onDevicePathToLocalIDs and missingAssetsInApp
     final Set<String> onDeviceAssetIDs = {};
     final Map<String, Set<String>> onDevicePathToLocalIDs = {};
@@ -204,7 +173,6 @@ class LocalAssetsService {
       } else {
         // Path exists in both, check if the assets differ
         final Set<String> onDeviceLocalIDs = onDevicePathToLocalIDs[pathID]!;
-
         // Simplified comparison: check if sets have same size and same elements
         if (inAppLocalIDs.length != onDeviceLocalIDs.length ||
             !inAppLocalIDs.containsAll(onDeviceLocalIDs)) {
@@ -213,7 +181,7 @@ class LocalAssetsService {
       }
     }
 
-    return LocalDiffResult(
+    return FullDiffWithOnDevice(
       missingAssetsInApp: uniqueMissingAssetsInApp.values.toList(),
       extraAssetIDsInApp: extraAssetIDsInApp,
       extraPathIDsInApp: extraPathIDsInApp,
@@ -223,34 +191,22 @@ class LocalAssetsService {
 
 // review: do we need to run this inside compute, after making File.FromAsset
 // sync. If yes, update the method documentation with reason.
-  Future<List<AssetEntity>> _getLocalIDsAndFilesFromAssets(
+  Future<List<AssetEntity>> _computeIncrementalDiffWithOnDevice(
     Map<String, dynamic> args,
   ) async {
     final assetList = args["assetList"];
-    final fromTime = args["fromTimeInMicroSec"];
+    final fromTimeInMs = args["fromTimeInMs"];
     final List<AssetEntity> filteredAssets = [];
     for (AssetEntity entity in assetList) {
       final bool assetCreatedOrUpdatedAfterGivenTime = max(
             entity.createDateTime.millisecondsSinceEpoch,
             entity.modifiedDateTime.millisecondsSinceEpoch,
           ) >=
-          (fromTime / ~1000);
+          (fromTimeInMs);
       if (assetCreatedOrUpdatedAfterGivenTime) {
         filteredAssets.add(entity);
       }
     }
     return filteredAssets;
   }
-}
-
-class _DiffParams {
-  final List<LocalPathAssets> allOnDeviceAssets;
-  final Set<String> inAppAssetIDs;
-  final Map<String, Set<String>> inAppPathToLocalIDs;
-
-  _DiffParams(
-    this.allOnDeviceAssets,
-    this.inAppAssetIDs,
-    this.inAppPathToLocalIDs,
-  );
 }

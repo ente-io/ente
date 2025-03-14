@@ -22,4 +22,13 @@ class LocalDB {
     _sqliteDB = database;
     devLog("LocalDB init complete $path");
   }
+
+  Future<Set<String>> getAssetsIDs() async {
+    final result = await _sqliteDB.execute("SELECT id FROM assets");
+    final ids = <String>{};
+    for (var row in result) {
+      ids.add(row["id"] as String);
+    }
+    return ids;
+  }
 }
