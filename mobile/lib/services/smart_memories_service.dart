@@ -1281,10 +1281,7 @@ class SmartMemoriesService {
       }
     }
 
-    // process to find fillers (months)
-    const wantedMemories = 3;
-    final neededMemories = wantedMemories - memoryResult.length;
-    if (neededMemories <= 0) return memoryResult;
+    // process to find months memories
     const monthSelectionSize = 20;
 
     // Group files by month and year
@@ -1310,39 +1307,35 @@ class SmartMemoriesService {
               currentMonthYearGroups[a]!.length,
             ),
       );
-    if (neededMemories > 1) {
-      for (int i = neededMemories; i > 1; i--) {
-        if (sortedYearsForCurrentMonth.isEmpty) break;
-        final year = sortedYearsForCurrentMonth.removeAt(0);
-        final monthYearFiles = currentMonthYearGroups[year]!;
-        final photoSelection = await _bestSelection(
-          monthYearFiles,
-          prefferedSize: monthSelectionSize,
-          fileIdToFaces: fileIdToFaces,
-          faceIDsToPersonID: faceIDsToPersonID,
-          fileIDToImageEmbedding: fileIDToImageEmbedding,
-          clipPositiveTextVector: clipPositiveTextVector,
-        );
-        final monthName =
-            DateFormat.MMMM().format(DateTime(year, currentMonth));
-        final daysLeftInMonth = DateTime(currentYear, currentMonth + 1, 0).day -
-            currentTime.day +
-            1;
-        final name = monthName + ", ${currentTime.year - year} years back";
-        memoryResult.add(
-          TimeMemory(
-            photoSelection,
-            name,
-            currentTime.microsecondsSinceEpoch,
-            currentTime
-                .add(Duration(days: daysLeftInMonth))
-                .microsecondsSinceEpoch,
-          ),
-        );
-      }
+    for (int i = 0; i < 2; i++) {
+      if (sortedYearsForCurrentMonth.isEmpty) break;
+      final year = sortedYearsForCurrentMonth.removeAt(0);
+      final monthYearFiles = currentMonthYearGroups[year]!;
+      final photoSelection = await _bestSelection(
+        monthYearFiles,
+        prefferedSize: monthSelectionSize,
+        fileIdToFaces: fileIdToFaces,
+        faceIDsToPersonID: faceIDsToPersonID,
+        fileIDToImageEmbedding: fileIDToImageEmbedding,
+        clipPositiveTextVector: clipPositiveTextVector,
+      );
+      final monthName = DateFormat.MMMM().format(DateTime(year, currentMonth));
+      final daysLeftInMonth =
+          DateTime(currentYear, currentMonth + 1, 0).day - currentTime.day + 1;
+      final name = monthName + ", ${currentTime.year - year} years back";
+      memoryResult.add(
+        TimeMemory(
+          photoSelection,
+          name,
+          currentTime.microsecondsSinceEpoch,
+          currentTime
+              .add(Duration(days: daysLeftInMonth))
+              .microsecondsSinceEpoch,
+        ),
+      );
     }
     // Show the month through the remaining years
-    if (sortedYearsForCurrentMonth.isEmpty) return memoryResult;
+    if (sortedYearsForCurrentMonth.length <= 3) return memoryResult;
     final allPhotos = sortedYearsForCurrentMonth
         .expand((year) => currentMonthYearGroups[year]!)
         .toList();
