@@ -291,6 +291,12 @@ dev_dependencies:
   # adaptive_icon_foreground: "assets/launcher_icon/icon-og-foreground.png"
   # adaptive_icon_background: "#ffffff"
 
+  # 3. MONOCHROME
+  # adaptive_icon_foreground: "assets/launcher_icon/icon-monochrome-foreground.png"
+  # adaptive_icon_background: "#08C225"
+  # android: "icon_monochrome"
+  # image_path: "assets/launcher_icon/icon-monochrome-foreground.png"
+
   # NON ADAPTIVE ICONS
   
   # 1. GREEN ICON
