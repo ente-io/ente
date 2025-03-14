@@ -430,14 +430,13 @@ class SmartMemoriesService {
         w?.log('getting clip vectors for doingSomethingTogether');
         final activityFiles = <EnteFile>[];
         PeopleActivity lastActivity = PeopleActivity.values.first;
-        activityLoop:
         for (final activity in PeopleActivity.values) {
           activityFiles.clear();
           lastActivity = activity;
           final Vector? activityVector = clipPeopleActivityVectors[activity];
           if (activityVector == null) {
             dev.log("No vector for activity $activity");
-            continue activityLoop;
+            continue;
           }
           final Map<int, double> similarities = {};
           for (final embedding in vectors) {
@@ -457,7 +456,7 @@ class SmartMemoriesService {
               }
             }
           }
-          if (activityFiles.length > 5) break activityLoop;
+          if (activityFiles.length > 5) break;
         }
         if (activityFiles.length > 5) {
           final String title = activityTitle(lastActivity, personName);
@@ -543,7 +542,6 @@ class SmartMemoriesService {
     }
 
     // Loop through the people and check if we should surface anything based on relevancy (bday, last met)
-    personRelevancyLoop:
     for (final personID in orderedImportantPersonsID) {
       final personMemories = personToMemories[personID];
       if (personID == meID || personMemories == null) continue;
@@ -592,7 +590,7 @@ class SmartMemoriesService {
               ),
             );
           }
-          continue personRelevancyLoop;
+          continue;
         }
       }
 
