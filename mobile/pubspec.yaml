@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.101+1014
+version: 0.9.105+1015
 publish_to: none
 
 environment:
@@ -102,7 +102,7 @@ dependencies:
   fraction: ^5.0.2
   freezed_annotation: ^2.4.1
   google_nav_bar: ^5.0.5
-  home_widget: ^0.6.0
+  home_widget: ^0.7.0+1
   html_unescape: ^2.0.0
   http: ^1.1.0
   image: ^4.0.17
@@ -157,6 +157,7 @@ dependencies:
   password_strength: ^0.2.0
   path: #dart
   path_provider: ^2.1.1
+  path_provider_foundation: ^2.4.1
   pedantic: ^1.9.2
   permission_handler: ^11.0.1
   photo_manager: ^3.5.3
@@ -281,43 +282,43 @@ dev_dependencies:
 # https://github.com/ente-io/ente/commit/40ae8d91c359447fc2cf6672bfa754c5cc7a6af1
 
 # flutter_icons:
-  # ADAPTIVE ICONS
+# ADAPTIVE ICONS
 
-  # 1. E + HEART
-  # adaptive_icon_foreground: "assets/launcher_icon/icon-foreground.png"
-  # adaptive_icon_background: "#08C225"
+# 1. E + HEART
+# adaptive_icon_foreground: "assets/launcher_icon/icon-foreground.png"
+# adaptive_icon_background: "#08C225"
 
-  # 2. OG
-  # adaptive_icon_foreground: "assets/launcher_icon/icon-og-foreground.png"
-  # adaptive_icon_background: "#ffffff"
+# 2. OG
+# adaptive_icon_foreground: "assets/launcher_icon/icon-og-foreground.png"
+# adaptive_icon_background: "#ffffff"
 
-  # 3. MONOCHROME
-  # adaptive_icon_foreground: "assets/launcher_icon/icon-monochrome-foreground.png"
-  # adaptive_icon_background: "#08C225"
-  # android: "icon_monochrome"
-  # image_path: "assets/launcher_icon/icon-monochrome-foreground.png"
+# 3. MONOCHROME
+# adaptive_icon_foreground: "assets/launcher_icon/icon-monochrome-foreground.png"
+# adaptive_icon_background: "#08C225"
+# android: "icon_monochrome"
+# image_path: "assets/launcher_icon/icon-monochrome-foreground.png"
 
-  # NON ADAPTIVE ICONS
-  
-  # 1. GREEN ICON
-  # android: "icon_green"
-  # ios: "IconGreen"
-  # image_path: "assets/launcher_icon/icon-green.png"
+# NON ADAPTIVE ICONS
 
-  # 2. DARK ICON
-  # android: "icon_dark"
-  # ios: "IconDark"
-  # image_path: "assets/launcher_icon/icon-dark.png"
-  
-  # 3. LIGHT ICON
-  # android: "icon_light"
-  # ios: "IconLight"
-  # image_path: "assets/launcher_icon/icon-light.png"
+# 1. GREEN ICON
+# android: "icon_green"
+# ios: "IconGreen"
+# image_path: "assets/launcher_icon/icon-green.png"
 
-  # 4. OG ICON
-  # android: "icon_og"
-  # ios: "IconOG"
-  # image_path: "assets/launcher_icon/icon-og.png"
+# 2. DARK ICON
+# android: "icon_dark"
+# ios: "IconDark"
+# image_path: "assets/launcher_icon/icon-dark.png"
+
+# 3. LIGHT ICON
+# android: "icon_light"
+# ios: "IconLight"
+# image_path: "assets/launcher_icon/icon-light.png"
+
+# 4. OG ICON
+# android: "icon_og"
+# ios: "IconOG"
+# image_path: "assets/launcher_icon/icon-og.png"
 
 flutter_native_splash:
   color: "#ffffff"

@@ -32,8 +32,14 @@ class SlideshowWidgetProvider : HomeWidgetProvider() {
                                 )
                         setOnClickPendingIntent(R.id.widget_container, pendingIntent)
 
+                        val totalSet = widgetData.getInt("totalSet", 0)
+                        var randomNumber = 0
+                        if (totalSet > 0) {
+                            randomNumber = (0 until totalSet!!).random()
+                            val imagePath = widgetData.getString("slideshow_" + randomNumber, null)
+                        }
                         // Show Images saved with `renderFlutterWidget`
-                        val imagePath = widgetData.getString("slideshow", null)
+                        val imagePath = widgetData.getString("slideshow_" + randomNumber, null)
                         var imageExists: Boolean = false
                         if (imagePath != null) {
                             val imageFile = File(imagePath)
