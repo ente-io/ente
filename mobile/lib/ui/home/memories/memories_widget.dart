@@ -123,8 +123,17 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   }
 
   Widget _buildSmartMemories(List<SmartMemory> memories) {
-    final collatedMemories =
-        memories.map((e) => (e.memories, e.title)).toList();
+    final List<(List<Memory>, String)> collatedMemories = [];
+    final List<SmartMemory> seenMemories = [];
+    for (final memory in memories) {
+      final seen = memory.memories.every((element) => element.isSeen());
+      if (seen) {
+        seenMemories.add(memory);
+      } else {
+        collatedMemories.add((memory.memories, memory.title));
+      }
+    }
+    collatedMemories.addAll(seenMemories.map((e) => (e.memories, e.title)));
 
     return SizedBox(
       height: _maxHeight + MemoryCoverWidget.outerStrokeWidth * 2,

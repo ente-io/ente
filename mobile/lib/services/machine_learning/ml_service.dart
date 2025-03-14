@@ -153,7 +153,7 @@ class MLService {
         // refresh discover section
         magicCacheService.updateCache().ignore();
         // refresh memories section
-        memoriesCacheService.updateCache(forced: force).ignore();
+        memoriesCacheService.updateCache().ignore();
       }
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);

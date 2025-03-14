@@ -3,12 +3,15 @@ import "dart:convert";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/models/memories/clip_memory.dart";
 import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
+import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/models/memories/trip_memory.dart";
 
 const kPersonShowTimeout = Duration(days: 7 * 10);
 const kPersonAndTypeShowTimeout = Duration(days: 7 * 26);
+const kClipShowTimeout = Duration(days: 3 * 10);
 const kTripShowTimeout = Duration(days: 7 * 25);
 
 final maxShowTimeout = [
@@ -21,12 +24,14 @@ final maxShowTimeout = [
 class MemoriesCache {
   final List<ToShowMemory> toShowMemories;
   final List<PeopleShownLog> peopleShownLogs;
+  final List<ClipShownLog> clipShownLogs;
   final List<TripsShownLog> tripsShownLogs;
   final List<BaseLocation> baseLocations;
 
   MemoriesCache({
     required this.toShowMemories,
     required this.peopleShownLogs,
+    required this.clipShownLogs,
     required this.tripsShownLogs,
     required this.baseLocations,
   });
@@ -38,6 +43,7 @@ class MemoriesCache {
     return MemoriesCache(
       toShowMemories: ToShowMemory.decodeJsonToList(json['toShowMemories']),
       peopleShownLogs: PeopleShownLog.decodeJsonToList(json['peopleShownLogs']),
+      clipShownLogs: ClipShownLog.decodeJsonToList(json['clipShownLogs']),
       tripsShownLogs: TripsShownLog.decodeJsonToList(json['tripsShownLogs']),
       baseLocations: json['baseLocations'] != null
           ? BaseLocation.decodeJsonToList(
@@ -52,6 +58,7 @@ class MemoriesCache {
     return {
       'toShowMemories': ToShowMemory.encodeListToJson(toShowMemories),
       'peopleShownLogs': PeopleShownLog.encodeListToJson(peopleShownLogs),
+      'clipShownLogs': ClipShownLog.encodeListToJson(clipShownLogs),
       'tripsShownLogs': TripsShownLog.encodeListToJson(tripsShownLogs),
       'baseLocations': BaseLocation.encodeListToJson(baseLocations),
     };
@@ -79,6 +86,7 @@ class ToShowMemory {
 
   final String? personID;
   final PeopleMemoryType? peopleMemoryType;
+  final ClipMemoryType? clipMemoryType;
   final Location? location;
 
   bool get isOld {
@@ -103,25 +111,32 @@ class ToShowMemory {
     this.calculationTime, {
     this.personID,
     this.peopleMemoryType,
+    this.clipMemoryType,
     this.location,
   }) : assert(
           (type == MemoryType.people &&
                   personID != null &&
                   peopleMemoryType != null) ||
               (type == MemoryType.trips && location != null) ||
-              (type != MemoryType.people && type != MemoryType.trips),
+              (type == MemoryType.clip && clipMemoryType != null) ||
+              (type != MemoryType.people &&
+                  type != MemoryType.trips &&
+                  type != MemoryType.clip),
           "PersonID and peopleMemoryType must be provided for people memory type, and location must be provided for trips memory type",
         );
 
   factory ToShowMemory.fromSmartMemory(SmartMemory memory, DateTime calcTime) {
     String? personID;
     PeopleMemoryType? peopleMemoryType;
+    ClipMemoryType? clipMemoryType;
     Location? location;
     if (memory is PeopleMemory) {
       personID = memory.personID;
       peopleMemoryType = memory.peopleMemoryType;
     } else if (memory is TripMemory) {
       location = memory.location;
+    } else if (memory is ClipMemory) {
+      clipMemoryType = memory.clipMemoryType;
     }
     return ToShowMemory(
       memory.title,
@@ -135,6 +150,7 @@ class ToShowMemory {
       calcTime.microsecondsSinceEpoch,
       personID: personID,
       peopleMemoryType: peopleMemoryType,
+      clipMemoryType: clipMemoryType,
       location: location,
     );
   }
@@ -150,6 +166,9 @@ class ToShowMemory {
       personID: json['personID'],
       peopleMemoryType: json['peopleMemoryType'] != null
           ? peopleMemoryTypeFromString(json['peopleMemoryType'])
+          : null,
+      clipMemoryType: json['clipMemoryType'] != null
+          ? clipMemoryTypeFromString(json['clipMemoryType'])
           : null,
       location: json['location'] != null
           ? Location(
@@ -170,6 +189,7 @@ class ToShowMemory {
       'calculationTime': calculationTime,
       'personID': personID,
       'peopleMemoryType': peopleMemoryType?.toString().split('.').last,
+      'clipMemoryType': clipMemoryType?.toString().split('.').last,
       'location': location != null
           ? {
               'latitude': location!.latitude!,
@@ -238,6 +258,50 @@ class PeopleShownLog {
   static List<PeopleShownLog> decodeJsonToList(String jsonString) {
     final jsonList = jsonDecode(jsonString) as List;
     return jsonList.map((json) => PeopleShownLog.fromJson(json)).toList();
+  }
+}
+
+class ClipShownLog {
+  final ClipMemoryType clipMemoryType;
+  final int lastTimeShown;
+
+  ClipShownLog(
+    this.clipMemoryType,
+    this.lastTimeShown,
+  );
+
+  factory ClipShownLog.fromOldCacheMemory(ToShowMemory memory) {
+    assert(
+      memory.type == MemoryType.clip && memory.clipMemoryType != null,
+    );
+    return ClipShownLog(
+      memory.clipMemoryType!,
+      memory.lastTimeToShow,
+    );
+  }
+
+  factory ClipShownLog.fromJson(Map<String, dynamic> json) {
+    return ClipShownLog(
+      clipMemoryTypeFromString(json['clipMemoryType']),
+      json['lastTimeShown'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'clipMemoryType': clipMemoryType.toString().split('.').last,
+      'lastTimeShown': lastTimeShown,
+    };
+  }
+
+  static String encodeListToJson(List<ClipShownLog> shownLogs) {
+    final jsonList = shownLogs.map((log) => log.toJson()).toList();
+    return jsonEncode(jsonList);
+  }
+
+  static List<ClipShownLog> decodeJsonToList(String jsonString) {
+    final jsonList = jsonDecode(jsonString) as List;
+    return jsonList.map((json) => ClipShownLog.fromJson(json)).toList();
   }
 }
 

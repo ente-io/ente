@@ -210,6 +210,7 @@ class PersonService {
     if (data.email != null) {
       await resetEmailToPartialPersonDataCache();
     }
+    memoriesCacheService.queueUpdateCache();
     return PersonEntity(result.id, data);
   }
 
