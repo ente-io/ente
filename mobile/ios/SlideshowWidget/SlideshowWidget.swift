@@ -13,7 +13,7 @@ import WidgetKit
 private let widgetGroupId = "group.io.ente.frame.SlideshowWidget"
 
 struct Provider: TimelineProvider {
-    let X = 1
+    let X = 15
     let data = UserDefaults(suiteName: widgetGroupId)
 
     func placeholder(in _: Context) -> FileEntry {

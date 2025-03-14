@@ -53,14 +53,7 @@ class HomeWidgetService {
         _logger.warning("no home widget active");
         return;
       }
-      await hw.HomeWidget.saveWidgetData("totalSet", 0);
-      await hw.HomeWidget.updateWidget(
-        name: 'SlideshowWidgetProvider',
-        androidName: 'SlideshowWidgetProvider',
-        qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
-        iOSName: 'SlideshowWidget',
-      );
-      await hw.HomeWidget.saveWidgetData("totalSet", value);
+
       await hw.HomeWidget.updateWidget(
         name: 'SlideshowWidgetProvider',
         androidName: 'SlideshowWidgetProvider',
