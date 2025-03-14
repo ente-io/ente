@@ -87,17 +87,11 @@ class LocationService {
     return result;
   }
 
-  /// WARNING: This method does not use computer, consider using [getFilesInCity] instead
-  Map<City, List<EnteFile>> getFilesInCitySync(
-    List<EnteFile> allFiles,
-  ) {
-    if (allFiles.isEmpty) reloadLocationDiscoverySection = true;
-    final result = getCityResults({
-      "query": '',
-      "cities": _cities,
-      "files": allFiles,
-    });
-    return result;
+  Future<List<City>> getCities() async {
+    if (_cities.isEmpty) {
+      await _loadCities();
+    }
+    return _cities;
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> getLocationTags() {
