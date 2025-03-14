@@ -5,6 +5,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
+import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/models/memories/trip_memory.dart";
 
 const kPersonShowTimeout = Duration(days: 7 * 10);

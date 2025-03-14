@@ -1,9 +1,5 @@
 import "package:photos/models/memories/memory.dart";
 
-const kMemoriesUpdateFrequency = Duration(days: 7);
-const kMemoriesMargin = Duration(days: 2);
-const kDayItself = Duration(days: 1);
-
 enum MemoryType {
   people,
   trips,
