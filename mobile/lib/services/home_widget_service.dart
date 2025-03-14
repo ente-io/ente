@@ -128,25 +128,14 @@ class HomeWidgetService {
   }
 
   Future<void> clearHomeWidget() async {
-    final previousGeneratedId =
-        await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
-    if (previousGeneratedId == null) return;
-
     _logger.info("Clearing SlideshowWidget");
-    await hw.HomeWidget.saveWidgetData(
-      "slideshow",
-      null,
-    );
 
+    await hw.HomeWidget.saveWidgetData("totalSet", 0);
     await hw.HomeWidget.updateWidget(
       name: 'SlideshowWidgetProvider',
       androidName: 'SlideshowWidgetProvider',
       qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
       iOSName: 'SlideshowWidget',
-    );
-    await hw.HomeWidget.saveWidgetData<int>(
-      "home_widget_last_img",
-      null,
     );
     _logger.info(">>> SlideshowWidget cleared");
   }

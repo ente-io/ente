@@ -1459,12 +1459,12 @@ class SmartMemoriesService {
       );
 
       // then filter out similar images as much as possible
-      if(safeMemories.isNotEmpty) {
+      if (safeMemories.isNotEmpty) {
         filteredMemories.add(safeMemories.first);
       }
       int skipped = 0;
       filesLoop:
-      for (final mem in sagifeMemories.sublist(1)) {
+      for (final mem in safeMemories.sublist(1)) {
         if (filteredMemories.length >= targetSize) break;
         final clip = fileIdToClip[mem.file.uploadedFileID!];
         if (clip != null && (safeCount - skipped) > targetSize) {
