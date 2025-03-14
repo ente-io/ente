@@ -103,7 +103,7 @@ class MemoriesCacheService {
 
   Future<String> _getCachePath() async {
     return (await getApplicationSupportDirectory()).path +
-        "/cache/test3/memories_cache";
+        "/cache/test4/memories_cache";
     // TODO: lau: remove the test1 directory after testing
   }
 
@@ -197,6 +197,7 @@ class MemoriesCacheService {
 
   MemoriesCache _processOldCache(MemoriesCache? oldCache) {
     final List<PeopleShownLog> peopleShownLogs = [];
+    final List<ClipShownLog> clipShownLogs = [];
     final List<TripsShownLog> tripsShownLogs = [];
     if (oldCache != null) {
       final now = DateTime.now();
@@ -216,12 +217,22 @@ class MemoriesCacheService {
           tripsShownLogs.add(tripsLog);
         }
       }
+      for (final clipLog in oldCache.clipShownLogs) {
+        if (now.difference(
+              DateTime.fromMicrosecondsSinceEpoch(clipLog.lastTimeShown),
+            ) <
+            maxShowTimeout) {
+          clipShownLogs.add(clipLog);
+        }
+      }
       for (final oldMemory in oldCache.toShowMemories) {
         if (oldMemory.isOld) {
           if (oldMemory.type == MemoryType.people) {
-              peopleShownLogs.add(PeopleShownLog.fromOldCacheMemory(oldMemory));
+            peopleShownLogs.add(PeopleShownLog.fromOldCacheMemory(oldMemory));
+          } else if (oldMemory.type == MemoryType.clip) {
+            clipShownLogs.add(ClipShownLog.fromOldCacheMemory(oldMemory));
           } else if (oldMemory.type == MemoryType.trips) {
-              tripsShownLogs.add(TripsShownLog.fromOldCacheMemory(oldMemory));
+            tripsShownLogs.add(TripsShownLog.fromOldCacheMemory(oldMemory));
           }
         }
       }
@@ -229,6 +240,7 @@ class MemoriesCacheService {
     return MemoriesCache(
       toShowMemories: [],
       peopleShownLogs: peopleShownLogs,
+      clipShownLogs: clipShownLogs,
       tripsShownLogs: tripsShownLogs,
       baseLocations: [],
     );

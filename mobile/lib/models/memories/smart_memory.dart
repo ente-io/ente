@@ -3,6 +3,7 @@ import "package:photos/models/memories/memory.dart";
 enum MemoryType {
   people,
   trips,
+  clip,
   time,
   filler,
 }
@@ -17,6 +18,8 @@ MemoryType memoryTypeFromString(String type) {
       return MemoryType.time;
     case "filler":
       return MemoryType.filler;
+    case "clip":
+      return MemoryType.clip;
     default:
       throw ArgumentError("Invalid memory type: $type");
   }

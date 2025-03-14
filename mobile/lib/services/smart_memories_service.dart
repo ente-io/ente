@@ -15,6 +15,7 @@ import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/models/memories/clip_memory.dart";
 import "package:photos/models/memories/filler_memory.dart";
 import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
@@ -47,6 +48,7 @@ class SmartMemoriesService {
 
   static const _clipSimilarImageThreshold = 0.75;
   static const _clipActivityQueryThreshold = 0.25;
+  static const _clipMemoryTypeQueryThreshold = 0.25;
 
   static const yearsBefore = 30;
 
@@ -100,6 +102,13 @@ class SmartMemoriesService {
           await MLComputer.instance.runClipText(activityQuery(peopleActivity)),
         );
       }
+      final Map<ClipMemoryType, Vector> clipMemoryTypeVectors = {};
+      for (final clipMemoryType in ClipMemoryType.values) {
+        clipMemoryTypeVectors[clipMemoryType] ??= Vector.fromList(
+          await MLComputer.instance.runClipText(clipQuery(clipMemoryType)),
+        );
+      }
+      _logger.finest('clipPositiveTextVector and clipPeopleActivityVectors $t');
 
       // final locale = await getLocale();
       // TODO: lau: locale with DateFormat is not working well in computer, fix later
@@ -121,6 +130,7 @@ class SmartMemoriesService {
           "allImageEmbeddings": allImageEmbeddings,
           "clipPositiveTextVector": clipPositiveTextVector,
           "clipPeopleActivityVectors": clipPeopleActivityVectors,
+          "clipMemoryTypeVectors": clipMemoryTypeVectors,
         },
       );
     } catch (e, s) {
@@ -181,6 +191,8 @@ class SmartMemoriesService {
       final Vector clipPositiveTextVector = args["clipPositiveTextVector"];
       final Map<PeopleActivity, Vector> clipPeopleActivityVectors =
           args["clipPeopleActivityVectors"];
+      final Map<ClipMemoryType, Vector> clipMemoryTypeVectors =
+          args["clipMemoryTypeVectors"];
       dev.log('All arguments (direct data) unwrapped $t');
 
       final Map<String, String> faceIDsToPersonID = {};
@@ -235,6 +247,20 @@ class SmartMemoriesService {
       _deductUsedMemories(allFiles, tripMemories);
       memories.addAll(tripMemories);
       dev.log("All files length after trips: ${allFiles.length} $t");
+
+      // Clip memories
+      final clipMemories = await _getClipResults(
+        allFiles,
+        now,
+        oldCache.clipShownLogs,
+        surfaceAll: debugSurfaceAll,
+        seenTimes: seenTimes,
+        fileIDToImageEmbedding: fileIDToImageEmbedding,
+        clipMemoryTypeVectors: clipMemoryTypeVectors,
+      );
+      _deductUsedMemories(allFiles, clipMemories);
+      memories.addAll(clipMemories);
+      dev.log("All files length after clip memories: ${allFiles.length} $t");
 
       // Time memories
       final timeMemories = await _onThisDayOrWeekResults(
@@ -324,8 +350,10 @@ class SmartMemoriesService {
             .addAll(cluster.faces.map((faceID) => getFileIdFromFaceId(faceID)));
       }
     }
-    final List<String> orderedImportantPersonsID =
-        persons.where((person) => !person.data.isHidden).map((p) => p.remoteID).toList();
+    final List<String> orderedImportantPersonsID = persons
+        .where((person) => !person.data.isHidden)
+        .map((p) => p.remoteID)
+        .toList();
     orderedImportantPersonsID.sort((a, b) {
       final aFaces = personIdToFaceIDs[a]!.length;
       final bFaces = personIdToFaceIDs[b]!.length;
@@ -649,6 +677,92 @@ class SmartMemoriesService {
     w?.log('rotation setup');
 
     return memoryResults;
+  }
+
+  static Future<List<ClipMemory>> _getClipResults(
+    Iterable<EnteFile> allFiles,
+    DateTime currentTime,
+    List<ClipShownLog> shownClip, {
+    bool surfaceAll = false,
+    required Map<int, int> seenTimes,
+    required Map<int, EmbeddingVector> fileIDToImageEmbedding,
+    required Map<ClipMemoryType, Vector> clipMemoryTypeVectors,
+  }) async {
+    final w = (kDebugMode ? EnteWatch('getClipResults') : null)?..start();
+    final List<ClipMemory> clipResults = [];
+    if (allFiles.isEmpty) return [];
+    final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
+    final windowEnd =
+        currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
+    final Map<ClipMemoryType, ClipMemory> clipTypeToMemory = {};
+    w?.log('allFiles setup');
+
+    // Loop through the clip types and find all memories
+    final clipFiles = <EnteFile>[];
+    for (final clipMemoryType in ClipMemoryType.values) {
+      clipFiles.clear();
+      final Vector? activityVector = clipMemoryTypeVectors[clipMemoryType];
+      if (activityVector == null) {
+        dev.log("No vector for clipMemoryType $clipMemoryType");
+        continue;
+      }
+      final Map<int, double> similarities = {};
+      for (final fileID in fileIDToImageEmbedding.keys) {
+        similarities[fileID] =
+            fileIDToImageEmbedding[fileID]!.vector.dot(activityVector);
+      }
+      w?.log(
+        'comparing embeddings for clipMemoryType $clipMemoryType',
+      );
+      for (final file in allFiles) {
+        final similarity = similarities[file.uploadedFileID!];
+        if (similarity == null) continue;
+        if (similarity > _clipMemoryTypeQueryThreshold) {
+          clipFiles.add(file);
+        }
+      }
+      if (clipFiles.length < 10) continue;
+      // sort based on highest similarity first
+      clipFiles.sort((a, b) {
+        return similarities[b.uploadedFileID!]!
+            .compareTo(similarities[a.uploadedFileID!]!);
+      });
+      clipTypeToMemory[clipMemoryType] = ClipMemory(
+        clipFiles.take(10).map((f) => Memory.fromFile(f, seenTimes)).toList(),
+        clipTitle(clipMemoryType),
+        nowInMicroseconds,
+        windowEnd,
+        clipMemoryType,
+      );
+    }
+
+    // Surface everything just for debug checking
+    if (surfaceAll) {
+      for (final clipMemoryType in ClipMemoryType.values) {
+        final clipMemory = clipTypeToMemory[clipMemoryType];
+        if (clipMemory != null) clipResults.add(clipMemory);
+      }
+      return clipResults;
+    }
+
+    // Loop through the clip types and add based on rotation
+    clipMemoriesLoop:
+    for (final clipMemoryType in ClipMemoryType.values) {
+      final clipMemory = clipTypeToMemory[clipMemoryType];
+      if (clipMemory == null) continue;
+      for (final shownLog in shownClip) {
+        if (shownLog.clipMemoryType != clipMemoryType) continue;
+        final shownDate =
+            DateTime.fromMicrosecondsSinceEpoch(shownLog.lastTimeShown);
+        final bool seenRecently =
+            currentTime.difference(shownDate) < kClipShowTimeout;
+        if (seenRecently) continue clipMemoriesLoop;
+      }
+      clipResults.add(clipMemory);
+      break;
+    }
+
+    return clipResults;
   }
 
   static Future<(List<TripMemory>, List<BaseLocation>)> _getTripsResults(
