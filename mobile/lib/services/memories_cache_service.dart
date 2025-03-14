@@ -294,7 +294,7 @@ class MemoriesCacheService {
     return result;
   }
 
-  Future<List<SmartMemory>> getMemories(int? limit) async {
+  Future<List<SmartMemory>> getMemories() async {
     if (!showAnyMemories) {
       return [];
     }

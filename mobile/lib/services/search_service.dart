@@ -25,6 +25,7 @@ import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/memories/memory.dart";
+import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
@@ -1231,9 +1232,12 @@ class SearchService {
     int? limit,
   ) async {
     DateTime calcTime = DateTime.now();
-    // await two seconds to let new page load first
-    await Future.delayed(const Duration(seconds: 1));
-    if (limit == null) {
+    late List<SmartMemory> memories;
+    if (limit != null) {
+      memories = await memoriesCacheService.getMemories();
+    } else {
+      // await two seconds to let new page load first
+      await Future.delayed(const Duration(seconds: 1));
       final DateTime? pickedTime = await showDatePicker(
         context: context,
         initialDate: DateTime.now(),
@@ -1241,13 +1245,15 @@ class SearchService {
         lastDate: DateTime(2100),
       );
       if (pickedTime != null) calcTime = pickedTime;
+
+      final cache = await memoriesCacheService.debugCacheForTesting();
+      final memoriesResult = await smartMemoriesService
+          .calcMemories(calcTime, cache, debugSurfaceAll: true);
+      locationService.baseLocations = memoriesResult.baseLocations;
+      memories = memoriesResult.memories;
     }
-    final cache = await memoriesCacheService.debugCacheForTesting();
-    final memoriesResult = await smartMemoriesService
-        .calcMemories(calcTime, cache, debugSurfaceAll: true);
-    locationService.baseLocations = memoriesResult.baseLocations;
     final searchResults = <GenericSearchResult>[];
-    for (final memory in memoriesResult.memories) {
+    for (final memory in memories) {
       final files = Memory.filesFromMemories(memory.memories);
       searchResults.add(
         GenericSearchResult(
