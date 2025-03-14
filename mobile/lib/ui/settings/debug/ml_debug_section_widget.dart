@@ -288,7 +288,10 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
+              final now = DateTime.now();
               await memoriesCacheService.updateCache(forced: true);
+              final duration = DateTime.now().difference(now);
+              showShortToast(context, "Done in ${duration.inSeconds} seconds");
             } catch (e, s) {
               logger.warning('Update memories failed', e, s);
               await showGenericErrorDialog(context: context, error: e);

@@ -54,7 +54,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (!MemoriesService.instance.showMemories) {
+    if (!memoriesCacheService.showAnyMemories) {
       return const SizedBox.shrink();
     }
     if (memoriesCacheService.enableSmartMemories) {
@@ -65,13 +65,8 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
 
   Widget _smartMemories() {
     return FutureBuilder<List<SmartMemory>>(
-      future: memoriesCacheService.getMemories(
-        null,
-      ),
+      future: memoriesCacheService.getMemories(),
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data!.isEmpty) {
-          return _oldMemories();
-        }
         if (snapshot.hasError || !snapshot.hasData) {
           return SizedBox(
             height: _maxHeight + 12 + 10,
@@ -128,8 +123,17 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   }
 
   Widget _buildSmartMemories(List<SmartMemory> memories) {
-    final collatedMemories =
-        memories.map((e) => (e.memories, e.title)).toList();
+    final List<(List<Memory>, String)> collatedMemories = [];
+    final List<SmartMemory> seenMemories = [];
+    for (final memory in memories) {
+      final seen = memory.memories.every((element) => element.isSeen());
+      if (seen) {
+        seenMemories.add(memory);
+      } else {
+        collatedMemories.add((memory.memories, memory.title));
+      }
+    }
+    collatedMemories.addAll(seenMemories.map((e) => (e.memories, e.title)));
 
     return SizedBox(
       height: _maxHeight + MemoryCoverWidget.outerStrokeWidth * 2,

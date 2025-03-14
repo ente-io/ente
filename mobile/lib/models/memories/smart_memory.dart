@@ -1,12 +1,9 @@
 import "package:photos/models/memories/memory.dart";
 
-const kMemoriesUpdateFrequency = Duration(days: 7);
-const kMemoriesMargin = Duration(days: 2);
-const kDayItself = Duration(days: 1);
-
 enum MemoryType {
   people,
   trips,
+  clip,
   time,
   filler,
 }
@@ -21,6 +18,8 @@ MemoryType memoryTypeFromString(String type) {
       return MemoryType.time;
     case "filler":
       return MemoryType.filler;
+    case "clip":
+      return MemoryType.clip;
     default:
       throw ArgumentError("Invalid memory type: $type");
   }
@@ -35,7 +34,6 @@ class SmartMemory {
 
   int? firstCreationTime;
   int? lastCreationTime;
-  // TODO: lau: actually use this in calculated filters
 
   SmartMemory(
     this.memories,
