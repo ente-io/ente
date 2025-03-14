@@ -85,16 +85,20 @@ class MemoriesCacheService {
   bool get enableSmartMemories =>
       flagService.showSmartMemories && flagService.hasGrantedMLConsent;
 
-  Future<void> _checkIfTimeToUpdateCache() async {
+  void _checkIfTimeToUpdateCache() {
     if (!enableSmartMemories) {
       return;
     }
-    if (lastMemoriesCacheUpdateTime <
-        DateTime.now()
-            .subtract(kMemoriesUpdateFrequency)
-            .microsecondsSinceEpoch) {
+    if (_timeToUpdateCache()) {
       _shouldUpdate = true;
     }
+  }
+
+  bool _timeToUpdateCache() {
+    return lastMemoriesCacheUpdateTime <
+        DateTime.now()
+            .subtract(kMemoriesUpdateFrequency)
+            .microsecondsSinceEpoch;
   }
 
   Future<String> _getCachePath() async {
@@ -125,7 +129,7 @@ class MemoriesCacheService {
     if (!showAnyMemories || !enableSmartMemories) {
       return;
     }
-    await _checkIfTimeToUpdateCache();
+    _checkIfTimeToUpdateCache();
     try {
       if ((!_shouldUpdate && !forced) || _isUpdateInProgress) {
         _logger.info(
@@ -302,7 +306,7 @@ class MemoriesCacheService {
       return _cachedMemories!;
     }
     _cachedMemories = await _getMemoriesFromCache();
-    if (_cachedMemories == null) {
+    if (_cachedMemories == null || _timeToUpdateCache()) {
       await updateCache(forced: true);
       _cachedMemories = await _getMemoriesFromCache();
     }
