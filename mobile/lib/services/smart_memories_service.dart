@@ -1,6 +1,6 @@
 import "dart:async";
 import "dart:developer" as dev show log;
-import "dart:math" show min, max;
+import "dart:math" show Random, max, min;
 
 import "package:computer/computer.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
@@ -374,8 +374,8 @@ class SmartMemoriesService {
     if (isMeAssigned) meFileIDs = personIdToFileIDs[meID]!;
 
     // Loop through the people and find all memories
-    final Map<String, Map<PeopleMemoryType, PeopleMemory>> personToMemories =
-        {};
+    final Map<String, Map<PeopleMemoryType, List<PeopleMemory>>>
+        personToMemories = {};
     for (final personID in orderedImportantPersonsID) {
       final personFileIDs = personIdToFileIDs[personID]!;
       final personName = personIdToPerson[personID]!.data.name;
@@ -411,7 +411,7 @@ class SmartMemoriesService {
         );
         personToMemories
             .putIfAbsent(personID, () => {})
-            .putIfAbsent(PeopleMemoryType.spotlight, () => spotlightMemory);
+            .putIfAbsent(PeopleMemoryType.spotlight, () => [spotlightMemory]);
       }
       w?.log('spotlight setup');
 
@@ -442,9 +442,10 @@ class SmartMemoriesService {
             PeopleMemoryType.youAndThem,
             personID,
           );
-          personToMemories
-              .putIfAbsent(personID, () => {})
-              .putIfAbsent(PeopleMemoryType.youAndThem, () => youAndThemMemory);
+          personToMemories.putIfAbsent(personID, () => {}).putIfAbsent(
+                PeopleMemoryType.youAndThem,
+                () => [youAndThemMemory],
+              );
         }
         w?.log('youAndThem setup');
       }
@@ -457,10 +458,8 @@ class SmartMemoriesService {
         );
         w?.log('getting clip vectors for doingSomethingTogether');
         final activityFiles = <EnteFile>[];
-        PeopleActivity lastActivity = PeopleActivity.values.first;
         for (final activity in PeopleActivity.values) {
           activityFiles.clear();
-          lastActivity = activity;
           final Vector? activityVector = clipPeopleActivityVectors[activity];
           if (activityVector == null) {
             dev.log("No vector for activity $activity");
@@ -484,29 +483,31 @@ class SmartMemoriesService {
               }
             }
           }
-          if (activityFiles.length > 5) break;
-          // TODO: lau: fix this, it's causing only one activity to be shown
+          if (activityFiles.length > 5) {
+            final String title = activityTitle(activity, personName);
+            final selectActivityMemories = await _bestSelectionPeople(
+              activityFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
+              fileIDToImageEmbedding: fileIDToImageEmbedding,
+              clipPositiveTextVector: clipPositiveTextVector,
+            );
+            final activityMemory = PeopleMemory(
+              selectActivityMemories,
+              title,
+              nowInMicroseconds,
+              windowEnd,
+              PeopleMemoryType.doingSomethingTogether,
+              personID,
+            );
+            personToMemories
+                .putIfAbsent(personID, () => {})
+                .putIfAbsent(
+                  PeopleMemoryType.doingSomethingTogether,
+                  () => [],
+                )
+                .add(activityMemory);
+          }
         }
-        if (activityFiles.length > 5) {
-          final String title = activityTitle(lastActivity, personName);
-          final selectActivityMemories = await _bestSelectionPeople(
-            activityFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
-            fileIDToImageEmbedding: fileIDToImageEmbedding,
-            clipPositiveTextVector: clipPositiveTextVector,
-          );
-          final activityMemory = PeopleMemory(
-            selectActivityMemories,
-            title,
-            nowInMicroseconds,
-            windowEnd,
-            PeopleMemoryType.doingSomethingTogether,
-            personID,
-          );
-          personToMemories.putIfAbsent(personID, () => {}).putIfAbsent(
-                PeopleMemoryType.doingSomethingTogether,
-                () => activityMemory,
-              );
-        }
+
         w?.log('doingSomethingTogether setup');
       }
 
@@ -552,7 +553,7 @@ class SmartMemoriesService {
         );
         personToMemories.putIfAbsent(personID, () => {}).putIfAbsent(
               PeopleMemoryType.lastTimeYouSawThem,
-              () => lastTimeMemory,
+              () => [lastTimeMemory],
             );
       }
       w?.log('lastTimeYouSawThem setup');
@@ -563,7 +564,7 @@ class SmartMemoriesService {
       for (final personID in personToMemories.keys) {
         final personMemories = personToMemories[personID]!;
         for (final memoryType in personMemories.keys) {
-          memoryResults.add(personMemories[memoryType]!);
+          memoryResults.addAll(personMemories[memoryType]!);
         }
       }
       return memoryResults;
@@ -583,7 +584,8 @@ class SmartMemoriesService {
         if (daysTillBirthday < 7 && daysTillBirthday >= 0) {
           final personName = person.data.name;
           final int newAge = currentTime.year - birthdate.year;
-          final spotlightMem = personMemories[PeopleMemoryType.spotlight];
+          final spotlightMem =
+              personMemories[PeopleMemoryType.spotlight]?.first;
           if (spotlightMem != null) {
             final String firstTitle = "$personName turning $newAge!";
             final String secondTitle = "$personName is $newAge!";
@@ -606,7 +608,8 @@ class SmartMemoriesService {
               ),
             );
           }
-          final youAndThemMem = personMemories[PeopleMemoryType.youAndThem];
+          final youAndThemMem =
+              personMemories[PeopleMemoryType.youAndThem]?.first;
           if (youAndThemMem != null) {
             memoryResults.add(
               youAndThemMem.copyWith(
@@ -623,7 +626,8 @@ class SmartMemoriesService {
       }
 
       // Check if we should surface memory based on last met
-      final lastMetMemory = personMemories[PeopleMemoryType.lastTimeYouSawThem];
+      final lastMetMemory =
+          personMemories[PeopleMemoryType.lastTimeYouSawThem]?.first;
       if (lastMetMemory != null) {
         final lastMetTime = DateTime.fromMicrosecondsSinceEpoch(
           lastMetMemory.lastCreationTime!,
@@ -656,7 +660,19 @@ class SmartMemoriesService {
       if (personToMemories[personID] == null) continue peopleRotationLoop;
       int added = 0;
       potentialMemoryLoop:
-      for (final potentialMemory in personToMemories[personID]!.values) {
+      for (final memoriesForCategory in personToMemories[personID]!.values) {
+        PeopleMemory potentialMemory = memoriesForCategory.first;
+        if (memoriesForCategory.length > 1) {
+          if (potentialMemory.peopleMemoryType !=
+              PeopleMemoryType.doingSomethingTogether) {
+            dev.log(
+              'Something is going wrong, ${potentialMemory.peopleMemoryType} has multiple memories for same person',
+            );
+          } else {
+            final randIdx = Random().nextInt(potentialMemory.memories.length);
+            potentialMemory = memoriesForCategory[randIdx];
+          }
+        }
         for (final shownLog in shownPeople) {
           if (shownLog.personID != personID) continue;
           if (shownLog.peopleMemoryType != potentialMemory.peopleMemoryType) {
