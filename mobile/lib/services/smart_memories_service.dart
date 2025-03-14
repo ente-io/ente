@@ -457,6 +457,7 @@ class SmartMemoriesService {
             }
           }
           if (activityFiles.length > 5) break;
+          // TODO: lau: fix this, it's causing only one activity to be shown
         }
         if (activityFiles.length > 5) {
           final String title = activityTitle(lastActivity, personName);
