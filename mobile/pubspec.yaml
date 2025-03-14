@@ -78,6 +78,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_animate: ^4.1.0
+  flutter_app_icon_changer: ^0.1.1
   flutter_cache_manager: ^3.3.0
   flutter_datetime_picker_bdaya: ^3.0.2
   flutter_displaymode: ^0.6.0
@@ -91,7 +92,7 @@ dependencies:
     sdk: flutter
   flutter_map: ^6.2.0
   flutter_map_marker_cluster: ^1.3.6
-  flutter_native_splash: ^2.2.0+1
+  flutter_native_splash: ^2.4.4
   flutter_password_strength: ^0.1.6
   flutter_secure_storage: ^9.2.4
   flutter_sodium:
@@ -111,6 +112,7 @@ dependencies:
   intl: ^0.19.0
   json_annotation: ^4.8.0
   latlong2: ^0.9.0
+  launcher_icon_switcher: ^0.0.2
   like_button: ^2.0.5
   loading_animations: ^2.1.0
   local_auth: ^2.1.5
@@ -269,19 +271,58 @@ dev_dependencies:
   json_serializable: ^6.6.1
   test: ^1.22.0
 
-flutter_icons:
-  android: "launcher_icon"
-  adaptive_icon_foreground: "assets/launcher_icon/ente-icon-foreground.png"
-  adaptive_icon_background: "#ffffff"
-  ios: true
-  image_path: "assets/icon-light.png"
+# ------------------------------
+# ICONs
+# ------------------------------
+# Run `dart run flutter_launcher_icons` after un-commenting one of the sections
+# (ADAPTIVE ICONS or NON ADAPTIVE ICONS) within the `flutter_icons` section. You
+# may have to update the `icon_X.xml` generated within `res/minimap-*` folder.
+# Sample commit for adding an icon:
+# https://github.com/ente-io/ente/commit/40ae8d91c359447fc2cf6672bfa754c5cc7a6af1
+
+# flutter_icons:
+  # ADAPTIVE ICONS
+
+  # 1. E + HEART
+  # adaptive_icon_foreground: "assets/launcher_icon/icon-foreground.png"
+  # adaptive_icon_background: "#08C225"
+
+  # 2. OG
+  # adaptive_icon_foreground: "assets/launcher_icon/icon-og-foreground.png"
+  # adaptive_icon_background: "#ffffff"
+
+  # 3. MONOCHROME
+  # adaptive_icon_foreground: "assets/launcher_icon/icon-monochrome-foreground.png"
+  # adaptive_icon_background: "#08C225"
+  # android: "icon_monochrome"
+  # image_path: "assets/launcher_icon/icon-monochrome-foreground.png"
+
+  # NON ADAPTIVE ICONS
+  
+  # 1. GREEN ICON
+  # android: "icon_green"
+  # ios: "IconGreen"
+  # image_path: "assets/launcher_icon/icon-green.png"
+
+  # 2. DARK ICON
+  # android: "icon_dark"
+  # ios: "IconDark"
+  # image_path: "assets/launcher_icon/icon-dark.png"
+  
+  # 3. LIGHT ICON
+  # android: "icon_light"
+  # ios: "IconLight"
+  # image_path: "assets/launcher_icon/icon-light.png"
+
+  # 4. OG ICON
+  # android: "icon_og"
+  # ios: "IconOG"
+  # image_path: "assets/launcher_icon/icon-og.png"
 
 flutter_native_splash:
   color: "#ffffff"
   color_dark: "#000000"
-  image: assets/splash-screen-light.png
-  image_dark: assets/splash-screen-dark.png
-  android_fullscreen: true
+  image: assets/splash-screen-icon.png
   android_gravity: center
   ios_content_mode: center
   android_12:
@@ -290,8 +331,7 @@ flutter_native_splash:
     # Please note that the splash screen will be clipped to a circle on the center of the screen.
     # App icon without an icon background: This should be 1152×1152 pixels, and fit within a circle
     # 768 pixels in diameter.
-    image: assets/splash-screen-light.png
-    image_dark: assets/splash-screen-dark.png
+    image: assets/splash-screen-icon.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -302,6 +342,7 @@ flutter:
     - assets/
     - assets/video-editor/
     - assets/icons/
+    - assets/launcher_icon/
   fonts:
     - family: Inter
       fonts:

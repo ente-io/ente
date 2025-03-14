@@ -1697,5 +1697,6 @@
         "example": "2"
       }
     }
-  }
+  },
+  "appIcon": "App icon"
 }
