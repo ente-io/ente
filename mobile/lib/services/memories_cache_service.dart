@@ -137,6 +137,13 @@ class MemoriesCacheService {
         _logger.info(
           "No update needed as shouldUpdate: $_shouldUpdate, forced: $forced and isUpdateInProgress $_isUpdateInProgress",
         );
+        if (_isUpdateInProgress) {
+          int waitingTime = 0;
+          while (_isUpdateInProgress && waitingTime < 60) {
+            await Future.delayed(const Duration(seconds: 1));
+            waitingTime++;
+          }
+        }
         return;
       }
       _logger.info("updating memories cache");
