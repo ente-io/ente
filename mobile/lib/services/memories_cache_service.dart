@@ -14,7 +14,6 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/location_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -124,6 +123,10 @@ class MemoriesCacheService {
         }
       }
     }
+  }
+
+  void queueUpdateCache() {
+    _shouldUpdate = true;
   }
 
   Future<void> updateCache({bool forced = false}) async {
