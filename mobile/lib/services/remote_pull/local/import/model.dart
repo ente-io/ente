@@ -1,19 +1,19 @@
 import "package:photo_manager/photo_manager.dart";
 
-class LocalPathAssets {
+class DevicePathAssets {
   final AssetPathEntity path;
   final List<AssetEntity> assets;
-  LocalPathAssets({required this.path, required this.assets});
+  DevicePathAssets({required this.path, required this.assets});
 }
 
 class IncrementalDiffReqParams {
-  final List<LocalPathAssets> incrementalAssets;
+  final List<DevicePathAssets> newOrUpdatedLocalPaths;
   final Set<String> inAppAssetIDs;
   final int fromTimeInMs;
   final int toTimeInMs;
 
   IncrementalDiffReqParams(
-    this.incrementalAssets,
+    this.newOrUpdatedLocalPaths,
     this.inAppAssetIDs,
     this.fromTimeInMs,
     this.toTimeInMs,
@@ -40,7 +40,7 @@ class IncrementalDiffWithOnDevice {
 }
 
 class FullDiffReqParams {
-  final List<LocalPathAssets> allOnDeviceAssets;
+  final List<DevicePathAssets> allOnDeviceAssets;
   final Set<String> inAppAssetIDs;
   final Map<String, Set<String>> inAppPathToLocalIDs;
 

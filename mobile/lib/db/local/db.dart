@@ -31,4 +31,20 @@ class LocalDB {
     }
     return ids;
   }
+
+  Future<Map<String, Set<String>>> pathToAssetIDs() async {
+    final result = await _sqliteDB
+        .execute("SELECT path_id, asset_id FROM device_path_assets");
+    final pathToAssetIDs = <String, Set<String>>{};
+    for (var row in result) {
+      final pathID = row["path_id"] as String;
+      final assetID = row["asset_id"] as String;
+      if (pathToAssetIDs.containsKey(pathID)) {
+        pathToAssetIDs[pathID]!.add(assetID);
+      } else {
+        pathToAssetIDs[pathID] = {assetID};
+      }
+    }
+    return pathToAssetIDs;
+  }
 }

@@ -6,9 +6,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
-import 'package:photos/db/files_db.dart';
 import "package:photos/events/permission_granted_event.dart";
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/extensions/stop_watch.dart';
@@ -25,10 +23,9 @@ import 'package:synchronized/synchronized.dart';
 
 class LocalImportService {
   final _log = Logger("LocalSyncService");
-  final _db = FilesDB.instance;
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
-  final LocalAssetsService _localAssetsService = LocalAssetsService();
+  final DeviceAssetsService _deviceAssetsService = DeviceAssetsService();
   late Debouncer _changeCallbackDebouncer;
   final Lock _lock = Lock();
 
@@ -87,8 +84,8 @@ class LocalImportService {
       }
       final Set<String> existingLocalFileIDs = await localDB.getAssetsIDs();
       _log.info("${existingLocalFileIDs.length} localIDs were discovered");
-      final List<LocalPathAssets> result =
-          await _localAssetsService.getLocalAssets(
+      final List<DevicePathAssets> result =
+          await _deviceAssetsService.getLocalAssets(
         fromTimeInMs: lastSyncTimeInMs,
         toTimeInMs: syncStartTime.microsecondsSinceEpoch,
       );
@@ -119,18 +116,17 @@ class LocalImportService {
       return false;
     }
     final TimeLogger t = TimeLogger(context: "");
-    final localAssets = await _localAssetsService.getLocalAssets();
-    _log.info("loaded localAssets $t");
+    final devicePathAssets = await _deviceAssetsService.getLocalAssets();
+    _log.info("loaded devicePathAssets $t");
     final inAppAssetIds = await localDB.getAssetsIDs();
-    final Map<String, Set<String>> pathToLocalIDs =
-        await _db.getDevicePathIDToLocalIDMap();
+    final inAppPathToAssetIds = await localDB.pathToAssetIDs();
     final localDiffResult =
-        await _localAssetsService.computeFullDiffWithOnDevice(
-      localAssets,
+        await _deviceAssetsService.computeFullDiffWithOnDevice(
+      devicePathAssets,
       inAppAssetIds,
-      pathToLocalIDs,
+      inAppPathToAssetIds,
     );
-    final bool hasAnyMappingChanged = !localDiffResult.noChange;
+    final bool hasAnyMappingChanged = localDiffResult.isInOutOfSync;
     // if (localDiffResult.newPathToLocalIDs?.isNotEmpty ?? false) {
     //   await _db
     //       .insertPathIDToLocalIDMapping(localDiffResult.newPathToLocalIDs!);
@@ -165,7 +161,7 @@ class LocalImportService {
     //     ),
     //   );
     // }
-    _log.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
+
     return hasAnyMappingChanged;
   }
 
@@ -200,7 +196,7 @@ class LocalImportService {
 
   Future<void> _loadAndStoreDiff(
     Set<String> existingLocalDs,
-    List<LocalPathAssets> devicePathAssets,
+    List<DevicePathAssets> devicePathAssets,
   ) async {
     // // final List<EnteFile> files = result.item2;
     // if (files.isNotEmpty) {

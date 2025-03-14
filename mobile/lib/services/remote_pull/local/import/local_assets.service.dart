@@ -8,24 +8,24 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_import_progress.dart';
 import "package:photos/services/remote_pull/local/import/model.dart";
 
-class LocalAssetsService {
-  final _logger = Logger("LocalAssetsService");
+class DeviceAssetsService {
+  final _logger = Logger("DeviceAssetsService");
   static const ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
   static const assetFetchPageSize = 2000;
 
-  Future<List<LocalPathAssets>> getLocalAssets({
+  Future<List<DevicePathAssets>> getLocalAssets({
     int? fromTimeInMs,
     int? toTimeInMs,
   }) async {
-    final List<AssetPathEntity> assetPaths = await _getGalleryList(
+    final List<AssetPathEntity> assetPaths = await _getDevicePaths(
       updateFromTimeInMs: fromTimeInMs,
       updateToTimeInMs: toTimeInMs,
     );
-    final List<LocalPathAssets> localPathAssets = [];
+    final List<DevicePathAssets> localPathAssets = [];
     for (final assetPath in assetPaths) {
-      final List<AssetEntity> assets = await _getAllAssetLists(assetPath);
+      final List<AssetEntity> assets = await _getPathAssetLists(assetPath);
       localPathAssets.add(
-        LocalPathAssets(
+        DevicePathAssets(
           path: assetPath,
           assets: assets,
         ),
@@ -35,7 +35,7 @@ class LocalAssetsService {
   }
 
   Future<FullDiffWithOnDevice> computeFullDiffWithOnDevice(
-    List<LocalPathAssets> allOnDeviceAssets,
+    List<DevicePathAssets> allOnDeviceAssets,
     // current set of assets available on device
     Set<String> inAppAssetIDs, // localIDs of files already imported in app
     Map<String, Set<String>> inAppPathToLocalIDs,
@@ -54,7 +54,7 @@ class LocalAssetsService {
   /// returns a list of AssetPathEntity with relevant filter operations.
   /// [needTitle] impacts the performance for fetching the actual [AssetEntity]
   /// in iOS. Same is true for [containsModifiedPath]
-  Future<List<AssetPathEntity>> _getGalleryList({
+  Future<List<AssetPathEntity>> _getDevicePaths({
     final int? updateFromTimeInMs,
     final int? updateToTimeInMs,
     final bool containsModifiedPath = false,
@@ -100,7 +100,7 @@ class LocalAssetsService {
     return galleryList;
   }
 
-  Future<List<AssetEntity>> _getAllAssetLists(
+  Future<List<AssetEntity>> _getPathAssetLists(
     AssetPathEntity pathEntity,
   ) async {
     final List<AssetEntity> result = [];
@@ -191,8 +191,8 @@ class LocalAssetsService {
 
 // review: do we need to run this inside compute, after making File.FromAsset
 // sync. If yes, update the method documentation with reason.
-  Future<List<AssetEntity>> _computeIncrementalDiffWithOnDevice(
-    Map<String, dynamic> args,
+  Future<IncrementalDiffWithOnDevice> _computeIncrementalDiffWithOnDevice(
+    IncrementalDiffReqParams reqParams,
   ) async {
     final assetList = args["assetList"];
     final fromTimeInMs = args["fromTimeInMs"];
