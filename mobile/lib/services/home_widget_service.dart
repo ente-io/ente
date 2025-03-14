@@ -272,9 +272,9 @@ class HomeWidgetService {
     routeToPage(context, page, forceCustomPageRoute: true).ignore();
   }
 
-  Future<List<EnteFile>> getFiles(bool isMemory) async {
-    if (isMemory) {
-      final memories = await memoriesCacheService.getMemories(100);
+  Future<List<EnteFile>> getFiles({required bool fetchMemory}) async {
+    if (fetchMemory) {
+      final memories = await memoriesCacheService.getMemories();
       if (memories.isEmpty) {
         return [];
       }
@@ -332,7 +332,7 @@ class HomeWidgetService {
   }
 
   Future<void> lockAndLoadMemories() async {
-    final files = await getFiles(false);
+    final files = await getFiles(fetchMemory: true);
 
     int index = 0;
 
