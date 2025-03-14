@@ -39,20 +39,26 @@ class EnteWatch extends Stopwatch {
 class TimeLogger {
   final String context;
   final int logThreshold;
-  DateTime _start;
+  final DateTime _start;
+  DateTime _toStringStart = DateTime.now();
   TimeLogger({this.context = "TLog:", this.logThreshold = 5})
       : _start = DateTime.now();
 
   @override
   String toString() {
-    final int diff = DateTime.now().difference(_start).inMilliseconds;
+    final int diff = DateTime.now().difference(_toStringStart).inMilliseconds;
     late String res;
     if (diff > logThreshold) {
       res = "[$context$diff ms]";
     } else {
       res = "[]";
     }
-    _start = DateTime.now();
+    _toStringStart = DateTime.now();
     return res;
+  }
+
+  String get elapsed {
+    final int diff = DateTime.now().difference(_start).inMilliseconds;
+    return "[$context$diff ms]";
   }
 }

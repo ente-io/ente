@@ -63,8 +63,10 @@ class FullDiffWithOnDevice {
   // Set of path ids that are present inside app, but missing on the device.
   // We should remove these paths from the app.
   final Set<String> extraPathIDsInApp;
+
   // map of path to localIDs which needs to be updated in the local db
-  // the localIDs contains list of all assets that are present in the device's path
+  // the localIDs contains list of all assets that are present in the device's path.
+  // We should delete existing mapping for these paths and insert the new mapping.
   final Map<String, Set<String>> updatePathToLocalIDs;
 
   FullDiffWithOnDevice({

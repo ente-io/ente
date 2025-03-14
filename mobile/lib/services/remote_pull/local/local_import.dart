@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/file_updation_db.dart';
@@ -53,116 +52,86 @@ class LocalImportService {
 
   bool get _inForeground => AppLifecycleService.instance.isForeground;
 
-  Future<void> importDiff() async {
-    if (!permissionService.hasGrantedPermissions()) {
-      _log.info("skip importDiff as permission is not granted");
+  Future<void> incrementalSync() async {
+    if (!await _canSync("incrementalSync")) {
       return;
     }
-    if (Platform.isAndroid && _inForeground) {
-      final permissionState =
-          await permissionService.requestPhotoMangerPermissions();
-      if (permissionState != PermissionState.authorized) {
-        _log.warning("sync with invalid permission $permissionState");
-        return;
-      }
-    }
     if (_existingSync != null) {
-      _log.info("importDiff already in progress.");
+      _log.info("incrementalSync already in progress.");
       return _existingSync!.future;
     }
     _existingSync = Completer<void>();
+    if (!_prefs.containsKey(lastLocalDBSyncTime)) {
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
+    }
 
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
     // This is a fix for https://github.com/ente-io/ente/issues/4296
     await _lock.synchronized(() async {
-      final syncStartTime = DateTime.now();
-      final lastSyncTimeInMs = _prefs.getInt(lastLocalDBSyncTime) ?? 0;
-      if (lastSyncTimeInMs == 0) {
-        Bus.instance
-            .fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
-      }
-      final Set<String> existingLocalFileIDs = await localDB.getAssetsIDs();
-      _log.info("${existingLocalFileIDs.length} localIDs were discovered");
-      final List<DevicePathAssets> result =
-          await _deviceAssetsService.getLocalAssets(
-        fromTimeInMs: lastSyncTimeInMs,
-        toTimeInMs: syncStartTime.microsecondsSinceEpoch,
+      final TimeLogger tl = TimeLogger(context: "incrementalSync");
+      final syncTime = DateTime.now().microsecondsSinceEpoch;
+      final Set<String> inAppAssetIds = await localDB.getAssetsIDs();
+      _log.info("${inAppAssetIds.length} assets in app $tl");
+      final IncrementalDiffWithOnDevice diff =
+          await _deviceAssetsService.incrementalDiffWithOnDevice(
+        inAppAssetIds,
+        fromTimeInMs: _prefs.getInt(lastLocalDBSyncTime) ?? 0,
+        toTimeInMs: syncTime,
       );
-      await _loadAndStoreDiff(existingLocalFileIDs, result);
-      await _prefs.setInt(
-        lastLocalDBSyncTime,
-        syncStartTime.microsecondsSinceEpoch,
-      );
-
+      await _storeDiff(incrementalDiff: diff);
+      await _prefs.setInt(lastLocalDBSyncTime, syncTime);
       if (!hasCompletedFirstImport()) {
         await _prefs.setBool(kHasCompletedFirstImportKey, true);
-        _log.fine("first gallery import finished");
+        _log.fine("initial incrementalSync completed $tl");
         Bus.instance
             .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
+      } else {
+        _log.info("incrementalSync completed $tl");
       }
-      _log.info(
-        "Load took ${syncStartTime.difference(DateTime.now()).inMilliseconds} ms",
-      );
     });
 
     _existingSync?.complete();
     _existingSync = null;
   }
 
-  Future<bool> syncAll() async {
-    if (!Configuration.instance.isLoggedIn()) {
-      _log.warning("syncCall called when user is not logged in");
+  Future<bool> fullSync() async {
+    if (!await _canSync("fullSync")) {
       return false;
     }
-    final TimeLogger t = TimeLogger(context: "");
-    final devicePathAssets = await _deviceAssetsService.getLocalAssets();
-    _log.info("loaded devicePathAssets $t");
+    final TimeLogger tL = TimeLogger(context: "fullSync");
     final inAppAssetIds = await localDB.getAssetsIDs();
     final inAppPathToAssetIds = await localDB.pathToAssetIDs();
-    final localDiffResult =
-        await _deviceAssetsService.computeFullDiffWithOnDevice(
-      devicePathAssets,
+    _log.info("loaded inApp State $tL");
+    final fullDiff = await _deviceAssetsService.fullDiffWithOnDevice(
       inAppAssetIds,
       inAppPathToAssetIds,
+      tL,
     );
-    final bool hasAnyMappingChanged = localDiffResult.isInOutOfSync;
-    // if (localDiffResult.newPathToLocalIDs?.isNotEmpty ?? false) {
-    //   await _db
-    //       .insertPathIDToLocalIDMapping(localDiffResult.newPathToLocalIDs!);
-    //   hasAnyMappingChanged = true;
-    // }
-    // if (localDiffResult.deletePathToLocalIDs?.isNotEmpty ?? false) {
-    //   await _db
-    //       .deletePathIDToLocalIDMapping(localDiffResult.deletePathToLocalIDs!);
-    //   hasAnyMappingChanged = true;
-    // }
-    // final bool hasUnsyncedFiles =
-    //     localDiffResult.uniqueLocalFiles?.isNotEmpty ?? false;
-    // if (hasUnsyncedFiles) {
-    //   await _db.insertMultiple(
-    //     localDiffResult.uniqueLocalFiles!,
-    //     conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
-    //   );
-    //   _log.info(
-    //     "Inserted ${localDiffResult.uniqueLocalFiles?.length} "
-    //     "un-synced files",
-    //   );
-    // }
-    // debugPrint(
-    //   "syncAll: mappingChange : $hasAnyMappingChanged, "
-    //   "unSyncedFiles: $hasUnsyncedFiles",
-    // );
-    // if (hasAnyMappingChanged || hasUnsyncedFiles) {
-    //   Bus.instance.fire(
-    //     LocalPhotosUpdatedEvent(
-    //       localDiffResult.uniqueLocalFiles ?? [],
-    //       source: "syncAllChange",
-    //     ),
-    //   );
-    // }
+    if (fullDiff.isInOutOfSync) {
+      _log.info("fullSync computedDiff: ${fullDiff.countLog()} ${tL.elapsed}");
+      await _storeDiff(fullDiff: fullDiff);
+    }
+    _log.fine(
+      "${fullDiff.isInOutOfSync ? 'changed saved ${fullDiff.countLog()} $tL)' : 'no change'}, completeTime ${tL.elapsed}",
+    );
+    return fullDiff.isInOutOfSync;
+  }
 
-    return hasAnyMappingChanged;
+  Future<bool> _canSync(String tag) async {
+    if (!permissionService.hasGrantedPermissions()) {
+      _log.info("skip $tag sync  as permission is not granted");
+      return false;
+    }
+    if (Platform.isAndroid && _inForeground) {
+      final permissionState =
+          await permissionService.requestPhotoMangerPermissions();
+      if (permissionState != PermissionState.authorized) {
+        _log.warning("skip $tag sync with invalid permission $permissionState");
+        return false;
+      }
+    }
+    return true;
   }
 
   Future<void> ignoreUpload(EnteFile file, InvalidFileError error) async {
@@ -194,10 +163,10 @@ class LocalImportService {
     return _prefs.getBool(kHasCompletedFirstImportKey) ?? false;
   }
 
-  Future<void> _loadAndStoreDiff(
-    Set<String> existingLocalDs,
-    List<DevicePathAssets> devicePathAssets,
-  ) async {
+  Future<void> _storeDiff({
+    IncrementalDiffWithOnDevice? incrementalDiff,
+    FullDiffWithOnDevice? fullDiff,
+  }) async {
     // // final List<EnteFile> files = result.item2;
     // if (files.isNotEmpty) {
     //   // Update the mapping for device path_id to local file id. Also, keep track
@@ -229,7 +198,6 @@ class LocalImportService {
     //     LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
     //   );
     // }
-    await _prefs.setInt(lastLocalDBSyncTime, toTime);
   }
 
   Future<void> _trackUpdatedFiles(
@@ -270,9 +238,9 @@ class LocalImportService {
       await _existingSync!.future;
     }
     if (permissionService.hasGrantedLimitedPermissions()) {
-      unawaited(syncAll());
+      unawaited(fullSync());
     } else {
-      unawaited(importDiff());
+      unawaited(incrementalSync());
     }
   }
 }

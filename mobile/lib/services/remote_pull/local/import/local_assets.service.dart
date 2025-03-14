@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_import_progress.dart';
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/services/remote_pull/local/import/model.dart";
 
 class DeviceAssetsService {
@@ -13,7 +14,55 @@ class DeviceAssetsService {
   static const ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
   static const assetFetchPageSize = 2000;
 
-  Future<List<DevicePathAssets>> getLocalAssets({
+  Future<IncrementalDiffWithOnDevice> incrementalDiffWithOnDevice(
+    Set<String> inAppAssetIDs,
+    TimeLogger tL, {
+    required int fromTimeInMs,
+    required int toTimeInMs,
+  }) async {
+    final newOrUpdatedDevicePaths = await getDevicePathAssets(
+      fromTimeInMs: fromTimeInMs,
+      toTimeInMs: toTimeInMs,
+    );
+    final logMsg =
+        "fetched devicePathDiff (${newOrUpdatedDevicePaths.length}) $tL";
+    final result = Computer.shared()
+        .compute<IncrementalDiffReqParams, IncrementalDiffWithOnDevice>(
+      _computeIncrementalDiffWithOnDevice,
+      param: IncrementalDiffReqParams(
+        newOrUpdatedDevicePaths,
+        inAppAssetIDs,
+        fromTimeInMs,
+        toTimeInMs,
+      ),
+      taskName: "computeIncrementalDiffWithOnDevice",
+    );
+    _logger.info('$logMsg, computed diff $tL');
+    return result;
+  }
+
+  Future<FullDiffWithOnDevice> fullDiffWithOnDevice(
+    Set<String> inAppAssetIDs, // localIDs of files already imported in app
+    Map<String, Set<String>> inAppPathToLocalIDs,
+    TimeLogger tL,
+  ) async {
+    final allOnDeviceAssets = await getDevicePathAssets();
+    final String logMsg = "fetched allDeviceAssets $tL";
+    final r = await Computer.shared()
+        .compute<FullDiffReqParams, FullDiffWithOnDevice>(
+      _computeFullDiffWithOnDevice,
+      param: FullDiffReqParams(
+        allOnDeviceAssets,
+        inAppAssetIDs,
+        inAppPathToLocalIDs,
+      ),
+      taskName: "computeFullDiffWithOnDevice",
+    );
+    _logger.info('$logMsg, computed diff $tL');
+    return r;
+  }
+
+  Future<List<DevicePathAssets>> getDevicePathAssets({
     int? fromTimeInMs,
     int? toTimeInMs,
   }) async {
@@ -32,23 +81,6 @@ class DeviceAssetsService {
       );
     }
     return localPathAssets;
-  }
-
-  Future<FullDiffWithOnDevice> computeFullDiffWithOnDevice(
-    List<DevicePathAssets> allOnDeviceAssets,
-    // current set of assets available on device
-    Set<String> inAppAssetIDs, // localIDs of files already imported in app
-    Map<String, Set<String>> inAppPathToLocalIDs,
-  ) async {
-    return Computer.shared().compute<FullDiffReqParams, FullDiffWithOnDevice>(
-      _computeFullDiffWithOnDevice,
-      param: FullDiffReqParams(
-        allOnDeviceAssets,
-        inAppAssetIDs,
-        inAppPathToLocalIDs,
-      ),
-      taskName: "getLocalAssetsDiff",
-    );
   }
 
   /// returns a list of AssetPathEntity with relevant filter operations.
@@ -192,7 +224,7 @@ class DeviceAssetsService {
 // review: do we need to run this inside compute, after making File.FromAsset
 // sync. If yes, update the method documentation with reason.
   Future<IncrementalDiffWithOnDevice> _computeIncrementalDiffWithOnDevice(
-    IncrementalDiffReqParams reqParams,
+    IncrementalDiffReqParams req,
   ) async {
     final assetList = args["assetList"];
     final fromTimeInMs = args["fromTimeInMs"];
