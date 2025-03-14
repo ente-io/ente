@@ -82,9 +82,13 @@ class MemoriesCacheService {
     return _prefs.getBool(_showAnyMemoryKey) ?? true;
   }
 
-  bool get enableSmartMemories => flagService.showSmartMemories;
+  bool get enableSmartMemories =>
+      flagService.showSmartMemories && flagService.hasGrantedMLConsent;
 
   Future<void> _checkIfTimeToUpdateCache() async {
+    if (!enableSmartMemories) {
+      return;
+    }
     if (lastMemoriesCacheUpdateTime <
         DateTime.now()
             .subtract(kMemoriesUpdateFrequency)
@@ -121,6 +125,7 @@ class MemoriesCacheService {
     if (!showAnyMemories || !enableSmartMemories) {
       return;
     }
+    await _checkIfTimeToUpdateCache();
     try {
       if ((!_shouldUpdate && !forced) || _isUpdateInProgress) {
         _logger.info(
@@ -276,23 +281,35 @@ class MemoriesCacheService {
     }
   }
 
-  Future<List<SmartMemory>> _getMemoriesFromCache() async {
+  Future<List<SmartMemory>?> _getMemoriesFromCache() async {
     final cache = await _readCacheFromDisk();
     if (cache == null) {
-      return [];
+      return null;
     }
     final result = await _fromCacheToMemories(cache);
     return result;
   }
 
-  Future<List<SmartMemory>> getMemories(int? limit) async {
+  Future<List<SmartMemory>> getMemories() async {
     if (!showAnyMemories) {
       return [];
+    }
+    if (!enableSmartMemories) {
+      final fillerMemories = await smartMemoriesService.calcFillerResults();
+      return fillerMemories;
     }
     if (_cachedMemories != null) {
       return _cachedMemories!;
     }
     _cachedMemories = await _getMemoriesFromCache();
+    if (_cachedMemories == null) {
+      await updateCache(forced: true);
+      _cachedMemories = await _getMemoriesFromCache();
+    }
+    if (_cachedMemories!.isEmpty) {
+      _logger.severe("No memories found in (computed) cache, getting fillers");
+      _cachedMemories = await smartMemoriesService.calcFillerResults();
+    }
     return _cachedMemories!;
   }
 
