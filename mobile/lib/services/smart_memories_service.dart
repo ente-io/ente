@@ -486,7 +486,6 @@ class SmartMemoriesService {
       final lastTimeYouSawThemFiles = <EnteFile>[];
       int lastCreationTime = 0;
       bool longAgo = true;
-      fileLoop:
       for (final fileID in personFileIDs) {
         final file = allFileIdsToFile[fileID];
         if (file != null && file.creationTime != null) {
@@ -495,7 +494,7 @@ class SmartMemoriesService {
               DateTime.fromMicrosecondsSinceEpoch(creationTime);
           if (currentTime.difference(creationDateTime).inDays < 365) {
             longAgo = false;
-            break fileLoop;
+            break;
           }
           if (creationTime > lastCreationTime - microSecondsInDay) {
             final lastDateTime =
@@ -1500,7 +1499,6 @@ class SmartMemoriesService {
       }
 
       final finalSelection = <Memory>[];
-      bucketLoop:
       for (final bucket in timeBuckets) {
         // Get X% most nostalgic photos
         final bucketFileIDs =
@@ -1537,7 +1535,7 @@ class SmartMemoriesService {
         // If no selection yet, take the most nostalgic photo
         if (finalSelection.isEmpty) {
           finalSelection.add(mostNostalgic.first);
-          continue bucketLoop;
+          continue;
         }
 
         // From nostalgic selection, take the photo furthest away from all currently selected ones
