@@ -1172,7 +1172,7 @@ class SmartMemoriesService {
         memoryResult.add(
           TimeMemory(
             photoSelection,
-            "${DateFormat('MMMM d').format(date)} through the years",
+            "${DateFormat.MMMd().format(date)} through the years",
             date.subtract(kMemoriesMargin).microsecondsSinceEpoch,
             date.add(kDayItself).microsecondsSinceEpoch,
           ),
@@ -1191,21 +1191,13 @@ class SmartMemoriesService {
             fileIDToImageEmbedding: fileIDToImageEmbedding,
             clipPositiveTextVector: clipPositiveTextVector,
           );
-          String name = DateFormat.yMMMd().format(date);
+          final name =
+              "${DateFormat.MMMd()}, ${currentTime.year - date.year} years ago";
           memoryResult.add(
             TimeMemory(
               photoSelection,
               name,
               showDate.subtract(kMemoriesMargin).microsecondsSinceEpoch,
-              showDate.microsecondsSinceEpoch,
-            ),
-          );
-          name = "This day, ${currentTime.year - date.year} years back";
-          memoryResult.add(
-            TimeMemory(
-              photoSelection,
-              name,
-              showDate.microsecondsSinceEpoch,
               showDate.add(kDayItself).microsecondsSinceEpoch,
             ),
           );
