@@ -34,7 +34,6 @@ class SmartMemory {
 
   int? firstCreationTime;
   int? lastCreationTime;
-  // TODO: lau: actually use this in calculated filters
 
   SmartMemory(
     this.memories,
