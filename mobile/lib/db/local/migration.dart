@@ -1,22 +1,45 @@
 import "package:flutter/foundation.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
+const assetColumns =
+    "id, type, sub_type, width, height, duration_in_sec, orientation, is_fav, title, relative_path, created_at, modified_at, mime_type, latitude, longitude";
+
+const devicePathColumns =
+    "path_id, name, album_type, ios_album_type, ios_album_subtype";
+const placeHolderMap = {
+  1: "?",
+  2: "?,?",
+  3: "?,?,?",
+  4: "?,?,?,?",
+  5: "?,?,?,?,?",
+  6: "?,?,?,?,?,?",
+  7: "?,?,?,?,?,?,?",
+  8: "?,?,?,?,?,?,?,?",
+  9: "?,?,?,?,?,?,?,?,?",
+  10: "?,?,?,?,?,?,?,?,,?,?",
+  11: "?,?,?,?,?,?,?,?,?,?,?,?",
+  12: "?,?,?,?,?,?,?,?,?,?,?,?,?",
+  13: "?,?,?,?,?,?,?,?,?,?,?,?,?,?",
+  14: "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?",
+  15: "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?",
+};
+
 class LocalDBMigration {
   static const migrationScripts = [
     '''
     CREATE TABLE assets (
       id TEXT PRIMARY KEY,
       type INTEGER NOT NULL,
-      subType INTEGER NOT NULL,
+      sub_type INTEGER NOT NULL,
       width INTEGER NOT NULL,
       height INTEGER NOT NULL,
-      durationMicroSec INTEGER NOT NULL,
+      duration_in_sec INTEGER NOT NULL,
       orientation INTEGER NOT NULL,
-      isFavorite INTEGER NOT NULL,
+      is_fav INTEGER NOT NULL,
       title TEXT NOT NULL,
       relative_path TEXT,
-      createdAtMicroSec INTEGER NOT NULL,
-      modifiedAtMicroSec INTEGER NOT NULL,
+      created_at INTEGER NOT NULL,
+      modified_at INTEGER NOT NULL,
       mime_type TEXT,
       latitude REAL,
       longitude REAL
@@ -26,8 +49,8 @@ class LocalDBMigration {
     CREATE TABLE metadata (
       id TEXT PRIMARY_KEY,
       hash TEXT NOT NULL,
-      creation_time INTEGER NOT NULL,
-      modification_time INTEGER NOT NULL,
+      created_at INTEGER NOT NULL,
+      modified_at INTEGER NOT NULL,
       latitude REAL,
       longitude REAL,
       PRIMARY KEY (id),

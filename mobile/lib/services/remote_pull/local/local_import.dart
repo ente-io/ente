@@ -5,7 +5,6 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/file_updation_db.dart';
 import "package:photos/events/permission_granted_event.dart";
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/extensions/stop_watch.dart';
@@ -166,6 +165,22 @@ class LocalImportService {
     IncrementalDiffWithOnDevice? incrementalDiff,
     FullDiffWithOnDevice? fullDiff,
   }) async {
+    if (incrementalDiff != null) {
+      await localDB.insertAssets(incrementalDiff.assets);
+      await localDB.insertDBPaths(incrementalDiff.addedOrModifiedPaths);
+      await localDB
+          .insertPathToAssetIDs(incrementalDiff.newOrUpdatedPathToLocalIDs);
+    } else if (fullDiff != null) {
+      await Future.wait([
+        localDB.deleteAssets(fullDiff.extraAssetIDsInApp),
+        localDB.deletePaths(fullDiff.extraPathIDsInApp),
+      ]);
+      await localDB.insertAssets(fullDiff.missingAssetsInApp);
+      await localDB.insertPathToAssetIDs(
+        fullDiff.updatePathToLocalIDs,
+        clearOldMappingsIdsInInput: true,
+      );
+    }
     // // final List<EnteFile> files = result.item2;
     // if (files.isNotEmpty) {
     //   // Update the mapping for device path_id to local file id. Also, keep track
@@ -197,26 +212,6 @@ class LocalImportService {
     //     LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
     //   );
     // }
-  }
-
-  Future<void> _trackUpdatedFiles(
-    List<EnteFile> files,
-    Set<String> existingLocalFileIDs,
-  ) async {
-    final List<String> updatedLocalIDs = files
-        .where(
-          (file) =>
-              file.localID != null &&
-              existingLocalFileIDs.contains(file.localID),
-        )
-        .map((e) => e.localID!)
-        .toList();
-    if (updatedLocalIDs.isNotEmpty) {
-      await FileUpdationDB.instance.insertMultiple(
-        updatedLocalIDs,
-        FileUpdationDB.modificationTimeUpdated,
-      );
-    }
   }
 
   void _registerChangeCallback() {
