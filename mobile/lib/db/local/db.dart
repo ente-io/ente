@@ -6,12 +6,12 @@ import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/db/local/mappers.dart";
-import "package:photos/db/local/migration.dart";
+import "package:photos/db/local/schema.dart";
 import "package:photos/log/devlog.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 class LocalDB {
-  static const _databaseName = "local_1.db";
+  static const _databaseName = "local_2.db";
   static const _batchInsertMaxCount = 1000;
   static const _smallTableBatchInsertMaxCount = 5000;
   late final SqliteDatabase _sqliteDB;
