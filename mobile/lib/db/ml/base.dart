@@ -2,6 +2,7 @@ import "dart:typed_data";
 
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 
@@ -30,6 +31,8 @@ abstract class IMLDataDB<T> {
     String? clusterID,
   });
   Future<List<Face>?> getFacesForGivenFileID(T fileUploadID);
+  Future<Map<int, List<FaceWithoutEmbedding>>>
+      getFileIDsToFacesWithoutEmbedding();
   Future<Map<String, Iterable<String>>> getClusterToFaceIDs(
     Set<String> clusterIDs,
   );

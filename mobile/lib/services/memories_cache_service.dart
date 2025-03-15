@@ -12,8 +12,8 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
+import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/location_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -82,21 +82,27 @@ class MemoriesCacheService {
     return _prefs.getBool(_showAnyMemoryKey) ?? true;
   }
 
-  bool get enableSmartMemories => flagService.showSmartMemories;
+  bool get enableSmartMemories => flagService.hasGrantedMLConsent;
 
-  Future<void> _checkIfTimeToUpdateCache() async {
-    if (lastMemoriesCacheUpdateTime <
-        DateTime.now()
-            .subtract(kMemoriesUpdateFrequency)
-            .microsecondsSinceEpoch) {
+  void _checkIfTimeToUpdateCache() {
+    if (!enableSmartMemories) {
+      return;
+    }
+    if (_timeToUpdateCache()) {
       _shouldUpdate = true;
     }
   }
 
+  bool _timeToUpdateCache() {
+    return lastMemoriesCacheUpdateTime <
+        DateTime.now()
+            .subtract(kMemoriesUpdateFrequency)
+            .microsecondsSinceEpoch;
+  }
+
   Future<String> _getCachePath() async {
     return (await getApplicationSupportDirectory()).path +
-        "/cache/test3/memories_cache";
-    // TODO: lau: remove the test1 directory after testing
+        "/cache/memories_cache";
   }
 
   Future markMemoryAsSeen(Memory memory) async {
@@ -117,15 +123,27 @@ class MemoriesCacheService {
     }
   }
 
+  void queueUpdateCache() {
+    _shouldUpdate = true;
+  }
+
   Future<void> updateCache({bool forced = false}) async {
     if (!showAnyMemories || !enableSmartMemories) {
       return;
     }
+    _checkIfTimeToUpdateCache();
     try {
       if ((!_shouldUpdate && !forced) || _isUpdateInProgress) {
         _logger.info(
           "No update needed as shouldUpdate: $_shouldUpdate, forced: $forced and isUpdateInProgress $_isUpdateInProgress",
         );
+        if (_isUpdateInProgress) {
+          int waitingTime = 0;
+          while (_isUpdateInProgress && waitingTime < 60) {
+            await Future.delayed(const Duration(seconds: 1));
+            waitingTime++;
+          }
+        }
         return;
       }
       _logger.info("updating memories cache");
@@ -184,6 +202,7 @@ class MemoriesCacheService {
 
   MemoriesCache _processOldCache(MemoriesCache? oldCache) {
     final List<PeopleShownLog> peopleShownLogs = [];
+    final List<ClipShownLog> clipShownLogs = [];
     final List<TripsShownLog> tripsShownLogs = [];
     if (oldCache != null) {
       final now = DateTime.now();
@@ -203,26 +222,22 @@ class MemoriesCacheService {
           tripsShownLogs.add(tripsLog);
         }
       }
+      for (final clipLog in oldCache.clipShownLogs) {
+        if (now.difference(
+              DateTime.fromMicrosecondsSinceEpoch(clipLog.lastTimeShown),
+            ) <
+            maxShowTimeout) {
+          clipShownLogs.add(clipLog);
+        }
+      }
       for (final oldMemory in oldCache.toShowMemories) {
         if (oldMemory.isOld) {
           if (oldMemory.type == MemoryType.people) {
-            if (!peopleShownLogs.any(
-              (person) =>
-                  (person.personID == oldMemory.personID) &&
-                  (person.peopleMemoryType == oldMemory.peopleMemoryType),
-            )) {
-              peopleShownLogs.add(PeopleShownLog.fromOldCacheMemory(oldMemory));
-            }
+            peopleShownLogs.add(PeopleShownLog.fromOldCacheMemory(oldMemory));
+          } else if (oldMemory.type == MemoryType.clip) {
+            clipShownLogs.add(ClipShownLog.fromOldCacheMemory(oldMemory));
           } else if (oldMemory.type == MemoryType.trips) {
-            if (!tripsShownLogs.any(
-              (trip) => isFileInsideLocationTag(
-                oldMemory.location!,
-                trip.location,
-                10.0,
-              ),
-            )) {
-              tripsShownLogs.add(TripsShownLog.fromOldCacheMemory(oldMemory));
-            }
+            tripsShownLogs.add(TripsShownLog.fromOldCacheMemory(oldMemory));
           }
         }
       }
@@ -230,6 +245,7 @@ class MemoriesCacheService {
     return MemoriesCache(
       toShowMemories: [],
       peopleShownLogs: peopleShownLogs,
+      clipShownLogs: clipShownLogs,
       tripsShownLogs: tripsShownLogs,
       baseLocations: [],
     );
@@ -276,23 +292,35 @@ class MemoriesCacheService {
     }
   }
 
-  Future<List<SmartMemory>> _getMemoriesFromCache() async {
+  Future<List<SmartMemory>?> _getMemoriesFromCache() async {
     final cache = await _readCacheFromDisk();
     if (cache == null) {
-      return [];
+      return null;
     }
     final result = await _fromCacheToMemories(cache);
     return result;
   }
 
-  Future<List<SmartMemory>> getMemories(int? limit) async {
+  Future<List<SmartMemory>> getMemories() async {
     if (!showAnyMemories) {
       return [];
+    }
+    if (!enableSmartMemories) {
+      final fillerMemories = await smartMemoriesService.calcFillerResults();
+      return fillerMemories;
     }
     if (_cachedMemories != null) {
       return _cachedMemories!;
     }
     _cachedMemories = await _getMemoriesFromCache();
+    if (_cachedMemories == null || _timeToUpdateCache()) {
+      await updateCache(forced: true);
+      _cachedMemories = await _getMemoriesFromCache();
+    }
+    if (_cachedMemories!.isEmpty) {
+      _logger.severe("No memories found in (computed) cache, getting fillers");
+      _cachedMemories = await smartMemoriesService.calcFillerResults();
+    }
     return _cachedMemories!;
   }
 

@@ -386,6 +386,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Android, iOS, Web, Desktop"),
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Authentication required"),
+        "appIcon": MessageLookupByLibrary.simpleMessage("App icon"),
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "Choose between your device\'s default lock screen and a custom lock screen with a PIN or password."),
