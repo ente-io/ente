@@ -2,6 +2,7 @@ package repo
 
 import (
 	"database/sql"
+
 	"github.com/ente-io/stacktrace"
 
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -28,4 +29,13 @@ func (repo *NotificationHistoryRepository) SetLastNotificationTimeToNow(userID i
 	_, err := repo.DB.Exec(`INSERT INTO notification_history(user_id, template_id, sent_time) VALUES($1, $2, $3)`,
 		userID, templateID, time.Microseconds())
 	return stacktrace.Propagate(err, "")
+}
+
+func (repo *NotificationHistoryRepository) DeleteLastNotificationTime(userID int64, templateID string) error {
+	_, err := repo.DB.Exec(`DELETE FROM notification_history WHERE user_id=$1 AND template_id='$2'`)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+
+	return nil
 }
