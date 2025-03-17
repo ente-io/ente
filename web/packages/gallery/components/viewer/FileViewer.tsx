@@ -793,27 +793,30 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     // If the active annotated file is no longer being shown, move to the next
     // slide if possible, or close the viewer otherwise.
     useEffect(() => {
-        if (files.length) {
-            setActiveAnnotatedFile((activeAnnotatedFile) => {
-                const updatedFile = files.find(
-                    ({ id }) => id == activeAnnotatedFile?.file.id,
-                );
+        setActiveAnnotatedFile((af) => {
+            // Do nothing if we're not showing a file (we might not be open).
+            if (!af) return af;
 
-                if (activeAnnotatedFile && updatedFile) {
-                    // Modify the file attribute of activeAnnotatedFile if we're
-                    // still showing a slide with a file that has the same ID as
-                    // the one we expected to modify.
+            if (files.length) {
+                const updatedFile = files.find(({ id }) => id == af?.file.id);
+                if (updatedFile) {
+                    // Modify the active annotated file if we found a file with
+                    // the same ID in the (possibly) updated files array.
                     //
-                    // In the case of delete, this code will not run, and in the
-                    // case of toggling archive, none of the other attributes of
-                    // activeAnnotatedFile currently depend on the archive
-                    // status change, so this is safe. But it is still on the
-                    // kludgy side, and might need care with future changes.
+                    // Note the omission of the PhotoSwipe refresh: we don't
+                    // refresh the PhotoSwipe dialog itself since that would
+                    // cause the user to lose their pan / zoom etc.
                     //
-                    // (We don't do a full refresh since that would cause the
-                    // user to lose their pan / zoom etc)
-
-                    activeAnnotatedFile.file = updatedFile;
+                    // This is not correct in its full generality, but it works
+                    // fine in the specific cases we would need to handle:
+                    //
+                    // - In case of delete, we'll not get to this code branch.
+                    //
+                    // - In case of toggling archive, just updating the file
+                    //   attribute is enough, the UI state is derived from it;
+                    //   none of the other attributes of the annotated file
+                    //   currently depend on the archive status change.
+                    af = { ...af, file: updatedFile };
                 } else {
                     // Refreshing the current slide after the current file has
                     // gone will show the subsequent slide (since that would've
@@ -823,14 +826,21 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     // we need to go back one slide first. To determine this,
                     // also pass the expected count of files to our PhotoSwipe
                     // wrapper.
-                    psRef.current!.refreshCurrentSlideContent(files.length);
+                    psRef.current?.refreshCurrentSlideContent(files.length);
                 }
-                return activeAnnotatedFile;
-            });
-        } else {
-            // If there are no more files left, close the viewer.
-            handleClose();
-        }
+            } else {
+                // If there are no more files left, close the viewer.
+                handleClose();
+            }
+
+            return af;
+        });
+
+        // - Used for favorite updates.
+        setOnNextFilesOrFavoritesUpdate((cbs) => {
+            cbs.forEach((cb) => cb(files));
+            return [];
+        });
     }, [handleClose, files, favoriteFileIDs]);
 
     useEffect(() => {
