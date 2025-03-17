@@ -404,10 +404,11 @@ const createMainWindow = () => {
     // "The unresponsive event is fired when Chromium detects that your
     //  webContents is not responding to input messages for > 30 seconds."
     window.webContents.on("unresponsive", () => {
-        log.error(
-            "MainWindow's webContents are unresponsive, will restart the renderer process",
-        );
-        window.webContents.forcefullyCrashRenderer();
+        // There is a known case when this can happen: When the user to select a
+        // folder to upload (Upload > Folder), the browser callback to us takes
+        // some time. When trying to upload very large folders on slower Windows
+        // machines, this can take up to 30 seconds.
+        log.warn("MainWindow's webContents are unresponsive");
     });
 
     window.on("close", (event) => {
