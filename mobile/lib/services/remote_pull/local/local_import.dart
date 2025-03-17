@@ -25,7 +25,10 @@ class LocalImportService {
   Completer<void>? _existingSync;
   Completer<bool>? _fullSync;
   final DeviceAssetsService _deviceAssetsService = DeviceAssetsService();
-  late Debouncer _changeCallbackDebouncer;
+  late final Debouncer _changeCallbackDebouncer = Debouncer(
+    const Duration(milliseconds: 2000),
+    leading: true,
+  );
   final Lock _lock = Lock();
 
   static const lastLocalDBSyncTime = "localImport.lastSyncTime";
@@ -207,7 +210,6 @@ class LocalImportService {
   }
 
   void _registerChangeCallback() {
-    _changeCallbackDebouncer = Debouncer(const Duration(milliseconds: 500));
     // In case of iOS limit permission, this call back is fired immediately
     // after file selection dialog is dismissed.
     PhotoManager.addChangeCallback((value) async {
