@@ -821,13 +821,9 @@ const Page: React.FC = () => {
                     });
                 // TODO(AR): Trigger a "lite" sync?
 
-                dispatch({
-                    type: "markPendingVisibilityUpdate",
-                    fileID,
-                    mark: false,
-                });
-
-                // Keep this as the last operation on the happy path.
+                // The file viewer listens for the next update to files, so keep
+                // this as the first operation on the happy path that can
+                // trigger an update of files.
                 //
                 // See: [Note: File viewer update and dispatch]
                 dispatch({
@@ -835,13 +831,12 @@ const Page: React.FC = () => {
                     fileID,
                     privateMagicMetadata,
                 });
-            } catch (e) {
+            } finally {
                 dispatch({
                     type: "markPendingVisibilityUpdate",
                     fileID,
                     mark: false,
                 });
-                throw e;
             }
         },
         [],
