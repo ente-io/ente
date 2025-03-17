@@ -13,8 +13,7 @@ Future<DateTime?> showEditDateSheet(
   BuildContext context,
   Iterable<EnteFile> enteFiles, {
   bool showHeader = true,
-  }
-) async {
+}) async {
   final newDate = await showModalBottomSheet<DateTime?>(
     context: context,
     isScrollControlled: true,
@@ -266,7 +265,9 @@ class DateAndTimeWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final locale = Localizations.localeOf(context);
     final String date = DateFormat.yMMMd(locale.languageCode).format(dateTime);
-    final String time = DateFormat.Hm(locale.languageCode).format(dateTime);
+    final String time = DateFormat(
+      MediaQuery.of(context).alwaysUse24HourFormat ? 'HH:mm' : 'h:mm a',
+    ).format(dateTime);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
@@ -396,7 +397,7 @@ class DateAndTimeWidget extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            _formatDate(dateTime, locale),
+                            _formatDate(dateTime, locale, context),
                             style: TextStyle(
                               color: colorScheme.textFaint,
                               fontSize: 12,
@@ -413,7 +414,7 @@ class DateAndTimeWidget extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            _formatDate(newRangeEnd!, locale),
+                            _formatDate(newRangeEnd!, locale, context),
                             style: TextStyle(
                               color: colorScheme.textFaint,
                               fontSize: 12,
@@ -578,7 +579,7 @@ class PhotoDateHeaderWidget extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            _formatDate(startDate, locale),
+                            _formatDate(startDate, locale, context),
                             style: TextStyle(
                               color: colorScheme.textMuted,
                               fontSize: 12,
@@ -595,7 +596,7 @@ class PhotoDateHeaderWidget extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            _formatDate(endDate, locale),
+                            _formatDate(endDate, locale, context),
                             style: TextStyle(
                               color: colorScheme.textMuted,
                               fontSize: 12,
@@ -627,7 +628,11 @@ class PhotoDateHeaderWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "${DateFormat.yMEd(locale.languageCode).format(startDate)} · ${DateFormat.Hm(locale.languageCode).format(startDate)}",
+                        "${DateFormat.yMEd(locale.languageCode).format(startDate)} · ${DateFormat(
+                          MediaQuery.of(context).alwaysUse24HourFormat
+                              ? 'HH:mm'
+                              : 'h:mm a',
+                        ).format(startDate)}",
                         style: TextStyle(
                           color: colorScheme.textMuted,
                           fontSize: 12,
@@ -642,6 +647,8 @@ class PhotoDateHeaderWidget extends StatelessWidget {
   }
 }
 
-String _formatDate(DateTime date, Locale locale) {
-  return "${DateFormat.yMEd(locale.languageCode).format(date)}\n${DateFormat.Hm(locale.languageCode).format(date)}";
+String _formatDate(DateTime date, Locale locale, BuildContext context) {
+  return "${DateFormat.yMEd(locale.languageCode).format(date)}\n${DateFormat(
+    MediaQuery.of(context).alwaysUse24HourFormat ? 'HH:mm' : 'h:mm a',
+  ).format(date)}";
 }
