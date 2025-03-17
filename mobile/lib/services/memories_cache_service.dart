@@ -20,6 +20,7 @@ import "package:shared_preferences/shared_preferences.dart";
 class MemoriesCacheService {
   static const _lastMemoriesCacheUpdateTimeKey = "lastMemoriesCacheUpdateTime";
   static const _showAnyMemoryKey = "memories.enabled";
+  static const _shouldUpdateCacheKey = "memories.shouldUpdateCache";
 
   /// Delay is for cache update to be done not during app init, during which a
   /// lot of other things are happening.
@@ -88,8 +89,9 @@ class MemoriesCacheService {
     if (!enableSmartMemories) {
       return;
     }
+    _shouldUpdate = _prefs.getBool(_shouldUpdateCacheKey) ?? _shouldUpdate;
     if (_timeToUpdateCache()) {
-      _shouldUpdate = true;
+      queueUpdateCache();
     }
   }
 
@@ -125,6 +127,12 @@ class MemoriesCacheService {
 
   void queueUpdateCache() {
     _shouldUpdate = true;
+    unawaited(_prefs.setBool(_shouldUpdateCacheKey, true));
+  }
+
+  void _cacheUpdated() {
+    _shouldUpdate = false;
+    unawaited(_prefs.setBool(_shouldUpdateCacheKey, false));
   }
 
   Future<void> updateCache({bool forced = false}) async {
@@ -185,7 +193,7 @@ class MemoriesCacheService {
       w?.log("cacheWritten");
       await _resetLastMemoriesCacheUpdateTime();
       w?.logAndReset('done');
-      _shouldUpdate = false;
+      _cacheUpdated();
     } catch (e, s) {
       _logger.info("Error updating memories cache", e, s);
     } finally {

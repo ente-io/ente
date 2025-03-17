@@ -152,8 +152,8 @@ class MLService {
       if (_mlControllerStatus == true) {
         // refresh discover section
         magicCacheService.updateCache().ignore();
-        // refresh memories section
-        memoriesCacheService.updateCache().ignore();
+        // refresh memories section (only runs if forced is true)
+        memoriesCacheService.updateCache(forced: force).ignore();
       }
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);
