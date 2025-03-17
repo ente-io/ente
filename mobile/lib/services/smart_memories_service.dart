@@ -421,7 +421,7 @@ class SmartMemoriesService {
         for (final fileID in personFileIDs) {
           final bool mePresent = meFileIDs!.contains(fileID);
           final personFaces = fileIdToFaces[fileID] ?? [];
-          if (mePresent || personFaces.length != 2) continue;
+          if (!mePresent || personFaces.length != 2) continue;
           final file = allFileIdsToFile[fileID];
           if (file != null) {
             youAndThemFiles.add(file);
