@@ -196,7 +196,7 @@ class _EditDateSheetState extends State<EditDateSheet> {
                 ],
               ),
             // Bottom indicator line
-            const SizedBox(height: 48),
+            const SizedBox(height: 20),
           ],
         ),
       ),
