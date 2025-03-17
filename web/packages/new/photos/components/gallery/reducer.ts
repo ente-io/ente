@@ -122,7 +122,7 @@ export interface GalleryState {
     /*--<  Primary state: Files, collections, people  >--*/
 
     /**
-     * The user's non-hidden collections.
+     * The user's normal (non-hidden) collections.
      */
     collections: Collection[];
     /**

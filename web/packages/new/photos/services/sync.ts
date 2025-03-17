@@ -1,4 +1,5 @@
 import { resetFileViewerDataSourceOnClose } from "@/gallery/components/viewer/data-source";
+import type { Collection } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
 import { isHiddenCollection } from "@/new/photos/services/collection";
 import {
@@ -46,21 +47,30 @@ export const sync = async () => {
 
 interface SyncFilesAndCollectionsOpts {
     /**
-     * Called when saved normal files were replaced by the given {@link files}.
+     * Called when saved collections, both normal and hidden, are (potentially)
+     * updated.
      */
-    onResetFiles: (files: EnteFile[]) => void;
+    onSetCollections: (
+        normalCollections: Collection[],
+        hiddenCollections: Collection[],
+    ) => void;
     /**
-     * Called when saved normal files were augmented with the newly fetched
-     * {@link files}.
+     * Called when saved normal (non-hidden, non-trash) files were replaced by
+     * the given {@link files}.
      */
-    onFetchFiles: (files: EnteFile[]) => void;
+    onResetNormalFiles: (files: EnteFile[]) => void;
+    /**
+     * Called when saved normal files were augmented with the given newly
+     * fetched {@link files}.
+     */
+    onFetchNormalFiles: (files: EnteFile[]) => void;
     /**
      * Called when saved hidden files were replaced by the given {@link files}.
      */
     onResetHiddenFiles: (files: EnteFile[]) => void;
     /**
-     * Called when saved hidden files were augmented with the newly fetched
-     * {@link files}.
+     * Called when saved hidden files were augmented with the given newly
+     * fetched {@link files}.
      */
     onFetchHiddenFiles: (files: EnteFile[]) => void;
     /**
@@ -93,11 +103,12 @@ export const syncFilesAndCollections = async (
         allCollections,
         isHiddenCollection,
     );
+    opts?.onSetCollections(normalCollections, hiddenCollections);
     const didUpdateNormalFiles = await syncFiles(
         "normal",
         normalCollections,
-        opts?.onResetFiles,
-        opts?.onFetchFiles,
+        opts?.onResetNormalFiles,
+        opts?.onFetchNormalFiles,
     );
     const didUpdateHiddenFiles = await syncFiles(
         "hidden",
