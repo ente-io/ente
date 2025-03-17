@@ -89,6 +89,7 @@
     "toggle_live": "",
     "toggle_audio": "",
     "toggle_favorite": "",
+    "toggle_archive": "",
     "view_info": "",
     "copy_as_png": "PNG로 복사",
     "toggle_fullscreen": "전체 화면 열기",
