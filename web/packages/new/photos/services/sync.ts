@@ -63,8 +63,13 @@ interface SyncCallectionAndFilesOpts {
     /**
      * Called when saved collections, both normal and hidden, are (potentially)
      * updated.
+     *
+     * The callback is passed all the collections (as {@link collections}), and
+     * also their splits into normal ({@link normalCollections}) and hidden
+     * ({@link hiddenCollections}).
      */
     onSetCollections: (
+        collections: Collection[],
         normalCollections: Collection[],
         hiddenCollections: Collection[],
     ) => void;
@@ -118,7 +123,7 @@ export const syncCollectionAndFiles = async (
         collections,
         isHiddenCollection,
     );
-    opts?.onSetCollections(normalCollections, hiddenCollections);
+    opts?.onSetCollections(collections, normalCollections, hiddenCollections);
     const didUpdateNormalFiles = await syncFiles(
         "normal",
         normalCollections,

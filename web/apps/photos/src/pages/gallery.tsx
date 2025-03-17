@@ -257,10 +257,10 @@ const Page: React.FC = () => {
     // TODO: Temp
     const user = state.user;
     const familyData = state.familyData;
-    const collections = state.collections;
-    const files = state.files;
+    const collections = state.normalCollections;
+    const normalFiles = state.normalFiles;
     const hiddenFiles = state.hiddenFiles;
-    const collectionSummaries = state.collectionSummaries;
+    const collectionSummaries = state.normalCollectionSummaries;
     const barMode = state.view?.type ?? "albums";
     const activeCollectionID =
         state.view?.type == "people"
@@ -322,8 +322,8 @@ const Page: React.FC = () => {
                 type: "mount",
                 user,
                 familyData,
-                allCollections: await getAllLocalCollections(),
-                files: await getLocalFiles("normal"),
+                collections: await getAllLocalCollections(),
+                normalFiles: await getLocalFiles("normal"),
                 hiddenFiles: await getLocalFiles("hidden"),
                 trashedFiles: await getLocalTrashedFiles(),
             });
@@ -347,8 +347,8 @@ const Page: React.FC = () => {
     }, []);
 
     useEffect(
-        () => setSearchCollectionsAndFiles({ collections, files }),
-        [collections, files],
+        () => setSearchCollectionsAndFiles({ collections, files: normalFiles }),
+        [collections, normalFiles],
     );
 
     useEffect(() => {
@@ -520,22 +520,27 @@ const Page: React.FC = () => {
 
     const handleFileAndCollectionSyncWithRemote = useCallback(async () => {
         const didUpdateFiles = await syncCollectionAndFiles({
-            onSetCollections: (normalCollections, hiddenCollections) =>
+            onSetCollections: (
+                collections,
+                normalCollections,
+                hiddenCollections,
+            ) =>
                 dispatch({
                     type: "setCollections",
+                    collections,
                     normalCollections,
                     hiddenCollections,
                 }),
             onResetNormalFiles: (files) =>
-                dispatch({ type: "setFiles", files }),
+                dispatch({ type: "setNormalFiles", files }),
             onFetchNormalFiles: (files) =>
-                dispatch({ type: "fetchFiles", files }),
-            onResetHiddenFiles: (hiddenFiles) =>
-                dispatch({ type: "setHiddenFiles", hiddenFiles }),
-            onFetchHiddenFiles: (hiddenFiles) =>
-                dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
-            onResetTrashedFiles: (trashedFiles) =>
-                dispatch({ type: "setTrashedFiles", trashedFiles }),
+                dispatch({ type: "fetchNormalFiles", files }),
+            onResetHiddenFiles: (files) =>
+                dispatch({ type: "setHiddenFiles", files }),
+            onFetchHiddenFiles: (files) =>
+                dispatch({ type: "fetchHiddenFiles", files }),
+            onResetTrashedFiles: (files) =>
+                dispatch({ type: "setTrashedFiles", files }),
         });
         if (didUpdateFiles) {
             exportService.onLocalFilesUpdated();
@@ -693,7 +698,7 @@ const Page: React.FC = () => {
             // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(
                 selected,
-                ops === FILE_OPS_TYPE.HIDE ? files : filteredFiles,
+                ops === FILE_OPS_TYPE.HIDE ? normalFiles : filteredFiles,
             );
             const toProcessFiles =
                 ops === FILE_OPS_TYPE.DOWNLOAD
@@ -751,7 +756,7 @@ const Page: React.FC = () => {
         if (type == "collection" || type == "person") {
             if (type == "collection") {
                 dispatch({
-                    type: "showNormalOrHiddenCollectionSummary",
+                    type: "showCollectionSummary",
                     collectionSummaryID: searchOption.suggestion.collectionID,
                 });
             } else {
@@ -781,11 +786,7 @@ const Page: React.FC = () => {
 
     const handleSetActiveCollectionID = (
         collectionSummaryID: number | undefined,
-    ) =>
-        dispatch({
-            type: "showNormalOrHiddenCollectionSummary",
-            collectionSummaryID,
-        });
+    ) => dispatch({ type: "showCollectionSummary", collectionSummaryID });
 
     const handleChangeBarMode = (mode: GalleryBarMode) =>
         mode == "people"
@@ -840,7 +841,7 @@ const Page: React.FC = () => {
     const handleSelectCollection = useCallback(
         (collectionID: number) =>
             dispatch({
-                type: "showNormalOrHiddenCollectionSummary",
+                type: "showCollectionSummary",
                 collectionSummaryID: collectionID,
             }),
         [],
@@ -1036,7 +1037,7 @@ const Page: React.FC = () => {
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
                     onUploadFile={(file) =>
-                        dispatch({ type: "uploadFile", file })
+                        dispatch({ type: "uploadNormalFile", file })
                     }
                     onShowPlanSelector={showPlanSelector}
                     setCollections={(collections) =>
@@ -1062,7 +1063,7 @@ const Page: React.FC = () => {
                 <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
                 !isFirstLoad &&
-                !files?.length &&
+                !normalFiles?.length &&
                 !hiddenFiles?.length &&
                 activeCollectionID === ALL_SECTION ? (
                     <GalleryEmptyState openUploader={openUploader} />
@@ -1079,15 +1080,15 @@ const Page: React.FC = () => {
                         files={filteredFiles}
                         enableDownload={true}
                         showAppDownloadBanner={
-                            files.length < 30 && !isInSearchMode
+                            normalFiles.length < 30 && !isInSearchMode
                         }
                         selectable={true}
                         selected={selected}
                         setSelected={setSelected}
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
-                        fileCollectionIDs={state.fileCollectionIDs}
-                        allCollectionsNameByID={state.allCollectionsNameByID}
+                        fileCollectionIDs={state.fileNormalCollectionIDs}
+                        allCollectionsNameByID={state.collectionNameByID}
                         isInIncomingSharedCollection={
                             collectionSummaries.get(activeCollectionID)?.type ==
                                 "incomingShareCollaborator" ||
@@ -1118,7 +1119,7 @@ const Page: React.FC = () => {
                 )}
                 <Export
                     {...exportVisibilityProps}
-                    allCollectionsNameByID={state.allCollectionsNameByID}
+                    allCollectionsNameByID={state.collectionNameByID}
                 />
                 <AuthenticateUser
                     {...authenticateUserVisibilityProps}
