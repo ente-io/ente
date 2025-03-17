@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import "package:photos/db/enum/conflict_algo.dart";
+import "package:photos/db/common/base.dart";
+import "package:photos/db/common/conflict_algo.dart";
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file/file.dart';
@@ -18,7 +19,7 @@ import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 
-class FilesDB {
+class FilesDB with SqlDbBase {
   /*
   Note: columnUploadedFileID and columnCollectionID have to be compared against
   both NULL and -1 because older clients might have entries where the DEFAULT
@@ -75,7 +76,7 @@ class FilesDB {
 //If adding or removing a new column, make sure to update the `_columnNames` list
 //and update `_generateColumnsAndPlaceholdersForInsert` and
 //`_generateUpdateAssignmentsWithPlaceholders`
-  static final migrationScripts = [
+  static final _migrationScripts = [
     ...createTable(filesTable),
     ...alterDeviceFolderToAllowNULL(),
     ...alterTimestampColumnTypes(),
@@ -145,31 +146,8 @@ class FilesDB {
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     final database = SqliteDatabase(path: path);
-    await _migrate(database);
-
+    await migrate(database, _migrationScripts);
     return database;
-  }
-
-  Future<void> _migrate(
-    SqliteDatabase database,
-  ) async {
-    final result = await database.execute('PRAGMA user_version');
-    final currentVersion = result[0]['user_version'] as int;
-    final toVersion = migrationScripts.length;
-
-    if (currentVersion < toVersion) {
-      _logger.info("Migrating database from $currentVersion to $toVersion");
-      await database.writeTransaction((tx) async {
-        for (int i = currentVersion + 1; i <= toVersion; i++) {
-          await tx.execute(migrationScripts[i - 1]);
-        }
-        await tx.execute('PRAGMA user_version = $toVersion');
-      });
-    } else if (currentVersion > toVersion) {
-      throw AssertionError(
-        "currentVersion($currentVersion) cannot be greater than toVersion($toVersion)",
-      );
-    }
   }
 
   // SQL code to create the database table
