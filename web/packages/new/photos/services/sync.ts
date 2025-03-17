@@ -13,39 +13,55 @@ import { syncSettings } from "@/new/photos/services/settings";
 import { splitByPredicate } from "@/utils/array";
 
 /**
- * Part 1 of {@link sync}. See TODO below for why this is split.
+ * Called during a full sync, before doing the collection and file sync.
+ *
+ * [Note: Remote sync]
+ *
+ * There are two types of remote syncs we perform:
+ *
+ * - A "collection and file" sync: Syncing our local state of collections and
+ *   files with remote.
+ *
+ * - A "full" sync, which includes the collection and file sync, and more.
+ *
+ * The full sync is performed by the gallery page, in the following sequence:
+ *
+ * 1. {@link preCollectionAndFilesSync}
+ * 2. {@link syncCollectionAndFiles}
+ * 3. {@link postCollectionAndFilesSync}.
+ *
+ * In some other cases, where we know that only specific collection and/or file
+ * state needs to be synced, step 2 ({@link syncCollectionAndFiles}) is
+ * performed independently. Examples of such cases are:
+ *
+ * - After deduping files.
+ * - After performing a file operation (e.g. delete, toggle favorite, toggle
+ *   archive) within the file viewer.
+ *
+ * The full sync is performed in the following cases:
+ *
+ * - On the gallery page load for web and desktop
+ * - Every 5 minutes thereafter (while the gallery page remains in front).
+ * - Each time the desktop app gains focus.
+ * - When the file viewer is closed after performing some operation.
  */
-export const preCollectionsAndFilesSync = async () => {
+export const preCollectionAndFilesSync = async () => {
     await Promise.all([syncSettings(), isMLSupported && mlStatusSync()]);
 };
 
 /**
- * Sync our local state with remote on page load for web and focus for desktop.
+ * Called during a full sync, after doing the collection and file sync.
  *
- * This function makes various API calls to fetch state from remote, using it to
- * update our local state, and triggering periodic jobs that depend on the local
- * state.
- *
- * This runs on initial page load (on both web and desktop). In addition for
- * desktop, it also runs each time the desktop app gains focus.
- *
- * TODO: This is called after we've synced the local files DBs with remote. That
- * code belongs here, but currently that state is persisted in the top level
- * gallery React component.
- *
- * So meanwhile we've split this sync into this method, which is called after
- * the file info has been synced (which can take a few minutes for large
- * libraries after initial login), and the `preFileInfoSync`, which is called
- * before doing the file sync and thus should run immediately after login.
+ * See: [Note: Remote sync]
  */
-export const sync = async () => {
+export const postCollectionAndFilesSync = async () => {
     await Promise.all([searchDataSync()]);
     // ML sync might take a very long time for initial indexing, so don't wait
     // for it to finish.
     void mlSync();
 };
 
-interface SyncFilesAndCollectionsOpts {
+interface SyncCallectionAndFilesOpts {
     /**
      * Called when saved collections, both normal and hidden, are (potentially)
      * updated.
@@ -82,21 +98,22 @@ interface SyncFilesAndCollectionsOpts {
 /**
  * Sync our local file and collection state with remote.
  *
- * This is a subset of {@link sync}, independently exposed for use at times when
+ * This is a subset of a full sync, independently exposed for use at times when
  * we only want to sync collections and files (e.g. we just made some API
  * request that modified collections or files, and so now want to sync our local
  * changes to match remote).
  *
- * It takes various optional callbacks that are used by gallery to update its
- * local state in tandem with the sync. The callbacks are optional since we
- * might not have local state to update, as is the case when this is invoked
- * post dedup.
+ * See: [Note: Remote sync]
+ *
+ * @param opts various callbacks that are used by gallery to update its local
+ * state in tandem with the sync. The callbacks are optional since we might not
+ * have local state to update, as is the case when this is invoked post dedup.
  *
  * @returns `true` if one or more normal or hidden files were updated during the
  * sync.
  */
-export const syncFilesAndCollections = async (
-    opts?: SyncFilesAndCollectionsOpts,
+export const syncCollectionAndFiles = async (
+    opts?: SyncCallectionAndFilesOpts,
 ) => {
     const collections = await getAllLatestCollections();
     const [hiddenCollections, normalCollections] = splitByPredicate(
@@ -120,7 +137,9 @@ export const syncFilesAndCollections = async (
     if (didUpdateNormalFiles || didUpdateHiddenFiles) {
         // TODO: Ok for now since its is only commented for the deduper (gallery
         // does this on the return value), but still needs fixing instead of a
-        // hidden gotcha.
+        // hidden gotcha. Fix is simple, just uncomment, but that can be done
+        // once the exportService can be imported here in the @/new.
+        //
         // exportService.onLocalFilesUpdated();
         resetFileViewerDataSourceOnClose();
         return true;

@@ -56,9 +56,9 @@ import {
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
 import {
-    preCollectionsAndFilesSync,
-    sync,
-    syncFilesAndCollections,
+    postCollectionAndFilesSync,
+    preCollectionAndFilesSync,
+    syncCollectionAndFiles,
 } from "@/new/photos/services/sync";
 import {
     initUserDetailsOrTriggerSync,
@@ -518,6 +518,30 @@ const Page: React.FC = () => {
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
 
+    const handleFileAndCollectionSyncWithRemote = useCallback(async () => {
+        const didUpdateFiles = await syncCollectionAndFiles({
+            onSetCollections: (normalCollections, hiddenCollections) =>
+                dispatch({
+                    type: "setCollections",
+                    normalCollections,
+                    hiddenCollections,
+                }),
+            onResetNormalFiles: (files) =>
+                dispatch({ type: "setFiles", files }),
+            onFetchNormalFiles: (files) =>
+                dispatch({ type: "fetchFiles", files }),
+            onResetHiddenFiles: (hiddenFiles) =>
+                dispatch({ type: "setHiddenFiles", hiddenFiles }),
+            onFetchHiddenFiles: (hiddenFiles) =>
+                dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
+            onResetTrashedFiles: (trashedFiles) =>
+                dispatch({ type: "setTrashedFiles", trashedFiles }),
+        });
+        if (didUpdateFiles) {
+            exportService.onLocalFilesUpdated();
+        }
+    }, []);
+
     const handleSyncWithRemote = useCallback(
         async (force = false, silent = false) => {
             if (!navigator.onLine) return;
@@ -537,36 +561,15 @@ const Page: React.FC = () => {
                     throw new Error(CustomError.SESSION_EXPIRED);
                 }
                 !silent && showLoadingBar();
-                await preCollectionsAndFilesSync();
-
-                const didUpdateFiles = await syncFilesAndCollections({
-                    onSetCollections: (normalCollections, hiddenCollections) =>
-                        dispatch({
-                            type: "setCollections",
-                            normalCollections,
-                            hiddenCollections,
-                        }),
-                    onResetNormalFiles: (files) =>
-                        dispatch({ type: "setFiles", files }),
-                    onFetchNormalFiles: (files) =>
-                        dispatch({ type: "fetchFiles", files }),
-                    onResetHiddenFiles: (hiddenFiles) =>
-                        dispatch({ type: "setHiddenFiles", hiddenFiles }),
-                    onFetchHiddenFiles: (hiddenFiles) =>
-                        dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
-                    onResetTrashedFiles: (trashedFiles) =>
-                        dispatch({ type: "setTrashedFiles", trashedFiles }),
-                });
-                if (didUpdateFiles) {
-                    exportService.onLocalFilesUpdated();
-                }
+                await preCollectionAndFilesSync();
+                await handleFileAndCollectionSyncWithRemote();
                 // syncWithRemote is called with the force flag set to true before
                 // doing an upload. So it is possible, say when resuming a pending
                 // upload, that we get two syncWithRemotes happening in parallel.
                 //
                 // Do the non-file-related sync only for one of these parallel ones.
                 if (!isForced) {
-                    await sync();
+                    await postCollectionAndFilesSync();
                 }
             } catch (e) {
                 switch (e.message) {
@@ -591,7 +594,13 @@ const Page: React.FC = () => {
                 resync.current = undefined;
             }
         },
-        [showLoadingBar, hideLoadingBar, router, showSessionExpiredDialog],
+        [
+            showLoadingBar,
+            hideLoadingBar,
+            router,
+            showSessionExpiredDialog,
+            handleFileAndCollectionSyncWithRemote,
+        ],
     );
 
     // Alias for existing code.
