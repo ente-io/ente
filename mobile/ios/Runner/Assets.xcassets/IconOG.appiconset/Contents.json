@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "IconOG.png",
+      "filename" : "IconOGAny.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,7 +25,7 @@
           "value" : "tinted"
         }
       ],
-      "filename" : "IconOGDark 1.png",
+      "filename" : "IconOGTinted.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
