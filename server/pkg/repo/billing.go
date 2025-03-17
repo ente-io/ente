@@ -155,7 +155,7 @@ func (repo *BillingRepository) LogStripePush(eventLog ente.StripeEventLog) error
 	return stacktrace.Propagate(err, "")
 }
 
-// LogStripePush logs a subscription modification by an admin
+// LogAdminTriggeredSubscriptionUpdate logs a subscription modification by an admin
 func (repo *BillingRepository) LogAdminTriggeredSubscriptionUpdate(r ente.UpdateSubscriptionRequest) error {
 	requestJSON, _ := json.Marshal(r)
 	_, err := repo.DB.Exec(`INSERT INTO subscription_logs(user_id, payment_provider, notification, verification_response) VALUES($1, $2, $3, '{}'::json)`,

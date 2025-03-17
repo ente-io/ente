@@ -23,6 +23,7 @@ const (
 	StorageLimitExceededMailLock   = "storage_limit_exceeded_mail_lock"
 	StorageLimitExceededTemplateID = "storage_limit_exceeded"
 	StorageLimitExceededTemplate   = "storage_limit_exceeded.html"
+	StorageLimitExceededSubject    = "[Alert] You have exceeded your storage limit"
 
 	FilesCollectedTemplate   = "files_collected.html"
 	FilesCollectedTemplateID = "files_collected"
@@ -35,9 +36,12 @@ const (
 	SubscriptionCancelledTemplate       = "subscription_cancelled.html"
 	FilesCollectedMuteDurationInMinutes = 10
 
-	StorageLimitExceededSubject = "[Alert] You have exceeded your storage limit"
-	ReferralSuccessfulTemplate  = "successful_referral.html"
-	ReferralSuccessfulSubject   = "You've earned 10 GB on Ente! 🎁"
+	ReferralSuccessfulTemplate = "successful_referral.html"
+	ReferralSuccessfulSubject  = "You've earned 10 GB on Ente! 🎁"
+
+	StorageLimitExceedingID       = "90_percent_consumed"
+	StorageLimitExceedingTemplate = "ninety_percent_consumed.html"
+	StorageLimitExceedingSubject  = "Storage About to Exceed!!"
 
 	LoginSuccessSubject  = "New login to your Ente account"
 	LoginSuccessTemplate = "on_login.html"
@@ -179,10 +183,10 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 	}
 	defer c.LockController.ReleaseLock(StorageLimitExceededMailLock)
 
-	// Notifs struct gets the list of both the users who have consumed
+	// storageAlertGroups struct gets the list of both the users who have consumed
 	// 90% storage and 100% of their subcriptions. Then, it ranges through
 	// the slices of the both the users and inside this for loop, users from
-	// both the slices are separately looped. This was done to avoid
+	// both the slices are separately looped. This is done to avoid
 	// duplication of a lot of code if both the users were ranged inside a loop
 	// separately.
 	storageAlertGroups := []struct {
@@ -194,8 +198,8 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 			getListofSubscribers: func() ([]ente.User, error) {
 				return c.UserRepo.GetUsersWithExceedingStorages(90)
 			},
-			template: StorageLimitExceededTemplate,
-			subject:  StorageLimitExceededTemplate,
+			template: StorageLimitExceedingTemplate,
+			subject:  StorageLimitExceedingSubject,
 		},
 		{
 			getListofSubscribers: func() ([]ente.User, error) {
