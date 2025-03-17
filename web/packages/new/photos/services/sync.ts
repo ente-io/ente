@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { resetFileViewerDataSourceOnClose } from "@/gallery/components/viewer/data-source";
+import type { EnteFile } from "@/media/file";
 import { isHiddenCollection } from "@/new/photos/services/collection";
 import {
     getAllLatestCollections,
@@ -44,6 +44,31 @@ export const sync = async () => {
     void mlSync();
 };
 
+interface SyncFilesAndCollectionsOpts {
+    /**
+     * Called when saved normal files were replaced by the given {@link files}.
+     */
+    onResetFiles: (files: EnteFile[]) => void;
+    /**
+     * Called when saved normal files were augmented with the newly fetched
+     * {@link files}.
+     */
+    onFetchFiles: (files: EnteFile[]) => void;
+    /**
+     * Called when saved hidden files were replaced by the given {@link files}.
+     */
+    onResetHiddenFiles: (files: EnteFile[]) => void;
+    /**
+     * Called when saved hidden files were augmented with the newly fetched
+     * {@link files}.
+     */
+    onFetchHiddenFiles: (files: EnteFile[]) => void;
+    /**
+     * Called when saved trashed files were replaced by the given {@link files}.
+     */
+    onResetTrashedFiles: (files: EnteFile[]) => void;
+}
+
 /**
  * Sync our local file and collection state with remote.
  *
@@ -52,12 +77,17 @@ export const sync = async () => {
  * request that modified collections or files, and so now want to sync our local
  * changes to match remote).
  *
- * A bespoke version of this in currently used by the gallery component when it
- * syncs - it needs a broken down, bespoke version because it also keeps local
- * state variables that need to be updated with the various callbacks that we
- * ignore in this version.
+ * It takes various optional callbacks that are used by gallery to update its
+ * local state in tandem with the sync. The callbacks are optional since we
+ * might not have local state to update, as is the case when this is invoked
+ * post dedup.
+ *
+ * @returns `true` if one or more normal or hidden files were updated during the
+ * sync.
  */
-export const syncFilesAndCollections = async () => {
+export const syncFilesAndCollections = async (
+    opts?: SyncFilesAndCollectionsOpts,
+) => {
     const allCollections = await getAllLatestCollections();
     const [hiddenCollections, normalCollections] = splitByPredicate(
         allCollections,
@@ -66,20 +96,23 @@ export const syncFilesAndCollections = async () => {
     const didUpdateNormalFiles = await syncFiles(
         "normal",
         normalCollections,
-        () => {},
-        () => {},
+        opts?.onResetFiles,
+        opts?.onFetchFiles,
     );
     const didUpdateHiddenFiles = await syncFiles(
         "hidden",
         hiddenCollections,
-        () => {},
-        () => {},
+        opts?.onResetHiddenFiles,
+        opts?.onFetchHiddenFiles,
     );
-    await syncTrash(allCollections, () => {});
+    await syncTrash(allCollections, opts?.onResetTrashedFiles);
     if (didUpdateNormalFiles || didUpdateHiddenFiles) {
-        // TODO: Ok for now since we're only called by deduper, but still needs
-        // fixing instead of a hidden gotcha.
+        // TODO: Ok for now since its is only commented for the deduper (gallery
+        // does this on the return value), but still needs fixing instead of a
+        // hidden gotcha.
         // exportService.onLocalFilesUpdated();
         resetFileViewerDataSourceOnClose();
+        return true;
     }
+    return false;
 };
