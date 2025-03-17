@@ -601,6 +601,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "בשל טבע הפרוטוקול של ההצפנת קצה-אל-קצה שלנו, אין אפשרות לפענח את הנתונים שלך בלי הסיסמה או מפתח השחזור שלך"),
         "noResults": MessageLookupByLibrary.simpleMessage("אין תוצאות"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "notifications": MessageLookupByLibrary.simpleMessage("התראות"),
         "ok": MessageLookupByLibrary.simpleMessage("אוקיי"),
         "onDevice": MessageLookupByLibrary.simpleMessage("על המכשיר"),
@@ -771,6 +773,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedFoldersWillBeEncryptedAndBackedUp":
             MessageLookupByLibrary.simpleMessage(
                 "התיקיות שנבחרו יוצפנו ויגובו"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "selectedPhotos": m7,
         "selectedPhotosWithYours": m71,
         "send": MessageLookupByLibrary.simpleMessage("שלח"),

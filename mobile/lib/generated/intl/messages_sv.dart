@@ -456,6 +456,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("Inga resultat hittades"),
         "notPersonLabel": m53,
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "onlyFamilyAdminCanChangeCode": m54,
         "oops": MessageLookupByLibrary.simpleMessage("Hoppsan"),
@@ -582,6 +584,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedFoldersWillBeEncryptedAndBackedUp":
             MessageLookupByLibrary.simpleMessage(
                 "Valda mappar kommer att krypteras och säkerhetskopieras"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "send": MessageLookupByLibrary.simpleMessage("Skicka"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Skicka e-post"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("Skicka inbjudan"),

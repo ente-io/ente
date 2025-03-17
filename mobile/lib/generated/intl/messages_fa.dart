@@ -274,6 +274,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("کلید بازیابی ندارید؟"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "با توجه به ماهیت پروتکل رمزگذاری سرتاسر ما، اطلاعات شما بدون رمز عبور یا کلید بازیابی شما قابل رمزگشایی نیست"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "notifications": MessageLookupByLibrary.simpleMessage("آگاه‌سازی‌ها"),
         "ok": MessageLookupByLibrary.simpleMessage("تایید"),
         "oops": MessageLookupByLibrary.simpleMessage("اوه"),
@@ -353,6 +355,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedFoldersWillBeEncryptedAndBackedUp":
             MessageLookupByLibrary.simpleMessage(
                 "پوشه‌های انتخاب شده، رمزگذاری شده و از آنها نسخه پشتیبان تهیه می‌شود"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "send": MessageLookupByLibrary.simpleMessage("ارسال"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ارسال ایمیل"),
         "setPasswordTitle":

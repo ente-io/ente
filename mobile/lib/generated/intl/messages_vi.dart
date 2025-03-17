@@ -1282,6 +1282,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noSystemLockFound": MessageLookupByLibrary.simpleMessage(
             "Không tìm thấy khóa hệ thống"),
         "notPersonLabel": m53,
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "nothingSharedWithYouYet": MessageLookupByLibrary.simpleMessage(
             "Chưa có gì được chia sẻ với bạn"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage(
@@ -1640,6 +1642,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
                 "Các mục đã chọn sẽ bị xóa khỏi tất cả các album và chuyển vào thùng rác."),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "selectedPhotos": m7,
         "selectedPhotosWithYours": m71,
         "send": MessageLookupByLibrary.simpleMessage("Gửi"),

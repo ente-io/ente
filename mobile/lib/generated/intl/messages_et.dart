@@ -173,6 +173,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "newest": MessageLookupByLibrary.simpleMessage("Uusimad"),
         "no": MessageLookupByLibrary.simpleMessage("Ei"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Puudub"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "oops": MessageLookupByLibrary.simpleMessage("Oih"),
         "oopsSomethingWentWrong":
@@ -229,6 +231,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Select start of range"),
         "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
         "selectYourPlan": MessageLookupByLibrary.simpleMessage("Vali pakett"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "sendLink": MessageLookupByLibrary.simpleMessage("Saada link"),
         "setAPassword": MessageLookupByLibrary.simpleMessage("Määra parool"),
         "setCover": MessageLookupByLibrary.simpleMessage("Määra kaanepilt"),
