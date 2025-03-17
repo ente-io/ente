@@ -4,6 +4,7 @@ import "package:collection/collection.dart";
 import "package:flutter/foundation.dart";
 import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/db/common/base.dart";
 import "package:photos/db/remote/schema.dart";
 import "package:photos/log/devlog.dart";
 import "package:photos/models/api/diff/diff.dart";
@@ -13,7 +14,7 @@ import "package:sqlite_async/sqlite_async.dart";
 // ignore: constant_identifier_names
 enum RemoteTable { collections, collection_files, files, entities }
 
-class RemoteDB {
+class RemoteDB with SqlDbBase {
   static const _databaseName = "remotex2.db";
   static const _batchInsertMaxCount = 1000;
   late final SqliteDatabase _sqliteDB;
@@ -24,9 +25,9 @@ class RemoteDB {
         await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
 
-    final database = SqliteDatabase(path: path);
-    await RemoteDBMigration.migrate(database);
-    _sqliteDB = database;
+    final db = SqliteDatabase(path: path);
+    await migrate(db, RemoteDBMigration.migrationScripts, onForeignKey: true);
+    _sqliteDB = db;
     devLog("RemoteDB init complete $path");
   }
 

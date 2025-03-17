@@ -1,5 +1,3 @@
-import "package:flutter/cupertino.dart";
-import "package:sqlite_async/sqlite_async.dart";
 
 const collectionColumns =
     'id, owner, enc_key, enc_key_nonce, name, type, local_path, '
@@ -67,27 +65,4 @@ class RemoteDBMigration {
     )
     ''',
   ];
-
-  static Future<void> migrate(
-    SqliteDatabase database,
-  ) async {
-    final result = await database.execute('PRAGMA user_version');
-    await database.execute("PRAGMA foreign_keys = ON");
-    final currentVersion = result[0]['user_version'] as int;
-    final toVersion = migrationScripts.length;
-
-    if (currentVersion < toVersion) {
-      debugPrint("Migrating Remote DB from $currentVersion to $toVersion");
-      await database.writeTransaction((tx) async {
-        for (int i = currentVersion + 1; i <= toVersion; i++) {
-          await tx.execute(migrationScripts[i - 1]);
-        }
-        await tx.execute('PRAGMA user_version = $toVersion');
-      });
-    } else if (currentVersion > toVersion) {
-      throw AssertionError(
-        "currentVersion($currentVersion) cannot be greater than toVersion($toVersion)",
-      );
-    }
-  }
 }
