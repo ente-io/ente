@@ -233,6 +233,7 @@ class DeviceAssetsService {
     final Map<String, Set<String>> newOrUpdatedPathToLocalIDs = {};
     final int fromInSec = req.fromTimeInMs ~/ 1000;
     for (final DevicePathAssets pathAssets in req.newOrUpdatedLocalPaths) {
+      addedOrModifiedPaths.add(pathAssets.path);
       final String pathID = pathAssets.path.id;
       final Set<String> localIDs = {};
       for (final AssetEntity asset in pathAssets.assets) {

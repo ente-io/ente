@@ -12,8 +12,10 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
+import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/services/notification_service.dart';
+import "package:photos/services/remote_pull/local/local_import.dart";
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -191,10 +193,18 @@ class SyncService {
   }
 
   Future<void> _doSync() async {
+    final TimeLogger tl = TimeLogger(context: "syncDB");
     await _localSyncService.sync();
+    _logger.info("old localSync completed $tl");
+    await LocalImportService.instance.incrementalSync();
+    _logger.info("incrementalSync completed $tl");
     if (_localSyncService.hasCompletedFirstImport()) {
       await _remoteSyncService.sync();
+      _logger.info("remoteSync completed $tl");
       final shouldSync = await _localSyncService.syncAll();
+      _logger.info("localSync completed $tl");
+      await LocalImportService.instance.fullSync();
+      _logger.info("fullSync completed $tl");
       if (shouldSync) {
         await _remoteSyncService.sync();
       }

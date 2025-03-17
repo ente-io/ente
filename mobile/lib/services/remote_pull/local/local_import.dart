@@ -60,37 +60,44 @@ class LocalImportService {
       return _existingSync!.future;
     }
     _existingSync = Completer<void>();
-    if (!_prefs.containsKey(lastLocalDBSyncTime)) {
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
-    }
-
-    // We use a lock to prevent synchronisation to occur while it is downloading
-    // as this introduces wrong entry in FilesDB due to race condition
-    // This is a fix for https://github.com/ente-io/ente/issues/4296
-    await _lock.synchronized(() async {
-      final TimeLogger tl = TimeLogger(context: "incrementalSync");
-      final syncTime = DateTime.now().microsecondsSinceEpoch;
-      final Set<String> inAppAssetIds = await localDB.getAssetsIDs();
-      _log.info("${inAppAssetIds.length} assets in app $tl");
-      final diff = await _deviceAssetsService.incrementalDiffWithOnDevice(
-        inAppAssetIds,
-        tl,
-        fromTimeInMs: _prefs.getInt(lastLocalDBSyncTime) ?? 0,
-        toTimeInMs: syncTime,
-      );
-      await _storeDiff(incrementalDiff: diff);
-      await _prefs.setInt(lastLocalDBSyncTime, syncTime);
-      if (!hasCompletedFirstImport()) {
-        await _prefs.setBool(kHasCompletedFirstImportKey, true);
-        _log.fine("initial incrementalSync completed $tl");
+    try {
+      if (!_prefs.containsKey(lastLocalDBSyncTime)) {
         Bus.instance
-            .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
-      } else {
-        _log.info("incrementalSync completed $tl");
+            .fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
       }
-    });
-    _existingSync?.complete();
-    _existingSync = null;
+
+      // We use a lock to prevent synchronisation to occur while it is downloading
+      // as this introduces wrong entry in FilesDB due to race condition
+      // This is a fix for https://github.com/ente-io/ente/issues/4296
+      await _lock.synchronized(() async {
+        final TimeLogger tl = TimeLogger(context: "incrementalSync");
+        final syncTime = DateTime.now().microsecondsSinceEpoch;
+        final Set<String> inAppAssetIds = await localDB.getAssetsIDs();
+        _log.info("${inAppAssetIds.length} assets in app $tl");
+        final diff = await _deviceAssetsService.incrementalDiffWithOnDevice(
+          inAppAssetIds,
+          tl,
+          fromTimeInMs: _prefs.getInt(lastLocalDBSyncTime) ?? 0,
+          toTimeInMs: syncTime,
+        );
+        await _storeDiff(incrementalDiff: diff);
+        await _prefs.setInt(lastLocalDBSyncTime, syncTime);
+        if (!hasCompletedFirstImport()) {
+          await _prefs.setBool(kHasCompletedFirstImportKey, true);
+          _log.fine("initial incrementalSync completed $tl");
+          Bus.instance
+              .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
+        } else {
+          _log.info("incrementalSync completed $tl");
+        }
+      });
+    } catch (e, st) {
+      _log.severe("incrementalSync failed", e, st);
+      rethrow;
+    } finally {
+      _existingSync?.complete();
+      _existingSync = null;
+    }
   }
 
   Future<bool> fullSync() async {
