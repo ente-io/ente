@@ -1098,6 +1098,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noSuggestionsForPerson": m52,
         "noSystemLockFound": MessageLookupByLibrary.simpleMessage("未找到系统锁"),
         "notPersonLabel": m53,
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "nothingSharedWithYouYet":
             MessageLookupByLibrary.simpleMessage("尚未与您共享任何内容"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage("这里空空如也! 👀"),
@@ -1399,6 +1401,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("所选文件夹将被加密并备份"),
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage("所选项目将从所有相册中删除并移动到回收站。"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "selectedPhotos": m7,
         "selectedPhotosWithYours": m71,
         "send": MessageLookupByLibrary.simpleMessage("发送"),

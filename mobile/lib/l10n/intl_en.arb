@@ -1698,5 +1698,7 @@
       }
     }
   },
-  "appIcon": "App icon"
+  "appIcon": "App icon",
+  "notThisPerson": "Not this person?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library."
 }
