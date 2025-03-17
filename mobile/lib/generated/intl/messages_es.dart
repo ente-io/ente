@@ -1353,6 +1353,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noSystemLockFound": MessageLookupByLibrary.simpleMessage(
             "Bloqueo de sistema no encontrado"),
         "notPersonLabel": m53,
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "nothingSharedWithYouYet": MessageLookupByLibrary.simpleMessage(
             "Aún no hay nada compartido contigo"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage(
@@ -1748,6 +1750,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
                 "Los archivos seleccionados serán eliminados de todos los álbumes y movidos a la papelera."),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "selectedPhotos": m7,
         "selectedPhotosWithYours": m71,
         "send": MessageLookupByLibrary.simpleMessage("Enviar"),

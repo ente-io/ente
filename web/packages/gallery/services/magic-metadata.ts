@@ -3,15 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { Collection } from "@/media/collection";
-import type { EnteFile, MagicMetadataCore } from "@/media/file";
+import { type MagicMetadataCore } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
-
-export function isArchivedFile(item: EnteFile): boolean {
-    if (!item || !item.magicMetadata || !item.magicMetadata.data) {
-        return false;
-    }
-    return item.magicMetadata.data.visibility === ItemVisibility.archived;
-}
 
 export const isArchivedCollection = (item: Collection) => {
     if (!item) {

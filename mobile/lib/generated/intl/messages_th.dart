@@ -229,6 +229,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ไม่มีคีย์การกู้คืน?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "เนื่องจากลักษณะของโปรโตคอลการเข้ารหัสตั้งแต่ต้นทางถึงปลายทางของเรา ข้อมูลของคุณจึงไม่สามารถถอดรหัสได้หากไม่มีรหัสผ่านหรือคีย์การกู้คืน"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "ok": MessageLookupByLibrary.simpleMessage("ตกลง"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "บน <branding>ente</branding>"),
@@ -307,6 +309,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectStartOfRange":
             MessageLookupByLibrary.simpleMessage("Select start of range"),
         "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ส่งอีเมล"),
         "sendLink": MessageLookupByLibrary.simpleMessage("ส่งลิงก์"),
         "setPasswordTitle":

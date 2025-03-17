@@ -350,6 +350,7 @@ class UserService {
             userPassword,
             _config.getKeyAttributes()!,
           );
+          _config.resetVolatilePassword();
           page = const HomePage();
         } else {
           throw Exception("unexpected response during passkey verification");

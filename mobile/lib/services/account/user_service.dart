@@ -767,6 +767,7 @@ class UserService {
             Configuration.instance.getKeyAttributes()!,
             keyEncryptionKey: keyEncryptionKey,
           );
+          Configuration.instance.resetVolatilePassword();
           page = const HomeWidget();
         } else {
           throw Exception("unexpected response during email verification");

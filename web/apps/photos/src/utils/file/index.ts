@@ -4,10 +4,7 @@ import { type Electron } from "@/base/types/ipc";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import { updateFileMagicMetadata } from "@/gallery/services/file";
-import {
-    isArchivedFile,
-    updateMagicMetadata,
-} from "@/gallery/services/magic-metadata";
+import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
 import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
 import { writeStream } from "@/gallery/utils/native-stream";
 import {
@@ -15,7 +12,7 @@ import {
     FileMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
 } from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
+import { ItemVisibility, isArchivedFile } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { deleteFromTrash, moveToTrash } from "@/new/photos/services/collection";

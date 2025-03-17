@@ -951,6 +951,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("Tidak ada hasil"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("Tidak ditemukan hasil"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "nothingSharedWithYouYet": MessageLookupByLibrary.simpleMessage(
             "Belum ada yang dibagikan denganmu"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage(
@@ -1225,6 +1227,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
                 "Item terpilih akan dihapus dari semua album dan dipindahkan ke sampah."),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "selectedPhotos": m7,
         "selectedPhotosWithYours": m71,
         "send": MessageLookupByLibrary.simpleMessage("Kirim"),

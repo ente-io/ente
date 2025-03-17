@@ -322,5 +322,7 @@
   "moveSelectedPhotosToOneDate": "Move selected photos to one date",
   "shiftDatesAndTime": "Shift dates and time",
   "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos"
+  "photocountPhotos": "$photoCount photos",
+  "notThisPerson": "Not this person?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library."
 }

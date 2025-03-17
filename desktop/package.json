@@ -41,14 +41,14 @@
         "onnxruntime-node": "^1.20.1"
     },
     "devDependencies": {
-        "@eslint/js": "^9.21.0",
+        "@eslint/js": "^9.22.0",
         "@tsconfig/node20": "^20.1.4",
         "@types/auto-launch": "^5.0.5",
         "@types/ffmpeg-static": "^3.0.3",
         "ajv": "^8.17.1",
         "concurrently": "^9.1.2",
         "cross-env": "^7.0.3",
-        "electron": "^34.3.1",
+        "electron": "^34.3.3",
         "electron-builder": "^26.0.0",
         "eslint": "^9",
         "prettier": "3.5.3",
@@ -56,7 +56,7 @@
         "prettier-plugin-packagejson": "^2.5.10",
         "shx": "^0.3.4",
         "typescript": "^5.8.2",
-        "typescript-eslint": "^8.26.0"
+        "typescript-eslint": "^8.26.1"
     },
     "packageManager": "yarn@1.22.22",
     "productName": "ente"

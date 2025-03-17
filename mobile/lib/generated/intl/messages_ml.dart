@@ -94,6 +94,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "newRange": MessageLookupByLibrary.simpleMessage("New range"),
         "no": MessageLookupByLibrary.simpleMessage("വേണ്ട"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("ഒന്നുമില്ല"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "nothingToSeeHere":
             MessageLookupByLibrary.simpleMessage("ഇവിടൊന്നും കാണ്മാനില്ല! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("ശരി"),
@@ -127,6 +129,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectStartOfRange":
             MessageLookupByLibrary.simpleMessage("Select start of range"),
         "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "send": MessageLookupByLibrary.simpleMessage("അയക്കുക"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ഇമെയിൽ അയക്കുക"),
         "setupComplete":

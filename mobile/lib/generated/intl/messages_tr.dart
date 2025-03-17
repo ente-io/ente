@@ -1327,6 +1327,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noSystemLockFound":
             MessageLookupByLibrary.simpleMessage("Sistem kilidi bulunamadı"),
         "notPersonLabel": m53,
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "nothingSharedWithYouYet": MessageLookupByLibrary.simpleMessage(
             "Henüz sizinle paylaşılan bir şey yok"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage(
@@ -1714,6 +1716,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
                 "Seçilen öğeler tüm albümlerden silinecek ve çöp kutusuna taşınacak."),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "selectedPhotos": m7,
         "selectedPhotosWithYours": m71,
         "send": MessageLookupByLibrary.simpleMessage("Gönder"),

@@ -14,7 +14,11 @@ import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
 import { resetFileViewerDataSourceOnClose } from "@/gallery/components/viewer/data-source";
 import { type Collection } from "@/media/collection";
-import { mergeMetadata, type EnteFile } from "@/media/file";
+import { type EnteFile } from "@/media/file";
+import {
+    updateRemotePrivateMagicMetadata,
+    type ItemVisibility,
+} from "@/media/file-metadata";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -50,7 +54,6 @@ import {
 import {
     getLocalFiles,
     getLocalTrashedFiles,
-    sortFiles,
     syncFiles,
 } from "@/new/photos/services/files";
 import {
@@ -319,22 +322,14 @@ const Page: React.FC = () => {
             const user = getData(LS_KEYS.USER);
             // TODO: Pass entire snapshot to reducer?
             const familyData = userDetailsSnapshot()?.familyData;
-            const files = sortFiles(
-                mergeMetadata(await getLocalFiles("normal")),
-            );
-            const hiddenFiles = sortFiles(
-                mergeMetadata(await getLocalFiles("hidden")),
-            );
-            const allCollections = await getAllLocalCollections();
-            const trashedFiles = await getLocalTrashedFiles();
             dispatch({
                 type: "mount",
                 user,
                 familyData,
-                allCollections,
-                files,
-                hiddenFiles,
-                trashedFiles,
+                allCollections: await getAllLocalCollections(),
+                files: await getLocalFiles("normal"),
+                hiddenFiles: await getLocalFiles("hidden"),
+                trashedFiles: await getLocalTrashedFiles(),
             });
             await syncWithRemote(true);
             setIsFirstLoad(false);
@@ -513,6 +508,19 @@ const Page: React.FC = () => {
         () => showMiniDialog(sessionExpiredDialogAttributes(logout)),
         [showMiniDialog, logout],
     );
+
+    // [Note: Visual feedback to acknowledge user actions]
+    //
+    // In some infrequent cases, we want to acknowledge some user action (e.g.
+    // pressing a keyboard shortcut which doesn't have an immediate on-screen
+    // impact). In these cases, we tickle the loading bar at the top to
+    // acknowledge that their action.
+    //
+    // TODO: Move to the new "GalleryContext"?
+    const handleVisualFeedback = useCallback(() => {
+        showLoadingBar();
+        setTimeout(hideLoadingBar, 0);
+    }, [showLoadingBar, hideLoadingBar]);
 
     const handleSyncWithRemote = useCallback(
         async (force = false, silent = false) => {
@@ -797,6 +805,43 @@ const Page: React.FC = () => {
         });
     };
 
+    const handleFileViewerFileVisibilityUpdate = useCallback(
+        async (file: EnteFile, visibility: ItemVisibility) => {
+            const fileID = file.id;
+            dispatch({
+                type: "markPendingVisibilityUpdate",
+                fileID,
+                mark: true,
+            });
+
+            try {
+                const privateMagicMetadata =
+                    await updateRemotePrivateMagicMetadata(file, {
+                        visibility,
+                    });
+                // TODO(AR): Trigger a "lite" sync?
+
+                // The file viewer listens for the next update to files, so keep
+                // this as the first operation on the happy path that can
+                // trigger an update of files.
+                //
+                // See: [Note: File viewer update and dispatch]
+                dispatch({
+                    type: "unsyncedPrivateMagicMetadataUpdate",
+                    fileID,
+                    privateMagicMetadata,
+                });
+            } finally {
+                dispatch({
+                    type: "markPendingVisibilityUpdate",
+                    fileID,
+                    mark: false,
+                });
+            }
+        },
+        [],
+    );
+
     const handleMarkUnsyncedFavoriteUpdate = useCallback(
         (fileID: number, isFavorite: boolean) =>
             dispatch({
@@ -1070,9 +1115,15 @@ const Page: React.FC = () => {
                                 "incomingShareViewer"
                         }
                         isInHiddenSection={barMode == "hidden-albums"}
+                        pendingVisibilityUpdates={
+                            state.pendingVisibilityUpdates
+                        }
                         favoriteFileIDs={state.favoriteFileIDs}
                         setFilesDownloadProgressAttributesCreator={
                             setFilesDownloadProgressAttributesCreator
+                        }
+                        onFileVisibilityUpdate={
+                            handleFileViewerFileVisibilityUpdate
                         }
                         onMarkUnsyncedFavoriteUpdate={
                             handleMarkUnsyncedFavoriteUpdate
@@ -1080,6 +1131,7 @@ const Page: React.FC = () => {
                         onMarkTempDeleted={handleMarkTempDeleted}
                         onSetOpenFileViewer={setIsFileViewerOpen}
                         onSyncWithRemote={handleSyncWithRemote}
+                        onVisualFeedback={handleVisualFeedback}
                         onSelectCollection={handleSelectCollection}
                         onSelectPerson={handleSelectPerson}
                     />

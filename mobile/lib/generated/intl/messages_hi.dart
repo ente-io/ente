@@ -87,6 +87,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("रिकवरी कुंजी नहीं है?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "हमारे एंड-टू-एंड एन्क्रिप्शन प्रोटोकॉल की प्रकृति के कारण, आपके डेटा को आपके पासवर्ड या रिकवरी कुंजी के बिना डिक्रिप्ट नहीं किया जा सकता है"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "ok": MessageLookupByLibrary.simpleMessage("ठीक है"),
         "oops": MessageLookupByLibrary.simpleMessage("ओह!"),
         "password": MessageLookupByLibrary.simpleMessage("पासवर्ड"),
@@ -107,6 +109,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectStartOfRange":
             MessageLookupByLibrary.simpleMessage("Select start of range"),
         "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ईमेल भेजें"),
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Shift dates and time"),
