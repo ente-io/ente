@@ -9,7 +9,7 @@ import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import { lowercaseExtension } from "@/base/file-name";
-import { formattedListJoin, pt, ut } from "@/base/i18n";
+import { formattedListJoin, ut } from "@/base/i18n";
 import type { LocalUser } from "@/base/local-user";
 import log from "@/base/log";
 import {
@@ -1207,10 +1207,7 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
                 />
             )}
             {haveUser && (
-                <Shortcut
-                    action={/*TODO*/ pt("Toggle archive")}
-                    shortcut={ut("X")}
-                />
+                <Shortcut action={t("toggle_archive")} shortcut={ut("X")} />
             )}
             {!disableDownload && (
                 <Shortcut action={t("copy_as_png")} shortcut={ut("^C / ⌘C")} />
