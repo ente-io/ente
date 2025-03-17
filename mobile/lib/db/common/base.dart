@@ -14,9 +14,13 @@ mixin SqlDbBase {
 
   Future<void> migrate(
     SqliteDatabase database,
-    List<String> migrationScripts,
-  ) async {
+    List<String> migrationScripts, {
+    bool onForeignKey = false,
+  }) async {
     final result = await database.execute('PRAGMA user_version');
+    if (onForeignKey) {
+      await database.execute("PRAGMA foreign_keys = ON");
+    }
     final currentVersion = result[0]['user_version'] as int;
     final toVersion = migrationScripts.length;
 

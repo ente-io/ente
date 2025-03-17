@@ -23,9 +23,9 @@ class LocalDB with SqlDbBase {
         await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
 
-    final database = SqliteDatabase(path: path);
-    await migrate(database, LocalDBMigration.migrationScripts);
-    _sqliteDB = database;
+    final db = SqliteDatabase(path: path);
+    await migrate(db, LocalDBMigration.migrationScripts, onForeignKey: true);
+    _sqliteDB = db;
     devLog("LocalDB init complete $path");
   }
 
