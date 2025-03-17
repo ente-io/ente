@@ -133,14 +133,14 @@ class HomeWidgetService {
         logicalSize: const Size(minSize, minSize),
         key: key,
       );
-      await hw.HomeWidget.saveWidgetData<Map>(
+      await hw.HomeWidget.saveWidgetData<Map<String, dynamic>>(
         key + "_data",
         {
           "title": title,
           "subText": SmartMemoriesService.getDateFormatted(
             creationTime: ogFile.creationTime!,
           ),
-          "generatedId": ogFile.generatedID,
+          "generatedId": ogFile.generatedID!,
         },
       );
     } catch (_, __) {
