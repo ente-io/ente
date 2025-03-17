@@ -1,5 +1,5 @@
 import "package:photos/db/ml/db.dart";
-import "package:photos/db/ml/db_fields.dart";
+import "package:photos/db/ml/schema.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 
 extension FileDataTable on MLDataDB {
