@@ -23,6 +23,7 @@ class LocalImportService {
   final _log = Logger("LocalSyncService");
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
+  Completer<bool>? _fullSync;
   final DeviceAssetsService _deviceAssetsService = DeviceAssetsService();
   late Debouncer _changeCallbackDebouncer;
   final Lock _lock = Lock();
@@ -104,23 +105,38 @@ class LocalImportService {
     if (!await _canSync("fullSync")) {
       return false;
     }
-    final TimeLogger tL = TimeLogger(context: "fullSync");
-    final inAppAssetIds = await localDB.getAssetsIDs();
-    final inAppPathToAssetIds = await localDB.pathToAssetIDs();
-    _log.info("loaded inApp State $tL");
-    final fullDiff = await _deviceAssetsService.fullDiffWithOnDevice(
-      inAppAssetIds,
-      inAppPathToAssetIds,
-      tL,
-    );
-    if (fullDiff.isInOutOfSync) {
-      _log.info("fullSync computedDiff: ${fullDiff.countLog()} ${tL.elapsed}");
-      await _storeDiff(fullDiff: fullDiff);
+    if (_fullSync != null) {
+      _log.info("fullSync already in progress.");
+      return _fullSync!.future;
     }
-    _log.fine(
-      "${fullDiff.isInOutOfSync ? 'changed saved ${fullDiff.countLog()} $tL)' : 'no change'}, completeTime ${tL.elapsed}",
-    );
-    return fullDiff.isInOutOfSync;
+    bool hasChanges = false;
+    _fullSync = Completer<bool>();
+    try {
+      final TimeLogger tL = TimeLogger(context: "fullSync");
+      final inAppAssetIds = await localDB.getAssetsIDs();
+      final inAppPathToAssetIds = await localDB.pathToAssetIDs();
+      _log.info("loaded inApp State $tL");
+      final fullDiff = await _deviceAssetsService.fullDiffWithOnDevice(
+        inAppAssetIds,
+        inAppPathToAssetIds,
+        tL,
+      );
+      if (fullDiff.isInOutOfSync) {
+        _log.info("fullSyncDiff: ${fullDiff.countLog()} ${tL.elapsed}");
+        await _storeDiff(fullDiff: fullDiff);
+      }
+      _log.fine(
+        "${fullDiff.isInOutOfSync ? 'changed saved ${fullDiff.countLog()} $tL)' : 'no change'}, completeTime ${tL.elapsed}",
+      );
+      hasChanges = fullDiff.isInOutOfSync;
+    } catch (e, s) {
+      _log.severe("fullSync failed", e, s);
+      rethrow;
+    } finally {
+      _fullSync?.complete(hasChanges);
+      _fullSync = null;
+    }
+    return hasChanges;
   }
 
   Future<bool> _canSync(String tag) async {
@@ -188,37 +204,6 @@ class LocalImportService {
         clearOldMappingsIdsInInput: true,
       );
     }
-    // // final List<EnteFile> files = result.item2;
-    // if (files.isNotEmpty) {
-    //   // Update the mapping for device path_id to local file id. Also, keep track
-    //   // of newly discovered device paths
-    //   // await FilesDB.instance.insertLocalAssets(
-    //   //   result.item1,
-    //   //   shouldAutoBackup:
-    //   //       Configuration.instance.hasSelectedAllFoldersForBackup(),
-    //   // );
-    //
-    //   _log.info(
-    //     "Loaded ${files.length} photos from " +
-    //         DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +
-    //         " to " +
-    //         DateTime.fromMicrosecondsSinceEpoch(toTime).toString(),
-    //   );
-    //   await _trackUpdatedFiles(files, existingLocalDs);
-    //   // keep reference of all Files for firing LocalPhotosUpdatedEvent
-    //   final List<EnteFile> allFiles = [];
-    //   allFiles.addAll(files);
-    //   // remove existing files and insert newly imported files in the table
-    //   files.removeWhere((file) => existingLocalDs.contains(file.localID));
-    //   await _db.insertMultiple(
-    //     files,
-    //     conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
-    //   );
-    //   _log.info('Inserted ${files.length} files');
-    //   Bus.instance.fire(
-    //     LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
-    //   );
-    // }
   }
 
   void _registerChangeCallback() {
@@ -235,12 +220,15 @@ class LocalImportService {
   }
 
   Future<void> checkAndSync() async {
-    if (_existingSync != null) {
-      await _existingSync!.future;
-    }
     if (permissionService.hasGrantedLimitedPermissions()) {
+      if (_fullSync != null) {
+        await _fullSync!.future;
+      }
       unawaited(fullSync());
     } else {
+      if (_existingSync != null) {
+        await _existingSync!.future;
+      }
       unawaited(incrementalSync());
     }
   }
