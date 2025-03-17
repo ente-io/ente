@@ -1,6 +1,6 @@
 import "dart:convert";
 
-import 'package:photos/db/ml/db_fields.dart';
+import 'package:photos/db/ml/schema.dart';
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/ml/face/detection.dart";
 import "package:photos/models/ml/face/face.dart";

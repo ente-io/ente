@@ -30,10 +30,6 @@ longer term, then it is recommended to follow the Docker approach.
 
 > [!IMPORTANT]
 >
-> This docker image is still in testing stage and it might show up with some
-> unknown variables in different scenarios. But this image has been tested on a
-> production Ente site.
->
 > Recurring changes might be made by the team or from community if more
 > improvements can be made so that we are able to build a full-fledged docker
 > image.
@@ -50,8 +46,8 @@ COPY apps/ .
 RUN corepack enable
 
 # Endpoint for Ente Server
-ENV NEXT_PUBLIC_ENTE_ENDPOINT=https://your-ente-endpoint.com
-ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your-albums-endpoint.com
+ENV NEXT_PUBLIC_ENTE_ENDPOINT=https://changeme.com
+ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://changeme.com
 
 RUN yarn cache clean
 RUN yarn install --network-timeout 1000000000
@@ -140,75 +136,6 @@ docker compose up -d # --build
 
 # Accessing the logs
 docker compose logs <container-name>
-```
-
-## Without Docker / Docker compose
-
-One way to run all the apps together without Docker is by using
-[PM2](https://pm2.keymetrics.io/) in this setup. The configuration and usage is
-very simple and just needs one configuration file for it. You can run the apps
-both in dev server mode as well as static files.
-
-The below configuration will run the apps in dev server mode.
-
-
-
-### Install PM2
-
-```sh
-npm install pm2@latest
-```
-
-Copy the below contents to a file called `ecosystem.config.js` inside the
-`ente/web` directory.
-
-```js
-module.exports = {
-  apps: [
-    {
-      name: "photos",
-      script: "yarn workspace photos next dev",
-      env: {
-        NODE_ENV: "development",
-        PORT: "3000"
-      }
-    },
-    {
-      name: "accounts",
-      script: "yarn workspace accounts next dev",
-      env: {
-        NODE_ENV: "development",
-        PORT: "3001"
-      }
-    },
-    {
-      name: "auth",
-      script: "yarn workspace auth next dev",
-      env: {
-        NODE_ENV: "development",
-        PORT: "3002"
-      }
-    },
-    {
-      name: "cast",
-      script: "yarn workspace cast next dev",
-      env: {
-        NODE_ENV: "development",
-        PORT: "3003"
-      }
-    }
-  ]
-};
-
-```
-
-Finally, start pm2.
-
-```sh
-pm2 start
-
-# for logs
-pm2 logs all
 ```
 
 ## Configure App Endpoints

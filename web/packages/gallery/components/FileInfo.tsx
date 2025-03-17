@@ -236,8 +236,10 @@ export const FileInfo: React.FC<FileInfoProps> = ({
             confirmDisableMapsDialogAttributes(() => updateMapEnabled(false)),
         );
 
-    const handleSelectFace = ({ personID }: AnnotatedFaceID) =>
+    const handleSelectFace = ({ personID, faceID }: AnnotatedFaceID) => {
+        log.info(`Selected person ${personID} for faceID ${faceID}`);
         onSelectPerson?.(personID);
+    };
 
     return (
         <FileInfoSidebar {...{ open, onClose }}>
