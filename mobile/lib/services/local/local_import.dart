@@ -3,18 +3,14 @@ import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
-import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/events/permission_granted_event.dart";
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/extensions/stop_watch.dart';
-import 'package:photos/models/file/file.dart';
-import "package:photos/models/ignored_file.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
-import "package:photos/services/ignored_files_service.dart";
-import "package:photos/services/remote_pull/local/import/device_assets.service.dart";
-import "package:photos/services/remote_pull/local/import/model.dart";
+import "package:photos/services/local/import/device_assets.service.dart";
+import "package:photos/services/local/import/model.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
@@ -26,8 +22,8 @@ class LocalImportService {
   Completer<bool>? _fullSync;
   final DeviceAssetsService _deviceAssetsService = DeviceAssetsService();
   late final Debouncer _changeCallbackDebouncer = Debouncer(
-    const Duration(milliseconds: 2000),
-    leading: true,
+    const Duration(milliseconds: 1000),
+    executionInterval: const Duration(milliseconds: 3000),
   );
   final Lock _lock = Lock();
 
@@ -158,27 +154,6 @@ class LocalImportService {
     return true;
   }
 
-  Future<void> ignoreUpload(EnteFile file, InvalidFileError error) async {
-    if (file.localID == null ||
-        file.deviceFolder == null ||
-        file.title == null) {
-      _log.warning('Invalid file received for ignoring: $file');
-      return;
-    }
-    if (Platform.isIOS && error.reason == InvalidReason.sourceFileMissing) {
-      // ignoreSourceFileMissing error on iOS as the file fetch from iCloud might have failed,
-      // but the file might be available later
-      return;
-    }
-    final ignored = IgnoredFile(
-      file.localID,
-      file.title,
-      file.deviceFolder,
-      error.reason.name,
-    );
-    await IgnoredFilesService.instance.cacheAndInsert([ignored]);
-  }
-
   Lock getLock() {
     return _lock;
   }
@@ -215,6 +190,7 @@ class LocalImportService {
     PhotoManager.addChangeCallback((value) async {
       _log.info("Something changed on disk");
       _changeCallbackDebouncer.run(() async {
+        _log.info("sync assets due to change on disk");
         unawaited(checkAndSync());
       });
     });
