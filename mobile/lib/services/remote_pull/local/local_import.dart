@@ -13,7 +13,7 @@ import "package:photos/models/ignored_file.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/ignored_files_service.dart";
-import "package:photos/services/remote_pull/local/import/local_assets.service.dart";
+import "package:photos/services/remote_pull/local/import/device_assets.service.dart";
 import "package:photos/services/remote_pull/local/import/model.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import 'package:shared_preferences/shared_preferences.dart';
