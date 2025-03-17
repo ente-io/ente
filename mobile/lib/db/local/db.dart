@@ -67,17 +67,21 @@ class LocalDB {
   }) async {
     if (pathToAssetIDs.isEmpty) return;
     final stopwatch = Stopwatch()..start();
+    late int pairCount;
 
     await _sqliteDB.writeTransaction((tx) async {
       if (clearOldMappingsIdsInInput) {
         await tx.execute(
-          "DELETE FROM device_path_assets WHERE path_id IN (${pathToAssetIDs.keys.join(",")})",
+          "DELETE FROM device_path_assets WHERE path_id IN (${List.generate(pathToAssetIDs.keys.length, (index) => '?').join(',')})",
+          pathToAssetIDs.keys.toList(),
         );
       }
       final List<List<String>> allValues = [];
+
       pathToAssetIDs.forEach((pathID, assetIDs) {
         allValues.addAll(assetIDs.map((assetID) => [pathID, assetID]));
       });
+      pairCount = allValues.length;
       const int batchSize = 15000;
       for (int i = 0; i < allValues.length; i += batchSize) {
         await tx.executeBatch(
@@ -90,7 +94,9 @@ class LocalDB {
       }
     });
     debugPrint(
-      '$runtimeType insertPathToAssetIDs complete in ${stopwatch.elapsed.inMilliseconds}ms for ${pathToAssetIDs.length} paths',
+      '$runtimeType insertPathToAssetIDs $pairCount complete in '
+      '${stopwatch.elapsed.inMilliseconds}ms for '
+      '${pathToAssetIDs.length} paths (replaced $clearOldMappingsIdsInInput}',
     );
   }
 
