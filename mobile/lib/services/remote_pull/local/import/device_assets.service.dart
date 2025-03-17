@@ -213,6 +213,13 @@ class DeviceAssetsService {
       }
     }
 
+    // Step 4: Add path are on device but not in app
+    for (var pathID in onDevicePathToLocalIDs.keys) {
+      if (!inAppPathToLocalIDs.containsKey(pathID)) {
+        updatePathToLocalIDs[pathID] = onDevicePathToLocalIDs[pathID]!;
+      }
+    }
+
     return FullDiffWithOnDevice(
       missingAssetsInApp: uniqueMissingAssetsInApp.values.toList(),
       extraAssetIDsInApp: extraAssetIDsInApp,
