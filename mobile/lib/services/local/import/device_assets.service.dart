@@ -7,7 +7,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_import_progress.dart';
 import "package:photos/extensions/stop_watch.dart";
-import "package:photos/services/remote_pull/local/import/model.dart";
+import "package:photos/services/local/import/model.dart";
 
 class DeviceAssetsService {
   final _logger = Logger("DeviceAssetsService");
