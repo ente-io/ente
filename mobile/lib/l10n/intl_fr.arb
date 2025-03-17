@@ -1674,18 +1674,6 @@
   "playStream": "Lire le stream",
   "playOriginal": "Lire l'original",
   "joinAlbumConfirmationDialogBody": "Rejoindre un album rendra votre e-mail visible à ses participants.",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos"
+  "selectDate": "Sélectionner la date",
+  "previous": "Précédent"
 }

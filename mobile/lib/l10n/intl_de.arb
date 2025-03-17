@@ -525,6 +525,7 @@
   "viewLargeFiles": "Große Dateien",
   "viewLargeFilesDesc": "Dateien anzeigen, die den meisten Speicherplatz belegen.",
   "noDuplicates": "✨ Keine Duplikate",
+  "youveNoDuplicateFilesThatCanBeCleared": "Du hast keine Duplikate, die gelöscht werden können",
   "success": "Abgeschlossen",
   "rateUs": "Bewerte uns",
   "remindToEmptyDeviceTrash": "Lösche auch Dateien aus \"Kürzlich gelöscht\" unter \"Einstellungen\" -> \"Speicher\" um freien Speicher zu erhalten",
@@ -1409,8 +1410,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
-
+  "collaboratorsSuccessfullyAdded": "{count, plural, one {}=0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1485,7 +1485,7 @@
   },
   "currentlyRunning": "läuft gerade",
   "ignored": "ignoriert",
-  "photosCount": "{count, plural, =0 {0 Fotos} =1 {1 Foto} other {{count} Fotos}}",
+  "photosCount": "{count, plural, one {}=0 {0 Fotos} =1 {1 Foto} other {{count} Fotos}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1674,18 +1674,28 @@
   "playStream": "Stream abspielen",
   "playOriginal": "Original abspielen",
   "joinAlbumConfirmationDialogBody": "Wenn du einem Album beitrittst, wird deine E-Mail-Adresse für seine Teilnehmer sichtbar.",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos"
+  "pleaseWaitThisWillTakeAWhile": "Bitte warten, dies wird eine Weile dauern.",
+  "editTime": "Uhrzeit ändern",
+  "selectTime": "Uhrzeit wählen",
+  "selectDate": "Datum wählen",
+  "previous": "Zurück",
+  "selectOneDateAndTimeForAll": "Wähle ein Datum und eine Uhrzeit für alle",
+  "selectStartOfRange": "Anfang des Bereichs auswählen",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "Dadurch werden Datum und Uhrzeit aller ausgewählten Fotos gleich.",
+  "allWillShiftRangeBasedOnFirst": "Dies ist die erste in der Gruppe. Andere ausgewählte Fotos werden automatisch nach diesem neuen Datum verschoben",
+  "newRange": "Neue Auswahl",
+  "selectOneDateAndTime": "Wähle ein Datum und eine Uhrzeit",
+  "moveSelectedPhotosToOneDate": "Ausgewählte Fotos auf ein Datum verschieben",
+  "shiftDatesAndTime": "Datum und Uhrzeit verschieben",
+  "photosKeepRelativeTimeDifference": "Fotos behalten relativen Zeitunterschied",
+  "photocountPhotos": "{count, plural, =0 {Keine Fotos} =1 {Ein Foto} other {{count} Fotos}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "appIcon": "App-Symbol"
 }

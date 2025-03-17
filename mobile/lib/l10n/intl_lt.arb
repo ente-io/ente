@@ -524,6 +524,7 @@
   "removeDuplicatesDesc": "Peržiūrėkite ir pašalinkite failus, kurie yra tiksliai dublikatai.",
   "viewLargeFiles": "Dideli failai",
   "noDuplicates": "✨ Dublikatų nėra",
+  "youveNoDuplicateFilesThatCanBeCleared": "Neturite dubliuotų failų, kuriuos būtų galima išvalyti.",
   "success": "Sėkmė",
   "rateUs": "Vertinti mus",
   "remindToEmptyDeviceTrash": "Taip pat ištuštinkite Neseniai ištrinti iš Nustatymai -> Saugykla, kad atlaisvintumėte vietos.",
@@ -1421,18 +1422,28 @@
   "playStream": "Leisti srautinį perdavimą",
   "playOriginal": "Leisti originalą",
   "joinAlbumConfirmationDialogBody": "Prisijungus prie albumo, jūsų el. paštas bus matomas jo dalyviams.",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos"
+  "pleaseWaitThisWillTakeAWhile": "Palaukite, tai šiek tiek užtruks.",
+  "editTime": "Redaguoti laiką",
+  "selectTime": "Pasirinkti laiką",
+  "selectDate": "Pasirinkti datą",
+  "previous": "Ankstesnis",
+  "selectOneDateAndTimeForAll": "Pasirinkti vieną datą ir laiką viskam",
+  "selectStartOfRange": "Pasirinkti intervalo pradžią",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "Tai padarys visų pasirinktų nuotraukų datą ir laiką vienodus.",
+  "allWillShiftRangeBasedOnFirst": "Tai – pirmoji šioje grupėje. Kitos pasirinktos nuotraukos bus automatiškai perkeltos pagal šią naują datą.",
+  "newRange": "Naujas intervalas",
+  "selectOneDateAndTime": "Pasirinkti vieną datą ir laiką",
+  "moveSelectedPhotosToOneDate": "Perkelti pasirinktas nuotraukas į vieną datą",
+  "shiftDatesAndTime": "Pastumti datas ir laiką",
+  "photosKeepRelativeTimeDifference": "Nuotraukos išlaiko santykinį laiko skirtumą",
+  "photocountPhotos": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {Nėra nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "appIcon": "Programos piktograma"
 }

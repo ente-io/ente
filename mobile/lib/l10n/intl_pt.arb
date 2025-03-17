@@ -1267,8 +1267,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Busque pessoas facilmente pelo nome",
-  "addViewers": "{count, plural, one {Adicionar visualizador} other {Adicionar visualizadores}}",
-  "addCollaborators": "{count, plural,  one {Adicionar colaborador} other {Adicionar colaboradores}}",
+  "addViewers": "{count, plural, one {Adicionar visualizador} one {Adicionar visualizador} other {Adicionar visualizadores}}",
+  "addCollaborators": "{count, plural, one {Adicionar colaborador} one {Adicionar colaborador} other {Adicionar colaboradores}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Pressione um e-mail para verificar a criptografia ponta a ponta.",
   "developerSettingsWarning": "Deseja modificar as Opções de Desenvolvedor?",
   "developerSettings": "Opções de desenvolvedor",
@@ -1675,18 +1675,28 @@
   "playStream": "Reproduzir transmissão",
   "playOriginal": "Reproduzir original",
   "joinAlbumConfirmationDialogBody": "Unir-se ao álbum fará que seu e-mail seja visível a todos do álbum.",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos"
+  "pleaseWaitThisWillTakeAWhile": "Aguarde um pouco, isso talvez leve um tempo.",
+  "editTime": "Editar tempo",
+  "selectTime": "Selecionar tempo",
+  "selectDate": "Selecionar data",
+  "previous": "Anterior",
+  "selectOneDateAndTimeForAll": "Selecione uma data e hora para todos",
+  "selectStartOfRange": "Selecionar início de intervalo",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "Isso fará que a data e hora de todas as fotos selecionadas fiquem iguais.",
+  "allWillShiftRangeBasedOnFirst": "Este é o primeiro do grupo. As outras fotos selecionadas serão automaticamente alteradas para esta nova data",
+  "newRange": "Novo intervalo",
+  "selectOneDateAndTime": "Selecionar data e hora",
+  "moveSelectedPhotosToOneDate": "Mover fotos selecionadas para uma data",
+  "shiftDatesAndTime": "Alterar data e horas",
+  "photosKeepRelativeTimeDifference": "As fotos mantêm a diferença de tempo relativo",
+  "photocountPhotos": "{count, plural, =0 {Sem fotos} =1 {1 foto} other {{count} fotos}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "appIcon": "Ícone do aplicativo"
 }

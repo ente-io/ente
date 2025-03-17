@@ -525,6 +525,7 @@
   "viewLargeFiles": "大きなファイル",
   "viewLargeFilesDesc": "最も多くのストレージを消費しているファイルを表示します。",
   "noDuplicates": "✨ 重複なし",
+  "youveNoDuplicateFilesThatCanBeCleared": "削除できる同一ファイルはありません",
   "success": "成功",
   "rateUs": "評価して下さい",
   "remindToEmptyDeviceTrash": "また、空き領域を取得するには、「設定」→「ストレージ」から「最近削除した項目」を空にします",
@@ -878,7 +879,7 @@
   "close": "閉じる",
   "setAs": "設定：",
   "fileSavedToGallery": "ファイルをギャラリーに保存しました",
-  "filesSavedToGallery": "ギャラリーに保存されたファイル",
+  "filesSavedToGallery": "写真をダウンロードしました",
   "fileFailedToSaveToGallery": "ギャラリーへの保存に失敗しました",
   "download": "ダウンロード",
   "pressAndHoldToPlayVideo": "長押しで動画を再生",
@@ -1674,18 +1675,27 @@
   "playStream": "再生",
   "playOriginal": "元動画を再生",
   "joinAlbumConfirmationDialogBody": "アルバムに参加すると、参加者にメールアドレスが公開されます。",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos"
+  "pleaseWaitThisWillTakeAWhile": "しばらくお待ちください。時間がかかります。",
+  "editTime": "時刻を編集",
+  "selectTime": "時刻を選択",
+  "selectDate": "日付を選択する",
+  "previous": "前",
+  "selectOneDateAndTimeForAll": "すべてに対して日付と時刻を1つ選択してください",
+  "selectStartOfRange": "範囲の開始位置を選択",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "選択したすべての写真の日付と時刻が同じになります。",
+  "allWillShiftRangeBasedOnFirst": "これはグループ内の最初のものです。他の選択した写真は、この新しい日付に基づいて自動的にシフトされます",
+  "newRange": "範囲を追加",
+  "selectOneDateAndTime": "日付と時刻を1つ選択してください",
+  "moveSelectedPhotosToOneDate": "選択した写真を1つの日付に移動",
+  "shiftDatesAndTime": "日付と時間のシフト",
+  "photosKeepRelativeTimeDifference": "写真はお互いの相対的な時間差を維持します",
+  "photocountPhotos": "{count, plural, =0 {0枚の写真} =1 {1枚の写真} other {{count} 枚の写真}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  }
 }

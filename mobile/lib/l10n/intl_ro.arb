@@ -1399,8 +1399,6 @@
   "enableMachineLearningBanner": "Activați învățarea automată pentru a folosi căutarea magică și recunoașterea facială",
   "searchDiscoverEmptySection": "Imaginile vor fi afișate aici odată ce procesarea și sincronizarea este completă",
   "searchPersonsEmptySection": "Persoanele vor fi afișate aici odată ce procesarea și sincronizarea este completă",
-
-
   "accountIsAlreadyConfigured": "Contul este deja configurat.",
   "sessionIdMismatch": "Nepotrivire ID sesiune",
   "@sessionIdMismatch": {
@@ -1466,7 +1464,7 @@
   },
   "currentlyRunning": "rulează în prezent",
   "ignored": "ignorat",
-  "photosCount": "{count, plural, =0 {0 Fotografii} =1 {O Fotografie} other {{count} Fotografii}}",
+  "photosCount": "{count, plural, =0 {Curând} =1 {O zi} other {{count} de zile}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1578,19 +1576,5 @@
   "joinAlbum": "Alăturați-vă albumului",
   "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
   "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
-  "join": "Alăturare",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos"
+  "join": "Alăturare"
 }
