@@ -236,16 +236,12 @@ export type FileViewerProps = ModalVisibilityProps & {
      * Called when the given {@link file} should be downloaded.
      *
      * If this is not provided then the download action will not be shown.
-     *
-     * See also: [Note: File viewer update and dispatch]
      */
     onDownload?: (file: EnteFile) => void;
     /**
      * Called when the given {@link file} should be deleted.
      *
      * If this is not provided then the delete action will not be shown.
-     *
-     * See also: [Note: File viewer update and dispatch]
      */
     onDelete?: (file: EnteFile) => Promise<void>;
     /**
