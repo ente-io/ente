@@ -1320,6 +1320,7 @@ class SmartMemoriesService {
             fileIDToImageEmbedding: fileIDToImageEmbedding,
             clipPositiveTextVector: clipPositiveTextVector,
           );
+          // TODO: here is the issue!!
           final name =
               "${DateFormat.MMMd()}, ${currentTime.year - date.year} years ago";
           memoryResult.add(
@@ -1393,7 +1394,7 @@ class SmartMemoriesService {
               clipPositiveTextVector: clipPositiveTextVector,
             );
             final name =
-                "This week, ${currentTime.year - date.year} years back";
+                "This week, ${currentTime.year - date.year} years ago";
 
             memoryResult.add(
               TimeMemory(
@@ -1451,7 +1452,7 @@ class SmartMemoriesService {
       final monthName = DateFormat.MMMM().format(DateTime(year, currentMonth));
       final daysLeftInMonth =
           DateTime(currentYear, currentMonth + 1, 0).day - currentTime.day + 1;
-      final name = monthName + ", ${currentTime.year - year} years back";
+      final name = monthName + ", ${currentTime.year - year} years ago";
       memoryResult.add(
         TimeMemory(
           photoSelection,
