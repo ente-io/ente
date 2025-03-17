@@ -419,8 +419,8 @@ export type GalleryAction =
       }
     | { type: "setNormalCollections"; collections: Collection[] }
     | {
-          type: "setAllCollections";
-          collections: Collection[];
+          type: "setCollections";
+          normalCollections: Collection[];
           hiddenCollections: Collection[];
       }
     | { type: "setFiles"; files: EnteFile[] }
@@ -631,18 +631,17 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             });
         }
 
-        case "setAllCollections": {
-            const collections = action.collections;
-            const hiddenCollections = action.hiddenCollections;
+        case "setCollections": {
+            const { normalCollections, hiddenCollections } = action;
             const archivedCollectionIDs =
-                deriveArchivedCollectionIDs(collections);
+                deriveArchivedCollectionIDs(normalCollections);
             const archivedFileIDs = deriveArchivedFileIDs(
                 archivedCollectionIDs,
                 state.files,
             );
             const collectionSummaries = deriveCollectionSummaries(
                 state.user!,
-                collections,
+                normalCollections,
                 state.files,
                 state.trashedFiles,
                 archivedFileIDs,
@@ -659,7 +658,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             if (state.view?.type == "albums") {
                 ({ view, selectedCollectionSummaryID } =
                     deriveAlbumsViewAndSelectedID(
-                        collections,
+                        normalCollections,
                         collectionSummaries,
                         selectedCollectionSummaryID,
                     ));
@@ -674,19 +673,19 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
 
             return stateByUpdatingFilteredFiles({
                 ...state,
-                collections,
+                collections: normalCollections,
                 hiddenCollections,
                 archivedCollectionIDs,
                 defaultHiddenCollectionIDs:
                     deriveDefaultHiddenCollectionIDs(hiddenCollections),
                 archivedFileIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
-                    collections,
+                    normalCollections,
                     state.files,
                     state.unsyncedFavoriteUpdates,
                 ),
                 allCollectionsNameByID: createCollectionNameByID(
-                    collections.concat(hiddenCollections),
+                    normalCollections.concat(hiddenCollections),
                 ),
                 collectionSummaries,
                 hiddenCollectionSummaries,

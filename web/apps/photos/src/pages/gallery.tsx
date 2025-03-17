@@ -12,7 +12,6 @@ import { useModalVisibility } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
-import { resetFileViewerDataSourceOnClose } from "@/gallery/components/viewer/data-source";
 import { type Collection } from "@/media/collection";
 import { type EnteFile } from "@/media/file";
 import {
@@ -43,18 +42,12 @@ import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import {
     ALL_SECTION,
     DUMMY_UNCATEGORIZED_COLLECTION,
-    isHiddenCollection,
 } from "@/new/photos/services/collection";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
-import {
-    getAllLatestCollections,
-    getAllLocalCollections,
-    syncTrash,
-} from "@/new/photos/services/collections";
+import { getAllLocalCollections } from "@/new/photos/services/collections";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
-    syncFiles,
 } from "@/new/photos/services/files";
 import {
     filterSearchableFiles,
@@ -62,7 +55,11 @@ import {
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
-import { preCollectionsAndFilesSync, sync } from "@/new/photos/services/sync";
+import {
+    preCollectionsAndFilesSync,
+    sync,
+    syncFilesAndCollections,
+} from "@/new/photos/services/sync";
 import {
     initUserDetailsOrTriggerSync,
     redirectToCustomerPortal,
@@ -70,7 +67,6 @@ import {
     verifyStripeSubscription,
 } from "@/new/photos/services/user-details";
 import { usePhotosAppContext } from "@/new/photos/types/context";
-import { splitByPredicate } from "@/utils/array";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
@@ -542,36 +538,27 @@ const Page: React.FC = () => {
                 }
                 !silent && showLoadingBar();
                 await preCollectionsAndFilesSync();
-                const allCollections = await getAllLatestCollections();
-                const [hiddenCollections, collections] = splitByPredicate(
-                    allCollections,
-                    isHiddenCollection,
-                );
-                dispatch({
-                    type: "setAllCollections",
-                    collections,
-                    hiddenCollections,
-                });
-                const didUpdateNormalFiles = await syncFiles(
-                    "normal",
-                    collections,
-                    (files) => dispatch({ type: "setFiles", files }),
-                    (files) => dispatch({ type: "fetchFiles", files }),
-                );
-                const didUpdateHiddenFiles = await syncFiles(
-                    "hidden",
-                    hiddenCollections,
-                    (hiddenFiles) =>
+
+                const didUpdateFiles = await syncFilesAndCollections({
+                    onSetCollections: (normalCollections, hiddenCollections) =>
+                        dispatch({
+                            type: "setCollections",
+                            normalCollections,
+                            hiddenCollections,
+                        }),
+                    onResetNormalFiles: (files) =>
+                        dispatch({ type: "setFiles", files }),
+                    onFetchNormalFiles: (files) =>
+                        dispatch({ type: "fetchFiles", files }),
+                    onResetHiddenFiles: (hiddenFiles) =>
                         dispatch({ type: "setHiddenFiles", hiddenFiles }),
-                    (hiddenFiles) =>
+                    onFetchHiddenFiles: (hiddenFiles) =>
                         dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
-                );
-                await syncTrash(allCollections, (trashedFiles: EnteFile[]) =>
-                    dispatch({ type: "setTrashedFiles", trashedFiles }),
-                );
-                if (didUpdateNormalFiles || didUpdateHiddenFiles) {
+                    onResetTrashedFiles: (trashedFiles) =>
+                        dispatch({ type: "setTrashedFiles", trashedFiles }),
+                });
+                if (didUpdateFiles) {
                     exportService.onLocalFilesUpdated();
-                    resetFileViewerDataSourceOnClose();
                 }
                 // syncWithRemote is called with the force flag set to true before
                 // doing an upload. So it is possible, say when resuming a pending

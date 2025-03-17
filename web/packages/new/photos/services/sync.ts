@@ -98,9 +98,9 @@ interface SyncFilesAndCollectionsOpts {
 export const syncFilesAndCollections = async (
     opts?: SyncFilesAndCollectionsOpts,
 ) => {
-    const allCollections = await getAllLatestCollections();
+    const collections = await getAllLatestCollections();
     const [hiddenCollections, normalCollections] = splitByPredicate(
-        allCollections,
+        collections,
         isHiddenCollection,
     );
     opts?.onSetCollections(normalCollections, hiddenCollections);
@@ -116,7 +116,7 @@ export const syncFilesAndCollections = async (
         opts?.onResetHiddenFiles,
         opts?.onFetchHiddenFiles,
     );
-    await syncTrash(allCollections, opts?.onResetTrashedFiles);
+    await syncTrash(collections, opts?.onResetTrashedFiles);
     if (didUpdateNormalFiles || didUpdateHiddenFiles) {
         // TODO: Ok for now since its is only commented for the deduper (gallery
         // does this on the return value), but still needs fixing instead of a
