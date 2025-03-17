@@ -1104,8 +1104,8 @@ const Page: React.FC = () => {
                         setSelected={setSelected}
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
-                        fileCollectionIDs={state.fileNormalCollectionIDs}
-                        allCollectionsNameByID={state.collectionNameByID}
+                        fileNormalCollectionIDs={state.fileNormalCollectionIDs}
+                        collectionNameByID={state.collectionNameByID}
                         isInIncomingSharedCollection={
                             normalCollectionSummaries.get(activeCollectionID)
                                 ?.type == "incomingShareCollaborator" ||

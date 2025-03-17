@@ -256,8 +256,8 @@ export type FileViewerProps = ModalVisibilityProps & {
     onSaveEditedImageCopy?: ImageEditorOverlayProps["onSaveEditedCopy"];
 } & Pick<
         FileInfoProps,
-        | "fileCollectionIDs"
-        | "allCollectionsNameByID"
+        | "fileNormalCollectionIDs"
+        | "collectionNameByID"
         | "onSelectCollection"
         | "onSelectPerson"
     >;
@@ -277,8 +277,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     isInHiddenSection,
     favoriteFileIDs,
     pendingVisibilityUpdates,
-    fileCollectionIDs,
-    allCollectionsNameByID,
+    fileNormalCollectionIDs,
+    collectionNameByID,
     onTriggerSyncWithRemote,
     onVisualFeedback,
     onToggleFavorite,
@@ -909,7 +909,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onUpdateCaption={handleUpdateCaption}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
-                {...{ fileCollectionIDs, allCollectionsNameByID }}
+                {...{ fileNormalCollectionIDs, collectionNameByID }}
             />
             <MoreMenu
                 open={!!moreMenuAnchorEl}
