@@ -5,12 +5,13 @@ import "package:flutter/foundation.dart";
 import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photo_manager/photo_manager.dart";
+import "package:photos/db/common/base.dart";
 import "package:photos/db/local/mappers.dart";
 import "package:photos/db/local/schema.dart";
 import "package:photos/log/devlog.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
-class LocalDB {
+class LocalDB with SqlDbBase {
   static const _databaseName = "local_2.db";
   static const _batchInsertMaxCount = 1000;
   static const _smallTableBatchInsertMaxCount = 5000;
@@ -23,7 +24,7 @@ class LocalDB {
     final String path = join(documentsDirectory.path, _databaseName);
 
     final database = SqliteDatabase(path: path);
-    await LocalDBMigration.migrate(database);
+    await migrate(database, LocalDBMigration.migrationScripts);
     _sqliteDB = database;
     devLog("LocalDB init complete $path");
   }
@@ -35,7 +36,7 @@ class LocalDB {
       final List<List<Object?>> values =
           slice.map((e) => LocalDBMappers.assetsRow(e)).toList();
       await _sqliteDB.executeBatch(
-        'INSERT OR REPLACE INTO assets ($assetColumns) values(${placeHolderMap[15]})',
+        'INSERT OR REPLACE INTO assets ($assetColumns) values(${getParams(15)})',
         values,
       );
     });
@@ -52,7 +53,7 @@ class LocalDB {
       final List<List<Object?>> values =
           slice.map((e) => LocalDBMappers.devicePathRow(e)).toList();
       await _sqliteDB.executeBatch(
-        'INSERT OR REPLACE INTO device_path ($devicePathColumns) values(${placeHolderMap[5]})',
+        'INSERT OR REPLACE INTO device_path ($devicePathColumns) values(${getParams(5)})',
         values,
       );
     });

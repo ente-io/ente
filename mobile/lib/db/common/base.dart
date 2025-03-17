@@ -4,7 +4,7 @@ import "package:sqlite_async/sqlite_async.dart";
 mixin SqlDbBase {
   static const _params = {};
 
-  static String getParams(int count) {
+  String getParams(int count) {
     if (!_params.containsKey(count)) {
       final params = List.generate(count, (_) => "?").join(", ");
       _params[count] = params;

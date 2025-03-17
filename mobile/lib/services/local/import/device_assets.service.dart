@@ -11,6 +11,9 @@ import "package:photos/services/local/import/model.dart";
 
 class DeviceAssetsService {
   final _logger = Logger("DeviceAssetsService");
+  // The ignoreSizeConstraint is used to ignore the size constraint, otherwise
+  // photo manager will only give assets that meet it's default constraint where
+  // only assets with w/h in [0,100000] dim will be returned
   static const ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
   static const assetFetchPageSize = 2000;
 
@@ -62,6 +65,9 @@ class DeviceAssetsService {
     return r;
   }
 
+  // _getAssetPaths will return AssetEntityPath and assets that will meet the
+  // specified filter conditions. If fromTimeInMs and toTimeInMs are provided,
+  // we will only get those assets that were updated in the specified time.
   Future<List<DevicePathAssets>> _getDevicePathAssets({
     int? fromTimeInMs,
     int? toTimeInMs,
@@ -95,6 +101,7 @@ class DeviceAssetsService {
     final OrderOption? orderOption,
   }) async {
     final filterOptionGroup = FilterOptionGroup();
+
     filterOptionGroup.setOption(
       AssetType.image,
       FilterOption(needTitle: needsTitle, sizeConstraint: ignoreSizeConstraint),
@@ -113,6 +120,10 @@ class DeviceAssetsService {
         max: DateTime.fromMillisecondsSinceEpoch(updateToTimeInMs),
       );
     } else {
+      // During full diff, ignore the default creation time filter otherwise
+      // photo manager will only give assets with creation time between [0, now()]
+      // utc. This will cause the app to miss out on assets that have creation_time
+      // outside this time window.
       filterOptionGroup.createTimeCond =
           DateTimeCond.def().copyWith(ignore: true);
     }
