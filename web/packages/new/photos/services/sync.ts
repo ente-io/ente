@@ -32,16 +32,14 @@ import { splitByPredicate } from "@/utils/array";
  *
  * In some other cases, where we know that only specific collection and/or file
  * state needs to be synced, step 2 ({@link syncCollectionAndFiles}) is
- * performed independently. Examples of such cases are:
+ * performed independently. The only example of such a cases currently is:
  *
  * - After deduping files.
- * - After performing a file operation (e.g. delete, toggle favorite, toggle
- *   archive) within the file viewer.
  *
  * The full sync is performed in the following cases:
  *
- * - On the gallery page load for web and desktop
- * - Every 5 minutes thereafter (while the gallery page remains in front).
+ * - On the gallery page load (for both web and desktop).
+ * - Every 5 minutes thereafter (while the user is on the gallery page).
  * - Each time the desktop app gains focus.
  * - When the file viewer is closed after performing some operation.
  */

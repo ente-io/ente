@@ -804,35 +804,19 @@ const Page: React.FC = () => {
     const handleFileViewerFileVisibilityUpdate = useCallback(
         async (file: EnteFile, visibility: ItemVisibility) => {
             const fileID = file.id;
-            dispatch({
-                type: "markPendingVisibilityUpdate",
-                fileID,
-                mark: true,
-            });
-
+            dispatch({ type: "addPendingVisibilityUpdate", fileID });
             try {
                 const privateMagicMetadata =
                     await updateRemotePrivateMagicMetadata(file, {
                         visibility,
                     });
-                // TODO(AR): Trigger a "lite" sync?
-
-                // The file viewer listens for the next update to files, so keep
-                // this as the first operation on the happy path that can
-                // trigger an update of files.
-                //
-                // See: [Note: File viewer update and dispatch]
                 dispatch({
                     type: "unsyncedPrivateMagicMetadataUpdate",
                     fileID,
                     privateMagicMetadata,
                 });
             } finally {
-                dispatch({
-                    type: "markPendingVisibilityUpdate",
-                    fileID,
-                    mark: false,
-                });
+                dispatch({ type: "removePendingVisibilityUpdate", fileID });
             }
         },
         [],

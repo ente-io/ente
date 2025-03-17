@@ -434,12 +434,8 @@ export type GalleryAction =
     | { type: "clearTempDeleted" }
     | { type: "markTempHidden"; files: EnteFile[] }
     | { type: "clearTempHidden" }
-    | {
-          type: "markPendingVisibilityUpdate";
-          fileID: number;
-          // Passing `true` adds an entry, and `false` clears any existing one.
-          mark: boolean;
-      }
+    | { type: "addPendingVisibilityUpdate"; fileID: number }
+    | { type: "removePendingVisibilityUpdate"; fileID: number }
     | {
           type: "unsyncedPrivateMagicMetadataUpdate";
           fileID: number;
@@ -879,17 +875,21 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 tempHiddenFileIDs: new Set(),
             });
 
-        case "markPendingVisibilityUpdate": {
+        case "addPendingVisibilityUpdate": {
             const pendingVisibilityUpdates = new Set(
                 state.pendingVisibilityUpdates,
             );
-            if (action.mark) {
-                pendingVisibilityUpdates.add(action.fileID);
-            } else {
-                pendingVisibilityUpdates.delete(action.fileID);
-            }
-            // Skipping a call to stateByUpdatingFilteredFiles since it
-            // currently doesn't depend on pendingVisibilityUpdates.
+            pendingVisibilityUpdates.add(action.fileID);
+            // Not using stateByUpdatingFilteredFiles since it does not depend
+            // on pendingVisibilityUpdates.
+            return { ...state, pendingVisibilityUpdates };
+        }
+
+        case "removePendingVisibilityUpdate": {
+            const pendingVisibilityUpdates = new Set(
+                state.pendingVisibilityUpdates,
+            );
+            pendingVisibilityUpdates.delete(action.fileID);
             return { ...state, pendingVisibilityUpdates };
         }
 
@@ -897,17 +897,14 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             const unsyncedPrivateMagicMetadataUpdates = new Map(
                 state.unsyncedPrivateMagicMetadataUpdates,
             );
-
             unsyncedPrivateMagicMetadataUpdates.set(
                 action.fileID,
                 action.privateMagicMetadata,
             );
-
             const files = deriveNormalOrHiddenFiles(
                 state.lastSyncedFiles,
                 unsyncedPrivateMagicMetadataUpdates,
             );
-
             return stateByUpdatingFilteredFiles({
                 ...stateForUpdatedFiles(state, files),
                 unsyncedPrivateMagicMetadataUpdates,
