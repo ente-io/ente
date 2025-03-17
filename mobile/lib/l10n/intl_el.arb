@@ -13,5 +13,7 @@
   "selectOneDateAndTime": "Select one date and time",
   "moveSelectedPhotosToOneDate": "Move selected photos to one date",
   "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference"
+  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
+  "notThisPerson": "Not this person?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library."
 }

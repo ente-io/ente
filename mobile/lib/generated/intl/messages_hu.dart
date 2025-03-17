@@ -46,6 +46,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
             "Move selected photos to one date"),
         "newRange": MessageLookupByLibrary.simpleMessage("New range"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "photocountPhotos": m1,
         "photosKeepRelativeTimeDifference":
             MessageLookupByLibrary.simpleMessage(
@@ -59,6 +61,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectStartOfRange":
             MessageLookupByLibrary.simpleMessage("Select start of range"),
         "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Shift dates and time"),
         "thisWillMakeTheDateAndTimeOfAllSelected":

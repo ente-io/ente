@@ -1410,7 +1410,6 @@
     "description": "Number of viewers that were successfully added to an album."
   },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
-
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1687,5 +1686,7 @@
   "moveSelectedPhotosToOneDate": "Move selected photos to one date",
   "shiftDatesAndTime": "Shift dates and time",
   "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos"
+  "photocountPhotos": "$photoCount photos",
+  "notThisPerson": "Not this person?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library."
 }

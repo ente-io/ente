@@ -180,6 +180,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Няма ключа аднаўлення?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "Вашы даныя не могуць быць расшыфраваны без пароля або ключа аднаўлення па прычыне архітэктуры наша пратакола скразнога шыфравання"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "notifications": MessageLookupByLibrary.simpleMessage("Апавяшчэнні"),
         "ok": MessageLookupByLibrary.simpleMessage("Добра"),
         "oops": MessageLookupByLibrary.simpleMessage("Вой"),
@@ -244,6 +246,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectStartOfRange":
             MessageLookupByLibrary.simpleMessage("Select start of range"),
         "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Адправіць ліст"),
         "sendLink": MessageLookupByLibrary.simpleMessage("Адправіць спасылку"),
         "setPasswordTitle":

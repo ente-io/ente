@@ -193,8 +193,8 @@ class _FileSelectionActionsWidgetState
     if (widget.type == GalleryType.cluster && widget.clusterID != null) {
       items.add(
         SelectionActionButton(
-          labelText: S.of(context).remove,
-          icon: CupertinoIcons.minus,
+          labelText: S.of(context).notThisPerson,
+          icon: Icons.remove_circle_outline,
           onTap: anyUploadedFiles ? _onRemoveFromClusterClicked : null,
         ),
       );
@@ -777,7 +777,7 @@ class _FileSelectionActionsWidgetState
             isInAlert: true,
           ),
         ],
-        title: "Remove these photos for ${widget.person!.data.name}?",
+        body: S.of(context).selectedItemsWillBeRemovedFromThisPerson,
         actionSheetType: ActionSheetType.defaultActionSheet,
       );
       if (actionResult?.action != null) {
@@ -822,7 +822,7 @@ class _FileSelectionActionsWidgetState
           isInAlert: true,
         ),
       ],
-      title: "Remove these photos?",
+      body: S.of(context).selectedItemsWillBeRemovedFromThisPerson,
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult?.action != null) {

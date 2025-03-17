@@ -245,6 +245,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "next": MessageLookupByLibrary.simpleMessage("Næste"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Ingen gendannelsesnøgle?"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "oopsSomethingWentWrong":
@@ -309,6 +311,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedFoldersWillBeEncryptedAndBackedUp":
             MessageLookupByLibrary.simpleMessage(
                 "Valgte mapper vil blive krypteret og sikkerhedskopieret"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "selectedPhotos": m7,
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
         "sendLink": MessageLookupByLibrary.simpleMessage("Send link"),

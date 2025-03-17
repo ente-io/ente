@@ -51,6 +51,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ما من مفتاح استرداد؟"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "لا يمكن فك تشفير بياناتك دون كلمة المرور أو مفتاح الاسترداد بسبب طبيعة بروتوكول التشفير الخاص بنا من النهاية إلى النهاية"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "photosKeepRelativeTimeDifference":
             MessageLookupByLibrary.simpleMessage(
                 "Photos keep relative time difference"),
@@ -66,6 +68,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectStartOfRange":
             MessageLookupByLibrary.simpleMessage("Select start of range"),
         "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Shift dates and time"),
         "sorry": MessageLookupByLibrary.simpleMessage("المعذرة"),
