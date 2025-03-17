@@ -444,90 +444,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [],
     );
 
-    const refreshSlideAfterDeleteOrArchive = useCallback(
-        (expectedFileID?: number) => {
-            // [Note: File viewer update and dispatch]
-            //
-            // This relies on the assumption that `onDelete` or
-            // `onFileVisibilityUpdate` will asynchronously result in updates to
-            // the `files` prop.
-            //
-            // Currently that is indeed what happens because the last call in
-            // the `onDelete` and `onFileVisibilityUpdate` implementations are
-            // calls to a (useReducer) dispatcher, but we need to be careful
-            // about preserving this assumption when changing their
-            // implementation in the future.
-            awaitNextFilesOrFavoritesUpdate((files: EnteFile[]) => {
-                handleNeedsRemoteSync();
-                // We might've been provided an expectedFileID. If so, only do
-                // the reload if it is no longer present in the files array.
-                //
-                // There are 3 cases:
-                //
-                // 1. On file deletion: expectedFileID is not provided.
-                //
-                // 2. On file archive when we're in the all section:
-                //    expectedFileID is provided, and will not be present in the
-                //    updated files array after update. In such cases, we want
-                //    to behave like delete (move to the next slide).
-                //
-                // 3. On other types of file archive: expectedFileID is
-                //    provided, but it'll still be present in the updated files
-                //    array, and in such cases we don't want to reload the
-                //    current slide. Instead, we only modify the file attribute
-                //    of the currentAnnotatedFile (if appropriate).
-                if (files.length) {
-                    const updatedFile = expectedFileID
-                        ? files.find(({ id }) => id == expectedFileID)
-                        : undefined;
-                    if (updatedFile) {
-                        setActiveAnnotatedFile((activeAnnotatedFile) => {
-                            // Modify the file attribute of activeAnnotatedFile
-                            // if we're still showing a slide with a file that
-                            // has the same ID as the one we expected to modify.
-                            //
-                            // In the case of delete, this code will not run,
-                            // and in the case of toggling archive, none of the
-                            // other attributes of activeAnnotatedFile currently
-                            // depend on the archive status change, so this is
-                            // safe. But it is still on the kludgy side, and
-                            // might need care with future changes.
-                            //
-                            // (We don't do a full refresh since that would
-                            // cause the user to lose their pan / zoom etc)
-                            if (
-                                activeAnnotatedFile &&
-                                activeAnnotatedFile.file.id == expectedFileID
-                            ) {
-                                activeAnnotatedFile.file = updatedFile;
-                            }
-                            return activeAnnotatedFile;
-                        });
-                    } else {
-                        // Refreshing the current slide after the current file
-                        // has gone will show the subsequent slide (since that
-                        // would've now moved down to the current index).
-                        //
-                        // However, we might've been the last slide, in which
-                        // case we need to go back one slide first. To determine
-                        // this, also pass the expected count of files to our
-                        // PhotoSwipe wrapper.
-                        psRef.current!.refreshCurrentSlideContent(files.length);
-                    }
-                } else {
-                    // If there are no more files left, close the viewer.
-                    handleClose();
-                }
-            });
-        },
-        [awaitNextFilesOrFavoritesUpdate, handleNeedsRemoteSync, handleClose],
-    );
-
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleDelete = async () => {
         const file = activeAnnotatedFile!.file;
         await onDelete!(file);
-        refreshSlideAfterDeleteOrArchive();
+        handleNeedsRemoteSync();
     };
 
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
@@ -781,7 +702,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             ? ItemVisibility.visible
                             : ItemVisibility.archived,
                     )
-                        .then(() => refreshSlideAfterDeleteOrArchive(file.id))
+                        .then(handleNeedsRemoteSync)
                         .catch(onGenericError);
                 };
             }
@@ -791,7 +712,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             pendingVisibilityUpdates,
             onFileVisibilityUpdate,
             onGenericError,
-            refreshSlideAfterDeleteOrArchive,
+            handleNeedsRemoteSync,
             handleMoreMenuCloseIfNeeded,
             activeAnnotatedFile,
         ]);
@@ -866,13 +787,51 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         performKeyAction,
     ]);
 
-    // Notify the listeners, if any, for updates to files or favorites.
+    // Update the active annotated file, if needed, on updates to files or
+    // favoriteFileIDs.
+    //
+    // If the active annotated file is no longer being shown, move to the next
+    // slide if possible, or close the viewer otherwise.
     useEffect(() => {
-        setOnNextFilesOrFavoritesUpdate((cbs) => {
-            cbs.forEach((cb) => cb(files));
-            return [];
-        });
-    }, [files, favoriteFileIDs]);
+        if (files.length) {
+            setActiveAnnotatedFile((activeAnnotatedFile) => {
+                const updatedFile = files.find(
+                    ({ id }) => id == activeAnnotatedFile?.file.id,
+                );
+
+                if (activeAnnotatedFile && updatedFile) {
+                    // Modify the file attribute of activeAnnotatedFile if we're
+                    // still showing a slide with a file that has the same ID as
+                    // the one we expected to modify.
+                    //
+                    // In the case of delete, this code will not run, and in the
+                    // case of toggling archive, none of the other attributes of
+                    // activeAnnotatedFile currently depend on the archive
+                    // status change, so this is safe. But it is still on the
+                    // kludgy side, and might need care with future changes.
+                    //
+                    // (We don't do a full refresh since that would cause the
+                    // user to lose their pan / zoom etc)
+
+                    activeAnnotatedFile.file = updatedFile;
+                } else {
+                    // Refreshing the current slide after the current file has
+                    // gone will show the subsequent slide (since that would've
+                    // now moved down to the current index).
+                    //
+                    // However, we might've been the last slide, in which case
+                    // we need to go back one slide first. To determine this,
+                    // also pass the expected count of files to our PhotoSwipe
+                    // wrapper.
+                    psRef.current!.refreshCurrentSlideContent(files.length);
+                }
+                return activeAnnotatedFile;
+            });
+        } else {
+            // If there are no more files left, close the viewer.
+            handleClose();
+        }
+    }, [handleClose, files, favoriteFileIDs]);
 
     useEffect(() => {
         if (open) {
