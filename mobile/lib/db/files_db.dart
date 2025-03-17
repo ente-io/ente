@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import "package:photos/db/enum/conflict_algo.dart";
+import "package:photos/db/common/conflict_algo.dart";
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file/file.dart';
