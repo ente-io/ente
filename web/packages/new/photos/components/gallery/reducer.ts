@@ -782,15 +782,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             );
 
             return stateByUpdatingFilteredFiles({
-                ...state,
+                ...stateForUpdatedHiddenFiles(state, hiddenFiles),
                 lastSyncedHiddenFiles,
-                hiddenFiles,
-                hiddenFileIDs: deriveHiddenFileIDs(hiddenFiles),
-                hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
-                    state.user!,
-                    state.hiddenCollections,
-                    hiddenFiles,
-                ),
                 unsyncedPrivateMagicMetadataUpdates,
             });
         }
@@ -815,15 +808,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             );
 
             return stateByUpdatingFilteredFiles({
-                ...state,
+                ...stateForUpdatedHiddenFiles(state, hiddenFiles),
                 lastSyncedHiddenFiles,
-                hiddenFiles,
-                hiddenFileIDs: deriveHiddenFileIDs(hiddenFiles),
-                hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
-                    state.user!,
-                    state.hiddenCollections,
-                    hiddenFiles,
-                ),
                 unsyncedPrivateMagicMetadataUpdates,
             });
         }
@@ -952,31 +938,34 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         }
 
         case "clearUnsyncedState": {
-            const pendingVisibilityUpdates: GalleryState["pendingVisibilityUpdates"] =
-                new Set();
             const unsyncedPrivateMagicMetadataUpdates: GalleryState["unsyncedPrivateMagicMetadataUpdates"] =
                 new Map();
-            const unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"] =
-                new Map();
-            // TODO: Reset files to lastSYncedFiles, ditto for hidden.
-            return stateByUpdatingFilteredFiles({
-                ...state,
-                archivedFileIDs: deriveArchivedFileIDs(
-                    state.archivedCollectionIDs,
-                    state.files,
-                    unsyncedVisibilityUpdates,
+
+            const files = deriveNormalOrHiddenFiles(
+                state.lastSyncedFiles,
+                unsyncedPrivateMagicMetadataUpdates,
+            );
+            const hiddenFiles = deriveNormalOrHiddenFiles(
+                state.lastSyncedHiddenFiles,
+                unsyncedPrivateMagicMetadataUpdates,
+            );
+
+            return stateByUpdatingFilteredFiles(
+                stateForUpdatedHiddenFiles(
+                    stateForUpdatedFiles(
+                        {
+                            ...state,
+                            tempDeletedFileIDs: new Set(),
+                            tempHiddenFileIDs: new Set(),
+                            pendingVisibilityUpdates: new Set(),
+                            unsyncedPrivateMagicMetadataUpdates,
+                            unsyncedFavoriteUpdates: new Map(),
+                        },
+                        files,
+                    ),
+                    hiddenFiles,
                 ),
-                favoriteFileIDs: deriveFavoriteFileIDs(
-                    state.collections,
-                    state.files,
-                    unsyncedFavoriteUpdates,
-                ),
-                tempDeletedFileIDs: new Set(),
-                tempHiddenFileIDs: new Set(),
-                pendingVisibilityUpdates,
-                unsyncedVisibilityUpdates,
-                unsyncedFavoriteUpdates,
-            });
+            );
         }
 
         case "showAll":
@@ -1649,9 +1638,9 @@ const derivePeopleView = (
  * that depend on file using the provided {@link files}.
  *
  * Usually, we update state by manually dependency tracking on a fine grained
- * basis, but it results in a lot of duplicate code when the files themselves
- * change, since they effect many things. This is a convenience function for
- * updating everything that needs to change when the files themselves change.
+ * basis, but it results in a duplicate code when the files themselves change,
+ * since they effect many things. This is a convenience function for updating
+ * everything that needs to change when the files themselves change.
  */
 const stateForUpdatedFiles = (
     state: GalleryState,
@@ -1677,6 +1666,29 @@ const stateForUpdatedFiles = (
         state.searchSuggestion,
         state.pendingSearchSuggestions,
         state.isInSearchMode,
+    ),
+});
+
+/**
+ * Return a new state from the given {@link state} by recomputing all properties
+ * that depend on file using the provided {@link hiddenFiles}.
+ *
+ * Usually, we update state by manually dependency tracking on a fine grained
+ * basis, but it results in a duplicate code when the hidden files themselves
+ * change, since they effect a few things. This is a convenience function for
+ * updating everything that needs to change when the hiddenFiles change.
+ */
+const stateForUpdatedHiddenFiles = (
+    state: GalleryState,
+    hiddenFiles: GalleryState["hiddenFiles"],
+) => ({
+    ...state,
+    hiddenFiles,
+    hiddenFileIDs: deriveHiddenFileIDs(hiddenFiles),
+    hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
+        state.user!,
+        state.hiddenCollections,
+        hiddenFiles,
     ),
 });
 
