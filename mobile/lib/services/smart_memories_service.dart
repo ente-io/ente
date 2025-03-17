@@ -421,7 +421,7 @@ class SmartMemoriesService {
         for (final fileID in personFileIDs) {
           final bool mePresent = meFileIDs!.contains(fileID);
           final personFaces = fileIdToFaces[fileID] ?? [];
-          if (mePresent || personFaces.length != 2) continue;
+          if (!mePresent || personFaces.length != 2) continue;
           final file = allFileIdsToFile[fileID];
           if (file != null) {
             youAndThemFiles.add(file);
@@ -1321,7 +1321,7 @@ class SmartMemoriesService {
             clipPositiveTextVector: clipPositiveTextVector,
           );
           final name =
-              "${DateFormat.MMMd()}, ${currentTime.year - date.year} years ago";
+              "${DateFormat.MMMd().format(date)}, ${currentTime.year - date.year} years ago";
           memoryResult.add(
             TimeMemory(
               photoSelection,
@@ -1392,8 +1392,7 @@ class SmartMemoriesService {
               fileIDToImageEmbedding: fileIDToImageEmbedding,
               clipPositiveTextVector: clipPositiveTextVector,
             );
-            final name =
-                "This week, ${currentTime.year - date.year} years back";
+            final name = "This week, ${currentTime.year - date.year} years ago";
 
             memoryResult.add(
               TimeMemory(
@@ -1451,7 +1450,7 @@ class SmartMemoriesService {
       final monthName = DateFormat.MMMM().format(DateTime(year, currentMonth));
       final daysLeftInMonth =
           DateTime(currentYear, currentMonth + 1, 0).day - currentTime.day + 1;
-      final name = monthName + ", ${currentTime.year - year} years back";
+      final name = monthName + ", ${currentTime.year - year} years ago";
       memoryResult.add(
         TimeMemory(
           photoSelection,
