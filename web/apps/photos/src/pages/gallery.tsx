@@ -819,8 +819,7 @@ const Page: React.FC = () => {
                     await updateRemotePrivateMagicMetadata(file, {
                         visibility,
                     });
-                // TODO(AR): Trigger a "lite" sync? (or update that particular
-                // file in the reducer state in some other way).
+                // TODO(AR): Trigger a "lite" sync?
 
                 dispatch({
                     type: "markPendingVisibilityUpdate",
@@ -1123,9 +1122,6 @@ const Page: React.FC = () => {
                         isInHiddenSection={barMode == "hidden-albums"}
                         pendingVisibilityUpdates={
                             state.pendingVisibilityUpdates
-                        }
-                        unsyncedVisibilityUpdates={
-                            state.unsyncedVisibilityUpdates
                         }
                         favoriteFileIDs={state.favoriteFileIDs}
                         setFilesDownloadProgressAttributesCreator={

@@ -123,35 +123,6 @@ export interface FileViewerAnnotatedFile {
     itemData: ItemData;
 }
 
-/**
- * File IDs of for which an update is pending, effects on previous toggles that
- * in this file viewer session, and a callback to trigger the toggle.
- *
- * The toggle archived button will shown in the file actions of the file viewer
- * only if all three of these props are specified.
- */
-export interface FileViewerToggleArchiveButtonProps {
-    /**
-     * File IDs of for which an update of its visibility is pending.
-     */
-    pendingVisibilityUpdates?: Set<number>;
-    /**
-     * Effects of previous visibility togles made in this file viewer session.
-     *
-     * These changes have already been reflected on remote, but we haven't yet
-     * done a sync to update our local DB (the sync will happen in a batch when
-     * the file viewer is closed).
-     */
-    unsyncedVisibilityUpdates?: Map<number, ItemVisibility>;
-    /**
-     * Update the {@link visibility} of the given {@link file}.
-     */
-    onFileVisibilityUpdate?: (
-        file: EnteFile,
-        visibility: ItemVisibility,
-    ) => Promise<void>;
-}
-
 export type FileViewerProps = ModalVisibilityProps & {
     /**
      * The currently logged in user, if any.
@@ -209,6 +180,13 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     favoriteFileIDs?: Set<number>;
     /**
+     * File IDs of for which an update of its visibility is pending (e.g. due to
+     * a toggle archived action in the file viewer).
+     *
+     * See also {@link pendingVisibilityUpdates}.
+     */
+    pendingVisibilityUpdates?: Set<number>;
+    /**
      * Called when there was some update performed within the file viewer that
      * necessitates us to sync with remote again to fetch the latest updates.
      *
@@ -243,6 +221,18 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onToggleFavorite?: (file: EnteFile) => Promise<void>;
     /**
+     * Called when {@link visibility} of the given {@link file} should be
+     * updated (when the user activates toggle archived action).
+     *
+     * The toggle archived action is shown only if both
+     * {@link pendingVisibilityUpdates} and {@link onFileVisibilityUpdate} are
+     * provided.
+     */
+    onFileVisibilityUpdate?: (
+        file: EnteFile,
+        visibility: ItemVisibility,
+    ) => Promise<void>;
+    /**
      * Called when the given {@link file} should be downloaded.
      *
      * If this is not provided then the download action will not be shown.
@@ -274,8 +264,7 @@ export type FileViewerProps = ModalVisibilityProps & {
         | "allCollectionsNameByID"
         | "onSelectCollection"
         | "onSelectPerson"
-    > &
-    FileViewerToggleArchiveButtonProps;
+    >;
 
 /**
  * A PhotoSwipe based image, live photo and video viewer.
@@ -292,7 +281,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     isInHiddenSection,
     favoriteFileIDs,
     pendingVisibilityUpdates,
-    unsyncedVisibilityUpdates,
     fileCollectionIDs,
     allCollectionsNameByID,
     onTriggerSyncWithRemote,
@@ -769,15 +757,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             if (
                 pendingVisibilityUpdates &&
-                unsyncedVisibilityUpdates &&
                 onFileVisibilityUpdate &&
                 file &&
                 activeAnnotatedFile.annotation.showArchive
             ) {
-                switch (
-                    unsyncedVisibilityUpdates.get(file.id) ??
-                    fileVisibility(file)
-                ) {
+                switch (fileVisibility(file)) {
                     case undefined:
                     case ItemVisibility.visible:
                         isArchived = false;
@@ -805,7 +789,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             return { isArchived, isPendingToggleArchive, toggleArchived };
         }, [
             pendingVisibilityUpdates,
-            unsyncedVisibilityUpdates,
             onFileVisibilityUpdate,
             onGenericError,
             refreshSlideAfterDeleteOrArchive,

@@ -3,7 +3,6 @@ import { formattedDate } from "@/base/i18n-date";
 import {
     FileViewer,
     type FileViewerProps,
-    type FileViewerToggleArchiveButtonProps,
 } from "@/gallery/components/viewer/FileViewer";
 import type { Collection } from "@/media/collection";
 import { EnteFile } from "@/media/file";
@@ -82,11 +81,12 @@ export type FileListWithViewerProps = {
         | "isInHiddenSection"
         | "fileCollectionIDs"
         | "allCollectionsNameByID"
+        | "pendingVisibilityUpdates"
         | "onVisualFeedback"
+        | "onFileVisibilityUpdate"
         | "onSelectCollection"
         | "onSelectPerson"
-    > &
-    FileViewerToggleArchiveButtonProps;
+    >;
 
 /**
  * A list of files (represented by their thumbnails), along with a file viewer
@@ -111,7 +111,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     fileCollectionIDs,
     allCollectionsNameByID,
     pendingVisibilityUpdates,
-    unsyncedVisibilityUpdates,
     setFilesDownloadProgressAttributesCreator,
     onFileVisibilityUpdate,
     onMarkUnsyncedFavoriteUpdate,
@@ -228,7 +227,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     fileCollectionIDs,
                     allCollectionsNameByID,
                     pendingVisibilityUpdates,
-                    unsyncedVisibilityUpdates,
                     onVisualFeedback,
                     onFileVisibilityUpdate,
                     onSelectCollection,
