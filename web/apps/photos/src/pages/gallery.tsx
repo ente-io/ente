@@ -254,13 +254,19 @@ const Page: React.FC = () => {
         [],
     );
 
-    // TODO: Temp
-    const user = state.user;
-    const familyData = state.familyData;
-    const collections = state.collections;
-    const files = state.files;
-    const hiddenFiles = state.hiddenFiles;
-    const collectionSummaries = state.collectionSummaries;
+    // Local aliases.
+    const {
+        user,
+        familyData,
+        normalCollections,
+        normalFiles,
+        hiddenFiles,
+        normalCollectionSummaries,
+        isInSearchMode,
+        filteredFiles,
+    } = state;
+
+    // Derived aliases.
     const barMode = state.view?.type ?? "albums";
     const activeCollectionID =
         state.view?.type == "people"
@@ -271,8 +277,6 @@ const Page: React.FC = () => {
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
-    const isInSearchMode = state.isInSearchMode;
-    const filteredFiles = state.filteredFiles;
 
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("render", state);
 
@@ -322,8 +326,8 @@ const Page: React.FC = () => {
                 type: "mount",
                 user,
                 familyData,
-                allCollections: await getAllLocalCollections(),
-                files: await getLocalFiles("normal"),
+                collections: await getAllLocalCollections(),
+                normalFiles: await getLocalFiles("normal"),
                 hiddenFiles: await getLocalFiles("hidden"),
                 trashedFiles: await getLocalTrashedFiles(),
             });
@@ -346,26 +350,35 @@ const Page: React.FC = () => {
         };
     }, []);
 
-    useEffect(
-        () => setSearchCollectionsAndFiles({ collections, files }),
-        [collections, files],
-    );
+    useEffect(() => {
+        setSearchCollectionsAndFiles({
+            collections: normalCollections,
+            files: normalFiles,
+        });
+    }, [normalCollections, normalFiles]);
 
     useEffect(() => {
-        if (!collections || !user) {
+        if (!user || !normalCollections) {
             return;
         }
-        const userIdToEmailMap = constructUserIDToEmailMap(user, collections);
+        const userIdToEmailMap = constructUserIDToEmailMap(
+            user,
+            normalCollections,
+        );
         setUserIDToEmailMap(userIdToEmailMap);
-    }, [collections]);
+    }, [user, normalCollections]);
 
     useEffect(() => {
-        if (!user || !collections) {
+        if (!user || !normalCollections) {
             return;
         }
-        const emailList = constructEmailList(user, collections, familyData);
+        const emailList = constructEmailList(
+            user,
+            normalCollections,
+            familyData,
+        );
         setEmailList(emailList);
-    }, [user, collections, familyData]);
+    }, [user, normalCollections, familyData]);
 
     useEffect(() => {
         collectionNamerAttributes && setCollectionNamerView(true);
@@ -520,22 +533,27 @@ const Page: React.FC = () => {
 
     const handleFileAndCollectionSyncWithRemote = useCallback(async () => {
         const didUpdateFiles = await syncCollectionAndFiles({
-            onSetCollections: (normalCollections, hiddenCollections) =>
+            onSetCollections: (
+                collections,
+                normalCollections,
+                hiddenCollections,
+            ) =>
                 dispatch({
                     type: "setCollections",
+                    collections,
                     normalCollections,
                     hiddenCollections,
                 }),
             onResetNormalFiles: (files) =>
-                dispatch({ type: "setFiles", files }),
+                dispatch({ type: "setNormalFiles", files }),
             onFetchNormalFiles: (files) =>
-                dispatch({ type: "fetchFiles", files }),
-            onResetHiddenFiles: (hiddenFiles) =>
-                dispatch({ type: "setHiddenFiles", hiddenFiles }),
-            onFetchHiddenFiles: (hiddenFiles) =>
-                dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
-            onResetTrashedFiles: (trashedFiles) =>
-                dispatch({ type: "setTrashedFiles", trashedFiles }),
+                dispatch({ type: "fetchNormalFiles", files }),
+            onResetHiddenFiles: (files) =>
+                dispatch({ type: "setHiddenFiles", files }),
+            onFetchHiddenFiles: (files) =>
+                dispatch({ type: "fetchHiddenFiles", files }),
+            onResetTrashedFiles: (files) =>
+                dispatch({ type: "setTrashedFiles", files }),
         });
         if (didUpdateFiles) {
             exportService.onLocalFilesUpdated();
@@ -693,7 +711,7 @@ const Page: React.FC = () => {
             // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(
                 selected,
-                ops === FILE_OPS_TYPE.HIDE ? files : filteredFiles,
+                ops === FILE_OPS_TYPE.HIDE ? normalFiles : filteredFiles,
             );
             const toProcessFiles =
                 ops === FILE_OPS_TYPE.DOWNLOAD
@@ -751,7 +769,7 @@ const Page: React.FC = () => {
         if (type == "collection" || type == "person") {
             if (type == "collection") {
                 dispatch({
-                    type: "showNormalOrHiddenCollectionSummary",
+                    type: "showCollectionSummary",
                     collectionSummaryID: searchOption.suggestion.collectionID,
                 });
             } else {
@@ -781,11 +799,7 @@ const Page: React.FC = () => {
 
     const handleSetActiveCollectionID = (
         collectionSummaryID: number | undefined,
-    ) =>
-        dispatch({
-            type: "showNormalOrHiddenCollectionSummary",
-            collectionSummaryID,
-        });
+    ) => dispatch({ type: "showCollectionSummary", collectionSummaryID });
 
     const handleChangeBarMode = (mode: GalleryBarMode) =>
         mode == "people"
@@ -840,7 +854,7 @@ const Page: React.FC = () => {
     const handleSelectCollection = useCallback(
         (collectionID: number) =>
             dispatch({
-                type: "showNormalOrHiddenCollectionSummary",
+                type: "showCollectionSummary",
                 collectionSummaryID: collectionID,
             }),
         [],
@@ -914,10 +928,10 @@ const Page: React.FC = () => {
                     open={openCollectionSelector}
                     onClose={handleCloseCollectionSelector}
                     attributes={collectionSelectorAttributes}
-                    collectionSummaries={collectionSummaries}
+                    collectionSummaries={normalCollectionSummaries}
                     collectionForCollectionID={(id) =>
                         findCollectionCreatingUncategorizedIfNeeded(
-                            collections,
+                            normalCollections,
                             id,
                         )
                     }
@@ -957,21 +971,25 @@ const Page: React.FC = () => {
                             activeCollectionID={activeCollectionID}
                             selectedCollection={getSelectedCollection(
                                 selected.collectionID,
-                                collections,
+                                normalCollections,
                             )}
                             isFavoriteCollection={
-                                collectionSummaries.get(activeCollectionID)
-                                    ?.type == "favorites"
+                                normalCollectionSummaries.get(
+                                    activeCollectionID,
+                                )?.type == "favorites"
                             }
                             isUncategorizedCollection={
-                                collectionSummaries.get(activeCollectionID)
-                                    ?.type == "uncategorized"
+                                normalCollectionSummaries.get(
+                                    activeCollectionID,
+                                )?.type == "uncategorized"
                             }
                             isIncomingSharedCollection={
-                                collectionSummaries.get(activeCollectionID)
-                                    ?.type == "incomingShareCollaborator" ||
-                                collectionSummaries.get(activeCollectionID)
-                                    ?.type == "incomingShareViewer"
+                                normalCollectionSummaries.get(
+                                    activeCollectionID,
+                                )?.type == "incomingShareCollaborator" ||
+                                normalCollectionSummaries.get(
+                                    activeCollectionID,
+                                )?.type == "incomingShareViewer"
                             }
                             isInSearchMode={isInSearchMode}
                             isInHiddenSection={barMode == "hidden-albums"}
@@ -1001,26 +1019,26 @@ const Page: React.FC = () => {
 
                 <GalleryBarAndListHeader
                     {...{
-                        shouldHide: isInSearchMode,
-                        mode: barMode,
-                        onChangeMode: handleChangeBarMode,
-                        collectionSummaries,
                         activeCollection,
                         activeCollectionID,
-                        setActiveCollectionID: handleSetActiveCollectionID,
-                        hiddenCollectionSummaries:
-                            state.hiddenCollectionSummaries,
-                        people:
-                            (state.view.type == "people"
-                                ? state.view.visiblePeople
-                                : undefined) ?? [],
                         activePerson,
-                        onSelectPerson: handleSelectPerson,
                         setCollectionNamerAttributes,
                         setPhotoListHeader,
                         setFilesDownloadProgressAttributesCreator,
                         filesDownloadProgressAttributesList,
                     }}
+                    mode={barMode}
+                    shouldHide={isInSearchMode}
+                    collectionSummaries={normalCollectionSummaries}
+                    hiddenCollectionSummaries={state.hiddenCollectionSummaries}
+                    people={
+                        (state.view.type == "people"
+                            ? state.view.visiblePeople
+                            : undefined) ?? []
+                    }
+                    onChangeMode={handleChangeBarMode}
+                    setActiveCollectionID={handleSetActiveCollectionID}
+                    onSelectPerson={handleSelectPerson}
                 />
 
                 <Upload
@@ -1036,14 +1054,14 @@ const Page: React.FC = () => {
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
                     onUploadFile={(file) =>
-                        dispatch({ type: "uploadFile", file })
+                        dispatch({ type: "uploadNormalFile", file })
                     }
                     onShowPlanSelector={showPlanSelector}
                     setCollections={(collections) =>
                         dispatch({ type: "setNormalCollections", collections })
                     }
                     isFirstUpload={areOnlySystemCollections(
-                        collectionSummaries,
+                        normalCollectionSummaries,
                     )}
                     showSessionExpiredMessage={showSessionExpiredDialog}
                     {...{
@@ -1054,7 +1072,7 @@ const Page: React.FC = () => {
                 />
                 <Sidebar
                     {...sidebarVisibilityProps}
-                    {...{ collectionSummaries }}
+                    collectionSummaries={normalCollectionSummaries}
                     onShowPlanSelector={showPlanSelector}
                     onShowExport={showExport}
                     onAuthenticateUser={authenticateUser}
@@ -1062,7 +1080,7 @@ const Page: React.FC = () => {
                 <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
                 !isFirstLoad &&
-                !files?.length &&
+                !normalFiles?.length &&
                 !hiddenFiles?.length &&
                 activeCollectionID === ALL_SECTION ? (
                     <GalleryEmptyState openUploader={openUploader} />
@@ -1079,20 +1097,20 @@ const Page: React.FC = () => {
                         files={filteredFiles}
                         enableDownload={true}
                         showAppDownloadBanner={
-                            files.length < 30 && !isInSearchMode
+                            normalFiles.length < 30 && !isInSearchMode
                         }
                         selectable={true}
                         selected={selected}
                         setSelected={setSelected}
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
-                        fileCollectionIDs={state.fileCollectionIDs}
-                        allCollectionsNameByID={state.allCollectionsNameByID}
+                        fileNormalCollectionIDs={state.fileNormalCollectionIDs}
+                        collectionNameByID={state.collectionNameByID}
                         isInIncomingSharedCollection={
-                            collectionSummaries.get(activeCollectionID)?.type ==
-                                "incomingShareCollaborator" ||
-                            collectionSummaries.get(activeCollectionID)?.type ==
-                                "incomingShareViewer"
+                            normalCollectionSummaries.get(activeCollectionID)
+                                ?.type == "incomingShareCollaborator" ||
+                            normalCollectionSummaries.get(activeCollectionID)
+                                ?.type == "incomingShareViewer"
                         }
                         isInHiddenSection={barMode == "hidden-albums"}
                         pendingVisibilityUpdates={
@@ -1118,7 +1136,7 @@ const Page: React.FC = () => {
                 )}
                 <Export
                     {...exportVisibilityProps}
-                    allCollectionsNameByID={state.allCollectionsNameByID}
+                    allCollectionsNameByID={state.collectionNameByID}
                 />
                 <AuthenticateUser
                     {...authenticateUserVisibilityProps}

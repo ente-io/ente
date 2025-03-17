@@ -522,8 +522,6 @@ export default function PublicCollectionGallery() {
                     selected={selected}
                     setSelected={setSelected}
                     activeCollectionID={ALL_SECTION}
-                    fileCollectionIDs={undefined}
-                    allCollectionsNameByID={undefined}
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
