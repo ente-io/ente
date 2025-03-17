@@ -218,6 +218,8 @@ export interface FileMagicMetadataProps {
 }
 
 export type FileMagicMetadata = MagicMetadataCore<FileMagicMetadataProps>;
+export type FilePrivateMagicMetadata =
+    MagicMetadataCore<FileMagicMetadataProps>;
 
 export interface FilePublicMagicMetadataProps {
     /**

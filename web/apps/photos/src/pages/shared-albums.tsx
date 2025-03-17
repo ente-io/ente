@@ -372,6 +372,12 @@ export default function PublicCollectionGallery() {
     // TODO: See gallery
     const syncWithRemote = handleSyncWithRemote;
 
+    // See: [Note: Visual feedback to acknowledge user actions]
+    const handleVisualFeedback = useCallback(() => {
+        showLoadingBar();
+        setTimeout(hideLoadingBar, 0);
+    }, [showLoadingBar, hideLoadingBar]);
+
     const verifyLinkPassword: SingleInputFormProps["callback"] = async (
         password,
         setFieldError,
@@ -522,6 +528,7 @@ export default function PublicCollectionGallery() {
                         setFilesDownloadProgressAttributesCreator
                     }
                     onSyncWithRemote={handleSyncWithRemote}
+                    onVisualFeedback={handleVisualFeedback}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 <Upload

@@ -69,7 +69,12 @@ export interface FileViewerPhotoSwipeDelegate {
      * appropriate.
      */
     performKeyAction: (
-        action: "delete" | "copy" | "toggle-fullscreen" | "help",
+        action:
+            | "delete"
+            | "toggle-archive"
+            | "copy"
+            | "toggle-fullscreen"
+            | "help",
     ) => void;
 }
 
@@ -634,10 +639,11 @@ export class FileViewerPhotoSwipe {
             button.disabled = pendingFavoriteUpdates.has(af.file.id);
 
             // Update the fill visibility based on the favorite status.
-            showIf(
-                document.getElementById("pswp__icn-favorite-fill")!,
-                !!delegate.isFavorite(af),
-            );
+            const fill = document.getElementById("pswp__icn-favorite-fill");
+            if (fill) {
+                // Need a null check since we might've been closed meanwhile.
+                showIf(fill, !!delegate.isFavorite(af));
+            }
         };
 
         const handleToggleFavorite = () => void toggleFavorite();
@@ -895,6 +901,9 @@ export class FileViewerPhotoSwipe {
 
         const handleDelete = () => delegate.performKeyAction("delete");
 
+        const handleToggleArchive = () =>
+            delegate.performKeyAction("toggle-archive");
+
         const handleCopy = () => delegate.performKeyAction("copy");
 
         const handleToggleFullscreen = () =>
@@ -973,6 +982,9 @@ export class FileViewerPhotoSwipe {
                         break;
                     case "k":
                         cb = handleDownloadIfEnabled;
+                        break;
+                    case "x":
+                        cb = handleToggleArchive;
                         break;
                     case "f":
                         cb = handleToggleFullscreen;
