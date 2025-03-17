@@ -639,10 +639,11 @@ export class FileViewerPhotoSwipe {
             button.disabled = pendingFavoriteUpdates.has(af.file.id);
 
             // Update the fill visibility based on the favorite status.
-            showIf(
-                document.getElementById("pswp__icn-favorite-fill")!,
-                !!delegate.isFavorite(af),
-            );
+            const fill = document.getElementById("pswp__icn-favorite-fill");
+            if (fill) {
+                // Need a null check since we might've been closed meanwhile.
+                showIf(fill, !!delegate.isFavorite(af));
+            }
         };
 
         const handleToggleFavorite = () => void toggleFavorite();
