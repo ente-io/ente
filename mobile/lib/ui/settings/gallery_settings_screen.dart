@@ -5,6 +5,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/hide_shared_items_from_home_gallery_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/memories_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -103,10 +104,15 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                         trailingWidget: ToggleSwitchWidget(
                           value: () => MemoriesService.instance.showMemories,
                           onChanged: () async {
+                            final showMemories =
+                                MemoriesService.instance.showMemories;
                             unawaited(
-                              MemoriesService.instance.setShowMemories(
-                                !MemoriesService.instance.showMemories,
-                              ),
+                              MemoriesService.instance
+                                  .setShowMemories(!showMemories),
+                            );
+
+                            unawaited(
+                              HomeWidgetService.instance.initHomeWidget(false),
                             );
                           },
                         ),

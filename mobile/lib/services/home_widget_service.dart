@@ -1,23 +1,19 @@
-import "dart:io";
-import "dart:math";
-
+import "package:crypto/crypto.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:fluttertoast/fluttertoast.dart";
 import 'package:home_widget/home_widget.dart' as hw;
-import "package:image/image.dart" as img;
 import "package:logging/logging.dart";
-import "package:path_provider/path_provider.dart";
-import "package:path_provider_foundation/path_provider_foundation.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/file/file_type.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/favorites_service.dart";
-import "package:photos/utils/file_util.dart";
+import "package:photos/services/memories_service.dart";
+import "package:photos/services/smart_memories_service.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/preload_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
@@ -36,88 +32,44 @@ class HomeWidgetService {
     }
 
     await hw.HomeWidget.setAppGroupId(iOSGroupID);
+
     final homeWidgetCount = await HomeWidgetService.instance.countHomeWidgets();
     if (homeWidgetCount == 0) {
       _logger.warning("no home widget active");
       return;
     }
-    final isLoggedIn = Configuration.instance.isLoggedIn();
 
+    final isLoggedIn = Configuration.instance.isLoggedIn();
     if (!isLoggedIn) {
       await clearHomeWidget();
       _logger.warning("user not logged in");
       return;
     }
 
-    if (syncIt) {
-      final value = await hw.HomeWidget.getWidgetData<int>("totalSet");
-      if (value == null) {
-        _logger.warning("no home widget active");
-        return;
-      }
-
-      await hw.HomeWidget.updateWidget(
-        name: 'SlideshowWidgetProvider',
-        androidName: 'SlideshowWidgetProvider',
-        qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
-        iOSName: 'SlideshowWidget',
-      );
+    final memoriesEnabled = MemoriesService.instance.showMemories;
+    if (!memoriesEnabled) {
+      _logger.warning("memories not enabled");
+      await clearHomeWidget();
       return;
     }
 
-    await lockAndLoadMemories();
+    await _lockAndLoadMemories();
   }
 
-  Future<(Size, Size)?> _renderFile(EnteFile randomFile, String key) async {
-    final fullImage = await getFile(randomFile);
-    if (fullImage == null) {
-      _logger.warning("Can't fetch file");
-      return null;
-    }
-
-    final image = await decodeImageFromList(await fullImage.readAsBytes());
-    final width = image.width.toDouble();
-    final height = image.height.toDouble();
-    final ogSize = Size(width, height);
-
-    // final size = min(min(width, height), 1024.0);
-    // final aspectRatio = width / height;
-
-    // late final double cacheWidth;
-    // late final double cacheHeight;
-    // if (aspectRatio > 1) {
-    //   cacheWidth = size;
-    //   cacheHeight = (size / aspectRatio);
-    // } else if (aspectRatio < 1) {
-    //   cacheHeight = size;
-    //   cacheWidth = (size * aspectRatio);
-    // } else {
-    //   cacheWidth = size;
-    //   cacheHeight = size;
-    // }
-
-    // final cacheSize = Size(cacheWidth, cacheHeight);
-
-    // if (Platform.isIOS) {
-    //   await captureFile2(randomFile, cacheSize, ogSize, key);
-    //   return (ogSize, cacheSize);
-    // }
-
-    // final result = await captureFile(randomFile, cacheSize, ogSize, key);
-
+  Future<Size?> _renderFile(
+    EnteFile randomFile,
+    String key,
+    String title,
+  ) async {
     const size = 512.0;
-    final result = await captureFile3(randomFile, ogSize, key);
-    if (result == null) {
-      _logger.warning("Can't capture file ${randomFile.displayName}");
+
+    final result = await _captureFile(randomFile, key, title);
+    if (!result) {
+      _logger.warning("can't capture file ${randomFile.displayName}");
       return null;
     }
 
-    await hw.HomeWidget.saveWidgetData(
-      key,
-      result.path,
-    );
-
-    return (ogSize, const Size(size, size));
+    return const Size(size, size);
   }
 
   Future<int> countHomeWidgets() async {
@@ -125,243 +77,139 @@ class HomeWidgetService {
   }
 
   Future<void> clearHomeWidget() async {
-    _logger.info("Clearing SlideshowWidget");
+    final total = await _getTotal();
+    if (total == 0 || total == null) return;
 
-    await hw.HomeWidget.saveWidgetData("totalSet", 0);
-    await hw.HomeWidget.updateWidget(
-      name: 'SlideshowWidgetProvider',
-      androidName: 'SlideshowWidgetProvider',
-      qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
-      iOSName: 'SlideshowWidget',
-    );
+    _logger.info("Clearing SlideshowWidget");
+    await _setFilesHash(null);
+    await _setTotal(0);
+    await _updateWidget();
     _logger.info(">>> SlideshowWidget cleared");
   }
 
-  Future captureFile2(
-    EnteFile file,
-    Size size,
-    Size ogSize,
-    String key,
-  ) async {
-    final ogFile = await getFile(file);
-
-    if (ogFile == null) {
-      return null;
-    }
-
-    final minSize = min(size.width, size.height);
-    final Image img = Image.file(
-      ogFile,
-      fit: BoxFit.cover,
-      cacheWidth: size.width.toInt(),
-      cacheHeight: size.height.toInt(),
-    );
-
-    await PreloadImage.loadImage(img.image);
-
-    final platformBrightness =
-        SchedulerBinding.instance.platformDispatcher.platformBrightness;
-
-    final widget = ClipSmoothRect(
-      radius: SmoothBorderRadius(cornerRadius: 32, cornerSmoothing: 1),
-      child: Container(
-        width: minSize,
-        height: minSize,
-        decoration: BoxDecoration(
-          color: platformBrightness == Brightness.light
-              ? const Color.fromRGBO(251, 251, 251, 1)
-              : const Color.fromRGBO(27, 27, 27, 1),
-          image: DecorationImage(image: img.image, fit: BoxFit.cover),
-        ),
-      ),
-    );
-    await hw.HomeWidget.renderFlutterWidget(
-      widget,
-      logicalSize: Size(minSize, minSize),
-      key: key,
-    );
-    return;
+  Future<String?> _getFilesHash() async {
+    return await hw.HomeWidget.getWidgetData<String>("filesHash");
   }
 
-  Future<File?> captureFile(
-    EnteFile file,
-    Size size,
-    Size ogSize,
-    String key,
-  ) async {
-    final ogFile = await getFile(file);
-
-    if (ogFile == null) {
-      return null;
-    }
-
-    try {
-      final dir = await imagePath();
-      final String path = '$dir/$key.png';
-
-      final File file = File(path);
-      file.createSync(recursive: true);
-      final image = img.decodeImage(ogFile.readAsBytesSync());
-      final resizedImage = img.copyResize(
-        image!,
-        width: size.width.toInt(),
-        height: size.height.toInt(),
-      );
-      await file.writeAsBytes(img.encodePng(resizedImage));
-      return file;
-    } catch (_, __) {
-      _logger.severe("Failed to save the capture", _, __);
-    }
-
-    return null;
+  Future<void> _setFilesHash(String? fileHash) async {
+    await hw.HomeWidget.saveWidgetData("filesHash", fileHash);
   }
 
-  Future<File?> captureFile3(
+  Future<bool> _captureFile(
     EnteFile ogFile,
-    Size ogSize,
     String key,
+    String title,
   ) async {
     try {
-      final dir = await imagePath();
-      final String path = '$dir/$key.png';
-
-      final File file = File(path);
-      file.createSync(recursive: true);
       final thumbnail = await getThumbnail(ogFile);
-      if (thumbnail == null) return null;
-      await file.writeAsBytes(thumbnail);
-      return file;
+      const double minSize = 512;
+      final Image img = Image.memory(
+        thumbnail!,
+        fit: BoxFit.cover,
+        cacheWidth: minSize.toInt(),
+        cacheHeight: minSize.toInt(),
+      );
+
+      await PreloadImage.loadImage(img.image);
+
+      final platformBrightness =
+          SchedulerBinding.instance.platformDispatcher.platformBrightness;
+
+      final widget = ClipSmoothRect(
+        radius: SmoothBorderRadius(cornerRadius: 32, cornerSmoothing: 1),
+        child: Container(
+          width: minSize,
+          height: minSize,
+          decoration: BoxDecoration(
+            color: platformBrightness == Brightness.light
+                ? const Color.fromRGBO(251, 251, 251, 1)
+                : const Color.fromRGBO(27, 27, 27, 1),
+            image: DecorationImage(image: img.image, fit: BoxFit.cover),
+          ),
+        ),
+      );
+      await hw.HomeWidget.renderFlutterWidget(
+        widget,
+        logicalSize: const Size(minSize, minSize),
+        key: key,
+      );
+      await hw.HomeWidget.saveWidgetData<Map>(
+        key + "_data",
+        {
+          "title": title,
+          "subText": SmartMemoriesService.getDateFormatted(
+            creationTime: ogFile.creationTime!,
+          ),
+          "generatedId": ogFile.generatedID,
+        },
+      );
     } catch (_, __) {
       _logger.severe("Failed to save the capture", _, __);
+      return false;
     }
-
-    return null;
+    return true;
   }
 
   Future<void> onLaunchFromWidget(Uri? uri, BuildContext context) async {
-    if (uri == null) return;
-
-    // final res = previousGeneratedId != null
-    //     ? await FilesDB.instance.getFile(
-    //         previousGeneratedId,
-    //       )
-    //     : null;
-
-    // final page = DetailPage(
-    //   DetailPageConfiguration(List.unmodifiable([res]), 0, "collection"),
-    // );
-    // routeToPage(context, page, forceCustomPageRoute: true).ignore();
-  }
-
-  Future<List<EnteFile>> getFiles({required bool fetchMemory}) async {
-    if (fetchMemory) {
-      final memories = await memoriesCacheService.getMemories();
-      if (memories.isEmpty) {
-        return [];
-      }
-
-      // flatten the list to list of ente files
-      final files = memories
-          .map((e) => e.memories.map((e) => e.file))
-          .expand((element) => element)
-          .where((element) => element.fileType == FileType.image)
-          .toList();
-
-      return files;
-    }
-
-    final collectionID =
-        await FavoritesService.instance.getFavoriteCollectionID();
-    if (collectionID == null) {
-      await clearHomeWidget();
-      _logger.warning("Favorite collection not found");
-      throw "Favorite collection not found";
-    }
-
-    final res = await FilesDB.instance.getFilesInCollection(
-      collectionID,
-      galleryLoadStartTime,
-      galleryLoadEndTime,
-      limit: 100,
-    );
-
-    return res.files
-        .where((element) => element.fileType == FileType.image)
-        .toList();
-  }
-
-  Future<String> imagePath() async {
-    String? directory;
-    // coverage:ignore-start
-    if (Platform.isIOS) {
-      final PathProviderFoundation provider = PathProviderFoundation();
-
-      directory = await provider.getContainerPath(
-        appGroupIdentifier: iOSGroupID,
-      );
-    } else {
-      // coverage:ignore-end
-      directory = (await getApplicationSupportDirectory()).path;
-    }
-
-    if (directory == null) {
-      throw "Directory is null";
-    }
-
-    final String path = '$directory/home_widget';
-
-    return path;
-  }
-
-  Future<void> lockAndLoadMemories() async {
-    final files = await getFiles(fetchMemory: true);
-
-    int index = 0;
-
-    for (final file in files) {
-      final value = await _renderFile(file, "slideshow_$index").catchError(
-        (e, sT) {
-          _logger.severe("Error rendering widget", e, sT);
-          return null;
-        },
-      );
-
-      if (value != null) {
-        await hw.HomeWidget.saveWidgetData<int>("totalSet", index);
-        if (index == 1 || index % 10 == 0) {
-          await Fluttertoast.showToast(
-            msg: "[i] SlideshowWidget updated",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.black,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-          await hw.HomeWidget.updateWidget(
-            name: 'SlideshowWidgetProvider',
-            androidName: 'SlideshowWidgetProvider',
-            qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
-            iOSName: 'SlideshowWidget',
-          );
-        }
-        index++;
-      }
-    }
-
-    if (index == 0) {
+    if (uri == null) {
+      _logger.warning("onLaunchFromWidget: uri is null");
       return;
     }
 
-    _logger.info(">>> SlideshowWidget params doing");
+    final generatedId = int.tryParse(uri.queryParameters["generatedId"] ?? "");
+    _logger.info("onLaunchFromWidget: $uri, $generatedId");
 
+    final res = generatedId != null
+        ? await FilesDB.instance.getFile(generatedId)
+        : null;
+
+    if (res == null) {
+      return;
+    }
+
+    final page = DetailPage(
+      DetailPageConfiguration(List.unmodifiable([res]), 0, "collection"),
+    );
+    routeToPage(context, page, forceCustomPageRoute: true).ignore();
+  }
+
+  Future<Map<String, Iterable<EnteFile>>> _getMemories() async {
+    // if (fetchMemory) {
+    final memories = await memoriesCacheService.getMemories();
+    if (memories.isEmpty) {
+      return {};
+    }
+
+    // flatten the list to list of ente files
+    final files = memories.asMap().map(
+          (k, v) => MapEntry(
+            v.title,
+            v.memories.map((e) => e.file),
+          ),
+        );
+
+    return files;
+  }
+
+  String _getFilesKey(Map<String, Iterable<EnteFile>> files) {
+    // 1: file1_file2_file3, 2: file4_file5_file6 -> md5 hash
+    final key = files.entries
+        .map(
+          (entry) =>
+              entry.key + ": " + entry.value.map((e) => e.cacheKey()).join("_"),
+        )
+        .join(", ");
+    final hash = md5.convert(key.codeUnits).toString();
+    return hash;
+  }
+
+  Future<void> _updateWidget() async {
     await hw.HomeWidget.updateWidget(
       name: 'SlideshowWidgetProvider',
       androidName: 'SlideshowWidgetProvider',
       qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
       iOSName: 'SlideshowWidget',
     );
-    _logger.info(">>> SlideshowWidget params done");
     if (flagService.internalUser) {
       await Fluttertoast.showToast(
         msg: "[i] SlideshowWidget updated",
@@ -373,5 +221,64 @@ class HomeWidgetService {
         fontSize: 16.0,
       );
     }
+    _logger.info(">>> Home Widget updated");
+  }
+
+  Future<int?> _getTotal() async {
+    return await hw.HomeWidget.getWidgetData<int>("totalSet");
+  }
+
+  Future<void> _setTotal(int total) async {
+    await hw.HomeWidget.saveWidgetData("totalSet", total);
+  }
+
+  Future<void> _lockAndLoadMemories() async {
+    final files = await _getMemories();
+
+    if (files.isEmpty) {
+      _logger.warning("No files found, clearing everything");
+      await clearHomeWidget();
+      return;
+    }
+
+    final keyHash = _getFilesKey(files);
+
+    final value = await _getFilesHash();
+    if (value == keyHash) {
+      _logger.info("No changes detected in memories");
+      await _updateWidget();
+      _logger.info(">>> Refreshing memory from same set");
+      return;
+    }
+    await _setFilesHash(keyHash);
+
+    int index = 0;
+
+    for (final i in files.entries) {
+      for (final file in i.value) {
+        final value =
+            await _renderFile(file, "slideshow_$index", i.key).catchError(
+          (e, sT) {
+            _logger.severe("Error rendering widget", e, sT);
+            return null;
+          },
+        );
+
+        if (value != null) {
+          await _setTotal(index);
+          if (index == 1) {
+            await _updateWidget();
+          }
+          index++;
+        }
+      }
+    }
+
+    if (index == 0) {
+      return;
+    }
+
+    await _updateWidget();
+    _logger.info(">>> Switching to next memory set");
   }
 }

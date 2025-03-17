@@ -4,6 +4,7 @@ import "dart:math" show Random, max, min;
 
 import "package:computer/computer.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
+import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:ml_linalg/vector.dart";
@@ -1549,6 +1550,17 @@ class SmartMemoriesService {
       memoryResults.add(fillerMemory);
     }
     return memoryResults;
+  }
+
+  static String getDateFormatted({
+    required int creationTime,
+    BuildContext? context,
+  }) {
+    return DateFormat.yMMMd(
+      context != null ? Localizations.localeOf(context).languageCode : "en",
+    ).format(
+      DateTime.fromMicrosecondsSinceEpoch(creationTime),
+    );
   }
 
   /// TODO: lau: replace this by just taking next 7 days
