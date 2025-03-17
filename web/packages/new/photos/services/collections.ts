@@ -346,7 +346,7 @@ async function getLastTrashSyncTime() {
 }
 export async function syncTrash(
     collections: Collection[],
-    setTrashedFiles: (fs: EnteFile[]) => void,
+    setTrashedFiles: ((fs: EnteFile[]) => void) | undefined,
 ): Promise<void> {
     const trash = await getLocalTrash();
     collections = [...collections, ...(await getLocalDeletedCollections())];
@@ -370,7 +370,7 @@ export async function syncTrash(
 export const updateTrash = async (
     collections: Map<number, Collection>,
     sinceTime: number,
-    setTrashedFiles: (fs: EnteFile[]) => void,
+    setTrashedFiles: ((fs: EnteFile[]) => void) | undefined,
     currentTrash: Trash,
 ): Promise<Trash> => {
     try {
@@ -416,7 +416,7 @@ export const updateTrash = async (
                 time = resp.data.diff.slice(-1)[0].updatedAt;
             }
 
-            setTrashedFiles(getTrashedFiles(updatedTrash));
+            setTrashedFiles?.(getTrashedFiles(updatedTrash));
             await localForage.setItem(TRASH, updatedTrash);
             await localForage.setItem(TRASH_TIME, time);
         } while (resp.data.hasMore);
