@@ -7,7 +7,7 @@ import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/remote_pull/collection_files.dart";
+import "package:photos/services/remote/collection_files.dart";
 
 class RemoteDiffService {
   final Logger _logger = Logger('RemoteDiffService');
