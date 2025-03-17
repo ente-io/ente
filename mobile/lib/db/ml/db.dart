@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/common/base.dart";
 import "package:photos/db/ml/base.dart";
 import 'package:photos/db/ml/db_fields.dart';
 import "package:photos/db/ml/db_model_mappers.dart";
@@ -34,7 +35,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 ///
 /// [clipTable] - Stores the embeddings of the CLIP model
 /// [fileDataTable] - Stores data about the files that are already processed by the ML models
-class MLDataDB extends IMLDataDB<int> {
+class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   static final Logger _logger = Logger("MLDataDB");
 
   static const _databaseName = "ente.ml.db";
@@ -75,40 +76,13 @@ class MLDataDB extends IMLDataDB<int> {
         SqliteDatabase(path: databaseDirectory, maxReaders: 2);
     final stopwatch = Stopwatch()..start();
     _logger.info("MLDataDB: Starting migration");
-    await _migrate(asyncDBConnection);
+    await migrate(asyncDBConnection, _migrationScripts);
     _logger.info(
       "MLDataDB Migration took ${stopwatch.elapsedMilliseconds} ms",
     );
     stopwatch.stop();
 
     return asyncDBConnection;
-  }
-
-  Future<void> _migrate(
-    SqliteDatabase database,
-  ) async {
-    final result = await database.execute('PRAGMA user_version');
-    final currentVersion = result[0]['user_version'] as int;
-    final toVersion = _migrationScripts.length;
-
-    if (currentVersion < toVersion) {
-      _logger.info("Migrating database from $currentVersion to $toVersion");
-      await database.writeTransaction((tx) async {
-        for (int i = currentVersion + 1; i <= toVersion; i++) {
-          try {
-            await tx.execute(_migrationScripts[i - 1]);
-          } catch (e) {
-            _logger.severe("Error running migration script index ${i - 1}", e);
-            rethrow;
-          }
-        }
-        await tx.execute('PRAGMA user_version = $toVersion');
-      });
-    } else if (currentVersion > toVersion) {
-      throw AssertionError(
-        "currentVersion($currentVersion) cannot be greater than toVersion($toVersion)",
-      );
-    }
   }
 
   // bulkInsertFaces inserts the faces in the database in batches of 1000.
