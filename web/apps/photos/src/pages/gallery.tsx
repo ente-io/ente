@@ -14,7 +14,7 @@ import log from "@/base/log";
 import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
 import { resetFileViewerDataSourceOnClose } from "@/gallery/components/viewer/data-source";
 import { type Collection } from "@/media/collection";
-import { mergeMetadata, type EnteFile } from "@/media/file";
+import { type EnteFile } from "@/media/file";
 import {
     updateRemotePrivateMagicMetadata,
     type ItemVisibility,
@@ -54,7 +54,6 @@ import {
 import {
     getLocalFiles,
     getLocalTrashedFiles,
-    sortFiles,
     syncFiles,
 } from "@/new/photos/services/files";
 import {
@@ -323,22 +322,14 @@ const Page: React.FC = () => {
             const user = getData(LS_KEYS.USER);
             // TODO: Pass entire snapshot to reducer?
             const familyData = userDetailsSnapshot()?.familyData;
-            const files = sortFiles(
-                mergeMetadata(await getLocalFiles("normal")),
-            );
-            const hiddenFiles = sortFiles(
-                mergeMetadata(await getLocalFiles("hidden")),
-            );
-            const allCollections = await getAllLocalCollections();
-            const trashedFiles = await getLocalTrashedFiles();
             dispatch({
                 type: "mount",
                 user,
                 familyData,
-                allCollections,
-                files,
-                hiddenFiles,
-                trashedFiles,
+                allCollections: await getAllLocalCollections(),
+                files: await getLocalFiles("normal"),
+                hiddenFiles: await getLocalFiles("hidden"),
+                trashedFiles: await getLocalTrashedFiles(),
             });
             await syncWithRemote(true);
             setIsFirstLoad(false);
