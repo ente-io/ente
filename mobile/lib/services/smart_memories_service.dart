@@ -761,7 +761,7 @@ class SmartMemoriesService {
 
     // Loop through the clip types and add based on rotation
     clipMemoriesLoop:
-    for (final clipMemoryType in ClipMemoryType.values) {
+    for (final clipMemoryType in ClipMemoryType.values..shuffle()) {
       final clipMemory = clipTypeToMemory[clipMemoryType];
       if (clipMemory == null) continue;
       for (final shownLog in shownClip) {
