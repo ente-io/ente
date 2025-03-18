@@ -834,7 +834,7 @@ const Page: React.FC = () => {
                 dispatch({
                     type: "unsyncedFavoriteUpdate",
                     fileID,
-                    isFavorite,
+                    isFavorite: !isFavorite,
                 });
             } finally {
                 dispatch({ type: "removePendingFavoriteUpdate", fileID });

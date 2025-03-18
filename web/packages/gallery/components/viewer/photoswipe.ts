@@ -614,27 +614,16 @@ export class FileViewerPhotoSwipe {
 
         let favoriteButtonElement: HTMLButtonElement | undefined;
 
-        const toggleFavorite = async () => {
-            // updateFavoriteButtonIfNeeded();
-            await delegate.toggleFavorite(currentAnnotatedFile());
-            // updateFavoriteButtonIfNeeded();
-        };
+        const toggleFavorite = () =>
+            delegate.toggleFavorite(currentAnnotatedFile());
 
         const updateFavoriteButtonIfNeeded = () => {
             const favoriteIconFill = document.getElementById(
                 "pswp__icn-favorite-fill",
             );
-            console.log("updateFavoriteButtonIfNeeded", {
-                favoriteIconFill,
-                isFavorite: delegate.isFavoritePending(currentAnnotatedFile()),
-                isFavoritePending: delegate.isFavoritePending(
-                    currentAnnotatedFile(),
-                ),
-            });
             if (!favoriteIconFill) {
-                // Need a null check since we might've been closed meanwhile on
-                // the code path where we're called after the async operation in
-                // `toggleFavorite`.
+                // Early return if we're not currently being shown, to implement
+                // the "IfNeeded" semantics.
                 return;
             }
 

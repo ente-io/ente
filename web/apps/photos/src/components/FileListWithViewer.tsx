@@ -27,19 +27,6 @@ export type FileListWithViewerProps = {
     files: EnteFile[];
     enableDownload?: boolean;
     /**
-     * Called when the component wants to update the in-memory, unsynced,
-     * favorite status of a file.
-     *
-     * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
-     * reducer's documentation.
-     *
-     * Not set in the context of the shared albums app.
-     */
-    onMarkUnsyncedFavoriteUpdate?: (
-        fileID: number,
-        isFavorite: boolean,
-    ) => void;
-    /**
      * Called when the component wants to mark the given files as deleted in the
      * the in-memory, unsynced, state maintained by the top level gallery.
      *
