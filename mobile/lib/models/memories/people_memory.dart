@@ -45,7 +45,7 @@ enum PeopleActivity {
 String activityQuery(PeopleActivity activity) {
   switch (activity) {
     case PeopleActivity.admiring:
-      return "Photo of two people lovingly admiring or looking at each other, without inappropriately touching, kissing, or other intimate physical actions";
+      return "Photo of two people admiring or looking at each other in a loving but non-intimate and non-physical way";
     case PeopleActivity.embracing:
       return "Photo of people hugging or embracing each other lovingly, without inappropriately kissing or other intimate actions";
     case PeopleActivity.party:
@@ -55,7 +55,7 @@ String activityQuery(PeopleActivity activity) {
     case PeopleActivity.feast:
       return "Photo of people having a big feast together";
     case PeopleActivity.selfies:
-      return "Happy and nostalgic selfie with people";
+      return "Happy and nostalgic selfie with people, clearly taken from the front camera of a phone";
     case PeopleActivity.posing:
       return "Photo of people posing together in a funny manner for the camera";
     case PeopleActivity.background:
