@@ -1,4 +1,5 @@
 import { assertionFailed } from "@/base/assert";
+import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { fetchFileData } from "./file-data";
@@ -9,7 +10,7 @@ import { fetchFileData } from "./file-data";
  *
  * @param file An {@link EnteFile} of type video.
  *
- * [Note: Video playlist vs preview]
+ * [Note: Video playlist and preview]
  *
  * In museum's ontology, there is a distinction between two concepts:
  *
@@ -37,6 +38,6 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
     }
 
     const encryptedHLS = await fetchFileData("vid_preview", file.id);
-    console.log(encryptedHLS);
+    log.debug(() => ["hlsPlaylistForFile", encryptedHLS]);
     return file.id;
 };

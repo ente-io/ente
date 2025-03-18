@@ -20,7 +20,7 @@ import { z } from "zod";
  */
 type FileDataType =
     | "mldata" /* See: [Note: "mldata" format] */
-    | "vid_preview" /* See: [Note: Video playlist vs preview] */;
+    | "vid_preview" /* See: [Note: Video playlist and preview] */;
 
 const RemoteFileData = z.object({
     /**
@@ -81,16 +81,19 @@ export const fetchFilesData = async (
  * A variant of {@link fetchFilesData} that fetches data for a single file.
  *
  * Unlike {@link fetchFilesData}, this uses a HTTP GET request.
+ *
+ * Returns `undefined` if no video preview has been generated for this file yet.
  */
 export const fetchFileData = async (
     type: FileDataType,
     fileID: number,
-): Promise<RemoteFileData> => {
+): Promise<RemoteFileData | undefined> => {
     const params = new URLSearchParams({ type, fileID: fileID.toString() });
     const url = await apiURL("/files/data/fetch");
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: await authenticatedRequestHeaders(),
     });
+    if (res.status == 404) return undefined;
     ensureOk(res);
     return z.object({ data: RemoteFileData }).parse(await res.json()).data;
 };

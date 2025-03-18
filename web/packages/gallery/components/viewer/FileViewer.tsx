@@ -8,6 +8,7 @@ import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
+import { isDevBuild } from "@/base/env";
 import { lowercaseExtension } from "@/base/file-name";
 import { formattedListJoin, ut } from "@/base/i18n";
 import type { LocalUser } from "@/base/local-user";
@@ -53,6 +54,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { hlsPlaylistForFile } from "../../services/video";
 import {
     fileInfoExifForFile,
     updateItemDataAlt,
@@ -517,6 +519,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         return false;
                 }
             })();
+
+            if (
+                isDevBuild &&
+                process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
+            ) {
+                if (file.metadata.fileType == FileType.video) {
+                    void hlsPlaylistForFile(file);
+                }
+            }
 
             const annotation: FileViewerFileAnnotation = {
                 fileID,
