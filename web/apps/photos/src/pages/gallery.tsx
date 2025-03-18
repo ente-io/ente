@@ -132,7 +132,7 @@ import {
     handleCollectionOp,
     type CollectionOp,
 } from "utils/collection";
-import { type FileOp, getSelectedFiles, handleFileOp } from "utils/file";
+import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
 
 const defaultGalleryContext: GalleryContextType = {
     setActiveCollectionID: () => null,

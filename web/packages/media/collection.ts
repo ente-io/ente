@@ -6,12 +6,7 @@ import { ItemVisibility } from "@/media/file-metadata";
 
 // TODO: Audit this file
 
-export enum CollectionType {
-    folder = "folder",
-    favorites = "favorites",
-    album = "album",
-    uncategorized = "uncategorized",
-}
+export type CollectionType = "folder" | "favorites" | "album" | "uncategorized";
 
 export enum COLLECTION_ROLE {
     VIEWER = "VIEWER",

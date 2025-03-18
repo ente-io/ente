@@ -7,7 +7,6 @@ import {
     type Collection,
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadataProps,
-    CollectionType,
     SUB_TYPE,
 } from "@/media/collection";
 import { EnteFile } from "@/media/file";
@@ -330,9 +329,9 @@ export function isValidReplacementAlbum(
 ) {
     return (
         collection.name === wantedCollectionName &&
-        (collection.type === CollectionType.album ||
-            collection.type === CollectionType.folder ||
-            collection.type === CollectionType.uncategorized) &&
+        (collection.type == "album" ||
+            collection.type == "folder" ||
+            collection.type == "uncategorized") &&
         !isHiddenCollection(collection) &&
         !isQuickLinkCollection(collection) &&
         !isIncomingShare(collection, user)

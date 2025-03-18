@@ -2,11 +2,7 @@ import {
     isArchivedCollection,
     isPinnedCollection,
 } from "@/gallery/services/magic-metadata";
-import {
-    COLLECTION_ROLE,
-    CollectionType,
-    type Collection,
-} from "@/media/collection";
+import { COLLECTION_ROLE, type Collection } from "@/media/collection";
 import type { EnteFile, FilePrivateMagicMetadata } from "@/media/file";
 import { mergeMetadata } from "@/media/file";
 import { isArchivedFile } from "@/media/file-metadata";
@@ -1221,7 +1217,7 @@ const deriveFavoriteFileIDs = (
 ) => {
     let favoriteFileIDs = new Set<number>();
     for (const collection of collections) {
-        if (collection.type === CollectionType.favorites) {
+        if (collection.type == "favorites") {
             favoriteFileIDs = new Set(
                 files
                     .filter((file) => file.collectionID === collection.id)
@@ -1254,7 +1250,7 @@ const deriveNormalCollectionSummaries = (
     );
 
     const uncategorizedCollection = normalCollections.find(
-        ({ type }) => type === CollectionType.uncategorized,
+        ({ type }) => type == "uncategorized",
     );
     if (!uncategorizedCollection) {
         normalCollectionSummaries.set(DUMMY_UNCATEGORIZED_COLLECTION, {
@@ -1365,23 +1361,7 @@ const createCollectionSummaries = (
         } else if (isPinnedCollection(collection)) {
             type = "pinned";
         } else {
-            // Directly use the collection type
-            // TODO: The constants can be aligned once collection type goes from
-            // an enum to an union.
-            switch (collection.type) {
-                case CollectionType.folder:
-                    type = "folder";
-                    break;
-                case CollectionType.favorites:
-                    type = "favorites";
-                    break;
-                case CollectionType.album:
-                    type = "album";
-                    break;
-                case CollectionType.uncategorized:
-                    type = "uncategorized";
-                    break;
-            }
+            type = collection.type;
         }
 
         // This block of code duplicates the above. Such duplication is needed
@@ -1409,20 +1389,9 @@ const createCollectionSummaries = (
         if (isPinnedCollection(collection)) {
             attributes.push("pinned");
         }
-        switch (collection.type) {
-            case CollectionType.folder:
-                attributes.push("folder");
-                break;
-            case CollectionType.favorites:
-                attributes.push("favorites");
-                break;
-            case CollectionType.album:
-                attributes.push("album");
-                break;
-            case CollectionType.uncategorized:
-                attributes.push("uncategorized");
-                break;
-        }
+        // TODO: Verify type before removing the null check.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (collection.type) attributes.push(collection.type);
 
         let name: string;
         if (type == "uncategorized") {
