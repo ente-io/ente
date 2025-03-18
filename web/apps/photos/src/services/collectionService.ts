@@ -8,12 +8,12 @@ import {
     CollectionMagicMetadata,
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadata,
+    CollectionSubType,
     type CollectionType,
     CreatePublicAccessTokenRequest,
     EncryptedCollection,
     PublicURL,
     RemoveFromCollectionRequest,
-    CollectionSubType,
     UpdatePublicURL,
 } from "@/media/collection";
 import { EncryptedMagicMetadata, EnteFile } from "@/media/file";
