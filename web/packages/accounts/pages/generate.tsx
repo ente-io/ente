@@ -21,7 +21,7 @@ import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import {
     justSignedUp,
     setJustSignedUp,
@@ -44,10 +44,8 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const key: string = getKey("encryptionKey");
-        const keyAttributes: KeyAttributes = getData(
-            LS_KEYS.ORIGINAL_KEY_ATTRIBUTES,
-        );
-        const user: User = getData(LS_KEYS.USER);
+        const keyAttributes: KeyAttributes = getData("originalKeyAttributes");
+        const user: User = getData("user");
         setUser(user);
         if (!user?.token) {
             void router.push("/");

@@ -16,7 +16,7 @@ import {
     decryptAndStoreToken,
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { getData, setData } from "@ente/shared/storage/localStorage";
 import { getKey } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
@@ -38,8 +38,8 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const user: User = getData(LS_KEYS.USER);
-        const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const user: User = getData("user");
+        const keyAttributes: KeyAttributes = getData("keyAttributes");
         const key = getKey("encryptionKey");
         if (!user?.email) {
             void router.push("/");
@@ -88,7 +88,7 @@ const Page: React.FC = () => {
             await saveKeyInSessionStore("encryptionKey", masterKey);
             await decryptAndStoreToken(keyAttr, masterKey);
 
-            setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
+            setData("showBackButton", { value: false });
             void router.push("/change-password");
         } catch (e) {
             log.error("password recovery failed", e);

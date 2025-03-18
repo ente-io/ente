@@ -40,7 +40,7 @@ import {
 import type { FamilyData } from "@/new/photos/services/user-details";
 import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
@@ -190,7 +190,7 @@ export const removeFromCollection = async (
     allFiles?: EnteFile[],
 ) => {
     try {
-        const user: User = getData(LS_KEYS.USER);
+        const user: User = getData("user");
         const nonUserFiles = [];
         const userFiles = [];
         for (const file of toRemoveFiles) {
@@ -232,7 +232,7 @@ export const removeUserFiles = async (
 
         const collections = await getLocalCollections();
         const collectionsMap = new Map(collections.map((c) => [c.id, c]));
-        const user: User = getData(LS_KEYS.USER);
+        const user: User = getData("user");
 
         for (const [targetCollectionID, files] of groupedFiles.entries()) {
             const targetCollection = collectionsMap.get(targetCollectionID);

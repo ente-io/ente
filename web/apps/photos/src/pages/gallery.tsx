@@ -70,7 +70,7 @@ import { usePhotosAppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
     isFirstLogin,
@@ -321,7 +321,7 @@ const Page: React.FC = () => {
                 showPlanSelector();
             }
             setIsFirstLogin(false);
-            const user = getData(LS_KEYS.USER);
+            const user = getData("user");
             // TODO: Pass entire snapshot to reducer?
             const familyData = userDetailsSnapshot()?.familyData;
             dispatch({

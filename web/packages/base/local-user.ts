@@ -29,7 +29,7 @@ export type LocalUser = z.infer<typeof LocalUser>;
  * The user's data is stored in the browser's localStorage.
  */
 export const localUser = (): LocalUser | undefined => {
-    // TODO(MR): duplicate of LS_KEYS.USER
+    // TODO: duplicate of getData("user")
     const s = localStorage.getItem("user");
     if (!s) return undefined;
     return LocalUser.parse(JSON.parse(s));

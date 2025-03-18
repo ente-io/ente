@@ -27,12 +27,7 @@ import SingleInputForm, {
 } from "@ente/shared/components/SingleInputForm";
 import { ApiError } from "@ente/shared/error";
 import localForage from "@ente/shared/storage/localForage";
-import {
-    getData,
-    LS_KEYS,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
+import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import {
     getLocalReferralSource,
     setIsFirstLogin,
@@ -63,7 +58,7 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const main = async () => {
-            const user: User = getData(LS_KEYS.USER);
+            const user: User = getData("user");
 
             const redirect = await redirectionIfNeeded(user);
             if (redirect) {
@@ -96,7 +91,7 @@ const Page: React.FC = () => {
                 await verifyEmail(email, ott, cleanedReferral),
             );
             if (passkeySessionID) {
-                const user = getData(LS_KEYS.USER);
+                const user = getData("user");
                 await setLSUser({
                     ...user,
                     passkeySessionID,
@@ -132,19 +127,18 @@ const Page: React.FC = () => {
                     isTwoFactorEnabled: false,
                 });
                 if (keyAttributes) {
-                    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-                    setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
+                    setData("keyAttributes", keyAttributes);
+                    setData("originalKeyAttributes", keyAttributes);
                 } else {
-                    if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
+                    if (getData("originalKeyAttributes")) {
                         await putAttributes(
                             token!,
-                            getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES),
+                            getData("originalKeyAttributes"),
                         );
                     }
-                    if (getData(LS_KEYS.SRP_SETUP_ATTRIBUTES)) {
-                        const srpSetupAttributes: SRPSetupAttributes = getData(
-                            LS_KEYS.SRP_SETUP_ATTRIBUTES,
-                        );
+                    if (getData("srpSetupAttributes")) {
+                        const srpSetupAttributes: SRPSetupAttributes =
+                            getData("srpSetupAttributes");
                         await configureSRP(srpSetupAttributes);
                     }
                 }
@@ -271,7 +265,7 @@ const redirectionIfNeeded = async (user: User | undefined) => {
         return "/";
     }
 
-    const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+    const keyAttributes: KeyAttributes = getData("keyAttributes");
 
     if (keyAttributes?.encryptedKey && (user.token || user.encryptedToken)) {
         return "/credentials";
@@ -291,7 +285,7 @@ const redirectionIfNeeded = async (user: User | undefined) => {
     // saved them). If they are present and indicate that email verification is
     // not required, redirect to the password verification page.
 
-    const srpAttributes: SRPAttributes = getData(LS_KEYS.SRP_ATTRIBUTES);
+    const srpAttributes: SRPAttributes = getData("srpAttributes");
     if (srpAttributes && !srpAttributes.isEmailMFAEnabled) {
         // Fetch the latest SRP attributes instead of relying on the potentially
         // stale stored values. This is an infrequent scenario path, so extra

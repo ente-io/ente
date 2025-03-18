@@ -3,12 +3,7 @@ import { verifyTwoFactor } from "@/accounts/services/user";
 import { LinkButton } from "@/base/components/LinkButton";
 import { useBaseContext } from "@/base/context";
 import { HTTPError } from "@/base/http";
-import {
-    LS_KEYS,
-    getData,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
+import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -28,7 +23,7 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const user: User = getData(LS_KEYS.USER);
+        const user: User = getData("user");
         if (!user?.email || !user.twoFactorSessionID) {
             void router.push("/");
         } else if (
@@ -45,13 +40,8 @@ const Page: React.FC = () => {
         try {
             const resp = await verifyTwoFactor(otp, sessionID);
             const { keyAttributes, encryptedToken, token, id } = resp;
-            await setLSUser({
-                ...getData(LS_KEYS.USER),
-                token,
-                encryptedToken,
-                id,
-            });
-            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
+            await setLSUser({ ...getData("user"), token, encryptedToken, id });
+            setData("keyAttributes", keyAttributes!);
             await router.push(unstashRedirect() ?? "/credentials");
         } catch (e) {
             if (e instanceof HTTPError && e.res.status == 404) {

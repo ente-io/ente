@@ -10,7 +10,7 @@ import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { isHTTPErrorWithStatus } from "@/base/http";
 import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
+import { getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Alert, Box, TextField } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
@@ -23,7 +23,7 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const user = getData(LS_KEYS.USER);
+        const user = getData("user");
         if (!user?.token) {
             void router.push("/");
         }
@@ -86,7 +86,7 @@ const ChangeEmailForm: React.FC = () => {
         try {
             setLoading(true);
             await changeEmail(email, ott!);
-            await setLSUser({ ...getData(LS_KEYS.USER), email });
+            await setLSUser({ ...getData("user"), email });
             setLoading(false);
             void goToApp();
         } catch (e) {

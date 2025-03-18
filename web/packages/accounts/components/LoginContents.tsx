@@ -10,7 +10,7 @@ import log from "@/base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import { LS_KEYS, setData, setLSUser } from "@ente/shared/storage/localStorage";
+import { setData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Input, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -56,7 +56,7 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                 void router.push("/verify");
             } else {
                 await setLSUser({ email });
-                setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
+                setData("srpAttributes", srpAttributes);
                 void router.push("/credentials");
             }
         } catch (e) {

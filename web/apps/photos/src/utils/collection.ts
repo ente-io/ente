@@ -26,7 +26,7 @@ import {
 } from "@/new/photos/services/collections";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import {
@@ -198,7 +198,7 @@ export const changeCollectionVisibility = async (
             visibility,
         };
 
-        const user: User = getData(LS_KEYS.USER);
+        const user: User = getData("user");
         if (collection.owner.id === user.id) {
             const updatedMagicMetadata = await updateMagicMetadata(
                 updatedMagicMetadataProps,
@@ -293,7 +293,7 @@ export const changeCollectionSubType = async (
 };
 
 export const getUserOwnedCollections = (collections: Collection[]) => {
-    const user: User = getData(LS_KEYS.USER);
+    const user: User = getData("user");
     if (!user?.id) {
         throw Error("user missing");
     }
@@ -341,7 +341,7 @@ export const getOrCreateAlbum = async (
     albumName: string,
     existingCollections: Collection[],
 ) => {
-    const user: User = getData(LS_KEYS.USER);
+    const user: User = getData("user");
     if (!user?.id) {
         throw Error("user missing");
     }

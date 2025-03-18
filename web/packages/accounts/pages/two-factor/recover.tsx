@@ -18,12 +18,7 @@ import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { ApiError } from "@ente/shared/error";
-import {
-    LS_KEYS,
-    getData,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
+import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Link } from "@mui/material";
 import { HttpStatusCode } from "axios";
 import { t } from "i18next";
@@ -52,7 +47,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     const router = useRouter();
 
     useEffect(() => {
-        const user = getData(LS_KEYS.USER);
+        const user = getData("user");
         const sid = user.passkeySessionID || user.twoFactorSessionID;
         if (!user?.email || !sid) {
             void router.push("/");
@@ -127,13 +122,13 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
             );
             const { keyAttributes, encryptedToken, token, id } = resp;
             await setLSUser({
-                ...getData(LS_KEYS.USER),
+                ...getData("user"),
                 token,
                 encryptedToken,
                 id,
                 isTwoFactorEnabled: false,
             });
-            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+            setData("keyAttributes", keyAttributes);
             void router.push("/credentials");
         } catch (e) {
             log.error("two factor recovery failed", e);

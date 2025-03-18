@@ -41,12 +41,7 @@ import {
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
-import {
-    LS_KEYS,
-    getData,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
+import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import {
     getToken,
     isFirstLogin,
@@ -90,14 +85,8 @@ const Page: React.FC = () => {
                 case "valid":
                     break;
                 case "validButPasswordChanged":
-                    setData(
-                        LS_KEYS.KEY_ATTRIBUTES,
-                        session.updatedKeyAttributes,
-                    );
-                    setData(
-                        LS_KEYS.SRP_ATTRIBUTES,
-                        session.updatedSRPAttributes,
-                    );
+                    setData("keyAttributes", session.updatedKeyAttributes);
+                    setData("srpAttributes", session.updatedSRPAttributes);
                     // Set a flag that causes new interactive key attributes to
                     // be generated.
                     setIsFirstLogin(true);
@@ -115,7 +104,7 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const main = async () => {
-            const user: User = getData(LS_KEYS.USER);
+            const user: User = getData("user");
             if (!user?.email) {
                 void router.push("/");
                 return;
@@ -140,12 +129,8 @@ const Page: React.FC = () => {
             }
             const kekEncryptedAttributes: B64EncryptionResult =
                 getKey("keyEncryptionKey");
-            const keyAttributes: KeyAttributes = getData(
-                LS_KEYS.KEY_ATTRIBUTES,
-            );
-            const srpAttributes: SRPAttributes = getData(
-                LS_KEYS.SRP_ATTRIBUTES,
-            );
+            const keyAttributes: KeyAttributes = getData("keyAttributes");
+            const srpAttributes: SRPAttributes = getData("srpAttributes");
 
             if (token) {
                 setSessionValidityCheck(validateSession());
@@ -222,7 +207,7 @@ const Page: React.FC = () => {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
                     setKey("keyEncryptionKey", sessionKeyAttributes);
-                    const user = getData(LS_KEYS.USER);
+                    const user = getData("user");
                     await setLSUser({
                         ...user,
                         passkeySessionID,
@@ -241,7 +226,7 @@ const Page: React.FC = () => {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
                     setKey("keyEncryptionKey", sessionKeyAttributes);
-                    const user = getData(LS_KEYS.USER);
+                    const user = getData("user");
                     await setLSUser({
                         ...user,
                         twoFactorSessionID,
@@ -250,7 +235,7 @@ const Page: React.FC = () => {
                     void router.push("/two-factor/verify");
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else {
-                    const user = getData(LS_KEYS.USER);
+                    const user = getData("user");
                     await setLSUser({
                         ...user,
                         token,
@@ -258,8 +243,7 @@ const Page: React.FC = () => {
                         id,
                         isTwoFactorEnabled: false,
                     });
-                    if (keyAttributes)
-                        setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                    if (keyAttributes) setData("keyAttributes", keyAttributes);
                     return keyAttributes;
                 }
             } catch (e) {
@@ -291,13 +275,12 @@ const Page: React.FC = () => {
             await saveKeyInSessionStore("encryptionKey", key);
             await decryptAndStoreToken(keyAttributes, key);
             try {
-                let srpAttributes: SRPAttributes | null = getData(
-                    LS_KEYS.SRP_ATTRIBUTES,
-                );
+                let srpAttributes: SRPAttributes | null =
+                    getData("srpAttributes");
                 if (!srpAttributes && user) {
                     srpAttributes = await getSRPAttributes(user.email);
                     if (srpAttributes) {
-                        setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
+                        setData("srpAttributes", srpAttributes);
                     }
                 }
                 log.debug(() => `userSRPSetupPending ${!srpAttributes}`);

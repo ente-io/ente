@@ -5,7 +5,7 @@ import { LinkButton } from "@/base/components/LinkButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { isMuseumHTTPError } from "@/base/http";
 import log from "@/base/log";
-import { LS_KEYS, setLSUser } from "@ente/shared//storage/localStorage";
+import { setLSUser } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
 import {
@@ -107,8 +107,8 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 const { keyAttributes, masterKey, srpSetupAttributes } =
                     await generateKeyAndSRPAttributes(passphrase);
 
-                setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
-                setData(LS_KEYS.SRP_SETUP_ATTRIBUTES, srpSetupAttributes);
+                setData("originalKeyAttributes", keyAttributes);
+                setData("srpSetupAttributes", srpSetupAttributes);
                 await generateAndSaveIntermediateKeyAttributes(
                     passphrase,
                     keyAttributes,

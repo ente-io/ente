@@ -15,11 +15,7 @@ import {
     type CollectionSummaries,
 } from "@/new/photos/services/collection/ui";
 import { includes } from "@/utils/type-guards";
-import {
-    getData,
-    LS_KEYS,
-    removeData,
-} from "@ente/shared/storage/localStorage";
+import { getData, removeData } from "@ente/shared/storage/localStorage";
 import { AllAlbums } from "components/Collections/AllAlbums";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import { CollectionShare } from "components/Collections/CollectionShare";
@@ -252,7 +248,7 @@ const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
             //
             // This migration added Sep 2024, can be removed after a bit (esp
             // since it effectively runs on each app start). (tag: Migration).
-            const oldData = getData(LS_KEYS.COLLECTION_SORT_BY);
+            const oldData = getData("collectionSortBy");
             if (oldData) {
                 let newValue: CollectionsSortBy | undefined;
                 switch (oldData.value) {
@@ -270,7 +266,7 @@ const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
                     localStorage.setItem(key, newValue);
                     setValue(newValue);
                 }
-                removeData(LS_KEYS.COLLECTION_SORT_BY);
+                removeData("collectionSortBy");
             }
         }
     }, []);

@@ -21,7 +21,7 @@ import { getAllLocalFiles } from "@/new/photos/services/files";
 import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
 import { PromiseQueue } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { getData, setData } from "@ente/shared/storage/localStorage";
 import i18n from "i18next";
 import { migrateExport, type ExportRecord } from "./migration";
 
@@ -120,7 +120,7 @@ class ExportService {
             if (this.exportSettings) {
                 return this.exportSettings;
             }
-            const exportSettings = getData(LS_KEYS.EXPORT);
+            const exportSettings = getData("export");
             this.exportSettings = exportSettings;
             return exportSettings;
         } catch (e) {
@@ -134,7 +134,7 @@ class ExportService {
             const exportSettings = this.getExportSettings();
             const newSettings = { ...exportSettings, ...newData };
             this.exportSettings = newSettings;
-            setData(LS_KEYS.EXPORT, newSettings);
+            setData("export", newSettings);
         } catch (e) {
             log.error("updateExportSettings failed", e);
             throw e;

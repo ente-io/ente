@@ -32,7 +32,6 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import {
     getData,
     isLocalStorageAndIndexedDBMismatch,
-    LS_KEYS,
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import "@fontsource-variable/inter";
@@ -66,7 +65,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const logout = useCallback(() => void photosLogout(), []);
 
     useEffect(() => {
-        const user = getData(LS_KEYS.USER) as User | undefined | null;
+        const user = getData("user") as User | undefined | null;
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
@@ -126,11 +125,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         const needsFamilyRedirect = query.get("redirect") == "families";
-        if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token)
+        if (needsFamilyRedirect && getData("user")?.token)
             redirectToFamilyPortal();
 
         router.events.on("routeChangeStart", () => {
-            if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token) {
+            if (needsFamilyRedirect && getData("user")?.token) {
                 redirectToFamilyPortal();
 
                 // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710

@@ -17,7 +17,7 @@ import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { deleteFromTrash, moveToTrash } from "@/new/photos/services/collection";
 import { safeFileName } from "@/new/photos/utils/native-fs";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import {
@@ -328,7 +328,7 @@ export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
 };
 
 export const getUserOwnedFiles = (files: EnteFile[]) => {
-    const user: User = getData(LS_KEYS.USER);
+    const user: User = getData("user");
     if (!user?.id) {
         throw Error("user missing");
     }

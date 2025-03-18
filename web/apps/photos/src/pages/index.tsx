@@ -10,7 +10,7 @@ import { albumsAppOrigin, customAPIHost } from "@/base/origins";
 import { DevSettings } from "@/new/photos/components/DevSettings";
 import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
 import localForage from "@ente/shared/storage/localForage";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getKey } from "@ente/shared/storage/sessionStorage";
 import { Box, Stack, Typography, styled } from "@mui/material";
@@ -60,7 +60,7 @@ const Page: React.FC = () => {
     };
 
     const handleNormalRedirect = async () => {
-        const user = getData(LS_KEYS.USER);
+        const user = getData("user");
         let key = getKey("encryptionKey");
         const electron = globalThis.electron;
         if (!key && electron) {

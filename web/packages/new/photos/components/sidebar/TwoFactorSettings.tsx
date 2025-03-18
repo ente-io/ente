@@ -12,7 +12,7 @@ import {
 } from "@/base/components/mui/SidebarDrawer";
 import { useBaseContext } from "@/base/context";
 import { disable2FA, get2FAStatus } from "@/new/photos/services/user";
-import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
+import { getData, setLSUser } from "@ente/shared/storage/localStorage";
 import LockIcon from "@mui/icons-material/Lock";
 import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
@@ -28,7 +28,7 @@ export const TwoFactorSettings: React.FC<
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const isTwoFactorEnabled =
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            getData(LS_KEYS.USER).isTwoFactorEnabled ?? false;
+            getData("user").isTwoFactorEnabled ?? false;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         setIsTwoFactorEnabled(isTwoFactorEnabled);
     }, []);
@@ -40,7 +40,7 @@ export const TwoFactorSettings: React.FC<
             setIsTwoFactorEnabled(isEnabled);
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             await setLSUser({
-                ...getData(LS_KEYS.USER),
+                ...getData("user"),
                 isTwoFactorEnabled: isEnabled,
             });
         })();
@@ -121,10 +121,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
     const disable = async () => {
         await disable2FA();
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        await setLSUser({
-            ...getData(LS_KEYS.USER),
-            isTwoFactorEnabled: false,
-        });
+        await setLSUser({ ...getData("user"), isTwoFactorEnabled: false });
         onRootClose();
     };
 

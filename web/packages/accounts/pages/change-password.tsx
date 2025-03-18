@@ -26,7 +26,7 @@ import {
     generateLoginSubKey,
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { getData, setData } from "@ente/shared/storage/localStorage";
 import { getActualKey } from "@ente/shared/user";
 import type { KEK, KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
@@ -40,7 +40,7 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const user = getData(LS_KEYS.USER);
+        const user = getData("user");
         setUser(user);
         if (!user?.token) {
             stashRedirect("/change-password");
@@ -56,7 +56,7 @@ const Page: React.FC = () => {
     ) => {
         const cryptoWorker = await sharedCryptoWorker();
         const key = await getActualKey();
-        const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const keyAttributes: KeyAttributes = getData("keyAttributes");
         const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
         let kek: KEK;
         try {
@@ -111,7 +111,7 @@ const Page: React.FC = () => {
         if (user?.email) {
             const srpAttributes = await getSRPAttributes(user.email);
             if (srpAttributes) {
-                setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
+                setData("srpAttributes", srpAttributes);
             }
         }
 
@@ -128,7 +128,7 @@ const Page: React.FC = () => {
     };
 
     const redirectToAppHome = () => {
-        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
+        setData("showBackButton", { value: true });
         void router.push(appHomeRoute);
     };
 
@@ -141,7 +141,7 @@ const Page: React.FC = () => {
                 callback={onSubmit}
                 buttonText={t("change_password")}
             />
-            {(getData(LS_KEYS.SHOW_BACK_BUTTON)?.value ?? true) && (
+            {(getData("showBackButton")?.value ?? true) && (
                 <AccountsPageFooter>
                     <LinkButton onClick={router.back}>
                         {t("go_back")}
