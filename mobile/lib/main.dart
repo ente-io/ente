@@ -110,9 +110,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
-    if (Platform.isAndroid) {
-      unawaited(_scheduleFGHomeWidgetSync());
-    }
+    unawaited(_scheduleFGHomeWidgetSync());
     unawaited(_scheduleFGSync('appStart in FG'));
   });
 }
