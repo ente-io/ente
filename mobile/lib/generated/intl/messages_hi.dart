@@ -119,10 +119,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "कुछ गड़बड़ हुई है। कृपया दोबारा प्रयास करें।"),
         "sorry": MessageLookupByLibrary.simpleMessage("क्षमा करें!"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "terminate": MessageLookupByLibrary.simpleMessage("रद्द करें"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("सेशन रद्द करें?"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("यह डिवाइस"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "इससे आप इन डिवाइसों से लॉग आउट हो जाएँगे:"),

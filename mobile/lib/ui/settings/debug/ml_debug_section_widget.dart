@@ -301,6 +301,26 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
+            title: "Clear memories cache",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final now = DateTime.now();
+              await memoriesCacheService.clearMemoriesCache();
+              final duration = DateTime.now().difference(now);
+              showShortToast(context, "Done in ${duration.inSeconds} seconds");
+            } catch (e, s) {
+              logger.warning('Clear memories cache failed', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             title: "Sync person mappings ",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,

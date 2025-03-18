@@ -1848,6 +1848,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nieuwste eerst"),
         "sortOldestFirst": MessageLookupByLibrary.simpleMessage("Oudste eerst"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Succes"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "startAccountRecoveryTitle":
             MessageLookupByLibrary.simpleMessage("Herstel starten"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Back-up starten"),
@@ -1940,6 +1942,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m84,
         "thisIsYourVerificationId":
             MessageLookupByLibrary.simpleMessage("Dit is uw verificatie-ID"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Dit zal je uitloggen van het volgende apparaat:"),

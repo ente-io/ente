@@ -1578,6 +1578,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortOldestFirst":
             MessageLookupByLibrary.simpleMessage("Seniausią pirmiausiai"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Sėkmė"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "startAccountRecoveryTitle":
             MessageLookupByLibrary.simpleMessage("Pradėti atkūrimą"),
         "startBackup": MessageLookupByLibrary.simpleMessage(
@@ -1652,6 +1654,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m84,
         "thisIsYourVerificationId":
             MessageLookupByLibrary.simpleMessage("Tai – jūsų patvirtinimo ID"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Tai jus atjungs nuo toliau nurodyto įrenginio:"),

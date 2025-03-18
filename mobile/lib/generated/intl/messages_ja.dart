@@ -1585,6 +1585,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("新しい順"),
         "sortOldestFirst": MessageLookupByLibrary.simpleMessage("古い順"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("成功✨"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "startAccountRecoveryTitle":
             MessageLookupByLibrary.simpleMessage("リカバリを開始"),
         "startBackup": MessageLookupByLibrary.simpleMessage("バックアップを開始"),
@@ -1662,6 +1664,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m84,
         "thisIsYourVerificationId":
             MessageLookupByLibrary.simpleMessage("これはあなたの認証IDです"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage("以下のデバイスからログアウトします:"),
         "thisWillLogYouOutOfThisDevice":

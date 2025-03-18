@@ -1756,6 +1756,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortOldestFirst":
             MessageLookupByLibrary.simpleMessage("Cũ nhất trước"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Thành công"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "startAccountRecoveryTitle":
             MessageLookupByLibrary.simpleMessage("Bắt đầu khôi phục"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Bắt đầu sao lưu"),
@@ -1843,6 +1845,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m84,
         "thisIsYourVerificationId":
             MessageLookupByLibrary.simpleMessage("Đây là ID xác minh của bạn"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Điều này sẽ đăng xuất bạn khỏi thiết bị sau:"),

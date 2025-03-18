@@ -638,6 +638,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Tyvärr, vi kunde inte generera säkra nycklar på den här enheten.\n\nVänligen registrera dig från en annan enhet."),
         "sort": MessageLookupByLibrary.simpleMessage("Sortera"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sortera efter"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Du"),
         "storageInGB": m2,
@@ -668,6 +670,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m84,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "Detta är ditt verifierings-ID"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Detta kommer att logga ut dig från följande enhet:"),

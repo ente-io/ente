@@ -143,7 +143,7 @@ class MemoriesCacheService {
     try {
       if ((!_shouldUpdate && !forced) || _isUpdateInProgress) {
         _logger.info(
-          "No update needed as shouldUpdate: $_shouldUpdate, forced: $forced and isUpdateInProgress $_isUpdateInProgress",
+          "No update needed (shouldUpdate: $_shouldUpdate, forced: $forced, isUpdateInProgress $_isUpdateInProgress)",
         );
         if (_isUpdateInProgress) {
           int waitingTime = 0;
@@ -154,7 +154,9 @@ class MemoriesCacheService {
         }
         return;
       }
-      _logger.info("updating memories cache");
+      _logger.info(
+        "Updating memories cache (shouldUpdate: $_shouldUpdate, forced: $forced, isUpdateInProgress $_isUpdateInProgress)",
+      );
       _isUpdateInProgress = true;
       final EnteWatch? w =
           kDebugMode ? EnteWatch("MemoriesCacheService") : null;

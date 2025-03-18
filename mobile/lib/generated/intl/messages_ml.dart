@@ -149,6 +149,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortAlbumsBy":
             MessageLookupByLibrary.simpleMessage("ഇപ്രകാരം അടുക്കുക"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ സഫലം"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("ശക്തം"),
         "success": MessageLookupByLibrary.simpleMessage("സഫലം"),
         "support": MessageLookupByLibrary.simpleMessage("പിന്തുണ"),
@@ -157,6 +159,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("നിബന്ധനകൾ"),
         "thankYou": MessageLookupByLibrary.simpleMessage("നന്ദി"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("ഈ ഉപകരണം"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillMakeTheDateAndTimeOfAllSelected":
             MessageLookupByLibrary.simpleMessage(
                 "This will make the date and time of all selected photos the same."),

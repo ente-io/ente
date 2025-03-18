@@ -848,6 +848,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortOldestFirst":
             MessageLookupByLibrary.simpleMessage("הישן ביותר קודם"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ הצלחה"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "startBackup": MessageLookupByLibrary.simpleMessage("התחל גיבוי"),
         "storage": MessageLookupByLibrary.simpleMessage("אחסון"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("משפחה"),
@@ -887,6 +889,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m84,
         "thisIsYourVerificationId":
             MessageLookupByLibrary.simpleMessage("זה מזהה האימות שלך"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage("זה ינתק אותך מהמכשיר הבא:"),
         "thisWillLogYouOutOfThisDevice":

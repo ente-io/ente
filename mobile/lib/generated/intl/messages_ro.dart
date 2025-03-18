@@ -1809,6 +1809,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortOldestFirst":
             MessageLookupByLibrary.simpleMessage("Cele mai vechi primele"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Succes"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "startAccountRecoveryTitle":
             MessageLookupByLibrary.simpleMessage("Începeți recuperarea"),
         "startBackup":
@@ -1899,6 +1901,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m84,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "Acesta este ID-ul dvs. de verificare"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Urmează să vă deconectați de pe următorul dispozitiv:"),
