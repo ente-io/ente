@@ -23,7 +23,7 @@ import {
 import { AllAlbums } from "components/Collections/AllAlbums";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import { CollectionShare } from "components/Collections/CollectionShare";
-import { ITEM_TYPE, TimeStampListItem } from "components/FileList";
+import { TimeStampListItem } from "components/FileList";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
@@ -167,7 +167,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 ) : (
                     <></>
                 ),
-            itemType: ITEM_TYPE.HEADER,
+            tag: "header",
             height: 68,
         });
     }, [

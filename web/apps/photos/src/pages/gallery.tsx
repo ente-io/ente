@@ -94,7 +94,7 @@ import CollectionNamer, {
 } from "components/Collections/CollectionNamer";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { Export } from "components/Export";
-import { ITEM_TYPE, TimeStampListItem } from "components/FileList";
+import { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import {
     FilesDownloadProgress,
@@ -428,7 +428,7 @@ const Page: React.FC = () => {
                         fileCount={state.searchResults?.length ?? 0}
                     />
                 ),
-                itemType: ITEM_TYPE.HEADER,
+                tag: "header",
             });
         }
     }, [isInSearchMode, state.searchSuggestion, state.searchResults]);

@@ -51,7 +51,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { ITEM_TYPE, TimeStampListItem } from "components/FileList";
+import { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import {
     FilesDownloadProgress,
@@ -266,7 +266,7 @@ export default function PublicCollectionGallery() {
                         }}
                     />
                 ),
-                itemType: ITEM_TYPE.HEADER,
+                tag: "header",
                 height: 68,
             });
     }, [publicCollection, publicFiles]);
@@ -280,7 +280,6 @@ export default function PublicCollectionGallery() {
                               <AddMorePhotosButton onClick={onAddPhotos} />
                           </CenteredFlex>
                       ),
-                      itemType: ITEM_TYPE.FOOTER,
                       height: 104,
                   }
                 : null,
