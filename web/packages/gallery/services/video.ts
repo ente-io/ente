@@ -46,6 +46,33 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
 
     const { playlist } = await decryptPlaylistJSON(playlistFileData, file);
 
+    // [Note: HLS playlist format]
+    //
+    // The decrypted playlist is a regular HLS playlist for an encrypted media
+    // stream, except that it uses a placeholder "output.ts" which needs to be
+    // replaced with the URL of the actual encrypted video data. A single URL
+    // pointing to the entire encrypted video data suffices; the individual
+    // chunks are fetched by HTTP range requests.
+    //
+    // Here is an example of what the contents of the `playlist` variable might
+    // look like at this point:
+    //
+    //     #EXTM3U
+    //     #EXT-X-VERSION:4
+    //     #EXT-X-TARGETDURATION:8
+    //     #EXT-X-MEDIA-SEQUENCE:0
+    //     #EXT-X-KEY:METHOD=AES-128,URI="data:text/plain;base64,XjvG7qeRrsOpPUbJPh2Ikg==",IV=0x00000000000000000000000000000000
+    //     #EXTINF:8.333333,
+    //     #EXT-X-BYTERANGE:3046928@0
+    //     output.ts
+    //     #EXTINF:8.333333,
+    //     #EXT-X-BYTERANGE:3012704@3046928
+    //     output.ts
+    //     #EXTINF:2.200000,
+    //     #EXT-X-BYTERANGE:834736@6059632
+    //     output.ts
+    //     #EXT-X-ENDLIST
+    //
     log.debug(() => ["hlsPlaylistForFile", playlist]);
     return file.id;
 };
