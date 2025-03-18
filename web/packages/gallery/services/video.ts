@@ -1,8 +1,11 @@
 import { assertionFailed } from "@/base/assert";
 import { decryptBlob } from "@/base/crypto";
+import type { EncryptedBlob } from "@/base/crypto/types";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
+import { gunzip } from "@/new/photos/utils/gzip";
+import { z } from "zod";
 import { fetchFileData } from "./file-data";
 
 /**
@@ -10,6 +13,9 @@ import { fetchFileData } from "./file-data";
  * {@link file}.
  *
  * @param file An {@link EnteFile} of type video.
+ *
+ * @returns The HLS playlist as a string, or `undefined` if there is no video
+ * preview associated with the given file.
  *
  * [Note: Video playlist and preview]
  *
@@ -38,12 +44,25 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
         return undefined;
     }
 
-    const encryptedPlaylist = await fetchFileData("vid_preview", file.id);
-    if (!encryptedPlaylist) return undefined;
+    const playlistFileData = await fetchFileData("vid_preview", file.id);
+    if (!playlistFileData) return undefined;
 
-    const playlist = new TextDecoder().decode(
-        await decryptBlob(encryptedPlaylist, file.key),
-    );
+    const { playlist } = await decryptPlaylistJSON(playlistFileData, file);
+
     log.debug(() => ["hlsPlaylistForFile", playlist]);
     return file.id;
+};
+
+const PlaylistJSON = z.object({
+    /** The HLS playlist, as a string. */
+    playlist: z.string(),
+});
+
+const decryptPlaylistJSON = async (
+    encryptedPlaylist: EncryptedBlob,
+    file: EnteFile,
+) => {
+    const decryptedBytes = await decryptBlob(encryptedPlaylist, file.key);
+    const jsonString = await gunzip(decryptedBytes);
+    return PlaylistJSON.parse(JSON.parse(jsonString));
 };
