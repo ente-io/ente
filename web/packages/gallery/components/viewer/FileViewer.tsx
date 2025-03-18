@@ -175,17 +175,28 @@ export type FileViewerProps = ModalVisibilityProps & {
     /**
      * File IDs of all the files that the user has marked as a favorite.
      *
-     * If this is not provided then the favorite toggle button will not be shown
-     * in the file actions.
+     * See also {@link onToggleFavorite}.
      */
     favoriteFileIDs?: Set<number>;
+    /**
+     * File IDs of for which an update of its favorite status is pending (e.g.
+     * due to a toggle favorite action in the file viewer).
+     *
+     * See also {@link favoriteFileIDs} and {@link onToggleFavorite}.
+     */
+    pendingFavoriteUpdates?: Set<number>;
     /**
      * File IDs of for which an update of its visibility is pending (e.g. due to
      * a toggle archived action in the file viewer).
      *
-     * See also {@link pendingVisibilityUpdates}.
+     * See also {@link onFileVisibilityUpdate}.
      */
     pendingVisibilityUpdates?: Set<number>;
+    /**
+     * A mapping from file IDs to the IDs of the normal (non-hidden) collections
+     * that they are a part of.
+     */
+    fileNormalCollectionIDs?: FileInfoProps["fileCollectionIDs"];
     /**
      * Called when there was some update performed within the file viewer that
      * necessitates us to sync with remote again to fetch the latest updates.
@@ -212,12 +223,9 @@ export type FileViewerProps = ModalVisibilityProps & {
      * Called when the favorite status of given {@link file} should be toggled
      * from its current value.
      *
-     * If this is not provided then the favorite toggle button will not be shown
-     * in the file actions.
-     *
-     * See also {@link favoriteFileIDs}.
-     *
-     * See also: [Note: File viewer update and dispatch]
+     * The favorite toggle button is shown only if all three of
+     * {@link favoriteFileIDs}, {@link pendingFavoriteUpdates} and
+     * {@link onToggleFavorite} are provided.
      */
     onToggleFavorite?: (file: EnteFile) => Promise<void>;
     /**
@@ -256,10 +264,7 @@ export type FileViewerProps = ModalVisibilityProps & {
     onSaveEditedImageCopy?: ImageEditorOverlayProps["onSaveEditedCopy"];
 } & Pick<
         FileInfoProps,
-        | "fileNormalCollectionIDs"
-        | "collectionNameByID"
-        | "onSelectCollection"
-        | "onSelectPerson"
+        "collectionNameByID" | "onSelectCollection" | "onSelectPerson"
     >;
 
 /**
@@ -276,15 +281,16 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     isInTrashSection,
     isInHiddenSection,
     favoriteFileIDs,
+    pendingFavoriteUpdates,
     pendingVisibilityUpdates,
     fileNormalCollectionIDs,
     collectionNameByID,
     onTriggerSyncWithRemote,
     onVisualFeedback,
     onToggleFavorite,
+    onFileVisibilityUpdate,
     onDownload,
     onDelete,
-    onFileVisibilityUpdate,
     onSelectCollection,
     onSelectPerson,
     onSaveEditedImageCopy,
@@ -339,31 +345,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const [isFullscreen, setIsFullscreen] = useState(false);
 
-    // Callbacks to be invoked (only once) the next time we get an update to the
-    // `files` or `favoriteFileIDs` props.
-    //
-    // The callback is passed the latest values of the `files` prop.
-    //
-    // Both of those trace their way back to the same reducer, so they get
-    // updated in tandem. When we delete files, only the `files` prop gets
-    // updated, while when we toggle favoriets, only the `favoriteFileIDs` prop
-    // gets updated.
-    const [, setOnNextFilesOrFavoritesUpdate] = useState<
-        ((files: EnteFile[]) => void)[]
-    >([]);
-
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
-
-    /**
-     * Add a callback to be fired (only once) the next time we get an update to
-     * the `files` prop.
-     */
-    const awaitNextFilesOrFavoritesUpdate = useCallback(
-        (cb: (files: EnteFile[]) => void) =>
-            setOnNextFilesOrFavoritesUpdate((cbs) => cbs.concat(cb)),
-        [],
-    );
 
     const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
 
@@ -586,35 +569,31 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const isFavorite = useCallback(
         ({ file }: FileViewerAnnotatedFile) => {
-            if (!haveUser || !favoriteFileIDs || !onToggleFavorite) {
+            if (
+                !haveUser ||
+                !favoriteFileIDs ||
+                !pendingFavoriteUpdates ||
+                !onToggleFavorite
+            ) {
                 return undefined;
             }
             return favoriteFileIDs.has(file.id);
         },
-        [haveUser, favoriteFileIDs, onToggleFavorite],
+        [haveUser, favoriteFileIDs, pendingFavoriteUpdates, onToggleFavorite],
+    );
+
+    const isFavoritePending = useCallback(
+        ({ file }: FileViewerAnnotatedFile) =>
+            !!pendingFavoriteUpdates?.has(file.id),
+        [pendingFavoriteUpdates],
     );
 
     const toggleFavorite = useCallback(
-        ({ file }: FileViewerAnnotatedFile) => {
-            return new Promise<void>((resolve) => {
-                // See: [Note: File viewer update and dispatch]
-                onToggleFavorite!(file)
-                    .then(
-                        () => awaitNextFilesOrFavoritesUpdate(() => resolve()),
-                        (e: unknown) => {
-                            onGenericError(e);
-                            resolve();
-                        },
-                    )
-                    .finally(handleNeedsRemoteSync);
-            });
-        },
-        [
-            onToggleFavorite,
-            onGenericError,
-            awaitNextFilesOrFavoritesUpdate,
-            handleNeedsRemoteSync,
-        ],
+        ({ file }: FileViewerAnnotatedFile) =>
+            onToggleFavorite!(file)
+                .catch(onGenericError)
+                .finally(handleNeedsRemoteSync),
+        [onToggleFavorite, onGenericError, handleNeedsRemoteSync],
     );
 
     const updateFullscreenStatus = useCallback(() => {
@@ -761,6 +740,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         delegateRef.current = {
             getFiles,
             isFavorite,
+            isFavoritePending,
             toggleFavorite,
             shouldIgnoreKeyboardEvent,
             performKeyAction,
@@ -772,12 +752,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         const delegate = delegateRef.current!;
         delegate.getFiles = getFiles;
         delegate.isFavorite = isFavorite;
+        delegate.isFavoritePending = isFavoritePending;
         delegate.toggleFavorite = toggleFavorite;
         delegate.shouldIgnoreKeyboardEvent = shouldIgnoreKeyboardEvent;
         delegate.performKeyAction = performKeyAction;
     }, [
         getFiles,
         isFavorite,
+        isFavoritePending,
         toggleFavorite,
         shouldIgnoreKeyboardEvent,
         performKeyAction,
@@ -831,13 +813,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             return af;
         });
+    }, [handleClose, files]);
 
-        // - Used for favorite updates.
-        setOnNextFilesOrFavoritesUpdate((cbs) => {
-            cbs.forEach((cb) => cb(files));
-            return [];
-        });
-    }, [handleClose, files, favoriteFileIDs]);
+    useEffect(() => {
+        psRef.current?.refreshCurrentSlideFavoriteButtonIfNeeded();
+    }, [favoriteFileIDs, pendingFavoriteUpdates]);
 
     useEffect(() => {
         if (open) {
@@ -904,12 +884,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 exif={activeFileExif}
                 allowEdits={!!activeAnnotatedFile.annotation.isOwnFile}
                 allowMap={haveUser}
-                showCollections={haveUser}
+                showCollections={haveUser && !isInHiddenSection}
+                fileCollectionIDs={fileNormalCollectionIDs}
+                collectionNameByID={collectionNameByID}
                 onNeedsRemoteSync={handleNeedsRemoteSync}
                 onUpdateCaption={handleUpdateCaption}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
-                {...{ fileNormalCollectionIDs, collectionNameByID }}
             />
             <MoreMenu
                 open={!!moreMenuAnchorEl}

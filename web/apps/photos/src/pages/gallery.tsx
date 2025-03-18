@@ -111,10 +111,12 @@ import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
+    addToFavorites,
     constructEmailList,
     constructUserIDToEmailMap,
     createAlbum,
     createUnCategorizedCollection,
+    removeFromFavorites,
 } from "services/collectionService";
 import exportService from "services/export";
 import uploadManager from "services/upload/uploadManager";
@@ -261,7 +263,12 @@ const Page: React.FC = () => {
         normalCollections,
         normalFiles,
         hiddenFiles,
+        favoriteFileIDs,
+        collectionNameByID,
+        fileNormalCollectionIDs,
         normalCollectionSummaries,
+        pendingFavoriteUpdates,
+        pendingVisibilityUpdates,
         isInSearchMode,
         filteredFiles,
     } = state;
@@ -815,6 +822,29 @@ const Page: React.FC = () => {
         });
     };
 
+    const handleToggleFavorite = useCallback(
+        async (file: EnteFile) => {
+            const fileID = file.id;
+            const isFavorite = favoriteFileIDs.has(fileID);
+
+            dispatch({ type: "addPendingFavoriteUpdate", fileID });
+            try {
+                await (isFavorite ? removeFromFavorites : addToFavorites)(
+                    file,
+                    true,
+                );
+                dispatch({
+                    type: "unsyncedFavoriteUpdate",
+                    fileID,
+                    isFavorite: !isFavorite,
+                });
+            } finally {
+                dispatch({ type: "removePendingFavoriteUpdate", fileID });
+            }
+        },
+        [favoriteFileIDs],
+    );
+
     const handleFileViewerFileVisibilityUpdate = useCallback(
         async (file: EnteFile, visibility: ItemVisibility) => {
             const fileID = file.id;
@@ -833,16 +863,6 @@ const Page: React.FC = () => {
                 dispatch({ type: "removePendingVisibilityUpdate", fileID });
             }
         },
-        [],
-    );
-
-    const handleMarkUnsyncedFavoriteUpdate = useCallback(
-        (fileID: number, isFavorite: boolean) =>
-            dispatch({
-                type: "markUnsyncedFavoriteUpdate",
-                fileID,
-                isFavorite,
-            }),
         [],
     );
 
@@ -1104,8 +1124,6 @@ const Page: React.FC = () => {
                         setSelected={setSelected}
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
-                        fileNormalCollectionIDs={state.fileNormalCollectionIDs}
-                        collectionNameByID={state.collectionNameByID}
                         isInIncomingSharedCollection={
                             normalCollectionSummaries.get(activeCollectionID)
                                 ?.type == "incomingShareCollaborator" ||
@@ -1113,18 +1131,19 @@ const Page: React.FC = () => {
                                 ?.type == "incomingShareViewer"
                         }
                         isInHiddenSection={barMode == "hidden-albums"}
-                        pendingVisibilityUpdates={
-                            state.pendingVisibilityUpdates
-                        }
-                        favoriteFileIDs={state.favoriteFileIDs}
+                        {...{
+                            favoriteFileIDs,
+                            collectionNameByID,
+                            fileNormalCollectionIDs,
+                            pendingFavoriteUpdates,
+                            pendingVisibilityUpdates,
+                        }}
                         setFilesDownloadProgressAttributesCreator={
                             setFilesDownloadProgressAttributesCreator
                         }
+                        onToggleFavorite={handleToggleFavorite}
                         onFileVisibilityUpdate={
                             handleFileViewerFileVisibilityUpdate
-                        }
-                        onMarkUnsyncedFavoriteUpdate={
-                            handleMarkUnsyncedFavoriteUpdate
                         }
                         onMarkTempDeleted={handleMarkTempDeleted}
                         onSetOpenFileViewer={setIsFileViewerOpen}
@@ -1136,7 +1155,7 @@ const Page: React.FC = () => {
                 )}
                 <Export
                     {...exportVisibilityProps}
-                    allCollectionsNameByID={state.collectionNameByID}
+                    allCollectionsNameByID={collectionNameByID}
                 />
                 <AuthenticateUser
                     {...authenticateUserVisibilityProps}
