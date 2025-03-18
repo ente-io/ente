@@ -12,7 +12,7 @@ import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
 import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
+import { getKey } from "@ente/shared/storage/sessionStorage";
 import { Box, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -61,7 +61,7 @@ const Page: React.FC = () => {
 
     const handleNormalRedirect = async () => {
         const user = getData(LS_KEYS.USER);
-        let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        let key = getKey("encryptionKey");
         const electron = globalThis.electron;
         if (!key && electron) {
             try {
@@ -70,11 +70,7 @@ const Page: React.FC = () => {
                 log.error("Failed to read master key from safe storage", e);
             }
             if (key) {
-                await saveKeyInSessionStore(
-                    SESSION_KEYS.ENCRYPTION_KEY,
-                    key,
-                    true,
-                );
+                await saveKeyInSessionStore("encryptionKey", key, true);
             }
         }
         const token = getToken();

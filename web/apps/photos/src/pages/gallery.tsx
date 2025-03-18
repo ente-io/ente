@@ -78,11 +78,7 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from "@ente/shared/storage/localStorage/helpers";
-import {
-    SESSION_KEYS,
-    clearKeys,
-    getKey,
-} from "@ente/shared/storage/sessionStorage";
+import { clearKeys, getKey } from "@ente/shared/storage/sessionStorage";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -302,7 +298,7 @@ const Page: React.FC = () => {
     };
 
     useEffect(() => {
-        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        const key = getKey("encryptionKey");
         const token = getToken();
         if (!key || !token) {
             stashRedirect("/gallery");
@@ -404,7 +400,7 @@ const Page: React.FC = () => {
     }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
-        if (router.isReady && getKey(SESSION_KEYS.ENCRYPTION_KEY)) {
+        if (router.isReady && getKey("encryptionKey")) {
             handleSubscriptionCompletionRedirectIfNeeded(
                 showMiniDialog,
                 showLoadingBar,

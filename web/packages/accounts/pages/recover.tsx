@@ -17,7 +17,7 @@ import {
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
+import { getKey } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -40,7 +40,7 @@ const Page: React.FC = () => {
     useEffect(() => {
         const user: User = getData(LS_KEYS.USER);
         const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        const key = getKey("encryptionKey");
         if (!user?.email) {
             void router.push("/");
             return;
@@ -85,7 +85,7 @@ const Page: React.FC = () => {
                 keyAttr.masterKeyDecryptionNonce!,
                 await cryptoWorker.fromHex(recoveryKey),
             );
-            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
+            await saveKeyInSessionStore("encryptionKey", masterKey);
             await decryptAndStoreToken(keyAttr, masterKey);
 
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });

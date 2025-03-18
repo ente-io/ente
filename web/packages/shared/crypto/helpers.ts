@@ -9,7 +9,7 @@ import {
     setLSUser,
 } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { SESSION_KEYS, setKey } from "@ente/shared/storage/sessionStorage";
+import { SessionKey, setKey } from "@ente/shared/storage/sessionStorage";
 import { getActualKey } from "@ente/shared/user";
 import type { KeyAttributes } from "@ente/shared/user/types";
 
@@ -99,7 +99,7 @@ export const generateLoginSubKey = async (kek: string) => {
 };
 
 export const saveKeyInSessionStore = async (
-    keyType: SESSION_KEYS,
+    keyType: SessionKey,
     key: string,
     fromDesktop?: boolean,
 ) => {
@@ -108,7 +108,7 @@ export const saveKeyInSessionStore = async (
         await cryptoWorker.generateKeyAndEncryptToB64(key);
     setKey(keyType, sessionKeyAttributes);
     const electron = globalThis.electron;
-    if (electron && !fromDesktop && keyType === SESSION_KEYS.ENCRYPTION_KEY) {
+    if (electron && !fromDesktop && keyType == "encryptionKey") {
         electron.saveMasterKeyB64(key);
     }
 };

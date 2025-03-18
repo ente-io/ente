@@ -17,7 +17,6 @@ import {
     setJustSignedUp,
     setLocalReferralSource,
 } from "@ente/shared/storage/localStorage/helpers";
-import { SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Box,
@@ -116,10 +115,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     masterKey,
                 );
 
-                await saveKeyInSessionStore(
-                    SESSION_KEYS.ENCRYPTION_KEY,
-                    masterKey,
-                );
+                await saveKeyInSessionStore("encryptionKey", masterKey);
                 setJustSignedUp(true);
                 void router.push("/verify");
             } catch (e) {

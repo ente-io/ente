@@ -52,12 +52,7 @@ import {
     isFirstLogin,
     setIsFirstLogin,
 } from "@ente/shared/storage/localStorage/helpers";
-import {
-    SESSION_KEYS,
-    getKey,
-    removeKey,
-    setKey,
-} from "@ente/shared/storage/sessionStorage";
+import { getKey, removeKey, setKey } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -126,7 +121,7 @@ const Page: React.FC = () => {
                 return;
             }
             setUser(user);
-            let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+            let key = getKey("encryptionKey");
             const electron = globalThis.electron;
             if (!key && electron) {
                 try {
@@ -135,11 +130,7 @@ const Page: React.FC = () => {
                     log.error("Failed to read master key from safe storage", e);
                 }
                 if (key) {
-                    await saveKeyInSessionStore(
-                        SESSION_KEYS.ENCRYPTION_KEY,
-                        key,
-                        true,
-                    );
+                    await saveKeyInSessionStore("encryptionKey", key, true);
                 }
             }
             const token = getToken();
@@ -147,9 +138,8 @@ const Page: React.FC = () => {
                 void router.push(appHomeRoute);
                 return;
             }
-            const kekEncryptedAttributes: B64EncryptionResult = getKey(
-                SESSION_KEYS.KEY_ENCRYPTION_KEY,
-            );
+            const kekEncryptedAttributes: B64EncryptionResult =
+                getKey("keyEncryptionKey");
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.KEY_ATTRIBUTES,
             );
@@ -162,7 +152,7 @@ const Page: React.FC = () => {
             }
 
             if (kekEncryptedAttributes && keyAttributes) {
-                removeKey(SESSION_KEYS.KEY_ENCRYPTION_KEY);
+                removeKey("keyEncryptionKey");
                 const cryptoWorker = await sharedCryptoWorker();
                 const kek = await cryptoWorker.decryptB64(
                     kekEncryptedAttributes.encryptedData,
@@ -231,10 +221,7 @@ const Page: React.FC = () => {
                 if (passkeySessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
-                    setKey(
-                        SESSION_KEYS.KEY_ENCRYPTION_KEY,
-                        sessionKeyAttributes,
-                    );
+                    setKey("keyEncryptionKey", sessionKeyAttributes);
                     const user = getData(LS_KEYS.USER);
                     await setLSUser({
                         ...user,
@@ -253,10 +240,7 @@ const Page: React.FC = () => {
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
-                    setKey(
-                        SESSION_KEYS.KEY_ENCRYPTION_KEY,
-                        sessionKeyAttributes,
-                    );
+                    setKey("keyEncryptionKey", sessionKeyAttributes);
                     const user = getData(LS_KEYS.USER);
                     await setLSUser({
                         ...user,
@@ -304,7 +288,7 @@ const Page: React.FC = () => {
                     key,
                 );
             }
-            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+            await saveKeyInSessionStore("encryptionKey", key);
             await decryptAndStoreToken(keyAttributes, key);
             try {
                 let srpAttributes: SRPAttributes | null = getData(

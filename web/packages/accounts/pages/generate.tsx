@@ -26,7 +26,7 @@ import {
     justSignedUp,
     setJustSignedUp,
 } from "@ente/shared/storage/localStorage/helpers";
-import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
+import { getKey } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -43,7 +43,7 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const key: string = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        const key: string = getKey("encryptionKey");
         const keyAttributes: KeyAttributes = getData(
             LS_KEYS.ORIGINAL_KEY_ATTRIBUTES,
         );
@@ -82,7 +82,7 @@ const Page: React.FC = () => {
                 keyAttributes,
                 masterKey,
             );
-            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
+            await saveKeyInSessionStore("encryptionKey", masterKey);
             setJustSignedUp(true);
             setOpenRecoveryKey(true);
         } catch (e) {

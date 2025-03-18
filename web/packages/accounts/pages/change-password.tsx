@@ -27,7 +27,6 @@ import {
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import { SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
 import { getActualKey } from "@ente/shared/user";
 import type { KEK, KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
@@ -123,7 +122,7 @@ const Page: React.FC = () => {
             key,
         );
 
-        await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+        await saveKeyInSessionStore("encryptionKey", key);
 
         redirectToAppHome();
     };
