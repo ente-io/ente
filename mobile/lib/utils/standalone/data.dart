@@ -1,6 +1,6 @@
 import 'dart:math';
 
-final storageUnits = ["bytes", "KB", "MB", "GB"];
+final storageUnits = ["bytes", "KB", "MB", "GB", "TB"];
 
 String convertBytesToReadableFormat(int bytes) {
   int storageUnitIndex = 0;
