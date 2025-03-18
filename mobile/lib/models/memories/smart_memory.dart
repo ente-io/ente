@@ -56,6 +56,10 @@ class SmartMemory {
     return now >= firstDateToShow && now <= lastDateToShow;
   }
 
+  String createTitle() {
+    throw UnimplementedError("createTitle must be implemented in subclass");
+  }
+
   int averageCreationTime() {
     if (firstCreationTime != null && lastCreationTime != null) {
       return (firstCreationTime! + lastCreationTime!) ~/ 2;

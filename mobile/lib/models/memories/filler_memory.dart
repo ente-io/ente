@@ -2,9 +2,11 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 
 class FillerMemory extends SmartMemory {
+  // For creating the title
+  int yearsAgo;
   FillerMemory(
     List<Memory> memories,
-    String title,
+    this.yearsAgo,
     int firstDateToShow,
     int lastDateToShow, {
     int? firstCreationTime,
@@ -12,8 +14,13 @@ class FillerMemory extends SmartMemory {
   }) : super(
           memories,
           MemoryType.filler,
-          title,
+          'filler',
           firstDateToShow,
           lastDateToShow,
         );
+
+  @override
+  String createTitle() {
+    return "$yearsAgo years ago";
+  }
 }

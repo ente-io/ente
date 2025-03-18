@@ -5,39 +5,60 @@ import "package:photos/models/memories/smart_memory.dart";
 class TripMemory extends SmartMemory {
   final Location location;
 
+  // Stuff for the title
+  String? locationName;
+  int? tripYear;
+
   TripMemory(
     List<Memory> memories,
-    String title,
     int firstDateToShow,
     int lastDateToShow,
     this.location, {
+    this.locationName,
+    this.tripYear,
     super.firstCreationTime,
     super.lastCreationTime,
   }) : super(
           memories,
           MemoryType.trips,
-          title,
+          '',
           firstDateToShow,
           lastDateToShow,
         );
 
   TripMemory copyWith({
     List<Memory>? memories,
-    String? title,
     int? firstDateToShow,
     int? lastDateToShow,
-    Location? location,
-    int? firstCreationTime,
-    int? lastCreationTime,
+    String? locationName,
+    int? tripYear,
   }) {
     return TripMemory(
       memories ?? this.memories,
-      title ?? this.title,
       firstDateToShow ?? this.firstDateToShow,
       lastDateToShow ?? this.lastDateToShow,
-      location ?? this.location,
-      firstCreationTime: firstCreationTime ?? this.firstCreationTime,
-      lastCreationTime: lastCreationTime ?? this.lastCreationTime,
+      location,
+      locationName: locationName ?? this.locationName,
+      tripYear: tripYear ?? this.tripYear,
+      firstCreationTime: firstCreationTime,
+      lastCreationTime: lastCreationTime,
     );
+  }
+
+  @override
+  String createTitle() {
+    assert(locationName != null || tripYear != null);
+    if (locationName != null) {
+      if (locationName!.toLowerCase().contains("base")) return locationName!;
+      return "Trip to $locationName";
+    }
+    if (tripYear != null) {
+      if (tripYear == DateTime.now().year - 1) {
+        return "Last year's trip";
+      } else {
+        return "Trip in $tripYear";
+      }
+    }
+    throw ArgumentError("TripMemory must have a location name or trip year");
   }
 }

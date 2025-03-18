@@ -96,7 +96,6 @@ class ClipMemory extends SmartMemory {
 
   ClipMemory(
     List<Memory> memories,
-    String title,
     int firstDateToShow,
     int lastDateToShow,
     this.clipMemoryType, {
@@ -105,27 +104,13 @@ class ClipMemory extends SmartMemory {
   }) : super(
           memories,
           MemoryType.clip,
-          title,
+          '',
           firstDateToShow,
           lastDateToShow,
         );
 
-  ClipMemory copyWith({
-    List<Memory>? memories,
-    String? title,
-    int? firstDateToShow,
-    int? lastDateToShow,
-    int? firstCreationTime,
-    int? lastCreationTime,
-  }) {
-    return ClipMemory(
-      memories ?? this.memories,
-      title ?? this.title,
-      firstDateToShow ?? this.firstDateToShow,
-      lastDateToShow ?? this.lastDateToShow,
-      clipMemoryType,
-      firstCreationTime: firstCreationTime ?? this.firstCreationTime,
-      lastCreationTime: lastCreationTime ?? this.lastCreationTime,
-    );
+  @override
+  String createTitle() {
+    return clipTitle(clipMemoryType);
   }
 }

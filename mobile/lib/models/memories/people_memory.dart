@@ -95,6 +95,10 @@ String activityTitle(PeopleActivity activity, String personName) {
 class PeopleMemory extends SmartMemory {
   final String personID;
   final PeopleMemoryType peopleMemoryType;
+  final PeopleActivity? activity;
+  final String? personName;
+  final bool? isBirthday;
+  final int? newAge;
 
   PeopleMemory(
     List<Memory> memories,
@@ -102,9 +106,13 @@ class PeopleMemory extends SmartMemory {
     int firstDateToShow,
     int lastDateToShow,
     this.peopleMemoryType,
-    this.personID, {
+    this.personID,
+    this.personName, {
     super.firstCreationTime,
     super.lastCreationTime,
+    this.activity,
+    this.isBirthday,
+    this.newAge,
   }) : super(
           memories,
           MemoryType.people,
@@ -114,24 +122,52 @@ class PeopleMemory extends SmartMemory {
         );
 
   PeopleMemory copyWith({
-    List<Memory>? memories,
-    String? title,
     int? firstDateToShow,
     int? lastDateToShow,
-    PeopleMemoryType? peopleMemoryType,
-    String? personID,
-    int? firstCreationTime,
-    int? lastCreationTime,
+    bool? isBirthday,
+    int? newAge,
   }) {
     return PeopleMemory(
-      memories ?? this.memories,
-      title ?? this.title,
+      memories,
+      title,
       firstDateToShow ?? this.firstDateToShow,
       lastDateToShow ?? this.lastDateToShow,
-      peopleMemoryType ?? this.peopleMemoryType,
-      personID ?? this.personID,
-      firstCreationTime: firstCreationTime ?? this.firstCreationTime,
-      lastCreationTime: lastCreationTime ?? this.lastCreationTime,
+      peopleMemoryType,
+      personID,
+      personName,
+      firstCreationTime: firstCreationTime,
+      lastCreationTime: lastCreationTime,
+      activity: activity,
+      isBirthday: isBirthday ?? this.isBirthday,
+      newAge: newAge ?? this.newAge,
     );
+  }
+
+  // TODO: extract strings below
+  @override
+  String createTitle() {
+    switch (peopleMemoryType) {
+      case PeopleMemoryType.youAndThem:
+        assert(personName != null);
+        return "You and $personName";
+      case PeopleMemoryType.doingSomethingTogether:
+        assert(activity != null);
+        assert(personName != null);
+        return activityTitle(activity!, personName!);
+      case PeopleMemoryType.spotlight:
+        if (personName == null) {
+          return "Spotlight on yourself";
+        } else if (newAge == null) {
+          return "Spotlight on $personName";
+        } else {
+          if (isBirthday!) {
+            return "$personName is $newAge!";
+          } else {
+            return "$personName turning $newAge soon";
+          }
+        }
+      case PeopleMemoryType.lastTimeYouSawThem:
+        return "Last time with $personName";
+    }
   }
 }
