@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"errors"
-
 	"github.com/ente-io/museum/pkg/utils/time"
 )
 
@@ -23,6 +22,7 @@ func (c ClaimScope) Ptr() *ClaimScope {
 type WebCommonJWTClaim struct {
 	UserID     int64       `json:"userID"`
 	ExpiryTime int64       `json:"expiryTime"`
+	Email      string      `json:"email"`
 	ClaimScope *ClaimScope `json:"claimScope"`
 }
 
@@ -51,10 +51,4 @@ func (c PublicAlbumPasswordClaim) Valid() error {
 		return errors.New("token expired")
 	}
 	return nil
-}
-
-type AccountRecoveryParams struct {
-	Email      string `json:"email"`
-	ExpiryTime int64  `json:"expiryTime"`
-	UserID     int64  `json:"userID"`
 }
