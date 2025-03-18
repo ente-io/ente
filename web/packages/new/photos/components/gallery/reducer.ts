@@ -2,7 +2,7 @@ import {
     isArchivedCollection,
     isPinnedCollection,
 } from "@/gallery/services/magic-metadata";
-import { COLLECTION_ROLE, type Collection } from "@/media/collection";
+import { type Collection } from "@/media/collection";
 import type { EnteFile, FilePrivateMagicMetadata } from "@/media/file";
 import { mergeMetadata } from "@/media/file";
 import { isArchivedFile } from "@/media/file-metadata";
@@ -1457,7 +1457,7 @@ const isIncomingCollabShare = (collection: Collection, user: User) => {
     // TODO: Need to audit the types
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
-    return sharee?.role === COLLECTION_ROLE.COLLABORATOR;
+    return sharee?.role == "COLLABORATOR";
 };
 
 const isOutgoingShare = (collection: Collection, user: User) =>

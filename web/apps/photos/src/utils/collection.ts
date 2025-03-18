@@ -3,7 +3,6 @@ import { joinPath } from "@/base/file-name";
 import log from "@/base/log";
 import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
 import {
-    COLLECTION_ROLE,
     type Collection,
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadataProps,
@@ -306,7 +305,7 @@ export const isQuickLinkCollection = (collection: Collection) =>
 
 export function isIncomingViewerShare(collection: Collection, user: User) {
     const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
-    return sharee?.role === COLLECTION_ROLE.VIEWER;
+    return sharee?.role == "VIEWER";
 }
 
 export function isValidMoveTarget(

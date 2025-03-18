@@ -8,17 +8,12 @@ import { ItemVisibility } from "@/media/file-metadata";
 
 export type CollectionType = "folder" | "favorites" | "album" | "uncategorized";
 
-export enum COLLECTION_ROLE {
-    VIEWER = "VIEWER",
-    OWNER = "OWNER",
-    COLLABORATOR = "COLLABORATOR",
-    UNKNOWN = "UNKNOWN",
-}
+export type CollectionRole = "VIEWER" | "OWNER" | "COLLABORATOR" | "UNKNOWN";
 
 export interface CollectionUser {
     id: number;
     email: string;
-    role: COLLECTION_ROLE;
+    role: CollectionRole;
 }
 
 export interface EncryptedCollection {
