@@ -1,10 +1,10 @@
 import { decryptBlob } from "@/base/crypto";
 import log from "@/base/log";
+import { fetchFilesData, putFileData } from "@/gallery/services/file-data";
 import type { EnteFile } from "@/media/file";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip, gzip } from "../../utils/gzip";
-import { fetchFileData, putFileData } from "../file-data";
 import { type RemoteCLIPIndex } from "./clip";
 import { type RemoteFaceIndex } from "./face";
 
@@ -153,7 +153,7 @@ const ParsedRemoteMLData = z.object({
 export const fetchMLData = async (
     filesByID: Map<number, EnteFile>,
 ): Promise<Map<number, RemoteMLData>> => {
-    const remoteFileDatas = await fetchFileData("mldata", [
+    const remoteFileDatas = await fetchFilesData("mldata", [
         ...filesByID.keys(),
     ]);
 
