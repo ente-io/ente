@@ -8,7 +8,7 @@
  * then we sort by this key. Since the key is random, the sorted array will have
  * the original elements in a random order.
  */
-export const shuffled = <T>(xs: T[]) =>
+export const shuffled = <T>(xs: T[]): T[] =>
     xs
         .map((x) => [Math.random(), x])
         .sort()
@@ -24,7 +24,9 @@ export const shuffled = <T>(xs: T[]) =>
  * If none of the strings are non-empty, or if there are no strings in the given
  * array, return undefined.
  */
-export const firstNonEmpty = (ss: (string | undefined)[]) => {
+export const firstNonEmpty = (
+    ss: (string | undefined)[],
+): string | undefined => {
     for (const s of ss) if (s && s.length > 0) return s;
     return undefined;
 };
@@ -35,7 +37,7 @@ export const firstNonEmpty = (ss: (string | undefined)[]) => {
  *
  * @param as An array of {@link Uint8Array}.
  */
-export const mergeUint8Arrays = (as: Uint8Array[]) => {
+export const mergeUint8Arrays = (as: Uint8Array[]): Uint8Array => {
     // A longer but better performing replacement of
     //
     //     new Uint8Array(as.reduce((acc, x) => acc.concat(...x), []))

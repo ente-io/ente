@@ -11,7 +11,7 @@ import type {
     FolderWatch,
     FolderWatchSyncedFile,
 } from "@/base/types/ipc";
-import { UPLOAD_RESULT } from "@/gallery/services/upload";
+import { type UploadResult } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
 import { EncryptedEnteFile } from "@/media/file";
 import {
@@ -324,7 +324,7 @@ class FolderWatcher {
      * {@link upload} gets uploaded.
      */
     async onFileUpload(
-        fileUploadResult: UPLOAD_RESULT,
+        fileUploadResult: UploadResult,
         item: UploadItemWithCollection,
         file: EncryptedEnteFile,
     ) {
@@ -333,10 +333,10 @@ class FolderWatcher {
         // file on disk).
         if (
             [
-                UPLOAD_RESULT.ADDED_SYMLINK,
-                UPLOAD_RESULT.UPLOADED,
-                UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL,
-                UPLOAD_RESULT.ALREADY_UPLOADED,
+                "addedSymlink",
+                "uploaded",
+                "uploadedWithStaticThumbnail",
+                "alreadyUploaded",
             ].includes(fileUploadResult)
         ) {
             if (item.isLivePhoto) {
@@ -354,11 +354,7 @@ class FolderWatcher {
                     file,
                 );
             }
-        } else if (
-            [UPLOAD_RESULT.UNSUPPORTED, UPLOAD_RESULT.TOO_LARGE].includes(
-                fileUploadResult,
-            )
-        ) {
+        } else if (["unsupported", "tooLarge"].includes(fileUploadResult)) {
             if (item.isLivePhoto) {
                 this.unUploadableFilePaths.add(
                     ensureString(item.livePhotoAssets.image),

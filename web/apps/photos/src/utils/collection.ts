@@ -3,12 +3,10 @@ import { joinPath } from "@/base/file-name";
 import log from "@/base/log";
 import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
 import {
-    COLLECTION_ROLE,
     type Collection,
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadataProps,
-    CollectionType,
-    SUB_TYPE,
+    CollectionSubType,
 } from "@/media/collection";
 import { EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
@@ -28,7 +26,7 @@ import {
 } from "@/new/photos/services/collections";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import {
@@ -45,41 +43,34 @@ import {
 } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
 
-export enum COLLECTION_OPS_TYPE {
-    ADD,
-    MOVE,
-    REMOVE,
-    RESTORE,
-    UNHIDE,
-}
-export async function handleCollectionOps(
-    type: COLLECTION_OPS_TYPE,
+export type CollectionOp = "add" | "move" | "remove" | "restore" | "unhide";
+
+export async function handleCollectionOp(
+    op: CollectionOp,
     collection: Collection,
     selectedFiles: EnteFile[],
     selectedCollectionID: number,
 ) {
-    switch (type) {
-        case COLLECTION_OPS_TYPE.ADD:
+    switch (op) {
+        case "add":
             await addToCollection(collection, selectedFiles);
             break;
-        case COLLECTION_OPS_TYPE.MOVE:
+        case "move":
             await moveToCollection(
                 selectedCollectionID,
                 collection,
                 selectedFiles,
             );
             break;
-        case COLLECTION_OPS_TYPE.REMOVE:
+        case "remove":
             await removeFromCollection(collection.id, selectedFiles);
             break;
-        case COLLECTION_OPS_TYPE.RESTORE:
+        case "restore":
             await restoreToCollection(collection, selectedFiles);
             break;
-        case COLLECTION_OPS_TYPE.UNHIDE:
+        case "unhide":
             await unhideToCollection(collection, selectedFiles);
             break;
-        default:
-            throw Error("Invalid collection operation");
     }
 }
 
@@ -207,7 +198,7 @@ export const changeCollectionVisibility = async (
             visibility,
         };
 
-        const user: User = getData(LS_KEYS.USER);
+        const user: User = getData("user");
         if (collection.owner.id === user.id) {
             const updatedMagicMetadata = await updateMagicMetadata(
                 updatedMagicMetadataProps,
@@ -282,7 +273,7 @@ export const changeCollectionOrder = async (
 
 export const changeCollectionSubType = async (
     collection: Collection,
-    subType: SUB_TYPE,
+    subType: CollectionSubType,
 ) => {
     try {
         const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
@@ -302,7 +293,7 @@ export const changeCollectionSubType = async (
 };
 
 export const getUserOwnedCollections = (collections: Collection[]) => {
-    const user: User = getData(LS_KEYS.USER);
+    const user: User = getData("user");
     if (!user?.id) {
         throw Error("user missing");
     }
@@ -310,11 +301,11 @@ export const getUserOwnedCollections = (collections: Collection[]) => {
 };
 
 export const isQuickLinkCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.subType === SUB_TYPE.QUICK_LINK_COLLECTION;
+    collection.magicMetadata?.data.subType == CollectionSubType.quicklink;
 
 export function isIncomingViewerShare(collection: Collection, user: User) {
     const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
-    return sharee?.role === COLLECTION_ROLE.VIEWER;
+    return sharee?.role == "VIEWER";
 }
 
 export function isValidMoveTarget(
@@ -337,9 +328,9 @@ export function isValidReplacementAlbum(
 ) {
     return (
         collection.name === wantedCollectionName &&
-        (collection.type === CollectionType.album ||
-            collection.type === CollectionType.folder ||
-            collection.type === CollectionType.uncategorized) &&
+        (collection.type == "album" ||
+            collection.type == "folder" ||
+            collection.type == "uncategorized") &&
         !isHiddenCollection(collection) &&
         !isQuickLinkCollection(collection) &&
         !isIncomingShare(collection, user)
@@ -350,7 +341,7 @@ export const getOrCreateAlbum = async (
     albumName: string,
     existingCollections: Collection[],
 ) => {
-    const user: User = getData(LS_KEYS.USER);
+    const user: User = getData("user");
     if (!user?.id) {
         throw Error("user missing");
     }

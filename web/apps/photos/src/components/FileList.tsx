@@ -52,17 +52,14 @@ const FOOTER_HEIGHT = 90;
 const ALBUM_FOOTER_HEIGHT = 75;
 const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
 
-export enum ITEM_TYPE {
-    TIME = "TIME",
-    FILE = "FILE",
-    HEADER = "HEADER",
-    FOOTER = "FOOTER",
-    MARKETING_FOOTER = "MARKETING_FOOTER",
-    OTHER = "OTHER",
-}
+export type FileListItemTag = "header" | "publicAlbumsFooter" | "date" | "file";
 
 export interface TimeStampListItem {
-    itemType: ITEM_TYPE;
+    /**
+     * An optional {@link FileListItemTag} that can be used to identify item
+     * types for conditional behaviour.
+     */
+    tag?: FileListItemTag;
     items?: FileListAnnotatedFile[];
     itemStartIndex?: number;
     date?: string;
@@ -256,10 +253,7 @@ export const FileList: React.FC<FileListProps> = ({
     useEffect(() => {
         setTimeStampList((timeStampList) => {
             timeStampList = timeStampList ?? [];
-            const hasHeader =
-                timeStampList.length > 0 &&
-                timeStampList[0].itemType === ITEM_TYPE.HEADER;
-
+            const hasHeader = timeStampList[0]?.tag == "header";
             if (hasHeader) {
                 return timeStampList;
             }
@@ -289,8 +283,8 @@ export const FileList: React.FC<FileListProps> = ({
             timeStampList = timeStampList ?? [];
             const hasFooter =
                 timeStampList.length > 0 &&
-                timeStampList[timeStampList.length - 1].itemType ===
-                    ITEM_TYPE.MARKETING_FOOTER;
+                timeStampList[timeStampList.length - 1]?.tag ==
+                    "publicAlbumsFooter";
             if (hasFooter) {
                 return timeStampList;
             }
@@ -334,12 +328,12 @@ export const FileList: React.FC<FileListProps> = ({
                 currentDate = item.file.metadata.creationTime / 1000;
 
                 timeStampList.push({
-                    itemType: ITEM_TYPE.TIME,
+                    tag: "date",
                     date: item.timelineDateString,
                     id: currentDate.toString(),
                 });
                 timeStampList.push({
-                    itemType: ITEM_TYPE.FILE,
+                    tag: "file",
                     items: [item],
                     itemStartIndex: index,
                 });
@@ -350,7 +344,7 @@ export const FileList: React.FC<FileListProps> = ({
             } else {
                 listItemIndex = 1;
                 timeStampList.push({
-                    itemType: ITEM_TYPE.FILE,
+                    tag: "file",
                     items: [item],
                     itemStartIndex: index,
                 });
@@ -367,7 +361,7 @@ export const FileList: React.FC<FileListProps> = ({
             } else {
                 listItemIndex = 1;
                 timeStampList.push({
-                    itemType: ITEM_TYPE.FILE,
+                    tag: "file",
                     items: [item],
                     itemStartIndex: index,
                 });
@@ -399,7 +393,6 @@ export const FileList: React.FC<FileListProps> = ({
 
     const getEmptyListItem = () => {
         return {
-            itemType: ITEM_TYPE.OTHER,
             item: (
                 <NothingContainer span={columns}>
                     <Typography sx={{ color: "text.faint" }}>
@@ -433,104 +426,99 @@ export const FileList: React.FC<FileListProps> = ({
             return sum;
         })();
         return {
-            itemType: ITEM_TYPE.OTHER,
             item: <></>,
             height: Math.max(height - fileListHeight - footerHeight, 0),
         };
     };
 
-    const getAppDownloadFooter = () => {
-        return {
-            itemType: ITEM_TYPE.MARKETING_FOOTER,
-            height: FOOTER_HEIGHT,
-            item: (
-                <FooterContainer span={columns}>
-                    <Typography variant="small" sx={{ color: "text.faint" }}>
-                        <Trans
-                            i18nKey={"install_mobile_app"}
-                            components={{
-                                a: (
-                                    <Link
-                                        href="https://play.google.com/store/apps/details?id=io.ente.photos"
-                                        target="_blank"
-                                        rel="noopener"
-                                    />
-                                ),
-                                b: (
-                                    <Link
-                                        href="https://apps.apple.com/in/app/ente-photos/id1542026904"
-                                        target="_blank"
-                                        rel="noopener"
-                                    />
-                                ),
-                            }}
-                        />
-                    </Typography>
-                </FooterContainer>
-            ),
-        };
-    };
+    const getAppDownloadFooter = (): TimeStampListItem => ({
+        tag: "publicAlbumsFooter",
+        height: FOOTER_HEIGHT,
+        item: (
+            <FooterContainer span={columns}>
+                <Typography variant="small" sx={{ color: "text.faint" }}>
+                    <Trans
+                        i18nKey={"install_mobile_app"}
+                        components={{
+                            a: (
+                                <Link
+                                    href="https://play.google.com/store/apps/details?id=io.ente.photos"
+                                    target="_blank"
+                                    rel="noopener"
+                                />
+                            ),
+                            b: (
+                                <Link
+                                    href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                                    target="_blank"
+                                    rel="noopener"
+                                />
+                            ),
+                        }}
+                    />
+                </Typography>
+            </FooterContainer>
+        ),
+    });
 
-    const getAlbumsFooter = () => {
-        return {
-            itemType: ITEM_TYPE.MARKETING_FOOTER,
-            height: publicCollectionGalleryContext.referralCode
-                ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
-                : ALBUM_FOOTER_HEIGHT,
-            item: (
-                <AlbumFooterContainer
-                    span={columns}
-                    hasReferral={!!publicCollectionGalleryContext.referralCode}
-                >
-                    {/* Make the entire area tappable, otherwise it is hard to
-                        get at on mobile devices. */}
-                    <Box sx={{ width: "100%" }}>
-                        <Link
-                            color="text.base"
-                            sx={{ "&:hover": { color: "inherit" } }}
-                            target="_blank"
-                            href={"https://ente.io"}
-                        >
-                            <Typography variant="small">
+    const getAlbumsFooter = (): TimeStampListItem => ({
+        tag: "publicAlbumsFooter",
+        height: publicCollectionGalleryContext.referralCode
+            ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
+            : ALBUM_FOOTER_HEIGHT,
+        item: (
+            <AlbumFooterContainer
+                span={columns}
+                hasReferral={!!publicCollectionGalleryContext.referralCode}
+            >
+                {/* Make the entire area tappable, otherwise it is hard to
+                    get at on mobile devices. */}
+                <Box sx={{ width: "100%" }}>
+                    <Link
+                        color="text.base"
+                        sx={{ "&:hover": { color: "inherit" } }}
+                        target="_blank"
+                        href={"https://ente.io"}
+                    >
+                        <Typography variant="small">
+                            <Trans
+                                i18nKey="shared_using"
+                                components={{
+                                    a: (
+                                        <Typography
+                                            variant="small"
+                                            component="span"
+                                            sx={{ color: "accent.main" }}
+                                        />
+                                    ),
+                                }}
+                                values={{ url: "ente.io" }}
+                            />
+                        </Typography>
+                    </Link>
+                    {publicCollectionGalleryContext.referralCode ? (
+                        <FullStretchContainer>
+                            <Typography
+                                sx={{
+                                    marginTop: "12px",
+                                    padding: "8px",
+                                    color: "accent.contrastText",
+                                }}
+                            >
                                 <Trans
-                                    i18nKey="shared_using"
-                                    components={{
-                                        a: (
-                                            <Typography
-                                                variant="small"
-                                                component="span"
-                                                sx={{ color: "accent.main" }}
-                                            />
-                                        ),
+                                    i18nKey={"sharing_referral_code"}
+                                    values={{
+                                        referralCode:
+                                            publicCollectionGalleryContext.referralCode,
                                     }}
-                                    values={{ url: "ente.io" }}
                                 />
                             </Typography>
-                        </Link>
-                        {publicCollectionGalleryContext.referralCode ? (
-                            <FullStretchContainer>
-                                <Typography
-                                    sx={{
-                                        marginTop: "12px",
-                                        padding: "8px",
-                                        color: "accent.contrastText",
-                                    }}
-                                >
-                                    <Trans
-                                        i18nKey={"sharing_referral_code"}
-                                        values={{
-                                            referralCode:
-                                                publicCollectionGalleryContext.referralCode,
-                                        }}
-                                    />
-                                </Typography>
-                            </FullStretchContainer>
-                        ) : null}
-                    </Box>
-                </AlbumFooterContainer>
-            ),
-        };
-    };
+                        </FullStretchContainer>
+                    ) : null}
+                </Box>
+            </AlbumFooterContainer>
+        ),
+    });
 
     /**
      * Checks and merge multiple dates into a single row.
@@ -546,7 +534,7 @@ export const FileList: React.FC<FileListProps> = ({
             const currItem = items[index];
             // If the current item is of type time, then it is not part of an ongoing date.
             // So, there is a possibility of merge.
-            if (currItem.itemType === ITEM_TYPE.TIME) {
+            if (currItem.tag == "date") {
                 // If new list pointer is not at the end of list then
                 // we can add more items to the same list.
                 if (newList[newIndex]) {
@@ -601,7 +589,7 @@ export const FileList: React.FC<FileListProps> = ({
         for (let i = 0; i < newList.length; i++) {
             const currItem = newList[i];
             const nextItem = newList[i + 1];
-            if (currItem.itemType === ITEM_TYPE.TIME) {
+            if (currItem.tag == "date") {
                 if (currItem.dates.length > 1) {
                     currItem.groups = currItem.dates.map((item) => item.span);
                     nextItem.groups = currItem.groups;
@@ -612,10 +600,10 @@ export const FileList: React.FC<FileListProps> = ({
     };
 
     const getItemSize = (timeStampList) => (index) => {
-        switch (timeStampList[index].itemType) {
-            case ITEM_TYPE.TIME:
+        switch (timeStampList[index].tag) {
+            case "date":
                 return DATE_CONTAINER_HEIGHT;
-            case ITEM_TYPE.FILE:
+            case "file":
                 return listItemHeight;
             default:
                 return timeStampList[index].height;
@@ -623,8 +611,8 @@ export const FileList: React.FC<FileListProps> = ({
     };
 
     const generateKey = (index) => {
-        switch (timeStampList[index].itemType) {
-            case ITEM_TYPE.FILE:
+        switch (timeStampList[index].tag) {
+            case "file":
                 return `${timeStampList[index].items[0].file.id}-${
                     timeStampList[index].items.slice(-1)[0].file.id
                 }`;
@@ -798,8 +786,8 @@ export const FileList: React.FC<FileListProps> = ({
         // Enhancement: This logic doesn't work on the shared album screen, the
         // galleryContext.selectedFile is always null there.
         const haveSelection = (galleryContext.selectedFile?.count ?? 0) > 0;
-        switch (listItem.itemType) {
-            case ITEM_TYPE.TIME:
+        switch (listItem.tag) {
+            case "date":
                 return listItem.dates ? (
                     listItem.dates
                         .map((item) => [
@@ -842,7 +830,7 @@ export const FileList: React.FC<FileListProps> = ({
                         {listItem.date}
                     </DateContainer>
                 );
-            case ITEM_TYPE.FILE: {
+            case "file": {
                 const ret = listItem.items.map((item, idx) =>
                     getThumbnail(
                         item,

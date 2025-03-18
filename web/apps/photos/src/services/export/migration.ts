@@ -15,7 +15,7 @@ import {
     sanitizeFilename,
 } from "@/new/photos/utils/native-fs";
 import { wait } from "@/utils/promise";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { getIDBasedSortedFiles, getPersonalFiles } from "utils/file";
 import {
@@ -135,7 +135,7 @@ async function migrationV0ToV1(
         return;
     }
     const collectionIDPathMap = new Map<number, string>();
-    const user: User = getData(LS_KEYS.USER);
+    const user: User = getData("user");
     const localFiles = mergeMetadata(await getAllLocalFiles());
     const localCollections = await getLocalCollections();
     const personalFiles = getIDBasedSortedFiles(
@@ -170,7 +170,7 @@ async function migrationV2ToV3(
     if (!exportRecord?.exportedFiles) {
         return;
     }
-    const user: User = getData(LS_KEYS.USER);
+    const user: User = getData("user");
     const localFiles = mergeMetadata(await getAllLocalFiles());
     const personalFiles = getIDBasedSortedFiles(
         getPersonalFiles(localFiles, user),

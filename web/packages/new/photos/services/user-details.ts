@@ -7,7 +7,7 @@ import {
     nullishToZero,
     nullToUndefined,
 } from "@/utils/transform";
-import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
+import { getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { z } from "zod";
 
 /**
@@ -243,7 +243,7 @@ export const syncUserDetails = async () => {
     //
     // Added Nov 2024, and can be removed after a while (tag: Migration).
 
-    const oldLSUser = getData(LS_KEYS.USER) as unknown;
+    const oldLSUser = getData("user") as unknown;
     const hasMatchingEmail =
         oldLSUser &&
         typeof oldLSUser == "object" &&
@@ -253,7 +253,7 @@ export const syncUserDetails = async () => {
 
     if (!hasMatchingEmail) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        await setLSUser({ ...getData(LS_KEYS.USER), email: userDetails.email });
+        await setLSUser({ ...getData("user"), email: userDetails.email });
         throw new Error("Email in local storage did not match user details");
     }
 };

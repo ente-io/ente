@@ -330,6 +330,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "มีบางอย่างผิดพลาด โปรดลองอีกครั้ง"),
         "sorry": MessageLookupByLibrary.simpleMessage("ขออภัย"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "status": MessageLookupByLibrary.simpleMessage("สถานะ"),
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("ครอบครัว"),
@@ -348,6 +350,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "คีย์การกู้คืนที่คุณป้อนไม่ถูกต้อง"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("อุปกรณ์นี้"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillMakeTheDateAndTimeOfAllSelected":
             MessageLookupByLibrary.simpleMessage(
                 "This will make the date and time of all selected photos the same."),

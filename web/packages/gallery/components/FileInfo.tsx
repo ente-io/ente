@@ -128,10 +128,10 @@ export type FileInfoProps = ModalVisibilityProps & {
      */
     allowMap?: boolean;
     /**
-     * If set, then a clickable chip will be shown for each collection that this
-     * file is a part of.
+     * If set, then a clickable chip will be shown for each normal collection
+     * that this file is a part of.
      *
-     * Uses {@link fileCollectionIDs}, {@link allCollectionsNameByID} and
+     * Uses {@link fileCollectionIDs}, {@link collectionNameByID} and
      * {@link onSelectCollection}, so all of those props should also be set for
      * this to have an effect.
      */
@@ -147,7 +147,7 @@ export type FileInfoProps = ModalVisibilityProps & {
      *
      * Used when {@link showCollections} is set.
      */
-    allCollectionsNameByID?: Map<number, string>;
+    collectionNameByID?: Map<number, string>;
     /**
      * Called when the action on the file info drawer has changed some the
      * metadata for some file, and we need to sync with remote to get our
@@ -189,7 +189,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     allowMap,
     showCollections,
     fileCollectionIDs,
-    allCollectionsNameByID,
+    collectionNameByID,
     onNeedsRemoteSync,
     onUpdateCaption,
     onSelectCollection,
@@ -339,13 +339,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 )}
                 {showCollections &&
                     fileCollectionIDs &&
-                    allCollectionsNameByID &&
+                    collectionNameByID &&
                     onSelectCollection && (
                         <Albums
                             {...{
                                 file,
                                 fileCollectionIDs,
-                                allCollectionsNameByID,
+                                collectionNameByID,
                                 onSelectCollection,
                             }}
                         />
@@ -1003,14 +1003,14 @@ const ExifItem = styled("div")`
 type AlbumsProps = Required<
     Pick<
         FileInfoProps,
-        "fileCollectionIDs" | "allCollectionsNameByID" | "onSelectCollection"
+        "fileCollectionIDs" | "collectionNameByID" | "onSelectCollection"
     >
 > & { file: EnteFile };
 
 const Albums: React.FC<AlbumsProps> = ({
     file,
     fileCollectionIDs,
-    allCollectionsNameByID,
+    collectionNameByID,
     onSelectCollection,
 }) => (
     <InfoItem icon={<FolderOutlinedIcon />}>
@@ -1025,15 +1025,13 @@ const Albums: React.FC<AlbumsProps> = ({
         >
             {fileCollectionIDs
                 .get(file.id)
-                ?.filter((collectionID) =>
-                    allCollectionsNameByID.has(collectionID),
-                )
+                ?.filter((collectionID) => collectionNameByID.has(collectionID))
                 .map((collectionID) => (
                     <ChipButton
                         key={collectionID}
                         onClick={() => onSelectCollection(collectionID)}
                     >
-                        {allCollectionsNameByID.get(collectionID)}
+                        {collectionNameByID.get(collectionID)}
                     </ChipButton>
                 ))}
         </Stack>

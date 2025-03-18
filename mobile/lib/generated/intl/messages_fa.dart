@@ -389,6 +389,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ایتدا جدیدترین"),
         "sortOldestFirst":
             MessageLookupByLibrary.simpleMessage("ایتدا قدیمی‌ترین"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "startBackup":
             MessageLookupByLibrary.simpleMessage("شروع پشتیبان گیری"),
         "status": MessageLookupByLibrary.simpleMessage("وضعیت"),
@@ -414,6 +416,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("دانلود کامل نشد"),
         "theme": MessageLookupByLibrary.simpleMessage("تم"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("این دستگاه"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "با این کار شما از دستگاه زیر خارج می‌شوید:"),

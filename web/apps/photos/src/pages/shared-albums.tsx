@@ -43,7 +43,6 @@ import { CenteredFlex } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -51,7 +50,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { ITEM_TYPE, TimeStampListItem } from "components/FileList";
+import { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import {
     FilesDownloadProgress,
@@ -185,7 +184,7 @@ export default function PublicCollectionGallery() {
         if (currentURL.pathname !== "/") {
             router.replace(
                 {
-                    pathname: PAGES.SHARED_ALBUMS,
+                    pathname: "/shared-albums",
                     search: currentURL.search,
                     hash: currentURL.hash,
                 },
@@ -266,7 +265,7 @@ export default function PublicCollectionGallery() {
                         }}
                     />
                 ),
-                itemType: ITEM_TYPE.HEADER,
+                tag: "header",
                 height: 68,
             });
     }, [publicCollection, publicFiles]);
@@ -280,7 +279,6 @@ export default function PublicCollectionGallery() {
                               <AddMorePhotosButton onClick={onAddPhotos} />
                           </CenteredFlex>
                       ),
-                      itemType: ITEM_TYPE.FOOTER,
                       height: 104,
                   }
                 : null,
@@ -522,8 +520,6 @@ export default function PublicCollectionGallery() {
                     selected={selected}
                     setSelected={setSelected}
                     activeCollectionID={ALL_SECTION}
-                    fileCollectionIDs={undefined}
-                    allCollectionsNameByID={undefined}
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }

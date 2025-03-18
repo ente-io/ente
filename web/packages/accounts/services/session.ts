@@ -1,7 +1,7 @@
 import { authenticatedRequestHeaders, HTTPError } from "@/base/http";
 import { ensureLocalUser } from "@/base/local-user";
 import { apiURL } from "@/base/origins";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import type { SRPAttributes } from "./srp-remote";
 import { getSRPAttributes } from "./srp-remote";
@@ -85,7 +85,7 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
 
         // We should have these values locally if we reach here.
         const email = ensureLocalUser().email;
-        const localSRPAttributes = getData(LS_KEYS.SRP_ATTRIBUTES)!;
+        const localSRPAttributes = getData("srpAttributes")!;
 
         // Fetch the remote SRP attributes.
         //

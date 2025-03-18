@@ -254,6 +254,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Uuemad eespool"),
         "sortOldestFirst":
             MessageLookupByLibrary.simpleMessage("Vanemad eespool"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "storage": MessageLookupByLibrary.simpleMessage("Mäluruum"),
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("Perekond"),
@@ -270,6 +272,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tingimused"),
         "theme": MessageLookupByLibrary.simpleMessage("Teema"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("See seade"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillMakeTheDateAndTimeOfAllSelected":
             MessageLookupByLibrary.simpleMessage(
                 "This will make the date and time of all selected photos the same."),

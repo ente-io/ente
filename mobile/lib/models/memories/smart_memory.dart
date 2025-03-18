@@ -1,3 +1,4 @@
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/memories/memory.dart";
 
 enum MemoryType {
@@ -54,6 +55,10 @@ class SmartMemory {
   bool shouldShowNow() {
     final int now = DateTime.now().microsecondsSinceEpoch;
     return now >= firstDateToShow && now <= lastDateToShow;
+  }
+
+  String createTitle(S s, String languageCode) {
+    throw UnimplementedError("createTitle must be implemented in subclass");
   }
 
   int averageCreationTime() {

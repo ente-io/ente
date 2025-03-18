@@ -13,6 +13,8 @@ import "package:photos/core/constants.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
+import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
@@ -111,11 +113,13 @@ class SmartMemoriesService {
       }
       _logger.finest('clipPositiveTextVector and clipPeopleActivityVectors $t');
 
-      // final locale = await getLocale();
-      // TODO: lau: locale with DateFormat is not working well in computer, fix later
+      final local = await getLocale();
+      final languageCode = local?.languageCode ?? "en";
+      final s = await S.load(local!);
+      _logger.finest('get locale and S $t');
 
       _logger.finest('all data fetched $t at ${DateTime.now()}, to computer');
-      return Computer.shared().compute(
+      final memoriesResult = await Computer.shared().compute(
         _allMemoriesCalculations,
         param: <String, dynamic>{
           "allFiles": allFiles,
@@ -133,7 +137,11 @@ class SmartMemoriesService {
           "clipPeopleActivityVectors": clipPeopleActivityVectors,
           "clipMemoryTypeVectors": clipMemoryTypeVectors,
         },
-      );
+      ) as MemoriesResult;
+      for (final memory in memoriesResult.memories) {
+        memory.title = memory.createTitle(s, languageCode);
+      }
+      return memoriesResult;
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
       return MemoriesResult(<SmartMemory>[], <BaseLocation>[]);
@@ -210,6 +218,7 @@ class SmartMemoriesService {
       }
       dev.log('arguments from indirect data calculated $t');
       dev.log('starting actual memory calculations ${DateTime.now()}');
+      dev.log("All files length at start: ${allFiles.length} $t");
 
       final List<SmartMemory> memories = [];
 
@@ -333,8 +342,7 @@ class SmartMemoriesService {
         currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
     w?.log('allFiles setup');
 
-    // Get ordered list of important people (all named, from most to least files)
-    if (persons.length < 5) return []; // Stop if not enough named persons
+    // Get ordered (random) list of important people
     final personIdToPerson = <String, PersonEntity>{};
     final personIdToFaceIDs = <String, Set<String>>{};
     final personIdToFileIDs = <String, Set<int>>{};
@@ -355,11 +363,7 @@ class SmartMemoriesService {
         .where((person) => !person.data.isHidden)
         .map((p) => p.remoteID)
         .toList();
-    orderedImportantPersonsID.sort((a, b) {
-      final aFaces = personIdToFaceIDs[a]!.length;
-      final bFaces = personIdToFaceIDs[b]!.length;
-      return bFaces.compareTo(aFaces);
-    });
+    orderedImportantPersonsID.shuffle(Random());
     w?.log('orderedImportantPersonsID setup');
 
     // Check if the user has assignmed "me"
@@ -393,10 +397,6 @@ class SmartMemoriesService {
         }
       }
       if (spotlightFiles.length > 5) {
-        String title = "Spotlight on $personName";
-        if (isMeAssigned && meID == personID) {
-          title = "Spotlight on yourself";
-        }
         final selectSpotlightMemories = await _bestSelectionPeople(
           spotlightFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
           fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -404,11 +404,11 @@ class SmartMemoriesService {
         );
         final spotlightMemory = PeopleMemory(
           selectSpotlightMemories,
-          title,
           nowInMicroseconds,
           windowEnd,
           PeopleMemoryType.spotlight,
           personID,
+          (isMeAssigned && meID == personID) ? null : personName,
         );
         personToMemories
             .putIfAbsent(personID, () => {})
@@ -429,7 +429,7 @@ class SmartMemoriesService {
           }
         }
         if (youAndThemFiles.length > 5) {
-          final String title = "You and $personName";
+          // final String title = "You and $personName";
           final selectYouAndThemMemories = await _bestSelectionPeople(
             youAndThemFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
             fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -437,11 +437,11 @@ class SmartMemoriesService {
           );
           final youAndThemMemory = PeopleMemory(
             selectYouAndThemMemories,
-            title,
             nowInMicroseconds,
             windowEnd,
             PeopleMemoryType.youAndThem,
             personID,
+            personName,
           );
           personToMemories.putIfAbsent(personID, () => {}).putIfAbsent(
                 PeopleMemoryType.youAndThem,
@@ -485,7 +485,6 @@ class SmartMemoriesService {
             }
           }
           if (activityFiles.length > 5) {
-            final String title = activityTitle(activity, personName);
             final selectActivityMemories = await _bestSelectionPeople(
               activityFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
               fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -493,11 +492,12 @@ class SmartMemoriesService {
             );
             final activityMemory = PeopleMemory(
               selectActivityMemories,
-              title,
               nowInMicroseconds,
               windowEnd,
               PeopleMemoryType.doingSomethingTogether,
               personID,
+              personName,
+              activity: activity,
             );
             personToMemories
                 .putIfAbsent(personID, () => {})
@@ -540,16 +540,15 @@ class SmartMemoriesService {
         }
       }
       if (longAgo && lastTimeYouSawThemFiles.length >= 2 && meID != personID) {
-        final String title = "Last time with $personName";
         final lastTimeMemory = PeopleMemory(
           lastTimeYouSawThemFiles
               .map((f) => Memory.fromFile(f, seenTimes))
               .toList(),
-          title,
           nowInMicroseconds,
           windowEnd,
           PeopleMemoryType.lastTimeYouSawThem,
           personID,
+          personName,
           lastCreationTime: lastCreationTime,
         );
         personToMemories.putIfAbsent(personID, () => {}).putIfAbsent(
@@ -583,17 +582,15 @@ class SmartMemoriesService {
             DateTime(currentTime.year, birthdate.month, birthdate.day);
         final daysTillBirthday = thisBirthday.difference(currentTime).inDays;
         if (daysTillBirthday < 7 && daysTillBirthday >= 0) {
-          final personName = person.data.name;
           final int newAge = currentTime.year - birthdate.year;
           final spotlightMem =
               personMemories[PeopleMemoryType.spotlight]?.first;
-          if (spotlightMem != null) {
-            final String firstTitle = "$personName turning $newAge!";
-            final String secondTitle = "$personName is $newAge!";
+          if (spotlightMem != null && spotlightMem.personName != null) {
             final thisBirthday = birthdate.copyWith(year: currentTime.year);
             memoryResults.add(
               spotlightMem.copyWith(
-                title: firstTitle,
+                isBirthday: false,
+                newAge: newAge,
                 firstDateToShow: thisBirthday
                     .subtract(const Duration(days: 6))
                     .microsecondsSinceEpoch,
@@ -602,7 +599,8 @@ class SmartMemoriesService {
             );
             memoryResults.add(
               spotlightMem.copyWith(
-                title: secondTitle,
+                isBirthday: true,
+                newAge: newAge,
                 firstDateToShow: thisBirthday.microsecondsSinceEpoch,
                 lastDateToShow:
                     thisBirthday.add(kDayItself).microsecondsSinceEpoch,
@@ -746,7 +744,6 @@ class SmartMemoriesService {
       });
       clipTypeToMemory[clipMemoryType] = ClipMemory(
         clipFiles.take(10).map((f) => Memory.fromFile(f, seenTimes)).toList(),
-        clipTitle(clipMemoryType),
         nowInMicroseconds,
         windowEnd,
         clipMemoryType,
@@ -764,7 +761,7 @@ class SmartMemoriesService {
 
     // Loop through the clip types and add based on rotation
     clipMemoriesLoop:
-    for (final clipMemoryType in ClipMemoryType.values) {
+    for (final clipMemoryType in ClipMemoryType.values..shuffle()) {
       final clipMemory = clipTypeToMemory[clipMemoryType];
       if (clipMemory == null) continue;
       for (final shownLog in shownClip) {
@@ -941,7 +938,6 @@ class SmartMemoriesService {
                   currentBlockFiles,
                   seenTimes,
                 ),
-                'Trip1',
                 0,
                 0,
                 location,
@@ -968,7 +964,6 @@ class SmartMemoriesService {
         tripLocations.add(
           TripMemory(
             Memory.fromFiles(currentBlockFiles, seenTimes),
-            'Trip2',
             0,
             0,
             location,
@@ -1002,7 +997,6 @@ class SmartMemoriesService {
             )) {
           mergedTrips[idx] = TripMemory(
             otherTrip.memories + trip.memories,
-            'Trip3',
             0,
             0,
             otherTrip.location,
@@ -1020,7 +1014,6 @@ class SmartMemoriesService {
       mergedTrips.add(
         TripMemory(
           trip.memories,
-          'Trip4',
           0,
           0,
           trip.location,
@@ -1057,10 +1050,10 @@ class SmartMemoriesService {
         memoryResults.add(
           TripMemory(
             Memory.fromFiles(baseLocation.files, seenTimes),
-            name,
             nowInMicroseconds,
             windowEnd,
             baseLocation.location,
+            locationName: name,
           ),
         );
       }
@@ -1070,12 +1063,6 @@ class SmartMemoriesService {
         ).year;
         final String? locationName =
             _tryFindLocationName(trip.memories, cities);
-        String name = "Trip in $year";
-        if (locationName != null) {
-          name = "Trip to $locationName";
-        } else if (year == currentTime.year - 1) {
-          name = "Last year's trip";
-        }
         final photoSelection = await _bestSelection(
           trip.memories,
           fileIdToFaces: fileIdToFaces,
@@ -1086,7 +1073,8 @@ class SmartMemoriesService {
         memoryResults.add(
           trip.copyWith(
             memories: photoSelection,
-            title: name,
+            tripYear: year,
+            locationName: locationName,
             firstDateToShow: nowInMicroseconds,
             lastDateToShow: windowEnd,
           ),
@@ -1129,13 +1117,6 @@ class SmartMemoriesService {
                 .year;
         final String? locationName =
             _tryFindLocationName(trip.memories, cities);
-        String name =
-            "Trip in $year"; // TODO lau: extract strings for translation
-        if (locationName != null) {
-          name = "Trip to $locationName";
-        } else if (year == currentTime.year - 1) {
-          name = "Last year's trip";
-        }
         final photoSelection = await _bestSelection(
           trip.memories,
           fileIdToFaces: fileIdToFaces,
@@ -1162,7 +1143,8 @@ class SmartMemoriesService {
         memoryResults.add(
           trip.copyWith(
             memories: photoSelection,
-            title: name,
+            tripYear: year,
+            locationName: locationName,
             firstDateToShow: firstDateToShow,
             lastDateToShow: lastDateToShow,
           ),
@@ -1206,12 +1188,6 @@ class SmartMemoriesService {
               ).year;
               final String? locationName =
                   _tryFindLocationName(trip.memories, cities);
-              String name = "Trip in $year";
-              if (locationName != null) {
-                name = "Trip to $locationName";
-              } else if (year == currentTime.year - 1) {
-                name = "Last year's trip";
-              }
               final photoSelection = await _bestSelection(
                 trip.memories,
                 fileIdToFaces: fileIdToFaces,
@@ -1222,7 +1198,8 @@ class SmartMemoriesService {
               memoryResults.add(
                 trip.copyWith(
                   memories: photoSelection,
-                  title: name,
+                  tripYear: year,
+                  locationName: locationName,
                   firstDateToShow: nowInMicroseconds,
                   lastDateToShow: windowEnd,
                 ),
@@ -1302,7 +1279,7 @@ class SmartMemoriesService {
         memoryResult.add(
           TimeMemory(
             photoSelection,
-            "${DateFormat.MMMd().format(date)} through the years",
+            day: date,
             date.subtract(kMemoriesMargin).microsecondsSinceEpoch,
             date.add(kDayItself).microsecondsSinceEpoch,
           ),
@@ -1321,12 +1298,11 @@ class SmartMemoriesService {
             fileIDToImageEmbedding: fileIDToImageEmbedding,
             clipPositiveTextVector: clipPositiveTextVector,
           );
-          final name =
-              "${DateFormat.MMMd().format(date)}, ${currentTime.year - date.year} years ago";
           memoryResult.add(
             TimeMemory(
               photoSelection,
-              name,
+              day: date,
+              yearsAgo: currentTime.year - date.year,
               showDate.subtract(kMemoriesMargin).microsecondsSinceEpoch,
               showDate.add(kDayItself).microsecondsSinceEpoch,
             ),
@@ -1370,11 +1346,10 @@ class SmartMemoriesService {
             fileIDToImageEmbedding: fileIDToImageEmbedding,
             clipPositiveTextVector: clipPositiveTextVector,
           );
-          const name = "This week through the years";
+          // const name = "This week through the years";
           memoryResult.add(
             TimeMemory(
               photoSelection,
-              name,
               currentTime.subtract(kMemoriesMargin).microsecondsSinceEpoch,
               currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch,
             ),
@@ -1393,12 +1368,10 @@ class SmartMemoriesService {
               fileIDToImageEmbedding: fileIDToImageEmbedding,
               clipPositiveTextVector: clipPositiveTextVector,
             );
-            final name = "This week, ${currentTime.year - date.year} years ago";
-
             memoryResult.add(
               TimeMemory(
                 photoSelection,
-                name,
+                yearsAgo: currentTime.year - date.year,
                 currentTime.subtract(kMemoriesMargin).microsecondsSinceEpoch,
                 currentTime
                     .add(kMemoriesUpdateFrequency)
@@ -1448,14 +1421,13 @@ class SmartMemoriesService {
         fileIDToImageEmbedding: fileIDToImageEmbedding,
         clipPositiveTextVector: clipPositiveTextVector,
       );
-      final monthName = DateFormat.MMMM().format(DateTime(year, currentMonth));
       final daysLeftInMonth =
           DateTime(currentYear, currentMonth + 1, 0).day - currentTime.day + 1;
-      final name = monthName + ", ${currentTime.year - year} years ago";
       memoryResult.add(
         TimeMemory(
           photoSelection,
-          name,
+          month: DateTime(year, currentMonth),
+          yearsAgo: currentTime.year - year,
           currentTime.microsecondsSinceEpoch,
           currentTime
               .add(Duration(days: daysLeftInMonth))
@@ -1476,15 +1448,12 @@ class SmartMemoriesService {
       fileIDToImageEmbedding: fileIDToImageEmbedding,
       clipPositiveTextVector: clipPositiveTextVector,
     );
-    final monthName =
-        DateFormat.MMMM().format(DateTime(currentTime.year, currentMonth));
     final daysLeftInMonth =
         DateTime(currentYear, currentMonth + 1, 0).day - currentTime.day + 1;
-    final name = monthName + " through the years";
     memoryResult.add(
       TimeMemory(
         photoSelection,
-        name,
+        month: DateTime(currentYear, currentMonth),
         currentTime.microsecondsSinceEpoch,
         currentTime.add(Duration(days: daysLeftInMonth)).microsecondsSinceEpoch,
       ),
@@ -1542,7 +1511,7 @@ class SmartMemoriesService {
       );
       final fillerMemory = FillerMemory(
         memories,
-        "filler",
+        yearAgo,
         nowInMicroseconds,
         windowEnd,
       );

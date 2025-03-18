@@ -74,10 +74,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Shift dates and time"),
         "sorry": MessageLookupByLibrary.simpleMessage("المعذرة"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "terminate": MessageLookupByLibrary.simpleMessage("إنهاء"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("إنهاء الجلسة؟"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("هذا الجهاز"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "سيؤدي هذا إلى تسجيل خروجك من الجهاز التالي:"),

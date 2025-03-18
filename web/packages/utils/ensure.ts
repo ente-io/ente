@@ -1,4 +1,14 @@
 /**
+ * Throw an exception if the given value {@link v} is false-y.
+ *
+ * This is a variant of {@link assertionFailed}, except it always throws, not
+ * just in dev builds, if the given value is falsey.
+ */
+export const ensurePrecondition = (v: unknown): void => {
+    if (!v) throw new Error("Precondition failed");
+};
+
+/**
  * Throw an exception if the given value is not a string.
  */
 export const ensureString = (v: unknown): string => {
