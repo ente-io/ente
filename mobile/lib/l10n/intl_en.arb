@@ -1723,14 +1723,13 @@
   "tripToLocation": "Trip to {location}",
   "tripInYear": "Trip in {year}",
   "lastYearsTrip": "Last year's trip",
-  "sunrise": "Sunrise",
-  "sunset": "Sunset",
-  "mountains": "Mountains",
-  "greenery": "Greenery",
-  "beach": "Beach",
-  "city": "City",
-  "moon": "Moon",
-  "onTheRoad": "On the road",
-  "food": "Food",
-  "pets": "Pets"
+  "sunrise": "On the horizon",
+  "mountains": "Over the hills",
+  "greenery": "The green life",
+  "beach": "Sand and sea",
+  "city": "In the city",
+  "moon": "In the moonlight",
+  "onTheRoad": "On the road again",
+  "food": "Culinary delight",
+  "pets": "Furry companions"
 }

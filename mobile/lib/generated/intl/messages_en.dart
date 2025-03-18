@@ -527,7 +527,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
             "Items that have been backed up will show up here"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Backup videos"),
-        "beach": MessageLookupByLibrary.simpleMessage("Beach"),
+        "beach": MessageLookupByLibrary.simpleMessage("Sand and sea"),
         "birthday": MessageLookupByLibrary.simpleMessage("Birthday"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday Sale"),
@@ -598,7 +598,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "checking": MessageLookupByLibrary.simpleMessage("Checking..."),
         "checkingModels":
             MessageLookupByLibrary.simpleMessage("Checking models..."),
-        "city": MessageLookupByLibrary.simpleMessage("City"),
+        "city": MessageLookupByLibrary.simpleMessage("In the city"),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Claim free storage"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim more!"),
@@ -1000,7 +1000,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "findThemQuickly":
             MessageLookupByLibrary.simpleMessage("Find them quickly"),
         "flip": MessageLookupByLibrary.simpleMessage("Flip"),
-        "food": MessageLookupByLibrary.simpleMessage("Food"),
+        "food": MessageLookupByLibrary.simpleMessage("Culinary delight"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("for your memories"),
         "forgotPassword":
@@ -1034,7 +1034,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please allow access to all photos in the Settings app"),
         "grantPermission":
             MessageLookupByLibrary.simpleMessage("Grant permission"),
-        "greenery": MessageLookupByLibrary.simpleMessage("Greenery"),
+        "greenery": MessageLookupByLibrary.simpleMessage("The green life"),
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Group nearby photos"),
         "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
@@ -1279,11 +1279,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "moments": MessageLookupByLibrary.simpleMessage("Moments"),
         "month": MessageLookupByLibrary.simpleMessage("month"),
         "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
-        "moon": MessageLookupByLibrary.simpleMessage("Moon"),
+        "moon": MessageLookupByLibrary.simpleMessage("In the moonlight"),
         "moreDetails": MessageLookupByLibrary.simpleMessage("More details"),
         "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
         "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
-        "mountains": MessageLookupByLibrary.simpleMessage("Mountains"),
+        "mountains": MessageLookupByLibrary.simpleMessage("Over the hills"),
         "moveItem": m50,
         "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
             "Move selected photos to one date"),
@@ -1356,7 +1356,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("On device"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "On <branding>ente</branding>"),
-        "onTheRoad": MessageLookupByLibrary.simpleMessage("On the road"),
+        "onTheRoad": MessageLookupByLibrary.simpleMessage("On the road again"),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
@@ -1421,7 +1421,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "personIsAge": m102,
         "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "personTurningAge": m103,
-        "pets": MessageLookupByLibrary.simpleMessage("Pets"),
+        "pets": MessageLookupByLibrary.simpleMessage("Furry companions"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Photo descriptions"),
         "photoGridSize":
@@ -1877,8 +1877,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Successfully unhid"),
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Suggest features"),
-        "sunrise": MessageLookupByLibrary.simpleMessage("Sunrise"),
-        "sunset": MessageLookupByLibrary.simpleMessage("Sunset"),
+        "sunrise": MessageLookupByLibrary.simpleMessage("On the horizon"),
         "support": MessageLookupByLibrary.simpleMessage("Support"),
         "syncProgress": m82,
         "syncStopped": MessageLookupByLibrary.simpleMessage("Sync stopped"),

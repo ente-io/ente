@@ -11636,100 +11636,90 @@ class S {
     );
   }
 
-  /// `Sunrise`
+  /// `On the horizon`
   String get sunrise {
     return Intl.message(
-      'Sunrise',
+      'On the horizon',
       name: 'sunrise',
       desc: '',
       args: [],
     );
   }
 
-  /// `Sunset`
-  String get sunset {
-    return Intl.message(
-      'Sunset',
-      name: 'sunset',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Mountains`
+  /// `Over the hills`
   String get mountains {
     return Intl.message(
-      'Mountains',
+      'Over the hills',
       name: 'mountains',
       desc: '',
       args: [],
     );
   }
 
-  /// `Greenery`
+  /// `The green life`
   String get greenery {
     return Intl.message(
-      'Greenery',
+      'The green life',
       name: 'greenery',
       desc: '',
       args: [],
     );
   }
 
-  /// `Beach`
+  /// `Sand and sea`
   String get beach {
     return Intl.message(
-      'Beach',
+      'Sand and sea',
       name: 'beach',
       desc: '',
       args: [],
     );
   }
 
-  /// `City`
+  /// `In the city`
   String get city {
     return Intl.message(
-      'City',
+      'In the city',
       name: 'city',
       desc: '',
       args: [],
     );
   }
 
-  /// `Moon`
+  /// `In the moonlight`
   String get moon {
     return Intl.message(
-      'Moon',
+      'In the moonlight',
       name: 'moon',
       desc: '',
       args: [],
     );
   }
 
-  /// `On the road`
+  /// `On the road again`
   String get onTheRoad {
     return Intl.message(
-      'On the road',
+      'On the road again',
       name: 'onTheRoad',
       desc: '',
       args: [],
     );
   }
 
-  /// `Food`
+  /// `Culinary delight`
   String get food {
     return Intl.message(
-      'Food',
+      'Culinary delight',
       name: 'food',
       desc: '',
       args: [],
     );
   }
 
-  /// `Pets`
+  /// `Furry companions`
   String get pets {
     return Intl.message(
-      'Pets',
+      'Furry companions',
       name: 'pets',
       desc: '',
       args: [],

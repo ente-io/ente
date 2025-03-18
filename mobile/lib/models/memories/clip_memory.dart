@@ -4,7 +4,6 @@ import "package:photos/models/memories/smart_memory.dart";
 
 enum ClipMemoryType {
   sunrise,
-  sunset,
   mountains,
   greenery,
   beach,
@@ -19,8 +18,6 @@ ClipMemoryType clipMemoryTypeFromString(String type) {
   switch (type) {
     case "sunrise":
       return ClipMemoryType.sunrise;
-    case "sunset":
-      return ClipMemoryType.sunset;
     case "mountains":
       return ClipMemoryType.mountains;
     case "greenery":
@@ -45,9 +42,7 @@ ClipMemoryType clipMemoryTypeFromString(String type) {
 String clipQuery(ClipMemoryType clipMemoryType) {
   switch (clipMemoryType) {
     case ClipMemoryType.sunrise:
-      return "Photo of an absolutely stunning sunrise";
-    case ClipMemoryType.sunset:
-      return "Photo of an absolutely stunning sunset";
+      return "Photo of an absolutely stunning sunrise or sunset";
     case ClipMemoryType.mountains:
       return "Photo of a beautiful mountain range";
     case ClipMemoryType.greenery:
@@ -71,8 +66,6 @@ String clipTitle(S s, ClipMemoryType clipMemoryType) {
   switch (clipMemoryType) {
     case ClipMemoryType.sunrise:
       return s.sunrise;
-    case ClipMemoryType.sunset:
-      return s.sunset;
     case ClipMemoryType.mountains:
       return s.mountains;
     case ClipMemoryType.greenery:
