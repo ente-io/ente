@@ -29,7 +29,7 @@ import {
 } from "@/new/photos/services/files";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import { isHiddenCollection } from "./collection";
@@ -200,7 +200,7 @@ export const getCollectionWithSecrets = async (
     masterKey: string,
 ): Promise<Collection> => {
     const cryptoWorker = await sharedCryptoWorker();
-    const userID = getData(LS_KEYS.USER).id;
+    const userID = getData("user").id;
     let collectionKey: string;
     if (collection.owner.id === userID) {
         collectionKey = await cryptoWorker.decryptB64(
@@ -209,7 +209,7 @@ export const getCollectionWithSecrets = async (
             masterKey,
         );
     } else {
-        const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const keyAttributes = getData("keyAttributes");
         const secretKey = await cryptoWorker.decryptB64(
             keyAttributes.encryptedSecretKey,
             keyAttributes.secretKeyDecryptionNonce,

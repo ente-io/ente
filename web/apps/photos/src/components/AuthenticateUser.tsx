@@ -9,7 +9,7 @@ import log from "@/base/log";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
@@ -60,12 +60,12 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
     useEffect(() => {
         const main = async () => {
             try {
-                const user = getData(LS_KEYS.USER);
+                const user = getData("user");
                 if (!user) {
                     throw Error("User not found");
                 }
                 setUser(user);
-                const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+                const keyAttributes = getData("keyAttributes");
                 if (
                     (!user?.token && !user?.encryptedToken) ||
                     (keyAttributes && !keyAttributes.memLimit)

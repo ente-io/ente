@@ -1,6 +1,6 @@
 import { FilledIconButton } from "@/base/components/mui";
 import { useBaseContext } from "@/base/context";
-import { UPLOAD_RESULT, type UploadPhase } from "@/gallery/services/upload";
+import { type UploadPhase, type UploadResult } from "@/gallery/services/upload";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -265,13 +265,12 @@ function UploadProgressDialog() {
 
     useEffect(() => {
         if (
-            finishedUploads.get(UPLOAD_RESULT.ALREADY_UPLOADED)?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.BLOCKED)?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.FAILED)?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE)
-                ?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.TOO_LARGE)?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.UNSUPPORTED)?.length > 0
+            finishedUploads.get("alreadyUploaded")?.length > 0 ||
+            finishedUploads.get("blocked")?.length > 0 ||
+            finishedUploads.get("failed")?.length > 0 ||
+            finishedUploads.get("largerThanAvailableStorage")?.length > 0 ||
+            finishedUploads.get("tooLarge")?.length > 0 ||
+            finishedUploads.get("unsupported")?.length > 0
         ) {
             setHasUnUploadedFiles(true);
         } else {
@@ -290,13 +289,11 @@ function UploadProgressDialog() {
                 <DialogContent sx={{ "&&&": { px: 0 } }}>
                     {uploadPhase === "uploading" && <InProgressSection />}
                     <ResultSection
-                        uploadResult={UPLOAD_RESULT.UPLOADED}
+                        uploadResult="uploaded"
                         sectionTitle={t("SUCCESSFUL_UPLOADS")}
                     />
                     <ResultSection
-                        uploadResult={
-                            UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
-                        }
+                        uploadResult="uploadedWithStaticThumbnail"
                         sectionTitle={t("THUMBNAIL_GENERATION_FAILED_UPLOADS")}
                         sectionInfo={t("THUMBNAIL_GENERATION_FAILED_INFO")}
                     />
@@ -306,12 +303,12 @@ function UploadProgressDialog() {
                         </NotUploadSectionHeader>
                     )}
                     <ResultSection
-                        uploadResult={UPLOAD_RESULT.BLOCKED}
+                        uploadResult="blocked"
                         sectionTitle={t("BLOCKED_UPLOADS")}
                         sectionInfo={<Trans i18nKey={"ETAGS_BLOCKED"} />}
                     />
                     <ResultSection
-                        uploadResult={UPLOAD_RESULT.FAILED}
+                        uploadResult="failed"
                         sectionTitle={t("FAILED_UPLOADS")}
                         sectionInfo={
                             uploadPhase == "done"
@@ -320,26 +317,24 @@ function UploadProgressDialog() {
                         }
                     />
                     <ResultSection
-                        uploadResult={UPLOAD_RESULT.ALREADY_UPLOADED}
+                        uploadResult="alreadyUploaded"
                         sectionTitle={t("SKIPPED_FILES")}
                         sectionInfo={t("SKIPPED_INFO")}
                     />
                     <ResultSection
-                        uploadResult={
-                            UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE
-                        }
+                        uploadResult="largerThanAvailableStorage"
                         sectionTitle={t(
                             "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS",
                         )}
                         sectionInfo={t("LARGER_THAN_AVAILABLE_STORAGE_INFO")}
                     />
                     <ResultSection
-                        uploadResult={UPLOAD_RESULT.UNSUPPORTED}
+                        uploadResult="unsupported"
                         sectionTitle={t("UNSUPPORTED_FILES")}
                         sectionInfo={t("UNSUPPORTED_INFO")}
                     />
                     <ResultSection
-                        uploadResult={UPLOAD_RESULT.TOO_LARGE}
+                        uploadResult="tooLarge"
                         sectionTitle={t("TOO_LARGE_UPLOADS")}
                         sectionInfo={t("TOO_LARGE_INFO")}
                     />
@@ -457,7 +452,7 @@ const NotUploadSectionHeader = styled("div")(
 );
 
 interface ResultSectionProps {
-    uploadResult: UPLOAD_RESULT;
+    uploadResult: UploadResult;
     sectionTitle: string;
     sectionInfo?: React.ReactNode;
 }
@@ -552,8 +547,8 @@ const DoneFooter: React.FC = () => {
     return (
         <DialogActions>
             {uploadPhase == "done" &&
-                (finishedUploads?.get(UPLOAD_RESULT.FAILED)?.length > 0 ||
-                finishedUploads?.get(UPLOAD_RESULT.BLOCKED)?.length > 0 ? (
+                (finishedUploads?.get("failed")?.length > 0 ||
+                finishedUploads?.get("blocked")?.length > 0 ? (
                     <Button fullWidth onClick={retryFailed}>
                         {t("RETRY_FAILED")}
                     </Button>

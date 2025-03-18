@@ -8,7 +8,7 @@ import {
     CollectionMagicMetadata,
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadata,
-    CollectionType,
+    type CollectionType,
     CreatePublicAccessTokenRequest,
     EncryptedCollection,
     PublicURL,
@@ -40,7 +40,7 @@ import {
 import type { FamilyData } from "@/new/photos/services/user-details";
 import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
@@ -58,7 +58,7 @@ const FAVORITE_COLLECTION_NAME = "Favorites";
 const REQUEST_BATCH_SIZE = 1000;
 
 export const createAlbum = (albumName: string) => {
-    return createCollection(albumName, CollectionType.album);
+    return createCollection(albumName, "album");
 };
 
 const createCollection = async (
@@ -136,7 +136,7 @@ const postCollection = async (
 };
 
 export const createFavoritesCollection = () => {
-    return createCollection(FAVORITE_COLLECTION_NAME, CollectionType.favorites);
+    return createCollection(FAVORITE_COLLECTION_NAME, "favorites");
 };
 
 export const addToFavorites = async (
@@ -190,7 +190,7 @@ export const removeFromCollection = async (
     allFiles?: EnteFile[],
 ) => {
     try {
-        const user: User = getData(LS_KEYS.USER);
+        const user: User = getData("user");
         const nonUserFiles = [];
         const userFiles = [];
         for (const file of toRemoveFiles) {
@@ -232,7 +232,7 @@ export const removeUserFiles = async (
 
         const collections = await getLocalCollections();
         const collectionsMap = new Map(collections.map((c) => [c.id, c]));
-        const user: User = getData(LS_KEYS.USER);
+        const user: User = getData("user");
 
         for (const [targetCollectionID, files] of groupedFiles.entries()) {
             const targetCollection = collectionsMap.get(targetCollectionID);
@@ -604,7 +604,7 @@ export const updateShareableURL = async (
 export const getFavCollection = async () => {
     const collections = await getLocalCollections();
     for (const collection of collections) {
-        if (collection.type === CollectionType.favorites) {
+        if (collection.type == "favorites") {
             return collection;
         }
     }
@@ -662,17 +662,14 @@ export async function getUncategorizedCollection(
         collections = await getLocalCollections();
     }
     const uncategorizedCollection = collections.find(
-        (collection) => collection.type === CollectionType.uncategorized,
+        (collection) => collection.type == "uncategorized",
     );
 
     return uncategorizedCollection;
 }
 
 export function createUnCategorizedCollection() {
-    return createCollection(
-        UNCATEGORIZED_COLLECTION_NAME,
-        CollectionType.uncategorized,
-    );
+    return createCollection(UNCATEGORIZED_COLLECTION_NAME, "uncategorized");
 }
 
 export async function getDefaultHiddenCollection(): Promise<Collection> {
@@ -685,7 +682,7 @@ export async function getDefaultHiddenCollection(): Promise<Collection> {
 }
 
 export function createHiddenCollection() {
-    return createCollection(HIDDEN_COLLECTION_NAME, CollectionType.album, {
+    return createCollection(HIDDEN_COLLECTION_NAME, "album", {
         subType: SUB_TYPE.DEFAULT_HIDDEN,
         visibility: ItemVisibility.hidden,
     });

@@ -1,13 +1,12 @@
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import { CustomError } from "@ente/shared/error";
-import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
+import { getKey } from "@ente/shared/storage/sessionStorage";
 
 export const getActualKey = async () => {
     try {
-        const encryptionKeyAttributes: B64EncryptionResult = getKey(
-            SESSION_KEYS.ENCRYPTION_KEY,
-        );
+        const encryptionKeyAttributes: B64EncryptionResult =
+            getKey("encryptionKey");
 
         const cryptoWorker = await sharedCryptoWorker();
         const key = await cryptoWorker.decryptB64(

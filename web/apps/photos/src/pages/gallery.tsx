@@ -68,10 +68,9 @@ import {
 } from "@/new/photos/services/user-details";
 import { usePhotosAppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
     isFirstLogin,
@@ -79,11 +78,7 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from "@ente/shared/storage/localStorage/helpers";
-import {
-    SESSION_KEYS,
-    clearKeys,
-    getKey,
-} from "@ente/shared/storage/sessionStorage";
+import { clearKeys, getKey } from "@ente/shared/storage/sessionStorage";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -94,7 +89,7 @@ import CollectionNamer, {
 } from "components/Collections/CollectionNamer";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { Export } from "components/Export";
-import { ITEM_TYPE, TimeStampListItem } from "components/FileList";
+import { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import {
     FilesDownloadProgress,
@@ -128,11 +123,11 @@ import {
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import {
-    COLLECTION_OPS_TYPE,
     getSelectedCollection,
-    handleCollectionOps,
+    handleCollectionOp,
+    type CollectionOp,
 } from "utils/collection";
-import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
+import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
 
 const defaultGalleryContext: GalleryContextType = {
     setActiveCollectionID: () => null,
@@ -303,10 +298,10 @@ const Page: React.FC = () => {
     };
 
     useEffect(() => {
-        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        const key = getKey("encryptionKey");
         const token = getToken();
         if (!key || !token) {
-            stashRedirect(PAGES.GALLERY);
+            stashRedirect("/gallery");
             router.push("/");
             return;
         }
@@ -326,7 +321,7 @@ const Page: React.FC = () => {
                 showPlanSelector();
             }
             setIsFirstLogin(false);
-            const user = getData(LS_KEYS.USER);
+            const user = getData("user");
             // TODO: Pass entire snapshot to reducer?
             const familyData = userDetailsSnapshot()?.familyData;
             dispatch({
@@ -405,7 +400,7 @@ const Page: React.FC = () => {
     }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
-        if (router.isReady && getKey(SESSION_KEYS.ENCRYPTION_KEY)) {
+        if (router.isReady && getKey("encryptionKey")) {
             handleSubscriptionCompletionRedirectIfNeeded(
                 showMiniDialog,
                 showLoadingBar,
@@ -428,7 +423,7 @@ const Page: React.FC = () => {
                         fileCount={state.searchResults?.length ?? 0}
                     />
                 ),
-                itemType: ITEM_TYPE.HEADER,
+                tag: "header",
             });
         }
     }, [isInSearchMode, state.searchSuggestion, state.searchResults]);
@@ -603,7 +598,7 @@ const Page: React.FC = () => {
                         break;
                     case CustomError.KEY_MISSING:
                         clearKeys();
-                        router.push(PAGES.CREDENTIALS);
+                        router.push("/credentials");
                         break;
                     default:
                         log.error("syncWithRemote failed", e);
@@ -684,20 +679,20 @@ const Page: React.FC = () => {
         }, []);
 
     const collectionOpsHelper =
-        (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
+        (op: CollectionOp) => async (collection: Collection) => {
             showLoadingBar();
             try {
                 setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredFiles);
                 const toProcessFiles =
-                    ops === COLLECTION_OPS_TYPE.REMOVE
+                    op == "remove"
                         ? selectedFiles
                         : selectedFiles.filter(
                               (file) => file.ownerID === user.id,
                           );
                 if (toProcessFiles.length > 0) {
-                    await handleCollectionOps(
-                        ops,
+                    await handleCollectionOp(
+                        op,
                         collection,
                         toProcessFiles,
                         selected.collectionID,
@@ -712,21 +707,21 @@ const Page: React.FC = () => {
             }
         };
 
-    const fileOpsHelper = (ops: FILE_OPS_TYPE) => async () => {
+    const fileOpHelper = (op: FileOp) => async () => {
         showLoadingBar();
         try {
             // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(
                 selected,
-                ops === FILE_OPS_TYPE.HIDE ? normalFiles : filteredFiles,
+                op == "hide" ? normalFiles : filteredFiles,
             );
             const toProcessFiles =
-                ops === FILE_OPS_TYPE.DOWNLOAD
+                op == "download"
                     ? selectedFiles
                     : selectedFiles.filter((file) => file.ownerID === user.id);
             if (toProcessFiles.length > 0) {
-                await handleFileOps(
-                    ops,
+                await handleFileOp(
+                    op,
                     toProcessFiles,
                     handleMarkTempDeleted,
                     () => dispatch({ type: "clearTempDeleted" }),
@@ -748,12 +743,12 @@ const Page: React.FC = () => {
         }
     };
 
-    const showCreateCollectionModal = (ops: COLLECTION_OPS_TYPE) => {
+    const showCreateCollectionModal = (op: CollectionOp) => {
         const callback = async (collectionName: string) => {
             try {
                 showLoadingBar();
                 const collection = await createAlbum(collectionName);
-                await collectionOpsHelper(ops)(collection);
+                await collectionOpsHelper(op)(collection);
             } catch (e) {
                 onGenericError(e);
             } finally {
@@ -976,8 +971,8 @@ const Page: React.FC = () => {
                 >
                     {showSelectionBar ? (
                         <SelectedFileOptions
-                            handleCollectionOps={collectionOpsHelper}
-                            handleFileOps={fileOpsHelper}
+                            handleCollectionOp={collectionOpsHelper}
+                            handleFileOp={fileOpHelper}
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }

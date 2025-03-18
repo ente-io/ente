@@ -1,15 +1,9 @@
 import { Verify2FACodeForm } from "@/accounts/components/Verify2FACodeForm";
-import { PAGES } from "@/accounts/constants/pages";
 import { verifyTwoFactor } from "@/accounts/services/user";
 import { LinkButton } from "@/base/components/LinkButton";
 import { useBaseContext } from "@/base/context";
 import { HTTPError } from "@/base/http";
-import {
-    LS_KEYS,
-    getData,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
+import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -29,14 +23,14 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const user: User = getData(LS_KEYS.USER);
+        const user: User = getData("user");
         if (!user?.email || !user.twoFactorSessionID) {
             void router.push("/");
         } else if (
             !user.isTwoFactorEnabled &&
             (user.encryptedToken || user.token)
         ) {
-            void router.push(PAGES.CREDENTIALS);
+            void router.push("/credentials");
         } else {
             setSessionID(user.twoFactorSessionID);
         }
@@ -46,14 +40,9 @@ const Page: React.FC = () => {
         try {
             const resp = await verifyTwoFactor(otp, sessionID);
             const { keyAttributes, encryptedToken, token, id } = resp;
-            await setLSUser({
-                ...getData(LS_KEYS.USER),
-                token,
-                encryptedToken,
-                id,
-            });
-            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
-            await router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
+            await setLSUser({ ...getData("user"), token, encryptedToken, id });
+            setData("keyAttributes", keyAttributes!);
+            await router.push(unstashRedirect() ?? "/credentials");
         } catch (e) {
             if (e instanceof HTTPError && e.res.status == 404) {
                 logout();
@@ -71,9 +60,7 @@ const Page: React.FC = () => {
                 submitButtonText={t("verify")}
             />
             <AccountsPageFooter>
-                <LinkButton
-                    onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}
-                >
+                <LinkButton onClick={() => router.push("/two-factor/recover")}>
                     {t("lost_2fa_device")}
                 </LinkButton>
                 <LinkButton onClick={logout}>{t("change_email")}</LinkButton>

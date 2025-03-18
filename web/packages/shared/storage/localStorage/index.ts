@@ -1,30 +1,30 @@
 import { getKVS, removeKV, setKV } from "@/base/kv";
 import log from "@/base/log";
 
-export enum LS_KEYS {
-    USER = "user",
-    KEY_ATTRIBUTES = "keyAttributes",
-    ORIGINAL_KEY_ATTRIBUTES = "originalKeyAttributes",
-    IS_FIRST_LOGIN = "isFirstLogin",
-    JUST_SIGNED_UP = "justSignedUp",
-    SHOW_BACK_BUTTON = "showBackButton",
-    EXPORT = "export",
+export type LocalStorageKey =
+    | "user"
+    | "keyAttributes"
+    | "originalKeyAttributes"
+    | "isFirstLogin"
+    | "justSignedUp"
+    | "showBackButton"
+    | "export"
     // LOGS = "logs",
     // Migrated to (and only used by) useCollectionsSortByLocalState.
-    COLLECTION_SORT_BY = "collectionSortBy",
+    | "collectionSortBy"
     // Moved to the new wrapper @/base/local-storage
     // LOCALE = 'locale',
-    SRP_SETUP_ATTRIBUTES = "srpSetupAttributes",
-    SRP_ATTRIBUTES = "srpAttributes",
-    REFERRAL_SOURCE = "referralSource",
-}
+    | "srpSetupAttributes"
+    | "srpAttributes"
+    | "referralSource";
 
-export const setData = (key: LS_KEYS, value: object) =>
+export const setData = (key: LocalStorageKey, value: object) =>
     localStorage.setItem(key, JSON.stringify(value));
 
-export const removeData = (key: LS_KEYS) => localStorage.removeItem(key);
+export const removeData = (key: LocalStorageKey) =>
+    localStorage.removeItem(key);
 
-export const getData = (key: LS_KEYS) => {
+export const getData = (key: LocalStorageKey) => {
     try {
         if (
             typeof localStorage === "undefined" ||
@@ -48,7 +48,7 @@ export const getData = (key: LS_KEYS) => {
 // Creating a new function here to act as a funnel point.
 export const setLSUser = async (user: object) => {
     await migrateKVToken(user);
-    setData(LS_KEYS.USER, user);
+    setData("user", user);
 };
 
 /**
@@ -66,7 +66,7 @@ export const migrateKVToken = async (user: unknown) => {
     // Throw an error if the data is in local storage but not in IndexedDB. This
     // is a pre-cursor to inlining this code.
     // TODO(REL): Remove this sanity check after a few days.
-    const oldLSUser = getData(LS_KEYS.USER);
+    const oldLSUser = getData("user");
     const wasMissing =
         oldLSUser &&
         typeof oldLSUser == "object" &&
@@ -103,7 +103,7 @@ export const migrateKVToken = async (user: unknown) => {
  * token in local storage, then it should also be present in IndexedDB.
  */
 export const isLocalStorageAndIndexedDBMismatch = async () => {
-    const oldLSUser = getData(LS_KEYS.USER);
+    const oldLSUser = getData("user");
     return (
         oldLSUser &&
         typeof oldLSUser == "object" &&
