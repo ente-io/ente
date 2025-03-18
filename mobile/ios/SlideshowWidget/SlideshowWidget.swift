@@ -112,6 +112,7 @@ struct SlideshowWidgetEntryView: View {
                             )
                             .frame(height: geometry.size.height * 0.4)
                             .frame(maxHeight: .infinity, alignment: .bottom)
+                            .backwardWidgetAccentable(true)
                         )
                         .overlay(
                             VStack(alignment: .leading, spacing: 2) {
@@ -121,12 +122,10 @@ struct SlideshowWidgetEntryView: View {
                                 .bold()
                                 .foregroundStyle(.white)
                                 .shadow(radius: 20)
-                                .backwardWidgetAccentable(true)
                                 Text(entry.subTitle ?? "Where is the sub title")
                                     .font(.custom("Inter", size: 12, relativeTo: .caption2))
                                     .foregroundStyle(.white)
                                     .shadow(radius: 2)
-                                    .backwardWidgetAccentable(true)
                             }
                             .padding(.leading, geometry.size.width * 0.05)
                             .padding(.bottom, geometry.size.height * 0.05),
