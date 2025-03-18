@@ -13,6 +13,7 @@ const (
 	FAMILIES       ClaimScope = "FAMILIES"
 	ACCOUNTS       ClaimScope = "ACCOUNTS"
 	DELETE_ACCOUNT ClaimScope = "DELETE_ACCOUNT"
+	RestoreAccount ClaimScope = "RestoreAccount"
 )
 
 func (c ClaimScope) Ptr() *ClaimScope {
@@ -50,4 +51,10 @@ func (c PublicAlbumPasswordClaim) Valid() error {
 		return errors.New("token expired")
 	}
 	return nil
+}
+
+type AccountRecoveryParams struct {
+	Email      string `json:"email"`
+	ExpiryTime int64  `json:"expiryTime"`
+	UserID     int64  `json:"userID"`
 }
