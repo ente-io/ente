@@ -942,7 +942,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         }
 
         case "clearUnsyncedState": {
-            const unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"] = new Map();
+            const unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"] =
+                new Map();
             const favoriteFileIDs = deriveFavoriteFileIDs(
                 state.normalCollections,
                 state.normalFiles,

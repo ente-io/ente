@@ -264,6 +264,8 @@ const Page: React.FC = () => {
         normalFiles,
         hiddenFiles,
         favoriteFileIDs,
+        collectionNameByID,
+        fileNormalCollectionIDs,
         normalCollectionSummaries,
         pendingFavoriteUpdates,
         pendingVisibilityUpdates,
@@ -1122,8 +1124,6 @@ const Page: React.FC = () => {
                         setSelected={setSelected}
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
-                        fileNormalCollectionIDs={state.fileNormalCollectionIDs}
-                        collectionNameByID={state.collectionNameByID}
                         isInIncomingSharedCollection={
                             normalCollectionSummaries.get(activeCollectionID)
                                 ?.type == "incomingShareCollaborator" ||
@@ -1133,6 +1133,8 @@ const Page: React.FC = () => {
                         isInHiddenSection={barMode == "hidden-albums"}
                         {...{
                             favoriteFileIDs,
+                            collectionNameByID,
+                            fileNormalCollectionIDs,
                             pendingFavoriteUpdates,
                             pendingVisibilityUpdates,
                         }}
@@ -1153,7 +1155,7 @@ const Page: React.FC = () => {
                 )}
                 <Export
                     {...exportVisibilityProps}
-                    allCollectionsNameByID={state.collectionNameByID}
+                    allCollectionsNameByID={collectionNameByID}
                 />
                 <AuthenticateUser
                     {...authenticateUserVisibilityProps}

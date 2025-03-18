@@ -193,6 +193,11 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     pendingVisibilityUpdates?: Set<number>;
     /**
+     * A mapping from file IDs to the IDs of the normal (non-hidden) collections
+     * that they are a part of.
+     */
+    fileNormalCollectionIDs?: FileInfoProps["fileCollectionIDs"];
+    /**
      * Called when there was some update performed within the file viewer that
      * necessitates us to sync with remote again to fetch the latest updates.
      *
@@ -259,10 +264,7 @@ export type FileViewerProps = ModalVisibilityProps & {
     onSaveEditedImageCopy?: ImageEditorOverlayProps["onSaveEditedCopy"];
 } & Pick<
         FileInfoProps,
-        | "fileNormalCollectionIDs"
-        | "collectionNameByID"
-        | "onSelectCollection"
-        | "onSelectPerson"
+        "collectionNameByID" | "onSelectCollection" | "onSelectPerson"
     >;
 
 /**
@@ -882,12 +884,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 exif={activeFileExif}
                 allowEdits={!!activeAnnotatedFile.annotation.isOwnFile}
                 allowMap={haveUser}
-                showCollections={haveUser}
+                showCollections={haveUser && !isInHiddenSection}
+                fileCollectionIDs={fileNormalCollectionIDs}
+                collectionNameByID={collectionNameByID}
                 onNeedsRemoteSync={handleNeedsRemoteSync}
                 onUpdateCaption={handleUpdateCaption}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
-                {...{ fileNormalCollectionIDs, collectionNameByID }}
             />
             <MoreMenu
                 open={!!moreMenuAnchorEl}
