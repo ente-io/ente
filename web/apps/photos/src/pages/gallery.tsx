@@ -132,7 +132,7 @@ import {
     handleCollectionOp,
     type CollectionOp,
 } from "utils/collection";
-import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
+import { type FileOp, getSelectedFiles, handleFileOp } from "utils/file";
 
 const defaultGalleryContext: GalleryContextType = {
     setActiveCollectionID: () => null,
@@ -712,21 +712,21 @@ const Page: React.FC = () => {
             }
         };
 
-    const fileOpsHelper = (ops: FILE_OPS_TYPE) => async () => {
+    const fileOpHelper = (op: FileOp) => async () => {
         showLoadingBar();
         try {
             // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(
                 selected,
-                ops === FILE_OPS_TYPE.HIDE ? normalFiles : filteredFiles,
+                op == "hide" ? normalFiles : filteredFiles,
             );
             const toProcessFiles =
-                ops === FILE_OPS_TYPE.DOWNLOAD
+                op == "download"
                     ? selectedFiles
                     : selectedFiles.filter((file) => file.ownerID === user.id);
             if (toProcessFiles.length > 0) {
-                await handleFileOps(
-                    ops,
+                await handleFileOp(
+                    op,
                     toProcessFiles,
                     handleMarkTempDeleted,
                     () => dispatch({ type: "clearTempDeleted" }),
@@ -977,7 +977,7 @@ const Page: React.FC = () => {
                     {showSelectionBar ? (
                         <SelectedFileOptions
                             handleCollectionOp={collectionOpsHelper}
-                            handleFileOps={fileOpsHelper}
+                            handleFileOp={fileOpHelper}
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }
