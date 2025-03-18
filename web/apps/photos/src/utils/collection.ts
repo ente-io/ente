@@ -45,41 +45,34 @@ import {
 } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
 
-export enum COLLECTION_OPS_TYPE {
-    ADD,
-    MOVE,
-    REMOVE,
-    RESTORE,
-    UNHIDE,
-}
-export async function handleCollectionOps(
-    type: COLLECTION_OPS_TYPE,
+export type CollectionOp = "add" | "move" | "remove" | "restore" | "unhide";
+
+export async function handleCollectionOp(
+    op: CollectionOp,
     collection: Collection,
     selectedFiles: EnteFile[],
     selectedCollectionID: number,
 ) {
-    switch (type) {
-        case COLLECTION_OPS_TYPE.ADD:
+    switch (op) {
+        case "add":
             await addToCollection(collection, selectedFiles);
             break;
-        case COLLECTION_OPS_TYPE.MOVE:
+        case "move":
             await moveToCollection(
                 selectedCollectionID,
                 collection,
                 selectedFiles,
             );
             break;
-        case COLLECTION_OPS_TYPE.REMOVE:
+        case "remove":
             await removeFromCollection(collection.id, selectedFiles);
             break;
-        case COLLECTION_OPS_TYPE.RESTORE:
+        case "restore":
             await restoreToCollection(collection, selectedFiles);
             break;
-        case COLLECTION_OPS_TYPE.UNHIDE:
+        case "unhide":
             await unhideToCollection(collection, selectedFiles);
             break;
-        default:
-            throw Error("Invalid collection operation");
     }
 }
 

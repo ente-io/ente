@@ -128,9 +128,9 @@ import {
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 import {
-    COLLECTION_OPS_TYPE,
     getSelectedCollection,
-    handleCollectionOps,
+    handleCollectionOp,
+    type CollectionOp,
 } from "utils/collection";
 import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
 
@@ -684,20 +684,20 @@ const Page: React.FC = () => {
         }, []);
 
     const collectionOpsHelper =
-        (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
+        (op: CollectionOp) => async (collection: Collection) => {
             showLoadingBar();
             try {
                 setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredFiles);
                 const toProcessFiles =
-                    ops === COLLECTION_OPS_TYPE.REMOVE
+                    op == "remove"
                         ? selectedFiles
                         : selectedFiles.filter(
                               (file) => file.ownerID === user.id,
                           );
                 if (toProcessFiles.length > 0) {
-                    await handleCollectionOps(
-                        ops,
+                    await handleCollectionOp(
+                        op,
                         collection,
                         toProcessFiles,
                         selected.collectionID,
@@ -748,12 +748,12 @@ const Page: React.FC = () => {
         }
     };
 
-    const showCreateCollectionModal = (ops: COLLECTION_OPS_TYPE) => {
+    const showCreateCollectionModal = (op: CollectionOp) => {
         const callback = async (collectionName: string) => {
             try {
                 showLoadingBar();
                 const collection = await createAlbum(collectionName);
-                await collectionOpsHelper(ops)(collection);
+                await collectionOpsHelper(op)(collection);
             } catch (e) {
                 onGenericError(e);
             } finally {
@@ -976,7 +976,7 @@ const Page: React.FC = () => {
                 >
                     {showSelectionBar ? (
                         <SelectedFileOptions
-                            handleCollectionOps={collectionOpsHelper}
+                            handleCollectionOp={collectionOpsHelper}
                             handleFileOps={fileOpsHelper}
                             showCreateCollectionModal={
                                 showCreateCollectionModal

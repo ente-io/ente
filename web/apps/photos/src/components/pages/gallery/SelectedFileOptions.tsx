@@ -23,15 +23,13 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { IconButton, Tooltip, Typography } from "@mui/material";
 import { t } from "i18next";
-import { COLLECTION_OPS_TYPE } from "utils/collection";
+import { type CollectionOp } from "utils/collection";
 import { FILE_OPS_TYPE } from "utils/file";
 
 interface Props {
-    handleCollectionOps: (
-        opsType: COLLECTION_OPS_TYPE,
-    ) => (...args: any[]) => void;
+    handleCollectionOp: (opsType: CollectionOp) => (...args: any[]) => void;
     handleFileOps: (opsType: FILE_OPS_TYPE) => (...args: any[]) => void;
-    showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
+    showCreateCollectionModal: (op: CollectionOp) => () => void;
     /**
      * Callback to open a dialog where the user can choose a collection.
      *
@@ -78,7 +76,7 @@ interface Props {
 const SelectedFileOptions = ({
     showCreateCollectionModal,
     onOpenCollectionSelector,
-    handleCollectionOps,
+    handleCollectionOp,
     handleFileOps,
     selectedCollection,
     count,
@@ -99,10 +97,8 @@ const SelectedFileOptions = ({
     const addToCollection = () =>
         onOpenCollectionSelector({
             action: "add",
-            onSelectCollection: handleCollectionOps(COLLECTION_OPS_TYPE.ADD),
-            onCreateCollection: showCreateCollectionModal(
-                COLLECTION_OPS_TYPE.ADD,
-            ),
+            onSelectCollection: handleCollectionOp("add"),
+            onCreateCollection: showCreateCollectionModal("add"),
             relatedCollectionID:
                 isInSearchMode || peopleMode ? undefined : activeCollectionID,
         });
@@ -132,12 +128,8 @@ const SelectedFileOptions = ({
     const restoreHandler = () =>
         onOpenCollectionSelector({
             action: "restore",
-            onSelectCollection: handleCollectionOps(
-                COLLECTION_OPS_TYPE.RESTORE,
-            ),
-            onCreateCollection: showCreateCollectionModal(
-                COLLECTION_OPS_TYPE.RESTORE,
-            ),
+            onSelectCollection: handleCollectionOp("restore"),
+            onCreateCollection: showCreateCollectionModal("restore"),
         });
 
     const removeFromCollectionHandler = () => {
@@ -150,9 +142,7 @@ const SelectedFileOptions = ({
                     color: "primary",
 
                     action: () =>
-                        handleCollectionOps(COLLECTION_OPS_TYPE.REMOVE)(
-                            selectedCollection,
-                        ),
+                        handleCollectionOp("remove")(selectedCollection),
                 },
             });
         } else {
@@ -163,9 +153,7 @@ const SelectedFileOptions = ({
                     text: t("yes_remove"),
                     color: "critical",
                     action: () =>
-                        handleCollectionOps(COLLECTION_OPS_TYPE.REMOVE)(
-                            selectedCollection,
-                        ),
+                        handleCollectionOp("remove")(selectedCollection),
                 },
             });
         }
@@ -174,10 +162,8 @@ const SelectedFileOptions = ({
     const moveToCollection = () => {
         onOpenCollectionSelector({
             action: "move",
-            onSelectCollection: handleCollectionOps(COLLECTION_OPS_TYPE.MOVE),
-            onCreateCollection: showCreateCollectionModal(
-                COLLECTION_OPS_TYPE.MOVE,
-            ),
+            onSelectCollection: handleCollectionOp("move"),
+            onCreateCollection: showCreateCollectionModal("move"),
             relatedCollectionID:
                 isInSearchMode || peopleMode ? undefined : activeCollectionID,
         });
@@ -186,10 +172,8 @@ const SelectedFileOptions = ({
     const unhideToCollection = () => {
         onOpenCollectionSelector({
             action: "unhide",
-            onSelectCollection: handleCollectionOps(COLLECTION_OPS_TYPE.UNHIDE),
-            onCreateCollection: showCreateCollectionModal(
-                COLLECTION_OPS_TYPE.UNHIDE,
-            ),
+            onSelectCollection: handleCollectionOp("unhide"),
+            onCreateCollection: showCreateCollectionModal("unhide"),
         });
     };
 
