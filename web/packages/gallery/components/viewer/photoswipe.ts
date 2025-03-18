@@ -615,15 +615,22 @@ export class FileViewerPhotoSwipe {
         let favoriteButtonElement: HTMLButtonElement | undefined;
 
         const toggleFavorite = async () => {
-            updateFavoriteButtonIfNeeded();
+            // updateFavoriteButtonIfNeeded();
             await delegate.toggleFavorite(currentAnnotatedFile());
-            updateFavoriteButtonIfNeeded();
+            // updateFavoriteButtonIfNeeded();
         };
 
         const updateFavoriteButtonIfNeeded = () => {
             const favoriteIconFill = document.getElementById(
                 "pswp__icn-favorite-fill",
             );
+            console.log("updateFavoriteButtonIfNeeded", {
+                favoriteIconFill,
+                isFavorite: delegate.isFavoritePending(currentAnnotatedFile()),
+                isFavoritePending: delegate.isFavoritePending(
+                    currentAnnotatedFile(),
+                ),
+            });
             if (!favoriteIconFill) {
                 // Need a null check since we might've been closed meanwhile on
                 // the code path where we're called after the async operation in
@@ -648,6 +655,9 @@ export class FileViewerPhotoSwipe {
             // Update the fill visibility based on the favorite status.
             showIf(favoriteIconFill, !!delegate.isFavorite(af));
         };
+
+        this.refreshCurrentSlideFavoriteButtonIfNeeded =
+            updateFavoriteButtonIfNeeded;
 
         const handleToggleFavorite = () => void toggleFavorite();
 
@@ -1044,6 +1054,15 @@ export class FileViewerPhotoSwipe {
             this.pswp.refreshSlideContent(this.pswp.currIndex);
         }
     }
+
+    /**
+     * Refresh the favorite button (if indeed it is visible at all) on the
+     * current slide, asking the delegate for the latest state.
+     *
+     * We do this piecemeal update instead of a full refresh because a full
+     * refresh would cause, e.g., the pan and zoom to be reset.
+     */
+    refreshCurrentSlideFavoriteButtonIfNeeded: () => void;
 }
 
 const videoHTML = (url: string, disableDownload: boolean) => `

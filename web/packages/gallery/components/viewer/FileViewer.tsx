@@ -343,31 +343,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const [isFullscreen, setIsFullscreen] = useState(false);
 
-    // Callbacks to be invoked (only once) the next time we get an update to the
-    // `files` or `favoriteFileIDs` props.
-    //
-    // The callback is passed the latest values of the `files` prop.
-    //
-    // Both of those trace their way back to the same reducer, so they get
-    // updated in tandem. When we delete files, only the `files` prop gets
-    // updated, while when we toggle favoriets, only the `favoriteFileIDs` prop
-    // gets updated.
-    const [, setOnNextFilesOrFavoritesUpdate] = useState<
-        ((files: EnteFile[]) => void)[]
-    >([]);
-
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
-
-    /**
-     * Add a callback to be fired (only once) the next time we get an update to
-     * the `files` prop.
-     */
-    const awaitNextFilesOrFavoritesUpdate = useCallback(
-        (cb: (files: EnteFile[]) => void) =>
-            setOnNextFilesOrFavoritesUpdate((cbs) => cbs.concat(cb)),
-        [],
-    );
 
     const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
 
@@ -602,6 +579,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         },
         [haveUser, favoriteFileIDs, pendingFavoriteUpdates, onToggleFavorite],
     );
+
     const isFavoritePending = useCallback(
         ({ file }: FileViewerAnnotatedFile) =>
             !!pendingFavoriteUpdates?.has(file.id),
@@ -609,26 +587,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const toggleFavorite = useCallback(
-        ({ file }: FileViewerAnnotatedFile) => {
-            return new Promise<void>((resolve) => {
-                // See: [Note: File viewer update and dispatch]
-                onToggleFavorite!(file)
-                    .then(
-                        () => awaitNextFilesOrFavoritesUpdate(() => resolve()),
-                        (e: unknown) => {
-                            onGenericError(e);
-                            resolve();
-                        },
-                    )
-                    .finally(handleNeedsRemoteSync);
-            });
-        },
-        [
-            onToggleFavorite,
-            onGenericError,
-            awaitNextFilesOrFavoritesUpdate,
-            handleNeedsRemoteSync,
-        ],
+        ({ file }: FileViewerAnnotatedFile) =>
+            onToggleFavorite!(file)
+                .catch(onGenericError)
+                .finally(handleNeedsRemoteSync),
+        [onToggleFavorite, onGenericError, handleNeedsRemoteSync],
     );
 
     const updateFullscreenStatus = useCallback(() => {
@@ -848,13 +811,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             return af;
         });
+    }, [handleClose, files]);
 
-        // - Used for favorite updates.
-        setOnNextFilesOrFavoritesUpdate((cbs) => {
-            cbs.forEach((cb) => cb(files));
-            return [];
-        });
-    }, [handleClose, files, favoriteFileIDs]);
+    useEffect(() => {
+        psRef.current?.refreshCurrentSlideFavoriteButtonIfNeeded();
+    }, [favoriteFileIDs, pendingFavoriteUpdates]);
 
     useEffect(() => {
         if (open) {
