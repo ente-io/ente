@@ -44,6 +44,10 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
     const playlistFileData = await fetchFileData("vid_preview", file.id);
     if (!playlistFileData) return undefined;
 
+    // See: [Note: strict mode migration]
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const { playlist } = await decryptPlaylistJSON(playlistFileData, file);
 
     // [Note: HLS playlist format]
