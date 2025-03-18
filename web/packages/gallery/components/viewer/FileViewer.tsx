@@ -175,15 +175,21 @@ export type FileViewerProps = ModalVisibilityProps & {
     /**
      * File IDs of all the files that the user has marked as a favorite.
      *
-     * If this is not provided then the favorite toggle button will not be shown
-     * in the file actions.
+     * See also {@link onToggleFavorite}.
      */
     favoriteFileIDs?: Set<number>;
+    /**
+     * File IDs of for which an update of its favorite status is pending (e.g.
+     * due to a toggle favorite action in the file viewer).
+     *
+     * See also {@link favoriteFileIDs} and {@link onToggleFavorite}.
+     */
+    pendingFavoriteUpdates?: Set<number>;
     /**
      * File IDs of for which an update of its visibility is pending (e.g. due to
      * a toggle archived action in the file viewer).
      *
-     * See also {@link pendingVisibilityUpdates}.
+     * See also {@link onFileVisibilityUpdate}.
      */
     pendingVisibilityUpdates?: Set<number>;
     /**
@@ -212,12 +218,9 @@ export type FileViewerProps = ModalVisibilityProps & {
      * Called when the favorite status of given {@link file} should be toggled
      * from its current value.
      *
-     * If this is not provided then the favorite toggle button will not be shown
-     * in the file actions.
-     *
-     * See also {@link favoriteFileIDs}.
-     *
-     * See also: [Note: File viewer update and dispatch]
+     * The favorite toggle button is shown only if all three of
+     * {@link favoriteFileIDs}, {@link pendingFavoriteUpdates} and
+     * {@link onToggleFavorite} are provided.
      */
     onToggleFavorite?: (file: EnteFile) => Promise<void>;
     /**
@@ -276,15 +279,16 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     isInTrashSection,
     isInHiddenSection,
     favoriteFileIDs,
+    pendingFavoriteUpdates,
     pendingVisibilityUpdates,
     fileNormalCollectionIDs,
     collectionNameByID,
     onTriggerSyncWithRemote,
     onVisualFeedback,
     onToggleFavorite,
+    onFileVisibilityUpdate,
     onDownload,
     onDelete,
-    onFileVisibilityUpdate,
     onSelectCollection,
     onSelectPerson,
     onSaveEditedImageCopy,
@@ -586,12 +590,17 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const isFavorite = useCallback(
         ({ file }: FileViewerAnnotatedFile) => {
-            if (!haveUser || !favoriteFileIDs || !onToggleFavorite) {
+            if (
+                !haveUser ||
+                !favoriteFileIDs ||
+                !pendingFavoriteUpdates ||
+                !onToggleFavorite
+            ) {
                 return undefined;
             }
             return favoriteFileIDs.has(file.id);
         },
-        [haveUser, favoriteFileIDs, onToggleFavorite],
+        [haveUser, favoriteFileIDs, pendingFavoriteUpdates, onToggleFavorite],
     );
 
     const toggleFavorite = useCallback(
