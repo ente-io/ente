@@ -102,15 +102,18 @@ export interface RemoveFromCollectionRequest {
     fileIDs: number[];
 }
 
-export enum SUB_TYPE {
-    DEFAULT = 0,
-    DEFAULT_HIDDEN = 1,
-    QUICK_LINK_COLLECTION = 2,
-}
+export const CollectionSubType = {
+    default: 0,
+    defaultHidden: 1,
+    quicklink: 2,
+} as const;
+
+export type CollectionSubType =
+    (typeof CollectionSubType)[keyof typeof CollectionSubType];
 
 export interface CollectionMagicMetadataProps {
     visibility?: ItemVisibility;
-    subType?: SUB_TYPE;
+    subType?: CollectionSubType;
     order?: number;
 }
 

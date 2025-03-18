@@ -6,7 +6,7 @@ import {
     type Collection,
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadataProps,
-    SUB_TYPE,
+    CollectionSubType,
 } from "@/media/collection";
 import { EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
@@ -273,7 +273,7 @@ export const changeCollectionOrder = async (
 
 export const changeCollectionSubType = async (
     collection: Collection,
-    subType: SUB_TYPE,
+    subType: CollectionSubType,
 ) => {
     try {
         const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
@@ -301,7 +301,7 @@ export const getUserOwnedCollections = (collections: Collection[]) => {
 };
 
 export const isQuickLinkCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.subType === SUB_TYPE.QUICK_LINK_COLLECTION;
+    collection.magicMetadata?.data.subType == CollectionSubType.quicklink;
 
 export function isIncomingViewerShare(collection: Collection, user: User) {
     const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
