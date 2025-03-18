@@ -1,27 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:id="@+id/widget_container">
-    <ImageView
-        android:id="@+id/widget_placeholder"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:visibility="visible"
-        tools:visibility="visible"
-        />
+
+    <!-- Main Image (if available) -->
     <ImageView
         android:id="@+id/widget_img"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:visibility="visible"
-        tools:visibility="visible"
-        />
-</LinearLayout>
+        android:scaleType="centerCrop"
+        android:visibility="gone" />  <!-- Initially hidden -->
+
+    <!-- Gradient Overlay for Text Readability -->
+    <LinearLayout
+        android:id="@+id/widget_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
+        android:paddingTop="4dp"
+        android:background="@layout/gradient_overlay"
+        android:visibility="gone"> <!-- Initially hidden, shown when image is available -->
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Where is the title?"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:visibility="gone"/>
+
+        <!-- Subtitle -->
+        <TextView
+            android:id="@+id/widget_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Where is the subtitle?"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+    <!-- Placeholder View (when no image available) -->
+    <LinearLayout
+        android:id="@+id/widget_placeholder_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:background="@color/widget_placeholder_bg">
+
+        <ImageView
+            android:id="@+id/widget_placeholder"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/ic_home_widget_default"
+            android:scaleType="fitCenter" />
+
+        <TextView
+            android:id="@+id/widget_placeholder_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your memories will appear here"
+            android:textSize="14sp"
+            android:textColor="@color/widget_text_color"
+            android:layout_marginTop="12dp"/>
+    </LinearLayout>
+
+</FrameLayout>

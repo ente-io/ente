@@ -42,8 +42,8 @@ struct Provider: TimelineProvider {
             data?.integer(forKey: "totalSet")
 
         if totalSet != nil && totalSet! > 0 {
-            totalSet = totalSet! > 5 ? 5 : totalSet!
-            for offset in 0..<totalSet! {
+            let count = totalSet! > 5 ? 5 : totalSet
+            for offset in 0..<count! {
                 let randomInt = Int.random(in: 0..<totalSet!)
                 let entryDate = Calendar.current.date(
                     byAdding: .minute, value: X * offset, to: currentDate
@@ -110,6 +110,7 @@ struct SlideshowWidgetEntryView: View {
                                 startPoint: .bottom,
                                 endPoint: .top
                             )
+
                             .frame(height: geometry.size.height * 0.4)
                             .frame(maxHeight: .infinity, alignment: .bottom)
                             .backwardWidgetAccentable(true)
@@ -125,7 +126,7 @@ struct SlideshowWidgetEntryView: View {
                                 Text(entry.subTitle ?? "Where is the sub title")
                                     .font(.custom("Inter", size: 12, relativeTo: .caption2))
                                     .foregroundStyle(.white)
-                                    .shadow(radius: 2)
+                                    .shadow(radius: 20)
                             }
                             .padding(.leading, geometry.size.width * 0.05)
                             .padding(.bottom, geometry.size.height * 0.05),

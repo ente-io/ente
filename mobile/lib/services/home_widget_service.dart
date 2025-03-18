@@ -1,3 +1,6 @@
+import "dart:convert";
+import "dart:io";
+
 import "package:crypto/crypto.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
@@ -102,12 +105,16 @@ class HomeWidgetService {
   ) async {
     try {
       final thumbnail = await getThumbnail(ogFile);
-      const double minSize = 512;
+
+      final decoded = await decodeImageFromList(thumbnail!);
+      final double width = decoded.width.toDouble();
+      final double height = decoded.height.toDouble();
+
       final Image img = Image.memory(
-        thumbnail!,
+        thumbnail,
         fit: BoxFit.cover,
-        cacheWidth: minSize.toInt(),
-        cacheHeight: minSize.toInt(),
+        cacheWidth: width.toInt(),
+        cacheHeight: height.toInt(),
       );
 
       await PreloadImage.loadImage(img.image);
@@ -118,8 +125,8 @@ class HomeWidgetService {
       final widget = ClipSmoothRect(
         radius: SmoothBorderRadius(cornerRadius: 32, cornerSmoothing: 1),
         child: Container(
-          width: minSize,
-          height: minSize,
+          width: width,
+          height: height,
           decoration: BoxDecoration(
             color: platformBrightness == Brightness.light
                 ? const Color.fromRGBO(251, 251, 251, 1)
@@ -130,19 +137,28 @@ class HomeWidgetService {
       );
       await hw.HomeWidget.renderFlutterWidget(
         widget,
-        logicalSize: const Size(minSize, minSize),
+        logicalSize: Size(width, height),
         key: key,
       );
-      await hw.HomeWidget.saveWidgetData<Map<String, dynamic>>(
-        key + "_data",
-        {
-          "title": title,
-          "subText": SmartMemoriesService.getDateFormatted(
-            creationTime: ogFile.creationTime!,
-          ),
-          "generatedId": ogFile.generatedID!,
-        },
-      );
+
+      final data = {
+        "title": title,
+        "subText": SmartMemoriesService.getDateFormatted(
+          creationTime: ogFile.creationTime!,
+        ),
+        "generatedId": ogFile.generatedID!,
+      };
+      if (Platform.isIOS) {
+        await hw.HomeWidget.saveWidgetData<Map<String, dynamic>>(
+          key + "_data",
+          data,
+        );
+      } else {
+        await hw.HomeWidget.saveWidgetData<String>(
+          key + "_data",
+          jsonEncode(data),
+        );
+      }
     } catch (_, __) {
       _logger.severe("Failed to save the capture", _, __);
       return false;
@@ -244,7 +260,7 @@ class HomeWidgetService {
     final keyHash = _getFilesKey(files);
 
     final value = await _getFilesHash();
-    if (value == keyHash) {
+    if (value != keyHash) {
       _logger.info("No changes detected in memories");
       await _updateWidget();
       _logger.info(">>> Refreshing memory from same set");
