@@ -431,98 +431,94 @@ export const FileList: React.FC<FileListProps> = ({
         };
     };
 
-    const getAppDownloadFooter = () => {
-        return {
-            tag: "publicAlbumsFooter",
-            height: FOOTER_HEIGHT,
-            item: (
-                <FooterContainer span={columns}>
-                    <Typography variant="small" sx={{ color: "text.faint" }}>
-                        <Trans
-                            i18nKey={"install_mobile_app"}
-                            components={{
-                                a: (
-                                    <Link
-                                        href="https://play.google.com/store/apps/details?id=io.ente.photos"
-                                        target="_blank"
-                                        rel="noopener"
-                                    />
-                                ),
-                                b: (
-                                    <Link
-                                        href="https://apps.apple.com/in/app/ente-photos/id1542026904"
-                                        target="_blank"
-                                        rel="noopener"
-                                    />
-                                ),
-                            }}
-                        />
-                    </Typography>
-                </FooterContainer>
-            ),
-        };
-    };
+    const getAppDownloadFooter = (): TimeStampListItem => ({
+        tag: "publicAlbumsFooter",
+        height: FOOTER_HEIGHT,
+        item: (
+            <FooterContainer span={columns}>
+                <Typography variant="small" sx={{ color: "text.faint" }}>
+                    <Trans
+                        i18nKey={"install_mobile_app"}
+                        components={{
+                            a: (
+                                <Link
+                                    href="https://play.google.com/store/apps/details?id=io.ente.photos"
+                                    target="_blank"
+                                    rel="noopener"
+                                />
+                            ),
+                            b: (
+                                <Link
+                                    href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                                    target="_blank"
+                                    rel="noopener"
+                                />
+                            ),
+                        }}
+                    />
+                </Typography>
+            </FooterContainer>
+        ),
+    });
 
-    const getAlbumsFooter = () => {
-        return {
-            itemType: "publicAlbumsFooter",
-            height: publicCollectionGalleryContext.referralCode
-                ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
-                : ALBUM_FOOTER_HEIGHT,
-            item: (
-                <AlbumFooterContainer
-                    span={columns}
-                    hasReferral={!!publicCollectionGalleryContext.referralCode}
-                >
-                    {/* Make the entire area tappable, otherwise it is hard to
-                        get at on mobile devices. */}
-                    <Box sx={{ width: "100%" }}>
-                        <Link
-                            color="text.base"
-                            sx={{ "&:hover": { color: "inherit" } }}
-                            target="_blank"
-                            href={"https://ente.io"}
-                        >
-                            <Typography variant="small">
+    const getAlbumsFooter = (): TimeStampListItem => ({
+        tag: "publicAlbumsFooter",
+        height: publicCollectionGalleryContext.referralCode
+            ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
+            : ALBUM_FOOTER_HEIGHT,
+        item: (
+            <AlbumFooterContainer
+                span={columns}
+                hasReferral={!!publicCollectionGalleryContext.referralCode}
+            >
+                {/* Make the entire area tappable, otherwise it is hard to
+                    get at on mobile devices. */}
+                <Box sx={{ width: "100%" }}>
+                    <Link
+                        color="text.base"
+                        sx={{ "&:hover": { color: "inherit" } }}
+                        target="_blank"
+                        href={"https://ente.io"}
+                    >
+                        <Typography variant="small">
+                            <Trans
+                                i18nKey="shared_using"
+                                components={{
+                                    a: (
+                                        <Typography
+                                            variant="small"
+                                            component="span"
+                                            sx={{ color: "accent.main" }}
+                                        />
+                                    ),
+                                }}
+                                values={{ url: "ente.io" }}
+                            />
+                        </Typography>
+                    </Link>
+                    {publicCollectionGalleryContext.referralCode ? (
+                        <FullStretchContainer>
+                            <Typography
+                                sx={{
+                                    marginTop: "12px",
+                                    padding: "8px",
+                                    color: "accent.contrastText",
+                                }}
+                            >
                                 <Trans
-                                    i18nKey="shared_using"
-                                    components={{
-                                        a: (
-                                            <Typography
-                                                variant="small"
-                                                component="span"
-                                                sx={{ color: "accent.main" }}
-                                            />
-                                        ),
+                                    i18nKey={"sharing_referral_code"}
+                                    values={{
+                                        referralCode:
+                                            publicCollectionGalleryContext.referralCode,
                                     }}
-                                    values={{ url: "ente.io" }}
                                 />
                             </Typography>
-                        </Link>
-                        {publicCollectionGalleryContext.referralCode ? (
-                            <FullStretchContainer>
-                                <Typography
-                                    sx={{
-                                        marginTop: "12px",
-                                        padding: "8px",
-                                        color: "accent.contrastText",
-                                    }}
-                                >
-                                    <Trans
-                                        i18nKey={"sharing_referral_code"}
-                                        values={{
-                                            referralCode:
-                                                publicCollectionGalleryContext.referralCode,
-                                        }}
-                                    />
-                                </Typography>
-                            </FullStretchContainer>
-                        ) : null}
-                    </Box>
-                </AlbumFooterContainer>
-            ),
-        };
-    };
+                        </FullStretchContainer>
+                    ) : null}
+                </Box>
+            </AlbumFooterContainer>
+        ),
+    });
 
     /**
      * Checks and merge multiple dates into a single row.
