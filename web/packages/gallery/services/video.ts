@@ -1,4 +1,5 @@
 import { assertionFailed } from "@/base/assert";
+import { decryptBlob } from "@/base/crypto";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
@@ -37,7 +38,12 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
         return undefined;
     }
 
-    const encryptedHLS = await fetchFileData("vid_preview", file.id);
-    log.debug(() => ["hlsPlaylistForFile", encryptedHLS]);
+    const encryptedPlaylist = await fetchFileData("vid_preview", file.id);
+    if (!encryptedPlaylist) return undefined;
+
+    const playlist = new TextDecoder().decode(
+        await decryptBlob(encryptedPlaylist, file.key),
+    );
+    log.debug(() => ["hlsPlaylistForFile", playlist]);
     return file.id;
 };
