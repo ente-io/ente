@@ -342,7 +342,6 @@ class SmartMemoriesService {
     w?.log('allFiles setup');
 
     // Get ordered (random) list of important people
-    if (persons.length < 5) return []; // Stop if not enough named persons
     final personIdToPerson = <String, PersonEntity>{};
     final personIdToFaceIDs = <String, Set<String>>{};
     final personIdToFileIDs = <String, Set<int>>{};
