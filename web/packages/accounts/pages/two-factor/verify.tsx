@@ -1,5 +1,4 @@
 import { Verify2FACodeForm } from "@/accounts/components/Verify2FACodeForm";
-import { PAGES } from "@/accounts/constants/pages";
 import { verifyTwoFactor } from "@/accounts/services/user";
 import { LinkButton } from "@/base/components/LinkButton";
 import { useBaseContext } from "@/base/context";
@@ -36,7 +35,7 @@ const Page: React.FC = () => {
             !user.isTwoFactorEnabled &&
             (user.encryptedToken || user.token)
         ) {
-            void router.push(PAGES.CREDENTIALS);
+            void router.push("/credentials");
         } else {
             setSessionID(user.twoFactorSessionID);
         }
@@ -53,7 +52,7 @@ const Page: React.FC = () => {
                 id,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
-            await router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
+            await router.push(unstashRedirect() ?? "/credentials");
         } catch (e) {
             if (e instanceof HTTPError && e.res.status == 404) {
                 logout();
@@ -71,9 +70,7 @@ const Page: React.FC = () => {
                 submitButtonText={t("verify")}
             />
             <AccountsPageFooter>
-                <LinkButton
-                    onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}
-                >
+                <LinkButton onClick={() => router.push("/two-factor/recover")}>
                     {t("lost_2fa_device")}
                 </LinkButton>
                 <LinkButton onClick={logout}>{t("change_email")}</LinkButton>

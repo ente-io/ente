@@ -12,7 +12,6 @@ import {
 } from "@/base/components/mui/SidebarDrawer";
 import { useBaseContext } from "@/base/context";
 import { disable2FA, get2FAStatus } from "@/new/photos/services/user";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import LockIcon from "@mui/icons-material/Lock";
 import { Stack, Typography } from "@mui/material";
@@ -83,7 +82,7 @@ const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const configure = () => {
         onRootClose();
-        void router.push(PAGES.TWO_FACTOR_SETUP);
+        void router.push("/two-factor/setup");
     };
 
     return (
@@ -142,7 +141,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const reconfigure = async () => {
         onRootClose();
-        await router.push(PAGES.TWO_FACTOR_SETUP);
+        await router.push("/two-factor/setup");
     };
 
     return (

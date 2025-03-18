@@ -7,7 +7,6 @@ import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import SetPasswordForm, {
     type SetPasswordFormProps,
 } from "@/accounts/components/SetPasswordForm";
-import { PAGES } from "@/accounts/constants/pages";
 import { appHomeRoute } from "@/accounts/services/redirect";
 import {
     configureSRP,
@@ -60,7 +59,7 @@ const Page: React.FC = () => {
                 void router.push(appHomeRoute);
             }
         } else if (keyAttributes?.encryptedKey) {
-            void router.push(PAGES.CREDENTIALS);
+            void router.push("/credentials");
         } else {
             setToken(user.token);
             setLoading(false);

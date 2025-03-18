@@ -3,7 +3,6 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "@/accounts/components/layouts/centered-paper";
-import { PAGES } from "@/accounts/constants/pages";
 import {
     recoverTwoFactor,
     removeTwoFactor,
@@ -61,7 +60,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
             !(user.isTwoFactorEnabled || user.isTwoFactorEnabledPasskey) &&
             (user.encryptedToken || user.token)
         ) {
-            void router.push(PAGES.GENERATE);
+            void router.push("/generate");
         } else {
             setSessionID(sid);
         }
@@ -135,7 +134,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
                 isTwoFactorEnabled: false,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-            void router.push(PAGES.CREDENTIALS);
+            void router.push("/credentials");
         } catch (e) {
             log.error("two factor recovery failed", e);
             setFieldError(t("incorrect_recovery_key"));

@@ -1,4 +1,3 @@
-import { PAGES } from "@/accounts/constants/pages";
 import { unstashRedirect } from "@/accounts/services/redirect";
 import { LoadingIndicator } from "@/base/components/loaders";
 import { fromB64URLSafeNoPaddingString } from "@/base/crypto/libsodium";
@@ -99,5 +98,5 @@ const saveCredentialsAndNavigateTo = async (
     await setLSUser({ ...getData(LS_KEYS.USER), token, encryptedToken, id });
     setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
 
-    return unstashRedirect() ?? PAGES.CREDENTIALS;
+    return unstashRedirect() ?? "/credentials";
 };

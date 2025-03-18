@@ -43,7 +43,6 @@ import { CenteredFlex } from "@ente/shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -185,7 +184,7 @@ export default function PublicCollectionGallery() {
         if (currentURL.pathname !== "/") {
             router.replace(
                 {
-                    pathname: PAGES.SHARED_ALBUMS,
+                    pathname: "/shared-albums",
                     search: currentURL.search,
                     hash: currentURL.hash,
                 },

@@ -12,7 +12,6 @@ import { useBaseContext } from "@/base/context";
 import { isHTTP401Error } from "@/base/http";
 import log from "@/base/log";
 import { masterKeyFromSessionIfLoggedIn } from "@/base/session";
-import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
     Box,
@@ -42,7 +41,7 @@ const Page: React.FC = () => {
         const fetchCodes = async () => {
             const masterKey = await masterKeyFromSessionIfLoggedIn();
             if (!masterKey) {
-                stashRedirect(PAGES.AUTH);
+                stashRedirect("/auth");
                 void router.push("/");
                 return;
             }

@@ -1,6 +1,5 @@
 import { AccountsPageContents } from "@/accounts/components/layouts/centered-paper";
 import { SignUpContents } from "@/accounts/components/SignUpContents";
-import { PAGES } from "@/accounts/constants/pages";
 import { LoadingIndicator } from "@/base/components/loaders";
 import { customAPIHost } from "@/base/origins";
 import { LS_KEYS, getData } from "@ente/shared//storage/localStorage";
@@ -17,12 +16,12 @@ const Page: React.FC = () => {
         void customAPIHost().then(setHost);
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
-            void router.push(PAGES.VERIFY);
+            void router.push("/verify");
         }
         setLoading(false);
     }, [router]);
 
-    const onLogin = () => void router.push(PAGES.LOGIN);
+    const onLogin = () => void router.push("/login");
 
     return loading ? (
         <LoadingIndicator />

@@ -6,7 +6,6 @@ import {
 import SetPasswordForm, {
     type SetPasswordFormProps,
 } from "@/accounts/components/SetPasswordForm";
-import { PAGES } from "@/accounts/constants/pages";
 import { appHomeRoute, stashRedirect } from "@/accounts/services/redirect";
 import {
     convertBase64ToBuffer,
@@ -45,7 +44,7 @@ const Page: React.FC = () => {
         const user = getData(LS_KEYS.USER);
         setUser(user);
         if (!user?.token) {
-            stashRedirect(PAGES.CHANGE_PASSWORD);
+            stashRedirect("/change-password");
             void router.push("/");
         } else {
             setToken(user.token);

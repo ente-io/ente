@@ -1,4 +1,3 @@
-import { PAGES } from "@/accounts/constants/pages";
 import { generateKeyAndSRPAttributes } from "@/accounts/services/srp";
 import { sendOTT } from "@/accounts/services/user";
 import { isWeakPassword } from "@/accounts/utils/password";
@@ -122,7 +121,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                     masterKey,
                 );
                 setJustSignedUp(true);
-                void router.push(PAGES.VERIFY);
+                void router.push("/verify");
             } catch (e) {
                 setFieldError("confirm", t("password_generation_failed"));
                 throw e;

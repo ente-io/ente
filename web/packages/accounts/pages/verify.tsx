@@ -6,7 +6,6 @@ import {
 import { VerifyingPasskey } from "@/accounts/components/LoginComponents";
 import { SecondFactorChoice } from "@/accounts/components/SecondFactorChoice";
 import { useSecondFactorChoiceIfNeeded } from "@/accounts/components/utils/second-factor-choice";
-import { PAGES } from "@/accounts/constants/pages";
 import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
@@ -123,7 +122,7 @@ const Page: React.FC = () => {
                     isTwoFactorEnabled: true,
                 });
                 setIsFirstLogin(true);
-                void router.push(PAGES.TWO_FACTOR_VERIFY);
+                void router.push("/two-factor/verify");
             } else {
                 await setLSUser({
                     email,
@@ -154,9 +153,9 @@ const Page: React.FC = () => {
                 const redirectURL = unstashRedirect();
                 if (keyAttributes?.encryptedKey) {
                     clearKeys();
-                    void router.push(redirectURL ?? PAGES.CREDENTIALS);
+                    void router.push(redirectURL ?? "/credentials");
                 } else {
-                    void router.push(redirectURL ?? PAGES.GENERATE);
+                    void router.push(redirectURL ?? "/generate");
                 }
             }
         } catch (e) {
@@ -275,11 +274,11 @@ const redirectionIfNeeded = async (user: User | undefined) => {
     const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
 
     if (keyAttributes?.encryptedKey && (user.token || user.encryptedToken)) {
-        return PAGES.CREDENTIALS;
+        return "/credentials";
     }
 
     // If we're coming here during the recover flow, do not redirect.
-    if (stashedRedirect() == PAGES.RECOVER) return undefined;
+    if (stashedRedirect() == "/recover") return undefined;
 
     // The user might have email verification disabled, but after previously
     // entering their email on the login screen, they might've closed the tab
@@ -299,7 +298,7 @@ const redirectionIfNeeded = async (user: User | undefined) => {
         // API calls are fine.
         const latestSRPAttributes = await getSRPAttributes(email);
         if (latestSRPAttributes && !latestSRPAttributes.isEmailMFAEnabled) {
-            return PAGES.CREDENTIALS;
+            return "/credentials";
         }
     }
 

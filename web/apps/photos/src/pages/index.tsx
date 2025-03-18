@@ -8,7 +8,6 @@ import { useBaseContext } from "@/base/context";
 import log from "@/base/log";
 import { albumsAppOrigin, customAPIHost } from "@/base/origins";
 import { DevSettings } from "@/new/photos/components/DevSettings";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
 import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -41,7 +40,7 @@ const Page: React.FC = () => {
         currentURL.pathname = router.pathname;
         if (
             currentURL.host === albumsURL.host &&
-            currentURL.pathname !== PAGES.SHARED_ALBUMS
+            currentURL.pathname != "/shared-albums"
         ) {
             handleAlbumsRedirect(currentURL);
         } else {
@@ -53,7 +52,7 @@ const Page: React.FC = () => {
         const end = currentURL.hash.lastIndexOf("&");
         const hash = currentURL.hash.slice(1, end !== -1 ? end : undefined);
         await router.replace({
-            pathname: PAGES.SHARED_ALBUMS,
+            pathname: "/shared-albums",
             search: currentURL.search,
             hash: hash,
         });
@@ -80,9 +79,9 @@ const Page: React.FC = () => {
         }
         const token = getToken();
         if (key && token) {
-            await router.push(PAGES.GALLERY);
+            await router.push("/gallery");
         } else if (user?.email) {
-            await router.push(PAGES.VERIFY);
+            await router.push("/verify");
         }
         await initLocalForage();
         setLoading(false);
@@ -107,8 +106,8 @@ const Page: React.FC = () => {
     const signUp = () => setShowLogin(false);
     const login = () => setShowLogin(true);
 
-    const redirectToSignupPage = () => router.push(PAGES.SIGNUP);
-    const redirectToLoginPage = () => router.push(PAGES.LOGIN);
+    const redirectToSignupPage = () => router.push("/signup");
+    const redirectToLoginPage = () => router.push("/login");
 
     return (
         <TappableContainer onMaybeChangeHost={refreshHost}>

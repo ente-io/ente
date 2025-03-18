@@ -3,7 +3,6 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "@/accounts/components/layouts/centered-paper";
-import { PAGES } from "@/accounts/constants/pages";
 import { appHomeRoute, stashRedirect } from "@/accounts/services/redirect";
 import { sendOTT } from "@/accounts/services/user";
 import { LinkButton } from "@/base/components/LinkButton";
@@ -48,12 +47,12 @@ const Page: React.FC = () => {
         }
         if (!user?.encryptedToken && !user?.token) {
             void sendOTT(user.email, undefined);
-            stashRedirect(PAGES.RECOVER);
-            void router.push(PAGES.VERIFY);
+            stashRedirect("/recover");
+            void router.push("/verify");
             return;
         }
         if (!keyAttributes) {
-            void router.push(PAGES.GENERATE);
+            void router.push("/generate");
         } else if (key) {
             void router.push(appHomeRoute);
         } else {
@@ -90,7 +89,7 @@ const Page: React.FC = () => {
             await decryptAndStoreToken(keyAttr, masterKey);
 
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
-            void router.push(PAGES.CHANGE_PASSWORD);
+            void router.push("/change-password");
         } catch (e) {
             log.error("password recovery failed", e);
             setFieldError(t("incorrect_recovery_key"));

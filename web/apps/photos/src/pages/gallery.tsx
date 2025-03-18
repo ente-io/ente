@@ -68,7 +68,6 @@ import {
 } from "@/new/photos/services/user-details";
 import { usePhotosAppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -306,7 +305,7 @@ const Page: React.FC = () => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         const token = getToken();
         if (!key || !token) {
-            stashRedirect(PAGES.GALLERY);
+            stashRedirect("/gallery");
             router.push("/");
             return;
         }
@@ -603,7 +602,7 @@ const Page: React.FC = () => {
                         break;
                     case CustomError.KEY_MISSING:
                         clearKeys();
-                        router.push(PAGES.CREDENTIALS);
+                        router.push("/credentials");
                         break;
                     default:
                         log.error("syncWithRemote failed", e);

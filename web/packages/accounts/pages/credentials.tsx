@@ -7,7 +7,6 @@ import {
 import { SecondFactorChoice } from "@/accounts/components/SecondFactorChoice";
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { useSecondFactorChoiceIfNeeded } from "@/accounts/components/utils/second-factor-choice";
-import { PAGES } from "@/accounts/constants/pages";
 import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
@@ -264,7 +263,7 @@ const Page: React.FC = () => {
                         twoFactorSessionID,
                         isTwoFactorEnabled: true,
                     });
-                    void router.push(PAGES.TWO_FACTOR_VERIFY);
+                    void router.push("/two-factor/verify");
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else {
                     const user = getData(LS_KEYS.USER);
@@ -379,7 +378,7 @@ const Page: React.FC = () => {
             />
 
             <AccountsPageFooterWithHost>
-                <LinkButton onClick={() => router.push(PAGES.RECOVER)}>
+                <LinkButton onClick={() => router.push("/recover")}>
                     {t("forgot_password")}
                 </LinkButton>
                 <LinkButton onClick={logout}>{t("change_email")}</LinkButton>

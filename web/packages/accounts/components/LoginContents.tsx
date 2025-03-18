@@ -2,7 +2,6 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "@/accounts/components/layouts/centered-paper";
-import { PAGES } from "@/accounts/constants/pages";
 import { getSRPAttributes } from "@/accounts/services/srp-remote";
 import { sendOTT } from "@/accounts/services/user";
 import { LinkButton } from "@/base/components/LinkButton";
@@ -54,11 +53,11 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                     throw e;
                 }
                 await setLSUser({ email });
-                void router.push(PAGES.VERIFY);
+                void router.push("/verify");
             } else {
                 await setLSUser({ email });
                 setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
-                void router.push(PAGES.CREDENTIALS);
+                void router.push("/credentials");
             }
         } catch (e) {
             log.error("Login failed", e);
