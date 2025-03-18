@@ -341,7 +341,7 @@ class SmartMemoriesService {
         currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
     w?.log('allFiles setup');
 
-    // Get ordered list of important people (all named, from most to least files)
+    // Get ordered (random) list of important people
     if (persons.length < 5) return []; // Stop if not enough named persons
     final personIdToPerson = <String, PersonEntity>{};
     final personIdToFaceIDs = <String, Set<String>>{};
@@ -404,7 +404,6 @@ class SmartMemoriesService {
         );
         final spotlightMemory = PeopleMemory(
           selectSpotlightMemories,
-          '',
           nowInMicroseconds,
           windowEnd,
           PeopleMemoryType.spotlight,
@@ -438,7 +437,6 @@ class SmartMemoriesService {
           );
           final youAndThemMemory = PeopleMemory(
             selectYouAndThemMemories,
-            '',
             nowInMicroseconds,
             windowEnd,
             PeopleMemoryType.youAndThem,
@@ -487,7 +485,6 @@ class SmartMemoriesService {
             }
           }
           if (activityFiles.length > 5) {
-            // final String title = activityTitle(activity, personName);
             final selectActivityMemories = await _bestSelectionPeople(
               activityFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
               fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -495,7 +492,6 @@ class SmartMemoriesService {
             );
             final activityMemory = PeopleMemory(
               selectActivityMemories,
-              '',
               nowInMicroseconds,
               windowEnd,
               PeopleMemoryType.doingSomethingTogether,
@@ -544,12 +540,10 @@ class SmartMemoriesService {
         }
       }
       if (longAgo && lastTimeYouSawThemFiles.length >= 2 && meID != personID) {
-        // final String title = "Last time with $personName";
         final lastTimeMemory = PeopleMemory(
           lastTimeYouSawThemFiles
               .map((f) => Memory.fromFile(f, seenTimes))
               .toList(),
-          '',
           nowInMicroseconds,
           windowEnd,
           PeopleMemoryType.lastTimeYouSawThem,
@@ -592,8 +586,6 @@ class SmartMemoriesService {
           final spotlightMem =
               personMemories[PeopleMemoryType.spotlight]?.first;
           if (spotlightMem != null && spotlightMem.personName != null) {
-            // final String firstTitle = "$personName turning $newAge!";
-            // final String secondTitle = "$personName is $newAge!";
             final thisBirthday = birthdate.copyWith(year: currentTime.year);
             memoryResults.add(
               spotlightMem.copyWith(
@@ -1071,12 +1063,6 @@ class SmartMemoriesService {
         ).year;
         final String? locationName =
             _tryFindLocationName(trip.memories, cities);
-        // String name = "Trip in $year";
-        // if (locationName != null) {
-        //   name = "Trip to $locationName";
-        // } else if (year == currentTime.year - 1) {
-        //   name = "Last year's trip";
-        // }
         final photoSelection = await _bestSelection(
           trip.memories,
           fileIdToFaces: fileIdToFaces,
@@ -1131,13 +1117,6 @@ class SmartMemoriesService {
                 .year;
         final String? locationName =
             _tryFindLocationName(trip.memories, cities);
-        // String name =
-        //     "Trip in $year"; // TODO lau: extract strings for translation
-        // if (locationName != null) {
-        //   name = "Trip to $locationName";
-        // } else if (year == currentTime.year - 1) {
-        //   name = "Last year's trip";
-        // }
         final photoSelection = await _bestSelection(
           trip.memories,
           fileIdToFaces: fileIdToFaces,
@@ -1209,12 +1188,6 @@ class SmartMemoriesService {
               ).year;
               final String? locationName =
                   _tryFindLocationName(trip.memories, cities);
-              // String name = "Trip in $year";
-              // if (locationName != null) {
-              //   name = "Trip to $locationName";
-              // } else if (year == currentTime.year - 1) {
-              //   name = "Last year's trip";
-              // }
               final photoSelection = await _bestSelection(
                 trip.memories,
                 fileIdToFaces: fileIdToFaces,
@@ -1325,8 +1298,6 @@ class SmartMemoriesService {
             fileIDToImageEmbedding: fileIDToImageEmbedding,
             clipPositiveTextVector: clipPositiveTextVector,
           );
-          // final name =
-          //     "${DateFormat.MMMd().format(date)}, ${currentTime.year - date.year} years ago";
           memoryResult.add(
             TimeMemory(
               photoSelection,
@@ -1397,8 +1368,6 @@ class SmartMemoriesService {
               fileIDToImageEmbedding: fileIDToImageEmbedding,
               clipPositiveTextVector: clipPositiveTextVector,
             );
-            // final name = "This week, ${currentTime.year - date.year} years ago";
-
             memoryResult.add(
               TimeMemory(
                 photoSelection,
@@ -1452,10 +1421,8 @@ class SmartMemoriesService {
         fileIDToImageEmbedding: fileIDToImageEmbedding,
         clipPositiveTextVector: clipPositiveTextVector,
       );
-      // final monthName = DateFormat.MMMM().format(DateTime(year, currentMonth));
       final daysLeftInMonth =
           DateTime(currentYear, currentMonth + 1, 0).day - currentTime.day + 1;
-      // final name = monthName + ", ${currentTime.year - year} years ago";
       memoryResult.add(
         TimeMemory(
           photoSelection,
@@ -1481,11 +1448,8 @@ class SmartMemoriesService {
       fileIDToImageEmbedding: fileIDToImageEmbedding,
       clipPositiveTextVector: clipPositiveTextVector,
     );
-    // final monthName =
-    //     DateFormat.MMMM().format(DateTime(currentTime.year, currentMonth));
     final daysLeftInMonth =
         DateTime(currentYear, currentMonth + 1, 0).day - currentTime.day + 1;
-    // final name = monthName + " through the years";
     memoryResult.add(
       TimeMemory(
         photoSelection,

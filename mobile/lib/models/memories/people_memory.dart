@@ -103,7 +103,6 @@ class PeopleMemory extends SmartMemory {
 
   PeopleMemory(
     List<Memory> memories,
-    String title,
     int firstDateToShow,
     int lastDateToShow,
     this.peopleMemoryType,
@@ -117,7 +116,7 @@ class PeopleMemory extends SmartMemory {
   }) : super(
           memories,
           MemoryType.people,
-          title,
+          '',
           firstDateToShow,
           lastDateToShow,
         );
@@ -130,7 +129,6 @@ class PeopleMemory extends SmartMemory {
   }) {
     return PeopleMemory(
       memories,
-      title,
       firstDateToShow ?? this.firstDateToShow,
       lastDateToShow ?? this.lastDateToShow,
       peopleMemoryType,
