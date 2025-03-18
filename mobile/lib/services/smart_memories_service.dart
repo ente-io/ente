@@ -354,11 +354,7 @@ class SmartMemoriesService {
         .where((person) => !person.data.isHidden)
         .map((p) => p.remoteID)
         .toList();
-    orderedImportantPersonsID.sort((a, b) {
-      final aFaces = personIdToFaceIDs[a]!.length;
-      final bFaces = personIdToFaceIDs[b]!.length;
-      return bFaces.compareTo(aFaces);
-    });
+    orderedImportantPersonsID.shuffle(Random());
     w?.log('orderedImportantPersonsID setup');
 
     // Check if the user has assignmed "me"
