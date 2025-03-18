@@ -18,7 +18,9 @@ import { z } from "zod";
  * There are specialized APIs for fetching and uploading the originals and the
  * thumbnails. But for the other associated data, we can use the file data APIs.
  */
-type FileDataType = "mldata" /* See: [Note: "mldata" format] */;
+type FileDataType =
+    | "mldata" /* See: [Note: "mldata" format] */
+    | "vid_preview" /* See: [Note: Video playlist vs preview] */;
 
 const RemoteFileData = z.object({
     /**
@@ -61,7 +63,7 @@ type RemoteFileData = z.infer<typeof RemoteFileData>;
  * payload, but we don't parse that information currently since the higher
  * levels of our code that use this function handle such rare skips gracefully.
  */
-export const fetchFileData = async (
+export const fetchFilesData = async (
     type: FileDataType,
     fileIDs: number[],
 ): Promise<RemoteFileData[]> => {
@@ -73,6 +75,24 @@ export const fetchFileData = async (
     ensureOk(res);
     return z.object({ data: z.array(RemoteFileData) }).parse(await res.json())
         .data;
+};
+
+/**
+ * A variant of {@link fetchFilesData} that fetches data for a single file.
+ *
+ * Unlike {@link fetchFilesData}, this uses a HTTP GET request.
+ */
+export const fetchFileData = async (
+    type: FileDataType,
+    fileID: number,
+): Promise<RemoteFileData> => {
+    const params = new URLSearchParams({ type, fileID: fileID.toString() });
+    const url = await apiURL("/files/data/fetch");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return z.object({ data: RemoteFileData }).parse(await res.json()).data;
 };
 
 /**
