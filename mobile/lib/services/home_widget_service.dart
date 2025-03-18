@@ -260,7 +260,7 @@ class HomeWidgetService {
     final keyHash = _getFilesKey(files);
 
     final value = await _getFilesHash();
-    if (value != keyHash) {
+    if (value == keyHash) {
       _logger.info("No changes detected in memories");
       await _updateWidget();
       _logger.info(">>> Refreshing memory from same set");
