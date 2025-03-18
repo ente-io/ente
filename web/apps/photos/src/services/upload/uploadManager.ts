@@ -598,7 +598,7 @@ class UploadManager {
         uploadResult: UploadResult,
         uploadedFile: EncryptedEnteFile | EnteFile | undefined,
     ) {
-        log.info(`Uploaded ${uploadableItem.fileName} (${uploadResult})`);
+        log.info(`Upload ${uploadableItem.fileName} | ${uploadResult}`);
         try {
             const electron = globalThis.electron;
             if (electron) await markUploaded(electron, uploadableItem);
