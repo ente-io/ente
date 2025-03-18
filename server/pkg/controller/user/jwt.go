@@ -38,7 +38,7 @@ func (c *UserController) GetJWTTokenForClaim(claim *enteJWT.WebCommonJWTClaim) (
 	return tokenString, nil
 }
 
-func (c *UserController) ValidateJWTToken(jwtToken string, scope enteJWT.ClaimScope) (int64, error) {
+func (c *UserController) ValidateJWTToken(jwtToken string, scope enteJWT.ClaimScope) (*enteJWT.WebCommonJWTClaim, error) {
 	token, err := jwt.ParseWithClaims(jwtToken, &enteJWT.WebCommonJWTClaim{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, stacktrace.Propagate(fmt.Errorf("unexpected signing method: %v", token.Header["alg"]), "")
@@ -46,14 +46,14 @@ func (c *UserController) ValidateJWTToken(jwtToken string, scope enteJWT.ClaimSc
 		return c.JwtSecret, nil
 	})
 	if err != nil {
-		return -1, stacktrace.Propagate(err, "JWT parsed failed")
+		return nil, stacktrace.Propagate(err, "JWT parsed failed")
 	}
 	claims, ok := token.Claims.(*enteJWT.WebCommonJWTClaim)
 	if ok && token.Valid {
 		if claims.GetScope() != scope {
-			return -1, stacktrace.Propagate(fmt.Errorf("recived claimScope %s is different than expected scope: %s", claims.GetScope(), scope), "")
+			return nil, stacktrace.Propagate(fmt.Errorf("recived claimScope %s is different than expected scope: %s", claims.GetScope(), scope), "")
 		}
-		return claims.UserID, nil
+		return claims, nil
 	}
-	return -1, stacktrace.Propagate(err, "JWT claim failed")
+	return nil, stacktrace.Propagate(err, "JWT claim failed")
 }
