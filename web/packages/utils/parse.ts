@@ -13,7 +13,7 @@
  * >
  * > https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/isNaN
  */
-export const maybeParseInt = (s: string) => {
+export const maybeParseInt = (s: string): number | undefined => {
     const n = parseInt(s, 10);
     return Number.isNaN(n) ? undefined : n;
 };

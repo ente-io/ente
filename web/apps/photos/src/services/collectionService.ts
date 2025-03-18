@@ -8,12 +8,12 @@ import {
     CollectionMagicMetadata,
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadata,
+    CollectionSubType,
     type CollectionType,
     CreatePublicAccessTokenRequest,
     EncryptedCollection,
     PublicURL,
     RemoveFromCollectionRequest,
-    SUB_TYPE,
     UpdatePublicURL,
 } from "@/media/collection";
 import { EncryptedMagicMetadata, EnteFile } from "@/media/file";
@@ -469,7 +469,7 @@ export const renameCollection = async (
 ) => {
     if (isQuickLinkCollection(collection)) {
         // Convert quick link collection to normal collection on rename
-        await changeCollectionSubType(collection, SUB_TYPE.DEFAULT);
+        await changeCollectionSubType(collection, CollectionSubType.default);
     }
     const token = getToken();
     const cryptoWorker = await sharedCryptoWorker();
@@ -683,7 +683,7 @@ export async function getDefaultHiddenCollection(): Promise<Collection> {
 
 export function createHiddenCollection() {
     return createCollection(HIDDEN_COLLECTION_NAME, "album", {
-        subType: SUB_TYPE.DEFAULT_HIDDEN,
+        subType: CollectionSubType.defaultHidden,
         visibility: ItemVisibility.hidden,
     });
 }

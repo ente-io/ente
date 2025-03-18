@@ -1,7 +1,7 @@
 import { encryptBoxB64 } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import { SUB_TYPE, type Collection } from "@/media/collection";
+import { CollectionSubType, type Collection } from "@/media/collection";
 import { type EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import { batch } from "@/utils/array";
@@ -32,7 +32,7 @@ export const ALL_SECTION = 0;
 export const isDefaultHiddenCollection = (collection: Collection) =>
     // TODO: Need to audit the types
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
+    collection.magicMetadata?.data.subType == CollectionSubType.defaultHidden;
 
 /**
  * Extract the IDs of all the "default" hidden collections.

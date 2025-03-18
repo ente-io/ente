@@ -51,7 +51,9 @@ export const Export: React.FC<ExportProps> = ({
     allCollectionsNameByID,
 }) => {
     const { showMiniDialog } = useBaseContext();
-    const [exportStage, setExportStage] = useState(ExportStage.INIT);
+    const [exportStage, setExportStage] = useState<ExportStage>(
+        ExportStage.init,
+    );
     const [exportFolder, setExportFolder] = useState("");
     const [continuousExport, setContinuousExport] = useState(false);
     const [exportProgress, setExportProgress] = useState<ExportProgress>({
@@ -224,8 +226,8 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
             {exportFolder ? (
                 <>
                     <DirectoryPath path={exportFolder} />
-                    {exportStage === ExportStage.FINISHED ||
-                    exportStage === ExportStage.INIT ? (
+                    {exportStage === ExportStage.finished ||
+                    exportStage === ExportStage.init ? (
                         <ChangeDirectoryOption
                             onClick={changeExportDirectory}
                         />
@@ -303,15 +305,15 @@ const ExportDynamicContent = ({
     allCollectionsNameByID: Map<number, string>;
 }) => {
     switch (exportStage) {
-        case ExportStage.INIT:
+        case ExportStage.init:
             return <ExportInit startExport={startExport} />;
 
-        case ExportStage.MIGRATION:
-        case ExportStage.STARTING:
-        case ExportStage.EXPORTING_FILES:
-        case ExportStage.RENAMING_COLLECTION_FOLDERS:
-        case ExportStage.TRASHING_DELETED_FILES:
-        case ExportStage.TRASHING_DELETED_COLLECTIONS:
+        case ExportStage.migration:
+        case ExportStage.starting:
+        case ExportStage.exportingFiles:
+        case ExportStage.renamingCollectionFolders:
+        case ExportStage.trashingDeletedFiles:
+        case ExportStage.trashingDeletedCollections:
             return (
                 <ExportInProgress
                     exportStage={exportStage}
@@ -320,7 +322,7 @@ const ExportDynamicContent = ({
                     closeExportDialog={onHide}
                 />
             );
-        case ExportStage.FINISHED:
+        case ExportStage.finished:
             return (
                 <ExportFinished
                     onHide={onHide}

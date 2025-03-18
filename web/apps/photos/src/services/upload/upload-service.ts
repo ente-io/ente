@@ -549,7 +549,7 @@ export const uploader = async (
     abortIfCancelled: () => void,
     makeProgessTracker: MakeProgressTracker,
 ): Promise<UploadResponse> => {
-    log.info(`Uploading ${fileName}`);
+    log.info(`Upload ${fileName} | start`);
     try {
         /*
          * We read the file four times:

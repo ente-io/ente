@@ -175,14 +175,23 @@ export interface PrivateMagicMetadata {
 /**
  * The visibility of an Ente file or collection.
  */
-export enum ItemVisibility {
+export const ItemVisibility = {
     /** The normal state - The item is visible. */
-    visible = 0,
+    visible: 0,
     /** The item has been archived. */
-    archived = 1,
+    archived: 1,
     /** The item has been hidden. */
-    hidden = 2,
-}
+    hidden: 2,
+} as const;
+
+/**
+ * The visibility of an Ente file or collection.
+ *
+ * This is the erasable type. See the {@link ItemVisibility} object for the
+ * possible values and their symbolic constants.
+ */
+export type ItemVisibility =
+    (typeof ItemVisibility)[keyof typeof ItemVisibility];
 
 /**
  * Mutable public metadata associated with an {@link EnteFile}.

@@ -316,7 +316,7 @@ async function downloadFileDesktop(
 }
 
 export const isImageOrVideo = (fileType: FileType) =>
-    [FileType.image, FileType.video].includes(fileType);
+    fileType == FileType.image || fileType == FileType.video;
 
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(isArchivedFile).map((file) => file.id);
