@@ -1,6 +1,16 @@
 {
     "extends": "@/build-config/tsconfig-typecheck.json",
-    // TODO: [Note: Enable isolatedDeclarations one by one]
-    "compilerOptions": { "isolatedDeclarations": true, "composite": true },
+    "compilerOptions": {
+        /* Require sufficient type annotations on exports so that non-tsc tools
+           can trivially (and quickly) generate declaration files
+
+           Eventually, we'd want to enable this for all our code, but currently
+           that cannot be done because it clashes with the allowJs flag that
+           Next.js insists on adding.
+         */
+        "isolatedDeclarations": true,
+        /* Required for isolatedDeclarations */
+        "composite": true
+    },
     "include": ["."]
 }
