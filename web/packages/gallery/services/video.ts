@@ -1,7 +1,7 @@
 import { assertionFailed } from "@/base/assert";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import { fetchFileData } from "@/new/photos/services/file-data";
+import { fetchFileData } from "./file-data";
 
 /**
  * Return a HLS playlist that can be used to stream playback of thne given video

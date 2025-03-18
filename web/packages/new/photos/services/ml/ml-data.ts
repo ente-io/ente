@@ -4,7 +4,7 @@ import type { EnteFile } from "@/media/file";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip, gzip } from "../../utils/gzip";
-import { fetchFilesData, putFileData } from "../file-data";
+import { fetchFilesData, putFileData } from "@/gallery/services/file-data";
 import { type RemoteCLIPIndex } from "./clip";
 import { type RemoteFaceIndex } from "./face";
 
