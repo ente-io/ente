@@ -1,10 +1,10 @@
-import { assertionFailed } from "@/base/assert";
 import { decryptBlob } from "@/base/crypto";
 import type { EncryptedBlob } from "@/base/crypto/types";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { gunzip } from "@/new/photos/utils/gzip";
+import { ensurePrecondition } from "@/utils/ensure";
 import { z } from "zod";
 import { fetchFileData } from "./file-data";
 
@@ -39,10 +39,7 @@ import { fetchFileData } from "./file-data";
  *   stored as file preview data of type "vid_preview").
  */
 export const hlsPlaylistForFile = async (file: EnteFile) => {
-    if (file.metadata.fileType != FileType.video) {
-        assertionFailed();
-        return undefined;
-    }
+    ensurePrecondition(file.metadata.fileType == FileType.video);
 
     const playlistFileData = await fetchFileData("vid_preview", file.id);
     if (!playlistFileData) return undefined;
