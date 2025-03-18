@@ -602,6 +602,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         },
         [haveUser, favoriteFileIDs, pendingFavoriteUpdates, onToggleFavorite],
     );
+    const isFavoritePending = useCallback(
+        ({ file }: FileViewerAnnotatedFile) =>
+            !!pendingFavoriteUpdates?.has(file.id),
+        [pendingFavoriteUpdates],
+    );
 
     const toggleFavorite = useCallback(
         ({ file }: FileViewerAnnotatedFile) => {
@@ -770,6 +775,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         delegateRef.current = {
             getFiles,
             isFavorite,
+            isFavoritePending,
             toggleFavorite,
             shouldIgnoreKeyboardEvent,
             performKeyAction,
@@ -781,12 +787,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         const delegate = delegateRef.current!;
         delegate.getFiles = getFiles;
         delegate.isFavorite = isFavorite;
+        delegate.isFavoritePending = isFavoritePending;
         delegate.toggleFavorite = toggleFavorite;
         delegate.shouldIgnoreKeyboardEvent = shouldIgnoreKeyboardEvent;
         delegate.performKeyAction = performKeyAction;
     }, [
         getFiles,
         isFavorite,
+        isFavoritePending,
         toggleFavorite,
         shouldIgnoreKeyboardEvent,
         performKeyAction,
