@@ -267,6 +267,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Немагчыма згенерыраваць ключы бяспекі на гэтай прыладзе.\n\nЗарэгіструйцеся з іншай прылады."),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "status": MessageLookupByLibrary.simpleMessage("Стан"),
         "storageInGB": m2,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Надзейны"),
@@ -280,6 +282,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "termsOfServicesTitle": MessageLookupByLibrary.simpleMessage("Умовы"),
         "theme": MessageLookupByLibrary.simpleMessage("Тема"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("Гэта прылада"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Гэта дзеянне завяршыць сеанс на наступнай прыладзе:"),

@@ -12,8 +12,8 @@ import "package:photos/core/constants.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
-// import "package:photos/generated/l10n.dart";
-// import "package:photos/l10n/l10n.dart";
+import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
@@ -112,9 +112,10 @@ class SmartMemoriesService {
       }
       _logger.finest('clipPositiveTextVector and clipPeopleActivityVectors $t');
 
-      // final local = await getLocale();
-      // final s = await S.load(local!);
-      // _logger.finest('get locale and S $t');
+      final local = await getLocale();
+      final languageCode = local?.languageCode ?? "en";
+      final s = await S.load(local!);
+      _logger.finest('get locale and S $t');
 
       _logger.finest('all data fetched $t at ${DateTime.now()}, to computer');
       final memoriesResult = await Computer.shared().compute(
@@ -137,7 +138,7 @@ class SmartMemoriesService {
         },
       ) as MemoriesResult;
       for (final memory in memoriesResult.memories) {
-        memory.title = memory.createTitle();
+        memory.title = memory.createTitle(s, languageCode);
       }
       return memoriesResult;
     } catch (e, s) {

@@ -1,4 +1,5 @@
 import "package:intl/intl.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 
@@ -26,27 +27,27 @@ class TimeMemory extends SmartMemory {
         );
 
   @override
-  String createTitle() {
+  String createTitle(S s, String languageCode) {
     if (day != null) {
-      final dayFormat = DateFormat.MMMd().format(day!);
+      final dayFormat = DateFormat.MMMd(languageCode).format(day!);
       if (yearsAgo != null) {
-        return "$dayFormat, ${yearsAgo!} years ago";
+        return "$dayFormat, " + s.yearsAgo(yearsAgo!);
       } else {
-        return "$dayFormat through the years";
+        return s.throughTheYears(dayFormat);
       }
     }
     if (month != null) {
-      final monthFormat = DateFormat.MMMM().format(month!);
+      final monthFormat = DateFormat.MMMM(languageCode).format(month!);
       if (yearsAgo != null) {
-        return "$monthFormat, ${yearsAgo!} years ago";
+        return "$monthFormat, " + s.yearsAgo(yearsAgo!);
       } else {
-        return "$monthFormat through the years";
+        return s.throughTheYears(monthFormat);
       }
     }
     if (yearsAgo != null) {
-      return "This week, ${yearsAgo!} years ago";
+      return s.thisWeekXYearsAgo(yearsAgo!);
     } else {
-      return "This week through the years";
+      return s.thisWeekThroughTheYears;
     }
   }
 }

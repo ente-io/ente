@@ -1,3 +1,4 @@
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
@@ -46,17 +47,17 @@ class TripMemory extends SmartMemory {
   }
 
   @override
-  String createTitle() {
+  String createTitle(S s, String languageCode) {
     assert(locationName != null || tripYear != null);
     if (locationName != null) {
       if (locationName!.toLowerCase().contains("base")) return locationName!;
-      return "Trip to $locationName";
+      return s.tripToLocation(locationName!);
     }
     if (tripYear != null) {
       if (tripYear == DateTime.now().year - 1) {
-        return "Last year's trip";
+        return s.lastYearsTrip;
       } else {
-        return "Trip in $tripYear";
+        return s.tripInYear(tripYear!);
       }
     }
     throw ArgumentError("TripMemory must have a location name or trip year");

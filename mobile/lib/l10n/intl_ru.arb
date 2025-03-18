@@ -1477,5 +1477,7 @@
   "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
   "photocountPhotos": "$photoCount photos",
   "notThisPerson": "Not this person?",
-  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library."
+  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
+  "thisWeekThroughTheYears": "This week through the years",
+  "spotlightOnYourself": "Spotlight on yourself"
 }

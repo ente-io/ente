@@ -1,3 +1,4 @@
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 
@@ -20,7 +21,7 @@ class FillerMemory extends SmartMemory {
         );
 
   @override
-  String createTitle() {
-    return "$yearsAgo years ago";
+  String createTitle(S s, String languageCode) {
+    return s.yearsAgo(yearsAgo);
   }
 }

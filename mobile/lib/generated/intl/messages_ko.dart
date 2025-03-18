@@ -68,6 +68,10 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Selected items will be removed from this person, but not deleted from your library."),
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Shift dates and time"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillMakeTheDateAndTimeOfAllSelected":
             MessageLookupByLibrary.simpleMessage(
                 "This will make the date and time of all selected photos the same."),

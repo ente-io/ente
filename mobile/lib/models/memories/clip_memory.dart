@@ -1,3 +1,4 @@
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 
@@ -66,28 +67,28 @@ String clipQuery(ClipMemoryType clipMemoryType) {
   }
 }
 
-String clipTitle(ClipMemoryType clipMemoryType) {
+String clipTitle(S s, ClipMemoryType clipMemoryType) {
   switch (clipMemoryType) {
     case ClipMemoryType.sunrise:
-      return "Sunrise";
+      return s.sunrise;
     case ClipMemoryType.sunset:
-      return "Sunset";
+      return s.sunset;
     case ClipMemoryType.mountains:
-      return "Mountains";
+      return s.mountains;
     case ClipMemoryType.greenery:
-      return "Greenery";
+      return s.greenery;
     case ClipMemoryType.beach:
-      return "Beach";
+      return s.beach;
     case ClipMemoryType.city:
-      return "City";
+      return s.city;
     case ClipMemoryType.moon:
-      return "Moon";
+      return s.moon;
     case ClipMemoryType.onTheRoad:
-      return "On the Road";
+      return s.onTheRoad;
     case ClipMemoryType.food:
-      return "Food";
+      return s.food;
     case ClipMemoryType.pets:
-      return "Pets";
+      return s.pets;
   }
 }
 
@@ -110,7 +111,7 @@ class ClipMemory extends SmartMemory {
         );
 
   @override
-  String createTitle() {
-    return clipTitle(clipMemoryType);
+  String createTitle(S s, String languageCode) {
+    return clipTitle(s, clipMemoryType);
   }
 }
