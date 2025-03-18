@@ -4,7 +4,7 @@
  * This function is a promisified `setTimeout`. It returns a promise that
  * resolves after {@link ms} milliseconds.
  */
-export const wait = (ms: number) =>
+export const wait = (ms: number): Promise<void> =>
     new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
@@ -65,7 +65,10 @@ export const wait = (ms: number) =>
  *   scratch for now. Indeed, I've spent more time writing about the function
  *   than the function itself.
  */
-export const throttled = (underlying: () => Promise<void>, period: number) => {
+export const throttled = (
+    underlying: () => Promise<void>,
+    period: number,
+): (() => void) => {
     let pending = 0;
 
     const f = () => {
@@ -91,7 +94,10 @@ export const throttled = (underlying: () => Promise<void>, period: number) => {
  * settled, just its eventual state will be ignored if it gets fullfilled or
  * rejected after we've already timed out.
  */
-export const withTimeout = async <T>(promise: Promise<T>, ms: number) => {
+export const withTimeout = async <T>(
+    promise: Promise<T>,
+    ms: number,
+): Promise<T> => {
     let timeoutId: ReturnType<typeof setTimeout>;
     const rejectOnTimeout = new Promise<T>((_, reject) => {
         timeoutId = setTimeout(

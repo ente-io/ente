@@ -60,6 +60,12 @@
         /* Ask TypeScript to warn us if we use TypeScript features that cannot
            be used by single-file transpilers */
         "isolatedModules": true,
+        /* Require sufficient type annotations on exports so that non-tsc tools
+           can trivially (and quickly) generate declaration files */
+        // TODO: [Note: Enable isolatedDeclarations one by one]
+        // "isolatedDeclarations": true,
+        /* Required for isolatedDeclarations */
+        // "composite": true,
         /* Enable various workarounds to play better with CJS libraries */
         "esModuleInterop": true,
 

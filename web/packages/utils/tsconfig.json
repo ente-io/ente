@@ -1,1 +1,6 @@
-{ "extends": "@/build-config/tsconfig-typecheck.json", "include": ["."] }
+{
+    "extends": "@/build-config/tsconfig-typecheck.json",
+    // TODO: [Note: Enable isolatedDeclarations one by one]
+    "compilerOptions": { "isolatedDeclarations": true, "composite": true },
+    "include": ["."]
+}
