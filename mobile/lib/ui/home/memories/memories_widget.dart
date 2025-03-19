@@ -5,6 +5,7 @@ import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_changed_event.dart";
 import "package:photos/events/memories_setting_changed.dart";
+import "package:photos/events/memory_seen_event.dart";
 import 'package:photos/models/memories/memory.dart';
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/service_locator.dart";
@@ -22,6 +23,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   late ScrollController _controller;
   late StreamSubscription<MemoriesSettingChanged> _memoriesSettingSubscription;
   late StreamSubscription<MemoriesChangedEvent> _memoriesChangedSubscription;
+  late StreamSubscription<MemorySeenEvent> _memorySeenSubscription;
   late double _maxHeight;
   late double _maxWidth;
 
@@ -36,6 +38,12 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     });
     _memoriesChangedSubscription =
         Bus.instance.on<MemoriesChangedEvent>().listen((event) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    _memorySeenSubscription =
+        Bus.instance.on<MemorySeenEvent>().listen((event) {
       if (mounted) {
         setState(() {});
       }
@@ -57,6 +65,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   void dispose() {
     _memoriesSettingSubscription.cancel();
     _memoriesChangedSubscription.cancel();
+    _memorySeenSubscription.cancel();
     _controller.dispose();
     super.dispose();
   }

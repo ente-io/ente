@@ -109,9 +109,6 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
-    if (Platform.isAndroid) {
-      unawaited(_scheduleFGHomeWidgetSync());
-    }
     unawaited(_scheduleFGSync('appStart in FG'));
   });
 }
@@ -125,7 +122,7 @@ ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
 
 Future<void> _homeWidgetSync() async {
   try {
-    await HomeWidgetService.instance.initHomeWidget(false, true);
+    await HomeWidgetService.instance.initHomeWidget();
   } catch (e, s) {
     _logger.severe("Error in initSlideshowWidget", e, s);
   }
@@ -255,13 +252,17 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("LocalSyncService init done $tlog");
 
     RemoteSyncService.instance.init(preferences);
+    _logger.info("RemoteFileMLService done $tlog");
 
     _logger.info("SyncService init $tlog");
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
-    _logger.info("RemoteFileMLService done $tlog");
-    unawaited(HomeWidgetService.instance.initHomeWidget(isBackground));
+    await HomeWidgetService.instance.init(preferences);
+
+    if (!isBackground) {
+      await _scheduleFGHomeWidgetSync();
+    }
 
     if (Platform.isIOS) {
       // ignore: unawaited_futures

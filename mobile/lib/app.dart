@@ -10,7 +10,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:home_widget/home_widget.dart' as hw;
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
+import "package:photos/core/event_bus.dart";
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/events/memories_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
@@ -47,6 +49,7 @@ class EnteApp extends StatefulWidget {
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   final _logger = Logger("EnteAppState");
   late Locale? locale;
+  late StreamSubscription<MemoriesChangedEvent> _memoriesChangedSubscription;
 
   @override
   void initState() {
@@ -55,6 +58,19 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     locale = widget.locale;
     setupIntentAction();
     WidgetsBinding.instance.addObserver(this);
+    setupSubscription();
+  }
+
+  void setupSubscription() {
+    _memoriesChangedSubscription =
+        Bus.instance.on<MemoriesChangedEvent>().listen(
+      (event) async {
+        await HomeWidgetService.instance.updateMemoryChanged(true);
+        await HomeWidgetService.instance.initHomeWidget(
+          changeMemories: true,
+        );
+      },
+    );
   }
 
   @override
@@ -64,9 +80,6 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   }
 
   void _checkForWidgetLaunch() {
-    if (Platform.isIOS) {
-      return;
-    }
     hw.HomeWidget.initiallyLaunchedFromHomeWidget().then(
       (uri) => HomeWidgetService.instance.onLaunchFromWidget(uri, context),
     );
@@ -156,6 +169,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _memoriesChangedSubscription.cancel();
     super.dispose();
   }
 
