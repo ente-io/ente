@@ -146,6 +146,7 @@ class MemoriesCacheService {
   void _cacheUpdated() {
     _shouldUpdate = false;
     unawaited(_prefs.setBool(_shouldUpdateCacheKey, false));
+    Bus.instance.fire(MemoriesChangedEvent());
   }
 
   Future<void> updateCache({bool forced = false}) async {
@@ -326,15 +327,21 @@ class MemoriesCacheService {
     return result;
   }
 
+  Future<void> _calculateRegularFillers() async {
+    _cachedMemories = await smartMemoriesService.calcFillerResults();
+    Bus.instance.fire(MemoriesChangedEvent());
+    return;
+  }
+
   Future<List<SmartMemory>> getMemories() async {
     if (!showAnyMemories) {
       return [];
     }
-    if (!enableSmartMemories) {
-      final fillerMemories = await smartMemoriesService.calcFillerResults();
-      return fillerMemories;
-    }
     if (_cachedMemories != null) {
+      return _cachedMemories!;
+    }
+    if (!enableSmartMemories) {
+      await _calculateRegularFillers();
       return _cachedMemories!;
     }
     _cachedMemories = await _getMemoriesFromCache();
@@ -345,7 +352,7 @@ class MemoriesCacheService {
     if (_cachedMemories == null ||
         (_cachedMemories != null && _cachedMemories!.isEmpty)) {
       _logger.severe("No memories found in (computed) cache, getting fillers");
-      _cachedMemories = await smartMemoriesService.calcFillerResults();
+      await _calculateRegularFillers();
     }
     return _cachedMemories!;
   }
