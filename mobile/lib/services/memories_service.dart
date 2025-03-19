@@ -4,14 +4,13 @@ import "package:photos/core/event_bus.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
 import "package:photos/events/files_updated_event.dart";
-import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/memories/memory.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:shared_preferences/shared_preferences.dart";
 
-class MemoriesService  {
+class MemoriesService {
   final _logger = Logger("MemoryService");
   final _memoriesDB = MemoriesDB.instance;
   final _filesDB = FilesDB.instance;
@@ -57,17 +56,12 @@ class MemoriesService  {
     if (futureToo) _future = null;
   }
 
-  bool get showMemories {
+  bool get showAnyMemories {
     return _prefs.getBool(_showMemoryKey) ?? true;
   }
 
-  Future<void> setShowMemories(bool value) async {
-    await _prefs.setBool(_showMemoryKey, value);
-    Bus.instance.fire(MemoriesSettingChanged());
-  }
-
   Future<List<Memory>> getMemories() async {
-    if (!showMemories) {
+    if (!showAnyMemories) {
       return [];
     }
     if (_cachedMemories != null) {

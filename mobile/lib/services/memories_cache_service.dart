@@ -8,6 +8,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/memories_changed_event.dart";
+import "package:photos/events/memories_setting_changed.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/memories/memories_cache.dart";
@@ -83,6 +84,11 @@ class MemoriesCacheService {
 
   bool get showAnyMemories {
     return _prefs.getBool(_showAnyMemoryKey) ?? true;
+  }
+
+  Future<void> setShowAnyMemories(bool value) async {
+    await _prefs.setBool(_showAnyMemoryKey, value);
+    Bus.instance.fire(MemoriesSettingChanged());
   }
 
   bool get enableSmartMemories => flagService.hasGrantedMLConsent;
