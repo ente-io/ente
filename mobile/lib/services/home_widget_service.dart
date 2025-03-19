@@ -12,7 +12,6 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/memories_service.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/utils/preload_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
@@ -52,7 +51,7 @@ class HomeWidgetService {
       return;
     }
 
-    final memoriesEnabled = MemoriesService.instance.showAnyMemories;
+    final memoriesEnabled = memoriesCacheService.showAnyMemories;
     if (!memoriesEnabled) {
       _logger.warning("memories not enabled");
       await clearHomeWidget();
