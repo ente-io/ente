@@ -583,6 +583,22 @@ class SmartMemoriesService {
       final personMemories = personToMemories[personID];
       if (personID == meID || personMemories == null) continue;
       final person = personIdToPerson[personID]!;
+
+      // Check if we should surface memory based on last met
+      final lastMetMemory =
+          personMemories[PeopleMemoryType.lastTimeYouSawThem]?.first;
+      if (lastMetMemory != null) {
+        final lastMetTime = DateTime.fromMicrosecondsSinceEpoch(
+          lastMetMemory.lastCreationTime!,
+        ).copyWith(year: currentTime.year);
+        final daysSinceLastMet = lastMetTime.difference(currentTime).inDays;
+        if (daysSinceLastMet < 7 && daysSinceLastMet >= 0) {
+          memoryResults.add(lastMetMemory);
+        }
+        // Don't surface birthday when person hasn't been seen in a while (could be passed away)
+        continue;
+      }
+
       // Check if we should surface memory based on birthday
       final birthdate = DateTime.tryParse(person.data.birthDate ?? "");
       if (birthdate != null) {
@@ -631,24 +647,10 @@ class SmartMemoriesService {
           continue;
         }
       }
-
-      // Check if we should surface memory based on last met
-      final lastMetMemory =
-          personMemories[PeopleMemoryType.lastTimeYouSawThem]?.first;
-      if (lastMetMemory != null) {
-        final lastMetTime = DateTime.fromMicrosecondsSinceEpoch(
-          lastMetMemory.lastCreationTime!,
-        ).copyWith(year: currentTime.year);
-        final daysSinceLastMet = lastMetTime.difference(currentTime).inDays;
-        if (daysSinceLastMet < 7 && daysSinceLastMet >= 0) {
-          memoryResults.add(lastMetMemory);
-        }
-      }
     }
     w?.log('relevancy setup');
 
     // Loop through the people (and memory types) and add based on rotation
-    if (memoryResults.length >= 3) return memoryResults;
     peopleRotationLoop:
     for (final personID in orderedImportantPersonsID) {
       for (final memory in memoryResults) {
