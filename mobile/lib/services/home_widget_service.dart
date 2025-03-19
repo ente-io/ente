@@ -10,13 +10,10 @@ import 'package:home_widget/home_widget.dart' as hw;
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/memories_service.dart";
 import "package:photos/services/smart_memories_service.dart";
-import "package:photos/ui/viewer/file/detail_page.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/preload_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
@@ -176,18 +173,15 @@ class HomeWidgetService {
     final generatedId = int.tryParse(uri.queryParameters["generatedId"] ?? "");
     _logger.info("onLaunchFromWidget: $uri, $generatedId");
 
-    final res = generatedId != null
-        ? await FilesDB.instance.getFile(generatedId)
-        : null;
-
-    if (res == null) {
+    if (generatedId == null) {
+      _logger.warning("onLaunchFromWidget: generatedId is null");
       return;
     }
 
-    final page = DetailPage(
-      DetailPageConfiguration(List.unmodifiable([res]), 0, "collection"),
+    await memoriesCacheService.goToMemoryFromGeneratedFileID(
+      context,
+      generatedId,
     );
-    routeToPage(context, page, forceCustomPageRoute: true).ignore();
   }
 
   Future<Map<String, Iterable<EnteFile>>> _getMemories() async {
