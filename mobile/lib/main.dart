@@ -38,7 +38,6 @@ import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
-import 'package:photos/services/memories_service.dart';
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/push_service.dart';
@@ -240,7 +239,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("CollectionsService init done $tlog");
 
     FavoritesService.instance.initFav().ignore();
-    MemoriesService.instance.init(preferences);
     LocalFileUpdateService.instance.init(preferences);
     SearchService.instance.init();
     FileDataService.instance.init(preferences);

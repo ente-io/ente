@@ -17,7 +17,6 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/memories_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -30,7 +29,7 @@ class MemoriesCacheService {
 
   /// Delay is for cache update to be done not during app init, during which a
   /// lot of other things are happening.
-  static const _kCacheUpdateDelay = Duration(seconds: 10);
+  static const _kCacheUpdateDelay = Duration(seconds: 5);
 
   final SharedPreferences _prefs;
   late final Logger _logger = Logger("MemoriesCacheService");
@@ -41,23 +40,17 @@ class MemoriesCacheService {
   bool _shouldUpdate = false;
   bool _isUpdateInProgress = false;
 
-  late Map<int, int> _seenTimes;
-
   MemoriesCacheService(this._prefs) {
     _logger.fine("MemoriesCacheService constructor");
 
     Future.delayed(_kCacheUpdateDelay, () {
       _checkIfTimeToUpdateCache();
-    });
-
-    unawaited(_memoriesDB.getSeenTimes().then((value) => _seenTimes = value));
-    unawaited(
       _memoriesDB.clearMemoriesSeenBeforeTime(
         DateTime.now()
             .subtract(kMemoriesUpdateFrequency)
             .microsecondsSinceEpoch,
-      ),
-    );
+      );
+    });
 
     Bus.instance.on<FilesUpdatedEvent>().where((event) {
       return event.type == EventType.deletedFromEverywhere;
@@ -135,7 +128,6 @@ class MemoriesCacheService {
       }
     }
     if (lastInList) Bus.instance.fire(MemoriesChangedEvent());
-    MemoriesService.instance.clearCache(futureToo: false);
   }
 
   void queueUpdateCache() {
@@ -146,10 +138,15 @@ class MemoriesCacheService {
   void _cacheUpdated() {
     _shouldUpdate = false;
     unawaited(_prefs.setBool(_shouldUpdateCacheKey, false));
+    Bus.instance.fire(MemoriesChangedEvent());
   }
 
   Future<void> updateCache({bool forced = false}) async {
-    if (!showAnyMemories || !enableSmartMemories) {
+    if (!showAnyMemories) {
+      return;
+    }
+    if (!enableSmartMemories) {
+      await _calculateRegularFillers();
       return;
     }
     _checkIfTimeToUpdateCache();
@@ -287,6 +284,7 @@ class MemoriesCacheService {
           allFileIdsToFile[file.uploadedFileID!] = file;
         }
       }
+      final seenTimes = await _memoriesDB.getSeenTimes();
 
       for (final ToShowMemory memory in cache.toShowMemories) {
         if (memory.shouldShowNow()) {
@@ -295,7 +293,7 @@ class MemoriesCacheService {
                 .where((fileID) => allFileIdsToFile.containsKey(fileID))
                 .map(
                   (fileID) =>
-                      Memory.fromFile(allFileIdsToFile[fileID]!, _seenTimes),
+                      Memory.fromFile(allFileIdsToFile[fileID]!, seenTimes),
                 )
                 .toList(),
             memory.type,
@@ -326,15 +324,21 @@ class MemoriesCacheService {
     return result;
   }
 
+  Future<void> _calculateRegularFillers() async {
+    _cachedMemories = await smartMemoriesService.calcFillerResults();
+    Bus.instance.fire(MemoriesChangedEvent());
+    return;
+  }
+
   Future<List<SmartMemory>> getMemories() async {
     if (!showAnyMemories) {
       return [];
     }
-    if (!enableSmartMemories) {
-      final fillerMemories = await smartMemoriesService.calcFillerResults();
-      return fillerMemories;
-    }
     if (_cachedMemories != null) {
+      return _cachedMemories!;
+    }
+    if (!enableSmartMemories) {
+      await _calculateRegularFillers();
       return _cachedMemories!;
     }
     _cachedMemories = await _getMemoriesFromCache();
@@ -345,7 +349,7 @@ class MemoriesCacheService {
     if (_cachedMemories == null ||
         (_cachedMemories != null && _cachedMemories!.isEmpty)) {
       _logger.severe("No memories found in (computed) cache, getting fillers");
-      _cachedMemories = await smartMemoriesService.calcFillerResults();
+      await _calculateRegularFillers();
     }
     return _cachedMemories!;
   }
