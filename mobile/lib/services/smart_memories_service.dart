@@ -1219,7 +1219,7 @@ class SmartMemoriesService {
   }
 
   static Future<List<TimeMemory>> _onThisDayOrWeekResults(
-    Iterable<EnteFile> allFiles,
+    Set<EnteFile> allFiles,
     DateTime currentTime, {
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
@@ -1393,6 +1393,7 @@ class SmartMemoriesService {
 
     // Group files by month and year
     final currentMonthYearGroups = <int, List<Memory>>{};
+    _deductUsedMemories(allFiles, memoryResult);
     for (final file in allFiles) {
       if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
 
