@@ -128,6 +128,8 @@ export const logoutSettings = () => {
  */
 export const syncSettings = async () => {
     const jsonString = await fetchFeatureFlags().then((res) => res.text());
+    // Do a parse as a sanity check before saving the string contents.
+    FeatureFlags.parse(JSON.parse(jsonString));
     saveRemoteFeatureFlagsJSONString(jsonString);
     syncSettingsSnapshotWithLocalStorage();
 };
@@ -138,7 +140,12 @@ const saveRemoteFeatureFlagsJSONString = (s: string) =>
 const savedRemoteFeatureFlags = () => {
     const s = localStorage.getItem("remoteFeatureFlags");
     if (!s) return undefined;
-    return FeatureFlags.parse(JSON.parse(s));
+    try {
+        return FeatureFlags.parse(JSON.parse(s));
+    } catch (e) {
+        log.warn("Ignoring unparseable saved remoteFeatureFlags", e);
+        return undefined;
+    }
 };
 
 const FeatureFlags = z.object({
