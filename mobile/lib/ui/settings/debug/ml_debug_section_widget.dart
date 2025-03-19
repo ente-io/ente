@@ -7,6 +7,7 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
@@ -316,6 +317,21 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               logger.warning('Clear memories cache failed', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Force sync memory widget",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await HomeWidgetService.instance.initHomeWidget(
+              false,
+              bypass: true,
+            );
           },
         ),
         sectionOptionSpacing,

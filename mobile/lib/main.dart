@@ -124,7 +124,7 @@ ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
 
 Future<void> _homeWidgetSync() async {
   try {
-    await HomeWidgetService.instance.initHomeWidget(false, true);
+    await HomeWidgetService.instance.initHomeWidget(false);
   } catch (e, s) {
     _logger.severe("Error in initSlideshowWidget", e, s);
   }

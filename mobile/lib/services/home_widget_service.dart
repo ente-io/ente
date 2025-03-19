@@ -28,7 +28,7 @@ class HomeWidgetService {
   static final HomeWidgetService instance =
       HomeWidgetService._privateConstructor();
 
-  Future<void> initHomeWidget(bool isBackground, [bool syncIt = false]) async {
+  Future<void> initHomeWidget(bool isBackground, {bool bypass = false}) async {
     if (isBackground) {
       _logger.warning("app is running in background");
       return;
@@ -56,7 +56,7 @@ class HomeWidgetService {
       return;
     }
 
-    await _lockAndLoadMemories();
+    await _lockAndLoadMemories(bypass: bypass);
   }
 
   Future<Size?> _renderFile(
@@ -169,6 +169,7 @@ class HomeWidgetService {
   Future<void> onLaunchFromWidget(Uri? uri, BuildContext context) async {
     if (uri == null) {
       _logger.warning("onLaunchFromWidget: uri is null");
+      await initHomeWidget(false);
       return;
     }
 
@@ -219,7 +220,7 @@ class HomeWidgetService {
     return hash;
   }
 
-  Future<void> _updateWidget() async {
+  Future<void> _updateWidget({String? text}) async {
     await hw.HomeWidget.updateWidget(
       name: 'SlideshowWidgetProvider',
       androidName: 'SlideshowWidgetProvider',
@@ -228,7 +229,7 @@ class HomeWidgetService {
     );
     if (flagService.internalUser) {
       await Fluttertoast.showToast(
-        msg: "[i] SlideshowWidget updated",
+        msg: text ?? "[i] SlideshowWidget updated",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -248,7 +249,7 @@ class HomeWidgetService {
     await hw.HomeWidget.saveWidgetData("totalSet", total);
   }
 
-  Future<void> _lockAndLoadMemories() async {
+  Future<void> _lockAndLoadMemories({bool bypass = false}) async {
     final files = await _getMemories();
 
     if (files.isEmpty) {
@@ -260,13 +261,12 @@ class HomeWidgetService {
     final keyHash = _getFilesKey(files);
 
     final value = await _getFilesHash();
-    if (value == keyHash) {
+    if (value != null && value == keyHash) {
       _logger.info("No changes detected in memories");
-      await _updateWidget();
+      await _updateWidget(text: "[i] No changes, refreshing from same set");
       _logger.info(">>> Refreshing memory from same set");
       return;
     }
-    await _setFilesHash(keyHash);
 
     int index = 0;
 
@@ -283,7 +283,11 @@ class HomeWidgetService {
         if (value != null) {
           await _setTotal(index);
           if (index == 1) {
-            await _updateWidget();
+            await _updateWidget(
+              text: bypass
+                  ? "[i] First memory after bypass, updating widget"
+                  : "[i] First memory fetched. updating widget",
+            );
           }
           index++;
         }
@@ -294,7 +298,11 @@ class HomeWidgetService {
       return;
     }
 
-    await _updateWidget();
+    await _setFilesHash(keyHash);
+
+    await _updateWidget(
+      text: bypass ? "[i] Bypassing memory set check, updated widget" : null,
+    );
     _logger.info(">>> Switching to next memory set");
   }
 }
