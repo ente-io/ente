@@ -62,6 +62,13 @@ class LocalDB with SqlDbBase {
     );
   }
 
+  Future<List<AssetPathEntity>> getAssetPaths() async {
+    final result = await _sqliteDB.execute(
+      "SELECT * FROM device_path",
+    );
+    return result.map((row) => LocalDBMappers.assetPath(row)).toList();
+  }
+
   Future<void> insertPathToAssetIDs(
     Map<String, Set<String>> pathToAssetIDs, {
     bool clearOldMappingsIdsInInput = false,

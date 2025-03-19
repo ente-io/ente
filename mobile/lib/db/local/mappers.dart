@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:photo_manager/photo_manager.dart";
 
 class LocalDBMappers {
@@ -31,5 +33,25 @@ class LocalDBMappers {
       entity.albumTypeEx?.darwin?.type?.index,
       entity.albumTypeEx?.darwin?.subtype?.index,
     ];
+  }
+
+  static AssetPathEntity assetPath(Map<String, dynamic> row) {
+    return AssetPathEntity(
+      id: row['id'] as String,
+      name: row['name'] as String,
+      albumType: row['album_type'] as int,
+      albumTypeEx: AlbumType(
+        darwin: !Platform.isAndroid
+            ? DarwinAlbumType(
+                type: PMDarwinAssetCollectionTypeExt.fromValue(
+                  row['ios_album_type'] as int?,
+                ),
+                subtype: PMDarwinAssetCollectionSubtypeExt.fromValue(
+                  row['darwin_subtype'] as int?,
+                ),
+              )
+            : null,
+      ),
+    );
   }
 }

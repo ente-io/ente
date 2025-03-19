@@ -2,7 +2,7 @@ import "package:flutter/foundation.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 mixin SqlDbBase {
-  static const _params = {};
+  static final _params = {};
 
   String getParams(int count) {
     if (!_params.containsKey(count)) {
