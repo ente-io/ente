@@ -605,7 +605,7 @@ class SmartMemoriesService {
         final thisBirthday =
             DateTime(currentTime.year, birthdate.month, birthdate.day);
         final daysTillBirthday = thisBirthday.difference(currentTime).inDays;
-        if (daysTillBirthday < 7 && daysTillBirthday >= 0) {
+        if (daysTillBirthday < 6 && daysTillBirthday >= 0) {
           final int newAge = currentTime.year - birthdate.year;
           final spotlightMem =
               personMemories[PeopleMemoryType.spotlight]?.first;
@@ -616,7 +616,7 @@ class SmartMemoriesService {
                 isBirthday: false,
                 newAge: newAge,
                 firstDateToShow: thisBirthday
-                    .subtract(const Duration(days: 6))
+                    .subtract(const Duration(days: 5))
                     .microsecondsSinceEpoch,
                 lastDateToShow: thisBirthday.microsecondsSinceEpoch,
               ),
@@ -637,7 +637,7 @@ class SmartMemoriesService {
             memoryResults.add(
               youAndThemMem.copyWith(
                 firstDateToShow: thisBirthday
-                    .subtract(const Duration(days: 6))
+                    .subtract(const Duration(days: 5))
                     .microsecondsSinceEpoch,
                 lastDateToShow:
                     thisBirthday.add(kDayItself).microsecondsSinceEpoch,
