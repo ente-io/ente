@@ -16,14 +16,6 @@ require you to clone the repository or build any images.
     ```sh
     # compose.yaml
     curl -LO https://raw.githubusercontent.com/ente-io/ente/main/server/compose.yaml
-
-    mkdir -p scripts/compose
-    cd scripts/compose
-
-    # scripts/compose/credentials.yaml
-    curl -LO https://raw.githubusercontent.com/ente-io/ente/main/server/scripts/compose/credentials.yaml
-
-    cd ../..
     ```
 
 3. Modify `compose.yaml`. Instead of building from source, we want directly use

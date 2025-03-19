@@ -46,20 +46,23 @@ Or interact with the MinIO S3 API
     AWS_ACCESS_KEY_ID=changeme AWS_SECRET_ACCESS_KEY=changeme1234 \
         aws s3 --endpoint-url http://localhost:3200 ls s3://b2-eu-cen
 
-Or open the MinIO dashboard at <http://localhost:3201> (user: changeme/password: changeme1234).
+Or open the MinIO dashboard at http://localhost:3201
+
+> [!NOTE]
+>
+> To avoid exposing unnecessary services, this port is not exposed by default.
+> You'll need to uncomment the corresponding port in your `compose.yaml` first.
+
+> [!WARNING]
+>
+> The default credentials are user changeme / password changeme1234. Goes
+> without saying, but remember to change them!
 
 > [!NOTE]
 >
 > While we've provided a MinIO based Docker compose file to make it easy for
 > people to get started, if you're running it in production we recommend using
 > an external S3.
-
-> [!NOTE]
->
-> If something seems amiss, ensure that Docker has read access to the parent
-> folder so that it can access credentials.yaml and other local files. On macOS,
-> you can do this by going to System Settings > Security & Privacy > Files and
-> Folders > Docker.
 
 ### Cleanup
 

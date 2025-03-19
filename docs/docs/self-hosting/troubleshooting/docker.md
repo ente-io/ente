@@ -5,6 +5,18 @@ description: Fixing docker related errors when trying to self host Ente
 
 # Docker
 
+## configs
+
+Remember to restart your cluster to ensure changes that you make in the
+`configs` section in `compose.yaml` get picked up.
+
+```sh
+docker compose down
+docker compose up
+```
+
+## post_start
+
 The `server/compose.yaml` Docker compose file uses the "post_start" lifecycle
 hook to provision the MinIO instance.
 
