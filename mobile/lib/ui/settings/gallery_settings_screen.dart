@@ -6,7 +6,6 @@ import "package:photos/events/hide_shared_items_from_home_gallery_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/home_widget_service.dart";
-import "package:photos/services/memories_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
@@ -102,15 +101,13 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                         singleBorderRadius: 8,
                         alignCaptionedTextToLeft: true,
                         trailingWidget: ToggleSwitchWidget(
-                          value: () => MemoriesService.instance.showMemories,
+                          value: () => memoriesCacheService.showAnyMemories,
                           onChanged: () async {
-                            final showMemories =
-                                MemoriesService.instance.showMemories;
                             unawaited(
-                              MemoriesService.instance
-                                  .setShowMemories(!showMemories),
+                              memoriesCacheService.setShowAnyMemories(
+                                !memoriesCacheService.showAnyMemories,
+                              ),
                             );
-
                             unawaited(
                               HomeWidgetService.instance.initHomeWidget(false),
                             );

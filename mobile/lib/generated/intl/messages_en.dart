@@ -48,7 +48,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m19(freeAmount, storageUnit) =>
       "${freeAmount} ${storageUnit} free";
 
-  static String m96(name) => "Scenery with ${name}";
+  static String m96(name) => "Beautiful views with ${name}";
 
   static String m20(paymentProvider) =>
       "Please cancel your existing subscription from ${paymentProvider} first";

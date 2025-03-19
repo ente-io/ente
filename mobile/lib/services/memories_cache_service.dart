@@ -2,11 +2,14 @@ import "dart:async";
 import "dart:io" show File;
 
 import "package:flutter/foundation.dart" show kDebugMode;
+import "package:flutter/material.dart" show BuildContext;
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/events/files_updated_event.dart";
+import "package:photos/events/memories_changed_event.dart";
+import "package:photos/events/memories_setting_changed.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/memories/memories_cache.dart";
@@ -14,7 +17,10 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/memories_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/ui/home/memories/full_screen_memory.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class MemoriesCacheService {
@@ -83,6 +89,11 @@ class MemoriesCacheService {
     return _prefs.getBool(_showAnyMemoryKey) ?? true;
   }
 
+  Future<void> setShowAnyMemories(bool value) async {
+    await _prefs.setBool(_showAnyMemoryKey, value);
+    Bus.instance.fire(MemoriesSettingChanged());
+  }
+
   bool get enableSmartMemories => flagService.hasGrantedMLConsent;
 
   void _checkIfTimeToUpdateCache() {
@@ -107,7 +118,7 @@ class MemoriesCacheService {
         "/cache/memories_cache";
   }
 
-  Future markMemoryAsSeen(Memory memory) async {
+  Future markMemoryAsSeen(Memory memory, bool lastInList) async {
     memory.markSeen();
     await _memoriesDB.markMemoryAsSeen(
       memory,
@@ -123,6 +134,8 @@ class MemoriesCacheService {
         }
       }
     }
+    if (lastInList) Bus.instance.fire(MemoriesChangedEvent());
+    MemoriesService.instance.clearCache(futureToo: false);
   }
 
   void queueUpdateCache() {
@@ -277,20 +290,22 @@ class MemoriesCacheService {
 
       for (final ToShowMemory memory in cache.toShowMemories) {
         if (memory.shouldShowNow()) {
-          memories.add(
-            SmartMemory(
-              memory.fileUploadedIDs
-                  .map(
-                    (fileID) =>
-                        Memory.fromFile(allFileIdsToFile[fileID]!, _seenTimes),
-                  )
-                  .toList(),
-              memory.type,
-              memory.title,
-              memory.firstTimeToShow,
-              memory.lastTimeToShow,
-            ),
+          final smartMemory = SmartMemory(
+            memory.fileUploadedIDs
+                .where((fileID) => allFileIdsToFile.containsKey(fileID))
+                .map(
+                  (fileID) =>
+                      Memory.fromFile(allFileIdsToFile[fileID]!, _seenTimes),
+                )
+                .toList(),
+            memory.type,
+            memory.title,
+            memory.firstTimeToShow,
+            memory.lastTimeToShow,
           );
+          if (smartMemory.memories.isNotEmpty) {
+            memories.add(smartMemory);
+          }
         }
       }
       locationService.baseLocations = cache.baseLocations;
@@ -327,11 +342,47 @@ class MemoriesCacheService {
       await updateCache(forced: true);
       _cachedMemories = await _getMemoriesFromCache();
     }
-    if (_cachedMemories!.isEmpty) {
+    if (_cachedMemories == null ||
+        (_cachedMemories != null && _cachedMemories!.isEmpty)) {
       _logger.severe("No memories found in (computed) cache, getting fillers");
       _cachedMemories = await smartMemoriesService.calcFillerResults();
     }
     return _cachedMemories!;
+  }
+
+  Future<void> goToMemoryFromGeneratedFileID(
+    BuildContext context,
+    int generatedFileID,
+  ) async {
+    final allMemories = await getMemories();
+    if (allMemories.isEmpty) return;
+    int memoryIdx = 0;
+    int fileIdx = 0;
+    bool found = false;
+    memoryLoop:
+    for (final memory in _cachedMemories!) {
+      for (final mem in memory.memories) {
+        if (mem.file.generatedID == generatedFileID) {
+          found = true;
+          break memoryLoop;
+        }
+        fileIdx++;
+      }
+      memoryIdx++;
+      fileIdx = 0;
+    }
+    if (!found) {
+      return;
+    }
+    await routeToPage(
+      context,
+      FullScreenMemoryDataUpdater(
+        initialIndex: fileIdx,
+        memories: allMemories[memoryIdx].memories,
+        child: FullScreenMemory(allMemories[memoryIdx].title, fileIdx),
+      ),
+      forceCustomPageRoute: true,
+    );
   }
 
   Future<MemoriesCache?> _readCacheFromDisk() async {

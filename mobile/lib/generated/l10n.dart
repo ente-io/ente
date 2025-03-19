@@ -11526,10 +11526,10 @@ class S {
     );
   }
 
-  /// `Scenery with {name}`
+  /// `Beautiful views with {name}`
   String backgroundWithThem(Object name) {
     return Intl.message(
-      'Scenery with $name',
+      'Beautiful views with $name',
       name: 'backgroundWithThem',
       desc: '',
       args: [name],

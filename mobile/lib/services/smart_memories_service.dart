@@ -138,9 +138,14 @@ class SmartMemoriesService {
           "clipMemoryTypeVectors": clipMemoryTypeVectors,
         },
       ) as MemoriesResult;
+      _logger.finest(
+        '${memoriesResult.memories.length} memories computed in computer $t',
+      );
+
       for (final memory in memoriesResult.memories) {
         memory.title = memory.createTitle(s, languageCode);
       }
+      _logger.finest('titles created for all memories $t');
       return memoriesResult;
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
@@ -343,6 +348,7 @@ class SmartMemoriesService {
     w?.log('allFiles setup');
 
     // Get ordered (random) list of important people
+    if (persons.isEmpty) return [];
     final personIdToPerson = <String, PersonEntity>{};
     final personIdToFaceIDs = <String, Set<String>>{};
     final personIdToFileIDs = <String, Set<int>>{};
@@ -761,7 +767,7 @@ class SmartMemoriesService {
 
     // Loop through the clip types and add based on rotation
     clipMemoriesLoop:
-    for (final clipMemoryType in ClipMemoryType.values..shuffle()) {
+    for (final clipMemoryType in [...ClipMemoryType.values]..shuffle()) {
       final clipMemory = clipTypeToMemory[clipMemoryType];
       if (clipMemory == null) continue;
       for (final shownLog in shownClip) {
@@ -1214,7 +1220,7 @@ class SmartMemoriesService {
   }
 
   static Future<List<TimeMemory>> _onThisDayOrWeekResults(
-    Iterable<EnteFile> allFiles,
+    Set<EnteFile> allFiles,
     DateTime currentTime, {
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
@@ -1388,6 +1394,7 @@ class SmartMemoriesService {
 
     // Group files by month and year
     final currentMonthYearGroups = <int, List<Memory>>{};
+    _deductUsedMemories(allFiles, memoryResult);
     for (final file in allFiles) {
       if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
 
