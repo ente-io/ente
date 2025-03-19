@@ -25,7 +25,13 @@ class HomeWidgetService {
   static final HomeWidgetService instance =
       HomeWidgetService._privateConstructor();
 
-  Future<void> initHomeWidget(bool isBackground, {bool bypass = false}) async {
+  bool _isBusyLoadingWidget = false;
+
+  Future<void> initHomeWidget(
+    bool isBackground, {
+    bool bypass = false,
+    bool bypassCount = false,
+  }) async {
     if (isBackground) {
       _logger.warning("app is running in background");
       return;
@@ -34,7 +40,7 @@ class HomeWidgetService {
     await hw.HomeWidget.setAppGroupId(iOSGroupID);
 
     final homeWidgetCount = await HomeWidgetService.instance.countHomeWidgets();
-    if (homeWidgetCount == 0) {
+    if (!bypassCount && homeWidgetCount == 0) {
       _logger.warning("no home widget active");
       return;
     }
@@ -53,7 +59,14 @@ class HomeWidgetService {
       return;
     }
 
-    await _lockAndLoadMemories(bypass: bypass);
+    if (!_isBusyLoadingWidget) {
+      _isBusyLoadingWidget = true;
+      try {
+        await _lockAndLoadMemories(bypass: bypass);
+      } finally {
+        _isBusyLoadingWidget = false;
+      }
+    }
   }
 
   Future<Size?> _renderFile(
