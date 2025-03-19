@@ -34,6 +34,7 @@ class LocationService {
 
   List<City> _cities = [];
 
+  // TODO: lau: consider actually using this in location section
   List<BaseLocation> baseLocations = [];
 
   LocationService(this.prefs) {
