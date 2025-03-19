@@ -16,7 +16,7 @@ use this new image (see [deploy/README](../scripts/deploy/README.md)).
 
 ## External
 
-Periodically, we can republish a new image from an existing known-to-be-good
+Periodically, we republish a new image from an existing known-to-be-good
 commit to the GitHub Container Registry (GHCR) so that it can be used by folks
 without needing to clone our repository just for building an image. For more
 details about the use case, see [docker.md](docker.md).

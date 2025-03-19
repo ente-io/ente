@@ -1,6 +1,8 @@
 A variant docker compose file that does not require cloning the repository, and
 instead uses pre-built images.
 
+**TODO: Not done yet, a future standalone compose file will live here.**
+
 ### Details
 
 This folder contains a `compose.yaml` file that is a variant of the top level
@@ -16,5 +18,5 @@ This folder contains a `compose.yaml` file that is a variant of the top level
 
 For more details about how to use it, see [docker.md](../../docs/docker.md).
 
-This folder also contains some other files that are required by (both) these
+This folder also contains a credentials file that is required by (both) these
 docker compose files.

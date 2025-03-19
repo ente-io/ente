@@ -1,5 +1,4 @@
-# Please note that the below docker compose is NOT directly  
-# meant to be copy pasted and deployed to production.
+# Sample docker compose file, not meant for production use.
 services:
   museum:
     build:
@@ -81,17 +80,30 @@ services:
     depends_on:
       - minio
     volumes:
-      - ./scripts/compose/minio-provision.sh:/provision.sh:ro
       - minio-data:/data
     networks:
       - internal
-    entrypoint: sh /provision.sh
+    entrypoint: |
+      sh -c '
+      #!/bin/sh
+
+      while ! mc config host add h0 http://minio:3200 changeme changeme1234
+      do
+        echo "waiting for minio..."
+        sleep 0.5
+      done
+
+      cd /data
+
+      mc mb -p b2-eu-cen
+      mc mb -p wasabi-eu-central-2-v3
+      mc mb -p scw-eu-fr-v3
+      '
 
 volumes:
   custom-logs:
   postgres-data:
   minio-data:
-
 
 networks:
   internal:
