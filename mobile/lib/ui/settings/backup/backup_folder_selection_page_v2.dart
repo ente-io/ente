@@ -9,7 +9,9 @@ import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/generated/l10n.dart';
-import "package:photos/service_locator.dart";
+import "package:photos/image_providers/local_thumbnail_img_provider.dart";
+import "package:photos/services/local/local_assets_cache.dart";
+import "package:photos/services/local/local_import.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -38,20 +40,39 @@ class _BackupFolderSelectionPageV2State
   final Set<String> _selectedDevicePathIDs = <String>{};
   List<AssetPathEntity>? _assetPathEntities;
   Map<String, Set<String>> _assetCount = {};
+  final Map<String, AssetEntity> _pathToLatestAsset = {};
 
   @override
   void initState() {
     _logger.info("BackupFolderSelectionPageV2 init");
-    localDB.getAssetPaths().then((assetsPath) async {
-      _assetPathEntities = assetsPath;
+    LocalImportService.instance
+        .getLocalAssetsCache()
+        .then((LocalAssetsCache c) async {
+      _assetPathEntities = c.assetPaths.values.toList();
       _logger.info(
-          "BackupFolderSelectionPageV2 got ${_assetPathEntities!.length} paths");
+        "BackupFolderSelectionPageV2 got ${_assetPathEntities!.length} paths",
+      );
       _assetCount.clear();
-      _assetCount = await localDB.pathToAssetIDs();
+      _assetCount = c.pathToAssetIDs;
       _logger.info("Asset count: $_assetCount");
       _assetPathEntities!.removeWhere(
         (path) => (_assetCount[path.id] ?? {}).isEmpty,
       );
+      final List<AssetEntity> latestAssets = c.assets.values.toList();
+      // sort by decreate creation date
+      latestAssets.sort((a, b) => b.createDateTime.compareTo(a.createDateTime));
+      for (final path in _assetPathEntities ?? []) {
+        final assetIDs = _assetCount[path.id] ?? {};
+        for (final assetID in assetIDs) {
+          for (final sortedAsset in latestAssets) {
+            if (sortedAsset.id == assetID) {
+              _pathToLatestAsset[path.id] = sortedAsset;
+              break;
+            }
+          }
+        }
+      }
+
       setState(() {
         _assetPathEntities!.sort((first, second) {
           return first.name.toLowerCase().compareTo(second.name.toLowerCase());
@@ -71,11 +92,11 @@ class _BackupFolderSelectionPageV2State
         _selectedDevicePathIDs
             .removeWhere((folder) => !_allDevicePathIDs.contains(folder));
       });
-    }).onError((error, stackTrace) {
+    }).onError((e, s) {
       _logger.warning(
         "Failed to get asset paths for backup folder selection",
-        error,
-        stackTrace,
+        e,
+        s,
       );
     });
     super.initState();
@@ -308,7 +329,6 @@ class _BackupFolderSelectionPageV2State
 
   Widget _getFileItem(AssetPathEntity assetPathEntity) {
     final isSelected = _selectedDevicePathIDs.contains(assetPathEntity.id);
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 1, right: 1),
       child: Container(
@@ -319,9 +339,6 @@ class _BackupFolderSelectionPageV2State
           borderRadius: const BorderRadius.all(
             Radius.circular(12),
           ),
-          // color: isSelected
-          //     ? Theme.of(context).colorScheme.boxSelectColor
-          //     : Theme.of(context).colorScheme.boxUnSelectColor,
           gradient: isSelected
               ? const LinearGradient(
                   colors: [Color(0xFF00DD4D), Color(0xFF43BA6C)],
@@ -378,14 +395,20 @@ class _BackupFolderSelectionPageV2State
                       ),
                       const Padding(padding: EdgeInsets.only(top: 2)),
                       FutureBuilder<int>(
-                        future: assetPathEntity.assetCountAsync,
+                        future: kDebugMode
+                            ? assetPathEntity.assetCountAsync
+                            : Future.value(0),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             return Text(
                               (kDebugMode
                                       ? 'inApp: ${snapshot.data} : device '
                                       : '') +
-                                  S.of(context).itemCount(snapshot.data!),
+                                  S.of(context).itemCount(
+                                        _assetCount[assetPathEntity.id]
+                                                ?.length ??
+                                            0,
+                                      ),
                               textAlign: TextAlign.left,
                               style: TextStyle(
                                 fontSize: 12,
@@ -422,20 +445,12 @@ class _BackupFolderSelectionPageV2State
 
   void _sortFiles() {
     _assetPathEntities!.sort((first, second) {
-      if (_selectedDevicePathIDs.contains(first.id) &&
-          _selectedDevicePathIDs.contains(second.id)) {
-        return first.name.toLowerCase().compareTo(second.name.toLowerCase());
-      } else if (_selectedDevicePathIDs.contains(first.id)) {
-        return -1;
-      } else if (_selectedDevicePathIDs.contains(second.id)) {
-        return 1;
-      }
       return first.name.toLowerCase().compareTo(second.name.toLowerCase());
     });
   }
 
   // todo: replace with asset thumbnail provider
-  Widget _getThumbnail(AssetPathEntity file, bool isSelected) {
+  Widget _getThumbnail(AssetPathEntity path, bool isSelected) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: SizedBox(
@@ -444,14 +459,17 @@ class _BackupFolderSelectionPageV2State
         child: Stack(
           alignment: AlignmentDirectional.bottomEnd,
           children: [
-            NoThumbnailWidget(
-              key: Key("backup_selection_widget" + file.id),
-            ),
-            // ThumbnailWidget(
-            //   file,
-            //   shouldShowSyncStatus: false,
-
-            // ),
+            _pathToLatestAsset[path.id] != null
+                ? Image(
+                    key: Key("backup_selection_widget" + path.id),
+                    image: LocalThumbnailProvider(
+                      LocalThumbnailProviderKey(
+                        asset: _pathToLatestAsset[path.id]!,
+                      ),
+                    ),
+                    fit: BoxFit.cover,
+                  )
+                : const NoThumbnailWidget(),
             Padding(
               padding: const EdgeInsets.all(9),
               child: isSelected
