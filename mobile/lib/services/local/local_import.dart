@@ -11,6 +11,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/local/import/device_assets.service.dart";
 import "package:photos/services/local/import/model.dart";
+import "package:photos/services/local/local_assets_cache.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
@@ -20,6 +21,7 @@ class LocalImportService {
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
   Completer<bool>? _fullSync;
+  LocalAssetsCache? _localAssetsCache;
   final DeviceAssetsService _deviceAssetsService = DeviceAssetsService();
   late final Debouncer _changeCallbackDebouncer = Debouncer(
     const Duration(milliseconds: 1000),
@@ -151,7 +153,31 @@ class LocalImportService {
         return false;
       }
     }
+    await _loadCache();
     return true;
+  }
+
+  Future<void> _loadCache() async {
+    if (_localAssetsCache == null) {
+      await _lock.synchronized(() async {
+        if (_localAssetsCache == null) {
+          final List<AssetPathEntity> paths = await localDB.getAssetPaths();
+          final List<AssetEntity> assets = await localDB.getAssets();
+          final Map<String, Set<String>> pathToAssetIDs =
+              await localDB.pathToAssetIDs();
+          _localAssetsCache = LocalAssetsCache(
+            assetPaths: Map.fromEntries(paths.map((e) => MapEntry(e.id, e))),
+            assets: Map.fromEntries(assets.map((e) => MapEntry(e.id, e))),
+            pathToAssetIDs: pathToAssetIDs,
+          );
+        }
+      });
+    }
+  }
+
+  Future<LocalAssetsCache> getLocalAssetsCache() async {
+    await _loadCache();
+    return _localAssetsCache!;
   }
 
   Lock getLock() {
@@ -166,22 +192,27 @@ class LocalImportService {
     IncrementalDiffWithOnDevice? incrementalDiff,
     FullDiffWithOnDevice? fullDiff,
   }) async {
-    if (incrementalDiff != null) {
-      await localDB.insertAssets(incrementalDiff.assets);
-      await localDB.insertDBPaths(incrementalDiff.addedOrModifiedPaths);
-      await localDB
-          .insertPathToAssetIDs(incrementalDiff.newOrUpdatedPathToLocalIDs);
-    } else if (fullDiff != null) {
-      await Future.wait([
-        localDB.deleteAssets(fullDiff.extraAssetIDsInApp),
-        localDB.deletePaths(fullDiff.extraPathIDsInApp),
-      ]);
-      await localDB.insertAssets(fullDiff.missingAssetsInApp);
-      await localDB.insertPathToAssetIDs(
-        fullDiff.updatePathToLocalIDs,
-        clearOldMappingsIdsInInput: true,
-      );
-    }
+    await _lock.synchronized(
+      () async {
+        if (incrementalDiff != null) {
+          await localDB.insertAssets(incrementalDiff.assets);
+          await localDB.insertDBPaths(incrementalDiff.addedOrModifiedPaths);
+          await localDB
+              .insertPathToAssetIDs(incrementalDiff.newOrUpdatedPathToLocalIDs);
+
+        } else if (fullDiff != null) {
+          await Future.wait([
+            localDB.deleteAssets(fullDiff.extraAssetIDsInApp),
+            localDB.deletePaths(fullDiff.extraPathIDsInApp),
+          ]);
+          await localDB.insertAssets(fullDiff.missingAssetsInApp);
+          await localDB.insertPathToAssetIDs(
+            fullDiff.updatePathToLocalIDs,
+            clearOldMappingsIdsInInput: true,
+          );
+        }
+      },
+    );
   }
 
   void _registerChangeCallback() {

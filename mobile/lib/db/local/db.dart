@@ -45,6 +45,13 @@ class LocalDB with SqlDbBase {
     );
   }
 
+  Future<List<AssetEntity>> getAssets() async {
+    final result = await _sqliteDB.execute(
+      "SELECT * FROM assets",
+    );
+    return result.map((row) => LocalDBMappers.asset(row)).toList();
+  }
+
   Future<void> insertDBPaths(List<AssetPathEntity> entries) async {
     if (entries.isEmpty) return;
     final stopwatch = Stopwatch()..start();

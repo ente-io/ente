@@ -25,6 +25,26 @@ class LocalDBMappers {
     ];
   }
 
+  static AssetEntity asset(Map<String, dynamic> row) {
+    return AssetEntity(
+      id: row['id'] as String,
+      typeInt: row['type'] as int,
+      subtype: row['sub_type'] as int,
+      width: row['width'] as int,
+      height: row['height'] as int,
+      duration: row['duration_in_sec'] as int,
+      orientation: row['orientation'] as int,
+      isFavorite: (row['is_fav'] as int) == 1,
+      title: row['title'] as String?,
+      relativePath: row['relative_path'] as String?,
+      createDateSecond: (row['created_at'] as int) ~/ 1000,
+      modifiedDateSecond: (row['modified_at'] as int) ~/ 1000,
+      mimeType: row['mime_type'] as String?,
+      latitude: row['latitude'] as double?,
+      longitude: row['longitude'] as double?,
+    );
+  }
+
   static List<Object?> devicePathRow(AssetPathEntity entity) {
     return [
       entity.id,
