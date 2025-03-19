@@ -81,9 +81,11 @@ class HomeWidgetService {
     if (total == 0 || total == null) return;
 
     _logger.info("Clearing SlideshowWidget");
+
     await _setFilesHash(null);
     await _setTotal(0);
-    await _updateWidget();
+
+    await _updateWidget(text: "[i] SlideshowWidget cleared & updated");
     _logger.info(">>> SlideshowWidget cleared");
   }
 
@@ -255,7 +257,7 @@ class HomeWidgetService {
     final keyHash = _getFilesKey(files);
 
     final value = await _getFilesHash();
-    if (value != null && value == keyHash) {
+    if (!bypass && value != null && value == keyHash) {
       _logger.info("No changes detected in memories");
       await _updateWidget(text: "[i] No changes, refreshing from same set");
       _logger.info(">>> Refreshing memory from same set");
