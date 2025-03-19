@@ -10,6 +10,7 @@ import "package:photos/db/memories_db.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/memories_changed_event.dart";
 import "package:photos/events/memories_setting_changed.dart";
+import "package:photos/events/memory_seen_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/memories/memories_cache.dart";
@@ -127,7 +128,7 @@ class MemoriesCacheService {
         }
       }
     }
-    if (lastInList) Bus.instance.fire(MemoriesChangedEvent());
+    if (lastInList) Bus.instance.fire(MemorySeenEvent());
   }
 
   void queueUpdateCache() {
@@ -338,21 +339,22 @@ class MemoriesCacheService {
       return _cachedMemories!;
     }
     try {
-    if (!enableSmartMemories) {
-      await _calculateRegularFillers();
-      return _cachedMemories!;
-    }
-    _cachedMemories = await _getMemoriesFromCache();
-    if (_cachedMemories == null || _cachedMemories!.isEmpty) {
-      await updateCache(forced: true);
+      if (!enableSmartMemories) {
+        await _calculateRegularFillers();
+        return _cachedMemories!;
+      }
       _cachedMemories = await _getMemoriesFromCache();
-    }
-    if (_cachedMemories == null ||
-        (_cachedMemories != null && _cachedMemories!.isEmpty)) {
-      _logger.severe("No memories found in (computed) cache, getting fillers");
-      await _calculateRegularFillers();
-    }
-    return _cachedMemories!;
+      if (_cachedMemories == null || _cachedMemories!.isEmpty) {
+        await updateCache(forced: true);
+        _cachedMemories = await _getMemoriesFromCache();
+      }
+      if (_cachedMemories == null ||
+          (_cachedMemories != null && _cachedMemories!.isEmpty)) {
+        _logger
+            .severe("No memories found in (computed) cache, getting fillers");
+        await _calculateRegularFillers();
+      }
+      return _cachedMemories!;
     } catch (e, s) {
       _logger.severe("Error in getMemories", e, s);
       return [];
