@@ -146,36 +146,6 @@ struct SlideshowWidgetEntryView: View {
                             .backwardWidgetFullColorRenderingMode()
                             .aspectRatio(contentMode: .fill)
                             .frame(width: geometry.size.width, height: geometry.size.height)
-                            .overlay(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color.black.opacity(0.7), Color.clear,
-                                    ]),
-                                    startPoint: .bottom,
-                                    endPoint: .top
-                                )
-
-                                .frame(height: geometry.size.height * 0.4)
-                                .frame(maxHeight: .infinity, alignment: .bottom)
-                                .backwardWidgetAccentable(true)
-                            )
-                            .overlay(
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(data!.string(forKey: "title") ?? "").font(
-                                        .custom("Inter", size: 14, relativeTo: .caption)
-                                    )  // Custom with fallback
-                                    .bold()
-                                    .foregroundStyle(.white)
-                                    .shadow(radius: 20)
-                                    Text(data!.string(forKey: "subTitle") ?? "")
-                                        .font(.custom("Inter", size: 12, relativeTo: .caption2))
-                                        .foregroundStyle(.white)
-                                        .shadow(radius: 20)
-                                }
-                                .padding(.leading, geometry.size.width * 0.05)
-                                .padding(.bottom, geometry.size.height * 0.05),
-                                alignment: .bottomLeading
-                            )
                     }
                 } else if let data = Data(
                     base64Encoded: defaultBase64Image),
