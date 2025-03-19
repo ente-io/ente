@@ -277,20 +277,22 @@ class MemoriesCacheService {
 
       for (final ToShowMemory memory in cache.toShowMemories) {
         if (memory.shouldShowNow()) {
-          memories.add(
-            SmartMemory(
-              memory.fileUploadedIDs
-                  .map(
-                    (fileID) =>
-                        Memory.fromFile(allFileIdsToFile[fileID]!, _seenTimes),
-                  )
-                  .toList(),
-              memory.type,
-              memory.title,
-              memory.firstTimeToShow,
-              memory.lastTimeToShow,
-            ),
+          final smartMemory = SmartMemory(
+            memory.fileUploadedIDs
+                .where((fileID) => allFileIdsToFile.containsKey(fileID))
+                .map(
+                  (fileID) =>
+                      Memory.fromFile(allFileIdsToFile[fileID]!, _seenTimes),
+                )
+                .toList(),
+            memory.type,
+            memory.title,
+            memory.firstTimeToShow,
+            memory.lastTimeToShow,
           );
+          if (smartMemory.memories.isNotEmpty) {
+            memories.add(smartMemory);
+          }
         }
       }
       locationService.baseLocations = cache.baseLocations;
