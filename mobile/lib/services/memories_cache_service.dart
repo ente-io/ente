@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:io" show File;
 
 import "package:flutter/foundation.dart" show kDebugMode;
+import "package:flutter/material.dart" show BuildContext;
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
@@ -18,6 +19,8 @@ import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/memories_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/ui/home/memories/full_screen_memory.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class MemoriesCacheService {
@@ -345,6 +348,41 @@ class MemoriesCacheService {
       _cachedMemories = await smartMemoriesService.calcFillerResults();
     }
     return _cachedMemories!;
+  }
+
+  Future<void> goToMemoryFromGeneratedFileID(
+    BuildContext context,
+    int generatedFileID,
+  ) async {
+    final allMemories = await getMemories();
+    if (allMemories.isEmpty) return;
+    int memoryIdx = 0;
+    int fileIdx = 0;
+    bool found = false;
+    memoryLoop:
+    for (final memory in _cachedMemories!) {
+      for (final mem in memory.memories) {
+        if (mem.file.generatedID == generatedFileID) {
+          found = true;
+          break memoryLoop;
+        }
+        fileIdx++;
+      }
+      memoryIdx++;
+      fileIdx = 0;
+    }
+    if (!found) {
+      return;
+    }
+    await routeToPage(
+      context,
+      FullScreenMemoryDataUpdater(
+        initialIndex: fileIdx,
+        memories: allMemories[memoryIdx].memories,
+        child: FullScreenMemory(allMemories[memoryIdx].title, fileIdx),
+      ),
+      forceCustomPageRoute: true,
+    );
   }
 
   Future<MemoriesCache?> _readCacheFromDisk() async {
