@@ -26,7 +26,7 @@ class LocalDB with SqlDbBase {
     final db = SqliteDatabase(path: path);
     await migrate(db, LocalDBMigration.migrationScripts, onForeignKey: true);
     _sqliteDB = db;
-    devLog("LocalDB init complete $path");
+    debugPrint("LocalDB init complete $path");
   }
 
   Future<void> insertAssets(List<AssetEntity> entries) async {
@@ -101,6 +101,7 @@ class LocalDB with SqlDbBase {
         );
       }
     });
+  
     debugPrint(
       '$runtimeType insertPathToAssetIDs $pairCount complete in '
       '${stopwatch.elapsed.inMilliseconds}ms for '

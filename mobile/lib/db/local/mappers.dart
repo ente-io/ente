@@ -37,7 +37,7 @@ class LocalDBMappers {
 
   static AssetPathEntity assetPath(Map<String, dynamic> row) {
     return AssetPathEntity(
-      id: row['id'] as String,
+      id: row['path_id'] as String,
       name: row['name'] as String,
       albumType: row['album_type'] as int,
       albumTypeEx: AlbumType(

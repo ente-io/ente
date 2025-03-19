@@ -5,6 +5,7 @@ import "package:photos/ui/components/captioned_text_widget.dart";
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
+import "package:photos/ui/settings/backup/backup_folder_selection_page_v2.dart";
 import 'package:photos/ui/settings/backup/backup_settings_screen.dart';
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
 import "package:photos/ui/settings/backup/free_space_options.dart";
@@ -30,6 +31,24 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
 
   Widget _getSectionOptions(BuildContext context) {
     final List<Widget> sectionOptions = [
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: S.of(context).backedUpFolders,
+        ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        surfaceExecutionStates: false,
+        onTap: () async {
+          await routeToPage(
+            context,
+            const BackupFolderSelectionPageV2(
+              isFirstBackup: false,
+            ),
+          );
+        },
+      ),
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
