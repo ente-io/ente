@@ -54,6 +54,8 @@ class SmartMemoriesService {
 
   static const yearsBefore = 30;
 
+  static const minimumMemoryLength = 5;
+
   SmartMemoriesService();
 
   // One general method to get all memories, which calls on internal methods for each separate memory type
@@ -391,6 +393,7 @@ class SmartMemoriesService {
       final personName = personIdToPerson[personID]!.data.name;
       w?.log('start with new person $personName');
       w?.log('personFilesToFaces setup');
+
       // Inside people loop, check for spotlight (Most likely every person will have a spotlight)
       final spotlightFiles = <EnteFile>[];
       for (final fileID in personFileIDs) {
@@ -401,7 +404,7 @@ class SmartMemoriesService {
           spotlightFiles.add(file);
         }
       }
-      if (spotlightFiles.length > 5) {
+      if (spotlightFiles.length > minimumMemoryLength) {
         final selectSpotlightMemories = await _bestSelectionPeople(
           spotlightFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
           fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -433,7 +436,7 @@ class SmartMemoriesService {
             youAndThemFiles.add(file);
           }
         }
-        if (youAndThemFiles.length > 5) {
+        if (youAndThemFiles.length > minimumMemoryLength) {
           // final String title = "You and $personName";
           final selectYouAndThemMemories = await _bestSelectionPeople(
             youAndThemFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
@@ -489,7 +492,7 @@ class SmartMemoriesService {
               }
             }
           }
-          if (activityFiles.length > 5) {
+          if (activityFiles.length > minimumMemoryLength) {
             final selectActivityMemories = await _bestSelectionPeople(
               activityFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
               fileIDToImageEmbedding: fileIDToImageEmbedding,
