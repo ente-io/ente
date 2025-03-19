@@ -49,7 +49,7 @@ class HomeWidgetService {
       return;
     }
 
-    final memoriesEnabled = MemoriesService.instance.showMemories;
+    final memoriesEnabled = MemoriesService.instance.showAnyMemories;
     if (!memoriesEnabled) {
       _logger.warning("memories not enabled");
       await clearHomeWidget();
