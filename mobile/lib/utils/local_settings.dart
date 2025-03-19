@@ -81,7 +81,7 @@ class LocalSettings {
       _prefs.getBool(_kisMLLocalIndexingEnabled) ?? enoughRamForLocalIndexing;
 
   bool get userEnabledMultiplePart =>
-      _prefs.getBool(kEnableMultiplePart) ?? false;
+      _prefs.getBool(kEnableMultiplePart) ?? true;
 
   Future<bool> setUserEnabledMultiplePart(bool value) async {
     await _prefs.setBool(kEnableMultiplePart, value);
