@@ -64,11 +64,9 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   void setupSubscription() {
     _memoriesChangedSubscription =
         Bus.instance.on<MemoriesChangedEvent>().listen(
-      (event) async {
-        await HomeWidgetService.instance
-            .initHomeWidget(false, bypassCount: true);
-      },
-    );
+              (event) async =>
+                  await HomeWidgetService.instance.initHomeWidget(false),
+            );
   }
 
   @override

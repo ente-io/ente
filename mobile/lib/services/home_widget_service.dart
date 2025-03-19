@@ -1,7 +1,6 @@
 import "dart:convert";
 import "dart:io";
 
-import "package:crypto/crypto.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
@@ -15,6 +14,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/utils/preload_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 class HomeWidgetService {
   final Logger _logger = Logger((HomeWidgetService).toString());
@@ -24,13 +24,33 @@ class HomeWidgetService {
   static final HomeWidgetService instance =
       HomeWidgetService._privateConstructor();
 
-  bool _isBusyLoadingWidget = false;
+  init(SharedPreferences prefs) {
+    _prefs = prefs;
+  }
+
+  static const memoryChangedKey = "memoryChanged.widget";
+
+  late final SharedPreferences _prefs;
+
+  Future<void> checkPendingMemorySync() async {
+    final memoryChanged = _prefs.getBool(memoryChangedKey);
+    if (memoryChanged == null || !memoryChanged) {
+      await initHomeWidget(false, memoryChanged: false);
+      return;
+    }
+
+    await initHomeWidget(false, memoryChanged: true);
+  }
 
   Future<void> initHomeWidget(
     bool isBackground, {
-    bool bypass = false,
     bool bypassCount = false,
+    bool memoryChanged = false,
   }) async {
+    if (memoryChanged) {
+      await _prefs.setBool(memoryChangedKey, true);
+    }
+
     if (isBackground) {
       _logger.warning("app is running in background");
       return;
@@ -38,15 +58,8 @@ class HomeWidgetService {
 
     await hw.HomeWidget.setAppGroupId(iOSGroupID);
 
-    final homeWidgetCount = await HomeWidgetService.instance.countHomeWidgets();
-    if (!bypassCount && homeWidgetCount == 0) {
-      _logger.warning("no home widget active");
-      return;
-    }
-
     final isLoggedIn = Configuration.instance.isLoggedIn();
     if (!isLoggedIn) {
-      await clearHomeWidget();
       _logger.warning("user not logged in");
       return;
     }
@@ -58,14 +71,31 @@ class HomeWidgetService {
       return;
     }
 
-    if (!_isBusyLoadingWidget) {
-      _isBusyLoadingWidget = true;
-      try {
-        await _lockAndLoadMemories(bypass: bypass);
-      } finally {
-        _isBusyLoadingWidget = false;
-      }
+    if (memoryChanged) {
+      await _memoryChanged();
+    } else {
+      await _memorySync(
+        bypassCount: bypassCount,
+      );
     }
+  }
+
+  Future<void> _memoryChanged() async {
+    await _lockAndLoadMemories();
+    await _prefs.setBool(memoryChangedKey, false);
+  }
+
+  Future<void> _memorySync({
+    bool bypassCount = false,
+  }) async {
+    final homeWidgetCount = await HomeWidgetService.instance.countHomeWidgets();
+    if (!bypassCount && homeWidgetCount == 0) {
+      _logger.warning("no home widget active");
+      return;
+    }
+
+    await _updateWidget(text: "[i] refreshing from same set");
+    _logger.info(">>> Refreshing memory from same set");
   }
 
   Future<Size?> _renderFile(
@@ -94,19 +124,10 @@ class HomeWidgetService {
 
     _logger.info("Clearing SlideshowWidget");
 
-    await _setFilesHash(null);
     await _setTotal(0);
 
     await _updateWidget(text: "[i] SlideshowWidget cleared & updated");
     _logger.info(">>> SlideshowWidget cleared");
-  }
-
-  Future<String?> _getFilesHash() async {
-    return await hw.HomeWidget.getWidgetData<String>("filesHash");
-  }
-
-  Future<void> _setFilesHash(String? fileHash) async {
-    await hw.HomeWidget.saveWidgetData("filesHash", fileHash);
   }
 
   Future<bool> _captureFile(
@@ -180,7 +201,6 @@ class HomeWidgetService {
   Future<void> onLaunchFromWidget(Uri? uri, BuildContext context) async {
     if (uri == null) {
       _logger.warning("onLaunchFromWidget: uri is null");
-      await initHomeWidget(false);
       return;
     }
 
@@ -216,18 +236,6 @@ class HomeWidgetService {
     return files;
   }
 
-  String _getFilesKey(Map<String, Iterable<EnteFile>> files) {
-    // 1: file1_file2_file3, 2: file4_file5_file6 -> md5 hash
-    final key = files.entries
-        .map(
-          (entry) =>
-              entry.key + ": " + entry.value.map((e) => e.cacheKey()).join("_"),
-        )
-        .join(", ");
-    final hash = md5.convert(key.codeUnits).toString();
-    return hash;
-  }
-
   Future<void> _updateWidget({String? text}) async {
     await hw.HomeWidget.updateWidget(
       name: 'SlideshowWidgetProvider',
@@ -257,22 +265,12 @@ class HomeWidgetService {
     await hw.HomeWidget.saveWidgetData("totalSet", total);
   }
 
-  Future<void> _lockAndLoadMemories({bool bypass = false}) async {
+  Future<void> _lockAndLoadMemories() async {
     final files = await _getMemories();
 
     if (files.isEmpty) {
       _logger.warning("No files found, clearing everything");
       await clearHomeWidget();
-      return;
-    }
-
-    final keyHash = _getFilesKey(files);
-
-    final value = await _getFilesHash();
-    if (!bypass && value != null && value == keyHash) {
-      _logger.info("No changes detected in memories");
-      await _updateWidget(text: "[i] No changes, refreshing from same set");
-      _logger.info(">>> Refreshing memory from same set");
       return;
     }
 
@@ -292,9 +290,7 @@ class HomeWidgetService {
           await _setTotal(index);
           if (index == 1) {
             await _updateWidget(
-              text: bypass
-                  ? "[i] First memory after bypass, updating widget"
-                  : "[i] First memory fetched. updating widget",
+              text: "[i] First memory fetched. updating widget",
             );
           }
           index++;
@@ -306,11 +302,7 @@ class HomeWidgetService {
       return;
     }
 
-    await _setFilesHash(keyHash);
-
-    await _updateWidget(
-      text: bypass ? "[i] Bypassing memory set check, updated widget" : null,
-    );
+    await _updateWidget();
     _logger.info(">>> Switching to next memory set");
   }
 }

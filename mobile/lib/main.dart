@@ -252,13 +252,15 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("LocalSyncService init done $tlog");
 
     RemoteSyncService.instance.init(preferences);
+    _logger.info("RemoteFileMLService done $tlog");
 
     _logger.info("SyncService init $tlog");
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
-    _logger.info("RemoteFileMLService done $tlog");
-    unawaited(HomeWidgetService.instance.initHomeWidget(isBackground));
+    if (!isBackground) {
+      await _scheduleFGHomeWidgetSync();
+    }
 
     if (Platform.isIOS) {
       // ignore: unawaited_futures

@@ -322,17 +322,24 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
+            title: "Force changed memory widget",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async => await HomeWidgetService.instance
+              .initHomeWidget(false, memoryChanged: true),
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             title: "Force sync memory widget",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () async {
-            await HomeWidgetService.instance.initHomeWidget(
-              false,
-              bypass: true,
-            );
-          },
+          onTap: () async =>
+              await HomeWidgetService.instance.initHomeWidget(false),
         ),
         sectionOptionSpacing,
         MenuItemWidget(
