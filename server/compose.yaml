@@ -34,8 +34,6 @@ services:
 
   postgres:
     image: postgres:15
-    ports:
-      - 12432:5432
     environment:
       POSTGRES_USER: pguser
       POSTGRES_PASSWORD: pgpass
@@ -95,7 +93,7 @@ configs:
     content: |
       db:
           host: postgres
-          port: 12432
+          port: 5432
           name: ente_db
           user: pguser
           password: pgpass
