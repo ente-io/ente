@@ -372,6 +372,9 @@ class MemoriesCacheService {
       fileIdx = 0;
     }
     if (!found) {
+      _logger.warning(
+        "Could not find memory with generatedFileID: $generatedFileID",
+      );
       return;
     }
     await routeToPage(
