@@ -31,15 +31,24 @@ class HomeWidgetService {
 
   static const memoryChangedKey = "memoryChanged.widget";
 
+  bool _hasSyncedMemory = false;
+
   late final SharedPreferences _prefs;
 
   Future<void> checkPendingMemorySync() async {
+    await Future.delayed(const Duration(seconds: 5), () {});
+
     final memoryChanged = _prefs.getBool(memoryChangedKey);
     final total = await _getTotal();
 
-    final changeMemories = memoryChanged == true || total == 0 || total == null;
+    final forceFetchNewMemories =
+        memoryChanged == true || total == 0 || total == null;
 
-    await initHomeWidget(changeMemories: changeMemories);
+    if (_hasSyncedMemory && !forceFetchNewMemories) {
+      _logger.info(">>> Memory already synced");
+      return;
+    }
+    await initHomeWidget(forceFetchNewMemories: forceFetchNewMemories);
   }
 
   Future<void> updateMemoryChanged(bool value) async {
@@ -47,8 +56,7 @@ class HomeWidgetService {
   }
 
   Future<void> initHomeWidget({
-    bool bypassCount = false,
-    bool changeMemories = false,
+    bool forceFetchNewMemories = false,
   }) async {
     final isLoggedIn = Configuration.instance.isLoggedIn();
     if (!isLoggedIn) {
@@ -63,7 +71,7 @@ class HomeWidgetService {
       return;
     }
 
-    if (changeMemories) {
+    if (forceFetchNewMemories) {
       await _forceMemoryUpdate();
     } else {
       final total = await _getTotal();
@@ -73,9 +81,7 @@ class HomeWidgetService {
         );
         return;
       }
-      await _memorySync(
-        bypassCount: bypassCount,
-      );
+      await _memorySync();
     }
   }
 
@@ -84,11 +90,9 @@ class HomeWidgetService {
     await updateMemoryChanged(false);
   }
 
-  Future<void> _memorySync({
-    bool bypassCount = false,
-  }) async {
+  Future<void> _memorySync() async {
     final homeWidgetCount = await HomeWidgetService.instance.countHomeWidgets();
-    if (!bypassCount && homeWidgetCount == 0) {
+    if (homeWidgetCount == 0) {
       _logger.warning("no home widget active");
       return;
     }
@@ -124,6 +128,7 @@ class HomeWidgetService {
     _logger.info("Clearing SlideshowWidget");
 
     await _setTotal(0);
+    _hasSyncedMemory = false;
 
     await _updateWidget(text: "[i] SlideshowWidget cleared & updated");
     _logger.info(">>> SlideshowWidget cleared");
@@ -202,6 +207,10 @@ class HomeWidgetService {
       _logger.warning("onLaunchFromWidget: uri is null");
       return;
     }
+
+    _hasSyncedMemory = true;
+    // sync the memories
+    initHomeWidget().ignore();
 
     final generatedId = int.tryParse(uri.queryParameters["generatedId"] ?? "");
     _logger.info("onLaunchFromWidget: $uri, $generatedId");
