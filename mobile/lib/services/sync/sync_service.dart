@@ -125,7 +125,7 @@ class SyncService {
           error: NoMediaLocationAccessError(),
         ),
       );
-    } catch (e) {
+    } catch (e, s) {
       if (e is DioException) {
         if (e.type == DioExceptionType.connectionTimeout ||
             e.type == DioExceptionType.sendTimeout ||
@@ -137,11 +137,11 @@ class SyncService {
               reason: "Waiting for network...",
             ),
           );
-          _logger.severe("unable to connect", e, StackTrace.current);
+          _logger.severe("unable to connect", e, s);
           return false;
         }
       }
-      _logger.severe("backup failed", e, StackTrace.current);
+      _logger.severe("backup failed", e, s);
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
       rethrow;
     } finally {
