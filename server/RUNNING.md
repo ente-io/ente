@@ -46,7 +46,17 @@ Or interact with the MinIO S3 API
     AWS_ACCESS_KEY_ID=changeme AWS_SECRET_ACCESS_KEY=changeme1234 \
         aws s3 --endpoint-url http://localhost:3200 ls s3://b2-eu-cen
 
-Or open the MinIO dashboard at <http://localhost:3201> (user: changeme/password: changeme1234).
+Or open the MinIO dashboard at http://localhost:3201
+
+> [!NOTE]
+>
+> To avoid exposing unnecessary services, this port is not exposed by default.
+> You'll need to uncomment the corresponding port in your `compose.yaml` first.
+
+> [!WARNING]
+>
+> The default credentials are user changeme / password changeme1234. Goes
+> without saying, but remember to change them!
 
 > [!NOTE]
 >
