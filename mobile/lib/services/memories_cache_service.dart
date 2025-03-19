@@ -337,6 +337,7 @@ class MemoriesCacheService {
     if (_cachedMemories != null) {
       return _cachedMemories!;
     }
+    try {
     if (!enableSmartMemories) {
       await _calculateRegularFillers();
       return _cachedMemories!;
@@ -352,6 +353,10 @@ class MemoriesCacheService {
       await _calculateRegularFillers();
     }
     return _cachedMemories!;
+    } catch (e, s) {
+      _logger.severe("Error in getMemories", e, s);
+      return [];
+    }
   }
 
   Future<void> goToMemoryFromGeneratedFileID(
