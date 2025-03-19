@@ -14,6 +14,7 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/memories_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -123,6 +124,7 @@ class MemoriesCacheService {
         }
       }
     }
+    MemoriesService.instance.clearCache(futureToo: false);
   }
 
   void queueUpdateCache() {

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/core/event_bus.dart";
@@ -12,7 +11,7 @@ import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:shared_preferences/shared_preferences.dart";
 
-class MemoriesService extends ChangeNotifier {
+class MemoriesService  {
   final _logger = Logger("MemoryService");
   final _memoriesDB = MemoriesDB.instance;
   final _filesDB = FilesDB.instance;
@@ -32,9 +31,6 @@ class MemoriesService extends ChangeNotifier {
   static final MemoriesService instance = MemoriesService._privateConstructor();
 
   void init(SharedPreferences prefs) {
-    addListener(() {
-      _cachedMemories = null;
-    });
     _prefs = prefs;
     // Clear memory after a delay, in async manner.
     // Intention of delay is to give more CPU cycles to other tasks
@@ -56,9 +52,9 @@ class MemoriesService extends ChangeNotifier {
     });
   }
 
-  void clearCache() {
+  void clearCache({bool futureToo = true}) {
     _cachedMemories = null;
-    _future = null;
+    if (futureToo) _future = null;
   }
 
   bool get showMemories {
@@ -136,14 +132,5 @@ class MemoriesService extends ChangeNotifier {
         present.day > 9 ? present.day.toString() : "0" + present.day.toString();
     final date = DateTime.parse(year + "-" + month + "-" + day);
     return date;
-  }
-
-  Future markMemoryAsSeen(Memory memory) async {
-    memory.markSeen();
-    await _memoriesDB.markMemoryAsSeen(
-      memory,
-      DateTime.now().microsecondsSinceEpoch,
-    );
-    notifyListeners();
   }
 }
