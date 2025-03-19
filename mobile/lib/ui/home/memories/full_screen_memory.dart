@@ -55,7 +55,10 @@ class _FullScreenMemoryDataUpdaterState
   void initState() {
     super.initState();
     indexNotifier = ValueNotifier(widget.initialIndex);
-    memoriesCacheService.markMemoryAsSeen(widget.memories[widget.initialIndex]);
+    memoriesCacheService.markMemoryAsSeen(
+      widget.memories[widget.initialIndex],
+      widget.memories.length == widget.initialIndex + 1,
+    );
   }
 
   @override
@@ -272,8 +275,10 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
             },
             onPageChanged: (index) {
               unawaited(
-                memoriesCacheService
-                    .markMemoryAsSeen(inheritedData.memories[index]),
+                memoriesCacheService.markMemoryAsSeen(
+                  inheritedData.memories[index],
+                  inheritedData.memories.length == index + 1,
+                ),
               );
               inheritedData.indexNotifier.value = index;
             },
