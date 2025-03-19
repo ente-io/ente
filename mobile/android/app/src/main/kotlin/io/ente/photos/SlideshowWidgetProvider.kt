@@ -15,8 +15,8 @@ import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetProvider
 import java.io.File
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 @Serializable
 data class MemoryFileData(val title: String?, val subText: String?, val generatedId: Int?)
@@ -32,13 +32,12 @@ class SlideshowWidgetProvider : HomeWidgetProvider() {
             val views =
                     RemoteViews(context.packageName, R.layout.slideshow_layout).apply {
                         val totalSet = widgetData.getInt("totalSet", 0)
-                        var randomNumber = 0
+                        var randomNumber = -1
+                        var imagePath: String? = null
                         if (totalSet > 0) {
                             randomNumber = (0 until totalSet!!).random()
-                            val imagePath = widgetData.getString("slideshow_" + randomNumber, null)
+                            imagePath = widgetData.getString("slideshow_" + randomNumber, null)
                         }
-                        // Show Images saved with `renderFlutterWidget`
-                        val imagePath = widgetData.getString("slideshow_" + randomNumber, null)
                         var imageExists: Boolean = false
                         if (imagePath != null) {
                             val imageFile = File(imagePath)
@@ -46,23 +45,29 @@ class SlideshowWidgetProvider : HomeWidgetProvider() {
                         }
                         if (imageExists) {
                             val data = widgetData.getString("slideshow_${randomNumber}_data", null)
-                            val decoded: MemoryFileData? = data?.let { Json.decodeFromString<MemoryFileData>(it) }
+                            val decoded: MemoryFileData? =
+                                    data?.let { Json.decodeFromString<MemoryFileData>(it) }
                             val title = decoded?.title
                             val subText = decoded?.subText
                             val generatedId = decoded?.generatedId
 
-                            val deepLinkUri = Uri.parse("memoryWidget://message?generatedId=${generatedId}&homeWidget")
-                
-                            val pendingIntent = HomeWidgetLaunchIntent.getActivity(
-                                context, MainActivity::class.java, deepLinkUri
-                            )
-                
+                            val deepLinkUri =
+                                    Uri.parse(
+                                            "memoryWidget://message?generatedId=${generatedId}&homeWidget"
+                                    )
+
+                            val pendingIntent =
+                                    HomeWidgetLaunchIntent.getActivity(
+                                            context,
+                                            MainActivity::class.java,
+                                            deepLinkUri
+                                    )
+
                             setOnClickPendingIntent(R.id.widget_container, pendingIntent)
-                        
 
                             Log.d("SlideshowWidgetProvider", "Image exists: $imagePath")
                             setViewVisibility(R.id.widget_img, View.VISIBLE)
-                            setViewVisibility(R.id.widget_placeholder_container , View.VISIBLE)
+                            setViewVisibility(R.id.widget_placeholder_container, View.VISIBLE)
                             setViewVisibility(R.id.widget_subtitle, View.VISIBLE)
                             setViewVisibility(R.id.widget_title, View.VISIBLE)
                             setViewVisibility(R.id.widget_overlay, View.VISIBLE)
@@ -82,10 +87,10 @@ class SlideshowWidgetProvider : HomeWidgetProvider() {
                                             MainActivity::class.java
                                     )
                             setOnClickPendingIntent(R.id.widget_container, pendingIntent)
-    
+
                             Log.d("SlideshowWidgetProvider", "Image doesn't exists")
                             setViewVisibility(R.id.widget_img, View.GONE)
-                            setViewVisibility(R.id.widget_placeholder_container , View.GONE)
+                            setViewVisibility(R.id.widget_placeholder_container, View.GONE)
                             setViewVisibility(R.id.widget_subtitle, View.GONE)
                             setViewVisibility(R.id.widget_title, View.GONE)
                             setViewVisibility(R.id.widget_overlay, View.GONE)
