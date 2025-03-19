@@ -328,7 +328,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async => await HomeWidgetService.instance
-              .initHomeWidget(changeMemories: true),
+              .initHomeWidget(forceFetchNewMemories: true),
         ),
         sectionOptionSpacing,
         MenuItemWidget(

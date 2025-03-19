@@ -39,7 +39,7 @@ class HomeWidgetService {
 
     final changeMemories = memoryChanged == true || total == 0 || total == null;
 
-    await initHomeWidget(changeMemories: changeMemories);
+    await initHomeWidget(forceFetchNewMemories: changeMemories);
   }
 
   Future<void> updateMemoryChanged(bool value) async {
@@ -47,8 +47,7 @@ class HomeWidgetService {
   }
 
   Future<void> initHomeWidget({
-    bool bypassCount = false,
-    bool changeMemories = false,
+    bool forceFetchNewMemories = false,
   }) async {
     final isLoggedIn = Configuration.instance.isLoggedIn();
     if (!isLoggedIn) {
@@ -63,7 +62,7 @@ class HomeWidgetService {
       return;
     }
 
-    if (changeMemories) {
+    if (forceFetchNewMemories) {
       await _forceMemoryUpdate();
     } else {
       final total = await _getTotal();
@@ -73,9 +72,7 @@ class HomeWidgetService {
         );
         return;
       }
-      await _memorySync(
-        bypassCount: bypassCount,
-      );
+      await _memorySync();
     }
   }
 
@@ -84,11 +81,9 @@ class HomeWidgetService {
     await updateMemoryChanged(false);
   }
 
-  Future<void> _memorySync({
-    bool bypassCount = false,
-  }) async {
+  Future<void> _memorySync() async {
     final homeWidgetCount = await HomeWidgetService.instance.countHomeWidgets();
-    if (!bypassCount && homeWidgetCount == 0) {
+    if (homeWidgetCount == 0) {
       _logger.warning("no home widget active");
       return;
     }
@@ -202,6 +197,9 @@ class HomeWidgetService {
       _logger.warning("onLaunchFromWidget: uri is null");
       return;
     }
+
+    // sync the memories
+    await initHomeWidget();
 
     final generatedId = int.tryParse(uri.queryParameters["generatedId"] ?? "");
     _logger.info("onLaunchFromWidget: $uri, $generatedId");

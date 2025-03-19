@@ -67,7 +67,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       (event) async {
         await HomeWidgetService.instance.updateMemoryChanged(true);
         await HomeWidgetService.instance.initHomeWidget(
-          changeMemories: true,
+          forceFetchNewMemories: true,
         );
       },
     );
