@@ -23,9 +23,6 @@ require you to clone the repository or build any images.
     # scripts/compose/credentials.yaml
     curl -LO https://raw.githubusercontent.com/ente-io/ente/main/server/scripts/compose/credentials.yaml
 
-    # scripts/compose/minio-provision.sh
-    curl -LO https://raw.githubusercontent.com/ente-io/ente/main/server/scripts/compose/minio-provision.sh
-
     cd ../..
     ```
 
