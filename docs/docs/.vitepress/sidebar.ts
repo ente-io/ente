@@ -312,6 +312,10 @@ export const sidebar = [
                         link: "/self-hosting/troubleshooting/uploads",
                     },
                     {
+                        text: "Docker",
+                        link: "/self-hosting/troubleshooting/docker",
+                    },
+                    {
                         text: "Yarn",
                         link: "/self-hosting/troubleshooting/yarn",
                     },
