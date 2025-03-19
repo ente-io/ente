@@ -74,8 +74,14 @@ class LocalDB with SqlDbBase {
     bool clearOldMappingsIdsInInput = false,
   }) async {
     if (pathToAssetIDs.isEmpty) return;
+    final List<List<String>> allValues = [];
+    pathToAssetIDs.forEach((pathID, assetIDs) {
+      allValues.addAll(assetIDs.map((assetID) => [pathID, assetID]));
+    });
+    if (allValues.isEmpty && !clearOldMappingsIdsInInput) {
+      return;
+    }
     final stopwatch = Stopwatch()..start();
-    late int pairCount;
 
     await _sqliteDB.writeTransaction((tx) async {
       if (clearOldMappingsIdsInInput) {
@@ -84,12 +90,6 @@ class LocalDB with SqlDbBase {
           pathToAssetIDs.keys.toList(),
         );
       }
-      final List<List<String>> allValues = [];
-
-      pathToAssetIDs.forEach((pathID, assetIDs) {
-        allValues.addAll(assetIDs.map((assetID) => [pathID, assetID]));
-      });
-      pairCount = allValues.length;
       const int batchSize = 15000;
       for (int i = 0; i < allValues.length; i += batchSize) {
         await tx.executeBatch(
@@ -103,7 +103,7 @@ class LocalDB with SqlDbBase {
     });
 
     debugPrint(
-      '$runtimeType insertPathToAssetIDs $pairCount complete in '
+      '$runtimeType insertPathToAssetIDs ${allValues.length} complete in '
       '${stopwatch.elapsed.inMilliseconds}ms for '
       '${pathToAssetIDs.length} paths (replaced $clearOldMappingsIdsInInput}',
     );
