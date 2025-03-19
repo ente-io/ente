@@ -12,7 +12,7 @@ import "package:photos/log/devlog.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 class LocalDB with SqlDbBase {
-  static const _databaseName = "local_2.db";
+  static const _databaseName = "local_3.db";
   static const _batchInsertMaxCount = 1000;
   static const _smallTableBatchInsertMaxCount = 5000;
   late final SqliteDatabase _sqliteDB;
@@ -101,7 +101,7 @@ class LocalDB with SqlDbBase {
         );
       }
     });
-  
+
     debugPrint(
       '$runtimeType insertPathToAssetIDs $pairCount complete in '
       '${stopwatch.elapsed.inMilliseconds}ms for '

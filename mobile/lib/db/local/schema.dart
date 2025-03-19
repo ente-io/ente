@@ -30,25 +30,38 @@ class LocalDBMigration {
     ''',
     '''
     CREATE TABLE metadata (
-      id TEXT PRIMARY_KEY,
+      id TEXT PRIMARY KEY,
       hash TEXT NOT NULL,
       created_at INTEGER NOT NULL,
       modified_at INTEGER NOT NULL,
       latitude REAL,
-      longitude REAL,
-      PRIMARY KEY (id),
-      FOREIGN KEY (id) REFERENCES assets (id) ON DELETE CASCADE
+      longitude REAL
     );
+    ''',
+    '''
+    CREATE TRIGGER delete_metadata
+    AFTER DELETE ON assets
+    FOR EACH ROW
+    BEGIN
+        DELETE FROM metadata WHERE id = OLD.id;
+    END;
     ''',
     '''
     CREATE TABLE old_hash (
      id TEXT NOT NULL,
      hash TEXT NOT NULL,
      created_at INTEGER NOT NULL,
-     PRIMARY KEY (id, hash),
-     FOREIGN KEY (id) REFERENCES assets (id) ON DELETE CASCADE
+     PRIMARY KEY (id, hash)
     ); 
-  ''',
+    ''',
+    '''
+    CREATE TRIGGER delete_old_hash
+    AFTER DELETE ON assets
+    FOR EACH ROW
+    BEGIN
+        DELETE FROM old_hash WHERE id = OLD.id;
+    END;
+    ''',
     '''
     CREATE TRIGGER update_old_hash
     AFTER UPDATE OF hash ON metadata
@@ -72,18 +85,31 @@ class LocalDBMigration {
     CREATE TABLE device_path_assets (
       path_id TEXT NOT NULL,
       asset_id TEXT NOT NULL,
-      PRIMARY KEY (path_id, asset_id),
-      FOREIGN KEY (path_id) REFERENCES device_path (path_id) ON DELETE CASCADE,
-      FOREIGN KEY (asset_id) REFERENCES assets (id) ON DELETE CASCADE
+      PRIMARY KEY (path_id, asset_id)
     );
+    ''',
+    '''
+    CREATE TRIGGER delete_device_path_assets
+    AFTER DELETE ON assets
+    FOR EACH ROW
+    BEGIN
+        DELETE FROM device_path_assets WHERE asset_id = OLD.id;
+    END;
     ''',
     '''
     CREATE TABLE queue (
       id TEXT NOT NULL,
       name TEXT NOT NULL,
-      PRIMARY KEY (id, name),
-      FOREIGN KEY (id) REFERENCES assets (id) ON DELETE CASCADE
-    )
+      PRIMARY KEY (id, name)
+    );
+    ''',
+    '''
+    CREATE TRIGGER delete_queue
+    AFTER DELETE ON assets
+    FOR EACH ROW
+    BEGIN
+        DELETE FROM queue WHERE id = OLD.id;
+    END;
     ''',
   ];
 
