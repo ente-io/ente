@@ -117,13 +117,13 @@ struct SlideshowWidgetEntryView: View {
                         )
                         .overlay(
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(entry.title ?? "Where is the title").font(
+                                Text(entry.title ?? "").font(
                                     .custom("Inter", size: 14, relativeTo: .caption)
                                 )  // Custom with fallback
                                 .bold()
                                 .foregroundStyle(.white)
                                 .shadow(radius: 20)
-                                Text(entry.subTitle ?? "Where is the sub title")
+                                Text(entry.subTitle ?? "")
                                     .font(.custom("Inter", size: 12, relativeTo: .caption2))
                                     .foregroundStyle(.white)
                                     .shadow(radius: 20)
