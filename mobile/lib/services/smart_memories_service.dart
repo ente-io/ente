@@ -137,9 +137,14 @@ class SmartMemoriesService {
           "clipMemoryTypeVectors": clipMemoryTypeVectors,
         },
       ) as MemoriesResult;
+      _logger.finest(
+        '${memoriesResult.memories.length} memories computed in computer $t',
+      );
+
       for (final memory in memoriesResult.memories) {
         memory.title = memory.createTitle(s, languageCode);
       }
+      _logger.finest('titles created for all memories $t');
       return memoriesResult;
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
