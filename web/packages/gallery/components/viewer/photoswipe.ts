@@ -42,6 +42,11 @@ export interface FileViewerPhotoSwipeDelegate {
      */
     isFavorite: (annotatedFile: FileViewerAnnotatedFile) => boolean | undefined;
     /**
+     * Return `true` if there is an inflight request to update the favorite
+     * status of the file.
+     */
+    isFavoritePending: (annotatedFile: FileViewerAnnotatedFile) => boolean;
+    /**
      * Called when the user activates the toggle favorite action on a file.
      *
      * The toggle favorite button will be disabled for the file until the
@@ -69,7 +74,12 @@ export interface FileViewerPhotoSwipeDelegate {
      * appropriate.
      */
     performKeyAction: (
-        action: "delete" | "copy" | "toggle-fullscreen" | "help",
+        action:
+            | "delete"
+            | "toggle-archive"
+            | "copy"
+            | "toggle-fullscreen"
+            | "help",
     ) => void;
 }
 
@@ -604,21 +614,19 @@ export class FileViewerPhotoSwipe {
 
         let favoriteButtonElement: HTMLButtonElement | undefined;
 
-        /**
-         * IDs of files for which a there is a favorite update in progress.
-         */
-        const pendingFavoriteUpdates = new Set<number>();
+        const toggleFavorite = () =>
+            delegate.toggleFavorite(currentAnnotatedFile());
 
-        const toggleFavorite = async () => {
-            const af = currentAnnotatedFile();
-            pendingFavoriteUpdates.add(af.file.id);
-            updateFavoriteButton();
-            await delegate.toggleFavorite(af);
-            pendingFavoriteUpdates.delete(af.file.id);
-            updateFavoriteButton();
-        };
+        const updateFavoriteButtonIfNeeded = () => {
+            const favoriteIconFill = document.getElementById(
+                "pswp__icn-favorite-fill",
+            );
+            if (!favoriteIconFill) {
+                // Early return if we're not currently being shown, to implement
+                // the "IfNeeded" semantics.
+                return;
+            }
 
-        const updateFavoriteButton = () => {
             const button = favoriteButtonElement!;
 
             const af = currentAnnotatedFile();
@@ -631,19 +639,24 @@ export class FileViewerPhotoSwipe {
             }
 
             // Update the button interactivity based on pending requests.
-            button.disabled = pendingFavoriteUpdates.has(af.file.id);
+            button.disabled = delegate.isFavoritePending(af);
 
             // Update the fill visibility based on the favorite status.
-            showIf(
-                document.getElementById("pswp__icn-favorite-fill")!,
-                !!delegate.isFavorite(af),
-            );
+            showIf(favoriteIconFill, !!delegate.isFavorite(af));
         };
+
+        this.refreshCurrentSlideFavoriteButtonIfNeeded =
+            updateFavoriteButtonIfNeeded;
 
         const handleToggleFavorite = () => void toggleFavorite();
 
         const handleToggleFavoriteIfEnabled = () => {
-            if (haveUser) handleToggleFavorite();
+            if (
+                haveUser &&
+                !delegate.isFavoritePending(currentAnnotatedFile())
+            ) {
+                handleToggleFavorite();
+            }
         };
 
         const handleDownload = () => onDownload(currentAnnotatedFile());
@@ -755,7 +768,7 @@ export class FileViewerPhotoSwipe {
                             // The cast should be safe (unless there is a
                             // PhotoSwipe bug) since we set isButton to true.
                             buttonElement as HTMLButtonElement;
-                        pswp.on("change", updateFavoriteButton);
+                        pswp.on("change", updateFavoriteButtonIfNeeded);
                     },
                     onClick: handleToggleFavorite,
                 });
@@ -895,6 +908,9 @@ export class FileViewerPhotoSwipe {
 
         const handleDelete = () => delegate.performKeyAction("delete");
 
+        const handleToggleArchive = () =>
+            delegate.performKeyAction("toggle-archive");
+
         const handleCopy = () => delegate.performKeyAction("copy");
 
         const handleToggleFullscreen = () =>
@@ -974,6 +990,9 @@ export class FileViewerPhotoSwipe {
                     case "k":
                         cb = handleDownloadIfEnabled;
                         break;
+                    case "x":
+                        cb = handleToggleArchive;
+                        break;
                     case "f":
                         cb = handleToggleFullscreen;
                         break;
@@ -1024,6 +1043,15 @@ export class FileViewerPhotoSwipe {
             this.pswp.refreshSlideContent(this.pswp.currIndex);
         }
     }
+
+    /**
+     * Refresh the favorite button (if indeed it is visible at all) on the
+     * current slide, asking the delegate for the latest state.
+     *
+     * We do this piecemeal update instead of a full refresh because a full
+     * refresh would cause, e.g., the pan and zoom to be reset.
+     */
+    refreshCurrentSlideFavoriteButtonIfNeeded: () => void;
 }
 
 const videoHTML = (url: string, disableDownload: boolean) => `

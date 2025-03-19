@@ -11413,6 +11413,318 @@ class S {
       args: [],
     );
   }
+
+  /// `{dateFormat} through the years`
+  String throughTheYears(Object dateFormat) {
+    return Intl.message(
+      '$dateFormat through the years',
+      name: 'throughTheYears',
+      desc: '',
+      args: [dateFormat],
+    );
+  }
+
+  /// `This week through the years`
+  String get thisWeekThroughTheYears {
+    return Intl.message(
+      'This week through the years',
+      name: 'thisWeekThroughTheYears',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1 {This week, {count} year ago} other {This week, {count} years ago}}`
+  String thisWeekXYearsAgo(num count) {
+    return Intl.plural(
+      count,
+      one: 'This week, $count year ago',
+      other: 'This week, $count years ago',
+      name: 'thisWeekXYearsAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `You and {name}`
+  String youAndThem(Object name) {
+    return Intl.message(
+      'You and $name',
+      name: 'youAndThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Admiring {name}`
+  String admiringThem(Object name) {
+    return Intl.message(
+      'Admiring $name',
+      name: 'admiringThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Embracing {name}`
+  String embracingThem(Object name) {
+    return Intl.message(
+      'Embracing $name',
+      name: 'embracingThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Party with {name}`
+  String partyWithThem(Object name) {
+    return Intl.message(
+      'Party with $name',
+      name: 'partyWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Hiking with {name}`
+  String hikingWithThem(Object name) {
+    return Intl.message(
+      'Hiking with $name',
+      name: 'hikingWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Feasting with {name}`
+  String feastingWithThem(Object name) {
+    return Intl.message(
+      'Feasting with $name',
+      name: 'feastingWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Selfies with {name}`
+  String selfiesWithThem(Object name) {
+    return Intl.message(
+      'Selfies with $name',
+      name: 'selfiesWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Posing with {name}`
+  String posingWithThem(Object name) {
+    return Intl.message(
+      'Posing with $name',
+      name: 'posingWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Scenery with {name}`
+  String backgroundWithThem(Object name) {
+    return Intl.message(
+      'Scenery with $name',
+      name: 'backgroundWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Sports with {name}`
+  String sportsWithThem(Object name) {
+    return Intl.message(
+      'Sports with $name',
+      name: 'sportsWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Road trip with {name}`
+  String roadtripWithThem(Object name) {
+    return Intl.message(
+      'Road trip with $name',
+      name: 'roadtripWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Spotlight on yourself`
+  String get spotlightOnYourself {
+    return Intl.message(
+      'Spotlight on yourself',
+      name: 'spotlightOnYourself',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Spotlight on {name}`
+  String spotlightOnThem(Object name) {
+    return Intl.message(
+      'Spotlight on $name',
+      name: 'spotlightOnThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `{name} is {age}!`
+  String personIsAge(Object name, Object age) {
+    return Intl.message(
+      '$name is $age!',
+      name: 'personIsAge',
+      desc: '',
+      args: [name, age],
+    );
+  }
+
+  /// `{name} turning {age} soon`
+  String personTurningAge(Object name, Object age) {
+    return Intl.message(
+      '$name turning $age soon',
+      name: 'personTurningAge',
+      desc: '',
+      args: [name, age],
+    );
+  }
+
+  /// `Last time with {name}`
+  String lastTimeWithThem(Object name) {
+    return Intl.message(
+      'Last time with $name',
+      name: 'lastTimeWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Trip to {location}`
+  String tripToLocation(Object location) {
+    return Intl.message(
+      'Trip to $location',
+      name: 'tripToLocation',
+      desc: '',
+      args: [location],
+    );
+  }
+
+  /// `Trip in {year}`
+  String tripInYear(Object year) {
+    return Intl.message(
+      'Trip in $year',
+      name: 'tripInYear',
+      desc: '',
+      args: [year],
+    );
+  }
+
+  /// `Last year's trip`
+  String get lastYearsTrip {
+    return Intl.message(
+      'Last year\'s trip',
+      name: 'lastYearsTrip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On the horizon`
+  String get sunrise {
+    return Intl.message(
+      'On the horizon',
+      name: 'sunrise',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Over the hills`
+  String get mountains {
+    return Intl.message(
+      'Over the hills',
+      name: 'mountains',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The green life`
+  String get greenery {
+    return Intl.message(
+      'The green life',
+      name: 'greenery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sand and sea`
+  String get beach {
+    return Intl.message(
+      'Sand and sea',
+      name: 'beach',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In the city`
+  String get city {
+    return Intl.message(
+      'In the city',
+      name: 'city',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In the moonlight`
+  String get moon {
+    return Intl.message(
+      'In the moonlight',
+      name: 'moon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On the road again`
+  String get onTheRoad {
+    return Intl.message(
+      'On the road again',
+      name: 'onTheRoad',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Culinary delight`
+  String get food {
+    return Intl.message(
+      'Culinary delight',
+      name: 'food',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Furry companions`
+  String get pets {
+    return Intl.message(
+      'Furry companions',
+      name: 'pets',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -41,6 +41,7 @@ For more details, see:
 
 - https://web.dev/articles/indexeddb
 - https://github.com/jakearchibald/idb
+- https://github.com/localForage/localForage
 
 ## OPFS
 

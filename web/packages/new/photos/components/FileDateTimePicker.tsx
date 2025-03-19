@@ -57,7 +57,6 @@ export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
     };
 
     const handleClose = () => {
-        console.log("handleClose");
         setOpen(false);
         onDidClose?.();
     };

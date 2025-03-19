@@ -4,10 +4,7 @@ import { type Electron } from "@/base/types/ipc";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { downloadManager } from "@/gallery/services/download";
 import { updateFileMagicMetadata } from "@/gallery/services/file";
-import {
-    isArchivedFile,
-    updateMagicMetadata,
-} from "@/gallery/services/magic-metadata";
+import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
 import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
 import { writeStream } from "@/gallery/utils/native-stream";
 import {
@@ -15,12 +12,12 @@ import {
     FileMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
 } from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
+import { ItemVisibility, isArchivedFile } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { deleteFromTrash, moveToTrash } from "@/new/photos/services/collection";
 import { safeFileName } from "@/new/photos/utils/native-fs";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import {
@@ -33,16 +30,15 @@ import {
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 
-export enum FILE_OPS_TYPE {
-    DOWNLOAD,
-    FIX_TIME,
-    ARCHIVE,
-    UNARCHIVE,
-    HIDE,
-    TRASH,
-    DELETE_PERMANENTLY,
-    SET_FAVORITE,
-}
+export type FileOp =
+    | "download"
+    | "fixTime"
+    | "favorite"
+    | "archive"
+    | "unarchive"
+    | "hide"
+    | "trash"
+    | "deletePermanently";
 
 export async function downloadFile(file: EnteFile) {
     try {
@@ -320,7 +316,7 @@ async function downloadFileDesktop(
 }
 
 export const isImageOrVideo = (fileType: FileType) =>
-    [FileType.image, FileType.video].includes(fileType);
+    fileType == FileType.image || fileType == FileType.video;
 
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(isArchivedFile).map((file) => file.id);
@@ -332,7 +328,7 @@ export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
 };
 
 export const getUserOwnedFiles = (files: EnteFile[]) => {
-    const user: User = getData(LS_KEYS.USER);
+    const user: User = getData("user");
     if (!user?.id) {
         throw Error("user missing");
     }
@@ -378,8 +374,8 @@ export const shouldShowAvatar = (file: EnteFile, user: User) => {
     }
 };
 
-export const handleFileOps = async (
-    ops: FILE_OPS_TYPE,
+export const handleFileOp = async (
+    op: FileOp,
     files: EnteFile[],
     markTempDeleted: (files: EnteFile[]) => void,
     clearTempDeleted: () => void,
@@ -388,35 +384,8 @@ export const handleFileOps = async (
     fixCreationTime: (files: EnteFile[]) => void,
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
 ) => {
-    switch (ops) {
-        case FILE_OPS_TYPE.TRASH:
-            try {
-                markTempDeleted(files);
-                await moveToTrash(files);
-            } catch (e) {
-                clearTempDeleted();
-                throw e;
-            }
-            break;
-        case FILE_OPS_TYPE.DELETE_PERMANENTLY:
-            try {
-                markTempDeleted(files);
-                await deleteFromTrash(files.map((file) => file.id));
-            } catch (e) {
-                clearTempDeleted();
-                throw e;
-            }
-            break;
-        case FILE_OPS_TYPE.HIDE:
-            try {
-                markTempHidden(files);
-                await moveToHiddenCollection(files);
-            } catch (e) {
-                clearTempHidden();
-                throw e;
-            }
-            break;
-        case FILE_OPS_TYPE.DOWNLOAD: {
+    switch (op) {
+        case "download": {
             const setSelectedFileDownloadProgressAttributes =
                 setFilesDownloadProgressAttributesCreator(
                     t("files_count", { count: files.length }),
@@ -427,17 +396,44 @@ export const handleFileOps = async (
             );
             break;
         }
-        case FILE_OPS_TYPE.FIX_TIME:
+        case "fixTime":
             fixCreationTime(files);
             break;
-        case FILE_OPS_TYPE.ARCHIVE:
+        case "favorite":
+            await addMultipleToFavorites(files);
+            break;
+        case "archive":
             await changeFilesVisibility(files, ItemVisibility.archived);
             break;
-        case FILE_OPS_TYPE.UNARCHIVE:
+        case "unarchive":
             await changeFilesVisibility(files, ItemVisibility.visible);
             break;
-        case FILE_OPS_TYPE.SET_FAVORITE:
-            await addMultipleToFavorites(files);
+        case "hide":
+            try {
+                markTempHidden(files);
+                await moveToHiddenCollection(files);
+            } catch (e) {
+                clearTempHidden();
+                throw e;
+            }
+            break;
+        case "trash":
+            try {
+                markTempDeleted(files);
+                await moveToTrash(files);
+            } catch (e) {
+                clearTempDeleted();
+                throw e;
+            }
+            break;
+        case "deletePermanently":
+            try {
+                markTempDeleted(files);
+                await deleteFromTrash(files.map((file) => file.id));
+            } catch (e) {
+                clearTempDeleted();
+                throw e;
+            }
             break;
     }
 };

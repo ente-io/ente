@@ -1,15 +1,9 @@
-import { PAGES } from "@/accounts/constants/pages";
 import { unstashRedirect } from "@/accounts/services/redirect";
 import { LoadingIndicator } from "@/base/components/loaders";
 import { fromB64URLSafeNoPaddingString } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
-import {
-    LS_KEYS,
-    getData,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
+import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 
@@ -96,8 +90,8 @@ const saveCredentialsAndNavigateTo = async (
     //   user is signing into an existing account).
     const { keyAttributes, encryptedToken, token, id } = decodedResponse;
 
-    await setLSUser({ ...getData(LS_KEYS.USER), token, encryptedToken, id });
-    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+    await setLSUser({ ...getData("user"), token, encryptedToken, id });
+    setData("keyAttributes", keyAttributes);
 
-    return unstashRedirect() ?? PAGES.CREDENTIALS;
+    return unstashRedirect() ?? "/credentials";
 };

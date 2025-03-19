@@ -6,24 +6,14 @@ import { ItemVisibility } from "@/media/file-metadata";
 
 // TODO: Audit this file
 
-export enum CollectionType {
-    folder = "folder",
-    favorites = "favorites",
-    album = "album",
-    uncategorized = "uncategorized",
-}
+export type CollectionType = "folder" | "favorites" | "album" | "uncategorized";
 
-export enum COLLECTION_ROLE {
-    VIEWER = "VIEWER",
-    OWNER = "OWNER",
-    COLLABORATOR = "COLLABORATOR",
-    UNKNOWN = "UNKNOWN",
-}
+export type CollectionRole = "VIEWER" | "OWNER" | "COLLABORATOR" | "UNKNOWN";
 
 export interface CollectionUser {
     id: number;
     email: string;
-    role: COLLECTION_ROLE;
+    role: CollectionRole;
 }
 
 export interface EncryptedCollection {
@@ -112,15 +102,18 @@ export interface RemoveFromCollectionRequest {
     fileIDs: number[];
 }
 
-export enum SUB_TYPE {
-    DEFAULT = 0,
-    DEFAULT_HIDDEN = 1,
-    QUICK_LINK_COLLECTION = 2,
-}
+export const CollectionSubType = {
+    default: 0,
+    defaultHidden: 1,
+    quicklink: 2,
+} as const;
+
+export type CollectionSubType =
+    (typeof CollectionSubType)[keyof typeof CollectionSubType];
 
 export interface CollectionMagicMetadataProps {
     visibility?: ItemVisibility;
-    subType?: SUB_TYPE;
+    subType?: CollectionSubType;
     order?: number;
 }
 

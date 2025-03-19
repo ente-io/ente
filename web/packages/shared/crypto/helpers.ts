@@ -2,14 +2,9 @@ import { setRecoveryKey } from "@/accounts/services/user";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session";
-import {
-    LS_KEYS,
-    getData,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
+import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { SESSION_KEYS, setKey } from "@ente/shared/storage/sessionStorage";
+import { type SessionKey, setKey } from "@ente/shared/storage/sessionStorage";
 import { getActualKey } from "@ente/shared/user";
 import type { KeyAttributes } from "@ente/shared/user/types";
 
@@ -23,7 +18,7 @@ export async function decryptAndStoreToken(
     masterKey: string,
 ) {
     const cryptoWorker = await sharedCryptoWorker();
-    const user = getData(LS_KEYS.USER);
+    const user = getData("user");
     let decryptedToken = null;
     const { encryptedToken } = user;
     if (encryptedToken && encryptedToken.length > 0) {
@@ -76,7 +71,7 @@ export async function generateAndSaveIntermediateKeyAttributes(
         opsLimit: intermediateKek.opsLimit,
         memLimit: intermediateKek.memLimit,
     });
-    setData(LS_KEYS.KEY_ATTRIBUTES, intermediateKeyAttributes);
+    setData("keyAttributes", intermediateKeyAttributes);
     return intermediateKeyAttributes;
 }
 
@@ -99,7 +94,7 @@ export const generateLoginSubKey = async (kek: string) => {
 };
 
 export const saveKeyInSessionStore = async (
-    keyType: SESSION_KEYS,
+    keyType: SessionKey,
     key: string,
     fromDesktop?: boolean,
 ) => {
@@ -108,7 +103,7 @@ export const saveKeyInSessionStore = async (
         await cryptoWorker.generateKeyAndEncryptToB64(key);
     setKey(keyType, sessionKeyAttributes);
     const electron = globalThis.electron;
-    if (electron && !fromDesktop && keyType === SESSION_KEYS.ENCRYPTION_KEY) {
+    if (electron && !fromDesktop && keyType == "encryptionKey") {
         electron.saveMasterKeyB64(key);
     }
 };
@@ -124,7 +119,7 @@ export const getRecoveryKey = async () => {
     try {
         const cryptoWorker = await sharedCryptoWorker();
 
-        const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const keyAttributes: KeyAttributes = getData("keyAttributes");
         const {
             recoveryKeyEncryptedWithMasterKey,
             recoveryKeyDecryptionNonce,
@@ -152,7 +147,7 @@ export const getRecoveryKey = async () => {
 // sign up
 async function createNewRecoveryKey() {
     const masterKey = await getActualKey();
-    const existingAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+    const existingAttributes = getData("keyAttributes");
 
     const cryptoWorker = await sharedCryptoWorker();
 
@@ -177,7 +172,7 @@ async function createNewRecoveryKey() {
         existingAttributes,
         recoveryKeyAttributes,
     );
-    setData(LS_KEYS.KEY_ATTRIBUTES, updatedKeyAttributes);
+    setData("keyAttributes", updatedKeyAttributes);
 
     return recoveryKey;
 }
@@ -193,7 +188,7 @@ export const decryptDeleteAccountChallenge = async (
 ) => {
     const cryptoWorker = await sharedCryptoWorker();
     const masterKey = await masterKeyFromSession();
-    const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+    const keyAttributes = getData("keyAttributes");
     const secretKey = await cryptoWorker.decryptBoxB64(
         {
             encryptedData: keyAttributes.encryptedSecretKey,

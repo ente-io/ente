@@ -14,7 +14,7 @@ import {
 import type { UploadItem } from "@/gallery/services/upload";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
-    UPLOAD_RESULT,
+    type UploadResult,
 } from "@/gallery/services/upload";
 import {
     detectFileTypeInfoFromChunk,
@@ -528,7 +528,7 @@ type MakeProgressTracker = (
 ) => unknown;
 
 interface UploadResponse {
-    uploadResult: UPLOAD_RESULT;
+    uploadResult: UploadResult;
     uploadedFile?: EncryptedEnteFile | EnteFile;
 }
 
@@ -549,7 +549,7 @@ export const uploader = async (
     abortIfCancelled: () => void,
     makeProgessTracker: MakeProgressTracker,
 ): Promise<UploadResponse> => {
-    log.info(`Uploading ${fileName}`);
+    log.info(`Upload ${fileName} | start`);
     try {
         /*
          * We read the file four times:
@@ -574,7 +574,7 @@ export const uploader = async (
         } catch (e) {
             if (isFileTypeNotSupportedError(e)) {
                 log.error(`Not uploading ${fileName}`, e);
-                return { uploadResult: UPLOAD_RESULT.UNSUPPORTED };
+                return { uploadResult: "unsupported" };
             }
             throw e;
         }
@@ -582,8 +582,7 @@ export const uploader = async (
         const { fileTypeInfo, fileSize, lastModifiedMs } = assetDetails;
 
         const maxFileSize = 4 * 1024 * 1024 * 1024; /* 4 GB */
-        if (fileSize >= maxFileSize)
-            return { uploadResult: UPLOAD_RESULT.TOO_LARGE };
+        if (fileSize >= maxFileSize) return { uploadResult: "tooLarge" };
 
         abortIfCancelled();
 
@@ -608,7 +607,7 @@ export const uploader = async (
             );
             if (matchInSameCollection) {
                 return {
-                    uploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
+                    uploadResult: "alreadyUploaded",
                     uploadedFile: matchInSameCollection,
                 };
             } else {
@@ -616,10 +615,7 @@ export const uploader = async (
                 const symlink = Object.assign({}, anyMatch);
                 symlink.collectionID = collection.id;
                 await addToCollection(collection, [symlink]);
-                return {
-                    uploadResult: UPLOAD_RESULT.ADDED_SYMLINK,
-                    uploadedFile: symlink,
-                };
+                return { uploadResult: "addedSymlink", uploadedFile: symlink };
             }
         }
 
@@ -669,8 +665,8 @@ export const uploader = async (
 
         return {
             uploadResult: metadata.hasStaticThumbnail
-                ? UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
-                : UPLOAD_RESULT.UPLOADED,
+                ? "uploadedWithStaticThumbnail"
+                : "uploaded",
             uploadedFile: uploadedFile,
         };
     } catch (e) {
@@ -683,13 +679,11 @@ export const uploader = async (
         const error = handleUploadError(e);
         switch (error.message) {
             case CustomError.ETAG_MISSING:
-                return { uploadResult: UPLOAD_RESULT.BLOCKED };
+                return { uploadResult: "blocked" };
             case CustomError.FILE_TOO_LARGE:
-                return {
-                    uploadResult: UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE,
-                };
+                return { uploadResult: "largerThanAvailableStorage" };
             default:
-                return { uploadResult: UPLOAD_RESULT.FAILED };
+                return { uploadResult: "failed" };
         }
     }
 };

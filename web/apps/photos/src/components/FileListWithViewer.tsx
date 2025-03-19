@@ -11,10 +11,6 @@ import { styled } from "@mui/material";
 import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import {
-    addToFavorites,
-    removeFromFavorites,
-} from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { downloadSingleFile } from "utils/file";
@@ -30,19 +26,6 @@ export type FileListWithViewerProps = {
      */
     files: EnteFile[];
     enableDownload?: boolean;
-    /**
-     * Called when the component wants to update the in-memory, unsynced,
-     * favorite status of a file.
-     *
-     * For more details, see {@link unsyncedFavoriteUpdates} in the gallery
-     * reducer's documentation.
-     *
-     * Not set in the context of the shared albums app.
-     */
-    onMarkUnsyncedFavoriteUpdate?: (
-        fileID: number,
-        isFavorite: boolean,
-    ) => void;
     /**
      * Called when the component wants to mark the given files as deleted in the
      * the in-memory, unsynced, state maintained by the top level gallery.
@@ -79,8 +62,13 @@ export type FileListWithViewerProps = {
         | "user"
         | "isInIncomingSharedCollection"
         | "isInHiddenSection"
-        | "fileCollectionIDs"
-        | "allCollectionsNameByID"
+        | "fileNormalCollectionIDs"
+        | "collectionNameByID"
+        | "pendingFavoriteUpdates"
+        | "pendingVisibilityUpdates"
+        | "onVisualFeedback"
+        | "onToggleFavorite"
+        | "onFileVisibilityUpdate"
         | "onSelectCollection"
         | "onSelectPerson"
     >;
@@ -105,13 +93,17 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     favoriteFileIDs,
     isInIncomingSharedCollection,
     isInHiddenSection,
-    fileCollectionIDs,
-    allCollectionsNameByID,
+    fileNormalCollectionIDs,
+    collectionNameByID,
+    pendingFavoriteUpdates,
+    pendingVisibilityUpdates,
     setFilesDownloadProgressAttributesCreator,
-    onMarkUnsyncedFavoriteUpdate,
-    onMarkTempDeleted,
     onSetOpenFileViewer,
     onSyncWithRemote,
+    onVisualFeedback,
+    onToggleFavorite,
+    onFileVisibilityUpdate,
+    onMarkTempDeleted,
     onSelectCollection,
     onSelectPerson,
 }) => {
@@ -143,20 +135,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         [onSyncWithRemote],
     );
 
-    const handleToggleFavorite = useMemo(() => {
-        return favoriteFileIDs && onMarkUnsyncedFavoriteUpdate
-            ? async (file: EnteFile) => {
-                  const isFavorite = favoriteFileIDs!.has(file.id);
-                  await (isFavorite ? removeFromFavorites : addToFavorites)(
-                      file,
-                      true,
-                  );
-                  // See: [Note: File viewer update and dispatch]
-                  onMarkUnsyncedFavoriteUpdate(file.id, !isFavorite);
-              }
-            : undefined;
-    }, [favoriteFileIDs, onMarkUnsyncedFavoriteUpdate]);
-
     const handleDownload = useCallback(
         (file: EnteFile) => {
             const setSingleFileDownloadProgress =
@@ -168,11 +146,8 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
 
     const handleDelete = useMemo(() => {
         return onMarkTempDeleted
-            ? async (file: EnteFile) => {
-                  await moveToTrash([file]);
-                  // See: [Note: File viewer update and dispatch]
-                  onMarkTempDeleted?.([file]);
-              }
+            ? (file: EnteFile) =>
+                  moveToTrash([file]).then(() => onMarkTempDeleted?.([file]))
             : undefined;
     }, [onMarkTempDeleted]);
 
@@ -218,13 +193,17 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     isInHiddenSection,
                     isInIncomingSharedCollection,
                     favoriteFileIDs,
-                    fileCollectionIDs,
-                    allCollectionsNameByID,
+                    fileNormalCollectionIDs,
+                    collectionNameByID,
+                    pendingFavoriteUpdates,
+                    pendingVisibilityUpdates,
+                    onVisualFeedback,
+                    onToggleFavorite,
+                    onFileVisibilityUpdate,
                     onSelectCollection,
                     onSelectPerson,
                 }}
                 onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
-                onToggleFavorite={handleToggleFavorite}
                 onDownload={handleDownload}
                 onDelete={handleDelete}
                 onSaveEditedImageCopy={handleSaveEditedImageCopy}

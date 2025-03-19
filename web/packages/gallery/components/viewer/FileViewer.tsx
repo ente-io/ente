@@ -8,6 +8,7 @@ import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useBaseContext } from "@/base/context";
+import { isDevBuild } from "@/base/env";
 import { lowercaseExtension } from "@/base/file-name";
 import { formattedListJoin, ut } from "@/base/i18n";
 import type { LocalUser } from "@/base/local-user";
@@ -18,6 +19,7 @@ import {
     type FileInfoProps,
 } from "@/gallery/components/FileInfo";
 import type { Collection } from "@/media/collection";
+import { fileVisibility, ItemVisibility } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
@@ -25,12 +27,14 @@ import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "@/new/photos/components/ImageEditorOverlay";
+import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
+import UnArchiveIcon from "@mui/icons-material/Unarchive";
 import {
     Dialog,
     DialogContent,
@@ -50,6 +54,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { hlsPlaylistForFile } from "../../services/video";
 import {
     fileInfoExifForFile,
     updateItemDataAlt,
@@ -96,6 +101,10 @@ export interface FileViewerFileAnnotation {
      * `true` if the delete action should be shown for this file.
      */
     showDelete: boolean;
+    /**
+     * `true` if the toggle archive action should be shown for this file.
+     */
+    showArchive: boolean;
     /**
      * `true` if the copy image action should be shown for this file.
      */
@@ -168,10 +177,28 @@ export type FileViewerProps = ModalVisibilityProps & {
     /**
      * File IDs of all the files that the user has marked as a favorite.
      *
-     * If this is not provided then the favorite toggle button will not be shown
-     * in the file actions.
+     * See also {@link onToggleFavorite}.
      */
     favoriteFileIDs?: Set<number>;
+    /**
+     * File IDs of for which an update of its favorite status is pending (e.g.
+     * due to a toggle favorite action in the file viewer).
+     *
+     * See also {@link favoriteFileIDs} and {@link onToggleFavorite}.
+     */
+    pendingFavoriteUpdates?: Set<number>;
+    /**
+     * File IDs of for which an update of its visibility is pending (e.g. due to
+     * a toggle archived action in the file viewer).
+     *
+     * See also {@link onFileVisibilityUpdate}.
+     */
+    pendingVisibilityUpdates?: Set<number>;
+    /**
+     * A mapping from file IDs to the IDs of the normal (non-hidden) collections
+     * that they are a part of.
+     */
+    fileNormalCollectionIDs?: FileInfoProps["fileCollectionIDs"];
     /**
      * Called when there was some update performed within the file viewer that
      * necessitates us to sync with remote again to fetch the latest updates.
@@ -188,31 +215,43 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     onTriggerSyncWithRemote?: () => void;
     /**
+     * Called when the user performs an action which does not otherwise have any
+     * immediate visual impact, to acknowledge it.
+     *
+     * See: [Note: Visual feedback to acknowledge user actions]
+     */
+    onVisualFeedback: () => void;
+    /**
      * Called when the favorite status of given {@link file} should be toggled
      * from its current value.
      *
-     * If this is not provided then the favorite toggle button will not be shown
-     * in the file actions.
-     *
-     * See also {@link favoriteFileIDs}.
-     *
-     * See also: [Note: File viewer update and dispatch]
+     * The favorite toggle button is shown only if all three of
+     * {@link favoriteFileIDs}, {@link pendingFavoriteUpdates} and
+     * {@link onToggleFavorite} are provided.
      */
     onToggleFavorite?: (file: EnteFile) => Promise<void>;
+    /**
+     * Called when {@link visibility} of the given {@link file} should be
+     * updated (when the user activates toggle archived action).
+     *
+     * The toggle archived action is shown only if both
+     * {@link pendingVisibilityUpdates} and {@link onFileVisibilityUpdate} are
+     * provided.
+     */
+    onFileVisibilityUpdate?: (
+        file: EnteFile,
+        visibility: ItemVisibility,
+    ) => Promise<void>;
     /**
      * Called when the given {@link file} should be downloaded.
      *
      * If this is not provided then the download action will not be shown.
-     *
-     * See also: [Note: File viewer update and dispatch]
      */
     onDownload?: (file: EnteFile) => void;
     /**
      * Called when the given {@link file} should be deleted.
      *
      * If this is not provided then the delete action will not be shown.
-     *
-     * See also: [Note: File viewer update and dispatch]
      */
     onDelete?: (file: EnteFile) => Promise<void>;
     /**
@@ -227,14 +266,11 @@ export type FileViewerProps = ModalVisibilityProps & {
     onSaveEditedImageCopy?: ImageEditorOverlayProps["onSaveEditedCopy"];
 } & Pick<
         FileInfoProps,
-        | "fileCollectionIDs"
-        | "allCollectionsNameByID"
-        | "onSelectCollection"
-        | "onSelectPerson"
+        "collectionNameByID" | "onSelectCollection" | "onSelectPerson"
     >;
 
 /**
- * A PhotoSwipe based image and video viewer.
+ * A PhotoSwipe based image, live photo and video viewer.
  */
 export const FileViewer: React.FC<FileViewerProps> = ({
     open,
@@ -247,10 +283,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     isInTrashSection,
     isInHiddenSection,
     favoriteFileIDs,
-    fileCollectionIDs,
-    allCollectionsNameByID,
+    pendingFavoriteUpdates,
+    pendingVisibilityUpdates,
+    fileNormalCollectionIDs,
+    collectionNameByID,
     onTriggerSyncWithRemote,
+    onVisualFeedback,
     onToggleFavorite,
+    onFileVisibilityUpdate,
     onDownload,
     onDelete,
     onSelectCollection,
@@ -307,31 +347,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const [isFullscreen, setIsFullscreen] = useState(false);
 
-    // Callbacks to be invoked (only once) the next time we get an update to the
-    // `files` or `favoriteFileIDs` props.
-    //
-    // The callback is passed the latest values of the `files` prop.
-    //
-    // Both of those trace their way back to the same reducer, so they get
-    // updated in tandem. When we delete files, only the `files` prop gets
-    // updated, while when we toggle favoriets, only the `favoriteFileIDs` prop
-    // gets updated.
-    const [, setOnNextFilesOrFavoritesUpdate] = useState<
-        ((files: EnteFile[]) => void)[]
-    >([]);
-
     // If `true`, then we need to trigger a sync with remote when we close.
     const [, setNeedsSync] = useState(false);
 
-    /**
-     * Add a callback to be fired (only once) the next time we get an update to
-     * the `files` prop.
-     */
-    const awaitNextFilesOrFavoritesUpdate = useCallback(
-        (cb: (files: EnteFile[]) => void) =>
-            setOnNextFilesOrFavoritesUpdate((cbs) => cbs.concat(cb)),
-        [],
-    );
+    const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
 
     const handleClose = useCallback(() => {
         setNeedsSync((needSync) => {
@@ -410,29 +429,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const handleDelete = async () => {
         const file = activeAnnotatedFile!.file;
         await onDelete!(file);
-        // [Note: File viewer update and dispatch]
-        //
-        // This relies on the assumption that `onDelete` will asynchronously
-        // result in updates to the `files` prop. Currently that indeed is what
-        // happens as the last call in the `onDelete` implementation is a call
-        // to a dispatcher, but we need to be careful about preserving this
-        // assumption when changing `onDelete` implementation in the future.
-        awaitNextFilesOrFavoritesUpdate((files: EnteFile[]) => {
-            handleNeedsRemoteSync();
-            if (files.length) {
-                // Refreshing the current slide after the current file has gone
-                // will show the subsequent slide (since that would've now moved
-                // down to the current index).
-                //
-                // However, we might've been the last slide, in which case we
-                // need to go back one slide first. To determine this, also pass
-                // the expected count of files to our PhotoSwipe wrapper.
-                psRef.current!.refreshCurrentSlideContent(files.length);
-            } else {
-                // If there are no more files left, close the viewer.
-                handleClose();
-            }
-        });
+        handleNeedsRemoteSync();
     };
 
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
@@ -488,6 +485,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             const showFavorite = canModify;
 
+            const showArchive = canModify;
+
             const showDelete =
                 !!handleConfirmDelete &&
                 isOwnFile &&
@@ -521,12 +520,22 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 }
             })();
 
+            if (
+                isDevBuild &&
+                process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
+            ) {
+                if (file.metadata.fileType == FileType.video) {
+                    void hlsPlaylistForFile(file);
+                }
+            }
+
             const annotation: FileViewerFileAnnotation = {
                 fileID,
                 isOwnFile,
                 showFavorite,
                 showDownload,
                 showDelete,
+                showArchive,
                 showCopyImage,
                 showEditImage,
             };
@@ -546,8 +555,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             handleConfirmDelete,
         ],
     );
-
-    const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
 
     const handleSelectCollection = useMemo(() => {
         return onSelectCollection
@@ -573,35 +580,31 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const isFavorite = useCallback(
         ({ file }: FileViewerAnnotatedFile) => {
-            if (!haveUser || !favoriteFileIDs || !onToggleFavorite) {
+            if (
+                !haveUser ||
+                !favoriteFileIDs ||
+                !pendingFavoriteUpdates ||
+                !onToggleFavorite
+            ) {
                 return undefined;
             }
             return favoriteFileIDs.has(file.id);
         },
-        [haveUser, favoriteFileIDs, onToggleFavorite],
+        [haveUser, favoriteFileIDs, pendingFavoriteUpdates, onToggleFavorite],
+    );
+
+    const isFavoritePending = useCallback(
+        ({ file }: FileViewerAnnotatedFile) =>
+            !!pendingFavoriteUpdates?.has(file.id),
+        [pendingFavoriteUpdates],
     );
 
     const toggleFavorite = useCallback(
-        ({ file }: FileViewerAnnotatedFile) => {
-            return new Promise<void>((resolve) => {
-                // See: [Note: File viewer update and dispatch]
-                onToggleFavorite!(file)
-                    .then(
-                        () => awaitNextFilesOrFavoritesUpdate(() => resolve()),
-                        (e: unknown) => {
-                            onGenericError(e);
-                            resolve();
-                        },
-                    )
-                    .finally(handleNeedsRemoteSync);
-            });
-        },
-        [
-            onToggleFavorite,
-            onGenericError,
-            awaitNextFilesOrFavoritesUpdate,
-            handleNeedsRemoteSync,
-        ],
+        ({ file }: FileViewerAnnotatedFile) =>
+            onToggleFavorite!(file)
+                .catch(onGenericError)
+                .finally(handleNeedsRemoteSync),
+        [onToggleFavorite, onGenericError, handleNeedsRemoteSync],
     );
 
     const updateFullscreenStatus = useCallback(() => {
@@ -651,6 +654,55 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [activeAnnotatedFile],
     );
 
+    const { isArchived, isPendingToggleArchive, toggleArchived } =
+        useMemo(() => {
+            let isArchived: boolean | undefined;
+            let isPendingToggleArchive: boolean | undefined;
+            let toggleArchived: (() => void) | undefined;
+
+            const file = activeAnnotatedFile?.file;
+
+            if (
+                pendingVisibilityUpdates &&
+                onFileVisibilityUpdate &&
+                file &&
+                activeAnnotatedFile.annotation.showArchive
+            ) {
+                switch (fileVisibility(file)) {
+                    case undefined:
+                    case ItemVisibility.visible:
+                        isArchived = false;
+                        break;
+                    case ItemVisibility.archived:
+                        isArchived = true;
+                        break;
+                }
+
+                isPendingToggleArchive = pendingVisibilityUpdates.has(file.id);
+
+                toggleArchived = () => {
+                    handleMoreMenuCloseIfNeeded();
+                    void onFileVisibilityUpdate(
+                        file,
+                        isArchived
+                            ? ItemVisibility.visible
+                            : ItemVisibility.archived,
+                    )
+                        .then(handleNeedsRemoteSync)
+                        .catch(onGenericError);
+                };
+            }
+
+            return { isArchived, isPendingToggleArchive, toggleArchived };
+        }, [
+            pendingVisibilityUpdates,
+            onFileVisibilityUpdate,
+            onGenericError,
+            handleNeedsRemoteSync,
+            handleMoreMenuCloseIfNeeded,
+            activeAnnotatedFile,
+        ]);
+
     const performKeyAction = useCallback<
         FileViewerPhotoSwipeDelegate["performKeyAction"]
     >(
@@ -659,6 +711,16 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 case "delete":
                     if (activeAnnotatedFile?.annotation.showDelete)
                         handleConfirmDelete?.();
+                    break;
+                case "toggle-archive":
+                    if (!isPendingToggleArchive) {
+                        // Provide extra visual feedback when the toggle archive
+                        // action is invoked via a keyboard shortcut since there
+                        // is no corresponding screen control visible (the more
+                        // menu might not be visible).
+                        onVisualFeedback();
+                        toggleArchived?.();
+                    }
                     break;
                 case "copy":
                     if (canCopyImage()) handleCopyImage();
@@ -672,11 +734,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             }
         },
         [
+            onVisualFeedback,
             handleConfirmDelete,
             handleCopyImage,
             handleToggleFullscreen,
             handleShortcuts,
             activeAnnotatedFile,
+            isPendingToggleArchive,
+            toggleArchived,
             canCopyImage,
         ],
     );
@@ -686,6 +751,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         delegateRef.current = {
             getFiles,
             isFavorite,
+            isFavoritePending,
             toggleFavorite,
             shouldIgnoreKeyboardEvent,
             performKeyAction,
@@ -697,24 +763,72 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         const delegate = delegateRef.current!;
         delegate.getFiles = getFiles;
         delegate.isFavorite = isFavorite;
+        delegate.isFavoritePending = isFavoritePending;
         delegate.toggleFavorite = toggleFavorite;
         delegate.shouldIgnoreKeyboardEvent = shouldIgnoreKeyboardEvent;
         delegate.performKeyAction = performKeyAction;
     }, [
         getFiles,
         isFavorite,
+        isFavoritePending,
         toggleFavorite,
         shouldIgnoreKeyboardEvent,
         performKeyAction,
     ]);
 
-    // Notify the listeners, if any, for updates to files or favorites.
+    // Update the active annotated file, if needed, on updates to files or
+    // favoriteFileIDs.
+    //
+    // If the active annotated file is no longer being shown, move to the next
+    // slide if possible, or close the viewer otherwise.
     useEffect(() => {
-        setOnNextFilesOrFavoritesUpdate((cbs) => {
-            cbs.forEach((cb) => cb(files));
-            return [];
+        setActiveAnnotatedFile((af) => {
+            // Do nothing if we're not showing a file (we might not be open).
+            if (!af) return af;
+
+            if (files.length) {
+                const updatedFile = files.find(({ id }) => id == af?.file.id);
+                if (updatedFile) {
+                    // Modify the active annotated file if we found a file with
+                    // the same ID in the (possibly) updated files array.
+                    //
+                    // Note the omission of the PhotoSwipe refresh: we don't
+                    // refresh the PhotoSwipe dialog itself since that would
+                    // cause the user to lose their pan / zoom etc.
+                    //
+                    // This is not correct in its full generality, but it works
+                    // fine in the specific cases we would need to handle:
+                    //
+                    // - In case of delete, we'll not get to this code branch.
+                    //
+                    // - In case of toggling archive, just updating the file
+                    //   attribute is enough, the UI state is derived from it;
+                    //   none of the other attributes of the annotated file
+                    //   currently depend on the archive status change.
+                    af = { ...af, file: updatedFile };
+                } else {
+                    // Refreshing the current slide after the current file has
+                    // gone will show the subsequent slide (since that would've
+                    // now moved down to the current index).
+                    //
+                    // However, we might've been the last slide, in which case
+                    // we need to go back one slide first. To determine this,
+                    // also pass the expected count of files to our PhotoSwipe
+                    // wrapper.
+                    psRef.current?.refreshCurrentSlideContent(files.length);
+                }
+            } else {
+                // If there are no more files left, close the viewer.
+                handleClose();
+            }
+
+            return af;
         });
-    }, [files, favoriteFileIDs]);
+    }, [handleClose, files]);
+
+    useEffect(() => {
+        psRef.current?.refreshCurrentSlideFavoriteButtonIfNeeded();
+    }, [favoriteFileIDs, pendingFavoriteUpdates]);
 
     useEffect(() => {
         if (open) {
@@ -781,12 +895,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 exif={activeFileExif}
                 allowEdits={!!activeAnnotatedFile.annotation.isOwnFile}
                 allowMap={haveUser}
-                showCollections={haveUser}
+                showCollections={haveUser && !isInHiddenSection}
+                fileCollectionIDs={fileNormalCollectionIDs}
+                collectionNameByID={collectionNameByID}
                 onNeedsRemoteSync={handleNeedsRemoteSync}
                 onUpdateCaption={handleUpdateCaption}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
-                {...{ fileCollectionIDs, allCollectionsNameByID }}
             />
             <MoreMenu
                 open={!!moreMenuAnchorEl}
@@ -805,6 +920,21 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     <MoreMenuItem onClick={handleConfirmDelete}>
                         <MoreMenuItemTitle>{t("delete")}</MoreMenuItemTitle>
                         <DeleteIcon />
+                    </MoreMenuItem>
+                )}
+                {isArchived !== undefined && (
+                    <MoreMenuItem
+                        onClick={toggleArchived}
+                        disabled={isPendingToggleArchive}
+                    >
+                        <MoreMenuItemTitle>
+                            {isArchived ? t("unarchive") : t("archive")}
+                        </MoreMenuItemTitle>
+                        {isArchived ? (
+                            <UnArchiveIcon />
+                        ) : (
+                            <ArchiveOutlinedIcon />
+                        )}
                     </MoreMenuItem>
                 )}
                 {canCopyImage() && (
@@ -1063,6 +1193,9 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
                         ut("Backspace"),
                     ])}
                 />
+            )}
+            {haveUser && (
+                <Shortcut action={t("toggle_archive")} shortcut={ut("X")} />
             )}
             {!disableDownload && (
                 <Shortcut action={t("copy_as_png")} shortcut={ut("^C / ⌘C")} />

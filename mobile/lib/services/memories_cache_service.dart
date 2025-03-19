@@ -20,6 +20,7 @@ import "package:shared_preferences/shared_preferences.dart";
 class MemoriesCacheService {
   static const _lastMemoriesCacheUpdateTimeKey = "lastMemoriesCacheUpdateTime";
   static const _showAnyMemoryKey = "memories.enabled";
+  static const _shouldUpdateCacheKey = "memories.shouldUpdateCache";
 
   /// Delay is for cache update to be done not during app init, during which a
   /// lot of other things are happening.
@@ -88,8 +89,9 @@ class MemoriesCacheService {
     if (!enableSmartMemories) {
       return;
     }
+    _shouldUpdate = _prefs.getBool(_shouldUpdateCacheKey) ?? _shouldUpdate;
     if (_timeToUpdateCache()) {
-      _shouldUpdate = true;
+      queueUpdateCache();
     }
   }
 
@@ -125,6 +127,12 @@ class MemoriesCacheService {
 
   void queueUpdateCache() {
     _shouldUpdate = true;
+    unawaited(_prefs.setBool(_shouldUpdateCacheKey, true));
+  }
+
+  void _cacheUpdated() {
+    _shouldUpdate = false;
+    unawaited(_prefs.setBool(_shouldUpdateCacheKey, false));
   }
 
   Future<void> updateCache({bool forced = false}) async {
@@ -135,7 +143,7 @@ class MemoriesCacheService {
     try {
       if ((!_shouldUpdate && !forced) || _isUpdateInProgress) {
         _logger.info(
-          "No update needed as shouldUpdate: $_shouldUpdate, forced: $forced and isUpdateInProgress $_isUpdateInProgress",
+          "No update needed (shouldUpdate: $_shouldUpdate, forced: $forced, isUpdateInProgress $_isUpdateInProgress)",
         );
         if (_isUpdateInProgress) {
           int waitingTime = 0;
@@ -146,7 +154,9 @@ class MemoriesCacheService {
         }
         return;
       }
-      _logger.info("updating memories cache");
+      _logger.info(
+        "Updating memories cache (shouldUpdate: $_shouldUpdate, forced: $forced, isUpdateInProgress $_isUpdateInProgress)",
+      );
       _isUpdateInProgress = true;
       final EnteWatch? w =
           kDebugMode ? EnteWatch("MemoriesCacheService") : null;
@@ -185,7 +195,7 @@ class MemoriesCacheService {
       w?.log("cacheWritten");
       await _resetLastMemoriesCacheUpdateTime();
       w?.logAndReset('done');
-      _shouldUpdate = false;
+      _cacheUpdated();
     } catch (e, s) {
       _logger.info("Error updating memories cache", e, s);
     } finally {

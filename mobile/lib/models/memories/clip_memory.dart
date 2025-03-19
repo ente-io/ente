@@ -1,9 +1,9 @@
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 
 enum ClipMemoryType {
   sunrise,
-  sunset,
   mountains,
   greenery,
   beach,
@@ -18,8 +18,6 @@ ClipMemoryType clipMemoryTypeFromString(String type) {
   switch (type) {
     case "sunrise":
       return ClipMemoryType.sunrise;
-    case "sunset":
-      return ClipMemoryType.sunset;
     case "mountains":
       return ClipMemoryType.mountains;
     case "greenery":
@@ -44,9 +42,7 @@ ClipMemoryType clipMemoryTypeFromString(String type) {
 String clipQuery(ClipMemoryType clipMemoryType) {
   switch (clipMemoryType) {
     case ClipMemoryType.sunrise:
-      return "Photo of an absolutely stunning sunrise";
-    case ClipMemoryType.sunset:
-      return "Photo of an absolutely stunning sunset";
+      return "Photo of an absolutely stunning sunrise or sunset";
     case ClipMemoryType.mountains:
       return "Photo of a beautiful mountain range";
     case ClipMemoryType.greenery:
@@ -66,28 +62,26 @@ String clipQuery(ClipMemoryType clipMemoryType) {
   }
 }
 
-String clipTitle(ClipMemoryType clipMemoryType) {
+String clipTitle(S s, ClipMemoryType clipMemoryType) {
   switch (clipMemoryType) {
     case ClipMemoryType.sunrise:
-      return "Sunrise";
-    case ClipMemoryType.sunset:
-      return "Sunset";
+      return s.sunrise;
     case ClipMemoryType.mountains:
-      return "Mountains";
+      return s.mountains;
     case ClipMemoryType.greenery:
-      return "Greenery";
+      return s.greenery;
     case ClipMemoryType.beach:
-      return "Beach";
+      return s.beach;
     case ClipMemoryType.city:
-      return "City";
+      return s.city;
     case ClipMemoryType.moon:
-      return "Moon";
+      return s.moon;
     case ClipMemoryType.onTheRoad:
-      return "On the Road";
+      return s.onTheRoad;
     case ClipMemoryType.food:
-      return "Food";
+      return s.food;
     case ClipMemoryType.pets:
-      return "Pets";
+      return s.pets;
   }
 }
 
@@ -96,7 +90,6 @@ class ClipMemory extends SmartMemory {
 
   ClipMemory(
     List<Memory> memories,
-    String title,
     int firstDateToShow,
     int lastDateToShow,
     this.clipMemoryType, {
@@ -105,27 +98,13 @@ class ClipMemory extends SmartMemory {
   }) : super(
           memories,
           MemoryType.clip,
-          title,
+          '',
           firstDateToShow,
           lastDateToShow,
         );
 
-  ClipMemory copyWith({
-    List<Memory>? memories,
-    String? title,
-    int? firstDateToShow,
-    int? lastDateToShow,
-    int? firstCreationTime,
-    int? lastCreationTime,
-  }) {
-    return ClipMemory(
-      memories ?? this.memories,
-      title ?? this.title,
-      firstDateToShow ?? this.firstDateToShow,
-      lastDateToShow ?? this.lastDateToShow,
-      clipMemoryType,
-      firstCreationTime: firstCreationTime ?? this.firstCreationTime,
-      lastCreationTime: lastCreationTime ?? this.lastCreationTime,
-    );
+  @override
+  String createTitle(S s, String languageCode) {
+    return clipTitle(s, clipMemoryType);
   }
 }

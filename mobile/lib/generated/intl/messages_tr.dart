@@ -1829,6 +1829,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Yeniden eskiye"),
         "sortOldestFirst": MessageLookupByLibrary.simpleMessage("Önce en eski"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Başarılı"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "startAccountRecoveryTitle":
             MessageLookupByLibrary.simpleMessage("Kurtarmayı başlat"),
         "startBackup":
@@ -1922,6 +1924,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m84,
         "thisIsYourVerificationId":
             MessageLookupByLibrary.simpleMessage("Doğrulama kimliğiniz"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Bu, sizi aşağıdaki cihazdan çıkış yapacak:"),

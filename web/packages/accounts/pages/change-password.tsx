@@ -6,7 +6,6 @@ import {
 import SetPasswordForm, {
     type SetPasswordFormProps,
 } from "@/accounts/components/SetPasswordForm";
-import { PAGES } from "@/accounts/constants/pages";
 import { appHomeRoute, stashRedirect } from "@/accounts/services/redirect";
 import {
     convertBase64ToBuffer,
@@ -27,8 +26,7 @@ import {
     generateLoginSubKey,
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import { SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
+import { getData, setData } from "@ente/shared/storage/localStorage";
 import { getActualKey } from "@ente/shared/user";
 import type { KEK, KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
@@ -42,10 +40,10 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const user = getData(LS_KEYS.USER);
+        const user = getData("user");
         setUser(user);
         if (!user?.token) {
-            stashRedirect(PAGES.CHANGE_PASSWORD);
+            stashRedirect("/change-password");
             void router.push("/");
         } else {
             setToken(user.token);
@@ -58,7 +56,7 @@ const Page: React.FC = () => {
     ) => {
         const cryptoWorker = await sharedCryptoWorker();
         const key = await getActualKey();
-        const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const keyAttributes: KeyAttributes = getData("keyAttributes");
         const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
         let kek: KEK;
         try {
@@ -113,7 +111,7 @@ const Page: React.FC = () => {
         if (user?.email) {
             const srpAttributes = await getSRPAttributes(user.email);
             if (srpAttributes) {
-                setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
+                setData("srpAttributes", srpAttributes);
             }
         }
 
@@ -124,13 +122,13 @@ const Page: React.FC = () => {
             key,
         );
 
-        await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+        await saveKeyInSessionStore("encryptionKey", key);
 
         redirectToAppHome();
     };
 
     const redirectToAppHome = () => {
-        setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
+        setData("showBackButton", { value: true });
         void router.push(appHomeRoute);
     };
 
@@ -143,7 +141,7 @@ const Page: React.FC = () => {
                 callback={onSubmit}
                 buttonText={t("change_password")}
             />
-            {(getData(LS_KEYS.SHOW_BACK_BUTTON)?.value ?? true) && (
+            {(getData("showBackButton")?.value ?? true) && (
                 <AccountsPageFooter>
                     <LinkButton onClick={router.back}>
                         {t("go_back")}

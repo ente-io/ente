@@ -337,6 +337,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Beklager, vi kunne ikke generere sikre krypteringsnøgler på denne enhed.\n\nForsøg venligst at oprette en konto fra en anden enhed."),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
         "storageInGB": m2,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Stærkt"),
@@ -351,6 +353,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Betingelser"),
         "theyAlsoGetXGb": m9,
         "thisDevice": MessageLookupByLibrary.simpleMessage("Denne enhed"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Dette vil logge dig ud af følgende enhed:"),

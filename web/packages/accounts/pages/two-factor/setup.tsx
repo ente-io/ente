@@ -8,7 +8,7 @@ import { LinkButton } from "@/base/components/LinkButton";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
-import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
+import { getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Paper, Stack, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -35,7 +35,7 @@ const Page: React.FC = () => {
             encryptedTwoFactorSecret,
             twoFactorSecretDecryptionNonce,
         });
-        await setLSUser({ ...getData(LS_KEYS.USER), isTwoFactorEnabled: true });
+        await setLSUser({ ...getData("user"), isTwoFactorEnabled: true });
         await router.push(appHomeRoute);
     };
 

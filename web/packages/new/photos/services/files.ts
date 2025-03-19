@@ -33,7 +33,7 @@ export const getAllLocalFiles = async () =>
  * "hidden" to get it to instead return hidden files that we know about locally.
  */
 export const getLocalFiles = async (type: "normal" | "hidden" = "normal") => {
-    const tableName = type === "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
+    const tableName = type == "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
     const files: EnteFile[] =
         (await localForage.getItem<EnteFile[]>(tableName)) ?? [];
     return files;
@@ -48,7 +48,7 @@ export const setLocalFiles = async (
     type: "normal" | "hidden",
     files: EnteFile[],
 ) => {
-    const tableName = type === "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
+    const tableName = type == "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
     await localForage.setItem(tableName, files);
 };
 
@@ -70,15 +70,15 @@ export const setLocalFiles = async (
 export const syncFiles = async (
     type: "normal" | "hidden",
     collections: Collection[],
-    onResetFiles: (fs: EnteFile[]) => void,
-    onFetchFiles: (fs: EnteFile[]) => void,
+    onResetFiles: ((files: EnteFile[]) => void) | undefined,
+    onFetchFiles: ((files: EnteFile[]) => void) | undefined,
 ) => {
     const localFiles = await getLocalFiles(type);
     let files = removeDeletedCollectionFiles(collections, localFiles);
     let didUpdateFiles = false;
     if (files.length !== localFiles.length) {
         await setLocalFiles(type, files);
-        onResetFiles(files);
+        onResetFiles?.(files);
         didUpdateFiles = true;
     }
     for (const collection of collections) {
@@ -103,7 +103,7 @@ export const syncFiles = async (
 export const getFiles = async (
     collection: Collection,
     sinceTime: number,
-    onFetchFiles: (fs: EnteFile[]) => void,
+    onFetchFiles: ((fs: EnteFile[]) => void) | undefined,
 ): Promise<EnteFile[]> => {
     try {
         let decryptedFiles: EnteFile[] = [];
@@ -132,7 +132,7 @@ export const getFiles = async (
             );
             decryptedFiles = [...decryptedFiles, ...newDecryptedFilesBatch];
 
-            onFetchFiles(decryptedFiles);
+            onFetchFiles?.(decryptedFiles);
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (resp.data.diff.length) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
@@ -340,14 +340,8 @@ export function getLatestVersionFiles(files: EnteFile[]) {
     const latestVersionFiles = new Map<string, EnteFile>();
     files.forEach((file) => {
         const uid = `${file.collectionID}-${file.id}`;
-        if (
-            !latestVersionFiles.has(uid) ||
-            // See: [Note: strict mode migration]
-            //
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            latestVersionFiles.get(uid).updationTime < file.updationTime
-        ) {
+        const existingFile = latestVersionFiles.get(uid);
+        if (!existingFile || existingFile.updationTime < file.updationTime) {
             latestVersionFiles.set(uid, file);
         }
     });

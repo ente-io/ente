@@ -296,10 +296,12 @@ class LocalSyncService {
         files,
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
-      _logger.info('Inserted ${files.length} files');
-      Bus.instance.fire(
-        LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
-      );
+      _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
+      if (allFiles.isNotEmpty) {
+        Bus.instance.fire(
+          LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
+        );
+      }
     }
     await _prefs.setInt(kDbUpdationTimeKey, toTime);
   }

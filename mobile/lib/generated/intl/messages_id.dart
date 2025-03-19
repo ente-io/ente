@@ -1326,6 +1326,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("Terbaru dulu"),
         "sortOldestFirst": MessageLookupByLibrary.simpleMessage("Terlama dulu"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Berhasil"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "startBackup":
             MessageLookupByLibrary.simpleMessage("Mulai pencadangan"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
@@ -1400,6 +1402,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m84,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "Ini adalah ID Verifikasi kamu"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Ini akan mengeluarkan akunmu dari perangkat berikut:"),

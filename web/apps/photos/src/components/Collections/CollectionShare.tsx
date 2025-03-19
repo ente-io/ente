@@ -25,7 +25,7 @@ import type {
     PublicURL,
     UpdatePublicURL,
 } from "@/media/collection";
-import { COLLECTION_ROLE, type CollectionUser } from "@/media/collection";
+import { type CollectionUser } from "@/media/collection";
 import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreated";
 import { avatarTextColor } from "@/new/photos/services/avatar";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
@@ -153,12 +153,12 @@ function SharingDetails({ collection, type }) {
             : collection.owner?.email;
 
     const collaborators = collection.sharees
-        ?.filter((sharee) => sharee.role === COLLECTION_ROLE.COLLABORATOR)
+        ?.filter((sharee) => sharee.role == "COLLABORATOR")
         .map((sharee) => sharee.email);
 
     const viewers =
         collection.sharees
-            ?.filter((sharee) => sharee.role === COLLECTION_ROLE.VIEWER)
+            ?.filter((sharee) => sharee.role == "VIEWER")
             .map((sharee) => sharee.email) || [];
 
     const isOwner = galleryContext.user?.id === collection.owner?.id;
@@ -345,17 +345,15 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
     const closeManageEmailShare = () => setManageEmailShareView(false);
     const openManageEmailShare = () => setManageEmailShareView(true);
 
-    const participantType = useRef<
-        COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
-    >(undefined);
+    const participantType = useRef<"COLLABORATOR" | "VIEWER">(undefined);
 
     const openAddCollab = () => {
-        participantType.current = COLLECTION_ROLE.COLLABORATOR;
+        participantType.current = "COLLABORATOR";
         openAddParticipant();
     };
 
     const openAddViewer = () => {
-        participantType.current = COLLECTION_ROLE.VIEWER;
+        participantType.current = "VIEWER";
         openAddParticipant();
     };
 
@@ -469,7 +467,7 @@ interface AddParticipantProps {
     open: boolean;
     onClose: () => void;
     onRootClose: () => void;
-    type: COLLECTION_ROLE.VIEWER | COLLECTION_ROLE.COLLABORATOR;
+    type: "VIEWER" | "COLLABORATOR";
 }
 
 const AddParticipant: React.FC<AddParticipantProps> = ({
@@ -541,7 +539,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     {...{ onClose }}
                     onRootClose={handleRootClose}
                     title={
-                        type === COLLECTION_ROLE.VIEWER
+                        type == "VIEWER"
                             ? t("add_viewers")
                             : t("add_collaborators")
                     }
@@ -554,7 +552,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     placeholder={t("enter_email")}
                     fieldType="email"
                     buttonText={
-                        type === COLLECTION_ROLE.VIEWER
+                        type == "VIEWER"
                             ? t("add_viewers")
                             : t("add_collaborators")
                     }
@@ -818,19 +816,17 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const closeAddParticipant = () => setAddParticipantView(false);
     const openAddParticipant = () => setAddParticipantView(true);
 
-    const participantType = useRef<
-        COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
-    >(null);
+    const participantType = useRef<"COLLABORATOR" | "VIEWER">(null);
 
     const selectedParticipant = useRef<CollectionUser>(null);
 
     const openAddCollab = () => {
-        participantType.current = COLLECTION_ROLE.COLLABORATOR;
+        participantType.current = "COLLABORATOR";
         openAddParticipant();
     };
 
     const openAddViewer = () => {
-        participantType.current = COLLECTION_ROLE.VIEWER;
+        participantType.current = "VIEWER";
         openAddParticipant();
     };
 
@@ -857,12 +853,12 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const isOwner = galleryContext.user.id === collection.owner?.id;
 
     const collaborators = collection.sharees
-        ?.filter((sharee) => sharee.role === COLLECTION_ROLE.COLLABORATOR)
+        ?.filter((sharee) => sharee.role == "COLLABORATOR")
         .map((sharee) => sharee.email);
 
     const viewers =
         collection.sharees
-            ?.filter((sharee) => sharee.role === COLLECTION_ROLE.VIEWER)
+            ?.filter((sharee) => sharee.role == "VIEWER")
             .map((sharee) => sharee.email) || [];
 
     const openManageParticipant = (email) => {

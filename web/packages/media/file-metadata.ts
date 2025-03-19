@@ -5,6 +5,8 @@ import { type Location } from "@/base/types";
 import {
     fileLogID,
     type EnteFile,
+    type FileMagicMetadata,
+    type FilePrivateMagicMetadata,
     type FilePublicMagicMetadata,
 } from "@/media/file";
 import { nullToUndefined } from "@/utils/transform";
@@ -152,6 +154,8 @@ export interface Metadata {
  * - Unlike {@link PublicMagicMetadata}, this is only available to the owner of
  *   the file.
  *
+ * [Note: Private magic metadata is called magic metadata on remote]
+ *
  * For historical reasons, the unqualified phrase "magic metadata" in various
  * APIs refers to the (this) private metadata, even though the mutable public
  * metadata is the much more frequently used of the two. See: [Note: Metadatum].
@@ -171,14 +175,23 @@ export interface PrivateMagicMetadata {
 /**
  * The visibility of an Ente file or collection.
  */
-export enum ItemVisibility {
+export const ItemVisibility = {
     /** The normal state - The item is visible. */
-    visible = 0,
+    visible: 0,
     /** The item has been archived. */
-    archived = 1,
+    archived: 1,
     /** The item has been hidden. */
-    hidden = 2,
-}
+    hidden: 2,
+} as const;
+
+/**
+ * The visibility of an Ente file or collection.
+ *
+ * This is the erasable type. See the {@link ItemVisibility} object for the
+ * possible values and their symbolic constants.
+ */
+export type ItemVisibility =
+    (typeof ItemVisibility)[keyof typeof ItemVisibility];
 
 /**
  * Mutable public metadata associated with an {@link EnteFile}.
@@ -293,6 +306,29 @@ const PublicMagicMetadata = z
         editedTime: z.number().optional(),
     })
     .passthrough();
+
+/**
+ * Return the private magic metadata for an {@link EnteFile}.
+ *
+ * We are not expected to be in a scenario where the file gets to the UI without
+ * having its private magic metadata decrypted, so this function is a sanity
+ * check and should be a no-op in usually. It'll throw if it finds its
+ * assumptions broken. Once the types have been refactored this entire
+ * check/cast shouldn't be needed, and this should become a trivial accessor.
+ */
+export const filePrivateMagicMetadata = (file: EnteFile) => {
+    // TODO: Audit the types.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!file.magicMetadata) return undefined;
+    if (typeof file.magicMetadata.data == "string") {
+        throw new Error(
+            `Private magic metadata for ${fileLogID(file)} had not been decrypted even when the file reached the UI layer`,
+        );
+    }
+    // This cast is unavoidable in the current setup. We need to refactor the
+    // types so that this cast in not needed.
+    return file.magicMetadata.data as PrivateMagicMetadata;
+};
 
 /**
  * Return the public magic metadata for an {@link EnteFile}.
@@ -411,15 +447,90 @@ export const fileCreationPhotoDate = (
     );
 
 /**
- * Update the public magic metadata associated with a file on remote.
+ * Update the private magic metadata associated with a file on remote.
  *
- * This function updates the public magic metadata on remote, and as a
- * convenience also modifies the provided {@link EnteFile} object in place with
- * the updated values, but it does not update the state of the local databases.
+ * @param file The {@link EnteFile} whose public magic metadata we want to
+ * update.
+ *
+ * @param metadataUpdates A subset of {@link PrivateMagicMetadata} containing
+ * the fields that we want to add or update.
+ *
+ * @returns An updated {@link PrivateMagicMetadata} object containing the
+ * (decrypted) metadata updates we just made. This is effectively what we would
+ * get if we to ask the remote for the latest file for this ID, except we don't
+ * do an actual sync and instead reconstruct it piecemeal.
+ *
+ * [Note: Interactive updates to file metadata]
+ *
+ * This function updates the magic metadata on remote, and returns a magic
+ * metadata object with the updated (and decrypted) values, but it does not
+ * update the state of the file objects in our databases.
  *
  * The caller needs to ensure that we subsequently sync with remote to fetch the
  * updates as part of the diff and update the {@link EnteFile} that is persisted
  * in our local db.
+ *
+ * This partial update approach is used because a full sync requires multiple
+ * API calls, which can cause a slow experience for interactive operations (e.g.
+ * archiving a file). So this function does not immediately perform the sync,
+ * but instead expects the caller to arrange for an eventual delayed sync in the
+ * background without waiting for it to complete.
+ *
+ * Returning a modified in-memory object is essential because in addition to the
+ * updated metadata itself, the metadatum (See: [Note: Metadatum]) contain a
+ * version field that is incremented for each change. So if we were not to
+ * update the version, and if the user were to perform another operation on that
+ * file before the asynchronous remote sync completes, the client will send a
+ * stale version of the metadata, and remote will reject the update.
+ *
+ * The overall sequence is thus:
+ *
+ * 1. This function modifies the remote metadata.
+ *
+ * 2. It returns a metadata object with the updates reflected in it.
+ *
+ * 3. The caller (eventually) triggers a remote sync in the background, but
+ *    meanwhile uses this updated metadata.
+ */
+export const updateRemotePrivateMagicMetadata = async (
+    file: EnteFile,
+    metadataUpdates: Partial<PrivateMagicMetadata>,
+): Promise<FilePrivateMagicMetadata> => {
+    const existingMetadata = filePrivateMagicMetadata(file);
+
+    const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const metadataVersion = file.magicMetadata?.version ?? 1;
+
+    const updateRequest = await updateMagicMetadataRequest(
+        file,
+        updatedMetadata,
+        metadataVersion,
+    );
+
+    const updatedEnvelope = updateRequest.metadataList[0]!.magicMetadata;
+
+    await putFilesPrivateMagicMetadata(updateRequest);
+
+    // See: [Note: Interactive updates to file metadata]
+
+    // Use the updated envelope we sent as a starting point for the metadata we
+    // will use for the updated file.
+    const updatedMagicMetadata = updatedEnvelope as FileMagicMetadata;
+    // The correct version will come in the updated EnteFile we get in the
+    // response of the /diff. Temporarily bump it to reflect our latest edit.
+    updatedMagicMetadata.version = metadataVersion + 1;
+    // Set the contents (data) to the updated metadata contents we just PUT.
+    updatedMagicMetadata.data = updatedMetadata;
+
+    return updatedMagicMetadata;
+};
+
+/**
+ * Update the public magic metadata associated with a file on remote.
+ *
+ * See: [Note: Interactive updates to file metadata]
  *
  * @param file The {@link EnteFile} whose public magic metadata we want to
  * update.
@@ -553,13 +664,14 @@ const updateMagicMetadataRequest = async (
 };
 
 /**
- * Update the magic metadata for a list of files.
+ * Update the (private) magic metadata for a list of files.
+ *
+ * See: [Note: Private magic metadata is called magic metadata on remote]
  *
  * @param request The list of file ids and the updated encrypted magic metadata
  * associated with each of them.
  */
-// TODO: Remove export once this is used.
-export const putFilesMagicMetadata = async (
+const putFilesPrivateMagicMetadata = async (
     request: UpdateMagicMetadataRequest,
 ) =>
     ensureOk(
@@ -586,6 +698,46 @@ const putFilesPublicMagicMetadata = async (
             body: JSON.stringify(request),
         }),
     );
+
+/**
+ * Return the {@link ItemVisibility} for the given {@link file}.
+ */
+export const fileVisibility = (file: EnteFile) =>
+    filePrivateMagicMetadata(file)?.visibility;
+
+/**
+ * Return `true` if the {@link ItemVisibility} of the given {@link file} is
+ * archived.
+ */
+export const isArchivedFile = (item: EnteFile) =>
+    fileVisibility(item) === ItemVisibility.archived;
+
+/**
+ * Return the GPS coordinates (if any) present in the given {@link EnteFile}.
+ */
+export const fileLocation = (file: EnteFile): Location | undefined => {
+    // TODO: EnteFile types. Need to verify that metadata itself, and
+    // metadata.lat/lng can not be null (I think they likely can, if so need to
+    // update the types). Need to supress the linter meanwhile.
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!file.metadata) return undefined;
+
+    const latitude = nullToUndefined(file.metadata.latitude);
+    const longitude = nullToUndefined(file.metadata.longitude);
+
+    if (latitude === undefined || longitude === undefined) return undefined;
+    if (Number.isNaN(latitude) || Number.isNaN(longitude)) return undefined;
+
+    return { latitude, longitude };
+};
+
+/**
+ * Return the caption, aka "description", (if any) attached to the given
+ * {@link EnteFile}.
+ */
+export const fileCaption = (file: EnteFile): string | undefined =>
+    filePublicMagicMetadata(file)?.caption;
 
 /**
  * Metadata about a file extracted from various sources (like Exif) when
@@ -835,30 +987,3 @@ export const createPhotoDate = (
             return new Date(dateLike / 1000);
     }
 };
-
-/**
- * Return the GPS coordinates (if any) present in the given {@link EnteFile}.
- */
-export const fileLocation = (file: EnteFile): Location | undefined => {
-    // TODO: EnteFile types. Need to verify that metadata itself, and
-    // metadata.lat/lng can not be null (I think they likely can, if so need to
-    // update the types). Need to supress the linter meanwhile.
-
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!file.metadata) return undefined;
-
-    const latitude = nullToUndefined(file.metadata.latitude);
-    const longitude = nullToUndefined(file.metadata.longitude);
-
-    if (latitude === undefined || longitude === undefined) return undefined;
-    if (Number.isNaN(latitude) || Number.isNaN(longitude)) return undefined;
-
-    return { latitude, longitude };
-};
-
-/**
- * Return the caption, aka "description", (if any) attached to the given
- * {@link EnteFile}.
- */
-export const fileCaption = (file: EnteFile): string | undefined =>
-    filePublicMagicMetadata(file)?.caption;

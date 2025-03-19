@@ -1700,6 +1700,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortOldestFirst":
             MessageLookupByLibrary.simpleMessage("Сначала старые"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Успешно"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "startBackup": MessageLookupByLibrary.simpleMessage(
             "Начать резервное копирование"),
         "status": MessageLookupByLibrary.simpleMessage("Статус"),
@@ -1784,6 +1786,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m84,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "Это ваш идентификатор подтверждения"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Вы выйдете из списка следующих устройств:"),

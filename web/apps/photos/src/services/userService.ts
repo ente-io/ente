@@ -4,7 +4,7 @@ import { apiURL } from "@/base/origins";
 import type { UserDetails } from "@/new/photos/services/user-details";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { HttpStatusCode } from "axios";
 
@@ -36,7 +36,7 @@ export const isTokenValid = async (token: string) => {
                 try {
                     await putAttributes(
                         token,
-                        getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES),
+                        getData("originalKeyAttributes"),
                     );
                 } catch (e) {
                     log.error("put attribute failed", e);

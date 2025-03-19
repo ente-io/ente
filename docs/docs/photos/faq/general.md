@@ -128,3 +128,15 @@ If you create a new album on your device after the initial backup, the photos in
 
 ### What happens if I reorganize my photos in the iOS Photos app after backing up?
 Reorganizing photos in the iOS Photos app (e.g., moving photos to new albums) won’t automatically reflect in Ente. You’ll need to manually add those photos to the corresponding albums in Ente to maintain consistency.
+
+### Can I search for photos using the descriptions I’ve added?
+Yes, descriptions are searchable, making it easier to find specific photos later.
+To do this, open the photo, tap the (i) button, and enter your description.
+
+### How does the deduplication feature work on the desktop app?
+If the app finds exact duplicates, it will show them in the deduplication. When you delete a duplicate, the app keeps one copy and creates a symlink for the other duplicate. This helps save storage space.
+
+### What happens if I lose access to my email address? Can I use my recovery key to bypass email verification?
+No, the recovery key does not bypass email verification. For security reasons, we do not disable or bypass email verification unless the account owner reaches out to us and successfully verifies their identity by providing details about their account. 
+
+If you lose access to your email, please contact our support team at support@ente.io
