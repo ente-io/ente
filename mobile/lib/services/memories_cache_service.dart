@@ -343,7 +343,7 @@ class MemoriesCacheService {
       return _cachedMemories!;
     }
     _cachedMemories = await _getMemoriesFromCache();
-    if (_cachedMemories == null || _timeToUpdateCache()) {
+    if (_cachedMemories == null || _cachedMemories!.isEmpty) {
       await updateCache(forced: true);
       _cachedMemories = await _getMemoriesFromCache();
     }
