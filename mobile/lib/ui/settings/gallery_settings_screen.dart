@@ -109,7 +109,7 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                               ),
                             );
                             unawaited(
-                              HomeWidgetService.instance.initHomeWidget(false),
+                              HomeWidgetService.instance.initHomeWidget(),
                             );
                           },
                         ),

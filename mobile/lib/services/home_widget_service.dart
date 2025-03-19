@@ -25,6 +25,7 @@ class HomeWidgetService {
       HomeWidgetService._privateConstructor();
 
   init(SharedPreferences prefs) {
+    hw.HomeWidget.setAppGroupId(iOSGroupID).ignore();
     _prefs = prefs;
   }
 
@@ -34,55 +35,53 @@ class HomeWidgetService {
 
   Future<void> checkPendingMemorySync() async {
     final memoryChanged = _prefs.getBool(memoryChangedKey);
-    if (memoryChanged == null || !memoryChanged) {
-      await initHomeWidget(false, memoryChanged: false);
-      return;
-    }
+    final total = await _getTotal();
 
-    await initHomeWidget(false, memoryChanged: true);
+    final changeMemories = memoryChanged == true || total == 0 || total == null;
+
+    await initHomeWidget(changeMemories: changeMemories);
   }
 
-  Future<void> initHomeWidget(
-    bool isBackground, {
+  Future<void> updateMemoryChanged(bool value) async {
+    await _prefs.setBool(memoryChangedKey, value);
+  }
+
+  Future<void> initHomeWidget({
     bool bypassCount = false,
-    bool memoryChanged = false,
+    bool changeMemories = false,
   }) async {
-    if (memoryChanged) {
-      await _prefs.setBool(memoryChangedKey, true);
-    }
-
-    if (isBackground) {
-      _logger.warning("app is running in background");
-      return;
-    }
-
-    await hw.HomeWidget.setAppGroupId(iOSGroupID);
-
     final isLoggedIn = Configuration.instance.isLoggedIn();
     if (!isLoggedIn) {
       _logger.warning("user not logged in");
       return;
     }
 
-    final memoriesEnabled = memoriesCacheService.showAnyMemories;
-    if (!memoriesEnabled) {
+    final areMemoriesShown = memoriesCacheService.showAnyMemories;
+    if (!areMemoriesShown) {
       _logger.warning("memories not enabled");
       await clearHomeWidget();
       return;
     }
 
-    if (memoryChanged) {
-      await _memoryChanged();
+    if (changeMemories) {
+      await _forceMemoryUpdate();
     } else {
+      final total = await _getTotal();
+      if (total == 0 || total == null) {
+        _logger.warning(
+          "sync stopped because no memory is cached yet, so nothing to sync",
+        );
+        return;
+      }
       await _memorySync(
         bypassCount: bypassCount,
       );
     }
   }
 
-  Future<void> _memoryChanged() async {
+  Future<void> _forceMemoryUpdate() async {
     await _lockAndLoadMemories();
-    await _prefs.setBool(memoryChangedKey, false);
+    await updateMemoryChanged(false);
   }
 
   Future<void> _memorySync({
