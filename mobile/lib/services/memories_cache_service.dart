@@ -337,12 +337,13 @@ class MemoriesCacheService {
     if (_cachedMemories != null) {
       return _cachedMemories!;
     }
+    try {
     if (!enableSmartMemories) {
       await _calculateRegularFillers();
       return _cachedMemories!;
     }
     _cachedMemories = await _getMemoriesFromCache();
-    if (_cachedMemories == null || _timeToUpdateCache()) {
+    if (_cachedMemories == null || _cachedMemories!.isEmpty) {
       await updateCache(forced: true);
       _cachedMemories = await _getMemoriesFromCache();
     }
@@ -352,6 +353,10 @@ class MemoriesCacheService {
       await _calculateRegularFillers();
     }
     return _cachedMemories!;
+    } catch (e, s) {
+      _logger.severe("Error in getMemories", e, s);
+      return [];
+    }
   }
 
   Future<void> goToMemoryFromGeneratedFileID(
