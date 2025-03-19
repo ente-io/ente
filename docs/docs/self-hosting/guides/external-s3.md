@@ -9,11 +9,11 @@ description:
 
 > [!NOTE]
 >
-> This is a community contributed guide, and some of these steps might be out of
-> sync with the upstream documentation. If something is not working correctly,
-> please also see the latest
-> [READMEs](https://github.com/ente-io/ente/blob/main/server/README.md) in the
-> repository and/or other guides in [self-hosting](/self-hosting/).
+> This is a community contributed guide, and some of these steps ~~might be~~
+> ARE out of sync with the upstream changes. This document is retained for
+> reference purposes, but if something is not working correctly, please see the
+> latest [READMEs](https://github.com/ente-io/ente/blob/main/server/README.md)
+> in the repository and/or other guides in [self-hosting](/self-hosting/).
 
 This guide is for self hosting the server and the web application of Ente Photos
 using docker compose and an external S3 bucket. So we assume that you already
