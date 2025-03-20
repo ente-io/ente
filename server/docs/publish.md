@@ -37,7 +37,7 @@ Once the workflow completes, the resultant image will be available at
 `ghcr.io/ente-io/server`. The image will be tagged by the commit SHA. The latest
 image will also be tagged, well, "latest".
 
-The workflow will also update the branch `server/ghcr` to point to the commit it
+The workflow will also update the branch `ghcr/server` to point to the commit it
 used to build the image. This branch will be overwritten on each publish; thus
-`server/ghcr` will always points to the code from which the most recent ghcr
+`ghcr/server` will always points to the code from which the most recent ghcr
 docker image for museum has been built.
