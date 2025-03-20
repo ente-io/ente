@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -100,26 +101,26 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "New Icon",
-        "Finally, a new app icon, that we think best represents our work. We've also added an icon-switcher so you can continue using the old icon.",
+        context.l10n.cLIcon,
+        context.l10n.cLIconDesc,
       ),
       ChangeLogEntry(
-        "Memories",
-        "Rediscover your special moments - spotlight on your favorite people, your trips and holidays, your best clicks, and much more. Turn on machine learning, tag yourself and name your friends for the best experience.",
+        context.l10n.cLMemories,
+        context.l10n.cLMemoriesDesc,
       ),
       ChangeLogEntry(
-        "Widgets",
-        "Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app.",
-      ),
-      ChangeLogEntry(
-        isFeature: false,
-        "Family Plan Limits",
-        "You can now set limits on how much storage your family members can use.",
+        context.l10n.cLWidgets,
+        context.l10n.cLWidgetsDesc,
       ),
       ChangeLogEntry(
         isFeature: false,
-        "Bulk Edit dates",
-        "You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.",
+        context.l10n.cLFamilyPlan,
+        context.l10n.cLFamilyPlanDesc,
+      ),
+      ChangeLogEntry(
+        isFeature: false,
+        context.l10n.cLBulkEdit,
+        context.l10n.cLBulkEditDesc,
       ),
     ]);
 

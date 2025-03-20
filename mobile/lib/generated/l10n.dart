@@ -11665,6 +11665,106 @@ class S {
       args: [],
     );
   }
+
+  /// `New Icon`
+  String get cLIcon {
+    return Intl.message(
+      'New Icon',
+      name: 'cLIcon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Finally, a new app icon, that we think best represents our work. We've also added an icon-switcher so you can continue using the old icon.`
+  String get cLIconDesc {
+    return Intl.message(
+      'Finally, a new app icon, that we think best represents our work. We\'ve also added an icon-switcher so you can continue using the old icon.',
+      name: 'cLIconDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Memories`
+  String get cLMemories {
+    return Intl.message(
+      'Memories',
+      name: 'cLMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rediscover your special moments - spotlight on your favorite people, your trips and holidays, your best clicks, and much more. Turn on machine learning, tag yourself and name your friends for the best experience.`
+  String get cLMemoriesDesc {
+    return Intl.message(
+      'Rediscover your special moments - spotlight on your favorite people, your trips and holidays, your best clicks, and much more. Turn on machine learning, tag yourself and name your friends for the best experience.',
+      name: 'cLMemoriesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Widgets`
+  String get cLWidgets {
+    return Intl.message(
+      'Widgets',
+      name: 'cLWidgets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app.`
+  String get cLWidgetsDesc {
+    return Intl.message(
+      'Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app.',
+      name: 'cLWidgetsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Family Plan Limits`
+  String get cLFamilyPlan {
+    return Intl.message(
+      'Family Plan Limits',
+      name: 'cLFamilyPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can now set limits on how much storage your family members can use.`
+  String get cLFamilyPlanDesc {
+    return Intl.message(
+      'You can now set limits on how much storage your family members can use.',
+      name: 'cLFamilyPlanDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bulk Edit dates`
+  String get cLBulkEdit {
+    return Intl.message(
+      'Bulk Edit dates',
+      name: 'cLBulkEdit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.`
+  String get cLBulkEditDesc {
+    return Intl.message(
+      'You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.',
+      name: 'cLBulkEditDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
