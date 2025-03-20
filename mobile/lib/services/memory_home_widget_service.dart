@@ -39,8 +39,7 @@ class MemoryHomeWidgetService {
       return;
     }
 
-    await _updateWidget(text: "[i] refreshing from same set");
-    _logger.info(">>> Refreshing memory from same set");
+    await _updateWidget(text: "refreshing from same set");
   }
 
   Future<void> initMemoryHW(bool? forceFetchNewMemories) async {
@@ -52,7 +51,7 @@ class MemoryHomeWidgetService {
     }
 
     await _memoryForceRefreshLock.synchronized(() async {
-      final isTotalEmpty = await checkIfTotalEmpty();
+      final isTotalEmpty = await _checkIfTotalEmpty();
       forceFetchNewMemories ??= await getForceFetchCondition(isTotalEmpty);
 
       _logger.warning(
@@ -68,16 +67,18 @@ class MemoryHomeWidgetService {
   }
 
   Future<void> clearWidget() async {
-    final total = await _getTotal();
-    if (total == 0 || total == null) return;
+    final isTotalEmpty = await _checkIfTotalEmpty();
+    if (isTotalEmpty) {
+      _logger.info(">>> Nothing to clear");
+      return;
+    }
 
-    _logger.info("Clearing SlideshowWidget");
+    _logger.info("Clearing MemoryHomeWidget");
 
     await _setTotal(null);
     _hasSyncedMemory = false;
 
-    await _updateWidget(text: "[i] SlideshowWidget cleared & updated");
-    _logger.info(">>> SlideshowWidget cleared");
+    await _updateWidget(text: "MemoryHomeWidget cleared & updated");
   }
 
   Future<void> updateMemoryChanged(bool value) async {
@@ -85,7 +86,7 @@ class MemoryHomeWidgetService {
     await _prefs.setBool(memoryChangedKey, value);
   }
 
-  Future<bool> checkIfTotalEmpty() async {
+  Future<bool> _checkIfTotalEmpty() async {
     final total = await _getTotal();
     return total == 0 || total == null;
   }
@@ -104,7 +105,7 @@ class MemoryHomeWidgetService {
   Future<void> checkPendingMemorySync() async {
     await Future.delayed(const Duration(seconds: 5), () {});
 
-    final isTotalEmpty = await checkIfTotalEmpty();
+    final isTotalEmpty = await _checkIfTotalEmpty();
     final forceFetchNewMemories = await getForceFetchCondition(isTotalEmpty);
 
     if (_hasSyncedMemory && !forceFetchNewMemories) {
@@ -138,7 +139,7 @@ class MemoryHomeWidgetService {
     );
     if (flagService.internalUser) {
       await Fluttertoast.showToast(
-        msg: text ?? "[i] SlideshowWidget updated",
+        msg: "[i] ${text ?? "MemoryHomeWidget updated"}",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -147,7 +148,7 @@ class MemoryHomeWidgetService {
         fontSize: 16.0,
       );
     }
-    _logger.info(">>> Home Widget updated");
+    _logger.info(">>> Home Widget updated, type: ${text ?? "normal"}");
   }
 
   Future<void> memoryChanged() async {
@@ -199,7 +200,7 @@ class MemoryHomeWidgetService {
           await _setTotal(index);
           if (index == 1) {
             await _updateWidget(
-              text: "[i] First memory fetched. updating widget",
+              text: "First memory fetched. updating widget",
             );
           }
           index++;
@@ -211,8 +212,7 @@ class MemoryHomeWidgetService {
       return;
     }
 
-    await _updateWidget();
-    _logger.info(">>> Switching to next memory set");
+    await _updateWidget(text: ">>> Switching to next memory set");
   }
 
   Future<void> onLaunchFromWidget(int generatedId, BuildContext context) async {

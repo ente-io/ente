@@ -23,8 +23,12 @@ class HomeWidgetService {
       HomeWidgetService._privateConstructor();
 
   init(SharedPreferences prefs) {
-    hw.HomeWidget.setAppGroupId(iOSGroupID).ignore();
+    setAppGroupID(iOSGroupID);
     MemoryHomeWidgetService.instance.init(prefs);
+  }
+
+  void setAppGroupID(String id) {
+    hw.HomeWidget.setAppGroupId(id).ignore();
   }
 
   Future<void> initHomeWidget() async {
@@ -129,7 +133,10 @@ class HomeWidgetService {
     return true;
   }
 
-  Future<void> clearWidget() async {
+  Future<void> clearWidget(bool autoLogout) async {
+    if (autoLogout) {
+      setAppGroupID(iOSGroupID);
+    }
     await MemoryHomeWidgetService.instance.clearWidget();
   }
 
@@ -140,7 +147,6 @@ class HomeWidgetService {
     }
 
     final generatedId = int.tryParse(uri.queryParameters["generatedId"] ?? "");
-    _logger.info("onLaunchFromWidget: $uri, $generatedId");
 
     if (generatedId == null) {
       _logger.warning("onLaunchFromWidget: generatedId is null");
@@ -148,6 +154,7 @@ class HomeWidgetService {
     }
 
     if (uri.scheme == "memorywidget") {
+      _logger.info("onLaunchFromWidget: redirecting to memory widget");
       await MemoryHomeWidgetService.instance.onLaunchFromWidget(
         generatedId,
         context,
