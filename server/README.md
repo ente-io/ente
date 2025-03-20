@@ -46,7 +46,6 @@ This time you'll see the updated message.
 For more details about how to get museum up and running, see
 [RUNNING.md](RUNNING.md).
 
-
 ## Architecture
 
 With the mechanics of running museum out of the way, let us revisit the diagram

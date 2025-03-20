@@ -68,6 +68,11 @@ The apps take use various `packages/` to share code amongst themselves.
 You might also find this [overview of dependencies](docs/dependencies.md)
 useful.
 
+## Docker images
+
+A Docker image containing all the web apps are available from
+`ghcr.io/ente-io/web`. See [docs/docker.md](docs/docker.md) for more details.
+
 ## Attributions
 
 City coordinates from [Simple Maps](https://simplemaps.com/data/world-cities)

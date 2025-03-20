@@ -98,7 +98,7 @@ call out:
    doing and have a [backup
    strategy](https://help.ente.io/self-hosting/faq/backup) worked out.
 
-### Next steps
+## Next steps
 
 * Get a login [verification
   code](https://help.ente.io/self-hosting/faq/otp#verification-code).
