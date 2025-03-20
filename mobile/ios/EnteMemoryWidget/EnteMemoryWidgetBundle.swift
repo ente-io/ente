@@ -1,17 +1,17 @@
 //
-//  SlideshowWidgetBundle.swift
-//  SlideshowWidget
+//  EnteMemoryWidgetBundle.swift
+//  EnteMemoryWidget
 //
 //  Created by Prateek Sunal on 3/7/25.
 //  Copyright © 2025 The Chromium Authors. All rights reserved.
 //
 
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 @main
-struct SlideshowWidgetBundle: WidgetBundle {
+struct EnteMemoryWidgetBundle: WidgetBundle {
     var body: some Widget {
-        SlideshowWidget()
+        EnteMemoryWidget()
     }
 }
