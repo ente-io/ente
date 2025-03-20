@@ -346,10 +346,8 @@ class MemoriesCacheService {
       _cachedMemories = await _getMemoriesFromCache();
       if (_cachedMemories == null || _cachedMemories!.isEmpty) {
         await updateCache(forced: true);
-        _cachedMemories = await _getMemoriesFromCache();
       }
-      if (_cachedMemories == null ||
-          (_cachedMemories != null && _cachedMemories!.isEmpty)) {
+      if (_cachedMemories == null || _cachedMemories!.isEmpty) {
         _logger
             .severe("No memories found in (computed) cache, getting fillers");
         await _calculateRegularFillers();
