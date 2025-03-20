@@ -1514,12 +1514,6 @@
   "@selectAllShort": {
     "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
   },
-  "changeLogMagicSearchImprovementTitle": "Magic Search Improvement",
-  "changeLogMagicSearchImprovementContent": "We have improved magic search to become much faster, so you don\\'t have to wait to find what you\\'re looking for.",
-  "changeLogBackupStatusTitle": "Backup Status",
-  "changeLogBackupStatusContent": "We\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.",
-  "changeLogDiscoverTitle": "Discover",
-  "changeLogDiscoverContent": "Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning.",
   "selectCoverPhoto": "Select cover photo",
   "newLocation": "New location",
   "faceNotClusteredYet": "Face not clustered yet, please come back later",
@@ -1731,5 +1725,17 @@
   "moon": "In the moonlight",
   "onTheRoad": "On the road again",
   "food": "Culinary delight",
-  "pets": "Furry companions"
+  "pets": "Furry companions",
+
+  "cLIcon": "New Icon",
+  "cLIconDesc": "Finally, a new app icon, that we think best represents our work. We've also added an icon-switcher so you can continue using the old icon.",
+  "cLMemories": "Memories",
+  "cLMemoriesDesc": "Rediscover your special moments - spotlight on your favorite people, your trips and holidays, your best clicks, and much more. Turn on machine learning, tag yourself and name your friends for the best experience.",
+  "cLWidgets": "Widgets",
+  "cLWidgetsDesc": "Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app.",
+  "cLFamilyPlan": "Family Plan Limits",
+  "cLFamilyPlanDesc": "You can now set limits on how much storage your family members can use.",
+
+  "cLBulkEdit": "Bulk Edit dates",
+  "cLBulkEditDesc": "You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported."
 }

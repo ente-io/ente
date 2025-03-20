@@ -525,20 +525,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Schimbați e-mailul"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Schimbați locația articolelor selectate?"),
-        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
-            "Am adăugat un jurnal al tuturor fișierelor care au fost încărcate pe Ente, inclusiv eșecurile și coada de așteptare."),
-        "changeLogBackupStatusTitle":
-            MessageLookupByLibrary.simpleMessage("Starea copiei de rezervă"),
-        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
-            "Căutați fotografii ale cărților de identitate, notițe sau chiar meme-uri? Mergeți la fila de căutare și dați o privire la Descoperire. Bazat pe căutarea noastră semantică, este un loc în care puteți găsi fotografii care ar putea fi importante pentru dvs.\\n\\nEste disponibilă numai dacă ați activat învățarea automată."),
-        "changeLogDiscoverTitle":
-            MessageLookupByLibrary.simpleMessage("Descoperire"),
-        "changeLogMagicSearchImprovementContent":
-            MessageLookupByLibrary.simpleMessage(
-                "Am îmbunătățit căutarea magică pentru a deveni mult mai rapidă, astfel încât să nu trebuiască să așteptați pentru a găsi ceea ce căutați."),
-        "changeLogMagicSearchImprovementTitle":
-            MessageLookupByLibrary.simpleMessage(
-                "Îmbunătățire a căutării magice"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Schimbare parolă"),
         "changePasswordTitle":

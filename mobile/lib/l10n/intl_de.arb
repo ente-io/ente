@@ -1690,5 +1690,15 @@
   "notThisPerson": "Not this person?",
   "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
   "thisWeekThroughTheYears": "This week through the years",
-  "spotlightOnYourself": "Spotlight on yourself"
+  "spotlightOnYourself": "Spotlight on yourself",
+  "cLIcon": "Neues Symbol",
+  "cLIconDesc": "Endlich ein neues App-Symbol, das unserer Meinung nach unsere Arbeit am besten repräsentiert. Wir haben auch einen Symbol-Wechsler hinzugefügt, damit Sie das alte Symbol weiterhin verwenden können.",
+  "cLMemories": "Erinnerungen",
+  "cLMemoriesDesc": "Entdecken Sie Ihre besonderen Momente neu – im Rampenlicht stehen Ihre Lieblingsmenschen, Ihre Reisen und Urlaube, Ihre besten Aufnahmen und vieles mehr. Aktivieren Sie maschinelles Lernen, markieren Sie sich selbst und benennen Sie Ihre Freunde für das beste Erlebnis.",
+  "cLWidgets": "Widgets",
+  "cLWidgetsDesc": "Homescreen-Widgets, die mit Erinnerungen integriert sind, sind jetzt verfügbar. Sie zeigen Ihre besonderen Momente, ohne die App zu öffnen.",
+  "cLFamilyPlan": "Familienplan-Limits",
+  "cLFamilyPlanDesc": "Sie können jetzt festlegen, wie viel Speicherplatz Ihre Familienmitglieder verwenden dürfen.",
+  "cLBulkEdit": "Massenbearbeitung von Datumsangaben",
+  "cLBulkEditDesc": "Sie können jetzt mehrere Fotos auswählen und das Datum/die Uhrzeit für alle mit einer schnellen Aktion bearbeiten. Das Verschieben von Datumsangaben wird ebenfalls unterstützt."
 }
