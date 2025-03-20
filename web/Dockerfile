@@ -1,3 +1,5 @@
+# Docs - https://github.com/ente-io/ente/blob/main/web/docs/docker.md
+
 FROM node:20-alpine AS builder
 
 WORKDIR /build

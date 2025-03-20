@@ -1,9 +1,7 @@
 A variant docker compose file that does not require cloning the repository, and
 uses pre-built images instead.
 
-# WARNING: WIP - THIS DOESN'T WORK AS WRITTEN YET
-
-### Quickstart
+## Quickstart
 
 Copy paste the following command into your terminal
 
@@ -22,11 +20,11 @@ command above does for you):
    mkdir my-ente && cd my-ente
    ```
 
-   > [!TIP]
-   >
-   > "Ente" (pronounced _en-tay_) means "mine" in Malayalam, our Founder's mother
-   > tongue (the product literally thus means "My Photos"), so a directory named
-   > `my-ente` would translate to "my-my".
+> [!TIP]
+>
+> "Ente" (pronounced _en-tay_) means "mine" in Malayalam, our Founder's mother
+> tongue (the product literally thus means "My Photos"), so our example
+> directory name `my-ente` would mean to "my-my".
 
 2. Download the sample quickstart Docker compose file.
 
@@ -46,8 +44,8 @@ command above does for you):
    docker compose up
    ```
 
-That's it. You can now open **http://localhost:3000** in your browser to use
-Ente's web app.
+That's it. You can now open http://localhost:3000 in your browser to use Ente's
+web app.
 
 ## Details
 
@@ -91,11 +89,16 @@ you're intending to use your self hosted instance for serious purposes, we
 strongly recommend understanding all the moving parts. Some particular things to
 call out:
 
-1. Change all the hardcoded credentials.
-2. Consider if you want an external DB or an external S3 instead of the samples.
-3. Keep a plaintext backup of your photos until you are proficient.
+1. Remember to change all hardcoded credentials.
 
-### Next steps
+2. Consider if you should use an external DB or an external S3 instead of the
+   provided quickstart sample.
+
+3. Keep a plaintext backup of your photos until you are sure of what you are
+   doing and have a [backup
+   strategy](https://help.ente.io/self-hosting/faq/backup) worked out.
+
+## Next steps
 
 * Get a login [verification
   code](https://help.ente.io/self-hosting/faq/otp#verification-code).
