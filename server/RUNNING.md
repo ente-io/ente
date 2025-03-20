@@ -196,6 +196,15 @@ run Ente's server, you can just pull and run the image from
 docker pull ghcr.io/ente-io/server
 ```
 
+## web
+
+Similarly, there is a pre-built Docker image containing all the web apps which
+you can just pull and run the from **`ghcr.io/ente-io/web`**.
+
+```sh
+docker pull ghcr.io/ente-io/web
+```
+
 ## Configuration
 
 Now that you have museum running (either inside Docker or standalone), we can
