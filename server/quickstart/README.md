@@ -1,5 +1,5 @@
-A variant docker compose file that does not require cloning the repository,
-using pre-built images instead.
+A variant docker compose file that does not require cloning the repository, and
+uses pre-built images instead.
 
 # WARNING: WIP - THIS DOESN'T WORK AS WRITTEN YET
 
@@ -56,7 +56,7 @@ The quickstart steps above created a Docker compose cluster containing:
 - Ente's own server, museum
 - Ente's web app
 - Postgres (DB)
-- minio (the S3 storage)
+- Minio (S3 storage)
 
 For each of these, it'll use the latest published Docker image.
 
@@ -97,3 +97,11 @@ call out:
 
 ### Next steps
 
+* Get a login [verification
+  code](https://help.ente.io/self-hosting/faq/otp#verification-code).
+
+* Connect to your self hosted instance [from your mobile
+  app](https://help.ente.io/self-hosting/guides/custom-server/).
+
+* Modify your setup to allow [uploading from your mobile
+  app](https://help.ente.io/self-hosting/guides/configuring-s3).

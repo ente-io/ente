@@ -10,18 +10,23 @@ static go binary.
 
 This document describes these approaches, and also outlines configuration.
 
--   [Run using Docker using a pre-built Docker image](docs/docker.md)
--   [Run using Docker but build an image from source](#build-and-run-using-docker)
--   [Running without Docker](#running-without-docker)
+-   **[Run using pre-built Docker images](quickstart/README.md)**
+-   [Run using Docker, building image from source](#build-and-run-using-docker)
+-   [Run without Docker](#running-without-docker)
+-   [External DB or S3](#pre-built-images)
 -   [Configuration](#configuration)
 
 If your mobile app is able to connect to your self hosted instance but is not
 able to view or upload images, see
 [help.ente.io/self-hosting/guides/configuring-s3](https://help.ente.io/self-hosting/guides/configuring-s3).
 
+## Run using pre-built Docker images
+
+See [quickstart/README.md](quickstart/README.md).
+
 ## Build and run using Docker
 
-Start the cluster
+Start the cluster (in the `ente/server` directory)
 
     docker compose up --build
 
@@ -178,6 +183,17 @@ For running the tests, you can use the following command:
 ```sh
 ENV="test" go test -v ./pkg/...
 go clean -testcache  && ENV="test" go test -v ./pkg/...
+```
+## Pre-built images
+
+## server
+
+If you have setup the database and object storage externally and only want to
+run Ente's server, you can just pull and run the image from
+**`ghcr.io/ente-io/server`**.
+
+```sh
+docker pull ghcr.io/ente-io/server
 ```
 
 ## Configuration
