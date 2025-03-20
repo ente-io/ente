@@ -15,17 +15,20 @@ then
    exit 1
 fi
 
+printf "\n - \033[1mH E L L O\033[0m - \033[1;32mE N T E\033[0m -\n\n"
+
 mkdir my-ente && cd my-ente
-printf "E Create directory my-ente\n"
+printf " \033[1;32mE\033[0m   Created directory my-ente\n"
 
 curl -fsSOL https://raw.githubusercontent.com/ente-io/ente/HEAD/server/quickstart/compose.yaml
-printf "N Create compose.yaml\n"
+printf " \033[1;32mN\033[0m   Fetched compose.yaml\n"
 
 touch museum.yaml
-printf "T Create museum.yaml\n"
+printf " \033[1;32mT\033[0m   Created museum.yaml\n"
 
-sleep 5 && open "http://localhost:3000" &
-printf "E Schedule opening web app (http://localhost:3000) in 5 seconds\n"
+printf " \033[1;32mE\033[0m   Starting docker compose\n"
+printf "\nAfter the cluster has started, open web app at http://localhost:3000\n"
+printf "For more details, see https://github.com/ente-io/ente/blob/main/server/quickstart/README.md\n\n"
 
 sleep 1
 
