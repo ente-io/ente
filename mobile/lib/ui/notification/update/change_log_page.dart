@@ -100,18 +100,26 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "Deep Links",
-        "We have made public links even more powerful. Open links for Ente album directly in the app.\n\n"
-            "Join the album as a viewer or collaborator, and experience it like any other shared album.",
+        "New Icon",
+        "Finally, a new app icon, that we think best represents our work. We've also added an icon-switcher so you can continue using the old icon.",
       ),
       ChangeLogEntry(
-          "Search Shared Files",
-          "Indexes will now be shared along with shared memories.\n\n"
-              "Which means you can now search for them using semantic search and label the people in shared photos. "),
+        "Memories",
+        "Rediscover your special moments - spotlight on your favorite people, your trips and holidays, your best clicks, and much more. Turn on machine learning, tag yourself and name your friends for the best experience.",
+      ),
       ChangeLogEntry(
-        "Link Contact with people",
-        "You dont have to deal with email addresses while sharing anymore.\n\n"
-            "Connect a contact with a face and name. Go to the contact or people section to get started.",
+        "Widgets",
+        "Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app.",
+      ),
+      ChangeLogEntry(
+        isFeature: false,
+        "Family Plan Limits",
+        "You can now set limits on how much storage your family members can use.",
+      ),
+      ChangeLogEntry(
+        isFeature: false,
+        "Bulk Edit dates",
+        "You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.",
       ),
     ]);
 
