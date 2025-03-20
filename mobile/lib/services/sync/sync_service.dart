@@ -192,8 +192,12 @@ class SyncService {
     );
   }
 
-  Future<void> _doSync() async {
+  Future<void> _doSync({bool localSyncOnly = true}) async {
     final TimeLogger tl = TimeLogger(context: "syncDB");
+    if (localSyncOnly) {
+      await LocalImportService.instance.incrementalSync();
+      await LocalImportService.instance.fullSync();
+    }
     await _localSyncService.sync();
     _logger.info("old localSync completed $tl");
     await LocalImportService.instance.incrementalSync();
@@ -206,7 +210,7 @@ class SyncService {
       await LocalImportService.instance.fullSync();
       _logger.info("fullSync completed $tl");
       if (shouldSync) {
-        await _remoteSyncService.sync();
+        // await _remoteSyncService.sync();
       }
     }
   }
