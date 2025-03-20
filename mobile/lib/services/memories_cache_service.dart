@@ -334,8 +334,10 @@ class MemoriesCacheService {
   }
 
   Future<void> _calculateRegularFillers() async {
-    _cachedMemories = await smartMemoriesService.calcFillerResults();
-    Bus.instance.fire(MemoriesChangedEvent());
+    if (_cachedMemories == null) {
+      _cachedMemories = await smartMemoriesService.calcFillerResults();
+      Bus.instance.fire(MemoriesChangedEvent());
+    }
     return;
   }
 
