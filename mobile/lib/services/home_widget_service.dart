@@ -24,7 +24,7 @@ class HomeWidgetService {
 
   init(SharedPreferences prefs) {
     hw.HomeWidget.setAppGroupId(iOSGroupID).ignore();
-    MemoryHomeWidgetService.instance.init(prefs).ignore();
+    MemoryHomeWidgetService.instance.init(prefs);
   }
 
   Future<void> initHomeWidget() async {
