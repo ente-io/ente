@@ -18,7 +18,6 @@ services:
       - source: credentials_yaml
         target: /credentials.yaml
     volumes:
-      - custom-logs:/var/logs
       - ./museum.yaml:/museum.yaml:ro
       - ./data:/data:ro
     networks:
@@ -112,7 +111,6 @@ configs:
               bucket: scw-eu-fr-v3
 
 volumes:
-  custom-logs:
   postgres-data:
   minio-data:
 
