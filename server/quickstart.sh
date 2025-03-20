@@ -27,7 +27,7 @@ touch museum.yaml
 printf " \033[1;32mT\033[0m   Created museum.yaml\n"
 
 printf " \033[1;32mE\033[0m   Starting docker compose\n"
-printf "\nAfter the cluster has started, open web app at http://localhost:3000\n"
+printf "\nAfter the cluster has started, open web app at \033[1mhttp://localhost:3000\033[0m\n"
 printf "For more details, see https://github.com/ente-io/ente/blob/main/server/quickstart/README.md\n\n"
 
 sleep 1

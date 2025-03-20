@@ -43,6 +43,8 @@ class MemoriesResult {
   final List<BaseLocation> baseLocations;
 
   MemoriesResult(this.memories, this.baseLocations);
+
+  get isEmpty => memories.isEmpty;
 }
 
 class SmartMemoriesService {
