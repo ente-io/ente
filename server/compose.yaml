@@ -40,16 +40,7 @@ services:
       POSTGRES_DB: ente_db
     # Wait for postgres to accept connections before starting museum.
     healthcheck:
-      test:
-        [
-          "CMD",
-          "pg_isready",
-          "-q",
-          "-d",
-          "ente_db",
-          "-U",
-          "pguser"
-        ]
+      test: pg_isready -q -d ente_db -U pguser
       start_period: 40s
       start_interval: 1s
     volumes:
