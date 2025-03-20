@@ -10409,66 +10409,6 @@ class S {
     );
   }
 
-  /// `Magic Search Improvement`
-  String get changeLogMagicSearchImprovementTitle {
-    return Intl.message(
-      'Magic Search Improvement',
-      name: 'changeLogMagicSearchImprovementTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `We have improved magic search to become much faster, so you don\'t have to wait to find what you\'re looking for.`
-  String get changeLogMagicSearchImprovementContent {
-    return Intl.message(
-      'We have improved magic search to become much faster, so you don\\\'t have to wait to find what you\\\'re looking for.',
-      name: 'changeLogMagicSearchImprovementContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Backup Status`
-  String get changeLogBackupStatusTitle {
-    return Intl.message(
-      'Backup Status',
-      name: 'changeLogBackupStatusTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `We\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.`
-  String get changeLogBackupStatusContent {
-    return Intl.message(
-      'We\\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.',
-      name: 'changeLogBackupStatusContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Discover`
-  String get changeLogDiscoverTitle {
-    return Intl.message(
-      'Discover',
-      name: 'changeLogDiscoverTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\'s a place to find photos that might be important for you.\n\nOnly available if you have enabled Machine Learning.`
-  String get changeLogDiscoverContent {
-    return Intl.message(
-      'Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning.',
-      name: 'changeLogDiscoverContent',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Select cover photo`
   String get selectCoverPhoto {
     return Intl.message(
@@ -11721,6 +11661,106 @@ class S {
     return Intl.message(
       'Furry companions',
       name: 'pets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New Icon`
+  String get cLIcon {
+    return Intl.message(
+      'New Icon',
+      name: 'cLIcon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Finally, a new app icon, that we think best represents our work. We've also added an icon-switcher so you can continue using the old icon.`
+  String get cLIconDesc {
+    return Intl.message(
+      'Finally, a new app icon, that we think best represents our work. We\'ve also added an icon-switcher so you can continue using the old icon.',
+      name: 'cLIconDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Memories`
+  String get cLMemories {
+    return Intl.message(
+      'Memories',
+      name: 'cLMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rediscover your special moments - spotlight on your favorite people, your trips and holidays, your best clicks, and much more. Turn on machine learning, tag yourself and name your friends for the best experience.`
+  String get cLMemoriesDesc {
+    return Intl.message(
+      'Rediscover your special moments - spotlight on your favorite people, your trips and holidays, your best clicks, and much more. Turn on machine learning, tag yourself and name your friends for the best experience.',
+      name: 'cLMemoriesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Widgets`
+  String get cLWidgets {
+    return Intl.message(
+      'Widgets',
+      name: 'cLWidgets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app.`
+  String get cLWidgetsDesc {
+    return Intl.message(
+      'Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app.',
+      name: 'cLWidgetsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Family Plan Limits`
+  String get cLFamilyPlan {
+    return Intl.message(
+      'Family Plan Limits',
+      name: 'cLFamilyPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can now set limits on how much storage your family members can use.`
+  String get cLFamilyPlanDesc {
+    return Intl.message(
+      'You can now set limits on how much storage your family members can use.',
+      name: 'cLFamilyPlanDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bulk Edit dates`
+  String get cLBulkEdit {
+    return Intl.message(
+      'Bulk Edit dates',
+      name: 'cLBulkEdit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.`
+  String get cLBulkEditDesc {
+    return Intl.message(
+      'You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.',
+      name: 'cLBulkEditDesc',
       desc: '',
       args: [],
     );
