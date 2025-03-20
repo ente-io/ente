@@ -20,8 +20,6 @@ services:
     volumes:
       - ./museum.yaml:/museum.yaml:ro
       - ./data:/data:ro
-    networks:
-      - internal
 
   # Resolve "localhost:3200" in the museum container to the minio container.
   socat:
@@ -44,8 +42,6 @@ services:
       start_interval: 1s
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    networks:
-      - internal
 
   minio:
     image: minio/minio
@@ -58,8 +54,6 @@ services:
     command: server /data --address ":3200" --console-address ":3201"
     volumes:
       - minio-data:/data
-    networks:
-      - internal
     post_start:
       - command: |
           sh -c '
@@ -113,6 +107,3 @@ configs:
 volumes:
   postgres-data:
   minio-data:
-
-networks:
-  internal:
