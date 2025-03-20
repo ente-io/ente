@@ -11,6 +11,7 @@ import "package:photos/core/constants.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/smart_memories_service.dart";
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -35,6 +36,13 @@ class HomeWidgetService {
     final isLoggedIn = Configuration.instance.isLoggedIn();
     if (!isLoggedIn) {
       _logger.warning("user not logged in");
+      return;
+    }
+
+    final hasCompletedFirstImport =
+        LocalSyncService.instance.hasCompletedFirstImport();
+    if (!hasCompletedFirstImport) {
+      _logger.warning("first import not completed");
       return;
     }
 

@@ -183,6 +183,9 @@ class MemoryHomeWidgetService {
       return;
     }
 
+    final total = await _getTotal();
+    _logger.info(">>> Total memories before: $total");
+
     int index = 0;
 
     for (final i in files.entries) {
@@ -212,7 +215,9 @@ class MemoryHomeWidgetService {
       return;
     }
 
-    await _updateWidget(text: ">>> Switching to next memory set");
+    await _updateWidget(
+      text: ">>> Switching to next memory set, total: $index",
+    );
   }
 
   Future<void> onLaunchFromWidget(int generatedId, BuildContext context) async {
