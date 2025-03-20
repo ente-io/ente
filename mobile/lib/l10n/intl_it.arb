@@ -1617,5 +1617,19 @@
   "notThisPerson": "Not this person?",
   "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
   "thisWeekThroughTheYears": "This week through the years",
-  "spotlightOnYourself": "Spotlight on yourself"
+  "spotlightOnYourself": "Spotlight on yourself",
+  "cLIcon": "Nuova icona",
+  "cLIconDesc": "Finalmente, una nuova icona per l'app, che riteniamo rappresenti al meglio il nostro lavoro. Abbiamo anche aggiunto un selettore di icone in modo che tu possa continuare a usare la vecchia icona.",
+
+  "cLMemories": "Ricordi",
+  "cLMemoriesDesc": "Riscopri i tuoi momenti speciali: i riflettori sono puntati sulle tue persone preferite, sui tuoi viaggi e vacanze, sui tuoi scatti migliori e molto altro. Attiva l'apprendimento automatico, taggati e dai un nome ai tuoi amici per un'esperienza migliore.",
+
+  "cLWidgets": "Widget",
+  "cLWidgetsDesc": "Sono ora disponibili widget per la schermata principale integrati con i ricordi. Mostreranno i tuoi momenti speciali senza aprire l'app.",
+
+  "cLFamilyPlan": "Limiti del piano famiglia",
+  "cLFamilyPlanDesc": "Ora puoi impostare limiti su quanto spazio di archiviazione possono utilizzare i membri della tua famiglia.",
+
+  "cLBulkEdit": "Modifica multipla delle date",
+  "cLBulkEditDesc": "Ora puoi selezionare più foto e modificare la data/ora per tutte con un'azione rapida. È supportato anche lo spostamento delle date."
 }

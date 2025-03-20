@@ -1691,5 +1691,19 @@
   "notThisPerson": "Not this person?",
   "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
   "thisWeekThroughTheYears": "This week through the years",
-  "spotlightOnYourself": "Spotlight on yourself"
+  "spotlightOnYourself": "Spotlight on yourself",
+  "cLIcon": "Nouvelle icône",
+  "cLIconDesc": "Enfin, une nouvelle icône d'application que nous pensons représenter au mieux notre travail. Nous avons également ajouté un sélecteur d'icône pour que vous puissiez continuer à utiliser l'ancienne icône.",
+
+  "cLMemories": "Souvenirs",
+  "cLMemoriesDesc": "Redécouvrez vos moments spéciaux - mettez en avant vos personnes préférées, vos voyages et vacances, vos meilleurs clichés et bien plus encore. Activez l'apprentissage automatique, identifiez-vous et nommez vos amis pour une expérience optimale.",
+
+  "cLWidgets": "Widgets",
+  "cLWidgetsDesc": "Les widgets de l'écran d'accueil intégrés aux souvenirs sont désormais disponibles. Ils afficheront vos moments spéciaux sans ouvrir l'application.",
+
+  "cLFamilyPlan": "Limites du plan familial",
+  "cLFamilyPlanDesc": "Vous pouvez maintenant définir des limites sur la quantité de stockage que les membres de votre famille peuvent utiliser.",
+
+  "cLBulkEdit": "Modification en masse des dates",
+  "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes en une seule action rapide. Le décalage des dates est également pris en charge."
 }
