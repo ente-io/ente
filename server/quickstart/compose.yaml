@@ -102,6 +102,13 @@ configs:
           user: pguser
           password: pgpass
 
+      key:
+          encryption: yvmG/RnzKrbCb9L3mgsmoxXr9H7i2Z4qlbT0mL3ln4w=
+          hash: KXYiG07wC7GIgvCSdg+WmyWdXDAn6XKYJtp/wkEU7x573+byBRAYtpTP0wwvi8i/4l37uicX1dVTUzwH3sLZyw==
+
+      jwt:
+          secret: i2DecQmfGreG6q1vBj5tCokhlN41gcfS2cjOs9Po-u8=
+
       s3:
           are_local_buckets: true
           b2-eu-cen:
