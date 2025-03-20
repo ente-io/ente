@@ -6,6 +6,9 @@ COPY . .
 ENV NEXT_PUBLIC_ENTE_ENDPOINT=ENTE_API_ORIGIN_PLACEHOLDER
 ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=ENTE_ALBUMS_ORIGIN_PLACEHOLDER
 
+# `yarn install` is flaky on the GitHub arm64 runners otherwise.
+RUN yarn config set network-timeout 900000 -g
+
 RUN yarn install
 RUN yarn build:photos
 RUN yarn build:accounts
