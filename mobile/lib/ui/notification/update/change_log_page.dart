@@ -34,10 +34,11 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
             ),
             Container(
               alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: TitleBarTitleWidget(
-                  title: S.of(context).whatsNew,
+                  // title: S.of(context).whatsNew,
+                  title: "v1.0",
                 ),
               ),
             ),
