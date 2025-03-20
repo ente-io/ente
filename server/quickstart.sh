@@ -3,7 +3,7 @@
 # Ente self-host quickstart helper script.
 #
 # Usage:
-# sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/HEAD/server/hello.sh)"
+# sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/HEAD/server/quickstart.sh)"
 #
 # Docs:
 # https://github.com/ente-io/ente/blob/main/server/quickstart/README.md
