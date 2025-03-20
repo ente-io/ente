@@ -8,11 +8,20 @@
 # Docs:
 # https://github.com/ente-io/ente/blob/main/server/quickstart/README.md
 
-dc_version=`docker compose version --quiet 2>/dev/null`
+dcv=`docker compose version --short 2>/dev/null`
 
-if test -z "$dc_version"
+if test -z "$dcv"
 then
    printf "ERROR: Please install Docker Compose before running this script.\n"
+   exit 1
+fi
+
+dcv_maj=`echo "$dcv" | cut -d . -f 1`
+dcv_min=`echo "$dcv" | cut -d . -f 2`
+
+if test \( "$dcv_maj" -lt 2 \) -o \( "$dcv_maj" -eq 2 -a "$dcv_min" -lt 30 \)
+then
+   printf "ERROR: Docker Compose version ($dcv) should be at least 2.30+ for running this script.\n"
    exit 1
 fi
 
