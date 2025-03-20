@@ -115,6 +115,9 @@ you can just pull and run the from **`ghcr.io/ente-io/web`**.
 docker pull ghcr.io/ente-io/web
 ```
 
+For details about configuring the web image, see
+[web/docs/docker.md](../web/docs/docker.md).
+
 ## Running without Docker
 
 The museum binary can be run by using `go run cmd/museum/main.go`. But first,
