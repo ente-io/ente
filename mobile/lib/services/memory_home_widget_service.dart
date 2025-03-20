@@ -200,6 +200,11 @@ class MemoryHomeWidgetService {
         );
 
         if (value != null) {
+          final areMemoriesShown = memoriesCacheService.showAnyMemories;
+          if (!areMemoriesShown) {
+            _logger.warning("memories not enabled");
+            return;
+          }
           await _setTotal(index);
           if (index == 1) {
             await _updateWidget(
