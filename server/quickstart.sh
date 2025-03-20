@@ -25,7 +25,7 @@ then
     exit 1
 fi
 
-if ! which base64 >/dev/null
+if ! command -v base64 >/dev/null
 then
     printf "ERROR: base64 command not found. It is needed to autogenerate credentials.\n"
     exit 1
