@@ -124,7 +124,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     _logger.info("Building initstate");
     super.initState();
 
-    MemoryHomeWidgetService.instance.checkPendingMemorySync();
+    if (LocalSyncService.instance.hasCompletedFirstImport()) {
+      MemoryHomeWidgetService.instance.checkPendingMemorySync();
+    }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       _selectedTabIndex = event.selectedIndex;
@@ -184,13 +186,11 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
         Future.delayed(
           delayInRefresh,
-          () => {
-            if (mounted)
-              {
-                setState(
-                  () {},
-                ),
-              },
+          () {
+            if (mounted) {
+              setState(() {});
+              MemoryHomeWidgetService.instance.checkPendingMemorySync();
+            }
           },
         );
       }

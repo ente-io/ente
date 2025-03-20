@@ -370,6 +370,10 @@ class MemoriesCacheService {
     }
   }
 
+  Future<List<SmartMemory>?> getCachedMemories() async {
+    return _cachedMemories;
+  }
+
   Future<void> goToMemoryFromGeneratedFileID(
     BuildContext context,
     int generatedFileID,

@@ -5,6 +5,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/home_widget_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
+import "package:synchronized/synchronized.dart";
 
 class MemoryHomeWidgetService {
   final Logger _logger = Logger((MemoryHomeWidgetService).toString());
@@ -16,6 +17,7 @@ class MemoryHomeWidgetService {
 
   late final SharedPreferences _prefs;
 
+  final _memoryForceRefreshLock = Lock();
   bool _hasSyncedMemory = false;
 
   static const memoryChangedKey = "memoryChanged.widget";
@@ -31,14 +33,6 @@ class MemoryHomeWidgetService {
   }
 
   Future<void> _memorySync() async {
-    final total = await _getTotal();
-    if (total == 0 || total == null) {
-      _logger.warning(
-        "sync stopped because no memory is cached yet, so nothing to sync",
-      );
-      return;
-    }
-
     final homeWidgetCount = await HomeWidgetService.instance.countHomeWidgets();
     if (homeWidgetCount == 0) {
       _logger.warning("no home widget active");
@@ -57,13 +51,20 @@ class MemoryHomeWidgetService {
       return;
     }
 
-    forceFetchNewMemories ??= await getForceFetchCondition();
+    await _memoryForceRefreshLock.synchronized(() async {
+      final isTotalEmpty = await checkIfTotalEmpty();
+      forceFetchNewMemories ??= await getForceFetchCondition(isTotalEmpty);
 
-    if (forceFetchNewMemories) {
-      await _forceMemoryUpdate();
-    } else {
-      await _memorySync();
-    }
+      _logger.warning(
+        "init memory hw: forceFetch: $forceFetchNewMemories, isTotalEmpty: $isTotalEmpty",
+      );
+
+      if (forceFetchNewMemories!) {
+        await _forceMemoryUpdate();
+      } else if (!isTotalEmpty) {
+        await _memorySync();
+      }
+    });
   }
 
   Future<void> clearWidget() async {
@@ -84,19 +85,27 @@ class MemoryHomeWidgetService {
     await _prefs.setBool(memoryChangedKey, value);
   }
 
-  Future<bool> getForceFetchCondition() async {
-    final memoryChanged = _prefs.getBool(memoryChangedKey);
+  Future<bool> checkIfTotalEmpty() async {
     final total = await _getTotal();
+    return total == 0 || total == null;
+  }
+
+  Future<bool> getForceFetchCondition(bool isTotalEmpty) async {
+    final memoryChanged = _prefs.getBool(memoryChangedKey);
+    if (memoryChanged == true) return true;
+
+    final cachedMemories = await memoriesCacheService.getCachedMemories();
 
     final forceFetchNewMemories =
-        memoryChanged == true || total == 0 || total == null;
+        isTotalEmpty && (cachedMemories?.isNotEmpty ?? false);
     return forceFetchNewMemories;
   }
 
   Future<void> checkPendingMemorySync() async {
     await Future.delayed(const Duration(seconds: 5), () {});
 
-    final forceFetchNewMemories = await getForceFetchCondition();
+    final isTotalEmpty = await checkIfTotalEmpty();
+    final forceFetchNewMemories = await getForceFetchCondition(isTotalEmpty);
 
     if (_hasSyncedMemory && !forceFetchNewMemories) {
       _logger.info(">>> Memory already synced");
@@ -139,6 +148,22 @@ class MemoryHomeWidgetService {
       );
     }
     _logger.info(">>> Home Widget updated");
+  }
+
+  Future<void> memoryChanged() async {
+    final cachedMemories = await memoriesCacheService.getCachedMemories();
+    final currentTotal = cachedMemories?.length ?? 0;
+
+    final int total = await _getTotal() ?? 0;
+
+    if (total == currentTotal && total == 0) {
+      _logger.info(">>> Memories not changed, doing nothing");
+      return;
+    }
+
+    _logger.info(">>> Memories changed, updating widget");
+    await updateMemoryChanged(true);
+    await initMemoryHW(true);
   }
 
   Future<int?> _getTotal() async {

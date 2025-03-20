@@ -66,8 +66,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     _memoriesChangedSubscription =
         Bus.instance.on<MemoriesChangedEvent>().listen(
       (event) async {
-        await MemoryHomeWidgetService.instance.updateMemoryChanged(true);
-        await MemoryHomeWidgetService.instance.initMemoryHW(true);
+        await MemoryHomeWidgetService.instance.memoryChanged();
       },
     );
   }

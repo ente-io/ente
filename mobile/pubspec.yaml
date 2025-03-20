@@ -189,7 +189,7 @@ dependencies:
   styled_text: ^8.1.0
   syncfusion_flutter_core: ^25.2.5
   syncfusion_flutter_sliders: ^25.2.5
-  synchronized: ^3.1.0
+  synchronized: ^3.3.0+3
   system_info_plus: ^0.0.6
   tuple: ^2.0.0
   ua_client_hints: ^1.4.0
