@@ -181,6 +181,14 @@ class MemoriesCacheService {
       final now = DateTime.now();
       final next = now.add(kMemoriesUpdateFrequency);
       final nowResult = await smartMemoriesService.calcMemories(now, newCache);
+      if (nowResult.isEmpty) {
+        _cachedMemories = [];
+        _isUpdateInProgress = false;
+        _logger.warning(
+          "No memories found for now, not updating cache and returning early",
+        );
+        return;
+      }
       final nextResult =
           await smartMemoriesService.calcMemories(next, newCache);
       w?.log("calculated new memories");
@@ -333,9 +341,10 @@ class MemoriesCacheService {
 
   Future<List<SmartMemory>> getMemories() async {
     if (!showAnyMemories) {
+      _logger.info('Showing memories is disabled in settings, showing none');
       return [];
     }
-    if (_cachedMemories != null) {
+    if (_cachedMemories != null && _cachedMemories!.isNotEmpty) {
       return _cachedMemories!;
     }
     try {

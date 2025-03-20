@@ -88,6 +88,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
             child: const EnteLoadingWidget(),
           );
         } else {
+          if (snapshot.data!.isEmpty) return const SizedBox.shrink();
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
