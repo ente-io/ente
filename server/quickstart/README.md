@@ -8,7 +8,7 @@ uses pre-built images instead.
 Copy paste the following command into your terminal
 
 ```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/HEAD/server/hello.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/HEAD/server/quickstart.sh)"
 ```
 
 Alternatively, you can run the following four steps manually (that's all the
@@ -69,15 +69,15 @@ curl localhost:8080/ping
 And start using the web app by opening http://localhost:3000 in your browser.
 
 The cluster will keep running as long as the `docker compose up` command (or the
-`hello.sh` script you curl-ed) is running. If you want to keep it running in the
-background, you can instead.
+`quickstart.sh` script you curl-ed) is running. If you want to keep it running
+in the background, you can instead:
 
 ```sh
 cd /path/to/my-ente # Or whichever directory you created
 docker compose up -d
 ```
 
-And then later, to stop the cluster, you can
+And then later, to stop the cluster, you can:
 
 ```sh
 cd /path/to/my-ente
