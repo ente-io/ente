@@ -4,6 +4,7 @@ import "package:logging/logging.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/home_widget_service.dart";
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
 
@@ -42,10 +43,26 @@ class MemoryHomeWidgetService {
     await _updateWidget(text: "refreshing from same set");
   }
 
-  Future<void> initMemoryHW(bool? forceFetchNewMemories) async {
+  Future<bool> hasAnyBlockers() async {
+    final hasCompletedFirstImport =
+        LocalSyncService.instance.hasCompletedFirstImport();
+    if (!hasCompletedFirstImport) {
+      _logger.warning("first import not completed");
+      return true;
+    }
+
     final areMemoriesShown = memoriesCacheService.showAnyMemories;
     if (!areMemoriesShown) {
       _logger.warning("memories not enabled");
+      return true;
+    }
+
+    return false;
+  }
+
+  Future<void> initMemoryHW(bool? forceFetchNewMemories) async {
+    final result = await hasAnyBlockers();
+    if (result) {
       await clearWidget();
       return;
     }
@@ -200,9 +217,8 @@ class MemoryHomeWidgetService {
         );
 
         if (value != null) {
-          final areMemoriesShown = memoriesCacheService.showAnyMemories;
-          if (!areMemoriesShown) {
-            _logger.warning("memories not enabled");
+          final result = await hasAnyBlockers();
+          if (result) {
             return;
           }
           await _setTotal(index);

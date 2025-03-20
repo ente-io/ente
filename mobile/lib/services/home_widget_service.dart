@@ -6,12 +6,10 @@ import 'package:home_widget/home_widget.dart' as hw;
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:path_provider_foundation/path_provider_foundation.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/smart_memories_service.dart";
-import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -33,19 +31,6 @@ class HomeWidgetService {
   }
 
   Future<void> initHomeWidget() async {
-    final isLoggedIn = Configuration.instance.isLoggedIn();
-    if (!isLoggedIn) {
-      _logger.warning("user not logged in");
-      return;
-    }
-
-    final hasCompletedFirstImport =
-        LocalSyncService.instance.hasCompletedFirstImport();
-    if (!hasCompletedFirstImport) {
-      _logger.warning("first import not completed");
-      return;
-    }
-
     await MemoryHomeWidgetService.instance.initMemoryHW(null);
   }
 
