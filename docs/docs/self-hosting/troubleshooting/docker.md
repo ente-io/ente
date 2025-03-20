@@ -33,7 +33,6 @@ If you cannot update your Docker compose version, then alternatively you can
 perform the same configuration by removing the "post_start" hook, and adding a
 new service definition:
 
-
 ```yaml
   minio-provision:
     image: minio/mc
@@ -60,3 +59,14 @@ new service definition:
       mc mb -p scw-eu-fr-v3
       '
 ```
+
+## start_interval
+
+Similar to the `post_start` case above, if you are seeing an error like
+
+```
+services.postgres.healthcheck Additional property start_interval is not allowed
+```
+
+You will need to upgrade your Docker compose version to a newer version that
+supports the `start_interval` property on the health check.
