@@ -136,9 +136,10 @@ class MemoriesCacheService {
     unawaited(_prefs.setBool(_shouldUpdateCacheKey, true));
   }
 
-  void _cacheUpdated() {
+  Future<void> _cacheUpdated() async {
     _shouldUpdate = false;
     unawaited(_prefs.setBool(_shouldUpdateCacheKey, false));
+    await _resetLastMemoriesCacheUpdateTime();
     Bus.instance.fire(MemoriesChangedEvent());
   }
 
@@ -204,9 +205,8 @@ class MemoriesCacheService {
         MemoriesCache.encodeToJsonString(newCache).codeUnits,
       );
       w?.log("cacheWritten");
-      await _resetLastMemoriesCacheUpdateTime();
-      w?.logAndReset('done');
-      _cacheUpdated();
+      await _cacheUpdated();
+      w?.logAndReset('_cacheUpdated method done');
     } catch (e, s) {
       _logger.info("Error updating memories cache", e, s);
     } finally {
