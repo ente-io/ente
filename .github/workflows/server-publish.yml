@@ -36,6 +36,6 @@ jobs:
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Update branch server/ghcr to point to source commit
+            - name: Update branch ghcr/server to point to source commit
               run: |
-                  git push -f origin HEAD:refs/heads/server/ghcr
+                  git push -f origin HEAD:refs/heads/ghcr/server
