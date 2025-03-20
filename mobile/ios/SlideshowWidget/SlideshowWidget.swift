@@ -24,7 +24,8 @@ struct Provider: TimelineProvider {
 
     func getSnapshot(in _: Context, completion: @escaping (FileEntry) -> Void) {
         let entry = FileEntry(
-            date: Date(), index: -2, imageData: nil, title: "Over the hills", subTitle: "May 23, 2021",
+            date: Date(), index: -2, imageData: nil, title: "Over the hills",
+            subTitle: "May 23, 2021",
             generatedId: nil)
         completion(entry)
     }
@@ -207,7 +208,7 @@ struct SlideshowWidgetEntryView: View {
             .widgetURL(
                 URL(
                     string:
-                        "memoryWidget://message?generatedId=\(entry.generatedId != nil ? String(entry.generatedId!) : "nan")&homeWidget"
+                        "memorywidget://message?generatedId=\(entry.generatedId != nil ? String(entry.generatedId!) : "nan")&homeWidget"
                 )
             )
         }

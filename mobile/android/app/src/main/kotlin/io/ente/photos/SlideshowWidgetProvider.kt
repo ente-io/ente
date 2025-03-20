@@ -22,93 +22,144 @@ import kotlinx.serialization.json.Json
 data class MemoryFileData(val title: String?, val subText: String?, val generatedId: Int?)
 
 class SlideshowWidgetProvider : HomeWidgetProvider() {
-    override fun onUpdate(
-            context: Context,
-            appWidgetManager: AppWidgetManager,
-            appWidgetIds: IntArray,
-            widgetData: SharedPreferences
-    ) {
-        appWidgetIds.forEach { widgetId ->
-            val views =
-                    RemoteViews(context.packageName, R.layout.slideshow_layout).apply {
-                        val totalSet = widgetData.getInt("totalSet", 0)
-                        var randomNumber = -1
-                        var imagePath: String? = null
-                        if (totalSet > 0) {
-                            randomNumber = (0 until totalSet!!).random()
-                            imagePath = widgetData.getString("slideshow_" + randomNumber, null)
-                        }
-                        var imageExists: Boolean = false
-                        if (imagePath != null) {
-                            val imageFile = File(imagePath)
-                            imageExists = imageFile.exists()
-                        }
-                        if (imageExists) {
-                            val data = widgetData.getString("slideshow_${randomNumber}_data", null)
-                            val decoded: MemoryFileData? =
-                                    data?.let { Json.decodeFromString<MemoryFileData>(it) }
-                            val title = decoded?.title
-                            val subText = decoded?.subText
-                            val generatedId = decoded?.generatedId
+        override fun onUpdate(
+                context: Context,
+                appWidgetManager: AppWidgetManager,
+                appWidgetIds: IntArray,
+                widgetData: SharedPreferences
+        ) {
+                appWidgetIds.forEach { widgetId ->
+                        val views =
+                                RemoteViews(context.packageName, R.layout.slideshow_layout).apply {
+                                        val totalSet = widgetData.getInt("totalSet", 0)
+                                        var randomNumber = -1
+                                        var imagePath: String? = null
+                                        if (totalSet > 0) {
+                                                randomNumber = (0 until totalSet!!).random()
+                                                imagePath =
+                                                        widgetData.getString(
+                                                                "slideshow_" + randomNumber,
+                                                                null
+                                                        )
+                                        }
+                                        var imageExists: Boolean = false
+                                        if (imagePath != null) {
+                                                val imageFile = File(imagePath)
+                                                imageExists = imageFile.exists()
+                                        }
+                                        if (imageExists) {
+                                                val data =
+                                                        widgetData.getString(
+                                                                "slideshow_${randomNumber}_data",
+                                                                null
+                                                        )
+                                                val decoded: MemoryFileData? =
+                                                        data?.let {
+                                                                Json.decodeFromString<
+                                                                        MemoryFileData>(it)
+                                                        }
+                                                val title = decoded?.title
+                                                val subText = decoded?.subText
+                                                val generatedId = decoded?.generatedId
 
-                            val deepLinkUri =
-                                    Uri.parse(
-                                            "memoryWidget://message?generatedId=${generatedId}&homeWidget"
-                                    )
+                                                val deepLinkUri =
+                                                        Uri.parse(
+                                                                "memorywidget://message?generatedId=${generatedId}&homeWidget"
+                                                        )
 
-                            val pendingIntent =
-                                    HomeWidgetLaunchIntent.getActivity(
-                                            context,
-                                            MainActivity::class.java,
-                                            deepLinkUri
-                                    )
+                                                val pendingIntent =
+                                                        HomeWidgetLaunchIntent.getActivity(
+                                                                context,
+                                                                MainActivity::class.java,
+                                                                deepLinkUri
+                                                        )
 
-                            setOnClickPendingIntent(R.id.widget_container, pendingIntent)
+                                                setOnClickPendingIntent(
+                                                        R.id.widget_container,
+                                                        pendingIntent
+                                                )
 
-                            Log.d("SlideshowWidgetProvider", "Image exists: $imagePath")
-                            setViewVisibility(R.id.widget_img, View.VISIBLE)
-                            setViewVisibility(R.id.widget_placeholder_container, View.VISIBLE)
-                            setViewVisibility(R.id.widget_subtitle, View.VISIBLE)
-                            setViewVisibility(R.id.widget_title, View.VISIBLE)
-                            setViewVisibility(R.id.widget_overlay, View.VISIBLE)
-                            setViewVisibility(R.id.widget_placeholder, View.GONE)
-                            setViewVisibility(R.id.widget_placeholder_text, View.GONE)
-                            setViewVisibility(R.id.widget_placeholder_container, View.GONE)
+                                                Log.d(
+                                                        "SlideshowWidgetProvider",
+                                                        "Image exists: $imagePath"
+                                                )
+                                                setViewVisibility(R.id.widget_img, View.VISIBLE)
+                                                setViewVisibility(
+                                                        R.id.widget_placeholder_container,
+                                                        View.VISIBLE
+                                                )
+                                                setViewVisibility(
+                                                        R.id.widget_subtitle,
+                                                        View.VISIBLE
+                                                )
+                                                setViewVisibility(R.id.widget_title, View.VISIBLE)
+                                                setViewVisibility(R.id.widget_overlay, View.VISIBLE)
+                                                setViewVisibility(
+                                                        R.id.widget_placeholder,
+                                                        View.GONE
+                                                )
+                                                setViewVisibility(
+                                                        R.id.widget_placeholder_text,
+                                                        View.GONE
+                                                )
+                                                setViewVisibility(
+                                                        R.id.widget_placeholder_container,
+                                                        View.GONE
+                                                )
 
-                            val bitmap: Bitmap = BitmapFactory.decodeFile(imagePath)
-                            setImageViewBitmap(R.id.widget_img, bitmap)
-                            setTextViewText(R.id.widget_title, title)
-                            setTextViewText(R.id.widget_subtitle, subText)
-                        } else {
-                            // Open App on Widget Click
-                            val pendingIntent =
-                                    HomeWidgetLaunchIntent.getActivity(
-                                            context,
-                                            MainActivity::class.java
-                                    )
-                            setOnClickPendingIntent(R.id.widget_container, pendingIntent)
+                                                val bitmap: Bitmap =
+                                                        BitmapFactory.decodeFile(imagePath)
+                                                setImageViewBitmap(R.id.widget_img, bitmap)
+                                                setTextViewText(R.id.widget_title, title)
+                                                setTextViewText(R.id.widget_subtitle, subText)
+                                        } else {
+                                                // Open App on Widget Click
+                                                val pendingIntent =
+                                                        HomeWidgetLaunchIntent.getActivity(
+                                                                context,
+                                                                MainActivity::class.java
+                                                        )
+                                                setOnClickPendingIntent(
+                                                        R.id.widget_container,
+                                                        pendingIntent
+                                                )
 
-                            Log.d("SlideshowWidgetProvider", "Image doesn't exists")
-                            setViewVisibility(R.id.widget_img, View.GONE)
-                            setViewVisibility(R.id.widget_placeholder_container, View.GONE)
-                            setViewVisibility(R.id.widget_subtitle, View.GONE)
-                            setViewVisibility(R.id.widget_title, View.GONE)
-                            setViewVisibility(R.id.widget_overlay, View.GONE)
-                            setViewVisibility(R.id.widget_placeholder, View.VISIBLE)
-                            setViewVisibility(R.id.widget_placeholder_text, View.VISIBLE)
-                            setViewVisibility(R.id.widget_placeholder_container, View.VISIBLE)
+                                                Log.d(
+                                                        "SlideshowWidgetProvider",
+                                                        "Image doesn't exists"
+                                                )
+                                                setViewVisibility(R.id.widget_img, View.GONE)
+                                                setViewVisibility(
+                                                        R.id.widget_placeholder_container,
+                                                        View.GONE
+                                                )
+                                                setViewVisibility(R.id.widget_subtitle, View.GONE)
+                                                setViewVisibility(R.id.widget_title, View.GONE)
+                                                setViewVisibility(R.id.widget_overlay, View.GONE)
+                                                setViewVisibility(
+                                                        R.id.widget_placeholder,
+                                                        View.VISIBLE
+                                                )
+                                                setViewVisibility(
+                                                        R.id.widget_placeholder_text,
+                                                        View.VISIBLE
+                                                )
+                                                setViewVisibility(
+                                                        R.id.widget_placeholder_container,
+                                                        View.VISIBLE
+                                                )
 
-                            val drawable =
-                                    ContextCompat.getDrawable(
-                                            context,
-                                            R.drawable.ic_home_widget_default
-                                    )
-                            val bitmap = (drawable as BitmapDrawable).bitmap
-                            setImageViewBitmap(R.id.widget_placeholder, bitmap)
-                        }
-                    }
+                                                val drawable =
+                                                        ContextCompat.getDrawable(
+                                                                context,
+                                                                R.drawable.ic_home_widget_default
+                                                        )
+                                                val bitmap = (drawable as BitmapDrawable).bitmap
+                                                setImageViewBitmap(R.id.widget_placeholder, bitmap)
+                                        }
+                                }
 
-            appWidgetManager.updateAppWidget(widgetId, views)
+                        appWidgetManager.updateAppWidget(widgetId, views)
+                }
         }
-    }
 }

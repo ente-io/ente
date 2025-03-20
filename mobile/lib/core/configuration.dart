@@ -216,7 +216,7 @@ class Configuration {
       FavoritesService.instance.clearCache();
       SearchService.instance.clearCache();
       PersonService.instance.clearCache();
-      unawaited(HomeWidgetService.instance.clearHomeWidget());
+      unawaited(HomeWidgetService.instance.clearWidget());
       Bus.instance.fire(UserLoggedOutEvent());
     } else {
       await _preferences.setBool("auto_logout", true);
