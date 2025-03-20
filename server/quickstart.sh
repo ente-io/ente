@@ -8,6 +8,14 @@
 # Docs:
 # https://github.com/ente-io/ente/blob/main/server/quickstart/README.md
 
+dc_version=`docker compose version --quiet 2>/dev/null`
+
+if test -z "$dc_version"
+then
+   printf "ERROR: Please install Docker Compose before running this script.\n"
+   exit 1
+fi
+
 if test -d my-ente
 then
    printf "ERROR: A directory named 'my-ente' already exists.\n"
