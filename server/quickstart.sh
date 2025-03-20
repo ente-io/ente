@@ -12,8 +12,8 @@ dcv=`docker compose version --short 2>/dev/null`
 
 if test -z "$dcv"
 then
-   printf "ERROR: Please install Docker Compose before running this script.\n"
-   exit 1
+    printf "ERROR: Please install Docker Compose before running this script.\n"
+    exit 1
 fi
 
 dcv_maj=`echo "$dcv" | cut -d . -f 1`
@@ -21,15 +21,21 @@ dcv_min=`echo "$dcv" | cut -d . -f 2`
 
 if test \( "$dcv_maj" -lt 2 \) -o \( "$dcv_maj" -eq 2 -a "$dcv_min" -lt 30 \)
 then
-   printf "ERROR: Docker Compose version ($dcv) should be at least 2.30+ for running this script.\n"
-   exit 1
+    printf "ERROR: Docker Compose version ($dcv) should be at least 2.30+ for running this script.\n"
+    exit 1
+fi
+
+if ! which base64 >/dev/null
+then
+    printf "ERROR: base64 command not found. It is needed to autogenerate credentials.\n"
+    exit 1
 fi
 
 if test -d my-ente
 then
-   printf "ERROR: A directory named 'my-ente' already exists.\n"
-   printf "       Aborting script to avoid accidentally overwriting user data.\n"
-   exit 1
+    printf "ERROR: A directory named 'my-ente' already exists.\n"
+    printf "       Aborting script to avoid accidentally overwriting user data.\n"
+    exit 1
 fi
 
 printf "\n - \033[1mH E L L O\033[0m - \033[1;32mE N T E\033[0m -\n\n"
