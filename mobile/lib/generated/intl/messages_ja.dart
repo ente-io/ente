@@ -481,19 +481,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeEmail": MessageLookupByLibrary.simpleMessage("Eメールを変更"),
         "changeLocationOfSelectedItems":
             MessageLookupByLibrary.simpleMessage("選択したアイテムの位置を変更しますか？"),
-        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
-            "私たちは、失敗と待機中を含む、Enteにアップロードされたすべてのファイルのログを追加しました。"),
-        "changeLogBackupStatusTitle":
-            MessageLookupByLibrary.simpleMessage("バックアップ ステータス"),
-        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
-            "IDカード、メモなどの写真をお探しですか？検索タブに移動し、ディスカバーを確認してください。 \\n\\n機械学習を有効にしている場合にのみ利用できます。"),
-        "changeLogDiscoverTitle":
-            MessageLookupByLibrary.simpleMessage("ディスカバー"),
-        "changeLogMagicSearchImprovementContent":
-            MessageLookupByLibrary.simpleMessage(
-                "マジック検索が改善しました。もう、あなたが探しているものを見つけるのを待つ必要はありません。"),
-        "changeLogMagicSearchImprovementTitle":
-            MessageLookupByLibrary.simpleMessage("マジック検索の改善"),
         "changePassword": MessageLookupByLibrary.simpleMessage("パスワードを変更"),
         "changePasswordTitle": MessageLookupByLibrary.simpleMessage("パスワードを変更"),
         "changePermissions": MessageLookupByLibrary.simpleMessage("権限を変更する"),

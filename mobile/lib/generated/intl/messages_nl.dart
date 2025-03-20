@@ -541,19 +541,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeEmail": MessageLookupByLibrary.simpleMessage("E-mail wijzigen"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Locatie van geselecteerde items wijzigen?"),
-        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
-            "We hebben een logboek toegevoegd van alle bestanden die zijn geüpload naar Ente, inclusief fouten en wachtrij."),
-        "changeLogBackupStatusTitle":
-            MessageLookupByLibrary.simpleMessage("Back-up status"),
-        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
-            "Op zoek naar foto\'s van je identiteitskaarten, notities of zelfs herinneringen? Ga naar het tabblad Zoeken en bekijk ontdekking. Op basis van onze semantische zoekopdracht is het een plek om foto\'s te vinden die belangrijk voor jou kunnen zijn.\\n\\nAlleen beschikbaar als je Machine Learning hebt ingeschakeld."),
-        "changeLogDiscoverTitle":
-            MessageLookupByLibrary.simpleMessage("Ontdek"),
-        "changeLogMagicSearchImprovementContent":
-            MessageLookupByLibrary.simpleMessage(
-                "We hebben magische zoekopdrachten veel sneller gemaakt zodat je niet hoeft te wachten om te vinden wat je zoekt."),
-        "changeLogMagicSearchImprovementTitle":
-            MessageLookupByLibrary.simpleMessage("Magisch zoeken verbetering"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Wachtwoord wijzigen"),
         "changePasswordTitle":

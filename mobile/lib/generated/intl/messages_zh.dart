@@ -466,18 +466,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeEmail": MessageLookupByLibrary.simpleMessage("修改邮箱"),
         "changeLocationOfSelectedItems":
             MessageLookupByLibrary.simpleMessage("确定要更改所选项目的位置吗？"),
-        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
-            "我们添加了所有已上传到 Ente 的文件的日志，包括失败和排队的文件。"),
-        "changeLogBackupStatusTitle":
-            MessageLookupByLibrary.simpleMessage("备份状态"),
-        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
-            "想要查找您的身份证、笔记甚至表情包的照片？转到搜索选项卡并查看“发现”。根据我们的语义搜索，您可以在这里找到对您来说可能很重要的照片。\\n\\n仅当您启用了机器学习时才可用。"),
-        "changeLogDiscoverTitle": MessageLookupByLibrary.simpleMessage("发现"),
-        "changeLogMagicSearchImprovementContent":
-            MessageLookupByLibrary.simpleMessage(
-                "我们改进了魔法搜索，使其速度更快，因此您无需等待就能找到您要查找的内容。"),
-        "changeLogMagicSearchImprovementTitle":
-            MessageLookupByLibrary.simpleMessage("魔法搜索改进"),
         "changePassword": MessageLookupByLibrary.simpleMessage("修改密码"),
         "changePasswordTitle": MessageLookupByLibrary.simpleMessage("修改密码"),
         "changePermissions": MessageLookupByLibrary.simpleMessage("要修改权限吗？"),

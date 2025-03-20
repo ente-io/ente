@@ -529,16 +529,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeEmail": MessageLookupByLibrary.simpleMessage("Modifica email"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Cambiare la posizione degli elementi selezionati?"),
-        "changeLogBackupStatusTitle":
-            MessageLookupByLibrary.simpleMessage("Stato Backup"),
-        "changeLogDiscoverTitle":
-            MessageLookupByLibrary.simpleMessage("Esplora"),
-        "changeLogMagicSearchImprovementContent":
-            MessageLookupByLibrary.simpleMessage(
-                "Abbiamo migliorato la ricerca magica per renderla molto più veloce, così non devi aspettare per trovare quello che cerchi."),
-        "changeLogMagicSearchImprovementTitle":
-            MessageLookupByLibrary.simpleMessage(
-                "Miglioramento della Ricerca Magica"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Cambia password"),
         "changePasswordTitle":

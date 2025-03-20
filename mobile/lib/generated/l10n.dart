@@ -10409,66 +10409,6 @@ class S {
     );
   }
 
-  /// `Magic Search Improvement`
-  String get changeLogMagicSearchImprovementTitle {
-    return Intl.message(
-      'Magic Search Improvement',
-      name: 'changeLogMagicSearchImprovementTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `We have improved magic search to become much faster, so you don\'t have to wait to find what you\'re looking for.`
-  String get changeLogMagicSearchImprovementContent {
-    return Intl.message(
-      'We have improved magic search to become much faster, so you don\\\'t have to wait to find what you\\\'re looking for.',
-      name: 'changeLogMagicSearchImprovementContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Backup Status`
-  String get changeLogBackupStatusTitle {
-    return Intl.message(
-      'Backup Status',
-      name: 'changeLogBackupStatusTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `We\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.`
-  String get changeLogBackupStatusContent {
-    return Intl.message(
-      'We\\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.',
-      name: 'changeLogBackupStatusContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Discover`
-  String get changeLogDiscoverTitle {
-    return Intl.message(
-      'Discover',
-      name: 'changeLogDiscoverTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\'s a place to find photos that might be important for you.\n\nOnly available if you have enabled Machine Learning.`
-  String get changeLogDiscoverContent {
-    return Intl.message(
-      'Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning.',
-      name: 'changeLogDiscoverContent',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Select cover photo`
   String get selectCoverPhoto {
     return Intl.message(

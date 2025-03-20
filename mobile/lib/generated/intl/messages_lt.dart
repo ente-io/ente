@@ -448,20 +448,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeEmail": MessageLookupByLibrary.simpleMessage("Keisti el. paštą"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Keisti pasirinktų elementų vietovę?"),
-        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
-            "Pridėjome visų į „Ente“ įkeltų failų žurnalą, įskaitant nesėkmingus ir laukiančius eilėje."),
-        "changeLogBackupStatusTitle":
-            MessageLookupByLibrary.simpleMessage("Atsarginės kopijos būsena"),
-        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
-            "Ieškote savo tapatybės kortelių, užrašų ar net memų nuotraukų? Eikite į paieškos kortelę ir patikrinkite Atrasti. Remiantis mūsų semantine paieška, joje rasite nuotraukų, kurios gali būti jums svarbios.\\n\\nPasiekiama tik tada, jei įjungėte mašininį mokymąsi."),
-        "changeLogDiscoverTitle":
-            MessageLookupByLibrary.simpleMessage("Atraskite"),
-        "changeLogMagicSearchImprovementContent":
-            MessageLookupByLibrary.simpleMessage(
-                "Patobulinome magiškąją paiešką, kad ji taptų daug spartesnė ir jums nereikėtų laukti, kol rasite tai, ko ieškote."),
-        "changeLogMagicSearchImprovementTitle":
-            MessageLookupByLibrary.simpleMessage(
-                "Magiškos paieškos patobulinimas"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Keisti slaptažodį"),
         "changePasswordTitle":
