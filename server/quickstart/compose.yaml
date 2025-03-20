@@ -18,12 +18,39 @@ services:
       - ./data:/data:ro
 
   # Resolve "localhost:3200" in the museum container to the minio container.
-  socat:
+  socat-museum-3200:
     image: alpine/socat
     network_mode: service:museum
-    depends_on:
-      - museum
+    depends_on: [museum]
     command: "TCP-LISTEN:3200,fork,reuseaddr TCP:minio:3200"
+
+  web:
+    # image: ghcr.io/ente-io/web
+    image: web-test:latest # WIP
+    # Uncomment what you need to tweak.
+    ports:
+      - 3000:3000 # Photos web app
+      # - 3001:3001 # Accounts
+      - 3002:3002 # Public albums
+      # - 3003:3003 # Auth
+      # - 3004:3004 # Cast
+    # environment:
+    #   ENTE_API_ORIGIN: http://localhost:8080
+    #   ENTE_ALBUMS_ORIGIN: https://localhost:3002
+
+  # Resolve "localhost:3200" in the web container to the minio container.
+  socat-web-3200:
+    image: alpine/socat
+    network_mode: service:web
+    depends_on: [web]
+    command: "TCP-LISTEN:3200,fork,reuseaddr TCP:minio:3200"
+
+  # Resolve "localhost:8080" in the web container to the museum container.
+  socat-web-8080:
+    image: alpine/socat
+    network_mode: service:web
+    depends_on: [web]
+    command: "TCP-LISTEN:8080,fork,reuseaddr TCP:minio:8080"
 
   postgres:
     image: postgres:15
