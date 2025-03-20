@@ -21,7 +21,7 @@ import kotlinx.serialization.json.Json
 @Serializable
 data class MemoryFileData(val title: String?, val subText: String?, val generatedId: Int?)
 
-class SlideshowWidgetProvider : HomeWidgetProvider() {
+class EnteMemoryWidgetProvider : HomeWidgetProvider() {
         override fun onUpdate(
                 context: Context,
                 appWidgetManager: AppWidgetManager,
@@ -80,7 +80,7 @@ class SlideshowWidgetProvider : HomeWidgetProvider() {
                                                 )
 
                                                 Log.d(
-                                                        "SlideshowWidgetProvider",
+                                                        "EnteMemoryWidgetProvider",
                                                         "Image exists: $imagePath"
                                                 )
                                                 setViewVisibility(R.id.widget_img, View.VISIBLE)
@@ -125,7 +125,7 @@ class SlideshowWidgetProvider : HomeWidgetProvider() {
                                                 )
 
                                                 Log.d(
-                                                        "SlideshowWidgetProvider",
+                                                        "EnteMemoryWidgetProvider",
                                                         "Image doesn't exists"
                                                 )
                                                 setViewVisibility(R.id.widget_img, View.GONE)

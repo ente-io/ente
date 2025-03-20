@@ -134,7 +134,7 @@ class MemoryHomeWidgetService {
 
   Future<void> _updateWidget({String? text}) async {
     await HomeWidgetService.instance.updateWidget(
-      androidClass: "SlideshowWidgetProvider",
+      androidClass: "EnteMemoryWidgetProvider",
       iOSClass: "SlideshowWidget",
     );
     if (flagService.internalUser) {

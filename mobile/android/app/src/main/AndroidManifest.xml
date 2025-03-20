@@ -143,7 +143,7 @@
             android:value="https://2235e5c99219488ea93da34b9ac1cb68@sentry.ente.io/4" />
         <meta-data android:name="firebase_analytics_collection_deactivated"
             android:value="true" />
-        <receiver android:name="SlideshowWidgetProvider" android:label="Memories" android:exported="true">
+        <receiver android:name="EnteMemoryWidgetProvider" android:label="Memories" android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
