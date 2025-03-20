@@ -1,13 +1,13 @@
 FROM node:20-alpine AS builder
 
-ARG ENTE_API_ORIGIN=http://localhost:8080
-ARG ENTE_ALBUMS_APP_ORIGIN=https://localhost:3002
-
-ENV NEXT_PUBLIC_ENTE_ENDPOINT="$ENTE_API_ORIGIN"
-ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT="$ENTE_ALBUMS_APP_ORIGIN"
-
 WORKDIR /build
 COPY . .
+
+ENV NEXT_PUBLIC_ENTE_ENDPOINT=ENTE_API_ORIGIN_PLACEHOLDER
+ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=ENTE_ALBUMS_ORIGIN_PLACEHOLDER
+
+# `yarn install` is flaky on the GitHub arm64 runners otherwise.
+RUN yarn config set network-timeout 900000 -g
 
 RUN yarn install
 RUN yarn build:photos
@@ -20,7 +20,6 @@ FROM nginx
 WORKDIR /out
 
 COPY --from=builder /build/apps/photos/out /out/photos
-COPY --from=builder /build/apps/photos/out /out/albums
 COPY --from=builder /build/apps/accounts/out /out/accounts
 COPY --from=builder /build/apps/auth/out /out/auth
 COPY --from=builder /build/apps/cast/out /out/cast
@@ -35,7 +34,7 @@ server {
     location / { try_files \$uri \$uri/ \$uri.html /index.html; }
 }
 server {
-    listen 3002; root /out/albums;
+    listen 3002; root /out/photos;
     location / { try_files \$uri \$uri/ \$uri.html /index.html; }
 }
 server {
@@ -53,3 +52,15 @@ EXPOSE 3001
 EXPOSE 3002
 EXPOSE 3003
 EXPOSE 3004
+
+ENV ENTE_API_ORIGIN=http://localhost:8080
+ENV ENTE_ALBUMS_ORIGIN=https://localhost:3002
+
+COPY <<EOF /docker-entrypoint.d/90-replace-ente-env.sh
+find /out -name '*.js' |
+    xargs sed -i'' "s#ENTE_API_ORIGIN_PLACEHOLDER#\$ENTE_API_ORIGIN#g"
+find /out/photos -name '*.js' |
+    xargs sed -i'' "s#ENTE_ALBUMS_ORIGIN_PLACEHOLDER#\$ENTE_ALBUMS_ORIGIN#g"
+EOF
+
+RUN chmod +x /docker-entrypoint.d/90-replace-ente-env.sh

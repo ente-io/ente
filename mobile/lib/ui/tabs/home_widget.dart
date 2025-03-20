@@ -37,6 +37,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/sync/diff_fetcher.dart";
@@ -122,6 +123,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     _logger.info("Building initstate");
     super.initState();
+
+    HomeWidgetService.instance.checkPendingMemorySync();
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       _selectedTabIndex = event.selectedIndex;

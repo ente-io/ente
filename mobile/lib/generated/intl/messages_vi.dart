@@ -524,19 +524,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeEmail": MessageLookupByLibrary.simpleMessage("Thay đổi email"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Thay đổi vị trí của các mục đã chọn?"),
-        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
-            "Chúng tôi đã thêm một nhật ký của tất cả các tệp đã được tải lên Ente, bao gồm cả các tệp thất bại và đang chờ xử lý."),
-        "changeLogBackupStatusTitle":
-            MessageLookupByLibrary.simpleMessage("Trạng thái Sao lưu"),
-        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
-            "Bạn đang tìm kiếm ảnh thẻ ID, ghi chú, hoặc thậm chí là meme? Hãy đến tab tìm kiếm và kiểm tra Khám Phá. Dựa trên tìm kiếm ngữ nghĩa của chúng tôi, đây là nơi để tìm những bức ảnh có thể quan trọng với bạn.\\n\\nChỉ có sẵn nếu bạn đã bật Học máy."),
-        "changeLogDiscoverTitle":
-            MessageLookupByLibrary.simpleMessage("Khám Phá"),
-        "changeLogMagicSearchImprovementContent":
-            MessageLookupByLibrary.simpleMessage(
-                "Chúng tôi đã cải tiến tìm kiếm ma thuật để nhanh hơn rất nhiều, vì vậy bạn không phải chờ đợi để tìm những gì bạn đang tìm kiếm."),
-        "changeLogMagicSearchImprovementTitle":
-            MessageLookupByLibrary.simpleMessage("Cải tiến Tìm kiếm Ma thuật"),
         "changePassword": MessageLookupByLibrary.simpleMessage("Đổi mật khẩu"),
         "changePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Thay đổi mật khẩu"),

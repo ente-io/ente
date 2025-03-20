@@ -10,18 +10,23 @@ static go binary.
 
 This document describes these approaches, and also outlines configuration.
 
--   [Run using Docker using a pre-built Docker image](docs/docker.md)
--   [Run using Docker but build an image from source](#build-and-run-using-docker)
--   [Running without Docker](#running-without-docker)
+-   **[Run using pre-built Docker images](quickstart/README.md)**
+-   [Run using Docker, building image from source](#build-and-run-using-docker)
+-   [Run without Docker](#running-without-docker)
+-   [External DB or S3](#pre-built-images)
 -   [Configuration](#configuration)
 
 If your mobile app is able to connect to your self hosted instance but is not
 able to view or upload images, see
 [help.ente.io/self-hosting/guides/configuring-s3](https://help.ente.io/self-hosting/guides/configuring-s3).
 
+## Run using pre-built Docker images
+
+See [quickstart/README.md](quickstart/README.md).
+
 ## Build and run using Docker
 
-Start the cluster
+Start the cluster (in the `ente/server` directory)
 
     docker compose up --build
 
@@ -46,20 +51,23 @@ Or interact with the MinIO S3 API
     AWS_ACCESS_KEY_ID=changeme AWS_SECRET_ACCESS_KEY=changeme1234 \
         aws s3 --endpoint-url http://localhost:3200 ls s3://b2-eu-cen
 
-Or open the MinIO dashboard at <http://localhost:3201> (user: changeme/password: changeme1234).
+Or open the MinIO dashboard at http://localhost:3201
+
+> [!NOTE]
+>
+> To avoid exposing unnecessary services, this port is not exposed by default.
+> You'll need to uncomment the corresponding port in your `compose.yaml` first.
+
+> [!WARNING]
+>
+> The default credentials are user changeme / password changeme1234. Goes
+> without saying, but remember to change them!
 
 > [!NOTE]
 >
 > While we've provided a MinIO based Docker compose file to make it easy for
 > people to get started, if you're running it in production we recommend using
 > an external S3.
-
-> [!NOTE]
->
-> If something seems amiss, ensure that Docker has read access to the parent
-> folder so that it can access credentials.yaml and other local files. On macOS,
-> you can do this by going to System Settings > Security & Privacy > Files and
-> Folders > Docker.
 
 ### Cleanup
 
@@ -175,6 +183,26 @@ For running the tests, you can use the following command:
 ```sh
 ENV="test" go test -v ./pkg/...
 go clean -testcache  && ENV="test" go test -v ./pkg/...
+```
+## Pre-built images
+
+## server
+
+If you have setup the database and object storage externally and only want to
+run Ente's server, you can just pull and run the image from
+**`ghcr.io/ente-io/server`**.
+
+```sh
+docker pull ghcr.io/ente-io/server
+```
+
+## web
+
+Similarly, there is a pre-built Docker image containing all the web apps which
+you can just pull and run the from **`ghcr.io/ente-io/web`**.
+
+```sh
+docker pull ghcr.io/ente-io/web
 ```
 
 ## Configuration

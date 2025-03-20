@@ -550,20 +550,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Modifier l\'e-mail"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Changer l\'emplacement des éléments sélectionnés ?"),
-        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
-            "Nous avons ajouté un journal de tous les fichiers qui ont été envoyés vers Ente, y compris les échecs et la file d\'attente."),
-        "changeLogBackupStatusTitle":
-            MessageLookupByLibrary.simpleMessage("Statut de la Sauvegarde"),
-        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
-            "Vous cherchez des photos de vos papiers d\'identité, des notes ou même des \"memes\" ? Rendez-vous dans l\'onglet de recherche et explorez la fonction Découverte. Grâce à notre recherche sémantique vous trouverez des photos qui pourraient être importantes pour vous.\\n\\nDisponible uniquement si vous avez activé l\'apprentissage automatique."),
-        "changeLogDiscoverTitle":
-            MessageLookupByLibrary.simpleMessage("Découverte"),
-        "changeLogMagicSearchImprovementContent":
-            MessageLookupByLibrary.simpleMessage(
-                "Nous avons amélioré la recherche magique pour qu\'elle soit beaucoup plus rapide. N\'attendez plus pour trouver ce que vous cherchez."),
-        "changeLogMagicSearchImprovementTitle":
-            MessageLookupByLibrary.simpleMessage(
-                "Amélioration de la recherche magique"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Modifier le mot de passe"),
         "changePasswordTitle":

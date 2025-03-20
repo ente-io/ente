@@ -535,19 +535,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("E-posta adresini değiştir"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Seçilen öğelerin konumu değiştirilsin mi?"),
-        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
-            "Ente\'ye yüklenen tüm dosyaların, hatalar ve sıraya alınanlar da dahil olmak üzere bir günlüğünü ekledik."),
-        "changeLogBackupStatusTitle":
-            MessageLookupByLibrary.simpleMessage("Yedekleme Durumu"),
-        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
-            "Kimlik kartlarınızın, notlarınızın ve hatta memlerinizin fotoğraflarını mı arıyorsunuz? Arama sekmesine gidin ve Keşfet\'e göz atın. Anlamsal aramamıza dayanarak, sizin için önemli olabilecek fotoğrafları bulabileceğiniz bir yerdir.\\n\\n Sadece Makine Öğrenimini etkinleştirdiyseniz kullanılabilir."),
-        "changeLogDiscoverTitle":
-            MessageLookupByLibrary.simpleMessage("Keşfet"),
-        "changeLogMagicSearchImprovementContent":
-            MessageLookupByLibrary.simpleMessage(
-                "Sihirli aramayı çok daha hızlı olacak şekilde geliştirdik, böylece aradığınızı bulmak için beklemek zorunda kalmazsınız."),
-        "changeLogMagicSearchImprovementTitle":
-            MessageLookupByLibrary.simpleMessage("Sihirli Arama İyileştirme"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Sifrenizi değiştirin"),
         "changePasswordTitle":

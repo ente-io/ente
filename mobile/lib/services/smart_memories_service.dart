@@ -4,6 +4,7 @@ import "dart:math" show Random, max, min;
 
 import "package:computer/computer.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
+import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:ml_linalg/vector.dart";
@@ -53,6 +54,8 @@ class SmartMemoriesService {
   static const _clipMemoryTypeQueryThreshold = 0.25;
 
   static const yearsBefore = 30;
+
+  static const minimumMemoryLength = 5;
 
   SmartMemoriesService();
 
@@ -137,9 +140,14 @@ class SmartMemoriesService {
           "clipMemoryTypeVectors": clipMemoryTypeVectors,
         },
       ) as MemoriesResult;
+      _logger.finest(
+        '${memoriesResult.memories.length} memories computed in computer $t',
+      );
+
       for (final memory in memoriesResult.memories) {
         memory.title = memory.createTitle(s, languageCode);
       }
+      _logger.finest('titles created for all memories $t');
       return memoriesResult;
     } catch (e, s) {
       _logger.severe("Error calculating smart memories", e, s);
@@ -342,6 +350,7 @@ class SmartMemoriesService {
     w?.log('allFiles setup');
 
     // Get ordered (random) list of important people
+    if (persons.isEmpty) return [];
     final personIdToPerson = <String, PersonEntity>{};
     final personIdToFaceIDs = <String, Set<String>>{};
     final personIdToFileIDs = <String, Set<int>>{};
@@ -385,6 +394,7 @@ class SmartMemoriesService {
       final personName = personIdToPerson[personID]!.data.name;
       w?.log('start with new person $personName');
       w?.log('personFilesToFaces setup');
+
       // Inside people loop, check for spotlight (Most likely every person will have a spotlight)
       final spotlightFiles = <EnteFile>[];
       for (final fileID in personFileIDs) {
@@ -395,7 +405,7 @@ class SmartMemoriesService {
           spotlightFiles.add(file);
         }
       }
-      if (spotlightFiles.length > 5) {
+      if (spotlightFiles.length > minimumMemoryLength) {
         final selectSpotlightMemories = await _bestSelectionPeople(
           spotlightFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
           fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -427,7 +437,7 @@ class SmartMemoriesService {
             youAndThemFiles.add(file);
           }
         }
-        if (youAndThemFiles.length > 5) {
+        if (youAndThemFiles.length > minimumMemoryLength) {
           // final String title = "You and $personName";
           final selectYouAndThemMemories = await _bestSelectionPeople(
             youAndThemFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
@@ -483,7 +493,7 @@ class SmartMemoriesService {
               }
             }
           }
-          if (activityFiles.length > 5) {
+          if (activityFiles.length > minimumMemoryLength) {
             final selectActivityMemories = await _bestSelectionPeople(
               activityFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
               fileIDToImageEmbedding: fileIDToImageEmbedding,
@@ -574,13 +584,29 @@ class SmartMemoriesService {
       final personMemories = personToMemories[personID];
       if (personID == meID || personMemories == null) continue;
       final person = personIdToPerson[personID]!;
+
+      // Check if we should surface memory based on last met
+      final lastMetMemory =
+          personMemories[PeopleMemoryType.lastTimeYouSawThem]?.first;
+      if (lastMetMemory != null) {
+        final lastMetTime = DateTime.fromMicrosecondsSinceEpoch(
+          lastMetMemory.lastCreationTime!,
+        ).copyWith(year: currentTime.year);
+        final daysSinceLastMet = lastMetTime.difference(currentTime).inDays;
+        if (daysSinceLastMet < 7 && daysSinceLastMet >= 0) {
+          memoryResults.add(lastMetMemory);
+        }
+        // Don't surface birthday when person hasn't been seen in a while (could be passed away)
+        continue;
+      }
+
       // Check if we should surface memory based on birthday
       final birthdate = DateTime.tryParse(person.data.birthDate ?? "");
       if (birthdate != null) {
         final thisBirthday =
             DateTime(currentTime.year, birthdate.month, birthdate.day);
         final daysTillBirthday = thisBirthday.difference(currentTime).inDays;
-        if (daysTillBirthday < 7 && daysTillBirthday >= 0) {
+        if (daysTillBirthday < 6 && daysTillBirthday >= 0) {
           final int newAge = currentTime.year - birthdate.year;
           final spotlightMem =
               personMemories[PeopleMemoryType.spotlight]?.first;
@@ -591,7 +617,7 @@ class SmartMemoriesService {
                 isBirthday: false,
                 newAge: newAge,
                 firstDateToShow: thisBirthday
-                    .subtract(const Duration(days: 6))
+                    .subtract(const Duration(days: 5))
                     .microsecondsSinceEpoch,
                 lastDateToShow: thisBirthday.microsecondsSinceEpoch,
               ),
@@ -612,7 +638,7 @@ class SmartMemoriesService {
             memoryResults.add(
               youAndThemMem.copyWith(
                 firstDateToShow: thisBirthday
-                    .subtract(const Duration(days: 6))
+                    .subtract(const Duration(days: 5))
                     .microsecondsSinceEpoch,
                 lastDateToShow:
                     thisBirthday.add(kDayItself).microsecondsSinceEpoch,
@@ -622,24 +648,10 @@ class SmartMemoriesService {
           continue;
         }
       }
-
-      // Check if we should surface memory based on last met
-      final lastMetMemory =
-          personMemories[PeopleMemoryType.lastTimeYouSawThem]?.first;
-      if (lastMetMemory != null) {
-        final lastMetTime = DateTime.fromMicrosecondsSinceEpoch(
-          lastMetMemory.lastCreationTime!,
-        ).copyWith(year: currentTime.year);
-        final daysSinceLastMet = lastMetTime.difference(currentTime).inDays;
-        if (daysSinceLastMet < 7 && daysSinceLastMet >= 0) {
-          memoryResults.add(lastMetMemory);
-        }
-      }
     }
     w?.log('relevancy setup');
 
     // Loop through the people (and memory types) and add based on rotation
-    if (memoryResults.length >= 3) return memoryResults;
     peopleRotationLoop:
     for (final personID in orderedImportantPersonsID) {
       for (final memory in memoryResults) {
@@ -760,7 +772,7 @@ class SmartMemoriesService {
 
     // Loop through the clip types and add based on rotation
     clipMemoriesLoop:
-    for (final clipMemoryType in ClipMemoryType.values..shuffle()) {
+    for (final clipMemoryType in [...ClipMemoryType.values]..shuffle()) {
       final clipMemory = clipTypeToMemory[clipMemoryType];
       if (clipMemory == null) continue;
       for (final shownLog in shownClip) {
@@ -1213,7 +1225,7 @@ class SmartMemoriesService {
   }
 
   static Future<List<TimeMemory>> _onThisDayOrWeekResults(
-    Iterable<EnteFile> allFiles,
+    Set<EnteFile> allFiles,
     DateTime currentTime, {
     required Map<int, int> seenTimes,
     required Map<int, List<FaceWithoutEmbedding>> fileIdToFaces,
@@ -1387,6 +1399,7 @@ class SmartMemoriesService {
 
     // Group files by month and year
     final currentMonthYearGroups = <int, List<Memory>>{};
+    _deductUsedMemories(allFiles, memoryResult);
     for (final file in allFiles) {
       if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) continue;
 
@@ -1517,6 +1530,17 @@ class SmartMemoriesService {
       memoryResults.add(fillerMemory);
     }
     return memoryResults;
+  }
+
+  static String getDateFormatted({
+    required int creationTime,
+    BuildContext? context,
+  }) {
+    return DateFormat.yMMMd(
+      context != null ? Localizations.localeOf(context).languageCode : "en",
+    ).format(
+      DateTime.fromMicrosecondsSinceEpoch(creationTime),
+    );
   }
 
   /// TODO: lau: replace this by just taking next 7 days

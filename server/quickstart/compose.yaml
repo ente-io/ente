@@ -2,13 +2,9 @@
 
 services:
   museum:
-    build:
-      context: .
-      args:
-        GIT_COMMIT: development-cluster
+    image: ghcr.io/ente-io/server
     ports:
       - 8080:8080 # API
-      # - 2112:2112 # Prometheus metrics (uncomment to access externally)
     depends_on:
       postgres:
         condition: service_healthy
@@ -22,11 +18,38 @@ services:
       - ./data:/data:ro
 
   # Resolve "localhost:3200" in the museum container to the minio container.
-  socat:
+  socat-museum-3200:
     image: alpine/socat
     network_mode: service:museum
     depends_on: [museum]
     command: "TCP-LISTEN:3200,fork,reuseaddr TCP:minio:3200"
+
+  web:
+    image: ghcr.io/ente-io/web
+    # Uncomment what you need to tweak.
+    ports:
+      - 3000:3000 # Photos web app
+      # - 3001:3001 # Accounts
+      - 3002:3002 # Public albums
+      # - 3003:3003 # Auth
+      # - 3004:3004 # Cast
+    # environment:
+    #   ENTE_API_ORIGIN: http://localhost:8080
+    #   ENTE_ALBUMS_ORIGIN: https://localhost:3002
+
+  # Resolve "localhost:3200" in the web container to the minio container.
+  socat-web-3200:
+    image: alpine/socat
+    network_mode: service:web
+    depends_on: [web]
+    command: "TCP-LISTEN:3200,fork,reuseaddr TCP:minio:3200"
+
+  # Resolve "localhost:8080" in the web container to the museum container.
+  socat-web-8080:
+    image: alpine/socat
+    network_mode: service:web
+    depends_on: [web]
+    command: "TCP-LISTEN:8080,fork,reuseaddr TCP:minio:8080"
 
   postgres:
     image: postgres:15
@@ -34,7 +57,6 @@ services:
       POSTGRES_USER: pguser
       POSTGRES_PASSWORD: pgpass
       POSTGRES_DB: ente_db
-    # Wait for postgres to accept connections before starting museum.
     healthcheck:
       test: pg_isready -q -d ente_db -U pguser
       start_period: 40s
@@ -46,7 +68,6 @@ services:
     image: minio/minio
     ports:
       - 3200:3200 # MinIO API
-      # - 3201:3201 # MinIO Console (uncomment to access externally)
     environment:
       MINIO_ROOT_USER: changeme
       MINIO_ROOT_PASSWORD: changeme1234

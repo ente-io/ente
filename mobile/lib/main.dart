@@ -39,7 +39,6 @@ import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
-import 'package:photos/services/memories_service.dart';
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/push_service.dart';
@@ -111,9 +110,6 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
-    if (Platform.isAndroid) {
-      unawaited(_scheduleFGHomeWidgetSync());
-    }
     unawaited(_scheduleFGSync('appStart in FG'));
   });
 }
@@ -127,7 +123,7 @@ ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
 
 Future<void> _homeWidgetSync() async {
   try {
-    await HomeWidgetService.instance.initHomeWidget(false, true);
+    await HomeWidgetService.instance.initHomeWidget();
   } catch (e, s) {
     _logger.severe("Error in initSlideshowWidget", e, s);
   }
@@ -244,7 +240,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("CollectionsService init done $tlog");
 
     FavoritesService.instance.initFav().ignore();
-    MemoriesService.instance.init(preferences);
     LocalFileUpdateService.instance.init(preferences);
     SearchService.instance.init();
     FileDataService.instance.init(preferences);
@@ -259,13 +254,17 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("LocalSyncService init done $tlog");
 
     RemoteSyncService.instance.init(preferences);
+    _logger.info("RemoteFileMLService done $tlog");
 
     _logger.info("SyncService init $tlog");
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
-    _logger.info("RemoteFileMLService done $tlog");
-    unawaited(HomeWidgetService.instance.initHomeWidget(isBackground));
+    await HomeWidgetService.instance.init(preferences);
+
+    if (!isBackground) {
+      await _scheduleFGHomeWidgetSync();
+    }
 
     if (Platform.isIOS) {
       // ignore: unawaited_futures

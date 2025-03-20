@@ -511,19 +511,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Змінити адресу пошти"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
             "Змінити розташування вибраних елементів?"),
-        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
-            "Ми додали журнал всіх файлів, які були завантажені на Ente, включаючи помилки та поставлені в чергу."),
-        "changeLogBackupStatusTitle":
-            MessageLookupByLibrary.simpleMessage("Стан резервних копій"),
-        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
-            "Шукаєте фотографії своїх посвідчень особи, нотаток або навіть мемів? Перейдіть на вкладку «Пошук» і перевірте «Дізнайтеся». На основі нашого семантичного пошуку тут можна знайти фотографії, які можуть бути важливими для вас.\\n\\nДоступно лише за умови увімкненого машинного навчання."),
-        "changeLogDiscoverTitle":
-            MessageLookupByLibrary.simpleMessage("Дізнайтеся"),
-        "changeLogMagicSearchImprovementContent":
-            MessageLookupByLibrary.simpleMessage(
-                "Ми вдосконалили магічний пошук, щоб він став набагато швидше, тож вам не доведеться чекати, щоб знайти те, що хочеться."),
-        "changeLogMagicSearchImprovementTitle":
-            MessageLookupByLibrary.simpleMessage("Покращення магічного пошуку"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Змінити пароль"),
         "changePasswordTitle":
