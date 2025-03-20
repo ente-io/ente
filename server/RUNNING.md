@@ -8,12 +8,13 @@ environment that doesn't clutter your machine.
 You can also run museum directly on your machine if you wish - it is a single
 static go binary.
 
-This document describes these approaches, and also outlines configuration.
+This document describes these different approaches (you can choose any one), and
+also outlines configuration.
 
--   **[Run using pre-built Docker images](quickstart/README.md)**
+-   [Run using pre-built Docker images](quickstart/README.md)
 -   [Run using Docker, building image from source](#build-and-run-using-docker)
+-   [Run with Docker, à la carte](#pre-built-images)
 -   [Run without Docker](#running-without-docker)
--   [External DB or S3](#pre-built-images)
 -   [Configuration](#configuration)
 
 If your mobile app is able to connect to your self hosted instance but is not
@@ -22,7 +23,11 @@ able to view or upload images, see
 
 ## Run using pre-built Docker images
 
-See [quickstart/README.md](quickstart/README.md).
+```sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/HEAD/server/quickstart.sh)"
+```
+
+For more details, see [quickstart/README.md](quickstart/README.md).
 
 ## Build and run using Docker
 
@@ -88,6 +93,27 @@ You can spin up independent clusters, each with its own volumes, by using the
 Each time museum gets rebuilt from source, a new image gets created but the old
 one is retained as a dangling image. You can use `docker image prune --force`,
 or `docker system prune` if that's fine with you, to remove these.
+
+## Pre-built images
+
+## server
+
+If you have setup the database and object storage externally and only want to
+run Ente's server, you can just pull and run the image from
+**`ghcr.io/ente-io/server`**.
+
+```sh
+docker pull ghcr.io/ente-io/server
+```
+
+## web
+
+Similarly, there is a pre-built Docker image containing all the web apps which
+you can just pull and run the from **`ghcr.io/ente-io/web`**.
+
+```sh
+docker pull ghcr.io/ente-io/web
+```
 
 ## Running without Docker
 
@@ -183,26 +209,6 @@ For running the tests, you can use the following command:
 ```sh
 ENV="test" go test -v ./pkg/...
 go clean -testcache  && ENV="test" go test -v ./pkg/...
-```
-## Pre-built images
-
-## server
-
-If you have setup the database and object storage externally and only want to
-run Ente's server, you can just pull and run the image from
-**`ghcr.io/ente-io/server`**.
-
-```sh
-docker pull ghcr.io/ente-io/server
-```
-
-## web
-
-Similarly, there is a pre-built Docker image containing all the web apps which
-you can just pull and run the from **`ghcr.io/ente-io/web`**.
-
-```sh
-docker pull ghcr.io/ente-io/web
 ```
 
 ## Configuration
