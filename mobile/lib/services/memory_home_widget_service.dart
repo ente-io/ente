@@ -21,7 +21,7 @@ class MemoryHomeWidgetService {
   bool _hasSyncedMemory = false;
 
   static const memoryChangedKey = "memoryChanged.widget";
-  static const totalSet = "totalSet";
+  static const totalMemories = "totalMemories";
 
   init(SharedPreferences prefs) {
     _prefs = prefs;
@@ -135,7 +135,7 @@ class MemoryHomeWidgetService {
   Future<void> _updateWidget({String? text}) async {
     await HomeWidgetService.instance.updateWidget(
       androidClass: "EnteMemoryWidgetProvider",
-      iOSClass: "SlideshowWidget",
+      iOSClass: "EnteMemoryWidget",
     );
     if (flagService.internalUser) {
       await Fluttertoast.showToast(
@@ -168,11 +168,11 @@ class MemoryHomeWidgetService {
   }
 
   Future<int?> _getTotal() async {
-    return HomeWidgetService.instance.getData<int>(totalSet);
+    return HomeWidgetService.instance.getData<int>(totalMemories);
   }
 
   Future<void> _setTotal(int? total) async =>
-      await HomeWidgetService.instance.setData(totalSet, total);
+      await HomeWidgetService.instance.setData(totalMemories, total);
 
   Future<void> _lockAndLoadMemories() async {
     final files = await _getMemories();
@@ -188,7 +188,7 @@ class MemoryHomeWidgetService {
     for (final i in files.entries) {
       for (final file in i.value) {
         final value = await HomeWidgetService.instance
-            .renderFile(file, "slideshow_$index", i.key)
+            .renderFile(file, "memory_widget_$index", i.key)
             .catchError(
           (e, sT) {
             _logger.severe("Error rendering widget", e, sT);
