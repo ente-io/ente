@@ -2,11 +2,8 @@
 #
 # Ente self-host quickstart helper script.
 #
-# Usage:
-# sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
-#
-# Docs:
-# https://github.com/ente-io/ente/blob/main/server/quickstart/README.md
+# Usage: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
+# Docs: https://github.com/ente-io/ente/blob/main/server/docs/quickstart.md
 
 set -e
 
@@ -76,7 +73,7 @@ printf " \033[1;32mT\033[0m   Created museum.yaml\n"
 
 printf " \033[1;32mE\033[0m   Starting docker compose\n"
 printf "\nAfter the cluster has started, open web app at \033[1mhttp://localhost:3000\033[0m\n"
-printf "For more details, see https://github.com/ente-io/ente/blob/main/server/quickstart/README.md\n\n"
+printf "(Verification code will be in the logs here)\n\n"
 
 sleep 1
 
