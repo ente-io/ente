@@ -229,8 +229,8 @@ struct EnteMemoryWidget: Widget {
                     .background()
             }
         }
-        .configurationDisplayName("Slideshow Album")
-        .description("This provides slideshow of memories.")
+        .configurationDisplayName("Your memories")
+        .description("See special moments from the past.")
         .contentMarginsDisabled()
     }
 }
