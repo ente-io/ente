@@ -32,8 +32,8 @@ fi
 
 if test -d my-ente
 then
-    printf "ERROR: A directory named 'my-ente' already exists.\n"
-    printf "       Aborting script to avoid accidentally overwriting user data.\n"
+    printf "ERROR: The 'my-ente' directory already exists. To start your instance again:\n\n"
+    printf "    \033[1mcd my-ente && docker compose up\033[0m\n\n"
     exit 1
 fi
 
@@ -60,7 +60,8 @@ museum_hash=`gen_hash`
 museum_jwt_secret=`gen_jwt_secret`
 
 mkdir my-ente && cd my-ente
-printf " \033[1;32mE\033[0m   Created directory my-ente\n"
+printf " \033[1;32mE\033[0m   Created directory \033[1mmy-ente\033[0m\n"
+sleep 1
 
 cat <<EOF >compose.yaml
 services:
@@ -76,7 +77,7 @@ services:
       - ./data:/data:ro
 
   # Resolve "localhost:3200" in the museum container to the minio container.
-  socat-museum-3200:
+  socat:
     image: alpine/socat
     network_mode: service:museum
     depends_on: [museum]
@@ -141,7 +142,8 @@ volumes:
   minio-data:
 EOF
 
-printf " \033[1;32mN\033[0m   Created compose.yaml\n"
+printf " \033[1;32mN\033[0m   Created \033[1mcompose.yaml\033[0m\n"
+sleep 1
 
 cat <<EOF >museum.yaml
 key:
@@ -181,7 +183,8 @@ s3:
          bucket: scw-eu-fr-v3
 EOF
 
-printf " \033[1;32mT\033[0m   Created museum.yaml\n"
+printf " \033[1;32mT\033[0m   Created \033[1mmuseum.yaml\033[0m\n"
+sleep 1
 
 printf " \033[1;32mE\033[0m   Starting docker compose\n"
 printf "\nAfter the cluster has started, open web app at \033[1mhttp://localhost:3000\033[0m\n"

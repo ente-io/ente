@@ -71,7 +71,7 @@ Subsequently, whenever you want to start the cluster, you can go back to the
 same directory and run `docker compose up` again.
 
 ```sh
-cd /path/to/my-ente # Or whichever directory you created
+cd /path/to/my-ente # Where you ran the quickstart script originally
 docker compose up
 ```
 
@@ -96,16 +96,23 @@ on your system. All persistent data is saved in volumes managed by Docker.
 > [!CAUTION]
 >
 > If you delete the `my-ente` folder, the volumes will still persist. So if you
-> want to recreate everything from scratch, you can clear these Docker volumes
-> (`my-ente_postgres-data` and `my-ente_minio-data`) by
+> want to recreate everything from scratch, you can clear these volumes by
 >
 > ```sh
 > cd /path/to/my-ente
 > docker compose down --volumes
 > ```
 >
-> Beware that this will permanently remove these volumes, including any photos
-> you added to your self hosted instance.
+> **Be careful** when doing so, making sure you run the command in the correct
+> directory as the volumes will be permanently removed, including any photos you
+> added to your self hosted instance.
+
+> [!TIP]
+>
+> If you're getting errors like `pq: password authentication failed` when
+> starting museum, one possibility is that you're recreating the `my-ente`
+> folder but still have leftover volumes (`my-ente_postgres-data` and
+> `my-ente_minio-data` from a previous attempt).
 
 ### Caveat
 
