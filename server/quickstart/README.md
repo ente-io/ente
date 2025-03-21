@@ -93,17 +93,14 @@ docker compose down
 
 This sample setup is only intended to make it easy for people to get started. If
 you're intending to use your self hosted instance for serious purposes, we
-strongly recommend understanding all the moving parts. Some particular things to
-call out:
+strongly recommend understanding all the moving parts, and consider if you
+should use an external S3 (/ DB) instead of the quickstart samples.
 
-1. Remember to change all hardcoded credentials.
-
-2. Consider if you should use an external DB or an external S3 instead of the
-   provided quickstart sample.
-
-3. Keep a plaintext backup of your photos until you are sure of what you are
-   doing and have a [backup
-   strategy](https://help.ente.io/self-hosting/faq/backup) worked out.
+> [!IMPORTANT]
+>
+> Keep a plaintext backup of your photos until you are sure of what you are
+> doing and have a [backup
+> strategy](https://help.ente.io/self-hosting/faq/backup) worked out.
 
 ## Next steps
 
