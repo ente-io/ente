@@ -68,6 +68,10 @@ class MemoryHomeWidgetService {
     }
 
     await _memoryForceRefreshLock.synchronized(() async {
+      final result = await hasAnyBlockers();
+      if (result) {
+        return;
+      }
       final isTotalEmpty = await _checkIfTotalEmpty();
       forceFetchNewMemories ??= await getForceFetchCondition(isTotalEmpty);
 
@@ -138,13 +142,11 @@ class MemoryHomeWidgetService {
       return {};
     }
 
-    // flatten the memories to a list of files and take first 50
-    final files = memories.take(50).toList().asMap().map(
-          (k, v) => MapEntry(
-            v.title,
-            v.memories.map((e) => e.file),
-          ),
-        );
+    final files = Map.fromEntries(
+      memories.map((m) {
+        return MapEntry(m.title, m.memories.map((e) => e.file).toList());
+      }).take(50),
+    );
 
     return files;
   }

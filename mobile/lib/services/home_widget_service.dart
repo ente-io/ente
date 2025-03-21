@@ -101,11 +101,13 @@ class HomeWidgetService {
 
       await setData(key, path);
 
+      final subText = await SmartMemoriesService.getDateFormattedLocale(
+        creationTime: ogFile.creationTime!,
+      );
+
       final data = {
         "title": title,
-        "subText": SmartMemoriesService.getDateFormatted(
-          creationTime: ogFile.creationTime!,
-        ),
+        "subText": subText,
         "generatedId": ogFile.generatedID!,
       };
       if (Platform.isIOS) {
