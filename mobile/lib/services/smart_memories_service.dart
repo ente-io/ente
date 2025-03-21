@@ -1543,15 +1543,6 @@ class SmartMemoriesService {
     return memoryResults;
   }
 
-  static String getTitle(EnteFile? file, S s) {
-    if (file == null) return '';
-    final present = DateTime.now();
-    final then = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-    final diffInYears = present.year - then.year;
-
-    return s.yearsAgo(diffInYears);
-  }
-
   static Future<String> getDateFormattedLocale({
     required int creationTime,
   }) async {
