@@ -1,8 +1,8 @@
 # Running Museum
 
-You can run a Docker compose cluster containing museum and the essential
-auxiliary services it requires (database and object storage). This is the
-easiest and simplest way to get started, and also provides an isolated
+You can run a Docker compose cluster containing museum, the web app, and the
+essential auxiliary services it requires (database and object storage). This is
+the easiest and simplest way to get started, and also provides an isolated
 environment that doesn't clutter your machine.
 
 You can also run museum directly on your machine if you wish - it is a single
@@ -17,17 +17,13 @@ also outlines configuration.
 -   [Run without Docker](#running-without-docker)
 -   [Configuration](#configuration)
 
-If your mobile app is able to connect to your self hosted instance but is not
-able to view or upload images, see
-[help.ente.io/self-hosting/guides/configuring-s3](https://help.ente.io/self-hosting/guides/configuring-s3).
-
 ## Run using pre-built Docker images
 
 ```sh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
 ```
 
-For more details, see [quickstart/README.md](quickstart/README.md).
+For more details, see [docs/quickstart.md](docs/quickstart.md).
 
 ## Build and run using Docker
 
@@ -230,3 +226,9 @@ a config file later on.
 
 The keys and values supported by this configuration file are documented in
 [configurations/local.yaml](configurations/local.yaml).
+
+> [!TIP]
+>
+> If your mobile app is able to connect to your self hosted instance but is not
+able to view or upload images, see
+[help.ente.io/self-hosting/guides/configuring-s3](https://help.ente.io/self-hosting/guides/configuring-s3).

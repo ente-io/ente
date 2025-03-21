@@ -12,6 +12,11 @@ verification code by:
 
 - Reading it from the DB (otts table)
 
+> [!TIP]
+>
+> You can also configure your instance to send out emails so that you can get
+> your verification code via emails by using the `smtp` section in the config.
+
 You can also set pre-defined hardcoded OTTs for certain users when running
 locally by creating a `museum.yaml` and adding the `internal.hardcoded-ott`
 configuration setting to it. See

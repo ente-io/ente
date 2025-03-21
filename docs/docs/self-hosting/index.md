@@ -25,14 +25,13 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/q
 
 > [!TIP]
 >
-> For more details about what this does, or if you would rather do the same
-> steps manually, see
-> [the quickstart README](https://github.com/ente-io/ente/blob/main/server/quickstart/README.md).
+> For more details about what this does, see [the quickstart
+> README](https://github.com/ente-io/ente/blob/main/server/docs/quickstart.md).
 
 That's about it. If you open http://localhost:3000, you will be able to create
 an account on a Ente Photos web app running on your machine, and this web app
 will be connecting to the server running on your local machine at
-`localhost:8080`.
+`localhost:8080`. The verification code will be shown in the server logs.
 
 For the mobile or desktop apps, you don't even need to build, and can install
 normal Ente apps and configure them to use your
