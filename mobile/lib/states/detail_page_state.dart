@@ -11,6 +11,9 @@ class InheritedDetailPageState extends InheritedWidget {
   static InheritedDetailPageState of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<InheritedDetailPageState>()!;
 
+  static InheritedDetailPageState? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<InheritedDetailPageState>();
+
   void toggleFullScreen({bool? shouldEnable}) {
     if (shouldEnable != null) {
       if (enableFullScreenNotifier.value == shouldEnable) return;
