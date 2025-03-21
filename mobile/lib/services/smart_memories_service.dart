@@ -118,8 +118,8 @@ class SmartMemoriesService {
       }
       _logger.finest('clipPositiveTextVector and clipPeopleActivityVectors $t');
 
-      final locale = await getLocale();
-      final languageCode = locale?.languageCode ?? "en";
+      final local = await getLocale();
+      final languageCode = local?.languageCode ?? "en";
       final s = await LanguageService.s;
 
       _logger.finest('get locale and S $t');
