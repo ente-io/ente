@@ -56,10 +56,8 @@ gen_key () { head -c 32 /dev/urandom | base64 -w 0 }
 # crypto_generichash_BYTES_MAX = 64
 gen_hash () { head -c 64 /dev/urandom | base64 -w 0 }
 
-# Like gen_key but sodium_base64_VARIANT_URLSAFE which replaces "+/" with "-_"
-gen_jwt_secret () {
-  head -c 32 /dev/urandom | base64 -w 0 | sed -e 's,+,-,g' -e 's,/,_,g'
-}
+# Like gen_key but sodium_base64_VARIANT_URLSAFE which converts + to -, / to _
+gen_jwt_secret () { head -c 32 /dev/urandom | base64 -w 0 | tr '+/' '-_' }
 
 replace_in_compose () {
    sed "$1" compose.yaml > compose.yaml.new
