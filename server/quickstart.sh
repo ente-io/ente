@@ -49,12 +49,16 @@ curl -fsSOL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstar
 printf " \033[1;32mN\033[0m   Fetched compose.yaml\n"
 
 gen_password () { head -c 12 /dev/urandom | base64 -w 0 }
-gen_key () { head -c 32 /dev/urandom | base64 -w 0 } # crypto_secretbox_KEYBYTES = 32
-gen_hash () { head -c 64 /dev/urandom | base64 -w 0 } # crypto_generichash_BYTES_MAX = 64
 
-# Same as gen_key, but sodium_base64_VARIANT_URLSAFE (TODO)
+# crypto_secretbox_KEYBYTES = 32
+gen_key () { head -c 32 /dev/urandom | base64 -w 0 }
+
+# crypto_generichash_BYTES_MAX = 64
+gen_hash () { head -c 64 /dev/urandom | base64 -w 0 }
+
+# Like gen_key but sodium_base64_VARIANT_URLSAFE which replaces "+/" with "-_"
 gen_jwt_secret () {
-  head -c 32 /dev/urandom | base64 -w 0
+  head -c 32 /dev/urandom | base64 -w 0 | sed -e 's,+,-,g' -e 's,/,_,g'
 }
 
 replace_in_compose () {
