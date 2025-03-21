@@ -159,19 +159,22 @@ class LocalImportService {
 
   Future<void> _loadCache() async {
     if (_localAssetsCache == null) {
-      await _lock.synchronized(() async {
-        if (_localAssetsCache == null) {
-          final List<AssetPathEntity> paths = await localDB.getAssetPaths();
-          final List<AssetEntity> assets = await localDB.getAssets();
-          final Map<String, Set<String>> pathToAssetIDs =
-              await localDB.pathToAssetIDs();
-          _localAssetsCache = LocalAssetsCache(
-            assetPaths: Map.fromEntries(paths.map((e) => MapEntry(e.id, e))),
-            assets: Map.fromEntries(assets.map((e) => MapEntry(e.id, e))),
-            pathToAssetIDs: pathToAssetIDs,
-          );
-        }
-      });
+      await _lock.synchronized(
+        () async {
+          if (_localAssetsCache == null) {
+            final List<AssetPathEntity> paths = await localDB.getAssetPaths();
+            final List<AssetEntity> assets = await localDB.getAssets();
+            final Map<String, Set<String>> pathToAssetIDs =
+                await localDB.pathToAssetIDs();
+            _localAssetsCache = LocalAssetsCache(
+              assetPaths: Map.fromEntries(paths.map((e) => MapEntry(e.id, e))),
+              assets: Map.fromEntries(assets.map((e) => MapEntry(e.id, e))),
+              pathToAssetIDs: pathToAssetIDs,
+            );
+          }
+        },
+        timeout: const Duration(seconds: 10),
+      );
     }
   }
 
@@ -192,27 +195,22 @@ class LocalImportService {
     IncrementalDiffWithOnDevice? incrementalDiff,
     FullDiffWithOnDevice? fullDiff,
   }) async {
-    await _lock.synchronized(
-      () async {
-        if (incrementalDiff != null) {
-          await localDB.insertAssets(incrementalDiff.assets);
-          await localDB.insertDBPaths(incrementalDiff.addedOrModifiedPaths);
-          await localDB
-              .insertPathToAssetIDs(incrementalDiff.newOrUpdatedPathToLocalIDs);
-
-        } else if (fullDiff != null) {
-          await Future.wait([
-            localDB.deleteAssets(fullDiff.extraAssetIDsInApp),
-            localDB.deletePaths(fullDiff.extraPathIDsInApp),
-          ]);
-          await localDB.insertAssets(fullDiff.missingAssetsInApp);
-          await localDB.insertPathToAssetIDs(
-            fullDiff.updatePathToLocalIDs,
-            clearOldMappingsIdsInInput: true,
-          );
-        }
-      },
-    );
+    if (incrementalDiff != null) {
+      await localDB.insertAssets(incrementalDiff.assets);
+      await localDB.insertDBPaths(incrementalDiff.addedOrModifiedPaths);
+      await localDB
+          .insertPathToAssetIDs(incrementalDiff.newOrUpdatedPathToLocalIDs);
+    } else if (fullDiff != null) {
+      await Future.wait([
+        localDB.deleteAssets(fullDiff.extraAssetIDsInApp),
+        localDB.deletePaths(fullDiff.extraPathIDsInApp),
+      ]);
+      await localDB.insertAssets(fullDiff.missingAssetsInApp);
+      await localDB.insertPathToAssetIDs(
+        fullDiff.updatePathToLocalIDs,
+        clearOldMappingsIdsInInput: true,
+      );
+    }
   }
 
   void _registerChangeCallback() {
