@@ -315,6 +315,13 @@ class SmartMemoriesService {
     final seenTimes = await _memoriesDB.getSeenTimes();
     final fillerMemories =
         await _getFillerResults(allFiles, now, seenTimes: seenTimes);
+    final local = await getLocale();
+    final languageCode = local?.languageCode ?? "en";
+    final s = await S.load(local!);
+    _logger.finest('get locale and S');
+    for (final memory in fillerMemories) {
+      memory.title = memory.createTitle(s, languageCode);
+    }
     return fillerMemories;
   }
 
