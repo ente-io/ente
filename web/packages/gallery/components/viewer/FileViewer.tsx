@@ -827,8 +827,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     }, [handleClose, files]);
 
     useEffect(() => {
-        psRef.current?.refreshCurrentSlideFavoriteButtonIfNeeded();
-    }, [favoriteFileIDs, pendingFavoriteUpdates]);
+        if (open) {
+            psRef.current?.refreshCurrentSlideFavoriteButtonIfNeeded();
+        }
+    }, [favoriteFileIDs, pendingFavoriteUpdates, open]);
 
     useEffect(() => {
         if (open) {
@@ -840,7 +842,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 disableDownload,
                 haveUser,
                 delegate: delegateRef.current!,
-                onClose: handleClose,
+                onClose: () => {
+                    if (psRef.current) handleClose();
+                },
                 onAnnotate: handleAnnotate,
                 onViewInfo: handleViewInfo,
                 onDownload: handleDownloadBarAction,
