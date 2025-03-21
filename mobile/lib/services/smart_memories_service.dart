@@ -13,7 +13,6 @@ import "package:photos/core/constants.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/base_location.dart";
 import "package:photos/models/file/file.dart";
@@ -317,9 +316,11 @@ class SmartMemoriesService {
     final seenTimes = await _memoriesDB.getSeenTimes();
     final fillerMemories =
         await _getFillerResults(allFiles, now, seenTimes: seenTimes);
+
     final local = await getLocale();
     final languageCode = local?.languageCode ?? "en";
-    final s = await S.load(local!);
+    final s = await LanguageService.s;
+
     _logger.finest('get locale and S');
     for (final memory in fillerMemories) {
       memory.title = memory.createTitle(s, languageCode);
