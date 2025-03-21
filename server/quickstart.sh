@@ -39,13 +39,9 @@ fi
 
 printf "\n - \033[1mH E L L O\033[0m - \033[1;32mE N T E\033[0m -\n\n"
 
-mkdir my-ente && cd my-ente
-printf " \033[1;32mE\033[0m   Created directory my-ente\n"
+gen_user_suffix () { head -c 6 /dev/urandom | base64 -w 0; }
 
-curl -fsSOL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart/compose.yaml
-printf " \033[1;32mN\033[0m   Fetched compose.yaml\n"
-
-gen_password () { head -c 12 /dev/urandom | base64 -w 0; }
+gen_password () { head -c 21 /dev/urandom | base64 -w 0; }
 
 # crypto_secretbox_KEYBYTES = 32
 gen_key () { head -c 32 /dev/urandom | base64 -w 0; }
@@ -56,19 +52,135 @@ gen_hash () { head -c 64 /dev/urandom | base64 -w 0; }
 # Like gen_key but sodium_base64_VARIANT_URLSAFE which converts + to -, / to _
 gen_jwt_secret () { head -c 32 /dev/urandom | base64 -w 0 | tr '+/' '-_'; }
 
-replace_in_compose () {
-   sed "$1" compose.yaml > compose.yaml.new
-   mv compose.yaml.new compose.yaml
-}
+pg_pass=`gen_password`
+minio_user=minio-user-$(gen_user_suffix)
+minio_pass=`gen_password`
+museum_key=`gen_key`
+museum_hash=`gen_hash`
+museum_jwt_secret=`gen_jwt_secret`
 
-replace_in_compose "s,changeme1234,$(gen_password),g"
-replace_in_compose "s,changeme,minio-user,g"
-replace_in_compose "s,pgpass,$(gen_password),g"
-replace_in_compose "s,yvmG/RnzKrbCb9L3mgsmoxXr9H7i2Z4qlbT0mL3ln4w=,$(gen_key),"
-replace_in_compose "s,KXYiG07wC7GIgvCSdg+WmyWdXDAn6XKYJtp/wkEU7x573+byBRAYtpTP0wwvi8i/4l37uicX1dVTUzwH3sLZyw==,$(gen_hash),"
-replace_in_compose "s,i2DecQmfGreG6q1vBj5tCokhlN41gcfS2cjOs9Po-u8=,$(gen_jwt_secret),"
+mkdir my-ente && cd my-ente
+printf " \033[1;32mE\033[0m   Created directory my-ente\n"
 
-touch museum.yaml
+cat <<EOF >compose.yaml
+services:
+  museum:
+    image: ghcr.io/ente-io/server
+    ports:
+      - 8080:8080 # API
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./museum.yaml:/museum.yaml:ro
+      - ./data:/data:ro
+
+  # Resolve "localhost:3200" in the museum container to the minio container.
+  socat-museum-3200:
+    image: alpine/socat
+    network_mode: service:museum
+    depends_on: [museum]
+    command: "TCP-LISTEN:3200,fork,reuseaddr TCP:minio:3200"
+
+  web:
+    image: ghcr.io/ente-io/web
+    # Uncomment what you need to tweak.
+    ports:
+      - 3000:3000 # Photos web app
+      # - 3001:3001 # Accounts
+      - 3002:3002 # Public albums
+      # - 3003:3003 # Auth
+      # - 3004:3004 # Cast
+    # environment:
+    #   ENTE_API_ORIGIN: http://localhost:8080
+    #   ENTE_ALBUMS_ORIGIN: https://localhost:3002
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: pg-user
+      POSTGRES_PASSWORD: $pg_pass
+      POSTGRES_DB: ente_db
+    healthcheck:
+      test: pg_isready -q -d ente_db -U pg-user
+      start_period: 40s
+      start_interval: 1s
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio
+    ports:
+      - 3200:3200 # MinIO API
+    environment:
+      MINIO_ROOT_USER: $minio_user
+      MINIO_ROOT_PASSWORD: $minio_pass
+    command: server /data --address ":3200" --console-address ":3201"
+    volumes:
+      - minio-data:/data
+    post_start:
+      - command: |
+          sh -c '
+          #!/bin/sh
+
+          while ! mc config host add h0 http://minio:3200 $minio_user $minio_pass 2>/dev/null
+          do
+            echo "Waiting for minio..."
+            sleep 0.5
+          done
+
+          cd /data
+
+          mc mb -p b2-eu-cen
+          mc mb -p wasabi-eu-central-2-v3
+          mc mb -p scw-eu-fr-v3
+          '
+
+volumes:
+  postgres-data:
+  minio-data:
+EOF
+
+printf " \033[1;32mN\033[0m   Created compose.yaml\n"
+
+cat <<EOF >museum.yaml
+key:
+      encryption: $museum_key
+      hash: $museum_hash
+
+jwt:
+      secret: $museum_jwt_secret
+
+db:
+      host: postgres
+      port: 5432
+      name: ente_db
+      user: pg-user
+      password: $pg_pass
+
+s3:
+      are_local_buckets: true
+      b2-eu-cen:
+         key: $minio_user
+         secret: $minio_pass
+         endpoint: localhost:3200
+         region: eu-central-2
+         bucket: b2-eu-cen
+      wasabi-eu-central-2-v3:
+         key: $minio_user
+         secret: $minio_pass
+         endpoint: localhost:3200
+         region: eu-central-2
+         bucket: wasabi-eu-central-2-v3
+         compliance: false
+      scw-eu-fr-v3:
+         key: $minio_user
+         secret: $minio_pass
+         endpoint: localhost:3200
+         region: eu-central-2
+         bucket: scw-eu-fr-v3
+EOF
+
 printf " \033[1;32mT\033[0m   Created museum.yaml\n"
 
 printf " \033[1;32mE\033[0m   Starting docker compose\n"
