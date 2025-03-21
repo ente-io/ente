@@ -98,11 +98,11 @@ services:
   postgres:
     image: postgres:15
     environment:
-      POSTGRES_USER: pg-user
+      POSTGRES_USER: pguser
       POSTGRES_PASSWORD: $pg_pass
       POSTGRES_DB: ente_db
     healthcheck:
-      test: pg_isready -q -d ente_db -U pg-user
+      test: pg_isready -q -d ente_db -U pguser
       start_period: 40s
       start_interval: 1s
     volumes:
@@ -155,7 +155,7 @@ db:
       host: postgres
       port: 5432
       name: ente_db
-      user: pg-user
+      user: pguser
       password: $pg_pass
 
 s3:
