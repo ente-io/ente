@@ -41,7 +41,7 @@ This time you'll see the updated message.
 >
 > You can also use pre-built Docker images to directly start a cluster without
 > needing to clone this repository - see
-> [quickstart/README.md](quickstart/README.md).
+> [docs/quickstart.md](docs/quickstart.md).
 
 For more details about how to get museum up and running, see
 [RUNNING.md](RUNNING.md).

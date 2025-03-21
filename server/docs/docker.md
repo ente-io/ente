@@ -1,1 +1,1 @@
-Moved to [quickstart/README.md](../quickstart/README.md).
+Moved to [quickstart.md](./quickstart.md).
