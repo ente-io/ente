@@ -1534,6 +1534,14 @@ class SmartMemoriesService {
     return memoryResults;
   }
 
+  static String getTitle(EnteFile? file) {
+    if (file == null) return '';
+    final present = DateTime.now();
+    final then = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+    final diffInYears = present.year - then.year;
+    return S.current.yearsAgo(diffInYears);
+  }
+
   static String getDateFormatted({
     required int creationTime,
     BuildContext? context,

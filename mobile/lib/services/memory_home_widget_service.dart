@@ -4,6 +4,7 @@ import "package:logging/logging.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/home_widget_service.dart";
+import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
@@ -137,14 +138,13 @@ class MemoryHomeWidgetService {
     if (memories.isEmpty) {
       return {};
     }
-
-    // flatten the memories to a list of files and take first 50
-    final files = memories.take(50).toList().asMap().map(
-          (k, v) => MapEntry(
-            v.title,
-            v.memories.map((e) => e.file),
-          ),
-        );
+    final files = Map.fromEntries(
+      memories.map((m) {
+        var title = m.title != "filler" ? m.title : null;
+        title ??= SmartMemoriesService.getTitle(m.memories.firstOrNull?.file);
+        return MapEntry(m.title, m.memories.map((e) => e.file).toList());
+      }).take(50),
+    );
 
     return files;
   }
