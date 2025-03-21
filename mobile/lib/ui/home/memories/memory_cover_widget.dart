@@ -1,8 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/models/memories/memory.dart";
-import "package:photos/services/smart_memories_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -20,7 +18,7 @@ class MemoryCoverWidget extends StatefulWidget {
   static const aspectRatio = 0.68;
   static const horizontalPadding = 2.5;
   final double maxScaleOffsetX;
-  final String? title;
+  final String title;
 
   const MemoryCoverWidget({
     required this.memories,
@@ -29,7 +27,7 @@ class MemoryCoverWidget extends StatefulWidget {
     required this.maxHeight,
     required this.maxWidth,
     required this.maxScaleOffsetX,
-    this.title,
+    required this.title,
     super.key,
   });
 
@@ -48,13 +46,8 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
 
     final widthOfScreen = MediaQuery.sizeOf(context).width;
     final index = _getNextMemoryIndex();
-    String? title = widget.title != null && widget.title! != "filler"
-        ? widget.title!
-        : null;
-    title ??= SmartMemoriesService.getTitle(
-      widget.memories[index].file,
-      S.of(context),
-    );
+    final title = widget.title;
+
     final memory = widget.memories[index];
     final isSeen = memory.isSeen();
     final brightness =
@@ -77,7 +70,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                 FullScreenMemoryDataUpdater(
                   initialIndex: index,
                   memories: widget.memories,
-                  child: FullScreenMemory(title!, index),
+                  child: FullScreenMemory(title, index),
                 ),
                 forceCustomPageRoute: true,
               );
@@ -139,7 +132,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                           horizontal: 8.0,
                                         ),
                                         child: Hero(
-                                          tag: title!,
+                                          tag: title,
                                           child: Center(
                                             child: Text(
                                               title,
@@ -190,7 +183,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                         horizontal: 8.0,
                                       ),
                                       child: Hero(
-                                        tag: title!,
+                                        tag: title,
                                         child: Center(
                                           child: Text(
                                             title,

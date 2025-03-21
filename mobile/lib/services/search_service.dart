@@ -1257,7 +1257,7 @@ class SearchService {
       searchResults.add(
         GenericSearchResult(
           ResultType.event,
-          memory.title,
+          memory.title + "(I)",
           files,
           hierarchicalSearchFilter: TopLevelGenericFilter(
             filterName: memory.title,
