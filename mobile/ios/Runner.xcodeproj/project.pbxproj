@@ -86,7 +86,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		DA6FFCCD2D85E926004A6BE4 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		CEE6BE802D7AE7FE00E4048B /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
