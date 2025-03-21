@@ -29,7 +29,7 @@ command above does for you):
 2. Download the sample quickstart Docker compose file.
 
    ```sh
-   curl -fsSOL https://raw.githubusercontent.com/ente-io/ente/HEAD/server/quickstart/compose.yaml
+   curl -fsSOL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart/compose.yaml
    ```
 
 > [!CAUTION]

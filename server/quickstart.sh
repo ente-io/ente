@@ -45,12 +45,17 @@ printf "\n - \033[1mH E L L O\033[0m - \033[1;32mE N T E\033[0m -\n\n"
 mkdir my-ente && cd my-ente
 printf " \033[1;32mE\033[0m   Created directory my-ente\n"
 
-curl -fsSOL https://raw.githubusercontent.com/ente-io/ente/HEAD/server/quickstart/compose.yaml
+curl -fsSOL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart/compose.yaml
 printf " \033[1;32mN\033[0m   Fetched compose.yaml\n"
 
-gen_password () { cat /dev/urandom | head -c12 | base64; }
-gen_key () { cat /dev/urandom | head -c32 | base64; } # crypto_secretbox_KEYBYTES = 32
-gen_hash () { cat /dev/urandom | head -c64 | base64; } # crypto_generichash_BYTES_MAX = 64
+gen_password () { head -c 12 /dev/urandom | base64 -w 0 }
+gen_key () { head -c 32 /dev/urandom | base64 -w 0 } # crypto_secretbox_KEYBYTES = 32
+gen_hash () { head -c 64 /dev/urandom | base64 -w 0 } # crypto_generichash_BYTES_MAX = 64
+
+# Same as gen_key, but sodium_base64_VARIANT_URLSAFE (TODO)
+gen_jwt_secret () {
+  head -c 32 /dev/urandom | base64 -w 0
+}
 
 replace_in_compose () {
    sed "$1" compose.yaml > compose.yaml.new
@@ -62,7 +67,7 @@ replace_in_compose "s,changeme,minio-user,g"
 replace_in_compose "s,pgpass,$(gen_password),g"
 replace_in_compose "s,yvmG/RnzKrbCb9L3mgsmoxXr9H7i2Z4qlbT0mL3ln4w=,$(gen_key),"
 replace_in_compose "s,KXYiG07wC7GIgvCSdg+WmyWdXDAn6XKYJtp/wkEU7x573+byBRAYtpTP0wwvi8i/4l37uicX1dVTUzwH3sLZyw==,$(gen_hash),"
-replace_in_compose "s,i2DecQmfGreG6q1vBj5tCokhlN41gcfS2cjOs9Po-u8=,$(gen_key),"
+replace_in_compose "s,i2DecQmfGreG6q1vBj5tCokhlN41gcfS2cjOs9Po-u8=,$(gen_jwt_secret),"
 
 touch museum.yaml
 printf " \033[1;32mT\033[0m   Created museum.yaml\n"
