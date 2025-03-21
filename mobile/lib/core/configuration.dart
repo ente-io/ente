@@ -209,6 +209,7 @@ class Configuration {
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
+    unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
     if (!autoLogout) {
       // Following services won't be initialized if it's the case of autoLogout
       FileUploader.instance.clearCachedUploadURLs();
@@ -216,7 +217,6 @@ class Configuration {
       FavoritesService.instance.clearCache();
       SearchService.instance.clearCache();
       PersonService.instance.clearCache();
-      unawaited(HomeWidgetService.instance.clearHomeWidget());
       Bus.instance.fire(UserLoggedOutEvent());
     } else {
       await _preferences.setBool("auto_logout", true);

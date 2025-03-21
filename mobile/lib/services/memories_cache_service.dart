@@ -334,8 +334,10 @@ class MemoriesCacheService {
   }
 
   Future<void> _calculateRegularFillers() async {
-    _cachedMemories = await smartMemoriesService.calcFillerResults();
-    Bus.instance.fire(MemoriesChangedEvent());
+    if (_cachedMemories == null) {
+      _cachedMemories = await smartMemoriesService.calcFillerResults();
+      Bus.instance.fire(MemoriesChangedEvent());
+    }
     return;
   }
 
@@ -366,6 +368,10 @@ class MemoriesCacheService {
       _logger.severe("Error in getMemories", e, s);
       return [];
     }
+  }
+
+  Future<List<SmartMemory>?> getCachedMemories() async {
+    return _cachedMemories;
   }
 
   Future<void> goToMemoryFromGeneratedFileID(

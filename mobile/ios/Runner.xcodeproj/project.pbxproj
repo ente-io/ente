@@ -18,7 +18,7 @@
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		CEE6BE702D7AE7FD00E4048B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83C2B755B0600BA9516 /* WidgetKit.framework */; };
 		CEE6BE712D7AE7FD00E4048B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DACD83E2B755B0600BA9516 /* SwiftUI.framework */; };
-		CEE6BE7C2D7AE7FE00E4048B /* SlideshowWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE6BE6F2D7AE7FD00E4048B /* SlideshowWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		CEE6BE7C2D7AE7FE00E4048B /* EnteMemoryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CEE6BE6F2D7AE7FD00E4048B /* EnteMemoryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		DA6BE5E826B3BC8600656280 /* (null) in Resources */ = {isa = PBXBuildFile; };
 /* End PBXBuildFile section */
 
@@ -28,7 +28,7 @@
 			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = CEE6BE6E2D7AE7FD00E4048B;
-			remoteInfo = SlideshowWidgetExtension;
+			remoteInfo = EnteMemoryWidgetExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -39,7 +39,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				CEE6BE7C2D7AE7FE00E4048B /* SlideshowWidgetExtension.appex in Embed Foundation Extensions */,
+				CEE6BE7C2D7AE7FE00E4048B /* EnteMemoryWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -78,8 +78,9 @@
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A78E51A260432466D4C456A9 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		BB097BB5EB0EEB41344338D2 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
-		CEE6BE6F2D7AE7FD00E4048B /* SlideshowWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SlideshowWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		CEE6BE822D7AE8C700E4048B /* SlideshowWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SlideshowWidgetExtension.entitlements; sourceTree = "<group>"; };
+		CE93A9062D808893005CD942 /* EnteMemoryWidgetExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EnteMemoryWidgetExtensionDebug.entitlements; sourceTree = "<group>"; };
+		CEE6BE6F2D7AE7FD00E4048B /* EnteMemoryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = EnteMemoryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEE6BE822D7AE8C700E4048B /* EnteMemoryWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EnteMemoryWidgetExtension.entitlements; sourceTree = "<group>"; };
 		DA8D6672273BBB59007651D4 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		F82DAEEB9A7D9FD00E0FFA1E /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -90,12 +91,12 @@
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = CEE6BE6E2D7AE7FD00E4048B /* SlideshowWidgetExtension */;
+			target = CEE6BE6E2D7AE7FD00E4048B /* EnteMemoryWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		CEE6BE722D7AE7FD00E4048B /* SlideshowWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (DA6FFCCD2D85E926004A6BE4 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = SlideshowWidget; sourceTree = "<group>"; };
+		CEE6BE722D7AE7FD00E4048B /* EnteMemoryWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (CEE6BE802D7AE7FE00E4048B /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = EnteMemoryWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,11 +135,12 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
-				CEE6BE822D7AE8C700E4048B /* SlideshowWidgetExtension.entitlements */,
+				CE93A9062D808893005CD942 /* EnteMemoryWidgetExtensionDebug.entitlements */,
+				CEE6BE822D7AE8C700E4048B /* EnteMemoryWidgetExtension.entitlements */,
 				2772189F270F596900FFE3CC /* GoogleService-Info.plist */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
-				CEE6BE722D7AE7FD00E4048B /* SlideshowWidget */,
+				CEE6BE722D7AE7FD00E4048B /* EnteMemoryWidget */,
 				97C146EF1CF9000F007C117D /* Products */,
 				AC6CA265BB505D982CB00391 /* Pods */,
 				C6A22658E77FF012720BEDDA /* Frameworks */,
@@ -149,7 +151,7 @@
 			isa = PBXGroup;
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
-				CEE6BE6F2D7AE7FD00E4048B /* SlideshowWidgetExtension.appex */,
+				CEE6BE6F2D7AE7FD00E4048B /* EnteMemoryWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -228,9 +230,9 @@
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
 		};
-		CEE6BE6E2D7AE7FD00E4048B /* SlideshowWidgetExtension */ = {
+		CEE6BE6E2D7AE7FD00E4048B /* EnteMemoryWidgetExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CEE6BE812D7AE7FE00E4048B /* Build configuration list for PBXNativeTarget "SlideshowWidgetExtension" */;
+			buildConfigurationList = CEE6BE812D7AE7FE00E4048B /* Build configuration list for PBXNativeTarget "EnteMemoryWidgetExtension" */;
 			buildPhases = (
 				CEE6BE6B2D7AE7FD00E4048B /* Sources */,
 				CEE6BE6C2D7AE7FD00E4048B /* Frameworks */,
@@ -241,13 +243,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				CEE6BE722D7AE7FD00E4048B /* SlideshowWidget */,
+				CEE6BE722D7AE7FD00E4048B /* EnteMemoryWidget */,
 			);
-			name = SlideshowWidgetExtension;
+			name = EnteMemoryWidgetExtension;
 			packageProductDependencies = (
 			);
-			productName = SlideshowWidgetExtension;
-			productReference = CEE6BE6F2D7AE7FD00E4048B /* SlideshowWidgetExtension.appex */;
+			productName = EnteMemoryWidgetExtension;
+			productReference = CEE6BE6F2D7AE7FD00E4048B /* EnteMemoryWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -284,7 +286,7 @@
 			projectRoot = "";
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
-				CEE6BE6E2D7AE7FD00E4048B /* SlideshowWidgetExtension */,
+				CEE6BE6E2D7AE7FD00E4048B /* EnteMemoryWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -612,7 +614,7 @@
 /* Begin PBXTargetDependency section */
 		CEE6BE7B2D7AE7FE00E4048B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = CEE6BE6E2D7AE7FD00E4048B /* SlideshowWidgetExtension */;
+			target = CEE6BE6E2D7AE7FD00E4048B /* EnteMemoryWidgetExtension */;
 			targetProxy = CEE6BE7A2D7AE7FE00E4048B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -953,7 +955,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = SlideshowWidgetExtensionDebug.entitlements;
+				CODE_SIGN_ENTITLEMENTS = EnteMemoryWidgetExtensionDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -961,8 +963,8 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SlideshowWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = SlideshowWidget;
+				INFOPLIST_FILE = EnteMemoryWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EnteMemoryWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 The Chromium Authors. All rights reserved.";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -974,7 +976,7 @@
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.debug.SlideshowWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.debug.EnteMemoryWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
@@ -995,7 +997,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = SlideshowWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = EnteMemoryWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1003,8 +1005,8 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SlideshowWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = SlideshowWidget;
+				INFOPLIST_FILE = EnteMemoryWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EnteMemoryWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 The Chromium Authors. All rights reserved.";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1015,7 +1017,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.SlideshowWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.EnteMemoryWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1035,7 +1037,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = SlideshowWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = EnteMemoryWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1043,8 +1045,8 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SlideshowWidget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = SlideshowWidget;
+				INFOPLIST_FILE = EnteMemoryWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = EnteMemoryWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 The Chromium Authors. All rights reserved.";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1055,7 +1057,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.SlideshowWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = io.ente.frame.EnteMemoryWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1087,7 +1089,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CEE6BE812D7AE7FE00E4048B /* Build configuration list for PBXNativeTarget "SlideshowWidgetExtension" */ = {
+		CEE6BE812D7AE7FE00E4048B /* Build configuration list for PBXNativeTarget "EnteMemoryWidgetExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CEE6BE7D2D7AE7FE00E4048B /* Debug */,

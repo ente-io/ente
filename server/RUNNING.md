@@ -24,7 +24,7 @@ able to view or upload images, see
 ## Run using pre-built Docker images
 
 ```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/HEAD/server/quickstart.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
 ```
 
 For more details, see [quickstart/README.md](quickstart/README.md).

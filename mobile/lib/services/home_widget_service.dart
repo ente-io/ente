@@ -1,18 +1,15 @@
 import "dart:convert";
 import "dart:io";
 
-import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
-import "package:flutter/scheduler.dart";
-import "package:fluttertoast/fluttertoast.dart";
 import 'package:home_widget/home_widget.dart' as hw;
 import "package:logging/logging.dart";
-import "package:photos/core/configuration.dart";
+import "package:path_provider/path_provider.dart";
+import "package:path_provider_foundation/path_provider_foundation.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/service_locator.dart";
+import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/smart_memories_service.dart";
-import "package:photos/utils/preload_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -25,83 +22,37 @@ class HomeWidgetService {
       HomeWidgetService._privateConstructor();
 
   init(SharedPreferences prefs) {
-    hw.HomeWidget.setAppGroupId(iOSGroupID).ignore();
-    _prefs = prefs;
+    setAppGroupID(iOSGroupID);
+    MemoryHomeWidgetService.instance.init(prefs);
   }
 
-  static const memoryChangedKey = "memoryChanged.widget";
-
-  bool _hasSyncedMemory = false;
-
-  late final SharedPreferences _prefs;
-
-  Future<void> checkPendingMemorySync() async {
-    await Future.delayed(const Duration(seconds: 5), () {});
-
-    final memoryChanged = _prefs.getBool(memoryChangedKey);
-    final total = await _getTotal();
-
-    final forceFetchNewMemories =
-        memoryChanged == true || total == 0 || total == null;
-
-    if (_hasSyncedMemory && !forceFetchNewMemories) {
-      _logger.info(">>> Memory already synced");
-      return;
-    }
-    await initHomeWidget(forceFetchNewMemories: forceFetchNewMemories);
+  void setAppGroupID(String id) {
+    hw.HomeWidget.setAppGroupId(id).ignore();
   }
 
-  Future<void> updateMemoryChanged(bool value) async {
-    await _prefs.setBool(memoryChangedKey, value);
+  Future<void> initHomeWidget() async {
+    await MemoryHomeWidgetService.instance.initMemoryHW(null);
   }
 
-  Future<void> initHomeWidget({
-    bool forceFetchNewMemories = false,
+  Future<bool?> updateWidget({
+    required String androidClass,
+    required String iOSClass,
   }) async {
-    final isLoggedIn = Configuration.instance.isLoggedIn();
-    if (!isLoggedIn) {
-      _logger.warning("user not logged in");
-      return;
-    }
-
-    final areMemoriesShown = memoriesCacheService.showAnyMemories;
-    if (!areMemoriesShown) {
-      _logger.warning("memories not enabled");
-      await clearHomeWidget();
-      return;
-    }
-
-    if (forceFetchNewMemories) {
-      await _forceMemoryUpdate();
-    } else {
-      final total = await _getTotal();
-      if (total == 0 || total == null) {
-        _logger.warning(
-          "sync stopped because no memory is cached yet, so nothing to sync",
-        );
-        return;
-      }
-      await _memorySync();
-    }
+    return await hw.HomeWidget.updateWidget(
+      name: androidClass,
+      androidName: androidClass,
+      qualifiedAndroidName: 'io.ente.photos.$androidClass',
+      iOSName: iOSClass,
+    );
   }
 
-  Future<void> _forceMemoryUpdate() async {
-    await _lockAndLoadMemories();
-    await updateMemoryChanged(false);
-  }
+  Future<T?> getData<T>(String key) async =>
+      await hw.HomeWidget.getWidgetData<T>(key);
 
-  Future<void> _memorySync() async {
-    final homeWidgetCount = await HomeWidgetService.instance.countHomeWidgets();
-    if (homeWidgetCount == 0) {
-      _logger.warning("no home widget active");
-      return;
-    }
+  Future<bool?> setData<T>(String key, T? data) async =>
+      await hw.HomeWidget.saveWidgetData<T>(key, data);
 
-    await _updateWidget(text: "[i] refreshing from same set");
-    _logger.info(">>> Refreshing memory from same set");
-  }
-
-  Future<Size?> _renderFile(
+  Future<Size?> renderFile(
     EnteFile randomFile,
     String key,
     String title,
@@ -121,19 +72,6 @@ class HomeWidgetService {
     return (await hw.HomeWidget.getInstalledWidgets()).length;
   }
 
-  Future<void> clearHomeWidget() async {
-    final total = await _getTotal();
-    if (total == 0 || total == null) return;
-
-    _logger.info("Clearing SlideshowWidget");
-
-    await _setTotal(0);
-    _hasSyncedMemory = false;
-
-    await _updateWidget(text: "[i] SlideshowWidget cleared & updated");
-    _logger.info(">>> SlideshowWidget cleared");
-  }
-
   Future<bool> _captureFile(
     EnteFile ogFile,
     String key,
@@ -142,40 +80,26 @@ class HomeWidgetService {
     try {
       final thumbnail = await getThumbnail(ogFile);
 
-      final decoded = await decodeImageFromList(thumbnail!);
-      final double width = decoded.width.toDouble();
-      final double height = decoded.height.toDouble();
+      late final String? directory;
 
-      final Image img = Image.memory(
-        thumbnail,
-        fit: BoxFit.cover,
-        cacheWidth: width.toInt(),
-        cacheHeight: height.toInt(),
-      );
+      // coverage:ignore-start
+      if (Platform.isIOS) {
+        final PathProviderFoundation provider = PathProviderFoundation();
+        directory = await provider.getContainerPath(
+          appGroupIdentifier: iOSGroupID,
+        );
+      } else {
+        directory = (await getApplicationSupportDirectory()).path;
+      }
 
-      await PreloadImage.loadImage(img.image);
+      final String path = '$directory/home_widget/$key.png';
+      final File file = File(path);
+      if (!await file.exists()) {
+        await file.create(recursive: true);
+      }
+      await file.writeAsBytes(thumbnail!);
 
-      final platformBrightness =
-          SchedulerBinding.instance.platformDispatcher.platformBrightness;
-
-      final widget = ClipSmoothRect(
-        radius: SmoothBorderRadius(cornerRadius: 32, cornerSmoothing: 1),
-        child: Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            color: platformBrightness == Brightness.light
-                ? const Color.fromRGBO(251, 251, 251, 1)
-                : const Color.fromRGBO(27, 27, 27, 1),
-            image: DecorationImage(image: img.image, fit: BoxFit.cover),
-          ),
-        ),
-      );
-      await hw.HomeWidget.renderFlutterWidget(
-        widget,
-        logicalSize: Size(width, height),
-        key: key,
-      );
+      await setData(key, path);
 
       final data = {
         "title": title,
@@ -202,115 +126,32 @@ class HomeWidgetService {
     return true;
   }
 
+  Future<void> clearWidget(bool autoLogout) async {
+    if (autoLogout) {
+      setAppGroupID(iOSGroupID);
+    }
+    await MemoryHomeWidgetService.instance.clearWidget();
+  }
+
   Future<void> onLaunchFromWidget(Uri? uri, BuildContext context) async {
     if (uri == null) {
       _logger.warning("onLaunchFromWidget: uri is null");
       return;
     }
 
-    _hasSyncedMemory = true;
-    // sync the memories
-    initHomeWidget().ignore();
-
     final generatedId = int.tryParse(uri.queryParameters["generatedId"] ?? "");
-    _logger.info("onLaunchFromWidget: $uri, $generatedId");
 
     if (generatedId == null) {
       _logger.warning("onLaunchFromWidget: generatedId is null");
       return;
     }
 
-    await memoriesCacheService.goToMemoryFromGeneratedFileID(
-      context,
-      generatedId,
-    );
-  }
-
-  Future<Map<String, Iterable<EnteFile>>> _getMemories() async {
-    // if (fetchMemory) {
-    final memories = await memoriesCacheService.getMemories();
-    if (memories.isEmpty) {
-      return {};
-    }
-
-    // flatten the list to list of ente files
-    final files = memories.asMap().map(
-          (k, v) => MapEntry(
-            v.title,
-            v.memories.map((e) => e.file),
-          ),
-        );
-
-    return files;
-  }
-
-  Future<void> _updateWidget({String? text}) async {
-    await hw.HomeWidget.updateWidget(
-      name: 'SlideshowWidgetProvider',
-      androidName: 'SlideshowWidgetProvider',
-      qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
-      iOSName: 'SlideshowWidget',
-    );
-    if (flagService.internalUser) {
-      await Fluttertoast.showToast(
-        msg: text ?? "[i] SlideshowWidget updated",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 16.0,
+    if (uri.scheme == "memorywidget") {
+      _logger.info("onLaunchFromWidget: redirecting to memory widget");
+      await MemoryHomeWidgetService.instance.onLaunchFromWidget(
+        generatedId,
+        context,
       );
     }
-    _logger.info(">>> Home Widget updated");
-  }
-
-  Future<int?> _getTotal() async {
-    return await hw.HomeWidget.getWidgetData<int>("totalSet");
-  }
-
-  Future<void> _setTotal(int total) async {
-    await hw.HomeWidget.saveWidgetData("totalSet", total);
-  }
-
-  Future<void> _lockAndLoadMemories() async {
-    final files = await _getMemories();
-
-    if (files.isEmpty) {
-      _logger.warning("No files found, clearing everything");
-      await clearHomeWidget();
-      return;
-    }
-
-    int index = 0;
-
-    for (final i in files.entries) {
-      for (final file in i.value) {
-        final value =
-            await _renderFile(file, "slideshow_$index", i.key).catchError(
-          (e, sT) {
-            _logger.severe("Error rendering widget", e, sT);
-            return null;
-          },
-        );
-
-        if (value != null) {
-          await _setTotal(index);
-          if (index == 1) {
-            await _updateWidget(
-              text: "[i] First memory fetched. updating widget",
-            );
-          }
-          index++;
-        }
-      }
-    }
-
-    if (index == 0) {
-      return;
-    }
-
-    await _updateWidget();
-    _logger.info(">>> Switching to next memory set");
   }
 }

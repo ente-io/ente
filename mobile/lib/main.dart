@@ -125,7 +125,7 @@ Future<void> _homeWidgetSync() async {
   try {
     await HomeWidgetService.instance.initHomeWidget();
   } catch (e, s) {
-    _logger.severe("Error in initSlideshowWidget", e, s);
+    _logger.severe("Error in syncing home widget", e, s);
   }
 }
 

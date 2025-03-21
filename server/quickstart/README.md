@@ -6,7 +6,7 @@ uses pre-built images instead.
 Copy paste the following command into your terminal
 
 ```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/HEAD/server/quickstart.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
 ```
 
 Alternatively, you can run the following four steps manually (that's all the
