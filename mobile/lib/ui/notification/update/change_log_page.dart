@@ -114,12 +114,10 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         context.l10n.cLWidgetsDesc,
       ),
       ChangeLogEntry(
-        isFeature: false,
         context.l10n.cLFamilyPlan,
         context.l10n.cLFamilyPlanDesc,
       ),
       ChangeLogEntry(
-        isFeature: false,
         context.l10n.cLBulkEdit,
         context.l10n.cLBulkEditDesc,
       ),
