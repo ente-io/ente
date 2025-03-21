@@ -73,6 +73,8 @@ services:
 
 configs:
   credentials_yaml:
+    # You'll need to recreate the containers (docker compose down && docker
+    # compose up) when changing this inline config for the changes to apply.
     content: |
       db:
           host: postgres
