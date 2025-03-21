@@ -194,8 +194,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
                   left: 0,
                   right: 0,
                   child: ValueListenableBuilder<bool>(
-                    valueListenable: InheritedDetailPageState.of(context)
-                        .enableFullScreenNotifier,
+                    valueListenable: InheritedDetailPageState.maybeOf(context)
+                            ?.enableFullScreenNotifier ??
+                        ValueNotifier(false),
                     builder: (context, doNotShowCaption, _) {
                       return AnimatedOpacity(
                         opacity: doNotShowCaption ? 0.0 : 1.0,
