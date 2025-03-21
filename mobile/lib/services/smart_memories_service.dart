@@ -31,6 +31,7 @@ import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/language_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
@@ -117,9 +118,10 @@ class SmartMemoriesService {
       }
       _logger.finest('clipPositiveTextVector and clipPeopleActivityVectors $t');
 
-      final local = await getLocale();
-      final languageCode = local?.languageCode ?? "en";
-      final s = await S.load(local!);
+      final s = await LanguageService.s;
+      final locale = await getLocale();
+      final languageCode = locale!.languageCode;
+
       _logger.finest('get locale and S $t');
 
       _logger.finest('all data fetched $t at ${DateTime.now()}, to computer');
@@ -1534,20 +1536,35 @@ class SmartMemoriesService {
     return memoryResults;
   }
 
-  static String getTitle(EnteFile? file) {
+  static String getTitle(EnteFile? file, S s) {
     if (file == null) return '';
     final present = DateTime.now();
     final then = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
     final diffInYears = present.year - then.year;
-    return S.current.yearsAgo(diffInYears);
+
+    return s.yearsAgo(diffInYears);
+  }
+
+  static Future<String> getDateFormattedLocale({
+    required int creationTime,
+  }) async {
+    final locale = await getLocale();
+
+    return getDateFormatted(
+      creationTime: creationTime,
+      languageCode: locale!.languageCode,
+    );
   }
 
   static String getDateFormatted({
     required int creationTime,
     BuildContext? context,
+    String? languageCode,
   }) {
     return DateFormat.yMMMd(
-      context != null ? Localizations.localeOf(context).languageCode : "en",
+      context != null
+          ? Localizations.localeOf(context).languageCode
+          : languageCode ?? "en",
     ).format(
       DateTime.fromMicrosecondsSinceEpoch(creationTime),
     );

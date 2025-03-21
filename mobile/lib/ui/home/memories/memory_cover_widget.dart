@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/theme/colors.dart";
@@ -50,7 +51,10 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
     String? title = widget.title != null && widget.title! != "filler"
         ? widget.title!
         : null;
-    title ??= SmartMemoriesService.getTitle(widget.memories[index].file);
+    title ??= SmartMemoriesService.getTitle(
+      widget.memories[index].file,
+      S.of(context),
+    );
     final memory = widget.memories[index];
     final isSeen = memory.isSeen();
     final brightness =
