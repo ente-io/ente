@@ -68,6 +68,10 @@ class MemoryHomeWidgetService {
     }
 
     await _memoryForceRefreshLock.synchronized(() async {
+      final result = await hasAnyBlockers();
+      if (result) {
+        return;
+      }
       final isTotalEmpty = await _checkIfTotalEmpty();
       forceFetchNewMemories ??= await getForceFetchCondition(isTotalEmpty);
 
