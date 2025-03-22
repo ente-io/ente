@@ -142,6 +142,7 @@ export const sidebar = [
                         text: "Video streaming",
                         link: "/photos/faq/video-streaming",
                     },
+                    { text: "Misc", link: "/photos/faq/misc" },
                 ],
             },
             {
