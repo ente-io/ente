@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/user_details.dart';
@@ -35,7 +37,9 @@ class NotificationBannerWidget extends StatelessWidget {
                 [
                   BannerWidget(
                     text: l10n.tellUsWhatYouThink,
-                    subText: l10n.dropReview,
+                    subText: Platform.isIOS
+                        ? l10n.dropReviewiOS
+                        : l10n.dropReviewAndroid,
                     type: BannerType.rateUs,
                   ),
                   sectionSpacing,
@@ -84,7 +88,8 @@ class NotificationBannerWidget extends StatelessWidget {
           [
             BannerWidget(
               text: l10n.tellUsWhatYouThink,
-              subText: l10n.dropReview,
+              subText:
+                  Platform.isIOS ? l10n.dropReviewiOS : l10n.dropReviewAndroid,
               type: BannerType.rateUs,
             ),
             sectionSpacing,
