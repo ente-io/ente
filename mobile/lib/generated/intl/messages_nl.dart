@@ -504,6 +504,23 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday-aanbieding"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLBulkEdit":
+            MessageLookupByLibrary.simpleMessage("Bewerken van datums in bulk"),
+        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
+            "U kunt nu meerdere foto\'s selecteren en de datum/tijd voor allemaal in één snelle actie bewerken. Het verschuiven van datums wordt ook ondersteund."),
+        "cLFamilyPlan":
+            MessageLookupByLibrary.simpleMessage("Gezinsplanlimieten"),
+        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
+            "U kunt nu limieten instellen voor hoeveel opslagruimte uw familieleden kunnen gebruiken."),
+        "cLIcon": MessageLookupByLibrary.simpleMessage("Nieuw pictogram"),
+        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
+            "Eindelijk een nieuw app-pictogram dat volgens ons ons werk het beste vertegenwoordigt. We hebben ook een pictogramwisselaar toegevoegd, zodat u het oude pictogram kunt blijven gebruiken."),
+        "cLMemories": MessageLookupByLibrary.simpleMessage("Herinneringen"),
+        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
+            "Herontdek uw speciale momenten - in de schijnwerpers staan uw favoriete mensen, uw reizen en vakanties, uw beste foto\'s en nog veel meer. Schakel machine learning in, tag uzelf en noem uw vrienden voor de beste ervaring."),
+        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgets"),
+        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
+            "Startscherm-widgets die zijn geïntegreerd met herinneringen zijn nu beschikbaar. Ze laten uw speciale momenten zien zonder de app te openen."),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cachegegevens"),
         "calculating": MessageLookupByLibrary.simpleMessage("Berekenen..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(

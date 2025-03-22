@@ -435,6 +435,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "birthday": MessageLookupByLibrary.simpleMessage("生日"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage("黑色星期五特惠"),
         "blog": MessageLookupByLibrary.simpleMessage("博客"),
+        "cLBulkEdit": MessageLookupByLibrary.simpleMessage("批量编辑日期"),
+        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
+            "您现在可以选择多张照片，并通过一个快速操作为所有照片编辑日期/时间。还支持日期偏移。"),
+        "cLFamilyPlan": MessageLookupByLibrary.simpleMessage("家庭计划限制"),
+        "cLFamilyPlanDesc":
+            MessageLookupByLibrary.simpleMessage("您现在可以设置家庭成员使用的存储空间限制。"),
+        "cLIcon": MessageLookupByLibrary.simpleMessage("新图标"),
+        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
+            "终于，我们有了一个新应用图标，我们认为它最能代表我们的工作。我们还添加了一个图标切换器，以便您可以继续使用旧图标。"),
+        "cLMemories": MessageLookupByLibrary.simpleMessage("回忆"),
+        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
+            "重新发现您的特殊时刻——聚焦于您最喜欢的人、您的旅行和假期、您的最佳拍摄等等。开启机器学习，标记自己并命名您的朋友，以获得最佳体验。"),
+        "cLWidgets": MessageLookupByLibrary.simpleMessage("小部件"),
+        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
+            "现在提供了与回忆集成的主屏幕小部件。它们将显示您的特殊时刻，而无需打开应用程序。"),
         "cachedData": MessageLookupByLibrary.simpleMessage("缓存数据"),
         "calculating": MessageLookupByLibrary.simpleMessage("正在计算..."),
         "canNotOpenBody":

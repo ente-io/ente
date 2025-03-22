@@ -447,6 +447,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "birthday": MessageLookupByLibrary.simpleMessage("誕生日"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage("ブラックフライデーセール"),
         "blog": MessageLookupByLibrary.simpleMessage("ブログ"),
+        "cLBulkEdit": MessageLookupByLibrary.simpleMessage("日付の一括編集"),
+        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
+            "複数の写真を選択し、1回の操作ですべての日付/時刻を編集できるようになりました。日付のシフトもサポートされています。"),
+        "cLFamilyPlan": MessageLookupByLibrary.simpleMessage("ファミリープランの制限"),
+        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
+            "家族が使用できるストレージの制限を設定できるようになりました。"),
+        "cLIcon": MessageLookupByLibrary.simpleMessage("新しいアイコン"),
+        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
+            "ついに、私たちの仕事を最もよく表す新しいアプリアイコンができました。また、アイコン切り替え機能を追加したので、以前のアイコンを引き続き使用できます。"),
+        "cLMemories": MessageLookupByLibrary.simpleMessage("思い出"),
+        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
+            "特別な瞬間を再発見しましょう。お気に入りの人、旅行や休暇、ベストショットなどがスポットライトを浴びます。機械学習を有効にし、自分をタグ付けして友達の名前を付けることで、最高の体験を実現できます。"),
+        "cLWidgets": MessageLookupByLibrary.simpleMessage("ウィジェット"),
+        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
+            "思い出と連携したホーム画面ウィジェットが利用可能になりました。アプリを開かなくても、特別な瞬間を表示します。"),
         "cachedData": MessageLookupByLibrary.simpleMessage("キャッシュデータ"),
         "calculating": MessageLookupByLibrary.simpleMessage("計算中..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(

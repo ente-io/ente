@@ -507,6 +507,23 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Oferta del Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLBulkEdit":
+            MessageLookupByLibrary.simpleMessage("Edición masiva de fechas"),
+        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
+            "Ahora puedes seleccionar varias fotos y editar la fecha/hora para todas ellas con una acción rápida. También se admite el cambio de fechas."),
+        "cLFamilyPlan":
+            MessageLookupByLibrary.simpleMessage("Límites del plan familiar"),
+        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
+            "Ahora puedes establecer límites sobre cuánto almacenamiento pueden usar los miembros de tu familia."),
+        "cLIcon": MessageLookupByLibrary.simpleMessage("Nuevo ícono"),
+        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
+            "Finalmente, un nuevo ícono de la aplicación que creemos que representa mejor nuestro trabajo. También hemos agregado un selector de íconos para que puedas seguir usando el ícono anterior."),
+        "cLMemories": MessageLookupByLibrary.simpleMessage("Recuerdos"),
+        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
+            "Redescubre tus momentos especiales: destaca a tus personas favoritas, tus viajes y vacaciones, tus mejores fotos y mucho más. Activa el aprendizaje automático, etiquétate y nombra a tus amigos para la mejor experiencia."),
+        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgets"),
+        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
+            "Ahora están disponibles widgets en la pantalla de inicio integrados con recuerdos. Mostrarán tus momentos especiales sin necesidad de abrir la aplicación."),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Datos almacenados en caché"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculando..."),

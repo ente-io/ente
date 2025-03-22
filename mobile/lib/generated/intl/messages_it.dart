@@ -492,6 +492,23 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Offerta del Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLBulkEdit": MessageLookupByLibrary.simpleMessage(
+            "Modifica multipla delle date"),
+        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
+            "Ora puoi selezionare più foto e modificare la data/ora per tutte con un\'azione rapida. È supportato anche lo spostamento delle date."),
+        "cLFamilyPlan":
+            MessageLookupByLibrary.simpleMessage("Limiti del piano famiglia"),
+        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
+            "Ora puoi impostare limiti su quanto spazio di archiviazione possono utilizzare i membri della tua famiglia."),
+        "cLIcon": MessageLookupByLibrary.simpleMessage("Nuova icona"),
+        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
+            "Finalmente, una nuova icona per l\'app, che riteniamo rappresenti al meglio il nostro lavoro. Abbiamo anche aggiunto un selettore di icone in modo che tu possa continuare a usare la vecchia icona."),
+        "cLMemories": MessageLookupByLibrary.simpleMessage("Ricordi"),
+        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
+            "Riscopri i tuoi momenti speciali: i riflettori sono puntati sulle tue persone preferite, sui tuoi viaggi e vacanze, sui tuoi scatti migliori e molto altro. Attiva l\'apprendimento automatico, taggati e dai un nome ai tuoi amici per un\'esperienza migliore."),
+        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widget"),
+        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
+            "Sono ora disponibili widget per la schermata principale integrati con i ricordi. Mostreranno i tuoi momenti speciali senza aprire l\'app."),
         "cachedData": MessageLookupByLibrary.simpleMessage("Dati nella cache"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calcolando..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
