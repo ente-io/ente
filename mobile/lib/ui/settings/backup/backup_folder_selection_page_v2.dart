@@ -44,35 +44,32 @@ class _BackupFolderSelectionPageV2State
 
   @override
   void initState() {
-    _logger.info("BackupFolderSelectionPageV2 init");
     LocalImportService.instance
         .getLocalAssetsCache()
         .then((LocalAssetsCache c) async {
       _assetPathEntities = c.assetPaths.values.toList();
-      _logger.info(
-        "BackupFolderSelectionPageV2 got ${_assetPathEntities!.length} paths",
-      );
       _assetCount.clear();
       _assetCount = c.pathToAssetIDs;
-      _logger.info("Asset count: $_assetCount");
       _assetPathEntities!.removeWhere(
         (path) => (_assetCount[path.id] ?? {}).isEmpty,
       );
       final List<AssetEntity> latestAssets = c.assets.values.toList();
-      // sort by decreate creation date
-      latestAssets.sort((a, b) => b.createDateTime.compareTo(a.createDateTime));
       for (final path in _assetPathEntities ?? []) {
         final assetIDs = _assetCount[path.id] ?? {};
-        for (final assetID in assetIDs) {
-          for (final sortedAsset in latestAssets) {
-            if (sortedAsset.id == assetID) {
+        for (final sortedAsset in latestAssets) {
+          if (assetIDs.contains(sortedAsset.id)) {
+            if (_pathToLatestAsset.containsKey(path.id)) {
+              // check time and insert one with latest time
+              if (_pathToLatestAsset[path.id]!.createDateSecond! <
+                  sortedAsset.createDateSecond!) {
+                _pathToLatestAsset[path.id] = sortedAsset;
+              }
+            } else {
               _pathToLatestAsset[path.id] = sortedAsset;
-              break;
             }
           }
         }
       }
-
       setState(() {
         _assetPathEntities!.sort((first, second) {
           return first.name.toLowerCase().compareTo(second.name.toLowerCase());
