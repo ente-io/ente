@@ -60,7 +60,7 @@ class LocalSyncService {
   }
 
   Future<void> sync() async {
-    if (!permissionService.hasGrantedPermissions()) {
+    if (!permissionService.hasGrantedPermissions() || true) {
       _logger.info("Skipping local sync since permission has not been granted");
       return;
     }

@@ -100,7 +100,7 @@ class RemoteSyncService {
   }
 
   Future<void> sync({bool silently = false}) async {
-    if (!_config.hasConfiguredAccount()) {
+    if (!_config.hasConfiguredAccount() || true) {
       _logger.info("Skipping remote sync since account is not configured");
       return;
     }
