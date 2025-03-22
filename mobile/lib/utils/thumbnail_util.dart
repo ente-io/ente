@@ -17,6 +17,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/utils/file_key.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
+import "package:photos/utils/standalone/task_queue.dart";
 
 final _logger = Logger("ThumbnailUtil");
 final _uploadIDToDownloadItem = <int, FileDownloadItem>{};
@@ -92,6 +93,13 @@ Future<Uint8List> getThumbnailFromServer(EnteFile file) async {
   }
 }
 
+final thumbnailQueue = TaskQueue<String>(
+  maxConcurrentTasks: 15,
+  taskTimeout: const Duration(minutes: 1),
+  maxQueueSize: 100, // Limit the queue to 50 pending tasks
+);
+
+final Set<String> _fetchedThisSession = <String>{};
 Future<Uint8List?> getThumbnailFromLocal(
   EnteFile file, {
   int size = thumbnailSmallSize,
@@ -110,17 +118,47 @@ Future<Uint8List?> getThumbnailFromLocal(
       return data;
     });
   } else {
-    return file.getAsset.then((asset) async {
-      if (asset == null || !(await asset.exists)) {
-        return null;
-      }
-      return asset
-          .thumbnailDataWithSize(ThumbnailSize(size, size), quality: quality)
-          .then((data) {
-        ThumbnailInMemoryLruCache.put(file, data, size);
-        return data;
+    // Use file.localID as the queue ID
+    final String queueId = file.localID ?? '';
+    if (_fetchedThisSession.contains(queueId)) {
+      return file.getAsset.then((asset) async {
+        if (asset == null || !(await asset.exists)) {
+          return null;
+        }
+        return asset
+            .thumbnailDataWithSize(ThumbnailSize(size, size), quality: quality)
+            .then((data) {
+          ThumbnailInMemoryLruCache.put(file, data, size);
+          return data;
+        });
       });
-    });
+    }
+    try {
+      // Add the task to the queue and await its completion
+      _logger.info(
+        'Queue stats Pending ${thumbnailQueue.pendingTasksCount} runningTasks ${thumbnailQueue.runningTasksCount}',
+      );
+      await thumbnailQueue.addTask(queueId, () async {
+        final asset = await file.getAsset;
+        if (asset == null || !(await asset.exists)) {
+          return;
+        }
+        final data = await asset
+            .thumbnailDataWithSize(ThumbnailSize(size, size), quality: quality);
+        _fetchedThisSession.add(queueId);
+        ThumbnailInMemoryLruCache.put(file, data, size);
+      });
+      // If we get here, the task completed successfully, retrieve from cache
+      return ThumbnailInMemoryLruCache.get(file, size);
+    } catch (e) {
+      if (e is TaskQueueTimeoutException || e is TaskQueueOverflowException) {
+        _logger.info('localThumb timeout or cancelled for ${file.localID}', e);
+        rethrow;
+      } else {
+        _logger.warning('localThumb failed for ${file.localID}', e);
+      }
+      return null;
+    }
   }
 }
 

@@ -286,6 +286,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }).catchError((e) {
       _logger.warning("Could not load image: ", e);
       _errorLoadingLocalThumbnail = true;
+
+      if (mounted) {
+        _reset();
+        setState(() {});
+      }
     });
   }
 
