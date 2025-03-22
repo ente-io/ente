@@ -101,12 +101,6 @@ Future<Uint8List?> getThumbnailFromLocal(
   if (lruCachedThumbnail != null) {
     return lruCachedThumbnail;
   }
-  final cachedThumbnail = cachedThumbnailPath(file);
-  if ((await cachedThumbnail.exists())) {
-    final data = await cachedThumbnail.readAsBytes();
-    ThumbnailInMemoryLruCache.put(file, data);
-    return data;
-  }
   if (file.isSharedMediaToAppSandbox) {
     //todo:neeraj support specifying size/quality
     return getThumbnailFromInAppCacheFile(file).then((data) {
