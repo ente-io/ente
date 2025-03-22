@@ -499,9 +499,18 @@
   "appLockOfflineModeWarning": "Bạn đã chọn tiếp tục mà không có bản sao lưu. Nếu bạn quên khóa ứng dụng, bạn sẽ bị khóa khỏi việc truy cập dữ liệu của mình.",
   "duplicateCodes": "Mã trùng lặp",
   "noDuplicates": "✨ Không có trùng lặp",
+  "youveNoDuplicateCodesThatCanBeCleared": "Bạn không có mã nào bị trùng để xóa",
   "deduplicateCodes": "Loại bỏ mã trùng lặp",
   "deselectAll": "Bỏ chọn tất cả",
   "selectAll": "Chọn tất cả",
   "deleteDuplicates": "Xóa trùng lặp",
-  "plainHTML": "HTML thuần"
+  "plainHTML": "HTML thuần",
+  "tellUsWhatYouThink": "Hãy cho chúng tôi biết bạn nghĩ gì",
+  "dropReview": "Hãy đánh giá trên App/Play Store",
+  "supportEnte": "Hỗ trợ <bold-green>ente</bold-green>",
+  "giveUsAStarOnGithub": "Cho chúng tôi ngôi sao trên Github",
+  "free5GB": "Miễn phí 5GB cho <bold-green>ente</bold-green> Hình ảnh",
+  "loginWithAuthAccount": "Đăng nhập bằng tài khoản Ente Auth",
+  "freeStorageOffer": "Giảm giá 10% cho <bold-green>ente</bold-green> Hình ảnh",
+  "freeStorageOfferDescription": "Sử dụng mã giảm giá \"AUTH\" để được giảm 10% trong năm đầu tiên"
 }

@@ -499,11 +499,17 @@
   "appLockOfflineModeWarning": "Избрахте да продължите без резервни копия. Ако забравите паролата на приложението си, ще бъдете заключени от достъп до вашите данни.",
   "duplicateCodes": "Повтарящи се кодове",
   "noDuplicates": "✨ Няма дубликати",
+  "youveNoDuplicateCodesThatCanBeCleared": "Нямате повтарящи се кодове, които могат да бъдат изчистени",
   "deduplicateCodes": "Премахване на повтарящи се кодове",
   "deselectAll": "Демаркиране на всички",
   "selectAll": "Избиране на всички",
   "deleteDuplicates": "Изтриване на дубликатите",
   "plainHTML": "Обикновен HTML",
   "tellUsWhatYouThink": "Кажете ни какво мислите",
+  "dropReview": "Оставете отзив в App/Play Store",
+  "supportEnte": "Подкрепете <bold-green>ente</bold-green>",
+  "giveUsAStarOnGithub": "Дайте ни звезда в GitHub",
+  "free5GB": "5GB безплатни в <bold-green>ente</bold-green> Photos",
+  "freeStorageOffer": "10% отстъпка в <bold-green>ente</bold-green> Photos",
   "freeStorageOfferDescription": "Използвайте промокод „AUTH“, за да получите 10% отстъпка през първата година"
 }
