@@ -84,6 +84,22 @@ class EnteFile {
     return file;
   }
 
+  static EnteFile fromAssetSync(AssetEntity asset) {
+    final EnteFile file = EnteFile();
+    file.localID = asset.id;
+    file.title = asset.title;
+    file.deviceFolder = asset.relativePath;
+    file.location =
+        Location(latitude: asset.latitude, longitude: asset.longitude);
+    file.fileType = fileTypeFromAsset(asset);
+    file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
+    file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
+    file.fileSubType = asset.subtype;
+    file.metadataVersion = kCurrentMetadataVersion;
+    file.duration = asset.duration;
+    return file;
+  }
+
   static int parseFileCreationTime(String? fileTitle, AssetEntity asset) {
     int creationTime = asset.createDateTime.microsecondsSinceEpoch;
     final int modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;

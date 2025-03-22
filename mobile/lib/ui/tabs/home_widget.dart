@@ -37,6 +37,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/local/local_import.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/notification_service.dart";
@@ -54,7 +55,7 @@ import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/home/grant_permissions_widget.dart';
 import 'package:photos/ui/home/header_widget.dart';
 import 'package:photos/ui/home/home_bottom_nav_bar.dart';
-import 'package:photos/ui/home/home_gallery_widget.dart';
+import "package:photos/ui/home/home_gallery_widget_v2.dart";
 import 'package:photos/ui/home/landing_page_widget.dart';
 import "package:photos/ui/home/loading_photos_widget.dart";
 import 'package:photos/ui/home/start_backup_hook_widget.dart';
@@ -583,7 +584,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
     bool isSettingsOpen = false;
-    final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport();
+    final enableDrawer = LocalImportService.instance.hasCompletedFirstImport();
     final action = AppLifecycleService.instance.mediaExtensionAction.action;
     return UserDetailsStateWidget(
       child: PopScope(
@@ -656,7 +657,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
       return const GrantPermissionsWidget();
     }
-    if (!LocalSyncService.instance.hasCompletedFirstImport()) {
+    if (!(LocalSyncService.instance.hasCompletedFirstImport() ||
+        LocalImportService.instance.hasCompletedFirstImport())) {
       return const LoadingPhotosWidget();
     }
     if (_sharedFiles != null &&
@@ -676,10 +678,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     }
 
-    _showShowBackupHook =
-        !Configuration.instance.hasSelectedAnyBackupFolder() &&
-            !permissionService.hasGrantedLimitedPermissions() &&
-            CollectionsService.instance.getActiveCollections().isEmpty;
+    _showShowBackupHook = false;
 
     return Stack(
       children: [
@@ -700,7 +699,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               children: [
                 _showShowBackupHook
                     ? const StartBackupHookWidget(headerWidget: HeaderWidget())
-                    : HomeGalleryWidget(
+                    : HomeGalleryWidgetV2(
                         header: const HeaderWidget(),
                         footer: const SizedBox(
                           height: 160,
