@@ -262,6 +262,9 @@ const parseCodeDisplay = (url: URL): CodeDisplay | undefined => {
 export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
     let otp: string;
     let nextOTP: string;
+    if (code.issuer.toLowerCase().includes("steam")) {
+        code.type = "steam";
+    }
     switch (code.type) {
         case "totp": {
             const totp = new TOTP({
