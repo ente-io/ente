@@ -15,6 +15,7 @@ ente account add [flags]
 ```
   -h, --help   help for add
 ```
+The process will ask for a role, email, a password, and an OTP.  OTP stands for "One Time Password" and is available in the output of the Museum logs.
 
 ### SEE ALSO
 
