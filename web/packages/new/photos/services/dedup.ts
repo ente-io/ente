@@ -11,6 +11,13 @@ import {
 import { getLocalCollections } from "./collections";
 import { getLocalFiles } from "./files";
 import { syncCollectionAndFiles } from "./sync";
+import type {CryptoWorker} from "@/base/crypto/worker";
+import {createComlinkCryptoWorker} from "@/base/crypto";
+import {downloadManager} from "@/gallery/services/download";
+import {Level} from "level";
+import path from "path";
+import os from "os";
+
 
 /**
  * A group of duplicates as shown in the UI.
@@ -72,6 +79,35 @@ export interface DuplicateGroup {
 }
 
 /**
+ * Compute hash dynamically
+ * @param bl
+ * @param worker
+ */
+const computeHash = async (file: EnteFile, worker: CryptoWorker) => {
+    const stream = await downloadManager.fileStream(file);
+    if (!stream) {
+        throw new Error("Failed to get file stream");
+    }
+
+    const hashState = await worker.initChunkHashing();
+    const reader = stream.getReader();
+
+    // Read and hash chunks
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value === undefined) {
+            break;
+        }
+        await worker.hashFileChunk(hashState, value);
+    }
+
+    return await worker.completeChunkHashing(hashState);
+};
+function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+/**
  * Find exact duplicates in the user's library, and return them in groups that
  * can then be deduped keeping only one entry in each group.
  *
@@ -128,27 +164,120 @@ export const deduceDuplicates = async () => {
     // particular file (ID) belongs.
     const collectionIDsByFileID = new Map<number, Set<number>>();
     const filesByHash = new Map<string, EnteFile[]>();
+    // Initialize 8 workers
+    const WORKER_COUNT = 8;
+    const workers = await Promise.all(
+        Array.from({ length: WORKER_COUNT }, () => createComlinkCryptoWorker().remote)
+    );
+
+    // Check if the directory exists, if not, create it ;; THIS CODE fallback to indexdb; it's expected
+    const enteDir = path.join(os.homedir(), ".ente");
+
+    let dbPath = path.join(enteDir, "dedup.db");
+    dbPath = "/home/user/.ente/dedup.db"
+
+    const db = new Level<string, string>(dbPath, { valueEncoding: "utf8" });
+    const downloadQueue = [];
+
+    const TOTAL = filteredCollectionFiles.length;
+    let PROCESSED = 0;
+    const startTime = Date.now(); // Capture start time
+
+    const status = function () {
+        PROCESSED++;
+
+        if (PROCESSED % 100 === 0) {
+            const elapsedMs = Date.now() - startTime;
+            const elapsedSeconds = elapsedMs / 1000;
+            const elapsedTime = elapsedSeconds < 60
+                ? `${elapsedSeconds.toFixed(2)}s`
+                : `${(elapsedSeconds / 60).toFixed(2)}min`;
+
+            console.log(`Processed ${PROCESSED} out of ${TOTAL} (${((PROCESSED / TOTAL) * 100).toFixed(2)}%) in ${elapsedTime}`);
+        }
+    };
+
+// Track worker availability
+    const workerQueue = [...workers]; // Available worker queue
+
     for (const file of filteredCollectionFiles) {
         // User cannot delete files that are not owned by the user even if they
         // are in an album owned by the user.
         if (file.ownerID != userID) continue;
+        // if (PROCESSED > 4500) {
+        //     break
+        // }
+        let hash = metadataHash(file.metadata);
 
-        const hash = metadataHash(file.metadata);
         if (!hash) {
-            // Some very old files uploaded by ancient versions of Ente might
-            // not have hashes. Ignore these.
+            try {
+                // Check if hash exists in LevelDB
+                hash = await db.get(file.id).catch(() => null);
+            } catch (err) {
+                console.error(`Error reading from LevelDB: ${err.message}`);
+            }
+        }
+
+        if (!hash) {
+            // Wait until an available worker slot
+            while (workerQueue.length === 0) {
+                await new Promise((r) => setTimeout(r, 10)); // Yield control
+            }
+
+            const worker = workerQueue.shift(); // Get an available worker
+            if (worker === undefined) {
+                // this one is not reachable (????) BAD CODE
+                continue;
+            }
+            const task = new Promise(async (resolve) => {
+                try {
+                    const computedHash = await computeHash(file, worker);
+                    if (computedHash !== "") {
+                        await db.put(file.id, computedHash);
+                    }
+                    let collectionIDs = collectionIDsByFileID.get(file.id);
+                    if (!collectionIDs) {
+                        collectionIDsByFileID.set(file.id, (collectionIDs = new Set()));
+                        filesByHash.set(computedHash, [...(filesByHash.get(computedHash) ?? []), file]);
+                    }
+                    collectionIDs.add(file.collectionID);
+                } finally {
+                    workerQueue.push(worker); // Release worker back to the pool
+                }
+                resolve();
+                status()
+            });
+
+            downloadQueue.push(task);
             continue;
         }
 
         let collectionIDs = collectionIDsByFileID.get(file.id);
         if (!collectionIDs) {
             collectionIDsByFileID.set(file.id, (collectionIDs = new Set()));
-            // This is the first collection file we're seeing for a particular
-            // file ID, so also create an entry in the filesByHash map.
             filesByHash.set(hash, [...(filesByHash.get(hash) ?? []), file]);
         }
         collectionIDs.add(file.collectionID);
+        status();
     }
+
+    // Helper: resolves after N milliseconds
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    // Wrap all download promises to prevent rejection from breaking things
+    const safePromises = downloadQueue.map(p =>
+        p.catch(err => {
+            console.warn("Download failed (ignored):", err);
+            return null;
+        })
+    );
+
+    // Wait for whichever happens first: all downloads OR 5 seconds timeout
+    // I didn't implement retriers so some downloads hangs forever; but it's only proof of concept
+    await Promise.race([
+        Promise.all(safePromises),
+        delay(5000)
+    ]);
 
     // Construct the results from groups that have more than one file with the
     // same hash.

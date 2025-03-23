@@ -11,10 +11,12 @@
         "@mui/system": "^6.4.7",
         "@mui/x-date-pickers": "^7.27.3",
         "dayjs": "^1.11.13",
+        "level": "^9.0.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0"
     },
     "devDependencies": {
-        "@/build-config": "*"
+        "@/build-config": "*",
+        "@types/level": "^8.0.0"
     }
 }
