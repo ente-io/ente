@@ -3,10 +3,10 @@ import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import "package:equatable/equatable.dart";
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:photo_manager/photo_manager.dart';
+import "package:photos/image/in_memory_cache.dart";
 
 class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
   final LocalThumbnailProviderKey key;
@@ -42,22 +42,43 @@ class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
     StreamController<ImageChunkEvent> chunkEvents,
   ) async* {
     final asset = key.asset;
-    final thumbBytes = await asset.thumbnailDataWithSize(
-      ThumbnailSize(key.smallThumbWidth, key.smallThumbHeight),
-      quality: 75,
-    );
+    Uint8List? normalThumbBytes = inMemCache.getThumbByID(asset.id, key.height);
+    if (normalThumbBytes != null) {
+      final buffer = await ui.ImmutableBuffer.fromUint8List(normalThumbBytes);
+      final codec = await decode(buffer);
+      yield codec;
+      chunkEvents.close().ignore();
+    }
+
+    // todo: (neeraj) either cache or use
+    // imageCache.statusForKey(key) to avoid refresh when zooming out
+    Uint8List? thumbBytes =
+        inMemCache.getThumbByID(asset.id, key.smallThumbWidth);
+    if (thumbBytes == null) {
+      thumbBytes = await asset.thumbnailDataWithSize(
+        ThumbnailSize(key.smallThumbWidth, key.smallThumbHeight),
+        quality: 75,
+      );
+      inMemCache.putThumbByID(asset.id, thumbBytes, key.smallThumbWidth);
+    }
     if (thumbBytes != null) {
       final buffer = await ui.ImmutableBuffer.fromUint8List(thumbBytes);
       final codec = await decode(buffer);
       yield codec;
     } else {
-      debugPrint("$runtimeType smallThum ${key.asset.title} failed");
+      debugPrint("$runtimeType smallThumb ${key.asset.title} failed");
     }
-    final normalThumbBytes =
-        await asset.thumbnailDataWithSize(ThumbnailSize(key.width, key.height));
+
+    if (normalThumbBytes == null) {
+      normalThumbBytes = await asset.thumbnailDataWithSize(
+        ThumbnailSize(key.width, key.height),
+        quality: 50,
+      );
+      inMemCache.putThumbByID(asset.id, normalThumbBytes, key.height);
+    }
     if (normalThumbBytes == null) {
       throw StateError(
-        "$runtimeType bugThumb ${asset.title} failed",
+        "$runtimeType biThumb ${asset.title} failed",
       );
     }
     final buffer = await ui.ImmutableBuffer.fromUint8List(normalThumbBytes);

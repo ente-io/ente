@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
+import "package:photos/image/in_memory_cache.dart";
 import "package:photos/image/provider/local_thumbnail_img.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -115,15 +116,21 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     if (widget.file.isRemoteFile) {
       _loadNetworkImage();
     } else {
-      // todo(neeraj): load image from cache and also implement deferred loading
-      _imageProvider = LocalThumbnailProvider(
-        LocalThumbnailProviderKey(
-          asset: widget.file.asset!,
-          height: widget.thumbnailSize,
-          width: widget.thumbnailSize,
-        ),
-      );
-      precacheImage(_imageProvider!, context);
+      // todo(neeraj): implement deferred loading implement deferred loading
+      final cachedThumb =
+          inMemCache.getThumb(widget.file, widget.thumbnailSize);
+      if (cachedThumb != null) {
+        _imageProvider = Image.memory(cachedThumb).image;
+        _hasLoadedThumbnail = true;
+      } else {
+        _imageProvider = LocalThumbnailProvider(
+          LocalThumbnailProviderKey(
+            asset: widget.file.asset!,
+            height: widget.thumbnailSize,
+            width: widget.thumbnailSize,
+          ),
+        );
+      }
     }
     Widget? image;
     if (_imageProvider != null) {

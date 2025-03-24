@@ -29,6 +29,10 @@ class LRUMap<K, V> {
     }
   }
 
+  bool containsKey(K key) {
+    return _map.containsKey(key);
+  }
+
   void remove(K key) {
     _map.remove(key);
   }

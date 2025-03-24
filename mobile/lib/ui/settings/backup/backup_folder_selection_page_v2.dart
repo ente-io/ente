@@ -9,7 +9,7 @@ import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/generated/l10n.dart';
-import "package:photos/image_providers/local_thumbnail_img_provider.dart";
+import "package:photos/image/provider/local_thumbnail_img.dart";
 import "package:photos/services/local/local_assets_cache.dart";
 import "package:photos/services/local/local_import.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
