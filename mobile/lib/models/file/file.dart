@@ -17,6 +17,7 @@ import 'package:photos/utils/standalone/date_time.dart';
 
 //Todo: files with no location data have lat and long set to 0.0. This should ideally be null.
 class EnteFile {
+  AssetEntity? asset;
   int? generatedID;
   int? uploadedFileID;
   int? ownerID;
@@ -71,6 +72,7 @@ class EnteFile {
 
   static Future<EnteFile> fromAsset(String pathName, AssetEntity asset) async {
     final EnteFile file = EnteFile();
+    file.asset = asset;
     file.localID = asset.id;
     file.title = asset.title;
     file.deviceFolder = pathName;
@@ -86,6 +88,7 @@ class EnteFile {
 
   static EnteFile fromAssetSync(AssetEntity asset) {
     final EnteFile file = EnteFile();
+    file.asset = asset;
     file.localID = asset.id;
     file.title = asset.title;
     file.deviceFolder = asset.relativePath;
