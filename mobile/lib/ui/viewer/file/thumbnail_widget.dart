@@ -2,10 +2,9 @@ import "dart:async";
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
-import "package:photos/image/in_memory_cache.dart";
+import "package:photos/image/in_memory_image_cache.dart";
 import "package:photos/image/provider/local_thumbnail_img.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -118,9 +117,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     } else {
       // todo(neeraj): implement deferred loading implement deferred loading
       final cachedThumb =
-          inMemCache.getThumb(widget.file, widget.thumbnailSize);
+          enteImageCache.getThumb(widget.file, widget.thumbnailSize);
       if (cachedThumb != null) {
-        _imageProvider = Image.memory(cachedThumb).image;
+        _imageProvider = Image.memory(
+          cachedThumb,
+          gaplessPlayback: true,
+        ).image;
         _hasLoadedThumbnail = true;
       } else {
         _imageProvider = LocalThumbnailProvider(
@@ -232,7 +234,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_errorLoadingRemoteThumbnail &&
         !_isLoadingRemoteThumbnail) {
       _isLoadingRemoteThumbnail = true;
-      final cachedThumbnail = ThumbnailInMemoryLruCache.get(widget.file);
+      final cachedThumbnail =
+          enteImageCache.getThumb(widget.file, thumbnailLargeSize);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _hasLoadedThumbnail = true;

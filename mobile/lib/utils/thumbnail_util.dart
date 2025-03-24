@@ -7,11 +7,11 @@ import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
+import "package:photos/image/in_memory_image_cache.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/utils/file_key.dart";
@@ -68,7 +68,7 @@ Future<Uint8List> getThumbnailFromServer(EnteFile file) async {
   final cachedThumbnail = cachedThumbnailPath(file);
   if (await cachedThumbnail.exists()) {
     final data = await cachedThumbnail.readAsBytes();
-    ThumbnailInMemoryLruCache.put(file, data);
+    enteImageCache.putThumb(file, data, thumbnailLargeSize);
     return data;
   }
   // Check if there's already in flight request for fetching thumbnail from the
@@ -97,7 +97,7 @@ Future<Uint8List?> getThumbnailFromLocal(
   int size = thumbnailSmallSize,
   int quality = thumbnailQuality,
 }) async {
-  final lruCachedThumbnail = ThumbnailInMemoryLruCache.get(file, size);
+  final lruCachedThumbnail = enteImageCache.getThumb(file, size);
   if (lruCachedThumbnail != null) {
     return lruCachedThumbnail;
   }
@@ -105,7 +105,7 @@ Future<Uint8List?> getThumbnailFromLocal(
     //todo:neeraj support specifying size/quality
     return getThumbnailFromInAppCacheFile(file).then((data) {
       if (data != null) {
-        ThumbnailInMemoryLruCache.put(file, data, size);
+        enteImageCache.putThumb(file, data, size);
       }
       return data;
     });
@@ -117,7 +117,7 @@ Future<Uint8List?> getThumbnailFromLocal(
       return asset
           .thumbnailDataWithSize(ThumbnailSize(size, size), quality: quality)
           .then((data) {
-        ThumbnailInMemoryLruCache.put(file, data, size);
+        enteImageCache.putThumb(file, data, size);
         return data;
       });
     });
@@ -211,7 +211,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   if (thumbnailSize > thumbnailDataLimit) {
     data = await compressThumbnail(data);
   }
-  ThumbnailInMemoryLruCache.put(item.file, data);
+  enteImageCache.putThumb(item.file, data, thumbnailLargeSize);
   final cachedThumbnail = cachedThumbnailPath(item.file);
   if (await cachedThumbnail.exists()) {
     await cachedThumbnail.delete();

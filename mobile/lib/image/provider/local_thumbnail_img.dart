@@ -6,7 +6,7 @@ import "package:equatable/equatable.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:photo_manager/photo_manager.dart';
-import "package:photos/image/in_memory_cache.dart";
+import "package:photos/image/in_memory_image_cache.dart";
 
 class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
   final LocalThumbnailProviderKey key;
@@ -42,7 +42,8 @@ class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
     StreamController<ImageChunkEvent> chunkEvents,
   ) async* {
     final asset = key.asset;
-    Uint8List? normalThumbBytes = inMemCache.getThumbByID(asset.id, key.height);
+    Uint8List? normalThumbBytes =
+        enteImageCache.getThumbByID(asset.id, key.height);
     if (normalThumbBytes != null) {
       final buffer = await ui.ImmutableBuffer.fromUint8List(normalThumbBytes);
       final codec = await decode(buffer);
@@ -53,13 +54,13 @@ class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
     // todo: (neeraj) either cache or use
     // imageCache.statusForKey(key) to avoid refresh when zooming out
     Uint8List? thumbBytes =
-        inMemCache.getThumbByID(asset.id, key.smallThumbWidth);
+        enteImageCache.getThumbByID(asset.id, key.smallThumbWidth);
     if (thumbBytes == null) {
       thumbBytes = await asset.thumbnailDataWithSize(
         ThumbnailSize(key.smallThumbWidth, key.smallThumbHeight),
         quality: 75,
       );
-      inMemCache.putThumbByID(asset.id, thumbBytes, key.smallThumbWidth);
+      enteImageCache.putThumbByID(asset.id, thumbBytes, key.smallThumbWidth);
     }
     if (thumbBytes != null) {
       final buffer = await ui.ImmutableBuffer.fromUint8List(thumbBytes);
@@ -74,7 +75,7 @@ class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
         ThumbnailSize(key.width, key.height),
         quality: 50,
       );
-      inMemCache.putThumbByID(asset.id, normalThumbBytes, key.height);
+      enteImageCache.putThumbByID(asset.id, normalThumbBytes, key.height);
     }
     if (normalThumbBytes == null) {
       throw StateError(

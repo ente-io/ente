@@ -10,10 +10,10 @@ import 'package:logging/logging.dart';
 import 'package:motionphoto/motionphoto.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/cache/image_cache.dart';
-import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/image/in_memory_image_cache.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -368,7 +368,7 @@ Future<void> clearCache(EnteFile file) async {
   if (cachedThumbnail.existsSync()) {
     await cachedThumbnail.delete();
   }
-  ThumbnailInMemoryLruCache.clearCache(file);
+  enteImageCache.clearCache(file);
 }
 
 class _LivePhoto {

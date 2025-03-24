@@ -3,13 +3,13 @@ import "package:photos/core/cache/lru_map.dart";
 import "package:photos/models/file/file.dart";
 
 // Singleton instance for global access
-final inMemCache = ImageInMemoryCache._instance;
+final enteImageCache = InMemoryImageCache._instance;
 
-class ImageInMemoryCache {
-  static final ImageInMemoryCache _instance = ImageInMemoryCache._();
+class InMemoryImageCache {
+  static final InMemoryImageCache _instance = InMemoryImageCache._();
 
   // Private constructor for singleton
-  ImageInMemoryCache._();
+  InMemoryImageCache._();
 
   // Supported dimensions with associated cache sizes
   static const Map<int, int> _cacheSizes = {
@@ -48,6 +48,12 @@ class ImageInMemoryCache {
   /// Checks if a thumbnail exists for a file at the specified dimension
   bool containsThumb(EnteFile file, int dimension) {
     return _isCached(file.cacheKey(), dimension);
+  }
+
+  void clearCache(EnteFile file) {
+    _caches.forEach((_, cache) {
+      cache.remove(file.cacheKey());
+    });
   }
 
   // Private helper methods

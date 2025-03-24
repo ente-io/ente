@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import 'package:logging/logging.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/image/in_memory_image_cache.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/states/detail_page_state.dart";
@@ -252,7 +252,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   void _loadNetworkImage() {
     if (!_loadedSmallThumbnail && !_loadedFinalImage) {
-      final cachedThumbnail = ThumbnailInMemoryLruCache.get(_photo);
+      final cachedThumbnail =
+          enteImageCache.getThumb(_photo, thumbnailLargeSize);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
@@ -294,7 +295,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
         !_loadedLargeThumbnail &&
         !_loadedFinalImage) {
       final cachedThumbnail =
-          ThumbnailInMemoryLruCache.get(_photo, thumbnailSmallSize);
+          enteImageCache.getThumb(_photo, thumbnailSmallSize);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
