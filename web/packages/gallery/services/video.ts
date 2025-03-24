@@ -77,6 +77,31 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
     //     output.ts
     //     #EXT-X-ENDLIST
     //
+    // The HLS playlist format is specified in RFC 8216:
+    // https://datatracker.ietf.org/doc/html/rfc8216
+    //
+    // Some notes pertinent to us:
+    //
+    // - A URI line identifies a media segment.
+    //
+    // - The EXTINF tag specifies the duration of the media segment (applies
+    //   only to the next URI line that follows it in the playlist).
+    //
+    // - The EXT-X-BYTERANGE tag indicates that a media segment is a sub-range
+    //   of the resource identified by its URI (applies only to the next URI
+    //   line that follows it in the playlist). The value should be of the
+    //   format `<n>[@<o>]` where n is an integer indicating the length of the
+    //   sub-range in bytes, and if present, o is the integer indicating the
+    //   start of the sub-range as a byte offset from the beginning of the
+    //   resource. If o is not present, the sub-range begins at the next byte
+    //   following the sub-range of the preivous media segment.
+    //
+    // - Media segments may be encrypted, and the EXT-X-KEY tag specifies how to
+    //   decrypt them. It applies to all subsequent media segment (until another
+    //   EXT-X-KEY). Value is an `<attribute-list>`, consisting of the METHOD
+    //   (AES-128 for us), URI and IV attributes. The URI attribute value is a
+    //   quoted string containing a URI that specfies how to obtain the key.
+
     log.debug(() => ["hlsPlaylistForFile", playlist]);
     return file.id;
 };
