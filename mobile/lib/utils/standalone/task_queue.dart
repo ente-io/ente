@@ -8,13 +8,16 @@ class _QueueItem<T> {
   final Future<void> Function() task;
   final Completer<void> completer;
   DateTime lastUpdated;
+  int counter;
 
   _QueueItem(this.id, this.task)
       : lastUpdated = DateTime.now(),
+        counter = 1,
         completer = Completer<void>();
 
   void updateTimestamp() {
     lastUpdated = DateTime.now();
+    counter++;
   }
 
   bool isTimedOut(Duration timeout) {
@@ -148,8 +151,11 @@ class TaskQueue<T> {
 
     if (_taskMap.containsKey(id)) {
       final item = _taskMap[id]!;
+      item.counter--;
+      if (item.counter > 0) {
+        return false;
+      }
       _priorityQueue.remove(item);
-
       // Complete the future with a cancellation error
       if (!item.completer.isCompleted) {
         item.completer.completeError(Exception('Task $id was cancelled'));

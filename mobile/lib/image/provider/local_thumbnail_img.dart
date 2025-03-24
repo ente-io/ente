@@ -7,6 +7,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/image/in_memory_image_cache.dart";
+import "package:photos/utils/standalone/task_queue.dart";
+
+final thumbnailQueue = TaskQueue<String>(
+  maxConcurrentTasks: 15,
+  taskTimeout: const Duration(minutes: 1),
+  maxQueueSize: 1000, // Limit the queue to 50 pending tasks
+);
+
+final mediumThumbnailQueue = TaskQueue<String>(
+  maxConcurrentTasks: 5,
+  taskTimeout: const Duration(minutes: 1),
+  maxQueueSize: 1000, // Limit the queue to 50 pending tasks
+);
 
 class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
   final LocalThumbnailProviderKey key;
@@ -36,6 +49,11 @@ class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
     );
   }
 
+  static Future<void> cancelRequest(LocalThumbnailProviderKey key) async {
+    thumbnailQueue.removeTask('${key.asset.id}-small');
+    mediumThumbnailQueue.removeTask('${key.asset.id}-medium');
+  }
+
   Stream<ui.Codec> _codec(
     LocalThumbnailProviderKey key,
     ImageDecoderCallback decode,
@@ -56,10 +74,16 @@ class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
     Uint8List? thumbBytes =
         enteImageCache.getThumbByID(asset.id, key.smallThumbWidth);
     if (thumbBytes == null) {
-      thumbBytes = await asset.thumbnailDataWithSize(
-        ThumbnailSize(key.smallThumbWidth, key.smallThumbHeight),
-        quality: 75,
-      );
+      final Completer<Uint8List?> future = Completer();
+      await thumbnailQueue.addTask('${asset.id}-small', () async {
+        final thumbBytes = await asset.thumbnailDataWithSize(
+          ThumbnailSize(key.smallThumbWidth, key.smallThumbHeight),
+          quality: 75,
+        );
+        enteImageCache.putThumbByID(asset.id, thumbBytes, key.smallThumbWidth);
+        future.complete(thumbBytes);
+      });
+      thumbBytes = await future.future;
       enteImageCache.putThumbByID(asset.id, thumbBytes, key.smallThumbWidth);
     }
     if (thumbBytes != null) {
@@ -71,10 +95,16 @@ class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
     }
 
     if (normalThumbBytes == null) {
-      normalThumbBytes = await asset.thumbnailDataWithSize(
-        ThumbnailSize(key.width, key.height),
-        quality: 50,
-      );
+      final Completer<Uint8List?> future = Completer();
+      await mediumThumbnailQueue.addTask('${asset.id}-medium', () async {
+        normalThumbBytes = await asset.thumbnailDataWithSize(
+          ThumbnailSize(key.width, key.height),
+          quality: 50,
+        );
+        enteImageCache.putThumbByID(asset.id, normalThumbBytes, key.height);
+        future.complete(normalThumbBytes);
+      });
+      normalThumbBytes = await future.future;
       enteImageCache.putThumbByID(asset.id, normalThumbBytes, key.height);
     }
     if (normalThumbBytes == null) {
@@ -82,7 +112,7 @@ class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
         "$runtimeType biThumb ${asset.title} failed",
       );
     }
-    final buffer = await ui.ImmutableBuffer.fromUint8List(normalThumbBytes);
+    final buffer = await ui.ImmutableBuffer.fromUint8List(normalThumbBytes!);
     final codec = await decode(buffer);
     yield codec;
     chunkEvents.close().ignore();

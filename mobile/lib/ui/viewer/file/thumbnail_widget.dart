@@ -71,6 +71,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   ImageProvider? _imageProvider;
   int? optimizedImageHeight;
   int? optimizedImageWidth;
+  LocalThumbnailProviderKey? localImageProviderKey;
 
   @override
   void initState() {
@@ -81,7 +82,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   @override
   void dispose() {
     super.dispose();
+
     Future.delayed(const Duration(milliseconds: 10), () {
+      if (!mounted) {
+        if (localImageProviderKey != null) {
+          LocalThumbnailProvider.cancelRequest(localImageProviderKey!);
+        }
+      }
       // Cancel request only if the widget has been unmounted
       if (!mounted && widget.file.isRemoteFile && !_hasLoadedThumbnail) {
         removePendingGetThumbnailRequestIfAny(widget.file);
@@ -125,13 +132,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         ).image;
         _hasLoadedThumbnail = true;
       } else {
-        _imageProvider = LocalThumbnailProvider(
-          LocalThumbnailProviderKey(
-            asset: widget.file.asset!,
-            height: widget.thumbnailSize,
-            width: widget.thumbnailSize,
-          ),
+        localImageProviderKey = LocalThumbnailProviderKey(
+          asset: widget.file.asset!,
+          height: widget.thumbnailSize,
+          width: widget.thumbnailSize,
         );
+        _imageProvider = LocalThumbnailProvider(localImageProviderKey!);
       }
     }
     Widget? image;
