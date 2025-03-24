@@ -1507,12 +1507,6 @@
   "@selectAllShort": {
     "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
   },
-  "changeLogMagicSearchImprovementTitle": "Покращення магічного пошуку",
-  "changeLogMagicSearchImprovementContent": "Ми вдосконалили магічний пошук, щоб він став набагато швидше, тож вам не доведеться чекати, щоб знайти те, що хочеться.",
-  "changeLogBackupStatusTitle": "Стан резервних копій",
-  "changeLogBackupStatusContent": "Ми додали журнал всіх файлів, які були завантажені на Ente, включаючи помилки та поставлені в чергу.",
-  "changeLogDiscoverTitle": "Дізнайтеся",
-  "changeLogDiscoverContent": "Шукаєте фотографії своїх посвідчень особи, нотаток або навіть мемів? Перейдіть на вкладку «Пошук» і перевірте «Дізнайтеся». На основі нашого семантичного пошуку тут можна знайти фотографії, які можуть бути важливими для вас.\\n\\nДоступно лише за умови увімкненого машинного навчання.",
   "selectCoverPhoto": "Вибрати обкладинку",
   "newLocation": "Нове розташування",
   "faceNotClusteredYet": "Обличчя ще не згруповані, поверніться пізніше",
@@ -1584,23 +1578,5 @@
   },
   "legacyInvite": "{email} запросив вас стати довіреною особою",
   "authToManageLegacy": "Авторизуйтесь, щоби керувати довіреними контактами",
-  "useDifferentPlayerInfo": "Виникли проблеми з відтворенням цього відео? Натисніть і утримуйте тут, щоб спробувати інший плеєр.",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos",
-  "notThisPerson": "Not this person?",
-  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
-  "thisWeekThroughTheYears": "This week through the years",
-  "spotlightOnYourself": "Spotlight on yourself"
+  "useDifferentPlayerInfo": "Виникли проблеми з відтворенням цього відео? Натисніть і утримуйте тут, щоб спробувати інший плеєр."
 }
