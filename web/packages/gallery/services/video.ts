@@ -91,7 +91,11 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
 
     const playlist = playlistTemplate.replaceAll("output.ts", videoURL);
     log.debug(() => ["hlsPlaylistForFile", playlist]);
-    return file.id;
+
+    const playlistBlob = new Blob([playlist])
+    const playlistURL = URL.createObjectURL(playlistBlob);
+
+    return playlistURL;
 };
 
 const PlaylistJSON = z.object({

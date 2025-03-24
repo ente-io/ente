@@ -305,12 +305,10 @@ export class FileViewerPhotoSwipe {
                 pswp.refreshSlideContent(index),
             );
 
-            const { videoURL, ...rest } = itemData;
-            if (itemData.fileType === FileType.video && videoURL) {
-                itemData = {
-                    ...rest,
-                    html: videoHTML(videoURL, !!disableDownload),
-                };
+            const { videoURL, videoPlaylistURL, ...rest } = itemData;
+            const url = videoPlaylistURL ?? videoURL;
+            if (itemData.fileType === FileType.video && url) {
+                itemData = { ...rest, html: videoHTML(url, !!disableDownload) };
             }
 
             return itemData;
