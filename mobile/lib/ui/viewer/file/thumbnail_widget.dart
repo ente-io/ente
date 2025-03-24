@@ -86,7 +86,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     Future.delayed(const Duration(milliseconds: 10), () {
       if (!mounted) {
         if (localImageProviderKey != null) {
-          LocalThumbnailProvider.cancelRequest(localImageProviderKey!);
+          // LocalThumbnailProvider.cancelRequest(localImageProviderKey!);
         }
       }
       // Cancel request only if the widget has been unmounted
