@@ -26,7 +26,7 @@ dependencies:
   app_links: ^6.4.0
   archive: ^3.6.1
   background_fetch: ^1.2.1
-  battery_info: # update source if there is any update
+  battery_info: # replace plugin, og is archived
     git:
       url: https://github.com/ente-io/battery_info
   bip39: ^1.0.6
@@ -132,8 +132,8 @@ dependencies:
     git: "https://github.com/ente-io/motion_photo.git"
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
-  move_to_background: # update source if there is any update
-    git: "https://github.com/ente-io/move_to_background.git"
+  move_to_background: # no updates in og, replace soon
+    git: https://github.com/ente-io/move_to_background.git
   nanoid: ^1.0.0
   native_dio_adapter: ^1.4.0
   native_video_player: ^3.0.0-dev.4
@@ -143,7 +143,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/onnxruntime.git
       ref: ios_only
-  open_mail_app: # update source if there is any update
+  open_mail_app: # replace plugin, og is archived
     git:
       url: https://github.com/ente-io/open-mail-app-flutter.git
   package_info_plus: ^8.2.1
@@ -163,7 +163,7 @@ dependencies:
   pinput: ^5.0.0
   pointycastle: ^3.7.3
   pool: ^1.5.1
-  privacy_screen: # update source if there is any update
+  privacy_screen: # git is up-to-date but pub.dev is not
     git:
       url: https://github.com/ente-io/privacy_screen.git
       ref: pb/FIX-obsolete-android-plugin
@@ -204,7 +204,7 @@ dependencies:
   video_thumbnail:
   visibility_detector: ^0.3.3
   wakelock_plus: ^1.1.1
-  wallpaper_manager_flutter: # update source if there is any update
+  wallpaper_manager_flutter: # no updates on git, replace package
     git:
       url: https://github.com/ente-io/wallpaper_manager_fork.git
   wechat_assets_picker: ^8.6.3
