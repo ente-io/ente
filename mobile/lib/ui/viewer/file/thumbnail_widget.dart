@@ -82,11 +82,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   @override
   void dispose() {
     super.dispose();
-
     Future.delayed(const Duration(milliseconds: 10), () {
       if (!mounted) {
         if (localImageProviderKey != null) {
-          // LocalThumbnailProvider.cancelRequest(localImageProviderKey!);
+          LocalThumbnailProvider.cancelRequest(localImageProviderKey!);
         }
       }
       // Cancel request only if the widget has been unmounted
@@ -128,7 +127,6 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       if (cachedThumb != null) {
         _imageProvider = Image.memory(
           cachedThumb,
-          gaplessPlayback: true,
         ).image;
         _hasLoadedThumbnail = true;
       } else {
@@ -138,6 +136,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           width: widget.thumbnailSize,
         );
         _imageProvider = LocalThumbnailProvider(localImageProviderKey!);
+        precacheImage(_imageProvider!, context);
       }
     }
     Widget? image;

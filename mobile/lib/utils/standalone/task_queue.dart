@@ -7,21 +7,22 @@ class _QueueItem<T> {
   final T id;
   final Future<void> Function() task;
   final Completer<void> completer;
-  DateTime lastUpdated;
+  int lastUpdated;
   int counter;
 
   _QueueItem(this.id, this.task)
-      : lastUpdated = DateTime.now(),
+      : lastUpdated = DateTime.now().millisecondsSinceEpoch,
         counter = 1,
         completer = Completer<void>();
 
   void updateTimestamp() {
-    lastUpdated = DateTime.now();
+    lastUpdated = DateTime.now().millisecondsSinceEpoch;
     counter++;
   }
 
   bool isTimedOut(Duration timeout) {
-    return DateTime.now().difference(lastUpdated) > timeout;
+    return (DateTime.now().millisecondsSinceEpoch - lastUpdated) >
+        timeout.inMilliseconds;
   }
 
   Future<void> get future => completer.future;
@@ -47,6 +48,15 @@ class TaskQueueOverflowException implements Exception {
 
   @override
   String toString() => 'Task $taskId was discarded due to queue overflow';
+}
+
+class TaskQueueCancelledException implements Exception {
+  final dynamic taskId;
+
+  TaskQueueCancelledException(this.taskId);
+
+  @override
+  String toString() => 'Task $taskId was cancelled';
 }
 
 /// A generic task queue that can manage tasks with priority, cancellation, and timeout functionality.
@@ -158,7 +168,7 @@ class TaskQueue<T> {
       _priorityQueue.remove(item);
       // Complete the future with a cancellation error
       if (!item.completer.isCompleted) {
-        item.completer.completeError(Exception('Task $id was cancelled'));
+        item.completer.completeError(TaskQueueCancelledException(id));
       }
 
       _taskMap.remove(id);
@@ -226,7 +236,6 @@ class TaskQueue<T> {
         timedOutIds.add(entry.key);
       }
     }
-
     // Second pass: remove them and complete with timeout error
     for (var id in timedOutIds) {
       final item = _taskMap[id]!;
