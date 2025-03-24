@@ -160,7 +160,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                                 error: e,
                               );
                               _logger.severe(
-                                "Failed to link email to person",
+                                "Failed to link user email to person",
                                 e,
                               );
                             }
