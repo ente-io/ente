@@ -111,13 +111,16 @@ export const codeFromURIString = (id: string, uriString: string): Code => {
 const _codeFromURIString = (id: string, uriString: string): Code => {
     const url = new URL(uriString);
 
-    const [type, path] = parsePathname(url);
+    const [originalType, path] = parsePathname(url);
+    const issuer = parseIssuer(url, path);
+
+    const type = issuer.toLowerCase().includes("steam") ? "steam" : originalType
 
     return {
         id,
         type,
+        issuer,
         account: parseAccount(path),
-        issuer: parseIssuer(url, path),
         length: parseLength(url, type),
         period: parsePeriod(url),
         algorithm: parseAlgorithm(url),
@@ -262,9 +265,7 @@ const parseCodeDisplay = (url: URL): CodeDisplay | undefined => {
 export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
     let otp: string;
     let nextOTP: string;
-    if (code.issuer.toLowerCase().includes("steam")) {
-        code.type = "steam";
-    }
+
     switch (code.type) {
         case "totp": {
             const totp = new TOTP({
