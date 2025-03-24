@@ -132,7 +132,7 @@ dependencies:
     git: "https://github.com/ente-io/motion_photo.git"
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
-  move_to_background: # no updates in og, replace soon
+  move_to_background: # no updates in git, replace soon
     git: https://github.com/ente-io/move_to_background.git
   nanoid: ^1.0.0
   native_dio_adapter: ^1.4.0
