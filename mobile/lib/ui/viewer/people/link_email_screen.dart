@@ -13,6 +13,7 @@ import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import "package:photos/ui/components/dialog_widget.dart";
@@ -22,6 +23,7 @@ import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/components/text_input_widget.dart";
 import 'package:photos/ui/sharing/user_avator_widget.dart';
+import "package:photos/ui/viewer/people/people_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/person_contact_linking_util.dart";
 import "package:photos/utils/share_util.dart";
@@ -116,6 +118,71 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
               keyboardType: TextInputType.emailAddress,
               shouldUnfocusOnClearOrSubmit: true,
               autoCorrect: false,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: FutureBuilder<bool>(
+              future: isMeAssigned(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final isMeAssigned = snapshot.data!;
+                  if (!isMeAssigned) {
+                    return Column(
+                      children: [
+                        const SizedBox(height: 16),
+                        const MenuSectionTitle(
+                          title: "assign yourself",
+                        ),
+                        ButtonWidget(
+                          buttonType: ButtonType.neutral,
+                          labelText: context.l10n.thisIsMeExclamation,
+                          onTap: () async {
+                            try {
+                              final userEmail =
+                                  Configuration.instance.getEmail();
+                              if (userEmail == null) {
+                                throw AssertionError("User email is null");
+                              }
+                              final result = await linkEmailToPerson(
+                                userEmail,
+                                widget.personID!,
+                                context,
+                              );
+                              if (!result) {
+                                _textController.clear();
+                                return;
+                              }
+                              Navigator.of(context).pop(userEmail);
+                            } catch (e) {
+                              await showGenericErrorDialog(
+                                context: context,
+                                error: e,
+                              );
+                              _logger.severe(
+                                "Failed to link email to person",
+                                e,
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                } else if (snapshot.hasError) {
+                  _logger.severe(
+                    "Error getting isMeAssigned",
+                    snapshot.error,
+                  );
+                  return const RepaintBoundary(
+                    child: EnteLoadingWidget(),
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              },
             ),
           ),
           const SizedBox(height: 16),
