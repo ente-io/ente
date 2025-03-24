@@ -23,6 +23,7 @@ dependencies:
   android_intent_plus: ^5.2.0
   animate_do: ^2.0.0
   animated_list_plus: ^0.5.2
+  app_links: ^6.4.0
   archive: ^3.6.1
   background_fetch: ^1.2.1
   battery_info: # update source if there is any update
@@ -190,10 +191,6 @@ dependencies:
   system_info_plus: ^0.0.6
   tuple: ^2.0.0
   ua_client_hints: ^1.4.0
-  uni_links: # update to app_links
-    git:
-      url: https://github.com/ente-io/uni_links.git
-      path: uni_links
   url_launcher: ^6.3.0
   uuid: ^4.5.0
   video_editor:

@@ -2,6 +2,7 @@ import 'dart:async';
 import "dart:convert";
 import "dart:io";
 
+import "package:app_links/app_links.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -72,7 +73,6 @@ import "package:photos/utils/collection_util.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
@@ -540,8 +540,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
+    final appLinks = AppLinks();
     try {
-      final initialUri = await getInitialUri();
+      final initialUri = await appLinks.getInitialLink();
       if (initialUri != null) {
         if (initialUri.toString().contains("albums.ente.io")) {
           await _handlePublicAlbumLink(initialUri);
@@ -559,7 +560,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _logger.severe("Error while getting initial public album deep link: $e");
     }
 
-    _publicAlbumLinkSubscription = uriLinkStream.listen(
+    _publicAlbumLinkSubscription = appLinks.uriLinkStream.listen(
       (Uri? uri) {
         if (uri != null) {
           if (uri.toString().contains("albums.ente.io")) {
@@ -776,8 +777,9 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<bool> _initDeepLinks() async {
     // Platform messages may fail, so we use a try/catch PlatformException.
+    final appLinks = AppLinks();
     try {
-      final String? initialLink = await getInitialLink();
+      final String? initialLink = await appLinks.getInitialLinkString();
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {
@@ -794,7 +796,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     // Attach a listener to the stream
-    linkStream.listen(
+    appLinks.stringLinkStream.listen(
       (String? link) {
         _logger.info("Link received: " + link!);
         _getCredentials(context, link);

@@ -1,6 +1,7 @@
 import "dart:async";
 import 'dart:convert';
 
+import "package:app_links/app_links.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -15,7 +16,6 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:uni_links/uni_links.dart";
 import 'package:url_launcher/url_launcher_string.dart';
 
 class PasskeyPage extends StatefulWidget {
@@ -126,8 +126,9 @@ class _PasskeyPageState extends State<PasskeyPage> {
   }
 
   Future<bool> _initDeepLinks() async {
+    final appLinks = AppLinks();
     // Attach a listener to the stream
-    linkStreamSubscription = linkStream.listen(
+    linkStreamSubscription = appLinks.stringLinkStream.listen(
       _handleDeeplink,
       onError: (err) {
         _logger.severe(err);
