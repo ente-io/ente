@@ -26,7 +26,7 @@ dependencies:
   app_links: ^6.4.0
   archive: ^3.6.1
   background_fetch: ^1.2.1
-  battery_info: # replace plugin, og is archived
+  battery_info: # replace plugin, it is archived
     git:
       url: https://github.com/ente-io/battery_info
   bip39: ^1.0.6
@@ -132,7 +132,7 @@ dependencies:
     git: "https://github.com/ente-io/motion_photo.git"
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
-  move_to_background: # no updates in git, replace soon
+  move_to_background: # no updates in git, replace package
     git: https://github.com/ente-io/move_to_background.git
   nanoid: ^1.0.0
   native_dio_adapter: ^1.4.0
@@ -143,7 +143,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/onnxruntime.git
       ref: ios_only
-  open_mail_app: # replace plugin, og is archived
+  open_mail_app: # replace plugin, git is archived
     git:
       url: https://github.com/ente-io/open-mail-app-flutter.git
   package_info_plus: ^8.2.1
@@ -163,13 +163,13 @@ dependencies:
   pinput: ^5.0.0
   pointycastle: ^3.7.3
   pool: ^1.5.1
-  privacy_screen: # git is up-to-date but pub.dev is not
+  privacy_screen: # pub.dev is behind
     git:
-      url: https://github.com/ente-io/privacy_screen.git
-      ref: pb/FIX-obsolete-android-plugin
+      url: https://github.com/eddyuan/privacy_screen.git
+      ref: 855418e4b39632893a322fdfa2a9b69487b1831d
   protobuf: ^3.1.0
   quiver: ^3.0.1
-  receive_sharing_intent: # update source if there is any update
+  receive_sharing_intent: # pub.dev is behind
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
   screenshot: ^3.0.0

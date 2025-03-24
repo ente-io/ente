@@ -2185,9 +2185,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "pb/FIX-obsolete-android-plugin"
-      resolved-ref: "949de7b6beedf163507d649a71b1f55bc8f083ca"
-      url: "https://github.com/ente-io/privacy_screen.git"
+      ref: "855418e4b39632893a322fdfa2a9b69487b1831d"
+      resolved-ref: "855418e4b39632893a322fdfa2a9b69487b1831d"
+      url: "https://github.com/eddyuan/privacy_screen.git"
     source: git
     version: "0.0.6"
   process:
