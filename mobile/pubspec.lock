@@ -633,12 +633,11 @@ packages:
   figma_squircle:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "7cc383b30e96c07acd4e484c1d6731d054f7f6ec"
-      resolved-ref: "7cc383b30e96c07acd4e484c1d6731d054f7f6ec"
-      url: "https://github.com/aloisdeniel/figma_squircle.git"
-    source: git
-    version: "1.0.0"
+      name: figma_squircle
+      sha256: "7de45eb9ec66f1c3fea65587d94d66c31e97a9d9068b38bd23d3461aaab5119a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.3"
   file:
     dependency: transitive
     description:
