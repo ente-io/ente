@@ -92,8 +92,10 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
     const playlist = playlistTemplate.replaceAll("output.ts", videoURL);
     log.debug(() => ["hlsPlaylistForFile", playlist]);
 
-    const playlistBlob = new Blob([playlist]);
-    const playlistURL = URL.createObjectURL(playlistBlob);
+    const playlistBlob = new File([playlist], "vid.m3u8", {
+        type: "application/vnd.apple.mpegurl",
+    });
+    const playlistURL = await blobToDataURL(playlistBlob);
 
     return playlistURL;
 };
@@ -111,3 +113,19 @@ const decryptPlaylistJSON = async (
     const jsonString = await gunzip(decryptedBytes);
     return PlaylistJSON.parse(JSON.parse(jsonString));
 };
+
+/**
+ * Convert a blob to a `data:` URL.
+ */
+const blobToDataURL = (blob: Blob) =>
+    new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        // We need to cast to a string here. This should be safe since MDN says:
+        //
+        // > the result attribute contains the data as a data: URL representing
+        // > the file's data as a base64 encoded string.
+        // >
+        // > https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(blob);
+    });
