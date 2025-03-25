@@ -92,12 +92,24 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
     const playlist = playlistTemplate.replaceAll("output.ts", videoURL);
     log.debug(() => ["hlsPlaylistForFile", playlist]);
 
-    const playlistBlob = new File([playlist], "vid.m3u8", {
-        type: "application/vnd.apple.mpegurl",
-    });
-    const playlistURL = await blobToDataURL(playlistBlob);
+    // From the RFC
+    //
+    // > Each playlist file must be identifiable either by the path component of
+    // > its URI (ending with either ".m3u8" or ".m3u") or by its HTTP
+    // > Content-Type ("application/vnd.apple.mpegurl" or "audio/mpegurl").
+    // > Clients should refuse to parse playlists that are not so identified.
+    //
+    // As of now (2025), there isn't a way to set the filename for a URL created
+    // via createObjectURL, so instead we create a "data:" URL where the MIME
+    // type can be specified.
+    //
+    // The generated data URL be of the form:
+    //
+    //     data:application/vnd.apple.mpegurl;base64,<base64-string>
 
-    return playlistURL;
+    return await blobToDataURL(
+        new Blob([playlist], { type: "application/vnd.apple.mpegurl" }),
+    );
 };
 
 const PlaylistJSON = z.object({
