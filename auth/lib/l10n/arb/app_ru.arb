@@ -493,5 +493,10 @@
   "duplicateCodes": "Дублировать коды",
   "noDuplicates": "✨ Дубликатов нет",
   "selectAll": "Выбрать все",
-  "plainHTML": "Обычный HTML"
+  "plainHTML": "Обычный HTML",
+  "tellUsWhatYouThink": "Расскажите нам, что вы думаете",
+  "free5GB": "5GB бесплатно на <bold-green>ente</bold-green> фото",
+  "loginWithAuthAccount": "Войти с помощью учетной записи Auth",
+  "freeStorageOffer": "Скидка 10% на <bold-green>ente</bold-green> фото",
+  "freeStorageOfferDescription": "Используйте код \"AUTH\", чтобы получить скидку 10% в первый год"
 }
