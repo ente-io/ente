@@ -8,6 +8,7 @@
         "@ffmpeg/ffmpeg": "^0.12.10",
         "bs58": "^6.0.0",
         "exifreader": "^4.26.2",
+        "hls.js": "^1.5.20",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.2",
         "photoswipe": "^5.4.4",

@@ -23,11 +23,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(passwordStrengthValue) =>
       "Надзейнасць пароля: ${passwordStrengthValue}";
 
-  static String m1(count) => "\$photoCount photos";
+  static String m1(storageAmountInGB) => "${storageAmountInGB} Гб";
 
-  static String m2(storageAmountInGB) => "${storageAmountInGB} Гб";
-
-  static String m3(email) =>
+  static String m2(email) =>
       "Ліст адпраўлены на электронную пошту <green>${email}</green>";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -40,14 +38,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Актыўныя сеансы"),
         "addMore": MessageLookupByLibrary.simpleMessage("Дадаць яшчэ"),
+        "addViewer": MessageLookupByLibrary.simpleMessage("Дадаць гледача"),
         "after1Day": MessageLookupByLibrary.simpleMessage("Праз 1 дзень"),
         "after1Hour": MessageLookupByLibrary.simpleMessage("Праз 1 гадзіну"),
         "after1Month": MessageLookupByLibrary.simpleMessage("Праз 1 месяц"),
         "after1Week": MessageLookupByLibrary.simpleMessage("Праз 1 тыдзень"),
         "after1Year": MessageLookupByLibrary.simpleMessage("Праз 1 год"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Уладальнік"),
-        "allWillShiftRangeBasedOnFirst": MessageLookupByLibrary.simpleMessage(
-            "This is the first in the group. Other selected photos will automatically shift based on this new date"),
         "apply": MessageLookupByLibrary.simpleMessage("Ужыць"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Якая асноўная прычына выдалення вашага ўліковага запісу?"),
@@ -113,7 +110,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "doThisLater":
             MessageLookupByLibrary.simpleMessage("Зрабіць гэта пазней"),
         "done": MessageLookupByLibrary.simpleMessage("Гатова"),
-        "editTime": MessageLookupByLibrary.simpleMessage("Edit time"),
         "email": MessageLookupByLibrary.simpleMessage("Электронная пошта"),
         "encryption": MessageLookupByLibrary.simpleMessage("Шыфраванне"),
         "encryptionKeys":
@@ -135,6 +131,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Увядзіце свой ключ аднаўлення"),
         "familyPlans":
             MessageLookupByLibrary.simpleMessage("Сямейныя тарыфныя планы"),
+        "faq": MessageLookupByLibrary.simpleMessage("Частыя пытанні"),
         "faqs": MessageLookupByLibrary.simpleMessage("Частыя пытанні"),
         "feedback": MessageLookupByLibrary.simpleMessage("Водгук"),
         "forgotPassword":
@@ -158,33 +155,35 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Усталяваць уручную"),
         "invalidEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Памылковы адрас электроннай пошты"),
+        "invalidKey": MessageLookupByLibrary.simpleMessage("Няправільны ключ"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Калі ласка, дапамажыце нам з гэтай інфармацыяй"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Светлая"),
+        "linkExpired": MessageLookupByLibrary.simpleMessage("Пратэрмінавана"),
+        "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Ніколі"),
+        "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Замкнуць"),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Экран блакіроўкі"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Увайсці"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Націскаючы ўвайсці, я пагаджаюся з <u-terms>умовамі абслугоўвання</u-terms> і <u-policy>палітыкай прыватнасці</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("Выйсці"),
+        "lostDevice": MessageLookupByLibrary.simpleMessage("Згубілі прыладу?"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Магічны пошук"),
         "manage": MessageLookupByLibrary.simpleMessage("Кіраванне"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Кіраванне"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Умераны"),
-        "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
-            "Move selected photos to one date"),
         "never": MessageLookupByLibrary.simpleMessage("Ніколі"),
-        "newRange": MessageLookupByLibrary.simpleMessage("New range"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("✨ Няма дублікатаў"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Няма ключа аднаўлення?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "Вашы даныя не могуць быць расшыфраваны без пароля або ключа аднаўлення па прычыне архітэктуры наша пратакола скразнога шыфравання"),
-        "notThisPerson":
-            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "notifications": MessageLookupByLibrary.simpleMessage("Апавяшчэнні"),
         "ok": MessageLookupByLibrary.simpleMessage("Добра"),
         "oops": MessageLookupByLibrary.simpleMessage("Вой"),
+        "oopsSomethingWentWrong":
+            MessageLookupByLibrary.simpleMessage("Штосьці пайшло не так"),
         "password": MessageLookupByLibrary.simpleMessage("Пароль"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("Пароль паспяхова зменены"),
@@ -192,14 +191,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Мы не захоўваем гэты пароль і <underline>мы не зможам расшыфраваць вашы даныя</underline>, калі вы забудзеце яго"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("фота"),
-        "photocountPhotos": m1,
-        "photosKeepRelativeTimeDifference":
-            MessageLookupByLibrary.simpleMessage(
-                "Photos keep relative time difference"),
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Паспрабуйце яшчэ раз"),
         "pleaseWait": MessageLookupByLibrary.simpleMessage("Пачакайце..."),
-        "previous": MessageLookupByLibrary.simpleMessage("Previous"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Палітыка прыватнасці"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Ацаніце нас"),
@@ -236,27 +230,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanCode": MessageLookupByLibrary.simpleMessage("Сканіраваць код"),
         "security": MessageLookupByLibrary.simpleMessage("Бяспека"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Абраць усё"),
-        "selectDate": MessageLookupByLibrary.simpleMessage("Select date"),
-        "selectOneDateAndTime":
-            MessageLookupByLibrary.simpleMessage("Select one date and time"),
-        "selectOneDateAndTimeForAll": MessageLookupByLibrary.simpleMessage(
-            "Select one date and time for all"),
         "selectReason":
             MessageLookupByLibrary.simpleMessage("Выберыце прычыну"),
-        "selectStartOfRange":
-            MessageLookupByLibrary.simpleMessage("Select start of range"),
-        "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
-        "selectedItemsWillBeRemovedFromThisPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Selected items will be removed from this person, but not deleted from your library."),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Адправіць ліст"),
         "sendLink": MessageLookupByLibrary.simpleMessage("Адправіць спасылку"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Задаць пароль"),
         "setupComplete":
             MessageLookupByLibrary.simpleMessage("Наладжванне завершана"),
-        "shiftDatesAndTime":
-            MessageLookupByLibrary.simpleMessage("Shift dates and time"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Я пагаджаюся з <u-terms>умовамі абслугоўвання</u-terms> і <u-policy>палітыкай прыватнасці</u-policy>"),
         "skip": MessageLookupByLibrary.simpleMessage("Прапусціць"),
@@ -267,13 +248,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Немагчыма згенерыраваць ключы бяспекі на гэтай прыладзе.\n\nЗарэгіструйцеся з іншай прылады."),
-        "spotlightOnYourself":
-            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "status": MessageLookupByLibrary.simpleMessage("Стан"),
-        "storageInGB": m2,
+        "storageInGB": m1,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Надзейны"),
         "support": MessageLookupByLibrary.simpleMessage("Падтрымка"),
         "systemTheme": MessageLookupByLibrary.simpleMessage("Сістэма"),
+        "tapToCopy":
+            MessageLookupByLibrary.simpleMessage("націсніце, каб скапіяваць"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("Націсніце, каб увесці код"),
         "terminate": MessageLookupByLibrary.simpleMessage("Перарваць"),
@@ -282,16 +263,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "termsOfServicesTitle": MessageLookupByLibrary.simpleMessage("Умовы"),
         "theme": MessageLookupByLibrary.simpleMessage("Тема"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("Гэта прылада"),
-        "thisWeekThroughTheYears":
-            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Гэта дзеянне завяршыць сеанс на наступнай прыладзе:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Гэта дзеянне завяршыць сеанс на вашай прыладзе!"),
-        "thisWillMakeTheDateAndTimeOfAllSelected":
-            MessageLookupByLibrary.simpleMessage(
-                "This will make the date and time of all selected photos the same."),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
             "Праверце электронную пошту, каб скінуць свой пароль."),
         "trash": MessageLookupByLibrary.simpleMessage("Сметніца"),
@@ -312,7 +288,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("відэа"),
         "viewLargeFiles": MessageLookupByLibrary.simpleMessage("Вялікія файлы"),
         "viewer": MessageLookupByLibrary.simpleMessage("Праглядальнік"),
-        "weHaveSendEmailTo": m3,
+        "weHaveSendEmailTo": m2,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Ненадзейны"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("З вяртаннем!"),
         "yesDelete": MessageLookupByLibrary.simpleMessage("Так, выдаліць"),

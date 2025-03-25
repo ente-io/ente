@@ -843,6 +843,10 @@
       "title": "Parsec"
     },
     {
+      "title": "Patient Access",
+      "slug": "patient_access"
+    },
+    {
       "title": "PayPal"
     },
     {
@@ -866,6 +870,10 @@
     },
     {
       "title": "Pingvin Share"
+    },
+    {
+      "title": "Pionex",
+      "slug": "pionex"
     },
     {
       "title": "Plutus",

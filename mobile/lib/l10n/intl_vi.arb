@@ -1513,12 +1513,6 @@
   "@selectAllShort": {
     "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
   },
-  "changeLogMagicSearchImprovementTitle": "Cải tiến Tìm kiếm Ma thuật",
-  "changeLogMagicSearchImprovementContent": "Chúng tôi đã cải tiến tìm kiếm ma thuật để nhanh hơn rất nhiều, vì vậy bạn không phải chờ đợi để tìm những gì bạn đang tìm kiếm.",
-  "changeLogBackupStatusTitle": "Trạng thái Sao lưu",
-  "changeLogBackupStatusContent": "Chúng tôi đã thêm một nhật ký của tất cả các tệp đã được tải lên Ente, bao gồm cả các tệp thất bại và đang chờ xử lý.",
-  "changeLogDiscoverTitle": "Khám Phá",
-  "changeLogDiscoverContent": "Bạn đang tìm kiếm ảnh thẻ ID, ghi chú, hoặc thậm chí là meme? Hãy đến tab tìm kiếm và kiểm tra Khám Phá. Dựa trên tìm kiếm ngữ nghĩa của chúng tôi, đây là nơi để tìm những bức ảnh có thể quan trọng với bạn.\\n\\nChỉ có sẵn nếu bạn đã bật Học máy.",
   "selectCoverPhoto": "Chọn ảnh bìa",
   "newLocation": "Vị trí mới",
   "faceNotClusteredYet": "Khuôn mặt chưa được phân cụm, vui lòng quay lại sau",
@@ -1596,23 +1590,5 @@
   "joinAlbum": "Tham gia album",
   "joinAlbumSubtext": "để xem và thêm ảnh của bạn",
   "joinAlbumSubtextViewer": "thêm vào album được chia sẻ",
-  "join": "Tham gia",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos",
-  "notThisPerson": "Not this person?",
-  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
-  "thisWeekThroughTheYears": "This week through the years",
-  "spotlightOnYourself": "Spotlight on yourself"
+  "join": "Tham gia"
 }

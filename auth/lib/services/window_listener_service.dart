@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WindowListenerService {
-  static const double minWindowHeight = 600.0;
-  static const double minWindowWidth = 800.0;
+  static const double initialWindowHeight = 1200.0;
+  static const double initialWindowWidth = 800.0;
   static const double maxWindowHeight = 8192.0;
   static const double maxWindowWidth = 8192.0;
   late SharedPreferences _preferences;
@@ -23,9 +23,9 @@ class WindowListenerService {
 
   Size getWindowSize() {
     final double windowWidth =
-        _preferences.getDouble('windowWidth') ?? minWindowWidth;
+        _preferences.getDouble('windowWidth') ?? initialWindowWidth;
     final double windowHeight =
-        _preferences.getDouble('windowHeight') ?? minWindowHeight;
+        _preferences.getDouble('windowHeight') ?? initialWindowHeight;
     final w = windowWidth.clamp(200.0, maxWindowWidth);
     final h = windowHeight.clamp(400.0, maxWindowHeight);
     return Size(w, h);
