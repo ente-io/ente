@@ -310,7 +310,10 @@ export class FileViewerPhotoSwipe {
             const { videoURL, videoPlaylistURL, ...rest } = itemData;
             if (itemData.fileType === FileType.video) {
                 if (videoPlaylistURL) {
-                    return { ...rest, html: hlsVideoHTML(videoPlaylistURL) };
+                    return {
+                        ...rest,
+                        html: hlsVideoHTML(videoPlaylistURL, file.id),
+                    };
                 } else if (videoURL) {
                     return {
                         ...rest,
@@ -1086,13 +1089,15 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 //     import "media-chrome";
 //
 // TODO: Update code above that searches for the video element
-const hlsVideoHTML = (url: string) => `
-<media-controller>
-  <hls-video slot="media" src="${url}"></hls-video>
-  <media-control-bar>
+const hlsVideoHTML = (url: string, fileID: number) => `
+<div class="media-controller-container">
+  <media-controller id="ente-mc-${fileID}">
+    <hls-video slot="media" src="${url}"></hls-video>
+  </media-controller>
+  <media-control-bar mediacontroller="ente-mc-${fileID}">
     <media-play-button></media-play-button>
   </media-control-bar>
-</media-controller>
+</div>
 `;
 
 const livePhotoVideoHTML = (videoURL: string) => `
