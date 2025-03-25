@@ -501,6 +501,23 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Promoção Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLBulkEdit":
+            MessageLookupByLibrary.simpleMessage("Edição em massa de datas"),
+        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
+            "Agora você pode selecionar várias fotos e editar a data/hora para todas elas com uma ação rápida. A mudança de datas também é suportada."),
+        "cLFamilyPlan":
+            MessageLookupByLibrary.simpleMessage("Limites do plano familiar"),
+        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
+            "Agora você pode definir limites de quanto armazenamento os membros da sua família podem usar."),
+        "cLIcon": MessageLookupByLibrary.simpleMessage("Novo ícone"),
+        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
+            "Finalmente, um novo ícone de aplicativo que achamos que melhor representa nosso trabalho. Também adicionamos um seletor de ícones para que você possa continuar usando o ícone antigo."),
+        "cLMemories": MessageLookupByLibrary.simpleMessage("Memórias"),
+        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
+            "Redescubra seus momentos especiais - destaque para suas pessoas favoritas, suas viagens e férias, suas melhores fotos e muito mais. Ative o aprendizado de máquina, marque a si mesmo e nomeie seus amigos para a melhor experiência."),
+        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgets"),
+        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
+            "Widgets da tela inicial integrados com memórias agora estão disponíveis. Eles mostrarão seus momentos especiais sem abrir o aplicativo."),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Dados armazenados em cache"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculando..."),

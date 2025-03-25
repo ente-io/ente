@@ -511,6 +511,23 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Offre Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLBulkEdit": MessageLookupByLibrary.simpleMessage(
+            "Modification en masse des dates"),
+        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
+            "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes en une seule action rapide. Le décalage des dates est également pris en charge."),
+        "cLFamilyPlan":
+            MessageLookupByLibrary.simpleMessage("Limites du plan familial"),
+        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
+            "Vous pouvez maintenant définir des limites sur la quantité de stockage que les membres de votre famille peuvent utiliser."),
+        "cLIcon": MessageLookupByLibrary.simpleMessage("Nouvelle icône"),
+        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
+            "Enfin, une nouvelle icône d\'application que nous pensons représenter au mieux notre travail. Nous avons également ajouté un sélecteur d\'icône pour que vous puissiez continuer à utiliser l\'ancienne icône."),
+        "cLMemories": MessageLookupByLibrary.simpleMessage("Souvenirs"),
+        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
+            "Redécouvrez vos moments spéciaux - mettez en avant vos personnes préférées, vos voyages et vacances, vos meilleurs clichés et bien plus encore. Activez l\'apprentissage automatique, identifiez-vous et nommez vos amis pour une expérience optimale."),
+        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgets"),
+        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
+            "Les widgets de l\'écran d\'accueil intégrés aux souvenirs sont désormais disponibles. Ils afficheront vos moments spéciaux sans ouvrir l\'application."),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Données mises en cache"),
         "calculating":

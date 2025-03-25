@@ -506,6 +506,23 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black-Friday-Aktion"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLBulkEdit": MessageLookupByLibrary.simpleMessage(
+            "Massenbearbeitung von Datumsangaben"),
+        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
+            "Sie können jetzt mehrere Fotos auswählen und das Datum/die Uhrzeit für alle mit einer schnellen Aktion bearbeiten. Das Verschieben von Datumsangaben wird ebenfalls unterstützt."),
+        "cLFamilyPlan":
+            MessageLookupByLibrary.simpleMessage("Familienplan-Limits"),
+        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
+            "Sie können jetzt festlegen, wie viel Speicherplatz Ihre Familienmitglieder verwenden dürfen."),
+        "cLIcon": MessageLookupByLibrary.simpleMessage("Neues Symbol"),
+        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
+            "Endlich ein neues App-Symbol, das unserer Meinung nach unsere Arbeit am besten repräsentiert. Wir haben auch einen Symbol-Wechsler hinzugefügt, damit Sie das alte Symbol weiterhin verwenden können."),
+        "cLMemories": MessageLookupByLibrary.simpleMessage("Erinnerungen"),
+        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
+            "Entdecken Sie Ihre besonderen Momente neu – im Rampenlicht stehen Ihre Lieblingsmenschen, Ihre Reisen und Urlaube, Ihre besten Aufnahmen und vieles mehr. Aktivieren Sie maschinelles Lernen, markieren Sie sich selbst und benennen Sie Ihre Freunde für das beste Erlebnis."),
+        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgets"),
+        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
+            "Homescreen-Widgets, die mit Erinnerungen integriert sind, sind jetzt verfügbar. Sie zeigen Ihre besonderen Momente, ohne die App zu öffnen."),
         "cachedData": MessageLookupByLibrary.simpleMessage("Daten im Cache"),
         "calculating":
             MessageLookupByLibrary.simpleMessage("Wird berechnet..."),
