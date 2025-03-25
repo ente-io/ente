@@ -335,8 +335,7 @@ Future<bool> deleteLocalFiles(
   final List<String> localSharedMediaIDs = [];
   try {
     for (String id in localIDs) {
-      if (id.startsWith(oldSharedMediaIdentifier) ||
-          id.startsWith(sharedMediaIdentifier)) {
+      if (id.startsWith(sharedMediaIdentifier)) {
         localSharedMediaIDs.add(id);
       } else {
         localAssetIDs.add(id);
@@ -411,8 +410,7 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID!);
-      } else if (file.localID!.startsWith(oldSharedMediaIdentifier) ||
-          file.localID!.startsWith(sharedMediaIdentifier)) {
+      } else if (file.localID!.startsWith(sharedMediaIdentifier)) {
         localSharedMediaIDs.add(file.localID!);
       } else {
         localAssetIDs.add(file.localID!);
@@ -498,8 +496,7 @@ Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
     status = await FilesService.instance.getBackupStatus();
 
     for (String localID in status.localIDs) {
-      if (localID.startsWith(oldSharedMediaIdentifier) ||
-          localID.startsWith(sharedMediaIdentifier)) {
+      if (localID.startsWith(sharedMediaIdentifier)) {
         localSharedMediaIDs.add(localID);
       } else {
         localAssetIDs.add(localID);
