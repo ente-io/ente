@@ -1,5 +1,6 @@
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
+import "hls-video-element";
 import { t } from "i18next";
 import PhotoSwipe, { type SlideData } from "photoswipe";
 import {
@@ -301,14 +302,20 @@ export class FileViewerPhotoSwipe {
             const files = delegate.getFiles();
             const file = files[index]!;
 
-            let itemData = itemDataForFile(file, () =>
+            const itemData = itemDataForFile(file, () =>
                 pswp.refreshSlideContent(index),
             );
 
             const { videoURL, videoPlaylistURL, ...rest } = itemData;
-            const url = videoPlaylistURL ?? videoURL;
-            if (itemData.fileType === FileType.video && url) {
-                itemData = { ...rest, html: videoHTML(url, !!disableDownload) };
+            if (itemData.fileType === FileType.video) {
+                if (videoPlaylistURL) {
+                    return { ...rest, html: hlsVideoHTML(videoPlaylistURL) };
+                } else if (videoURL) {
+                    return {
+                        ...rest,
+                        html: videoHTML(videoURL, !!disableDownload),
+                    };
+                }
             }
 
             return itemData;
@@ -1070,6 +1077,11 @@ const videoHTML = (url: string, disableDownload: boolean) => `
   <source src="${url}" />
   Your browser does not support video playback.
 </video>
+`;
+
+// Requires `import "hls-video-element"`
+const hlsVideoHTML = (url: string) => `
+<hls-video controls src="${url}"></hls-video>
 `;
 
 const livePhotoVideoHTML = (videoURL: string) => `
