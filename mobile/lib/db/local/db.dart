@@ -145,7 +145,8 @@ class LocalDB with SqlDbBase {
     if (ids.isEmpty) return;
     final stopwatch = Stopwatch()..start();
     await _sqliteDB.execute(
-      'DELETE FROM assets WHERE id IN (${ids.join(',')})',
+      'DELETE FROM assets WHERE id IN (${List.filled(ids.length, "?").join(",")})',
+      ids.toList(),
     );
     debugPrint(
       '$runtimeType deleteEntries complete in ${stopwatch.elapsed.inMilliseconds}ms for ${ids.length} assets entries',
@@ -156,7 +157,8 @@ class LocalDB with SqlDbBase {
     if (pathIds.isEmpty) return;
     final stopwatch = Stopwatch()..start();
     await _sqliteDB.execute(
-      'DELETE FROM device_path WHERE path_id IN (${pathIds.join(',')})',
+      'DELETE FROM device_path WHERE path_id IN (${List.filled(pathIds.length, "?").join(",")})',
+      pathIds.toList(),
     );
     debugPrint(
       '$runtimeType deleteEntries complete in ${stopwatch.elapsed.inMilliseconds}ms for ${pathIds.length} path entries',
