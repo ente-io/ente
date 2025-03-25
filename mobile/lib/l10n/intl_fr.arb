@@ -1513,12 +1513,6 @@
   "@selectAllShort": {
     "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
   },
-  "changeLogMagicSearchImprovementTitle": "Amélioration de la recherche magique",
-  "changeLogMagicSearchImprovementContent": "Nous avons amélioré la recherche magique pour qu'elle soit beaucoup plus rapide. N'attendez plus pour trouver ce que vous cherchez.",
-  "changeLogBackupStatusTitle": "Statut de la Sauvegarde",
-  "changeLogBackupStatusContent": "Nous avons ajouté un journal de tous les fichiers qui ont été envoyés vers Ente, y compris les échecs et la file d'attente.",
-  "changeLogDiscoverTitle": "Découverte",
-  "changeLogDiscoverContent": "Vous cherchez des photos de vos papiers d'identité, des notes ou même des \"memes\" ? Rendez-vous dans l'onglet de recherche et explorez la fonction Découverte. Grâce à notre recherche sémantique vous trouverez des photos qui pourraient être importantes pour vous.\\n\\nDisponible uniquement si vous avez activé l'apprentissage automatique.",
   "selectCoverPhoto": "Sélectionnez la photo de couverture",
   "newLocation": "Nouveau lieu",
   "faceNotClusteredYet": "Ce visage n'a pas encore été regroupé, veuillez revenir plus tard",
@@ -1674,36 +1668,6 @@
   "playStream": "Lire le stream",
   "playOriginal": "Lire l'original",
   "joinAlbumConfirmationDialogBody": "Rejoindre un album rendra votre e-mail visible à ses participants.",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos",
-  "notThisPerson": "Not this person?",
-  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
-  "thisWeekThroughTheYears": "This week through the years",
-  "spotlightOnYourself": "Spotlight on yourself",
-  "cLIcon": "Nouvelle icône",
-  "cLIconDesc": "Enfin, une nouvelle icône d'application que nous pensons représenter au mieux notre travail. Nous avons également ajouté un sélecteur d'icône pour que vous puissiez continuer à utiliser l'ancienne icône.",
-
-  "cLMemories": "Souvenirs",
-  "cLMemoriesDesc": "Redécouvrez vos moments spéciaux - mettez en avant vos personnes préférées, vos voyages et vacances, vos meilleurs clichés et bien plus encore. Activez l'apprentissage automatique, identifiez-vous et nommez vos amis pour une expérience optimale.",
-
-  "cLWidgets": "Widgets",
-  "cLWidgetsDesc": "Les widgets de l'écran d'accueil intégrés aux souvenirs sont désormais disponibles. Ils afficheront vos moments spéciaux sans ouvrir l'application.",
-
-  "cLFamilyPlan": "Limites du plan familial",
-  "cLFamilyPlanDesc": "Vous pouvez maintenant définir des limites sur la quantité de stockage que les membres de votre famille peuvent utiliser.",
-
-  "cLBulkEdit": "Modification en masse des dates",
-  "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes en une seule action rapide. Le décalage des dates est également pris en charge."
+  "selectDate": "Sélectionner la date",
+  "previous": "Précédent"
 }
