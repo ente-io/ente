@@ -25,9 +25,10 @@ class LocalImportService {
   LocalAssetsCache? _localAssetsCache;
   final DeviceAssetsService _deviceAssetsService = DeviceAssetsService();
   late final Debouncer _changeCallbackDebouncer = Debouncer(
-      const Duration(milliseconds: 1000),
-      executionInterval: const Duration(milliseconds: 3000),
-      leading: true);
+    const Duration(milliseconds: 1000),
+    executionInterval: const Duration(milliseconds: 3000),
+    leading: true,
+  );
   final Lock _lock = Lock();
 
   static const lastLocalDBSyncTime = "localImport.lastSyncTime";

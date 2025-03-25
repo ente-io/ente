@@ -51,7 +51,8 @@ class LocalSyncService {
       await PhotoManager.setIgnorePermissionCheck(true);
     }
     if (permissionService.hasGrantedPermissions()) {
-      _registerChangeCallback();
+      // todo:neeraj oldflow stop register change callback
+      // _registerChangeCallback();
     } else {
       Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
         _registerChangeCallback();
