@@ -113,23 +113,25 @@ class LocalImportService {
     bool hasChanges = false;
     _fullSync = Completer<bool>();
     try {
-      final TimeLogger tL = TimeLogger(context: "fullSync");
-      final inAppAssetIds = await localDB.getAssetsIDs();
-      final inAppPathToAssetIds = await localDB.pathToAssetIDs();
-      _log.info("loaded inApp State $tL");
-      final fullDiff = await _deviceAssetsService.fullDiffWithOnDevice(
-        inAppAssetIds,
-        inAppPathToAssetIds,
-        tL,
-      );
-      if (fullDiff.isInOutOfSync) {
-        _log.info("fullSyncDiff: ${fullDiff.countLog()} ${tL.elapsed}");
-        await _storeDiff(fullDiff: fullDiff);
-      }
-      _log.fine(
-        "${fullDiff.isInOutOfSync ? 'changed saved ${fullDiff.countLog()} $tL)' : 'no change'}, completeTime ${tL.elapsed}",
-      );
-      hasChanges = fullDiff.isInOutOfSync;
+      await _lock.synchronized(() async {
+        final TimeLogger tL = TimeLogger(context: "fullSync");
+        final inAppAssetIds = await localDB.getAssetsIDs();
+        final inAppPathToAssetIds = await localDB.pathToAssetIDs();
+        _log.info("loaded inApp State $tL");
+        final fullDiff = await _deviceAssetsService.fullDiffWithOnDevice(
+          inAppAssetIds,
+          inAppPathToAssetIds,
+          tL,
+        );
+        if (fullDiff.isInOutOfSync) {
+          _log.info("fullSyncDiff: ${fullDiff.countLog()} ${tL.elapsed}");
+          await _storeDiff(fullDiff: fullDiff);
+        }
+        _log.fine(
+          "${fullDiff.isInOutOfSync ? 'changed saved ${fullDiff.countLog()} $tL)' : 'no change'}, completeTime ${tL.elapsed}",
+        );
+        hasChanges = fullDiff.isInOutOfSync;
+      });
     } catch (e, s) {
       _log.severe("fullSync failed", e, s);
       rethrow;
