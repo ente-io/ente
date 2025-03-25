@@ -46,11 +46,11 @@ func NewOfferController(
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
-		log.Error("Error reading config file", err)
+		log.Info("Skipping optional Black Friday offers", err)
 	}
 	err = json.Unmarshal(data, &blackFridayOffers)
 	if err != nil {
-		log.Error("Error un-marshalling JSON", err)
+		log.Info("Could not get Black Friday Offer", err)
 	}
 	return &OfferController{
 		BlackFridayOffers: blackFridayOffers,

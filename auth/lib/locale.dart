@@ -15,6 +15,7 @@ const List<Locale> appSupportedLocales = <Locale>[
   Locale('es', 'ES'),
   Locale('fa'),
   Locale('fr'),
+  Locale('he'),
   Locale('hu'),
   Locale('id'),
   Locale('it'),
@@ -25,6 +26,7 @@ const List<Locale> appSupportedLocales = <Locale>[
   Locale('pl'),
   Locale('pt'),
   Locale('pt', 'BR'),
+  Locale('ro'),
   Locale('ru'),
   Locale('sl'),
   Locale('sk'),
@@ -32,6 +34,7 @@ const List<Locale> appSupportedLocales = <Locale>[
   Locale('uk'),
   Locale('vi'),
   Locale("zh", "CN"),
+  Locale("zh", "TW"),
 ];
 
 Locale? autoDetectedLocale;

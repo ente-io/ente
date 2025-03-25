@@ -20,8 +20,6 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'et';
 
-  static String m1(count) => "\$photoCount photos";
-
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "about": MessageLookupByLibrary.simpleMessage("Info"),
@@ -37,8 +35,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "albumOwner": MessageLookupByLibrary.simpleMessage("Omanik"),
         "albumUpdated":
             MessageLookupByLibrary.simpleMessage("Albumit on uuendatud"),
-        "allWillShiftRangeBasedOnFirst": MessageLookupByLibrary.simpleMessage(
-            "This is the first in the group. Other selected photos will automatically shift based on this new date"),
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Luba allalaadimised"),
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
@@ -101,7 +97,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "doThisLater": MessageLookupByLibrary.simpleMessage("Tee seda hiljem"),
         "done": MessageLookupByLibrary.simpleMessage("Valmis"),
         "edit": MessageLookupByLibrary.simpleMessage("Muuda"),
-        "editTime": MessageLookupByLibrary.simpleMessage("Edit time"),
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
         "encryption": MessageLookupByLibrary.simpleMessage("Krüpteerimine"),
         "enterCode": MessageLookupByLibrary.simpleMessage("Sisesta kood"),
@@ -163,32 +158,22 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "merchandise": MessageLookupByLibrary.simpleMessage("Kaup"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Keskmine"),
-        "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
-            "Move selected photos to one date"),
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Liigutatud prügikasti"),
         "name": MessageLookupByLibrary.simpleMessage("Nimi"),
         "never": MessageLookupByLibrary.simpleMessage("Mitte kunagi"),
-        "newRange": MessageLookupByLibrary.simpleMessage("New range"),
         "newest": MessageLookupByLibrary.simpleMessage("Uusimad"),
         "no": MessageLookupByLibrary.simpleMessage("Ei"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Puudub"),
-        "notThisPerson":
-            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "oops": MessageLookupByLibrary.simpleMessage("Oih"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oih, midagi läks valesti"),
         "password": MessageLookupByLibrary.simpleMessage("Parool"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("foto"),
-        "photocountPhotos": m1,
-        "photosKeepRelativeTimeDifference":
-            MessageLookupByLibrary.simpleMessage(
-                "Photos keep relative time difference"),
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Palun proovi uuesti"),
         "pleaseWait": MessageLookupByLibrary.simpleMessage("Palun oota..."),
-        "previous": MessageLookupByLibrary.simpleMessage("Previous"),
         "privacy": MessageLookupByLibrary.simpleMessage("Privaatsus"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Privaatsus"),
@@ -220,20 +205,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Skaneeri seda QR koodi\noma autentimisrakendusega"),
         "security": MessageLookupByLibrary.simpleMessage("Turvalisus"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Vali kõik"),
-        "selectDate": MessageLookupByLibrary.simpleMessage("Select date"),
         "selectLanguage": MessageLookupByLibrary.simpleMessage("Vali keel"),
-        "selectOneDateAndTime":
-            MessageLookupByLibrary.simpleMessage("Select one date and time"),
-        "selectOneDateAndTimeForAll": MessageLookupByLibrary.simpleMessage(
-            "Select one date and time for all"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Vali põhjus"),
-        "selectStartOfRange":
-            MessageLookupByLibrary.simpleMessage("Select start of range"),
-        "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
         "selectYourPlan": MessageLookupByLibrary.simpleMessage("Vali pakett"),
-        "selectedItemsWillBeRemovedFromThisPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Selected items will be removed from this person, but not deleted from your library."),
         "sendLink": MessageLookupByLibrary.simpleMessage("Saada link"),
         "setAPassword": MessageLookupByLibrary.simpleMessage("Määra parool"),
         "setCover": MessageLookupByLibrary.simpleMessage("Määra kaanepilt"),
@@ -242,8 +216,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "share": MessageLookupByLibrary.simpleMessage("Jaga"),
         "shareALink": MessageLookupByLibrary.simpleMessage("Jaga linki"),
         "sharing": MessageLookupByLibrary.simpleMessage("Jagamine..."),
-        "shiftDatesAndTime":
-            MessageLookupByLibrary.simpleMessage("Shift dates and time"),
         "skip": MessageLookupByLibrary.simpleMessage("Jäta vahele"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
@@ -254,8 +226,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Uuemad eespool"),
         "sortOldestFirst":
             MessageLookupByLibrary.simpleMessage("Vanemad eespool"),
-        "spotlightOnYourself":
-            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "storage": MessageLookupByLibrary.simpleMessage("Mäluruum"),
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("Perekond"),
@@ -272,11 +242,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tingimused"),
         "theme": MessageLookupByLibrary.simpleMessage("Teema"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("See seade"),
-        "thisWeekThroughTheYears":
-            MessageLookupByLibrary.simpleMessage("This week through the years"),
-        "thisWillMakeTheDateAndTimeOfAllSelected":
-            MessageLookupByLibrary.simpleMessage(
-                "This will make the date and time of all selected photos the same."),
         "trash": MessageLookupByLibrary.simpleMessage("Prügikast"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Proovi uuesti"),
         "twitter": MessageLookupByLibrary.simpleMessage("Twitter"),

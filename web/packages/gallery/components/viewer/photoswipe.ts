@@ -305,12 +305,10 @@ export class FileViewerPhotoSwipe {
                 pswp.refreshSlideContent(index),
             );
 
-            const { videoURL, ...rest } = itemData;
-            if (itemData.fileType === FileType.video && videoURL) {
-                itemData = {
-                    ...rest,
-                    html: videoHTML(videoURL, !!disableDownload),
-                };
+            const { videoURL, videoPlaylistURL, ...rest } = itemData;
+            const url = videoPlaylistURL ?? videoURL;
+            if (itemData.fileType === FileType.video && url) {
+                itemData = { ...rest, html: videoHTML(url, !!disableDownload) };
             }
 
             return itemData;
@@ -540,6 +538,19 @@ export class FileViewerPhotoSwipe {
 
         pswp.on("change", () => {
             const itemData = currSlideData();
+
+            // For each slide ("item holder"), mirror the "aria-hidden" state
+            // into the "inert" property so that keyboard navigation via tabs
+            // does not cycle through to the hidden slides (e.g. if the hidden
+            // slide is a video element with browser provided controls).
+
+            pswp.mainScroll.itemHolders.forEach(({ el }) => {
+                if (el.getAttribute("aria-hidden") == "true") {
+                    el.setAttribute("inert", "");
+                } else {
+                    el.removeAttribute("inert");
+                }
+            });
 
             // Clear existing listeners, if any.
             if (videoVideoEl && onVideoPlayback) {
