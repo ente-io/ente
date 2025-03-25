@@ -43,4 +43,24 @@ class LocalAssetsCache {
       }
     }
   }
+
+  Map<String, AssetEntity> getPathToLatestAsset() {
+    final Map<String, AssetEntity> pathToLatestAsset = {};
+    for (final entry in pathToAssetIDs.entries) {
+      AssetEntity? latestAsset;
+      for (final id in entry.value) {
+        final asset = assets[id];
+        if (asset != null &&
+            (latestAsset == null ||
+                (asset.createDateSecond ?? 0) >
+                    (latestAsset.createDateSecond ?? 0))) {
+          latestAsset = asset;
+        }
+      }
+      if (latestAsset != null) {
+        pathToLatestAsset[entry.key] = latestAsset;
+      }
+    }
+    return pathToLatestAsset;
+  }
 }

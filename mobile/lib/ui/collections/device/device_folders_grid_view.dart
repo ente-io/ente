@@ -6,9 +6,11 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/events/v1/LocalAssetChangedEvent.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
+import "package:photos/services/local/device_albums.dart";
+import "package:photos/services/local/local_import.dart";
 import "package:photos/ui/collections/device/device_folder_item.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
@@ -25,7 +27,7 @@ class DeviceFoldersGridView extends StatefulWidget {
 
 class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
   StreamSubscription<BackupFoldersUpdatedEvent>? _backupFoldersUpdatedEvent;
-  StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
+  StreamSubscription<LocalAssetChangedEvent>? _localFilesSubscription;
   String _loadReason = "init";
   final _logger = Logger((_DeviceFoldersGridViewState).toString());
   final _debouncer = Debouncer(
@@ -45,7 +47,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
       }
     });
     _localFilesSubscription =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+        Bus.instance.on<LocalAssetChangedEvent>().listen((event) {
       _debouncer.run(() async {
         if (mounted) {
           _loadReason = event.reason;
@@ -63,8 +65,8 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
       child: Align(
         alignment: Alignment.centerLeft,
         child: FutureBuilder<List<DeviceCollection>>(
-          future: FilesDB.instance
-              .getDeviceCollections(includeCoverThumbnail: true),
+          future: LocalImportService.instance
+              .getDeviceCollections(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return snapshot.data!.isEmpty

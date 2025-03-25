@@ -10,6 +10,8 @@ import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
+import "package:photos/services/local/device_albums.dart";
+import "package:photos/services/local/local_import.dart";
 import "package:photos/ui/collections/device/device_folder_item.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
@@ -98,7 +100,7 @@ class _DeviceFolderVerticalGridViewBodyState
     );
     return FutureBuilder<List<DeviceCollection>>(
       future:
-          FilesDB.instance.getDeviceCollections(includeCoverThumbnail: true),
+          LocalImportService.instance.getDeviceCollections(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final double screenWidth = MediaQuery.of(context).size.width;

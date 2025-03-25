@@ -16,56 +16,6 @@ extension DeviceFiles on FilesDB {
   static const _sqlBoolTrue = 1;
   static const _sqlBoolFalse = 0;
 
-  Future<void> insertPathIDToLocalIDMapping(
-    Map<String, Set<String>> mappingToAdd, {
-    ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore,
-  }) async {
-    debugPrint("Inserting missing PathIDToLocalIDMapping");
-    final parameterSets = <List<Object?>>[];
-    int batchCounter = 0;
-    for (MapEntry e in mappingToAdd.entries) {
-      final String pathID = e.key;
-      for (String localID in e.value) {
-        parameterSets.add([localID, pathID]);
-        batchCounter++;
-
-        if (batchCounter == 400) {
-          await _insertBatch(parameterSets, conflictAlgorithm);
-          parameterSets.clear();
-          batchCounter = 0;
-        }
-      }
-    }
-    await _insertBatch(parameterSets, conflictAlgorithm);
-    parameterSets.clear();
-    batchCounter = 0;
-  }
-
-  Future<void> deletePathIDToLocalIDMapping(
-    Map<String, Set<String>> mappingsToRemove,
-  ) async {
-    debugPrint("removing PathIDToLocalIDMapping");
-    final parameterSets = <List<Object?>>[];
-    int batchCounter = 0;
-    for (MapEntry e in mappingsToRemove.entries) {
-      final String pathID = e.key;
-
-      for (String localID in e.value) {
-        parameterSets.add([localID, pathID]);
-        batchCounter++;
-
-        if (batchCounter == 400) {
-          await _deleteBatch(parameterSets);
-          parameterSets.clear();
-          batchCounter = 0;
-        }
-      }
-    }
-    await _deleteBatch(parameterSets);
-    parameterSets.clear();
-    batchCounter = 0;
-  }
-
   Future<Map<String, int>> getDevicePathIDToImportedFileCount() async {
     try {
       final db = await sqliteAsyncDB;

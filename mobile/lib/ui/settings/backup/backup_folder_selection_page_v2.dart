@@ -449,7 +449,9 @@ class _BackupFolderSelectionPageV2State
 
   // todo: replace with asset thumbnail provider
   Widget _getThumbnail(AssetPathEntity path, bool isSelected) {
-    final file = _pathToLatestAsset[path.id] != null ? EnteFile.fromAssetSync(_pathToLatestAsset[path.id]!): null;
+    final file = _pathToLatestAsset[path.id] != null
+        ? EnteFile.fromAssetSync(_pathToLatestAsset[path.id]!)
+        : null;
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: SizedBox(
@@ -460,11 +462,11 @@ class _BackupFolderSelectionPageV2State
           children: [
             file != null
                 ? ThumbnailWidget(
-              file,
-              shouldShowSyncStatus: false,
-              key: Key("backup_selection_widget" + file.tag),
-            ):
-                 const NoThumbnailWidget(),
+                    file,
+                    shouldShowSyncStatus: false,
+                    key: Key("backup_selection_widget" + file.tag),
+                  )
+                : const NoThumbnailWidget(),
             Padding(
               padding: const EdgeInsets.all(9),
               child: isSelected
