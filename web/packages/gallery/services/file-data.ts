@@ -82,7 +82,9 @@ export const fetchFilesData = async (
  *
  * Unlike {@link fetchFilesData}, this uses a HTTP GET request.
  *
- * Returns `undefined` if no video preview has been generated for this file yet.
+ * Returns `undefined` if no file data of the given type has been uploaded for
+ * this file yet (e.g. if type was "vid_preview", this would indicate that a
+ * video preview has been generated for this file yet).
  */
 export const fetchFileData = async (
     type: FileDataType,
@@ -133,4 +135,55 @@ export const putFileData = async (
         }),
     });
     ensureOk(res);
+};
+
+/**
+ * Fetch the preview file data the given file.
+ *
+ * @param type The {@link FileDataType} which we want.
+ *
+ * @param fileIDs The id of the files for which we want the file preview data.
+ *
+ * @returns the (presigned) URL to the preview data, or undefined if there is
+ * not preview data of the given type for the given file yet.
+ *
+ * [Note: File data vs file preview data]
+ *
+ * In museum's ontology, there is a distinction between two concepts:
+ *
+ * S3 metadata (museum term, the APIs call it "file data") is data that museum
+ * uploads on behalf of the client. e.g.,
+ *
+ * - ML data.
+ *
+ * - Preview video playlist.
+ *
+ * S3 file data (museum term, the APIs call it "file preview data") is data that
+ * a client itself uploads. e.g.,
+ *
+ * - The preview video itself.
+ *
+ * - Additional preview images.
+ *
+ * [Note: Video playlist and preview]
+ *
+ * For a streaming video, both these concepts are needed:
+ *
+ * - The encrypted HLS playlist is stored as "file data" of type "vid_preview",
+ *
+ * - The encrypted video chunks that the playlist refers to are stored as "file
+ *   preview data" of type "vid_preview".
+ */
+export const fetchFilePreviewData = async (
+    type: FileDataType,
+    fileID: number,
+): Promise<string | undefined> => {
+    const params = new URLSearchParams({ type, fileID: fileID.toString() });
+    const url = await apiURL("/files/data/preview");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    if (res.status == 404) return undefined;
+    ensureOk(res);
+    return z.object({ url: z.string() }).parse(await res.json()).url;
 };
