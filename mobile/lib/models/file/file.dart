@@ -333,9 +333,7 @@ class EnteFile {
   }
 
   bool get isSharedMediaToAppSandbox {
-    return localID != null &&
-        (localID!.startsWith(oldSharedMediaIdentifier) ||
-            localID!.startsWith(sharedMediaIdentifier));
+    return localID != null && localID!.startsWith(sharedMediaIdentifier);
   }
 
   bool get hasLocation {
