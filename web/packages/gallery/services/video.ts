@@ -28,11 +28,11 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
     const videoURL = await fetchFilePreviewData("vid_preview", file.id);
     if (!videoURL) return undefined;
 
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     const { playlist: playlistTemplate } = await decryptPlaylistJSON(
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         playlistFileData,
         file,
     );
@@ -92,7 +92,7 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
     const playlist = playlistTemplate.replaceAll("output.ts", videoURL);
     log.debug(() => ["hlsPlaylistForFile", playlist]);
 
-    const playlistBlob = new Blob([playlist])
+    const playlistBlob = new Blob([playlist]);
     const playlistURL = URL.createObjectURL(playlistBlob);
 
     return playlistURL;
