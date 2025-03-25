@@ -1,5 +1,5 @@
 // DO NOT EDIT. This is code generated via package:intl/generate_localized.dart
-// This is a library that provides messages for a cs locale. All the
+// This is a library that provides messages for a lv locale. All the
 // messages from the main program should be duplicated here with the same
 // function name.
 
@@ -18,14 +18,8 @@ final messages = new MessageLookup();
 typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 
 class MessageLookup extends MessageLookupByLibrary {
-  String get localeName => 'cs';
+  String get localeName => 'lv';
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "askDeleteReason": MessageLookupByLibrary.simpleMessage(
-            "Jaký je váš hlavní důvod, proč mažete svůj účet?"),
-        "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
-            "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření"),
-        "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage("")
-      };
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{};
 }
