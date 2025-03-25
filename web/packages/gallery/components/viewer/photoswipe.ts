@@ -2,6 +2,7 @@ import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import "hls-video-element";
 import { t } from "i18next";
+import "media-chrome";
 import PhotoSwipe, { type SlideData } from "photoswipe";
 import {
     fileViewerDidClose,
@@ -1079,9 +1080,16 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 </video>
 `;
 
-// Requires `import "hls-video-element"`
+// Requires the following imports to register the Web components we use:
+//
+//     import "hls-video-element";
+//     import "media-chrome";
+//
+// TODO: Update code above that searches for the video element
 const hlsVideoHTML = (url: string) => `
-<hls-video controls src="${url}"></hls-video>
+<media-controller>
+<hls-video slot="media" src="${url}"></hls-video>
+</media-controller>
 `;
 
 const livePhotoVideoHTML = (videoURL: string) => `
