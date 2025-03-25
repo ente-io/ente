@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/permission_granted_event.dart";
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/extensions/stop_watch.dart';
@@ -24,9 +25,9 @@ class LocalImportService {
   LocalAssetsCache? _localAssetsCache;
   final DeviceAssetsService _deviceAssetsService = DeviceAssetsService();
   late final Debouncer _changeCallbackDebouncer = Debouncer(
-    const Duration(milliseconds: 1000),
-    executionInterval: const Duration(milliseconds: 3000),
-  );
+      const Duration(milliseconds: 1000),
+      executionInterval: const Duration(milliseconds: 3000),
+      leading: true);
   final Lock _lock = Lock();
 
   static const lastLocalDBSyncTime = "localImport.lastSyncTime";
@@ -197,11 +198,15 @@ class LocalImportService {
     IncrementalDiffWithOnDevice? incrementalDiff,
     FullDiffWithOnDevice? fullDiff,
   }) async {
+    bool anythingChanged = fullDiff != null;
     if (incrementalDiff != null) {
       await localDB.insertAssets(incrementalDiff.assets);
       await localDB.insertDBPaths(incrementalDiff.addedOrModifiedPaths);
       await localDB
           .insertPathToAssetIDs(incrementalDiff.newOrUpdatedPathToLocalIDs);
+      if (incrementalDiff.assets.isNotEmpty) {
+        anythingChanged = true;
+      }
     } else if (fullDiff != null) {
       await Future.wait([
         localDB.deleteAssets(fullDiff.extraAssetIDsInApp),
@@ -212,6 +217,13 @@ class LocalImportService {
         fullDiff.updatePathToLocalIDs,
         clearOldMappingsIdsInInput: true,
       );
+    }
+    _localAssetsCache?.updateForDiff(
+      incrementalDiff: incrementalDiff,
+      fullDiff: fullDiff,
+    );
+    if (anythingChanged) {
+      Bus.instance.fire(LocalPhotosUpdatedEvent([], source: "localImport"));
     }
   }
 
