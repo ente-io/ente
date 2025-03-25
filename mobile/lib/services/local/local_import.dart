@@ -73,7 +73,7 @@ class LocalImportService {
       // This is a fix for https://github.com/ente-io/ente/issues/4296
       await _lock.synchronized(() async {
         final TimeLogger tl = TimeLogger(context: "incrementalSync");
-        final syncTime = DateTime.now().microsecondsSinceEpoch;
+        final syncTime = DateTime.now().millisecondsSinceEpoch;
         final Set<String> inAppAssetIds = await localDB.getAssetsIDs();
         _log.info("${inAppAssetIds.length} assets in app $tl");
         final diff = await _deviceAssetsService.incrementalDiffWithOnDevice(
