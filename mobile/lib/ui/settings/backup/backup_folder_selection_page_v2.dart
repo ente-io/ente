@@ -9,13 +9,14 @@ import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/generated/l10n.dart';
-import "package:photos/image/provider/local_thumbnail_img.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/services/local/local_assets_cache.dart";
 import "package:photos/services/local/local_import.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
+import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
 
 class BackupFolderSelectionPageV2 extends StatefulWidget {
@@ -448,6 +449,7 @@ class _BackupFolderSelectionPageV2State
 
   // todo: replace with asset thumbnail provider
   Widget _getThumbnail(AssetPathEntity path, bool isSelected) {
+    final file = _pathToLatestAsset[path.id] != null ? EnteFile.fromAssetSync(_pathToLatestAsset[path.id]!): null;
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: SizedBox(
@@ -456,17 +458,13 @@ class _BackupFolderSelectionPageV2State
         child: Stack(
           alignment: AlignmentDirectional.bottomEnd,
           children: [
-            _pathToLatestAsset[path.id] != null
-                ? Image(
-                    key: Key("backup_selection_widget" + path.id),
-                    image: LocalThumbnailProvider(
-                      LocalThumbnailProviderKey(
-                        asset: _pathToLatestAsset[path.id]!,
-                      ),
-                    ),
-                    fit: BoxFit.cover,
-                  )
-                : const NoThumbnailWidget(),
+            file != null
+                ? ThumbnailWidget(
+              file,
+              shouldShowSyncStatus: false,
+              key: Key("backup_selection_widget" + file.tag),
+            ):
+                 const NoThumbnailWidget(),
             Padding(
               padding: const EdgeInsets.all(9),
               child: isSelected
