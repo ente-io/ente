@@ -1,4 +1,6 @@
 PODS:
+  - app_links (0.0.2):
+    - Flutter
   - background_fetch (1.3.7):
     - Flutter
   - battery_info (0.0.1):
@@ -231,8 +233,6 @@ PODS:
     - Flutter
   - ua_client_hints (1.4.1):
     - Flutter
-  - uni_links (0.0.1):
-    - Flutter
   - url_launcher_ios (0.0.1):
     - Flutter
   - video_player_avfoundation (0.0.1):
@@ -247,6 +247,7 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
+  - app_links (from `.symlinks/plugins/app_links/ios`)
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
@@ -299,7 +300,6 @@ DEPENDENCIES:
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - system_info_plus (from `.symlinks/plugins/system_info_plus/ios`)
   - ua_client_hints (from `.symlinks/plugins/ua_client_hints/ios`)
-  - uni_links (from `.symlinks/plugins/uni_links/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - video_thumbnail (from `.symlinks/plugins/video_thumbnail/ios`)
@@ -329,6 +329,8 @@ SPEC REPOS:
     - sqlite3
 
 EXTERNAL SOURCES:
+  app_links:
+    :path: ".symlinks/plugins/app_links/ios"
   background_fetch:
     :path: ".symlinks/plugins/background_fetch/ios"
   battery_info:
@@ -433,8 +435,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/system_info_plus/ios"
   ua_client_hints:
     :path: ".symlinks/plugins/ua_client_hints/ios"
-  uni_links:
-    :path: ".symlinks/plugins/uni_links/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
   video_player_avfoundation:
@@ -447,6 +447,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock_plus/ios"
 
 SPEC CHECKSUMS:
+  app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
   background_fetch: 94b36ee293e82972852dba8ede1fbcd3bd3d9d57
   battery_info: 83f3aae7be2fccefab1d2bf06b8aa96f11c8bcdd
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
@@ -518,7 +519,6 @@ SPEC CHECKSUMS:
   sqlite3_flutter_libs: 3c323550ef3b928bc0aa9513c841e45a7d242832
   system_info_plus: 555ce7047fbbf29154726db942ae785c29211740
   ua_client_hints: 92fe0d139619b73ec9fcb46cc7e079a26178f586
-  uni_links: f191d616c4db8750f74c72c988e79a83dd297fac
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
   video_thumbnail: 584ccfa55d8fd2f3d5507218b0a18d84c839c620

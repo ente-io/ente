@@ -29,6 +29,7 @@ dependencies:
   battery_info: # replace plugin, it is archived
     git:
       url: https://github.com/ente-io/battery_info
+      ref: 95c7a9f
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
   chewie:
@@ -36,7 +37,7 @@ dependencies:
       url: https://github.com/ente-io/chewie.git
       ref: mybranched
   collection: # dart
-  computer:
+  computer: # logged task name in verbose in fork
     git: "https://github.com/ente-io/computer.git"
   connectivity_plus: ^6.0.2
   cross_file: ^0.3.3
@@ -133,7 +134,9 @@ dependencies:
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: # no updates in git, replace package
-    git: https://github.com/ente-io/move_to_background.git
+    git:
+      url: https://github.com/ente-io/move_to_background.git
+      ref: 3b862fe
   nanoid: ^1.0.0
   native_dio_adapter: ^1.4.0
   native_video_player: ^3.0.0-dev.4
@@ -146,6 +149,7 @@ dependencies:
   open_mail_app: # replace plugin, git is archived
     git:
       url: https://github.com/ente-io/open-mail-app-flutter.git
+      ref: 83740bf
   package_info_plus: ^8.2.1
   page_transition: ^2.0.2
   panorama:
@@ -166,12 +170,13 @@ dependencies:
   privacy_screen: # pub.dev is behind
     git:
       url: https://github.com/eddyuan/privacy_screen.git
-      ref: 855418e4b39632893a322fdfa2a9b69487b1831d
+      ref: 855418e
   protobuf: ^3.1.0
   quiver: ^3.0.1
   receive_sharing_intent: # pub.dev is behind
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
+      ref: 2cea396
   screenshot: ^3.0.0
   scrollable_positioned_list: ^0.3.5
   sentry: ^8.13.2
@@ -193,7 +198,7 @@ dependencies:
   ua_client_hints: ^1.4.0
   url_launcher: ^6.3.0
   uuid: ^4.5.0
-  video_editor:
+  video_editor: # edge cases handled in fork
     git:
       url: https://github.com/ente-io/video_editor_fork.git
   video_player:
@@ -207,6 +212,7 @@ dependencies:
   wallpaper_manager_flutter: # no updates on git, replace package
     git:
       url: https://github.com/ente-io/wallpaper_manager_fork.git
+      ref: a1c9661
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
   win32: ^5.10.1

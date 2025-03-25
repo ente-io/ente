@@ -154,7 +154,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: "95c7a9f"
       resolved-ref: "95c7a9f0400b968b3bfdc98c8c10a07fb4a62ea2"
       url: "https://github.com/ente-io/battery_info"
     source: git
@@ -1822,7 +1822,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: "3b862fe"
       resolved-ref: "3b862fea9665a50e59bcce96cab6997cc7c0cb9e"
       url: "https://github.com/ente-io/move_to_background.git"
     source: git
@@ -1919,7 +1919,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: "83740bf"
       resolved-ref: "83740bf55dac38a0be01c863609cf900c4d1aab1"
       url: "https://github.com/ente-io/open-mail-app-flutter.git"
     source: git
@@ -2185,7 +2185,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "855418e4b39632893a322fdfa2a9b69487b1831d"
+      ref: "855418e"
       resolved-ref: "855418e4b39632893a322fdfa2a9b69487b1831d"
       url: "https://github.com/eddyuan/privacy_screen.git"
     source: git
@@ -2250,7 +2250,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: "2cea396"
       resolved-ref: "2cea396843cd3ab1b5ec4334be4233864637874e"
       url: "https://github.com/KasemJaffer/receive_sharing_intent.git"
     source: git
@@ -2971,7 +2971,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: a1c9661
       resolved-ref: a1c96618483ace4596af085891f04a4d463725b4
       url: "https://github.com/ente-io/wallpaper_manager_fork.git"
     source: git
