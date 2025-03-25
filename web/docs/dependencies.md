@@ -226,8 +226,16 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 - [PhotoSwipe](https://photoswipe.com) provides the base image viewer on top of
   which we've built our file viewer.
 
-- [hls.js](https://github.com/video-dev/hls.js/) is used for HLS playback (we
-  provide a HLS playlist to the browser for streaming videos).
+- [hls-video-element](https://github.com/muxinc/media-elements/tree/main/packages/hls-video-element)
+  provides a custom web component element for HLS playback with custom video
+  controls.
+
+  > Internally, it uses [media-chrome](https://github.com/muxinc/media-chrome)
+  > to provide video controls (we use custom controls to provide a standardized
+  > UX across browsers, but really the main reason is that Safari's default
+  > video control are on the verge of unusable), and
+  > [hls.js](https://github.com/video-dev/hls.js/) for HLS playback (Chrome and
+  > Firefox do not have native support for HLS playlists).
 
 - [react-dropzone](https://github.com/react-dropzone/react-dropzone/) is a React
   hook to create a drag-and-drop input zone. Note that we pin to the last
