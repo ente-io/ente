@@ -1088,7 +1088,10 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 // TODO: Update code above that searches for the video element
 const hlsVideoHTML = (url: string) => `
 <media-controller>
-<hls-video slot="media" src="${url}"></hls-video>
+  <hls-video slot="media" src="${url}"></hls-video>
+  <media-control-bar>
+    <media-play-button></media-play-button>
+  </media-control-bar>
 </media-controller>
 `;
 
