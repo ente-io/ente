@@ -73,6 +73,7 @@ class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
       final codec = await decode(buffer);
       yield codec;
       chunkEvents.close().ignore();
+      return;
     }
 
     // Try to load small thumbnail with retry logic
