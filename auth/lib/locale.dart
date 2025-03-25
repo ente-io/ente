@@ -32,6 +32,7 @@ const List<Locale> appSupportedLocales = <Locale>[
   Locale('uk'),
   Locale('vi'),
   Locale("zh", "CN"),
+  Locale("zh", "TW"),
 ];
 
 Locale? autoDetectedLocale;

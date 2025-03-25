@@ -181,6 +181,13 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       case 'fi':
         return 'Suomi';
       case 'zh':
+        if (locale.countryCode == 'TW') {
+          return '中文 (台灣)';
+        } else if (locale.countryCode == 'HK') {
+          return '中文 (香港)';
+        } else if (locale.countryCode == 'CN') {
+          return '中文 (中国)';
+        }
         switch (locale.scriptCode) {
           case 'Hans':
             return '中文 (简体)';
