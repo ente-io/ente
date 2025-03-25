@@ -312,6 +312,8 @@ export class FileViewerPhotoSwipe {
                 if (videoPlaylistURL) {
                     return {
                         ...rest,
+                        width: 1286,
+                        height: 746,
                         html: hlsVideoHTML(videoPlaylistURL, file.id),
                     };
                 } else if (videoURL) {
