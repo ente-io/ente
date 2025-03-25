@@ -43,7 +43,6 @@ import "package:photos/services/notification_service.dart";
 import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
-import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
 import 'package:photos/ui/tools/app_lock.dart';
@@ -249,7 +248,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("FileUploader init done $tlog");
 
     _logger.info("LocalSyncService init $tlog");
-    await LocalSyncService.instance.init(preferences);
     await LocalImportService.instance.init(preferences);
     _logger.info("LocalSyncService init done $tlog");
 

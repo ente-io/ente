@@ -42,7 +42,6 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/sync/diff_fetcher.dart";
-import 'package:photos/services/sync/local_sync_service.dart';
 import "package:photos/services/sync/remote_sync_service.dart";
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
@@ -125,7 +124,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _logger.info("Building initstate");
     super.initState();
 
-    if (LocalSyncService.instance.hasCompletedFirstImport()) {
+    if (LocalImportService.instance.hasCompletedFirstImport()) {
       MemoryHomeWidgetService.instance.checkPendingMemorySync();
     }
     _tabChangedEventSubscription =
@@ -657,8 +656,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
       return const GrantPermissionsWidget();
     }
-    if (!(LocalSyncService.instance.hasCompletedFirstImport() ||
-        LocalImportService.instance.hasCompletedFirstImport())) {
+    if (!(LocalImportService.instance.hasCompletedFirstImport())) {
       return const LoadingPhotosWidget();
     }
     if (_sharedFiles != null &&

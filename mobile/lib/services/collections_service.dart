@@ -40,7 +40,6 @@ import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/favorites_service.dart";
-import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -703,8 +702,6 @@ class CollectionsService {
       ),
     );
     sync().ignore();
-    // not required once remote & local world are separate
-    LocalSyncService.instance.syncAll().ignore();
   }
 
   Uint8List getCollectionKey(int collectionID) {

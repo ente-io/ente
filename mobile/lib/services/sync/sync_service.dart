@@ -16,14 +16,12 @@ import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/services/local/local_import.dart";
 import 'package:photos/services/notification_service.dart';
-import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SyncService {
   final _logger = Logger("SyncService");
-  final _localSyncService = LocalSyncService.instance;
   final _remoteSyncService = RemoteSyncService.instance;
   final _uploader = FileUploader.instance;
   bool _syncStopRequested = false;
@@ -197,17 +195,15 @@ class SyncService {
     if (localSyncOnly) {
       await LocalImportService.instance.incrementalSync();
       await LocalImportService.instance.fullSync();
+      return;
     }
-    await _localSyncService.sync();
     _logger.info("old localSync completed $tl");
     await LocalImportService.instance.incrementalSync();
     _logger.info("incrementalSync completed $tl");
-    if (_localSyncService.hasCompletedFirstImport()) {
+    if (LocalImportService.instance.hasCompletedFirstImport()) {
       await _remoteSyncService.sync();
       _logger.info("remoteSync completed $tl");
-      final shouldSync = await _localSyncService.syncAll();
-      _logger.info("localSync completed $tl");
-      await LocalImportService.instance.fullSync();
+      final bool shouldSync = await LocalImportService.instance.fullSync();
       _logger.info("fullSync completed $tl");
       if (shouldSync) {
         // await _remoteSyncService.sync();

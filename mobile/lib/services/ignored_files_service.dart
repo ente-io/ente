@@ -24,6 +24,27 @@ class IgnoredFilesService {
     return _idsToReasonMap!;
   }
 
+  Future<void> ignoreUpload(EnteFile file, InvalidFileError error) async {
+    if (file.localID == null ||
+        file.deviceFolder == null ||
+        file.title == null) {
+      _logger.warning('Invalid file received for ignoring: $file');
+      return;
+    }
+    if (Platform.isIOS && error.reason == InvalidReason.sourceFileMissing) {
+      // ignoreSourceFileMissing error on iOS as the file fetch from iCloud might have failed,
+      // but the file might be available later
+      return;
+    }
+    final ignored = IgnoredFile(
+      file.localID,
+      file.title,
+      file.deviceFolder,
+      error.reason.name,
+    );
+    await IgnoredFilesService.instance.cacheAndInsert([ignored]);
+  }
+
   Future<void> cacheAndInsert(List<IgnoredFile> ignoredFiles) async {
     final existingIDs = await idToIgnoreReasonMap;
     for (IgnoredFile iFile in ignoredFiles) {

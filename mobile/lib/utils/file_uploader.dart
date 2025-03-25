@@ -36,8 +36,8 @@ import "package:photos/module/upload/service/multipart.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/preview_video_store.dart";
-import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -1131,7 +1131,7 @@ class FileUploader {
         await FilesDB.instance.deleteLocalFile(file);
       }
       if (canIgnoreFile) {
-        await LocalSyncService.instance.ignoreUpload(file, e);
+        await IgnoredFilesService.instance.ignoreUpload(file, e);
       }
     } catch (e, s) {
       _logger.severe("Failed to handle invalid file error", e, s);

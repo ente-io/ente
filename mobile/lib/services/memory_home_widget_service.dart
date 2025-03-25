@@ -4,7 +4,7 @@ import "package:logging/logging.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/home_widget_service.dart";
-import "package:photos/services/sync/local_sync_service.dart";
+import "package:photos/services/local/local_import.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
 
@@ -45,7 +45,7 @@ class MemoryHomeWidgetService {
 
   Future<bool> hasAnyBlockers() async {
     final hasCompletedFirstImport =
-        LocalSyncService.instance.hasCompletedFirstImport();
+        LocalImportService.instance.hasCompletedFirstImport();
     if (!hasCompletedFirstImport) {
       _logger.warning("first import not completed");
       return true;

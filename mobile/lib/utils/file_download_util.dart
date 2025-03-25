@@ -18,7 +18,7 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ignored_file.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/ignored_files_service.dart";
-import "package:photos/services/sync/local_sync_service.dart";
+import "package:photos/services/local/local_import.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/standalone/data.dart";
@@ -195,7 +195,7 @@ Future<void> downloadToGallery(EnteFile file) async {
     // We use a lock to prevent synchronisation to occur while it is downloading
     // as this introduces wrong entry in FilesDB due to race condition
     // This is a fix for https://github.com/ente-io/ente/issues/4296
-    await LocalSyncService.instance.getLock().synchronized(() async {
+    await LocalImportService.instance.getLock().synchronized(() async {
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
       await PhotoManager.stopChangeNotify();
@@ -240,7 +240,7 @@ Future<void> downloadToGallery(EnteFile file) async {
     rethrow;
   } finally {
     await PhotoManager.startChangeNotify();
-    LocalSyncService.instance.checkAndSync().ignore();
+    LocalImportService.instance.checkAndSync().ignore();
   }
 }
 

@@ -1430,21 +1430,12 @@
   "moveSelectedPhotosToOneDate": "Perkelti pasirinktas nuotraukas į vieną datą",
   "shiftDatesAndTime": "Pastumti datas ir laiką",
   "photosKeepRelativeTimeDifference": "Nuotraukos išlaiko santykinį laiko skirtumą",
-  "photocountPhotos": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {Nėra nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
-  "@photocountPhotos": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
+
   "appIcon": "Programos piktograma",
   "notThisPerson": "Ne šis asmuo?",
   "selectedItemsWillBeRemovedFromThisPerson": "Pasirinkti elementai bus pašalinti iš šio asmens, bet nebus ištrinti iš jūsų bibliotekos.",
   "throughTheYears": "{dateFormat} per metus",
   "thisWeekThroughTheYears": "Ši savaitė per metus",
-  "thisWeekXYearsAgo": "{count, plural, one {Šią savaitę, prieš {count} metus} few {Šią savaitę, prieš {count} metus} many {Šią savaitę, prieš {count} metų}=1 {Šią savaitę, prieš {count} metus} other {Šią savaitę, prieš {count} metų}}",
   "youAndThem": "Jūs ir {name}",
   "admiringThem": "Žavisi {name}",
   "backgroundWithThem": "Gražūs vaizdai su {name}",

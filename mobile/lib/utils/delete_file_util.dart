@@ -21,7 +21,7 @@ import "package:photos/models/files_split.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
-import "package:photos/services/sync/local_sync_service.dart";
+import "package:photos/services/local/local_import.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
@@ -487,7 +487,7 @@ Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
     _logger.info(
       "removeAllNoExistsAsset took: ${stopwatch.elapsedMilliseconds}ms",
     );
-    await LocalSyncService.instance.sync();
+    await LocalImportService.instance.fullSync();
 
     late final BackupStatus status;
     final List<String> deletedIDs = [];

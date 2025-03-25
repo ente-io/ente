@@ -1400,26 +1400,7 @@
   "enableMachineLearningBanner": "Aktiver maskinlæring for magisk søk og ansiktsgjenkjenning",
   "searchDiscoverEmptySection": "Bilder vil vises her når behandlingen og synkronisering er fullført",
   "searchPersonsEmptySection": "Folk vil vises her når behandling og synkronisering er fullført",
-  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {La til 0 seere} =1 {La til 1 seer} other {La til {count} seere}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {}=0 {La til 0 samarbeidspartner} =1 {La til 1 samarbeidspartner} other {Lagt til {count} samarbeidspartnere}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
+
   "accountIsAlreadyConfigured": "Kontoen er allerede konfigurert.",
   "sessionIdMismatch": "Økt-ID stemmer ikke",
   "@sessionIdMismatch": {

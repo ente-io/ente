@@ -24,26 +24,26 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m18(versionValue) => "รุ่น: ${versionValue}";
 
-  static String m28(count) =>
+  static String m27(count) =>
       "${Intl.plural(count, one: 'ลบ ${count} รายการ', other: 'ลบ ${count} รายการ')}";
 
-  static String m29(currentlyDeleting, totalCount) =>
+  static String m28(currentlyDeleting, totalCount) =>
       "กำลังลบ ${currentlyDeleting} / ${totalCount}";
 
-  static String m31(supportEmail) =>
+  static String m30(supportEmail) =>
       "กรุณาส่งอีเมลไปที่ ${supportEmail} จากที่อยู่อีเมลที่คุณลงทะเบียนไว้";
 
-  static String m46(currentlyProcessing, totalCount) =>
+  static String m45(currentlyProcessing, totalCount) =>
       "กำลังประมวลผล ${currentlyProcessing} / ${totalCount}";
 
-  static String m48(count) => "${Intl.plural(count, other: '${count} รายการ')}";
+  static String m47(count) => "${Intl.plural(count, other: '${count} รายการ')}";
 
-  static String m54(count) => "${Intl.plural(count, other: 'ย้ายรายการ')}";
+  static String m53(count) => "${Intl.plural(count, other: 'ย้ายรายการ')}";
 
   static String m0(passwordStrengthValue) =>
       "ความแข็งแรงของรหัสผ่าน: ${passwordStrengthValue}";
 
-  static String m92(
+  static String m90(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "ใช้ไป ${usedAmount} ${usedStorageUnit} จาก ${totalAmount} ${totalStorageUnit}";
 
@@ -130,8 +130,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteEmptyAlbumsWithQuestionMark":
             MessageLookupByLibrary.simpleMessage(
                 "ลบอัลบั้มที่ว่างเปล่าหรือไม่?"),
-        "deleteItemCount": m28,
-        "deleteProgress": m29,
+        "deleteItemCount": m27,
+        "deleteProgress": m28,
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "ขาดคุณสมบัติสำคัญที่ฉันต้องการ"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
@@ -143,7 +143,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "คำขอของคุณจะได้รับการดำเนินการภายใน 72 ชั่วโมง"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("ทำในภายหลัง"),
-        "dropSupportEmail": m31,
+        "dropSupportEmail": m30,
         "edit": MessageLookupByLibrary.simpleMessage("แก้ไข"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("แก้ไขตำแหน่ง"),
@@ -172,7 +172,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("เพิ่มคำอธิบาย..."),
         "forgotPassword": MessageLookupByLibrary.simpleMessage("ลืมรหัสผ่าน"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("ทดลองใช้ฟรี"),
-        "genericProgress": m46,
+        "genericProgress": m45,
         "goToSettings": MessageLookupByLibrary.simpleMessage("ไปที่การตั้งค่า"),
         "hide": MessageLookupByLibrary.simpleMessage("ซ่อน"),
         "hostedAtOsmFrance":
@@ -195,7 +195,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "invalidKey": MessageLookupByLibrary.simpleMessage("รหัสไม่ถูกต้อง"),
         "invalidRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "คีย์การกู้คืนที่คุณป้อนไม่ถูกต้อง โปรดตรวจสอบให้แน่ใจว่ามี 24 คำ และตรวจสอบการสะกดของแต่ละคำ\n\nหากคุณป้อนรหัสกู้คืนที่เก่ากว่า ตรวจสอบให้แน่ใจว่ามีความยาว 64 ตัวอักษร และตรวจสอบแต่ละตัวอักษร"),
-        "itemCount": m48,
+        "itemCount": m47,
         "kindlyHelpUsWithThisInformation":
             MessageLookupByLibrary.simpleMessage("กรุณาช่วยเราด้วยข้อมูลนี้"),
         "lastUpdated": MessageLookupByLibrary.simpleMessage("อัปเดตล่าสุด"),
@@ -213,7 +213,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "map": MessageLookupByLibrary.simpleMessage("แผนที่"),
         "maps": MessageLookupByLibrary.simpleMessage("แผนที่"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("ปานกลาง"),
-        "moveItem": m54,
+        "moveItem": m53,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("ย้ายไปยังอัลบั้ม"),
         "name": MessageLookupByLibrary.simpleMessage("ชื่อ"),
         "newest": MessageLookupByLibrary.simpleMessage("ใหม่สุด"),
@@ -306,7 +306,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("ครอบครัว"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("คุณ"),
-        "storageUsageInfo": m92,
+        "storageUsageInfo": m90,
         "strongStrength": MessageLookupByLibrary.simpleMessage("แข็งแรง"),
         "syncStopped": MessageLookupByLibrary.simpleMessage("หยุดการซิงค์แล้ว"),
         "syncing": MessageLookupByLibrary.simpleMessage("กำลังซิงค์..."),

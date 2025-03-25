@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/ignored_files_service.dart';
-import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -38,19 +37,6 @@ class DebugSectionWidget extends StatelessWidget {
           onTap: () async {
             await updateService.resetChangeLog();
             _showKeyAttributesDialog(context);
-          },
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Delete Local Import DB",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            await LocalSyncService.instance.resetLocalSync();
-            showShortToast(context, "Done");
           },
         ),
         sectionOptionSpacing,

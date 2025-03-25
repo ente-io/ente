@@ -8,7 +8,6 @@ import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/upload_strategy.dart';
-import "package:photos/services/sync/import/model.dart";
 import 'package:sqflite/sqlite_api.dart';
 import 'package:tuple/tuple.dart';
 
@@ -121,56 +120,6 @@ extension DeviceFiles on FilesDB {
       result.add(row['id'] as String);
     }
     return result;
-  }
-
-  Future<void> insertLocalAssets(
-    List<LocalPathAsset> localPathAssets, {
-    bool shouldAutoBackup = false,
-  }) async {
-    final db = await sqliteAsyncDB;
-    final Map<String, Set<String>> pathIDToLocalIDsMap = {};
-    try {
-      final Set<String> existingPathIds = await getDevicePathIDs();
-      final parameterSetsForUpdate = <List<Object?>>[];
-      final parameterSetsForInsert = <List<Object?>>[];
-      for (LocalPathAsset localPathAsset in localPathAssets) {
-        if (localPathAsset.localIDs.isNotEmpty) {
-          pathIDToLocalIDsMap[localPathAsset.pathID] = localPathAsset.localIDs;
-        }
-        if (existingPathIds.contains(localPathAsset.pathID)) {
-          parameterSetsForUpdate
-              .add([localPathAsset.pathName, localPathAsset.pathID]);
-        } else if (localPathAsset.localIDs.isNotEmpty) {
-          parameterSetsForInsert.add([
-            localPathAsset.pathID,
-            localPathAsset.pathName,
-            shouldAutoBackup ? _sqlBoolTrue : _sqlBoolFalse,
-          ]);
-        }
-      }
-
-      await db.executeBatch(
-        '''
-        INSERT OR IGNORE INTO device_collections (id, name, should_backup) VALUES (?, ?, ?);
-      ''',
-        parameterSetsForInsert,
-      );
-
-      await db.executeBatch(
-        '''
-        UPDATE device_collections SET name = ? WHERE id = ?;
-      ''',
-        parameterSetsForUpdate,
-      );
-
-      // add the mappings for localIDs
-      if (pathIDToLocalIDsMap.isNotEmpty) {
-        await insertPathIDToLocalIDMapping(pathIDToLocalIDsMap);
-      }
-    } catch (e) {
-      _logger.severe("failed to save path names", e);
-      rethrow;
-    }
   }
 
   Future<bool> updateDeviceCoverWithCount(
