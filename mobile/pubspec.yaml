@@ -25,7 +25,7 @@ dependencies:
   app_links: ^6.4.0
   archive: ^3.6.1
   background_fetch: ^1.2.1
-  battery_info: # replace plugin, it is archived
+  battery_info: # replace with battery_plus
     git:
       url: https://github.com/ente-io/battery_info
       ref: 95c7a9f
