@@ -428,7 +428,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.auth.mac;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -560,7 +560,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.auth.mac;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -587,7 +587,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				PRODUCT_BUNDLE_IDENTIFIER = io.ente.auth.mac;
 				PROVISIONING_PROFILE_SPECIFIER = "";
