@@ -226,6 +226,9 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 - [PhotoSwipe](https://photoswipe.com) provides the base image viewer on top of
   which we've built our file viewer.
 
+- [hls.js](https://github.com/video-dev/hls.js/) is used for HLS playback (we
+  provide a HLS playlist to the browser for streaming videos).
+
 - [react-dropzone](https://github.com/react-dropzone/react-dropzone/) is a React
   hook to create a drag-and-drop input zone. Note that we pin to the last
   version in the 14.2 series, since if we use 14.3 onwards (I tested till
