@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/core/event_bus.dart';
+import "package:photos/core/event_bus.dart";
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/events/v1/LocalAssetChangedEvent.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/file_load_result.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
+import "package:photos/services/local/device_albums.dart";
+import "package:photos/services/local/local_import.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -33,19 +36,13 @@ class DeviceFolderPage extends StatelessWidget {
 
   @override
   Widget build(Object context) {
-    final int? userID = Configuration.instance.getUserID();
     final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return FilesDB.instance.getFilesInDeviceCollection(
-          deviceCollection,
-          userID,
-          creationStartTime,
-          creationEndTime,
-          limit: limit,
-          asc: asc,
-        );
+      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
+        final files = await LocalImportService.instance
+            .getAlbumFiles(deviceCollection.id);
+        return FileLoadResult(files, false);
       },
-      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      forceReloadEvents: [Bus.instance.on<LocalAssetChangedEvent>()],
       removalEventTypes: const {
         EventType.deletedFromDevice,
         EventType.deletedFromEverywhere,

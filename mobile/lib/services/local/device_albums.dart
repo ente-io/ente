@@ -22,4 +22,21 @@ extension DeviceAlbums on LocalImportService {
     }
     return collections;
   }
+
+  Future<List<EnteFile>> getAlbumFiles(String pathID) async {
+    final cache = await getLocalAssetsCache();
+    final assetIDs = cache.pathToAssetIDs[pathID];
+    if (assetIDs == null) {
+      return [];
+    }
+    final List<EnteFile> files = [];
+    for (final id in assetIDs) {
+      final asset = cache.assets[id];
+      if (asset != null) {
+        files.add(EnteFile.fromAssetSync(asset));
+      }
+    }
+    files.sort((a, b) => (b.creationTime ?? 0).compareTo(a.creationTime ?? 0));
+    return files;
+  }
 }
