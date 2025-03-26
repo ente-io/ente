@@ -215,7 +215,7 @@ dependencies:
       url: https://github.com/ente-io/wallpaper_manager_fork.git
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
-  win32: ^5.10.1
+  workmanager: ^0.5.2
   xml: ^6.3.0
   xmp: ^1.0.3
 

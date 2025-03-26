@@ -2,7 +2,7 @@ import "dart:async";
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:background_fetch/background_fetch.dart';
+import "package:background_fetch/background_fetch.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -15,6 +15,7 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/events/memories_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/main.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/home_widget_service.dart";
@@ -23,16 +24,13 @@ import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/intent_util.dart";
+import "package:workmanager/workmanager.dart" as workmanager;
 
 class EnteApp extends StatefulWidget {
-  final Future<void> Function(String) runBackgroundTask;
-  final Future<void> Function(String) killBackgroundTask;
   final AdaptiveThemeMode? savedThemeMode;
   final Locale? locale;
 
   const EnteApp(
-    this.runBackgroundTask,
-    this.killBackgroundTask,
     this.locale,
     this.savedThemeMode, {
     super.key,
@@ -48,9 +46,9 @@ class EnteApp extends StatefulWidget {
 }
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
-  final _logger = Logger("EnteAppState");
   late Locale? locale;
   late StreamSubscription<MemoriesChangedEvent> _memoriesChangedSubscription;
+  final _logger = Logger("EnteAppState");
 
   @override
   void initState() {
@@ -98,7 +96,11 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         : MediaExtentionAction(action: IntentAction.main);
     AppLifecycleService.instance.setMediaExtensionAction(mediaExtentionAction);
     if (mediaExtentionAction.action == IntentAction.main) {
-      _configureBackgroundFetch();
+      if (!enableWorkManager) {
+        _configureBackgroundFetch();
+      } else {
+        _configureWorkManager();
+      }
     }
   }
 
@@ -182,29 +184,68 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       AppLifecycleService.instance.onAppInBackground(stateChangeReason);
     }
   }
+}
 
-  void _configureBackgroundFetch() {
-    BackgroundFetch.configure(
-        BackgroundFetchConfig(
-          minimumFetchInterval: 15,
-          forceAlarmManager: false,
-          stopOnTerminate: false,
-          startOnBoot: true,
-          enableHeadless: true,
-          requiresBatteryNotLow: true,
-          requiresCharging: false,
-          requiresStorageNotLow: false,
-          requiresDeviceIdle: false,
-          requiredNetworkType: NetworkType.ANY,
-        ), (String taskId) async {
-      await widget.runBackgroundTask(taskId);
-    }, (taskId) {
-      _logger.info("BG task timeout taskID: $taskId");
-      widget.killBackgroundTask(taskId);
-    }).then((int status) {
-      _logger.info('[BackgroundFetch] configure success: $status');
-    }).catchError((e) {
-      _logger.info('[BackgroundFetch] configure ERROR: $e');
-    });
-  }
+final _logger = Logger("BackgroundInitializer");
+
+void _configureWorkManager() {
+  workmanager.Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: kDebugMode,
+  );
+  workmanager.Workmanager().registerPeriodicTask(
+    'backgroundFetchTask',
+    'syncThings',
+    frequency: const Duration(minutes: 15),
+    initialDelay: const Duration(minutes: 1),
+    constraints: workmanager.Constraints(
+      networkType: workmanager.NetworkType.connected,
+      requiresBatteryNotLow: true,
+      requiresCharging: false,
+      requiresStorageNotLow: false,
+      requiresDeviceIdle: false,
+    ),
+    existingWorkPolicy: workmanager.ExistingWorkPolicy.keep,
+    backoffPolicy: workmanager.BackoffPolicy.linear,
+    backoffPolicyDelay: const Duration(minutes: 15),
+  );
+}
+
+void _configureBackgroundFetch() {
+  BackgroundFetch.configure(
+      BackgroundFetchConfig(
+        minimumFetchInterval: 15,
+        forceAlarmManager: false,
+        stopOnTerminate: false,
+        startOnBoot: true,
+        enableHeadless: true,
+        requiresBatteryNotLow: true,
+        requiresCharging: false,
+        requiresStorageNotLow: false,
+        requiresDeviceIdle: false,
+        requiredNetworkType: NetworkType.ANY,
+      ), (String taskId) async {
+    await runBackgroundTask(taskId);
+  }, (taskId) {
+    _logger.info("BG task timeout taskID: $taskId");
+    killBGTask(taskId);
+  }).then((int status) {
+    _logger.info('[BackgroundFetch] configure success: $status');
+  }).catchError((e) {
+    _logger.info('[BackgroundFetch] configure ERROR: $e');
+  });
+}
+
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  workmanager.Workmanager().executeTask((taskName, inputData) async {
+    try {
+      await runBackgroundTask(taskName);
+      return true;
+    } catch (e) {
+      _logger.info('[WorkManager] task error: $e');
+      await killBGTask(taskName);
+      return false;
+    }
+  });
 }
