@@ -95,15 +95,9 @@ String getSharedMediaFilePath(EnteFile file) {
 }
 
 String getSharedMediaPathFromLocalID(String localID) {
-  if (localID.startsWith(oldSharedMediaIdentifier)) {
-    return Configuration.instance.getOldSharedMediaCacheDirectory() +
-        "/" +
-        localID.replaceAll(oldSharedMediaIdentifier, '');
-  } else {
-    return Configuration.instance.getSharedMediaDirectory() +
-        "/" +
-        localID.replaceAll(sharedMediaIdentifier, '');
-  }
+  return Configuration.instance.getSharedMediaDirectory() +
+      "/" +
+      localID.replaceAll(sharedMediaIdentifier, '');
 }
 
 void preloadThumbnail(EnteFile file) {

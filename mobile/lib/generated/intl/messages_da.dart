@@ -20,30 +20,28 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'da';
 
-  static String m4(user) =>
+  static String m3(user) =>
       "${user} vil ikke kunne tilføje flere billeder til dette album\n\nDe vil stadig kunne fjerne eksisterende billeder tilføjet af dem";
 
-  static String m5(storageAmountInGB) =>
+  static String m4(storageAmountInGB) =>
       "${storageAmountInGB} GB hver gang nogen tilmelder sig et betalt abonnement og anvender din kode";
 
-  static String m6(count, formattedCount) =>
+  static String m5(count, formattedCount) =>
       "${Intl.plural(count, zero: 'ingen minder', one: '${formattedCount} minde', other: '${formattedCount} minder')}";
 
   static String m0(passwordStrengthValue) =>
       "Kodeordets styrke: ${passwordStrengthValue}";
 
-  static String m1(count) => "\$photoCount photos";
+  static String m6(count) => "${count} valgt";
 
-  static String m7(count) => "${count} valgt";
-
-  static String m8(verificationID) =>
+  static String m7(verificationID) =>
       "Hey, kan du bekræfte, at dette er dit ente.io verifikation ID: ${verificationID}";
 
-  static String m2(storageAmountInGB) => "${storageAmountInGB} GB";
+  static String m1(storageAmountInGB) => "${storageAmountInGB} GB";
 
-  static String m9(storageAmountInGB) => "De får også ${storageAmountInGB} GB";
+  static String m8(storageAmountInGB) => "De får også ${storageAmountInGB} GB";
 
-  static String m3(email) =>
+  static String m2(email) =>
       "Vi har sendt en email til <green>${email}</green>";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -67,8 +65,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Week": MessageLookupByLibrary.simpleMessage("Efter 1 uge"),
         "after1Year": MessageLookupByLibrary.simpleMessage("Efter 1 år"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Ejer"),
-        "allWillShiftRangeBasedOnFirst": MessageLookupByLibrary.simpleMessage(
-            "This is the first in the group. Other selected photos will automatically shift based on this new date"),
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Tillad downloads"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -82,7 +78,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "canOnlyRemoveFilesOwnedByYou": MessageLookupByLibrary.simpleMessage(
             "Kan kun fjerne filer ejet af dig"),
         "cancel": MessageLookupByLibrary.simpleMessage("Annuller"),
-        "cannotAddMorePhotosAfterBecomingViewer": m4,
+        "cannotAddMorePhotosAfterBecomingViewer": m3,
         "cannotDeleteSharedFiles":
             MessageLookupByLibrary.simpleMessage("Kan ikke slette delte filer"),
         "changeEmail":
@@ -146,7 +142,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "discover_sunset": MessageLookupByLibrary.simpleMessage("Solnedgang"),
         "discover_wallpapers":
             MessageLookupByLibrary.simpleMessage("Baggrundsbilleder"),
-        "editTime": MessageLookupByLibrary.simpleMessage("Edit time"),
         "eligible": MessageLookupByLibrary.simpleMessage("kvalificeret"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
         "emailAlreadyRegistered": MessageLookupByLibrary.simpleMessage(
@@ -182,7 +177,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Find folk hurtigt ved navn"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Glemt adgangskode"),
-        "freeStorageOnReferralSuccess": m5,
+        "freeStorageOnReferralSuccess": m4,
         "freeUpDeviceSpace":
             MessageLookupByLibrary.simpleMessage("Frigør enhedsplads"),
         "freeUpDeviceSpaceDesc": MessageLookupByLibrary.simpleMessage(
@@ -227,7 +222,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "manage": MessageLookupByLibrary.simpleMessage("Administrér"),
         "manageDeviceStorageDesc": MessageLookupByLibrary.simpleMessage(
             "Gennemgå og ryd lokal cache-lagring."),
-        "memoryCount": m6,
+        "memoryCount": m5,
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Aktiver maskinlæring"),
         "mlConsentPrivacy": MessageLookupByLibrary.simpleMessage(
@@ -237,16 +232,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Bemærk venligst, at maskinindlæring vil resultere i en højere båndbredde og batteriforbrug, indtil alle elementer er indekseret. Overvej at bruge desktop app til hurtigere indeksering, vil alle resultater blive synkroniseret automatisk."),
         "moments": MessageLookupByLibrary.simpleMessage("Øjeblikke"),
-        "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
-            "Move selected photos to one date"),
         "never": MessageLookupByLibrary.simpleMessage("Aldrig"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nyt album"),
-        "newRange": MessageLookupByLibrary.simpleMessage("New range"),
         "next": MessageLookupByLibrary.simpleMessage("Næste"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Ingen gendannelsesnøgle?"),
-        "notThisPerson":
-            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "oopsSomethingWentWrong":
@@ -261,15 +251,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Afventende elementer"),
         "peopleUsingYourCode": MessageLookupByLibrary.simpleMessage(
             "Personer, der bruger din kode"),
-        "photocountPhotos": m1,
-        "photosKeepRelativeTimeDifference":
-            MessageLookupByLibrary.simpleMessage(
-                "Photos keep relative time difference"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
                 "Kontakt support@ente.io og vi vil være glade for at hjælpe!"),
         "pleaseWait": MessageLookupByLibrary.simpleMessage("Vent venligst..."),
-        "previous": MessageLookupByLibrary.simpleMessage("Previous"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Privatlivspolitik"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Gendan"),
@@ -297,31 +282,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchHint1":
             MessageLookupByLibrary.simpleMessage("Hurtig, søgning på enheden"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Vælg alle"),
-        "selectDate": MessageLookupByLibrary.simpleMessage("Select date"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(
             "Vælg mapper til sikkerhedskopiering"),
-        "selectOneDateAndTime":
-            MessageLookupByLibrary.simpleMessage("Select one date and time"),
-        "selectOneDateAndTimeForAll": MessageLookupByLibrary.simpleMessage(
-            "Select one date and time for all"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Vælg årsag"),
-        "selectStartOfRange":
-            MessageLookupByLibrary.simpleMessage("Select start of range"),
-        "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
         "selectedFoldersWillBeEncryptedAndBackedUp":
             MessageLookupByLibrary.simpleMessage(
                 "Valgte mapper vil blive krypteret og sikkerhedskopieret"),
-        "selectedItemsWillBeRemovedFromThisPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Selected items will be removed from this person, but not deleted from your library."),
-        "selectedPhotos": m7,
+        "selectedPhotos": m6,
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
         "sendLink": MessageLookupByLibrary.simpleMessage("Send link"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Angiv adgangskode"),
-        "shareTextConfirmOthersVerificationID": m8,
-        "shiftDatesAndTime":
-            MessageLookupByLibrary.simpleMessage("Shift dates and time"),
+        "shareTextConfirmOthersVerificationID": m7,
         "showMemories": MessageLookupByLibrary.simpleMessage("Vis minder"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Jeg er enig i <u-terms>betingelser for brug</u-terms> og <u-policy>privatlivspolitik</u-policy>"),
@@ -337,10 +309,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Beklager, vi kunne ikke generere sikre krypteringsnøgler på denne enhed.\n\nForsøg venligst at oprette en konto fra en anden enhed."),
-        "spotlightOnYourself":
-            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
-        "storageInGB": m2,
+        "storageInGB": m1,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Stærkt"),
         "subscribe": MessageLookupByLibrary.simpleMessage("Abonner"),
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
@@ -351,18 +321,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Afslut session?"),
         "termsOfServicesTitle":
             MessageLookupByLibrary.simpleMessage("Betingelser"),
-        "theyAlsoGetXGb": m9,
+        "theyAlsoGetXGb": m8,
         "thisDevice": MessageLookupByLibrary.simpleMessage("Denne enhed"),
-        "thisWeekThroughTheYears":
-            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Dette vil logge dig ud af følgende enhed:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Dette vil logge dig ud af denne enhed!"),
-        "thisWillMakeTheDateAndTimeOfAllSelected":
-            MessageLookupByLibrary.simpleMessage(
-                "This will make the date and time of all selected photos the same."),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
             "For at nulstille din adgangskode, bekræft venligst din email adresse."),
         "unavailableReferralCode": MessageLookupByLibrary.simpleMessage(
@@ -375,7 +340,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Vis tilføjelser"),
         "waitingForWifi":
             MessageLookupByLibrary.simpleMessage("Venter på Wi-fi..."),
-        "weHaveSendEmailTo": m3,
+        "weHaveSendEmailTo": m2,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Svagt"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Velkommen tilbage!"),

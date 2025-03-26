@@ -8,8 +8,10 @@
         "@ffmpeg/ffmpeg": "^0.12.10",
         "bs58": "^6.0.0",
         "exifreader": "^4.26.2",
+        "hls-video-element": "^1.5.0",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.2",
+        "media-chrome": "^4.8.0",
         "photoswipe": "^5.4.4",
         "react-dropzone": "14.2.10"
     },

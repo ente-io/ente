@@ -1483,10 +1483,6 @@
     }
   },
   "file": "File",
-  "changeLogMagicSearchImprovementTitle": "Miglioramento della Ricerca Magica",
-  "changeLogMagicSearchImprovementContent": "Abbiamo migliorato la ricerca magica per renderla molto più veloce, così non devi aspettare per trovare quello che cerchi.",
-  "changeLogBackupStatusTitle": "Stato Backup",
-  "changeLogDiscoverTitle": "Esplora",
   "selectCoverPhoto": "Seleziona foto di copertina",
   "newLocation": "Nuova posizione",
   "faceNotClusteredYet": "Faccia non ancora raggruppata, per favore torna più tardi",
@@ -1599,37 +1595,5 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "processingVideos": "Elaborando video",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos",
-  "notThisPerson": "Not this person?",
-  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
-  "thisWeekThroughTheYears": "This week through the years",
-  "spotlightOnYourself": "Spotlight on yourself",
-  "cLIcon": "Nuova icona",
-  "cLIconDesc": "Finalmente, una nuova icona per l'app, che riteniamo rappresenti al meglio il nostro lavoro. Abbiamo anche aggiunto un selettore di icone in modo che tu possa continuare a usare la vecchia icona.",
-
-  "cLMemories": "Ricordi",
-  "cLMemoriesDesc": "Riscopri i tuoi momenti speciali: i riflettori sono puntati sulle tue persone preferite, sui tuoi viaggi e vacanze, sui tuoi scatti migliori e molto altro. Attiva l'apprendimento automatico, taggati e dai un nome ai tuoi amici per un'esperienza migliore.",
-
-  "cLWidgets": "Widget",
-  "cLWidgetsDesc": "Sono ora disponibili widget per la schermata principale integrati con i ricordi. Mostreranno i tuoi momenti speciali senza aprire l'app.",
-
-  "cLFamilyPlan": "Limiti del piano famiglia",
-  "cLFamilyPlanDesc": "Ora puoi impostare limiti su quanto spazio di archiviazione possono utilizzare i membri della tua famiglia.",
-
-  "cLBulkEdit": "Modifica multipla delle date",
-  "cLBulkEditDesc": "Ora puoi selezionare più foto e modificare la data/ora per tutte con un'azione rapida. È supportato anche lo spostamento delle date."
+  "processingVideos": "Elaborando video"
 }

@@ -94,7 +94,9 @@ class _MachineLearningSettingsPageState
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (BuildContext context) {
-                          return const MLUserDeveloperOptions();
+                          return MLUserDeveloperOptions(
+                            mlIsEnabled: hasEnabled,
+                          );
                         },
                       ),
                     ).ignore();

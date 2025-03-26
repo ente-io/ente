@@ -1,0 +1,30 @@
+Ente هو تطبيق بسيط لنسخ الصور ومقاطع الفيديو الخاصة بك احتياطيا وتنظيمها.
+
+إذا كنت تبحث عن بديل صديق للخصوصية للحفاظ على ذكرياتك، فقد جئت إلى المكان الصحيح. مع Ente، يتم تخزينها مشفرة من طرف إلى طرف (e2ee). هذا يعني أنك وحدك من يمكنه رؤيتها.
+
+لدينا تطبيقات على أندرويد، اي او اس، ويب، وسطح المكتب، وسيتم مزامنة صورك بسلاسة بين جميع أجهزتك بطريقة مشفرة من طرف إلى طرف (e2ee).
+
+Ente also makes it simple to share your albums with your loved ones. You can either share them directly with other Ente users, end-to-end encrypted; or with publicly viewable links.
+
+Your encrypted data is stored across multiple locations, including a fall-out shelter in Paris. We take posterity seriously and make it easy to ensure that your memories outlive you.
+
+We are here to make the safest photos app ever, come join our journey!
+
+✨ FEATURES
+-    Original quality backups, because every pixel is important
+-    Family plans, so you can share storage with your family
+-    Shared folders, in case you want your partner to enjoy your "Camera" clicks
+-    Album links, that can be protected with a password and set to expire
+-    Ability to free up space, by removing files that have been safely backed up
+-    Image editor, to add finishing touches
+-    Favorite, hide and relive your memories, for they are precious
+-    One-click import from Google, Apple, your hard drive and more
+-    Dark theme, because your photos look good in it
+-    2FA, 3FA, biometric auth
+-    and a LOT more!
+
+💲 PRICING
+We don't offer forever free plans, because it is important to us that we remain sustainable and withstand the test of time. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
+
+🙋 SUPPORT
+We take pride in offering human support. If you are our paid customer, you can reach out to team@ente.io and expect a response from our team within 24 hours.

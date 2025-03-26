@@ -77,18 +77,16 @@ class FlagService {
 
   Completer<void>? _fetchCompleter;
   Future<void> _fetch() async {
+    if (!_prefs.containsKey("token")) {
+      log("token not found, skip", name: "FlagService");
+      return;
+    }
     if (_fetchCompleter != null) {
       await _fetchCompleter!.future;
       return;
     }
     _fetchCompleter = Completer<void>();
     try {
-      if (!_prefs.containsKey("token")) {
-        log("token not found, skip", name: "FlagService");
-        _fetchCompleter!.complete();
-        _fetchCompleter = null;
-        return;
-      }
       log("fetching feature flags", name: "FlagService");
       final response = await _enteDio.get("/remote-store/feature-flags");
       final remoteFlags = RemoteFlags.fromMap(response.data);
@@ -97,7 +95,7 @@ class FlagService {
     } catch (e) {
       debugPrint("Failed to sync feature flags $e");
     } finally {
-      _fetchCompleter!.complete();
+      _fetchCompleter?.complete();
       _fetchCompleter = null;
     }
   }
