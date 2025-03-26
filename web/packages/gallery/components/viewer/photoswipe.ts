@@ -1142,7 +1142,7 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 const hlsVideoHTML = (url: string, mediaControllerID: string) => `
 <div class="media-controller-container">
   <media-controller id="${mediaControllerID}">
-    <hls-video slot="media" src="${url}"></hls-video>
+    <hls-video playsinline slot="media" src="${url}"></hls-video>
   </media-controller>
 </div>
 `;
