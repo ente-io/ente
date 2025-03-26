@@ -35,6 +35,7 @@ import "package:photos/models/search/hierarchical/hierarchical_search_filter.dar
 import "package:photos/models/search/hierarchical/location_filter.dart";
 import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/models/search/hierarchical/top_level_generic_filter.dart";
+import "package:photos/models/search/hierarchical/uploader_filter.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
@@ -551,12 +552,20 @@ class SearchService {
     final List<EnteFile> allFiles = await getAllFilesForSearch();
     final List<EnteFile> captionMatch = <EnteFile>[];
     final List<EnteFile> displayNameMatch = <EnteFile>[];
+    final Map<String, List<EnteFile>> uploaderToFile = {};
     for (EnteFile eachFile in allFiles) {
       if (eachFile.caption != null && pattern.hasMatch(eachFile.caption!)) {
         captionMatch.add(eachFile);
       }
       if (pattern.hasMatch(eachFile.displayName)) {
         displayNameMatch.add(eachFile);
+      }
+      if (eachFile.uploaderName != null &&
+          pattern.hasMatch(eachFile.uploaderName!)) {
+        if (!uploaderToFile.containsKey(eachFile.uploaderName!)) {
+          uploaderToFile[eachFile.uploaderName!] = [];
+        }
+        uploaderToFile[eachFile.uploaderName!]!.add(eachFile);
       }
     }
     if (captionMatch.isNotEmpty) {
@@ -589,6 +598,22 @@ class SearchService {
           ),
         ),
       );
+    }
+    if (uploaderToFile.isNotEmpty) {
+      for (MapEntry<String, List<EnteFile>> entry in uploaderToFile.entries) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.uploader,
+            entry.key,
+            entry.value,
+            hierarchicalSearchFilter: UploaderFilter(
+              uploaderName: entry.key,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
+            ),
+          ),
+        );
+      }
     }
     return searchResults;
   }
