@@ -1,1 +1,1 @@
-ente is an end-to-end encrypted photo storage app
+Backup, Organise, Share - Private photo storage with end-to-end encryption
