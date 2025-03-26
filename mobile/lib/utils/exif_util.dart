@@ -151,26 +151,30 @@ Future<ParsedExifDateTime?> tryParseExifDateTime(
   try {
     assert(file != null || exifData != null);
     final exif = exifData ?? await readExifAsync(file!);
-    final exifTime = exif.containsKey(kDateTimeOriginal)
-        ? exif[kDateTimeOriginal]!.printable
-        : exif.containsKey(kImageDateTime)
-            ? exif[kImageDateTime]!.printable
-            : null;
-    if (exifTime == null || exifTime == kEmptyExifDateTime) {
-      return null;
-    }
-    String? exifOffsetTime;
-    for (final key in kExifOffSetKeys) {
-      if (exif.containsKey(key)) {
-        exifOffsetTime = exif[key]!.printable;
-        break;
-      }
-    }
-    return getDateTimeInDeviceTimezone(exifTime, exifOffsetTime);
+    return parseExifTime(exif);
   } catch (e) {
     _logger.severe("failed to getCreationTimeFromEXIF", e);
   }
   return null;
+}
+
+ParsedExifDateTime? parseExifTime(Map<String, IfdTag> exif) {
+  final exifTime = exif.containsKey(kDateTimeOriginal)
+      ? exif[kDateTimeOriginal]!.printable
+      : exif.containsKey(kImageDateTime)
+          ? exif[kImageDateTime]!.printable
+          : null;
+  if (exifTime == null || exifTime == kEmptyExifDateTime) {
+    return null;
+  }
+  String? exifOffsetTime;
+  for (final key in kExifOffSetKeys) {
+    if (exif.containsKey(key)) {
+      exifOffsetTime = exif[key]!.printable;
+      break;
+    }
+  }
+  return getDateTimeInDeviceTimezone(exifTime, exifOffsetTime);
 }
 
 ParsedExifDateTime getDateTimeInDeviceTimezone(

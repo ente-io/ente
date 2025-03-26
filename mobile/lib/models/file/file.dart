@@ -79,7 +79,7 @@ class EnteFile {
     file.location =
         Location(latitude: asset.latitude, longitude: asset.longitude);
     file.fileType = fileTypeFromAsset(asset);
-    file.creationTime = parseFileCreationTime(file.title, asset);
+    file.creationTime = parseFileCreationTime(asset);
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     file.fileSubType = asset.subtype;
     file.metadataVersion = kCurrentMetadataVersion;
@@ -103,7 +103,7 @@ class EnteFile {
     return file;
   }
 
-  static int parseFileCreationTime(String? fileTitle, AssetEntity asset) {
+  static int parseFileCreationTime(AssetEntity asset) {
     int creationTime = asset.createDateTime.microsecondsSinceEpoch;
     final int modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     if (creationTime >= jan011981Time) {
@@ -128,7 +128,7 @@ class EnteFile {
       }
       try {
         final parsedDateTime = parseDateTimeFromFileNameV2(
-          basenameWithoutExtension(fileTitle ?? ""),
+          basenameWithoutExtension(asset.title ?? ""),
         );
         if (parsedDateTime != null) {
           creationTime = parsedDateTime.microsecondsSinceEpoch;
