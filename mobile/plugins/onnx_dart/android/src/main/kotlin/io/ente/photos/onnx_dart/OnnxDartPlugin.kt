@@ -66,7 +66,10 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
   override fun onMethodCall(call: MethodCall, result: Result) {
     when (call.method) {
       "getPlatformVersion" -> {
-        result.success("Android ${android.os.Build.VERSION.RELEASE}")
+        var env = OrtEnvironment.getEnvironment()
+        var OrtVersion = env.getVersion()
+        Log.d(TAG, "Android: ${android.os.Build.VERSION.RELEASE}, OrtVersion: $OrtVersion")
+        result.success("Android: ${android.os.Build.VERSION.RELEASE}, OrtVersion: $OrtVersion")
       }
       "init" -> {
         val modelType = call.argument<String>("modelType")
