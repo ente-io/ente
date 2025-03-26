@@ -1,6 +1,5 @@
 import { decryptBlob } from "@/base/crypto";
 import type { EncryptedBlob } from "@/base/crypto/types";
-import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { gunzip } from "@/new/photos/utils/gzip";
@@ -8,18 +7,30 @@ import { ensurePrecondition } from "@/utils/ensure";
 import { z } from "zod";
 import { fetchFileData, fetchFilePreviewData } from "./file-data";
 
+interface HLSPlaylistData {
+    /** A data URL to a HLS playlist that streams the video. */
+    playlistURL: string;
+    /** The width of the video (px). */
+    width: number;
+    /** The height of the video (px). */
+    height: number;
+}
+
 /**
  * Return a HLS playlist that can be used to stream playback of thne given video
  * {@link file}.
  *
  * @param file An {@link EnteFile} of type video.
  *
- * @returns The HLS playlist as a string, or `undefined` if there is no video
- * preview associated with the given file.
+ * @returns The HLS playlist as a string (along with the dimensions of the video
+ * it will play), or `undefined` if there is no video preview associated with
+ * the given file.
  *
  * See: [Note: Video playlist and preview]
  */
-export const hlsPlaylistForFile = async (file: EnteFile) => {
+export const hlsPlaylistDataForFile = async (
+    file: EnteFile,
+): Promise<HLSPlaylistData | undefined> => {
     ensurePrecondition(file.metadata.fileType == FileType.video);
 
     const playlistFileData = await fetchFileData("vid_preview", file.id);
@@ -28,7 +39,11 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
     const videoURL = await fetchFilePreviewData("vid_preview", file.id);
     if (!videoURL) return undefined;
 
-    const { playlist: playlistTemplate } = await decryptPlaylistJSON(
+    const {
+        playlist: playlistTemplate,
+        width,
+        height,
+    } = await decryptPlaylistJSON(
         // See: [Note: strict mode migration]
         //
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -90,7 +105,6 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
     //   quoted string containing a URI that specfies how to obtain the key.
 
     const playlist = playlistTemplate.replaceAll("output.ts", videoURL);
-    log.debug(() => ["hlsPlaylistForFile", playlist]);
 
     // From the RFC
     //
@@ -107,14 +121,20 @@ export const hlsPlaylistForFile = async (file: EnteFile) => {
     //
     //     data:application/vnd.apple.mpegurl;base64,<base64-string>
 
-    return await blobToDataURL(
+    const playlistURL = await blobToDataURL(
         new Blob([playlist], { type: "application/vnd.apple.mpegurl" }),
     );
+
+    return { playlistURL, width, height };
 };
 
 const PlaylistJSON = z.object({
     /** The HLS playlist, as a string. */
     playlist: z.string(),
+    /** The width of the video (px). */
+    width: z.number(),
+    /** The height of the video (px). */
+    height: z.number(),
 });
 
 const decryptPlaylistJSON = async (

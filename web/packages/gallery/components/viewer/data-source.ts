@@ -6,7 +6,7 @@ import {
     type LivePhotoSourceURL,
 } from "@/gallery/services/download";
 import { extractRawExif, parseExif } from "@/gallery/services/exif";
-import { hlsPlaylistForFile } from "@/gallery/services/video";
+import { hlsPlaylistDataForFile } from "@/gallery/services/video";
 import type { EnteFile } from "@/media/file";
 import { fileCaption } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
@@ -412,9 +412,14 @@ const enqueueUpdates = async (file: EnteFile) => {
                     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
                 ) {
                     if (file.metadata.fileType == FileType.video) {
-                        const playlistURL = await hlsPlaylistForFile(file);
-                        if (playlistURL) {
-                            update({ videoPlaylistURL: playlistURL });
+                        const playlistData = await hlsPlaylistDataForFile(file);
+                        if (playlistData) {
+                            const {
+                                playlistURL: videoPlaylistURL,
+                                width,
+                                height,
+                            } = playlistData;
+                            update({ videoPlaylistURL, width, height });
                             break;
                         }
                     }
