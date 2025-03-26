@@ -1,3 +1,4 @@
+import { assertionFailed } from "@/base/assert";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import "hls-video-element";
@@ -451,15 +452,19 @@ export class FileViewerPhotoSwipe {
          * controller. Otherwise hide the media controls.
          */
         const updateMediaControls = (mediaControllerID: string | undefined) => {
-            // The PhotoSwipe CSS sets the display for this to be
-            // block, so that's what we restore to when needed.
-            mediaControlsContainerElement!.style.display = mediaControllerID
-                ? "block"
-                : "none";
+            const controlBar =
+                mediaControlsContainerElement?.querySelector(
+                    "media-control-bar",
+                );
+            if (!controlBar) {
+                assertionFailed();
+                return;
+            }
+
             if (mediaControllerID) {
-                mediaControlsContainerElement!
-                    .querySelector("media-control-bar")!
-                    .setAttribute("mediacontroller", mediaControllerID);
+                controlBar.setAttribute("mediacontroller", mediaControllerID);
+            } else {
+                controlBar.removeAttribute("mediacontroller");
             }
         };
 

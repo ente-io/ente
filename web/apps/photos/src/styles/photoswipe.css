@@ -204,3 +204,7 @@
     left: 0;
     width: 100%;
 }
+
+.pswp-ente .pswp__media-controls media-control-bar:not([mediacontroller]) {
+    display: none;
+}
