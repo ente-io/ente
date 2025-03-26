@@ -6,7 +6,7 @@ import {
     type LivePhotoSourceURL,
 } from "@/gallery/services/download";
 import { extractRawExif, parseExif } from "@/gallery/services/exif";
-import { hlsPlaylistForFile } from "@/gallery/services/video";
+import { hlsPlaylistDataForFile } from "@/gallery/services/video";
 import type { EnteFile } from "@/media/file";
 import { fileCaption } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
@@ -93,7 +93,8 @@ export type ItemData = PhotoSwipeSlideData & {
      * The renderable object URL of the video associated with the file.
      *
      * - For images, this will not be defined.
-     * - For videos, this will be the object URL of a renderable video.
+     * - For videos, this will be the object URL of a renderable video (but only
+     *   if {@link videoPlaylistURL} is not set).
      * - For live photos, this will be a renderable object URL of the video
      *   portion of the live photo.
      */
@@ -109,6 +110,17 @@ export type ItemData = PhotoSwipeSlideData & {
      * time.
      */
     videoPlaylistURL?: string;
+    /**
+     * The DOM element ID of the `media-controller` element that is showing the
+     * video for the current item.
+     *
+     * If present, this value will be used to display controls for controlling
+     * the video wrapped by the media-controller.
+     *
+     * This is only set for videos that are streamed using HLS (i.e. videos for
+     * which {@link videoPlaylistURL} has also been set).
+     */
+    mediaControllerID?: string;
     /**
      * `true` if we should indicate to the user that we're still fetching data
      * for this file.
@@ -412,9 +424,14 @@ const enqueueUpdates = async (file: EnteFile) => {
                     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
                 ) {
                     if (file.metadata.fileType == FileType.video) {
-                        const playlistURL = await hlsPlaylistForFile(file);
-                        if (playlistURL) {
-                            update({ videoPlaylistURL: playlistURL });
+                        const playlistData = await hlsPlaylistDataForFile(file);
+                        if (playlistData) {
+                            const {
+                                playlistURL: videoPlaylistURL,
+                                width,
+                                height,
+                            } = playlistData;
+                            update({ videoPlaylistURL, width, height });
                             break;
                         }
                     }
