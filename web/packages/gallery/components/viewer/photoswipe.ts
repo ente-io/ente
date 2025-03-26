@@ -1154,6 +1154,7 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 const hlsVideoHTML = (url: string, mediaControllerID: string) => `
 <media-controller id="${mediaControllerID}">
   <hls-video playsinline slot="media" src="${url}"></hls-video>
+  <media-loading-indicator slot="centered-chrome" noautohide></media-loading-indicator>
 </media-controller>
 `;
 
