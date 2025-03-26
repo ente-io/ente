@@ -206,7 +206,7 @@
 
     /* Similar to our other controls */
     --media-icon-color: rgba(255 255 255 / 0.8);
-    --media-font-family: Inter Variable, sans-serif;
+    --media-font-family: "Inter Variable", sans-serif;
 }
 
 .pswp-ente .pswp__media-controls media-control-bar {
