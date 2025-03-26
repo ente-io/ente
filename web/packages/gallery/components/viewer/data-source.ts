@@ -93,7 +93,8 @@ export type ItemData = PhotoSwipeSlideData & {
      * The renderable object URL of the video associated with the file.
      *
      * - For images, this will not be defined.
-     * - For videos, this will be the object URL of a renderable video.
+     * - For videos, this will be the object URL of a renderable video (but only
+     *   if {@link videoPlaylistURL} is not set).
      * - For live photos, this will be a renderable object URL of the video
      *   portion of the live photo.
      */
@@ -109,6 +110,16 @@ export type ItemData = PhotoSwipeSlideData & {
      * time.
      */
     videoPlaylistURL?: string;
+    /**
+     * The ID of the `media-controller` element that is showing the video.
+     *
+     * If present, this value will be used to display controls for controlling
+     * the video wrapped by the media-controller.
+     *
+     * This is only set for videos that are streamed using HLS (i.e. videos for
+     * which {@link videoPlaylistURL} has also been set).
+     */
+    mediaControllerElementID?: string;
     /**
      * `true` if we should indicate to the user that we're still fetching data
      * for this file.

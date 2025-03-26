@@ -307,16 +307,18 @@ export class FileViewerPhotoSwipe {
                 pswp.refreshSlideContent(index),
             );
 
-            const { videoURL, videoPlaylistURL, ...rest } = itemData;
             if (itemData.fileType === FileType.video) {
+                const { videoURL, videoPlaylistURL } = itemData;
                 if (videoPlaylistURL) {
+                    const mcID = `ente-mc-${file.id}`;
                     return {
-                        ...rest,
-                        html: hlsVideoHTML(videoPlaylistURL, file.id),
+                        ...itemData,
+                        html: hlsVideoHTML(videoPlaylistURL, mcID),
+                        mediaControllerElementID: mcID,
                     };
                 } else if (videoURL) {
                     return {
-                        ...rest,
+                        ...itemData,
                         html: videoHTML(videoURL, !!disableDownload),
                     };
                 }
@@ -863,6 +865,36 @@ export class FileViewerPhotoSwipe {
                     });
                 },
             });
+
+            ui.registerElement({
+                name: "media-controls",
+                // Arbitrary order towards the end (it doesn't matter anyways
+                // since we're absolutely positioned).
+                order: 31,
+                appendTo: "root",
+                html: hlsVideoControlsHTML(),
+                onInit: (element, pswp) => {
+                    // TODO:
+                    // captionElement = element;
+                    pswp.on("change", () => {
+                        console.log("change", currSlideData());
+                        const { mediaControllerElementID } = currSlideData();
+                        // The PhotoSwipe CSS sets the display for this to be
+                        // block, so that's what we restore to when needed.
+                        element.style.display = mediaControllerElementID
+                            ? "block"
+                            : "none";
+                        if (mediaControllerElementID) {
+                            element
+                                .querySelector("media-control-bar")!
+                                .setAttribute(
+                                    "mediacontroller",
+                                    mediaControllerElementID,
+                                );
+                        }
+                    });
+                },
+            });
         });
 
         // Pan action handlers
@@ -1089,15 +1121,24 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 //     import "media-chrome";
 //
 // TODO: Update code above that searches for the video element
-const hlsVideoHTML = (url: string, fileID: number) => `
+const hlsVideoHTML = (url: string, mediaControllerElementID: string) => `
 <div class="media-controller-container">
-  <media-controller id="ente-mc-${fileID}">
+  <media-controller id="${mediaControllerElementID}">
     <hls-video slot="media" src="${url}"></hls-video>
   </media-controller>
-  <media-control-bar mediacontroller="ente-mc-${fileID}">
-    <media-play-button></media-play-button>
-  </media-control-bar>
 </div>
+`;
+
+/**
+ * HTML for controls associated with {@link hlsVideoHTML}.
+ *
+ * To make these functional, the `media-control-bar` requires the
+ * `mediacontroller="${mediaControllerElementID}"` attribute.
+ */
+const hlsVideoControlsHTML = () => `
+<media-control-bar>
+  <media-play-button></media-play-button>
+</media-control-bar>
 `;
 
 const livePhotoVideoHTML = (videoURL: string) => `
