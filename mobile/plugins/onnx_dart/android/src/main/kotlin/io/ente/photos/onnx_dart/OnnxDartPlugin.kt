@@ -130,7 +130,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         modelState.isInitialized = true
         modelState.sessionsCount = sessionsCount
         withContext(Dispatchers.Main) {
-          Log.d("OnnxFlutterPlugin", "Model initialized: $modelType")
+          Log.d(TAG, "Model initialized: $modelType")
           result.success(true)
         }
       } else {
