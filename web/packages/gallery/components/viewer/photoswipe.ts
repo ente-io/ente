@@ -471,7 +471,14 @@ export class FileViewerPhotoSwipe {
             // "change", so we need to wire up the controls (or hide them) for
             // the initial slide here also (in addition to in "change").
             if (currSlideData().fileID == fileID) {
-                updateMediaControls(mediaControllerID);
+                // For reasons I didn't investigate further but are possibly
+                // related to https://github.com/muxinc/media-chrome/issues/940,
+                // the association between the media-controller and
+                // media-control-bar doesn't get established on the first slide
+                // if we reopen the file viewer.
+                //
+                // As a workaround, defer the association to the next tick.
+                setTimeout(() => updateMediaControls(mediaControllerID), 0);
             }
 
             // Rest of this function deals with live photos.
