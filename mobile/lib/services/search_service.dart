@@ -551,7 +551,7 @@ class SearchService {
     final List<EnteFile> allFiles = await getAllFilesForSearch();
     final List<EnteFile> captionMatch = <EnteFile>[];
     final List<EnteFile> displayNameMatch = <EnteFile>[];
-    final List<EnteFile> uploaderNameMatch = <EnteFile>[];
+    final Map<String, List<EnteFile>> uploaderToFile = {};
     for (EnteFile eachFile in allFiles) {
       if (eachFile.caption != null && pattern.hasMatch(eachFile.caption!)) {
         captionMatch.add(eachFile);
@@ -561,7 +561,10 @@ class SearchService {
       }
       if (eachFile.uploaderName != null &&
           pattern.hasMatch(eachFile.uploaderName!)) {
-        uploaderNameMatch.add(eachFile);
+        if (!uploaderToFile.containsKey(eachFile.uploaderName!)) {
+          uploaderToFile[eachFile.uploaderName!] = [];
+        }
+        uploaderToFile[eachFile.uploaderName!]!.add(eachFile);
       }
     }
     if (captionMatch.isNotEmpty) {
@@ -595,20 +598,22 @@ class SearchService {
         ),
       );
     }
-    if (uploaderNameMatch.isNotEmpty) {
-      searchResults.add(
-        GenericSearchResult(
-          ResultType.uploader,
-          query,
-          uploaderNameMatch,
-          hierarchicalSearchFilter: TopLevelGenericFilter(
-            filterName: query,
-            occurrence: kMostRelevantFilter,
-            filterResultType: ResultType.uploader,
-            matchedUploadedIDs: filesToUploadedFileIDs(uploaderNameMatch),
+    if (uploaderToFile.isNotEmpty) {
+      for (MapEntry<String, List<EnteFile>> entry in uploaderToFile.entries) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.uploader,
+            entry.key,
+            entry.value,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: entry.key,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.uploader,
+              matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
     return searchResults;
   }
