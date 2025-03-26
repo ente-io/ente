@@ -192,27 +192,13 @@
 /*
  Style the custom video controls we provide.
 
- - Center fit the video within the PhotoSwipe slide contents, but also ensuring
-   it doesn't overflow.
- - Assumes that the slide's item data is specifying the width and height of the
-   video.
- - The controls are absolutely position at the bottom of the screen instead of
-   being attached to the video.
+ The media-controller itself is center positioned (shrinking if needed) by
+ PhotoSwipe using the width and height of the video that we provide to it.
+
+ The controls are absolutely position at the bottom of the screen instead of
+ being attached to the video.
  */
-.pswp-ente .media-controller-container {
-    max-width: 100%;
-    max-height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.pswp-ente .media-controller-container media-controller {
-    max-width: 100%;
-    max-height: 100%;
-}
-
-.pswp-ente .media-controller-container media-control-bar {
+.pswp-ente .pswp__media-controls {
     position: absolute;
     bottom: 0;
     left: 0;

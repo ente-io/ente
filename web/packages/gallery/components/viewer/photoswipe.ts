@@ -1138,13 +1138,12 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 //     import "hls-video-element";
 //     import "media-chrome";
 //
-// TODO: Update code above that searches for the video element
+// TODO(HLS): Update code above that searches for the video element
+// TODO(HLS): Initial slide needs to be resynced cf playsinline
 const hlsVideoHTML = (url: string, mediaControllerID: string) => `
-<div class="media-controller-container">
-  <media-controller id="${mediaControllerID}">
-    <hls-video playsinline slot="media" src="${url}"></hls-video>
-  </media-controller>
-</div>
+<media-controller id="${mediaControllerID}">
+  <hls-video playsinline slot="media" src="${url}"></hls-video>
+</media-controller>
 `;
 
 /**
