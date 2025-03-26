@@ -1159,8 +1159,10 @@ const hlsVideoControlsHTML = () => `
 </media-control-bar>
 `;
 
+// playsinline will play the video inline on mobile browsers (where the default
+// is to open a full screen player).
 const livePhotoVideoHTML = (videoURL: string) => `
-<video loop muted oncontextmenu="return false;">
+<video loop muted playsinline oncontextmenu="return false;">
   <source src="${videoURL}" />
 </video>
 `;
