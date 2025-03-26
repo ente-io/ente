@@ -200,7 +200,35 @@
  */
 .pswp-ente .pswp__media-controls {
     position: absolute;
-    bottom: 0;
-    left: 0;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+
+    /* Similar to our other controls */
+    --media-icon-color: rgba(255 255 255 / 0.8);
+    --media-font-family: "Inter Variable", sans-serif;
+}
+
+.pswp-ente .pswp__media-controls media-control-bar {
+    /*
+     The control-bar sizes to fit the media controller (which itself fills up
+     the full width), but since we're showing the control bar outside of the
+     media controller, we need to ask it to fill the available width ourselves.
+    */
     width: 100%;
+}
+
+/* Hide the controls if they're not associated to a media-controller. */
+.pswp-ente .pswp__media-controls media-control-bar:not([mediacontroller]) {
+    display: none;
+}
+
+/*
+  Hide specific controls when the user's browser doesn't support the feature
+  they trigger.
+ */
+media-pip-button[mediapipunavailable],
+media-airplay-button[mediaairplayunavailable],
+media-fullscreen-button[mediafullscreenunavailable] {
+    display: none;
 }

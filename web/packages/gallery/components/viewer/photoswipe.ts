@@ -1,3 +1,4 @@
+import { assertionFailed } from "@/base/assert";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import "hls-video-element";
@@ -451,15 +452,19 @@ export class FileViewerPhotoSwipe {
          * controller. Otherwise hide the media controls.
          */
         const updateMediaControls = (mediaControllerID: string | undefined) => {
-            // The PhotoSwipe CSS sets the display for this to be
-            // block, so that's what we restore to when needed.
-            mediaControlsContainerElement!.style.display = mediaControllerID
-                ? "block"
-                : "none";
+            const controlBar =
+                mediaControlsContainerElement?.querySelector(
+                    "media-control-bar",
+                );
+            if (!controlBar) {
+                assertionFailed();
+                return;
+            }
+
             if (mediaControllerID) {
-                mediaControlsContainerElement!
-                    .querySelector("media-control-bar")!
-                    .setAttribute("mediacontroller", mediaControllerID);
+                controlBar.setAttribute("mediacontroller", mediaControllerID);
+            } else {
+                controlBar.removeAttribute("mediacontroller");
             }
         };
 
@@ -471,7 +476,14 @@ export class FileViewerPhotoSwipe {
             // "change", so we need to wire up the controls (or hide them) for
             // the initial slide here also (in addition to in "change").
             if (currSlideData().fileID == fileID) {
-                updateMediaControls(mediaControllerID);
+                // For reasons I didn't investigate further but are possibly
+                // related to https://github.com/muxinc/media-chrome/issues/940,
+                // the association between the media-controller and
+                // media-control-bar doesn't get established on the first slide
+                // if we reopen the file viewer.
+                //
+                // As a workaround, defer the association to the next tick.
+                setTimeout(() => updateMediaControls(mediaControllerID), 0);
             }
 
             // Rest of this function deals with live photos.
@@ -1142,6 +1154,7 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 const hlsVideoHTML = (url: string, mediaControllerID: string) => `
 <media-controller id="${mediaControllerID}">
   <hls-video playsinline slot="media" src="${url}"></hls-video>
+  <media-loading-indicator slot="centered-chrome" noautohide></media-loading-indicator>
 </media-controller>
 `;
 
@@ -1154,6 +1167,12 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
 const hlsVideoControlsHTML = () => `
 <media-control-bar>
   <media-play-button></media-play-button>
+  <media-mute-button></media-mute-button>
+  <media-time-range></media-time-range>
+  <media-time-display showduration notoggle></media-time-display>
+  <media-pip-button></media-pip-button>
+  <media-airplay-button></media-airplay-button>
+  <media-fullscreen-button></media-fullscreen-button>
 </media-control-bar>
 `;
 
