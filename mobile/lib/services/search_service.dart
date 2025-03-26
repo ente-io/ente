@@ -89,15 +89,7 @@ class SearchService {
       return _cachedFilesForSearch!;
     }
 
-    if (_cachedFilesFuture == null) {
-      _logger.fine("Reading all files from db");
-      _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
-        ignoreCollections(),
-        dedupeByUploadId: false,
-      );
-    }
-
-    _cachedFilesForSearch = _cachedFilesFuture!.then((files) {
+    _cachedFilesForSearch = _getCacheFileFuture().then((files) {
       return applyDBFilters(
         files,
         DBFilterOptions(
@@ -114,16 +106,7 @@ class SearchService {
         _cachedFilesForHierarchicalSearch != null) {
       return _cachedFilesForHierarchicalSearch!;
     }
-
-    if (_cachedFilesFuture == null) {
-      _logger.fine("Reading all files from db");
-      _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
-        ignoreCollections(),
-        dedupeByUploadId: false,
-      );
-    }
-
-    _cachedFilesForHierarchicalSearch = _cachedFilesFuture!.then((files) {
+    _cachedFilesForHierarchicalSearch = _getCacheFileFuture().then((files) {
       return applyDBFilters(
         files,
         DBFilterOptions(
@@ -154,6 +137,17 @@ class SearchService {
     _cachedFilesForHierarchicalSearch = null;
     _cachedHiddenFilesFuture = null;
     unawaited(memoriesCacheService.clearMemoriesCache());
+  }
+
+  Future<List<EnteFile>> _getCacheFileFuture() {
+    if (_cachedFilesFuture == null) {
+      _logger.fine("Reading all files from db");
+      _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
+        ignoreCollections(),
+        dedupeByUploadId: false,
+      );
+    }
+    return _cachedFilesFuture!;
   }
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
