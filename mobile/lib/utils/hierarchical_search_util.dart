@@ -5,6 +5,7 @@ import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location_tag/location_tag.dart";
@@ -18,6 +19,7 @@ import "package:photos/models/search/hierarchical/location_filter.dart";
 import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import "package:photos/models/search/hierarchical/top_level_generic_filter.dart";
+import "package:photos/models/search/hierarchical/uploader_filter.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
@@ -155,6 +157,7 @@ Future<void> curateFilters(
       files,
     );
     final contactsFilters = _curateContactsFilter(files);
+    final uploaderFilters = _curateUploaderFilter(files);
     final faceFilters = await curateFaceFilters(files);
     final magicFilters = await curateMagicFilters(files, context);
     final onlyThemFilter = getOnlyThemFilter(
@@ -169,6 +172,7 @@ Future<void> curateFilters(
         ...faceFilters,
         ...fileTypeFilters,
         ...contactsFilters,
+        ...uploaderFilters,
         ...albumFilters,
         ...locationFilters,
       ],
@@ -346,6 +350,31 @@ List<ContactsFilter> _curateContactsFilter(
   return contactsFilters;
 }
 
+List<UploaderFilter> _curateUploaderFilter(
+  List<EnteFile> files,
+) {
+  final uploaderFilter = <UploaderFilter>[];
+  final ownerIdToOccurrence = <String, int>{};
+
+  for (EnteFile file in files) {
+    if (file.uploaderName == null) {
+      continue;
+    }
+    ownerIdToOccurrence[file.uploaderName!] =
+        (ownerIdToOccurrence[file.uploaderName!] ?? 0) + 1;
+  }
+  for (String uploader in ownerIdToOccurrence.keys) {
+    uploaderFilter.add(
+      UploaderFilter(
+        uploaderName: uploader,
+        occurrence: ownerIdToOccurrence[uploader]!,
+      ),
+    );
+  }
+
+  return uploaderFilter;
+}
+
 Future<List<FaceFilter>> curateFaceFilters(
   List<EnteFile> files,
 ) async {
@@ -502,6 +531,13 @@ Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
     searchFilterDataProvider.recommendations.whereType<ContactsFilter>(),
   );
 
+  final uploaderFilters = searchFilterDataProvider.appliedFilters
+      .whereType<UploaderFilter>()
+      .toList();
+  uploaderFilters.addAll(
+    searchFilterDataProvider.recommendations.whereType<UploaderFilter>(),
+  );
+
   final magicFilters =
       searchFilterDataProvider.appliedFilters.whereType<MagicFilter>().toList();
   magicFilters.addAll(
@@ -518,6 +554,7 @@ Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
     "magicFilters": magicFilters,
     "locationFilters": locationFilters,
     "contactsFilters": contactsFilters,
+    "uploaderFilters": uploaderFilters,
     "albumFilters": albumFilters,
     "fileTypeFilters": fileTypeFilters,
     "topLevelGenericFilter": topLevelGenericFilter,
@@ -567,6 +604,7 @@ List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
   final magicReccos = <MagicFilter>[];
   final locationReccos = <LocationFilter>[];
   final contactsReccos = <ContactsFilter>[];
+  final uploaderReccos = <UploaderFilter>[];
   final albumReccos = <AlbumFilter>[];
   final fileTypeReccos = <FileTypeFilter>[];
   final onlyThemFilter = <OnlyThemFilter>[];
@@ -582,6 +620,8 @@ List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
       locationReccos.add(recommendation);
     } else if (recommendation is ContactsFilter) {
       contactsReccos.add(recommendation);
+    } else if (recommendation is UploaderFilter) {
+      uploaderReccos.add(recommendation);
     } else if (recommendation is AlbumFilter) {
       albumReccos.add(recommendation);
     } else if (recommendation is FileTypeFilter) {
@@ -595,6 +635,7 @@ List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
     ...magicReccos,
     ...locationReccos,
     ...contactsReccos,
+    ...uploaderReccos,
     ...albumReccos,
     ...fileTypeReccos,
   ];

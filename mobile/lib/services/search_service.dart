@@ -35,6 +35,7 @@ import "package:photos/models/search/hierarchical/hierarchical_search_filter.dar
 import "package:photos/models/search/hierarchical/location_filter.dart";
 import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/models/search/hierarchical/top_level_generic_filter.dart";
+import "package:photos/models/search/hierarchical/uploader_filter.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
@@ -605,10 +606,9 @@ class SearchService {
             ResultType.uploader,
             entry.key,
             entry.value,
-            hierarchicalSearchFilter: TopLevelGenericFilter(
-              filterName: entry.key,
+            hierarchicalSearchFilter: UploaderFilter(
+              uploaderName: entry.key,
               occurrence: kMostRelevantFilter,
-              filterResultType: ResultType.uploader,
               matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
             ),
           ),
