@@ -1,15 +1,18 @@
 import "package:photo_manager/photo_manager.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/services/local/import/model.dart";
 
 class LocalAssetsCache {
   final Map<String, AssetPathEntity> assetPaths;
-  final Map<String, AssetEntity> assets;
+  final Map<String, EnteFile> assets;
   final Map<String, Set<String>> pathToAssetIDs;
+  final List<EnteFile> sortedAssets;
 
   LocalAssetsCache({
     required this.assetPaths,
     required this.assets,
     required this.pathToAssetIDs,
+    required this.sortedAssets,
   });
 
   void updateForDiff({
@@ -18,7 +21,7 @@ class LocalAssetsCache {
   }) {
     if (incrementalDiff != null) {
       for (final asset in incrementalDiff.assets) {
-        assets[asset.id] = asset;
+        assets[asset.id] = EnteFile.fromAssetSync(asset);
       }
       for (final path in incrementalDiff.addedOrModifiedPaths) {
         assetPaths[path.id] = path;
@@ -35,7 +38,7 @@ class LocalAssetsCache {
         assetPaths.remove(id);
       }
       for (final asset in fullDiff.missingAssetsInApp) {
-        assets[asset.id] = asset;
+        assets[asset.id] = EnteFile.fromAssetSync(asset);
       }
       for (final entry in fullDiff.updatePathToLocalIDs.entries) {
         // delete old mappings
@@ -44,16 +47,15 @@ class LocalAssetsCache {
     }
   }
 
-  Map<String, AssetEntity> getPathToLatestAsset() {
-    final Map<String, AssetEntity> pathToLatestAsset = {};
+  Map<String, EnteFile> getPathToLatestAsset() {
+    final Map<String, EnteFile> pathToLatestAsset = {};
     for (final entry in pathToAssetIDs.entries) {
-      AssetEntity? latestAsset;
+      EnteFile? latestAsset;
       for (final id in entry.value) {
         final asset = assets[id];
         if (asset != null &&
             (latestAsset == null ||
-                (asset.createDateSecond ?? 0) >
-                    (latestAsset.createDateSecond ?? 0))) {
+                (asset.creationTime ?? 0) > (latestAsset.creationTime ?? 0))) {
           latestAsset = asset;
         }
       }

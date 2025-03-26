@@ -8,6 +8,7 @@ import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/events/permission_granted_event.dart";
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/extensions/stop_watch.dart';
+import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/local/import/device_assets.service.dart";
@@ -31,8 +32,8 @@ class LocalImportService {
   );
   final Lock _lock = Lock();
 
-  static const lastLocalDBSyncTime = "localImport.lastSyncTime";
-  static const kHasCompletedFirstImportKey = "has_completed_firstImport_x";
+  static const lastLocalDBSyncTime = "localImport.lastSyncTime_2";
+  static const kHasCompletedFirstImportKey = "has_completed_firstImport_2";
 
   LocalImportService._privateConstructor();
 
@@ -168,13 +169,15 @@ class LocalImportService {
           if (_localAssetsCache == null) {
             _log.info("loading local assets cache");
             final List<AssetPathEntity> paths = await localDB.getAssetPaths();
-            final List<AssetEntity> assets = await localDB.getAssets();
+            final List<EnteFile> assets = await localDB.getAssets();
             final Map<String, Set<String>> pathToAssetIDs =
                 await localDB.pathToAssetIDs();
             _localAssetsCache = LocalAssetsCache(
               assetPaths: Map.fromEntries(paths.map((e) => MapEntry(e.id, e))),
-              assets: Map.fromEntries(assets.map((e) => MapEntry(e.id, e))),
+              assets:
+                  Map.fromEntries(assets.map((e) => MapEntry(e.localID!, e))),
               pathToAssetIDs: pathToAssetIDs,
+              sortedAssets: assets,
             );
           }
         },
@@ -190,8 +193,6 @@ class LocalImportService {
     await _loadCache();
     return _localAssetsCache!;
   }
-
-  LocalAssetsCache? get localAssetsCache => _localAssetsCache;
 
   Lock getLock() {
     return _lock;

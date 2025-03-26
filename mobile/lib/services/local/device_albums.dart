@@ -16,7 +16,7 @@ extension DeviceAlbums on LocalImportService {
             path.id,
             path.name,
             count: cache.pathToAssetIDs[path.id]?.length ?? 0,
-            thumbnail: EnteFile.fromAssetSync(asset),
+            thumbnail: asset,
           ),
         );
       }

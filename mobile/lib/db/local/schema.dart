@@ -5,7 +5,7 @@ const assetColumns =
     "id, type, sub_type, width, height, duration_in_sec, orientation, is_fav, title, relative_path, created_at, modified_at, mime_type, latitude, longitude, scan_state";
 
 // Generate the update clause dynamically (excludes 'id')
-final updateAssetColumns = assetColumns
+final String updateAssetColumns = assetColumns
     .split(', ')
     .where((column) => column != 'id') // Exclude primary key from update
     .map((column) => '$column = excluded.$column') // Use excluded virtual table
@@ -13,6 +13,85 @@ final updateAssetColumns = assetColumns
 
 const devicePathColumns =
     "path_id, name, album_type, ios_album_type, ios_album_subtype";
+
+final String updateDevicePathColumns = devicePathColumns
+    .split(', ')
+    .where((column) => column != 'path_id') // Exclude primary key from update
+    .map((column) => '$column = excluded.$column') // Use excluded virtual table
+    .join(', ');
+
+const String deviceCollectionWithOneAssetQuery = '''
+WITH latest_per_path AS (
+    SELECT 
+        dpa.path_id,
+        MAX(a.created_at) as max_created
+    FROM 
+        device_path_assets dpa
+    JOIN 
+        assets a ON dpa.asset_id = a.id
+    GROUP BY 
+        dpa.path_id
+),
+ranked_assets AS (
+    SELECT 
+        dpa.path_id,
+        a.*,
+        ROW_NUMBER() OVER (PARTITION BY dpa.path_id ORDER BY a.id) as rn
+    FROM 
+        device_path_assets dpa
+    JOIN 
+        assets a ON dpa.asset_id = a.id
+    JOIN 
+        latest_per_path lpp ON dpa.path_id = lpp.path_id AND a.created_at = lpp.max_created
+)
+SELECT 
+    dp.*,
+    ra.*
+FROM 
+    device_path dp
+JOIN 
+    ranked_assets ra ON dp.path_id = ra.path_id AND ra.rn = 1
+    ''';
+
+class LocalAssertsParam {
+  int? limit;
+  int? offset;
+  String? orderByColumn;
+  bool? isAsc;
+  (int?, int?)? createAtRange;
+
+  LocalAssertsParam({
+    this.limit,
+    this.offset,
+    this.orderByColumn = "created_at",
+    this.isAsc = false,
+    this.createAtRange,
+  });
+
+  String get orderBy => orderByColumn == null
+      ? ""
+      : "ORDER BY $orderByColumn ${isAsc! ? "ASC" : "DESC"}";
+
+  String get limitOffset => (limit != null && offset != null)
+      ? "LIMIT $limit +  OFFSET $offset)"
+      : (limit != null)
+          ? "LIMIT $limit"
+          : "";
+
+  String get createAtRangeStr => (createAtRange == null ||
+          createAtRange!.$1 == null)
+      ? ""
+      : "(created_at BETWEEN ${createAtRange!.$1} AND ${createAtRange!.$2})";
+
+  String whereClause() {
+    final where = <String>[];
+    if (createAtRangeStr.isNotEmpty) {
+      where.add(createAtRangeStr);
+    }
+
+    return (where.isEmpty ? "" : where.join(" AND ")) + " " + limitOffset;
+  }
+}
 
 class LocalDBMigration {
   static const migrationScripts = [
@@ -63,7 +142,10 @@ class LocalDBMigration {
       name TEXT NOT NULL,
       PRIMARY KEY (id, name)
     );
+    ''',
     '''
+        CREATE INDEX IF NOT EXISTS assets_created_at ON assets(created_at);
+    ''',
   ];
 
   static Future<void> migrate(

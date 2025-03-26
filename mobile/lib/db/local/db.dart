@@ -9,12 +9,11 @@ import "package:photos/db/common/base.dart";
 import "package:photos/db/local/mappers.dart";
 import "package:photos/db/local/schema.dart";
 import "package:photos/log/devlog.dart";
+import 'package:photos/models/file/file.dart';
 import "package:sqlite_async/sqlite_async.dart";
 
-import 'package:photos/models/file/file.dart';
-
 class LocalDB with SqlDbBase {
-  static const _databaseName = "local_4.db";
+  static const _databaseName = "local_5.db";
   static const _batchInsertMaxCount = 1000;
   static const _smallTableBatchInsertMaxCount = 5000;
   late final SqliteDatabase _sqliteDB;
@@ -47,11 +46,11 @@ class LocalDB with SqlDbBase {
     );
   }
 
-  Future<List<AssetEntity>> getAssets() async {
+  Future<List<EnteFile>> getAssets({LocalAssertsParam? params}) async {
     final result = await _sqliteDB.execute(
-      "SELECT * FROM assets",
+      "SELECT * FROM assets ${params != null ? 'WHERE  ${params.whereClause()}' : ""}",
     );
-    return result.map((row) => LocalDBMappers.asset(row)).toList();
+    return result.map((row) => LocalDBMappers.assetRowToEnteFile(row)).toList();
   }
 
   Future<List<EnteFile>> getPathAssets(String pathID) async {
@@ -70,7 +69,7 @@ class LocalDB with SqlDbBase {
       final List<List<Object?>> values =
           slice.map((e) => LocalDBMappers.devicePathRow(e)).toList();
       await _sqliteDB.executeBatch(
-        'INSERT OR REPLACE INTO device_path ($devicePathColumns) values(${getParams(5)})',
+        'INSERT  INTO device_path ($devicePathColumns) values(${getParams(5)}) ON CONFLICT(path_id) DO UPDATE SET $updateDevicePathColumns',
         values,
       );
     });

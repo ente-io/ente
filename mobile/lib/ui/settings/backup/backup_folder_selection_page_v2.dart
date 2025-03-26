@@ -41,7 +41,7 @@ class _BackupFolderSelectionPageV2State
   final Set<String> _selectedDevicePathIDs = <String>{};
   List<AssetPathEntity>? _assetPathEntities;
   Map<String, Set<String>> _assetCount = {};
-  final Map<String, AssetEntity> _pathToLatestAsset = {};
+  final Map<String, EnteFile> _pathToLatestAsset = {};
 
   @override
   void initState() {
@@ -54,15 +54,15 @@ class _BackupFolderSelectionPageV2State
       _assetPathEntities!.removeWhere(
         (path) => (_assetCount[path.id] ?? {}).isEmpty,
       );
-      final List<AssetEntity> latestAssets = c.assets.values.toList();
+      final List<EnteFile> latestAssets = c.assets.values.toList();
       for (final path in _assetPathEntities ?? []) {
         final assetIDs = _assetCount[path.id] ?? {};
         for (final sortedAsset in latestAssets) {
-          if (assetIDs.contains(sortedAsset.id)) {
+          if (assetIDs.contains(sortedAsset.localID!)) {
             if (_pathToLatestAsset.containsKey(path.id)) {
               // check time and insert one with latest time
-              if (_pathToLatestAsset[path.id]!.createDateSecond! <
-                  sortedAsset.createDateSecond!) {
+              if (_pathToLatestAsset[path.id]!.creationTime! <
+                  sortedAsset.creationTime!) {
                 _pathToLatestAsset[path.id] = sortedAsset;
               }
             } else {
@@ -449,9 +449,7 @@ class _BackupFolderSelectionPageV2State
 
   // todo: replace with asset thumbnail provider
   Widget _getThumbnail(AssetPathEntity path, bool isSelected) {
-    final file = _pathToLatestAsset[path.id] != null
-        ? EnteFile.fromAssetSync(_pathToLatestAsset[path.id]!)
-        : null;
+    final file = _pathToLatestAsset[path.id];
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: SizedBox(
