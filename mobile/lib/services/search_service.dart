@@ -551,12 +551,17 @@ class SearchService {
     final List<EnteFile> allFiles = await getAllFilesForSearch();
     final List<EnteFile> captionMatch = <EnteFile>[];
     final List<EnteFile> displayNameMatch = <EnteFile>[];
+    final List<EnteFile> uploaderNameMatch = <EnteFile>[];
     for (EnteFile eachFile in allFiles) {
       if (eachFile.caption != null && pattern.hasMatch(eachFile.caption!)) {
         captionMatch.add(eachFile);
       }
       if (pattern.hasMatch(eachFile.displayName)) {
         displayNameMatch.add(eachFile);
+      }
+      if (eachFile.uploaderName != null &&
+          pattern.hasMatch(eachFile.uploaderName!)) {
+        uploaderNameMatch.add(eachFile);
       }
     }
     if (captionMatch.isNotEmpty) {
@@ -586,6 +591,21 @@ class SearchService {
             occurrence: kMostRelevantFilter,
             filterResultType: ResultType.file,
             matchedUploadedIDs: filesToUploadedFileIDs(displayNameMatch),
+          ),
+        ),
+      );
+    }
+    if (uploaderNameMatch.isNotEmpty) {
+      searchResults.add(
+        GenericSearchResult(
+          ResultType.uploader,
+          query,
+          uploaderNameMatch,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: query,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.uploader,
+            matchedUploadedIDs: filesToUploadedFileIDs(uploaderNameMatch),
           ),
         ),
       );
