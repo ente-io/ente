@@ -142,10 +142,7 @@ class SearchService {
   Future<List<EnteFile>> _getCacheFileFuture() {
     if (_cachedFilesFuture == null) {
       _logger.fine("Reading all files from db");
-      _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
-        ignoreCollections(),
-        dedupeByUploadId: false,
-      );
+      _cachedFilesFuture = localDB.getAssets();
     }
     return _cachedFilesFuture!;
   }
