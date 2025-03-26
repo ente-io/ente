@@ -12,13 +12,13 @@ import "package:photos/utils/standalone/task_queue.dart";
 final thumbnailQueue = TaskQueue<String>(
   maxConcurrentTasks: 15,
   taskTimeout: const Duration(minutes: 1),
-  maxQueueSize: 1000, // Limit the queue to 50 pending tasks
+  maxQueueSize: 200, // Limit the queue to 50 pending tasks
 );
 
 final mediumThumbnailQueue = TaskQueue<String>(
   maxConcurrentTasks: 5,
   taskTimeout: const Duration(minutes: 1),
-  maxQueueSize: 1000, // Limit the queue to 50 pending tasks
+  maxQueueSize: 200, // Limit the queue to 50 pending tasks
 );
 
 class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
