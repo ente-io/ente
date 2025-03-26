@@ -111,7 +111,8 @@ export type ItemData = PhotoSwipeSlideData & {
      */
     videoPlaylistURL?: string;
     /**
-     * The ID of the `media-controller` element that is showing the video.
+     * The DOM element ID of the `media-controller` element that is showing the
+     * video for the current item.
      *
      * If present, this value will be used to display controls for controlling
      * the video wrapped by the media-controller.
@@ -119,7 +120,7 @@ export type ItemData = PhotoSwipeSlideData & {
      * This is only set for videos that are streamed using HLS (i.e. videos for
      * which {@link videoPlaylistURL} has also been set).
      */
-    mediaControllerElementID?: string;
+    mediaControllerID?: string;
     /**
      * `true` if we should indicate to the user that we're still fetching data
      * for this file.

@@ -314,7 +314,7 @@ export class FileViewerPhotoSwipe {
                     return {
                         ...itemData,
                         html: hlsVideoHTML(videoPlaylistURL, mcID),
-                        mediaControllerElementID: mcID,
+                        mediaControllerID: mcID,
                     };
                 } else if (videoURL) {
                     return {
@@ -440,9 +440,43 @@ export class FileViewerPhotoSwipe {
             livePhotoUpdateMute(video);
         };
 
+        /**
+         * The DOM element housing the media-control-bar and friends.
+         */
+        let mediaControlsContainerElement: HTMLElement | undefined;
+
+        /**
+         * If a {@link mediaControllerID} is provided, then make the
+         * media controls visible and link the media-control-bar to the given
+         * controller. Otherwise hide the media controls.
+         */
+        const updateMediaControls = (mediaControllerID: string | undefined) => {
+            // The PhotoSwipe CSS sets the display for this to be
+            // block, so that's what we restore to when needed.
+            mediaControlsContainerElement!.style.display = mediaControllerID
+                ? "block"
+                : "none";
+            if (mediaControllerID) {
+                mediaControlsContainerElement!
+                    .querySelector("media-control-bar")!
+                    .setAttribute("mediacontroller", mediaControllerID);
+            }
+        };
+
         pswp.on("contentAppend", (e) => {
-            const { fileID, fileType, videoURL } = asItemData(e.content.data);
-            if (fileType !== FileType.livePhoto) return;
+            console.log("contentAppend");
+            const { fileID, fileType, videoURL, mediaControllerID } =
+                asItemData(e.content.data);
+
+            // For the initial slide, "contentAppend" will get called after
+            // "change", so we need to wire up the controls (or hide them) for
+            // the initial slide here also (in addition to in "change").
+            if (currSlideData().fileID == fileID) {
+                updateMediaControls(mediaControllerID);
+            }
+
+            // Rest of this function deals with live photos.
+            if (fileType != FileType.livePhoto) return;
             if (!videoURL) return;
 
             // This slide is displaying a live photo. Append a video element to
@@ -868,30 +902,14 @@ export class FileViewerPhotoSwipe {
 
             ui.registerElement({
                 name: "media-controls",
-                // Arbitrary order towards the end (it doesn't matter anyways
-                // since we're absolutely positioned).
                 order: 31,
                 appendTo: "root",
                 html: hlsVideoControlsHTML(),
                 onInit: (element, pswp) => {
-                    // TODO:
-                    // captionElement = element;
+                    mediaControlsContainerElement = element;
                     pswp.on("change", () => {
-                        console.log("change", currSlideData());
-                        const { mediaControllerElementID } = currSlideData();
-                        // The PhotoSwipe CSS sets the display for this to be
-                        // block, so that's what we restore to when needed.
-                        element.style.display = mediaControllerElementID
-                            ? "block"
-                            : "none";
-                        if (mediaControllerElementID) {
-                            element
-                                .querySelector("media-control-bar")!
-                                .setAttribute(
-                                    "mediacontroller",
-                                    mediaControllerElementID,
-                                );
-                        }
+                        const { mediaControllerID } = currSlideData();
+                        updateMediaControls(mediaControllerID);
                     });
                 },
             });
@@ -1121,9 +1139,9 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 //     import "media-chrome";
 //
 // TODO: Update code above that searches for the video element
-const hlsVideoHTML = (url: string, mediaControllerElementID: string) => `
+const hlsVideoHTML = (url: string, mediaControllerID: string) => `
 <div class="media-controller-container">
-  <media-controller id="${mediaControllerElementID}">
+  <media-controller id="${mediaControllerID}">
     <hls-video slot="media" src="${url}"></hls-video>
   </media-controller>
 </div>
@@ -1133,7 +1151,7 @@ const hlsVideoHTML = (url: string, mediaControllerElementID: string) => `
  * HTML for controls associated with {@link hlsVideoHTML}.
  *
  * To make these functional, the `media-control-bar` requires the
- * `mediacontroller="${mediaControllerElementID}"` attribute.
+ * `mediacontroller="${mediaControllerID}"` attribute.
  */
 const hlsVideoControlsHTML = () => `
 <media-control-bar>
