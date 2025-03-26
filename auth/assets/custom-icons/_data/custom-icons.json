@@ -286,6 +286,14 @@
       "slug": "csgoroll"
     },
     {
+      "title": "Cwallet",
+      "altNames": [
+        "cwallet",
+        "c-wallet",
+        "c wallet"
+      ]
+    },
+    {
       "title": "DCS",
       "altNames": [
         "Digital Combat Simulator"
@@ -951,6 +959,13 @@
       "title": "RealVNC",
       "slug": "realvnc",
       "hex": "488aec"
+    },
+    {
+      "title": "RedotPay",
+      "altNames": [
+        "redotpay",
+        "redot pay"
+      ]
     },
     {
       "title": "Registro br",
