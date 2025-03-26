@@ -228,18 +228,19 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 
 - For streaming video (HLS), we use three libraries:
 
-  1. [media-chrome](https://github.com/muxinc/media-chrome) provides custom
-     video controls which we use when playing HLS playlists (we use custom
-     controls to provide a standardized UX across browsers, but really the main
-     reason is that Safari's default video controls are on the verge of
-     unusable, especially for streaming playback),
-  2. [hls-video-element](https://github.com/muxinc/media-elements/tree/main/packages/hls-video-element)
-     provides a custom web component element that glues media-chrome and hls.js
-     together, and
-  3. [hls.js](https://github.com/video-dev/hls.js/) (indirect dependency via
-     hls-video-element) is needed on HLS playback on Chrome and Firefox (which
-     do not have native support for HLS playlists).
+    1. [media-chrome](https://github.com/muxinc/media-chrome) provides custom
+       video controls which we use when playing HLS playlists (we use custom
+       controls to provide a standardized UX across browsers, but really the
+       main reason is that Safari's default video controls are on the verge of
+       unusable, especially for streaming playback),
 
+    2. [hls-video-element](https://github.com/muxinc/media-elements/tree/main/packages/hls-video-element)
+       provides a custom web component element that glues media-chrome and
+       hls.js together, and
+
+    3. [hls.js](https://github.com/video-dev/hls.js/) (indirect dependency via
+       hls-video-element) is needed on HLS playback on Chrome and Firefox (which
+       do not have native support for HLS playlists).
 
 - [react-dropzone](https://github.com/react-dropzone/react-dropzone/) is a React
   hook to create a drag-and-drop input zone. Note that we pin to the last

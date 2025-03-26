@@ -464,7 +464,6 @@ export class FileViewerPhotoSwipe {
         };
 
         pswp.on("contentAppend", (e) => {
-            console.log("contentAppend");
             const { fileID, fileType, videoURL, mediaControllerID } =
                 asItemData(e.content.data);
 
