@@ -77,11 +77,15 @@ class _HomeGalleryWidgetV2State extends State<HomeGalleryWidgetV2> {
       key: ValueKey(_shouldHideSharedItems),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         Logger("_HomeGalleryWidgetV2State").info("Loading home gallery files");
-        final cache = await LocalImportService.instance.getLocalAssetsCache();
+        final cache = LocalImportService.instance.localAssetsCache ??
+            await LocalImportService.instance.getLocalAssetsCache();
         final enteFiles = <EnteFile>[];
         for (var asset in cache.assets.values) {
           enteFiles.add(EnteFile.fromAssetSync(asset));
         }
+        enteFiles.sort(
+          (a, b) => (a.creationTime ?? 0).compareTo(b.creationTime ?? 0),
+        );
         Logger("_HomeGalleryWidgetV2State").info(
           "Load home gallery files ${enteFiles.length} files",
         );

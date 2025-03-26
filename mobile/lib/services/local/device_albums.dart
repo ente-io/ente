@@ -1,5 +1,7 @@
+import "package:photo_manager/photo_manager.dart";
 import "package:photos/models/device_collection.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/local/local_import.dart";
 
 extension DeviceAlbums on LocalImportService {
@@ -24,19 +26,6 @@ extension DeviceAlbums on LocalImportService {
   }
 
   Future<List<EnteFile>> getAlbumFiles(String pathID) async {
-    final cache = await getLocalAssetsCache();
-    final assetIDs = cache.pathToAssetIDs[pathID];
-    if (assetIDs == null) {
-      return [];
-    }
-    final List<EnteFile> files = [];
-    for (final id in assetIDs) {
-      final asset = cache.assets[id];
-      if (asset != null) {
-        files.add(EnteFile.fromAssetSync(asset));
-      }
-    }
-    files.sort((a, b) => (b.creationTime ?? 0).compareTo(a.creationTime ?? 0));
-    return files;
+    return localDB.getPathAssets(pathID);
   }
 }

@@ -166,6 +166,7 @@ class LocalImportService {
       await _lock.synchronized(
         () async {
           if (_localAssetsCache == null) {
+            _log.info("loading local assets cache");
             final List<AssetPathEntity> paths = await localDB.getAssetPaths();
             final List<AssetEntity> assets = await localDB.getAssets();
             final Map<String, Set<String>> pathToAssetIDs =
@@ -183,9 +184,14 @@ class LocalImportService {
   }
 
   Future<LocalAssetsCache> getLocalAssetsCache() async {
+    if (_localAssetsCache != null) {
+      return _localAssetsCache!;
+    }
     await _loadCache();
     return _localAssetsCache!;
   }
+
+  LocalAssetsCache? get localAssetsCache => _localAssetsCache;
 
   Lock getLock() {
     return _lock;

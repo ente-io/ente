@@ -11,6 +11,8 @@ import "package:photos/db/local/schema.dart";
 import "package:photos/log/devlog.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
+import "../../models/file/file.dart";
+
 class LocalDB with SqlDbBase {
   static const _databaseName = "local_4.db";
   static const _batchInsertMaxCount = 1000;
@@ -50,6 +52,14 @@ class LocalDB with SqlDbBase {
       "SELECT * FROM assets",
     );
     return result.map((row) => LocalDBMappers.asset(row)).toList();
+  }
+
+  Future<List<EnteFile>> getPathAssets(String pathID) async {
+    final result = await _sqliteDB.execute(
+      "SELECT * FROM assets WHERE id IN (SELECT asset_id FROM device_path_assets WHERE path_id = ?)",
+      [pathID],
+    );
+    return result.map((row) => LocalDBMappers.assetRowToEnteFile(row)).toList();
   }
 
   Future<void> insertDBPaths(List<AssetPathEntity> entries) async {

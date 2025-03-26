@@ -1,6 +1,7 @@
 import "dart:io";
 
 import "package:photo_manager/photo_manager.dart";
+import "package:photos/models/file/file.dart";
 
 class LocalDBMappers {
   const LocalDBMappers._();
@@ -43,6 +44,27 @@ class LocalDBMappers {
       latitude: row['latitude'] as double?,
       longitude: row['longitude'] as double?,
     );
+  }
+
+  static EnteFile assetRowToEnteFile(Map<String, dynamic> row) {
+    final asset = AssetEntity(
+      id: row['id'] as String,
+      typeInt: row['type'] as int,
+      subtype: row['sub_type'] as int,
+      width: row['width'] as int,
+      height: row['height'] as int,
+      duration: row['duration_in_sec'] as int,
+      orientation: row['orientation'] as int,
+      isFavorite: (row['is_fav'] as int) == 1,
+      title: row['title'] as String?,
+      relativePath: row['relative_path'] as String?,
+      createDateSecond: (row['created_at'] as int),
+      modifiedDateSecond: (row['modified_at'] as int),
+      mimeType: row['mime_type'] as String?,
+      latitude: row['latitude'] as double?,
+      longitude: row['longitude'] as double?,
+    );
+    return EnteFile.fromAssetSync(asset);
   }
 
   static List<Object?> devicePathRow(AssetPathEntity entity) {
