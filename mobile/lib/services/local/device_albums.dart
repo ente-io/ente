@@ -1,4 +1,3 @@
-import "package:photo_manager/photo_manager.dart";
 import "package:photos/models/device_collection.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
