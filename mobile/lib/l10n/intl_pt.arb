@@ -1674,5 +1674,37 @@
   "failed": "Falhou",
   "playStream": "Reproduzir transmissão",
   "playOriginal": "Reproduzir original",
-  "joinAlbumConfirmationDialogBody": "Unir-se ao álbum fará que seu e-mail seja visível a todos do álbum."
+  "joinAlbumConfirmationDialogBody": "Unir-se ao álbum fará que seu e-mail seja visível a todos do álbum.",
+  "editTime": "Edit time",
+  "selectTime": "Select time",
+  "selectDate": "Select date",
+  "previous": "Previous",
+  "selectOneDateAndTimeForAll": "Select one date and time for all",
+  "selectStartOfRange": "Select start of range",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
+  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
+  "newRange": "New range",
+  "selectOneDateAndTime": "Select one date and time",
+  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
+  "shiftDatesAndTime": "Shift dates and time",
+  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
+  "photocountPhotos": "$photoCount photos",
+  "notThisPerson": "Not this person?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
+  "thisWeekThroughTheYears": "This week through the years",
+  "spotlightOnYourself": "Spotlight on yourself",
+  "cLIcon": "Novo ícone",
+  "cLIconDesc": "Finalmente, um novo ícone de aplicativo que achamos que melhor representa nosso trabalho. Também adicionamos um seletor de ícones para que você possa continuar usando o ícone antigo.",
+
+  "cLMemories": "Memórias",
+  "cLMemoriesDesc": "Redescubra seus momentos especiais - destaque para suas pessoas favoritas, suas viagens e férias, suas melhores fotos e muito mais. Ative o aprendizado de máquina, marque a si mesmo e nomeie seus amigos para a melhor experiência.",
+
+  "cLWidgets": "Widgets",
+  "cLWidgetsDesc": "Widgets da tela inicial integrados com memórias agora estão disponíveis. Eles mostrarão seus momentos especiais sem abrir o aplicativo.",
+
+  "cLFamilyPlan": "Limites do plano familiar",
+  "cLFamilyPlanDesc": "Agora você pode definir limites de quanto armazenamento os membros da sua família podem usar.",
+
+  "cLBulkEdit": "Edição em massa de datas",
+  "cLBulkEditDesc": "Agora você pode selecionar várias fotos e editar a data/hora para todas elas com uma ação rápida. A mudança de datas também é suportada."
 }

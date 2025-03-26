@@ -37,14 +37,14 @@ And ping again
 
 This time you'll see the updated message.
 
-For more details about how to get museum up and running, see
-[RUNNING](RUNNING.md).
-
 > [!TIP]
 >
-> Also, there is a way to use our pre-built Docker images to directly start a
-> cluster without needing to clone this repository - see
-> [docs/docker](docs/docker.md).
+> You can also use pre-built Docker images to directly start a cluster without
+> needing to clone this repository - see
+> [docs/quickstart.md](docs/quickstart.md).
+
+For more details about how to get museum up and running, see
+[RUNNING.md](RUNNING.md).
 
 ## Architecture
 

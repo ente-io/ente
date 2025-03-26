@@ -25,7 +25,7 @@ import type {
     PublicURL,
     UpdatePublicURL,
 } from "@/media/collection";
-import { COLLECTION_ROLE, type CollectionUser } from "@/media/collection";
+import { type CollectionUser } from "@/media/collection";
 import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreated";
 import { avatarTextColor } from "@/new/photos/services/avatar";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
@@ -153,12 +153,12 @@ function SharingDetails({ collection, type }) {
             : collection.owner?.email;
 
     const collaborators = collection.sharees
-        ?.filter((sharee) => sharee.role === COLLECTION_ROLE.COLLABORATOR)
+        ?.filter((sharee) => sharee.role == "COLLABORATOR")
         .map((sharee) => sharee.email);
 
     const viewers =
         collection.sharees
-            ?.filter((sharee) => sharee.role === COLLECTION_ROLE.VIEWER)
+            ?.filter((sharee) => sharee.role == "VIEWER")
             .map((sharee) => sharee.email) || [];
 
     const isOwner = galleryContext.user?.id === collection.owner?.id;
@@ -345,17 +345,15 @@ const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
     const closeManageEmailShare = () => setManageEmailShareView(false);
     const openManageEmailShare = () => setManageEmailShareView(true);
 
-    const participantType = useRef<
-        COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
-    >(undefined);
+    const participantType = useRef<"COLLABORATOR" | "VIEWER">(undefined);
 
     const openAddCollab = () => {
-        participantType.current = COLLECTION_ROLE.COLLABORATOR;
+        participantType.current = "COLLABORATOR";
         openAddParticipant();
     };
 
     const openAddViewer = () => {
-        participantType.current = COLLECTION_ROLE.VIEWER;
+        participantType.current = "VIEWER";
         openAddParticipant();
     };
 
@@ -469,7 +467,7 @@ interface AddParticipantProps {
     open: boolean;
     onClose: () => void;
     onRootClose: () => void;
-    type: COLLECTION_ROLE.VIEWER | COLLECTION_ROLE.COLLABORATOR;
+    type: "VIEWER" | "COLLABORATOR";
 }
 
 const AddParticipant: React.FC<AddParticipantProps> = ({
@@ -541,7 +539,7 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     {...{ onClose }}
                     onRootClose={handleRootClose}
                     title={
-                        type === COLLECTION_ROLE.VIEWER
+                        type == "VIEWER"
                             ? t("add_viewers")
                             : t("add_collaborators")
                     }
@@ -554,14 +552,11 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     placeholder={t("enter_email")}
                     fieldType="email"
                     buttonText={
-                        type === COLLECTION_ROLE.VIEWER
+                        type == "VIEWER"
                             ? t("add_viewers")
                             : t("add_collaborators")
                     }
-                    submitButtonProps={{
-                        size: "large",
-                        sx: { mt: 1, mb: 2 },
-                    }}
+                    submitButtonProps={{ size: "large", sx: { mt: 1, mb: 2 } }}
                     disableAutoFocus
                 />
             </Stack>
@@ -821,19 +816,17 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const closeAddParticipant = () => setAddParticipantView(false);
     const openAddParticipant = () => setAddParticipantView(true);
 
-    const participantType = useRef<
-        COLLECTION_ROLE.COLLABORATOR | COLLECTION_ROLE.VIEWER
-    >(null);
+    const participantType = useRef<"COLLABORATOR" | "VIEWER">(null);
 
     const selectedParticipant = useRef<CollectionUser>(null);
 
     const openAddCollab = () => {
-        participantType.current = COLLECTION_ROLE.COLLABORATOR;
+        participantType.current = "COLLABORATOR";
         openAddParticipant();
     };
 
     const openAddViewer = () => {
-        participantType.current = COLLECTION_ROLE.VIEWER;
+        participantType.current = "VIEWER";
         openAddParticipant();
     };
 
@@ -860,12 +853,12 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const isOwner = galleryContext.user.id === collection.owner?.id;
 
     const collaborators = collection.sharees
-        ?.filter((sharee) => sharee.role === COLLECTION_ROLE.COLLABORATOR)
+        ?.filter((sharee) => sharee.role == "COLLABORATOR")
         .map((sharee) => sharee.email);
 
     const viewers =
         collection.sharees
-            ?.filter((sharee) => sharee.role === COLLECTION_ROLE.VIEWER)
+            ?.filter((sharee) => sharee.role == "VIEWER")
             .map((sharee) => sharee.email) || [];
 
     const openManageParticipant = (email) => {
@@ -1074,9 +1067,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
             message: (
                 <Trans
                     i18nKey="remove_participant_message"
-                    values={{
-                        selectedEmail: selectedParticipant.email,
-                    }}
+                    values={{ selectedEmail: selectedParticipant.email }}
                 />
             ),
             continue: {
@@ -1258,13 +1249,9 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     return (
         <>
             <Stack>
-                <Typography
-                    variant="small"
-                    sx={{ color: "text.muted", padding: 1 }}
-                >
-                    <PublicIcon style={{ fontSize: 17, marginRight: 8 }} />
+                <RowButtonGroupTitle icon={<PublicIcon />}>
                     {t("public_link_enabled")}
-                </Typography>
+                </RowButtonGroupTitle>
                 <RowButtonGroup>
                     {isLinkExpired(publicShareProp.validTill) ? (
                         <RowButton
@@ -1853,9 +1840,7 @@ function PublicLinkSetPassword({
                 // We're being shown within the sidebar drawer, and also the
                 // content of this dialog is lesser than what a normal dialog
                 // contains. Use a bespoke padding.
-                paper: {
-                    sx: { "&&": { padding: "4px" } },
-                },
+                paper: { sx: { "&&": { padding: "4px" } } },
             }}
             sx={{ position: "absolute" }}
             maxWidth={"sm"}

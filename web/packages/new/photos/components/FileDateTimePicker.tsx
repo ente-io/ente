@@ -6,7 +6,6 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useState } from "react";
-import { aboveFileViewerContentZ } from "./utils/z-index";
 
 interface FileDateTimePickerProps {
     /**
@@ -58,7 +57,6 @@ export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
     };
 
     const handleClose = () => {
-        console.log("handleClose");
         setOpen(false);
         onDidClose?.();
     };
@@ -91,17 +89,8 @@ export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
                        MUI is anyways intending to replace the TimeClock with a
                        DigitalTimePicker that has a better UX. */
                     layout: {
-                        sx: {
-                            ".MuiTimeClock-root": {
-                                minHeight: "336px",
-                            },
-                        },
+                        sx: { ".MuiTimeClock-root": { minHeight: "336px" } },
                     },
-
-                    /* We also get opened from the info drawer in the photo
-                       viewer, so give our dialog a higher z-index than both the
-                       photo viewer and the info drawer */
-                    dialog: { sx: { zIndex: aboveFileViewerContentZ } },
                 }}
             />
         </LocalizationProvider>

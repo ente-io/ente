@@ -110,9 +110,7 @@ const registerDevice = async (publicKey: string) => {
     const res = await fetch(await apiURL("/cast/device-info"), {
         method: "POST",
         headers: publicRequestHeaders(),
-        body: JSON.stringify({
-            publicKey,
-        }),
+        body: JSON.stringify({ publicKey }),
     });
     ensureOk(res);
     return z.object({ deviceCode: z.string() }).parse(await res.json())

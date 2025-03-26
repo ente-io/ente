@@ -45,10 +45,7 @@ export const configureSRP = async ({
 
         const srpM1 = convertBufferToBase64(srpClient.computeM1());
 
-        const { srpM2 } = await completeSRPSetup(token, {
-            srpM1,
-            setupID,
-        });
+        const { srpM2 } = await completeSRPSetup(token, { srpM1, setupID });
 
         srpClient.checkM2(convertBase64ToBuffer(srpM2));
     } catch (e) {
@@ -76,12 +73,7 @@ export const generateSRPSetupAttributes = async (
 
     const srpVerifier = convertBufferToBase64(srpVerifierBuffer);
 
-    const result = {
-        srpUserID,
-        srpSalt,
-        srpVerifier,
-        loginSubKey,
-    };
+    const result = { srpUserID, srpSalt, srpVerifier, loginSubKey };
 
     log.debug(
         () => `SRP setup attributes generated: ${JSON.stringify(result)}`,
@@ -171,7 +163,9 @@ export const convertBase64ToBuffer = (base64: string) => {
     return Buffer.from(base64, "base64");
 };
 
-export async function generateKeyAndSRPAttributes(passphrase: string): Promise<{
+export async function generateKeyAndSRPAttributes(
+    passphrase: string,
+): Promise<{
     keyAttributes: KeyAttributes;
     masterKey: string;
     srpSetupAttributes: SRPSetupAttributes;
@@ -222,9 +216,5 @@ export async function generateKeyAndSRPAttributes(passphrase: string): Promise<{
         recoveryKeyDecryptionNonce: recoveryKeyEncryptedWithMasterKey.nonce,
     };
 
-    return {
-        keyAttributes,
-        masterKey,
-        srpSetupAttributes,
-    };
+    return { keyAttributes, masterKey, srpSetupAttributes };
 }

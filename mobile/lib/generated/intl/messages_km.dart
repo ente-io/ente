@@ -20,6 +20,42 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'km';
 
+  static String m1(count) => "\$photoCount photos";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{};
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "allWillShiftRangeBasedOnFirst": MessageLookupByLibrary.simpleMessage(
+            "This is the first in the group. Other selected photos will automatically shift based on this new date"),
+        "editTime": MessageLookupByLibrary.simpleMessage("Edit time"),
+        "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
+            "Move selected photos to one date"),
+        "newRange": MessageLookupByLibrary.simpleMessage("New range"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
+        "photocountPhotos": m1,
+        "photosKeepRelativeTimeDifference":
+            MessageLookupByLibrary.simpleMessage(
+                "Photos keep relative time difference"),
+        "previous": MessageLookupByLibrary.simpleMessage("Previous"),
+        "selectDate": MessageLookupByLibrary.simpleMessage("Select date"),
+        "selectOneDateAndTime":
+            MessageLookupByLibrary.simpleMessage("Select one date and time"),
+        "selectOneDateAndTimeForAll": MessageLookupByLibrary.simpleMessage(
+            "Select one date and time for all"),
+        "selectStartOfRange":
+            MessageLookupByLibrary.simpleMessage("Select start of range"),
+        "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
+        "shiftDatesAndTime":
+            MessageLookupByLibrary.simpleMessage("Shift dates and time"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
+        "thisWillMakeTheDateAndTimeOfAllSelected":
+            MessageLookupByLibrary.simpleMessage(
+                "This will make the date and time of all selected photos the same.")
+      };
 }

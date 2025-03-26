@@ -7,7 +7,6 @@ import {
 import { SecondFactorChoice } from "@/accounts/components/SecondFactorChoice";
 import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { useSecondFactorChoiceIfNeeded } from "@/accounts/components/utils/second-factor-choice";
-import { PAGES } from "@/accounts/constants/pages";
 import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
@@ -42,23 +41,13 @@ import {
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
-import {
-    LS_KEYS,
-    getData,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
+import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import {
     getToken,
     isFirstLogin,
     setIsFirstLogin,
 } from "@ente/shared/storage/localStorage/helpers";
-import {
-    SESSION_KEYS,
-    getKey,
-    removeKey,
-    setKey,
-} from "@ente/shared/storage/sessionStorage";
+import { getKey, removeKey, setKey } from "@ente/shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -96,14 +85,8 @@ const Page: React.FC = () => {
                 case "valid":
                     break;
                 case "validButPasswordChanged":
-                    setData(
-                        LS_KEYS.KEY_ATTRIBUTES,
-                        session.updatedKeyAttributes,
-                    );
-                    setData(
-                        LS_KEYS.SRP_ATTRIBUTES,
-                        session.updatedSRPAttributes,
-                    );
+                    setData("keyAttributes", session.updatedKeyAttributes);
+                    setData("srpAttributes", session.updatedSRPAttributes);
                     // Set a flag that causes new interactive key attributes to
                     // be generated.
                     setIsFirstLogin(true);
@@ -121,13 +104,13 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const main = async () => {
-            const user: User = getData(LS_KEYS.USER);
+            const user: User = getData("user");
             if (!user?.email) {
                 void router.push("/");
                 return;
             }
             setUser(user);
-            let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+            let key = getKey("encryptionKey");
             const electron = globalThis.electron;
             if (!key && electron) {
                 try {
@@ -136,11 +119,7 @@ const Page: React.FC = () => {
                     log.error("Failed to read master key from safe storage", e);
                 }
                 if (key) {
-                    await saveKeyInSessionStore(
-                        SESSION_KEYS.ENCRYPTION_KEY,
-                        key,
-                        true,
-                    );
+                    await saveKeyInSessionStore("encryptionKey", key, true);
                 }
             }
             const token = getToken();
@@ -148,22 +127,17 @@ const Page: React.FC = () => {
                 void router.push(appHomeRoute);
                 return;
             }
-            const kekEncryptedAttributes: B64EncryptionResult = getKey(
-                SESSION_KEYS.KEY_ENCRYPTION_KEY,
-            );
-            const keyAttributes: KeyAttributes = getData(
-                LS_KEYS.KEY_ATTRIBUTES,
-            );
-            const srpAttributes: SRPAttributes = getData(
-                LS_KEYS.SRP_ATTRIBUTES,
-            );
+            const kekEncryptedAttributes: B64EncryptionResult =
+                getKey("keyEncryptionKey");
+            const keyAttributes: KeyAttributes = getData("keyAttributes");
+            const srpAttributes: SRPAttributes = getData("srpAttributes");
 
             if (token) {
                 setSessionValidityCheck(validateSession());
             }
 
             if (kekEncryptedAttributes && keyAttributes) {
-                removeKey(SESSION_KEYS.KEY_ENCRYPTION_KEY);
+                removeKey("keyEncryptionKey");
                 const cryptoWorker = await sharedCryptoWorker();
                 const kek = await cryptoWorker.decryptB64(
                     kekEncryptedAttributes.encryptedData,
@@ -232,11 +206,8 @@ const Page: React.FC = () => {
                 if (passkeySessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
-                    setKey(
-                        SESSION_KEYS.KEY_ENCRYPTION_KEY,
-                        sessionKeyAttributes,
-                    );
-                    const user = getData(LS_KEYS.USER);
+                    setKey("keyEncryptionKey", sessionKeyAttributes);
+                    const user = getData("user");
                     await setLSUser({
                         ...user,
                         passkeySessionID,
@@ -245,7 +216,7 @@ const Page: React.FC = () => {
                     });
                     stashRedirect("/");
                     const url = passkeyVerificationRedirectURL(
-                        accountsUrl,
+                        accountsUrl!,
                         passkeySessionID,
                     );
                     setPasskeyVerificationData({ passkeySessionID, url });
@@ -254,20 +225,17 @@ const Page: React.FC = () => {
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
-                    setKey(
-                        SESSION_KEYS.KEY_ENCRYPTION_KEY,
-                        sessionKeyAttributes,
-                    );
-                    const user = getData(LS_KEYS.USER);
+                    setKey("keyEncryptionKey", sessionKeyAttributes);
+                    const user = getData("user");
                     await setLSUser({
                         ...user,
                         twoFactorSessionID,
                         isTwoFactorEnabled: true,
                     });
-                    void router.push(PAGES.TWO_FACTOR_VERIFY);
+                    void router.push("/two-factor/verify");
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else {
-                    const user = getData(LS_KEYS.USER);
+                    const user = getData("user");
                     await setLSUser({
                         ...user,
                         token,
@@ -275,8 +243,7 @@ const Page: React.FC = () => {
                         id,
                         isTwoFactorEnabled: false,
                     });
-                    if (keyAttributes)
-                        setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                    if (keyAttributes) setData("keyAttributes", keyAttributes);
                     return keyAttributes;
                 }
             } catch (e) {
@@ -305,16 +272,15 @@ const Page: React.FC = () => {
                     key,
                 );
             }
-            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+            await saveKeyInSessionStore("encryptionKey", key);
             await decryptAndStoreToken(keyAttributes, key);
             try {
-                let srpAttributes: SRPAttributes | null = getData(
-                    LS_KEYS.SRP_ATTRIBUTES,
-                );
+                let srpAttributes: SRPAttributes | null =
+                    getData("srpAttributes");
                 if (!srpAttributes && user) {
                     srpAttributes = await getSRPAttributes(user.email);
                     if (srpAttributes) {
-                        setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
+                        setData("srpAttributes", srpAttributes);
                     }
                 }
                 log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
@@ -379,7 +345,7 @@ const Page: React.FC = () => {
             />
 
             <AccountsPageFooterWithHost>
-                <LinkButton onClick={() => router.push(PAGES.RECOVER)}>
+                <LinkButton onClick={() => router.push("/recover")}>
                     {t("forgot_password")}
                 </LinkButton>
                 <LinkButton onClick={logout}>{t("change_email")}</LinkButton>

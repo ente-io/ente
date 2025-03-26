@@ -10,6 +10,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/api/entity/type.dart";
+import "package:photos/models/base_location.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
@@ -32,6 +33,9 @@ class LocationService {
   static const kCitiesRemotePath = "https://static.ente.io/world_cities.json";
 
   List<City> _cities = [];
+
+  // TODO: lau: consider actually using this in location section
+  List<BaseLocation> baseLocations = [];
 
   LocationService(this.prefs) {
     debugPrint('LocationService constructor');
@@ -84,17 +88,11 @@ class LocationService {
     return result;
   }
 
-  /// WARNING: This method does not use computer, consider using [getFilesInCity] instead
-  Map<City, List<EnteFile>> getFilesInCitySync(
-    List<EnteFile> allFiles,
-  ) {
-    if (allFiles.isEmpty) reloadLocationDiscoverySection = true;
-    final result = getCityResults({
-      "query": '',
-      "cities": _cities,
-      "files": allFiles,
-    });
-    return result;
+  Future<List<City>> getCities() async {
+    if (_cities.isEmpty) {
+      await _loadCities();
+    }
+    return _cities;
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> getLocationTags() {

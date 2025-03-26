@@ -36,17 +36,9 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
         {
             label: "Ente Photos",
             submenu: [
-                ...macOSOnly([
-                    {
-                        label: "About Ente",
-                        role: "about",
-                    },
-                ]),
+                ...macOSOnly([{ label: "About Ente", role: "about" }]),
                 { type: "separator" },
-                {
-                    label: "Check for Updates...",
-                    click: handleCheckForUpdates,
-                },
+                { label: "Check for Updates...", click: handleCheckForUpdates },
                 { type: "separator" },
 
                 ...macOSOnly([
@@ -65,20 +57,11 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
 
                 { type: "separator" },
                 ...macOSOnly([
-                    {
-                        label: "Hide Ente",
-                        role: "hide",
-                    },
-                    {
-                        label: "Hide Others",
-                        role: "hideOthers",
-                    },
+                    { label: "Hide Ente", role: "hide" },
+                    { label: "Hide Others", role: "hideOthers" },
                     { type: "separator" },
                 ]),
-                {
-                    label: "Quit",
-                    role: "quit",
-                },
+                { label: "Quit", role: "quit" },
             ],
         },
         {
@@ -96,14 +79,8 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
                     {
                         label: "Speech",
                         submenu: [
-                            {
-                                role: "startSpeaking",
-                                label: "Start Speaking",
-                            },
-                            {
-                                role: "stopSpeaking",
-                                label: "Stop Speaking",
-                            },
+                            { role: "startSpeaking", label: "Start Speaking" },
+                            { role: "stopSpeaking", label: "Stop Speaking" },
                         ],
                     },
                 ]),
@@ -132,15 +109,7 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
                 ]),
             ],
         },
-        {
-            label: "Help",
-            submenu: [
-                {
-                    label: "Ente Help",
-                    click: handleHelp,
-                },
-            ],
-        },
+        { label: "Help", submenu: [{ label: "Ente Help", click: handleHelp }] },
     ]);
 };
 
@@ -159,13 +128,7 @@ export const createTrayContextMenu = (mainWindow: BrowserWindow) => {
     };
 
     return Menu.buildFromTemplate([
-        {
-            label: "Open Ente",
-            click: handleOpen,
-        },
-        {
-            label: "Quit Ente",
-            click: handleClose,
-        },
+        { label: "Open Ente", click: handleOpen },
+        { label: "Quit Ente", click: handleClose },
     ]);
 };

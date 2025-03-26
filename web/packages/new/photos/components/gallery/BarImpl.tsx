@@ -6,7 +6,7 @@ import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortO
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
-} from "@/new/photos/components/PhotoList";
+} from "@/new/photos/components/FileList";
 import {
     BarItemTile,
     ItemCard,
@@ -388,11 +388,7 @@ const ScrollButtonBase_ = styled("button")(({ theme }) => ({
     backgroundColor: theme.vars.palette.backdrop.muted,
     color: theme.vars.palette.stroke.base,
     cursor: "pointer",
-    "& > svg": {
-        borderRadius: "50%",
-        height: "30px",
-        width: "30px",
-    },
+    "& > svg": { borderRadius: "50%", height: "30px", width: "30px" },
 }));
 
 const ScrollButtonLeft = styled(ScrollButtonBase)`

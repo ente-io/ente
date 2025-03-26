@@ -20,10 +20,14 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ta';
 
+  static String m1(count) => "\$photoCount photos";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("மீண்டும் வருக!"),
+        "allWillShiftRangeBasedOnFirst": MessageLookupByLibrary.simpleMessage(
+            "This is the first in the group. Other selected photos will automatically shift based on this new date"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "உங்கள் கணக்கை நீக்குவதற்கான முக்கிய காரணம் என்ன?"),
         "cancel": MessageLookupByLibrary.simpleMessage("ரத்து செய்"),
@@ -38,6 +42,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("கணக்கை நிரந்தரமாக நீக்கவும்"),
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை"),
+        "editTime": MessageLookupByLibrary.simpleMessage("Edit time"),
         "email": MessageLookupByLibrary.simpleMessage("மின்னஞ்சல்"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்."),
@@ -48,6 +53,36 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("தவறான மின்னஞ்சல் முகவரி"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "இந்த தகவலுடன் தயவுசெய்து எங்களுக்கு உதவுங்கள்"),
+        "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
+            "Move selected photos to one date"),
+        "newRange": MessageLookupByLibrary.simpleMessage("New range"),
+        "notThisPerson":
+            MessageLookupByLibrary.simpleMessage("Not this person?"),
+        "photocountPhotos": m1,
+        "photosKeepRelativeTimeDifference":
+            MessageLookupByLibrary.simpleMessage(
+                "Photos keep relative time difference"),
+        "previous": MessageLookupByLibrary.simpleMessage("Previous"),
+        "selectDate": MessageLookupByLibrary.simpleMessage("Select date"),
+        "selectOneDateAndTime":
+            MessageLookupByLibrary.simpleMessage("Select one date and time"),
+        "selectOneDateAndTimeForAll": MessageLookupByLibrary.simpleMessage(
+            "Select one date and time for all"),
+        "selectStartOfRange":
+            MessageLookupByLibrary.simpleMessage("Select start of range"),
+        "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
+        "selectedItemsWillBeRemovedFromThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Selected items will be removed from this person, but not deleted from your library."),
+        "shiftDatesAndTime":
+            MessageLookupByLibrary.simpleMessage("Shift dates and time"),
+        "spotlightOnYourself":
+            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
+        "thisWeekThroughTheYears":
+            MessageLookupByLibrary.simpleMessage("This week through the years"),
+        "thisWillMakeTheDateAndTimeOfAllSelected":
+            MessageLookupByLibrary.simpleMessage(
+                "This will make the date and time of all selected photos the same."),
         "verify": MessageLookupByLibrary.simpleMessage("சரிபார்க்கவும்")
       };
 }

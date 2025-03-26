@@ -254,6 +254,7 @@ class CollectionsDB {
     row[columnOwner] = collection.owner.toJson();
     row[columnEncryptedKey] = collection.encryptedKey;
     row[columnKeyDecryptionNonce] = collection.keyDecryptionNonce;
+    // ignore: deprecated_member_use_from_same_package
     row[columnName] = collection.name;
     row[columnEncryptedName] = collection.encryptedName;
     row[columnNameDecryptionNonce] = collection.nameDecryptionNonce;

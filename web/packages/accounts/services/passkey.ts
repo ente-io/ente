@@ -12,12 +12,7 @@ import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import HTTPService from "@ente/shared/network/HTTPService";
-import {
-    getData,
-    LS_KEYS,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
+import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { z } from "zod";
 import { unstashRedirect } from "./redirect";
@@ -146,9 +141,7 @@ export const isPasskeyRecoveryEnabled = async () => {
         const resp = await HTTPService.get(
             await apiURL("/users/two-factor/recovery-status"),
             {},
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
 
         if (typeof resp.data === "undefined") {
@@ -172,15 +165,9 @@ const configurePasskeyRecovery = async (
 
         const resp = await HTTPService.post(
             await apiURL("/users/two-factor/passkeys/configure-recovery"),
-            {
-                secret,
-                userSecretCipher,
-                userSecretNonce,
-            },
+            { secret, userSecretCipher, userSecretNonce },
             undefined,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
 
         if (typeof resp.data === "undefined") {
@@ -273,12 +260,8 @@ export const saveCredentialsAndNavigateTo = async (
     // /passkeys/finish page.
     const { id, encryptedToken, keyAttributes } = response;
 
-    await setLSUser({
-        ...getData(LS_KEYS.USER),
-        encryptedToken,
-        id,
-    });
-    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
+    await setLSUser({ ...getData("user"), encryptedToken, id });
+    setData("keyAttributes", keyAttributes!);
 
     return unstashRedirect() ?? "/credentials";
 };

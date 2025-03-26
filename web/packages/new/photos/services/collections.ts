@@ -29,7 +29,7 @@ import {
 } from "@/new/photos/services/files";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import { isHiddenCollection } from "./collection";
@@ -163,9 +163,7 @@ const getCollections = async (
     try {
         const resp = await HTTPService.get(
             await apiURL("/collections/v2"),
-            {
-                sinceTime,
-            },
+            { sinceTime },
             { "X-Auth-Token": token },
         );
         const decryptedCollections: Collection[] = await Promise.all(
@@ -202,7 +200,7 @@ export const getCollectionWithSecrets = async (
     masterKey: string,
 ): Promise<Collection> => {
     const cryptoWorker = await sharedCryptoWorker();
-    const userID = getData(LS_KEYS.USER).id;
+    const userID = getData("user").id;
     let collectionKey: string;
     if (collection.owner.id === userID) {
         collectionKey = await cryptoWorker.decryptB64(
@@ -211,7 +209,7 @@ export const getCollectionWithSecrets = async (
             masterKey,
         );
     } else {
-        const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const keyAttributes = getData("keyAttributes");
         const secretKey = await cryptoWorker.decryptB64(
             keyAttributes.encryptedSecretKey,
             keyAttributes.secretKeyDecryptionNonce,
@@ -348,7 +346,7 @@ async function getLastTrashSyncTime() {
 }
 export async function syncTrash(
     collections: Collection[],
-    setTrashedFiles: (fs: EnteFile[]) => void,
+    setTrashedFiles: ((fs: EnteFile[]) => void) | undefined,
 ): Promise<void> {
     const trash = await getLocalTrash();
     collections = [...collections, ...(await getLocalDeletedCollections())];
@@ -372,7 +370,7 @@ export async function syncTrash(
 export const updateTrash = async (
     collections: Map<number, Collection>,
     sinceTime: number,
-    setTrashedFiles: (fs: EnteFile[]) => void,
+    setTrashedFiles: ((fs: EnteFile[]) => void) | undefined,
     currentTrash: Trash,
 ): Promise<Trash> => {
     try {
@@ -387,12 +385,8 @@ export const updateTrash = async (
             }
             resp = await HTTPService.get(
                 await apiURL("/trash/v2/diff"),
-                {
-                    sinceTime: time,
-                },
-                {
-                    "X-Auth-Token": token,
-                },
+                { sinceTime: time },
+                { "X-Auth-Token": token },
             );
             // #Perf: This can be optimized by running the decryption in parallel
             for (const trashItem of resp.data.diff as EncryptedTrashItem[]) {
@@ -422,7 +416,7 @@ export const updateTrash = async (
                 time = resp.data.diff.slice(-1)[0].updatedAt;
             }
 
-            setTrashedFiles(getTrashedFiles(updatedTrash));
+            setTrashedFiles?.(getTrashedFiles(updatedTrash));
             await localForage.setItem(TRASH, updatedTrash);
             await localForage.setItem(TRASH_TIME, time);
         } while (resp.data.hasMore);
@@ -447,9 +441,7 @@ export const emptyTrash = async () => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             null,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
     } catch (e) {
         log.error("empty trash failed", e);

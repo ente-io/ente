@@ -195,18 +195,24 @@ s3:
 
 # Key used for encrypting customer emails before storing them in DB
 #
-# To make it easy to get started, some randomly generated values are provided
-# here. But if you're really going to be using museum, please generate new keys.
-# You can use `go run tools/gen-random-keys/main.go` for that.
+# [Note: Self hosting credentials]
+#
+# To make it easy to get started, some randomly generated (but fixed) values are
+# provided here. But if you're really going to be using museum, please generate
+# new keys. You can use `go run tools/gen-random-keys/main.go` for that.
+#
+# If you used the quickstart.sh script to prepare your compose.yaml, it would've
+# already generated new randomly credentials for you in your `museum.yaml`.
+# Those will override these defaults; those are the values for your instance
+# would use, and what you need to backup.
 key:
     encryption: yvmG/RnzKrbCb9L3mgsmoxXr9H7i2Z4qlbT0mL3ln4w=
     hash: KXYiG07wC7GIgvCSdg+WmyWdXDAn6XKYJtp/wkEU7x573+byBRAYtpTP0wwvi8i/4l37uicX1dVTUzwH3sLZyw==
 
 # JWT secrets
 #
-# To make it easy to get started, a randomly generated values is provided here.
-# But if you're really going to be using museum, please generate new keys. You
-# can use `go run tools/gen-random-keys/main.go` for that.
+# See: [Note: Self hosting credentials] above.
+#
 jwt:
     secret: i2DecQmfGreG6q1vBj5tCokhlN41gcfS2cjOs9Po-u8=
 

@@ -142,6 +142,7 @@ export const sidebar = [
                         text: "Video streaming",
                         link: "/photos/faq/video-streaming",
                     },
+                    { text: "Misc", link: "/photos/faq/misc" },
                 ],
             },
             {
@@ -310,6 +311,10 @@ export const sidebar = [
                     {
                         text: "Uploads",
                         link: "/self-hosting/troubleshooting/uploads",
+                    },
+                    {
+                        text: "Docker",
+                        link: "/self-hosting/troubleshooting/docker",
                     },
                     {
                         text: "Yarn",

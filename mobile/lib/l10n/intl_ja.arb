@@ -1673,5 +1673,36 @@
   "failed": "失敗",
   "playStream": "再生",
   "playOriginal": "元動画を再生",
-  "joinAlbumConfirmationDialogBody": "アルバムに参加すると、参加者にメールアドレスが公開されます。"
+  "joinAlbumConfirmationDialogBody": "アルバムに参加すると、参加者にメールアドレスが公開されます。",
+  "editTime": "Edit time",
+  "selectTime": "Select time",
+  "selectDate": "Select date",
+  "previous": "Previous",
+  "selectOneDateAndTimeForAll": "Select one date and time for all",
+  "selectStartOfRange": "Select start of range",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
+  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
+  "newRange": "New range",
+  "selectOneDateAndTime": "Select one date and time",
+  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
+  "shiftDatesAndTime": "Shift dates and time",
+  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
+  "photocountPhotos": "$photoCount photos",
+  "notThisPerson": "Not this person?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
+  "thisWeekThroughTheYears": "This week through the years",
+  "spotlightOnYourself": "Spotlight on yourself",
+  "cLIcon": "新しいアイコン",
+  "cLIconDesc": "ついに、私たちの仕事を最もよく表す新しいアプリアイコンができました。また、アイコン切り替え機能を追加したので、以前のアイコンを引き続き使用できます。",
+  "cLMemories": "思い出",
+  "cLMemoriesDesc": "特別な瞬間を再発見しましょう。お気に入りの人、旅行や休暇、ベストショットなどがスポットライトを浴びます。機械学習を有効にし、自分をタグ付けして友達の名前を付けることで、最高の体験を実現できます。",
+
+  "cLWidgets": "ウィジェット",
+  "cLWidgetsDesc": "思い出と連携したホーム画面ウィジェットが利用可能になりました。アプリを開かなくても、特別な瞬間を表示します。",
+
+  "cLFamilyPlan": "ファミリープランの制限",
+  "cLFamilyPlanDesc": "家族が使用できるストレージの制限を設定できるようになりました。",
+
+  "cLBulkEdit": "日付の一括編集",
+  "cLBulkEditDesc": "複数の写真を選択し、1回の操作ですべての日付/時刻を編集できるようになりました。日付のシフトもサポートされています。"
 }

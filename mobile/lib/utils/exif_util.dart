@@ -10,6 +10,7 @@ import "package:ffmpeg_kit_flutter_full_gpl/media_information_session.dart";
 import "package:flutter/foundation.dart";
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+// ignore: implementation_imports
 import "package:motion_photos/src/xmp_extractor.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import 'package:photos/models/file/file.dart';

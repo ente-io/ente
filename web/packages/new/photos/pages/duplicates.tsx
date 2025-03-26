@@ -227,11 +227,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
                 state.duplicateGroups,
                 sortOrder,
             );
-            return {
-                ...state,
-                sortOrder,
-                duplicateGroups,
-            };
+            return { ...state, sortOrder, duplicateGroups };
         }
 
         case "toggleSelection": {
@@ -240,12 +236,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
             duplicateGroup.isSelected = !duplicateGroup.isSelected;
             const { prunableCount, prunableSize } =
                 deducePrunableCountAndSize(duplicateGroups);
-            return {
-                ...state,
-                duplicateGroups,
-                prunableCount,
-                prunableSize,
-            };
+            return { ...state, duplicateGroups, prunableCount, prunableSize };
         }
 
         case "deselectAll": {
@@ -254,12 +245,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
             );
             const { prunableCount, prunableSize } =
                 deducePrunableCountAndSize(duplicateGroups);
-            return {
-                ...state,
-                duplicateGroups,
-                prunableCount,
-                prunableSize,
-            };
+            return { ...state, duplicateGroups, prunableCount, prunableSize };
         }
 
         case "dedupe":
@@ -490,9 +476,7 @@ interface DuplicatesListProps {
 type DuplicatesListItemData = Pick<
     DuplicatesListProps,
     "duplicateGroups" | "onToggleSelection"
-> & {
-    layoutParams: ThumbnailGridLayoutParams;
-};
+> & { layoutParams: ThumbnailGridLayoutParams };
 
 const DuplicatesList: React.FC<DuplicatesListProps> = ({
     width,

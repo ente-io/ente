@@ -9,9 +9,9 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import type { UploadItem } from "@/gallery/services/upload";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
-    UPLOAD_RESULT,
     shouldDisableCFUploadProxy,
     type UploadPhase,
+    type UploadResult,
 } from "@/gallery/services/upload";
 import type { Collection } from "@/media/collection";
 import {
@@ -64,14 +64,14 @@ export interface InProgressUpload {
 
 export interface FinishedUpload {
     localFileID: FileID;
-    result: UPLOAD_RESULT;
+    result: UploadResult;
 }
 
 export type InProgressUploads = Map<FileID, PercentageUploaded>;
 
-export type FinishedUploads = Map<FileID, UPLOAD_RESULT>;
+export type FinishedUploads = Map<FileID, UploadResult>;
 
-export type SegregatedFinishedUploads = Map<UPLOAD_RESULT, FileID[]>;
+export type SegregatedFinishedUploads = Map<UploadResult, FileID[]>;
 
 export interface ProgressUpdater {
     setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
@@ -106,9 +106,7 @@ interface UploadCancelStatus {
 }
 
 class UploadCancelService {
-    private shouldUploadBeCancelled: UploadCancelStatus = {
-        value: false,
-    };
+    private shouldUploadBeCancelled: UploadCancelStatus = { value: false };
 
     reset() {
         this.shouldUploadBeCancelled.value = false;
@@ -163,7 +161,7 @@ class UIService {
         this.setTotalFileCount(count);
         this.filesUploadedCount = 0;
         this.inProgressUploads = new Map<number, number>();
-        this.finishedUploads = new Map<number, UPLOAD_RESULT>();
+        this.finishedUploads = new Map<number, UploadResult>();
         this.updateProgressBarUI();
     }
 
@@ -207,7 +205,7 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    moveFileToResultList(key: number, uploadResult: UPLOAD_RESULT) {
+    moveFileToResultList(key: number, uploadResult: UploadResult) {
         this.finishedUploads.set(key, uploadResult);
         this.inProgressUploads.delete(key);
         this.updateProgressBarUI();
@@ -297,10 +295,7 @@ class UIService {
 function convertInProgressUploadsToList(inProgressUploads) {
     return [...inProgressUploads.entries()].map(
         ([localFileID, progress]) =>
-            ({
-                localFileID,
-                progress,
-            }) as InProgressUpload,
+            ({ localFileID, progress }) as InProgressUpload,
     );
 }
 
@@ -600,39 +595,36 @@ class UploadManager {
 
     private async postUploadTask(
         uploadableItem: UploadableUploadItem,
-        uploadResult: UPLOAD_RESULT,
+        uploadResult: UploadResult,
         uploadedFile: EncryptedEnteFile | EnteFile | undefined,
     ) {
-        const key = UPLOAD_RESULT[uploadResult];
-        log.info(
-            `Uploaded ${uploadableItem.fileName} with result ${uploadResult} (${key})`,
-        );
+        log.info(`Upload ${uploadableItem.fileName} | ${uploadResult}`);
         try {
             const electron = globalThis.electron;
             if (electron) await markUploaded(electron, uploadableItem);
 
             let decryptedFile: EnteFile;
             switch (uploadResult) {
-                case UPLOAD_RESULT.FAILED:
-                case UPLOAD_RESULT.BLOCKED:
+                case "failed":
+                case "blocked":
                     this.failedItems.push(uploadableItem);
                     break;
-                case UPLOAD_RESULT.ALREADY_UPLOADED:
+                case "alreadyUploaded":
                     decryptedFile = uploadedFile as EnteFile;
                     break;
-                case UPLOAD_RESULT.ADDED_SYMLINK:
+                case "addedSymlink":
                     decryptedFile = uploadedFile as EnteFile;
-                    uploadResult = UPLOAD_RESULT.UPLOADED;
+                    uploadResult = "uploaded";
                     break;
-                case UPLOAD_RESULT.UPLOADED:
-                case UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL:
+                case "uploaded":
+                case "uploadedWithStaticThumbnail":
                     decryptedFile = await decryptFile(
                         uploadedFile as EncryptedEnteFile,
                         uploadableItem.collection.key,
                     );
                     break;
-                case UPLOAD_RESULT.UNSUPPORTED:
-                case UPLOAD_RESULT.TOO_LARGE:
+                case "unsupported":
+                case "tooLarge":
                     // no-op
                     break;
                 default:
@@ -640,9 +632,9 @@ class UploadManager {
             }
             if (
                 [
-                    UPLOAD_RESULT.ADDED_SYMLINK,
-                    UPLOAD_RESULT.UPLOADED,
-                    UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL,
+                    "addedSymlink",
+                    "uploaded",
+                    "uploadedWithStaticThumbnail",
                 ].includes(uploadResult)
             ) {
                 const uploadItem =
@@ -650,9 +642,8 @@ class UploadManager {
                     uploadableItem.livePhotoAssets.image;
                 if (
                     uploadItem &&
-                    (uploadResult == UPLOAD_RESULT.UPLOADED ||
-                        uploadResult ==
-                            UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL)
+                    (uploadResult == "uploaded" ||
+                        uploadResult == "uploadedWithStaticThumbnail")
                 ) {
                     indexNewUpload(decryptedFile, uploadItem);
                 }
@@ -666,12 +657,12 @@ class UploadManager {
             return uploadResult;
         } catch (e) {
             log.error("failed to do post file upload action", e);
-            return UPLOAD_RESULT.FAILED;
+            return "failed";
         }
     }
 
     private async watchFolderCallback(
-        fileUploadResult: UPLOAD_RESULT,
+        fileUploadResult: UploadResult,
         fileWithCollection: ClusteredUploadItem,
         uploadedFile: EncryptedEnteFile,
     ) {
@@ -907,18 +898,12 @@ const clusterLivePhotos = async (
             });
             index += 2;
         } else {
-            result.push({
-                ...f,
-                isLivePhoto: false,
-            });
+            result.push({ ...f, isLivePhoto: false });
             index += 1;
         }
     }
     if (index === items.length - 1) {
-        result.push({
-            ...items[index],
-            isLivePhoto: false,
-        });
+        result.push({ ...items[index], isLivePhoto: false });
     }
     return result;
 };

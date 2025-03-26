@@ -6,6 +6,7 @@ extension UserExtension on User {
   String? get displayName =>
       PersonService.instance.emailToPartialPersonDataMapCache[email]
           ?[PersonService.kNameKey] ??
+      // ignore: deprecated_member_use_from_same_package
       ((name?.isEmpty ?? true) ? null : name);
 
   String? get linkedPersonID =>

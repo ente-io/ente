@@ -13,6 +13,8 @@ import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/viewer/file_details/face_widget.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 
+final Logger _logger = Logger("FacesItemWidget");
+
 class FacesItemWidget extends StatefulWidget {
   final EnteFile file;
   const FacesItemWidget(this.file, {super.key});
@@ -135,6 +137,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       final _ = await getCachedFaceCrops(file, faces);
 
       final faceCrops = getCachedFaceCrops(file, faces);
+      final List<String> faceIDs = [];
       for (final Face face in faces) {
         final String? clusterID = faceIdsToClusterIds[face.faceID];
         final PersonEntity? person = clusterIDToPerson[clusterID] != null
@@ -142,6 +145,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
             : null;
         final highlight =
             (clusterID == lastViewedClusterID) && (person == null);
+        faceIDs.add(face.faceID);
         faceWidgets.add(
           FaceWidget(
             file,
@@ -155,9 +159,11 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         );
       }
 
+      _logger.info('File ${file.uploadedFileID} has FaceIDs: $faceIDs');
+
       return faceWidgets;
     } catch (e, s) {
-      Logger("FacesItemWidget").info(e, s);
+      _logger.severe('failed to get face widgets in file info', e, s);
       return <FaceWidget>[];
     }
   }

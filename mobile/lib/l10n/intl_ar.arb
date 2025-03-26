@@ -23,5 +23,22 @@
   "noRecoveryKeyNoDecryption": "لا يمكن فك تشفير بياناتك دون كلمة المرور أو مفتاح الاسترداد بسبب طبيعة بروتوكول التشفير الخاص بنا من النهاية إلى النهاية",
   "verifyEmail": "التحقق من البريد الإلكتروني",
   "toResetVerifyEmail": "لإعادة تعيين كلمة المرور، يرجى التحقق من بريدك الإلكتروني أولاً.",
-  "ackPasswordLostWarning": "أُدركُ أنّني فقدتُ كلمة مروري، فقد أفقد بياناتي لأن بياناتي <underline>مشفرة تشفيرًا تامًّا من النهاية إلى النهاية</underline>."
+  "ackPasswordLostWarning": "أُدركُ أنّني فقدتُ كلمة مروري، فقد أفقد بياناتي لأن بياناتي <underline>مشفرة تشفيرًا تامًّا من النهاية إلى النهاية</underline>.",
+  "editTime": "Edit time",
+  "selectTime": "Select time",
+  "selectDate": "Select date",
+  "previous": "Previous",
+  "selectOneDateAndTimeForAll": "Select one date and time for all",
+  "selectStartOfRange": "Select start of range",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
+  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
+  "newRange": "New range",
+  "selectOneDateAndTime": "Select one date and time",
+  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
+  "shiftDatesAndTime": "Shift dates and time",
+  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
+  "notThisPerson": "Not this person?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
+  "thisWeekThroughTheYears": "This week through the years",
+  "spotlightOnYourself": "Spotlight on yourself"
 }

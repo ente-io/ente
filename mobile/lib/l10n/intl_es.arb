@@ -1673,5 +1673,37 @@
   "failed": "Fallido",
   "playStream": "Reproducir transmisión",
   "playOriginal": "Reproducir original",
-  "joinAlbumConfirmationDialogBody": "Unirse a un álbum hará visible tu correo electrónico a sus participantes."
+  "joinAlbumConfirmationDialogBody": "Unirse a un álbum hará visible tu correo electrónico a sus participantes.",
+  "editTime": "Edit time",
+  "selectTime": "Select time",
+  "selectDate": "Select date",
+  "previous": "Previous",
+  "selectOneDateAndTimeForAll": "Select one date and time for all",
+  "selectStartOfRange": "Select start of range",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
+  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
+  "newRange": "New range",
+  "selectOneDateAndTime": "Select one date and time",
+  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
+  "shiftDatesAndTime": "Shift dates and time",
+  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
+  "photocountPhotos": "$photoCount photos",
+  "notThisPerson": "Not this person?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
+  "thisWeekThroughTheYears": "This week through the years",
+  "spotlightOnYourself": "Spotlight on yourself",
+  "cLIcon": "Nuevo ícono",
+  "cLIconDesc": "Finalmente, un nuevo ícono de la aplicación que creemos que representa mejor nuestro trabajo. También hemos agregado un selector de íconos para que puedas seguir usando el ícono anterior.",
+
+  "cLMemories": "Recuerdos",
+  "cLMemoriesDesc": "Redescubre tus momentos especiales: destaca a tus personas favoritas, tus viajes y vacaciones, tus mejores fotos y mucho más. Activa el aprendizaje automático, etiquétate y nombra a tus amigos para la mejor experiencia.",
+
+  "cLWidgets": "Widgets",
+  "cLWidgetsDesc": "Ahora están disponibles widgets en la pantalla de inicio integrados con recuerdos. Mostrarán tus momentos especiales sin necesidad de abrir la aplicación.",
+
+  "cLFamilyPlan": "Límites del plan familiar",
+  "cLFamilyPlanDesc": "Ahora puedes establecer límites sobre cuánto almacenamiento pueden usar los miembros de tu familia.",
+
+  "cLBulkEdit": "Edición masiva de fechas",
+  "cLBulkEditDesc": "Ahora puedes seleccionar varias fotos y editar la fecha/hora para todas ellas con una acción rápida. También se admite el cambio de fechas."
 }

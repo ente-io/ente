@@ -4,12 +4,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
+import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/permission_granted_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/photo_manager_util.dart";
 import "package:styled_text/styled_text.dart";
 
 class GrantPermissionsWidget extends StatefulWidget {
@@ -106,11 +109,12 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           child: Text(S.of(context).grantPermission),
           onPressed: () async {
             try {
-              final state = await requestPhotoMangerPermissions();
+              final state =
+                  await permissionService.requestPhotoMangerPermissions();
               _logger.info("Permission state: $state");
               if (state == PermissionState.authorized ||
                   state == PermissionState.limited) {
-                await SyncService.instance.onPermissionGranted(state);
+                await onPermissionGranted(state);
               } else if (state == PermissionState.denied) {
                 await showChoiceDialog(
                   context,
@@ -138,5 +142,17 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+  Future<void> onPermissionGranted(PermissionState state) async {
+    _logger.info("Permission granted " + state.toString());
+    await permissionService.onUpdatePermission(state);
+    if (state == PermissionState.limited) {
+      // when limited permission is granted, by default mark all folders for
+      // backup
+      await Configuration.instance.setSelectAllFoldersForBackup(true);
+    }
+    SyncService.instance.onPermissionGranted().ignore();
+    Bus.instance.fire(PermissionGrantedEvent());
   }
 }

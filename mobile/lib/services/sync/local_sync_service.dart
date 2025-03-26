@@ -7,20 +7,23 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
+import "package:photos/db/common/conflict_algo.dart";
 import 'package:photos/db/device_files_db.dart';
-import "package:photos/db/enum/conflict_algo.dart";
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/events/permission_granted_event.dart";
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ignored_file.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/ignored_files_service.dart";
-import 'package:photos/services/local/local_sync_util.dart';
-import "package:photos/utils/photo_manager_util.dart";
+import "package:photos/services/sync/import/diff.dart";
+import "package:photos/services/sync/import/local_assets.dart";
+import "package:photos/services/sync/import/model.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
@@ -36,8 +39,6 @@ class LocalSyncService {
 
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
-  static const kHasGrantedPermissionsKey = "has_granted_permissions";
-  static const kPermissionStateKey = "permission_state";
 
   LocalSyncService._privateConstructor();
 
@@ -49,18 +50,23 @@ class LocalSyncService {
     if (!AppLifecycleService.instance.isForeground) {
       await PhotoManager.setIgnorePermissionCheck(true);
     }
-    if (hasGrantedPermissions()) {
+    if (permissionService.hasGrantedPermissions()) {
       _registerChangeCallback();
+    } else {
+      Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
+        _registerChangeCallback();
+      });
     }
   }
 
   Future<void> sync() async {
-    if (!_prefs.containsKey(kHasGrantedPermissionsKey)) {
+    if (!permissionService.hasGrantedPermissions()) {
       _logger.info("Skipping local sync since permission has not been granted");
       return;
     }
     if (Platform.isAndroid && AppLifecycleService.instance.isForeground) {
-      final permissionState = await requestPhotoMangerPermissions();
+      final permissionState =
+          await permissionService.requestPhotoMangerPermissions();
       if (permissionState != PermissionState.authorized) {
         _logger.severe(
           "sync requested with invalid permission",
@@ -168,7 +174,7 @@ class LocalSyncService {
     final Map<String, Set<String>> pathToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
 
-    final localDiffResult = await getDiffWithLocal(
+    final localDiffResult = await getDiffFromExistingImport(
       localAssets,
       existingLocalFileIDs,
       pathToLocalIDs,
@@ -203,7 +209,7 @@ class LocalSyncService {
     if (hasAnyMappingChanged || hasUnsyncedFiles) {
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
-          localDiffResult.uniqueLocalFiles,
+          localDiffResult.uniqueLocalFiles ?? [],
           source: "syncAllChange",
         ),
       );
@@ -235,36 +241,6 @@ class LocalSyncService {
 
   Lock getLock() {
     return _lock;
-  }
-
-  bool hasGrantedPermissions() {
-    return _prefs.getBool(kHasGrantedPermissionsKey) ?? false;
-  }
-
-  bool hasGrantedLimitedPermissions() {
-    return _prefs.getString(kPermissionStateKey) ==
-        PermissionState.limited.toString();
-  }
-
-  bool hasGrantedFullPermission() {
-    return (_prefs.getString(kPermissionStateKey) ?? '') ==
-        PermissionState.authorized.toString();
-  }
-
-  Future<void> onUpdatePermission(PermissionState state) async {
-    await _prefs.setBool(kHasGrantedPermissionsKey, true);
-    await _prefs.setString(kPermissionStateKey, state.toString());
-  }
-
-  Future<void> onPermissionGranted(PermissionState state) async {
-    await _prefs.setBool(kHasGrantedPermissionsKey, true);
-    await _prefs.setString(kPermissionStateKey, state.toString());
-    if (state == PermissionState.limited) {
-      // when limited permission is granted, by default mark all folders for
-      // backup
-      await Configuration.instance.setSelectAllFoldersForBackup(true);
-    }
-    _registerChangeCallback();
   }
 
   bool hasCompletedFirstImport() {
@@ -320,10 +296,12 @@ class LocalSyncService {
         files,
         conflictAlgorithm: SqliteAsyncConflictAlgorithm.ignore,
       );
-      _logger.info('Inserted ${files.length} files');
-      Bus.instance.fire(
-        LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
-      );
+      _logger.info('Inserted ${files.length} out of ${allFiles.length} files');
+      if (allFiles.isNotEmpty) {
+        Bus.instance.fire(
+          LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
+        );
+      }
     }
     await _prefs.setInt(kDbUpdationTimeKey, toTime);
   }
@@ -365,7 +343,7 @@ class LocalSyncService {
     if (_existingSync != null) {
       await _existingSync!.future;
     }
-    if (hasGrantedLimitedPermissions()) {
+    if (permissionService.hasGrantedLimitedPermissions()) {
       unawaited(syncAll());
     } else {
       unawaited(sync().then((value) => _refreshDeviceFolderCountAndCover()));

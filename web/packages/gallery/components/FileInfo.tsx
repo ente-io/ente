@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* TODO: Audit this file
-Plan of action:
-- Move common components into FileInfoComponents.tsx
-
-- Move the rest out to files in the apps themeselves: albums/SharedFileInfo
-  and photos/FileInfo to deal with the @/new/photos imports here.
+/* TODO: Split this file to deal with the @/new/photos imports.
+1. Move common components into FileInfoComponents.tsx
+2. Move the rest out to files in the apps themeselves:
+   - albums/SharedFileInfo
+  -  photos/FileInfo
 */
 
-import { assertionFailed } from "@/base/assert";
 import { LinkButtonUndecorated } from "@/base/components/LinkButton";
 import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
@@ -51,10 +49,6 @@ import {
     confirmEnableMapsDialogAttributes,
 } from "@/new/photos/components/utils/dialog";
 import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
-import {
-    aboveFileViewerContentZ,
-    fileInfoDrawerZ,
-} from "@/new/photos/components/utils/z-index";
 import {
     getAnnotatedFacesForFile,
     isMLEnabled,
@@ -118,7 +112,7 @@ export type FileInfoProps = ModalVisibilityProps & {
     /**
      * The file whose information we are showing.
      */
-    file: EnteFile | undefined;
+    file: EnteFile;
     /**
      * Exif information for {@link file}.
      */
@@ -134,10 +128,10 @@ export type FileInfoProps = ModalVisibilityProps & {
      */
     allowMap?: boolean;
     /**
-     * If set, then a clickable chip will be shown for each collection that this
-     * file is a part of.
+     * If set, then a clickable chip will be shown for each normal collection
+     * that this file is a part of.
      *
-     * Uses {@link fileCollectionIDs}, {@link allCollectionsNameByID} and
+     * Uses {@link fileCollectionIDs}, {@link collectionNameByID} and
      * {@link onSelectCollection}, so all of those props should also be set for
      * this to have an effect.
      */
@@ -153,7 +147,7 @@ export type FileInfoProps = ModalVisibilityProps & {
      *
      * Used when {@link showCollections} is set.
      */
-    allCollectionsNameByID?: Map<number, string>;
+    collectionNameByID?: Map<number, string>;
     /**
      * Called when the action on the file info drawer has changed some the
      * metadata for some file, and we need to sync with remote to get our
@@ -195,7 +189,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     allowMap,
     showCollections,
     fileCollectionIDs,
-    allCollectionsNameByID,
+    collectionNameByID,
     onNeedsRemoteSync,
     onUpdateCaption,
     onSelectCollection,
@@ -212,14 +206,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     const location = useMemo(
         // Prefer the location in the EnteFile, then fall back to Exif.
-        () => (file ? fileLocation(file) : undefined) ?? exif?.parsed?.location,
+        () => fileLocation(file) ?? exif?.parsed?.location,
         [file, exif],
     );
 
     const annotatedExif = useMemo(() => annotateExif(exif), [exif]);
 
     useEffect(() => {
-        if (!file) return;
         if (!isMLEnabled()) return;
 
         let didCancel = false;
@@ -243,13 +236,10 @@ export const FileInfo: React.FC<FileInfoProps> = ({
             confirmDisableMapsDialogAttributes(() => updateMapEnabled(false)),
         );
 
-    const handleSelectFace = ({ personID }: AnnotatedFaceID) =>
+    const handleSelectFace = ({ personID, faceID }: AnnotatedFaceID) => {
+        log.info(`Selected person ${personID} for faceID ${faceID}`);
         onSelectPerson?.(personID);
-
-    if (!file) {
-        if (open) assertionFailed();
-        return <></>;
-    }
+    };
 
     return (
         <FileInfoSidebar {...{ open, onClose }}>
@@ -349,13 +339,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 )}
                 {showCollections &&
                     fileCollectionIDs &&
-                    allCollectionsNameByID &&
+                    collectionNameByID &&
                     onSelectCollection && (
                         <Albums
                             {...{
                                 file,
                                 fileCollectionIDs,
-                                allCollectionsNameByID,
+                                collectionNameByID,
                                 onSelectCollection,
                             }}
                         />
@@ -433,7 +423,6 @@ const FileInfoSidebar = styled(
         />
     ),
 )(({ theme }) => ({
-    zIndex: fileInfoDrawerZ,
     // [Note: Lighter backdrop for overlays on photo viewer]
     //
     // The default backdrop color we use for the drawer in light mode is too
@@ -540,13 +529,8 @@ const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
 
 type CaptionProps = Pick<
     FileInfoProps,
-    "allowEdits" | "onNeedsRemoteSync" | "onUpdateCaption"
-> & {
-    /* TODO(PS): This is DisplayFile, but that's meant to be removed */
-    file: EnteFile & {
-        title?: string;
-    };
-};
+    "file" | "allowEdits" | "onNeedsRemoteSync" | "onUpdateCaption"
+>;
 
 const Caption: React.FC<CaptionProps> = ({
     file,
@@ -570,8 +554,6 @@ const Caption: React.FC<CaptionProps> = ({
             try {
                 const updatedFile = await changeCaption(file, newCaption);
                 updateExistingFilePubMetadata(file, updatedFile);
-                // @ts-ignore
-                file.title = file.pubMagicMetadata.data.caption;
                 onUpdateCaption(file);
             } catch (e) {
                 log.error("Failed to update caption", e);
@@ -636,9 +618,7 @@ const CaptionForm = styled("form")(({ theme }) => ({
 type CreationTimeProps = Pick<
     FileInfoProps,
     "allowEdits" | "onNeedsRemoteSync"
-> & {
-    file: EnteFile;
-};
+> & { file: EnteFile };
 
 const CreationTime: React.FC<CreationTimeProps> = ({
     file,
@@ -821,12 +801,7 @@ const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
     };
 
     return (
-        <Dialog
-            {...{ open, onClose }}
-            sx={{ zIndex: aboveFileViewerContentZ }}
-            fullWidth
-            maxWidth="xs"
-        >
+        <Dialog {...{ open, onClose }} fullWidth maxWidth="xs">
             <DialogTitle sx={{ "&&&": { paddingBlock: "26px 0px" } }}>
                 {t("rename_file")}
             </DialogTitle>
@@ -888,11 +863,7 @@ const MapBox: React.FC<MapBoxProps> = ({
                 // @ts-ignore
                 const map = leaflet.map(mapContainer).setView(position, zoom);
                 // @ts-ignore
-                leaflet
-                    .tileLayer(urlTemplate, {
-                        attribution,
-                    })
-                    .addTo(map);
+                leaflet.tileLayer(urlTemplate, { attribution }).addTo(map);
                 // @ts-ignore
                 leaflet.marker(position).addTo(map).openPopup();
             }
@@ -1032,16 +1003,14 @@ const ExifItem = styled("div")`
 type AlbumsProps = Required<
     Pick<
         FileInfoProps,
-        "fileCollectionIDs" | "allCollectionsNameByID" | "onSelectCollection"
+        "fileCollectionIDs" | "collectionNameByID" | "onSelectCollection"
     >
-> & {
-    file: EnteFile;
-};
+> & { file: EnteFile };
 
 const Albums: React.FC<AlbumsProps> = ({
     file,
     fileCollectionIDs,
-    allCollectionsNameByID,
+    collectionNameByID,
     onSelectCollection,
 }) => (
     <InfoItem icon={<FolderOutlinedIcon />}>
@@ -1056,15 +1025,13 @@ const Albums: React.FC<AlbumsProps> = ({
         >
             {fileCollectionIDs
                 .get(file.id)
-                ?.filter((collectionID) =>
-                    allCollectionsNameByID.has(collectionID),
-                )
+                ?.filter((collectionID) => collectionNameByID.has(collectionID))
                 .map((collectionID) => (
                     <ChipButton
                         key={collectionID}
                         onClick={() => onSelectCollection(collectionID)}
                     >
-                        {allCollectionsNameByID.get(collectionID)}
+                        {collectionNameByID.get(collectionID)}
                     </ChipButton>
                 ))}
         </Stack>
@@ -1073,7 +1040,4 @@ const Albums: React.FC<AlbumsProps> = ({
 
 const ChipButton = styled((props: ButtonProps) => (
     <Button color="secondary" {...props} />
-))(({ theme }) => ({
-    ...theme.typography.small,
-    padding: "8px",
-}));
+))(({ theme }) => ({ ...theme.typography.small, padding: "8px" }));

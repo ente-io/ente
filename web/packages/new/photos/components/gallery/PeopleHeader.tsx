@@ -74,9 +74,7 @@ import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 type PeopleHeaderProps = Pick<
     GalleryBarImplProps,
     "people" | "onSelectPerson"
-> & {
-    person: Person;
-};
+> & { person: Person };
 
 export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     people,
@@ -214,9 +212,7 @@ const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
 type ClusterPersonHeaderProps = Pick<
     PeopleHeaderProps,
     "people" | "onSelectPerson"
-> & {
-    person: ClusterPerson;
-};
+> & { person: ClusterPerson };
 
 const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
     people,
@@ -411,9 +407,7 @@ const PersonButton: React.FC<PersonButtonProps> = ({
     </ItemCard>
 );
 
-type SuggestionsDialogProps = ModalVisibilityProps & {
-    person: CGroupPerson;
-};
+type SuggestionsDialogProps = ModalVisibilityProps & { person: CGroupPerson };
 
 interface SuggestionsDialogState {
     activity: "fetching" | "saving" | undefined;
@@ -687,10 +681,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 ) : state.suggestions.length == 0 ? (
                     <CenteredFill>
                         <Typography
-                            sx={{
-                                color: "text.muted",
-                                textAlign: "center",
-                            }}
+                            sx={{ color: "text.muted", textAlign: "center" }}
                         >
                             {t("people_suggestions_empty")}
                         </Typography>

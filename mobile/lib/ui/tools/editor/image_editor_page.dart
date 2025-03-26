@@ -66,7 +66,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, _) async {
         if (_hasBeenEdited()) {
           await _showExitConfirmationDialog(context);
         } else {
@@ -358,11 +358,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
       await PhotoManager.stopChangeNotify();
-      final AssetEntity? newAsset =
+      final AssetEntity newAsset =
           await (PhotoManager.editor.saveImage(result, filename: fileName));
       final newFile = await ente.EnteFile.fromAsset(
         widget.originalFile.deviceFolder ?? '',
-        newAsset!,
+        newAsset,
       );
 
       newFile.creationTime = widget.originalFile.creationTime;

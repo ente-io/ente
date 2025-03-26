@@ -1,4 +1,3 @@
-import { PAGES } from "@/accounts/constants/pages";
 import { generateKeyAndSRPAttributes } from "@/accounts/services/srp";
 import { sendOTT } from "@/accounts/services/user";
 import { isWeakPassword } from "@/accounts/utils/password";
@@ -6,7 +5,7 @@ import { LinkButton } from "@/base/components/LinkButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { isMuseumHTTPError } from "@/base/http";
 import log from "@/base/log";
-import { LS_KEYS, setLSUser } from "@ente/shared//storage/localStorage";
+import { setLSUser } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
 import {
@@ -18,7 +17,6 @@ import {
     setJustSignedUp,
     setLocalReferralSource,
 } from "@ente/shared/storage/localStorage/helpers";
-import { SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Box,
@@ -109,20 +107,17 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 const { keyAttributes, masterKey, srpSetupAttributes } =
                     await generateKeyAndSRPAttributes(passphrase);
 
-                setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
-                setData(LS_KEYS.SRP_SETUP_ATTRIBUTES, srpSetupAttributes);
+                setData("originalKeyAttributes", keyAttributes);
+                setData("srpSetupAttributes", srpSetupAttributes);
                 await generateAndSaveIntermediateKeyAttributes(
                     passphrase,
                     keyAttributes,
                     masterKey,
                 );
 
-                await saveKeyInSessionStore(
-                    SESSION_KEYS.ENCRYPTION_KEY,
-                    masterKey,
-                );
+                await saveKeyInSessionStore("encryptionKey", masterKey);
                 setJustSignedUp(true);
-                void router.push(PAGES.VERIFY);
+                void router.push("/verify");
             } catch (e) {
                 setFieldError("confirm", t("password_generation_failed"));
                 throw e;

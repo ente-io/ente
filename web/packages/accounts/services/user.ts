@@ -16,12 +16,15 @@ export interface UserVerificationResponse {
     encryptedToken?: string | undefined;
     token?: string;
     twoFactorSessionID?: string | undefined;
+    passkeySessionID?: string | undefined;
     /**
      * Base URL for the accounts app where we should redirect to for passkey
      * verification.
+     *
+     * This will only be set if the user has setup a passkey (i.e., whenever
+     * {@link passkeySessionID} is defined).
      */
-    accountsUrl: string;
-    passkeySessionID?: string | undefined;
+    accountsUrl: string | undefined;
     /**
      * If both passkeys and TOTP based two factors are enabled, then {@link
      * twoFactorSessionIDV2} will be set to the TOTP session ID instead of
@@ -111,11 +114,7 @@ export const verifyEmail = async (
     const res = await fetch(await apiURL("/users/verify-email"), {
         method: "POST",
         headers: publicRequestHeaders(),
-        body: JSON.stringify({
-            email,
-            ott,
-            ...(source ? { source } : {}),
-        }),
+        body: JSON.stringify({ email, ott, ...(source ? { source } : {}) }),
     });
     ensureOk(res);
     // See: [Note: strict mode migration]
@@ -162,11 +161,11 @@ export const EmailOrSRPAuthorizationResponse = z.object({
     keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
     encryptedToken: z.string().nullish().transform(nullToUndefined),
     token: z.string().nullish().transform(nullToUndefined),
+    twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
     passkeySessionID: z.string().nullish().transform(nullToUndefined),
     // Base URL for the accounts app where we should redirect to for passkey
     // verification.
-    accountsUrl: z.string(),
-    twoFactorSessionID: z.string().nullish().transform(nullToUndefined),
+    accountsUrl: z.string().nullish().transform(nullToUndefined),
     // TwoFactorSessionIDV2 is only set if user has both passkey and two factor
     // enabled. This is to ensure older clients keep using passkey flow when
     // both are set. It is intended to be removed once all clients starts
@@ -204,9 +203,7 @@ export const putAttributes = async (
         await apiURL("/users/attributes"),
         { keyAttributes },
         undefined,
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );
 
 /**
@@ -256,10 +253,7 @@ export const recoverTwoFactor = async (
 ) => {
     const resp = await HTTPService.get(
         await apiURL("/users/two-factor/recover"),
-        {
-            sessionID,
-            twoFactorType,
-        },
+        { sessionID, twoFactorType },
     );
     return resp.data as TwoFactorRecoveryResponse;
 };
@@ -271,11 +265,7 @@ export const removeTwoFactor = async (
 ) => {
     const resp = await HTTPService.post(
         await apiURL("/users/two-factor/remove"),
-        {
-            sessionID,
-            secret,
-            twoFactorType,
-        },
+        { sessionID, secret, twoFactorType },
     );
     return resp.data as TwoFactorVerificationResponse;
 };
@@ -283,14 +273,9 @@ export const removeTwoFactor = async (
 export const changeEmail = async (email: string, ott: string) => {
     await HTTPService.post(
         await apiURL("/users/change-email"),
-        {
-            email,
-            ott,
-        },
+        { email, ott },
         undefined,
-        {
-            "X-Auth-Token": getToken(),
-        },
+        { "X-Auth-Token": getToken() },
     );
 };
 
@@ -331,7 +316,5 @@ export const setRecoveryKey = async (token: string, recoveryKey: RecoveryKey) =>
         await apiURL("/users/recovery-key"),
         recoveryKey,
         undefined,
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );

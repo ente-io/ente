@@ -133,9 +133,7 @@ export const OverflowMenuOption: React.FC<
                 color: theme.vars.palette[color].main,
                 // Reduce the size of the icons a bit to make it fit better with
                 // the text.
-                "& .MuiSvgIcon-root": {
-                    fontSize: "20px",
-                },
+                "& .MuiSvgIcon-root": { fontSize: "20px" },
             })}
         >
             <Stack

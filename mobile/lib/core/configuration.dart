@@ -28,7 +28,6 @@ import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -210,15 +209,14 @@ class Configuration {
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
+    unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
     if (!autoLogout) {
       // Following services won't be initialized if it's the case of autoLogout
       FileUploader.instance.clearCachedUploadURLs();
       CollectionsService.instance.clearCache();
       FavoritesService.instance.clearCache();
-      MemoriesService.instance.clearCache();
       SearchService.instance.clearCache();
       PersonService.instance.clearCache();
-      unawaited(HomeWidgetService.instance.clearHomeWidget());
       Bus.instance.fire(UserLoggedOutEvent());
     } else {
       await _preferences.setBool("auto_logout", true);

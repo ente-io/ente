@@ -1673,5 +1673,37 @@
   "failed": "Mislukt",
   "playStream": "Stream afspelen",
   "playOriginal": "Origineel afspelen",
-  "joinAlbumConfirmationDialogBody": "Deelnemen aan een album maakt je e-mail zichtbaar voor de deelnemers."
+  "joinAlbumConfirmationDialogBody": "Deelnemen aan een album maakt je e-mail zichtbaar voor de deelnemers.",
+  "editTime": "Edit time",
+  "selectTime": "Select time",
+  "selectDate": "Select date",
+  "previous": "Previous",
+  "selectOneDateAndTimeForAll": "Select one date and time for all",
+  "selectStartOfRange": "Select start of range",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
+  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
+  "newRange": "New range",
+  "selectOneDateAndTime": "Select one date and time",
+  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
+  "shiftDatesAndTime": "Shift dates and time",
+  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
+  "photocountPhotos": "$photoCount photos",
+  "notThisPerson": "Not this person?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
+  "thisWeekThroughTheYears": "This week through the years",
+  "spotlightOnYourself": "Spotlight on yourself",
+  "cLIcon": "Nieuw pictogram",
+  "cLIconDesc": "Eindelijk een nieuw app-pictogram dat volgens ons ons werk het beste vertegenwoordigt. We hebben ook een pictogramwisselaar toegevoegd, zodat u het oude pictogram kunt blijven gebruiken.",
+
+  "cLMemories": "Herinneringen",
+  "cLMemoriesDesc": "Herontdek uw speciale momenten - in de schijnwerpers staan uw favoriete mensen, uw reizen en vakanties, uw beste foto's en nog veel meer. Schakel machine learning in, tag uzelf en noem uw vrienden voor de beste ervaring.",
+
+  "cLWidgets": "Widgets",
+  "cLWidgetsDesc": "Startscherm-widgets die zijn geïntegreerd met herinneringen zijn nu beschikbaar. Ze laten uw speciale momenten zien zonder de app te openen.",
+
+  "cLFamilyPlan": "Gezinsplanlimieten",
+  "cLFamilyPlanDesc": "U kunt nu limieten instellen voor hoeveel opslagruimte uw familieleden kunnen gebruiken.",
+
+  "cLBulkEdit": "Bewerken van datums in bulk",
+  "cLBulkEditDesc": "U kunt nu meerdere foto's selecteren en de datum/tijd voor allemaal in één snelle actie bewerken. Het verschuiven van datums wordt ook ondersteund."
 }

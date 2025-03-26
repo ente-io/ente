@@ -24,7 +24,6 @@ import {
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
-import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
 import { runMigrations } from "@/new/photos/services/migration";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
@@ -33,7 +32,6 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import {
     getData,
     isLocalStorageAndIndexedDBMismatch,
-    LS_KEYS,
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import "@fontsource-variable/inter";
@@ -49,10 +47,8 @@ import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 
 import "photoswipe/dist/photoswipe.css";
-// TODO(PS): Note, auto hide only works with the new CSS.
-// import "../../../../packages/gallery/components/viewer/ps5/dist/photoswipe.css";
-
 import "styles/global.css";
+import "styles/photoswipe.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
@@ -69,7 +65,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const logout = useCallback(() => void photosLogout(), []);
 
     useEffect(() => {
-        const user = getData(LS_KEYS.USER) as User | undefined | null;
+        const user = getData("user") as User | undefined | null;
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
@@ -129,11 +125,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         const needsFamilyRedirect = query.get("redirect") == "families";
-        if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token)
+        if (needsFamilyRedirect && getData("user")?.token)
             redirectToFamilyPortal();
 
         router.events.on("routeChangeStart", () => {
-            if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token) {
+            if (needsFamilyRedirect && getData("user")?.token) {
                 redirectToFamilyPortal();
 
                 // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
@@ -170,13 +166,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         <ThemeProvider theme={photosTheme}>
             <CustomHead {...{ title }} />
             <CssBaseline enableColorScheme />
+
             <ThemedLoadingBar ref={loadingBarRef} />
-
-            <AttributedMiniDialog
-                sx={{ zIndex: aboveFileViewerContentZ }}
-                {...miniDialogProps}
-            />
-
+            <AttributedMiniDialog {...miniDialogProps} />
             <Notification {...notificationProps} />
 
             {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}

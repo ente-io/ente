@@ -38,6 +38,7 @@ import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/sync/diff_fetcher.dart";
 import 'package:photos/services/sync/local_sync_service.dart';
@@ -122,6 +123,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     _logger.info("Building initstate");
     super.initState();
+
+    if (LocalSyncService.instance.hasCompletedFirstImport()) {
+      MemoryHomeWidgetService.instance.checkPendingMemorySync();
+    }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       _selectedTabIndex = event.selectedIndex;
@@ -176,18 +181,16 @@ class _HomeWidgetState extends State<HomeWidget> {
         // Loading page will redirect to BackupFolderSelectionPage.
         // To avoid showing folder hook in middle during routing,
         // delay state refresh for home page
-        if (!LocalSyncService.instance.hasGrantedLimitedPermissions()) {
+        if (!permissionService.hasGrantedLimitedPermissions()) {
           delayInRefresh = const Duration(milliseconds: 250);
         }
         Future.delayed(
           delayInRefresh,
-          () => {
-            if (mounted)
-              {
-                setState(
-                  () {},
-                ),
-              },
+          () {
+            if (mounted) {
+              setState(() {});
+              MemoryHomeWidgetService.instance.checkPendingMemorySync();
+            }
           },
         );
       }
@@ -446,53 +449,57 @@ class _HomeWidgetState extends State<HomeWidget> {
           return;
         }
 
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              actions: [
-                const SizedBox(height: 24),
-                ButtonWidget(
-                  labelText: S.of(context).openFile,
-                  buttonType: ButtonType.primary,
-                  onTap: () async {
-                    Navigator.of(context).pop(true);
+        if (value.isNotEmpty &&
+            (value[0].mimeType == "image/*" ||
+                value[0].mimeType == "video/*")) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                actions: [
+                  const SizedBox(height: 24),
+                  ButtonWidget(
+                    labelText: S.of(context).openFile,
+                    buttonType: ButtonType.primary,
+                    onTap: () async {
+                      Navigator.of(context).pop(true);
+                    },
+                  ),
+                  const SizedBox(
+                    height: 12,
+                  ),
+                  ButtonWidget(
+                    buttonType: ButtonType.secondary,
+                    labelText: S.of(context).backupFile,
+                    onTap: () async {
+                      Navigator.of(context).pop(false);
+                    },
+                  ),
+                ],
+              );
+            },
+          ).then((shouldOpenFile) {
+            if (shouldOpenFile) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) {
+                    return FileViewer(
+                      sharedMediaFile: value[0],
+                    );
                   },
                 ),
-                const SizedBox(
-                  height: 12,
-                ),
-                ButtonWidget(
-                  buttonType: ButtonType.secondary,
-                  labelText: S.of(context).backupFile,
-                  onTap: () async {
-                    Navigator.of(context).pop(false);
-                  },
-                ),
-              ],
-            );
-          },
-        ).then((shouldOpenFile) {
-          if (shouldOpenFile) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) {
-                  return FileViewer(
-                    sharedMediaFile: value[0],
-                  );
-                },
-              ),
-            );
-          } else {
-            if (mounted) {
-              setState(() {
-                _shouldRenderCreateCollectionSheet = true;
-                _sharedFiles = value;
-              });
+              );
+            } else {
+              if (mounted) {
+                setState(() {
+                  _shouldRenderCreateCollectionSheet = true;
+                  _sharedFiles = value;
+                });
+              }
             }
-          }
-        });
+          });
+        }
       },
       onError: (err) {
         _logger.severe("getIntentDataStream error: $err");
@@ -581,7 +588,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     return UserDetailsStateWidget(
       child: PopScope(
         canPop: false,
-        onPopInvoked: (didPop) async {
+        onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
           if (_selectedTabIndex == 0) {
             if (_selectedFiles.files.isNotEmpty) {
@@ -643,7 +650,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
-    if (!LocalSyncService.instance.hasGrantedPermissions()) {
+    if (!permissionService.hasGrantedPermissions()) {
       entityService.syncEntities().then((_) {
         PersonService.instance.resetEmailToPartialPersonDataCache();
       });
@@ -671,7 +678,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     _showShowBackupHook =
         !Configuration.instance.hasSelectedAnyBackupFolder() &&
-            !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
+            !permissionService.hasGrantedLimitedPermissions() &&
             CollectionsService.instance.getActiveCollections().isEmpty;
 
     return Stack(

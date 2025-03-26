@@ -1,12 +1,14 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:like_button/like_button.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/favorites_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 
@@ -38,6 +40,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return FutureBuilder<bool>(
       future: _fetchData(),
       builder: (context, snapshot) {
@@ -48,6 +51,14 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
                 padding: 2,
               ) // Add this line
             : LikeButton(
+                bubblesColor: BubblesColor(
+                  dotPrimaryColor: colorScheme.primary700,
+                  dotSecondaryColor: colorScheme.primary400,
+                ),
+                circleColor: CircleColor(
+                  start: colorScheme.primary400,
+                  end: colorScheme.primary300,
+                ),
                 size: 24,
                 isLiked: isLiked,
                 onTap: (oldValue) async {
@@ -90,6 +101,11 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
                   setState(() {
                     _isLoading = false; // Add this line
                   });
+
+                  if (isLiked) {
+                    unawaited(HapticFeedback.mediumImpact());
+                  }
+
                   return hasError ? oldValue : isLiked;
                 },
                 likeBuilder: (isLiked) {
@@ -100,9 +116,7 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
                     isLiked
                         ? Icons.favorite_rounded
                         : Icons.favorite_border_rounded,
-                    color: isLiked
-                        ? Colors.pinkAccent
-                        : Colors.white, //same for both themes
+                    color: Colors.white, //same for both themes
                     size: 24,
                   );
                 },

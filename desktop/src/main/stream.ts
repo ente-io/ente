@@ -125,7 +125,12 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
     const { writable, readable } = new TransformStream();
     const stream = await zip.stream(entry);
 
-    const nodeWritable = Writable.fromWeb(writable);
+    // Silence a type error about the Promise<void> returned by the close method
+    // of writable as not being assignable to Promise<undefined> which started
+    // appearing after updating to TypeScript 5.8.
+    //
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+    const nodeWritable = Writable.fromWeb(writable as any);
     stream.pipe(nodeWritable);
 
     nodeWritable.on("error", (e: unknown) => {
