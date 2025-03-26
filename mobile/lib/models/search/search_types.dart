@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -245,7 +246,7 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getMagicSectionResults(context);
 
       case SectionType.moment:
-        if (flagService.internalUser) {
+        if (flagService.internalUser && !kDebugMode) {
           // TODO: lau: remove this whole smart memories and moment altogether
           return SearchService.instance.smartMemories(context, limit);
         }
