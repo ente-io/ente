@@ -1,6 +1,7 @@
+import AVFoundation
 import Flutter
 import UIKit
-import AVFoundation
+import workmanager
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -13,10 +14,11 @@ import AVFoundation
       UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
     }
 
-    let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
-    let audioSessionChannel = FlutterMethodChannel(name: "io.ente.frame/audio_session",
-                                                   binaryMessenger: controller.binaryMessenger)
-    
+    let controller: FlutterViewController = window?.rootViewController as! FlutterViewController
+    let audioSessionChannel = FlutterMethodChannel(
+      name: "io.ente.frame/audio_session",
+      binaryMessenger: controller.binaryMessenger)
+
     audioSessionChannel.setMethodCallHandler({
       (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
       if call.method == "setAudioSessionCategory" {
@@ -27,19 +29,25 @@ import AVFoundation
     })
 
     GeneratedPluginRegistrant.register(with: self)
+    WorkmanagerPlugin.setPluginRegistrantCallback { registry in
+      GeneratedPluginRegistrant.register(with: registry)
+    }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
   private func setAudioSessionCategory(result: @escaping FlutterResult) {
     do {
-      try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers, .defaultToSpeaker])
+      try AVAudioSession.sharedInstance().setCategory(
+        .playback, mode: .default, options: [.mixWithOthers, .defaultToSpeaker])
       try AVAudioSession.sharedInstance().setActive(true)
       result(nil)
     } catch {
-      result(FlutterError(code: "AUDIO_SESSION_ERROR",
-                          message: "Failed to set audio session category",
-                          details: error.localizedDescription))
+      result(
+        FlutterError(
+          code: "AUDIO_SESSION_ERROR",
+          message: "Failed to set audio session category",
+          details: error.localizedDescription))
     }
   }
 

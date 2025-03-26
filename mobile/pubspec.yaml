@@ -24,7 +24,6 @@ dependencies:
   animate_do: ^2.0.0
   animated_list_plus: ^0.5.2
   archive: ^3.6.1
-  background_fetch: ^1.2.1
   battery_info: # update source if there is any update
     git:
       url: https://github.com/ente-io/battery_info
@@ -215,7 +214,11 @@ dependencies:
       url: https://github.com/ente-io/wallpaper_manager_fork.git
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
-  workmanager: ^0.5.2
+  workmanager: # pub.dev is behind
+    git:
+      url: https://github.com/fluttercommunity/flutter_workmanager
+      ref: 4ce0651
+      path: workmanager
   xml: ^6.3.0
   xmp: ^1.0.3
 

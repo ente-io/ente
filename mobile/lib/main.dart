@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import "package:adaptive_theme/adaptive_theme.dart";
-import "package:background_fetch/background_fetch.dart";
 import "package:computer/computer.dart";
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -53,8 +52,6 @@ import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:workmanager/workmanager.dart";
 
-bool enableWorkManager = Platform.isAndroid;
-
 final _logger = Logger("main");
 
 bool _isProcessRunning = false;
@@ -79,9 +76,9 @@ void main() async {
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
 
-  if (!enableWorkManager) {
-    unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
-  }
+  // if (!enableWorkManager) {
+  //   unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
+  // }
 
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
   SystemChrome.setSystemUIOverlayStyle(
@@ -137,7 +134,7 @@ Future<void> runBackgroundTask(String taskId, {String mode = 'normal'}) async {
   if (_isProcessRunning) {
     _logger.info("Background task triggered when process was already running");
     await _sync('bgTaskActiveProcess');
-    if (!enableWorkManager) await BackgroundFetch.finish(taskId);
+    // if (!enableWorkManager) await BackgroundFetch.finish(taskId);
   } else {
     _runWithLogs(
       () async {
@@ -153,7 +150,7 @@ Future<void> _runInBackground(String taskId) async {
   await Future.delayed(const Duration(seconds: 3));
   if (await _isRunningInForeground()) {
     _logger.info("FG task running, skipping BG taskID: $taskId");
-    if (!enableWorkManager) await BackgroundFetch.finish(taskId);
+    // if (!enableWorkManager) await BackgroundFetch.finish(taskId);
     return;
   } else {
     _logger.info("FG task is not running");
@@ -161,9 +158,9 @@ Future<void> _runInBackground(String taskId) async {
   _logger.info("[BackgroundFetch] Event received: $taskId");
   _scheduleBGTaskKill(taskId);
 
-  if (!enableWorkManager && Platform.isIOS) {
-    _scheduleSuicide(kBGTaskTimeout, taskId); // To prevent OS from punishing us
-  }
+  // if (!enableWorkManager && Platform.isIOS) {
+  //   _scheduleSuicide(kBGTaskTimeout, taskId); // To prevent OS from punishing us
+  // }
 
   await _init(true, via: 'runViaBackgroundTask');
   await Future.wait(
@@ -175,22 +172,28 @@ Future<void> _runInBackground(String taskId) async {
       }(),
     ],
   );
-  if (!enableWorkManager) await BackgroundFetch.finish(taskId);
+  // if (!enableWorkManager) await BackgroundFetch.finish(taskId);
 }
 
 // https://stackoverflow.com/a/73796478/546896
-@pragma('vm:entry-point')
-void _headlessTaskHandler(HeadlessTask task) {
-  debugPrint("_headlessTaskHandler");
-  if (task.timeout) {
-    BackgroundFetch.finish(task.taskId);
-  } else {
-    runBackgroundTask(task.taskId, mode: "headless");
-  }
-}
+// @pragma('vm:entry-point')
+// void _headlessTaskHandler(HeadlessTask task) {
+//   debugPrint("_headlessTaskHandler");
+//   if (task.timeout) {
+//     BackgroundFetch.finish(task.taskId);
+//   } else {
+//     runBackgroundTask(task.taskId, mode: "headless");
+//   }
+// }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
   try {
+    // if (isBackground) {
+    //   for (int i = 0; i < 60 * 10; i++) {
+    //     await Future.delayed(const Duration(seconds: 1));
+    //     _logger.info("Waiting for 10 minutes for foreground to start $i");
+    //   }
+    // }
     bool initComplete = false;
     final TimeLogger tlog = TimeLogger();
     Future.delayed(const Duration(seconds: 15), () {
@@ -397,11 +400,11 @@ Future<void> killBGTask([String? taskId]) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
-    if (!enableWorkManager) {
-      await BackgroundFetch.finish(taskId);
-    } else {
-      await Workmanager().cancelByUniqueName(taskId);
-    }
+    // if (!enableWorkManager) {
+    //   await BackgroundFetch.finish(taskId);
+    // } else {
+    await Workmanager().cancelByUniqueName(taskId);
+    // }
   }
 }
 
@@ -421,9 +424,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     _runWithLogs(
       () async {
         _logger.info("Background push received");
-        if (Platform.isIOS) {
-          _scheduleSuicide(kBGPushTimeout); // To prevent OS from punishing us
-        }
+        // if (Platform.isIOS) {
+        //   _scheduleSuicide(kBGPushTimeout); // To prevent OS from punishing us
+        // }
         await _init(true, via: 'firebasePush');
         if (PushService.shouldSync(message)) {
           await _sync('firebaseBgSyncNoActiveProcess');
