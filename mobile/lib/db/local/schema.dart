@@ -2,7 +2,14 @@ import "package:flutter/foundation.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 const assetColumns =
-    "id, type, sub_type, width, height, duration_in_sec, orientation, is_fav, title, relative_path, created_at, modified_at, mime_type, latitude, longitude";
+    "id, type, sub_type, width, height, duration_in_sec, orientation, is_fav, title, relative_path, created_at, modified_at, mime_type, latitude, longitude, scan_state";
+
+// Generate the update clause dynamically (excludes 'id')
+final updateAssetColumns = assetColumns
+    .split(', ')
+    .where((column) => column != 'id') // Exclude primary key from update
+    .map((column) => '$column = excluded.$column') // Use excluded virtual table
+    .join(', ');
 
 const devicePathColumns =
     "path_id, name, album_type, ios_album_type, ios_album_subtype";
@@ -25,52 +32,12 @@ class LocalDBMigration {
       modified_at INTEGER NOT NULL,
       mime_type TEXT,
       latitude REAL,
-      longitude REAL
+      longitude REAL,
+      scan_state INTEGER DEFAULT 0,
+      hash TEXT,
+      size INTEGER,
+      os_metadata TEXT DEFAULT '{}'
     );
-    ''',
-    '''
-    CREATE TABLE metadata (
-      id TEXT PRIMARY KEY,
-      hash TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      modified_at INTEGER NOT NULL,
-      latitude REAL,
-      longitude REAL
-    );
-    ''',
-    '''
-    CREATE TRIGGER delete_metadata
-    AFTER DELETE ON assets
-    FOR EACH ROW
-    BEGIN
-        DELETE FROM metadata WHERE id = OLD.id;
-    END;
-    ''',
-    '''
-    CREATE TABLE old_hash (
-     id TEXT NOT NULL,
-     hash TEXT NOT NULL,
-     created_at INTEGER NOT NULL,
-     PRIMARY KEY (id, hash)
-    ); 
-    ''',
-    '''
-    CREATE TRIGGER delete_old_hash
-    AFTER DELETE ON assets
-    FOR EACH ROW
-    BEGIN
-        DELETE FROM old_hash WHERE id = OLD.id;
-    END;
-    ''',
-    '''
-    CREATE TRIGGER update_old_hash
-    AFTER UPDATE OF hash ON metadata
-    FOR EACH ROW
-        WHEN OLD.hash != NEW.hash AND NEW.hash IS NOT NULL
-          BEGIN
-            INSERT OR REPLACE INTO old_hash (id, hash, created_at) 
-            VALUES (OLD.id, OLD.hash, strftime('%s', 'now'));
-           END;
     ''',
     '''
     CREATE TABLE device_path (
@@ -86,15 +53,9 @@ class LocalDBMigration {
       path_id TEXT NOT NULL,
       asset_id TEXT NOT NULL,
       PRIMARY KEY (path_id, asset_id)
+      FOREIGN KEY (path_id) REFERENCES device_path(path_id)
+      FOREIGN KEY (asset_id) REFERENCES assets(id)
     );
-    ''',
-    '''
-    CREATE TRIGGER delete_device_path_assets
-    AFTER DELETE ON assets
-    FOR EACH ROW
-    BEGIN
-        DELETE FROM device_path_assets WHERE asset_id = OLD.id;
-    END;
     ''',
     '''
     CREATE TABLE queue (
@@ -102,15 +63,7 @@ class LocalDBMigration {
       name TEXT NOT NULL,
       PRIMARY KEY (id, name)
     );
-    ''',
     '''
-    CREATE TRIGGER delete_queue
-    AFTER DELETE ON assets
-    FOR EACH ROW
-    BEGIN
-        DELETE FROM queue WHERE id = OLD.id;
-    END;
-    ''',
   ];
 
   static Future<void> migrate(

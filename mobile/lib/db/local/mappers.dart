@@ -23,6 +23,7 @@ class LocalDBMappers {
       entity.mimeType,
       entity.latitude,
       entity.longitude,
+      0, // scan_state
     ];
   }
 

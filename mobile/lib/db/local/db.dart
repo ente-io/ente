@@ -11,7 +11,7 @@ import "package:photos/db/local/schema.dart";
 import "package:photos/log/devlog.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
-import "../../models/file/file.dart";
+import 'package:photos/models/file/file.dart';
 
 class LocalDB with SqlDbBase {
   static const _databaseName = "local_4.db";
@@ -38,7 +38,7 @@ class LocalDB with SqlDbBase {
       final List<List<Object?>> values =
           slice.map((e) => LocalDBMappers.assetsRow(e)).toList();
       await _sqliteDB.executeBatch(
-        'INSERT OR REPLACE INTO assets ($assetColumns) values(${getParams(15)})',
+        'INSERT INTO assets ($assetColumns) values(${getParams(16)}) ON CONFLICT(id) DO UPDATE SET $updateAssetColumns',
         values,
       );
     });
