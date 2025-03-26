@@ -205,6 +205,7 @@
     width: 100%;
 }
 
+/* Hide the controls if they're not associated to a media-controller. */
 .pswp-ente .pswp__media-controls media-control-bar:not([mediacontroller]) {
     display: none;
 }

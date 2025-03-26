@@ -1166,6 +1166,10 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
 const hlsVideoControlsHTML = () => `
 <media-control-bar>
   <media-play-button></media-play-button>
+  <media-mute-button></media-mute-button>
+  <media-time-range></media-time-range>
+  <media-time-display></media-time-display>
+  <media-fullscreen-button></media-fullscreen-button>
 </media-control-bar>
 `;
 
