@@ -204,6 +204,8 @@
     left: 0px;
     right: 0px;
 
+    background: linear-gradient(transparent, rgb(0 0 0 / 0.8));
+
     /* Similar to our other controls */
     --media-icon-color: rgb(255 255 255 / 0.8);
     --media-font-family: "Inter Variable", sans-serif;
