@@ -17,7 +17,7 @@ class MLComputer extends SuperIsolate {
   final _initModelLock = Lock();
 
   @override
-  bool get isDartUiIsolate => true;
+  bool get isDartUiIsolate => false;
 
   @override
   String get isolateName => "MLComputerIsolate";
