@@ -217,6 +217,7 @@
     flex-direction: column;
 }
 
+
 /* Hide the controls if they're not associated to a media-controller. */
 media-control-bar:not([mediacontroller]) {
     display: none;
