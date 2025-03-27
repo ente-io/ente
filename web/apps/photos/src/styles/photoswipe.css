@@ -190,13 +190,13 @@
 }
 
 /*
- Style the custom video controls we provide.
+  Style the custom video controls we provide.
 
- The media-controller itself is center positioned (shrinking if needed) by
- PhotoSwipe using the width and height of the video that we provide to it.
+  The media-controller itself is center positioned (shrinking if needed) by
+  PhotoSwipe using the width and height of the video that we provide to it.
 
- The controls are absolutely position at the bottom of the screen instead of
- being attached to the video.
+  The controls are absolutely position at the bottom of the screen instead of
+  being attached to the video.
  */
 .pswp-ente .pswp__media-controls {
     position: absolute;
@@ -207,10 +207,12 @@
     /* Similar to our other controls */
     --media-icon-color: rgba(255 255 255 / 0.8);
     --media-font-family: "Inter Variable", sans-serif;
+    --media-control-background: transparent;
+    --media-control-hover-background: rgba(255 255 255 / 0.12);
 }
 
 /*
- Stack controls rows vertically.
+  Stack controls rows vertically.
  */
 .pswp-ente .pswp__media-controls > div {
     display: flex;
@@ -223,16 +225,7 @@ media-control-bar:not([mediacontroller]) {
 }
 
 media-control-bar {
-    padding-inline: 4px;
-}
-
-media-control-bar:not(:first-child) {
-    /* Background color the padding around the controls. Color is same as the
-       --media-secondary-color that (transitively) gets used as the default
-       background for the media chrome controls. */
-    background-color: rgba(20 20 30 / 0.7);
-    /** Reset the default background since we now provide our own. */
-    --media-control-background: transparent;
+    padding-inline: 12px;
 }
 
 media-control-bar:last-child {
@@ -247,6 +240,12 @@ media-loading-indicator {
 /* Used as a spacer. */
 media-text-display {
     flex-grow: 1;
+}
+
+media-time-range {
+    --media-primary-color: red;
+    --media-control-hover-background: transparent;
+    --media-control-padding: 0px;
 }
 
 /*
