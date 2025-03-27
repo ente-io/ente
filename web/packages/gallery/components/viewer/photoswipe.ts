@@ -3,6 +3,7 @@ import { FileType } from "@/media/file-type";
 import "hls-video-element";
 import { t } from "i18next";
 import "media-chrome";
+import "media-chrome/menu";
 import PhotoSwipe, { type SlideData } from "photoswipe";
 import {
     fileViewerDidClose,
@@ -453,7 +454,7 @@ export class FileViewerPhotoSwipe {
         const updateMediaControls = (mediaControllerID: string | undefined) => {
             const controlBars =
                 mediaControlsContainerElement?.querySelectorAll(
-                    "media-control-bar",
+                    "media-control-bar, media-playback-rate-menu",
                 ) ?? [];
             for (const bar of controlBars) {
                 if (mediaControllerID) {
@@ -1147,6 +1148,7 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 //
 //     import "hls-video-element";
 //     import "media-chrome";
+//     import "media-chrome/menu";
 //
 // TODO(HLS): Update code above that searches for the video element
 const hlsVideoHTML = (url: string, mediaControllerID: string) => `
@@ -1170,6 +1172,7 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  */
 const hlsVideoControlsHTML = () => `
 <div>
+  <media-playback-rate-menu hidden id="menu1" anchor="menu-button1"></media-playback-rate-menu>
   <media-control-bar>
     <media-loading-indicator noautohide></media-loading-indicator>
   </media-control-bar>
@@ -1181,6 +1184,7 @@ const hlsVideoControlsHTML = () => `
     <media-mute-button></media-mute-button>
     <media-time-display showduration notoggle></media-time-display>
     <media-text-display></media-text-display>
+    <media-playback-rate-menu-button id="menu-button1" invoketarget="menu1"></media-playback-rate-menu-button>
     <media-pip-button></media-pip-button>
     <media-airplay-button></media-airplay-button>
     <media-fullscreen-button></media-fullscreen-button>
