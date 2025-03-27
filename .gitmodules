@@ -9,3 +9,6 @@
 [submodule "auth/assets/simple-icons"]
 	path = auth/assets/simple-icons
 	url = https://github.com/simple-icons/simple-icons.git
+[submodule "mobile/thirdparty/flutter"]
+	path = mobile/thirdparty/flutter
+	url = https://github.com/flutter/flutter.git
