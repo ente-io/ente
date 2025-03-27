@@ -90,7 +90,7 @@ class LocalDB with SqlDbBase {
 
   Future<List<EnteFile>> getPathAssets(String pathID) async {
     final result = await _sqliteDB.execute(
-      "SELECT * FROM assets WHERE id IN (SELECT asset_id FROM device_path_assets WHERE path_id = ?)",
+      "SELECT * FROM assets WHERE id IN (SELECT asset_id FROM device_path_assets WHERE path_id = ?) ORDER BY created_at DESC",
       [pathID],
     );
     return result.map((row) => LocalDBMappers.assetRowToEnteFile(row)).toList();
