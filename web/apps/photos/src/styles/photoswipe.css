@@ -217,15 +217,19 @@
     flex-direction: column;
 }
 
-
 /* Hide the controls if they're not associated to a media-controller. */
 media-control-bar:not([mediacontroller]) {
     display: none;
 }
 
 media-loading-indicator {
-  /* Similar to the top bar loading indicator */
-  --media-icon-color: rgba(255 255 255 / 0.6);
+    /* Similar to the top bar loading indicator */
+    --media-icon-color: rgba(255 255 255 / 0.6);
+}
+
+/* Used as a spacer. */
+media-text-display {
+    flex-grow: 1;
 }
 
 /*
