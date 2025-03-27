@@ -36,9 +36,9 @@ class LocalMetadataService {
           : (await motionVideoIndex(sourceFile.path))?.start;
 
       if (!Location.isValidLocation(location) && exifData != null) {
-        final exifLocation = locationFromExif(exifData)!;
+        final exifLocation = locationFromExif(exifData);
         if (Location.isValidLocation(exifLocation)) {
-          location = exifLocation;
+          location = exifLocation!;
         }
       }
       if (!Location.isValidLocation(location) &&
@@ -51,10 +51,7 @@ class LocalMetadataService {
       }
       final (createdAt, modifiedAt) =
           computeCreationAndModification(asset, exifData);
-      _logger.info(
-        "getMetadata for ${asset.title} took ${t.elapsed}",
-      );
-      return DroidMetadata(
+      final result = DroidMetadata(
         size: size,
         hash: hash,
         location: location,
@@ -62,6 +59,10 @@ class LocalMetadataService {
         modificationTime: modifiedAt,
         mviIndex: mviIndex,
       );
+      _logger.info(
+        "getMetadata for ${asset.title} ${asset.relativePath} took ${t.elapsed}",
+      );
+      return result;
     } catch (e) {
       _logger.severe("failed to getMetadata", e);
       rethrow;
@@ -73,19 +74,18 @@ class LocalMetadataService {
     Map<String, IfdTag>? exifData,
   ) {
     int createdAt = EnteFile.parseFileCreationTime(asset);
-    final int modifiedAt = asset.modifiedDateTime.millisecondsSinceEpoch;
+    final int modifiedAt = asset.modifiedDateTime.microsecondsSinceEpoch;
     final ParsedExifDateTime? parsedExifDateTime =
         exifData == null ? null : parseExifTime(exifData);
     if (parsedExifDateTime?.time != null) {
-      createdAt = parsedExifDateTime!.time!.millisecondsSinceEpoch;
+      createdAt = parsedExifDateTime!.time!.microsecondsSinceEpoch;
     }
     return (createdAt, modifiedAt);
   }
 
   static Future<VideoIndex?> motionVideoIndex(String sourceFile) async {
-    return Computer.shared().compute<String, VideoIndex?>(
+    return Computer.shared().compute<void, VideoIndex?>(
       MotionPhotos(sourceFile).getMotionVideoIndex,
-      param: sourceFile,
       taskName: "motionVideoIndex",
     );
   }
