@@ -32,6 +32,10 @@ import workmanager
     WorkmanagerPlugin.setPluginRegistrantCallback { registry in
       GeneratedPluginRegistrant.register(with: registry)
     }
+    // Register a periodic task in iOS 13+
+    WorkmanagerPlugin.registerPeriodicTask(
+      withIdentifier: "io.ente.frame.iOSBackgroundAppRefresh",
+      frequency: NSNumber(value: 20 * 60))
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

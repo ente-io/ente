@@ -56,9 +56,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     _logger.info('init App');
     super.initState();
     locale = widget.locale;
-    Future.delayed(const Duration(seconds: 2), () {
-      setupIntentAction();
-    });
+    setupIntentAction();
     WidgetsBinding.instance.addObserver(this);
     setupSubscription();
   }
