@@ -19,7 +19,7 @@ class FaceThumbnailGenerator extends SuperIsolate {
   String get isolateName => "FaceThumbnailGenerator";
 
   @override
-  bool get shouldAutomaticDispose => false;
+  bool get shouldAutomaticDispose => true;
 
   // Singleton pattern
   FaceThumbnailGenerator._privateConstructor();
