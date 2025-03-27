@@ -188,3 +188,47 @@
     width: 100%;
     height: 100%;
 }
+
+/*
+ Style the custom video controls we provide.
+
+ The media-controller itself is center positioned (shrinking if needed) by
+ PhotoSwipe using the width and height of the video that we provide to it.
+
+ The controls are absolutely position at the bottom of the screen instead of
+ being attached to the video.
+ */
+.pswp-ente .pswp__media-controls {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+
+    /* Similar to our other controls */
+    --media-icon-color: rgba(255 255 255 / 0.8);
+    --media-font-family: "Inter Variable", sans-serif;
+}
+
+.pswp-ente .pswp__media-controls media-control-bar {
+    /*
+     The control-bar sizes to fit the media controller (which itself fills up
+     the full width), but since we're showing the control bar outside of the
+     media controller, we need to ask it to fill the available width ourselves.
+    */
+    width: 100%;
+}
+
+/* Hide the controls if they're not associated to a media-controller. */
+.pswp-ente .pswp__media-controls media-control-bar:not([mediacontroller]) {
+    display: none;
+}
+
+/*
+  Hide specific controls when the user's browser doesn't support the feature
+  they trigger.
+ */
+media-pip-button[mediapipunavailable],
+media-airplay-button[mediaairplayunavailable],
+media-fullscreen-button[mediafullscreenunavailable] {
+    display: none;
+}

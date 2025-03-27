@@ -412,7 +412,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
  * value, we alias it the same weight as regular, 500).
  */
 const typography: TypographyOptions = {
-    fontFamily: "Inter Variable, sans-serif",
+    fontFamily: '"Inter Variable", sans-serif',
     fontWeightLight: 500,
     fontWeightRegular: 500 /* CSS baseline reset sets this as the default */,
     fontWeightMedium: 600,

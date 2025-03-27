@@ -1,6 +1,9 @@
+import { assertionFailed } from "@/base/assert";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
+import "hls-video-element";
 import { t } from "i18next";
+import "media-chrome";
 import PhotoSwipe, { type SlideData } from "photoswipe";
 import {
     fileViewerDidClose,
@@ -301,14 +304,25 @@ export class FileViewerPhotoSwipe {
             const files = delegate.getFiles();
             const file = files[index]!;
 
-            let itemData = itemDataForFile(file, () =>
+            const itemData = itemDataForFile(file, () =>
                 pswp.refreshSlideContent(index),
             );
 
-            const { videoURL, videoPlaylistURL, ...rest } = itemData;
-            const url = videoPlaylistURL ?? videoURL;
-            if (itemData.fileType === FileType.video && url) {
-                itemData = { ...rest, html: videoHTML(url, !!disableDownload) };
+            if (itemData.fileType === FileType.video) {
+                const { videoURL, videoPlaylistURL } = itemData;
+                if (videoPlaylistURL) {
+                    const mcID = `ente-mc-${file.id}`;
+                    return {
+                        ...itemData,
+                        html: hlsVideoHTML(videoPlaylistURL, mcID),
+                        mediaControllerID: mcID,
+                    };
+                } else if (videoURL) {
+                    return {
+                        ...itemData,
+                        html: videoHTML(videoURL, !!disableDownload),
+                    };
+                }
             }
 
             return itemData;
@@ -427,9 +441,53 @@ export class FileViewerPhotoSwipe {
             livePhotoUpdateMute(video);
         };
 
+        /**
+         * The DOM element housing the media-control-bar and friends.
+         */
+        let mediaControlsContainerElement: HTMLElement | undefined;
+
+        /**
+         * If a {@link mediaControllerID} is provided, then make the
+         * media controls visible and link the media-control-bar to the given
+         * controller. Otherwise hide the media controls.
+         */
+        const updateMediaControls = (mediaControllerID: string | undefined) => {
+            const controlBar =
+                mediaControlsContainerElement?.querySelector(
+                    "media-control-bar",
+                );
+            if (!controlBar) {
+                assertionFailed();
+                return;
+            }
+
+            if (mediaControllerID) {
+                controlBar.setAttribute("mediacontroller", mediaControllerID);
+            } else {
+                controlBar.removeAttribute("mediacontroller");
+            }
+        };
+
         pswp.on("contentAppend", (e) => {
-            const { fileID, fileType, videoURL } = asItemData(e.content.data);
-            if (fileType !== FileType.livePhoto) return;
+            const { fileID, fileType, videoURL, mediaControllerID } =
+                asItemData(e.content.data);
+
+            // For the initial slide, "contentAppend" will get called after
+            // "change", so we need to wire up the controls (or hide them) for
+            // the initial slide here also (in addition to in "change").
+            if (currSlideData().fileID == fileID) {
+                // For reasons I didn't investigate further but are possibly
+                // related to https://github.com/muxinc/media-chrome/issues/940,
+                // the association between the media-controller and
+                // media-control-bar doesn't get established on the first slide
+                // if we reopen the file viewer.
+                //
+                // As a workaround, defer the association to the next tick.
+                setTimeout(() => updateMediaControls(mediaControllerID), 0);
+            }
+
+            // Rest of this function deals with live photos.
+            if (fileType != FileType.livePhoto) return;
             if (!videoURL) return;
 
             // This slide is displaying a live photo. Append a video element to
@@ -538,6 +596,19 @@ export class FileViewerPhotoSwipe {
 
         pswp.on("change", () => {
             const itemData = currSlideData();
+
+            // For each slide ("item holder"), mirror the "aria-hidden" state
+            // into the "inert" property so that keyboard navigation via tabs
+            // does not cycle through to the hidden slides (e.g. if the hidden
+            // slide is a video element with browser provided controls).
+
+            pswp.mainScroll.itemHolders.forEach(({ el }) => {
+                if (el.getAttribute("aria-hidden") == "true") {
+                    el.setAttribute("inert", "");
+                } else {
+                    el.removeAttribute("inert");
+                }
+            });
 
             // Clear existing listeners, if any.
             if (videoVideoEl && onVideoPlayback) {
@@ -839,6 +910,20 @@ export class FileViewerPhotoSwipe {
                     });
                 },
             });
+
+            ui.registerElement({
+                name: "media-controls",
+                order: 31,
+                appendTo: "root",
+                html: hlsVideoControlsHTML(),
+                onInit: (element, pswp) => {
+                    mediaControlsContainerElement = element;
+                    pswp.on("change", () => {
+                        const { mediaControllerID } = currSlideData();
+                        updateMediaControls(mediaControllerID);
+                    });
+                },
+            });
         });
 
         // Pan action handlers
@@ -1059,8 +1144,42 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 </video>
 `;
 
+// Requires the following imports to register the Web components we use:
+//
+//     import "hls-video-element";
+//     import "media-chrome";
+//
+// TODO(HLS): Update code above that searches for the video element
+// TODO(HLS): Initial slide needs to be resynced cf playsinline
+const hlsVideoHTML = (url: string, mediaControllerID: string) => `
+<media-controller id="${mediaControllerID}">
+  <hls-video playsinline slot="media" src="${url}"></hls-video>
+  <media-loading-indicator slot="centered-chrome" noautohide></media-loading-indicator>
+</media-controller>
+`;
+
+/**
+ * HTML for controls associated with {@link hlsVideoHTML}.
+ *
+ * To make these functional, the `media-control-bar` requires the
+ * `mediacontroller="${mediaControllerID}"` attribute.
+ */
+const hlsVideoControlsHTML = () => `
+<media-control-bar>
+  <media-play-button></media-play-button>
+  <media-mute-button></media-mute-button>
+  <media-time-range></media-time-range>
+  <media-time-display showduration notoggle></media-time-display>
+  <media-pip-button></media-pip-button>
+  <media-airplay-button></media-airplay-button>
+  <media-fullscreen-button></media-fullscreen-button>
+</media-control-bar>
+`;
+
+// playsinline will play the video inline on mobile browsers (where the default
+// is to open a full screen player).
 const livePhotoVideoHTML = (videoURL: string) => `
-<video loop muted oncontextmenu="return false;">
+<video loop muted playsinline oncontextmenu="return false;">
   <source src="${videoURL}" />
 </video>
 `;
