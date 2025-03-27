@@ -115,7 +115,7 @@
 
 .pswp-ente button.pswp-ente-off .pswp__icn {
     /* PhotoSwipe already uses the CSS opacity, so reduce the color's opacity */
-    fill: rgba(255 255 255 / 0.6);
+    fill: rgb(255 255 255 / 0.6);
 }
 
 /* Make the controls fit the top bar on mobile sized screens */
@@ -158,8 +158,8 @@
     padding: 6px 16px;
     border-radius: 2px;
     /* Same opacity as the other controls. */
-    color: rgba(255 255 255 / 0.85);
-    background-color: rgba(0 0 0 / 0.2);
+    color: rgb(255 255 255 / 0.85);
+    background-color: rgb(0 0 0 / 0.2);
     backdrop-filter: blur(10px);
     /* 4 lines max, ellipsis on overflow. */
     word-break: break-word;
@@ -205,10 +205,10 @@
     right: 0px;
 
     /* Similar to our other controls */
-    --media-icon-color: rgba(255 255 255 / 0.8);
+    --media-icon-color: rgb(255 255 255 / 0.8);
     --media-font-family: "Inter Variable", sans-serif;
     --media-control-background: transparent;
-    --media-control-hover-background: rgba(255 255 255 / 0.12);
+    --media-control-hover-background: rgb(255 255 255 / 0.12);
 }
 
 /*
@@ -234,7 +234,7 @@ media-control-bar:last-child {
 
 media-loading-indicator {
     /* Similar to the top bar loading indicator */
-    --media-icon-color: rgba(255 255 255 / 0.6);
+    --media-icon-color: rgb(255 255 255 / 0.6);
 }
 
 /* Used as a spacer. */
