@@ -104,7 +104,10 @@ export const hlsPlaylistDataForFile = async (
     //   (AES-128 for us), URI and IV attributes. The URI attribute value is a
     //   quoted string containing a URI that specfies how to obtain the key.
 
-    const playlist = playlistTemplate.replaceAll("output.ts", videoURL);
+    const playlist = playlistTemplate.replaceAll(
+        "\noutput.ts",
+        `\n${videoURL}`,
+    );
 
     // From the RFC
     //
