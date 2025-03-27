@@ -115,7 +115,7 @@
 
 .pswp-ente button.pswp-ente-off .pswp__icn {
     /* PhotoSwipe already uses the CSS opacity, so reduce the color's opacity */
-    fill: rgba(255 255 255 / 0.6);
+    fill: rgb(255 255 255 / 0.6);
 }
 
 /* Make the controls fit the top bar on mobile sized screens */
@@ -158,8 +158,8 @@
     padding: 6px 16px;
     border-radius: 2px;
     /* Same opacity as the other controls. */
-    color: rgba(255 255 255 / 0.85);
-    background-color: rgba(0 0 0 / 0.2);
+    color: rgb(255 255 255 / 0.85);
+    background-color: rgb(0 0 0 / 0.2);
     backdrop-filter: blur(10px);
     /* 4 lines max, ellipsis on overflow. */
     word-break: break-word;
@@ -190,37 +190,70 @@
 }
 
 /*
- Style the custom video controls we provide.
+  Style the custom video controls we provide.
 
- The media-controller itself is center positioned (shrinking if needed) by
- PhotoSwipe using the width and height of the video that we provide to it.
+  The media-controller itself is center positioned (shrinking if needed) by
+  PhotoSwipe using the width and height of the video that we provide to it.
 
- The controls are absolutely position at the bottom of the screen instead of
- being attached to the video.
+  The controls are absolutely position at the bottom of the screen instead of
+  being attached to the video.
  */
 .pswp-ente .pswp__media-controls {
     position: absolute;
-    bottom: 4px;
-    left: 4px;
-    right: 4px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+
+    background: linear-gradient(transparent, rgb(0 0 0 / 0.8));
 
     /* Similar to our other controls */
-    --media-icon-color: rgba(255 255 255 / 0.8);
+    --media-icon-color: rgb(255 255 255 / 0.8);
     --media-font-family: "Inter Variable", sans-serif;
+    --media-control-background: transparent;
+    --media-control-hover-background: rgb(255 255 255 / 0.12);
 }
 
-.pswp-ente .pswp__media-controls media-control-bar {
-    /*
-     The control-bar sizes to fit the media controller (which itself fills up
-     the full width), but since we're showing the control bar outside of the
-     media controller, we need to ask it to fill the available width ourselves.
-    */
-    width: 100%;
+/*
+  Stack controls rows vertically.
+ */
+.pswp-ente .pswp__media-controls > div {
+    display: flex;
+    flex-direction: column;
 }
 
 /* Hide the controls if they're not associated to a media-controller. */
-.pswp-ente .pswp__media-controls media-control-bar:not([mediacontroller]) {
+media-control-bar:not([mediacontroller]) {
     display: none;
+}
+
+media-control-bar {
+    padding-inline: 12px;
+}
+
+media-control-bar:last-child {
+    padding-block-end: 4px;
+}
+
+media-loading-indicator {
+    /* Similar to the top bar loading indicator */
+    --media-icon-color: rgb(255 255 255 / 0.6);
+}
+
+/* Used as a spacer. */
+media-text-display {
+    flex-grow: 1;
+}
+
+media-time-range {
+    --media-range-bar-color: red;
+    --media-range-thumb-background: var(--media-range-bar-color);
+    --media-control-hover-background: transparent;
+    --media-control-padding: 0px;
+}
+
+media-time-range:hover {
+    --media-range-track-height: 5px;
+    --media-range-thumb-transform: scale(1.1);
 }
 
 /*

@@ -36,10 +36,8 @@ export const hlsPlaylistDataForFile = async (
     const playlistFileData = await fetchFileData("vid_preview", file.id);
     if (!playlistFileData) return undefined;
 
-    const videoURL = await fetchFilePreviewData("vid_preview", file.id);
-    if (!videoURL) return undefined;
-
     const {
+        type,
         playlist: playlistTemplate,
         width,
         height,
@@ -51,6 +49,12 @@ export const hlsPlaylistDataForFile = async (
         playlistFileData,
         file,
     );
+
+    // A playlist format the current client does not understand.
+    if (type != "hls_video") return undefined;
+
+    const videoURL = await fetchFilePreviewData("vid_preview", file.id);
+    if (!videoURL) return undefined;
 
     // [Note: HLS playlist format]
     //
@@ -104,7 +108,10 @@ export const hlsPlaylistDataForFile = async (
     //   (AES-128 for us), URI and IV attributes. The URI attribute value is a
     //   quoted string containing a URI that specfies how to obtain the key.
 
-    const playlist = playlistTemplate.replaceAll("output.ts", videoURL);
+    const playlist = playlistTemplate.replaceAll(
+        "\noutput.ts",
+        `\n${videoURL}`,
+    );
 
     // From the RFC
     //
@@ -129,11 +136,24 @@ export const hlsPlaylistDataForFile = async (
 };
 
 const PlaylistJSON = z.object({
-    /** The HLS playlist, as a string. */
+    /**
+     * The type of the playlist.
+     *
+     * The only value we currently understand on this client is "hls_video", but
+     * for future extensibility this might be other values too.
+     */
+    type: z.string(),
+    /**
+     * The HLS playlist, as a string.
+     */
     playlist: z.string(),
-    /** The width of the video (px). */
+    /**
+     * The width of the video (px).
+     */
     width: z.number(),
-    /** The height of the video (px). */
+    /**
+     * The height of the video (px).
+     */
     height: z.number(),
 });
 
