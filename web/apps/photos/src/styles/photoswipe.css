@@ -209,18 +209,22 @@
     --media-font-family: "Inter Variable", sans-serif;
 }
 
-.pswp-ente .pswp__media-controls media-control-bar {
-    /*
-     The control-bar sizes to fit the media controller (which itself fills up
-     the full width), but since we're showing the control bar outside of the
-     media controller, we need to ask it to fill the available width ourselves.
-    */
-    width: 100%;
+/*
+ Stack controls rows vertically.
+ */
+.pswp-ente .pswp__media-controls > div {
+    display: flex;
+    flex-direction: column;
 }
 
 /* Hide the controls if they're not associated to a media-controller. */
-.pswp-ente .pswp__media-controls media-control-bar:not([mediacontroller]) {
+media-control-bar:not([mediacontroller]) {
     display: none;
+}
+
+media-loading-indicator {
+  /* Similar to the top bar loading indicator */
+  --media-icon-color: rgba(255 255 255 / 0.6);
 }
 
 /*

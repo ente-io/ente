@@ -1,4 +1,3 @@
-import { assertionFailed } from "@/base/assert";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import "hls-video-element";
@@ -452,19 +451,16 @@ export class FileViewerPhotoSwipe {
          * controller. Otherwise hide the media controls.
          */
         const updateMediaControls = (mediaControllerID: string | undefined) => {
-            const controlBar =
-                mediaControlsContainerElement?.querySelector(
+            const controlBars =
+                mediaControlsContainerElement?.querySelectorAll(
                     "media-control-bar",
-                );
-            if (!controlBar) {
-                assertionFailed();
-                return;
-            }
-
-            if (mediaControllerID) {
-                controlBar.setAttribute("mediacontroller", mediaControllerID);
-            } else {
-                controlBar.removeAttribute("mediacontroller");
+                ) ?? [];
+            for (const bar of controlBars) {
+                if (mediaControllerID) {
+                    bar.setAttribute("mediacontroller", mediaControllerID);
+                } else {
+                    bar.removeAttribute("mediacontroller");
+                }
             }
         };
 
@@ -1156,7 +1152,6 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 const hlsVideoHTML = (url: string, mediaControllerID: string) => `
 <media-controller id="${mediaControllerID}">
   <hls-video playsinline slot="media" src="${url}"></hls-video>
-  <media-loading-indicator slot="centered-chrome" noautohide></media-loading-indicator>
 </media-controller>
 `;
 
@@ -1174,15 +1169,20 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  *   indicator (browser specific) in the in-page video element.
  */
 const hlsVideoControlsHTML = () => `
-<media-control-bar>
-  <media-play-button></media-play-button>
-  <media-mute-button></media-mute-button>
-  <media-time-range></media-time-range>
-  <media-time-display showduration notoggle></media-time-display>
-  <media-pip-button></media-pip-button>
-  <media-airplay-button></media-airplay-button>
-  <media-fullscreen-button></media-fullscreen-button>
-</media-control-bar>
+<div>
+  <media-control-bar>
+    <media-loading-indicator noautohide></media-loading-indicator>
+  </media-control-bar>
+  <media-control-bar>
+    <media-play-button></media-play-button>
+    <media-mute-button></media-mute-button>
+    <media-time-range></media-time-range>
+    <media-time-display showduration notoggle></media-time-display>
+    <media-pip-button></media-pip-button>
+    <media-airplay-button></media-airplay-button>
+    <media-fullscreen-button></media-fullscreen-button>
+  </media-control-bar>
+</div>
 `;
 
 // playsinline will play the video inline on mobile browsers (where the default
