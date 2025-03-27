@@ -195,6 +195,7 @@ class SyncService {
     if (localSyncOnly) {
       await LocalImportService.instance.incrementalSync();
       await LocalImportService.instance.fullSync();
+      unawaited(LocalImportService.instance.metadataScan());
       return;
     }
     _logger.info("old localSync completed $tl");

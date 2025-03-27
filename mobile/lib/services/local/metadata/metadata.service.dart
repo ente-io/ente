@@ -112,7 +112,7 @@ class LocalMetadataService {
         .timeout(const Duration(seconds: 15))
         .catchError((e) async {
       if (e is TimeoutException) {
-        _logger.info("Origin file fetch timed out for " + file.tag);
+        _logger.info("Origin file fetch timed out for ${asset.id}");
         return await asset.originFile;
       } else {
         throw e;

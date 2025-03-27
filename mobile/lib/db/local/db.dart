@@ -10,6 +10,7 @@ import "package:photos/db/local/mappers.dart";
 import "package:photos/db/local/schema.dart";
 import "package:photos/log/devlog.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/local/local_metadata.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 class LocalDB with SqlDbBase {
@@ -44,6 +45,40 @@ class LocalDB with SqlDbBase {
     debugPrint(
       '$runtimeType insertAssets complete in ${stopwatch.elapsed.inMilliseconds}ms for ${entries.length} assets',
     );
+  }
+
+  Future<void> updateMetadata(
+    String id, {
+    DroidMetadata? droid,
+    IOSMetadata? ios,
+  }) async {
+    if (droid != null) {
+      await _sqliteDB.execute(
+        'UPDATE assets SET size = ?, hash = ?, latitude = ?, longitude = ?, created_at = ?, modified_at = ?, scan_state = 1 WHERE id = ?',
+        [
+          droid.size,
+          droid.hash,
+          droid.location?.latitude,
+          droid.location?.longitude,
+          droid.creationTime,
+          droid.modificationTime,
+          id,
+        ],
+      );
+    } else if (ios != null) {
+      // await _sqliteDB.execute(
+      //   'UPDATE assets SET size = ?, hash = ?, latitude = ?, longitude = ?, created_at = ?, modified_at = ? WHERE id = ?',
+      //   [
+      //     ios.size,
+      //     ios.hash,
+      //     ios.location.latitude,
+      //     ios.location.longitude,
+      //     ios.creationTime.millisecondsSinceEpoch,
+      //     ios.modificationTime.millisecondsSinceEpoch,
+      //     ios.id,
+      //   ],
+      // );
+    }
   }
 
   Future<List<EnteFile>> getAssets({LocalAssertsParam? params}) async {
@@ -125,8 +160,10 @@ class LocalDB with SqlDbBase {
     );
   }
 
-  Future<Set<String>> getAssetsIDs() async {
-    final result = await _sqliteDB.execute("SELECT id FROM assets");
+  Future<Set<String>> getAssetsIDs({bool pendingScan = false}) async {
+    final result = await _sqliteDB.execute(
+      "SELECT id FROM assets ${pendingScan ? 'WHERE scan_state = 0' : ''}",
+    );
     final ids = <String>{};
     for (var row in result) {
       ids.add(row["id"] as String);

@@ -14,6 +14,7 @@ import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/local/import/device_assets.service.dart";
 import "package:photos/services/local/import/model.dart";
 import "package:photos/services/local/local_assets_cache.dart";
+import "package:photos/services/local/metadata/metadata.service.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
@@ -143,6 +144,33 @@ class LocalImportService {
       _fullSync = null;
     }
     return hasChanges;
+  }
+
+  bool _isMetaScanRunning = false;
+  Future<void> metadataScan() async {
+    if (_isMetaScanRunning) {
+      _log.info("metadata scan already in progress");
+      return;
+    }
+    _isMetaScanRunning = true;
+    try {
+      final Set<String> pendingScan =
+          await localDB.getAssetsIDs(pendingScan: true);
+      if (pendingScan.isEmpty) {
+        _log.info("no pending scan");
+        return;
+      }
+      _log.info("pending scan ${pendingScan.length}");
+      for (final id in pendingScan) {
+        final meatdata = await LocalMetadataService.getMetadata(id);
+        await localDB.updateMetadata(id, droid: meatdata);
+      }
+    } catch (e, s) {
+      _log.severe("metadata scan failed", e, s);
+      rethrow;
+    } finally {
+      _isMetaScanRunning = false;
+    }
   }
 
   Future<bool> _canSync(String tag) async {
