@@ -162,8 +162,8 @@ class LocalImportService {
       }
       _log.info("pending scan ${pendingScan.length}");
       for (final id in pendingScan) {
-        final meatdata = await LocalMetadataService.getMetadata(id);
-        await localDB.updateMetadata(id, droid: meatdata);
+        final metadata = await LocalMetadataService.getMetadata(id);
+        await localDB.updateMetadata(id, droid: metadata);
       }
     } catch (e, s) {
       _log.severe("metadata scan failed", e, s);
