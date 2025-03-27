@@ -200,9 +200,9 @@
  */
 .pswp-ente .pswp__media-controls {
     position: absolute;
-    bottom: 4px;
-    left: 4px;
-    right: 4px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
 
     /* Similar to our other controls */
     --media-icon-color: rgba(255 255 255 / 0.8);
@@ -220,6 +220,23 @@
 /* Hide the controls if they're not associated to a media-controller. */
 media-control-bar:not([mediacontroller]) {
     display: none;
+}
+
+media-control-bar {
+    padding-inline: 4px;
+}
+
+media-control-bar:not(:first-child) {
+    /* Background color the padding around the controls. Color is same as the
+       --media-secondary-color that (transitively) gets used as the default
+       background for the media chrome controls. */
+    background-color: rgba(20 20 30 / 0.7);
+    /** Reset the default background since we now provide our own. */
+    --media-control-background: transparent;
+}
+
+media-control-bar:last-child {
+    padding-block-end: 4px;
 }
 
 media-loading-indicator {

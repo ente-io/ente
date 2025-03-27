@@ -1179,8 +1179,8 @@ const hlsVideoControlsHTML = () => `
   <media-control-bar>
     <media-play-button></media-play-button>
     <media-mute-button></media-mute-button>
-    <media-text-display></media-text-display>
     <media-time-display showduration notoggle></media-time-display>
+    <media-text-display></media-text-display>
     <media-pip-button></media-pip-button>
     <media-airplay-button></media-airplay-button>
     <media-fullscreen-button></media-fullscreen-button>
