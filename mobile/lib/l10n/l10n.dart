@@ -1,5 +1,4 @@
 import "package:flutter/widgets.dart";
-import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart";
 import "package:photos/generated/l10n.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -82,37 +81,4 @@ Future<void> setLocale(Locale locale) async {
   }
   await (await SharedPreferences.getInstance())
       .setString('locale', out.toString());
-}
-
-bool showAmPmTimePicker(Locale locale) {
-  return locale.languageCode == "en" ||
-      locale.languageCode == "es" ||
-      locale.languageCode == "pt";
-}
-
-LocaleType getFromLocalString(Locale locale) {
-  switch (locale.languageCode) {
-    case "en":
-      return LocaleType.en;
-    case "es":
-      return LocaleType.es;
-    case "de":
-      return LocaleType.de;
-    case "fr":
-      return LocaleType.fr;
-    case "it":
-      return LocaleType.it;
-    case "nl":
-      return LocaleType.nl;
-    case "pt":
-      return LocaleType.pt;
-    case "ru":
-      return LocaleType.ru;
-    case "tr":
-      return LocaleType.tr;
-    case "zh":
-      return LocaleType.zh;
-    default:
-      return LocaleType.en;
-  }
 }
