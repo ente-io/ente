@@ -30,3 +30,9 @@ The easiest way to fix this would be to restart your computer (or logout and
 login again into your desktop environment). It should also be possible to do
 this without restarting, but the steps for refreshing the icon cache would then
 be specific to your distro (e.g. `xdg-desktop-menu forceupdate`).
+
+> [!NOTE]
+>
+> If you're using an AppImage and not seeing the icon, you'll need to [enable
+> AppImage desktop
+> integration](/photos/troubleshooting/desktop-install#appimage-desktop-integration).
