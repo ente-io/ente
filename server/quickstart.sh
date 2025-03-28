@@ -7,7 +7,11 @@
 
 set -e
 
-dcv=`docker compose version --short 2>/dev/null`
+dcv=""
+if command -v docker >/dev/null
+then
+    dcv=`docker compose version --short 2>/dev/null`
+fi
 
 if test -z "$dcv"
 then
