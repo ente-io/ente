@@ -5,7 +5,6 @@ import "dart:ui" show Image;
 
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
-import "package:ml_linalg/vector.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -14,7 +13,6 @@ import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/ml_versions.dart";
-import "package:photos/models/ml/vector.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
@@ -295,44 +293,4 @@ class SemanticSearchService {
 
     return clipResult;
   }
-}
-
-Map<String, List<QueryResult>> computeBulkSimilarities(Map args) {
-  final imageEmbeddings = args["imageEmbeddings"] as List<EmbeddingVector>;
-  final textEmbedding =
-      args["textQueryToEmbeddingMap"] as Map<String, List<double>>;
-  final minimumSimilarityMap =
-      args["minimumSimilarityMap"] as Map<String, double>;
-  final result = <String, List<QueryResult>>{};
-  for (final MapEntry<String, List<double>> entry in textEmbedding.entries) {
-    final query = entry.key;
-    final textVector = Vector.fromList(entry.value);
-    final minimumSimilarity = minimumSimilarityMap[query]!;
-    final queryResults = <QueryResult>[];
-    if (!kDebugMode) {
-      for (final imageEmbedding in imageEmbeddings) {
-        final similarity = imageEmbedding.vector.dot(textVector);
-        if (similarity >= minimumSimilarity) {
-          queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
-        }
-      }
-    } else {
-      double bestScore = 0.0;
-      for (final imageEmbedding in imageEmbeddings) {
-        final similarity = imageEmbedding.vector.dot(textVector);
-        if (similarity >= minimumSimilarity) {
-          queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
-        }
-        if (similarity > bestScore) {
-          bestScore = similarity;
-        }
-      }
-      if (kDebugMode && queryResults.isEmpty) {
-        dev.log("No results found for query with best score: $bestScore");
-      }
-    }
-    queryResults.sort((first, second) => second.score.compareTo(first.score));
-    result[query] = queryResults;
-  }
-  return result;
 }
