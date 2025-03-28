@@ -80,7 +80,6 @@ dependencies:
   flutter_animate: ^4.1.0
   flutter_app_icon_changer: ^0.1.1
   flutter_cache_manager: ^3.3.0
-  flutter_datetime_picker_bdaya: ^3.0.2
   flutter_displaymode: ^0.6.0
   flutter_easyloading: ^3.0.0
   flutter_email_sender: ^7.0.0
