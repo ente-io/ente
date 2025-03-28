@@ -118,8 +118,11 @@ class SemanticSearchService {
       if (_imageEmbeddingsAreCached) {
         return;
       }
+      final now = DateTime.now();
       final imageEmbeddings = await mlDataDB.getAllClipVectors();
-      _logger.info("read all embeddings from DB");
+      _logger.info(
+        "read all ${imageEmbeddings.length} embeddings from DB in ${DateTime.now().difference(now).inMilliseconds} ms",
+      );
       await MLComputer.instance.cacheImageEmbeddings(imageEmbeddings);
       _imageEmbeddingsAreCached = true;
       return;
