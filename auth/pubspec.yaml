@@ -70,7 +70,7 @@ dependencies:
   io: ^1.0.5
   json_annotation: ^4.5.0
   local_auth: ^2.3.0
-  local_auth_android: ^1.0.48
+  local_auth_android: ^1.0.38
   local_auth_darwin: ^1.4.3
   logging: ^1.0.1
   modal_bottom_sheet: ^3.0.0
