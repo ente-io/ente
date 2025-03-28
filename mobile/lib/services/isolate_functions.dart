@@ -47,6 +47,7 @@ enum IsolateOperation {
   /// Cache operations
   setIsolateCache,
   clearIsolateCache,
+  clearAllIsolateCache,
 }
 
 /// WARNING: Only return primitives unless you know the method is only going
@@ -179,6 +180,11 @@ Future<dynamic> isolateFunction(
     case IsolateOperation.clearIsolateCache:
       final key = args['key'] as String;
       _isolateCache.remove(key);
+      return true;
+
+    /// Caching
+    case IsolateOperation.clearAllIsolateCache:
+      _isolateCache.clear();
       return true;
 
     /// Cases for Caching stop here

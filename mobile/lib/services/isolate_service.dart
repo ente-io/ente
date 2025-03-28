@@ -165,6 +165,10 @@ abstract class SuperIsolate {
     });
   }
 
+  Future<void> clearAllCachedData() async {
+    await runInIsolate(IsolateOperation.clearAllIsolateCache, {});
+  }
+
   /// Resets a timer that kills the isolate after a certain amount of inactivity.
   ///
   /// Should be called after initialization (e.g. inside `init()`) and after every call to isolate (e.g. inside `_runInIsolate()`)
@@ -189,7 +193,7 @@ abstract class SuperIsolate {
   void _disposeIsolate() async {
     if (!_isIsolateSpawned) return;
     logger.info('Disposing isolate');
-    // await clearAllCachedData();
+    await clearAllCachedData();
     await onDispose();
     _isIsolateSpawned = false;
     _isolate.kill();
