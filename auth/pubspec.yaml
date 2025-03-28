@@ -31,7 +31,7 @@ dependencies:
   event_bus: ^2.0.0
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0
-  ffi: ^2.1.4
+  ffi: ^2.1.3
   figma_squircle: ^0.6.3
   file_picker: ^8.3.7
   # https://github.com/incrediblezayed/file_saver/issues/86
