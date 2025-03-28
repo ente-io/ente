@@ -25,7 +25,7 @@ Reproducible builds for Ente are available on
 ### GitHub
 
 Latest releases are built straight from the source and made available over
-[GitHub](https://github.com/ente-io/ente/releases?q=tag%253Aphotos-v0).
+[GitHub](https://github.com/ente-io/ente/releases?q=photos-v1).
 
 These builds will notify you whenever a new release is available and will help
 you stay updated.
