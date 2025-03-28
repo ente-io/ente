@@ -779,11 +779,11 @@ class _HomeWidgetState extends State<HomeWidget> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     final appLinks = AppLinks();
     try {
-      final String? initialLink = await appLinks.getInitialLinkString();
+      final initialLink = await appLinks.getInitialLink();
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {
-        _logger.info("Initial link received: " + initialLink);
+        _logger.info("Initial link received: " + initialLink.toString());
         _getCredentials(context, initialLink);
         return true;
       } else {
@@ -796,9 +796,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     // Attach a listener to the stream
-    appLinks.stringLinkStream.listen(
-      (String? link) {
-        _logger.info("Link received: " + link!);
+    appLinks.uriLinkStream.listen(
+      (link) {
+        _logger.info("Link received: " + link.toString());
         _getCredentials(context, link);
       },
       onError: (err) {
@@ -808,11 +808,11 @@ class _HomeWidgetState extends State<HomeWidget> {
     return false;
   }
 
-  void _getCredentials(BuildContext context, String? link) {
+  void _getCredentials(BuildContext context, Uri? link) {
     if (Configuration.instance.hasConfiguredAccount()) {
       return;
     }
-    final ott = Uri.parse(link!).queryParameters["ott"]!;
+    final ott = link!.queryParameters["ott"]!;
     UserService.instance.verifyEmail(context, ott);
   }
 

@@ -36,7 +36,7 @@ class PasskeyPage extends StatefulWidget {
 
 class _PasskeyPageState extends State<PasskeyPage> {
   final Logger _logger = Logger("PasskeyPage");
-  late StreamSubscription<String?> linkStreamSubscription;
+  late StreamSubscription<Uri?> linkStreamSubscription;
 
   @override
   void initState() {
@@ -85,15 +85,16 @@ class _PasskeyPageState extends State<PasskeyPage> {
     await UserService.instance.onPassKeyVerified(context, response);
   }
 
-  Future<void> _handleDeeplink(String? link) async {
+  Future<void> _handleDeeplink(Uri? uri) async {
     if (!context.mounted ||
         Configuration.instance.hasConfiguredAccount() ||
-        link == null) {
+        uri == null) {
       _logger.warning(
         'ignored deeplink: contextMounted ${context.mounted} hasConfiguredAccount ${Configuration.instance.hasConfiguredAccount()}',
       );
       return;
     }
+    final link = uri.toString();
     try {
       if (mounted && link.toLowerCase().startsWith("ente://passkey")) {
         if (Configuration.instance.isLoggedIn()) {
@@ -128,7 +129,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
   Future<bool> _initDeepLinks() async {
     final appLinks = AppLinks();
     // Attach a listener to the stream
-    linkStreamSubscription = appLinks.stringLinkStream.listen(
+    linkStreamSubscription = appLinks.uriLinkStream.listen(
       _handleDeeplink,
       onError: (err) {
         _logger.severe(err);
