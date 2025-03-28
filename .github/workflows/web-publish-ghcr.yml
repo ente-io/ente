@@ -7,6 +7,10 @@ on:
     # Run manually if needed to publish out of schedule.
     workflow_dispatch:
 
+permissions:
+    contents: read
+    packages: write
+
 jobs:
     publish:
         runs-on: ubuntu-latest
