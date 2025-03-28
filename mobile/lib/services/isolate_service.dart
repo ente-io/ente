@@ -137,6 +137,20 @@ abstract class SuperIsolate {
 
   bool postFunctionlockStop(IsolateOperation operation) => false;
 
+  Future<void> cacheData(String key, dynamic value) async {
+    await runInIsolate(IsolateOperation.setIsolateCache, {
+      'key': key,
+      'value': value,
+    });
+  }
+
+  /// Clears specific data from the isolate's cache
+  Future<void> clearCachedData(String key) async {
+    await runInIsolate(IsolateOperation.clearIsolateCache, {
+      'key': key,
+    });
+  }
+
   /// Resets a timer that kills the isolate after a certain amount of inactivity.
   ///
   /// Should be called after initialization (e.g. inside `init()`) and after every call to isolate (e.g. inside `_runInIsolate()`)
@@ -161,6 +175,7 @@ abstract class SuperIsolate {
   void _disposeIsolate() async {
     if (!_isIsolateSpawned) return;
     logger.info('Disposing isolate');
+    // await clearAllCachedData();
     await onDispose();
     _isIsolateSpawned = false;
     _isolate.kill();

@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import "package:logging/logging.dart";
-import "package:ml_linalg/linalg.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/services/isolate_functions.dart";
 import "package:photos/services/isolate_service.dart";
+import "package:photos/services/machine_learning/ml_constants.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
+import "package:photos/services/machine_learning/semantic_search/query_result.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:synchronized/synchronized.dart";
 
@@ -45,23 +46,6 @@ class MLComputer extends SuperIsolate {
     }
   }
 
-  Future<Map<int, double>> compareEmbeddings(
-    List<EmbeddingVector> embeddings,
-    Vector otherEmbedding,
-  ) async {
-    try {
-      final fileIdToSimilarity =
-          await runInIsolate(IsolateOperation.compareEmbeddings, {
-        "embeddings": embeddings.map((e) => e.toJsonString()).toList(),
-        "otherEmbedding": otherEmbedding.toList(),
-      }) as Map<int, double>;
-      return fileIdToSimilarity;
-    } catch (e, s) {
-      _logger.severe("Could not compare embeddings MLComputer isolate", e, s);
-      rethrow;
-    }
-  }
-
   Future<void> _ensureLoadedClipTextModel() async {
     return _initModelLock.synchronized(() async {
       if (ClipTextEncoder.instance.isInitialized) return;
@@ -96,5 +80,62 @@ class MLComputer extends SuperIsolate {
         rethrow;
       }
     });
+  }
+
+  Future<Map<String, List<QueryResult>>> computeBulkSimilarities(
+    Map<String, List<double>> textQueryToEmbeddingMap,
+    Map<String, double> minimumSimilarityMap,
+  ) async {
+    try {
+      final queryToResults =
+          await runInIsolate(IsolateOperation.computeBulkSimilarities, {
+        "textQueryToEmbeddingMap": textQueryToEmbeddingMap,
+        "minimumSimilarityMap": minimumSimilarityMap,
+      }) as Map<String, List<QueryResult>>;
+      return queryToResults;
+    } catch (e, s) {
+      _logger.severe(
+        "Could not bulk compare embeddings inside MLComputer isolate",
+        e,
+        s,
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> cacheImageEmbeddings(List<EmbeddingVector> embeddings) async {
+    try {
+      await runInIsolate(
+        IsolateOperation.setIsolateCache,
+        {
+          'key': imageEmbeddingsKey,
+          'value': embeddings,
+        },
+      ) as bool;
+      _logger.info(
+        'Cached ${embeddings.length} image embeddings inside MLComputer',
+      );
+      return;
+    } catch (e, s) {
+      _logger.severe("Could not cache image embeddings in MLComputer", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> clearImageEmbeddingsCache() async {
+    try {
+      await runInIsolate(
+        IsolateOperation.clearIsolateCache,
+        {'key': imageEmbeddingsKey},
+      ) as bool;
+      return;
+    } catch (e, s) {
+      _logger.severe(
+        "Could not clear image embeddings cache in MLComputer",
+        e,
+        s,
+      );
+      rethrow;
+    }
   }
 }

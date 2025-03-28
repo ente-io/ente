@@ -35,7 +35,6 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
-import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
 
 class MemoriesResult {
@@ -92,8 +91,7 @@ class SmartMemoriesService {
           await MLDataDB.instance.getFileIDsToFacesWithoutEmbedding();
       _logger.finest('fileIdToFaces has ${fileIdToFaces.length} entries $t');
 
-      final allImageEmbeddings =
-          await SemanticSearchService.instance.getClipVectors();
+      final allImageEmbeddings = await MLDataDB.instance.getAllClipVectors();
       _logger.finest(
         'allImageEmbeddings has ${allImageEmbeddings.length} entries $t',
       );
