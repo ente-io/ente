@@ -355,6 +355,8 @@ class PreviewVideoStore {
           collectionID: enteFile.collectionID ?? 0,
         );
         _removeFromLocks(enteFile).ignore();
+        Directory(prefix).delete(recursive: true).ignore();
+
         Bus.instance.fire(PreviewUpdatedEvent(_items));
       }
     } finally {
