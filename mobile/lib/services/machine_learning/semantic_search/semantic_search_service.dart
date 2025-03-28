@@ -1,4 +1,4 @@
-import "dart:async" show unawaited;
+import "dart:async" show Timer, unawaited;
 import "dart:developer" as dev show log;
 import "dart:math" show min;
 import "dart:ui" show Image;
@@ -38,6 +38,8 @@ class SemanticSearchService {
 
   final _cacheLock = Lock();
   bool _imageEmbeddingsAreCached = false;
+  Timer? _embeddingsCacheTimer;
+  final Duration _embeddingsCacheDuration = const Duration(seconds: 60);
 
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
@@ -109,6 +111,7 @@ class SemanticSearchService {
 
   Future<void> _cacheClipVectors() async {
     return _cacheLock.synchronized(() async {
+      _resetInactivityTimer();
       if (_imageEmbeddingsAreCached) {
         return;
       }
@@ -274,6 +277,19 @@ class SemanticSearchService {
           "ms",
     );
     return queryResults;
+  }
+
+  void _resetInactivityTimer() {
+    _embeddingsCacheTimer?.cancel();
+    _embeddingsCacheTimer = Timer(_embeddingsCacheDuration, () {
+      _logger.info(
+        'Embeddings cache is unused for ${_embeddingsCacheDuration.inSeconds} seconds. Removing cache.',
+      );
+      if (_imageEmbeddingsAreCached) {
+        MLComputer.instance.clearImageEmbeddingsCache();
+        _imageEmbeddingsAreCached = false;
+      }
+    });
   }
 
   static Future<ClipResult> runClipImage(
