@@ -11,6 +11,7 @@
 name: "CodeQL"
 
 on:
+    workflow_dispatch: # Allow running manually
     schedule:
         - cron: "22 1 * * 1"
 
