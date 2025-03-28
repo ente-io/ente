@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.7.12 (Unreleased)
+
+- .
+
 ## v1.7.11
 
 - Improved file viewer.
