@@ -101,7 +101,7 @@ dependencies:
     git:
       url: https://github.com/tekartik/sqflite
       path: sqflite
-  sqflite_common_ffi: ^2.3.5
+  sqflite_common_ffi: ^2.3.4+4
   sqlite3: ^2.7.5
   sqlite3_flutter_libs: ^0.5.29
   steam_totp: ^0.0.1
