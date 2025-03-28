@@ -55,10 +55,6 @@ class SemanticSearchService {
     _logger.info("init called");
     _hasInitialized = true;
 
-    // cache clip embeddings after 5 seconds
-    Future.delayed(const Duration(seconds: 5), () async {
-      await _cacheClipVectors();
-    });
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
       if (_imageEmbeddingsAreCached) {
         MLComputer.instance.clearImageEmbeddingsCache();
