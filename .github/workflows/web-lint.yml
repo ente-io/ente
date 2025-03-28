@@ -7,6 +7,9 @@ on:
             - "web/**"
             - ".github/workflows/web-lint.yml"
 
+permissions:
+    contents: read
+
 # Cancel in-progress lint runs when a new commit is pushed.
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}

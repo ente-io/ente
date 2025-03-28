@@ -15,6 +15,9 @@ on:
                     - "payments"
                     - "photos"
 
+permissions:
+    contents: read
+
 jobs:
     deploy:
         runs-on: ubuntu-latest
