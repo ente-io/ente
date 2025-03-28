@@ -35,4 +35,4 @@ be specific to your distro (e.g. `xdg-desktop-menu forceupdate`).
 >
 > If you're using an AppImage and not seeing the icon, you'll need to [enable
 > AppImage desktop
-> integration](/photos/troubleshooting/desktop-install#appimage-desktop-integration).
+> integration](/photos/troubleshooting/desktop-install/#appimage-desktop-integration).
