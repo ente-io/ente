@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import "package:dart_ui_isolate/dart_ui_isolate.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
+import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/error-reporting/isolate_logging.dart";
 import "package:photos/models/base/id.dart";
@@ -36,15 +37,22 @@ abstract class SuperIsolate {
 
       _receivePort = ReceivePort();
 
+      // Get the root token before spawning the isolate
+      final rootToken = RootIsolateToken.instance;
+      if (rootToken == null && !isDartUiIsolate) {
+        logger.severe('Failed to get RootIsolateToken');
+        return;
+      }
+
       try {
         _isolate = isDartUiIsolate
             ? await DartUiIsolate.spawn(
                 _isolateMain,
-                _receivePort.sendPort,
+                [_receivePort.sendPort, null],
               )
             : await Isolate.spawn(
                 _isolateMain,
-                _receivePort.sendPort,
+                [_receivePort.sendPort, rootToken],
                 debugName: isolateName,
               );
         _mainSendPort = await _receivePort.first as SendPort;
@@ -60,12 +68,18 @@ abstract class SuperIsolate {
   }
 
   @pragma('vm:entry-point')
-  static void _isolateMain(SendPort mainSendPort) async {
+  static void _isolateMain(List<dynamic> args) async {
+    final SendPort mainSendPort = args[0] as SendPort;
+    final RootIsolateToken? rootToken = args[1] as RootIsolateToken?;
+
     Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
     final IsolateLogger isolateLogger = IsolateLogger();
     Logger.root.onRecord.listen(isolateLogger.onLogRecordInIsolate);
     final receivePort = ReceivePort();
     mainSendPort.send(receivePort.sendPort);
+    if (rootToken != null) {
+      BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
+    }
 
     receivePort.listen((message) async {
       final taskID = message[0] as String;
