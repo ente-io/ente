@@ -14,7 +14,7 @@ abstract class SuperIsolate {
   Logger get logger;
 
   Timer? _inactivityTimer;
-  final Duration _inactivityDuration = const Duration(seconds: 120);
+  final Duration _inactivityDuration = const Duration(seconds: 60);
   int _activeTasks = 0;
 
   final _initIsolateLock = Lock();
