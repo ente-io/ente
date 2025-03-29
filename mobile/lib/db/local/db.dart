@@ -162,7 +162,7 @@ class LocalDB with SqlDbBase {
 
   Future<Set<String>> getAssetsIDs({bool pendingScan = false}) async {
     final result = await _sqliteDB.execute(
-      "SELECT id FROM assets ${pendingScan ? 'WHERE scan_state != 1 ORDER BY created_at DESC' : ''}",
+      "SELECT id FROM assets ${pendingScan ? 'WHERE scan_state != $finalState ORDER BY created_at DESC' : ''}",
     );
     final ids = <String>{};
     for (var row in result) {

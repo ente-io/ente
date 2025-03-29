@@ -1,9 +1,21 @@
+import "dart:io";
+
 import "package:flutter/foundation.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 const assetColumns =
     "id, type, sub_type, width, height, duration_in_sec, orientation, is_fav, title, relative_path, created_at, modified_at, mime_type, latitude, longitude, scan_state";
 
+const androidAssetState = 1;
+const androidHashState = 1 << 2;
+const androidMediaType = 1 << 3;
+const iOSAssetState = 1;
+const iOSCloudIdState = 1 << 2;
+const iOSAssetHashState = 1 << 3;
+
+final finalState = Platform.isAndroid
+    ? (androidAssetState ^ androidHashState ^ androidMediaType)
+    : (iOSAssetState ^ iOSCloudIdState ^ iOSAssetHashState);
 // Generate the update clause dynamically (excludes 'id')
 final String updateAssetColumns = assetColumns
     .split(', ')
