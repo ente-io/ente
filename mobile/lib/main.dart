@@ -45,6 +45,7 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
+import "package:photos/src/rust/frb_generated.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import "package:photos/utils/email_util.dart";
@@ -66,6 +67,7 @@ const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
+  await RustLib.init();
   WidgetsFlutterBinding.ensureInitialized();
   //For audio to work on vidoes in iOS when in silent mode.
   if (Platform.isIOS) {
@@ -442,3 +444,4 @@ void _scheduleSuicide(Duration duration, [String? taskID]) {
     _killBGTask(taskID);
   });
 }
+

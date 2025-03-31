@@ -151,6 +151,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.1"
+  build_cli_annotations:
+    dependency: transitive
+    description:
+      name: build_cli_annotations
+      sha256: b59d2769769efd6c9ff6d4c4cede0be115a566afc591705c2040b707534b1172
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   build_config:
     dependency: transitive
     description:
@@ -780,14 +788,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.1"
-  flutter_datetime_picker_bdaya:
-    dependency: "direct main"
-    description:
-      name: flutter_datetime_picker_bdaya
-      sha256: "6cb42a7d659cb9a10afa0a390b81677e15fd2f7e340e7eaffabf770e6b6709c0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.2"
   flutter_displaymode:
     dependency: "direct main"
     description:
@@ -1022,6 +1022,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.24"
+  flutter_rust_bridge:
+    dependency: "direct main"
+    description:
+      name: flutter_rust_bridge
+      sha256: "5a5c7a5deeef2cc2ffe6076a33b0429f4a20ceac22a397297aed2b1eb067e611"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.9.0"
   flutter_secure_storage:
     dependency: "direct main"
     description:
@@ -2216,6 +2224,13 @@ packages:
       url: "https://github.com/KasemJaffer/receive_sharing_intent.git"
     source: git
     version: "1.8.1"
+  rust_lib_photos:
+    dependency: "direct main"
+    description:
+      path: rust_builder
+      relative: true
+    source: path
+    version: "0.0.1"
   rxdart:
     dependency: transitive
     description:
