@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "Введите свою электронную почту",
   "accountWelcomeBack": "С возвращением!",
+  "emailAlreadyRegistered": "E-mail уже зарегистрирован.",
+  "emailNotRegistered": "Email не зарегистрирован.",
   "email": "Электронная почта",
   "cancel": "Отменить",
   "verify": "Подтвердить",
@@ -48,8 +50,8 @@
   "noRecoveryKey": "Нет ключа восстановления?",
   "sorry": "Извините",
   "noRecoveryKeyNoDecryption": "Из-за природы нашего сквозного протокола шифрования ваши данные не могут быть расшифрованы без вашего пароля или ключа восстановления",
-  "verifyEmail": "Подтвердить электронную почту",
-  "toResetVerifyEmail": "Чтобы сбросить пароль, сначала подтвердите свой адрес электронной почты.",
+  "verifyEmail": "Подтвердить email",
+  "toResetVerifyEmail": "Чтобы сбросить пароль, сначала подтвердите свой email.",
   "checkInboxAndSpamFolder": "Пожалуйста, проверьте свой почтовый ящик (и спам) для завершения верификации",
   "tapToEnterCode": "Нажмите, чтобы ввести код",
   "resendEmail": "Отправить письмо еще раз",
@@ -150,6 +152,7 @@
   "tryAgain": "Попробовать снова",
   "viewRecoveryKey": "Просмотреть ключ восстановления",
   "confirmRecoveryKey": "Подтвердите ключ восстановления",
+  "recoveryKeyVerifyReason": "Ваш ключ восстановления - это единственный способ восстановить ваши фотографии, если вы забудете свой пароль. Вы можете найти свой ключ восстановления в разделе \"Настройки\" > \"Учетная запись\".\n\nПожалуйста, введите свой ключ восстановления здесь, чтобы убедиться, что вы правильно его сохранили.",
   "confirmYourRecoveryKey": "Подтвердите ваш ключ восстановления",
   "addViewer": "Добавить наблюдателя",
   "addCollaborator": "Добавить соавтора",
@@ -184,6 +187,8 @@
   },
   "allowAddPhotosDescription": "Разрешить пользователям со ссылкой также добавлять фотографии в общий альбом.",
   "passwordLock": "Блокировка паролем",
+  "canNotOpenTitle": "Не удается открыть этот альбом",
+  "canNotOpenBody": "К сожалению, этот альбом не может быть открыт в приложении.",
   "disableDownloadWarningTitle": "Обратите внимание",
   "disableDownloadWarningBody": "Наблюдатели все еще могут делать скриншоты или копировать ваши фотографии с помощью других инструментов",
   "allowDownloads": "Разрешить загрузку",
@@ -275,6 +280,8 @@
   "changeYourReferralCode": "Изменить ваш реферальный код",
   "change": "Изменить",
   "unavailableReferralCode": "Извините, такого кода не существует.",
+  "codeChangeLimitReached": "К сожалению, вы исчерпали количество изменений в коде.",
+  "onlyFamilyAdminCanChangeCode": "Пожалуйста, свяжитесь с {familyAdminEmail} для изменения кода.",
   "storageInGB": "{storageAmountInGB} Гигабайт",
   "claimed": "Получено",
   "@claimed": {
@@ -324,6 +331,7 @@
   "removingFromFavorites": "Удаление из избранного...",
   "sorryCouldNotAddToFavorites": "Извините, не удалось добавить в избранное!",
   "sorryCouldNotRemoveFromFavorites": "Извините, не удалось удалить из избранного!",
+  "subscribeToEnableSharing": "Чтобы разрешить общий доступ, требуется активная платная подписка.",
   "subscribe": "Подписаться",
   "canOnlyRemoveFilesOwnedByYou": "Можно удалять только файлы, принадлежащие вам",
   "deleteSharedAlbum": "Удалить общий альбом?",
@@ -347,6 +355,7 @@
   "failedToLoadAlbums": "Не удалось загрузить альбомы",
   "hidden": "Скрыто",
   "authToViewYourHiddenFiles": "Пожалуйста, авторизуйтесь для просмотра скрытых файлов",
+  "authToViewTrashedFiles": "Пожалуйста, авторизуйтесь, чтобы просмотреть ваши удаленные файлы",
   "trash": "Корзина",
   "uncategorized": "Без категории",
   "videoSmallCase": "видео",
@@ -408,6 +417,8 @@
     "description": "The text to display in the advanced settings section"
   },
   "photoGridSize": "Размер сетки фотографий",
+  "manageDeviceStorage": "Управление кэшем устройства",
+  "manageDeviceStorageDesc": "Просмотрите и очистите локальное хранилище кэша.",
   "machineLearning": "Machine learning",
   "mlConsent": "Включить машинное обучение",
   "mlConsentTitle": "Включить машинное обучение?",
@@ -415,8 +426,16 @@
   "mlConsentPrivacy": "Пожалуйста, нажмите здесь, чтобы узнать больше об этой функции в нашей политике конфиденциальности",
   "mlConsentConfirmation": "Я понимаю и хочу включить машинное обучение",
   "magicSearch": "Волшебный поиск",
+  "discover": "Откройте для себя",
+  "@discover": {
+    "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
+  },
+  "discover_identity": "Личные данные",
+  "discover_screenshots": "Скриншоты",
+  "discover_receipts": "Квитанции",
   "discover_notes": "Заметки",
   "discover_memes": "Мемы",
+  "discover_visiting_cards": "Визитные карточки",
   "discover_babies": "Дети",
   "discover_pets": "Питомцы",
   "discover_selfies": "Селфи",
@@ -459,6 +478,7 @@
   "showMemories": "Показать воспоминания",
   "yearsAgo": "{count, plural, one{{count} год назад} other{{count} лет назад}}",
   "backupSettings": "Настройки резервного копирования",
+  "backupStatus": "Статус резервного копирования",
   "backupStatusDescription": "Здесь будут сохранены резервные копии",
   "backupOverMobileData": "Резервное копирование через мобильную сеть",
   "backupVideos": "Резервное копирование видео",
@@ -503,7 +523,9 @@
   "removeDuplicates": "Удаление дубликатов",
   "removeDuplicatesDesc": "Просмотрите и удалите точные дубликаты.",
   "viewLargeFiles": "Большие файлы",
+  "viewLargeFilesDesc": "Просмотр файлов, которые занимают больше всего места в хранилище.",
   "noDuplicates": "✨ Дубликатов нет",
+  "youveNoDuplicateFilesThatCanBeCleared": "У вас нет дубликатов файлов, которые можно удалить",
   "success": "Успешно",
   "rateUs": "Оцените нас",
   "remindToEmptyDeviceTrash": "Также очистите \"Недавно удалённые\" из \"Настройки\" -> \"Хранилище\", чтобы получить больше свободного места",
@@ -672,6 +694,8 @@
   "noPhotosAreBeingBackedUpRightNow": "На данный момент резервных копий нет",
   "preserveMore": "Сохранить больше",
   "grantFullAccessPrompt": "Пожалуйста, разрешите доступ к вашим фотографиям в Настройках приложения",
+  "allowPermTitle": "Разрешить доступ к фотографиям",
+  "allowPermBody": "Пожалуйста, разрешите доступ к вашим фотографиям в настройках, чтобы мы могли отображать и создавать резервные копии вашей библиотеки.",
   "openSettings": "Открыть настройки",
   "selectMorePhotos": "Выбрать больше фотографий",
   "existingUser": "Существующий пользователь",
@@ -800,6 +824,16 @@
   "referFriendsAnd2xYourPlan": "Пригласите друзей и удвойте свой план",
   "shareAlbumHint": "Откройте альбом и нажмите кнопку \"Поделиться\" в правом верхнем углу экрана.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Элементы показывают количество дней, оставшихся до окончательного удаления",
+  "trashDaysLeft": "{count, plural, =0 {В ближайшее время} =1 {1 день} other {{count} дней}}",
+  "@trashDaysLeft": {
+    "description": "Text to indicate number of days remaining before permanent deletion",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
   "deleteAll": "Удалить всё",
   "renameAlbum": "Переименовать альбом",
   "convertToAlbum": "Преобразовать в альбом",
@@ -930,6 +964,16 @@
   "encryptingBackup": "Шифрование резервной копии...",
   "syncStopped": "Синхронизация остановлена",
   "syncProgress": "{completed}/{total} сохранено",
+  "uploadingMultipleMemories": "Сохранение воспоминаний: {count}...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "uploadingSingleMemory": "Сохранение 1 воспоминания...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
     "placeholders": {
@@ -1205,6 +1249,7 @@
   "waitingForVerification": "Ожидание подтверждения...",
   "passkey": "Ключ",
   "passkeyAuthTitle": "Проверка с помощью ключа",
+  "loginWithTOTP": "Войти через TOTP",
   "passKeyPendingVerification": "Верификация еще не завершена",
   "loginSessionExpired": "Сессия недействительная",
   "loginSessionExpiredDetails": "Сессия истекла. Зайдите снова.",
@@ -1217,6 +1262,10 @@
   "joinDiscord": "Присоединиться в Discord",
   "locations": "Локации",
   "addAName": "Добавить имя",
+  "findThemQuickly": "Быстрый поиск",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Быстрый поиск людей по имени",
   "addViewers": "{count, plural, one {Добавьте зрителя} few {Добавьте зрителей} many {Добавьте зрителей} other {Добавьте зрителей}}",
   "addCollaborators": "{count, plural, one {Добавьте соавтора} few {Добавьте соавторов} many {Добавьте соавторов} other {Добавьте соавторов}}",
@@ -1341,6 +1390,7 @@
   "extraPhotosFound": "Найдены дополнительные фотографии",
   "configuration": "Настройки",
   "localIndexing": "Локальное индексирование",
+  "processed": "Обработано",
   "resetPerson": "Убрать",
   "areYouSureYouWantToResetThisPerson": "Вы уверены, что хотите сбросить этого человека?",
   "allPersonGroupingWillReset": "Все группы этого человека будут сброшены, и вы потеряете все предложения, сделанные для этого человека",
@@ -1348,6 +1398,8 @@
   "onlyThem": "Только их",
   "checkingModels": "Проверка моделей...",
   "enableMachineLearningBanner": "Включить автоматическое обучение для Магического Поиска и распознавания лица",
+  "searchDiscoverEmptySection": "Изображения будут показаны здесь после завершения обработки и синхронизации",
+  "searchPersonsEmptySection": "Люди будут показаны здесь после завершения обработки и синхронизации",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 зрителей}=1 {Добавлен 1 зритель} other {Добавлено {count} зрителей}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
@@ -1397,6 +1449,20 @@
       }
     }
   },
+  "tapToUploadIsIgnoredDue": "Нажмите, чтобы загрузить, загрузка в данный момент недоступна из-за {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Нажмите, чтобы загрузить",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
   "info": "Информация",
   "addFiles": "Добавить файлы",
   "castAlbum": "Трансляция альбома",
@@ -1429,6 +1495,20 @@
     }
   },
   "file": "Файл",
+  "searchSectionsLengthMismatch": "Несоответствие длины секций: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "selectMailApp": "Выберите приложение почты",
   "selectAllShort": "Все",
   "@selectAllShort": {
@@ -1449,11 +1529,211 @@
   "acceptTrustInvite": "Принять приглашение",
   "declineTrustInvite": "Отклонить приглашение",
   "removeYourselfAsTrustedContact": "Удалить себя как доверенный контакт",
+  "legacy": "Доверенные",
+  "legacyPageDesc": "Доверенные аккаунты могут получать доступ к вашей учетной записи в ваше отсутствие.",
   "legacyPageDesc2": "Доверенные контакты могут инициировать восстановление учетной записи, если они не будут заблокированы в течение 30 дней, сбросить пароль и получить доступ к вашей учетной записи.",
+  "legacyAccounts": "Доверенные аккаунты",
   "trustedContacts": "Доверенные контакты",
   "addTrustedContact": "Добавить доверенный контакт",
   "removeInvite": "Удалить приглашение",
   "recoveryWarning": "Доверенный контакт пытается получить доступ к вашей учетной записи",
   "rejectRecovery": "Отклонить восстановление",
-  "recoveryInitiated": "Восстановление запущено"
+  "recoveryInitiated": "Восстановление запущено",
+  "recoveryInitiatedDesc": "Вы сможете получить доступ к аккаунту через: {days} дней. Уведомление будет отправлено на {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Отменить восстановление",
+  "recoveryAccount": "Восстановить аккаунт",
+  "cancelAccountRecoveryBody": "Вы уверены, что хотите отменить восстановление?",
+  "startAccountRecoveryTitle": "Начать восстановление",
+  "whyAddTrustContact": "Надежный контакт может помочь в восстановлении ваших данных.",
+  "recoveryReady": "Теперь вы можете восстановить аккаунт {email}, установив новый пароль.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} пытается восстановить ваш аккаунт.",
+  "trustedInviteBody": "{email} пригласил Вас стать доверенным контактом.",
+  "warning": "Предупреждение",
+  "proceed": "Продолжить",
+  "confirmAddingTrustedContact": "Вы собираетесь добавить {email} в качестве доверенного контакта. Доверенный контакт может восстановить ваш аккаунт, если вы будете отсутствовать в течение {numOfDays} дней.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} пригласил вас стать доверенным контактом",
+  "authToManageLegacy": "Пожалуйста, пройдите аутентификацию, чтобы управлять своими доверенными контактами",
+  "useDifferentPlayerInfo": "Возникли проблемы с воспроизведением этого видео? Нажмите и удерживайте здесь, чтобы попробовать другой проигрыватель.",
+  "hideSharedItemsFromHomeGallery": "Скрыть общие элементы из домашней галереи",
+  "gallery": "Галерея",
+  "joinAlbum": "Присоединиться к альбому",
+  "joinAlbumSubtext": "чтобы просмотреть и добавить свои фотографии",
+  "joinAlbumSubtextViewer": "чтобы добавить это в общие альбомы",
+  "join": "Присоединиться",
+  "linkEmail": "Привязать email",
+  "link": "Привязать",
+  "noEnteAccountExclamation": "Нет аккаунта Ente!",
+  "orPickFromYourContacts": "или выберите из списка ваших контактов",
+  "emailDoesNotHaveEnteAccount": "{email} не имеет аккаунта Ente.",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (Я)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignMe": "Переназначить \"Я\"",
+  "me": "Я",
+  "linkEmailToContactBannerCaption": "чтобы быстро поделиться",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "Выберите человека, чтобы связать",
+  "linkPersonToEmail": "Связать человека с {email}",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "linkPersonToEmailConfirmation": "Это свяжет {personName} с {email}",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "Выберите ваше лицо",
+  "reassigningLoading": "Переназначение...",
+  "reassignedToName": "Переназначен {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "Сохранить изменения перед выходом?",
+  "dontSave": "Не сохранять",
+  "thisIsMeExclamation": "Это я!",
+  "linkPerson": "Связать человека",
+  "linkPersonCaption": "для лучшего обмена опытом",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "Потоковое видео",
+  "processingVideos": "Обработка видео",
+  "streamDetails": "Информация о потоке",
+  "processing": "Обработка",
+  "queued": "В очереди",
+  "ineligible": "Несоответствие",
+  "failed": "Не удалось",
+  "playStream": "Воспроизвести поток",
+  "playOriginal": "Воспроизвести оригинал",
+  "joinAlbumConfirmationDialogBody": "Если вы присоединитесь к альбому, ваш email будет виден его участникам.",
+  "pleaseWaitThisWillTakeAWhile": "Пожалуйста, подождите, это займет некоторое время.",
+  "editTime": "Изменить время",
+  "selectTime": "Выбрать время",
+  "selectDate": "Выбрать дату",
+  "previous": "Предыдущий",
+  "selectOneDateAndTimeForAll": "Выберите одну дату и время для всех",
+  "selectStartOfRange": "Выберите начало диапазона",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "Это сделает дату и время всех выбранных фотографий одинаковыми.",
+  "allWillShiftRangeBasedOnFirst": "Это первая фотография в группе. Остальные выбранные фотографии будут автоматически изменены в зависимости от новой даты",
+  "newRange": "Новый диапазон",
+  "selectOneDateAndTime": "Выберите одну дату и время",
+  "moveSelectedPhotosToOneDate": "Переместить выбранные фотографии на одну дату",
+  "shiftDatesAndTime": "Изменить даты и время",
+  "photosKeepRelativeTimeDifference": "Фотографии сохраняют относительную разницу во времени",
+  "photocountPhotos": "{count, plural, =0 {Нет фото} =1 {1 фото} other {{count} фото}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "appIcon": "Иконка приложения",
+  "notThisPerson": "Не этот человек?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Выбранные элементы будут удалены у этого пользователя, но не из вашей библиотеки.",
+  "throughTheYears": "{dateFormat} сквозь годы",
+  "thisWeekThroughTheYears": "Эта неделя на протяжении многих лет",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Эта неделя, {count} лет назад} other {Эта неделя, {count} лет назад}}",
+  "youAndThem": "Вы и {name}",
+  "admiringThem": "Восхищен {name}",
+  "embracingThem": "Обнимает {name}",
+  "partyWithThem": "Вечеринка с {name}",
+  "hikingWithThem": "Прогуливается с {name}",
+  "feastingWithThem": "Пирует с {name}",
+  "selfiesWithThem": "Селфи с {name}",
+  "posingWithThem": "Позирует с {name}",
+  "backgroundWithThem": "Прекрасные виды с {name}",
+  "sportsWithThem": "Виды спорта с {name}",
+  "roadtripWithThem": "Дорожное путешествие с {name}",
+  "spotlightOnYourself": "Сосредоточьте внимание на себе",
+  "spotlightOnThem": "В центре внимания {name}",
+  "personIsAge": "{name} сейчас {age}!",
+  "personTurningAge": "{name} скоро исполнится {age}",
+  "lastTimeWithThem": "В последний раз с {name}",
+  "tripToLocation": "Поездка в {location}",
+  "tripInYear": "Поездка в {year}",
+  "lastYearsTrip": "Прошлогодняя поездка",
+  "sunrise": "На горизонте",
+  "mountains": "Через холмы",
+  "greenery": "Зеленая жизнь",
+  "beach": "Песок и море",
+  "city": "В городе",
+  "moon": "В лунном свете",
+  "onTheRoad": "Снова в пути",
+  "food": "Кулинарное наслаждение",
+  "pets": "Пушистые компаньоны",
+  "cLIcon": "Новая иконка",
+  "cLIconDesc": "Наконец, появился новый значок приложения, который, по нашему мнению, наилучшим образом отражает нашу работу. Мы также добавили переключатель значков, чтобы вы могли продолжать использовать старый значок.",
+  "cLMemories": "Воспоминания",
+  "cLMemoriesDesc": "Заново откройте для себя свои особые моменты - обратите внимание на своих любимых людей, свои поездки и праздники, свои лучшие снимки и многое другое. Включите машинное обучение, отмечайте себя и своих друзей, чтобы получить наилучшие впечатления.",
+  "cLWidgets": "Виджеты",
+  "cLWidgetsDesc": "Теперь доступны виджеты главного экрана, интегрированные с функцией Воспоминания. Они будут отображать ваши особые моменты, не открывая приложение.",
+  "cLFamilyPlan": "Ограничения семейного тарифа",
+  "cLFamilyPlanDesc": "Теперь вы можете установить ограничения на объем памяти, который могут использовать участники вашего семейного тарифа.",
+  "cLBulkEdit": "Массовое редактирование дат",
+  "cLBulkEditDesc": "Теперь вы можете выбрать несколько фотографий и отредактировать дату и время для каждой из них одним быстрым действием. Также поддерживается перенос дат."
 }
