@@ -147,7 +147,8 @@ Future<Uint8List?> precomputeClusterFaceCrop(
   required bool useFullFile,
 }) async {
   try {
-    final w = (kDebugMode ? EnteWatch('precomputeClusterFaceCrop') : null)?..start();
+    final w = (kDebugMode ? EnteWatch('precomputeClusterFaceCrop') : null)
+      ?..start();
     final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
       clusterID: clusterID,

@@ -100,7 +100,7 @@ class ExtentsPageView extends StatefulWidget {
     int? itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.openDrawer,
-  })  : childrenDelegate = SliverChildBuilderDelegate(
+  }) : childrenDelegate = SliverChildBuilderDelegate(
           itemBuilder,
           childCount: itemCount,
           addAutomaticKeepAlives: false,
@@ -198,7 +198,7 @@ class ExtentsPageView extends StatefulWidget {
     required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
     this.openDrawer,
-  })  : extents = 0;
+  }) : extents = 0;
 
   /// The number of pages to build off screen.
   ///

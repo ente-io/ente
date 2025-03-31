@@ -64,8 +64,8 @@ class AlbumColumnItemWidget extends StatelessWidget {
                     children: [
                       Text(collection.displayName),
                       FutureBuilder<int>(
-                        future: CollectionsService.instance.getFileCount
-                          (collection),
+                        future: CollectionsService.instance
+                            .getFileCount(collection),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
                             return Text(

@@ -22,6 +22,5 @@ const EVector$json = {
 };
 
 /// Descriptor for `EVector`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List eVectorDescriptor = $convert.base64Decode(
-    'CgdFVmVjdG9yEhYKBnZhbHVlcxgBIAMoAVIGdmFsdWVz');
-
+final $typed_data.Uint8List eVectorDescriptor =
+    $convert.base64Decode('CgdFVmVjdG9yEhYKBnZhbHVlcxgBIAMoAVIGdmFsdWVz');

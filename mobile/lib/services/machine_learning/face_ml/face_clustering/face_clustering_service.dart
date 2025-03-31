@@ -507,7 +507,8 @@ ClusteringResult _runCompleteClustering(Map args) {
           EVector.fromBuffer(entry.value).values,
           dtype: DType.float32,
         ),
-        fileCreationTime: fileIDToCreationTime?[getFileIdFromFaceId<int>(entry.key)],
+        fileCreationTime:
+            fileIDToCreationTime?[getFileIdFromFaceId<int>(entry.key)],
       ),
     );
   }

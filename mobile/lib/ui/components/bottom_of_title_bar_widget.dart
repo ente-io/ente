@@ -18,8 +18,9 @@ class BottomOfTitleBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: showCloseButton ? MainAxisAlignment.spaceBetween :
-      MainAxisAlignment.start,
+      mainAxisAlignment: showCloseButton
+          ? MainAxisAlignment.spaceBetween
+          : MainAxisAlignment.start,
       children: [
         Flexible(
           child: Padding(

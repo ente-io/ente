@@ -29,25 +29,30 @@ class EPoint extends $pb.GeneratedMessage {
     return $result;
   }
   EPoint._() : super();
-  factory EPoint.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory EPoint.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory EPoint.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory EPoint.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'EPoint', package: const $pb.PackageName(_omitMessageNames ? '' : 'ente.common'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'EPoint',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'ente.common'),
+      createEmptyInstance: create)
     ..a<$core.double>(1, _omitFieldNames ? '' : 'x', $pb.PbFieldType.OF)
     ..a<$core.double>(2, _omitFieldNames ? '' : 'y', $pb.PbFieldType.OF)
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   EPoint clone() => EPoint()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  EPoint copyWith(void Function(EPoint) updates) => super.copyWith((message) => updates(message as EPoint)) as EPoint;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  EPoint copyWith(void Function(EPoint) updates) =>
+      super.copyWith((message) => updates(message as EPoint)) as EPoint;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -56,13 +61,17 @@ class EPoint extends $pb.GeneratedMessage {
   EPoint createEmptyInstance() => create();
   static $pb.PbList<EPoint> createRepeated() => $pb.PbList<EPoint>();
   @$core.pragma('dart2js:noInline')
-  static EPoint getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<EPoint>(create);
+  static EPoint getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<EPoint>(create);
   static EPoint? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.double get x => $_getN(0);
   @$pb.TagNumber(1)
-  set x($core.double v) { $_setFloat(0, v); }
+  set x($core.double v) {
+    $_setFloat(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasX() => $_has(0);
   @$pb.TagNumber(1)
@@ -71,13 +80,16 @@ class EPoint extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.double get y => $_getN(1);
   @$pb.TagNumber(2)
-  set y($core.double v) { $_setFloat(1, v); }
+  set y($core.double v) {
+    $_setFloat(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasY() => $_has(1);
   @$pb.TagNumber(2)
   void clearY() => clearField(2);
 }
 
-
 const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

@@ -82,7 +82,11 @@ class FaceDetectionService extends MlModel {
         'Face detection is finished, in ${inferenceTime.difference(startTime).inMilliseconds} ms (preprocessing: $preprocessingMs ms, inference: $inferenceMs ms)',
       );
     } catch (e, s) {
-      _logger.severe('Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})', e, s);
+      _logger.severe(
+        'Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})',
+        e,
+        s,
+      );
       throw YOLOFaceInterpreterRunException();
     }
     try {

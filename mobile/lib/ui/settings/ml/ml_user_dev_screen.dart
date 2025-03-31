@@ -57,57 +57,69 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
                           ),
                     ),
                     const SizedBox(height: 48),
-                    widget.mlIsEnabled ? ButtonWidget(
-                      buttonType: ButtonType.neutral,
-                      labelText: "Purge empty indices",
-                      onTap: () async {
-                        await deleteEmptyIndices(context);
-                      },
-                    ) : const SizedBox(),
-                    widget.mlIsEnabled ? const SizedBox(height: 24) : const SizedBox(),
-                    widget.mlIsEnabled ? ButtonWidget(
-                      buttonType: ButtonType.neutral,
-                      labelText: "Reset all local ML",
-                      onTap: () async {
-                        await deleteAllLocalML(context);
-                      },
-                    ) : const SizedBox(),
-                    widget.mlIsEnabled ? const SizedBox(height: 24) : const SizedBox(),
-                    widget.mlIsEnabled ? MenuItemWidget(
-                      captionedTextWidget: const CaptionedTextWidget(
-                        title: "Remote fetch",
-                      ),
-                      menuItemColor: colorScheme.fillFaint,
-                      trailingWidget: ToggleSwitchWidget(
-                        value: () => localSettings.remoteFetchEnabled,
-                        onChanged: () async {
-                          try {
-                            await localSettings.toggleRemoteFetch();
-                            _logger.info(
-                              'Remote fetch is turned ${localSettings.remoteFetchEnabled ? 'on' : 'off'}',
-                            );
-                            if (mounted) {
-                              setState(() {});
-                            }
-                          } catch (e, s) {
-                            _logger.warning(
-                              'Remote fetch toggle failed ',
-                              e,
-                              s,
-                            );
-                            await showGenericErrorDialog(
-                              context: context,
-                              error: e,
-                            );
-                          }
-                        },
-                      ),
-                      singleBorderRadius: 8,
-                      alignCaptionedTextToLeft: true,
-                      isBottomBorderRadiusRemoved: true,
-                      isGestureDetectorDisabled: true,
-                    ) : const SizedBox(),
-                    widget.mlIsEnabled ? const SizedBox(height: 24) : const SizedBox.shrink(),
+                    widget.mlIsEnabled
+                        ? ButtonWidget(
+                            buttonType: ButtonType.neutral,
+                            labelText: "Purge empty indices",
+                            onTap: () async {
+                              await deleteEmptyIndices(context);
+                            },
+                          )
+                        : const SizedBox(),
+                    widget.mlIsEnabled
+                        ? const SizedBox(height: 24)
+                        : const SizedBox(),
+                    widget.mlIsEnabled
+                        ? ButtonWidget(
+                            buttonType: ButtonType.neutral,
+                            labelText: "Reset all local ML",
+                            onTap: () async {
+                              await deleteAllLocalML(context);
+                            },
+                          )
+                        : const SizedBox(),
+                    widget.mlIsEnabled
+                        ? const SizedBox(height: 24)
+                        : const SizedBox(),
+                    widget.mlIsEnabled
+                        ? MenuItemWidget(
+                            captionedTextWidget: const CaptionedTextWidget(
+                              title: "Remote fetch",
+                            ),
+                            menuItemColor: colorScheme.fillFaint,
+                            trailingWidget: ToggleSwitchWidget(
+                              value: () => localSettings.remoteFetchEnabled,
+                              onChanged: () async {
+                                try {
+                                  await localSettings.toggleRemoteFetch();
+                                  _logger.info(
+                                    'Remote fetch is turned ${localSettings.remoteFetchEnabled ? 'on' : 'off'}',
+                                  );
+                                  if (mounted) {
+                                    setState(() {});
+                                  }
+                                } catch (e, s) {
+                                  _logger.warning(
+                                    'Remote fetch toggle failed ',
+                                    e,
+                                    s,
+                                  );
+                                  await showGenericErrorDialog(
+                                    context: context,
+                                    error: e,
+                                  );
+                                }
+                              },
+                            ),
+                            singleBorderRadius: 8,
+                            alignCaptionedTextToLeft: true,
+                            isBottomBorderRadiusRemoved: true,
+                            isGestureDetectorDisabled: true,
+                          )
+                        : const SizedBox(),
+                    widget.mlIsEnabled
+                        ? const SizedBox(height: 24)
+                        : const SizedBox.shrink(),
                     ButtonWidget(
                       buttonType: ButtonType.neutral,
                       labelText: "Load face detection model",
