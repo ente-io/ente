@@ -1128,10 +1128,9 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     );
 
     useEffect(() => {
-        let timerID: ReturnType<typeof setTimeout>;
-        if (isLongPressing) {
-            setTimeout(() => onSelect(!selected), 500);
-        }
+        const timerID = isLongPressing
+            ? setTimeout(() => onSelect(!selected), 500)
+            : undefined;
         return () => {
             if (timerID) clearTimeout(timerID);
         };
