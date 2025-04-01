@@ -18,7 +18,7 @@ import {
     type FileViewerAnnotatedFile,
     type FileViewerProps,
 } from "./FileViewer";
-import { createPSRegisterElementIconHTML } from "./icons";
+import { createPSRegisterElementIconHTML, settingsSVGPath } from "./icons";
 
 export interface FileViewerPhotoSwipeDelegate {
     /**
@@ -1164,6 +1164,10 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  * To make these functional, the `media-control-bar` requires the
  * `mediacontroller="${mediaControllerID}"` attribute.
  *
+ * TODO(HLS): Tooltips get clipped
+ * TODO(HLS): Translation
+ * TODO(HLS): Spurious console warning
+ *
  * Notes:
  *
  * - Examples: https://media-chrome.mux.dev/examples/vanilla/
@@ -1194,9 +1198,9 @@ const hlsVideoControlsHTML = () => `
     <media-mute-button></media-mute-button>
     <media-time-display showduration notoggle></media-time-display>
     <media-text-display></media-text-display>
-    <media-chrome-menu-button id="et-settings-menu-btn" invoketarget="et-settings-menu" notooltip>
-      <h1>B2</h1>
-    </media-chrome-menu-button>
+    <media-settings-menu-button id="et-settings-menu-btn" invoketarget="et-settings-menu" notooltip>
+      <svg slot="icon" viewBox="0 0 24 24">${settingsSVGPath}</svg>
+    </media-settings-menu-button>
     <media-pip-button></media-pip-button>
     <media-airplay-button></media-airplay-button>
     <media-fullscreen-button></media-fullscreen-button>

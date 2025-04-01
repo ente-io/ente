@@ -230,6 +230,7 @@
       which case this should be possible straightforwardly.
       */
     --media-menu-hidden-max-height: 1px;
+    --media-menu-max-height: 1000px;
 }
 
 /*
@@ -287,12 +288,10 @@ media-fullscreen-button[mediafullscreenunavailable] {
 
 media-settings-menu {
     /*
-      Restore the background for the settings menu.
-
-      The default is var(--_menu-bg), which is rgb(20 20 30 / .8).
+      Restore the background for the settings menu (we made it transparent). The
+      default is var(--_menu-bg), which is rgb(20 20 30 / .8).
      */
     --media-control-background: var(--mui-palette-fixed-dark-background-paper);
-    --media-menu-border: 10px solid #1b1b1b;
     /* Regular, but since the rest of media controls use 400, it
        appears heavier. */
     --media-font-weight: 500;
@@ -302,10 +301,4 @@ media-settings-menu {
       See: [Note: Showing menus outside of media-controller]
      */
     z-index: 1;
-    /*
-      Undo the effects of --media-menu-hidden-max-height.
-
-      See: [Note: Showing menus outside of media-controller]
-     */
-    --media-menu-max-height: 1000px;
 }
