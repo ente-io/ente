@@ -216,6 +216,20 @@
     --media-font-family: "Inter Variable", sans-serif;
     --media-control-background: transparent;
     --media-control-hover-background: rgb(255 255 255 / 0.12);
+    /*
+      Prevent menus from occluding clicks on other controls when hidden.
+
+      [Note: Showing menus outside of media-controller]
+
+      This is all very hacky. None of the media controller examples currently
+      show menus work for our specific scenario (the controls detached from the
+      the media controller itself, and shown at the bottom of the screen). As
+      such, a lot of undocumented and arbitrary tweaks are needed. This is a
+      house of cards, and might fall when the media-chrome version is updated;
+      on the other hand, they might also add better support for our scenario, in
+      which case this should be possible straightforwardly.
+      */
+    --media-menu-hidden-max-height: 1px;
 }
 
 /*
@@ -279,7 +293,19 @@ media-settings-menu {
      */
     --media-control-background: var(--mui-palette-fixed-dark-background-paper);
     --media-menu-border: 10px solid #1b1b1b;
+    /* Regular, but since the rest of media controls use 400, it
+       appears heavier. */
     --media-font-weight: 500;
-    /* Bring it above the rest of our controls */
-    /* z-index: 1; */
+    /*
+      Bring it above the rest of our controls.
+
+      See: [Note: Showing menus outside of media-controller]
+     */
+    z-index: 1;
+    /*
+      Undo the effects of --media-menu-hidden-max-height.
+
+      See: [Note: Showing menus outside of media-controller]
+     */
+    --media-menu-max-height: 1000px;
 }

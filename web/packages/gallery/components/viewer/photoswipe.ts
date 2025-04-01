@@ -447,20 +447,21 @@ export class FileViewerPhotoSwipe {
         let mediaControlsContainerElement: HTMLElement | undefined;
 
         /**
-         * If a {@link mediaControllerID} is provided, then make the
-         * media controls visible and link the media-control-bar to the given
-         * controller. Otherwise hide the media controls.
+         * If a {@link mediaControllerID} is provided, then make the media
+         * controls visible and link the media-control-bars (and other
+         * containers that house controls) to the given controller. Otherwise
+         * hide the media controls.
          */
         const updateMediaControls = (mediaControllerID: string | undefined) => {
-            const controlBars =
+            const controls =
                 mediaControlsContainerElement?.querySelectorAll(
                     "media-control-bar, media-playback-rate-menu",
                 ) ?? [];
-            for (const bar of controlBars) {
+            for (const control of controls) {
                 if (mediaControllerID) {
-                    bar.setAttribute("mediacontroller", mediaControllerID);
+                    control.setAttribute("mediacontroller", mediaControllerID);
                 } else {
-                    bar.removeAttribute("mediacontroller");
+                    control.removeAttribute("mediacontroller");
                 }
             }
         };
@@ -1169,6 +1170,8 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  *
  * - When PiP is active and the video moves out, the browser displays some
  *   indicator (browser specific) in the in-page video element.
+ *
+ * - The media-cast-button currently doesn't work with the `hls-video` player.
  */
 const hlsVideoControlsHTML = () => `
 <div>
@@ -1180,8 +1183,6 @@ const hlsVideoControlsHTML = () => `
       </media-playback-rate-menu>
     </media-settings-menu-item>
   </media-settings-menu>
-  <media-playback-rate-menu id="m2" hidden anchor="b2"></media-playback-rate-menu>
-
   <media-control-bar>
     <media-loading-indicator noautohide></media-loading-indicator>
   </media-control-bar>
