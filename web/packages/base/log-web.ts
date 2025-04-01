@@ -31,7 +31,7 @@ export const logStartupBanner = (userID?: number) => {
  */
 export const logUnhandledErrorsAndRejections = (attach: boolean) => {
     const handleError = (event: ErrorEvent) => {
-        log.error("Unhandled error", event.error);
+        log.error("Unhandled error", event.error ?? event.message);
     };
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {

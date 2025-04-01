@@ -3,6 +3,7 @@ import { FileType } from "@/media/file-type";
 import "hls-video-element";
 import { t } from "i18next";
 import "media-chrome";
+import "media-chrome/menu";
 import PhotoSwipe, { type SlideData } from "photoswipe";
 import {
     fileViewerDidClose,
@@ -17,7 +18,7 @@ import {
     type FileViewerAnnotatedFile,
     type FileViewerProps,
 } from "./FileViewer";
-import { createPSRegisterElementIconHTML } from "./icons";
+import { createPSRegisterElementIconHTML, settingsSVGPath } from "./icons";
 
 export interface FileViewerPhotoSwipeDelegate {
     /**
@@ -446,20 +447,21 @@ export class FileViewerPhotoSwipe {
         let mediaControlsContainerElement: HTMLElement | undefined;
 
         /**
-         * If a {@link mediaControllerID} is provided, then make the
-         * media controls visible and link the media-control-bar to the given
-         * controller. Otherwise hide the media controls.
+         * If a {@link mediaControllerID} is provided, then make the media
+         * controls visible and link the media-control-bars (and other
+         * containers that house controls) to the given controller. Otherwise
+         * hide the media controls.
          */
         const updateMediaControls = (mediaControllerID: string | undefined) => {
-            const controlBars =
+            const controls =
                 mediaControlsContainerElement?.querySelectorAll(
-                    "media-control-bar",
+                    "media-control-bar, media-playback-rate-menu",
                 ) ?? [];
-            for (const bar of controlBars) {
+            for (const control of controls) {
                 if (mediaControllerID) {
-                    bar.setAttribute("mediacontroller", mediaControllerID);
+                    control.setAttribute("mediacontroller", mediaControllerID);
                 } else {
-                    bar.removeAttribute("mediacontroller");
+                    control.removeAttribute("mediacontroller");
                 }
             }
         };
@@ -1147,6 +1149,7 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 //
 //     import "hls-video-element";
 //     import "media-chrome";
+//     import "media-chrome/menu";
 //
 // TODO(HLS): Update code above that searches for the video element
 const hlsVideoHTML = (url: string, mediaControllerID: string) => `
@@ -1161,15 +1164,29 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  * To make these functional, the `media-control-bar` requires the
  * `mediacontroller="${mediaControllerID}"` attribute.
  *
+ * TODO(HLS): Tooltips get clipped
+ * TODO(HLS): Translation
+ * TODO(HLS): Spurious console warning
+ *
  * Notes:
  *
  * - Examples: https://media-chrome.mux.dev/examples/vanilla/
  *
  * - When PiP is active and the video moves out, the browser displays some
  *   indicator (browser specific) in the in-page video element.
+ *
+ * - The media-cast-button currently doesn't work with the `hls-video` player.
  */
 const hlsVideoControlsHTML = () => `
 <div>
+  <media-settings-menu id="et-settings-menu" hidden anchor="et-settings-menu-btn">
+    <media-settings-menu-item>
+      Speed
+      <media-playback-rate-menu slot="submenu" hidden>
+        <div slot="title">Speed</div>
+      </media-playback-rate-menu>
+    </media-settings-menu-item>
+  </media-settings-menu>
   <media-control-bar>
     <media-loading-indicator noautohide></media-loading-indicator>
   </media-control-bar>
@@ -1181,6 +1198,9 @@ const hlsVideoControlsHTML = () => `
     <media-mute-button></media-mute-button>
     <media-time-display showduration notoggle></media-time-display>
     <media-text-display></media-text-display>
+    <media-settings-menu-button id="et-settings-menu-btn" invoketarget="et-settings-menu" notooltip>
+      <svg slot="icon" viewBox="0 0 24 24">${settingsSVGPath}</svg>
+    </media-settings-menu-button>
     <media-pip-button></media-pip-button>
     <media-airplay-button></media-airplay-button>
     <media-fullscreen-button></media-fullscreen-button>

@@ -208,9 +208,29 @@
 
     /* Similar to our other controls */
     --media-icon-color: rgb(255 255 255 / 0.8);
+    /* NB: We don't reset the font-weight, so this'll be using 400 instead of
+       the 500 we use elsewhere. See: [Note: Font weights].
+
+       We don't reset it because on this screen the 400 looks better (for now).
+      */
     --media-font-family: "Inter Variable", sans-serif;
     --media-control-background: transparent;
     --media-control-hover-background: rgb(255 255 255 / 0.12);
+    /*
+      Prevent menus from occluding clicks on other controls when hidden.
+
+      [Note: Showing menus outside of media-controller]
+
+      This is all very hacky. None of the media controller examples currently
+      show menus work for our specific scenario (the controls detached from the
+      the media controller itself, and shown at the bottom of the screen). As
+      such, a lot of undocumented and arbitrary tweaks are needed. This is a
+      house of cards, and might fall when the media-chrome version is updated;
+      on the other hand, they might also add better support for our scenario, in
+      which case this should be possible straightforwardly.
+      */
+    --media-menu-hidden-max-height: 1px;
+    --media-menu-max-height: 1000px;
 }
 
 /*
@@ -264,4 +284,21 @@ media-pip-button[mediapipunavailable],
 media-airplay-button[mediaairplayunavailable],
 media-fullscreen-button[mediafullscreenunavailable] {
     display: none;
+}
+
+media-settings-menu {
+    /*
+      Restore the background for the settings menu (we made it transparent). The
+      default is var(--_menu-bg), which is rgb(20 20 30 / .8).
+     */
+    --media-control-background: var(--mui-palette-fixed-dark-background-paper);
+    /* Regular, but since the rest of media controls use 400, it
+       appears heavier. */
+    --media-font-weight: 500;
+    /*
+      Bring it above the rest of our controls.
+
+      See: [Note: Showing menus outside of media-controller]
+     */
+    z-index: 1;
 }
