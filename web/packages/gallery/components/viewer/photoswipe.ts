@@ -1173,7 +1173,16 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  */
 const hlsVideoControlsHTML = () => `
 <div>
-  <media-chrome-menu id="m2" hidden anchor="b2"><h1>Test menu in div</h1></media-chrome-menu>
+  <media-settings-menu id="m2" hidden anchor="b2">
+    <media-settings-menu-item>
+      Speed
+      <media-playback-rate-menu slot="submenu" hidden>
+        <div slot="title">Speed</div>
+      </media-playback-rate-menu>
+    </media-settings-menu-item>
+  </media-settings-menu>
+  <media-chrome-menu id="m2-" hidden anchor="b2"><h1>Test menu in div</h1></media-chrome-menu>
+  <media-playback-rate-menu id="m2" hidden anchor="b2"></media-playback-rate-menu>
   <media-playback-rate-menu hidden id="menu1" anchor="menu-button1"></media-playback-rate-menu>
   <media-control-bar>
     <media-loading-indicator noautohide></media-loading-indicator>
@@ -1184,7 +1193,7 @@ const hlsVideoControlsHTML = () => `
   <media-control-bar>
     <media-chrome-menu id="m1" hidden><h1>Test menu in control bar</h1></media-chrome-menu>
     <media-chrome-menu-button id="b1" invoketarget="m1"><h1>B1</h1></media-chrome-menu-button>
-    <media-chrome-menu-button id="b2" invoketarget="m2"><h1>B2</h1></media-chrome-menu-button>
+    <media-chrome-menu-button id="b2" invoketarget="m2" notooltip><h1>B2</h1></media-chrome-menu-button>
     <media-chrome-menu-button id="b3" invoketarget="m3"><h1>B3</h1></media-chrome-menu-button>
     <media-play-button></media-play-button>
     <media-mute-button></media-mute-button>
