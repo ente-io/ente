@@ -19,7 +19,6 @@ import {
 import { TileBottomTextOverlay } from "@/new/photos/components/Tiles";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
@@ -28,7 +27,7 @@ import Avatar from "components/pages/gallery/Avatar";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
     VariableSizeList as List,
@@ -681,13 +680,23 @@ export const FileList: React.FC<FileListProps> = ({
         handleSelectMulti(filesOnADay.map((af) => af.file))(isDateSelected);
     };
 
-    const handleSelect = handleSelectCreator(
-        setSelected,
-        mode,
-        galleryContext.user?.id,
-        activeCollectionID,
-        activePersonID,
-        setRangeStart,
+    const handleSelect = useMemo(
+        () =>
+            handleSelectCreator(
+                setSelected,
+                mode,
+                galleryContext.user?.id,
+                activeCollectionID,
+                activePersonID,
+                setRangeStart,
+            ),
+        [
+            setSelected,
+            mode,
+            galleryContext.user?.id,
+            activeCollectionID,
+            activePersonID,
+        ],
     );
 
     const onHoverOver = (index: number) => () => {
@@ -1105,8 +1114,28 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     const galleryContext = useContext(GalleryContext);
 
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
+    const [isLongPressing, setIsLongPressing] = useState(false);
 
-    const longPress = useLongPress(() => onSelect(!selected), 500);
+    const longPressHandlers = useMemo(
+        () => ({
+            onMouseDown: () => setIsLongPressing(true),
+            onMouseUp: () => setIsLongPressing(false),
+            onMouseLeave: () => setIsLongPressing(false),
+            onTouchStart: () => setIsLongPressing(true),
+            onTouchEnd: () => setIsLongPressing(false),
+        }),
+        [],
+    );
+
+    useEffect(() => {
+        let timerID: ReturnType<typeof setTimeout>;
+        if (isLongPressing) {
+            setTimeout(() => onSelect(!selected), 500);
+        }
+        return () => {
+            if (timerID) clearTimeout(timerID);
+        };
+    }, [selected, onSelect, isLongPressing]);
 
     useEffect(() => {
         let didCancel = false;
@@ -1152,7 +1181,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!imageURL}
-            {...(selectable ? longPress : {})}
+            {...(selectable ? longPressHandlers : {})}
         >
             {selectable && (
                 <Check
