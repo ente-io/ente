@@ -24,7 +24,9 @@
 #
 # For example, the nested string "db.user" in the config file can alternatively
 # be specified (or be overridden) by setting an environment variable named
-# ENTE_DB_USER.
+# ENTE_DB_USER. Also, please make a note that "-"" (hyphens) will be replaced with 
+# "_" (underscores). so a nested string "s3.b2-eu-cen" will be replaced with
+# the string "S3_B2_EU_CEN".
 #
 #
 # Empty strings
