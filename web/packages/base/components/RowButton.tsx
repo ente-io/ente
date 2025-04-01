@@ -243,7 +243,11 @@ export const RowButton: React.FC<RowButtonProps> = ({
                             direction="row"
                             sx={{ gap: "4px", alignItems: "center" }}
                         >
-                            <Typography>{label}</Typography>
+                            {/* Don't shrink the main label, instead let the
+                                caption grow into two lines if it needs to. */}
+                            <Typography sx={{ flexShrink: 0 }}>
+                                {label}
+                            </Typography>
                             <CaptionTypography color={color}>
                                 {"•"}
                             </CaptionTypography>

@@ -1526,9 +1526,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                         isLinkExpired(publicShareProp?.validTill)
                             ? t("link_expired")
                             : publicShareProp?.validTill
-                              ? formattedDateTime(
-                                    publicShareProp.validTill / 1000,
-                                )
+                              ? formattedDateTime(publicShareProp.validTill)
                               : t("never")
                     }
                 />
