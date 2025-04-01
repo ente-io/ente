@@ -40,6 +40,7 @@ func ConfigureViper(environment string) error {
 	viper.SetEnvPrefix("ENTE")
 	// Ask Viper to look for underscores (instead of dots) for nested configs.
 	viper.SetEnvKeyReplacer(strings.NewReplacer(`.`, `_`))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(`-`, `_`))
 
 	viper.SetConfigFile("configurations/" + environment + ".yaml")
 	err := viper.ReadInConfig()
