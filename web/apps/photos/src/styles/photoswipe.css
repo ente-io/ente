@@ -208,6 +208,11 @@
 
     /* Similar to our other controls */
     --media-icon-color: rgb(255 255 255 / 0.8);
+    /* NB: We don't reset the font-weight, so this'll be using 400 instead of
+       the 500 we use elsewhere. See: [Note: Font weights].
+
+       We don't reset it because on this screen the 400 looks better (for now).
+      */
     --media-font-family: "Inter Variable", sans-serif;
     --media-control-background: transparent;
     --media-control-hover-background: rgb(255 255 255 / 0.12);
@@ -264,4 +269,17 @@ media-pip-button[mediapipunavailable],
 media-airplay-button[mediaairplayunavailable],
 media-fullscreen-button[mediafullscreenunavailable] {
     display: none;
+}
+
+media-settings-menu {
+    /*
+      Restore the background for the settings menu.
+
+      The default is var(--_menu-bg), which is rgb(20 20 30 / .8).
+     */
+    --media-control-background: var(--mui-palette-fixed-dark-background-paper);
+    --media-menu-border: 10px solid #1b1b1b;
+    --media-font-weight: 500;
+    /* Bring it above the rest of our controls */
+    /* z-index: 1; */
 }
