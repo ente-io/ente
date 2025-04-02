@@ -558,8 +558,9 @@ export class FileViewerPhotoSwipe {
 
             // Pause the video element, if any, when we move away from the
             // slide.
-            const video =
-                e.content.slide?.container.getElementsByTagName("video")[0];
+            const video = e.content.slide?.container.querySelector(
+                "video, hls-video",
+            ) as HTMLVideoElement | null;
             video?.pause();
         });
 
