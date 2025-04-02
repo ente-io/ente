@@ -930,12 +930,19 @@ export class FileViewerPhotoSwipe {
                 // them (nb: the caption will hide when the video is playing).
                 order: 31,
                 appendTo: "root",
-                tagName: "p",
+                // The caption uses the line-clamp CSS property, which behaves
+                // unexpectedly when we also assign padding to the "p" element
+                // on which we're setting the line clamp: the "clipped" lines
+                // show through in the padding area.
+                //
+                // As a workaround, wrap the p in a div. Set the line-clamp on
+                // the p, and the padding on the div.
+                html: "<div><p></p></div>",
                 onInit: (element, pswp) => {
                     captionElement = element;
                     pswp.on("change", () => {
                         const { fileType, alt } = currSlideData();
-                        element.innerText = alt ?? "";
+                        element.querySelector("p")!.innerText = alt ?? "";
                         element.style.visibility = alt ? "visible" : "hidden";
                         // Add extra offset for video captions so that they do
                         // not overlap with the video controls. The constant is

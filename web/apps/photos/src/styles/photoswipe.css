@@ -155,23 +155,24 @@
     bottom: 0px;
     right: 0;
     margin: 20px 24px;
-    padding: 8px 16px;
+    padding-inline: 16px;
     border-radius: 3px;
     /* Same opacity as the other controls. */
     color: rgb(255 255 255 / 0.85);
     background-color: rgb(0 0 0 / 0.2);
     backdrop-filter: blur(10px);
-    /* 4 lines max, ellipsis on overflow. */
-    word-break: break-word;
     text-align: right;
     max-width: 375px;
     max-height: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
+    p {
+        /* 4 lines max, ellipsis on overflow. */
+        word-break: break-word;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+        line-clamp: 4;
+    }
 }
 
 /* Change the cursor on the thumbnail to the default arrow to indicate that it is
