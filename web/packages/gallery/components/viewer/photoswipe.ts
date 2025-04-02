@@ -551,7 +551,7 @@ export class FileViewerPhotoSwipe {
          * While the return type is an {@link HTMLVideoElement}, the result can
          * also be an instance of a media-chrome `CustomVideoElement`,
          * specifically a {@link HlsVideoElement}.
-         * https://github.com/muxinc/media-elements/blob/main/packages/hls-video-element/hls-video-element.js#L284
+         * https://github.com/muxinc/media-elements/blob/main/packages/hls-video-element/hls-video-element.js
          *
          * The media-chrome `CustomVideoElement`s provide the same API as the
          * browser's built-in {@link HTMLVideoElement}s, so we can use the same
@@ -978,14 +978,36 @@ export class FileViewerPhotoSwipe {
 
         // Actions we handle ourselves.
 
+        const handlePreviousSlide = () => pswp.prev();
+
+        const handleNextSlide = () => pswp.next();
+
+        const handleSeekBackOrPreviousSlide = () => {
+            const vid = videoVideoEl;
+            if (vid) {
+                vid.currentTime = Math.max(vid.currentTime - 5, 0);
+            } else {
+                handlePreviousSlide();
+            }
+        };
+
+        const handleSeekForwardOrNextSlide = () => {
+            const vid = videoVideoEl;
+            if (vid) {
+                vid.currentTime = vid.currentTime + 5;
+            } else {
+                handleNextSlide();
+            }
+        };
+
         const handleTogglePlayIfPossible = () => {
             switch (currentAnnotatedFile().itemData.fileType) {
                 case FileType.video:
                     videoTogglePlayIfPossible();
-                    return;
+                    break;
                 case FileType.livePhoto:
                     livePhotoTogglePlayIfPossible();
-                    return;
+                    break;
             }
         };
 
@@ -993,10 +1015,10 @@ export class FileViewerPhotoSwipe {
             switch (currentAnnotatedFile().itemData.fileType) {
                 case FileType.video:
                     videoToggleMuteIfPossible();
-                    return;
+                    break;
                 case FileType.livePhoto:
                     livePhotoToggleMuteIfPossible();
-                    return;
+                    break;
             }
         };
 
@@ -1048,15 +1070,25 @@ export class FileViewerPhotoSwipe {
             // For example, Cmd-D adds a bookmark, which is why we don't use it
             // for download.
             //
-            // An exception is Ctrl/Cmd-C, which we intercept to copy the image
-            // since that should match the user's expectation.
+            // There are some exception, e.g. Ctrl/Cmd-C, which we intercept to
+            // copy the image since that should match the user's expectation.
 
             let cb: (() => void) | undefined;
             if (e.shiftKey) {
                 // Ignore except "?" for help.
                 if (key == "?") cb = handleHelp;
             } else if (e.altKey) {
-                // Ignore.
+                // Ignore except if for arrow keys since when showing a video,
+                // the arrow keys are used for seeking, and the normal arrow key
+                // function (slide movement) needs the Alt/Opt modifier.
+                switch (key) {
+                    case "ArrowLeft":
+                        cb = handlePreviousSlide;
+                        break;
+                    case "ArrowRight":
+                        cb = handleNextSlide;
+                        break;
+                }
             } else if (e.metaKey || e.ctrlKey) {
                 // Ignore except Ctrl/Cmd-C for copy
                 if (lkey == "c") cb = handleCopy;
@@ -1072,6 +1104,16 @@ export class FileViewerPhotoSwipe {
                     case "Backspace":
                     case "Delete":
                         cb = handleDelete;
+                        break;
+                    case "ArrowLeft":
+                        cb = handleSeekBackOrPreviousSlide;
+                        // Prevent PhotoSwipe's default handling of this key.
+                        pswpEvent.preventDefault();
+                        break;
+                    case "ArrowRight":
+                        cb = handleSeekForwardOrNextSlide;
+                        // Prevent PhotoSwipe's default handling of this key.
+                        pswpEvent.preventDefault();
                         break;
                     // We check for "?"" both with an without shift, since some
                     // keyboards might have it emittable without shift.
@@ -1180,7 +1222,7 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 //
 // TODO(HLS): Update code above that searches for the video element
 const hlsVideoHTML = (url: string, mediaControllerID: string) => `
-<media-controller id="${mediaControllerID}">
+<media-controller id="${mediaControllerID}" nohotkeys>
   <hls-video playsinline slot="media" src="${url}"></hls-video>
 </media-controller>
 `;
