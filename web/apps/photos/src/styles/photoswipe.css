@@ -155,8 +155,8 @@
     bottom: 0px;
     right: 0;
     margin: 20px 24px;
-    padding: 6px 16px;
-    border-radius: 2px;
+    padding: 8px 16px;
+    border-radius: 3px;
     /* Same opacity as the other controls. */
     color: rgb(255 255 255 / 0.85);
     background-color: rgb(0 0 0 / 0.2);

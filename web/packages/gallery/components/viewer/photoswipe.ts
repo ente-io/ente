@@ -910,10 +910,25 @@ export class FileViewerPhotoSwipe {
             });
 
             ui.registerElement({
-                name: "caption",
-                // Arbitrary order towards the end (it doesn't matter anyways
-                // since we're absolutely positioned).
+                name: "media-controls",
+                // Arbitrary order towards the end.
                 order: 30,
+                appendTo: "root",
+                html: hlsVideoControlsHTML(),
+                onInit: (element, pswp) => {
+                    mediaControlsContainerElement = element;
+                    pswp.on("change", () => {
+                        const { mediaControllerID } = currSlideData();
+                        updateMediaControls(mediaControllerID);
+                    });
+                },
+            });
+
+            ui.registerElement({
+                name: "caption",
+                // After the video controls so that we don't get occluded by
+                // them (nb: the caption will hide when the video is playing).
+                order: 31,
                 appendTo: "root",
                 tagName: "p",
                 onInit: (element, pswp) => {
@@ -924,23 +939,9 @@ export class FileViewerPhotoSwipe {
                         element.style.visibility = alt ? "visible" : "hidden";
                         // Add extra offset for video captions so that they do
                         // not overlap with the video controls. The constant is
-                        // an ad-hoc value that looked okay-ish across browsers.
+                        // such that it lies above the media controls.
                         element.style.bottom =
-                            fileType === FileType.video ? "36px" : "0";
-                    });
-                },
-            });
-
-            ui.registerElement({
-                name: "media-controls",
-                order: 31,
-                appendTo: "root",
-                html: hlsVideoControlsHTML(),
-                onInit: (element, pswp) => {
-                    mediaControlsContainerElement = element;
-                    pswp.on("change", () => {
-                        const { mediaControllerID } = currSlideData();
-                        updateMediaControls(mediaControllerID);
+                            fileType === FileType.video ? "44px" : "0";
                     });
                 },
             });
