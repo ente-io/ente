@@ -41,6 +41,10 @@ func ConfigureViper(environment string) error {
 	// Ask Viper to look for underscores (instead of dots) for nested configs.
 	viper.SetEnvKeyReplacer(strings.NewReplacer(`.`, `_`))
 
+	// Also replace "-" with underscores since "-" cannot be used in
+	// environment variable names.
+	viper.SetEnvKeyReplacer(strings.NewReplacer(`-`, `_`))
+
 	viper.SetConfigFile("configurations/" + environment + ".yaml")
 	err := viper.ReadInConfig()
 	if err != nil {
