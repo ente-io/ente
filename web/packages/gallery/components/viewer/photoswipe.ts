@@ -1295,7 +1295,6 @@ const hlsVideoControlsHTML = () => `
       <svg slot="icon" viewBox="0 0 24 24">${settingsSVGPath}</svg>
     </media-settings-menu-button>
     <media-pip-button></media-pip-button>
-    <media-airplay-button></media-airplay-button>
     <media-fullscreen-button></media-fullscreen-button>
   </media-control-bar>
 </div>

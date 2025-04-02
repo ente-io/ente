@@ -286,7 +286,6 @@ media-time-range:hover {
   they trigger.
  */
 media-pip-button[mediapipunavailable],
-media-airplay-button[mediaairplayunavailable],
 media-fullscreen-button[mediafullscreenunavailable] {
     display: none;
 }
