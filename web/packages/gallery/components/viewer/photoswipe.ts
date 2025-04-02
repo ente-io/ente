@@ -544,6 +544,24 @@ export class FileViewerPhotoSwipe {
             video.style.height = `${height}px`;
         });
 
+        /**
+         * Get the video element, if any, that is a descendant of the given HTML
+         * element.
+         *
+         * While the return type is an {@link HTMLVideoElement}, the result can
+         * also be an instance of a media-chrome `CustomVideoElement`,
+         * specifically a {@link HlsVideoElement}.
+         * https://github.com/muxinc/media-elements/blob/main/packages/hls-video-element/hls-video-element.js#L284
+         *
+         * The media-chrome `CustomVideoElement`s provide the same API as the
+         * browser's built-in {@link HTMLVideoElement}s, so we can use the same
+         * methods on them.
+         *
+         * For ergonomic use at call sites, it accepts an optional.
+         */
+        const queryVideoElement = (element: HTMLElement | undefined) =>
+            element?.querySelector<HTMLVideoElement>("video, hls-video");
+
         pswp.on("contentDeactivate", (e) => {
             // Reset failures, if any, for this file so that the fetch is tried
             // again when we come back to it^.
@@ -558,9 +576,7 @@ export class FileViewerPhotoSwipe {
 
             // Pause the video element, if any, when we move away from the
             // slide.
-            const video = e.content.slide?.container.querySelector(
-                "video, hls-video",
-            ) as HTMLVideoElement | null;
+            const video = queryVideoElement(e.content.slide?.container);
             video?.pause();
         });
 
@@ -580,6 +596,8 @@ export class FileViewerPhotoSwipe {
         /**
          * If the current slide is showing a video, then the DOM video element
          * showing that video.
+         *
+         * See also {@link queryVideoElement}.
          */
         let videoVideoEl: HTMLVideoElement | undefined;
 
@@ -634,7 +652,7 @@ export class FileViewerPhotoSwipe {
                 // It works subsequently, which is why, e.g., we can use it to
                 // pause the video in "contentDeactivate".
                 const contentElement = pswp.currSlide?.content.element;
-                videoVideoEl = contentElement?.getElementsByTagName("video")[0];
+                videoVideoEl = queryVideoElement(contentElement) ?? undefined;
 
                 if (videoVideoEl) {
                     onVideoPlayback = () =>
