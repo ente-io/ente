@@ -2884,10 +2884,10 @@ math-intrinsics@^1.1.0:
   resolved "https://registry.yarnpkg.com/math-intrinsics/-/math-intrinsics-1.1.0.tgz#a0dd74be81e2aa5c2f27e65ce283605ee4e2b7f9"
   integrity sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==
 
-media-chrome@^4.8.0:
-  version "4.8.0"
-  resolved "https://registry.yarnpkg.com/media-chrome/-/media-chrome-4.8.0.tgz#ff881a5466fe02ad07344a370a8a1106988ca245"
-  integrity sha512-oioEGlluW+1RqknqsszrKHDs3NZ9AaatEaE2kYYOSWxnwvVmhRTfDWT4JeMgtUr5r3i2dAI3e/qbeb1j+a0MhA==
+media-chrome@^4.9.0:
+  version "4.9.0"
+  resolved "https://registry.yarnpkg.com/media-chrome/-/media-chrome-4.9.0.tgz#05f692781234dfb02baf1bdbc578af62b7edeeb7"
+  integrity sha512-KSGZUDEt0vg0Ogx+B8YYj0O32l0ppPLR8s5rXBMOEpkLYbJrKfhSPfwTmjJGcp2Nf3F/X2ddwO96YvUXHYeYvw==
   dependencies:
     ce-la-react "^0.1.3"
 
