@@ -221,10 +221,14 @@
 
       [Note: Showing menus outside of media-controller]
 
-      This is all very hacky. None of the media controller examples currently
-      show menus work for our specific scenario (the controls detached from the
-      the media controller itself, and shown at the bottom of the screen). As
-      such, a lot of undocumented and arbitrary tweaks are needed. This is a
+      This is all very hacky. The standalone control example
+      (https://media-chrome.mux.dev/examples/vanilla/standalone-controls.html),
+      doesn't (as of now) include a menu, so it is possible this is just not
+      supported. None of the media controller examples I could find show menus
+      work for our specific scenario (the controls detached from the the media
+      controller itself, and shown at the bottom of the screen).
+
+      As such, a lot of undocumented and arbitrary tweaks are needed. This is a
       house of cards, and might fall when the media-chrome version is updated;
       on the other hand, they might also add better support for our scenario, in
       which case this should be possible straightforwardly.

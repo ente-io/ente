@@ -470,9 +470,9 @@ export class FileViewerPhotoSwipe {
             const { fileID, fileType, videoURL, mediaControllerID } =
                 asItemData(e.content.data);
 
-            // For the initial slide, "contentAppend" will get called after
-            // "change", so we need to wire up the controls (or hide them) for
-            // the initial slide here also (in addition to in "change").
+            // For the initial slide, "contentAppend" will get called after the
+            // "change" event, so we need to wire up the controls, or hide them,
+            // for the initial slide here also (in addition to in "change").
             if (currSlideData().fileID == fileID) {
                 // For reasons possibily related to the 1 tick waits in the
                 // hls-video implementation (`await Promise.resolve()`), the
@@ -483,11 +483,11 @@ export class FileViewerPhotoSwipe {
                 // See also: https://github.com/muxinc/media-chrome/issues/940
                 //
                 // As a workaround, defer the association to the next tick.
-                //
                 setTimeout(() => updateMediaControls(mediaControllerID), 0);
             }
 
             // Rest of this function deals with live photos.
+
             if (fileType != FileType.livePhoto) return;
             if (!videoURL) return;
 
