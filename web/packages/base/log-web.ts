@@ -31,6 +31,19 @@ export const logStartupBanner = (userID?: number) => {
  */
 export const logUnhandledErrorsAndRejections = (attach: boolean) => {
     const handleError = (event: ErrorEvent) => {
+        // [Note: Spurious media chrome resize observer errors]
+        //
+        // When attaching media chrome controls to the DOM, we get an (AFAICT)
+        // spurious error in the log. Ignore it. FWIW, the media control tests
+        // themselves do the same.
+        // https://github.com/muxinc/elements/blob/f602519f544509f15add8fcc8cbbf7379843dcd3/packages/mux-player/test/player.test.js#L6-L12C5
+        if (
+            event.message ==
+            "ResizeObserver loop completed with undelivered notifications."
+        ) {
+            return;
+        }
+
         log.error("Unhandled error", event.error ?? event.message);
     };
 

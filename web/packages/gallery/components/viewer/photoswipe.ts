@@ -1257,14 +1257,13 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  * To make these functional, the `media-control-bar` requires the
  * `mediacontroller="${mediaControllerID}"` attribute.
  *
- * TODO(HLS): Spurious console warning
- *
  * Notes:
  *
  * - Examples: https://media-chrome.mux.dev/examples/vanilla/
  *
  * - When PiP is active and the video moves out, the browser displays some
- *   indicator (browser specific) in the in-page video element.
+ *   indicator (browser specific) in the in-page video element. This element and
+ *   text is not under our control.
  *
  * - The media-cast-button currently doesn't work with the `hls-video` player.
  *
@@ -1276,6 +1275,8 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  *   Revisit this when we have a custom tooltip element we can then also use on
  *   this screen, which can also be used enhancement for the other buttons on
  *   this screen which use "title" (which get clipped when they are multi-word).
+ *
+ * - See: [Note: Spurious media chrome resize observer errors]
  */
 const hlsVideoControlsHTML = () => `
 <div>
