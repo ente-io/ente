@@ -1000,7 +1000,11 @@ export class FileViewerPhotoSwipe {
         const handleNextSlide = () => pswp.next();
 
         const handleSeekBackOrPreviousSlide = () => {
-            const vid = videoVideoEl;
+            // TODO(HLS): Behind temporary flag
+            // const vid = videoVideoEl;
+            const vid = process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
+                ? videoVideoEl
+                : undefined;
             if (vid) {
                 vid.currentTime = Math.max(vid.currentTime - 5, 0);
             } else {
@@ -1009,7 +1013,11 @@ export class FileViewerPhotoSwipe {
         };
 
         const handleSeekForwardOrNextSlide = () => {
-            const vid = videoVideoEl;
+            // TODO(HLS): Behind temporary flag
+            // const vid = videoVideoEl;
+            const vid = process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
+                ? videoVideoEl
+                : undefined;
             if (vid) {
                 vid.currentTime = vid.currentTime + 5;
             } else {
@@ -1237,7 +1245,6 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 //     import "media-chrome";
 //     import "media-chrome/menu";
 //
-// TODO(HLS): Update code above that searches for the video element
 const hlsVideoHTML = (url: string, mediaControllerID: string) => `
 <media-controller id="${mediaControllerID}" nohotkeys>
   <hls-video playsinline slot="media" src="${url}"></hls-video>

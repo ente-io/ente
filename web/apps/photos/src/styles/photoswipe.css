@@ -307,3 +307,11 @@ media-settings-menu {
      */
     z-index: 1;
 }
+
+/* Hide the caption when hovering over the video controls since they occupy
+   similar real estate */
+body:has(media-control-bar:hover) {
+    & .pswp-ente .pswp__caption {
+        display: none;
+    }
+}
