@@ -12,7 +12,7 @@ export type LocalStorageKey =
     // LOGS = "logs",
     // Migrated to (and only used by) useCollectionsSortByLocalState.
     | "collectionSortBy"
-    // Moved to the new wrapper @/base/local-storage
+    // Moved to the new wrapper ente-base/local-storage
     // LOCALE = 'locale',
     | "srpSetupAttributes"
     | "srpAttributes"

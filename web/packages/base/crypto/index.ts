@@ -8,9 +8,9 @@
  *
  * [Note: Crypto code hierarchy]
  *
- * 1. @/base/crypto            (Crypto API for our code)
- * 2. @/base/crypto/libsodium  (Lower level wrappers over libsodium)
- * 3. libsodium-wrappers       (JavaScript bindings to libsodium)
+ * 1. ente-base/crypto            (Crypto API for our code)
+ * 2. ente-base/crypto/libsodium  (Lower level wrappers over libsodium)
+ * 3. libsodium-wrappers          (JavaScript bindings to libsodium)
  *
  * Our cryptography primitives are provided by libsodium, specifically, its
  * JavaScript bindings ("libsodium-wrappers"). This is the lowest layer. Note

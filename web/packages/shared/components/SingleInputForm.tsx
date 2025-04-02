@@ -55,7 +55,7 @@ export interface SingleInputFormProps {
 }
 
 /**
- * Deprecated version, gradually migrate to use the one from @/base.
+ * Deprecated version, gradually migrate to use the one from ente-base.
  */
 export default function SingleInputForm(props: SingleInputFormProps) {
     const { submitButtonProps } = props;

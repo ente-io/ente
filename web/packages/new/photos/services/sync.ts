@@ -145,7 +145,7 @@ export const syncCollectionAndFiles = async (
         // TODO: Ok for now since its is only commented for the deduper (gallery
         // does this on the return value), but still needs fixing instead of a
         // hidden gotcha. Fix is simple, just uncomment, but that can be done
-        // once the exportService can be imported here in the @/new.
+        // once the exportService can be imported here in the ente-new package.
         //
         // exportService.onLocalFilesUpdated();
         resetFileViewerDataSourceOnClose();
