@@ -1,8 +1,8 @@
-import { isDesktop } from "@/base/app";
-import log from "@/base/log";
-import { workerBridge } from "@/base/worker/worker-bridge";
-import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import { heicToJPEG } from "@/media/heic-convert";
+import { isDesktop } from "ente-base/app";
+import log from "ente-base/log";
+import { workerBridge } from "ente-base/worker/worker-bridge";
+import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
+import { heicToJPEG } from "ente-media/heic-convert";
 import { convertToMP4 } from "../services/ffmpeg";
 import { detectFileTypeInfo } from "./detect-type";
 

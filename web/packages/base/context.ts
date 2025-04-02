@@ -1,4 +1,4 @@
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
+import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { createContext, useContext } from "react";
 import { genericErrorDialogAttributes } from "./components/utils/dialog";
 import log from "./log";

@@ -1,18 +1,18 @@
 {
-    "name": "@/accounts",
+    "name": "ente-accounts",
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/base": "*",
-        "@ente/shared": "*",
         "@types/zxcvbn": "^4.4.5",
         "bip39": "^3.1.0",
+        "ente-base": "*",
+        "ente-shared": "*",
         "fast-srp-hap": "^2.0.4",
         "react-otp-input": "^3.1.1",
         "uuid": "^11.1.0",
         "zxcvbn": "^4.4.2"
     },
     "devDependencies": {
-        "@/build-config": "*"
+        "ente-build-config": "*"
     }
 }

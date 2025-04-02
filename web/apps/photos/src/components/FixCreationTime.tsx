@@ -1,17 +1,3 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import log from "@/base/log";
-import { downloadManager } from "@/gallery/services/download";
-import { extractExifDates } from "@/gallery/services/exif";
-import { fileLogID, type EnteFile } from "@/media/file";
-import {
-    decryptPublicMagicMetadata,
-    fileCreationPhotoDate,
-    updateRemotePublicMagicMetadata,
-    type ParsedMetadataDate,
-} from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { FileDateTimePicker } from "@/new/photos/components/FileDateTimePicker";
 import {
     Dialog,
     DialogContent,
@@ -25,6 +11,20 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import log from "ente-base/log";
+import { downloadManager } from "ente-gallery/services/download";
+import { extractExifDates } from "ente-gallery/services/exif";
+import { fileLogID, type EnteFile } from "ente-media/file";
+import {
+    decryptPublicMagicMetadata,
+    fileCreationPhotoDate,
+    updateRemotePublicMagicMetadata,
+    type ParsedMetadataDate,
+} from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { FileDateTimePicker } from "ente-new/photos/components/FileDateTimePicker";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";

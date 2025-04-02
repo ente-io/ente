@@ -1,8 +1,8 @@
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { ensureElectron } from "@/base/electron";
-import type { AppUpdate } from "@/base/types/ipc";
-import { openURL } from "@/new/photos/utils/web";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
+import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
+import { ensureElectron } from "ente-base/electron";
+import type { AppUpdate } from "ente-base/types/ipc";
+import { openURL } from "ente-new/photos/utils/web";
 import { t } from "i18next";
 
 export const downloadAppDialogAttributes = (): MiniDialogAttributes => ({

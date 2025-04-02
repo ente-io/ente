@@ -1,8 +1,8 @@
-import { decryptBlob } from "@/base/crypto";
-import log from "@/base/log";
-import { fetchFilesData, putFileData } from "@/gallery/services/file-data";
-import type { EnteFile } from "@/media/file";
-import { nullToUndefined } from "@/utils/transform";
+import { decryptBlob } from "ente-base/crypto";
+import log from "ente-base/log";
+import { fetchFilesData, putFileData } from "ente-gallery/services/file-data";
+import type { EnteFile } from "ente-media/file";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import { gunzip, gzip } from "../../utils/gzip";
 import { type RemoteCLIPIndex } from "./clip";

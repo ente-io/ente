@@ -1,9 +1,9 @@
-import { staticAppTitle } from "@/base/app";
-import { CustomHead } from "@/base/components/Head";
-import { useSetupLogs } from "@/base/components/utils/hooks-app";
-import { castTheme } from "@/base/components/utils/theme";
 import "@fontsource-variable/inter";
 import { CssBaseline, ThemeProvider } from "@mui/material";
+import { staticAppTitle } from "ente-base/app";
+import { CustomHead } from "ente-base/components/Head";
+import { useSetupLogs } from "ente-base/components/utils/hooks-app";
+import { castTheme } from "ente-base/components/utils/theme";
 import type { AppProps } from "next/app";
 import React from "react";
 

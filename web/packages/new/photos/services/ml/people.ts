@@ -1,7 +1,7 @@
-import { assertionFailed } from "@/base/assert";
-import log from "@/base/log";
-import type { EnteFile } from "@/media/file";
-import { shuffled } from "@/utils/array";
+import { assertionFailed } from "ente-base/assert";
+import log from "ente-base/log";
+import type { EnteFile } from "ente-media/file";
+import { shuffled } from "ente-utils/array";
 import { getLocalFiles } from "../files";
 import {
     savedCGroups,

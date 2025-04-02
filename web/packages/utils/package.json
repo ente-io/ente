@@ -1,9 +1,9 @@
 {
-    "name": "@/utils",
+    "name": "ente-utils",
     "version": "0.0.0",
     "private": true,
     "dependencies": {},
     "devDependencies": {
-        "@/build-config": "*"
+        "ente-build-config": "*"
     }
 }

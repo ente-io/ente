@@ -1,28 +1,28 @@
-import { isDesktop } from "@/base/app";
-import { blobCache, type BlobCache } from "@/base/blob-cache";
+import { isDesktop } from "ente-base/app";
+import { blobCache, type BlobCache } from "ente-base/blob-cache";
 import {
     decryptStreamBytes,
     decryptStreamChunk,
     decryptThumbnail,
     initChunkDecryption,
-} from "@/base/crypto";
+} from "ente-base/crypto";
 import {
     authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
     publicRequestHeaders,
     retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
-} from "@/base/http";
-import { ensureAuthToken } from "@/base/local-user";
-import log from "@/base/log";
-import { customAPIOrigin } from "@/base/origins";
+} from "ente-base/http";
+import { ensureAuthToken } from "ente-base/local-user";
+import log from "ente-base/log";
+import { customAPIOrigin } from "ente-base/origins";
 import {
     playableVideoBlob,
     renderableImageBlob,
-} from "@/gallery/utils/convert";
-import type { EnteFile } from "@/media/file";
-import { FileType } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
+} from "ente-gallery/utils/convert";
+import type { EnteFile } from "ente-media/file";
+import { FileType } from "ente-media/file-type";
+import { decodeLivePhoto } from "ente-media/live-photo";
 
 export interface LivePhotoSourceURL {
     image: () => Promise<string | undefined>;

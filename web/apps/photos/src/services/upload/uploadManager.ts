@@ -1,32 +1,32 @@
-import { isDesktop } from "@/base/app";
-import { createComlinkCryptoWorker } from "@/base/crypto";
-import { type CryptoWorker } from "@/base/crypto/worker";
-import { lowercaseExtension, nameAndExtension } from "@/base/file-name";
-import type { PublicAlbumsCredentials } from "@/base/http";
-import log from "@/base/log";
-import type { Electron } from "@/base/types/ipc";
-import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import type { UploadItem } from "@/gallery/services/upload";
+import { Canceler } from "axios";
+import { isDesktop } from "ente-base/app";
+import { createComlinkCryptoWorker } from "ente-base/crypto";
+import { type CryptoWorker } from "ente-base/crypto/worker";
+import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
+import type { PublicAlbumsCredentials } from "ente-base/http";
+import log from "ente-base/log";
+import type { Electron } from "ente-base/types/ipc";
+import { ComlinkWorker } from "ente-base/worker/comlink-worker";
+import type { UploadItem } from "ente-gallery/services/upload";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     shouldDisableCFUploadProxy,
     type UploadPhase,
     type UploadResult,
-} from "@/gallery/services/upload";
-import type { Collection } from "@/media/collection";
+} from "ente-gallery/services/upload";
+import type { Collection } from "ente-media/collection";
 import {
     decryptFile,
     type EncryptedEnteFile,
     type EnteFile,
-} from "@/media/file";
-import type { ParsedMetadata } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { potentialFileTypeFromExtension } from "@/media/live-photo";
-import { getLocalFiles } from "@/new/photos/services/files";
-import { indexNewUpload } from "@/new/photos/services/ml";
-import { wait } from "@/utils/promise";
-import { CustomError } from "@ente/shared/error";
-import { Canceler } from "axios";
+} from "ente-media/file";
+import type { ParsedMetadata } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { potentialFileTypeFromExtension } from "ente-media/live-photo";
+import { getLocalFiles } from "ente-new/photos/services/files";
+import { indexNewUpload } from "ente-new/photos/services/ml";
+import { CustomError } from "ente-shared/error";
+import { wait } from "ente-utils/promise";
 import {
     getLocalPublicFiles,
     getPublicCollectionUID,

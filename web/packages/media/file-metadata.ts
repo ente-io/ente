@@ -1,15 +1,15 @@
-import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto";
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import { apiURL } from "@/base/origins";
-import { type Location } from "@/base/types";
+import { decryptMetadataJSON, encryptMetadataJSON } from "ente-base/crypto";
+import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
+import { apiURL } from "ente-base/origins";
+import { type Location } from "ente-base/types";
 import {
     fileLogID,
     type EnteFile,
     type FileMagicMetadata,
     type FilePrivateMagicMetadata,
     type FilePublicMagicMetadata,
-} from "@/media/file";
-import { nullToUndefined } from "@/utils/transform";
+} from "ente-media/file";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import { mergeMetadata1 } from "./file";
 import { FileType } from "./file-type";

@@ -1,19 +1,19 @@
-import { TitledMiniDialog } from "@/base/components/MiniDialog";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import log from "@/base/log";
-import type { Collection } from "@/media/collection";
-import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
+import { Link, Stack, Typography } from "@mui/material";
+import { TitledMiniDialog } from "ente-base/components/MiniDialog";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import log from "ente-base/log";
+import type { Collection } from "ente-media/collection";
+import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     publishCastPayload,
     revokeAllCastTokens,
     unknownDeviceCodeErrorMessage,
-} from "@/new/photos/services/cast";
-import { loadCast } from "@/new/photos/utils/chromecast-sender";
+} from "ente-new/photos/services/cast";
+import { loadCast } from "ente-new/photos/utils/chromecast-sender";
 import SingleInputForm, {
     type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
-import { Link, Stack, Typography } from "@mui/material";
+} from "ente-shared/components/SingleInputForm";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";

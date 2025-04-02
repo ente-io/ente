@@ -1,8 +1,8 @@
-import { authenticatedRequestHeaders, HTTPError } from "@/base/http";
-import { ensureLocalUser } from "@/base/local-user";
-import { apiURL } from "@/base/origins";
-import { getData } from "@ente/shared/storage/localStorage";
-import type { KeyAttributes } from "@ente/shared/user/types";
+import { authenticatedRequestHeaders, HTTPError } from "ente-base/http";
+import { ensureLocalUser } from "ente-base/local-user";
+import { apiURL } from "ente-base/origins";
+import { getData } from "ente-shared/storage/localStorage";
+import type { KeyAttributes } from "ente-shared/user/types";
 import type { SRPAttributes } from "./srp-remote";
 import { getSRPAttributes } from "./srp-remote";
 

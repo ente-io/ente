@@ -1,5 +1,3 @@
-import { EnteSwitch } from "@/base/components/EnteSwitch";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     Box,
     Divider,
@@ -9,6 +7,8 @@ import {
     type ButtonProps,
     type TypographyProps,
 } from "@mui/material";
+import { EnteSwitch } from "ente-base/components/EnteSwitch";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import React from "react";
 
 interface RowButtonGroupTitleProps {

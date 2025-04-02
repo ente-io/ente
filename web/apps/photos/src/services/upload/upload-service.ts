@@ -1,26 +1,26 @@
-import { streamEncryptionChunkSize } from "@/base/crypto/libsodium";
-import type { BytesOrB64 } from "@/base/crypto/types";
-import { type CryptoWorker } from "@/base/crypto/worker";
-import { ensureElectron } from "@/base/electron";
-import { basename, nameAndExtension } from "@/base/file-name";
-import type { PublicAlbumsCredentials } from "@/base/http";
-import log from "@/base/log";
-import { extractExif } from "@/gallery/services/exif";
-import { extractVideoMetadata } from "@/gallery/services/ffmpeg";
+import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
+import type { BytesOrB64 } from "ente-base/crypto/types";
+import { type CryptoWorker } from "ente-base/crypto/worker";
+import { ensureElectron } from "ente-base/electron";
+import { basename, nameAndExtension } from "ente-base/file-name";
+import type { PublicAlbumsCredentials } from "ente-base/http";
+import log from "ente-base/log";
+import { extractExif } from "ente-gallery/services/exif";
+import { extractVideoMetadata } from "ente-gallery/services/ffmpeg";
 import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
-} from "@/gallery/services/magic-metadata";
-import type { UploadItem } from "@/gallery/services/upload";
+} from "ente-gallery/services/magic-metadata";
+import type { UploadItem } from "ente-gallery/services/upload";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     type UploadResult,
-} from "@/gallery/services/upload";
+} from "ente-gallery/services/upload";
 import {
     detectFileTypeInfoFromChunk,
     isFileTypeNotSupportedError,
-} from "@/gallery/utils/detect-type";
-import { readStream } from "@/gallery/utils/native-stream";
+} from "ente-gallery/utils/detect-type";
+import { readStream } from "ente-gallery/utils/native-stream";
 import {
     EncryptedMagicMetadata,
     EnteFile,
@@ -29,19 +29,19 @@ import {
     type EncryptedEnteFile,
     type FilePublicMagicMetadata,
     type FilePublicMagicMetadataProps,
-} from "@/media/file";
+} from "ente-media/file";
 import {
     metadataHash,
     type Metadata,
     type ParsedMetadata,
     type PublicMagicMetadata,
-} from "@/media/file-metadata";
-import { FileType, type FileTypeInfo } from "@/media/file-type";
-import { encodeLivePhoto } from "@/media/live-photo";
-import { addToCollection } from "@/new/photos/services/collection";
-import { mergeUint8Arrays } from "@/utils/array";
-import { ensureInteger, ensureNumber } from "@/utils/ensure";
-import { CustomError, handleUploadError } from "@ente/shared/error";
+} from "ente-media/file-metadata";
+import { FileType, type FileTypeInfo } from "ente-media/file-type";
+import { encodeLivePhoto } from "ente-media/live-photo";
+import { addToCollection } from "ente-new/photos/services/collection";
+import { CustomError, handleUploadError } from "ente-shared/error";
+import { mergeUint8Arrays } from "ente-utils/array";
+import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import { type LivePhotoAssets } from "services/upload/uploadManager";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";

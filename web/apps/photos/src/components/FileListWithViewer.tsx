@@ -1,13 +1,16 @@
-import { isSameDay } from "@/base/date";
-import { formattedDate } from "@/base/i18n-date";
+import { styled } from "@mui/material";
+import { isSameDay } from "ente-base/date";
+import { formattedDate } from "ente-base/i18n-date";
 import {
     FileViewer,
     type FileViewerProps,
-} from "@/gallery/components/viewer/FileViewer";
-import type { Collection } from "@/media/collection";
-import { EnteFile } from "@/media/file";
-import { moveToTrash, TRASH_SECTION } from "@/new/photos/services/collection";
-import { styled } from "@mui/material";
+} from "ente-gallery/components/viewer/FileViewer";
+import type { Collection } from "ente-media/collection";
+import { EnteFile } from "ente-media/file";
+import {
+    moveToTrash,
+    TRASH_SECTION,
+} from "ente-new/photos/services/collection";
 import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";

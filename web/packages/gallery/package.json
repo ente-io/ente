@@ -1,12 +1,12 @@
 {
-    "name": "@/gallery",
+    "name": "ente-gallery",
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/base": "*",
-        "@/utils": "*",
         "@ffmpeg/ffmpeg": "^0.12.10",
         "bs58": "^6.0.0",
+        "ente-base": "*",
+        "ente-utils": "*",
         "exifreader": "^4.26.2",
         "hls-video-element": "^1.5.0",
         "leaflet": "^1.9.4",
@@ -16,7 +16,7 @@
         "react-dropzone": "14.2.10"
     },
     "devDependencies": {
-        "@/build-config": "*",
-        "@types/leaflet": "^1.9.16"
+        "@types/leaflet": "^1.9.16",
+        "ente-build-config": "*"
     }
 }

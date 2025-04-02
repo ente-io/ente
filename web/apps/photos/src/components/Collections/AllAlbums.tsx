@@ -1,15 +1,3 @@
-import { FilledIconButton } from "@/base/components/mui";
-import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import { SlideUpTransition } from "@/new/photos/components/mui/SlideUpTransition";
-import {
-    ItemCard,
-    LargeTileButton,
-    LargeTileTextOverlay,
-} from "@/new/photos/components/Tiles";
-import type { CollectionSummary } from "@/new/photos/services/collection/ui";
-import { CollectionsSortBy } from "@/new/photos/services/collection/ui";
-import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";
-import useWindowSize from "@ente/shared/hooks/useWindowSize";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
@@ -22,6 +10,18 @@ import {
     Typography,
     useMediaQuery,
 } from "@mui/material";
+import { FilledIconButton } from "ente-base/components/mui";
+import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
+import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
+import {
+    ItemCard,
+    LargeTileButton,
+    LargeTileTextOverlay,
+} from "ente-new/photos/components/Tiles";
+import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
+import { CollectionsSortBy } from "ente-new/photos/services/collection/ui";
+import { FlexWrapper, FluidContainer } from "ente-shared/components/Container";
+import useWindowSize from "ente-shared/hooks/useWindowSize";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";

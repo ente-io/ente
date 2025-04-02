@@ -1,1 +1,1 @@
-export { default } from "@/accounts/pages/passkeys/finish";
+export { default } from "ente-accounts/pages/passkeys/finish";

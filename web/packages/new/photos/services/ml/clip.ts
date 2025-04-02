@@ -1,4 +1,4 @@
-import type { ElectronMLWorker } from "@/base/types/ipc";
+import type { ElectronMLWorker } from "ente-base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
 import { savedCLIPIndexes } from "./db";
 import { dotProduct, norm } from "./math";

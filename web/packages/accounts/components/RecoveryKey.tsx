@@ -1,13 +1,3 @@
-import { type MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { SpacedRow } from "@/base/components/containers";
-import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { errorDialogAttributes } from "@/base/components/utils/dialog";
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import log from "@/base/log";
-import { downloadString } from "@/base/utils/web";
-import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
     Dialog,
     DialogActions,
@@ -17,6 +7,16 @@ import {
     Typography,
 } from "@mui/material";
 import * as bip39 from "bip39";
+import { type MiniDialogAttributes } from "ente-base/components/MiniDialog";
+import { SpacedRow } from "ente-base/components/containers";
+import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { errorDialogAttributes } from "ente-base/components/utils/dialog";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import log from "ente-base/log";
+import { downloadString } from "ente-base/utils/web";
+import { getRecoveryKey } from "ente-shared/crypto/helpers";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
 import { CodeBlock } from "./CodeBlock";

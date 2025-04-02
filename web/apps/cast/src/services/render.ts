@@ -5,26 +5,26 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { sharedCryptoWorker } from "@/base/crypto";
-import { nameAndExtension } from "@/base/file-name";
-import log from "@/base/log";
-import { apiURL, customAPIOrigin } from "@/base/origins";
+import type { AxiosResponse } from "axios";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import { nameAndExtension } from "ente-base/file-name";
+import log from "ente-base/log";
+import { apiURL, customAPIOrigin } from "ente-base/origins";
 import type {
     EncryptedEnteFile,
     EnteFile,
     FileMagicMetadata,
     FilePublicMagicMetadata,
-} from "@/media/file";
-import { mergeMetadata1 } from "@/media/file";
-import { FileType } from "@/media/file-type";
-import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import { heicToJPEG } from "@/media/heic-convert";
-import { decodeLivePhoto } from "@/media/live-photo";
-import { shuffled } from "@/utils/array";
-import { wait } from "@/utils/promise";
-import { ApiError } from "@ente/shared/error";
-import HTTPService from "@ente/shared/network/HTTPService";
-import type { AxiosResponse } from "axios";
+} from "ente-media/file";
+import { mergeMetadata1 } from "ente-media/file";
+import { FileType } from "ente-media/file-type";
+import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
+import { heicToJPEG } from "ente-media/heic-convert";
+import { decodeLivePhoto } from "ente-media/live-photo";
+import { ApiError } from "ente-shared/error";
+import HTTPService from "ente-shared/network/HTTPService";
+import { shuffled } from "ente-utils/array";
+import { wait } from "ente-utils/promise";
 import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
 import { isChromecast } from "./chromecast-receiver";

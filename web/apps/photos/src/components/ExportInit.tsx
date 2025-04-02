@@ -1,5 +1,5 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { DialogActions, DialogContent } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { t } from "i18next";
 
 interface Props {

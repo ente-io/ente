@@ -1,5 +1,5 @@
-import { isDevBuild } from "@/base/env";
-import log from "@/base/log";
+import { isDevBuild } from "ente-base/env";
+import log from "ente-base/log";
 import { appName, appNames } from "./app";
 
 /**

@@ -11,8 +11,8 @@ baseline for how our code be in all the workspaces in this (yarn) monorepo.
 
 - [typescript](https://www.typescriptlang.org/) - Type checker
 
-They also need some support packages, which come from the leaf `@/build-config`
-package:
+They also need some support packages, which come from the leaf
+`ente-build-config` package:
 
 - [@eslint/js](https://eslint.org/) provides JavaScript ESLint functionality,
   and provides the configuration recommended the by ESLint team.
@@ -91,7 +91,8 @@ DOM.
 >
 > We need to repeat the dependency on react and its siblings in multiple
 > package.jsons to avoid the unmet peer dependency warnings printed by yarn.
-> Ideally, the react dependencies can be specified just in the _@/base_ package.
+> Ideally, the react dependencies can be specified just in the _ente-base_
+> package.
 
 ### MUI and Material Icons
 
@@ -114,9 +115,9 @@ which provides Material icons exported as React components (a `SvgIcon`).
 > For a similar reason as with react,
 >
 > - the `@mui/material` dependency is also repeated at more places - the one in
->   _@/base_ is the canonical one.
-> - we need to add an explicit dependency to `mui/system` in _@/new_ even though
->   we don't directly depend on it.
+>   _ente-base_ is the canonical one.
+> - we need to add an explicit dependency to `mui/system` in _ente-new_ even
+>   though we don't directly depend on it.
 
 ### Date pickers
 

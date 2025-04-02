@@ -1,12 +1,12 @@
-import { putAttributes } from "@/accounts/services/user";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import type { UserDetails } from "@/new/photos/services/user-details";
-import { ApiError } from "@ente/shared/error";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getData } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { HttpStatusCode } from "axios";
+import { putAttributes } from "ente-accounts/services/user";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import type { UserDetails } from "ente-new/photos/services/user-details";
+import { ApiError } from "ente-shared/error";
+import HTTPService from "ente-shared/network/HTTPService";
+import { getData } from "ente-shared/storage/localStorage";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
 
 const HAS_SET_KEYS = "hasSetKeys";
 
