@@ -594,6 +594,21 @@ export class FileViewerPhotoSwipe {
         );
 
         /**
+         * The media-chrome-button elements (e.g the play button) retain focus
+         * after clicking on them. e.g., if I click the "media-mute-button" to
+         * activate it, then later press Space or Enter, then the mute button
+         * activates again instead of toggling video playback.
+         *
+         * I'm not sure who is at fault here, but this behaviour ends up being
+         * irritating. To prevent this from happening, drop the focus from any
+         * media chrome button when playback starts.
+         */
+        const resetFocus = () => {
+            const activeElement = document.activeElement;
+            if (activeElement instanceof HTMLElement) activeElement.blur();
+        };
+
+        /**
          * If the current slide is showing a video, then the DOM video element
          * showing that video.
          *
@@ -655,8 +670,10 @@ export class FileViewerPhotoSwipe {
                 videoVideoEl = queryVideoElement(contentElement) ?? undefined;
 
                 if (videoVideoEl) {
-                    onVideoPlayback = () =>
+                    onVideoPlayback = () => {
+                        resetFocus();
                         showIf(captionElement!, !!videoVideoEl?.paused);
+                    };
 
                     videoVideoEl.addEventListener("play", onVideoPlayback);
                     videoVideoEl.addEventListener("pause", onVideoPlayback);
