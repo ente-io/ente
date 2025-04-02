@@ -1,11 +1,11 @@
-import { encryptBoxB64 } from "@/base/crypto";
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import { apiURL } from "@/base/origins";
-import { CollectionSubType, type Collection } from "@/media/collection";
-import { type EnteFile } from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
-import { batch } from "@/utils/array";
-import type { User } from "@ente/shared/user/types";
+import { encryptBoxB64 } from "ente-base/crypto";
+import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
+import { apiURL } from "ente-base/origins";
+import { CollectionSubType, type Collection } from "ente-media/collection";
+import { type EnteFile } from "ente-media/file";
+import { ItemVisibility } from "ente-media/file-metadata";
+import type { User } from "ente-shared/user/types";
+import { batch } from "ente-utils/array";
 
 /**
  * An reasonable but otherwise arbitrary number of items (e.g. files) to include

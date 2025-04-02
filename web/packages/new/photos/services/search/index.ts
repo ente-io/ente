@@ -1,7 +1,7 @@
-import log from "@/base/log";
-import { masterKeyFromSession } from "@/base/session";
-import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import { FileType } from "@/media/file-type";
+import log from "ente-base/log";
+import { masterKeyFromSession } from "ente-base/session";
+import { ComlinkWorker } from "ente-base/worker/comlink-worker";
+import { FileType } from "ente-media/file-type";
 import i18n, { t } from "i18next";
 import { uniqueFilesByID } from "../files";
 import { clipMatches, isMLEnabled, isMLSupported } from "../ml";

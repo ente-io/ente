@@ -1,5 +1,3 @@
-import { isDesktop } from "@/base/app";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -11,6 +9,8 @@ import {
     Typography,
     type DrawerProps,
 } from "@mui/material";
+import { isDesktop } from "ente-base/app";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import React from "react";
 
 /**

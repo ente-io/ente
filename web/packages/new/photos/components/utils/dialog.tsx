@@ -1,5 +1,5 @@
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { Link } from "@mui/material";
+import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 

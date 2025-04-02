@@ -1,6 +1,6 @@
-import { ensureElectron } from "@/base/electron";
-import log, { logToDisk } from "@/base/log";
 import { expose, wrap, type Remote } from "comlink";
+import { ensureElectron } from "ente-base/electron";
+import log, { logToDisk } from "ente-base/log";
 
 /**
  * A minimal wrapper for a web {@link Worker}, proxying a class of type T.

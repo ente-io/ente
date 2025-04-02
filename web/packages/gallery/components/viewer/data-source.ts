@@ -1,16 +1,16 @@
-import { isDevBuild } from "@/base/env";
-import log from "@/base/log";
-import type { FileInfoExif } from "@/gallery/components/FileInfo";
+import { isDevBuild } from "ente-base/env";
+import log from "ente-base/log";
+import type { FileInfoExif } from "ente-gallery/components/FileInfo";
 import {
     downloadManager,
     type LivePhotoSourceURL,
-} from "@/gallery/services/download";
-import { extractRawExif, parseExif } from "@/gallery/services/exif";
-import { hlsPlaylistDataForFile } from "@/gallery/services/video";
-import type { EnteFile } from "@/media/file";
-import { fileCaption } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { ensureString } from "@/utils/ensure";
+} from "ente-gallery/services/download";
+import { extractRawExif, parseExif } from "ente-gallery/services/exif";
+import { hlsPlaylistDataForFile } from "ente-gallery/services/video";
+import type { EnteFile } from "ente-media/file";
+import { fileCaption } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { ensureString } from "ente-utils/ensure";
 
 /**
  * This is a subset of the fields expected by PhotoSwipe itself (see the

@@ -1,8 +1,8 @@
-import { Overlay } from "@/base/components/containers";
-import { FileType } from "@/media/file-type";
 import PhotoOutlinedIcon from "@mui/icons-material/PhotoOutlined";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { styled } from "@mui/material";
+import { Overlay } from "ente-base/components/containers";
+import { FileType } from "ente-media/file-type";
 import React from "react";
 
 /**

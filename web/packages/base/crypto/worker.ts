@@ -1,5 +1,5 @@
-import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
 import { expose } from "comlink";
+import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
 import type { StateAddress } from "libsodium-wrappers-sumo";
 import * as ei from "./ente-impl";
 import * as libsodium from "./libsodium";

@@ -2,23 +2,23 @@ import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
-} from "@/accounts/components/layouts/centered-paper";
-import { appHomeRoute, stashRedirect } from "@/accounts/services/redirect";
-import { sendOTT } from "@/accounts/services/user";
-import { LinkButton } from "@/base/components/LinkButton";
-import { useBaseContext } from "@/base/context";
-import { sharedCryptoWorker } from "@/base/crypto";
-import log from "@/base/log";
+} from "ente-accounts/components/layouts/centered-paper";
+import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
+import { sendOTT } from "ente-accounts/services/user";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { useBaseContext } from "ente-base/context";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import log from "ente-base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
+} from "ente-shared/components/SingleInputForm";
 import {
     decryptAndStoreToken,
     saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import { getData, setData } from "@ente/shared/storage/localStorage";
-import { getKey } from "@ente/shared/storage/sessionStorage";
-import type { KeyAttributes, User } from "@ente/shared/user/types";
+} from "ente-shared/crypto/helpers";
+import { getData, setData } from "ente-shared/storage/localStorage";
+import { getKey } from "ente-shared/storage/sessionStorage";
+import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";

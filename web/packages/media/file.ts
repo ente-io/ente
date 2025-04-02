@@ -1,6 +1,6 @@
-import { sharedCryptoWorker } from "@/base/crypto";
-import { dateFromEpochMicroseconds } from "@/base/date";
-import log from "@/base/log";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import { dateFromEpochMicroseconds } from "ente-base/date";
+import log from "ente-base/log";
 import { type Metadata, ItemVisibility } from "./file-metadata";
 import { FileType } from "./file-type";
 

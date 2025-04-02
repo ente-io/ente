@@ -107,7 +107,7 @@ const nextConfig = {
     devIndicators: false,
     compiler: { emotion: true },
     // Use Next.js to transpile our internal packages before bundling them.
-    transpilePackages: ["@/base", "@/utils", "@/new"],
+    transpilePackages: ["ente-base", "ente-utils", "ente-new"],
 
     // Add environment variables to the JavaScript bundle. They will be
     // available as `process.env.varName` to our code.

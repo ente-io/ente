@@ -1,6 +1,6 @@
-import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
-import { wait } from "@/utils/promise";
 import { expose } from "comlink";
+import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
+import { wait } from "ente-utils/promise";
 import HeicConvert from "heic-convert";
 
 export class HEICConvertWorker {

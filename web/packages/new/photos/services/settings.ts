@@ -8,11 +8,11 @@
 //
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
-import { isDevBuild } from "@/base/env";
-import { localUser } from "@/base/local-user";
-import log from "@/base/log";
-import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
-import { nullToUndefined } from "@/utils/transform";
+import { isDevBuild } from "ente-base/env";
+import { localUser } from "ente-base/local-user";
+import log from "ente-base/log";
+import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
 

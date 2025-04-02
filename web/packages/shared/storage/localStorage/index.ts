@@ -1,5 +1,5 @@
-import { getKVS, removeKV, setKV } from "@/base/kv";
-import log from "@/base/log";
+import { getKVS, removeKV, setKV } from "ente-base/kv";
+import log from "ente-base/log";
 
 export type LocalStorageKey =
     | "user"

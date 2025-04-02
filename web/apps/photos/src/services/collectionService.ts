@@ -1,8 +1,8 @@
-import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import { UpdateMagicMetadataRequest } from "@/gallery/services/file";
-import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
+import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import { UpdateMagicMetadataRequest } from "ente-gallery/services/file";
+import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import {
     Collection,
     CollectionMagicMetadata,
@@ -15,35 +15,35 @@ import {
     PublicURL,
     RemoveFromCollectionRequest,
     UpdatePublicURL,
-} from "@/media/collection";
-import { EncryptedMagicMetadata, EnteFile } from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
+} from "ente-media/collection";
+import { EncryptedMagicMetadata, EnteFile } from "ente-media/file";
+import { ItemVisibility } from "ente-media/file-metadata";
 import {
     addToCollection,
     isDefaultHiddenCollection,
     moveToCollection,
-} from "@/new/photos/services/collection";
-import type { CollectionSummary } from "@/new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection";
+import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import {
     CollectionSummaryOrder,
     CollectionsSortBy,
-} from "@/new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection/ui";
 import {
     getCollectionWithSecrets,
     getLocalCollections,
-} from "@/new/photos/services/collections";
+} from "ente-new/photos/services/collections";
 import {
     getLocalFiles,
     groupFilesByCollectionID,
     sortFiles,
-} from "@/new/photos/services/files";
-import type { FamilyData } from "@/new/photos/services/user-details";
-import { batch } from "@/utils/array";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getData } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { getActualKey } from "@ente/shared/user";
-import type { User } from "@ente/shared/user/types";
+} from "ente-new/photos/services/files";
+import type { FamilyData } from "ente-new/photos/services/user-details";
+import HTTPService from "ente-shared/network/HTTPService";
+import { getData } from "ente-shared/storage/localStorage";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
+import { getActualKey } from "ente-shared/user";
+import type { User } from "ente-shared/user/types";
+import { batch } from "ente-utils/array";
 import {
     changeCollectionSubType,
     isQuickLinkCollection,

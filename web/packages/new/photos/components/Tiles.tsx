@@ -1,13 +1,13 @@
-import { CenteredFill, Overlay } from "@/base/components/containers";
-import type { ButtonishProps } from "@/base/components/mui";
-import { downloadManager } from "@/gallery/services/download";
-import { type EnteFile } from "@/media/file";
+import AddIcon from "@mui/icons-material/Add";
+import { Stack, styled, Typography } from "@mui/material";
+import { CenteredFill, Overlay } from "ente-base/components/containers";
+import type { ButtonishProps } from "ente-base/components/mui";
+import { downloadManager } from "ente-gallery/services/download";
+import { type EnteFile } from "ente-media/file";
 import {
     LoadingThumbnail,
     StaticThumbnail,
-} from "@/new/photos/components/PlaceholderThumbnails";
-import AddIcon from "@mui/icons-material/Add";
-import { Stack, styled, Typography } from "@mui/material";
+} from "ente-new/photos/components/PlaceholderThumbnails";
 import React, { useEffect, useState } from "react";
 import { faceCrop } from "../services/ml";
 import { UnstyledButton } from "./UnstyledButton";

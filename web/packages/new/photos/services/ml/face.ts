@@ -1,6 +1,6 @@
-import { assertionFailed } from "@/base/assert";
-import type { ElectronMLWorker } from "@/base/types/ipc";
-import type { EnteFile } from "@/media/file";
+import { assertionFailed } from "ente-base/assert";
+import type { ElectronMLWorker } from "ente-base/types/ipc";
+import type { EnteFile } from "ente-media/file";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
 import type { ImageBitmapAndData } from "./blob";

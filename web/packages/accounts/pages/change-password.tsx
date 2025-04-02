@@ -2,33 +2,33 @@ import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
-} from "@/accounts/components/layouts/centered-paper";
+} from "ente-accounts/components/layouts/centered-paper";
 import SetPasswordForm, {
     type SetPasswordFormProps,
-} from "@/accounts/components/SetPasswordForm";
-import { appHomeRoute, stashRedirect } from "@/accounts/services/redirect";
+} from "ente-accounts/components/SetPasswordForm";
+import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import {
     convertBase64ToBuffer,
     convertBufferToBase64,
     generateSRPClient,
     generateSRPSetupAttributes,
-} from "@/accounts/services/srp";
+} from "ente-accounts/services/srp";
 import {
     getSRPAttributes,
     startSRPSetup,
     updateSRPAndKeys,
-} from "@/accounts/services/srp-remote";
-import type { UpdatedKey } from "@/accounts/services/user";
-import { LinkButton } from "@/base/components/LinkButton";
-import { sharedCryptoWorker } from "@/base/crypto";
+} from "ente-accounts/services/srp-remote";
+import type { UpdatedKey } from "ente-accounts/services/user";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { sharedCryptoWorker } from "ente-base/crypto";
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateLoginSubKey,
     saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import { getData, setData } from "@ente/shared/storage/localStorage";
-import { getActualKey } from "@ente/shared/user";
-import type { KEK, KeyAttributes, User } from "@ente/shared/user/types";
+} from "ente-shared/crypto/helpers";
+import { getData, setData } from "ente-shared/storage/localStorage";
+import { getActualKey } from "ente-shared/user";
+import type { KEK, KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";

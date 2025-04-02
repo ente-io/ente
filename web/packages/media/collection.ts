@@ -1,8 +1,8 @@
 import {
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
-} from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
+} from "ente-media/file";
+import { ItemVisibility } from "ente-media/file-metadata";
 
 // TODO: Audit this file
 

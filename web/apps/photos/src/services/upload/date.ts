@@ -1,4 +1,4 @@
-import log from "@/base/log";
+import log from "ente-base/log";
 
 /**
  * Try to extract a date (as epoch microseconds) from a file name by matching it

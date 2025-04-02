@@ -1,16 +1,20 @@
-import { resetFileViewerDataSourceOnClose } from "@/gallery/components/viewer/data-source";
-import type { Collection } from "@/media/collection";
-import type { EnteFile } from "@/media/file";
-import { isHiddenCollection } from "@/new/photos/services/collection";
+import { resetFileViewerDataSourceOnClose } from "ente-gallery/components/viewer/data-source";
+import type { Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
+import { isHiddenCollection } from "ente-new/photos/services/collection";
 import {
     getAllLatestCollections,
     syncTrash,
-} from "@/new/photos/services/collections";
-import { syncFiles } from "@/new/photos/services/files";
-import { isMLSupported, mlStatusSync, mlSync } from "@/new/photos/services/ml";
-import { searchDataSync } from "@/new/photos/services/search";
-import { syncSettings } from "@/new/photos/services/settings";
-import { splitByPredicate } from "@/utils/array";
+} from "ente-new/photos/services/collections";
+import { syncFiles } from "ente-new/photos/services/files";
+import {
+    isMLSupported,
+    mlStatusSync,
+    mlSync,
+} from "ente-new/photos/services/ml";
+import { searchDataSync } from "ente-new/photos/services/search";
+import { syncSettings } from "ente-new/photos/services/settings";
+import { splitByPredicate } from "ente-utils/array";
 
 /**
  * Called during a full sync, before doing the collection and file sync.

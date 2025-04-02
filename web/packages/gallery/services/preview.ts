@@ -1,5 +1,5 @@
-import type { EnteFile } from "@/media/file";
-import { FileType } from "@/media/file-type";
+import type { EnteFile } from "ente-media/file";
+import { FileType } from "ente-media/file-type";
 import { downloadManager } from "./download";
 import { generateVideoPreviewVariantWeb } from "./ffmpeg";
 

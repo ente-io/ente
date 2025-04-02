@@ -1,5 +1,5 @@
-import { fromB64, fromHex, toB64 } from "@/base/crypto";
 import bs58 from "bs58";
+import { fromB64, fromHex, toB64 } from "ente-base/crypto";
 
 /**
  * Add the collection key as the hash to the given URL.

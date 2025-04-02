@@ -47,7 +47,7 @@
  * and thus directly calls the functions in the web worker that it created
  * instead of going through this file.
  */
-import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import { type StateAddress } from "libsodium-wrappers-sumo";
 import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
