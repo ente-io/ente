@@ -1257,8 +1257,6 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  * To make these functional, the `media-control-bar` requires the
  * `mediacontroller="${mediaControllerID}"` attribute.
  *
- * TODO(HLS): Tooltips get clipped
- * TODO(HLS): Translation
  * TODO(HLS): Spurious console warning
  *
  * Notes:
@@ -1269,6 +1267,15 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  *   indicator (browser specific) in the in-page video element.
  *
  * - The media-cast-button currently doesn't work with the `hls-video` player.
+ *
+ * - Media chrome has mechanism for statically providing translations but it
+ *   wasn't working when I tried with 4.9.0. The media chrome tooltips also get
+ *   clipped for the cornermost buttons. Finally, the rest of the buttons on
+ *   this screen don't have a tooltip either.
+ *
+ *   Revisit this when we have a custom tooltip element we can then also use on
+ *   this screen, which can also be used enhancement for the other buttons on
+ *   this screen which use "title" (which get clipped when they are multi-word).
  */
 const hlsVideoControlsHTML = () => `
 <div>
@@ -1287,15 +1294,15 @@ const hlsVideoControlsHTML = () => `
     <media-time-range></media-time-range>
   </media-control-bar>
   <media-control-bar>
-    <media-play-button></media-play-button>
-    <media-mute-button></media-mute-button>
+    <media-play-button notooltip></media-play-button>
+    <media-mute-button notooltip></media-mute-button>
     <media-time-display showduration notoggle></media-time-display>
     <media-text-display></media-text-display>
     <media-settings-menu-button id="et-settings-menu-btn" invoketarget="et-settings-menu" notooltip>
       <svg slot="icon" viewBox="0 0 24 24">${settingsSVGPath}</svg>
     </media-settings-menu-button>
-    <media-pip-button></media-pip-button>
-    <media-fullscreen-button></media-fullscreen-button>
+    <media-pip-button notooltip></media-pip-button>
+    <media-fullscreen-button notooltip></media-fullscreen-button>
   </media-control-bar>
 </div>
 `;
