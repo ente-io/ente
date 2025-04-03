@@ -6,22 +6,6 @@ import { heicToJPEG } from "ente-media/heic-convert";
 import { convertToMP4 } from "../services/ffmpeg";
 import { detectFileTypeInfo } from "./detect-type";
 
-export interface RenderableBlobOpts {
-    /**
-     * If true, then the conversion step is skipped when for a format that we
-     * usually always convert, we are able to detect that the browser might be
-     * able to render the file natively.
-     *
-     * [Note: Browser HEIC support]
-     *
-     * Currently this has an effect only for HEIC files. Safari can show them
-     * natively, and if we detect HEIC support (by trying to ask the browser to
-     * show a small HEIC file), we skip the conversion to JPEG. This is then
-     * used by the file viewer to bypass the costly Wasm HEIC conversion.
-     */
-    avoidFormatConversion?: boolean;
-}
-
 /**
  * Return a new {@link Blob} containing an image's data in a format that the
  * browser (likely) knows how to render (in an img tag, or on the canvas).
@@ -47,7 +31,7 @@ export interface RenderableBlobOpts {
  *    desktop app can natively convert to a JPEG (using ffmpeg), do that and
  *    return the resultant JPEG blob.
  *
- * 4. If this is an HEIC file (and `opts.avoidFormatConversion` was not set),
+ * 4. If this is an HEIC file and the browser does not have native HEIC support,
  *    then use our (Wasm) HEIC converter and return the resultant JPEG blob.
  *
  * 5. Otherwise return the original (with the MIME type if we were able to
@@ -58,7 +42,6 @@ export interface RenderableBlobOpts {
 export const renderableImageBlob = async (
     imageBlob: Blob,
     fileName: string,
-    opts: RenderableBlobOpts,
 ) => {
     try {
         const file = new File([imageBlob], fileName);
@@ -84,14 +67,17 @@ export const renderableImageBlob = async (
             // to our web HEIC converter.
 
             if (isHEICExtension(extension)) {
-                // However, if the `avoidFormatConversion` option is set, skip
-                // conversion if we're able to detect that the browser can
-                // already render them (e.g. Safari 18+).
-                if (opts.avoidFormatConversion) {
-                    console.log("TODO implement me");
+                // But first, check if the browser already knows how to natively
+                // render HEICs, e.g. Safari 18+. In such cases not only is the
+                // Wasm conversion unnecessary, the native hardware accelerated
+                // support will also be _much_ faster.
+                if (mimeType == "image/heic" && /*TODO*/ false) {
+                    log.debug(
+                        () => `Using native HEIC support for ${fileName}`,
+                    );
+                } else {
+                    return await heicToJPEG(imageBlob);
                 }
-
-                return await heicToJPEG(imageBlob);
             }
         }
 

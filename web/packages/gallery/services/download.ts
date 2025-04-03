@@ -18,6 +18,7 @@ import { customAPIOrigin } from "ente-base/origins";
 import {
     playableVideoBlob,
     renderableImageBlob,
+    type RenderableBlobOpts,
 } from "ente-gallery/utils/convert";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
@@ -295,16 +296,23 @@ class DownloadManager {
      */
     renderableSourceURLs = async (
         file: EnteFile,
-        opts?: { forceConvert?: boolean },
+    opts?: RenderableBlobOpts,
     ): Promise<RenderableSourceURLs> => {
-        const forceConvert = opts?.forceConvert ?? false;
-        if (forceConvert || !this.renderableSourceURLPromises.has(file.id)) {
+        // Keep a separate code path for when the conversion is not needed. The
+        // download will already be cached. The (lack of) conversion shouldn't
+        // be cached since some other code might also invoke us without setting
+        // the avoid conversion option.
+        if (opts?.avoidFormatConversion) {
+
+        }
+
+        if (!this.renderableSourceURLPromises.has(file.id)) {
             this.renderableSourceURLPromises.set(
                 file.id,
                 createRenderableSourceURLs(
                     file,
                     this.fileURLDownloadAndCacheIfNeeded(file),
-                    forceConvert,
+                    opts,
                 ),
             );
         }
@@ -579,7 +587,7 @@ const wrapErrors = <T>(op: () => Promise<T>) =>
 const createRenderableSourceURLs = async (
     file: EnteFile,
     originalFileURLPromise: Promise<string>,
-    opts: RenderableSourceURLsOpts,
+    opts?: RenderableBlobOpts,
 ): Promise<RenderableSourceURLs> => {
     const originalFileURL = await originalFileURLPromise;
     const fileBlob = await fetch(originalFileURL).then((res) => res.blob());
@@ -601,7 +609,11 @@ const createRenderableSourceURLs = async (
     const fileName = file.metadata.title;
     switch (file.metadata.fileType) {
         case FileType.image: {
-            const convertedBlob = await renderableImageBlob(fileBlob, fileName);
+            const convertedBlob = await renderableImageBlob(
+                fileBlob,
+                fileName,
+                opts,
+            );
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
             originalImageBlob = fileBlob;
