@@ -472,11 +472,14 @@ class UploadManager {
             ? { timestamp, dateTime, offset }
             : undefined;
 
+        // Fallback to the timestamp if a creationDate could not be constructed.
+        const creationTime = creationDate ? undefined : timestamp;
+
         const item = {
             uploadItem: file,
             localID: 1,
             collectionID: collection.id,
-            externalParsedMetadata: { creationDate },
+            externalParsedMetadata: { creationDate, creationTime },
         };
 
         return this.uploadItems([item], [collection]);
