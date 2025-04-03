@@ -6,6 +6,22 @@ import { heicToJPEG } from "ente-media/heic-convert";
 import { convertToMP4 } from "../services/ffmpeg";
 import { detectFileTypeInfo } from "./detect-type";
 
+export interface RenderableBlobOpts {
+    /**
+     * If true, then the conversion step is skipped when for a format that we
+     * usually always convert, we are able to detect that the browser might be
+     * able to render the file natively.
+     *
+     * [Note: Browser HEIC support]
+     *
+     * Currently this has an effect only for HEIC files. Safari can show them
+     * natively, and if we detect HEIC support (by trying to ask the browser to
+     * show a small HEIC file), we skip the conversion to JPEG. This is then
+     * used by the file viewer to bypass the costly Wasm HEIC conversion.
+     */
+    avoidFormatConversion?: boolean;
+}
+
 /**
  * Return a new {@link Blob} containing an image's data in a format that the
  * browser (likely) knows how to render (in an img tag, or on the canvas).
@@ -16,6 +32,8 @@ import { detectFileTypeInfo } from "./detect-type";
  * @param imageBlob A {@link Blob} containing the contents of an image file.
  *
  * @param fileName The name of the file whose data {@link imageBlob} is.
+ *
+ * @param opts Options to tweak the conversion flowchart.
  *
  * The logic used by this function is:
  *
@@ -29,8 +47,8 @@ import { detectFileTypeInfo } from "./detect-type";
  *    desktop app can natively convert to a JPEG (using ffmpeg), do that and
  *    return the resultant JPEG blob.
  *
- * 4. If this is an HEIC file, use our (Wasm) HEIC converter and return the
- *    resultant JPEG blob.
+ * 4. If this is an HEIC file (and `opts.avoidFormatConversion` was not set),
+ *    then use our (Wasm) HEIC converter and return the resultant JPEG blob.
  *
  * 5. Otherwise return the original (with the MIME type if we were able to
  *    deduce one).
@@ -40,6 +58,7 @@ import { detectFileTypeInfo } from "./detect-type";
 export const renderableImageBlob = async (
     imageBlob: Blob,
     fileName: string,
+    opts: RenderableBlobOpts,
 ) => {
     try {
         const file = new File([imageBlob], fileName);
@@ -65,6 +84,13 @@ export const renderableImageBlob = async (
             // to our web HEIC converter.
 
             if (isHEICExtension(extension)) {
+                // However, if the `avoidFormatConversion` option is set, skip
+                // conversion if we're able to detect that the browser can
+                // already render them (e.g. Safari 18+).
+                if (opts.avoidFormatConversion) {
+                    console.log("TODO implement me");
+                }
+
                 return await heicToJPEG(imageBlob);
             }
         }
@@ -124,14 +150,9 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
  *
  * - Otherwise try to convert using FFmpeg. This conversion always happens on
  *   the desktop app, but in the browser the conversion only happens for short
- *   videos since the Wasm FFmpeg implementation is much slower. There is also a
- *   flag to force this conversion regardless.
+ *   videos since the Wasm FFmpeg implementation is much slower.
  */
-export const playableVideoBlob = async (
-    fileName: string,
-    videoBlob: Blob,
-    forceConvert: boolean,
-) => {
+export const playableVideoBlob = async (fileName: string, videoBlob: Blob) => {
     const converted = async () => {
         try {
             log.info(`Converting ${fileName} to mp4`);
@@ -142,9 +163,6 @@ export const playableVideoBlob = async (
             return null;
         }
     };
-
-    // If we've been asked to force convert, do it regardless of anything else.
-    if (forceConvert) return converted();
 
     const isPlayable = await isPlaybackPossible(URL.createObjectURL(videoBlob));
     if (isPlayable) return videoBlob;

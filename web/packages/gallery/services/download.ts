@@ -1,4 +1,3 @@
-import { isDesktop } from "ente-base/app";
 import { blobCache, type BlobCache } from "ente-base/blob-cache";
 import {
     decryptStreamBytes,
@@ -55,12 +54,6 @@ export interface RenderableSourceURLs {
     url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
     originalImageBlob?: Blob | undefined;
     type: "normal" | "livePhoto";
-    /**
-     * `true` if there is potential conversion that can still be applied.
-     *
-     * See: [Note: Forcing conversion of playable videos]
-     */
-    canForceConvert?: boolean;
     /**
      * Best effort attempt at obtaining the MIME type.
      *
@@ -582,14 +575,11 @@ const wrapErrors = <T>(op: () => Promise<T>) =>
  * Create and return a {@link RenderableSourceURLs} for the given {@link file},
  * where {@link originalFileURLPromise} is a promise that resolves with an
  * (object) URL to the contents of the original file.
- *
- * @param forceConvert `true` when the user presses the "Convert" button. See:
- * [Note: Forcing conversion of playable videos].
  */
 const createRenderableSourceURLs = async (
     file: EnteFile,
     originalFileURLPromise: Promise<string>,
-    forceConvert: boolean,
+    opts: RenderableSourceURLsOpts,
 ): Promise<RenderableSourceURLs> => {
     const originalFileURL = await originalFileURLPromise;
     const fileBlob = await fetch(originalFileURL).then((res) => res.blob());
@@ -607,7 +597,6 @@ const createRenderableSourceURLs = async (
         | undefined;
     let type: RenderableSourceURLs["type"] = "normal";
     let mimeType: string | undefined;
-    let canForceConvert = false;
 
     const fileName = file.metadata.title;
     switch (file.metadata.fileType) {
@@ -625,20 +614,10 @@ const createRenderableSourceURLs = async (
             break;
         }
         case FileType.video: {
-            const convertedBlob = await playableVideoBlob(
-                fileName,
-                fileBlob,
-                forceConvert,
-            );
+            const convertedBlob = await playableVideoBlob(fileName, fileBlob);
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
             mimeType = convertedBlob?.type;
-
-            const isOriginal = convertedURL === originalFileURL;
-            const isRenderable = !!convertedURL;
-            canForceConvert =
-                isDesktop && !forceConvert && isOriginal && isRenderable;
-
             break;
         }
         default: {
@@ -650,7 +629,7 @@ const createRenderableSourceURLs = async (
     // TODO: Can we remove this non-null assertion and reflect it in the types?
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return { url: url!, originalImageBlob, type, mimeType, canForceConvert };
+    return { url: url!, originalImageBlob, type, mimeType };
 };
 
 async function getRenderableLivePhotoURL(
