@@ -29,8 +29,8 @@ import { detectFileTypeInfo } from "./detect-type";
  *    desktop app can natively convert to a JPEG (using ffmpeg), do that and
  *    return the resultant JPEG blob.
  *
- * 4. If this is an HEIC file, use our (Wasm) HEIC converter and return the
- *    resultant JPEG blob.
+ * 4. If this is an HEIC file and the browser does not have native HEIC support,
+ *    then use our (Wasm) HEIC converter and return the resultant JPEG blob.
  *
  * 5. Otherwise return the original (with the MIME type if we were able to
  *    deduce one).
@@ -65,7 +65,17 @@ export const renderableImageBlob = async (
             // to our web HEIC converter.
 
             if (isHEICExtension(extension)) {
-                return await heicToJPEG(imageBlob);
+                // But first, check if the browser already knows how to natively
+                // render HEICs, e.g. Safari 17+. In such cases not only is the
+                // Wasm conversion unnecessary, the native hardware accelerated
+                // support will also be _much_ faster.
+                if (mimeType == "image/heic" && (await isHEICSupported())) {
+                    log.debug(
+                        () => `Using native HEIC support for ${fileName}`,
+                    );
+                } else {
+                    return await heicToJPEG(imageBlob);
+                }
             }
         }
 
@@ -113,6 +123,39 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
     return new Blob([jpegData], { type: "image/jpeg" });
 };
 
+let _isHEICSupported: Promise<boolean> | undefined;
+
+/**
+ * Return true if the browser can natively render HEIC files.
+ *
+ * For performance, the result of the check is cached. There shouldn't be a
+ * reason for this cache to need be invalidated, the browser shouldn't suddenly
+ * drop its HEIC support in the middle of it running (but I'm sure posterity
+ * will prove this assumption wrong in a way I can't yet anticipate).
+ *
+ * Some more details:
+ *
+ * - The check works by trying to load a small HEIC file.
+ *
+ * - Currently (Spring 2025), the only browser with support for HEIC is Safari.
+ */
+const isHEICSupported = () =>
+    (_isHEICSupported ??= new Promise((resolve) => {
+        const image = new Image();
+        image.onload = () => resolve(true);
+        image.onerror = () => resolve(false);
+        image.src = testHEICDataURL;
+    }));
+
+/**
+ * A data URL encoding the smallest HEIC image (439 bytes).
+ *
+ * Source:
+ * https://github.com/vvideo/detect-audio-video/blob/main/src/image/smallest/index.ts
+ */
+const testHEICDataURL =
+    "data:image/heic;base64,AAAAGGZ0eXBoZWljAAAAAG1pZjFoZWljAAABaW1ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAHBpY3QAAAAAAAAAAAAAAAAAAAAADnBpdG0AAAAAAAEAAAAiaWxvYwAAAABEQAABAAEAAAAAAYkAAQAAAAAAAAAuAAAAI2lpbmYAAAAAAAEAAAAVaW5mZQIAAAAAAQAAaHZjMQAAAADpaXBycAAAAMppcGNvAAAAdmh2Y0MBA3AAAAAAAAAAAAAe8AD8/fj4AAAPAyAAAQAYQAEMAf//A3AAAAMAkAAAAwAAAwAeugJAIQABACpCAQEDcAAAAwCQAAADAAADAB6gIIEFluqumubgIaDAgAAAAwCAAAADAIQiAAEABkQBwXPBiQAAABRpc3BlAAAAAAAAAEAAAABAAAAAKGNsYXAAAAABAAAAAQAAAAEAAAAB////wQAAAAL////BAAAAAgAAABBwaXhpAAAAAAMICAgAAAAXaXBtYQAAAAAAAAABAAEEgQKDBAAAADZtZGF0AAAAKigBrwayEx2gkim3i/2Rd0CR/V6h6GbEyV3dheegYfLV9ZwraCH8nff+7w==";
+
 /**
  * Return a new {@link Blob} containing a video's data in a format that the
  * browser (likely) knows how to play back (using an video tag).
@@ -124,14 +167,9 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
  *
  * - Otherwise try to convert using FFmpeg. This conversion always happens on
  *   the desktop app, but in the browser the conversion only happens for short
- *   videos since the Wasm FFmpeg implementation is much slower. There is also a
- *   flag to force this conversion regardless.
+ *   videos since the Wasm FFmpeg implementation is much slower.
  */
-export const playableVideoBlob = async (
-    fileName: string,
-    videoBlob: Blob,
-    forceConvert: boolean,
-) => {
+export const playableVideoBlob = async (fileName: string, videoBlob: Blob) => {
     const converted = async () => {
         try {
             log.info(`Converting ${fileName} to mp4`);
@@ -142,9 +180,6 @@ export const playableVideoBlob = async (
             return null;
         }
     };
-
-    // If we've been asked to force convert, do it regardless of anything else.
-    if (forceConvert) return converted();
 
     const isPlayable = await isPlaybackPossible(URL.createObjectURL(videoBlob));
     if (isPlayable) return videoBlob;
@@ -166,8 +201,6 @@ export const playableVideoBlob = async (
  * Try to see if the browser thinks it can play the video pointed to by the
  * given {@link url} by creating a <video> element and initiating playback.
  *
- * [Note: Forcing conversion of playable videos]
- *
  * Note that this can sometimes cause false positives if the browser can play
  * some of the streams in the video, but not all. For example, the browser may
  * be able to play back the video stream, but not the audio stream (say due to
@@ -175,10 +208,8 @@ export const playableVideoBlob = async (
  * to skip conversion, but when the user actually plays the video there will be
  * no sound.
  *
- * As an escape hatch, we provide a force convert button in the UI for such
- * cases, which'll cause the {@link forceConvert} flag in our caller function to
- * be set. If so, it'll bypasses this preflight check we use to see if the
- * browser can already play the video, and instead will always be transcoded.
+ * To deal with such cases in an holistic manner, we have a streaming variant of
+ * the video that gets transcoded into a (near) universal format.
  */
 const isPlaybackPossible = async (url: string) =>
     new Promise((resolve) => {
