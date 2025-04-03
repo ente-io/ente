@@ -69,7 +69,7 @@ export const renderableImageBlob = async (
                 // render HEICs, e.g. Safari 18+. In such cases not only is the
                 // Wasm conversion unnecessary, the native hardware accelerated
                 // support will also be _much_ faster.
-                if (mimeType == "image/heic" && /*TODO*/ false) {
+                if (mimeType == "image/heic" && (await isHEICSupported())) {
                     log.debug(
                         () => `Using native HEIC support for ${fileName}`,
                     );
@@ -122,6 +122,39 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
     log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
     return new Blob([jpegData], { type: "image/jpeg" });
 };
+
+let _isHEICSupported: Promise<boolean> | undefined;
+
+/**
+ * Return true if the browser can natively render HEIC files.
+ *
+ * For performance, the result of the check is cached. There shouldn't be a
+ * reason for this cache to need be invalidated, the browser should drop its
+ * HEIC support in the middle of it running (but I'm sure posterity will prove
+ * this assumption wrong in a way I can't yet anticipate).
+ *
+ * Some more details:
+ *
+ * - The check works by trying to load a small HEIC file.
+ *
+ * - Currently (Spring 2025), the only browser with support for HEIC is Safari.
+ */
+const isHEICSupported = () =>
+    (_isHEICSupported ??= new Promise((resolve) => {
+        const image = new Image();
+        image.onload = () => resolve(true);
+        image.onerror = () => resolve(false);
+        image.src = testHEICDataURL;
+    }));
+
+/**
+ * A data URL encoding the smallest HEIC image (439 bytes).
+ *
+ * Source:
+ * https://github.com/vvideo/detect-audio-video/blob/main/src/image/smallest/index.ts
+ */
+const testHEICDataURL =
+    "data:image/heic;base64,AAAAGGZ0eXBoZWljAAAAAG1pZjFoZWljAAABaW1ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAHBpY3QAAAAAAAAAAAAAAAAAAAAADnBpdG0AAAAAAAEAAAAiaWxvYwAAAABEQAABAAEAAAAAAYkAAQAAAAAAAAAuAAAAI2lpbmYAAAAAAAEAAAAVaW5mZQIAAAAAAQAAaHZjMQAAAADpaXBycAAAAMppcGNvAAAAdmh2Y0MBA3AAAAAAAAAAAAAe8AD8/fj4AAAPAyAAAQAYQAEMAf//A3AAAAMAkAAAAwAAAwAeugJAIQABACpCAQEDcAAAAwCQAAADAAADAB6gIIEFluqumubgIaDAgAAAAwCAAAADAIQiAAEABkQBwXPBiQAAABRpc3BlAAAAAAAAAEAAAABAAAAAKGNsYXAAAAABAAAAAQAAAAEAAAAB////wQAAAAL////BAAAAAgAAABBwaXhpAAAAAAMICAgAAAAXaXBtYQAAAAAAAAABAAEEgQKDBAAAADZtZGF0AAAAKigBrwayEx2gkim3i/2Rd0CR/V6h6GbEyV3dheegYfLV9ZwraCH8nff+7w==";
 
 /**
  * Return a new {@link Blob} containing a video's data in a format that the
