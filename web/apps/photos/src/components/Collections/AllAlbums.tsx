@@ -23,7 +23,7 @@ import { CollectionsSortBy } from "ente-new/photos/services/collection/ui";
 import { FlexWrapper, FluidContainer } from "ente-shared/components/Container";
 import { t } from "i18next";
 import memoize from "memoize-one";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { areEqual, FixedSizeList, ListChildComponentProps } from "react-window";
 
@@ -196,12 +196,17 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     onCollectionClick,
 }) => {
     const isTwoColumn = useMediaQuery(`(width < ${Column3To2Breakpoint}px)`);
-    const columns = isTwoColumn ? 2 : 3;
 
     const refreshInProgress = useRef(false);
     const shouldRefresh = useRef(false);
 
     const [collectionRowList, setCollectionRowList] = useState([]);
+
+    const columns = isTwoColumn ? 2 : 3;
+    const maxListContentHeight =
+        Math.ceil(collectionSummaries.length / columns) *
+            CollectionRowItemSize +
+        32; /* padding above first and below last row */
 
     useEffect(() => {
         if (!collectionSummaries) {
@@ -235,27 +240,24 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
             }
         };
         main();
-    }, [collectionSummaries]);
+    }, [collectionSummaries, columns]);
 
     // Bundle additional data to list items using the "itemData" prop.
     // It will be accessible to item renderers as props.data.
     // Memoize this data to avoid bypassing shouldComponentUpdate().
     const itemData = createItemData(collectionRowList, onCollectionClick);
 
-    const maxListContentHeight = useMemo(
-        () =>
-            Math.ceil(collectionSummaries.length / columns) *
-                CollectionRowItemSize +
-            32 /* padding above first and below last row */,
-        [collectionSummaries],
-    );
-
     return (
         <DialogContent
             sx={{
                 "&&": { padding: 0 },
-                height: `min(80svh, ${maxListContentHeight}px)`,
+                height: "min(80svh, var(--et-max-list-content-height))",
             }}
+            style={
+                {
+                    "--et-max-list-content-height": `${maxListContentHeight}px`,
+                } as React.CSSProperties
+            }
         >
             <AutoSizer>
                 {({ width, height }) => (
