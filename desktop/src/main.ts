@@ -675,6 +675,14 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
     const tray = new Tray(trayIcon);
     tray.setToolTip("Ente Photos");
     tray.setContextMenu(createTrayContextMenu(mainWindow));
+
+    // On Windows and Linux, toggle the window on double-click (Double clicks
+    // are captured by the context menu on macOS).
+    if (process.platform != "darwin") {
+        tray.on("double-click", () =>
+            mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show(),
+        );
+    }
 };
 
 /**
