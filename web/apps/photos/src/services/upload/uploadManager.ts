@@ -465,20 +465,21 @@ class UploadManager {
         sourceEnteFile: EnteFile,
     ) {
         const timestamp = sourceEnteFile.metadata.creationTime;
-        const dateTime = sourceEnteFile.pubMagicMetadata.data.dateTime;
-        const offset = sourceEnteFile.pubMagicMetadata.data.offsetTime;
+        const dateTime = sourceEnteFile.pubMagicMetadata?.data.dateTime;
+        const offset = sourceEnteFile.pubMagicMetadata?.data.offsetTime;
 
-        const creationDate: ParsedMetadata["creationDate"] = {
-            timestamp,
-            dateTime,
-            offset,
-        };
+        const creationDate: ParsedMetadata["creationDate"] = dateTime
+            ? { timestamp, dateTime, offset }
+            : undefined;
+
+        // Fallback to the timestamp if a creationDate could not be constructed.
+        const creationTime = creationDate ? undefined : timestamp;
 
         const item = {
             uploadItem: file,
             localID: 1,
             collectionID: collection.id,
-            externalParsedMetadata: { creationDate },
+            externalParsedMetadata: { creationDate, creationTime },
         };
 
         return this.uploadItems([item], [collection]);

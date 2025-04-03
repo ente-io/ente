@@ -236,6 +236,10 @@ export const uploadItemFileName = (uploadItem: UploadItem) => {
 
 /* -- Various intermediate type used during upload -- */
 
+export type ExternalParsedMetadata = ParsedMetadata & {
+    creationTime?: number | undefined;
+};
+
 export interface UploadAsset {
     /** `true` if this is a live photo. */
     isLivePhoto?: boolean;
@@ -254,7 +258,7 @@ export interface UploadAsset {
      *
      * This will not be present for live photos.
      */
-    externalParsedMetadata?: ParsedMetadata;
+    externalParsedMetadata?: ExternalParsedMetadata;
 }
 
 interface ThumbnailedFile {
@@ -973,7 +977,7 @@ const extractLivePhotoMetadata = async (
 
 const extractImageOrVideoMetadata = async (
     uploadItem: UploadItem,
-    externalParsedMetadata: ParsedMetadata | undefined,
+    externalParsedMetadata: ExternalParsedMetadata | undefined,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -983,7 +987,7 @@ const extractImageOrVideoMetadata = async (
     const fileName = uploadItemFileName(uploadItem);
     const { fileType } = fileTypeInfo;
 
-    let parsedMetadata: ParsedMetadata | undefined;
+    let parsedMetadata: (ParsedMetadata & ExternalParsedMetadata) | undefined;
     if (fileType == FileType.image) {
         parsedMetadata = await tryExtractImageMetadata(
             uploadItem,
@@ -1026,6 +1030,8 @@ const extractImageOrVideoMetadata = async (
         creationTime = timestamp;
         publicMagicMetadata.dateTime = dateTime;
         if (offset) publicMagicMetadata.offsetTime = offset;
+    } else if (parsedMetadata.creationTime) {
+        creationTime = parsedMetadata.creationTime;
     } else {
         creationTime =
             tryParseEpochMicrosecondsFromFileName(fileName) ?? modificationTime;

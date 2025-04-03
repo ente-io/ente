@@ -778,7 +778,7 @@ export interface ParsedMetadata {
      * Logically this is a date in local timezone of the place where the photo
      * was taken. See: [Note: Photos are always in local date/time].
      */
-    creationDate?: ParsedMetadataDate;
+    creationDate?: ParsedMetadataDate | undefined;
     /** The GPS coordinates where the photo was taken. */
     location?: Location;
     /**
