@@ -18,7 +18,6 @@ import { customAPIOrigin } from "ente-base/origins";
 import {
     playableVideoBlob,
     renderableImageBlob,
-    type RenderableBlobOpts,
 } from "ente-gallery/utils/convert";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
@@ -290,35 +289,21 @@ class DownloadManager {
      * (if possible).
      *
      * See the documentation of {@link RenderableSourceURLs} for more details.
-     *
-     * The `forceConvert` option is true when the user presses the "Convert"
-     * button. See: [Note: Forcing conversion of playable videos].
      */
     renderableSourceURLs = async (
         file: EnteFile,
-    opts?: RenderableBlobOpts,
     ): Promise<RenderableSourceURLs> => {
-        // Keep a separate code path for when the conversion is not needed. The
-        // download will already be cached. The (lack of) conversion shouldn't
-        // be cached since some other code might also invoke us without setting
-        // the avoid conversion option.
-        if (opts?.avoidFormatConversion) {
-
-        }
-
-        if (!this.renderableSourceURLPromises.has(file.id)) {
-            this.renderableSourceURLPromises.set(
-                file.id,
-                createRenderableSourceURLs(
-                    file,
-                    this.fileURLDownloadAndCacheIfNeeded(file),
-                    opts,
-                ),
+        let promise = this.renderableSourceURLPromises.get(file.id);
+        if (!promise) {
+            promise = createRenderableSourceURLs(
+                file,
+                this.fileURLDownloadAndCacheIfNeeded(file),
             );
+            this.renderableSourceURLPromises.set(file.id, promise);
         }
 
         try {
-            return await this.renderableSourceURLPromises.get(file.id)!;
+            return await promise;
         } catch (e) {
             log.error("Failed to obtain renderableSourceURLs", e);
             this.renderableSourceURLPromises.delete(file.id);
@@ -587,7 +572,6 @@ const wrapErrors = <T>(op: () => Promise<T>) =>
 const createRenderableSourceURLs = async (
     file: EnteFile,
     originalFileURLPromise: Promise<string>,
-    opts?: RenderableBlobOpts,
 ): Promise<RenderableSourceURLs> => {
     const originalFileURL = await originalFileURLPromise;
     const fileBlob = await fetch(originalFileURL).then((res) => res.blob());
@@ -609,11 +593,7 @@ const createRenderableSourceURLs = async (
     const fileName = file.metadata.title;
     switch (file.metadata.fileType) {
         case FileType.image: {
-            const convertedBlob = await renderableImageBlob(
-                fileBlob,
-                fileName,
-                opts,
-            );
+            const convertedBlob = await renderableImageBlob(fileBlob, fileName);
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
             originalImageBlob = fileBlob;
@@ -677,7 +657,6 @@ async function getRenderableLivePhotoURL(
             const convertedVideoBlob = await playableVideoBlob(
                 livePhoto.videoFileName,
                 videoBlob,
-                false,
             );
             if (!convertedVideoBlob) return undefined;
             return URL.createObjectURL(convertedVideoBlob);

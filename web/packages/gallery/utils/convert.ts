@@ -17,8 +17,6 @@ import { detectFileTypeInfo } from "./detect-type";
  *
  * @param fileName The name of the file whose data {@link imageBlob} is.
  *
- * @param opts Options to tweak the conversion flowchart.
- *
  * The logic used by this function is:
  *
  * 1. Try to detect the MIME type of the file from its contents and/or name.
@@ -170,8 +168,6 @@ export const playableVideoBlob = async (fileName: string, videoBlob: Blob) => {
  * Try to see if the browser thinks it can play the video pointed to by the
  * given {@link url} by creating a <video> element and initiating playback.
  *
- * [Note: Forcing conversion of playable videos]
- *
  * Note that this can sometimes cause false positives if the browser can play
  * some of the streams in the video, but not all. For example, the browser may
  * be able to play back the video stream, but not the audio stream (say due to
@@ -179,10 +175,8 @@ export const playableVideoBlob = async (fileName: string, videoBlob: Blob) => {
  * to skip conversion, but when the user actually plays the video there will be
  * no sound.
  *
- * As an escape hatch, we provide a force convert button in the UI for such
- * cases, which'll cause the {@link forceConvert} flag in our caller function to
- * be set. If so, it'll bypasses this preflight check we use to see if the
- * browser can already play the video, and instead will always be transcoded.
+ * To deal with such cases in an holistic manner, we have a streaming variant of
+ * the video that gets transcoded into a (near) universal format.
  */
 const isPlaybackPossible = async (url: string) =>
     new Promise((resolve) => {
