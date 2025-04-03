@@ -21,7 +21,6 @@ import {
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { CollectionsSortBy } from "ente-new/photos/services/collection/ui";
 import { FlexWrapper, FluidContainer } from "ente-shared/components/Container";
-import useWindowSize from "ente-shared/hooks/useWindowSize";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -81,7 +80,7 @@ export const AllAlbums: React.FC<AllAlbums> = ({
     );
 };
 
-export const AllCollectionMobileBreakpoint = 559;
+const Column3To2Breakpoint = 559;
 
 const AllAlbumsDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialog-container": { justifyContent: "flex-end" },
@@ -91,7 +90,7 @@ const AllAlbumsDialog = styled(Dialog)(({ theme }) => ({
         paddingRight: theme.spacing(1),
     },
     "& .MuiDialogContent-root": { padding: theme.spacing(2) },
-    [theme.breakpoints.down(AllCollectionMobileBreakpoint)]: {
+    [theme.breakpoints.down(Column3To2Breakpoint)]: {
         "& .MuiPaper-root": { width: "324px" },
         "& .MuiDialogContent-root": { padding: 6 },
     },
@@ -138,9 +137,6 @@ const Title = ({
         </FlexWrapper>
     </DialogTitle>
 );
-
-const MobileColumns = 2;
-const DesktopColumns = 3;
 
 const CollectionRowItemSize = 154;
 
@@ -199,15 +195,16 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     collectionSummaries,
     onCollectionClick,
 }) => {
+    const isTwoColumn = useMediaQuery(`(width < ${Column3To2Breakpoint}px)`);
+    const columns = isTwoColumn ? 2 : 3;
+
     const refreshInProgress = useRef(false);
     const shouldRefresh = useRef(false);
 
     const [collectionRowList, setCollectionRowList] = useState([]);
 
-    const windowSize = useWindowSize();
-
     useEffect(() => {
-        if (!windowSize.width || !collectionSummaries) {
+        if (!collectionSummaries) {
             return;
         }
         const main = async () => {
@@ -219,10 +216,6 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
 
             const collectionRowList: CollectionSummary[][] = [];
             let index = 0;
-            const columns =
-                windowSize.width > AllCollectionMobileBreakpoint
-                    ? DesktopColumns
-                    : MobileColumns;
             while (index < collectionSummaries.length) {
                 const collectionRow: CollectionSummary[] = [];
                 for (
@@ -242,23 +235,21 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
             }
         };
         main();
-    }, [collectionSummaries, windowSize]);
+    }, [collectionSummaries]);
 
     // Bundle additional data to list items using the "itemData" prop.
     // It will be accessible to item renderers as props.data.
     // Memoize this data to avoid bypassing shouldComponentUpdate().
     const itemData = createItemData(collectionRowList, onCollectionClick);
 
-    const maxListContentHeight = useMemo(() => {
-        // DesktopColumns give us an upper bound.
-        return (
-            Math.ceil(collectionSummaries.length / DesktopColumns) *
+    const maxListContentHeight = useMemo(
+        () =>
+            Math.ceil(collectionSummaries.length / columns) *
                 CollectionRowItemSize +
-            32
-        );
-    }, [collectionSummaries]);
+            32 /* padding above first and below last row */,
+        [collectionSummaries],
+    );
 
-    console.log(collectionSummaries.length, maxListContentHeight);
     return (
         <DialogContent
             sx={{
@@ -266,11 +257,10 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
                 height: `min(80svh, ${maxListContentHeight}px)`,
             }}
         >
-            <AutoSizer disableWidth>
-                {({ height }) => (
+            <AutoSizer>
+                {({ width, height }) => (
                     <FixedSizeList
-                        height={height}
-                        width={"100%"}
+                        {...{ width, height }}
                         itemCount={collectionRowList.length}
                         itemSize={CollectionRowItemSize}
                         itemData={itemData}
