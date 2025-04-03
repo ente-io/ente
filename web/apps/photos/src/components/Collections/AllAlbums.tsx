@@ -24,12 +24,9 @@ import { FlexWrapper, FluidContainer } from "ente-shared/components/Container";
 import useWindowSize from "ente-shared/hooks/useWindowSize";
 import { t } from "i18next";
 import memoize from "memoize-one";
-import React, { useEffect, useRef, useState } from "react";
-import {
-    areEqual,
-    FixedSizeList as List,
-    ListChildComponentProps,
-} from "react-window";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import AutoSizer from "react-virtualized-auto-sizer";
+import { areEqual, FixedSizeList, ListChildComponentProps } from "react-window";
 
 interface AllAlbums {
     open: boolean;
@@ -147,15 +144,6 @@ const DesktopColumns = 3;
 
 const CollectionRowItemSize = 154;
 
-const getCollectionRowListHeight = (
-    collectionRowList: CollectionSummary[][],
-    windowSize: { height: number; width: number },
-) =>
-    Math.min(
-        collectionRowList.length * CollectionRowItemSize + 32,
-        windowSize?.height - 177,
-    ) || 0;
-
 interface ItemData {
     collectionRowList: CollectionSummary[][];
     onCollectionClick: (id?: number) => void;
@@ -261,20 +249,36 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     // Memoize this data to avoid bypassing shouldComponentUpdate().
     const itemData = createItemData(collectionRowList, onCollectionClick);
 
+    const maxListContentHeight = useMemo(() => {
+        // DesktopColumns give us an upper bound.
+        return (
+            Math.ceil(collectionSummaries.length / DesktopColumns) *
+                CollectionRowItemSize +
+            32
+        );
+    }, [collectionSummaries]);
+
+    console.log(collectionSummaries.length, maxListContentHeight);
     return (
-        <DialogContent sx={{ "&&": { padding: 0 } }}>
-            <List
-                height={getCollectionRowListHeight(
-                    collectionRowList,
-                    windowSize,
+        <DialogContent
+            sx={{
+                "&&": { padding: 0 },
+                height: `min(80svh, ${maxListContentHeight}px)`,
+            }}
+        >
+            <AutoSizer disableWidth>
+                {({ height }) => (
+                    <FixedSizeList
+                        height={height}
+                        width={"100%"}
+                        itemCount={collectionRowList.length}
+                        itemSize={CollectionRowItemSize}
+                        itemData={itemData}
+                    >
+                        {AlbumsRow}
+                    </FixedSizeList>
                 )}
-                width={"100%"}
-                itemCount={collectionRowList.length}
-                itemSize={CollectionRowItemSize}
-                itemData={itemData}
-            >
-                {AlbumsRow}
-            </List>
+            </AutoSizer>
         </DialogContent>
     );
 };
