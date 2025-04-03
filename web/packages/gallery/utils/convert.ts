@@ -66,7 +66,7 @@ export const renderableImageBlob = async (
 
             if (isHEICExtension(extension)) {
                 // But first, check if the browser already knows how to natively
-                // render HEICs, e.g. Safari 18+. In such cases not only is the
+                // render HEICs, e.g. Safari 17+. In such cases not only is the
                 // Wasm conversion unnecessary, the native hardware accelerated
                 // support will also be _much_ faster.
                 if (mimeType == "image/heic" && (await isHEICSupported())) {
@@ -129,9 +129,9 @@ let _isHEICSupported: Promise<boolean> | undefined;
  * Return true if the browser can natively render HEIC files.
  *
  * For performance, the result of the check is cached. There shouldn't be a
- * reason for this cache to need be invalidated, the browser should drop its
- * HEIC support in the middle of it running (but I'm sure posterity will prove
- * this assumption wrong in a way I can't yet anticipate).
+ * reason for this cache to need be invalidated, the browser shouldn't suddenly
+ * drop its HEIC support in the middle of it running (but I'm sure posterity
+ * will prove this assumption wrong in a way I can't yet anticipate).
  *
  * Some more details:
  *
