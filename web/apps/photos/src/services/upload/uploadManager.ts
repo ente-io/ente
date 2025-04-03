@@ -465,14 +465,12 @@ class UploadManager {
         sourceEnteFile: EnteFile,
     ) {
         const timestamp = sourceEnteFile.metadata.creationTime;
-        const dateTime = sourceEnteFile.pubMagicMetadata.data.dateTime;
-        const offset = sourceEnteFile.pubMagicMetadata.data.offsetTime;
+        const dateTime = sourceEnteFile.pubMagicMetadata?.data.dateTime;
+        const offset = sourceEnteFile.pubMagicMetadata?.data.offsetTime;
 
-        const creationDate: ParsedMetadata["creationDate"] = {
-            timestamp,
-            dateTime,
-            offset,
-        };
+        const creationDate: ParsedMetadata["creationDate"] = dateTime
+            ? { timestamp, dateTime, offset }
+            : undefined;
 
         const item = {
             uploadItem: file,
