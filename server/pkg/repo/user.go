@@ -355,6 +355,10 @@ func (repo *UserRepository) GetUsersWithExceedingStorages(percentageThreshold in
 		}
 
 		totalStorage := refBonusStorage + subStorage + addOnBonusStorage
+
+		// the percentageThreshold comes from the function where this function is called.
+		// This percentageThreshold mechanism was used to avoid duplicating the same function
+		// to get the list of users differently who have exceeded 90% storage and 100% storage.
 		if percentageThreshold == 90 {
 			if storageConsumed >= (totalStorage*90/100) && storageConsumed < (totalStorage) {
 				email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
