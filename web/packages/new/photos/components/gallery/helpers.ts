@@ -38,34 +38,34 @@ export const constructUserIDToEmailMap = (
     return userIDToEmailMap;
 };
 
-export const constructEmailList = (
+/**
+ * Create a list of emails that are shown as suggestions to the user when they
+ * are trying to share albums with specific users.
+ */
+export const createShareeSuggestionEmails = (
     user: User,
     collections: Collection[],
     familyData: FamilyData | undefined,
 ): string[] => {
     const emails = collections
-        .map((item) => {
-            const { owner, sharees } = item;
-            if (owner.email && item.owner.id !== user.id) {
-                return [item.owner.email];
+        .map(({ owner, sharees }) => {
+            if (owner.email && owner.id !== user.id) {
+                return [owner.email];
             } else {
                 // Not sure about its nullability currently, revisit after auditing the
                 // type for Collection.
                 //
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                if (!sharees?.length) {
-                    return [];
-                }
-                const shareeEmails = item.sharees.map((sharee) => sharee.email);
-                return shareeEmails;
+                return (sharees ?? []).map((sharee) => sharee.email);
             }
         })
         .flat();
 
-    // adding family members
+    // Add family members.
     if (familyData) {
         const family = familyData.members.map((member) => member.email);
         emails.push(...family);
     }
-    return Array.from(new Set(emails.filter((email) => email !== user.email)));
+
+    return [...new Set(emails.filter((email) => email !== user.email))];
 };

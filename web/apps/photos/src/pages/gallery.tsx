@@ -54,8 +54,8 @@ import {
     SearchResultsHeader,
 } from "ente-new/photos/components/gallery";
 import {
-    constructEmailList,
     constructUserIDToEmailMap,
+    createShareeSuggestionEmails,
 } from "ente-new/photos/components/gallery/helpers";
 import {
     useGalleryReducer,
@@ -365,23 +365,10 @@ const Page: React.FC = () => {
         if (!user || !normalCollections) {
             return;
         }
-        const userIdToEmailMap = constructUserIDToEmailMap(
-            user,
-            normalCollections,
+        setUserIDToEmailMap(constructUserIDToEmailMap(user, normalCollections));
+        setEmailList(
+            createShareeSuggestionEmails(user, normalCollections, familyData),
         );
-        setUserIDToEmailMap(userIdToEmailMap);
-    }, [user, normalCollections]);
-
-    useEffect(() => {
-        if (!user || !normalCollections) {
-            return;
-        }
-        const emailList = constructEmailList(
-            user,
-            normalCollections,
-            familyData,
-        );
-        setEmailList(emailList);
     }, [user, normalCollections, familyData]);
 
     useEffect(() => {
