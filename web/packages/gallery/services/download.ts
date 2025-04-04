@@ -30,16 +30,9 @@ export interface LivePhotoSourceURL {
 }
 
 /**
- * URL for the original image or video, but with potential conversions applied
- * to make it more likely that the browser (or desktop app) will be able to
- * render (or play) it.
- *
- * This structure originally arose as the source object URL, and a bunch of
- * associated metadata, that the file viewer needs when the user wants to see
- * the original file (as opposed to say, the thumbnail which we were showing
- * them earlier as the file is getting downloaded). It is now also used in other
- * places that need an as-close access to the original file as possible whilst
- * still applying almost necessary conversions to be able to use that data.
+ * URL(s) for the original image or video, but with potential conversions
+ * applied to make it more likely that the browser (or desktop app) will be able
+ * to render (or play) it.
  *
  * The word "renderable" is not a guarantee, but rather a best effort indicator
  * as we might not always be able to convert all formats to something that the
