@@ -634,6 +634,7 @@ const createRenderableSourceURLs = async (
                 playableVideoURL(
                     livePhoto.videoFileName,
                     new Blob([livePhoto.videoData]),
+                    { fileType },
                 );
 
             return { type: "livePhoto", imageURL, originalImageBlob, videoURL };
