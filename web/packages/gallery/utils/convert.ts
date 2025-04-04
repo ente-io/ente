@@ -1,6 +1,7 @@
 import { isDesktop } from "ente-base/app";
 import log from "ente-base/log";
 import { workerBridge } from "ente-base/worker/worker-bridge";
+import { FileType } from "ente-media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
 import { convertToMP4 } from "../services/ffmpeg";
@@ -170,17 +171,49 @@ const testHEICDataURL =
  *    videos since the Wasm FFmpeg implementation is much slower.
  *
  * 3. On errors, return the original (as would've happened for step 1).
+ *
+ * A special case if for FileType.livePhoto on Linux in the desktop app, where
+ * the conversion always happens to workaround the audio only playback in that
+ * specific scenario.
  */
 export const playableVideoURL = async (
     fileName: string,
     videoBlob: Blob,
+    opts?: { fileType?: FileType },
 ): Promise<string> => {
     const videoObjectURL = URL.createObjectURL(videoBlob);
     const isPlayable = await isPlaybackPossible(videoObjectURL);
 
     let shouldConvert = false;
 
-    if (!isPlayable) {
+    if (isPlayable) {
+        // The browser thinks it can play this video.
+        //
+        // But it is not a guarantee. In particular, a problematic case is when
+        // for a particular codec combination, browser can play the audio
+        // stream, but not the video stream. `isPlaybackPossible` would return
+        // true, but when the user will hear only audio and not see the video.
+        //
+        // For videos themselves, we solve this (and other issues) by providing
+        // a streaming variant. However it can still happen for live photos.
+        //
+        // Unfortunately, I haven't found a way yet of detecting if this
+        // scenario is going to arise (open a issue if you've found one).
+        // Fortunately, this particular failure mode has only been reported on
+        // Linux desktop app (which uses Chromium underneath). So we add a
+        // special case - if (desktop && livePhoto && linux) then forceConvert.
+        // Practically this is a reasonable fallback since the video component
+        // of a live photo is going to be a few seconds only, and the video
+        // conversion is fast in the desktop app.
+        if (
+            isDesktop &&
+            opts?.fileType == FileType.livePhoto &&
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
+            navigator.platform.startsWith("Linux")
+        ) {
+            shouldConvert = true;
+        }
+    } else {
         // The browser doesn't think it can play this video, try transcoding.
         if (isDesktop) {
             // Always on desktop.
