@@ -39,11 +39,9 @@ func ConfigureViper(environment string) error {
 	// Set the prefix for the environment variables that Viper will look for.
 	viper.SetEnvPrefix("ENTE")
 	// Ask Viper to look for underscores (instead of dots) for nested configs.
-	viper.SetEnvKeyReplacer(strings.NewReplacer(`.`, `_`))
-
-	// Also replace "-" with underscores since "-" cannot be used in
-	// environment variable names.
-	viper.SetEnvKeyReplacer(strings.NewReplacer(`-`, `_`))
+	// Also replace "-" with underscores since "-" cannot be used in environment
+	// variable names.
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 
 	viper.SetConfigFile("configurations/" + environment + ".yaml")
 	err := viper.ReadInConfig()
