@@ -2,11 +2,17 @@ import "dart:async";
 
 import 'package:flutter/material.dart';
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/album_sort_order_change_event.dart";
 import "package:photos/events/collection_updated_event.dart";
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
+import "package:photos/ui/collections/new_album_icon.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/utils/local_settings.dart";
 
 enum UISectionType {
   incomingCollections,
@@ -38,6 +44,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
   List<Collection>? collections;
+  AlbumSortKey? sortKey;
 
   @override
   void initState() {
@@ -47,6 +54,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) async {
       unawaited(refreshCollections());
     });
+    sortKey = localSettings.albumSortKey();
   }
 
   @override
@@ -72,6 +80,11 @@ class _CollectionListPageState extends State<CollectionListPage> {
                 child: widget.appTitle ?? const SizedBox.shrink(),
               ),
               floating: true,
+              actions: widget.sectionType == UISectionType.homeCollections
+                  ? [
+                      _sortMenu(collections!),
+                    ]
+                  : null,
             ),
             CollectionsFlexiGridViewWidget(
               collections,
@@ -80,6 +93,74 @@ class _CollectionListPageState extends State<CollectionListPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _sortMenu(List<Collection> collections) {
+    Text sortOptionText(AlbumSortKey key) {
+      String text = key.toString();
+      switch (key) {
+        case AlbumSortKey.albumName:
+          text = S.of(context).name;
+          break;
+        case AlbumSortKey.newestPhoto:
+          text = S.of(context).newest;
+          break;
+        case AlbumSortKey.lastUpdated:
+          text = S.of(context).lastUpdated;
+      }
+      return Text(
+        text,
+        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+              fontSize: 14,
+              color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
+            ),
+      );
+    }
+
+    return Theme(
+      data: Theme.of(context).copyWith(
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+      ),
+      child: Row(
+        children: [
+          const NewAlbumIcon(
+            icon: Icons.add_rounded,
+            iconButtonType: IconButtonType.secondary,
+          ),
+          GestureDetector(
+            onTapDown: (TapDownDetails details) async {
+              final int? selectedValue = await showMenu<int>(
+                context: context,
+                position: RelativeRect.fromLTRB(
+                  details.globalPosition.dx,
+                  details.globalPosition.dy,
+                  details.globalPosition.dx,
+                  details.globalPosition.dy + 50,
+                ),
+                items: List.generate(AlbumSortKey.values.length, (index) {
+                  return PopupMenuItem(
+                    value: index,
+                    child: sortOptionText(AlbumSortKey.values[index]),
+                  );
+                }),
+              );
+              if (selectedValue != null) {
+                sortKey = AlbumSortKey.values[selectedValue];
+                await localSettings.setAlbumSortKey(sortKey!);
+                await refreshCollections();
+                setState(() {});
+                Bus.instance.fire(AlbumSortOrderChangeEvent());
+              }
+            },
+            child: const IconButtonWidget(
+              icon: Icons.sort_outlined,
+              iconButtonType: IconButtonType.secondary,
+            ),
+          ),
+        ],
       ),
     );
   }

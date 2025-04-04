@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/core/event_bus.dart';
+import "package:photos/events/album_sort_order_change_event.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import "package:photos/events/favorites_service_init_complete_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
-import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/button/archived_button.dart";
@@ -21,13 +21,11 @@ import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/collections/device/device_folders_grid_view.dart";
 import "package:photos/ui/collections/device/device_folders_vertical_grid_view.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
-import "package:photos/ui/collections/new_album_icon.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/tabs/section_title.dart";
 import "package:photos/ui/viewer/actions/delete_empty_albums.dart";
 import "package:photos/ui/viewer/gallery/empty_state.dart";
-import 'package:photos/utils/local_settings.dart';
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 
@@ -47,8 +45,8 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   late StreamSubscription<FavoritesServiceInitCompleteEvent>
       _favoritesServiceInitCompleteEvent;
+  late StreamSubscription<AlbumSortOrderChangeEvent> _albumSortOrderChangeEvent;
 
-  AlbumSortKey? sortKey;
   String _loadReason = "init";
   final _scrollController = ScrollController();
   final _debouncer = Debouncer(
@@ -90,7 +88,11 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
         setState(() {});
       });
     });
-    sortKey = localSettings.albumSortKey();
+    _albumSortOrderChangeEvent =
+        Bus.instance.on<AlbumSortOrderChangeEvent>().listen((event) {
+      _loadReason = event.reason;
+      setState(() {});
+    });
   }
 
   @override
@@ -127,34 +129,52 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
       slivers: [
         SliverToBoxAdapter(
           child: SectionOptions(
+            onTap: () {
+              unawaited(
+                routeToPage(
+                  context,
+                  DeviceFolderVerticalGridView(
+                    appTitle: SectionTitle(
+                      title: S.of(context).onDevice,
+                    ),
+                    tag: "OnDeviceAppTitle",
+                  ),
+                ),
+              );
+            },
             Hero(
               tag: "OnDeviceAppTitle",
               child: SectionTitle(title: S.of(context).onDevice),
             ),
-            trailingWidget: IconButtonWidget(
+            trailingWidget: const IconButtonWidget(
               icon: Icons.chevron_right,
               iconButtonType: IconButtonType.secondary,
-              onTap: () {
-                unawaited(
-                  routeToPage(
-                    context,
-                    DeviceFolderVerticalGridView(
-                      appTitle: SectionTitle(
-                        title: S.of(context).onDevice,
-                      ),
-                      tag: "OnDeviceAppTitle",
-                    ),
-                  ),
-                );
-              },
             ),
           ),
         ),
         const SliverToBoxAdapter(child: DeviceFoldersGridView()),
         SliverToBoxAdapter(
           child: SectionOptions(
+            onTap: () {
+              unawaited(
+                routeToPage(
+                  context,
+                  CollectionListPage(
+                    collections,
+                    sectionType: UISectionType.homeCollections,
+                    appTitle: SectionTitle(
+                      titleWithBrand: getOnEnteSection(context),
+                    ),
+                    initialScrollOffset: _scrollController.offset,
+                  ),
+                ),
+              );
+            },
             SectionTitle(titleWithBrand: getOnEnteSection(context)),
-            trailingWidget: _sortMenu(collections),
+            trailingWidget: const IconButtonWidget(
+              icon: Icons.chevron_right,
+              iconButtonType: IconButtonType.secondary,
+            ),
             padding: const EdgeInsets.only(left: 12, right: 6),
           ),
         ),
@@ -166,38 +186,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 shrinkWrap: true,
               )
             : const SliverToBoxAdapter(child: EmptyState()),
-        collections.length > _kOnEnteItemLimitCount
-            ? SliverToBoxAdapter(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    unawaited(
-                      routeToPage(
-                        context,
-                        CollectionListPage(
-                          collections,
-                          sectionType: UISectionType.homeCollections,
-                          appTitle: SectionTitle(
-                            titleWithBrand: getOnEnteSection(context),
-                          ),
-                          initialScrollOffset: _scrollController.offset,
-                        ),
-                      ),
-                    );
-                  },
-                  child: SectionOptions(
-                    SectionTitle(
-                      title: S.of(context).viewAll,
-                      mutedTitle: true,
-                    ),
-                    trailingWidget: const IconButtonWidget(
-                      icon: Icons.chevron_right,
-                      iconButtonType: IconButtonType.secondary,
-                    ),
-                  ),
-                ),
-              )
-            : const SliverToBoxAdapter(child: SizedBox.shrink()),
         SliverToBoxAdapter(
           child: Divider(
             color: getEnteColorScheme(context).strokeFaint,
@@ -227,72 +215,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     );
   }
 
-  Widget _sortMenu(List<Collection> collections) {
-    Text sortOptionText(AlbumSortKey key) {
-      String text = key.toString();
-      switch (key) {
-        case AlbumSortKey.albumName:
-          text = S.of(context).name;
-          break;
-        case AlbumSortKey.newestPhoto:
-          text = S.of(context).newest;
-          break;
-        case AlbumSortKey.lastUpdated:
-          text = S.of(context).lastUpdated;
-      }
-      return Text(
-        text,
-        style: Theme.of(context).textTheme.titleMedium!.copyWith(
-              fontSize: 14,
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
-            ),
-      );
-    }
-
-    return Theme(
-      data: Theme.of(context).copyWith(
-        highlightColor: Colors.transparent,
-        splashColor: Colors.transparent,
-      ),
-      child: Row(
-        children: [
-          const NewAlbumIcon(
-            icon: Icons.add_rounded,
-            iconButtonType: IconButtonType.secondary,
-          ),
-          GestureDetector(
-            onTapDown: (TapDownDetails details) async {
-              final int? selectedValue = await showMenu<int>(
-                context: context,
-                position: RelativeRect.fromLTRB(
-                  details.globalPosition.dx,
-                  details.globalPosition.dy,
-                  details.globalPosition.dx,
-                  details.globalPosition.dy + 50,
-                ),
-                items: List.generate(AlbumSortKey.values.length, (index) {
-                  return PopupMenuItem(
-                    value: index,
-                    child: sortOptionText(AlbumSortKey.values[index]),
-                  );
-                }),
-              );
-              if (selectedValue != null) {
-                sortKey = AlbumSortKey.values[selectedValue];
-                await localSettings.setAlbumSortKey(sortKey!);
-                setState(() {});
-              }
-            },
-            child: const IconButtonWidget(
-              icon: Icons.sort_outlined,
-              iconButtonType: IconButtonType.secondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   void dispose() {
     _localFilesSubscription.cancel();
@@ -301,6 +223,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     _favoritesServiceInitCompleteEvent.cancel();
     _scrollController.dispose();
     _debouncer.cancelDebounceTimer();
+    _albumSortOrderChangeEvent.cancel();
     super.dispose();
   }
 
