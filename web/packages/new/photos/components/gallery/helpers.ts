@@ -24,6 +24,10 @@ export const constructUserIDToEmailMap = (
         if (user.id !== owner.id && owner.email) {
             userIDToEmailMap.set(owner.id, owner.email);
         }
+        // Not sure about its nullability currently, revisit after auditing the
+        // type for Collection.
+        //
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (sharees) {
             sharees.forEach((item) => {
                 if (item.id !== user.id)
@@ -37,7 +41,7 @@ export const constructUserIDToEmailMap = (
 export const constructEmailList = (
     user: User,
     collections: Collection[],
-    familyData: FamilyData,
+    familyData: FamilyData | undefined,
 ): string[] => {
     const emails = collections
         .map((item) => {
@@ -45,6 +49,10 @@ export const constructEmailList = (
             if (owner.email && item.owner.id !== user.id) {
                 return [item.owner.email];
             } else {
+                // Not sure about its nullability currently, revisit after auditing the
+                // type for Collection.
+                //
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 if (!sharees?.length) {
                     return [];
                 }
