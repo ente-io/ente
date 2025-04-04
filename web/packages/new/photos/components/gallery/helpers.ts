@@ -10,7 +10,6 @@
  * is a needed for fast refresh to work.
  */
 
-import log from "ente-base/log";
 import type { Collection } from "ente-media/collection";
 import type { FamilyData } from "ente-new/photos/services/user-details";
 import type { User } from "ente-shared/user/types";
@@ -19,25 +18,20 @@ export const constructUserIDToEmailMap = (
     user: User,
     collections: Collection[],
 ): Map<number, string> => {
-    try {
-        const userIDToEmailMap = new Map<number, string>();
-        collections.forEach((item) => {
-            const { owner, sharees } = item;
-            if (user.id !== owner.id && owner.email) {
-                userIDToEmailMap.set(owner.id, owner.email);
-            }
-            if (sharees) {
-                sharees.forEach((item) => {
-                    if (item.id !== user.id)
-                        userIDToEmailMap.set(item.id, item.email);
-                });
-            }
-        });
-        return userIDToEmailMap;
-    } catch (e) {
-        log.error("Error Mapping UserId to email:", e);
-        return new Map<number, string>();
-    }
+    const userIDToEmailMap = new Map<number, string>();
+    collections.forEach((item) => {
+        const { owner, sharees } = item;
+        if (user.id !== owner.id && owner.email) {
+            userIDToEmailMap.set(owner.id, owner.email);
+        }
+        if (sharees) {
+            sharees.forEach((item) => {
+                if (item.id !== user.id)
+                    userIDToEmailMap.set(item.id, item.email);
+            });
+        }
+    });
+    return userIDToEmailMap;
 };
 
 export const constructEmailList = (
