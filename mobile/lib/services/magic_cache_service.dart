@@ -311,9 +311,9 @@ class MagicCacheService {
 
   Future<void> clearMagicCache() async {
     final file = File(await _getCachePath());
-      if (file.existsSync()) {
-        await file.delete();
-      }
+    if (file.existsSync()) {
+      await file.delete();
+    }
   }
 
   Future<List<GenericSearchResult>> getMagicGenericSearchResult(

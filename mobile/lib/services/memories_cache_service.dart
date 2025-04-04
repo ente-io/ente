@@ -434,9 +434,9 @@ class MemoriesCacheService {
 
   Future<void> clearMemoriesCache() async {
     final file = File(await _getCachePath());
-      if (file.existsSync()) {
-        await file.delete();
-      }
+    if (file.existsSync()) {
+      await file.delete();
+    }
     _cachedMemories = null;
   }
 }
