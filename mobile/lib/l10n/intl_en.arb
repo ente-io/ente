@@ -371,7 +371,7 @@
   "deleteFromBoth": "Delete from both",
   "newAlbum": "New album",
   "albums": "Albums",
-  "memoryCount": "{count, plural, zero{no memories} one{{formattedCount} memory} other{{formattedCount} memories}}",
+  "memoryCount": "{count, plural, =0{no memories} one{{formattedCount} memory} other{{formattedCount} memories}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -792,11 +792,11 @@
   "share": "Share",
   "unhideToAlbum": "Unhide to album",
   "restoreToAlbum": "Restore to album",
-  "moveItem": "{count, plural, one {Move item} other {Move items}}",
+  "moveItem": "{count, plural, =1 {Move item} other {Move items}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, one {Add item} other {Add items}}",
+  "addItem": "{count, plural, =1 {Add item} other {Add items}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -897,7 +897,7 @@
   "authToViewYourMemories": "Please authenticate to view your memories",
   "unlock": "Unlock",
   "freeUpSpace": "Free up space",
-  "freeUpSpaceSaving": "{count, plural, one {It can be deleted from the device to free up {formattedSize}} other {They can be deleted from the device to free up {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {It can be deleted from the device to free up {formattedSize}} other {They can be deleted from the device to free up {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 file} other {{formattedNumber} files}} in this album has been backed up safely",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -931,7 +931,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "You can still access {count, plural, one {it} other {them}} on Ente as long as you have an active subscription",
+  "freeUpAccessPostDelete": "You can still access {count, plural, =1 {it} other {them}} on Ente as long as you have an active subscription",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1267,8 +1267,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Find people quickly by name",
-  "addViewers": "{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}",
-  "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",
+  "addViewers": "{count, plural, =0 {Add viewer} =1 {Add viewer} other {Add viewers}}",
+  "addCollaborators": "{count, plural, =0 {Add collaborator} =1 {Add collaborator} other {Add collaborators}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption.",
   "developerSettingsWarning": "Are you sure that you want to modify Developer settings?",
   "developerSettings": "Developer settings",
@@ -1400,7 +1400,7 @@
   "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
   "searchDiscoverEmptySection": "Images will be shown here once processing and syncing is complete",
   "searchPersonsEmptySection": "People will be shown here once processing and syncing is complete",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 viewer} =1 {Added 1 viewer} other {Added {count} viewers}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 viewers} =1 {Added 1 viewer} other {Added {count} viewers}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1485,7 +1485,7 @@
   },
   "currentlyRunning": "currently running",
   "ignored": "ignored",
-  "photosCount": "{count, plural, =0 {0 photo} =1 {1 photo} other {{count} photos}}",
+  "photosCount": "{count, plural, =0 {0 photos} =1 {1 photo} other {{count} photos}}",
   "@photosCount": {
     "placeholders": {
       "count": {
