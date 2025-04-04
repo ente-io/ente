@@ -83,19 +83,19 @@ export type RenderableSourceURLs =
            * as a promise since we might want to operate on the different
            * components of a live image in a staggered order.
            */
-          image: () => Promise<string | undefined>;
+          renderableImageURL: () => Promise<string>;
           /**
            * Similar to the {@link originalImageBlob} for type "image", except
            * as a getter since we might want to operate on the different
            * components of a live image in a staggered order.
            */
-          originalImageBlob: () => Blob | undefined;
+          originalImageBlob: () => Blob;
           /**
            * Similar to the {@link playableVideoURL} for type "video", except as
            * a promise since we might want to operate on the different
            * components of a live image in a staggered order.
            */
-          video: () => Promise<string | undefined>;
+          playableVideoURL: () => Promise<string>;
       };
 
 /**
@@ -607,25 +607,21 @@ const createRenderableSourceURLs = async (
     const fileBlob = await fetch(originalFileURL).then((res) => res.blob());
 
     const existingOrNewObjectURL = (convertedBlob: Blob | null | undefined) =>
-        convertedBlob
-            ? convertedBlob === fileBlob
-                ? originalFileURL
-                : URL.createObjectURL(convertedBlob)
-            : undefined;
+        !convertedBlob || convertedBlob === fileBlob
+            ? originalFileURL
+            : URL.createObjectURL(convertedBlob);
 
     const fileName = file.metadata.title;
     const fileType = file.metadata.fileType;
     switch (fileType) {
         case FileType.image: {
             const convertedBlob = await renderableImageBlob(fileBlob, fileName);
-            const convertedURL = existingOrNewObjectURL(convertedBlob);
-            // TODO
-            const url = convertedURL!;
+            const renderableImageURL = existingOrNewObjectURL(convertedBlob);
             const originalImageBlob = fileBlob;
             const mimeType = convertedBlob.type;
             return {
                 type: "image",
-                renderableImageURL: url,
+                renderableImageURL,
                 originalImageBlob,
                 mimeType,
             };
@@ -652,27 +648,17 @@ const createRenderableSourceURLs = async (
             };
 
             const getOriginalImageBlob = () => {
-                try {
-                    return new Blob([livePhoto.imageData]);
-                } catch {
-                    //ignore and return null
-                    return undefined;
-                }
+                return new Blob([livePhoto.imageData]);
             };
 
             const getRenderableLivePhotoVideoURL = async () => {
-                try {
-                    const videoBlob = new Blob([livePhoto.videoData]);
-                    const convertedVideoBlob = await playableVideoBlob(
-                        livePhoto.videoFileName,
-                        videoBlob,
-                    );
-                    if (!convertedVideoBlob) return undefined;
-                    return URL.createObjectURL(convertedVideoBlob);
-                } catch {
-                    //ignore and return null
-                    return undefined;
-                }
+                const videoBlob = new Blob([livePhoto.videoData]);
+                const convertedVideoBlob = await playableVideoBlob(
+                    livePhoto.videoFileName,
+                    videoBlob,
+                );
+                if (!convertedVideoBlob) return undefined;
+                return URL.createObjectURL(convertedVideoBlob);
             };
 
             return {

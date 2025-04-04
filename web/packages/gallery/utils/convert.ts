@@ -168,6 +168,8 @@ const testHEICDataURL =
  * - Otherwise try to convert using FFmpeg. This conversion always happens on
  *   the desktop app, but in the browser the conversion only happens for short
  *   videos since the Wasm FFmpeg implementation is much slower.
+ *
+ * - On errors, return the original.
  */
 export const playableVideoBlob = async (fileName: string, videoBlob: Blob) => {
     const converted = async () => {
@@ -177,7 +179,7 @@ export const playableVideoBlob = async (fileName: string, videoBlob: Blob) => {
             return new Blob([convertedBlob], { type: "video/mp4" });
         } catch (e) {
             log.error(`Video conversion failed for ${fileName}`, e);
-            return null;
+            return videoBlob;
         }
     };
 
