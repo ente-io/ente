@@ -378,18 +378,20 @@ export class FileViewerPhotoSwipe {
         /**
          * A wrapper over video.play that prevents Chrome from spamming the
          * console with errors about interrupted plays when scrolling through
-         * files fast by keeping arrow keys pressed.
+         * files fast by keeping arrow keys pressed, or when the slide is reloaded.
          */
         const abortablePlayVideo = async (videoElement: HTMLVideoElement) => {
             try {
                 await videoElement.play();
             } catch (e) {
+                // Known message strings prefixes.
+                // - "The play() request was interrupted by a call to pause()."
+                // - "The play() request was interrupted because the media was removed from the document."
+
                 if (
                     e instanceof Error &&
                     e.name == "AbortError" &&
-                    e.message.startsWith(
-                        "The play() request was interrupted by a call to pause().",
-                    )
+                    e.message.startsWith("The play() request was interrupted")
                 ) {
                     // Ignore.
                 } else {
