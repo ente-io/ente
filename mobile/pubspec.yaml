@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.0.1+1032
+version: 1.0.0+1031
 publish_to: none
 
 environment:
@@ -95,7 +95,7 @@ dependencies:
   flutter_password_strength: ^0.1.6
   # Do not upgrade this package unless this issue is resolved:
   # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870
-  # On v9.4.2, keys related to lockscreen persist even after reintsall. For context see:
+  # On v9.2.4, keys related to lockscreen persist even after reintsall. For context see:
   # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870#issuecomment-2777447937
   # Let's wait till the issue is resolved by the package maintainer.
   # If not resolved and we need to upgrade, write a migration script.  
