@@ -54,6 +54,10 @@ import {
     SearchResultsHeader,
 } from "ente-new/photos/components/gallery";
 import {
+    constructEmailList,
+    constructUserIDToEmailMap,
+} from "ente-new/photos/components/gallery/helpers";
+import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "ente-new/photos/components/gallery/reducer";
@@ -107,8 +111,6 @@ import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
     addToFavorites,
-    constructEmailList,
-    constructUserIDToEmailMap,
     createAlbum,
     createUnCategorizedCollection,
     removeFromFavorites,
