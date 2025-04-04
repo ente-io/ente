@@ -56,9 +56,7 @@ export const constructEmailList = (
                 if (!sharees?.length) {
                     return [];
                 }
-                const shareeEmails = item.sharees
-                    .filter((sharee) => sharee.email !== user.email)
-                    .map((sharee) => sharee.email);
+                const shareeEmails = item.sharees.map((sharee) => sharee.email);
                 return shareeEmails;
             }
         })
@@ -69,5 +67,5 @@ export const constructEmailList = (
         const family = familyData.members.map((member) => member.email);
         emails.push(...family);
     }
-    return Array.from(new Set(emails));
+    return Array.from(new Set(emails.filter((email) => email !== user.email)));
 };
