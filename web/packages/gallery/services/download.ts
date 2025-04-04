@@ -16,7 +16,7 @@ import { ensureAuthToken } from "ente-base/local-user";
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
 import {
-    playableVideoBlob,
+    playableVideoURL,
     renderableImageBlob,
 } from "ente-gallery/utils/convert";
 import type { EnteFile } from "ente-media/file";
@@ -47,7 +47,7 @@ export type RenderableSourceURLs =
            * {@link originalImageBlob}. In other cases, this will point to a
            * separate, converted blob.
            */
-          renderableImageURL: string;
+          imageURL: string;
           /**
            * A {@link Blob} from the original image.
            *
@@ -74,28 +74,26 @@ export type RenderableSourceURLs =
            * This is a best effort basis. Not all videos will be playable in all
            * browsers, so the file might still not be previewable.
            */
-          playableVideoURL: string;
+          videoURL: string;
       }
     | {
           type: "livePhoto";
           /**
-           * Similar to the {@link renderableImageURL} for type "image", except
+           * Similar to the {@link imageURL} for type "image", except
            * as a promise since we might want to operate on the different
            * components of a live image in a staggered order.
            */
-          renderableImageURL: () => Promise<string>;
+          imageURL: () => Promise<string>;
           /**
-           * Similar to the {@link originalImageBlob} for type "image", except
-           * as a getter since we might want to operate on the different
-           * components of a live image in a staggered order.
+           * Similar to the {@link originalImageBlob} for type "image".
            */
-          originalImageBlob: () => Blob;
+          originalImageBlob: Blob;
           /**
-           * Similar to the {@link playableVideoURL} for type "video", except as
+           * Similar to the {@link videoURL} for type "video", except as
            * a promise since we might want to operate on the different
            * components of a live image in a staggered order.
            */
-          playableVideoURL: () => Promise<string>;
+          videoURL: () => Promise<string>;
       };
 
 /**
@@ -605,77 +603,47 @@ const createRenderableSourceURLs = async (
 ): Promise<RenderableSourceURLs> => {
     const originalFileURL = await originalFileURLPromise;
     const fileBlob = await fetch(originalFileURL).then((res) => res.blob());
-
-    const existingOrNewObjectURL = (convertedBlob: Blob | null | undefined) =>
-        !convertedBlob || convertedBlob === fileBlob
-            ? originalFileURL
-            : URL.createObjectURL(convertedBlob);
-
     const fileName = file.metadata.title;
     const fileType = file.metadata.fileType;
+
     switch (fileType) {
         case FileType.image: {
             const convertedBlob = await renderableImageBlob(fileBlob, fileName);
-            const renderableImageURL = existingOrNewObjectURL(convertedBlob);
+            const imageURL =
+                convertedBlob === fileBlob
+                    ? originalFileURL
+                    : URL.createObjectURL(convertedBlob);
             const originalImageBlob = fileBlob;
             const mimeType = convertedBlob.type;
-            return {
-                type: "image",
-                renderableImageURL,
-                originalImageBlob,
-                mimeType,
-            };
+            return { type: "image", imageURL, originalImageBlob, mimeType };
         }
+
         case FileType.livePhoto: {
-            const livePhoto = await decodeLivePhoto(
-                file.metadata.title,
-                fileBlob,
-            );
+            const livePhoto = await decodeLivePhoto(fileName, fileBlob);
+            const originalImageBlob = new Blob([livePhoto.imageData]);
 
-            const getRenderableLivePhotoImageURL = async () => {
-                try {
-                    const imageBlob = new Blob([livePhoto.imageData]);
-                    return URL.createObjectURL(
-                        await renderableImageBlob(
-                            imageBlob,
-                            livePhoto.imageFileName,
-                        ),
-                    );
-                } catch {
-                    //ignore and return null
-                    return undefined;
-                }
-            };
-
-            const getOriginalImageBlob = () => {
-                return new Blob([livePhoto.imageData]);
-            };
-
-            const getRenderableLivePhotoVideoURL = async () => {
-                const videoBlob = new Blob([livePhoto.videoData]);
-                const convertedVideoBlob = await playableVideoBlob(
-                    livePhoto.videoFileName,
-                    videoBlob,
+            const imageURL = async () =>
+                URL.createObjectURL(
+                    await renderableImageBlob(
+                        originalImageBlob,
+                        livePhoto.imageFileName,
+                    ),
                 );
-                if (!convertedVideoBlob) return undefined;
-                return URL.createObjectURL(convertedVideoBlob);
-            };
 
-            return {
-                type: "livePhoto",
-                image: getRenderableLivePhotoImageURL,
-                originalImageBlob: getOriginalImageBlob,
-                video: getRenderableLivePhotoVideoURL,
-            };
+            const videoURL = () =>
+                playableVideoURL(
+                    livePhoto.videoFileName,
+                    new Blob([livePhoto.videoData]),
+                );
+
+            return { type: "livePhoto", imageURL, originalImageBlob, videoURL };
         }
 
         case FileType.video: {
-            const convertedBlob = await playableVideoBlob(fileName, fileBlob);
-            const convertedURL = existingOrNewObjectURL(convertedBlob);
-            // TODO:
-            const url = convertedURL!;
-            return { type: "video", playableVideoURL: url };
+            const videoURL = await playableVideoURL(fileName, fileBlob);
+            return { type: "video", videoURL };
         }
+
         default: {
             throw new Error(`Unsupported file type ${fileType}`);
         }

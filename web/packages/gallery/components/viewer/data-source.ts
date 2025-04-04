@@ -423,15 +423,15 @@ const enqueueUpdates = async (file: EnteFile) => {
 
         switch (sourceURLs.type) {
             case "image": {
-                const imageURL = sourceURLs.renderableImageURL;
-                const originalImageBlob = sourceURLs.originalImageBlob;
+                const { imageURL, originalImageBlob } = sourceURLs;
                 const itemData = await withDimensionsIfPossible(imageURL);
                 update({ ...itemData, imageURL, originalImageBlob });
                 break;
             }
 
             case "video": {
-                update({ videoURL: sourceURLs.playableVideoURL });
+                const { videoURL } = sourceURLs;
+                update({ videoURL });
                 break;
             }
 
@@ -445,14 +445,14 @@ const enqueueUpdates = async (file: EnteFile) => {
                 //
                 // For these reasons, we resolve with the video first, then
                 // resolve with the image.
-                const videoURL = await sourceURLs.video();
+                const videoURL = await sourceURLs.videoURL();
                 update({
                     videoURL,
                     isContentLoading: true,
                     isContentZoomable: false,
                 });
-                const imageURL = await sourceURLs.image();
-                const originalImageBlob = sourceURLs.originalImageBlob()!;
+                const imageURL = await sourceURLs.imageURL();
+                const originalImageBlob = sourceURLs.originalImageBlob;
                 update({
                     ...(await withDimensionsIfPossible(imageURL)),
                     imageURL,

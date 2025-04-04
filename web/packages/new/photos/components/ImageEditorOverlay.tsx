@@ -383,8 +383,8 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                 if (sourceURLs.type != "image") {
                     throw new Error("Image editor invoked for non-image file");
                 }
-                img.src = sourceURLs.renderableImageURL;
-                setFileURL(sourceURLs.renderableImageURL);
+                img.src = sourceURLs.imageURL;
+                setFileURL(sourceURLs.imageURL);
                 setMIMEType(sourceURLs.mimeType);
             } else {
                 img.src = fileURL;
