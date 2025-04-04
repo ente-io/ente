@@ -54,6 +54,10 @@ import {
     SearchResultsHeader,
 } from "ente-new/photos/components/gallery";
 import {
+    constructUserIDToEmailMap,
+    createShareeSuggestionEmails,
+} from "ente-new/photos/components/gallery/helpers";
+import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "ente-new/photos/components/gallery/reducer";
@@ -107,8 +111,6 @@ import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
     addToFavorites,
-    constructEmailList,
-    constructUserIDToEmailMap,
     createAlbum,
     createUnCategorizedCollection,
     removeFromFavorites,
@@ -363,23 +365,10 @@ const Page: React.FC = () => {
         if (!user || !normalCollections) {
             return;
         }
-        const userIdToEmailMap = constructUserIDToEmailMap(
-            user,
-            normalCollections,
+        setUserIDToEmailMap(constructUserIDToEmailMap(user, normalCollections));
+        setEmailList(
+            createShareeSuggestionEmails(user, normalCollections, familyData),
         );
-        setUserIDToEmailMap(userIdToEmailMap);
-    }, [user, normalCollections]);
-
-    useEffect(() => {
-        if (!user || !normalCollections) {
-            return;
-        }
-        const emailList = constructEmailList(
-            user,
-            normalCollections,
-            familyData,
-        );
-        setEmailList(emailList);
     }, [user, normalCollections, familyData]);
 
     useEffect(() => {
