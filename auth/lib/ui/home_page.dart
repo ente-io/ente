@@ -580,7 +580,9 @@ class _HomePageState extends State<HomePage> {
 
                   return ClipRect(
                     child: CodeWidget(
-                      key: ValueKey('${code.hashCode}_${newIndex}_$_codeSortKey'),
+                      key: ValueKey(
+                        '${code.hashCode}_${newIndex}_$_codeSortKey',
+                      ),
                       code,
                       isCompactMode: isCompactMode,
                       sortKey: _codeSortKey,
@@ -667,11 +669,13 @@ class _HomePageState extends State<HomePage> {
     }
     return false;
   }
+
   int lastScanTime = DateTime.now().millisecondsSinceEpoch - 1000;
   void _handleDeeplink(BuildContext context, String? link) {
     bool isAccountConfigured = Configuration.instance.hasConfiguredAccount();
-    bool isOfflineModeEnabled = Configuration.instance.hasOptedForOfflineMode() &&
-        Configuration.instance.getOfflineSecretKey() != null;
+    bool isOfflineModeEnabled =
+        Configuration.instance.hasOptedForOfflineMode() &&
+            Configuration.instance.getOfflineSecretKey() != null;
     if (!(isAccountConfigured || isOfflineModeEnabled) || link == null) {
       return;
     }
