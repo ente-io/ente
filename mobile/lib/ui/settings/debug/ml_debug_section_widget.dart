@@ -12,6 +12,7 @@ import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
+import "package:photos/src/rust/api/simple.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -66,6 +67,27 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
     logger.info("Building ML Debug section options");
     return Column(
       children: [
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Test rust bridge",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final String greetings = greet(name: "Tom");
+              const String expected = "Hello, Tom!";
+              assert(greetings == expected);
+              debugPrint("String from rust: $greetings");
+              showShortToast(context, greetings);
+            } catch (e, s) {
+              logger.warning('Rust bridge failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: FutureBuilder<IndexStatus>(
