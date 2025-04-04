@@ -40,7 +40,7 @@ import { detectFileTypeInfo } from "./detect-type";
 export const renderableImageBlob = async (
     imageBlob: Blob,
     fileName: string,
-) => {
+): Promise<Blob> => {
     try {
         const file = new File([imageBlob], fileName);
         const fileTypeInfo = await detectFileTypeInfo(file);
@@ -157,44 +157,55 @@ const testHEICDataURL =
     "data:image/heic;base64,AAAAGGZ0eXBoZWljAAAAAG1pZjFoZWljAAABaW1ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAHBpY3QAAAAAAAAAAAAAAAAAAAAADnBpdG0AAAAAAAEAAAAiaWxvYwAAAABEQAABAAEAAAAAAYkAAQAAAAAAAAAuAAAAI2lpbmYAAAAAAAEAAAAVaW5mZQIAAAAAAQAAaHZjMQAAAADpaXBycAAAAMppcGNvAAAAdmh2Y0MBA3AAAAAAAAAAAAAe8AD8/fj4AAAPAyAAAQAYQAEMAf//A3AAAAMAkAAAAwAAAwAeugJAIQABACpCAQEDcAAAAwCQAAADAAADAB6gIIEFluqumubgIaDAgAAAAwCAAAADAIQiAAEABkQBwXPBiQAAABRpc3BlAAAAAAAAAEAAAABAAAAAKGNsYXAAAAABAAAAAQAAAAEAAAAB////wQAAAAL////BAAAAAgAAABBwaXhpAAAAAAMICAgAAAAXaXBtYQAAAAAAAAABAAEEgQKDBAAAADZtZGF0AAAAKigBrwayEx2gkim3i/2Rd0CR/V6h6GbEyV3dheegYfLV9ZwraCH8nff+7w==";
 
 /**
- * Return a new {@link Blob} containing a video's data in a format that the
- * browser (likely) knows how to play back (using an video tag).
+ * Return a object URL containing a video's data in a format that the browser
+ * (likely) knows how to play back using an video tag.
  *
  * Unlike {@link renderableImageBlob}, this uses a much simpler flowchart:
  *
- * - If the browser thinks it can play the video, then return the original blob
- *   back.
+ * 1. If the browser thinks it can play the video, then return the an object URL
+ *    created by directly using the provided {@link videoBlob}.
  *
- * - Otherwise try to convert using FFmpeg. This conversion always happens on
- *   the desktop app, but in the browser the conversion only happens for short
- *   videos since the Wasm FFmpeg implementation is much slower.
+ * 2. Otherwise try to convert using FFmpeg. This conversion always happens on
+ *    the desktop app, but in the browser the conversion only happens for short
+ *    videos since the Wasm FFmpeg implementation is much slower.
+ *
+ * 3. On errors, return the original (as would've happened for step 1).
  */
-export const playableVideoBlob = async (fileName: string, videoBlob: Blob) => {
-    const converted = async () => {
+export const playableVideoURL = async (
+    fileName: string,
+    videoBlob: Blob,
+): Promise<string> => {
+    const videoObjectURL = URL.createObjectURL(videoBlob);
+    const isPlayable = await isPlaybackPossible(videoObjectURL);
+
+    let shouldConvert = false;
+
+    if (!isPlayable) {
+        // The browser doesn't think it can play this video, try transcoding.
+        if (isDesktop) {
+            // Always on desktop.
+            shouldConvert = true;
+        } else {
+            // Don't try to transcode on the web if the file is too big.
+            if (videoBlob.size < 100 * 1024 * 1024 /* 100 MB, arbitrary */) {
+                shouldConvert = true;
+            }
+        }
+    }
+
+    if (shouldConvert) {
         try {
             log.info(`Converting ${fileName} to mp4`);
             const convertedBlob = await convertToMP4(videoBlob);
-            return new Blob([convertedBlob], { type: "video/mp4" });
+            return URL.createObjectURL(
+                new Blob([convertedBlob], { type: "video/mp4" }),
+            );
         } catch (e) {
             log.error(`Video conversion failed for ${fileName}`, e);
-            return null;
-        }
-    };
-
-    const isPlayable = await isPlaybackPossible(URL.createObjectURL(videoBlob));
-    if (isPlayable) return videoBlob;
-
-    // The browser doesn't think it can play this video, try transcoding.
-    if (isDesktop) {
-        return converted();
-    } else {
-        // Don't try to transcode on the web if the file is too big.
-        if (videoBlob.size > 100 * 1024 * 1024 /* 100 MB, arbitrary */) {
-            return null;
-        } else {
-            return converted();
         }
     }
+
+    return videoObjectURL;
 };
 
 /**
