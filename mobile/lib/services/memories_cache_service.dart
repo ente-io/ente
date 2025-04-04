@@ -428,8 +428,18 @@ class MemoriesCacheService {
         allFileIdsToFile[file.uploadedFileID!] = file;
       }
     }
-    final jsonString = file.readAsStringSync();
-    return MemoriesCache.decodeFromJsonString(jsonString, allFileIdsToFile);
+    try {
+      final bytes = await file.readAsBytes();
+      final jsonString = String.fromCharCodes(bytes);
+      final cache =
+          MemoriesCache.decodeFromJsonString(jsonString, allFileIdsToFile);
+      _logger.info("Reading memories cache result from disk done");
+      return cache;
+    } catch (e, s) {
+      _logger.severe("Error reading or decoding cache file", e, s);
+      await file.delete();
+      return null;
+    }
   }
 
   Future<void> clearMemoriesCache() async {
