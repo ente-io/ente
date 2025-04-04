@@ -29,11 +29,6 @@ export interface LivePhotoSourceURL {
     video: () => Promise<string | undefined>;
 }
 
-export interface LoadedLivePhotoSourceURL {
-    image: string;
-    video: string;
-}
-
 /**
  * URL for the original image or video, but with potential conversions applied
  * to make it more likely that the browser (or desktop app) will be able to
@@ -51,7 +46,7 @@ export interface LoadedLivePhotoSourceURL {
  * browser (or desktop app) can show.
  */
 export interface RenderableSourceURLs {
-    url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
+    url: string | LivePhotoSourceURL;
     originalImageBlob?: Blob | undefined;
     type: "normal" | "livePhoto";
     /**
