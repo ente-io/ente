@@ -64,6 +64,8 @@ class _CollectionListPageState extends State<CollectionListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final displayLimitCount =
+        (collections?.length ?? 0) + (widget.tag.isEmpty ? 1 : 0);
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
@@ -87,7 +89,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
             ),
             CollectionsFlexiGridViewWidget(
               collections,
-              displayLimitCount: (collections?.length ?? 0) + 1,
+              displayLimitCount: displayLimitCount,
               tag: widget.tag,
             ),
           ],

@@ -48,12 +48,14 @@ class CollectionsFlexiGridViewWidget extends StatelessWidget {
             albumsCountInOneRow;
     final List<Widget> displayItems = [];
 
-    displayItems.add(
-      NewAlbumIcon(
-        height: sideOfThumbnail,
-        width: sideOfThumbnail,
-      ),
-    );
+    if (tag.isEmpty) {
+      displayItems.add(
+        NewAlbumIcon(
+          height: sideOfThumbnail,
+          width: sideOfThumbnail,
+        ),
+      );
+    }
 
     if (collections != null && collections!.isNotEmpty) {
       for (int i = 0; i < collections!.length; i++) {
