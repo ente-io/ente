@@ -1,7 +1,10 @@
 import "dart:async";
+import "dart:typed_data" show Float32List;
 
 import 'package:flutter/material.dart';
+import "package:flutter_rust_bridge/flutter_rust_bridge.dart";
 import "package:logging/logging.dart";
+import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
@@ -13,6 +16,7 @@ import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/src/rust/api/simple.dart";
+import "package:photos/src/rust/api/usearch_api.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -67,6 +71,47 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
     logger.info("Building ML Debug section options");
     return Column(
       children: [
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Do some usearch",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final allImageEmbeddings = await mlDataDB.getAllClipVectors();
+              final tenVectors = allImageEmbeddings.sublist(0, 10);
+              final tenEmbeddings = tenVectors
+                  .map((e) => Float32List.fromList(e.vector.toList()))
+                  .toList();
+              final tenKeys =
+                  Uint64List.fromList(tenVectors.map((e) => e.fileID).toList());
+              final indexPath = (await getApplicationSupportDirectory()).path +
+                  "/ml/test/vector_db";
+              final stats = await getIndexStats(indexPath: indexPath);
+              logger.info("vector_db stats: $stats");
+              await bulkAddVectors(
+                indexPath: indexPath,
+                keys: tenKeys,
+                vectors: tenEmbeddings,
+              );
+              final statsAgain = await getIndexStats(indexPath: indexPath);
+              logger.info("vector_db stats again: $statsAgain");
+              final size = statsAgain.$1;
+              final capacity = statsAgain.$2;
+              final dimensions = statsAgain.$3;
+              showShortToast(
+                context,
+                "Size: $size, Capacity: $capacity, Dimensions: $dimensions",
+              );
+            } catch (e, s) {
+              logger.warning('Rust bridge failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
