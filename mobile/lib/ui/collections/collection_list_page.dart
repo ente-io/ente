@@ -10,7 +10,6 @@ import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
-import "package:photos/ui/collections/new_album_icon.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/utils/local_settings.dart";
 
@@ -88,7 +87,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
             ),
             CollectionsFlexiGridViewWidget(
               collections,
-              displayLimitCount: collections?.length ?? 0,
+              displayLimitCount: (collections?.length ?? 0) + 1,
               tag: widget.tag,
             ),
           ],
@@ -126,10 +125,6 @@ class _CollectionListPageState extends State<CollectionListPage> {
       ),
       child: Row(
         children: [
-          const NewAlbumIcon(
-            icon: Icons.add_rounded,
-            iconButtonType: IconButtonType.secondary,
-          ),
           GestureDetector(
             onTapDown: (TapDownDetails details) async {
               final int? selectedValue = await showMenu<int>(

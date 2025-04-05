@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:photos/models/collection/collection.dart';
 import "package:photos/ui/collections/album/row_item.dart";
+import "package:photos/ui/collections/new_album_icon.dart";
 
 class CollectionsFlexiGridViewWidget extends StatelessWidget {
   /*
@@ -45,19 +46,35 @@ class CollectionsFlexiGridViewWidget extends StatelessWidget {
     final double sideOfThumbnail =
         (screenWidth - gapOnSizeOfAlbums - gapBetweenAlbums) /
             albumsCountInOneRow;
+    final List<Widget> displayItems = [];
+
+    displayItems.add(
+      NewAlbumIcon(
+        height: sideOfThumbnail,
+        width: sideOfThumbnail,
+      ),
+    );
+
+    if (collections != null && collections!.isNotEmpty) {
+      for (int i = 0; i < collections!.length; i++) {
+        displayItems.add(
+          AlbumRowItemWidget(
+            collections![i],
+            sideOfThumbnail,
+            tag: tag,
+          ),
+        );
+      }
+    }
 
     return SliverPadding(
       padding: const EdgeInsets.all(8),
       sliver: SliverGrid(
         delegate: SliverChildBuilderDelegate(
           (context, index) {
-            return AlbumRowItemWidget(
-              collections![index],
-              sideOfThumbnail,
-              tag: tag,
-            );
+            return displayItems[index];
           },
-          childCount: min(collections!.length, displayLimitCount),
+          childCount: min(displayItems.length, displayLimitCount),
         ),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInOneRow,
