@@ -89,7 +89,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               final tenKeys =
                   Uint64List.fromList(tenVectors.map((e) => e.fileID).toList());
               final indexPath = (await getApplicationSupportDirectory()).path +
-                  "/ml/test/vector_db";
+                  "/ml/test1/vector_db";
               final stats = await getIndexStats(indexPath: indexPath);
               logger.info("vector_db stats: $stats");
               await bulkAddVectors(

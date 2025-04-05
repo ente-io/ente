@@ -3,7 +3,7 @@ use usearch::{Index, IndexOptions, MetricKind, ScalarKind};
 // Create DB index
 fn create_index() -> Index {
     let mut options = IndexOptions::default();
-    options.dimensions = 192; // Set the number of dimensions for vectors
+    options.dimensions = 512; // Set the number of dimensions for vectors
     options.metric = MetricKind::Cos; // Use cosine similarity for distance measurement
     options.quantization = ScalarKind::F32; // Use 32-bit floating point numbers
     options.connectivity = 0; // zero for auto
@@ -20,23 +20,21 @@ fn get_index(file_path: &str) -> Index {
     let file_exists: bool = std::path::Path::new(file_path).try_exists().unwrap();
     let index = create_index();
     if file_exists {
-        let index = load_index(index, file_path);
-        index
+        // Load into the existing index instead of creating a new variable
+        index.load(file_path).expect("Failed to load index.");
     } else {
         save_index(&index, file_path);
-        index
     }
+    index
 }
 
 // Save to disk
 fn save_index(index: &Index, file_path: &str) {
+    // Ensure directory exists
+    if let Some(parent) = std::path::Path::new(file_path).parent() {
+        std::fs::create_dir_all(parent).expect("Failed to create directory for index.");
+    }
     index.save(file_path).expect("Failed to save index.");
-}
-
-// Load from disk
-fn load_index(index: Index, file_path: &str) -> Index {
-    index.load(file_path).expect("Failed to load index.");
-    index
 }
 
 // Changes to DB index
