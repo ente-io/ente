@@ -118,25 +118,27 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SectionOptions(
+                    onTap: collections.incoming.isNotEmpty
+                        ? () {
+                            unawaited(
+                              routeToPage(
+                                context,
+                                CollectionListPage(
+                                  collections.incoming,
+                                  sectionType:
+                                      UISectionType.incomingCollections,
+                                  tag: "incoming",
+                                  appTitle: sharedWithYou,
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
                     Hero(tag: "incoming", child: sharedWithYou),
                     trailingWidget: collections.incoming.isNotEmpty
-                        ? IconButtonWidget(
+                        ? const IconButtonWidget(
                             icon: Icons.chevron_right,
                             iconButtonType: IconButtonType.secondary,
-                            onTap: () {
-                              unawaited(
-                                routeToPage(
-                                  context,
-                                  CollectionListPage(
-                                    collections.incoming,
-                                    sectionType:
-                                        UISectionType.incomingCollections,
-                                    tag: "incoming",
-                                    appTitle: sharedWithYou,
-                                  ),
-                                ),
-                              );
-                            },
                           )
                         : null,
                   ),
@@ -172,25 +174,27 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SectionOptions(
+                    onTap: collections.outgoing.isNotEmpty
+                        ? () {
+                            unawaited(
+                              routeToPage(
+                                context,
+                                CollectionListPage(
+                                  collections.outgoing,
+                                  sectionType:
+                                      UISectionType.outgoingCollections,
+                                  tag: "outgoing",
+                                  appTitle: sharedByYou,
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
                     Hero(tag: "outgoing", child: sharedByYou),
                     trailingWidget: collections.outgoing.isNotEmpty
-                        ? IconButtonWidget(
+                        ? const IconButtonWidget(
                             icon: Icons.chevron_right,
                             iconButtonType: IconButtonType.secondary,
-                            onTap: () {
-                              unawaited(
-                                routeToPage(
-                                  context,
-                                  CollectionListPage(
-                                    collections.outgoing,
-                                    sectionType:
-                                        UISectionType.outgoingCollections,
-                                    tag: "outgoing",
-                                    appTitle: sharedByYou,
-                                  ),
-                                ),
-                              );
-                            },
                           )
                         : null,
                   ),
@@ -228,6 +232,19 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     child: Column(
                       children: [
                         SectionOptions(
+                          onTap: numberOfQuickLinks > maxQuickLinks
+                              ? () {
+                                  unawaited(
+                                    routeToPage(
+                                      context,
+                                      AllQuickLinksPage(
+                                        titleHeroTag: quickLinkTitleHeroTag,
+                                        quickLinks: collections.quickLinks,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              : null,
                           Hero(
                             tag: quickLinkTitleHeroTag,
                             child: SectionTitle(
@@ -235,20 +252,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                             ),
                           ),
                           trailingWidget: numberOfQuickLinks > maxQuickLinks
-                              ? IconButtonWidget(
+                              ? const IconButtonWidget(
                                   icon: Icons.chevron_right,
                                   iconButtonType: IconButtonType.secondary,
-                                  onTap: () {
-                                    unawaited(
-                                      routeToPage(
-                                        context,
-                                        AllQuickLinksPage(
-                                          titleHeroTag: quickLinkTitleHeroTag,
-                                          quickLinks: collections.quickLinks,
-                                        ),
-                                      ),
-                                    );
-                                  },
                                 )
                               : null,
                         ),
