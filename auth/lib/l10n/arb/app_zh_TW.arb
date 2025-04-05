@@ -506,6 +506,8 @@
   "deleteDuplicates": "刪除重複項",
   "plainHTML": "Plain HTML",
   "tellUsWhatYouThink": "告訴我們您的想法",
+  "dropReviewiOS": "在 App Store 上發表意見",
+  "dropReviewAndroid": "在 Play 商店上發表評測",
   "supportEnte": "支援 <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "在 Github 上給我們一個星標",
   "free5GB": "<bold-green>ente</bold-green> Photos 上 5GB 可用空間",
