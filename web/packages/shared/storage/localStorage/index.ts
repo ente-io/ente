@@ -1,5 +1,5 @@
-import { getKVS, removeKV, setKV } from "@/base/kv";
-import log from "@/base/log";
+import { getKVS, removeKV, setKV } from "ente-base/kv";
+import log from "ente-base/log";
 
 export type LocalStorageKey =
     | "user"
@@ -12,7 +12,7 @@ export type LocalStorageKey =
     // LOGS = "logs",
     // Migrated to (and only used by) useCollectionsSortByLocalState.
     | "collectionSortBy"
-    // Moved to the new wrapper @/base/local-storage
+    // Moved to the new wrapper ente-base/local-storage
     // LOCALE = 'locale',
     | "srpSetupAttributes"
     | "srpAttributes"

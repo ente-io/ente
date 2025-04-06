@@ -1166,8 +1166,21 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   Future<List<EmbeddingVector>> getAllClipVectors() async {
     Logger("ClipDB").info("reading all embeddings from DB");
     final db = await instance.asyncDB;
-    final results = await db.getAll('SELECT * FROM $clipTable');
-    return _convertToVectors(results);
+    final results = await db
+        .getAll('SELECT $fileIDColumn, $embeddingColumn FROM $clipTable');
+
+    // Convert rows to vectors
+    final List<EmbeddingVector> embeddings = [];
+    for (final result in results) {
+      // Convert to EmbeddingVector
+      final embedding = EmbeddingVector(
+        fileID: result[fileIDColumn],
+        embedding: Float32List.view(result[embeddingColumn].buffer),
+      );
+      if (embedding.isEmpty) continue;
+      embeddings.add(embedding);
+    }
+    return embeddings;
   }
 
   // Get indexed FileIDs
@@ -1227,23 +1240,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final db = await instance.asyncDB;
     await db.execute('DELETE FROM $clipTable');
     Bus.instance.fire(EmbeddingUpdatedEvent());
-  }
-
-  List<EmbeddingVector> _convertToVectors(List<Map<String, dynamic>> results) {
-    final List<EmbeddingVector> embeddings = [];
-    for (final result in results) {
-      final embedding = _getVectorFromRow(result);
-      if (embedding.isEmpty) continue;
-      embeddings.add(embedding);
-    }
-    return embeddings;
-  }
-
-  EmbeddingVector _getVectorFromRow(Map<String, dynamic> row) {
-    final fileID = row[fileIDColumn] as int;
-    final bytes = row[embeddingColumn] as Uint8List;
-    final list = Float32List.view(bytes.buffer);
-    return EmbeddingVector(fileID: fileID, embedding: list);
   }
 
   List<Object?> _getRowFromEmbedding(ClipEmbedding embedding) {

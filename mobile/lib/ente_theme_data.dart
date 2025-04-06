@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 
@@ -291,18 +290,6 @@ extension CustomColorScheme on ColorScheme {
   Color get cupertinoPickerTopColor => brightness == Brightness.light
       ? const Color.fromARGB(255, 238, 238, 238)
       : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.1);
-
-  DatePickerThemeBdaya get dateTimePickertheme => brightness == Brightness.light
-      ? const DatePickerThemeBdaya(
-          backgroundColor: Colors.white,
-          itemStyle: TextStyle(color: Colors.black),
-          cancelStyle: TextStyle(color: Colors.black),
-        )
-      : const DatePickerThemeBdaya(
-          backgroundColor: Colors.black,
-          itemStyle: TextStyle(color: Colors.white),
-          cancelStyle: TextStyle(color: Colors.white),
-        );
 
   Color get stepProgressUnselectedColor => brightness == Brightness.light
       ? const Color.fromRGBO(196, 196, 196, 0.6)

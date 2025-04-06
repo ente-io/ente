@@ -1,15 +1,15 @@
 {
-    "name": "@/base",
+    "name": "ente-base",
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/utils": "*",
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.0",
         "@fontsource-variable/inter": "^5.2.5",
         "@mui/icons-material": "^6.4.7",
         "@mui/material": "^6.4.7",
         "comlink": "^4.4.2",
+        "ente-utils": "*",
         "formik": "^2.4.6",
         "get-user-locale": "^2.3.2",
         "i18next": "^24.2.2",
@@ -25,9 +25,9 @@
         "zod": "^3.24.2"
     },
     "devDependencies": {
-        "@/build-config": "*",
         "@types/libsodium-wrappers-sumo": "^0.7.8",
         "@types/react": "^19.0.10",
-        "@types/react-dom": "^19.0.4"
+        "@types/react-dom": "^19.0.4",
+        "ente-build-config": "*"
     }
 }

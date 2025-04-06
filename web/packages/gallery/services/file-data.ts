@@ -1,7 +1,7 @@
-import { encryptBlobB64 } from "@/base/crypto";
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import { apiURL } from "@/base/origins";
-import type { EnteFile } from "@/media/file";
+import { encryptBlobB64 } from "ente-base/crypto";
+import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
+import { apiURL } from "ente-base/origins";
+import type { EnteFile } from "ente-media/file";
 import { z } from "zod";
 
 /**

@@ -8,6 +8,10 @@ on:
     # Also allow manually running the workflow.
     workflow_dispatch:
 
+permissions:
+    contents: write
+    pull-requests: write
+
 jobs:
     synchronize-with-crowdin:
         runs-on: ubuntu-latest

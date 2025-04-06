@@ -1,16 +1,16 @@
-import { checkSessionValidity } from "@/accounts/services/session";
+import { checkSessionValidity } from "ente-accounts/services/session";
 import {
     TitledMiniDialog,
     type MiniDialogAttributes,
-} from "@/base/components/MiniDialog";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import log from "@/base/log";
+} from "ente-base/components/MiniDialog";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
-} from "@ente/shared/components/VerifyMasterPasswordForm";
-import { getData } from "@ente/shared/storage/localStorage";
-import type { KeyAttributes, User } from "@ente/shared/user/types";
+} from "ente-shared/components/VerifyMasterPasswordForm";
+import { getData } from "ente-shared/storage/localStorage";
+import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
 

@@ -1,4 +1,4 @@
-import type { Electron } from "@/base/types/ipc";
+import type { Electron } from "ente-base/types/ipc";
 
 /**
  * The current changelog version.

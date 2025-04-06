@@ -57,19 +57,10 @@ func (repo *FamilyRepository) CloseFamily(ctx context.Context, adminID int64) er
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	affectResult, err := tx.ExecContext(ctx, `DELETE FROM families WHERE admin_id = $1`, adminID)
+	_, err = tx.ExecContext(ctx, `DELETE FROM families WHERE admin_id = $1`, adminID)
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")
-	}
-	affected, err := affectResult.RowsAffected()
-	if err != nil {
-		tx.Rollback()
-		return stacktrace.Propagate(err, "")
-	}
-	if affected != 1 {
-		tx.Rollback()
-		return stacktrace.Propagate(errors.New("exactly one row should be deleted"), "")
 	}
 	affectedRows, err := tx.ExecContext(ctx, `UPDATE users SET family_admin_id = null WHERE family_admin_id = $1`, adminID)
 
@@ -77,7 +68,7 @@ func (repo *FamilyRepository) CloseFamily(ctx context.Context, adminID int64) er
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")
 	}
-	affected, err = affectedRows.RowsAffected()
+	affected, err := affectedRows.RowsAffected()
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")

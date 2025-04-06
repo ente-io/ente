@@ -8,7 +8,7 @@
  *
  * To see where this code fits, see [Note: Crypto code hierarchy].
  */
-import { mergeUint8Arrays } from "@/utils/array";
+import { mergeUint8Arrays } from "ente-utils/array";
 import sodium, { type StateAddress } from "libsodium-wrappers-sumo";
 import type {
     BytesOrB64,

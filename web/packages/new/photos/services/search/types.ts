@@ -3,11 +3,11 @@
  * and the search worker that does the actual searching (`worker.ts`).
  */
 
-import type { Location } from "@/base/types";
-import type { Collection } from "@/media/collection";
-import type { EnteFile } from "@/media/file";
-import { FileType } from "@/media/file-type";
-import type { Person } from "@/new/photos/services/ml/people";
+import type { Location } from "ente-base/types";
+import type { Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
+import { FileType } from "ente-media/file-type";
+import type { Person } from "ente-new/photos/services/ml/people";
 import type { LocationTag } from "../user-entity";
 
 /**

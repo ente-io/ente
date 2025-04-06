@@ -1,1 +1,1 @@
-export { default } from "@/build-config/eslintrc-next-app.mjs";
+export { default } from "ente-build-config/eslintrc-next-app.mjs";

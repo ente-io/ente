@@ -10,6 +10,9 @@ on:
             - "docs/**"
             - ".github/workflows/docs-verify-build.yml"
 
+permissions:
+    contents: read
+
 jobs:
     verify-build:
         runs-on: ubuntu-latest

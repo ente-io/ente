@@ -17,7 +17,7 @@ export const FlexWrapper = styled(Box)`
 `;
 
 /**
- * Deprecated, use {@link SpacedRow} from @/base/components/mui/container
+ * Deprecated, use {@link SpacedRow} from ente-base/components/mui/container
  * instead
  */
 export const SpaceBetweenFlex = styled(FlexWrapper)`
@@ -25,7 +25,7 @@ export const SpaceBetweenFlex = styled(FlexWrapper)`
 `;
 
 /**
- * Deprecated, use {@link CenteredRow} from @/base/components/mui/container
+ * Deprecated, use {@link CenteredRow} from ente-base/components/mui/container
  * instead
  */
 export const CenteredFlex = styled(FlexWrapper)`

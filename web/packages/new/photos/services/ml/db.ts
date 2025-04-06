@@ -1,4 +1,4 @@
-import log from "@/base/log";
+import log from "ente-base/log";
 import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
 import type { FaceCluster } from "./cluster";

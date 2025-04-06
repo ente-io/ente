@@ -1,24 +1,3 @@
-import { Overlay } from "@/base/components/containers";
-import { FilledIconButton } from "@/base/components/mui";
-import { Ellipsized2LineTypography } from "@/base/components/Typography";
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import {
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "@/new/photos/components/FileList";
-import {
-    BarItemTile,
-    ItemCard,
-    TileTextOverlay,
-} from "@/new/photos/components/Tiles";
-import { FocusVisibleUnstyledButton } from "@/new/photos/components/UnstyledButton";
-import type {
-    CollectionSummary,
-    CollectionSummaryType,
-    CollectionsSortBy,
-} from "@/new/photos/services/collection/ui";
-import type { Person } from "@/new/photos/services/ml/people";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
@@ -27,6 +6,27 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
+import { Overlay } from "ente-base/components/containers";
+import { FilledIconButton } from "ente-base/components/mui";
+import { Ellipsized2LineTypography } from "ente-base/components/Typography";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
+import {
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+} from "ente-new/photos/components/FileList";
+import {
+    BarItemTile,
+    ItemCard,
+    TileTextOverlay,
+} from "ente-new/photos/components/Tiles";
+import { FocusVisibleUnstyledButton } from "ente-new/photos/components/UnstyledButton";
+import type {
+    CollectionSummary,
+    CollectionSummaryType,
+    CollectionsSortBy,
+} from "ente-new/photos/services/collection/ui";
+import type { Person } from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
 import React, {
     memo,

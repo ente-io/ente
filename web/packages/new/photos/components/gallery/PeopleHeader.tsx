@@ -1,38 +1,3 @@
-import { CenteredFill, SpacedRow } from "@/base/components/containers";
-import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@/base/components/OverflowMenu";
-import { SingleInputDialog } from "@/base/components/SingleInputDialog";
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import {
-    useModalVisibility,
-    type ModalVisibilityProps,
-} from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import log from "@/base/log";
-import {
-    addCGroup,
-    addClusterToCGroup,
-    applyPersonSuggestionUpdates,
-    deleteCGroup,
-    ignoreCluster,
-    renameCGroup,
-    suggestionsAndChoicesForPerson,
-} from "@/new/photos/services/ml";
-import {
-    type CGroupPerson,
-    type ClusterPerson,
-    type Person,
-    type PersonSuggestionsAndChoices,
-    type PersonSuggestionUpdates,
-    type PreviewableCluster,
-} from "@/new/photos/services/ml/people";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -57,6 +22,41 @@ import {
     Typography,
     useMediaQuery,
 } from "@mui/material";
+import { CenteredFill, SpacedRow } from "ente-base/components/containers";
+import { ActivityErrorIndicator } from "ente-base/components/ErrorIndicator";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "ente-base/components/OverflowMenu";
+import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
+import {
+    addCGroup,
+    addClusterToCGroup,
+    applyPersonSuggestionUpdates,
+    deleteCGroup,
+    ignoreCluster,
+    renameCGroup,
+    suggestionsAndChoicesForPerson,
+} from "ente-new/photos/services/ml";
+import {
+    type CGroupPerson,
+    type ClusterPerson,
+    type Person,
+    type PersonSuggestionsAndChoices,
+    type PersonSuggestionUpdates,
+    type PreviewableCluster,
+} from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";

@@ -1,19 +1,60 @@
 import "package:flutter/cupertino.dart";
+import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
+
+Future<DateTime?> showDatePickerSheet(BuildContext context, {
+  required DateTime initialDate,
+  DateTime? maxDate,
+  DateTime? minDate,
+  bool startWithTime = false,
+}) async {
+  final colorScheme = getEnteColorScheme(context);
+  final sheet = Container(
+    decoration: BoxDecoration(
+      color: colorScheme.backgroundElevated,
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(12),
+        topRight: Radius.circular(12),
+      ),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: DateTimePickerWidget(
+        (DateTime dateTime) {
+          Navigator.of(context).pop(dateTime);
+        },
+        () {
+          Navigator.of(context).pop(null);
+        },
+        initialDate,
+        minDateTime: minDate,
+        maxDateTime: maxDate,
+      ),
+    ),
+  );
+  final newDate = await showModalBottomSheet<DateTime?>(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) => sheet,
+  );
+  return newDate;
+}
 
 class DateTimePickerWidget extends StatefulWidget {
   final Function(DateTime) onDateTimeSelected;
   final Function() onCancel;
   final DateTime initialDateTime;
-  final DateTime maxDateTime;
+  final DateTime? maxDateTime;
+  final DateTime? minDateTime;
   final bool startWithTime;
 
   const DateTimePickerWidget(
     this.onDateTimeSelected,
     this.onCancel,
-    this.initialDateTime,
-    this.maxDateTime, {
+    this.initialDateTime, {
+    this.maxDateTime,
+    this.minDateTime,
     this.startWithTime = false,
     super.key,
   });
@@ -81,8 +122,8 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                     ? CupertinoDatePickerMode.time
                     : CupertinoDatePickerMode.date,
                 initialDateTime: _selectedDateTime,
-                minimumDate: DateTime(1800),
-                maximumDate: widget.maxDateTime,
+                minimumDate: widget.minDateTime ?? DateTime(1800),
+                maximumDate: widget.maxDateTime ?? DateTime(2200),
                 use24hFormat: MediaQuery.of(context).alwaysUse24HourFormat,
                 showDayOfWeek: true,
                 onDateTimeChanged: (DateTime newDateTime) {
@@ -107,9 +148,14 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
                       );
                     }
 
-                    // Ensure the selected date doesn't exceed maxDateTime
-                    if (_selectedDateTime.isAfter(widget.maxDateTime)) {
-                      _selectedDateTime = widget.maxDateTime;
+                    // Ensure the selected date doesn't exceed maxDateTime or minDateTime
+                    if (widget.minDateTime != null &&
+                        _selectedDateTime.isBefore(widget.minDateTime!)) {
+                      _selectedDateTime = widget.minDateTime!;
+                    }
+                    if (widget.maxDateTime != null &&
+                        _selectedDateTime.isAfter(widget.maxDateTime!)) {
+                      _selectedDateTime = widget.maxDateTime!;
                     }
                   });
                 },

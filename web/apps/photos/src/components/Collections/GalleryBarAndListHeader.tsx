@@ -1,11 +1,15 @@
-import { useModalVisibility } from "@/base/components/utils/modal";
-import type { Collection } from "@/media/collection";
+import { AllAlbums } from "components/Collections/AllAlbums";
+import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
+import { CollectionShare } from "components/Collections/CollectionShare";
+import { TimeStampListItem } from "components/FileList";
+import { useModalVisibility } from "ente-base/components/utils/modal";
+import type { Collection } from "ente-media/collection";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
-} from "@/new/photos/components/gallery/BarImpl";
-import { PeopleHeader } from "@/new/photos/components/gallery/PeopleHeader";
-import { ALL_SECTION } from "@/new/photos/services/collection";
+} from "ente-new/photos/components/gallery/BarImpl";
+import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
+import { ALL_SECTION } from "ente-new/photos/services/collection";
 import {
     areOnlySystemCollections,
     collectionsSortBy,
@@ -13,13 +17,9 @@ import {
     shouldShowOnCollectionBar,
     type CollectionsSortBy,
     type CollectionSummaries,
-} from "@/new/photos/services/collection/ui";
-import { includes } from "@/utils/type-guards";
-import { getData, removeData } from "@ente/shared/storage/localStorage";
-import { AllAlbums } from "components/Collections/AllAlbums";
-import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
-import { CollectionShare } from "components/Collections/CollectionShare";
-import { TimeStampListItem } from "components/FileList";
+} from "ente-new/photos/services/collection/ui";
+import { getData, removeData } from "ente-shared/storage/localStorage";
+import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";

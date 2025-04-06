@@ -1,5 +1,3 @@
-import { EnteSwitch } from "@/base/components/EnteSwitch";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     Box,
     Divider,
@@ -9,6 +7,8 @@ import {
     type ButtonProps,
     type TypographyProps,
 } from "@mui/material";
+import { EnteSwitch } from "ente-base/components/EnteSwitch";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import React from "react";
 
 interface RowButtonGroupTitleProps {
@@ -243,7 +243,11 @@ export const RowButton: React.FC<RowButtonProps> = ({
                             direction="row"
                             sx={{ gap: "4px", alignItems: "center" }}
                         >
-                            <Typography>{label}</Typography>
+                            {/* Don't shrink the main label, instead let the
+                                caption grow into two lines if it needs to. */}
+                            <Typography sx={{ flexShrink: 0 }}>
+                                {label}
+                            </Typography>
                             <CaptionTypography color={color}>
                                 {"•"}
                             </CaptionTypography>

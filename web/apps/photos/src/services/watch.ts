@@ -3,23 +3,23 @@
  * watch folders functionality.
  */
 
-import { ensureElectron } from "@/base/electron";
-import { basename, dirname } from "@/base/file-name";
-import log from "@/base/log";
+import debounce from "debounce";
+import { ensureElectron } from "ente-base/electron";
+import { basename, dirname } from "ente-base/file-name";
+import log from "ente-base/log";
 import type {
     CollectionMapping,
     FolderWatch,
     FolderWatchSyncedFile,
-} from "@/base/types/ipc";
-import { type UploadResult } from "@/gallery/services/upload";
-import type { Collection } from "@/media/collection";
-import { EncryptedEnteFile } from "@/media/file";
+} from "ente-base/types/ipc";
+import { type UploadResult } from "ente-gallery/services/upload";
+import type { Collection } from "ente-media/collection";
+import { EncryptedEnteFile } from "ente-media/file";
 import {
     getLocalFiles,
     groupFilesByCollectionID,
-} from "@/new/photos/services/files";
-import { ensureString } from "@/utils/ensure";
-import debounce from "debounce";
+} from "ente-new/photos/services/files";
+import { ensureString } from "ente-utils/ensure";
 import uploadManager, {
     type UploadItemWithCollection,
 } from "services/upload/uploadManager";

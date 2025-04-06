@@ -1,9 +1,9 @@
-import { inWorker } from "@/base/env";
+import { inWorker } from "ente-base/env";
 import {
     parseMetadataDate,
     type ParsedMetadata,
     type ParsedMetadataDate,
-} from "@/media/file-metadata";
+} from "ente-media/file-metadata";
 import ExifReader from "exifreader";
 
 /**

@@ -1,5 +1,3 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import type { ButtonProps, ModalProps } from "@mui/material";
 import {
     Box,
@@ -10,6 +8,8 @@ import {
     Typography,
     type DialogProps,
 } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { t } from "i18next";
 import React, { useState } from "react";
 import log from "../log";

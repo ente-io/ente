@@ -1,8 +1,9 @@
-import { isDesktop } from "@/base/app";
-import log from "@/base/log";
-import { workerBridge } from "@/base/worker/worker-bridge";
-import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import { heicToJPEG } from "@/media/heic-convert";
+import { isDesktop } from "ente-base/app";
+import log from "ente-base/log";
+import { workerBridge } from "ente-base/worker/worker-bridge";
+import { FileType } from "ente-media/file-type";
+import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
+import { heicToJPEG } from "ente-media/heic-convert";
 import { convertToMP4 } from "../services/ffmpeg";
 import { detectFileTypeInfo } from "./detect-type";
 
@@ -29,8 +30,8 @@ import { detectFileTypeInfo } from "./detect-type";
  *    desktop app can natively convert to a JPEG (using ffmpeg), do that and
  *    return the resultant JPEG blob.
  *
- * 4. If this is an HEIC file, use our (Wasm) HEIC converter and return the
- *    resultant JPEG blob.
+ * 4. If this is an HEIC file and the browser does not have native HEIC support,
+ *    then use our (Wasm) HEIC converter and return the resultant JPEG blob.
  *
  * 5. Otherwise return the original (with the MIME type if we were able to
  *    deduce one).
@@ -40,7 +41,7 @@ import { detectFileTypeInfo } from "./detect-type";
 export const renderableImageBlob = async (
     imageBlob: Blob,
     fileName: string,
-) => {
+): Promise<Blob> => {
     try {
         const file = new File([imageBlob], fileName);
         const fileTypeInfo = await detectFileTypeInfo(file);
@@ -65,7 +66,17 @@ export const renderableImageBlob = async (
             // to our web HEIC converter.
 
             if (isHEICExtension(extension)) {
-                return await heicToJPEG(imageBlob);
+                // But first, check if the browser already knows how to natively
+                // render HEICs, e.g. Safari 17+. In such cases not only is the
+                // Wasm conversion unnecessary, the native hardware accelerated
+                // support will also be _much_ faster.
+                if (mimeType == "image/heic" && (await isHEICSupported())) {
+                    log.debug(
+                        () => `Using native HEIC support for ${fileName}`,
+                    );
+                } else {
+                    return await heicToJPEG(imageBlob);
+                }
             }
         }
 
@@ -113,60 +124,126 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
     return new Blob([jpegData], { type: "image/jpeg" });
 };
 
+let _isHEICSupported: Promise<boolean> | undefined;
+
 /**
- * Return a new {@link Blob} containing a video's data in a format that the
- * browser (likely) knows how to play back (using an video tag).
+ * Return true if the browser can natively render HEIC files.
+ *
+ * For performance, the result of the check is cached. There shouldn't be a
+ * reason for this cache to need be invalidated, the browser shouldn't suddenly
+ * drop its HEIC support in the middle of it running (but I'm sure posterity
+ * will prove this assumption wrong in a way I can't yet anticipate).
+ *
+ * Some more details:
+ *
+ * - The check works by trying to load a small HEIC file.
+ *
+ * - Currently (Spring 2025), the only browser with support for HEIC is Safari.
+ */
+const isHEICSupported = () =>
+    (_isHEICSupported ??= new Promise((resolve) => {
+        const image = new Image();
+        image.onload = () => resolve(true);
+        image.onerror = () => resolve(false);
+        image.src = testHEICDataURL;
+    }));
+
+/**
+ * A data URL encoding the smallest HEIC image (439 bytes).
+ *
+ * Source:
+ * https://github.com/vvideo/detect-audio-video/blob/main/src/image/smallest/index.ts
+ */
+const testHEICDataURL =
+    "data:image/heic;base64,AAAAGGZ0eXBoZWljAAAAAG1pZjFoZWljAAABaW1ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAHBpY3QAAAAAAAAAAAAAAAAAAAAADnBpdG0AAAAAAAEAAAAiaWxvYwAAAABEQAABAAEAAAAAAYkAAQAAAAAAAAAuAAAAI2lpbmYAAAAAAAEAAAAVaW5mZQIAAAAAAQAAaHZjMQAAAADpaXBycAAAAMppcGNvAAAAdmh2Y0MBA3AAAAAAAAAAAAAe8AD8/fj4AAAPAyAAAQAYQAEMAf//A3AAAAMAkAAAAwAAAwAeugJAIQABACpCAQEDcAAAAwCQAAADAAADAB6gIIEFluqumubgIaDAgAAAAwCAAAADAIQiAAEABkQBwXPBiQAAABRpc3BlAAAAAAAAAEAAAABAAAAAKGNsYXAAAAABAAAAAQAAAAEAAAAB////wQAAAAL////BAAAAAgAAABBwaXhpAAAAAAMICAgAAAAXaXBtYQAAAAAAAAABAAEEgQKDBAAAADZtZGF0AAAAKigBrwayEx2gkim3i/2Rd0CR/V6h6GbEyV3dheegYfLV9ZwraCH8nff+7w==";
+
+/**
+ * Return a object URL containing a video's data in a format that the browser
+ * (likely) knows how to play back using an video tag.
  *
  * Unlike {@link renderableImageBlob}, this uses a much simpler flowchart:
  *
- * - If the browser thinks it can play the video, then return the original blob
- *   back.
+ * 1. If the browser thinks it can play the video, then return the an object URL
+ *    created by directly using the provided {@link videoBlob}.
  *
- * - Otherwise try to convert using FFmpeg. This conversion always happens on
- *   the desktop app, but in the browser the conversion only happens for short
- *   videos since the Wasm FFmpeg implementation is much slower. There is also a
- *   flag to force this conversion regardless.
+ * 2. Otherwise try to convert using FFmpeg. This conversion always happens on
+ *    the desktop app, but in the browser the conversion only happens for short
+ *    videos since the Wasm FFmpeg implementation is much slower.
+ *
+ * 3. On errors, return the original (as would've happened for step 1).
+ *
+ * A special case if for FileType.livePhoto on Linux in the desktop app, where
+ * the conversion always happens to workaround the audio only playback in that
+ * specific scenario.
  */
-export const playableVideoBlob = async (
+export const playableVideoURL = async (
     fileName: string,
     videoBlob: Blob,
-    forceConvert: boolean,
-) => {
-    const converted = async () => {
+    opts?: { fileType?: FileType },
+): Promise<string> => {
+    const videoObjectURL = URL.createObjectURL(videoBlob);
+    const isPlayable = await isPlaybackPossible(videoObjectURL);
+
+    let shouldConvert = false;
+
+    if (isPlayable) {
+        // The browser thinks it can play this video.
+        //
+        // But it is not a guarantee. In particular, a problematic case is when
+        // for a particular codec combination, browser can play the audio
+        // stream, but not the video stream. `isPlaybackPossible` would return
+        // true, but when the user will hear only audio and not see the video.
+        //
+        // For videos themselves, we solve this (and other issues) by providing
+        // a streaming variant. However it can still happen for live photos.
+        //
+        // Unfortunately, I haven't found a way yet of detecting if this
+        // scenario is going to arise (open a issue if you've found one).
+        // Fortunately, this particular failure mode has only been reported on
+        // Linux desktop app (which uses Chromium underneath). So we add a
+        // special case - if (desktop && livePhoto && linux) then forceConvert.
+        // Practically this is a reasonable fallback since the video component
+        // of a live photo is going to be a few seconds only, and the video
+        // conversion is fast in the desktop app.
+        if (
+            isDesktop &&
+            opts?.fileType == FileType.livePhoto &&
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
+            navigator.platform.startsWith("Linux")
+        ) {
+            shouldConvert = true;
+        }
+    } else {
+        // The browser doesn't think it can play this video, try transcoding.
+        if (isDesktop) {
+            // Always on desktop.
+            shouldConvert = true;
+        } else {
+            // Don't try to transcode on the web if the file is too big.
+            if (videoBlob.size < 100 * 1024 * 1024 /* 100 MB, arbitrary */) {
+                shouldConvert = true;
+            }
+        }
+    }
+
+    if (shouldConvert) {
         try {
             log.info(`Converting ${fileName} to mp4`);
             const convertedBlob = await convertToMP4(videoBlob);
-            return new Blob([convertedBlob], { type: "video/mp4" });
+            return URL.createObjectURL(
+                new Blob([convertedBlob], { type: "video/mp4" }),
+            );
         } catch (e) {
             log.error(`Video conversion failed for ${fileName}`, e);
-            return null;
-        }
-    };
-
-    // If we've been asked to force convert, do it regardless of anything else.
-    if (forceConvert) return converted();
-
-    const isPlayable = await isPlaybackPossible(URL.createObjectURL(videoBlob));
-    if (isPlayable) return videoBlob;
-
-    // The browser doesn't think it can play this video, try transcoding.
-    if (isDesktop) {
-        return converted();
-    } else {
-        // Don't try to transcode on the web if the file is too big.
-        if (videoBlob.size > 100 * 1024 * 1024 /* 100 MB, arbitrary */) {
-            return null;
-        } else {
-            return converted();
         }
     }
+
+    return videoObjectURL;
 };
 
 /**
  * Try to see if the browser thinks it can play the video pointed to by the
  * given {@link url} by creating a <video> element and initiating playback.
- *
- * [Note: Forcing conversion of playable videos]
  *
  * Note that this can sometimes cause false positives if the browser can play
  * some of the streams in the video, but not all. For example, the browser may
@@ -175,10 +252,8 @@ export const playableVideoBlob = async (
  * to skip conversion, but when the user actually plays the video there will be
  * no sound.
  *
- * As an escape hatch, we provide a force convert button in the UI for such
- * cases, which'll cause the {@link forceConvert} flag in our caller function to
- * be set. If so, it'll bypasses this preflight check we use to see if the
- * browser can already play the video, and instead will always be transcoded.
+ * To deal with such cases in an holistic manner, we have a streaming variant of
+ * the video that gets transcoded into a (near) universal format.
  */
 const isPlaybackPossible = async (url: string) =>
     new Promise((resolve) => {

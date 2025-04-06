@@ -1,22 +1,3 @@
-import { generateKeyAndSRPAttributes } from "@/accounts/services/srp";
-import { sendOTT } from "@/accounts/services/user";
-import { isWeakPassword } from "@/accounts/utils/password";
-import { LinkButton } from "@/base/components/LinkButton";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import { isMuseumHTTPError } from "@/base/http";
-import log from "@/base/log";
-import { setLSUser } from "@ente/shared//storage/localStorage";
-import { VerticallyCentered } from "@ente/shared/components/Container";
-import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
-import {
-    generateAndSaveIntermediateKeyAttributes,
-    saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import { setData } from "@ente/shared/storage/localStorage";
-import {
-    setJustSignedUp,
-    setLocalReferralSource,
-} from "@ente/shared/storage/localStorage/helpers";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Box,
@@ -32,6 +13,25 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
+import { generateKeyAndSRPAttributes } from "ente-accounts/services/srp";
+import { sendOTT } from "ente-accounts/services/user";
+import { isWeakPassword } from "ente-accounts/utils/password";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import { isMuseumHTTPError } from "ente-base/http";
+import log from "ente-base/log";
+import { setLSUser } from "ente-shared//storage/localStorage";
+import { VerticallyCentered } from "ente-shared/components/Container";
+import ShowHidePassword from "ente-shared/components/Form/ShowHidePassword";
+import {
+    generateAndSaveIntermediateKeyAttributes,
+    saveKeyInSessionStore,
+} from "ente-shared/crypto/helpers";
+import { setData } from "ente-shared/storage/localStorage";
+import {
+    setJustSignedUp,
+    setLocalReferralSource,
+} from "ente-shared/storage/localStorage/helpers";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";

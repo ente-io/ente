@@ -1,17 +1,17 @@
-import { HTTPError } from "@/base/http";
-import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
-import type { Location } from "@/base/types";
-import type { Collection } from "@/media/collection";
-import type { EnteFile } from "@/media/file";
+import type { Component } from "chrono-node";
+import * as chrono from "chrono-node";
+import { expose } from "comlink";
+import { HTTPError } from "ente-base/http";
+import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
+import type { Location } from "ente-base/types";
+import type { Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
 import {
     fileCreationPhotoDate,
     fileLocation,
     filePublicMagicMetadata,
-} from "@/media/file-metadata";
-import { nullToUndefined } from "@/utils/transform";
-import type { Component } from "chrono-node";
-import * as chrono from "chrono-node";
-import { expose } from "comlink";
+} from "ente-media/file-metadata";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import type { NamedPerson } from "../ml/people";
 import {

@@ -1,8 +1,11 @@
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import type { EnteFile } from "@/media/file";
-import { faceCrop, type AnnotatedFaceID } from "@/new/photos/services/ml";
-import type { Person, PreviewableFace } from "@/new/photos/services/ml/people";
 import { Skeleton, styled } from "@mui/material";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import type { EnteFile } from "ente-media/file";
+import { faceCrop, type AnnotatedFaceID } from "ente-new/photos/services/ml";
+import type {
+    Person,
+    PreviewableFace,
+} from "ente-new/photos/services/ml/people";
 import React, { useEffect, useState } from "react";
 import { UnstyledButton } from "./UnstyledButton";
 

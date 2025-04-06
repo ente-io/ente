@@ -1,10 +1,10 @@
-import { TitledMiniDialog } from "@/base/components/MiniDialog";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { EnteFile } from "@/media/file";
-import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
-import { FlexWrapper } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";
 import ItemList from "components/ItemList";
+import { TitledMiniDialog } from "ente-base/components/MiniDialog";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { EnteFile } from "ente-media/file";
+import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
+import { FlexWrapper } from "ente-shared/components/Container";
 import { t } from "i18next";
 
 interface Iprops {

@@ -1,6 +1,6 @@
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import { apiURL } from "@/base/origins";
-import { nullToUndefined } from "@/utils/transform";
+import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
+import { apiURL } from "ente-base/origins";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
 /**

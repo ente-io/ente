@@ -1,8 +1,3 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import { ensureOk } from "@/base/http";
-import { getKVS, removeKV, setKV } from "@/base/kv";
-import log from "@/base/log";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Dialog,
@@ -15,6 +10,11 @@ import {
     TextField,
     type ModalProps,
 } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { ensureOk } from "ente-base/http";
+import { getKVS, removeKV, setKV } from "ente-base/kv";
+import log from "ente-base/log";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";

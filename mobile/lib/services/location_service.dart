@@ -68,7 +68,8 @@ class LocationService {
     List<EnteFile> allFiles,
     String query,
   ) async {
-    if (allFiles.isEmpty && query.isEmpty) {
+    // check if the cities where not loaded when discovery section was loaded
+    if (allFiles.isNotEmpty && _cities.isEmpty && query.isEmpty) {
       reloadLocationDiscoverySection = true;
     }
     final EnteWatch w = EnteWatch("cities_search")..start();
