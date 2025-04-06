@@ -155,23 +155,24 @@
     bottom: 0px;
     right: 0;
     margin: 20px 24px;
-    padding: 6px 16px;
-    border-radius: 2px;
+    padding-inline: 16px;
+    border-radius: 3px;
     /* Same opacity as the other controls. */
     color: rgb(255 255 255 / 0.85);
     background-color: rgb(0 0 0 / 0.2);
     backdrop-filter: blur(10px);
-    /* 4 lines max, ellipsis on overflow. */
-    word-break: break-word;
     text-align: right;
     max-width: 375px;
     max-height: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
+    p {
+        /* 4 lines max, ellipsis on overflow. */
+        word-break: break-word;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+        line-clamp: 4;
+    }
 }
 
 /* Change the cursor on the thumbnail to the default arrow to indicate that it is
@@ -208,9 +209,33 @@
 
     /* Similar to our other controls */
     --media-icon-color: rgb(255 255 255 / 0.8);
+    /* NB: We don't reset the font-weight, so this'll be using 400 instead of
+       the 500 we use elsewhere. See: [Note: Font weights].
+
+       We don't reset it because on this screen the 400 looks better (for now).
+      */
     --media-font-family: "Inter Variable", sans-serif;
     --media-control-background: transparent;
     --media-control-hover-background: rgb(255 255 255 / 0.12);
+    /*
+      Prevent menus from occluding clicks on other controls when hidden.
+
+      [Note: Showing menus outside of media-controller]
+
+      This is all very hacky. The standalone control example
+      (https://media-chrome.mux.dev/examples/vanilla/standalone-controls.html),
+      doesn't (as of now) include a menu, so it is possible this is just not
+      supported. None of the media controller examples I could find show menus
+      work for our specific scenario (the controls detached from the the media
+      controller itself, and shown at the bottom of the screen).
+
+      As such, a lot of undocumented and arbitrary tweaks are needed. This is a
+      house of cards, and might fall when the media-chrome version is updated;
+      on the other hand, they might also add better support for our scenario, in
+      which case this should be possible straightforwardly.
+      */
+    --media-menu-hidden-max-height: 1px;
+    --media-menu-max-height: 1000px;
 }
 
 /*
@@ -261,7 +286,35 @@ media-time-range:hover {
   they trigger.
  */
 media-pip-button[mediapipunavailable],
-media-airplay-button[mediaairplayunavailable],
 media-fullscreen-button[mediafullscreenunavailable] {
     display: none;
+}
+
+media-settings-menu {
+    /*
+      Restore the background for the settings menu (we made it transparent). The
+      default is var(--_menu-bg), which is rgb(20 20 30 / .8).
+     */
+    --media-control-background: var(--mui-palette-fixed-dark-background-paper);
+    /* Regular, but since the rest of media controls use 400, it
+       appears heavier. */
+    --media-font-weight: 500;
+    /*
+      Bring it above the rest of our controls.
+
+      See: [Note: Showing menus outside of media-controller]
+     */
+    z-index: 1;
+}
+
+/* Hide the caption when hovering over the video controls since they occupy
+   similar real estate */
+body:has(
+        media-control-bar:hover,
+        media-settings-menu:hover,
+        media-settings-menu:focus-within
+    ) {
+    & .pswp-ente .pswp__caption {
+        display: none;
+    }
 }

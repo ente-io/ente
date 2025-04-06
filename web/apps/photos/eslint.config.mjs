@@ -1,4 +1,4 @@
-import config from "@/build-config/eslintrc-next-app.mjs";
+import config from "ente-build-config/eslintrc-next-app.mjs";
 
 export default [
     ...config,

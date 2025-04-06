@@ -1,7 +1,11 @@
-import { decryptBlob } from "@/base/crypto";
-import type { EncryptedBlobB64 } from "@/base/crypto/types";
-import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
-import { apiURL } from "@/base/origins";
+import { decryptBlob } from "ente-base/crypto";
+import type { EncryptedBlobB64 } from "ente-base/crypto/types";
+import {
+    authenticatedRequestHeaders,
+    ensureOk,
+    HTTPError,
+} from "ente-base/http";
+import { apiURL } from "ente-base/origins";
 import { z } from "zod";
 import type { EntityType } from ".";
 

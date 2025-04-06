@@ -1,7 +1,7 @@
-import log from "@/base/log";
-import { customAPIOrigin } from "@/base/origins";
-import type { ZipItem } from "@/base/types/ipc";
-import { nullToUndefined } from "@/utils/transform";
+import log from "ente-base/log";
+import { customAPIOrigin } from "ente-base/origins";
+import type { ZipItem } from "ente-base/types/ipc";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
 /**

@@ -3,8 +3,8 @@ import {
     encryptBlobB64,
     encryptBoxB64,
     generateBlobOrStreamKey,
-} from "@/base/crypto";
-import { nullishToEmpty, nullToUndefined } from "@/utils/transform";
+} from "ente-base/crypto";
+import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import { gunzip, gzip } from "../../utils/gzip";
 import type { CGroupUserEntityData } from "../ml/people";

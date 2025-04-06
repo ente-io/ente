@@ -8,7 +8,7 @@ on:
     workflow_dispatch:
 
 permissions:
-    contents: read
+    contents: write  # for pushing the `ghcr/server` branch
     packages: write
 
 jobs:

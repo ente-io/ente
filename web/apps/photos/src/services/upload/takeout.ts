@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 /** @file Dealing with the JSON metadata sidecar files */
 
-import { ensureElectron } from "@/base/electron";
-import { nameAndExtension } from "@/base/file-name";
-import log from "@/base/log";
-import { type Location } from "@/base/types";
-import type { UploadItem } from "@/gallery/services/upload";
-import { readStream } from "@/gallery/utils/native-stream";
-import { maybeParseInt } from "@/utils/parse";
+import { ensureElectron } from "ente-base/electron";
+import { nameAndExtension } from "ente-base/file-name";
+import log from "ente-base/log";
+import { type Location } from "ente-base/types";
+import type { UploadItem } from "ente-gallery/services/upload";
+import { readStream } from "ente-gallery/utils/native-stream";
+import { maybeParseInt } from "ente-utils/parse";
 
 /**
  * The data we read from the JSON metadata sidecar files.

@@ -1,7 +1,7 @@
-import { newID } from "@/base/id";
-import log from "@/base/log";
-import { PromiseQueue } from "@/utils/promise";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { newID } from "ente-base/id";
+import log from "ente-base/log";
+import { PromiseQueue } from "ente-utils/promise";
 import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,

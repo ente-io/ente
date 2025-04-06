@@ -1,8 +1,8 @@
-import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import { UpdateMagicMetadataRequest } from "@/gallery/services/file";
-import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
+import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import { UpdateMagicMetadataRequest } from "ente-gallery/services/file";
+import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import {
     Collection,
     CollectionMagicMetadata,
@@ -15,35 +15,34 @@ import {
     PublicURL,
     RemoveFromCollectionRequest,
     UpdatePublicURL,
-} from "@/media/collection";
-import { EncryptedMagicMetadata, EnteFile } from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
+} from "ente-media/collection";
+import { EncryptedMagicMetadata, EnteFile } from "ente-media/file";
+import { ItemVisibility } from "ente-media/file-metadata";
 import {
     addToCollection,
     isDefaultHiddenCollection,
     moveToCollection,
-} from "@/new/photos/services/collection";
-import type { CollectionSummary } from "@/new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection";
+import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import {
     CollectionSummaryOrder,
     CollectionsSortBy,
-} from "@/new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection/ui";
 import {
     getCollectionWithSecrets,
     getLocalCollections,
-} from "@/new/photos/services/collections";
+} from "ente-new/photos/services/collections";
 import {
     getLocalFiles,
     groupFilesByCollectionID,
     sortFiles,
-} from "@/new/photos/services/files";
-import type { FamilyData } from "@/new/photos/services/user-details";
-import { batch } from "@/utils/array";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getData } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { getActualKey } from "@ente/shared/user";
-import type { User } from "@ente/shared/user/types";
+} from "ente-new/photos/services/files";
+import HTTPService from "ente-shared/network/HTTPService";
+import { getData } from "ente-shared/storage/localStorage";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
+import { getActualKey } from "ente-shared/user";
+import type { User } from "ente-shared/user/types";
+import { batch } from "ente-utils/array";
 import {
     changeCollectionSubType,
     isQuickLinkCollection,
@@ -724,58 +723,3 @@ export async function unhideToCollection(
         throw e;
     }
 }
-
-export const constructUserIDToEmailMap = (
-    user: User,
-    collections: Collection[],
-): Map<number, string> => {
-    try {
-        const userIDToEmailMap = new Map<number, string>();
-        collections.forEach((item) => {
-            const { owner, sharees } = item;
-            if (user.id !== owner.id && owner.email) {
-                userIDToEmailMap.set(owner.id, owner.email);
-            }
-            if (sharees) {
-                sharees.forEach((item) => {
-                    if (item.id !== user.id)
-                        userIDToEmailMap.set(item.id, item.email);
-                });
-            }
-        });
-        return userIDToEmailMap;
-    } catch (e) {
-        log.error("Error Mapping UserId to email:", e);
-        return new Map<number, string>();
-    }
-};
-
-export const constructEmailList = (
-    user: User,
-    collections: Collection[],
-    familyData: FamilyData,
-): string[] => {
-    const emails = collections
-        .map((item) => {
-            const { owner, sharees } = item;
-            if (owner.email && item.owner.id !== user.id) {
-                return [item.owner.email];
-            } else {
-                if (!sharees?.length) {
-                    return [];
-                }
-                const shareeEmails = item.sharees
-                    .filter((sharee) => sharee.email !== user.email)
-                    .map((sharee) => sharee.email);
-                return shareeEmails;
-            }
-        })
-        .flat();
-
-    // adding family members
-    if (familyData) {
-        const family = familyData.members.map((member) => member.email);
-        emails.push(...family);
-    }
-    return Array.from(new Set(emails));
-};

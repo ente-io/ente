@@ -1,33 +1,3 @@
-import { assertionFailed } from "@/base/assert";
-import { SpacedRow } from "@/base/components/containers";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@/base/components/OverflowMenu";
-import { useModalVisibility } from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import {
-    isArchivedCollection,
-    isPinnedCollection,
-} from "@/gallery/services/magic-metadata";
-import type { Collection } from "@/media/collection";
-import { ItemVisibility } from "@/media/file-metadata";
-import {
-    GalleryItemsHeaderAdapter,
-    GalleryItemsSummary,
-} from "@/new/photos/components/gallery/ListHeader";
-import {
-    ALL_SECTION,
-    HIDDEN_ITEMS_SECTION,
-    isHiddenCollection,
-} from "@/new/photos/services/collection";
-import type {
-    CollectionSummary,
-    CollectionSummaryType,
-} from "@/new/photos/services/collection/ui";
-import { clearLocalTrash, emptyTrash } from "@/new/photos/services/collections";
-import { usePhotosAppContext } from "@/new/photos/types/context";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
@@ -46,6 +16,39 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Menu, Stack, Tooltip } from "@mui/material";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
+import { assertionFailed } from "ente-base/assert";
+import { SpacedRow } from "ente-base/components/containers";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "ente-base/components/OverflowMenu";
+import { useModalVisibility } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import {
+    isArchivedCollection,
+    isPinnedCollection,
+} from "ente-gallery/services/magic-metadata";
+import type { Collection } from "ente-media/collection";
+import { ItemVisibility } from "ente-media/file-metadata";
+import {
+    GalleryItemsHeaderAdapter,
+    GalleryItemsSummary,
+} from "ente-new/photos/components/gallery/ListHeader";
+import {
+    ALL_SECTION,
+    HIDDEN_ITEMS_SECTION,
+    isHiddenCollection,
+} from "ente-new/photos/services/collection";
+import type {
+    CollectionSummary,
+    CollectionSummaryType,
+} from "ente-new/photos/services/collection/ui";
+import {
+    clearLocalTrash,
+    emptyTrash,
+} from "ente-new/photos/services/collections";
+import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useCallback, useContext, useRef } from "react";

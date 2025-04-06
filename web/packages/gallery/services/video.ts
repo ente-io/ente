@@ -1,9 +1,9 @@
-import { decryptBlob } from "@/base/crypto";
-import type { EncryptedBlob } from "@/base/crypto/types";
-import type { EnteFile } from "@/media/file";
-import { FileType } from "@/media/file-type";
-import { gunzip } from "@/new/photos/utils/gzip";
-import { ensurePrecondition } from "@/utils/ensure";
+import { decryptBlob } from "ente-base/crypto";
+import type { EncryptedBlob } from "ente-base/crypto/types";
+import type { EnteFile } from "ente-media/file";
+import { FileType } from "ente-media/file-type";
+import { gunzip } from "ente-new/photos/utils/gzip";
+import { ensurePrecondition } from "ente-utils/ensure";
 import { z } from "zod";
 import { fetchFileData, fetchFilePreviewData } from "./file-data";
 

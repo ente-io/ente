@@ -1,8 +1,9 @@
-import type { EnteFile } from "@/media/file";
-import { FileType } from "@/media/file-type";
+import type { EnteFile } from "ente-media/file";
+import { FileType } from "ente-media/file-type";
 import "hls-video-element";
 import { t } from "i18next";
 import "media-chrome";
+import "media-chrome/menu";
 import PhotoSwipe, { type SlideData } from "photoswipe";
 import {
     fileViewerDidClose,
@@ -17,7 +18,7 @@ import {
     type FileViewerAnnotatedFile,
     type FileViewerProps,
 } from "./FileViewer";
-import { createPSRegisterElementIconHTML } from "./icons";
+import { createPSRegisterElementIconHTML, settingsSVGPath } from "./icons";
 
 export interface FileViewerPhotoSwipeDelegate {
     /**
@@ -377,18 +378,20 @@ export class FileViewerPhotoSwipe {
         /**
          * A wrapper over video.play that prevents Chrome from spamming the
          * console with errors about interrupted plays when scrolling through
-         * files fast by keeping arrow keys pressed.
+         * files fast by keeping arrow keys pressed, or when the slide is reloaded.
          */
         const abortablePlayVideo = async (videoElement: HTMLVideoElement) => {
             try {
                 await videoElement.play();
             } catch (e) {
+                // Known message strings prefixes.
+                // - "The play() request was interrupted by a call to pause()."
+                // - "The play() request was interrupted because the media was removed from the document."
+
                 if (
                     e instanceof Error &&
                     e.name == "AbortError" &&
-                    e.message.startsWith(
-                        "The play() request was interrupted by a call to pause().",
-                    )
+                    e.message.startsWith("The play() request was interrupted")
                 ) {
                     // Ignore.
                 } else {
@@ -446,20 +449,21 @@ export class FileViewerPhotoSwipe {
         let mediaControlsContainerElement: HTMLElement | undefined;
 
         /**
-         * If a {@link mediaControllerID} is provided, then make the
-         * media controls visible and link the media-control-bar to the given
-         * controller. Otherwise hide the media controls.
+         * If a {@link mediaControllerID} is provided, then make the media
+         * controls visible and link the media-control-bars (and other
+         * containers that house controls) to the given controller. Otherwise
+         * hide the media controls.
          */
         const updateMediaControls = (mediaControllerID: string | undefined) => {
-            const controlBars =
+            const controls =
                 mediaControlsContainerElement?.querySelectorAll(
-                    "media-control-bar",
+                    "media-control-bar, media-playback-rate-menu",
                 ) ?? [];
-            for (const bar of controlBars) {
+            for (const control of controls) {
                 if (mediaControllerID) {
-                    bar.setAttribute("mediacontroller", mediaControllerID);
+                    control.setAttribute("mediacontroller", mediaControllerID);
                 } else {
-                    bar.removeAttribute("mediacontroller");
+                    control.removeAttribute("mediacontroller");
                 }
             }
         };
@@ -468,9 +472,9 @@ export class FileViewerPhotoSwipe {
             const { fileID, fileType, videoURL, mediaControllerID } =
                 asItemData(e.content.data);
 
-            // For the initial slide, "contentAppend" will get called after
-            // "change", so we need to wire up the controls (or hide them) for
-            // the initial slide here also (in addition to in "change").
+            // For the initial slide, "contentAppend" will get called after the
+            // "change" event, so we need to wire up the controls, or hide them,
+            // for the initial slide here also (in addition to in "change").
             if (currSlideData().fileID == fileID) {
                 // For reasons possibily related to the 1 tick waits in the
                 // hls-video implementation (`await Promise.resolve()`), the
@@ -481,11 +485,11 @@ export class FileViewerPhotoSwipe {
                 // See also: https://github.com/muxinc/media-chrome/issues/940
                 //
                 // As a workaround, defer the association to the next tick.
-                //
                 setTimeout(() => updateMediaControls(mediaControllerID), 0);
             }
 
             // Rest of this function deals with live photos.
+
             if (fileType != FileType.livePhoto) return;
             if (!videoURL) return;
 
@@ -542,6 +546,24 @@ export class FileViewerPhotoSwipe {
             video.style.height = `${height}px`;
         });
 
+        /**
+         * Get the video element, if any, that is a descendant of the given HTML
+         * element.
+         *
+         * While the return type is an {@link HTMLVideoElement}, the result can
+         * also be an instance of a media-chrome `CustomVideoElement`,
+         * specifically a {@link HlsVideoElement}.
+         * https://github.com/muxinc/media-elements/blob/main/packages/hls-video-element/hls-video-element.js
+         *
+         * The media-chrome `CustomVideoElement`s provide the same API as the
+         * browser's built-in {@link HTMLVideoElement}s, so we can use the same
+         * methods on them.
+         *
+         * For ergonomic use at call sites, it accepts an optional.
+         */
+        const queryVideoElement = (element: HTMLElement | undefined) =>
+            element?.querySelector<HTMLVideoElement>("video, hls-video");
+
         pswp.on("contentDeactivate", (e) => {
             // Reset failures, if any, for this file so that the fetch is tried
             // again when we come back to it^.
@@ -556,8 +578,7 @@ export class FileViewerPhotoSwipe {
 
             // Pause the video element, if any, when we move away from the
             // slide.
-            const video =
-                e.content.slide?.container.getElementsByTagName("video")[0];
+            const video = queryVideoElement(e.content.slide?.container);
             video?.pause();
         });
 
@@ -575,8 +596,25 @@ export class FileViewerPhotoSwipe {
         );
 
         /**
+         * The media-chrome-button elements (e.g the play button) retain focus
+         * after clicking on them. e.g., if I click the "media-mute-button" to
+         * activate it, then later press Space or Enter, then the mute button
+         * activates again instead of toggling video playback.
+         *
+         * I'm not sure who is at fault here, but this behaviour ends up being
+         * irritating. To prevent this from happening, drop the focus from any
+         * media chrome button when playback starts.
+         */
+        const resetFocus = () => {
+            const activeElement = document.activeElement;
+            if (activeElement instanceof HTMLElement) activeElement.blur();
+        };
+
+        /**
          * If the current slide is showing a video, then the DOM video element
          * showing that video.
+         *
+         * See also {@link queryVideoElement}.
          */
         let videoVideoEl: HTMLVideoElement | undefined;
 
@@ -631,11 +669,13 @@ export class FileViewerPhotoSwipe {
                 // It works subsequently, which is why, e.g., we can use it to
                 // pause the video in "contentDeactivate".
                 const contentElement = pswp.currSlide?.content.element;
-                videoVideoEl = contentElement?.getElementsByTagName("video")[0];
+                videoVideoEl = queryVideoElement(contentElement) ?? undefined;
 
                 if (videoVideoEl) {
-                    onVideoPlayback = () =>
+                    onVideoPlayback = () => {
+                        resetFocus();
                         showIf(captionElement!, !!videoVideoEl?.paused);
+                    };
 
                     videoVideoEl.addEventListener("play", onVideoPlayback);
                     videoVideoEl.addEventListener("pause", onVideoPlayback);
@@ -889,30 +929,9 @@ export class FileViewerPhotoSwipe {
             });
 
             ui.registerElement({
-                name: "caption",
-                // Arbitrary order towards the end (it doesn't matter anyways
-                // since we're absolutely positioned).
-                order: 30,
-                appendTo: "root",
-                tagName: "p",
-                onInit: (element, pswp) => {
-                    captionElement = element;
-                    pswp.on("change", () => {
-                        const { fileType, alt } = currSlideData();
-                        element.innerText = alt ?? "";
-                        element.style.visibility = alt ? "visible" : "hidden";
-                        // Add extra offset for video captions so that they do
-                        // not overlap with the video controls. The constant is
-                        // an ad-hoc value that looked okay-ish across browsers.
-                        element.style.bottom =
-                            fileType === FileType.video ? "36px" : "0";
-                    });
-                },
-            });
-
-            ui.registerElement({
                 name: "media-controls",
-                order: 31,
+                // Arbitrary order towards the end.
+                order: 30,
                 appendTo: "root",
                 html: hlsVideoControlsHTML(),
                 onInit: (element, pswp) => {
@@ -920,6 +939,35 @@ export class FileViewerPhotoSwipe {
                     pswp.on("change", () => {
                         const { mediaControllerID } = currSlideData();
                         updateMediaControls(mediaControllerID);
+                    });
+                },
+            });
+
+            ui.registerElement({
+                name: "caption",
+                // After the video controls so that we don't get occluded by
+                // them (nb: the caption will hide when the video is playing).
+                order: 31,
+                appendTo: "root",
+                // The caption uses the line-clamp CSS property, which behaves
+                // unexpectedly when we also assign padding to the "p" element
+                // on which we're setting the line clamp: the "clipped" lines
+                // show through in the padding area.
+                //
+                // As a workaround, wrap the p in a div. Set the line-clamp on
+                // the p, and the padding on the div.
+                html: "<div><p></p></div>",
+                onInit: (element, pswp) => {
+                    captionElement = element;
+                    pswp.on("change", () => {
+                        const { fileType, alt } = currSlideData();
+                        element.querySelector("p")!.innerText = alt ?? "";
+                        element.style.visibility = alt ? "visible" : "hidden";
+                        // Add extra offset for video captions so that they do
+                        // not overlap with the video controls. The constant is
+                        // such that it lies above the media controls.
+                        element.style.bottom =
+                            fileType === FileType.video ? "44px" : "0";
                     });
                 },
             });
@@ -949,14 +997,44 @@ export class FileViewerPhotoSwipe {
 
         // Actions we handle ourselves.
 
+        const handlePreviousSlide = () => pswp.prev();
+
+        const handleNextSlide = () => pswp.next();
+
+        const handleSeekBackOrPreviousSlide = () => {
+            // TODO(HLS): Behind temporary flag
+            // const vid = videoVideoEl;
+            const vid = process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
+                ? videoVideoEl
+                : undefined;
+            if (vid) {
+                vid.currentTime = Math.max(vid.currentTime - 5, 0);
+            } else {
+                handlePreviousSlide();
+            }
+        };
+
+        const handleSeekForwardOrNextSlide = () => {
+            // TODO(HLS): Behind temporary flag
+            // const vid = videoVideoEl;
+            const vid = process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
+                ? videoVideoEl
+                : undefined;
+            if (vid) {
+                vid.currentTime = vid.currentTime + 5;
+            } else {
+                handleNextSlide();
+            }
+        };
+
         const handleTogglePlayIfPossible = () => {
             switch (currentAnnotatedFile().itemData.fileType) {
                 case FileType.video:
                     videoTogglePlayIfPossible();
-                    return;
+                    break;
                 case FileType.livePhoto:
                     livePhotoTogglePlayIfPossible();
-                    return;
+                    break;
             }
         };
 
@@ -964,10 +1042,10 @@ export class FileViewerPhotoSwipe {
             switch (currentAnnotatedFile().itemData.fileType) {
                 case FileType.video:
                     videoToggleMuteIfPossible();
-                    return;
+                    break;
                 case FileType.livePhoto:
                     livePhotoToggleMuteIfPossible();
-                    return;
+                    break;
             }
         };
 
@@ -1019,15 +1097,25 @@ export class FileViewerPhotoSwipe {
             // For example, Cmd-D adds a bookmark, which is why we don't use it
             // for download.
             //
-            // An exception is Ctrl/Cmd-C, which we intercept to copy the image
-            // since that should match the user's expectation.
+            // There are some exception, e.g. Ctrl/Cmd-C, which we intercept to
+            // copy the image since that should match the user's expectation.
 
             let cb: (() => void) | undefined;
             if (e.shiftKey) {
                 // Ignore except "?" for help.
                 if (key == "?") cb = handleHelp;
             } else if (e.altKey) {
-                // Ignore.
+                // Ignore except if for arrow keys since when showing a video,
+                // the arrow keys are used for seeking, and the normal arrow key
+                // function (slide movement) needs the Alt/Opt modifier.
+                switch (key) {
+                    case "ArrowLeft":
+                        cb = handlePreviousSlide;
+                        break;
+                    case "ArrowRight":
+                        cb = handleNextSlide;
+                        break;
+                }
             } else if (e.metaKey || e.ctrlKey) {
                 // Ignore except Ctrl/Cmd-C for copy
                 if (lkey == "c") cb = handleCopy;
@@ -1043,6 +1131,16 @@ export class FileViewerPhotoSwipe {
                     case "Backspace":
                     case "Delete":
                         cb = handleDelete;
+                        break;
+                    case "ArrowLeft":
+                        cb = handleSeekBackOrPreviousSlide;
+                        // Prevent PhotoSwipe's default handling of this key.
+                        pswpEvent.preventDefault();
+                        break;
+                    case "ArrowRight":
+                        cb = handleSeekForwardOrNextSlide;
+                        // Prevent PhotoSwipe's default handling of this key.
+                        pswpEvent.preventDefault();
                         break;
                     // We check for "?"" both with an without shift, since some
                     // keyboards might have it emittable without shift.
@@ -1147,10 +1245,10 @@ const videoHTML = (url: string, disableDownload: boolean) => `
 //
 //     import "hls-video-element";
 //     import "media-chrome";
+//     import "media-chrome/menu";
 //
-// TODO(HLS): Update code above that searches for the video element
 const hlsVideoHTML = (url: string, mediaControllerID: string) => `
-<media-controller id="${mediaControllerID}">
+<media-controller id="${mediaControllerID}" nohotkeys>
   <hls-video playsinline slot="media" src="${url}"></hls-video>
 </media-controller>
 `;
@@ -1166,10 +1264,32 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  * - Examples: https://media-chrome.mux.dev/examples/vanilla/
  *
  * - When PiP is active and the video moves out, the browser displays some
- *   indicator (browser specific) in the in-page video element.
+ *   indicator (browser specific) in the in-page video element. This element and
+ *   text is not under our control.
+ *
+ * - The media-cast-button currently doesn't work with the `hls-video` player.
+ *
+ * - Media chrome has mechanism for statically providing translations but it
+ *   wasn't working when I tried with 4.9.0. The media chrome tooltips also get
+ *   clipped for the cornermost buttons. Finally, the rest of the buttons on
+ *   this screen don't have a tooltip either.
+ *
+ *   Revisit this when we have a custom tooltip element we can then also use on
+ *   this screen, which can also be used enhancement for the other buttons on
+ *   this screen which use "title" (which get clipped when they are multi-word).
+ *
+ * - See: [Note: Spurious media chrome resize observer errors]
  */
 const hlsVideoControlsHTML = () => `
 <div>
+  <media-settings-menu id="et-settings-menu" hidden anchor="et-settings-menu-btn">
+    <media-settings-menu-item>
+      Speed
+      <media-playback-rate-menu slot="submenu" hidden>
+        <div slot="title">Speed</div>
+      </media-playback-rate-menu>
+    </media-settings-menu-item>
+  </media-settings-menu>
   <media-control-bar>
     <media-loading-indicator noautohide></media-loading-indicator>
   </media-control-bar>
@@ -1177,13 +1297,15 @@ const hlsVideoControlsHTML = () => `
     <media-time-range></media-time-range>
   </media-control-bar>
   <media-control-bar>
-    <media-play-button></media-play-button>
-    <media-mute-button></media-mute-button>
+    <media-play-button notooltip></media-play-button>
+    <media-mute-button notooltip></media-mute-button>
     <media-time-display showduration notoggle></media-time-display>
     <media-text-display></media-text-display>
-    <media-pip-button></media-pip-button>
-    <media-airplay-button></media-airplay-button>
-    <media-fullscreen-button></media-fullscreen-button>
+    <media-settings-menu-button id="et-settings-menu-btn" invoketarget="et-settings-menu" notooltip>
+      <svg slot="icon" viewBox="0 0 24 24">${settingsSVGPath}</svg>
+    </media-settings-menu-button>
+    <media-pip-button notooltip></media-pip-button>
+    <media-fullscreen-button notooltip></media-fullscreen-button>
   </media-control-bar>
 </div>
 `;

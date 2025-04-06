@@ -160,7 +160,7 @@ class _EditDateSheetState extends State<EditDateSheet> {
                   setState(() {});
                 },
                 selectedDate,
-                maxDate,
+                maxDateTime: maxDate,
                 startWithTime: selectingTime,
               ),
             if (!showSingleOrShiftChoice &&

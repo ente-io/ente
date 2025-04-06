@@ -1,19 +1,22 @@
-import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
-import { clientPackageName, isDesktop } from "@/base/app";
-import { sharedCryptoWorker } from "@/base/crypto";
-import { encryptToB64, generateEncryptionKey } from "@/base/crypto/libsodium";
+import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
+import { clientPackageName, isDesktop } from "ente-base/app";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import {
+    encryptToB64,
+    generateEncryptionKey,
+} from "ente-base/crypto/libsodium";
 import {
     authenticatedRequestHeaders,
     ensureOk,
     HTTPError,
     publicRequestHeaders,
-} from "@/base/http";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import { getRecoveryKey } from "@ente/shared/crypto/helpers";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
+} from "ente-base/http";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import { getRecoveryKey } from "ente-shared/crypto/helpers";
+import HTTPService from "ente-shared/network/HTTPService";
+import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { z } from "zod";
 import { unstashRedirect } from "./redirect";
 

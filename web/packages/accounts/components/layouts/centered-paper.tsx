@@ -1,7 +1,7 @@
-import { CenteredFill } from "@/base/components/containers";
-import { EnteLogo } from "@/base/components/EnteLogo";
-import { NavbarBase } from "@/base/components/Navbar";
 import { Paper, Stack, styled, Typography } from "@mui/material";
+import { CenteredFill } from "ente-base/components/containers";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import { NavbarBase } from "ente-base/components/Navbar";
 
 /**
  * An ad-hoc component that abstracts the layout common to many of the pages

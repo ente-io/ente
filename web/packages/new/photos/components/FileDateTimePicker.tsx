@@ -1,10 +1,10 @@
-import type { ParsedMetadataDate } from "@/media/file-metadata";
 import {
     LocalizationProvider,
     MobileDateTimePicker,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
+import type { ParsedMetadataDate } from "ente-media/file-metadata";
 import React, { useState } from "react";
 
 interface FileDateTimePickerProps {

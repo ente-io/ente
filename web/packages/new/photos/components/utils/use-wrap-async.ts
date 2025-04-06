@@ -1,4 +1,4 @@
-import { useBaseContext } from "@/base/context";
+import { useBaseContext } from "ente-base/context";
 import { useCallback } from "react";
 import { usePhotosAppContext } from "../../types/context";
 
