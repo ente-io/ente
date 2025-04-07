@@ -506,6 +506,8 @@
   "deleteDuplicates": "Ištrinti dublikatus",
   "plainHTML": "Grynasis HTML",
   "tellUsWhatYouThink": "Pasakykite mums, ką manote",
+  "dropReviewiOS": "Rašyti apžvalgą parduotuvėje „App Store“",
+  "dropReviewAndroid": "Rašyti apžvalgą parduotuvėje „Play“ parduotuvė“",
   "giveUsAStarOnGithub": "Suteikite mums žvaigždutę platformoje „Github“",
   "free5GB": "5 GB nemokami programai „<bold-green>ente</bold-green>“ nuotraukos",
   "loginWithAuthAccount": "Prisijungti su jūsų „Auth“ paskyra",
