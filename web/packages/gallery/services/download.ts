@@ -94,25 +94,6 @@ export type RenderableSourceURLs =
       };
 
 /**
- * A URL that can be used to download a file, along a validity of the said URL.
- *
- * Used by {@link fileURLPromisesWithValidity}.
- */
-interface FileURLPromiseWithValidity {
-    /**
-     * A promise for a presigned URL that can be used to download the file.
-     */
-    url: Promise<string>;
-    /**
-     * Date until the URL is expected to be valid.
-     *
-     * We undercount a bit to be on the safer side, so this is a conservative
-     * estimate not an exact value.
-     */
-    validTill: Date;
-}
-
-/**
  * A class that tracks the state of in-progress downloads and conversions,
  * including caching them for subsequent retrieval if appropriate.
  *
@@ -152,21 +133,17 @@ class DownloadManager {
      * unsupported format). If a renderable URL is needed for the file,
      * {@link renderableSourceURLs} should be used instead.
      *
-     * The entries are keyed by the file ID, and include a timestamp that can be
-     * used to discard potentially stale ones.
+     * The entries are keyed by the file ID.
      */
-    private fileURLPromisesWithValidity = new Map<
-        number,
-        FileURLPromiseWithValidity
-    >();
+    private fileURLPromises = new Map<number, Promise<string>>();
     /**
      * An in-memory cache for {@link RenderableSourceURLs} for a file.
      *
      * These are saved as a result of invocation of
      * {@link renderableSourceURLs}, which goes one step beyond
-     * {@link fileURLWithValidityPromises}, and also attempts to convert the
-     * downloaded file into a URL that the browser (or the desktop app) is
-     * likely to be able to render or play.
+     * {@link fileURLPromises}, and also attempts to convert the downloaded file
+     * into a URL that the browser (or the desktop app) is likely to be able to
+     * render or play.
      *
      * The entries are keyed by file ID.
      */
@@ -210,7 +187,7 @@ class DownloadManager {
     logout() {
         this.publicAlbumsCredentials = undefined;
         this.thumbnailURLPromises.clear();
-        this.fileURLPromisesWithValidity.clear();
+        this.fileURLPromises.clear();
         this.renderableSourceURLPromises.clear();
         this.fileDownloadProgress.clear();
         this.fileDownloadProgressListeners = [];
@@ -383,15 +360,15 @@ class DownloadManager {
     async fileStream(
         file: EnteFile,
     ): Promise<ReadableStream<Uint8Array> | null> {
-        const cached = this.fileURLPromisesWithValidity.get(file.id);
-        if (cached && cached.validTill > new Date()) {
+        const cachedURL = this.fileURLPromises.get(file.id);
+        if (cachedURL) {
             try {
-                const url = await cached.url;
+                const url = await cachedURL;
                 const res = await fetch(url);
                 return res.body;
             } catch (e) {
                 log.warn("Failed to use cached object URL", e);
-                this.fileURLPromisesWithValidity.delete(file.id);
+                this.fileURLPromises.delete(file.id);
             }
         }
 
@@ -402,21 +379,18 @@ class DownloadManager {
      * A private variant of {@link fileStream} that also caches the results.
      */
     private async fileURLDownloadAndCacheIfNeeded(file: EnteFile) {
-        const cached = this.fileURLPromisesWithValidity.get(file.id);
-        if (cached && cached.validTill > new Date()) {
-            return cached.url;
-        }
+        const cachedURL = this.fileURLPromises.get(file.id);
+        if (cachedURL) return cachedURL;
 
         const url = this.downloadFile(file)
             .then((stream) => new Response(stream).blob())
             .then((blob) => URL.createObjectURL(blob));
-        const validTill = createFileURLValidity();
-        this.fileURLPromisesWithValidity.set(file.id, { url, validTill });
+        this.fileURLPromises.set(file.id, url);
 
         try {
             return await url;
         } catch (e) {
-            this.fileURLPromisesWithValidity.delete(file.id);
+            this.fileURLPromises.delete(file.id);
             throw e;
         }
     }
@@ -606,16 +580,6 @@ export class NetworkDownloadError extends Error {
 
 export const isNetworkDownloadError = (e: unknown) =>
     e instanceof NetworkDownloadError;
-
-/**
- * Return a new validity for a file download URL obtained from remote.
- *
- * Remote generates presigned URLs with a validity of 7 days (see
- * `PreSignedRequestValidityDuration` in the museum source). As a conservative
- * estimate, we only cache it for 5 days henceforth, for a 2 day margin.
- */
-const createFileURLValidity = () =>
-    new Date(Date.now() + 5 * 24 * 60 * 60 * 1000); /* 5 days */
 
 /**
  * A helper function to convert all rejections of the given promise {@link op}
