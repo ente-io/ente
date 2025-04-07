@@ -1,6 +1,7 @@
 import AVFoundation
 import Flutter
 import UIKit
+import app_links
 import workmanager
 
 @main
@@ -36,6 +37,13 @@ import workmanager
     WorkmanagerPlugin.registerPeriodicTask(
       withIdentifier: "io.ente.frame.iOSBackgroundAppRefresh",
       frequency: NSNumber(value: 20 * 60))
+
+    // Retrieve the link from parameters
+    if let url = AppLinks.shared.getLink(launchOptions: launchOptions) {
+      // We have a link, propagate it to your Flutter app or not
+      AppLinks.shared.handleLink(url: url)
+      return true  // Returning true will stop the propagation to other packages
+    }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
