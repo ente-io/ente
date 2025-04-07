@@ -973,6 +973,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.4"
+  flutter_password_strength:
+    dependency: "direct main"
+    description:
+      name: flutter_password_strength
+      sha256: "271b32c4003d7227e5a71d0303af0144e91a104b522da1a8d092b7847ebfee12"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.6"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
