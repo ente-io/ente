@@ -1299,6 +1299,14 @@ const hlsVideoControlsHTML = () => `
 <div>
   <media-settings-menu id="et-settings-menu" hidden anchor="et-settings-menu-btn">
     <media-settings-menu-item>
+      Quality
+      <media-chrome-menu slot="submenu" hidden>
+        <div slot="title">Quality</div>
+        <media-chrome-menu-item type="radio" aria-checked="true">Auto</media-chrome-menu-item>
+        <media-chrome-menu-item type="radio">Original</media-chrome-menu-item>
+      </media-chrome-menu>
+    </media-settings-menu-item>
+    <media-settings-menu-item>
       Speed
       <media-playback-rate-menu slot="submenu" hidden>
         <div slot="title">Speed</div>
