@@ -5,6 +5,7 @@ import { t } from "i18next";
 import "media-chrome";
 import { MediaMuteButton } from "media-chrome";
 import "media-chrome/menu";
+import { MediaChromeMenu } from "media-chrome/menu";
 import PhotoSwipe, { type SlideData } from "photoswipe";
 import {
     fileViewerDidClose,
@@ -784,6 +785,13 @@ export class FileViewerPhotoSwipe {
             if (currentFileAnnotation().showDownload) handleDownload();
         };
 
+        const videoQuality = "auto";
+
+        const onVideoQualityChange = (qualityMenu: MediaChromeMenu) => {
+            const newQuality = qualityMenu.value;
+            console.log(videoQuality, newQuality);
+        };
+
         const showIf = (element: HTMLElement, condition: boolean) =>
             condition
                 ? element.classList.remove("pswp__hidden")
@@ -947,6 +955,13 @@ export class FileViewerPhotoSwipe {
                 html: hlsVideoControlsHTML(),
                 onInit: (element, pswp) => {
                     mediaControlsContainerElement = element;
+                    const qualityMenu =
+                        element.querySelector("#et-quality-menu");
+                    if (qualityMenu instanceof MediaChromeMenu) {
+                        qualityMenu.addEventListener("change", () =>
+                            onVideoQualityChange(qualityMenu),
+                        );
+                    }
                     pswp.on("change", () => {
                         const { mediaControllerID } = currSlideData();
                         updateMediaControls(mediaControllerID);
@@ -1300,7 +1315,7 @@ const hlsVideoControlsHTML = () => `
   <media-settings-menu id="et-settings-menu" hidden anchor="et-settings-menu-btn">
     <media-settings-menu-item>
       Quality
-      <media-chrome-menu slot="submenu" hidden>
+      <media-chrome-menu id="et-quality-menu" slot="submenu" hidden>
         <div slot="title">Quality</div>
         <media-chrome-menu-item type="radio" aria-checked="true">Auto</media-chrome-menu-item>
         <media-chrome-menu-item type="radio">Original</media-chrome-menu-item>
