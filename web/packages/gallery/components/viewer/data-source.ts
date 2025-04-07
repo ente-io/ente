@@ -336,7 +336,6 @@ export const itemDataForFile = (
     if (!itemData) {
         itemData = { fileID, fileType, isContentLoading: true };
         _state.itemDataByFileID.set(file.id, itemData);
-        _state.itemDataValidTillByFileID.delete(fileID);
         void enqueueUpdates(file, opts);
     }
 

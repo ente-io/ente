@@ -1366,6 +1366,9 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  * To make these functional, the `media-control-bar` requires the
  * `mediacontroller="${mediaControllerID}"` attribute.
  *
+ * TODO(HLS): Add translations for all the pts
+ * TODO(HLS): Add "Toggle play", "Seek forward, backward" to list of shortcuts
+ *
  * Notes:
  *
  * - Examples: https://media-chrome.mux.dev/examples/vanilla/
@@ -1391,17 +1394,17 @@ const hlsVideoControlsHTML = () => `
 <div>
   <media-settings-menu id="et-settings-menu" hidden anchor="et-settings-menu-btn">
     <media-settings-menu-item>
-      Quality
+      ${pt("Quality")}
       <media-chrome-menu id="et-quality-menu" slot="submenu" hidden>
-        <div slot="title">Quality</div>
-        <media-chrome-menu-item type="radio" aria-checked="true">Auto</media-chrome-menu-item>
-        <media-chrome-menu-item type="radio">Original</media-chrome-menu-item>
+        <div slot="title">${pt("Quality")}</div>
+        <media-chrome-menu-item type="radio" aria-checked="true">${pt("Auto")}</media-chrome-menu-item>
+        <media-chrome-menu-item type="radio">${pt("Original")}</media-chrome-menu-item>
       </media-chrome-menu>
     </media-settings-menu-item>
     <media-settings-menu-item>
-      Speed
+      ${pt("Speed")}
       <media-playback-rate-menu slot="submenu" hidden>
-        <div slot="title">Speed</div>
+        <div slot="title">${pt("Speed")}</div>
       </media-playback-rate-menu>
     </media-settings-menu-item>
   </media-settings-menu>
