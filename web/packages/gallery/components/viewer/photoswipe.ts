@@ -1,3 +1,4 @@
+import { pt } from "ente-base/i18n";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import "hls-video-element";
@@ -305,6 +306,9 @@ export class FileViewerPhotoSwipe {
          */
         const originalVideoFileIDs = new Set<number>();
 
+        const videoQualityForFile = (file: EnteFile) =>
+            originalVideoFileIDs.has(file.id) ? "original" : "auto";
+
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
 
@@ -315,9 +319,7 @@ export class FileViewerPhotoSwipe {
             const file = files[index]!;
 
             const opts: ItemDataOpts = {
-                videoQuality: originalVideoFileIDs.has(file.id)
-                    ? "original"
-                    : "auto",
+                videoQuality: videoQualityForFile(file),
             };
 
             const itemData = itemDataForFile(file, opts, () =>
@@ -471,8 +473,9 @@ export class FileViewerPhotoSwipe {
          * hide the media controls.
          */
         const updateMediaControls = (mediaControllerID: string | undefined) => {
+            const container = mediaControlsContainerElement;
             const controls =
-                mediaControlsContainerElement?.querySelectorAll(
+                container?.querySelectorAll(
                     "media-control-bar, media-playback-rate-menu",
                 ) ?? [];
             for (const control of controls) {
@@ -480,6 +483,18 @@ export class FileViewerPhotoSwipe {
                     control.setAttribute("mediacontroller", mediaControllerID);
                 } else {
                     control.removeAttribute("mediacontroller");
+                }
+            }
+
+            const qualityMenu = container?.querySelector("#et-quality-menu");
+            if (qualityMenu instanceof MediaChromeMenu) {
+                const value =
+                    videoQualityForFile(currentFile()) == "auto"
+                        ? pt("Auto")
+                        : pt("Original");
+                // Check first to avoid infinite update loop.
+                if (qualityMenu.value != value) {
+                    qualityMenu.value = value;
                 }
             }
         };
@@ -799,7 +814,9 @@ export class FileViewerPhotoSwipe {
             if (currentFileAnnotation().showDownload) handleDownload();
         };
 
-        const onVideoQualityChange = () => {
+        const onVideoQualityChange = (e) => {
+            console.log(e);
+
             // Currently there are only two entries in the video quality menu,
             // and the callback only gets invoked if the value gets changed from
             // the current value. So we can assume toggle semantics when
@@ -981,8 +998,9 @@ export class FileViewerPhotoSwipe {
                     const qualityMenu =
                         element.querySelector("#et-quality-menu");
                     if (qualityMenu instanceof MediaChromeMenu) {
-                        qualityMenu.addEventListener("change", () =>
-                            onVideoQualityChange(qualityMenu),
+                        qualityMenu.addEventListener(
+                            "change",
+                            onVideoQualityChange,
                         );
                     }
                     pswp.on("change", () => {
