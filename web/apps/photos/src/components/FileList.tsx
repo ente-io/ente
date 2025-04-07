@@ -728,13 +728,13 @@ export const FileList: React.FC<FileListProps> = ({
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Shift") {
+            if (e.key == "Shift") {
                 setIsShiftKeyPressed(true);
             }
         };
 
         const handleKeyUp = (e: KeyboardEvent) => {
-            if (e.key === "Shift") {
+            if (e.key == "Shift") {
                 setIsShiftKeyPressed(false);
             }
         };

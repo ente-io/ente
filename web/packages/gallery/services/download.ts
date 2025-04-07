@@ -15,13 +15,10 @@ import {
 import { ensureAuthToken } from "ente-base/local-user";
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
-import {
-    playableVideoURL,
-    renderableImageBlob,
-} from "ente-gallery/utils/convert";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
+import { playableVideoURL, renderableImageBlob } from "./convert";
 
 /**
  * URL(s) for the original image or video, alongwith with potential conversions
@@ -134,7 +131,7 @@ class DownloadManager {
      * Unlike {@link thumbnailURLPromises}, there is no guarantee that the
      * browser will be able to render the original file (e.g. it might be in an
      * unsupported format). If a renderable URL is needed for the file,
-     * {@link renderableSourceURL} should be used instead.
+     * {@link renderableSourceURLs} should be used instead.
      *
      * The entries are keyed by the file ID.
      */
@@ -142,10 +139,11 @@ class DownloadManager {
     /**
      * An in-memory cache for {@link RenderableSourceURLs} for a file.
      *
-     * These are saved as a result of invocation of {@link renderableSourceURL},
-     * which goes one step beyond {@link fileURLPromises}, and also attempts to
-     * convert the downloaded file into a URL that the browser (or the desktop
-     * app) is likely to be able to render or play.
+     * These are saved as a result of invocation of
+     * {@link renderableSourceURLs}, which goes one step beyond
+     * {@link fileURLPromises}, and also attempts to convert the downloaded file
+     * into a URL that the browser (or the desktop app) is likely to be able to
+     * render or play.
      *
      * The entries are keyed by file ID.
      */

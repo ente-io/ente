@@ -172,6 +172,11 @@ class FileViewerDataSourceState {
      */
     itemDataByFileID = new Map<number, ItemData>();
     /**
+     * The validity (if applicable) for the corresponding entry in
+     * {@link itemDataByFileID}.
+     */
+    itemDataValidTillByFileID = new Map<number, Date>();
+    /**
      * The latest callback registered for notifications of better data being
      * available for a particular file (ID).
      */
@@ -249,6 +254,13 @@ export const fileViewerDidClose = () => {
 };
 
 /**
+ * Options to modify the default behaviour of {@link itemDataForFile}.
+ */
+export interface ItemDataOpts {
+    videoQuality?: "auto" | "original";
+}
+
+/**
  * Return the best available {@link ItemData} for rendering the given
  * {@link file}.
  *
@@ -258,6 +270,8 @@ export const fileViewerDidClose = () => {
  *
  * At each step, we call the provided callback so that file viewer can call us
  * again to get the updated data.
+ *
+ * @param opts Options to modify the default behaviours.
  *
  * ---
  *
@@ -283,7 +297,10 @@ export const fileViewerDidClose = () => {
  *
  * Then it'll continue fetching the original.
  *
- * - For images and videos, this will be the single original.
+ * - For images this will be the single original.
+ *
+ * - For videos this will be either the HLS playlist to a streamable variant of
+ *   the video (if the video has one available), or the original video itsel.
  *
  * - For live photos, this will also be a two step process, first fetching the
  *   video component, then fetching the image component.
@@ -296,9 +313,19 @@ export const fileViewerDidClose = () => {
  * next time the data is requested we repeat the process instead of continuing
  * to serve the incomplete result.
  */
-export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
+export const itemDataForFile = (
+    file: EnteFile,
+    opts: ItemDataOpts | undefined,
+    needsRefresh: () => void,
+) => {
     const fileID = file.id;
     const fileType = file.metadata.fileType;
+
+    const validTill = _state.itemDataValidTillByFileID.get(fileID);
+    if (validTill && validTill < new Date()) {
+        // Don't use the cached entry if it has become stale.
+        forgetItemDataForFileID(fileID);
+    }
 
     let itemData = _state.itemDataByFileID.get(fileID);
 
@@ -309,10 +336,21 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
     if (!itemData) {
         itemData = { fileID, fileType, isContentLoading: true };
         _state.itemDataByFileID.set(file.id, itemData);
-        void enqueueUpdates(file);
+        void enqueueUpdates(file, opts);
     }
 
     return itemData;
+};
+
+/**
+ * Forget item data for the given {@link file}.
+ *
+ * This is called when we change the options passed to {@link itemDataForFile},
+ * and so would like to clear any previously cached data.
+ */
+export const forgetItemDataForFileID = (fileID: number) => {
+    _state.itemDataByFileID.delete(fileID);
+    _state.itemDataValidTillByFileID.delete(fileID);
 };
 
 /**
@@ -322,9 +360,8 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
  * full retry when they come back the next time.
  */
 export const forgetFailedItemDataForFileID = (fileID: number) => {
-    if (_state.itemDataByFileID.get(fileID)?.fetchFailed) {
-        _state.itemDataByFileID.delete(fileID);
-    }
+    if (_state.itemDataByFileID.get(fileID)?.fetchFailed)
+        forgetItemDataForFileID(fileID);
 };
 
 /**
@@ -349,11 +386,14 @@ export const updateItemDataAlt = (updatedFile: EnteFile) => {
 const forgetFailedItems = () =>
     [..._state.itemDataByFileID.keys()].forEach(forgetFailedItemDataForFileID);
 
-const enqueueUpdates = async (file: EnteFile) => {
+const enqueueUpdates = async (
+    file: EnteFile,
+    opts: ItemDataOpts | undefined,
+) => {
     const fileID = file.id;
     const fileType = file.metadata.fileType;
 
-    const update = (itemData: Partial<ItemData>) => {
+    const update = (itemData: Partial<ItemData>, validTill?: Date) => {
         // Use the file's caption as its alt text (in addition to using it as
         // the visible caption).
         const alt = fileCaption(file);
@@ -364,6 +404,11 @@ const enqueueUpdates = async (file: EnteFile) => {
             fileID,
             alt,
         });
+        if (validTill) {
+            _state.itemDataValidTillByFileID.set(file.id, validTill);
+        } else {
+            _state.itemDataValidTillByFileID.delete(file.id);
+        }
         _state.needsRefreshByFileID.get(file.id)?.();
     };
 
@@ -405,7 +450,10 @@ const enqueueUpdates = async (file: EnteFile) => {
 
     try {
         if (isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING) {
-            if (file.metadata.fileType == FileType.video) {
+            if (
+                file.metadata.fileType == FileType.video &&
+                opts?.videoQuality != "original"
+            ) {
                 const playlistData = await hlsPlaylistDataForFile(file);
                 if (playlistData) {
                     const {
@@ -413,7 +461,10 @@ const enqueueUpdates = async (file: EnteFile) => {
                         width,
                         height,
                     } = playlistData;
-                    update({ videoPlaylistURL, width, height });
+                    update(
+                        { videoPlaylistURL, width, height },
+                        createHLSPlaylistItemDataValidity(),
+                    );
                     return;
                 }
             }
@@ -510,6 +561,18 @@ const withDimensionsIfPossible = (
         image.onerror = () => resolve({ src: imageURL });
         image.src = imageURL;
     });
+
+/**
+ * Return a new validity for a HLS playlist containing presigned URLs.
+ *
+ * The content chunks in HLS playlist generated by
+ * {@link hlsPlaylistDataForFile} use presigned URLs generated by remote (see
+ * `PreSignedRequestValidityDuration` in the museum source). These have a
+ * validity of 7 days. We keep a 2 day buffer, and consider any item data that
+ * uses such playlist as stale after 5 days.
+ */
+const createHLSPlaylistItemDataValidity = () =>
+    new Date(Date.now() + 5 * 24 * 60 * 60 * 1000); /* 5 days */
 
 /**
  * Return the cached Exif data for the given {@link file}.

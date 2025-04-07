@@ -1,18 +1,23 @@
+import { pt } from "ente-base/i18n";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import "hls-video-element";
 import { t } from "i18next";
 import "media-chrome";
+import { MediaMuteButton } from "media-chrome";
 import "media-chrome/menu";
+import { MediaChromeMenu, MediaChromeMenuButton } from "media-chrome/menu";
 import PhotoSwipe, { type SlideData } from "photoswipe";
 import {
     fileViewerDidClose,
     fileViewerWillOpen,
     forgetExifForItemData,
     forgetFailedItemDataForFileID,
+    forgetItemDataForFileID,
     itemDataForFile,
     updateFileInfoExifIfNeeded,
     type ItemData,
+    type ItemDataOpts,
 } from "./data-source";
 import {
     type FileViewerAnnotatedFile,
@@ -295,6 +300,15 @@ export class FileViewerPhotoSwipe {
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
 
+        /**
+         * File (ID)s for which we should render the original, non-streamable,
+         * video even if a HLS playlist is available.
+         */
+        const originalVideoFileIDs = new Set<number>();
+
+        const videoQualityForFile = (file: EnteFile) =>
+            originalVideoFileIDs.has(file.id) ? "original" : "auto";
+
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
 
@@ -304,7 +318,11 @@ export class FileViewerPhotoSwipe {
             const files = delegate.getFiles();
             const file = files[index]!;
 
-            const itemData = itemDataForFile(file, () =>
+            const opts: ItemDataOpts = {
+                videoQuality: videoQualityForFile(file),
+            };
+
+            const itemData = itemDataForFile(file, opts, () =>
                 pswp.refreshSlideContent(index),
             );
 
@@ -449,14 +467,22 @@ export class FileViewerPhotoSwipe {
         let mediaControlsContainerElement: HTMLElement | undefined;
 
         /**
+         * True if the next change to the videoQuality is initiated by us. This
+         * is used by the "change" event listener to ignore these events,
+         * avoiding a cyclic update loop.
+         */
+        let shouldIgnoreNextVideoQualityChange = false;
+
+        /**
          * If a {@link mediaControllerID} is provided, then make the media
          * controls visible and link the media-control-bars (and other
          * containers that house controls) to the given controller. Otherwise
          * hide the media controls.
          */
         const updateMediaControls = (mediaControllerID: string | undefined) => {
+            const container = mediaControlsContainerElement;
             const controls =
-                mediaControlsContainerElement?.querySelectorAll(
+                container?.querySelectorAll(
                     "media-control-bar, media-playback-rate-menu",
                 ) ?? [];
             for (const control of controls) {
@@ -464,6 +490,19 @@ export class FileViewerPhotoSwipe {
                     control.setAttribute("mediacontroller", mediaControllerID);
                 } else {
                     control.removeAttribute("mediacontroller");
+                }
+            }
+
+            const qualityMenu = container?.querySelector("#et-quality-menu");
+            if (qualityMenu instanceof MediaChromeMenu) {
+                const value =
+                    videoQualityForFile(currentFile()) == "auto"
+                        ? pt("Auto")
+                        : pt("Original");
+                // Check first, and set a flag, to avoid infinite update loop.
+                if (qualityMenu.value != value) {
+                    shouldIgnoreNextVideoQualityChange = true;
+                    qualityMenu.value = value;
                 }
             }
         };
@@ -708,6 +747,16 @@ export class FileViewerPhotoSwipe {
             if (!video) return;
 
             video.muted = !video.muted;
+
+            // TODO(HLS): Temporary gate
+            if (!process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING) return;
+
+            // Go via the media chrome mute button when muting, because
+            // otherwise the local storage that the media chrome internally
+            // manages ('media-chrome-pref-muted' which can be 'true' or
+            // 'false') gets out of sync with the playback state.
+            const muteButton = document.querySelector("media-mute-button");
+            if (muteButton instanceof MediaMuteButton) muteButton.handleClick();
         };
 
         // The PhotoSwipe dialog has being closed and the animations have
@@ -771,6 +820,38 @@ export class FileViewerPhotoSwipe {
 
         const handleDownloadIfEnabled = () => {
             if (currentFileAnnotation().showDownload) handleDownload();
+        };
+
+        const onVideoQualityChange = () => {
+            if (shouldIgnoreNextVideoQualityChange) {
+                // Ignore changes that we ourselves initiated on slide change.
+                shouldIgnoreNextVideoQualityChange = false;
+                return;
+            }
+
+            // Currently there are only two entries in the video quality menu,
+            // and the callback only gets invoked if the value gets changed from
+            // the current value. So we can assume toggle semantics when
+            // implementing the logic below.
+
+            const fileID = currentAnnotatedFile().file.id;
+            forgetItemDataForFileID(fileID);
+            if (originalVideoFileIDs.has(fileID)) {
+                originalVideoFileIDs.delete(fileID);
+            } else {
+                originalVideoFileIDs.add(fileID);
+            }
+
+            // Close the menu.
+            const menuButton = document.querySelector(
+                "media-settings-menu-button",
+            );
+            if (menuButton instanceof MediaChromeMenuButton)
+                menuButton.handleClick();
+
+            // Refresh the slide so that the video is fetched afresh, but using
+            // the updated `originalVideoFileIDs` value for it.
+            this.refreshCurrentSlideContent();
         };
 
         const showIf = (element: HTMLElement, condition: boolean) =>
@@ -936,6 +1017,10 @@ export class FileViewerPhotoSwipe {
                 html: hlsVideoControlsHTML(),
                 onInit: (element, pswp) => {
                     mediaControlsContainerElement = element;
+                    const menu = element.querySelector("#et-quality-menu");
+                    if (menu instanceof MediaChromeMenu) {
+                        menu.addEventListener("change", onVideoQualityChange);
+                    }
                     pswp.on("change", () => {
                         const { mediaControllerID } = currSlideData();
                         updateMediaControls(mediaControllerID);
@@ -1056,11 +1141,20 @@ export class FileViewerPhotoSwipe {
 
         // Return true if the current keyboard focus is on any of the UI
         // controls (e.g. as a result of user tabbing through them).
-        const isFocusedOnUIControl = () => {
+        const isFocusVisibledOnUIControl = () => {
             const fv = document.querySelector(":focus-visible");
             if (fv && !fv.classList.contains("pswp")) {
                 return true;
             }
+
+            // Media Chrome does its own thing and doesn't seem to gain the
+            // :focus-visible pseudo class even though it visually looks that
+            // way. We need to add a special case for it.
+            const f = document.querySelector(":focus");
+            if (f?.tagName.startsWith("MEDIA-")) {
+                return true;
+            }
+
             return false;
         };
 
@@ -1079,7 +1173,7 @@ export class FileViewerPhotoSwipe {
         const handleHelp = () => delegate.performKeyAction("help");
 
         pswp.on("keydown", (pswpEvent) => {
-            // Ignore keyboard events when we do not have "focus".
+            // Ignore keyboard events when one of our sub-dialogs are open.
             if (delegate.shouldIgnoreKeyboardEvent()) {
                 pswpEvent.preventDefault();
                 return;
@@ -1090,6 +1184,15 @@ export class FileViewerPhotoSwipe {
             const key = e.key;
             // Even though we ignore shift, Caps lock might still be on.
             const lkey = e.key.toLowerCase();
+
+            // When one of the controls on the screen has a visible focus
+            // indicator, we want the Escape key to blur its focus instead of
+            // closing the PhotoSwipe dialog.
+            if (isFocusVisibledOnUIControl() && key == "Escape") {
+                resetFocus();
+                pswpEvent.preventDefault();
+                return;
+            }
 
             // Keep the keybindings such that they don't use modifiers, because
             // these are more likely to interfere with browser shortcuts.
@@ -1124,9 +1227,13 @@ export class FileViewerPhotoSwipe {
                     case " ":
                         // Space activates controls when they're focused, so
                         // only act on it if no specific control is focused.
-                        if (!isFocusedOnUIControl()) {
+                        if (!isFocusVisibledOnUIControl()) {
                             cb = handleTogglePlayIfPossible;
                         }
+                        // Prevent the browser's default space behaviour of
+                        // scrolling the file list in the background (which is
+                        // not appropriate when the file viewer is visible).
+                        if (e.target == document.body) e.preventDefault();
                         break;
                     case "Backspace":
                     case "Delete":
@@ -1259,6 +1366,9 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
  * To make these functional, the `media-control-bar` requires the
  * `mediacontroller="${mediaControllerID}"` attribute.
  *
+ * TODO(HLS): Add translations for all the pts
+ * TODO(HLS): Add "Toggle play", "Seek forward, backward" to list of shortcuts
+ *
  * Notes:
  *
  * - Examples: https://media-chrome.mux.dev/examples/vanilla/
@@ -1284,9 +1394,17 @@ const hlsVideoControlsHTML = () => `
 <div>
   <media-settings-menu id="et-settings-menu" hidden anchor="et-settings-menu-btn">
     <media-settings-menu-item>
-      Speed
+      ${pt("Quality")}
+      <media-chrome-menu id="et-quality-menu" slot="submenu" hidden>
+        <div slot="title">${pt("Quality")}</div>
+        <media-chrome-menu-item type="radio" aria-checked="true">${pt("Auto")}</media-chrome-menu-item>
+        <media-chrome-menu-item type="radio">${pt("Original")}</media-chrome-menu-item>
+      </media-chrome-menu>
+    </media-settings-menu-item>
+    <media-settings-menu-item>
+      ${pt("Speed")}
       <media-playback-rate-menu slot="submenu" hidden>
-        <div slot="title">Speed</div>
+        <div slot="title">${pt("Speed")}</div>
       </media-playback-rate-menu>
     </media-settings-menu-item>
   </media-settings-menu>
