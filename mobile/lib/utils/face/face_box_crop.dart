@@ -10,7 +10,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/face.dart";
-import "package:photos/services/machine_learning/ml_computer.dart";
+import "package:photos/services/machine_learning/face_thumbnail_generator.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:pool/pool.dart";
@@ -210,7 +210,7 @@ Future<Map<String, Uint8List>?> _getFaceCrops(
     faceBoxes.add(e.value);
   }
   final List<Uint8List> faceCrop =
-      await MLComputer.instance.generateFaceThumbnails(
+      await FaceThumbnailGenerator.instance.generateFaceThumbnails(
     // await generateJpgFaceThumbnails(
     imagePath,
     faceBoxes,

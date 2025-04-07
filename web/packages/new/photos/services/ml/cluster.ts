@@ -1,8 +1,8 @@
-import { assertionFailed } from "@/base/assert";
-import { newNonSecureID } from "@/base/id-worker";
-import log from "@/base/log";
-import type { EnteFile } from "@/media/file";
-import { wait } from "@/utils/promise";
+import { assertionFailed } from "ente-base/assert";
+import { newNonSecureID } from "ente-base/id-worker";
+import log from "ente-base/log";
+import type { EnteFile } from "ente-media/file";
+import { wait } from "ente-utils/promise";
 import {
     pullUserEntities,
     savedCGroups,

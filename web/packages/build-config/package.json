@@ -1,5 +1,5 @@
 {
-    "name": "@/build-config",
+    "name": "ente-build-config",
     "version": "0.0.0",
     "private": true,
     "type": "module",

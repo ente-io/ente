@@ -1,4 +1,4 @@
-import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import type { HEICConvertWorker } from "./heic-convert.worker";
 
 /**

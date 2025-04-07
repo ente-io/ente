@@ -1,1 +1,1 @@
-export { default } from "@/accounts/pages/two-factor/verify";
+export { default } from "ente-accounts/pages/two-factor/verify";

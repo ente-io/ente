@@ -1,10 +1,10 @@
 // TODO: Review this file
 /* eslint-disable @typescript-eslint/prefer-optional-chain */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-import { sharedCryptoWorker } from "@/base/crypto";
-import type { Collection } from "@/media/collection";
-import { type MagicMetadataCore } from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import type { Collection } from "ente-media/collection";
+import { type MagicMetadataCore } from "ente-media/file";
+import { ItemVisibility } from "ente-media/file-metadata";
 
 export const isArchivedCollection = (item: Collection) => {
     if (!item) {

@@ -1,5 +1,5 @@
-import log from "@/base/log";
-import { nullToUndefined } from "@/utils/transform";
+import log from "ente-base/log";
+import { nullToUndefined } from "ente-utils/transform";
 import { HOTP, TOTP } from "otpauth";
 import { z } from "zod";
 import { Steam } from "./steam";

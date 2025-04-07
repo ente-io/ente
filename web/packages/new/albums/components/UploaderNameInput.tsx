@@ -1,5 +1,3 @@
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import {
     Box,
@@ -9,6 +7,8 @@ import {
     Typography,
     useMediaQuery,
 } from "@mui/material";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import SingleInputForm from "ente-shared/components/SingleInputForm";
 import { t } from "i18next";
 
 type UploaderNameInput = ModalVisibilityProps & {

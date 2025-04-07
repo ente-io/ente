@@ -147,7 +147,7 @@ class IgnoredFilesService {
       if (deviceFolder == null || title == null) {
         return null;
       }
-      return '$deviceFolder-$title';
+      return '$localID-$deviceFolder-$title';
     } else {
       return localID;
     }

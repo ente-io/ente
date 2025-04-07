@@ -3,7 +3,7 @@
  * needs to be in a separate file to allow fast refresh.
  */
 
-import { useModalVisibility } from "@/base/components/utils/modal";
+import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useCallback, useMemo, useRef } from "react";
 import type { UserVerificationResponse } from "../../services/user";
 import type { SecondFactorType } from "../SecondFactorChoice";

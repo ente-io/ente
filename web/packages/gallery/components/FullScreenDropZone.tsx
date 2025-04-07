@@ -1,6 +1,6 @@
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton, Stack, styled, Typography } from "@mui/material";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import { type FileWithPath, useDropzone } from "react-dropzone";

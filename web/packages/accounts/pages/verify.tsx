@@ -1,41 +1,48 @@
+import { Box, Typography } from "@mui/material";
+import { HttpStatusCode } from "axios";
 import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
-} from "@/accounts/components/layouts/centered-paper";
-import { VerifyingPasskey } from "@/accounts/components/LoginComponents";
-import { SecondFactorChoice } from "@/accounts/components/SecondFactorChoice";
-import { useSecondFactorChoiceIfNeeded } from "@/accounts/components/utils/second-factor-choice";
+} from "ente-accounts/components/layouts/centered-paper";
+import { VerifyingPasskey } from "ente-accounts/components/LoginComponents";
+import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice";
+import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
-} from "@/accounts/services/passkey";
-import { stashedRedirect, unstashRedirect } from "@/accounts/services/redirect";
-import { configureSRP } from "@/accounts/services/srp";
+} from "ente-accounts/services/passkey";
+import {
+    stashedRedirect,
+    unstashRedirect,
+} from "ente-accounts/services/redirect";
+import { configureSRP } from "ente-accounts/services/srp";
 import type {
     SRPAttributes,
     SRPSetupAttributes,
-} from "@/accounts/services/srp-remote";
-import { getSRPAttributes } from "@/accounts/services/srp-remote";
-import { putAttributes, sendOTT, verifyEmail } from "@/accounts/services/user";
-import { LinkButton } from "@/base/components/LinkButton";
-import { LoadingIndicator } from "@/base/components/loaders";
-import { useBaseContext } from "@/base/context";
-import log from "@/base/log";
+} from "ente-accounts/services/srp-remote";
+import { getSRPAttributes } from "ente-accounts/services/srp-remote";
+import {
+    putAttributes,
+    sendOTT,
+    verifyEmail,
+} from "ente-accounts/services/user";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { LoadingIndicator } from "ente-base/components/loaders";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
-import { ApiError } from "@ente/shared/error";
-import localForage from "@ente/shared/storage/localForage";
-import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
+} from "ente-shared/components/SingleInputForm";
+import { ApiError } from "ente-shared/error";
+import localForage from "ente-shared/storage/localForage";
+import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import {
     getLocalReferralSource,
     setIsFirstLogin,
-} from "@ente/shared/storage/localStorage/helpers";
-import { clearKeys } from "@ente/shared/storage/sessionStorage";
-import type { KeyAttributes, User } from "@ente/shared/user/types";
-import { Box, Typography } from "@mui/material";
-import { HttpStatusCode } from "axios";
+} from "ente-shared/storage/localStorage/helpers";
+import { clearKeys } from "ente-shared/storage/sessionStorage";
+import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";

@@ -1,16 +1,16 @@
-import { sharedCryptoWorker } from "@/base/crypto";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
 import type {
     Collection,
     CollectionPublicMagicMetadata,
-} from "@/media/collection";
-import type { EncryptedEnteFile, EnteFile } from "@/media/file";
-import { decryptFile, mergeMetadata } from "@/media/file";
-import { sortFiles } from "@/new/photos/services/files";
-import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
-import HTTPService from "@ente/shared/network/HTTPService";
-import localForage from "@ente/shared/storage/localForage";
+} from "ente-media/collection";
+import type { EncryptedEnteFile, EnteFile } from "ente-media/file";
+import { decryptFile, mergeMetadata } from "ente-media/file";
+import { sortFiles } from "ente-new/photos/services/files";
+import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
+import HTTPService from "ente-shared/network/HTTPService";
+import localForage from "ente-shared/storage/localForage";
 
 const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
 const PUBLIC_COLLECTIONS_TABLE = "public-collections";

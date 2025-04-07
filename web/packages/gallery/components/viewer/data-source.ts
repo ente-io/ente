@@ -1,16 +1,13 @@
-import { isDevBuild } from "@/base/env";
-import log from "@/base/log";
-import type { FileInfoExif } from "@/gallery/components/FileInfo";
-import {
-    downloadManager,
-    type LivePhotoSourceURL,
-} from "@/gallery/services/download";
-import { extractRawExif, parseExif } from "@/gallery/services/exif";
-import { hlsPlaylistForFile } from "@/gallery/services/video";
-import type { EnteFile } from "@/media/file";
-import { fileCaption } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { ensureString } from "@/utils/ensure";
+import { isDevBuild } from "ente-base/env";
+import log from "ente-base/log";
+import type { FileInfoExif } from "ente-gallery/components/FileInfo";
+import { downloadManager } from "ente-gallery/services/download";
+import { extractRawExif, parseExif } from "ente-gallery/services/exif";
+import { hlsPlaylistDataForFile } from "ente-gallery/services/video";
+import type { EnteFile } from "ente-media/file";
+import { fileCaption } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { ensureString } from "ente-utils/ensure";
 
 /**
  * This is a subset of the fields expected by PhotoSwipe itself (see the
@@ -93,7 +90,8 @@ export type ItemData = PhotoSwipeSlideData & {
      * The renderable object URL of the video associated with the file.
      *
      * - For images, this will not be defined.
-     * - For videos, this will be the object URL of a renderable video.
+     * - For videos, this will be the object URL of a renderable video (but only
+     *   if {@link videoPlaylistURL} is not set).
      * - For live photos, this will be a renderable object URL of the video
      *   portion of the live photo.
      */
@@ -109,6 +107,17 @@ export type ItemData = PhotoSwipeSlideData & {
      * time.
      */
     videoPlaylistURL?: string;
+    /**
+     * The DOM element ID of the `media-controller` element that is showing the
+     * video for the current item.
+     *
+     * If present, this value will be used to display controls for controlling
+     * the video wrapped by the media-controller.
+     *
+     * This is only set for videos that are streamed using HLS (i.e. videos for
+     * which {@link videoPlaylistURL} has also been set).
+     */
+    mediaControllerID?: string;
     /**
      * `true` if we should indicate to the user that we're still fetching data
      * for this file.
@@ -395,62 +404,55 @@ const enqueueUpdates = async (file: EnteFile) => {
     }
 
     try {
-        switch (fileType) {
-            case FileType.image: {
-                const sourceURLs =
-                    await downloadManager.renderableSourceURLs(file);
-                const imageURL = ensureString(sourceURLs.url);
-                const originalImageBlob = sourceURLs.originalImageBlob!;
+        if (isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING) {
+            if (file.metadata.fileType == FileType.video) {
+                const playlistData = await hlsPlaylistDataForFile(file);
+                if (playlistData) {
+                    const {
+                        playlistURL: videoPlaylistURL,
+                        width,
+                        height,
+                    } = playlistData;
+                    update({ videoPlaylistURL, width, height });
+                    return;
+                }
+            }
+        }
+
+        const sourceURLs = await downloadManager.renderableSourceURLs(file);
+
+        switch (sourceURLs.type) {
+            case "image": {
+                const { imageURL, originalImageBlob } = sourceURLs;
                 const itemData = await withDimensionsIfPossible(imageURL);
                 update({ ...itemData, imageURL, originalImageBlob });
                 break;
             }
 
-            case FileType.video: {
-                if (
-                    isDevBuild &&
-                    process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
-                ) {
-                    if (file.metadata.fileType == FileType.video) {
-                        const playlistURL = await hlsPlaylistForFile(file);
-                        if (playlistURL) {
-                            update({ videoPlaylistURL: playlistURL });
-                            break;
-                        }
-                    }
-                }
-
-                const sourceURLs =
-                    await downloadManager.renderableSourceURLs(file);
-                update({ videoURL: sourceURLs.url as string });
+            case "video": {
+                const { videoURL } = sourceURLs;
+                update({ videoURL });
                 break;
             }
 
-            case FileType.livePhoto: {
-                const sourceURLs =
-                    await downloadManager.renderableSourceURLs(file);
-                const livePhotoSourceURLs =
-                    sourceURLs.url as LivePhotoSourceURL;
+            case "livePhoto": {
                 // The image component of a live photo usually is an HEIC file,
-                // which cannot be displayed natively by browsers and needs a
-                // conversion, which is slow on web (faster on desktop). We
+                // which cannot be displayed natively by many browsers and needs
+                // a conversion, which is slow on web (faster on desktop). We
                 // already have both components available since they're part of
                 // the same zip. And in the UI, the first (default) interaction
                 // is to loop the live video.
                 //
                 // For these reasons, we resolve with the video first, then
                 // resolve with the image.
-                const videoURL = await livePhotoSourceURLs.video();
+                const videoURL = await sourceURLs.videoURL();
                 update({
                     videoURL,
                     isContentLoading: true,
                     isContentZoomable: false,
                 });
-                const imageURL = ensureString(
-                    await livePhotoSourceURLs.image(),
-                );
-                const originalImageBlob =
-                    livePhotoSourceURLs.originalImageBlob()!;
+                const imageURL = await sourceURLs.imageURL();
+                const originalImageBlob = sourceURLs.originalImageBlob;
                 update({
                     ...(await withDimensionsIfPossible(imageURL)),
                     imageURL,

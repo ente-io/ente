@@ -5,12 +5,16 @@ import "package:ml_linalg/linalg.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
+import "package:photos/services/machine_learning/ml_constants.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart";
+import "package:photos/services/machine_learning/semantic_search/query_result.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
+
+final Map<String, dynamic> _isolateCache = {};
 
 enum IsolateOperation {
   /// [MLIndexingIsolate]
@@ -35,10 +39,15 @@ enum IsolateOperation {
   runClipText,
 
   /// [MLComputer]
-  compareEmbeddings,
+  computeBulkSimilarities,
 
   /// [FaceClusteringService]
   linearIncrementalClustering,
+
+  /// Cache operations
+  setIsolateCache,
+  clearIsolateCache,
+  clearAllIsolateCache,
 }
 
 /// WARNING: Only return primitives unless you know the method is only going
@@ -121,19 +130,31 @@ Future<dynamic> isolateFunction(
       return List<double>.from(textEmbedding, growable: false);
 
     /// MLComputer
-    case IsolateOperation.compareEmbeddings:
-      final List<EmbeddingVector> embeddings =
-          (args['embeddings'] as List<String>)
-              .map((jsonString) => EmbeddingVector.fromJsonString(jsonString))
-              .toList();
-      final otherEmbedding =
-          Vector.fromList(args['otherEmbedding'] as List<double>);
-      final Map<int, double> result = {};
-      for (final embedding in embeddings) {
-        final double similarity = embedding.vector.dot(otherEmbedding);
-        result[embedding.fileID] = similarity;
+    case IsolateOperation.computeBulkSimilarities:
+      final imageEmbeddings =
+          _isolateCache[imageEmbeddingsKey] as List<EmbeddingVector>;
+      final textEmbedding =
+          args["textQueryToEmbeddingMap"] as Map<String, List<double>>;
+      final minimumSimilarityMap =
+          args["minimumSimilarityMap"] as Map<String, double>;
+      final result = <String, List<QueryResult>>{};
+      for (final MapEntry<String, List<double>> entry
+          in textEmbedding.entries) {
+        final query = entry.key;
+        final textVector = Vector.fromList(entry.value);
+        final minimumSimilarity = minimumSimilarityMap[query]!;
+        final queryResults = <QueryResult>[];
+        for (final imageEmbedding in imageEmbeddings) {
+          final similarity = imageEmbedding.vector.dot(textVector);
+          if (similarity >= minimumSimilarity) {
+            queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
+          }
+        }
+        queryResults
+            .sort((first, second) => second.score.compareTo(first.score));
+        result[query] = queryResults;
       }
-      return Map<int, double>.from(result);
+      return result;
 
     /// Cases for MLComputer end here
 
@@ -145,5 +166,27 @@ Future<dynamic> isolateFunction(
       return result;
 
     /// Cases for FaceClusteringService end here
+
+    /// Cases for Caching start here
+
+    /// Caching
+    case IsolateOperation.setIsolateCache:
+      final key = args['key'] as String;
+      final value = args['value'];
+      _isolateCache[key] = value;
+      return true;
+
+    /// Caching
+    case IsolateOperation.clearIsolateCache:
+      final key = args['key'] as String;
+      _isolateCache.remove(key);
+      return true;
+
+    /// Caching
+    case IsolateOperation.clearAllIsolateCache:
+      _isolateCache.clear();
+      return true;
+
+    /// Cases for Caching stop here
   }
 }

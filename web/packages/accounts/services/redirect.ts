@@ -1,4 +1,4 @@
-import { appName } from "@/base/app";
+import { appName } from "ente-base/app";
 
 /**
  * The default page ("home route") for each of our apps.

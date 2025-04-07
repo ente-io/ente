@@ -1,17 +1,20 @@
-import { ensureElectron } from "@/base/electron";
-import log from "@/base/log";
-import type { Electron } from "@/base/types/ipc";
+import { ensureElectron } from "ente-base/electron";
+import log from "ente-base/log";
+import type { Electron } from "ente-base/types/ipc";
 import {
     toDataOrPathOrZipEntry,
     type DesktopUploadItem,
     type UploadItem,
-} from "@/gallery/services/upload";
+} from "ente-gallery/services/upload";
 import {
     readConvertToMP4Done,
     readConvertToMP4Stream,
     writeConvertToMP4Stream,
-} from "@/gallery/utils/native-stream";
-import { parseMetadataDate, type ParsedMetadata } from "@/media/file-metadata";
+} from "ente-gallery/utils/native-stream";
+import {
+    parseMetadataDate,
+    type ParsedMetadata,
+} from "ente-media/file-metadata";
 import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,

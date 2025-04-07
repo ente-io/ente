@@ -1,6 +1,6 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { Dialog, DialogContent, DialogTitle, Stack } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { t } from "i18next";
 import React from "react";
 

@@ -300,7 +300,7 @@ or, if you just want to just set the `AllowedOrigins` Header, you can use the
 following command to do so.
 
 ```sh
-mc admin config set <your-minio>/<your-bucket-name> set "cors_allowed_origin=*"
+mc admin config set <your-minio>/<your-bucket-name> api cors_allow_origin="*"
 ```
 
 You can create also `.csv` file and dump the list of origins you would like to

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import { FileType } from "@/media/file-type";
-import { getLocalCollections } from "@/new/photos/services/collections";
+import { FileType } from "ente-media/file-type";
+import { getLocalCollections } from "ente-new/photos/services/collections";
 import {
     getLocalFiles,
     groupFilesByCollectionID,
-} from "@/new/photos/services/files";
+} from "ente-new/photos/services/files";
 import { parseDateFromDigitGroups } from "services/upload/date";
 import {
     matchTakeoutMetadata,

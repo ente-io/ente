@@ -135,7 +135,7 @@ func (c *ClICtrl) UpdateFreeStorage(ctx context.Context, params model.AdminActio
 		return err
 	}
 
-	fmt.Printf("Updating storage for user %s to %s (old %s) with new expirty %s (old %s) \n",
+	fmt.Printf("Updating storage for user %s to %s (old %s) with new expiry %s (old %s) \n",
 		params.UserEmail,
 		utils.ByteCountDecimalGIB(storageSize), utils.ByteCountDecimalGIB(userDetails.Subscription.Storage),
 		date.Format("2006-01-02"),

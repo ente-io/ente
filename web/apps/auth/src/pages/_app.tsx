@@ -1,26 +1,26 @@
-import { accountLogout } from "@/accounts/services/logout";
-import { clientPackageName, staticAppTitle } from "@/base/app";
-import { CustomHead } from "@/base/components/Head";
+import "@fontsource-variable/inter";
+import { CssBaseline } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import { accountLogout } from "ente-accounts/services/logout";
+import { clientPackageName, staticAppTitle } from "ente-base/app";
+import { CustomHead } from "ente-base/components/Head";
 import {
     LoadingIndicator,
     TranslucentLoadingOverlay,
-} from "@/base/components/loaders";
-import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
+} from "ente-base/components/loaders";
+import { AttributedMiniDialog } from "ente-base/components/MiniDialog";
+import { useAttributedMiniDialog } from "ente-base/components/utils/dialog";
 import {
     useIsRouteChangeInProgress,
     useSetupI18n,
     useSetupLogs,
-} from "@/base/components/utils/hooks-app";
-import { authTheme } from "@/base/components/utils/theme";
-import { BaseContext, deriveBaseContext } from "@/base/context";
-import { logStartupBanner } from "@/base/log-web";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getData } from "@ente/shared/storage/localStorage";
-import type { User } from "@ente/shared/user/types";
-import "@fontsource-variable/inter";
-import { CssBaseline } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
+} from "ente-base/components/utils/hooks-app";
+import { authTheme } from "ente-base/components/utils/theme";
+import { BaseContext, deriveBaseContext } from "ente-base/context";
+import { logStartupBanner } from "ente-base/log-web";
+import HTTPService from "ente-shared/network/HTTPService";
+import { getData } from "ente-shared/storage/localStorage";
+import type { User } from "ente-shared/user/types";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo } from "react";

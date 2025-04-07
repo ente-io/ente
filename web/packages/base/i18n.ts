@@ -1,6 +1,6 @@
-import { isDevBuild } from "@/base/env";
-import log from "@/base/log";
-import { includes } from "@/utils/type-guards";
+import { isDevBuild } from "ente-base/env";
+import log from "ente-base/log";
+import { includes } from "ente-utils/type-guards";
 import { getUserLocales } from "get-user-locale";
 import i18n from "i18next";
 import resourcesToBackend from "i18next-resources-to-backend";

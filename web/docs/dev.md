@@ -70,7 +70,7 @@ To add a local package as a dependency, use `<package-name>@*`. The "\*" here
 denotes any version.
 
 ```sh
-yarn workspace photos add '@/utils@*'
+yarn workspace photos add 'ente-utils@*'
 ```
 
 > Note: The yarn (classic) command above causes harmless but noisy diffs in

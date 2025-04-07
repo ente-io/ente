@@ -1,15 +1,15 @@
-import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto";
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import { apiURL } from "@/base/origins";
-import { type Location } from "@/base/types";
+import { decryptMetadataJSON, encryptMetadataJSON } from "ente-base/crypto";
+import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
+import { apiURL } from "ente-base/origins";
+import { type Location } from "ente-base/types";
 import {
     fileLogID,
     type EnteFile,
     type FileMagicMetadata,
     type FilePrivateMagicMetadata,
     type FilePublicMagicMetadata,
-} from "@/media/file";
-import { nullToUndefined } from "@/utils/transform";
+} from "ente-media/file";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import { mergeMetadata1 } from "./file";
 import { FileType } from "./file-type";
@@ -778,7 +778,7 @@ export interface ParsedMetadata {
      * Logically this is a date in local timezone of the place where the photo
      * was taken. See: [Note: Photos are always in local date/time].
      */
-    creationDate?: ParsedMetadataDate;
+    creationDate?: ParsedMetadataDate | undefined;
     /** The GPS coordinates where the photo was taken. */
     location?: Location;
     /**

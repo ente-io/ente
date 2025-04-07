@@ -1,12 +1,10 @@
-import "dart:async" show unawaited;
+import "dart:async" show Timer, unawaited;
 import "dart:developer" as dev show log;
 import "dart:math" show min;
 import "dart:ui" show Image;
 
-import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
-import "package:ml_linalg/vector.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -15,13 +13,14 @@ import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/ml_versions.dart";
-import "package:photos/models/ml/vector.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
+import "package:photos/services/machine_learning/semantic_search/query_result.dart";
 import "package:shared_preferences/shared_preferences.dart";
+import "package:synchronized/synchronized.dart";
 
 class SemanticSearchService {
   static final _logger = Logger("SemanticSearchService");
@@ -30,7 +29,6 @@ class SemanticSearchService {
   static final SemanticSearchService instance =
       SemanticSearchService._privateConstructor();
 
-  static final Computer _computer = Computer.shared();
   final LRUMap<String, List<double>> _queryEmbeddingCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
   late final mlDataDB = MLDataDB.instance;
@@ -38,7 +36,11 @@ class SemanticSearchService {
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
 
-  Future<List<EmbeddingVector>>? _cachedImageEmbeddingVectors;
+  final _cacheLock = Lock();
+  bool _imageEmbeddingsAreCached = false;
+  Timer? _embeddingsCacheTimer;
+  final Duration _embeddingsCacheDuration = const Duration(seconds: 60);
+
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
 
@@ -53,12 +55,11 @@ class SemanticSearchService {
     _logger.info("init called");
     _hasInitialized = true;
 
-    // call getClipEmbeddings after 5 seconds
-    Future.delayed(const Duration(seconds: 5), () async {
-      await getClipVectors();
-    });
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
-      _cachedImageEmbeddingVectors = null;
+      if (_imageEmbeddingsAreCached) {
+        MLComputer.instance.clearImageEmbeddingsCache();
+        _imageEmbeddingsAreCached = false;
+      }
     });
 
     unawaited(_loadTextModel(delay: true));
@@ -108,14 +109,21 @@ class SemanticSearchService {
     _logger.info("Indexes cleared");
   }
 
-  Future<List<EmbeddingVector>> getClipVectors() async {
-    if (_cachedImageEmbeddingVectors != null) {
-      return _cachedImageEmbeddingVectors!;
-    }
-    _cachedImageEmbeddingVectors ??= mlDataDB.getAllClipVectors();
-    _logger.info("read all embeddings from DB");
-
-    return _cachedImageEmbeddingVectors!;
+  Future<void> _cacheClipVectors() async {
+    return _cacheLock.synchronized(() async {
+      _resetInactivityTimer();
+      if (_imageEmbeddingsAreCached) {
+        return;
+      }
+      final now = DateTime.now();
+      final imageEmbeddings = await mlDataDB.getAllClipVectors();
+      _logger.info(
+        "read all ${imageEmbeddings.length} embeddings from DB in ${DateTime.now().difference(now).inMilliseconds} ms",
+      );
+      await MLComputer.instance.cacheImageEmbeddings(imageEmbeddings);
+      _imageEmbeddingsAreCached = true;
+      return;
+    });
   }
 
   Future<List<EnteFile>> getMatchingFiles(
@@ -257,17 +265,10 @@ class SemanticSearchService {
     required Map<String, double> minimumSimilarityMap,
   }) async {
     final startTime = DateTime.now();
-    final imageEmbeddings = await getClipVectors();
-    final Map<String, List<QueryResult>> queryResults = await _computer
-        .compute<Map<String, dynamic>, Map<String, List<QueryResult>>>(
-      computeBulkSimilarities,
-      param: {
-        "imageEmbeddings": imageEmbeddings,
-        "textQueryToEmbeddingMap": textQueryToEmbeddingMap,
-        "minimumSimilarityMap": minimumSimilarityMap,
-      },
-      taskName: "computeBulkSimilarities",
-    );
+    await _cacheClipVectors();
+    final Map<String, List<QueryResult>> queryResults = await MLComputer
+        .instance
+        .computeBulkSimilarities(textQueryToEmbeddingMap, minimumSimilarityMap);
     final endTime = DateTime.now();
     _logger.info(
       "computingSimilarities took for ${textQueryToEmbeddingMap.length} queries " +
@@ -276,6 +277,19 @@ class SemanticSearchService {
           "ms",
     );
     return queryResults;
+  }
+
+  void _resetInactivityTimer() {
+    _embeddingsCacheTimer?.cancel();
+    _embeddingsCacheTimer = Timer(_embeddingsCacheDuration, () {
+      _logger.info(
+        'Embeddings cache is unused for ${_embeddingsCacheDuration.inSeconds} seconds. Removing cache.',
+      );
+      if (_imageEmbeddingsAreCached) {
+        MLComputer.instance.clearImageEmbeddingsCache();
+        _imageEmbeddingsAreCached = false;
+      }
+    });
   }
 
   static Future<ClipResult> runClipImage(
@@ -295,51 +309,4 @@ class SemanticSearchService {
 
     return clipResult;
   }
-}
-
-Map<String, List<QueryResult>> computeBulkSimilarities(Map args) {
-  final imageEmbeddings = args["imageEmbeddings"] as List<EmbeddingVector>;
-  final textEmbedding =
-      args["textQueryToEmbeddingMap"] as Map<String, List<double>>;
-  final minimumSimilarityMap =
-      args["minimumSimilarityMap"] as Map<String, double>;
-  final result = <String, List<QueryResult>>{};
-  for (final MapEntry<String, List<double>> entry in textEmbedding.entries) {
-    final query = entry.key;
-    final textVector = Vector.fromList(entry.value);
-    final minimumSimilarity = minimumSimilarityMap[query]!;
-    final queryResults = <QueryResult>[];
-    if (!kDebugMode) {
-      for (final imageEmbedding in imageEmbeddings) {
-        final similarity = imageEmbedding.vector.dot(textVector);
-        if (similarity >= minimumSimilarity) {
-          queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
-        }
-      }
-    } else {
-      double bestScore = 0.0;
-      for (final imageEmbedding in imageEmbeddings) {
-        final similarity = imageEmbedding.vector.dot(textVector);
-        if (similarity >= minimumSimilarity) {
-          queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
-        }
-        if (similarity > bestScore) {
-          bestScore = similarity;
-        }
-      }
-      if (kDebugMode && queryResults.isEmpty) {
-        dev.log("No results found for query with best score: $bestScore");
-      }
-    }
-    queryResults.sort((first, second) => second.score.compareTo(first.score));
-    result[query] = queryResults;
-  }
-  return result;
-}
-
-class QueryResult {
-  final int id;
-  final double score;
-
-  QueryResult(this.id, this.score);
 }

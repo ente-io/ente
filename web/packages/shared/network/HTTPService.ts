@@ -1,5 +1,5 @@
-import log from "@/base/log";
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
+import log from "ente-base/log";
 import { ApiError, isApiErrorResponse } from "../error";
 
 type IHTTPHeaders = Record<string, any>;
