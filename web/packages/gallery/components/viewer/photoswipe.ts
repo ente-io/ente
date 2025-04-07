@@ -710,6 +710,9 @@ export class FileViewerPhotoSwipe {
 
             video.muted = !video.muted;
 
+            // TODO(HLS): Temporary gate
+            if (!process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING) return;
+
             // Go via the media chrome mute button when muting, because
             // otherwise the local storage that the media chrome internally
             // manages ('media-chrome-pref-muted' which can be 'true' or
