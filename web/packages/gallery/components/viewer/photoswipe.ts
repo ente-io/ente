@@ -6,7 +6,7 @@ import { t } from "i18next";
 import "media-chrome";
 import { MediaMuteButton } from "media-chrome";
 import "media-chrome/menu";
-import { MediaChromeMenu } from "media-chrome/menu";
+import { MediaChromeMenu, MediaChromeMenuButton } from "media-chrome/menu";
 import PhotoSwipe, { type SlideData } from "photoswipe";
 import {
     fileViewerDidClose,
@@ -467,6 +467,13 @@ export class FileViewerPhotoSwipe {
         let mediaControlsContainerElement: HTMLElement | undefined;
 
         /**
+         * True if the next change to the videoQuality is initiated by us. This
+         * is used by the "change" event listener to ignore these events,
+         * avoiding a cyclic update loop.
+         */
+        let shouldIgnoreNextVideoQualityChange = false;
+
+        /**
          * If a {@link mediaControllerID} is provided, then make the media
          * controls visible and link the media-control-bars (and other
          * containers that house controls) to the given controller. Otherwise
@@ -492,8 +499,9 @@ export class FileViewerPhotoSwipe {
                     videoQualityForFile(currentFile()) == "auto"
                         ? pt("Auto")
                         : pt("Original");
-                // Check first to avoid infinite update loop.
+                // Check first, and set a flag, to avoid infinite update loop.
                 if (qualityMenu.value != value) {
+                    shouldIgnoreNextVideoQualityChange = true;
                     qualityMenu.value = value;
                 }
             }
@@ -814,8 +822,12 @@ export class FileViewerPhotoSwipe {
             if (currentFileAnnotation().showDownload) handleDownload();
         };
 
-        const onVideoQualityChange = (e) => {
-            console.log(e);
+        const onVideoQualityChange = () => {
+            if (shouldIgnoreNextVideoQualityChange) {
+                // Ignore changes that we ourselves initiated on slide change.
+                shouldIgnoreNextVideoQualityChange = false;
+                return;
+            }
 
             // Currently there are only two entries in the video quality menu,
             // and the callback only gets invoked if the value gets changed from
@@ -829,6 +841,16 @@ export class FileViewerPhotoSwipe {
             } else {
                 originalVideoFileIDs.add(fileID);
             }
+
+            // Close the menu.
+            const menuButton = document.querySelector(
+                "media-settings-menu-button",
+            );
+            if (menuButton instanceof MediaChromeMenuButton)
+                menuButton.handleClick();
+
+            // Refresh the slide so that the video is fetched afresh, but using
+            // the updated `originalVideoFileIDs` value for it.
             this.refreshCurrentSlideContent();
         };
 
@@ -995,13 +1017,9 @@ export class FileViewerPhotoSwipe {
                 html: hlsVideoControlsHTML(),
                 onInit: (element, pswp) => {
                     mediaControlsContainerElement = element;
-                    const qualityMenu =
-                        element.querySelector("#et-quality-menu");
-                    if (qualityMenu instanceof MediaChromeMenu) {
-                        qualityMenu.addEventListener(
-                            "change",
-                            onVideoQualityChange,
-                        );
+                    const menu = element.querySelector("#et-quality-menu");
+                    if (menu instanceof MediaChromeMenu) {
+                        menu.addEventListener("change", onVideoQualityChange);
                     }
                     pswp.on("change", () => {
                         const { mediaControllerID } = currSlideData();
