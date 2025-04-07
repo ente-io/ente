@@ -4,8 +4,8 @@ import { workerBridge } from "ente-base/worker/worker-bridge";
 import { FileType } from "ente-media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
-import { convertToMP4 } from "../services/ffmpeg";
-import { detectFileTypeInfo } from "./detect-type";
+import { convertToMP4 } from "./ffmpeg";
+import { detectFileTypeInfo } from "../utils/detect-type";
 
 /**
  * Return a new {@link Blob} containing an image's data in a format that the

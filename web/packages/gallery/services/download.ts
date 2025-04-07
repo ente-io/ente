@@ -15,13 +15,10 @@ import {
 import { ensureAuthToken } from "ente-base/local-user";
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
-import {
-    playableVideoURL,
-    renderableImageBlob,
-} from "ente-gallery/utils/convert";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
+import { playableVideoURL, renderableImageBlob } from "./convert";
 
 /**
  * URL(s) for the original image or video, alongwith with potential conversions
