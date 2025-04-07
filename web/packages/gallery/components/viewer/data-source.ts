@@ -283,7 +283,10 @@ export const fileViewerDidClose = () => {
  *
  * Then it'll continue fetching the original.
  *
- * - For images and videos, this will be the single original.
+ * - For images this will be the single original.
+ *
+ * - For videos this will be either the HLS playlist to a streamable variant of
+ *   the video (if the video has one available), or the original video itsel.
  *
  * - For live photos, this will also be a two step process, first fetching the
  *   video component, then fetching the image component.
