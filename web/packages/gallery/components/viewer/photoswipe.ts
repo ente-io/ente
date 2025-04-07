@@ -3,6 +3,7 @@ import { FileType } from "ente-media/file-type";
 import "hls-video-element";
 import { t } from "i18next";
 import "media-chrome";
+import { MediaMuteButton } from "media-chrome";
 import "media-chrome/menu";
 import PhotoSwipe, { type SlideData } from "photoswipe";
 import {
@@ -708,6 +709,13 @@ export class FileViewerPhotoSwipe {
             if (!video) return;
 
             video.muted = !video.muted;
+
+            // Go via the media chrome mute button when muting, because
+            // otherwise the local storage that the media chrome internally
+            // manages ('media-chrome-pref-muted' which can be 'true' or
+            // 'false') gets out of sync with the playback state.
+            const muteButton = document.querySelector("media-mute-button");
+            if (muteButton instanceof MediaMuteButton) muteButton.handleClick();
         };
 
         // The PhotoSwipe dialog has being closed and the animations have
