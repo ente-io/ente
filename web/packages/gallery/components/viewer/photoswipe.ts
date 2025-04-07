@@ -1127,6 +1127,10 @@ export class FileViewerPhotoSwipe {
                         if (!isFocusedOnUIControl()) {
                             cb = handleTogglePlayIfPossible;
                         }
+                        // Prevent the browser's default space behaviour of
+                        // scrolling the file list in the background (which is
+                        // not appropriate when the file viewer is visible).
+                        if (e.target == document.body) e.preventDefault();
                         break;
                     case "Backspace":
                     case "Delete":
