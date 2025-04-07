@@ -1141,11 +1141,20 @@ export class FileViewerPhotoSwipe {
 
         // Return true if the current keyboard focus is on any of the UI
         // controls (e.g. as a result of user tabbing through them).
-        const isFocusedOnUIControl = () => {
+        const isFocusVisibledOnUIControl = () => {
             const fv = document.querySelector(":focus-visible");
             if (fv && !fv.classList.contains("pswp")) {
                 return true;
             }
+
+            // Media Chrome does its own thing and doesn't seem to gain the
+            // :focus-visible pseudo class even though it visually looks that
+            // way. We need to add a special case for it.
+            const f = document.querySelector(":focus");
+            if (f?.tagName.startsWith("MEDIA-")) {
+                return true;
+            }
+
             return false;
         };
 
@@ -1164,7 +1173,7 @@ export class FileViewerPhotoSwipe {
         const handleHelp = () => delegate.performKeyAction("help");
 
         pswp.on("keydown", (pswpEvent) => {
-            // Ignore keyboard events when we do not have "focus".
+            // Ignore keyboard events when one of our sub-dialogs are open.
             if (delegate.shouldIgnoreKeyboardEvent()) {
                 pswpEvent.preventDefault();
                 return;
@@ -1175,6 +1184,15 @@ export class FileViewerPhotoSwipe {
             const key = e.key;
             // Even though we ignore shift, Caps lock might still be on.
             const lkey = e.key.toLowerCase();
+
+            // When one of the controls on the screen has a visible focus
+            // indicator, we want the Escape key to blur its focus instead of
+            // closing the PhotoSwipe dialog.
+            if (isFocusVisibledOnUIControl() && key == "Escape") {
+                resetFocus();
+                pswpEvent.preventDefault();
+                return;
+            }
 
             // Keep the keybindings such that they don't use modifiers, because
             // these are more likely to interfere with browser shortcuts.
@@ -1209,7 +1227,7 @@ export class FileViewerPhotoSwipe {
                     case " ":
                         // Space activates controls when they're focused, so
                         // only act on it if no specific control is focused.
-                        if (!isFocusedOnUIControl()) {
+                        if (!isFocusVisibledOnUIControl()) {
                             cb = handleTogglePlayIfPossible;
                         }
                         // Prevent the browser's default space behaviour of
