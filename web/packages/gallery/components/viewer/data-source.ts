@@ -254,6 +254,13 @@ export const fileViewerDidClose = () => {
 };
 
 /**
+ * Options to modify the default behaviour of {@link itemDataForFile}.
+ */
+export interface ItemDataOpts {
+    videoQuality?: "auto" | "original";
+}
+
+/**
  * Return the best available {@link ItemData} for rendering the given
  * {@link file}.
  *
@@ -263,6 +270,8 @@ export const fileViewerDidClose = () => {
  *
  * At each step, we call the provided callback so that file viewer can call us
  * again to get the updated data.
+ *
+ * @param opts Options to modify the default behaviours.
  *
  * ---
  *
@@ -304,15 +313,18 @@ export const fileViewerDidClose = () => {
  * next time the data is requested we repeat the process instead of continuing
  * to serve the incomplete result.
  */
-export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
+export const itemDataForFile = (
+    file: EnteFile,
+    opts: ItemDataOpts | undefined,
+    needsRefresh: () => void,
+) => {
     const fileID = file.id;
     const fileType = file.metadata.fileType;
 
     const validTill = _state.itemDataValidTillByFileID.get(fileID);
     if (validTill && validTill < new Date()) {
         // Don't use the cached entry if it has become stale.
-        _state.itemDataByFileID.delete(fileID);
-        _state.itemDataValidTillByFileID.delete(fileID);
+        forgetItemDataForFileID(fileID);
     }
 
     let itemData = _state.itemDataByFileID.get(fileID);
@@ -325,10 +337,21 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
         itemData = { fileID, fileType, isContentLoading: true };
         _state.itemDataByFileID.set(file.id, itemData);
         _state.itemDataValidTillByFileID.delete(fileID);
-        void enqueueUpdates(file);
+        void enqueueUpdates(file, opts);
     }
 
     return itemData;
+};
+
+/**
+ * Forget item data for the given {@link file}.
+ *
+ * This is called when we change the options passed to {@link itemDataForFile},
+ * and so would like to clear any previously cached data.
+ */
+export const forgetItemDataForFileID = (fileID: number) => {
+    _state.itemDataByFileID.delete(fileID);
+    _state.itemDataValidTillByFileID.delete(fileID);
 };
 
 /**
@@ -338,10 +361,8 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
  * full retry when they come back the next time.
  */
 export const forgetFailedItemDataForFileID = (fileID: number) => {
-    if (_state.itemDataByFileID.get(fileID)?.fetchFailed) {
-        _state.itemDataByFileID.delete(fileID);
-        _state.itemDataValidTillByFileID.delete(fileID);
-    }
+    if (_state.itemDataByFileID.get(fileID)?.fetchFailed)
+        forgetItemDataForFileID(fileID);
 };
 
 /**
@@ -366,7 +387,10 @@ export const updateItemDataAlt = (updatedFile: EnteFile) => {
 const forgetFailedItems = () =>
     [..._state.itemDataByFileID.keys()].forEach(forgetFailedItemDataForFileID);
 
-const enqueueUpdates = async (file: EnteFile) => {
+const enqueueUpdates = async (
+    file: EnteFile,
+    opts: ItemDataOpts | undefined,
+) => {
     const fileID = file.id;
     const fileType = file.metadata.fileType;
 
@@ -427,7 +451,10 @@ const enqueueUpdates = async (file: EnteFile) => {
 
     try {
         if (isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING) {
-            if (file.metadata.fileType == FileType.video) {
+            if (
+                file.metadata.fileType == FileType.video &&
+                opts?.videoQuality != "original"
+            ) {
                 const playlistData = await hlsPlaylistDataForFile(file);
                 if (playlistData) {
                     const {

@@ -12,9 +12,11 @@ import {
     fileViewerWillOpen,
     forgetExifForItemData,
     forgetFailedItemDataForFileID,
+    forgetItemDataForFileID,
     itemDataForFile,
     updateFileInfoExifIfNeeded,
     type ItemData,
+    type ItemDataOpts,
 } from "./data-source";
 import {
     type FileViewerAnnotatedFile,
@@ -297,6 +299,12 @@ export class FileViewerPhotoSwipe {
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
 
+        /**
+         * File (ID)s for which we should render the original, non-streamable,
+         * video even if a HLS playlist is available.
+         */
+        const originalVideoFileIDs = new Set<number>();
+
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
 
@@ -306,7 +314,13 @@ export class FileViewerPhotoSwipe {
             const files = delegate.getFiles();
             const file = files[index]!;
 
-            const itemData = itemDataForFile(file, () =>
+            const opts: ItemDataOpts = {
+                videoQuality: originalVideoFileIDs.has(file.id)
+                    ? "original"
+                    : "auto",
+            };
+
+            const itemData = itemDataForFile(file, opts, () =>
                 pswp.refreshSlideContent(index),
             );
 
@@ -785,11 +799,20 @@ export class FileViewerPhotoSwipe {
             if (currentFileAnnotation().showDownload) handleDownload();
         };
 
-        const videoQuality = "auto";
+        const onVideoQualityChange = () => {
+            // Currently there are only two entries in the video quality menu,
+            // and the callback only gets invoked if the value gets changed from
+            // the current value. So we can assume toggle semantics when
+            // implementing the logic below.
 
-        const onVideoQualityChange = (qualityMenu: MediaChromeMenu) => {
-            const newQuality = qualityMenu.value;
-            console.log(videoQuality, newQuality);
+            const fileID = currentAnnotatedFile().file.id;
+            forgetItemDataForFileID(fileID);
+            if (originalVideoFileIDs.has(fileID)) {
+                originalVideoFileIDs.delete(fileID);
+            } else {
+                originalVideoFileIDs.add(fileID);
+            }
+            this.refreshCurrentSlideContent();
         };
 
         const showIf = (element: HTMLElement, condition: boolean) =>
