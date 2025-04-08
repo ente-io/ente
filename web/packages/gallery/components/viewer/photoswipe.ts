@@ -327,7 +327,7 @@ export class FileViewerPhotoSwipe {
             );
 
             if (itemData.fileType === FileType.video) {
-                const { videoURL, videoPlaylistURL } = itemData;
+                const { videoPlaylistURL, videoURL } = itemData;
                 if (videoPlaylistURL) {
                     const mcID = `ente-mc-${file.id}`;
                     return {
@@ -335,10 +335,24 @@ export class FileViewerPhotoSwipe {
                         html: hlsVideoHTML(videoPlaylistURL, mcID),
                         mediaControllerID: mcID,
                     };
+                } else if (
+                    videoURL &&
+                    // TODO(HLS):
+                    process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
+                ) {
+                    const mcID = `ente-mc-${file.id}`;
+                    return {
+                        ...itemData,
+                        html: videoHTML(videoURL, mcID),
+                        mediaControllerID: mcID,
+                    };
                 } else if (videoURL) {
                     return {
                         ...itemData,
-                        html: videoHTML(videoURL, !!disableDownload),
+                        html: videoHTMLBrowserControls(
+                            videoURL,
+                            !!disableDownload,
+                        ),
                     };
                 }
             }
@@ -1341,7 +1355,7 @@ export class FileViewerPhotoSwipe {
     refreshCurrentSlideFavoriteButtonIfNeeded: () => void;
 }
 
-const videoHTML = (url: string, disableDownload: boolean) => `
+const videoHTMLBrowserControls = (url: string, disableDownload: boolean) => `
 <video controls ${disableDownload && "controlsList=nodownload"} oncontextmenu="return false;">
   <source src="${url}" />
   Your browser does not support video playback.
@@ -1360,14 +1374,20 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
 </media-controller>
 `;
 
+const videoHTML = (url: string, mediaControllerID: string) => `
+<media-controller id="${mediaControllerID}" nohotkeys>
+  <video playsinline slot="media" src="${url}"></video>
+</media-controller>
+`;
+
 /**
- * HTML for controls associated with {@link hlsVideoHTML}.
+ * HTML for controls associated with {@link hlsVideoHTML} or {@link videoHTML}.
  *
  * To make these functional, the `media-control-bar` requires the
  * `mediacontroller="${mediaControllerID}"` attribute.
  *
- * TODO(HLS): Add translations for all the pts
- * TODO(HLS): Add "Toggle play", "Seek forward, backward" to list of shortcuts
+ * - TODO(HLS): Add translations for all the pts
+ * - TODO(HLS): Add "Toggle play", "Seek forward, backward" to list of shortcuts
  *
  * Notes:
  *
