@@ -175,8 +175,31 @@
     }
 }
 
-/* Change the cursor on the thumbnail to the default arrow to indicate that it is
-   not interactable (PhotoSwipe by default shows the zoom out icon). */
+.pswp-ente .pswp__caption.ente-video {
+    /* Add extra offset for video captions so that they do not overlap with the
+       video controls. The constant was picked such that it lay above the media
+       controls. */
+    bottom: 48px;
+    /* Adding a caption with a blur backdrop filter above the video element
+       contained in a media-controller causes a subtle tint to be overlaid on
+       the entire video. This is visible on both Chrome and Firefox as of
+       writing.
+
+       We'll hide the caption anyways when hovering on the controls or when the
+       video is playing, so remove the backdrop filter and rely on the
+       translucent background. Note that usually the video might not even extent
+       to this part of the screen on desktop sized screens. */
+    backdrop-filter: none;
+    /* Since there is too much going on in this part of the screen now, also
+      reduce the maximum number of lines for the caption. */
+    p {
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+}
+
+/* Change the cursor on the thumbnail to the default arrow to indicate that it
+   is not interactable (PhotoSwipe by default shows the zoom out icon). */
 .pswp-ente .pswp__img {
     cursor: auto;
 }

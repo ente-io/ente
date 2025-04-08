@@ -1062,11 +1062,10 @@ export class FileViewerPhotoSwipe {
                         const { fileType, alt } = currSlideData();
                         element.querySelector("p")!.innerText = alt ?? "";
                         element.style.visibility = alt ? "visible" : "hidden";
-                        // Add extra offset for video captions so that they do
-                        // not overlap with the video controls. The constant is
-                        // such that it lies above the media controls.
-                        element.style.bottom =
-                            fileType === FileType.video ? "44px" : "0";
+                        element.classList.toggle(
+                            "ente-video",
+                            fileType == FileType.video,
+                        );
                     });
                 },
             });
