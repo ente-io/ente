@@ -222,7 +222,7 @@
   Ref (not directly relevant, but a general direction):
   https://github.com/muxinc/media-elements/blob/main/packages/custom-media-element/custom-media-element.ts
  */
-.pswp-ente media-controller.et-vanilla-video {
+.pswp-ente media-controller.ente-vanilla-video {
     display: inline;
     /*
      On Chrome (I didn't check elsewhere), when putting a regular video element

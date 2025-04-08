@@ -524,7 +524,7 @@ export class FileViewerPhotoSwipe {
             // TODO(HLS): Temporary gate
             if (!process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING) return;
 
-            const qualityMenu = container?.querySelector("#et-quality-menu");
+            const qualityMenu = container?.querySelector("#ente-quality-menu");
             if (qualityMenu instanceof MediaChromeMenu) {
                 const { videoPlaylistURL } = itemData;
                 const value = videoPlaylistURL ? pt("Auto") : pt("Original");
@@ -1032,7 +1032,7 @@ export class FileViewerPhotoSwipe {
                 html: hlsVideoControlsHTML(),
                 onInit: (element, pswp) => {
                     mediaControlsContainerElement = element;
-                    const menu = element.querySelector("#et-quality-menu");
+                    const menu = element.querySelector("#ente-quality-menu");
                     if (menu instanceof MediaChromeMenu) {
                         menu.addEventListener("change", onVideoQualityChange);
                     }
@@ -1430,7 +1430,7 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
 `;
 
 const videoHTML = (url: string, mediaControllerID: string) => `
-<media-controller class="et-vanilla-video" id="${mediaControllerID}" nohotkeys>
+<media-controller class="ente-vanilla-video" id="${mediaControllerID}" nohotkeys>
   <video playsinline slot="media" src="${url}"></video>
 </media-controller>
 `;
@@ -1470,10 +1470,10 @@ const videoHTML = (url: string, mediaControllerID: string) => `
  */
 const hlsVideoControlsHTML = () => `
 <div>
-  <media-settings-menu id="et-settings-menu" hidden anchor="et-settings-menu-btn">
+  <media-settings-menu id="ente-settings-menu" hidden anchor="ente-settings-menu-btn">
     <media-settings-menu-item>
       ${pt("Quality")}
-      <media-chrome-menu id="et-quality-menu" slot="submenu" hidden>
+      <media-chrome-menu id="ente-quality-menu" slot="submenu" hidden>
         <div slot="title">${pt("Quality")}</div>
         <media-chrome-menu-item type="radio" aria-checked="true">${pt("Auto")}</media-chrome-menu-item>
         <media-chrome-menu-item type="radio">${pt("Original")}</media-chrome-menu-item>
@@ -1497,7 +1497,7 @@ const hlsVideoControlsHTML = () => `
     <media-mute-button notooltip></media-mute-button>
     <media-time-display showduration notoggle></media-time-display>
     <media-text-display></media-text-display>
-    <media-settings-menu-button id="et-settings-menu-btn" invoketarget="et-settings-menu" notooltip>
+    <media-settings-menu-button id="ente-settings-menu-btn" invoketarget="ente-settings-menu" notooltip>
       <svg slot="icon" viewBox="0 0 24 24">${settingsSVGPath}</svg>
     </media-settings-menu-button>
     <media-pip-button notooltip></media-pip-button>
