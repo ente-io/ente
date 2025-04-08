@@ -312,6 +312,8 @@ media-settings-menu {
 body:has(
         media-control-bar:hover,
         media-settings-menu:hover,
+        media-settings-menu:focus,
+        media-settings-menu:focus-visible,
         media-settings-menu:focus-within
     ) {
     & .pswp-ente .pswp__caption {
