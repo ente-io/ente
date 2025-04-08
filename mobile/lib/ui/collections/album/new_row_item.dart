@@ -10,11 +10,11 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class NewAlbumIcon extends StatelessWidget {
+class NewAlbumRowItemWidget extends StatelessWidget {
   final Color? color;
   final double height;
   final double width;
-  const NewAlbumIcon({
+  const NewAlbumRowItemWidget({
     this.color,
     super.key,
     required this.height,
@@ -52,7 +52,7 @@ class NewAlbumIcon extends StatelessWidget {
                 );
                 Navigator.of(context).pop();
               } catch (e, s) {
-                Logger("CreateNewAlbumIcon")
+                Logger("CreateNewAlbumRowItemWidget")
                     .severe("Failed to rename album", e, s);
                 rethrow;
               }
