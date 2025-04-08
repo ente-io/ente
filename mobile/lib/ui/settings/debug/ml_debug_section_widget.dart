@@ -89,15 +89,19 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               final tenKeys =
                   Uint64List.fromList(tenVectors.map((e) => e.fileID).toList());
               final indexPath = (await getApplicationSupportDirectory()).path +
-                  "/ml/test1/vector_db";
-              final stats = await getIndexStats(indexPath: indexPath);
+                  "/ml/test/vector_db_index.usearch";
+              final rustVectorDB = VectorDb(
+                filePath: indexPath,
+                dimensions: BigInt.from(tenEmbeddings.first.length),
+              );
+              await rustVectorDB.resetIndex();
+              final stats = await rustVectorDB.getIndexStats();
               logger.info("vector_db stats: $stats");
-              await bulkAddVectors(
-                indexPath: indexPath,
+              await rustVectorDB.bulkAddVectors(
                 keys: tenKeys,
                 vectors: tenEmbeddings,
               );
-              final statsAgain = await getIndexStats(indexPath: indexPath);
+              final statsAgain = await rustVectorDB.getIndexStats();
               logger.info("vector_db stats again: $statsAgain");
               final size = statsAgain.$1;
               final capacity = statsAgain.$2;
@@ -106,6 +110,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                 context,
                 "Size: $size, Capacity: $capacity, Dimensions: $dimensions",
               );
+              await rustVectorDB.deleteIndex();
             } catch (e, s) {
               logger.warning('Rust bridge failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);

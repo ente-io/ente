@@ -6,56 +6,41 @@
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:photos/src/rust/frb_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `create_index`, `ensure_capacity`, `get_index`, `load_index`, `save_index`
+// These functions are ignored because they are not marked as `pub`: `ensure_capacity`, `save_index`
 
-Future<(BigInt, BigInt, BigInt, BigInt, BigInt)> getIndexStats({
-  required String indexPath,
-}) =>
-    RustLib.instance.api.crateApiUsearchApiGetIndexStats(indexPath: indexPath);
+// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Box < dyn Error >>>
+abstract class BoxError implements RustOpaqueInterface {}
 
-Future<void> addVector({
-  required String indexPath,
-  required BigInt key,
-  required List<double> vector,
-}) =>
-    RustLib.instance.api.crateApiUsearchApiAddVector(
-      indexPath: indexPath,
-      key: key,
-      vector: vector,
-    );
+// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Matches>>
+abstract class Matches implements RustOpaqueInterface {}
 
-Future<void> bulkAddVectors({
-  required String indexPath,
-  required Uint64List keys,
-  required List<Float32List> vectors,
-}) =>
-    RustLib.instance.api.crateApiUsearchApiBulkAddVectors(
-      indexPath: indexPath,
-      keys: keys,
-      vectors: vectors,
-    );
+// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VectorDB>>
+abstract class VectorDb implements RustOpaqueInterface {
+  Future<void> addVector({required BigInt key, required List<double> vector});
 
-Future<(Uint64List, Float32List)> searchVectors({
-  required String indexPath,
-  required List<double> query,
-  required BigInt count,
-}) =>
-    RustLib.instance.api.crateApiUsearchApiSearchVectors(
-      indexPath: indexPath,
-      query: query,
-      count: count,
-    );
+  Future<void> bulkAddVectors({
+    required Uint64List keys,
+    required List<Float32List> vectors,
+  });
 
-Future<Float32List> getVector({
-  required String indexPath,
-  required BigInt key,
-}) =>
-    RustLib.instance.api
-        .crateApiUsearchApiGetVector(indexPath: indexPath, key: key);
+  Future<void> deleteIndex();
 
-Future<BigInt> removeVector({required String indexPath, required BigInt key}) =>
-    RustLib.instance.api
-        .crateApiUsearchApiRemoveVector(indexPath: indexPath, key: key);
+  Future<(BigInt, BigInt, BigInt, BigInt, BigInt)> getIndexStats();
 
-Future<void> resetIndex({required String indexPath}) =>
-    RustLib.instance.api.crateApiUsearchApiResetIndex(indexPath: indexPath);
+  Future<Float32List> getVector({required BigInt key});
+
+  factory VectorDb({required String filePath, required BigInt dimensions}) =>
+      RustLib.instance.api.crateApiUsearchApiVectorDbNew(
+        filePath: filePath,
+        dimensions: dimensions,
+      );
+
+  Future<BigInt> removeVector({required BigInt key});
+
+  Future<void> resetIndex();
+
+  Future<Matches> searchVectors({
+    required List<double> query,
+    required BigInt count,
+  });
+}
