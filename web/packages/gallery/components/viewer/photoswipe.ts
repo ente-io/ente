@@ -668,11 +668,6 @@ export class FileViewerPhotoSwipe {
             forgetExifForItemData(asItemData(e.content.data)),
         );
 
-        const resetFocus = () => {
-            const activeElement = document.activeElement;
-            if (activeElement instanceof HTMLElement) activeElement.blur();
-        };
-
         /**
          * If the current slide is showing a video, then the DOM video element
          * showing that video.
@@ -861,8 +856,22 @@ export class FileViewerPhotoSwipe {
             const menuButton = document.querySelector(
                 "media-settings-menu-button",
             );
-            if (menuButton instanceof MediaChromeMenuButton)
+            if (menuButton instanceof MediaChromeMenuButton) {
                 menuButton.handleClick();
+
+                // See: [Note: Media chrome focus workaround]
+                //
+                // Whatever media chrome is doing internally, it requires us to
+                // drop the focus multiple times (Removing either of these calls
+                // is not enough).
+                const blurAllFocused = () =>
+                    document
+                        .querySelectorAll(":focus")
+                        .forEach((e) => e instanceof HTMLElement && e.blur());
+
+                blurAllFocused();
+                setTimeout(blurAllFocused, 0);
+            }
 
             // Refresh the slide so that the video is fetched afresh, but using
             // the updated `originalVideoFileIDs` value for it.
@@ -1202,7 +1211,8 @@ export class FileViewerPhotoSwipe {
             // indicator, we want the Escape key to blur its focus instead of
             // closing the PhotoSwipe dialog.
             if (isFocusVisibledOnUIControl() && key == "Escape") {
-                resetFocus();
+                const activeElement = document.activeElement;
+                if (activeElement instanceof HTMLElement) activeElement.blur();
                 pswpEvent.preventDefault();
                 return;
             }
