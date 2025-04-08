@@ -386,8 +386,8 @@ const createMainWindow = () => {
     const wasAutoLaunched = autoLauncher.wasAutoLaunched();
     if (wasAutoLaunched) {
         // Don't automatically show the app's window if we were auto-launched.
-        // On macOS, also hide the dock icon on macOS.
-        if (process.platform == "darwin") app.dock.hide();
+        // On macOS, also hide the dock icon.
+        app.dock?.hide();
     } else {
         // Show our window otherwise, maximizing it if we're not asked to set it
         // to a specific size.
@@ -423,12 +423,10 @@ const createMainWindow = () => {
     window.on("hide", () => {
         // On macOS, when hiding the window also hide the app's icon in the dock
         // unless the user has unchecked the Settings > Hide dock icon checkbox.
-        if (shouldHideDockIcon()) app.dock.hide();
+        if (shouldHideDockIcon()) app.dock?.hide();
     });
 
-    window.on("show", () => {
-        if (process.platform == "darwin") void app.dock.show();
-    });
+    window.on("show", () => void app.dock?.show());
 
     // Let ipcRenderer know when mainWindow is in the foreground so that it can
     // in turn inform the renderer process.
