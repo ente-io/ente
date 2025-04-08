@@ -201,6 +201,21 @@
  */
 .pswp-ente media-controller.et-vanilla-video {
     display: inline;
+    /*
+     On Chrome (I didn't check elsewhere), when putting a regular video element
+     within a media-controller, we get a flickering at the edges. This isn't
+     related to the display: inline hack above, because it can be reproduced
+     without it too - At certain window sizes, when playing back the video,
+     there will be flickering / shifting at the horizontal edges.
+
+     This doesn't happen with the media-controller and hls-video combination. My
+     best guess is that it happens if the (eventually resolved) size of the
+     video happens to be a fractional value. Based on that theory, adding a 1px
+     leeway to the video width resolves the flickering.
+     */
+    video {
+        width: calc(100% - 1px) !important;
+    }
 }
 
 /*
