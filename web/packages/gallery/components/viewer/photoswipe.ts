@@ -1,4 +1,5 @@
 import { pt } from "ente-base/i18n";
+import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import "hls-video-element";
@@ -494,6 +495,20 @@ export class FileViewerPhotoSwipe {
          * hide the media controls.
          */
         const updateMediaControls = (mediaControllerID: string | undefined) => {
+            // For reasons possibily related to the 1 tick wait in the hls-video
+            // implementation (`await Promise.resolve()`), the association
+            // between media-controller and media-control-bar doesn't get
+            // established on the first slide if we reopen the file viewer.
+            //
+            // See also: https://github.com/muxinc/media-chrome/issues/940
+            //
+            // As a workaround, defer the association to the next tick.
+            setTimeout(() => _updateMediaControls(mediaControllerID), 0);
+        };
+
+        const _updateMediaControls = (
+            mediaControllerID: string | undefined,
+        ) => {
             const container = mediaControlsContainerElement;
             const controls =
                 container?.querySelectorAll(
@@ -522,6 +537,20 @@ export class FileViewerPhotoSwipe {
         };
 
         pswp.on("contentAppend", (e) => {
+            // PhotoSwipe emits stale contentAppend events. e.g. when changing
+            // the video quality, we'll first get "contentAppend" (and "change")
+            // with the latest item data, but then later PhotoSwipe will call
+            // "contentAppend" again with stale data.
+            //
+            // To ignore these, we check the `hasSlide` attribute. I'm not sure
+            // if this is a foolproof workaround.
+            //
+            // See also https://github.com/dimsemenov/PhotoSwipe/issues/2045.
+            if (!e.content.hasSlide) {
+                log.debug(() => ["Ignoring stale contentAppend", e]);
+                return;
+            }
+
             const { fileID, fileType, videoURL, mediaControllerID } =
                 asItemData(e.content.data);
 
@@ -529,16 +558,7 @@ export class FileViewerPhotoSwipe {
             // "change" event, so we need to wire up the controls, or hide them,
             // for the initial slide here also (in addition to in "change").
             if (currSlideData().fileID == fileID) {
-                // For reasons possibily related to the 1 tick waits in the
-                // hls-video implementation (`await Promise.resolve()`), the
-                // association between media-controller and media-control-bar
-                // doesn't get established on the first slide if we reopen the
-                // file viewer.
-                //
-                // See also: https://github.com/muxinc/media-chrome/issues/940
-                //
-                // As a workaround, defer the association to the next tick.
-                setTimeout(() => updateMediaControls(mediaControllerID), 0);
+                updateMediaControls(mediaControllerID);
             }
 
             // Rest of this function deals with live photos.
