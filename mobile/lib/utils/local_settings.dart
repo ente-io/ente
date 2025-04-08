@@ -8,6 +8,11 @@ enum AlbumSortKey {
   lastUpdated,
 }
 
+enum AlbumViewType {
+  grid,
+  list,
+}
+
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
@@ -22,6 +27,7 @@ class LocalSettings {
       "has_configured_links_in_app_permission";
   static const _hideSharedItemsFromHomeGalleryTag =
       "hide_shared_items_from_home_gallery";
+  static const kCollectionViewType = "collection_view_type";
 
   final SharedPreferences _prefs;
 
@@ -33,6 +39,15 @@ class LocalSettings {
 
   Future<bool> setAlbumSortKey(AlbumSortKey key) {
     return _prefs.setInt(kCollectionSortPref, key.index);
+  }
+
+  Future<void> setAlbumViewType(AlbumViewType viewType) async {
+    await _prefs.setInt(kCollectionViewType, viewType.index);
+  }
+
+  AlbumViewType albumViewType() {
+    final index = _prefs.getInt(kCollectionViewType) ?? 0;
+    return AlbumViewType.values[index];
   }
 
   int getPhotoGridSize() {

@@ -44,6 +44,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
       _collectionUpdatesSubscription;
   List<Collection>? collections;
   AlbumSortKey? sortKey;
+  AlbumViewType? albumViewType;
 
   @override
   void initState() {
@@ -54,6 +55,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
       unawaited(refreshCollections());
     });
     sortKey = localSettings.albumSortKey();
+    albumViewType = localSettings.albumViewType();
   }
 
   @override
@@ -91,6 +93,10 @@ class _CollectionListPageState extends State<CollectionListPage> {
               collections,
               displayLimitCount: displayLimitCount,
               tag: widget.tag,
+              enableSelectionMode:
+                  widget.sectionType == UISectionType.homeCollections,
+              albumViewType: albumViewType ?? AlbumViewType.grid,
+              shouldShowCreateAlbum: true,
             ),
           ],
         ),
@@ -127,6 +133,21 @@ class _CollectionListPageState extends State<CollectionListPage> {
       ),
       child: Row(
         children: [
+          IconButtonWidget(
+            icon: albumViewType == AlbumViewType.grid
+                ? Icons.view_list_outlined
+                : Icons.grid_view_outlined,
+            iconButtonType: IconButtonType.secondary,
+            onTap: () async {
+              setState(() {
+                albumViewType = albumViewType == AlbumViewType.grid
+                    ? AlbumViewType.list
+                    : AlbumViewType.grid;
+              });
+              await localSettings.setAlbumViewType(albumViewType!);
+            },
+          ),
+          const SizedBox(width: 8),
           GestureDetector(
             onTapDown: (TapDownDetails details) async {
               final int? selectedValue = await showMenu<int>(
