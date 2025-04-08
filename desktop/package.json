@@ -27,7 +27,7 @@
     "dependencies": {
         "any-shell-escape": "^0.1.1",
         "auto-launch": "^5.0.6",
-        "chokidar": "^3.6.0",
+        "chokidar": "^4.0.3",
         "clip-bpe-js": "^0.0.6",
         "comlink": "^4.4.2",
         "compare-versions": "^6.1.1",
