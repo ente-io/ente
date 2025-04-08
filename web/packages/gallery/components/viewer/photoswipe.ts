@@ -489,12 +489,12 @@ export class FileViewerPhotoSwipe {
         let shouldIgnoreNextVideoQualityChange = false;
 
         /**
-         * If a {@link mediaControllerID} is provided, then make the media
-         * controls visible and link the media-control-bars (and other
-         * containers that house controls) to the given controller. Otherwise
-         * hide the media controls.
+         * If a {@link mediaControllerID} is present in the given
+         * {@link itemData}, then make the media controls visible and link the
+         * media-control-bars (and other containers that house controls) to the
+         * given controller. Otherwise hide the media controls.
          */
-        const updateMediaControls = (mediaControllerID: string | undefined) => {
+        const updateMediaControls = (itemData: ItemData) => {
             // For reasons possibily related to the 1 tick wait in the hls-video
             // implementation (`await Promise.resolve()`), the association
             // between media-controller and media-control-bar doesn't get
@@ -503,18 +503,17 @@ export class FileViewerPhotoSwipe {
             // See also: https://github.com/muxinc/media-chrome/issues/940
             //
             // As a workaround, defer the association to the next tick.
-            setTimeout(() => _updateMediaControls(mediaControllerID), 0);
+            setTimeout(() => _updateMediaControls(itemData), 0);
         };
 
-        const _updateMediaControls = (
-            mediaControllerID: string | undefined,
-        ) => {
+        const _updateMediaControls = (itemData: ItemData) => {
             const container = mediaControlsContainerElement;
             const controls =
                 container?.querySelectorAll(
                     "media-control-bar, media-playback-rate-menu",
                 ) ?? [];
             for (const control of controls) {
+                const { mediaControllerID } = itemData;
                 if (mediaControllerID) {
                     control.setAttribute("mediacontroller", mediaControllerID);
                 } else {
@@ -522,12 +521,13 @@ export class FileViewerPhotoSwipe {
                 }
             }
 
+            // TODO(HLS): Temporary gate
+            if (!process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING) return;
+
             const qualityMenu = container?.querySelector("#et-quality-menu");
             if (qualityMenu instanceof MediaChromeMenu) {
-                const value =
-                    videoQualityForFile(currentFile()) == "auto"
-                        ? pt("Auto")
-                        : pt("Original");
+                const { videoPlaylistURL } = itemData;
+                const value = videoPlaylistURL ? pt("Auto") : pt("Original");
                 // Check first, and set a flag, to avoid infinite update loop.
                 if (qualityMenu.value != value) {
                     shouldIgnoreNextVideoQualityChange = true;
@@ -551,14 +551,13 @@ export class FileViewerPhotoSwipe {
                 return;
             }
 
-            const { fileID, fileType, videoURL, mediaControllerID } =
-                asItemData(e.content.data);
+            const { fileID, fileType, videoURL } = asItemData(e.content.data);
 
             // For the initial slide, "contentAppend" will get called after the
             // "change" event, so we need to wire up the controls, or hide them,
             // for the initial slide here also (in addition to in "change").
             if (currSlideData().fileID == fileID) {
-                updateMediaControls(mediaControllerID);
+                updateMediaControls(currSlideData());
             }
 
             // Rest of this function deals with live photos.
@@ -655,8 +654,9 @@ export class FileViewerPhotoSwipe {
             video?.pause();
         });
 
-        pswp.on("loadComplete", (e) =>
-            updateFileInfoExifIfNeeded(asItemData(e.content.data)),
+        pswp.on(
+            "loadComplete",
+            (e) => void updateFileInfoExifIfNeeded(asItemData(e.content.data)),
         );
 
         pswp.on(
@@ -1036,10 +1036,9 @@ export class FileViewerPhotoSwipe {
                     if (menu instanceof MediaChromeMenu) {
                         menu.addEventListener("change", onVideoQualityChange);
                     }
-                    pswp.on("change", () => {
-                        const { mediaControllerID } = currSlideData();
-                        updateMediaControls(mediaControllerID);
-                    });
+                    pswp.on("change", () =>
+                        updateMediaControls(currSlideData()),
+                    );
                 },
             });
 
