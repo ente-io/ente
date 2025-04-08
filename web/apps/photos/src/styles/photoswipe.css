@@ -175,8 +175,31 @@
     }
 }
 
-/* Change the cursor on the thumbnail to the default arrow to indicate that it is
-   not interactable (PhotoSwipe by default shows the zoom out icon). */
+.pswp-ente .pswp__caption.ente-video {
+    /* Add extra offset for video captions so that they do not overlap with the
+       video controls. The constant was picked such that it lay above the media
+       controls. */
+    bottom: 48px;
+    /* Adding a caption with a blur backdrop filter above the video element
+       contained in a media-controller causes a subtle tint to be overlaid on
+       the entire video. This is visible on both Chrome and Firefox as of
+       writing.
+
+       We'll hide the caption anyways when hovering on the controls or when the
+       video is playing, so remove the backdrop filter and rely on the
+       translucent background. Note that usually the video might not even extent
+       to this part of the screen on desktop sized screens. */
+    backdrop-filter: none;
+    /* Since there is too much going on in this part of the screen now, also
+      reduce the maximum number of lines for the caption. */
+    p {
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+}
+
+/* Change the cursor on the thumbnail to the default arrow to indicate that it
+   is not interactable (PhotoSwipe by default shows the zoom out icon). */
 .pswp-ente .pswp__img {
     cursor: auto;
 }
@@ -188,6 +211,27 @@
 .pswp-ente video[controls] {
     width: 100%;
     height: 100%;
+}
+
+/*
+  I tried various ways to get media-controller to embed a normal video, but in
+  all methods I kept getting a flickering at the edges on Chrome. My best guess
+  is that it happens when the resolved size of the video is a fractional value.
+
+  This is the current magic incantation that seems to get them to play without
+  the video's frame jittering. Note that the streaming hls-video elements work
+  fine without any workarounds, it is only the vanilla video elements that have
+  this issue and necessiate this workaround. The downside is that clicking
+  "outside" the video works for hls-video, but not for vanilla videos.
+ */
+.pswp-ente media-controller.ente-vanilla-video {
+    width: 100%;
+    height: 100%;
+
+    video {
+        width: calc(100% - 1px);
+        height: calc(100% - 1px);
+    }
 }
 
 /*
@@ -307,13 +351,9 @@ media-settings-menu {
     z-index: 1;
 }
 
-/* Hide the caption when hovering over the video controls since they occupy
-   similar real estate */
-body:has(
-        media-control-bar:hover,
-        media-settings-menu:hover,
-        media-settings-menu:focus-within
-    ) {
+/* Hide the caption when hovering over the video controls (and when the settings
+   menu is open) since they occupy similar real estate as the caption. */
+body:has(media-control-bar:hover, media-settings-menu:not([hidden])) {
     & .pswp-ente .pswp__caption {
         display: none;
     }
