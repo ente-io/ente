@@ -184,6 +184,8 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 collections,
                 displayLimitCount: _kOnEnteItemLimitCount,
                 shrinkWrap: true,
+                shouldShowCreateAlbum: true,
+                enableSelectionMode: false,
               )
             : const SliverToBoxAdapter(child: EmptyState()),
         SliverToBoxAdapter(
