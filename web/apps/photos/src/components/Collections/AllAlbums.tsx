@@ -267,6 +267,8 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
                         itemSize={CollectionRowItemSize}
                         itemData={itemData}
                     >
+                        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+                        /* @ts-ignore TODO deal with this new react-window type error */}
                         {AlbumsRow}
                     </FixedSizeList>
                 )}

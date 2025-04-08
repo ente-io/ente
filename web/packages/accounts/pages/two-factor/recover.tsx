@@ -48,7 +48,14 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
 
     useEffect(() => {
         const user = getData("user");
-        const sid = user.passkeySessionID || user.twoFactorSessionID;
+        // TODO: Can't disable @typescript-eslint/prefer-nullish-coalescing here
+        // because this file is imported from multiple configurations, some of
+        // which have it on, some of which have it off.
+        //
+        // Converting || to ?? here is a behaviour change that will need audit
+        // first. So for now, writing it the weird way around.
+        let sid = user.passkeySessionID;
+        if (!sid) sid = user.twoFactorSessionID;
         if (!user?.email || !sid) {
             void router.push("/");
         } else if (

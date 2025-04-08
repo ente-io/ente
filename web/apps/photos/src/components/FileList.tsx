@@ -908,6 +908,8 @@ export const FileList: React.FC<FileListProps> = ({
             overscanCount={3}
             useIsScrolling
         >
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+            /* @ts-ignore TODO deal with this new react-window type error */}
             {PhotoListRow}
         </List>
     );
