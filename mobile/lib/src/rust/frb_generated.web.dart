@@ -22,26 +22,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     required super.portManager,
   });
 
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_BoxErrorPtr => wire
-      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError;
-
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_MatchesPtr => wire
-      .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches;
-
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_VectorDbPtr => wire
       .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB;
-
-  @protected
-  BoxError
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    dynamic raw,
-  );
-
-  @protected
-  Matches
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    dynamic raw,
-  );
 
   @protected
   VectorDb
@@ -58,18 +40,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   VectorDb
       dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
-    dynamic raw,
-  );
-
-  @protected
-  BoxError
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    dynamic raw,
-  );
-
-  @protected
-  Matches
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
     dynamic raw,
   );
 
@@ -101,6 +71,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  (
+    Uint64List,
+    Float32List
+  ) dco_decode_record_list_prim_u_64_strict_list_prim_f_32_strict(dynamic raw);
+
+  @protected
   (BigInt, BigInt, BigInt, BigInt, BigInt)
       dco_decode_record_usize_usize_usize_usize_usize(dynamic raw);
 
@@ -117,18 +93,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   BigInt dco_decode_usize(dynamic raw);
 
   @protected
-  BoxError
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  Matches
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    SseDeserializer deserializer,
-  );
-
-  @protected
   VectorDb
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
     SseDeserializer deserializer,
@@ -143,18 +107,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   VectorDb
       sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  BoxError
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  Matches
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
     SseDeserializer deserializer,
   );
 
@@ -188,6 +140,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  (Uint64List, Float32List)
+      sse_decode_record_list_prim_u_64_strict_list_prim_f_32_strict(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   (BigInt, BigInt, BigInt, BigInt, BigInt)
       sse_decode_record_usize_usize_usize_usize_usize(
     SseDeserializer deserializer,
@@ -213,20 +171,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    BoxError self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    Matches self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
     VectorDb self,
     SseSerializer serializer,
@@ -243,20 +187,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void
       sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
     VectorDb self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    BoxError self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    Matches self,
     SseSerializer serializer,
   );
 
@@ -304,6 +234,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_record_list_prim_u_64_strict_list_prim_f_32_strict(
+    (Uint64List, Float32List) self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_record_usize_usize_usize_usize_usize(
     (BigInt, BigInt, BigInt, BigInt, BigInt) self,
     SseSerializer serializer,
@@ -334,42 +270,6 @@ class RustLibWire implements BaseWire {
   RustLibWire.fromExternalLibrary(ExternalLibrary lib);
 
   void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-            ptr,
-          );
-
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-            ptr,
-          );
-
-  void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-            ptr,
-          );
-
-  void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    int ptr,
-  ) =>
-          wasmModule
-              .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-            ptr,
-          );
-
-  void
       rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
     int ptr,
   ) =>
@@ -394,26 +294,6 @@ external RustLibWasmModule get wasmModule;
 @JS()
 @anonymous
 extension type RustLibWasmModule._(JSObject _) implements JSObject {
-  external void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    int ptr,
-  );
-
-  external void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    int ptr,
-  );
-
-  external void
-      rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    int ptr,
-  );
-
-  external void
-      rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    int ptr,
-  );
-
   external void
       rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
     int ptr,

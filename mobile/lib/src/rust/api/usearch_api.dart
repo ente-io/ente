@@ -8,12 +8,6 @@ import 'package:photos/src/rust/frb_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `ensure_capacity`, `save_index`
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Box < dyn Error >>>
-abstract class BoxError implements RustOpaqueInterface {}
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Matches>>
-abstract class Matches implements RustOpaqueInterface {}
-
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VectorDB>>
 abstract class VectorDb implements RustOpaqueInterface {
   Future<void> addVector({required BigInt key, required List<double> vector});
@@ -39,7 +33,7 @@ abstract class VectorDb implements RustOpaqueInterface {
 
   Future<void> resetIndex();
 
-  Future<Matches> searchVectors({
+  Future<(Uint64List, Float32List)> searchVectors({
     required List<double> query,
     required BigInt count,
   });

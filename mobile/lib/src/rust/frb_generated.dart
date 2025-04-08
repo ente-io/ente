@@ -115,7 +115,7 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiUsearchApiVectorDbResetIndex({required VectorDb that});
 
-  Future<Matches> crateApiUsearchApiVectorDbSearchVectors({
+  Future<(Uint64List, Float32List)> crateApiUsearchApiVectorDbSearchVectors({
     required VectorDb that,
     required List<double> query,
     required BigInt count,
@@ -124,20 +124,6 @@ abstract class RustLibApi extends BaseApi {
   String crateApiSimpleGreet({required String name});
 
   Future<void> crateApiSimpleInitApp();
-
-  RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_BoxError;
-
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_BoxError;
-
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_BoxErrorPtr;
-
-  RustArcIncrementStrongCountFnType get rust_arc_increment_strong_count_Matches;
-
-  RustArcDecrementStrongCountFnType get rust_arc_decrement_strong_count_Matches;
-
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_MatchesPtr;
 
   RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_VectorDb;
@@ -181,8 +167,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError,
+          decodeErrorData: null,
         ),
         constMeta: kCrateApiUsearchApiVectorDbAddVectorConstMeta,
         argValues: [that, key, vector],
@@ -222,8 +207,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError,
+          decodeErrorData: null,
         ),
         constMeta: kCrateApiUsearchApiVectorDbBulkAddVectorsConstMeta,
         argValues: [that, keys, vectors],
@@ -257,8 +241,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError,
+          decodeErrorData: null,
         ),
         constMeta: kCrateApiUsearchApiVectorDbDeleteIndexConstMeta,
         argValues: [that],
@@ -331,8 +314,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_list_prim_f_32_strict,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError,
+          decodeErrorData: null,
         ),
         constMeta: kCrateApiUsearchApiVectorDbGetVectorConstMeta,
         argValues: [that, key],
@@ -363,8 +345,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         codec: SseCodec(
           decodeSuccessData:
               sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError,
+          decodeErrorData: null,
         ),
         constMeta: kCrateApiUsearchApiVectorDbNewConstMeta,
         argValues: [filePath, dimensions],
@@ -402,8 +383,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_usize,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError,
+          decodeErrorData: null,
         ),
         constMeta: kCrateApiUsearchApiVectorDbRemoveVectorConstMeta,
         argValues: [that, key],
@@ -437,8 +417,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_unit,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError,
+          decodeErrorData: null,
         ),
         constMeta: kCrateApiUsearchApiVectorDbResetIndexConstMeta,
         argValues: [that],
@@ -454,7 +433,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<Matches> crateApiUsearchApiVectorDbSearchVectors({
+  Future<(Uint64List, Float32List)> crateApiUsearchApiVectorDbSearchVectors({
     required VectorDb that,
     required List<double> query,
     required BigInt count,
@@ -478,9 +457,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches,
-          decodeErrorData:
-              sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError,
+              sse_decode_record_list_prim_u_64_strict_list_prim_f_32_strict,
+          decodeErrorData: null,
         ),
         constMeta: kCrateApiUsearchApiVectorDbSearchVectorsConstMeta,
         argValues: [that, query, count],
@@ -550,46 +528,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_BoxError => wire
-          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError;
-
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_BoxError => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError;
-
-  RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_Matches => wire
-          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches;
-
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_Matches => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches;
-
-  RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_VectorDb => wire
           .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB;
 
   RustArcDecrementStrongCountFnType
       get rust_arc_decrement_strong_count_VectorDb => wire
           .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB;
-
-  @protected
-  BoxError
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return BoxErrorImpl.frbInternalDcoDecode(raw as List<dynamic>);
-  }
-
-  @protected
-  Matches
-      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return MatchesImpl.frbInternalDcoDecode(raw as List<dynamic>);
-  }
 
   @protected
   VectorDb
@@ -616,24 +560,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return VectorDbImpl.frbInternalDcoDecode(raw as List<dynamic>);
-  }
-
-  @protected
-  BoxError
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return BoxErrorImpl.frbInternalDcoDecode(raw as List<dynamic>);
-  }
-
-  @protected
-  Matches
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    dynamic raw,
-  ) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return MatchesImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
@@ -690,6 +616,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (
+    Uint64List,
+    Float32List
+  ) dco_decode_record_list_prim_u_64_strict_list_prim_f_32_strict(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2) {
+      throw Exception('Expected 2 elements, got ${arr.length}');
+    }
+    return (
+      dco_decode_list_prim_u_64_strict(arr[0]),
+      dco_decode_list_prim_f_32_strict(arr[1]),
+    );
+  }
+
+  @protected
   (BigInt, BigInt, BigInt, BigInt, BigInt)
       dco_decode_record_usize_usize_usize_usize_usize(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -731,30 +673,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  BoxError
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return BoxErrorImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
-  }
-
-  @protected
-  Matches
-      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return MatchesImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
-  }
-
-  @protected
   VectorDb
       sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
     SseDeserializer deserializer,
@@ -785,30 +703,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return VectorDbImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
-  }
-
-  @protected
-  BoxError
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return BoxErrorImpl.frbInternalSseDecode(
-      sse_decode_usize(deserializer),
-      sse_decode_i_32(deserializer),
-    );
-  }
-
-  @protected
-  Matches
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return MatchesImpl.frbInternalSseDecode(
       sse_decode_usize(deserializer),
       sse_decode_i_32(deserializer),
     );
@@ -882,6 +776,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (Uint64List, Float32List)
+      sse_decode_record_list_prim_u_64_strict_list_prim_f_32_strict(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final var_field0 = sse_decode_list_prim_u_64_strict(deserializer);
+    final var_field1 = sse_decode_list_prim_f_32_strict(deserializer);
+    return (var_field0, var_field1);
+  }
+
+  @protected
   (BigInt, BigInt, BigInt, BigInt, BigInt)
       sse_decode_record_usize_usize_usize_usize_usize(
     SseDeserializer deserializer,
@@ -932,32 +837,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    BoxError self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as BoxErrorImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
-  }
-
-  @protected
-  void
-      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    Matches self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as MatchesImpl).frbInternalSseEncode(move: true),
-      serializer,
-    );
-  }
-
-  @protected
-  void
       sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
     VectorDb self,
     SseSerializer serializer,
@@ -991,32 +870,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
       (self as VectorDbImpl).frbInternalSseEncode(move: false),
-      serializer,
-    );
-  }
-
-  @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-    BoxError self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as BoxErrorImpl).frbInternalSseEncode(move: null),
-      serializer,
-    );
-  }
-
-  @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-    Matches self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-      (self as MatchesImpl).frbInternalSseEncode(move: null),
       serializer,
     );
   }
@@ -1101,6 +954,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_record_list_prim_u_64_strict_list_prim_f_32_strict(
+    (Uint64List, Float32List) self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_list_prim_u_64_strict(self.$1, serializer);
+    sse_encode_list_prim_f_32_strict(self.$2, serializer);
+  }
+
+  @protected
   void sse_encode_record_usize_usize_usize_usize_usize(
     (BigInt, BigInt, BigInt, BigInt, BigInt) self,
     SseSerializer serializer,
@@ -1147,46 +1010,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putUint8(self ? 1 : 0);
   }
-}
-
-@sealed
-class BoxErrorImpl extends RustOpaque implements BoxError {
-  // Not to be used by end users
-  BoxErrorImpl.frbInternalDcoDecode(List<dynamic> wire)
-      : super.frbInternalDcoDecode(wire, _kStaticData);
-
-  // Not to be used by end users
-  BoxErrorImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
-      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
-
-  static final _kStaticData = RustArcStaticData(
-    rustArcIncrementStrongCount:
-        RustLib.instance.api.rust_arc_increment_strong_count_BoxError,
-    rustArcDecrementStrongCount:
-        RustLib.instance.api.rust_arc_decrement_strong_count_BoxError,
-    rustArcDecrementStrongCountPtr:
-        RustLib.instance.api.rust_arc_decrement_strong_count_BoxErrorPtr,
-  );
-}
-
-@sealed
-class MatchesImpl extends RustOpaque implements Matches {
-  // Not to be used by end users
-  MatchesImpl.frbInternalDcoDecode(List<dynamic> wire)
-      : super.frbInternalDcoDecode(wire, _kStaticData);
-
-  // Not to be used by end users
-  MatchesImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
-      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
-
-  static final _kStaticData = RustArcStaticData(
-    rustArcIncrementStrongCount:
-        RustLib.instance.api.rust_arc_increment_strong_count_Matches,
-    rustArcDecrementStrongCount:
-        RustLib.instance.api.rust_arc_decrement_strong_count_Matches,
-    rustArcDecrementStrongCountPtr:
-        RustLib.instance.api.rust_arc_decrement_strong_count_MatchesPtr,
-  );
 }
 
 @sealed
@@ -1246,7 +1069,7 @@ class VectorDbImpl extends RustOpaque implements VectorDb {
         that: this,
       );
 
-  Future<Matches> searchVectors({
+  Future<(Uint64List, Float32List)> searchVectors({
     required List<double> query,
     required BigInt count,
   }) =>

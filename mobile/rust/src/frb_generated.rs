@@ -75,7 +75,7 @@ fn wire__crate__api__usearch_api__VectorDb_add_vector_impl(
             let api_vector = <Vec<f32>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, Box<dyn Error>>((move || {
+                transform_result_sse::<_, ()>((move || {
                     let mut api_that_guard = None;
                     let decode_indices_ =
                         flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
@@ -90,11 +90,13 @@ fn wire__crate__api__usearch_api__VectorDb_add_vector_impl(
                         }
                     }
                     let mut api_that_guard = api_that_guard.unwrap();
-                    let output_ok = crate::api::usearch_api::VectorDB::add_vector(
-                        &mut *api_that_guard,
-                        api_key,
-                        &api_vector,
-                    )?;
+                    let output_ok = Result::<_, ()>::Ok({
+                        crate::api::usearch_api::VectorDB::add_vector(
+                            &mut *api_that_guard,
+                            api_key,
+                            &api_vector,
+                        );
+                    })?;
                     Ok(output_ok)
                 })())
             }
@@ -130,7 +132,7 @@ fn wire__crate__api__usearch_api__VectorDb_bulk_add_vectors_impl(
             let api_vectors = <Vec<Vec<f32>>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, Box<dyn Error>>((move || {
+                transform_result_sse::<_, ()>((move || {
                     let mut api_that_guard = None;
                     let decode_indices_ =
                         flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
@@ -145,11 +147,13 @@ fn wire__crate__api__usearch_api__VectorDb_bulk_add_vectors_impl(
                         }
                     }
                     let mut api_that_guard = api_that_guard.unwrap();
-                    let output_ok = crate::api::usearch_api::VectorDB::bulk_add_vectors(
-                        &mut *api_that_guard,
-                        api_keys,
-                        &api_vectors,
-                    )?;
+                    let output_ok = Result::<_, ()>::Ok({
+                        crate::api::usearch_api::VectorDB::bulk_add_vectors(
+                            &mut *api_that_guard,
+                            api_keys,
+                            &api_vectors,
+                        );
+                    })?;
                     Ok(output_ok)
                 })())
             }
@@ -181,8 +185,10 @@ fn wire__crate__api__usearch_api__VectorDb_delete_index_impl(
             let api_that = <VectorDB>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, Box<dyn Error>>((move || {
-                    let output_ok = crate::api::usearch_api::VectorDB::delete_index(api_that)?;
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok = Result::<_, ()>::Ok({
+                        crate::api::usearch_api::VectorDB::delete_index(api_that);
+                    })?;
                     Ok(output_ok)
                 })())
             }
@@ -252,7 +258,7 @@ fn wire__crate__api__usearch_api__VectorDb_get_vector_impl(
             let api_key = <u64>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, Box<dyn Error>>((move || {
+                transform_result_sse::<_, ()>((move || {
                     let mut api_that_guard = None;
                     let decode_indices_ =
                         flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
@@ -267,8 +273,9 @@ fn wire__crate__api__usearch_api__VectorDb_get_vector_impl(
                         }
                     }
                     let api_that_guard = api_that_guard.unwrap();
-                    let output_ok =
-                        crate::api::usearch_api::VectorDB::get_vector(&*api_that_guard, api_key)?;
+                    let output_ok = Result::<_, ()>::Ok(
+                        crate::api::usearch_api::VectorDB::get_vector(&*api_that_guard, api_key),
+                    )?;
                     Ok(output_ok)
                 })())
             }
@@ -299,9 +306,11 @@ fn wire__crate__api__usearch_api__VectorDb_new_impl(
             let api_file_path = <String>::sse_decode(&mut deserializer);
             let api_dimensions = <usize>::sse_decode(&mut deserializer);
             deserializer.end();
-            transform_result_sse::<_, Box<dyn Error>>((move || {
-                let output_ok =
-                    crate::api::usearch_api::VectorDB::new(&api_file_path, api_dimensions)?;
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Result::<_, ()>::Ok(crate::api::usearch_api::VectorDB::new(
+                    &api_file_path,
+                    api_dimensions,
+                ))?;
                 Ok(output_ok)
             })())
         },
@@ -335,7 +344,7 @@ fn wire__crate__api__usearch_api__VectorDb_remove_vector_impl(
             let api_key = <u64>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, Box<dyn Error>>((move || {
+                transform_result_sse::<_, ()>((move || {
                     let mut api_that_guard = None;
                     let decode_indices_ =
                         flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
@@ -350,10 +359,11 @@ fn wire__crate__api__usearch_api__VectorDb_remove_vector_impl(
                         }
                     }
                     let mut api_that_guard = api_that_guard.unwrap();
-                    let output_ok = crate::api::usearch_api::VectorDB::remove_vector(
-                        &mut *api_that_guard,
-                        api_key,
-                    )?;
+                    let output_ok =
+                        Result::<_, ()>::Ok(crate::api::usearch_api::VectorDB::remove_vector(
+                            &mut *api_that_guard,
+                            api_key,
+                        ))?;
                     Ok(output_ok)
                 })())
             }
@@ -387,7 +397,7 @@ fn wire__crate__api__usearch_api__VectorDb_reset_index_impl(
             >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, Box<dyn Error>>((move || {
+                transform_result_sse::<_, ()>((move || {
                     let mut api_that_guard = None;
                     let decode_indices_ =
                         flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
@@ -402,8 +412,9 @@ fn wire__crate__api__usearch_api__VectorDb_reset_index_impl(
                         }
                     }
                     let mut api_that_guard = api_that_guard.unwrap();
-                    let output_ok =
-                        crate::api::usearch_api::VectorDB::reset_index(&mut *api_that_guard)?;
+                    let output_ok = Result::<_, ()>::Ok({
+                        crate::api::usearch_api::VectorDB::reset_index(&mut *api_that_guard);
+                    })?;
                     Ok(output_ok)
                 })())
             }
@@ -439,7 +450,7 @@ fn wire__crate__api__usearch_api__VectorDb_search_vectors_impl(
             let api_count = <usize>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
-                transform_result_sse::<_, Box<dyn Error>>((move || {
+                transform_result_sse::<_, ()>((move || {
                     let mut api_that_guard = None;
                     let decode_indices_ =
                         flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
@@ -454,11 +465,12 @@ fn wire__crate__api__usearch_api__VectorDb_search_vectors_impl(
                         }
                     }
                     let api_that_guard = api_that_guard.unwrap();
-                    let output_ok = crate::api::usearch_api::VectorDB::search_vectors(
-                        &*api_that_guard,
-                        &api_query,
-                        api_count,
-                    )?;
+                    let output_ok =
+                        Result::<_, ()>::Ok(crate::api::usearch_api::VectorDB::search_vectors(
+                            &*api_that_guard,
+                            &api_query,
+                            api_count,
+                        ))?;
                     Ok(output_ok)
                 })())
             }
@@ -533,36 +545,10 @@ fn wire__crate__api__simple__init_app_impl(
 // Section: related_funcs
 
 flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
-    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Box<dyn Error>>
-);
-flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
-    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Matches>
-);
-flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
     flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VectorDB>
 );
 
 // Section: dart2rust
-
-impl SseDecode for Box<dyn Error> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <RustOpaqueMoi<
-            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Box<dyn Error>>,
-        >>::sse_decode(deserializer);
-        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
-    }
-}
-
-impl SseDecode for Matches {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <RustOpaqueMoi<
-            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Matches>,
-        >>::sse_decode(deserializer);
-        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
-    }
-}
 
 impl SseDecode for VectorDB {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -571,24 +557,6 @@ impl SseDecode for VectorDB {
             flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VectorDB>,
         >>::sse_decode(deserializer);
         return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
-    }
-}
-
-impl SseDecode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Box<dyn Error>>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return decode_rust_opaque_moi(inner);
-    }
-}
-
-impl SseDecode for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Matches>> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return decode_rust_opaque_moi(inner);
     }
 }
 
@@ -662,6 +630,15 @@ impl SseDecode for Vec<u8> {
             ans_.push(<u8>::sse_decode(deserializer));
         }
         return ans_;
+    }
+}
+
+impl SseDecode for (Vec<u64>, Vec<f32>) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_field0 = <Vec<u64>>::sse_decode(deserializer);
+        let mut var_field1 = <Vec<f32>>::sse_decode(deserializer);
+        return (var_field0, var_field1);
     }
 }
 
@@ -796,36 +773,6 @@ fn pde_ffi_dispatcher_sync_impl(
 // Section: rust2dart
 
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<Box<dyn Error>> {
-    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
-            .into_dart()
-    }
-}
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<Box<dyn Error>> {}
-
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<Box<dyn Error>>> for Box<dyn Error> {
-    fn into_into_dart(self) -> FrbWrapper<Box<dyn Error>> {
-        self.into()
-    }
-}
-
-// Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<Matches> {
-    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
-            .into_dart()
-    }
-}
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<Matches> {}
-
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<Matches>> for Matches {
-    fn into_into_dart(self) -> FrbWrapper<Matches> {
-        self.into()
-    }
-}
-
-// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for FrbWrapper<VectorDB> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
@@ -840,44 +787,10 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<VectorDB>> for VectorDB {
     }
 }
 
-impl SseEncode for Box<dyn Error> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Box < dyn Error >>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
-    }
-}
-
-impl SseEncode for Matches {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Matches>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
-    }
-}
-
 impl SseEncode for VectorDB {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VectorDB>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
-    }
-}
-
-impl SseEncode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Box<dyn Error>>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        let (ptr, size) = self.sse_encode_raw();
-        <usize>::sse_encode(ptr, serializer);
-        <i32>::sse_encode(size, serializer);
-    }
-}
-
-impl SseEncode for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Matches>> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        let (ptr, size) = self.sse_encode_raw();
-        <usize>::sse_encode(ptr, serializer);
-        <i32>::sse_encode(size, serializer);
     }
 }
 
@@ -943,6 +856,14 @@ impl SseEncode for Vec<u8> {
         for item in self {
             <u8>::sse_encode(item, serializer);
         }
+    }
+}
+
+impl SseEncode for (Vec<u64>, Vec<f32>) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <Vec<u64>>::sse_encode(self.0, serializer);
+        <Vec<f32>>::sse_encode(self.1, serializer);
     }
 }
 
@@ -1020,34 +941,6 @@ mod io {
     flutter_rust_bridge::frb_generated_boilerplate_io!();
 
     #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_photos_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Box < dyn Error >>>::increment_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_photos_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Box < dyn Error >>>::decrement_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_photos_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Matches>>::increment_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_photos_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Matches>>::decrement_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
     pub extern "C" fn frbgen_photos_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
         ptr: *const std::ffi::c_void,
     ) {
@@ -1085,34 +978,6 @@ mod web {
     // Section: boilerplate
 
     flutter_rust_bridge::frb_generated_boilerplate_web!();
-
-    #[wasm_bindgen]
-    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Box < dyn Error >>>::increment_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBoxdynError(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Box < dyn Error >>>::decrement_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Matches>>::increment_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMatches(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Matches>>::decrement_strong_count(ptr as _);
-    }
 
     #[wasm_bindgen]
     pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
