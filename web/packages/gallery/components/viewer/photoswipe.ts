@@ -1327,18 +1327,16 @@ export class FileViewerPhotoSwipe {
          */
         const blurMediaChromeFocus = (e: MouseEvent) => {
             const target = e.target;
-            if (
-                target instanceof HTMLElement &&
-                // A clickable media chrome element
-                target.tagName.startsWith("MEDIA-") &&
-                // Except the menu, which needs to retain focus to show itself
-                // (presumably).
-                target.tagName != "MEDIA-SETTINGS-MENU-ITEM"
-            ) {
-                // TODO: This doesn't quite work. figure.
-                console.log(target.tagName);
-                // setTimeout(() => target.blur(), 0);
-                // setTimeout(resetFocus, 0);
+            if (target instanceof HTMLElement) {
+                switch (target.tagName) {
+                    case "MEDIA-TIME-RANGE":
+                    case "MEDIA-PLAY-BUTTON":
+                    case "MEDIA-MUTE-BUTTON":
+                    case "MEDIA-PIP-BUTTON":
+                    case "MEDIA-FULLSCREEN-BUTTON":
+                        setTimeout(() => target.blur(), 0);
+                        break;
+                }
             }
         };
 
