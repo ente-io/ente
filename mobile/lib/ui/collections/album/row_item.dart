@@ -7,6 +7,7 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
@@ -20,6 +21,9 @@ class AlbumRowItemWidget extends StatelessWidget {
   final bool showFileCount;
   final String tag;
   final bool? hasVerifiedLock;
+  final List<Collection> selectedAlbums;
+  final void Function(Collection)? onTapCallback;
+  final void Function(Collection)? onLongPressCallback;
 
   const AlbumRowItemWidget(
     this.c,
@@ -28,10 +32,15 @@ class AlbumRowItemWidget extends StatelessWidget {
     this.showFileCount = true,
     this.tag = "",
     this.hasVerifiedLock,
+    this.selectedAlbums = const [],
+    this.onTapCallback,
+    this.onLongPressCallback,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final bool isSelected = selectedAlbums.contains(c);
     final bool isOwner = c.isOwner(Configuration.instance.getUserID()!);
     final String tagPrefix = (isOwner ? "collection" : "shared_collection") +
         tag +
@@ -103,6 +112,26 @@ class AlbumRowItemWidget extends StatelessWidget {
                             ),
                           ),
                         ),
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: Hero(
+                          tag: tagPrefix + "_album_selection",
+                          transitionOnUserGestures: true,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            child: isSelected
+                                ? IconButtonWidget(
+                                    key: const ValueKey("selected"),
+                                    icon: Icons.check_circle_rounded,
+                                    iconButtonType: IconButtonType.secondary,
+                                    iconColor: colorScheme.blurStrokeBase,
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
                       if (!isOwner)
                         Align(
                           alignment: Alignment.bottomRight,
@@ -188,6 +217,10 @@ class AlbumRowItemWidget extends StatelessWidget {
         ],
       ),
       onTap: () async {
+        if (onTapCallback != null) {
+          onTapCallback!(c);
+          return;
+        }
         final thumbnail = await CollectionsService.instance.getCover(c);
         // ignore: unawaited_futures
         routeToPage(
@@ -198,6 +231,11 @@ class AlbumRowItemWidget extends StatelessWidget {
             hasVerifiedLock: hasVerifiedLock,
           ),
         );
+      },
+      onLongPress: () {
+        if (onLongPressCallback != null) {
+          onLongPressCallback!(c);
+        }
       },
     );
   }
