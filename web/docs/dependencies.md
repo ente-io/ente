@@ -92,7 +92,7 @@ DOM.
 > We need to repeat the dependency on react and its siblings in multiple
 > package.jsons to avoid the unmet peer dependency warnings printed by yarn.
 > Ideally, the react dependencies can be specified just in the _ente-base_
-> package.
+> package. For now, we manually ensure that all of them use the same version.
 
 ### MUI and Material Icons
 
