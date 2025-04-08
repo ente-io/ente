@@ -8,6 +8,23 @@ description: Using a custom self-hosted server with Ente client apps and CLI
 You can modify various Ente client apps and CLI to connect to a self hosted
 custom server endpoint.
 
+## Find the hostname of your server
+
+First, run
+```sh
+hostname
+```
+
+The result will look something like this
+```sh
+my-computer.local
+```
+
+You will need to replace the server endpoint with an address that uses your server's hostname and the port number. Here's an example:
+```
+http://my-computer.local:8080
+```
+
 ## Mobile
 
 The pre-built Ente apps from GitHub / App Store / Play Store / F-Droid can be
