@@ -145,6 +145,9 @@ For showing the app's UI in multiple languages, we use the
 Note that inspite of the "next" in the name of the library, it has nothing to do
 with Next.js.
 
+[get-user-locale](https://github.com/wojtekmaj/get-user-locale) is used for
+enumerating the user's locale's to find the best match.
+
 For more details, see [translations.md](translations.md).
 
 ### Font

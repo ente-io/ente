@@ -3,16 +3,16 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@mui/material": "^6.4.7",
-        "@mui/system": "^6.4.7",
-        "@mui/x-date-pickers": "^7.27.3",
+        "@mui/material": "^6.4.10",
+        "@mui/system": "^6.4.10",
+        "@mui/x-date-pickers": "^7.28.3",
         "dayjs": "^1.11.13",
         "ente-base": "*",
         "ente-gallery": "*",
         "ente-shared": "*",
         "ente-utils": "*",
-        "react": "^19.0.0",
-        "react-dom": "^19.0.0"
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0"
     },
     "devDependencies": {
         "ente-build-config": "*"
