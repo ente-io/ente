@@ -191,6 +191,19 @@
 }
 
 /*
+  To get media chrome to apply the same styling to the native video element as
+  hls-video applies to the video element it embeds, we need to set the
+  media-controller's display to inline. It would be nice to do this "properly",
+  or at least understand why this works.
+
+  Ref (not directly relevant, but a general direction):
+  https://github.com/muxinc/media-elements/blob/main/packages/custom-media-element/custom-media-element.ts
+ */
+.pswp-ente media-controller.et-vanilla-video {
+    display: inline;
+}
+
+/*
   Style the custom video controls we provide.
 
   The media-controller itself is center positioned (shrinking if needed) by

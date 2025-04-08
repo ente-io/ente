@@ -329,7 +329,7 @@ export class FileViewerPhotoSwipe {
             if (itemData.fileType === FileType.video) {
                 const { videoPlaylistURL, videoURL } = itemData;
                 if (videoPlaylistURL) {
-                    const mcID = `ente-mc-${file.id}`;
+                    const mcID = `ente-mc-hls-${file.id}`;
                     return {
                         ...itemData,
                         html: hlsVideoHTML(videoPlaylistURL, mcID),
@@ -340,7 +340,7 @@ export class FileViewerPhotoSwipe {
                     // TODO(HLS):
                     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
                 ) {
-                    const mcID = `ente-mc-${file.id}`;
+                    const mcID = `ente-mc-orig-${file.id}`;
                     return {
                         ...itemData,
                         html: videoHTML(videoURL, mcID),
@@ -846,7 +846,7 @@ export class FileViewerPhotoSwipe {
 
             // Refresh the slide so that the video is fetched afresh, but using
             // the updated `originalVideoFileIDs` value for it.
-            this.refreshCurrentSlideContent();
+            pswp.refreshSlideContent(pswp.currIndex);
         };
 
         const showIf = (element: HTMLElement, condition: boolean) =>
@@ -1318,7 +1318,7 @@ export class FileViewerPhotoSwipe {
                 target.tagName != "MEDIA-SETTINGS-MENU-ITEM"
             ) {
                 // TODO: This doesn't quite work. figure.
-                console.log(target.tagName)
+                console.log(target.tagName);
                 // setTimeout(() => target.blur(), 0);
                 // setTimeout(resetFocus, 0);
             }
@@ -1412,7 +1412,7 @@ const hlsVideoHTML = (url: string, mediaControllerID: string) => `
 `;
 
 const videoHTML = (url: string, mediaControllerID: string) => `
-<media-controller id="${mediaControllerID}" nohotkeys>
+<media-controller class="et-vanilla-video" id="${mediaControllerID}" nohotkeys>
   <video playsinline slot="media" src="${url}"></video>
 </media-controller>
 `;
