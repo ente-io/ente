@@ -648,16 +648,6 @@ export class FileViewerPhotoSwipe {
             forgetExifForItemData(asItemData(e.content.data)),
         );
 
-        /**
-         * The media-chrome-button elements (e.g the play button) retain focus
-         * after clicking on them. e.g., if I click the "media-mute-button" to
-         * activate it, then later press Space or Enter, then the mute button
-         * activates again instead of toggling video playback.
-         *
-         * I'm not sure who is at fault here, but this behaviour ends up being
-         * irritating. To prevent this from happening, drop the focus from any
-         * media chrome button when playback starts.
-         */
         const resetFocus = () => {
             const activeElement = document.activeElement;
             if (activeElement instanceof HTMLElement) activeElement.blur();
@@ -726,7 +716,6 @@ export class FileViewerPhotoSwipe {
 
                 if (videoVideoEl) {
                     onVideoPlayback = () => {
-                        resetFocus();
                         showIf(captionElement!, !!videoVideoEl?.paused);
                     };
 
@@ -772,14 +761,6 @@ export class FileViewerPhotoSwipe {
             const muteButton = document.querySelector("media-mute-button");
             if (muteButton instanceof MediaMuteButton) muteButton.handleClick();
         };
-
-        // The PhotoSwipe dialog has being closed and the animations have
-        // completed.
-        pswp.on("destroy", () => {
-            fileViewerDidClose();
-            // Let our parent know that we have been closed.
-            onClose();
-        });
 
         const handleViewInfo = () => onViewInfo(currentAnnotatedFile());
 
@@ -1303,6 +1284,62 @@ export class FileViewerPhotoSwipe {
             cb?.();
         });
 
+        /**
+         * [Note: Media chrome focus workaround]
+         *
+         * The media-chrome-button elements (e.g, the play button, but also
+         * others, including the menu) retain focus after clicking on them.
+         * e.g., if I click the "media-mute-button" to activate it, then the
+         * mute button grabs focus (but not :focus-visible). So it doesn't
+         * appear focused visually, but then later if I press Space or Enter,
+         * then the mute button activates again instead of toggling video
+         * playback (as our keyboard shortcut is meant to do).
+         *
+         * I'm not sure who is at fault here, but this behaviour ends up being
+         * irritating. e.g. say I change the quality in the menu, and press
+         * space to play - well, the space no longer works because the media
+         * chrome has grabbed focus and instead activates itself, reopening the
+         * settings menu.
+         *
+         * As a workaround, we ask media chrome to drop focus on mouse clicks.
+         * This should not impact keyboard activations.
+         *
+         * This workaround is likely to cause problems in the future, but I
+         * can't find a better way short of upstream media chrome changes.
+         */
+        const blurMediaChromeFocus = (e: MouseEvent) => {
+            const target = e.target;
+            if (
+                target instanceof HTMLElement &&
+                // A clickable media chrome element
+                target.tagName.startsWith("MEDIA-") &&
+                // Except the menu, which needs to retain focus to show itself
+                // (presumably).
+                target.tagName != "MEDIA-SETTINGS-MENU-ITEM"
+            ) {
+                // TODO: This doesn't quite work. figure.
+                console.log(target.tagName)
+                // setTimeout(() => target.blur(), 0);
+                // setTimeout(resetFocus, 0);
+            }
+        };
+
+        pswp.on("initialLayout", () => {
+            pswp.element!.addEventListener("mousedown", blurMediaChromeFocus);
+        });
+
+        // The PhotoSwipe dialog has being closed and the animations have
+        // completed.
+        pswp.on("destroy", () => {
+            pswp.element?.removeEventListener(
+                "mousedown",
+                blurMediaChromeFocus,
+            );
+            fileViewerDidClose();
+            // Let our parent know that we have been closed.
+            onClose();
+        });
+
         // Let our data source know that we're about to open.
         fileViewerWillOpen();
 
@@ -1409,6 +1446,9 @@ const videoHTML = (url: string, mediaControllerID: string) => `
  *   this screen which use "title" (which get clipped when they are multi-word).
  *
  * - See: [Note: Spurious media chrome resize observer errors]
+ *
+ * - If something is not working as expected, a possible reason might be the
+ *   focus workaround. See: [Note: Media chrome focus workaround].
  */
 const hlsVideoControlsHTML = () => `
 <div>
