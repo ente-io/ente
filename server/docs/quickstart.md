@@ -46,12 +46,12 @@ Then it creates a Docker compose file (`compose.yaml`) from a template, and a
 Finally, it start the Docker compose cluster running the following services on 3
 open ports:
 
-| Service     | Port     | Notes                   |
-| ----------- | -------- | ----------------------- |
-| museum      | `:8080`  | Ente's API server       |
-| web         | `:3000`  | Ente Photos web app     |
-| postgres    |          | DB                      |
-| minio       | `:3200`  | S3                      |
+| Service  | Port    | Notes               |
+| -------- | ------- | ------------------- |
+| museum   | `:8080` | Ente's API server   |
+| web      | `:3000` | Ente Photos web app |
+| postgres |         | DB                  |
+| minio    | `:3200` | S3                  |
 
 For each of these, it'll use the latest published Docker image.
 
@@ -119,6 +119,15 @@ persistent data is saved in volumes managed by Docker.
 > starting museum, one possibility is that you're recreating the `my-ente`
 > folder but still have leftover volumes (`my-ente_postgres-data` and
 > `my-ente_minio-data` from a previous attempt).
+
+> [!TIP]
+>
+> If you're getting errors like `pq: password authentication failed` when
+> starting museum, another possibility is that the password is not being sent
+> in `scram-sha-256` if there are mentions of using `scram-sha-256` in the
+> logs. Set `password_encryption = scram-sha-256` in `postgresql.conf` 
+> (present in `/var/lib/postgresql/data/`) and restart the cluster after
+> removing it along with volumes.
 
 ### Caveat
 

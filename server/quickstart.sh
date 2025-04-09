@@ -196,4 +196,10 @@ printf "(Verification code will be in the logs here)\n\n"
 
 sleep 1
 
-docker compose up
+docker compose up -d
+
+docker exec -it my-ente-postgres-1 sh -c "echo \"password_encryption = scram-sha-256\" >> /var/lib/postgresql/data/postgresql.conf"
+
+docker exec -it my-ente-postgres-1 psql -U pguser -d postgres -c "SELECT 'CREATE DATABASE ente_db' WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'ente_db') LIMIT 1;"
+
+docker compose down && docker compose up
