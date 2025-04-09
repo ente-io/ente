@@ -53,7 +53,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
         //
         // Override, otherwise tsc complains about unknown property `chrome`.
         // eslint-disable-next-line @typescript-eslint/dot-notation
-        setBrowserCanCast(typeof window["chrome"] !== "undefined");
+        setBrowserCanCast(typeof window["chrome"] != "undefined");
     }, []);
 
     const onSubmit: SingleInputFormProps["callback"] = async (
@@ -77,7 +77,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     };
 
     useEffect(() => {
-        if (view === "auto") {
+        if (view == "auto") {
             loadCast().then(async (cast) => {
                 const instance = cast.framework.CastContext.getInstance();
                 try {

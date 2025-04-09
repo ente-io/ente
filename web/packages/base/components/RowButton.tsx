@@ -236,7 +236,7 @@ export const RowButton: React.FC<RowButtonProps> = ({
             <Stack direction="row" sx={{ py: "14px", gap: "10px" }}>
                 {startIcon && startIcon}
                 <Box sx={{ px: "2px" }}>
-                    {typeof label !== "string" ? (
+                    {typeof label != "string" ? (
                         label
                     ) : caption ? (
                         <Stack

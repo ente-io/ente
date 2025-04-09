@@ -147,7 +147,7 @@ export const isPasskeyRecoveryEnabled = async () => {
             { "X-Auth-Token": token },
         );
 
-        if (typeof resp.data === "undefined") {
+        if (typeof resp.data == "undefined") {
             throw Error("request failed");
         }
 
@@ -173,7 +173,7 @@ const configurePasskeyRecovery = async (
             { "X-Auth-Token": token },
         );
 
-        if (typeof resp.data === "undefined") {
+        if (typeof resp.data == "undefined") {
             throw Error("request failed");
         }
     } catch (e) {

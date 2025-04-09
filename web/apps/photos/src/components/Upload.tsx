@@ -1271,7 +1271,7 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
                         label={t("folder")}
                         onClick={() => onSelect("folders")}
                     />
-                    {intent !== "collect" && (
+                    {intent != "collect" && (
                         <RowButton
                             startIcon={<GoogleIcon />}
                             endIcon={<ChevronRightIcon />}
