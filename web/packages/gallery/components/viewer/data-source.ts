@@ -300,7 +300,7 @@ export interface ItemDataOpts {
  * - For images this will be the single original.
  *
  * - For videos this will be either the HLS playlist to a streamable variant of
- *   the video (if the video has one available), or the original video itsel.
+ *   the video (if the video has one available), or the original video itself.
  *
  * - For live photos, this will also be a two step process, first fetching the
  *   video component, then fetching the image component.

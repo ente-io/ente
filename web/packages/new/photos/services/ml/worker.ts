@@ -100,7 +100,7 @@ export class MLWorker {
     /** The last known state of the worker. */
     public state: WorkerState = "init";
     /** If the worker is currently clustering, then its last known progress. */
-    public clusteringProgess: ClusteringProgress | undefined;
+    public clusteringProgress: ClusteringProgress | undefined;
 
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
@@ -335,7 +335,7 @@ export class MLWorker {
     }
 
     private updateClusteringProgress(progress: ClusteringProgress | undefined) {
-        this.clusteringProgess = progress;
+        this.clusteringProgress = progress;
         this.delegate?.workerDidUpdateStatus();
     }
 

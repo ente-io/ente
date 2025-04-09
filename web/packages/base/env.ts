@@ -16,7 +16,7 @@ export const isDevBuild = process.env.NODE_ENV == "development";
  * of a web browser.
  *
  * In particular, this is `false` when we're running in a web worker,
- * irrespecitve of whether the worker is running in a Node.js context or a web
+ * irrespective of whether the worker is running in a Node.js context or a web
  * browser context.
  *
  * > We can be running in a browser context either if the user has the page open

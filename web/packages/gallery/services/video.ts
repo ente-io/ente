@@ -17,7 +17,7 @@ interface HLSPlaylistData {
 }
 
 /**
- * Return a HLS playlist that can be used to stream playback of thne given video
+ * Return a HLS playlist that can be used to stream playback of then given video
  * {@link file}.
  *
  * @param file An {@link EnteFile} of type video.
@@ -100,13 +100,13 @@ export const hlsPlaylistDataForFile = async (
     //   sub-range in bytes, and if present, o is the integer indicating the
     //   start of the sub-range as a byte offset from the beginning of the
     //   resource. If o is not present, the sub-range begins at the next byte
-    //   following the sub-range of the preivous media segment.
+    //   following the sub-range of the previous media segment.
     //
     // - Media segments may be encrypted, and the EXT-X-KEY tag specifies how to
     //   decrypt them. It applies to all subsequent media segment (until another
     //   EXT-X-KEY). Value is an `<attribute-list>`, consisting of the METHOD
     //   (AES-128 for us), URI and IV attributes. The URI attribute value is a
-    //   quoted string containing a URI that specfies how to obtain the key.
+    //   quoted string containing a URI that specifies how to obtain the key.
 
     const playlist = playlistTemplate.replaceAll(
         "\noutput.ts",

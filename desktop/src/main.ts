@@ -607,7 +607,7 @@ const handleBackOnStripeCheckout = (window: BrowserWindow) =>
  *
  * But this is an issue for uploads in the self hosted apps (or when we
  * ourselves are trying to test things by with an arbitrary S3 bucket without
- * going via a worker). During upload, theer is no redirection, so the request
+ * going via a worker). During upload, there is no redirection, so the request
  * ACAO is "ente://app" but the response ACAO is `null` which don't match,
  * causing the request to fail.
  *

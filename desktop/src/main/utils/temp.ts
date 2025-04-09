@@ -64,7 +64,7 @@ export const deleteTempFile = async (tempFilePath: string) => {
 };
 
 /**
- * A variant of {@link deleteTempFile} that supresses any errors, making it
+ * A variant of {@link deleteTempFile} that suppresses any errors, making it
  * safe to call them in a sequence without needing to handle the scenario where
  * one of them failing causes the rest to be skipped.
  */

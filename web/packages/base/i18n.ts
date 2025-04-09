@@ -49,7 +49,7 @@ const defaultLocale: SupportedLocale = "en-US";
  *
  * In addition to the base i18next package, we use two of its plugins:
  *
- * - i18next-http-backend, for loading the JSON files containin the translations
+ * - i18next-http-backend, for loading the JSON files containing the translations
  *   at runtime, and
  *
  * - react-i18next, which adds React specific APIs

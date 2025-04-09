@@ -221,7 +221,7 @@
   This is the current magic incantation that seems to get them to play without
   the video's frame jittering. Note that the streaming hls-video elements work
   fine without any workarounds, it is only the vanilla video elements that have
-  this issue and necessiate this workaround. The downside is that clicking
+  this issue and necessitate this workaround. The downside is that clicking
   "outside" the video works for hls-video, but not for vanilla videos.
  */
 .pswp-ente media-controller.ente-vanilla-video {
