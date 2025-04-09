@@ -1034,7 +1034,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
         let contentText;
         let buttonText;
 
-        if (newRole === "VIEWER") {
+        if (newRole == "VIEWER") {
             contentText = (
                 <Trans
                     i18nKey="change_permission_to_viewer"
@@ -1043,7 +1043,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
             );
 
             buttonText = t("confirm_convert_to_viewer");
-        } else if (newRole === "COLLABORATOR") {
+        } else if (newRole == "COLLABORATOR") {
             contentText = t("change_permission_to_collaborator", {
                 selectedEmail,
             });
@@ -1124,7 +1124,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                                 label={"Viewer"}
                                 startIcon={<PhotoIcon />}
                                 endIcon={
-                                    selectedParticipant.role === "VIEWER" && (
+                                    selectedParticipant.role == "VIEWER" && (
                                         <DoneIcon />
                                     )
                                 }

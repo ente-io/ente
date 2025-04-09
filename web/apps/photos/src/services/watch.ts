@@ -246,7 +246,7 @@ class FolderWatcher {
             return;
         }
 
-        if (event.action === "upload") {
+        if (event.action == "upload") {
             const paths = pathsToUpload(event.filePaths, watch);
             if (paths.length == 0) {
                 skip("none of the files need uploading");

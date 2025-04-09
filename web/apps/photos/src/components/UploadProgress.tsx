@@ -290,7 +290,7 @@ function UploadProgressDialog() {
             <UploadProgressHeader />
             {(uploadPhase == "uploading" || uploadPhase == "done") && (
                 <DialogContent sx={{ "&&&": { px: 0 } }}>
-                    {uploadPhase === "uploading" && <InProgressSection />}
+                    {uploadPhase == "uploading" && <InProgressSection />}
                     <ResultSection
                         uploadResult="uploaded"
                         sectionTitle={t("SUCCESSFUL_UPLOADS")}

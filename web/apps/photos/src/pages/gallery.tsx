@@ -376,7 +376,7 @@ const Page: React.FC = () => {
     }, [collectionNamerAttributes]);
 
     useEffect(() => {
-        if (typeof activeCollectionID === "undefined" || !router.isReady) {
+        if (typeof activeCollectionID == "undefined" || !router.isReady) {
             return;
         }
         let collectionURL = "";
@@ -641,7 +641,7 @@ const Page: React.FC = () => {
                 setFilesDownloadProgressAttributesList((prev) => {
                     const attributes = prev?.find((attr) => attr.id === id);
                     const updatedAttributes =
-                        typeof value === "function"
+                        typeof value == "function"
                             ? value(attributes)
                             : { ...attributes, ...value };
                     const updatedAttributesList = attributes

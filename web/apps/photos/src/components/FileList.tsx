@@ -704,7 +704,7 @@ export const FileList: React.FC<FileListProps> = ({
     };
 
     const handleRangeSelect = (index: number) => () => {
-        if (typeof rangeStart !== "undefined" && rangeStart !== index) {
+        if (typeof rangeStart != "undefined" && rangeStart !== index) {
             const direction =
                 (index - rangeStart) / Math.abs(index - rangeStart);
             let checked = true;
