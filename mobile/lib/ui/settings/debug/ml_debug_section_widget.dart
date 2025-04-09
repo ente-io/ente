@@ -1,13 +1,17 @@
 import "dart:async";
 import "dart:typed_data" show Float32List;
 
+import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart";
 import "package:logging/logging.dart";
+import "package:ml_linalg/linalg.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/extensions/stop_watch.dart";
+import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -114,6 +118,105 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               await rustVectorDB.deleteIndex();
             } catch (e, s) {
               logger.warning('Rust bridge failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Benchmark Vector DB Face",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final w = (kDebugMode ? EnteWatch('MLDebugSectionWidget') : null)
+                ?..start();
+              final persons = await PersonService.instance.getPersons();
+              w?.log('get all persons for ${persons.length} persons');
+              String laurensID = '';
+              for (final person in persons) {
+                if (person.data.name.toLowerCase().contains('laurens')) {
+                  laurensID = person.remoteID;
+                }
+              }
+              if (laurensID.isEmpty) {
+                throw Exception('Laurens not found');
+              }
+              final laurensFaceIDs =
+                  await MLDataDB.instance.getFaceIDsForPerson(laurensID);
+              w?.log(
+                'getting all face ids for laurens (${laurensFaceIDs.length} faces)',
+              );
+              final laurensFaceIdToEmbeddingData = await MLDataDB.instance
+                  .getFaceEmbeddingMapForFaces(laurensFaceIDs);
+
+              // Fill the vector DB with all embeddings
+              final laurensFaceIdToFloat32 = laurensFaceIdToEmbeddingData.map(
+                (key, value) => MapEntry(
+                  key,
+                  Float32List.fromList(EVector.fromBuffer(value).values),
+                ),
+              );
+              final keys = Uint64List.fromList(
+                List.generate(
+                  laurensFaceIdToFloat32.length,
+                  (index) => BigInt.from(index + 1),
+                ),
+              );
+              final vectorDB = VectorDb(
+                filePath: (await getApplicationSupportDirectory()).path +
+                    "/ml/test/vector_db_face_index.usearch",
+                dimensions: BigInt.from(
+                  laurensFaceIdToFloat32.values.first.length,
+                ),
+              );
+              await vectorDB.resetIndex();
+              await vectorDB.bulkAddVectors(
+                keys: keys,
+                vectors: laurensFaceIdToFloat32.values.toList(),
+              );
+
+              // Benchmarking the vector DB
+              final queries = laurensFaceIdToFloat32.values.toList();
+              final count = BigInt.from(10);
+              w?.reset();
+              final results = await vectorDB.bulkSearchVectors(
+                queries: queries,
+                count: count,
+              );
+
+              w?.log(
+                'Done with ${queries.length * queries.length} (${queries.length} x ${queries.length}}) embeddings comparisons in vector DB',
+              );
+              logger.info(
+                'vector db results: ${results.length} results, first: ${results.first}, hundredth: ${results[99]}',
+              );
+
+              // Benchmarking our own vector comparisons
+              final laurensFaceIdToEmbeddingVectors =
+                  laurensFaceIdToEmbeddingData.map(
+                (key, value) => MapEntry(
+                  key,
+                  Vector.fromList(EVector.fromBuffer(value).values),
+                ),
+              );
+              final faceVectors = laurensFaceIdToEmbeddingVectors.values;
+              w?.reset();
+              for (final faceVector in faceVectors) {
+                for (final otherFaceVector in faceVectors) {
+                  final _ = 1 - faceVector.dot(otherFaceVector);
+                }
+              }
+
+              w?.log(
+                'Done with ${faceVectors.length * faceVectors.length} (${faceVectors.length} x ${faceVectors.length}}) embeddings comparisons in own method',
+              );
+            } catch (e, s) {
+              logger.warning('vector DB search failed ', e, s);
+
               await showGenericErrorDialog(context: context, error: e);
             }
           },
