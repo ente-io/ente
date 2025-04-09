@@ -94,7 +94,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                 filePath: indexPath,
                 dimensions: BigInt.from(tenEmbeddings.first.length),
               );
-              await rustVectorDB.resetIndex();
               final stats = await rustVectorDB.getIndexStats();
               logger.info("vector_db stats: $stats");
               await rustVectorDB.bulkAddVectors(
