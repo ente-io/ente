@@ -7,7 +7,7 @@ import { ensurePrecondition } from "ente-utils/ensure";
 import { z } from "zod";
 import { fetchFileData, fetchFilePreviewData } from "./file-data";
 
-interface HLSPlaylistData {
+export interface HLSPlaylistData {
     /** A data URL to a HLS playlist that streams the video. */
     playlistURL: string;
     /** The width of the video (px). */

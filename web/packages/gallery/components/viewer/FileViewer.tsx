@@ -45,7 +45,6 @@ import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "ente-new/photos/components/ImageEditorOverlay";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { t } from "i18next";
 import React, {
     useCallback,
@@ -64,6 +63,7 @@ import {
     moreButtonID,
     moreMenuID,
     resetMoreMenuButtonOnMenuClose,
+    shouldUsePlayerV2,
     type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
 
@@ -1154,14 +1154,14 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
                 action={formattedListJoin([t("previous"), t("next")])}
                 shortcut={
                     // TODO(HLS):
-                    settingsSnapshot().isInternalUser
+                    shouldUsePlayerV2()
                         ? `${formattedListJoin([ut("←"), ut("→")])} (Option/Alt)`
                         : formattedListJoin([ut("←"), ut("→")])
                 }
             />
             {
                 /* TODO(HLS): */
-                settingsSnapshot().isInternalUser && (
+                shouldUsePlayerV2() && (
                     <Shortcut
                         action={pt("Video seek")}
                         shortcut={formattedListJoin([ut("←"), ut("→")])}
@@ -1186,7 +1186,7 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
             />
             {
                 /* TODO(HLS): */
-                settingsSnapshot().isInternalUser && (
+                shouldUsePlayerV2() && (
                     <Shortcut
                         action={pt("Play, Pause")}
                         shortcut={ut("Space")}

@@ -1,13 +1,16 @@
-import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import type { FileInfoExif } from "ente-gallery/components/FileInfo";
 import { downloadManager } from "ente-gallery/services/download";
 import { extractRawExif, parseExif } from "ente-gallery/services/exif";
-import { hlsPlaylistDataForFile } from "ente-gallery/services/video";
+import {
+    hlsPlaylistDataForFile,
+    type HLSPlaylistData,
+} from "ente-gallery/services/video";
 import type { EnteFile } from "ente-media/file";
 import { fileCaption } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { ensureString } from "ente-utils/ensure";
+import { shouldUsePlayerV2 } from "./photoswipe";
 
 /**
  * This is a subset of the fields expected by PhotoSwipe itself (see the
@@ -412,6 +415,26 @@ const enqueueUpdates = async (
         _state.needsRefreshByFileID.get(file.id)?.();
     };
 
+    const updateVideo = (
+        videoURL: string | undefined,
+        hlsPlaylistData: HLSPlaylistData | undefined,
+    ) => {
+        const videoURLD = videoURL ? { videoURL } : {};
+        if (hlsPlaylistData) {
+            const {
+                playlistURL: videoPlaylistURL,
+                width,
+                height,
+            } = hlsPlaylistData;
+            update(
+                { ...videoURLD, videoPlaylistURL, width, height },
+                createHLSPlaylistItemDataValidity(),
+            );
+        } else {
+            update(videoURLD);
+        }
+    };
+
     // Use the last best available data, but stop showing the loading indicator
     // and instead show the error indicator.
     const markFailed = () => {
@@ -449,24 +472,15 @@ const enqueueUpdates = async (
     }
 
     try {
-        if (isDevBuild && process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING) {
-            if (
-                file.metadata.fileType == FileType.video &&
-                opts?.videoQuality != "original"
-            ) {
-                const playlistData = await hlsPlaylistDataForFile(file);
-                if (playlistData) {
-                    const {
-                        playlistURL: videoPlaylistURL,
-                        width,
-                        height,
-                    } = playlistData;
-                    update(
-                        { videoPlaylistURL, width, height },
-                        createHLSPlaylistItemDataValidity(),
-                    );
-                    return;
-                }
+        // TODO(HLS):
+        let hlsPlaylistData: HLSPlaylistData | undefined;
+        if (shouldUsePlayerV2() && file.metadata.fileType == FileType.video) {
+            hlsPlaylistData = await hlsPlaylistDataForFile(file);
+            // We have a HLS playlist, and the user didn't request the original.
+            // Early return so that we don't initiate a fetch for the original.
+            if (hlsPlaylistData && opts?.videoQuality != "original") {
+                updateVideo(undefined, hlsPlaylistData);
+                return;
             }
         }
 
@@ -482,7 +496,7 @@ const enqueueUpdates = async (
 
             case "video": {
                 const { videoURL } = sourceURLs;
-                update({ videoURL });
+                updateVideo(videoURL, hlsPlaylistData);
                 break;
             }
 
