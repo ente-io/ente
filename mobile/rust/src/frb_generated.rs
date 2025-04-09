@@ -80,19 +80,19 @@ fn wire__crate__api__usearch_api__VectorDb_add_vector_impl(
                     let decode_indices_ =
                         flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
                             flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                &api_that, 0, true,
+                                &api_that, 0, false,
                             ),
                         ]);
                     for i in decode_indices_ {
                         match i {
-                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref_mut()),
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
                             _ => unreachable!(),
                         }
                     }
-                    let mut api_that_guard = api_that_guard.unwrap();
+                    let api_that_guard = api_that_guard.unwrap();
                     let output_ok = Result::<_, ()>::Ok({
                         crate::api::usearch_api::VectorDB::add_vector(
-                            &mut *api_that_guard,
+                            &*api_that_guard,
                             api_key,
                             &api_vector,
                         );
@@ -137,19 +137,19 @@ fn wire__crate__api__usearch_api__VectorDb_bulk_add_vectors_impl(
                     let decode_indices_ =
                         flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
                             flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                &api_that, 0, true,
+                                &api_that, 0, false,
                             ),
                         ]);
                     for i in decode_indices_ {
                         match i {
-                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref_mut()),
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
                             _ => unreachable!(),
                         }
                     }
-                    let mut api_that_guard = api_that_guard.unwrap();
+                    let api_that_guard = api_that_guard.unwrap();
                     let output_ok = Result::<_, ()>::Ok({
                         crate::api::usearch_api::VectorDB::bulk_add_vectors(
-                            &mut *api_that_guard,
+                            &*api_that_guard,
                             api_keys,
                             &api_vectors,
                         );
@@ -217,12 +217,28 @@ fn wire__crate__api__usearch_api__VectorDb_get_index_stats_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_that = <VectorDB>::sse_decode(&mut deserializer);
+            let api_that = <RustOpaqueMoi<
+                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VectorDB>,
+            >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, ()>((move || {
+                    let mut api_that_guard = None;
+                    let decode_indices_ =
+                        flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
+                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
+                                &api_that, 0, false,
+                            ),
+                        ]);
+                    for i in decode_indices_ {
+                        match i {
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
+                            _ => unreachable!(),
+                        }
+                    }
+                    let api_that_guard = api_that_guard.unwrap();
                     let output_ok = Result::<_, ()>::Ok(
-                        crate::api::usearch_api::VectorDB::get_index_stats(api_that),
+                        crate::api::usearch_api::VectorDB::get_index_stats(&*api_that_guard),
                     )?;
                     Ok(output_ok)
                 })())
@@ -349,21 +365,19 @@ fn wire__crate__api__usearch_api__VectorDb_remove_vector_impl(
                     let decode_indices_ =
                         flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
                             flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                &api_that, 0, true,
+                                &api_that, 0, false,
                             ),
                         ]);
                     for i in decode_indices_ {
                         match i {
-                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref_mut()),
+                            0 => api_that_guard = Some(api_that.lockable_decode_sync_ref()),
                             _ => unreachable!(),
                         }
                     }
-                    let mut api_that_guard = api_that_guard.unwrap();
-                    let output_ok =
-                        Result::<_, ()>::Ok(crate::api::usearch_api::VectorDB::remove_vector(
-                            &mut *api_that_guard,
-                            api_key,
-                        ))?;
+                    let api_that_guard = api_that_guard.unwrap();
+                    let output_ok = Result::<_, ()>::Ok(
+                        crate::api::usearch_api::VectorDB::remove_vector(&*api_that_guard, api_key),
+                    )?;
                     Ok(output_ok)
                 })())
             }

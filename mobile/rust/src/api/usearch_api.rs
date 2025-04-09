@@ -60,13 +60,13 @@ impl VectorDB {
         }
     }
 
-    pub fn add_vector(&mut self, key: u64, vector: &Vec<f32>) {
+    pub fn add_vector(&self, key: u64, vector: &Vec<f32>) {
         self.ensure_capacity(1);
         self.index.add(key, vector).expect("Failed to add vector");
         self.save_index();
     }
 
-    pub fn bulk_add_vectors(&mut self, keys: Vec<u64>, vectors: &Vec<Vec<f32>>) {
+    pub fn bulk_add_vectors(&self, keys: Vec<u64>, vectors: &Vec<Vec<f32>>) {
         self.ensure_capacity(keys.len());
         for (key, vector) in keys.iter().zip(vectors.iter()) {
             self.index
@@ -92,7 +92,7 @@ impl VectorDB {
         vector
     }
 
-    pub fn remove_vector(&mut self, key: u64) -> usize {
+    pub fn remove_vector(&self, key: u64) -> usize {
         let removed_count = self.index.remove(key).expect("Failed to remove vector");
         self.save_index();
         removed_count
@@ -106,7 +106,7 @@ impl VectorDB {
         }
     }
 
-    pub fn get_index_stats(self) -> (usize, usize, usize, usize, usize) {
+    pub fn get_index_stats(&self) -> (usize, usize, usize, usize, usize) {
         let size = self.index.size();
         let capacity = self.index.capacity();
         let dimensions = self.index.dimensions();

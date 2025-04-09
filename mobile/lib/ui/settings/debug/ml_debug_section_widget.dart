@@ -88,14 +88,15 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   .toList();
               final tenKeys =
                   Uint64List.fromList(tenVectors.map((e) => e.fileID).toList());
+              final embedDimensions = BigInt.from(tenEmbeddings.first.length);
               final indexPath = (await getApplicationSupportDirectory()).path +
                   "/ml/test/vector_db_index.usearch";
               final rustVectorDB = VectorDb(
                 filePath: indexPath,
-                dimensions: BigInt.from(tenEmbeddings.first.length),
+                dimensions: embedDimensions,
               );
-              final stats = await rustVectorDB.getIndexStats();
-              logger.info("vector_db stats: $stats");
+              // final stats = await rustVectorDB.getIndexStats();
+              // logger.info("vector_db stats: $stats");
               await rustVectorDB.bulkAddVectors(
                 keys: tenKeys,
                 vectors: tenEmbeddings,
