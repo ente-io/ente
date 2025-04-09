@@ -84,7 +84,11 @@ impl VectorDB {
         (matches.keys, matches.distances)
     }
 
-    pub fn bulk_search_vectors(&self, queries: &Vec<Vec<f32>>, count: usize) -> (Vec<Vec<u64>>, Vec<Vec<f32>>) {
+    pub fn bulk_search_vectors(
+        &self,
+        queries: &Vec<Vec<f32>>,
+        count: usize,
+    ) -> (Vec<Vec<u64>>, Vec<Vec<f32>>) {
         let mut keys = Vec::new();
         let mut distances = Vec::new();
 
