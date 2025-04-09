@@ -28,7 +28,7 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { lowercaseExtension } from "ente-base/file-name";
-import { formattedListJoin, ut } from "ente-base/i18n";
+import { formattedListJoin, pt, ut } from "ente-base/i18n";
 import type { LocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import {
@@ -45,6 +45,7 @@ import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "ente-new/photos/components/ImageEditorOverlay";
+import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { t } from "i18next";
 import React, {
     useCallback,
@@ -1151,8 +1152,22 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
             <Shortcut action={t("close")} shortcut={ut("Esc")} />
             <Shortcut
                 action={formattedListJoin([t("previous"), t("next")])}
-                shortcut={formattedListJoin([ut("←"), ut("→")])}
+                shortcut={
+                    // TODO(HLS):
+                    settingsSnapshot().isInternalUser
+                        ? `${formattedListJoin([ut("←"), ut("→")])} (Option/Alt)`
+                        : formattedListJoin([ut("←"), ut("→")])
+                }
             />
+            {
+                /* TODO(HLS): */
+                settingsSnapshot().isInternalUser && (
+                    <Shortcut
+                        action={pt("Video seek")}
+                        shortcut={formattedListJoin([ut("←"), ut("→")])}
+                    />
+                )
+            }
             <Shortcut
                 action={t("zoom")}
                 shortcut={formattedListJoin([t("mouse_scroll"), t("pinch")])}
@@ -1169,6 +1184,15 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
                 action={t("pan")}
                 shortcut={formattedListJoin([ut("W A S D"), t("drag")])}
             />
+            {
+                /* TODO(HLS): */
+                settingsSnapshot().isInternalUser && (
+                    <Shortcut
+                        action={pt("Play, Pause")}
+                        shortcut={ut("Space")}
+                    />
+                )
+            }
             <Shortcut action={t("toggle_live")} shortcut={ut("Space")} />
             <Shortcut action={t("toggle_audio")} shortcut={ut("M")} />
             {haveUser && (
