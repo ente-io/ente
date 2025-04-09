@@ -98,6 +98,11 @@ impl VectorDB {
         removed_count
     }
 
+    pub fn reset_index(&self) {
+        self.index.reset().expect("Failed to reset index");
+        self.save_index();
+    }
+
     pub fn delete_index(self) {
         if self.path.exists() {
             std::fs::remove_file(&self.path).expect("Failed to delete index file");

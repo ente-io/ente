@@ -70,7 +70,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.9.0';
 
   @override
-  int get rustContentHash => 846037902;
+  int get rustContentHash => 862168794;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -112,6 +112,8 @@ abstract class RustLibApi extends BaseApi {
     required VectorDb that,
     required BigInt key,
   });
+
+  Future<void> crateApiUsearchApiVectorDbResetIndex({required VectorDb that});
 
   Future<(Uint64List, Float32List)> crateApiUsearchApiVectorDbSearchVectors({
     required VectorDb that,
@@ -397,6 +399,40 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<void> crateApiUsearchApiVectorDbResetIndex({required VectorDb that}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
+            that,
+            serializer,
+          );
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 8,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiUsearchApiVectorDbResetIndexConstMeta,
+        argValues: [that],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiUsearchApiVectorDbResetIndexConstMeta =>
+      const TaskConstMeta(
+        debugName: "VectorDb_reset_index",
+        argNames: ["that"],
+      );
+
+  @override
   Future<(Uint64List, Float32List)> crateApiUsearchApiVectorDbSearchVectors({
     required VectorDb that,
     required List<double> query,
@@ -415,7 +451,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 9,
             port: port_,
           );
         },
@@ -444,7 +480,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         callFfi: () {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(name, serializer);
-          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_String,
@@ -471,7 +507,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 10,
+            funcId: 11,
             port: port_,
           );
         },
@@ -993,6 +1029,11 @@ class VectorDbImpl extends RustOpaque implements VectorDb {
 
   Future<BigInt> removeVector({required BigInt key}) => RustLib.instance.api
       .crateApiUsearchApiVectorDbRemoveVector(that: this, key: key);
+
+  Future<void> resetIndex() =>
+      RustLib.instance.api.crateApiUsearchApiVectorDbResetIndex(
+        that: this,
+      );
 
   Future<(Uint64List, Float32List)> searchVectors({
     required List<double> query,
