@@ -1732,5 +1732,8 @@
   "cLMemoriesDesc": "Ontdek nog eens je speciale momenten - spotlicht op je favoriete mensen, op je reizen en vakanties, op de beste plaatjes, en nog veel meer. Zet Machine Learning aan, tag jezelf en benoem je vrienden voor de beste ervaring.",
   "cLWidgets": "Widgets",
   "cLWidgetsDesc": "Widgets die zijn geïntegreerd met herinneringen zijn nu beschikbaar. Ze tonen je speciale momenten zonder de app te openen.",
-  "cLFamilyPlan": "Familieplan limieten"
+  "cLFamilyPlan": "Familieplan limieten",
+  "cLFamilyPlanDesc": "Je kunt nu limieten instellen voor hoeveel opslag je familieleden kunnen gebruiken.",
+  "cLBulkEdit": "Bulk datums wijzigen",
+  "cLBulkEditDesc": "Je kunt nu meerdere foto's selecteren en de datum/tijd van ze allemaal bewerken met één snelle actie. Verschuiven van datums wordt ook ondersteund."
 }
