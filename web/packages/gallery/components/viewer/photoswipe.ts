@@ -2,6 +2,10 @@ import { pt } from "ente-base/i18n";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
+import {
+    isDevBuildAndUser,
+    settingsSnapshot,
+} from "ente-new/photos/services/settings";
 import "hls-video-element";
 import { t } from "i18next";
 import "media-chrome";
@@ -162,6 +166,12 @@ export const moreButtonID = "ente-pswp-more-button";
  * @see also {@link moreButtonID}.
  */
 export const moreMenuID = "ente-pswp-more-menu";
+
+// TODO(HLS):
+let _shouldUsePlayerV2: boolean | undefined;
+export const shouldUsePlayerV2 = () =>
+    (_shouldUsePlayerV2 ??=
+        settingsSnapshot().isInternalUser && isDevBuildAndUser());
 
 /**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
@@ -336,11 +346,7 @@ export class FileViewerPhotoSwipe {
                         html: hlsVideoHTML(videoPlaylistURL, mcID),
                         mediaControllerID: mcID,
                     };
-                } else if (
-                    videoURL &&
-                    // TODO(HLS):
-                    process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
-                ) {
+                } else if (videoURL && shouldUsePlayerV2()) {
                     const mcID = `ente-mc-orig-${file.id}`;
                     return {
                         ...itemData,
@@ -522,7 +528,7 @@ export class FileViewerPhotoSwipe {
             }
 
             // TODO(HLS): Temporary gate
-            if (!process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING) return;
+            if (!shouldUsePlayerV2()) return;
 
             const qualityMenu = container?.querySelector("#ente-quality-menu");
             if (qualityMenu instanceof MediaChromeMenu) {
@@ -731,7 +737,8 @@ export class FileViewerPhotoSwipe {
 
                 if (videoVideoEl) {
                     onVideoPlayback = () => {
-                        showIf(captionElement!, !!videoVideoEl?.paused);
+                        if (!shouldUsePlayerV2())
+                            showIf(captionElement!, !!videoVideoEl?.paused);
                     };
 
                     videoVideoEl.addEventListener("play", onVideoPlayback);
@@ -761,13 +768,15 @@ export class FileViewerPhotoSwipe {
          * the current slide.
          */
         const videoToggleMuteIfPossible = () => {
-            const video = videoVideoEl;
-            if (!video) return;
-
-            video.muted = !video.muted;
-
             // TODO(HLS): Temporary gate
-            if (!process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING) return;
+            if (!shouldUsePlayerV2()) {
+                const video = videoVideoEl;
+                if (!video) return;
+
+                video.muted = !video.muted;
+
+                return;
+            }
 
             // Go via the media chrome mute button when muting, because
             // otherwise the local storage that the media chrome internally
@@ -1111,9 +1120,7 @@ export class FileViewerPhotoSwipe {
         const handleSeekBackOrPreviousSlide = () => {
             // TODO(HLS): Behind temporary flag
             // const vid = videoVideoEl;
-            const vid = process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
-                ? videoVideoEl
-                : undefined;
+            const vid = shouldUsePlayerV2() ? videoVideoEl : undefined;
             if (vid) {
                 vid.currentTime = Math.max(vid.currentTime - 5, 0);
             } else {
@@ -1124,9 +1131,7 @@ export class FileViewerPhotoSwipe {
         const handleSeekForwardOrNextSlide = () => {
             // TODO(HLS): Behind temporary flag
             // const vid = videoVideoEl;
-            const vid = process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
-                ? videoVideoEl
-                : undefined;
+            const vid = shouldUsePlayerV2() ? videoVideoEl : undefined;
             if (vid) {
                 vid.currentTime = vid.currentTime + 5;
             } else {
