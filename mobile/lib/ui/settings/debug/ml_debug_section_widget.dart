@@ -279,32 +279,32 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                 'vector db results: ${results.length} results, first: ${results.first}, hundredth: ${results[99]}',
               );
 
-              // Benchmarking our own vector comparisons
-              final clipVectors = clipEmbeddings
-                  .map(
-                    (value) => value.vector,
-                  )
-                  .toList();
-              w?.reset();
-              int compared = 0;
-              int ms = DateTime.now().millisecondsSinceEpoch;
-              for (final faceVector in clipVectors) {
-                for (final otherFaceVector in clipVectors) {
-                  final _ = 1 - faceVector.dot(otherFaceVector);
-                }
-                compared++;
-                if (compared % 100 == 0) {
-                  final now = DateTime.now().millisecondsSinceEpoch;
-                  logger.info(
-                    'Compared next 100 in ${now - ms} ms, progress: ($compared / ${clipVectors.length})',
-                  );
-                  ms = now;
-                }
-              }
+              // // Benchmarking our own vector comparisons
+              // final clipVectors = clipEmbeddings
+              //     .map(
+              //       (value) => value.vector,
+              //     )
+              //     .toList();
+              // w?.reset();
+              // int compared = 0;
+              // int ms = DateTime.now().millisecondsSinceEpoch;
+              // for (final faceVector in clipVectors) {
+              //   for (final otherFaceVector in clipVectors) {
+              //     final _ = 1 - faceVector.dot(otherFaceVector);
+              //   }
+              //   compared++;
+              //   if (compared % 100 == 0) {
+              //     final now = DateTime.now().millisecondsSinceEpoch;
+              //     logger.info(
+              //       'Compared next 100 in ${now - ms} ms, progress: ($compared / ${clipVectors.length})',
+              //     );
+              //     ms = now;
+              //   }
+              // }
+              // w?.log(
+              //   'Done with ${clipVectors.length * clipVectors.length} (${clipVectors.length} x ${clipVectors.length}}) embeddings comparisons in own method',
+              // );
 
-              w?.log(
-                'Done with ${clipVectors.length * clipVectors.length} (${clipVectors.length} x ${clipVectors.length}}) embeddings comparisons in own method',
-              );
               await vectorDB.deleteIndex();
             } catch (e, s) {
               logger.warning('vector DB search failed ', e, s);
