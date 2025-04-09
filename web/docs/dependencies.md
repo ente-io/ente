@@ -93,6 +93,9 @@ DOM.
 > package.jsons to avoid the unmet peer dependency warnings printed by yarn.
 > Ideally, the react dependencies can be specified just in the _ente-base_
 > package. For now, we manually ensure that all of them use the same version.
+> Additionally, we pin the versions of the react types using the resolutions
+> field in the top level `package.json`, otherwise we end up with type errors
+> because of multiple versions of react types being in scope.
 
 ### MUI and Material Icons
 
