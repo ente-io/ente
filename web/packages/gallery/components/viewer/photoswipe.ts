@@ -731,7 +731,8 @@ export class FileViewerPhotoSwipe {
 
                 if (videoVideoEl) {
                     onVideoPlayback = () => {
-                        showIf(captionElement!, !!videoVideoEl?.paused);
+                        if (!showPlayerV2)
+                            showIf(captionElement!, !!videoVideoEl?.paused);
                     };
 
                     videoVideoEl.addEventListener("play", onVideoPlayback);
@@ -761,13 +762,15 @@ export class FileViewerPhotoSwipe {
          * the current slide.
          */
         const videoToggleMuteIfPossible = () => {
-            const video = videoVideoEl;
-            if (!video) return;
-
-            video.muted = !video.muted;
-
             // TODO(HLS): Temporary gate
-            if (!showPlayerV2) return;
+            if (!showPlayerV2) {
+                const video = videoVideoEl;
+                if (!video) return;
+
+                video.muted = !video.muted;
+
+                return;
+            }
 
             // Go via the media chrome mute button when muting, because
             // otherwise the local storage that the media chrome internally
