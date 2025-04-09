@@ -93,10 +93,11 @@ abstract class RustLibApi extends BaseApi {
       required Uint64List keys,
       required List<Float32List> vectors});
 
-  Future<List<Uint64List>> crateApiUsearchApiVectorDbBulkSearchVectors(
-      {required VectorDb that,
-      required List<Float32List> queries,
-      required BigInt count});
+  Future<(List<Uint64List>, List<Float32List>)>
+      crateApiUsearchApiVectorDbBulkSearchVectors(
+          {required VectorDb that,
+          required List<Float32List> queries,
+          required BigInt count});
 
   Future<void> crateApiUsearchApiVectorDbDeleteIndex({required VectorDb that});
 
@@ -203,10 +204,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<List<Uint64List>> crateApiUsearchApiVectorDbBulkSearchVectors(
-      {required VectorDb that,
-      required List<Float32List> queries,
-      required BigInt count}) {
+  Future<(List<Uint64List>, List<Float32List>)>
+      crateApiUsearchApiVectorDbBulkSearchVectors(
+          {required VectorDb that,
+          required List<Float32List> queries,
+          required BigInt count}) {
     return handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
@@ -218,7 +220,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             funcId: 3, port: port_);
       },
       codec: SseCodec(
-        decodeSuccessData: sse_decode_list_list_prim_u_64_strict,
+        decodeSuccessData:
+            sse_decode_record_list_list_prim_u_64_strict_list_list_prim_f_32_strict,
         decodeErrorData: null,
       ),
       constMeta: kCrateApiUsearchApiVectorDbBulkSearchVectorsConstMeta,
@@ -558,6 +561,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (List<Uint64List>, List<Float32List>)
+      dco_decode_record_list_list_prim_u_64_strict_list_list_prim_f_32_strict(
+          dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2) {
+      throw Exception('Expected 2 elements, got ${arr.length}');
+    }
+    return (
+      dco_decode_list_list_prim_u_64_strict(arr[0]),
+      dco_decode_list_list_prim_f_32_strict(arr[1]),
+    );
+  }
+
+  @protected
   (
     Uint64List,
     Float32List
@@ -706,6 +724,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     final len_ = sse_decode_i_32(deserializer);
     return deserializer.buffer.getUint8List(len_);
+  }
+
+  @protected
+  (List<Uint64List>, List<Float32List>)
+      sse_decode_record_list_list_prim_u_64_strict_list_list_prim_f_32_strict(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final var_field0 = sse_decode_list_list_prim_u_64_strict(deserializer);
+    final var_field1 = sse_decode_list_list_prim_f_32_strict(deserializer);
+    return (var_field0, var_field1);
   }
 
   @protected
@@ -859,6 +887,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_record_list_list_prim_u_64_strict_list_list_prim_f_32_strict(
+      (List<Uint64List>, List<Float32List>) self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_list_list_prim_u_64_strict(self.$1, serializer);
+    sse_encode_list_list_prim_f_32_strict(self.$2, serializer);
+  }
+
+  @protected
   void sse_encode_record_list_prim_u_64_strict_list_prim_f_32_strict(
       (Uint64List, Float32List) self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -941,7 +977,7 @@ class VectorDbImpl extends RustOpaque implements VectorDb {
       RustLib.instance.api.crateApiUsearchApiVectorDbBulkAddVectors(
           that: this, keys: keys, vectors: vectors);
 
-  Future<List<Uint64List>> bulkSearchVectors(
+  Future<(List<Uint64List>, List<Float32List>)> bulkSearchVectors(
           {required List<Float32List> queries, required BigInt count}) =>
       RustLib.instance.api.crateApiUsearchApiVectorDbBulkSearchVectors(
           that: this, queries: queries, count: count);

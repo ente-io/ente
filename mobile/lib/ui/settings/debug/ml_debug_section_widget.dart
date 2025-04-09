@@ -183,7 +183,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               final queries = laurensFaceIdToFloat32.values.toList();
               final count = BigInt.from(10);
               w?.reset();
-              final results = await vectorDB.bulkSearchVectors(
+              final (vectorKeys, distances) = await vectorDB.bulkSearchVectors(
                 queries: queries,
                 count: count,
               );
@@ -192,7 +192,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                 'Done with ${queries.length * queries.length} (${queries.length} x ${queries.length}}) embeddings comparisons in vector DB',
               );
               logger.info(
-                'vector db results: ${results.length} results, first: ${results.first}, hundredth: ${results[99]}',
+                'vector db results: ${vectorKeys.length} results, first: ${vectorKeys.first}, hundredth: ${vectorKeys[99]}',
               );
 
               // Benchmarking our own vector comparisons
@@ -267,7 +267,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               // Benchmarking the vector DB
               final count = BigInt.from(10);
               w?.reset();
-              final results = await vectorDB.bulkSearchVectors(
+              final (vectorKeys, distances) = await vectorDB.bulkSearchVectors(
                 queries: clipFloat32,
                 count: count,
               );
@@ -276,7 +276,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                 'Done with ${clipFloat32.length * clipFloat32.length} (${clipFloat32.length} x ${clipFloat32.length}}) embeddings comparisons in vector DB',
               );
               logger.info(
-                'vector db results: ${results.length} results, first: ${results.first}, hundredth: ${results[99]}',
+                'vector db results: ${vectorKeys.length} results, first: ${vectorKeys.first} with distances ${distances.first}, hundredth: ${vectorKeys[99]} with distances ${distances[99]}',
               );
 
               // // Benchmarking our own vector comparisons

@@ -84,17 +84,16 @@ impl VectorDB {
         (matches.keys, matches.distances)
     }
 
-    pub fn bulk_search_vectors(&self, queries: &Vec<Vec<f32>>, count: usize) -> Vec<Vec<u64>> {
+    pub fn bulk_search_vectors(&self, queries: &Vec<Vec<f32>>, count: usize) -> (Vec<Vec<u64>>, Vec<Vec<f32>>) {
         let mut keys = Vec::new();
+        let mut distances = Vec::new();
 
         for query in queries {
-            let matches = self
-                .index
-                .search(query, count)
-                .expect("Failed to search vectors");
-            keys.push(matches.keys);
+            let (keys_result, distances_result) = self.search_vectors(query, count);
+            keys.push(keys_result);
+            distances.push(distances_result);
         }
-        keys
+        (keys, distances)
     }
 
     pub fn get_vector(&self, key: u64) -> Vec<f32> {
