@@ -92,7 +92,10 @@ DOM.
 > We need to repeat the dependency on react and its siblings in multiple
 > package.jsons to avoid the unmet peer dependency warnings printed by yarn.
 > Ideally, the react dependencies can be specified just in the _ente-base_
-> package.
+> package. For now, we manually ensure that all of them use the same version.
+> Additionally, we pin the versions of the react types using the resolutions
+> field in the top level `package.json`, otherwise we end up with type errors
+> because of multiple versions of react types being in scope.
 
 ### MUI and Material Icons
 
@@ -144,6 +147,9 @@ For showing the app's UI in multiple languages, we use the
 
 Note that inspite of the "next" in the name of the library, it has nothing to do
 with Next.js.
+
+[get-user-locale](https://github.com/wojtekmaj/get-user-locale) is used for
+enumerating the user's locale's to find the best match.
 
 For more details, see [translations.md](translations.md).
 
