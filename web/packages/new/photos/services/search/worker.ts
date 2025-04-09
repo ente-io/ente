@@ -456,7 +456,7 @@ const isWithinRadius = (
  *
  * The area bounded by the location tag becomes more elliptical with increase in
  * the magnitude of the latitude on the cartesian plane. When latitude is 0
- * degrees, the ellipse is a circle with a = b = r. When latitude incrases, the
+ * degrees, the ellipse is a circle with a = b = r. When latitude increases, the
  * major axis (a) has to be scaled by the secant of the latitude.
  */
 const radiusScaleFactor = (lat: number) => 1 / Math.cos(lat * (Math.PI / 180));

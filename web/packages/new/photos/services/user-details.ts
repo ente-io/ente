@@ -175,7 +175,7 @@ export const logoutUserDetails = () => {
 };
 
 /**
- * Read in the locally persisted settings into memory, otherwise initate a
+ * Read in the locally persisted settings into memory, otherwise initiate a
  * network requests to fetch the latest values (but don't wait for it to
  * complete).
  *

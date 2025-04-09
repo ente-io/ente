@@ -112,7 +112,7 @@ class FolderWatcher {
     /**
      * Temporarily pause syncing and cancel any running uploads.
      *
-     * This frees up the uploader for handling user initated uploads.
+     * This frees up the uploader for handling user initiated uploads.
      */
     pauseRunningSync() {
         this.isPaused = true;

@@ -495,7 +495,7 @@ export class FileViewerPhotoSwipe {
          * given controller. Otherwise hide the media controls.
          */
         const updateMediaControls = (itemData: ItemData) => {
-            // For reasons possibily related to the 1 tick wait in the hls-video
+            // For reasons possibly related to the 1 tick wait in the hls-video
             // implementation (`await Promise.resolve()`), the association
             // between media-controller and media-control-bar doesn't get
             // established on the first slide if we reopen the file viewer.

@@ -91,7 +91,7 @@ export interface MiniDialogAttributes {
          * be shown on the button until the promise settles.
          *
          * If this function is not provided, or if the function completes /
-         * fullfills, then then the dialog is automatically closed.
+         * fulfills, then then the dialog is automatically closed.
          *
          * Otherwise (that is, if the provided function throws), the dialog
          * remains open, showing a generic error.

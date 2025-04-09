@@ -197,7 +197,7 @@ const getAccountsTokenAndURL = async () => {
         .object({
             // The origin that serves the accounts app.
             accountsUrl: z.string(),
-            // A token that can be used to autheticate with the accounts app.
+            // A token that can be used to authenticate with the accounts app.
             accountsToken: z.string(),
         })
         .parse(await res.json());

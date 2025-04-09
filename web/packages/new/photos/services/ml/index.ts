@@ -507,7 +507,7 @@ const getMLStatus = async (): Promise<MLStatus> => {
 
     // The worker has a clustering progress set iff it is clustering. This
     // overrides other behaviours.
-    const clusteringProgress = await w.clusteringProgess;
+    const clusteringProgress = await w.clusteringProgress;
     if (clusteringProgress) {
         return {
             phase: "clustering",

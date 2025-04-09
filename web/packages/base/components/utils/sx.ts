@@ -6,7 +6,7 @@ import { type SystemStyleObject } from "@mui/system";
  * trying to spread them.
  *
  * The recommended pattern to use sx props in our own component (whilst
- * forwarding them to the underyling MUI component) is to:
+ * forwarding them to the underlying MUI component) is to:
  *
  *    ...(Array.isArray(sx) ? sx : [sx])
  *

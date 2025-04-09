@@ -370,7 +370,7 @@ class UploadManager {
      * Upload files
      *
      * This method waits for all the files to get uploaded (successfully or
-     * unsucessfully) before returning.
+     * unsuccessfully) before returning.
      *
      * It is an error to call this method when there is already an in-progress
      * upload.
