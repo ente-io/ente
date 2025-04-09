@@ -214,6 +214,98 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               w?.log(
                 'Done with ${faceVectors.length * faceVectors.length} (${faceVectors.length} x ${faceVectors.length}}) embeddings comparisons in own method',
               );
+              await vectorDB.deleteIndex();
+            } catch (e, s) {
+              logger.warning('vector DB search failed ', e, s);
+
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Benchmark Vector DB CLIP",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final w = (kDebugMode ? EnteWatch('MLDebugSectionWidget') : null)
+                ?..start();
+              final clipEmbeddings = await mlDataDB.getAllClipVectors();
+              w?.log(
+                'getting all clip embeddings (${clipEmbeddings.length} embeddings)',
+              );
+
+              // Fill the vector DB with all embeddings
+              final clipFloat32 = clipEmbeddings
+                  .map(
+                    (value) => Float32List.fromList(value.vector.toList()),
+                  )
+                  .toList();
+              final keys = Uint64List.fromList(
+                List.generate(
+                  clipFloat32.length,
+                  (index) => BigInt.from(index + 1),
+                ),
+              );
+              final vectorDB = VectorDb(
+                filePath: (await getApplicationSupportDirectory()).path +
+                    "/ml/test/vector_db_clip_index.usearch",
+                dimensions: BigInt.from(
+                  clipFloat32.first.length,
+                ),
+              );
+              await vectorDB.resetIndex();
+              await vectorDB.bulkAddVectors(
+                keys: keys,
+                vectors: clipFloat32,
+              );
+
+              // Benchmarking the vector DB
+              final count = BigInt.from(10);
+              w?.reset();
+              final results = await vectorDB.bulkSearchVectors(
+                queries: clipFloat32,
+                count: count,
+              );
+
+              w?.log(
+                'Done with ${clipFloat32.length * clipFloat32.length} (${clipFloat32.length} x ${clipFloat32.length}}) embeddings comparisons in vector DB',
+              );
+              logger.info(
+                'vector db results: ${results.length} results, first: ${results.first}, hundredth: ${results[99]}',
+              );
+
+              // Benchmarking our own vector comparisons
+              final clipVectors = clipEmbeddings
+                  .map(
+                    (value) => value.vector,
+                  )
+                  .toList();
+              w?.reset();
+              int compared = 0;
+              int ms = DateTime.now().millisecondsSinceEpoch;
+              for (final faceVector in clipVectors) {
+                for (final otherFaceVector in clipVectors) {
+                  final _ = 1 - faceVector.dot(otherFaceVector);
+                }
+                compared++;
+                if (compared % 100 == 0) {
+                  final now = DateTime.now().millisecondsSinceEpoch;
+                  logger.info(
+                    'Compared next 100 in ${now - ms} ms, progress: ($compared / ${clipVectors.length})',
+                  );
+                  ms = now;
+                }
+              }
+
+              w?.log(
+                'Done with ${clipVectors.length * clipVectors.length} (${clipVectors.length} x ${clipVectors.length}}) embeddings comparisons in own method',
+              );
+              await vectorDB.deleteIndex();
             } catch (e, s) {
               logger.warning('vector DB search failed ', e, s);
 
