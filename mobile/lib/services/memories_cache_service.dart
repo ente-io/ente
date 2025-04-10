@@ -88,7 +88,8 @@ class MemoriesCacheService {
     Bus.instance.fire(MemoriesSettingChanged());
   }
 
-  bool get enableSmartMemories => flagService.hasGrantedMLConsent;
+  bool get enableSmartMemories =>
+      flagService.hasGrantedMLConsent && localSettings.isMLLocalIndexingEnabled;
 
   void _checkIfTimeToUpdateCache() {
     if (!enableSmartMemories) {
