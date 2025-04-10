@@ -316,8 +316,8 @@ export class FileViewerPhotoSwipe {
          */
         const originalVideoFileIDs = new Set<number>();
 
-        const videoQualityForFile = (file: EnteFile) =>
-            originalVideoFileIDs.has(file.id) ? "original" : "auto";
+        const videoQualityForFileID = (fileID: number) =>
+            originalVideoFileIDs.has(fileID) ? "original" : "auto";
 
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
@@ -328,7 +328,7 @@ export class FileViewerPhotoSwipe {
             const files = delegate.getFiles();
             const file = files[index]!;
 
-            const videoQuality = videoQualityForFile(file);
+            const videoQuality = videoQualityForFileID(file.id);
 
             const itemData = itemDataForFile(file, { videoQuality }, () =>
                 pswp.refreshSlideContent(index),
@@ -528,17 +528,24 @@ export class FileViewerPhotoSwipe {
                 }
             }
 
-            // TODO(HLS): Temporary gate
-            if (!shouldUsePlayerV2()) return;
-
             const qualityMenu = container?.querySelector("#ente-quality-menu");
             if (qualityMenu instanceof MediaChromeMenu) {
-                const { videoPlaylistURL } = itemData;
-                const value = videoPlaylistURL ? pt("Auto") : pt("Original");
-                // Check first, and set a flag, to avoid infinite update loop.
-                if (qualityMenu.value != value) {
-                    shouldIgnoreNextVideoQualityChange = true;
-                    qualityMenu.value = value;
+                const { videoPlaylistURL, fileID } = itemData;
+                // TODO(HLS): Temporary gate
+                if (!shouldUsePlayerV2() || !videoPlaylistURL) {
+                    // Hide the auto option
+                    qualityMenu.radioGroupItems[0]!.hidden = true;
+                } else {
+                    const value =
+                        videoQualityForFileID(fileID) == "auto"
+                            ? pt("Auto")
+                            : pt("Original");
+                    // Check first to avoid spurious updates.
+                    if (qualityMenu.value != value) {
+                        // Set a flag to avoid infinite update loop.
+                        shouldIgnoreNextVideoQualityChange = true;
+                        qualityMenu.value = value;
+                    }
                 }
             }
         };
@@ -872,7 +879,7 @@ export class FileViewerPhotoSwipe {
             }
         };
 
-        const onVideoQualityChange = (e: Event) => {
+        const onVideoQualityChange = () => {
             if (shouldIgnoreNextVideoQualityChange) {
                 // Ignore changes that we ourselves initiated on slide change.
                 shouldIgnoreNextVideoQualityChange = false;
@@ -883,29 +890,12 @@ export class FileViewerPhotoSwipe {
             // closing it.
             toggleMediaChromeSettingsMenu();
 
-            const { file, itemData } = currentAnnotatedFile();
-            const fileID = file.id;
-
-            if (
-                e.target instanceof MediaChromeMenu &&
-                // e.target.value will be the new value.
-                e.target.value == pt("Auto") &&
-                !itemData.videoPlaylistURL
-            ) {
-                // The user is trying to switch to "auto" video quality, but
-                // there is no streamable variant yet.
-                console.log("TODO(HLS)", itemData);
-                // Revert.
-                shouldIgnoreNextVideoQualityChange = true;
-                e.target.value = pt("Original");
-                return;
-            }
-
             // Currently there are only two entries in the video quality menu,
             // and the callback only gets invoked if the value gets changed from
             // the current value. So we can assume toggle semantics when
             // implementing the logic below.
 
+            const fileID = currentAnnotatedFile().file.id;
             forgetItemDataForFileID(fileID);
             if (originalVideoFileIDs.has(fileID)) {
                 originalVideoFileIDs.delete(fileID);
@@ -1520,7 +1510,7 @@ const hlsVideoControlsHTML = () => `
       ${pt("Quality")}
       <media-chrome-menu id="ente-quality-menu" slot="submenu" hidden>
         <div slot="title">${pt("Quality")}</div>
-        <media-chrome-menu-item type="radio" aria-checked="true">${pt("Auto")}</media-chrome-menu-item>
+        <media-chrome-menu-item type="radio">${pt("Auto")}</media-chrome-menu-item>
         <media-chrome-menu-item type="radio">${pt("Original")}</media-chrome-menu-item>
       </media-chrome-menu>
     </media-settings-menu-item>
