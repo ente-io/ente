@@ -316,7 +316,7 @@ export class FileViewerPhotoSwipe {
          */
         const originalVideoFileIDs = new Set<number>();
 
-        const videoQualityForFileID = (fileID: number) =>
+        const intendedVideoQualityForFileID = (fileID: number) =>
             originalVideoFileIDs.has(fileID) ? "original" : "auto";
 
         // Provide data about slides to PhotoSwipe via callbacks
@@ -328,7 +328,7 @@ export class FileViewerPhotoSwipe {
             const files = delegate.getFiles();
             const file = files[index]!;
 
-            const videoQuality = videoQualityForFileID(file.id);
+            const videoQuality = intendedVideoQualityForFileID(file.id);
 
             const itemData = itemDataForFile(file, { videoQuality }, () =>
                 pswp.refreshSlideContent(index),
@@ -528,24 +528,48 @@ export class FileViewerPhotoSwipe {
                 }
             }
 
+            // TODO(HLS): Temporary gate
+            if (!shouldUsePlayerV2()) {
+                const qualityMenu =
+                    container?.querySelector("#ente-quality-menu");
+                if (qualityMenu instanceof MediaChromeMenu) {
+                    // Hide the auto option
+                    qualityMenu.radioGroupItems[0]!.hidden = true;
+                }
+                return;
+            }
+
             const qualityMenu = container?.querySelector("#ente-quality-menu");
             if (qualityMenu instanceof MediaChromeMenu) {
                 const { videoPlaylistURL, fileID } = itemData;
-                // TODO(HLS): Temporary gate
-                if (!shouldUsePlayerV2() || !videoPlaylistURL) {
-                    // Hide the auto option
-                    qualityMenu.radioGroupItems[0]!.hidden = true;
+
+                // Hide the auto option, keeping track of if we did indeed
+                // change something.
+                const item = qualityMenu.radioGroupItems[0]!;
+                let didChangeHide = false;
+                if (item.hidden && videoPlaylistURL) {
+                    didChangeHide = true;
+                    item.hidden = false;
+                } else if (!item.hidden && !videoPlaylistURL) {
+                    didChangeHide = true;
+                    item.hidden = true;
+                }
+
+                const value =
+                    intendedVideoQualityForFileID(fileID) == "auto" &&
+                    videoPlaylistURL
+                        ? pt("Auto")
+                        : pt("Original");
+                // Check first to avoid spurious updates.
+                if (qualityMenu.value != value) {
+                    // Set a flag to avoid infinite update loop.
+                    shouldIgnoreNextVideoQualityChange = true;
+                    // Setting the value will close it.
+                    qualityMenu.value = value;
                 } else {
-                    qualityMenu.radioGroupItems[0]!.hidden = false;
-                    const value =
-                        videoQualityForFileID(fileID) == "auto"
-                            ? pt("Auto")
-                            : pt("Original");
-                    // Check first to avoid spurious updates.
-                    if (qualityMenu.value != value) {
-                        // Set a flag to avoid infinite update loop.
-                        shouldIgnoreNextVideoQualityChange = true;
-                        qualityMenu.value = value;
+                    // Close it ourselves otherwise if we changed the menu.
+                    if (didChangeHide) {
+                        closeMediaChromeSettingsMenuIfOpen();
                     }
                 }
             }
@@ -713,8 +737,6 @@ export class FileViewerPhotoSwipe {
             "change",
             () => void updateFileInfoExifIfNeeded(currSlideData()),
         );
-
-        pswp.on("change", closeMediaChromeSettingsMenuIfOpen);
 
         pswp.on("contentDestroy", (e) =>
             forgetExifForItemData(asItemData(e.content.data)),
