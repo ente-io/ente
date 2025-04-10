@@ -1,5 +1,7 @@
+import { isDesktop } from "ente-base/app";
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
+import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
@@ -204,7 +206,22 @@ export const processVideoNewUpload = (
     // TODO(HLS):
     if (!isVideoProcessingEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
+    if (!isDesktop) {
+        // Processing very large videos with the current ffmpeg Wasm
+        // implementation can cause the app to crash, esp. on mobile devices
+        // (e.g. https://github.com/ffmpegwasm/ffmpeg.wasm/issues/851).
+        //
+        // So the video processing only happpens in the desktop app (which uses
+        // the much more efficient native ffmpeg integration).
+        if (process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING && isDevBuild) {
+            // TODO(HLS): Temporary dev convenience
+        } else {
+            return;
+        }
+    }
+
     log.debug(() => ["gen-hls", { file, uploadItem }]);
+
     // void worker().then((w) => w.onUpload(file, uploadItem));
 };
 
