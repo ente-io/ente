@@ -6,6 +6,7 @@ import log from "ente-base/log";
 import { logoutFileViewerDataSource } from "ente-gallery/components/viewer/data-source";
 import { downloadManager } from "ente-gallery/services/download";
 import { resetUploadState } from "ente-gallery/services/upload";
+import { resetVideoState } from "ente-gallery/services/video";
 import { logoutML, terminateMLWorker } from "ente-new/photos/services/ml";
 import { logoutSearch } from "ente-new/photos/services/search";
 import { logoutSettings } from "ente-new/photos/services/settings";
@@ -80,6 +81,12 @@ export const photosLogout = async () => {
     }
 
     try {
+        resetVideoState();
+    } catch (e) {
+        ignoreError("Video", e);
+    }
+
+    try {
         logoutFileViewerDataSource();
     } catch (e) {
         ignoreError("File viewer", e);
@@ -113,6 +120,8 @@ export const photosLogout = async () => {
 
     await logoutClearStateAgain();
 
+    // [Note: Full reload on logout]
+    //
     // Do a full reload to discard any in-flight requests that might still
     // remain.
 

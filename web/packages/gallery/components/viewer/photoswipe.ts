@@ -497,7 +497,7 @@ export class FileViewerPhotoSwipe {
          * media-control-bars (and other containers that house controls) to the
          * given controller. Otherwise hide the media controls.
          */
-        const updateMediaControls = (itemData: ItemData) => {
+        const updateVideoControlsAndPlayback = (itemData: ItemData) => {
             // For reasons possibly related to the 1 tick wait in the hls-video
             // implementation (`await Promise.resolve()`), the association
             // between media-controller and media-control-bar doesn't get
@@ -506,10 +506,10 @@ export class FileViewerPhotoSwipe {
             // See also: https://github.com/muxinc/media-chrome/issues/940
             //
             // As a workaround, defer the association to the next tick.
-            setTimeout(() => _updateMediaControls(itemData), 0);
+            setTimeout(() => _updateVideoControlsAndPlayback(itemData), 0);
         };
 
-        const _updateMediaControls = (itemData: ItemData) => {
+        const _updateVideoControlsAndPlayback = (itemData: ItemData) => {
             const container = mediaControlsContainerElement;
             const controls =
                 container?.querySelectorAll(
@@ -569,6 +569,10 @@ export class FileViewerPhotoSwipe {
                     }
                 }
             }
+
+            // Autoplay (unless the video has ended).
+            const video = videoVideoEl;
+            if (video?.paused && !video.ended) void video.play();
         };
 
         /**
@@ -627,7 +631,7 @@ export class FileViewerPhotoSwipe {
             // "change" event, so we need to wire up the controls, or hide them,
             // for the initial slide here also (in addition to in "change").
             if (currSlideData().fileID == fileID) {
-                updateMediaControls(currSlideData());
+                updateVideoControlsAndPlayback(currSlideData());
             }
 
             // Rest of this function deals with live photos.
@@ -1102,7 +1106,7 @@ export class FileViewerPhotoSwipe {
                         menu.addEventListener("change", onVideoQualityChange);
                     }
                     pswp.on("change", () =>
-                        updateMediaControls(currSlideData()),
+                        updateVideoControlsAndPlayback(currSlideData()),
                     );
                 },
             });
