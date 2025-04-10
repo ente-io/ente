@@ -475,17 +475,17 @@
     "@eslint/core" "^0.12.0"
     levn "^0.4.1"
 
-"@ffmpeg/ffmpeg@^0.12.10":
-  version "0.12.13"
-  resolved "https://registry.yarnpkg.com/@ffmpeg/ffmpeg/-/ffmpeg-0.12.13.tgz#654bb24d74638469e768c04e72ebd0988f65284a"
-  integrity sha512-DX5xvpxkV0QaHIJRMRiz8zfh4mJO01rPKrpXgIzHWSB0A58YMUvbBJxHs4cSJPcX1Lar7HK6RAi28ObsUe7V8A==
+"@ffmpeg/ffmpeg@^0.12.15":
+  version "0.12.15"
+  resolved "https://registry.yarnpkg.com/@ffmpeg/ffmpeg/-/ffmpeg-0.12.15.tgz#e5b05c2b5c946f3464b3aa85461e4654a4649d80"
+  integrity sha512-1C8Obr4GsN3xw+/1Ww6PFM84wSQAGsdoTuTWPOj2OizsRDLT4CXTaVjPhkw6ARyDus1B9X/L2LiXHqYYsGnRFw==
   dependencies:
-    "@ffmpeg/types" "^0.12.3"
+    "@ffmpeg/types" "^0.12.4"
 
-"@ffmpeg/types@^0.12.3":
-  version "0.12.3"
-  resolved "https://registry.yarnpkg.com/@ffmpeg/types/-/types-0.12.3.tgz#9065bbfaee45daf41b7a0163d5a1cd05a96e9f49"
-  integrity sha512-WK01NqTfFfdXxxVD2+OQnd6LQp4ahWq2kjIh/eVoTo43Lo9ICI5nLOItg/1rcIvOuM7J1ANWTBazWGBKk1kACA==
+"@ffmpeg/types@^0.12.4":
+  version "0.12.4"
+  resolved "https://registry.yarnpkg.com/@ffmpeg/types/-/types-0.12.4.tgz#aecd9b1a035882ee0bdf8853af37271a3b447473"
+  integrity sha512-k9vJQNBGTxE5AhYDtOYR5rO5fKsspbg51gbcwtbkw2lCdoIILzklulcjJfIDwrtn7XhDeF2M+THwJ2FGrLeV6A==
 
 "@floating-ui/core@^1.6.0":
   version "1.6.8"
