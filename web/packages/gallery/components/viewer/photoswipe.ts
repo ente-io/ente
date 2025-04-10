@@ -1488,10 +1488,7 @@ const hlsVideoControlsHTML = () => `
       ${pt("Quality")}
       <media-chrome-menu id="ente-quality-menu" slot="submenu" hidden>
         <div slot="title">${pt("Quality")}</div>
-        <media-chrome-menu-item type="radio" aria-checked="true">
-          ${pt("Auto")}
-          <slot name="suffix"><div class="ente-auto-progress"></div></slot>
-        </media-chrome-menu-item>
+        <media-chrome-menu-item type="radio" aria-checked="true">${pt("Auto")}</media-chrome-menu-item>
         <media-chrome-menu-item type="radio">${pt("Original")}</media-chrome-menu-item>
       </media-chrome-menu>
     </media-settings-menu-item>
