@@ -362,3 +362,20 @@ body:has(
         display: none;
     }
 }
+
+.pswp-ente media-settings-menu .ente-auto-progress {
+    aspect-ratio: 1;
+    width: 1.1em;
+    margin-inline-start: auto;
+    border-radius: 50%;
+    border: 0.15em solid var(--mui-palette-fixed-dark-text-faint);
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: progress-rotate 0.75s linear infinite;
+}
+
+@keyframes progress-rotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
