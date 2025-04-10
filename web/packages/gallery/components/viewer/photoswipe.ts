@@ -536,6 +536,7 @@ export class FileViewerPhotoSwipe {
                     // Hide the auto option
                     qualityMenu.radioGroupItems[0]!.hidden = true;
                 } else {
+                    qualityMenu.radioGroupItems[0]!.hidden = false;
                     const value =
                         videoQualityForFileID(fileID) == "auto"
                             ? pt("Auto")
@@ -548,6 +549,41 @@ export class FileViewerPhotoSwipe {
                     }
                 }
             }
+        };
+
+        /**
+         * Toggle the settings menu by activating the menu button.
+         *
+         * This should be more robust than us trying to reverse engineer the
+         * internal media chrome logic to open and close the menu. However, the
+         * caveat is that this will only work for closing the menu (our goal)
+         * if the menu is already open.
+         */
+        const toggleMediaChromeSettingsMenu = () => {
+            const menuButton = document.querySelector(
+                "media-settings-menu-button",
+            );
+            if (menuButton instanceof MediaChromeMenuButton) {
+                menuButton.handleClick();
+
+                // See: [Note: Media chrome focus workaround]
+                //
+                // Whatever media chrome is doing internally, it requires us to
+                // drop the focus multiple times (Removing either of these calls
+                // is not enough).
+                const blurAllFocused = () =>
+                    document
+                        .querySelectorAll(":focus")
+                        .forEach((e) => e instanceof HTMLElement && e.blur());
+
+                blurAllFocused();
+                setTimeout(blurAllFocused, 0);
+            }
+        };
+
+        const closeMediaChromeSettingsMenuIfOpen = () => {
+            if (document.querySelector("media-settings-menu:not([hidden])"))
+                toggleMediaChromeSettingsMenu();
         };
 
         pswp.on("contentAppend", (e) => {
@@ -677,6 +713,8 @@ export class FileViewerPhotoSwipe {
             "change",
             () => void updateFileInfoExifIfNeeded(currSlideData()),
         );
+
+        pswp.on("change", closeMediaChromeSettingsMenuIfOpen);
 
         pswp.on("contentDestroy", (e) =>
             forgetExifForItemData(asItemData(e.content.data)),
@@ -847,36 +885,6 @@ export class FileViewerPhotoSwipe {
 
         const handleDownloadIfEnabled = () => {
             if (currentFileAnnotation().showDownload) handleDownload();
-        };
-
-        /**
-         * Toggle the settings menu by activating the menu button.
-         *
-         * This should be more robust than us trying to reverse engineer the
-         * internal media chrome logic to open and close the menu. However, the
-         * caveat is that this will only work for closing the menu (our goal)
-         * if the menu is already open.
-         */
-        const toggleMediaChromeSettingsMenu = () => {
-            const menuButton = document.querySelector(
-                "media-settings-menu-button",
-            );
-            if (menuButton instanceof MediaChromeMenuButton) {
-                menuButton.handleClick();
-
-                // See: [Note: Media chrome focus workaround]
-                //
-                // Whatever media chrome is doing internally, it requires us to
-                // drop the focus multiple times (Removing either of these calls
-                // is not enough).
-                const blurAllFocused = () =>
-                    document
-                        .querySelectorAll(":focus")
-                        .forEach((e) => e instanceof HTMLElement && e.blur());
-
-                blurAllFocused();
-                setTimeout(blurAllFocused, 0);
-            }
         };
 
         const onVideoQualityChange = () => {
