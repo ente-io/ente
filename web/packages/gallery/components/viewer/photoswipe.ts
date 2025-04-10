@@ -842,40 +842,15 @@ export class FileViewerPhotoSwipe {
             if (currentFileAnnotation().showDownload) handleDownload();
         };
 
-        const onVideoQualityChange = (e: Event) => {
-            if (shouldIgnoreNextVideoQualityChange) {
-                // Ignore changes that we ourselves initiated on slide change.
-                shouldIgnoreNextVideoQualityChange = false;
-                return;
-            }
-
-            const { file, itemData } = currentAnnotatedFile();
-            const fileID = file.id;
-
-            if (
-                e.target instanceof MediaChromeMenu &&
-                e.target.value == pt("Original") &&
-                !itemData.videoPlaylistURL
-            ) {
-                // The user is trying to switch to "auto" video quality, but
-                // there is no streamable variant yet.
-                console.log("na", itemData);
-                return;
-            }
-
-            // Currently there are only two entries in the video quality menu,
-            // and the callback only gets invoked if the value gets changed from
-            // the current value. So we can assume toggle semantics when
-            // implementing the logic below.
-
-            forgetItemDataForFileID(fileID);
-            if (originalVideoFileIDs.has(fileID)) {
-                originalVideoFileIDs.delete(fileID);
-            } else {
-                originalVideoFileIDs.add(fileID);
-            }
-
-            // Close the menu.
+        /**
+         * Toggle the settings menu by activating the menu button.
+         *
+         * This should be more robust than us trying to reverse engineer the
+         * internal media chrome logic to open and close the menu. However, the
+         * caveat is that this will only work for closing the menu (our goal)
+         * if the menu is already open.
+         */
+        const toggleMediaChromeSettingsMenu = () => {
             const menuButton = document.querySelector(
                 "media-settings-menu-button",
             );
@@ -894,6 +869,48 @@ export class FileViewerPhotoSwipe {
 
                 blurAllFocused();
                 setTimeout(blurAllFocused, 0);
+            }
+        };
+
+        const onVideoQualityChange = (e: Event) => {
+            if (shouldIgnoreNextVideoQualityChange) {
+                // Ignore changes that we ourselves initiated on slide change.
+                shouldIgnoreNextVideoQualityChange = false;
+                return;
+            }
+
+            // The menu is open at this point, so toggling it is equivalent to
+            // closing it.
+            toggleMediaChromeSettingsMenu();
+
+            const { file, itemData } = currentAnnotatedFile();
+            const fileID = file.id;
+
+            if (
+                e.target instanceof MediaChromeMenu &&
+                // e.target.value will be the new value.
+                e.target.value == pt("Auto") &&
+                !itemData.videoPlaylistURL
+            ) {
+                // The user is trying to switch to "auto" video quality, but
+                // there is no streamable variant yet.
+                console.log("TODO(HLS)", itemData);
+                // Revert.
+                shouldIgnoreNextVideoQualityChange = true;
+                e.target.value = pt("Original");
+                return;
+            }
+
+            // Currently there are only two entries in the video quality menu,
+            // and the callback only gets invoked if the value gets changed from
+            // the current value. So we can assume toggle semantics when
+            // implementing the logic below.
+
+            forgetItemDataForFileID(fileID);
+            if (originalVideoFileIDs.has(fileID)) {
+                originalVideoFileIDs.delete(fileID);
+            } else {
+                originalVideoFileIDs.add(fileID);
             }
 
             // Refresh the slide so that the video is fetched afresh, but using
