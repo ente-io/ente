@@ -23,8 +23,8 @@ const ffmpegLazy = (): Promise<FFmpeg> => (_ffmpeg ??= createFFmpeg());
 const createFFmpeg = async () => {
     const ffmpeg = new FFmpeg();
     await ffmpeg.load({
-        coreURL: "https://assets.ente.io/ffmpeg-core-0.12.6/ffmpeg-core.js",
-        wasmURL: "https://assets.ente.io/ffmpeg-core-0.12.6/ffmpeg-core.wasm",
+        coreURL: "https://assets.ente.io/ffmpeg-core-0.12.10/ffmpeg-core.js",
+        wasmURL: "https://assets.ente.io/ffmpeg-core-0.12.10/ffmpeg-core.wasm",
     });
     return ffmpeg;
 };

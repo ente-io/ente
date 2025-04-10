@@ -3,7 +3,7 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@ffmpeg/ffmpeg": "^0.12.10",
+        "@ffmpeg/ffmpeg": "^0.12.15",
         "bs58": "^6.0.0",
         "ente-base": "*",
         "ente-utils": "*",
