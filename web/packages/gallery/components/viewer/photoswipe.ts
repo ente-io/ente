@@ -22,7 +22,6 @@ import {
     itemDataForFile,
     updateFileInfoExifIfNeeded,
     type ItemData,
-    type ItemDataOpts,
 } from "./data-source";
 import {
     type FileViewerAnnotatedFile,
@@ -329,17 +328,19 @@ export class FileViewerPhotoSwipe {
             const files = delegate.getFiles();
             const file = files[index]!;
 
-            const opts: ItemDataOpts = {
-                videoQuality: videoQualityForFile(file),
-            };
+            const videoQuality = videoQualityForFile(file);
 
-            const itemData = itemDataForFile(file, opts, () =>
+            const itemData = itemDataForFile(file, { videoQuality }, () =>
                 pswp.refreshSlideContent(index),
             );
 
             if (itemData.fileType === FileType.video) {
                 const { videoPlaylistURL, videoURL } = itemData;
-                if (videoPlaylistURL) {
+                if (
+                    videoPlaylistURL &&
+                    shouldUsePlayerV2() &&
+                    videoQuality == "auto"
+                ) {
                     const mcID = `ente-mc-hls-${file.id}`;
                     return {
                         ...itemData,
