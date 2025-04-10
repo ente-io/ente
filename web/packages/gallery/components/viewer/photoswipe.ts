@@ -842,10 +842,24 @@ export class FileViewerPhotoSwipe {
             if (currentFileAnnotation().showDownload) handleDownload();
         };
 
-        const onVideoQualityChange = () => {
+        const onVideoQualityChange = (e: Event) => {
             if (shouldIgnoreNextVideoQualityChange) {
                 // Ignore changes that we ourselves initiated on slide change.
                 shouldIgnoreNextVideoQualityChange = false;
+                return;
+            }
+
+            const { file, itemData } = currentAnnotatedFile();
+            const fileID = file.id;
+
+            if (
+                e.target instanceof MediaChromeMenu &&
+                e.target.value == pt("Original") &&
+                !itemData.videoPlaylistURL
+            ) {
+                // The user is trying to switch to "auto" video quality, but
+                // there is no streamable variant yet.
+                console.log("na", itemData);
                 return;
             }
 
@@ -854,7 +868,6 @@ export class FileViewerPhotoSwipe {
             // the current value. So we can assume toggle semantics when
             // implementing the logic below.
 
-            const fileID = currentAnnotatedFile().file.id;
             forgetItemDataForFileID(fileID);
             if (originalVideoFileIDs.has(fileID)) {
                 originalVideoFileIDs.delete(fileID);
