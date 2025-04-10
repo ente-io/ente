@@ -2,10 +2,7 @@ import { pt } from "ente-base/i18n";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
-import {
-    isDevBuildAndUser,
-    settingsSnapshot,
-} from "ente-new/photos/services/settings";
+import { settingsSnapshot } from "ente-new/photos/services/settings";
 import "hls-video-element";
 import { t } from "i18next";
 import "media-chrome";
@@ -22,7 +19,6 @@ import {
     itemDataForFile,
     updateFileInfoExifIfNeeded,
     type ItemData,
-    type ItemDataOpts,
 } from "./data-source";
 import {
     type FileViewerAnnotatedFile,
@@ -170,8 +166,7 @@ export const moreMenuID = "ente-pswp-more-menu";
 // TODO(HLS):
 let _shouldUsePlayerV2: boolean | undefined;
 export const shouldUsePlayerV2 = () =>
-    (_shouldUsePlayerV2 ??=
-        settingsSnapshot().isInternalUser && isDevBuildAndUser());
+    (_shouldUsePlayerV2 ??= settingsSnapshot().isInternalUser);
 
 /**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
@@ -317,8 +312,8 @@ export class FileViewerPhotoSwipe {
          */
         const originalVideoFileIDs = new Set<number>();
 
-        const videoQualityForFile = (file: EnteFile) =>
-            originalVideoFileIDs.has(file.id) ? "original" : "auto";
+        const intendedVideoQualityForFileID = (fileID: number) =>
+            originalVideoFileIDs.has(fileID) ? "original" : "auto";
 
         // Provide data about slides to PhotoSwipe via callbacks
         // https://photoswipe.com/data-sources/#dynamically-generated-data
@@ -329,17 +324,19 @@ export class FileViewerPhotoSwipe {
             const files = delegate.getFiles();
             const file = files[index]!;
 
-            const opts: ItemDataOpts = {
-                videoQuality: videoQualityForFile(file),
-            };
+            const videoQuality = intendedVideoQualityForFileID(file.id);
 
-            const itemData = itemDataForFile(file, opts, () =>
+            const itemData = itemDataForFile(file, { videoQuality }, () =>
                 pswp.refreshSlideContent(index),
             );
 
             if (itemData.fileType === FileType.video) {
                 const { videoPlaylistURL, videoURL } = itemData;
-                if (videoPlaylistURL) {
+                if (
+                    videoPlaylistURL &&
+                    shouldUsePlayerV2() &&
+                    videoQuality == "auto"
+                ) {
                     const mcID = `ente-mc-hls-${file.id}`;
                     return {
                         ...itemData,
@@ -528,18 +525,85 @@ export class FileViewerPhotoSwipe {
             }
 
             // TODO(HLS): Temporary gate
-            if (!shouldUsePlayerV2()) return;
+            if (!shouldUsePlayerV2()) {
+                const qualityMenu =
+                    container?.querySelector("#ente-quality-menu");
+                if (qualityMenu instanceof MediaChromeMenu) {
+                    // Hide the auto option
+                    qualityMenu.radioGroupItems[0]!.hidden = true;
+                }
+                return;
+            }
 
             const qualityMenu = container?.querySelector("#ente-quality-menu");
             if (qualityMenu instanceof MediaChromeMenu) {
-                const { videoPlaylistURL } = itemData;
-                const value = videoPlaylistURL ? pt("Auto") : pt("Original");
-                // Check first, and set a flag, to avoid infinite update loop.
+                const { videoPlaylistURL, fileID } = itemData;
+
+                // Hide the auto option, keeping track of if we did indeed
+                // change something.
+                const item = qualityMenu.radioGroupItems[0]!;
+                let didChangeHide = false;
+                if (item.hidden && videoPlaylistURL) {
+                    didChangeHide = true;
+                    item.hidden = false;
+                } else if (!item.hidden && !videoPlaylistURL) {
+                    didChangeHide = true;
+                    item.hidden = true;
+                }
+
+                const value =
+                    intendedVideoQualityForFileID(fileID) == "auto" &&
+                    videoPlaylistURL
+                        ? pt("Auto")
+                        : pt("Original");
+                // Check first to avoid spurious updates.
                 if (qualityMenu.value != value) {
+                    // Set a flag to avoid infinite update loop.
                     shouldIgnoreNextVideoQualityChange = true;
+                    // Setting the value will close it.
                     qualityMenu.value = value;
+                } else {
+                    // Close it ourselves otherwise if we changed the menu.
+                    if (didChangeHide) {
+                        closeMediaChromeSettingsMenuIfOpen();
+                    }
                 }
             }
+        };
+
+        /**
+         * Toggle the settings menu by activating the menu button.
+         *
+         * This should be more robust than us trying to reverse engineer the
+         * internal media chrome logic to open and close the menu. However, the
+         * caveat is that this will only work for closing the menu (our goal)
+         * if the menu is already open.
+         */
+        const toggleMediaChromeSettingsMenu = () => {
+            const menuButton = document.querySelector(
+                "media-settings-menu-button",
+            );
+            if (menuButton instanceof MediaChromeMenuButton) {
+                menuButton.handleClick();
+
+                // See: [Note: Media chrome focus workaround]
+                //
+                // Whatever media chrome is doing internally, it requires us to
+                // drop the focus multiple times (Removing either of these calls
+                // is not enough).
+                const blurAllFocused = () =>
+                    document
+                        .querySelectorAll(":focus")
+                        .forEach((e) => e instanceof HTMLElement && e.blur());
+
+                blurAllFocused();
+                setTimeout(blurAllFocused, 0);
+            }
+        };
+
+        const closeMediaChromeSettingsMenuIfOpen = () => {
+            if (document.querySelector("media-settings-menu:not([hidden])"))
+                toggleMediaChromeSettingsMenu();
         };
 
         pswp.on("contentAppend", (e) => {
@@ -848,6 +912,10 @@ export class FileViewerPhotoSwipe {
                 return;
             }
 
+            // The menu is open at this point, so toggling it is equivalent to
+            // closing it.
+            toggleMediaChromeSettingsMenu();
+
             // Currently there are only two entries in the video quality menu,
             // and the callback only gets invoked if the value gets changed from
             // the current value. So we can assume toggle semantics when
@@ -859,27 +927,6 @@ export class FileViewerPhotoSwipe {
                 originalVideoFileIDs.delete(fileID);
             } else {
                 originalVideoFileIDs.add(fileID);
-            }
-
-            // Close the menu.
-            const menuButton = document.querySelector(
-                "media-settings-menu-button",
-            );
-            if (menuButton instanceof MediaChromeMenuButton) {
-                menuButton.handleClick();
-
-                // See: [Note: Media chrome focus workaround]
-                //
-                // Whatever media chrome is doing internally, it requires us to
-                // drop the focus multiple times (Removing either of these calls
-                // is not enough).
-                const blurAllFocused = () =>
-                    document
-                        .querySelectorAll(":focus")
-                        .forEach((e) => e instanceof HTMLElement && e.blur());
-
-                blurAllFocused();
-                setTimeout(blurAllFocused, 0);
             }
 
             // Refresh the slide so that the video is fetched afresh, but using
@@ -1467,10 +1514,11 @@ const videoHTML = (url: string, mediaControllerID: string) => `
  *
  * - The media-cast-button currently doesn't work with the `hls-video` player.
  *
- * - Media chrome has mechanism for statically providing translations but it
- *   wasn't working when I tried with 4.9.0. The media chrome tooltips also get
- *   clipped for the cornermost buttons. Finally, the rest of the buttons on
- *   this screen don't have a tooltip either.
+ * - We don't use media chrome tooltips: Media chrome has mechanism for
+ *   statically providing translations but it wasn't working when I tried with
+ *   4.9.0. The media chrome tooltips also get clipped for the cornermost
+ *   buttons. Finally, the rest of the buttons on this screen don't have a
+ *   tooltip either.
  *
  *   Revisit this when we have a custom tooltip element we can then also use on
  *   this screen, which can also be used enhancement for the other buttons on
@@ -1488,7 +1536,7 @@ const hlsVideoControlsHTML = () => `
       ${pt("Quality")}
       <media-chrome-menu id="ente-quality-menu" slot="submenu" hidden>
         <div slot="title">${pt("Quality")}</div>
-        <media-chrome-menu-item type="radio" aria-checked="true">${pt("Auto")}</media-chrome-menu-item>
+        <media-chrome-menu-item type="radio">${pt("Auto")}</media-chrome-menu-item>
         <media-chrome-menu-item type="radio">${pt("Original")}</media-chrome-menu-item>
       </media-chrome-menu>
     </media-settings-menu-item>
