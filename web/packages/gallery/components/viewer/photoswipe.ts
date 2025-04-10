@@ -6,7 +6,7 @@ import { settingsSnapshot } from "ente-new/photos/services/settings";
 import "hls-video-element";
 import { t } from "i18next";
 import "media-chrome";
-import { MediaMuteButton } from "media-chrome";
+import { MediaMuteButton, MediaPlayButton } from "media-chrome";
 import "media-chrome/menu";
 import { MediaChromeMenu, MediaChromeMenuButton } from "media-chrome/menu";
 import PhotoSwipe, { type SlideData } from "photoswipe";
@@ -497,7 +497,7 @@ export class FileViewerPhotoSwipe {
          * media-control-bars (and other containers that house controls) to the
          * given controller. Otherwise hide the media controls.
          */
-        const updateMediaControls = (itemData: ItemData) => {
+        const updateVideoControlsAndPlayback = (itemData: ItemData) => {
             // For reasons possibly related to the 1 tick wait in the hls-video
             // implementation (`await Promise.resolve()`), the association
             // between media-controller and media-control-bar doesn't get
@@ -506,10 +506,10 @@ export class FileViewerPhotoSwipe {
             // See also: https://github.com/muxinc/media-chrome/issues/940
             //
             // As a workaround, defer the association to the next tick.
-            setTimeout(() => _updateMediaControls(itemData), 0);
+            setTimeout(() => _updateVideoControlsAndPlayback(itemData), 0);
         };
 
-        const _updateMediaControls = (itemData: ItemData) => {
+        const _updateVideoControlsAndPlayback = (itemData: ItemData) => {
             const container = mediaControlsContainerElement;
             const controls =
                 container?.querySelectorAll(
@@ -569,6 +569,11 @@ export class FileViewerPhotoSwipe {
                     }
                 }
             }
+
+            // Autoplay
+            if (document.querySelector("media-controller[mediapaused]")) {
+                videoPlay();
+            }
         };
 
         /**
@@ -627,7 +632,7 @@ export class FileViewerPhotoSwipe {
             // "change" event, so we need to wire up the controls, or hide them,
             // for the initial slide here also (in addition to in "change").
             if (currSlideData().fileID == fileID) {
-                updateMediaControls(currSlideData());
+                updateVideoControlsAndPlayback(currSlideData());
             }
 
             // Rest of this function deals with live photos.
@@ -825,6 +830,20 @@ export class FileViewerPhotoSwipe {
             } else {
                 video.pause();
             }
+        };
+
+        /**
+         * Play the video that's being shown on the current slide.
+         */
+        const videoPlay = () => {
+            // Unlike `videoToggleMuteIfPossible`, there is no specific state
+            // update reason to go via the media chrome play button to start
+            // playing instead of querying for the video element and invoking
+            // play on it; but doing it this way doesn't hurt either, and also
+            // comes off a bit more consistent and future proof (were media
+            // chrome to add internal state in the future).
+            const playButton = document.querySelector("media-play-button");
+            if (playButton instanceof MediaPlayButton) playButton.handleClick();
         };
 
         /**
@@ -1102,7 +1121,7 @@ export class FileViewerPhotoSwipe {
                         menu.addEventListener("change", onVideoQualityChange);
                     }
                     pswp.on("change", () =>
-                        updateMediaControls(currSlideData()),
+                        updateVideoControlsAndPlayback(currSlideData()),
                     );
                 },
             });
