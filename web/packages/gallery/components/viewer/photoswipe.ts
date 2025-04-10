@@ -2,10 +2,7 @@ import { pt } from "ente-base/i18n";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
-import {
-    isDevBuildAndUser,
-    settingsSnapshot,
-} from "ente-new/photos/services/settings";
+import { settingsSnapshot } from "ente-new/photos/services/settings";
 import "hls-video-element";
 import { t } from "i18next";
 import "media-chrome";
@@ -169,8 +166,7 @@ export const moreMenuID = "ente-pswp-more-menu";
 // TODO(HLS):
 let _shouldUsePlayerV2: boolean | undefined;
 export const shouldUsePlayerV2 = () =>
-    (_shouldUsePlayerV2 ??=
-        settingsSnapshot().isInternalUser && isDevBuildAndUser());
+    (_shouldUsePlayerV2 ??= settingsSnapshot().isInternalUser);
 
 /**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
