@@ -1467,10 +1467,11 @@ const videoHTML = (url: string, mediaControllerID: string) => `
  *
  * - The media-cast-button currently doesn't work with the `hls-video` player.
  *
- * - Media chrome has mechanism for statically providing translations but it
- *   wasn't working when I tried with 4.9.0. The media chrome tooltips also get
- *   clipped for the cornermost buttons. Finally, the rest of the buttons on
- *   this screen don't have a tooltip either.
+ * - We don't use media chrome tooltips: Media chrome has mechanism for
+ *   statically providing translations but it wasn't working when I tried with
+ *   4.9.0. The media chrome tooltips also get clipped for the cornermost
+ *   buttons. Finally, the rest of the buttons on this screen don't have a
+ *   tooltip either.
  *
  *   Revisit this when we have a custom tooltip element we can then also use on
  *   this screen, which can also be used enhancement for the other buttons on
