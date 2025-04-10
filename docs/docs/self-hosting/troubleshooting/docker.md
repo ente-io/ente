@@ -103,9 +103,9 @@ like this:
 
 3. However, you would already have a docker volume from the first run of
    `quickstart.sh`. Since the folder name is the same in both cases `my-ente`,
-   Docker will reuse the existing volumes. So your postgres is running off the
-   old credentials, and you're trying to connect to it using the new ones, and
-   the error arises.
+   Docker will reuse the existing volumes (`my-ente_postgres-data`,
+   `my-ente_minio-data`). So your postgres is running off the old credentials,
+   and you're trying to connect to it using the new ones, and the error arises.
 
 The solution is to delete the stale docker volume. **Be careful**, this will
 delete all data in those volumes (any thing you uploaded etc), so first
@@ -118,11 +118,11 @@ If you're sure of what you're doing, the volumes can be deleted by
 docker volume ls
 ```
 
-to list them, and then delete the ones that begin with `my-ente` using `docker
-volume rm`. You can delete all stale volumes by using `docker system prune` with
-the `--volumes` flag, but be _really_ careful, that'll delete all volumes (Ente
-or otherwise) on your machine that are not currently in use by a running docker
-container.
+to list them, and then delete the ones that begin with `my-ente` using
+`docker volume rm`. You can delete all stale volumes by using
+`docker system prune` with the `--volumes` flag, but be _really_ careful,
+that'll delete all volumes (Ente or otherwise) on your machine that are not
+currently in use by a running docker container.
 
 If you're unsure about removing volumes, another alternative is to rename your
 `my-ente` folder. Docker uses the folder name to determine the volume name
