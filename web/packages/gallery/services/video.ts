@@ -12,6 +12,51 @@ import { z } from "zod";
 import { fetchFileData, fetchFilePreviewData } from "./file-data";
 import type { UploadItem } from "./upload";
 
+interface VideoProcessingQueueItem {
+    /**
+     * The {@link EnteFile} (guaranteed to be of {@link FileType.video}) whose
+     * video data needs processing.
+     */
+    file: EnteFile;
+    /**
+     * The contents of the {@link file} as the newly uploaded {@link UploadItem}.
+     */
+    uploadItem: UploadItem;
+}
+
+/**
+ * Internal in-memory state shared by the functions in this module.
+ *
+ * This entire object will be reset on logout.
+ */
+class VideoState {
+    /**
+     * Queue of videos waiting to be processed.
+     */
+    videoProcessingQueue: VideoProcessingQueueItem[] = [];
+    /**
+     * Active queue processor, if any.
+     */
+    queueProcessor: Promise<void> | undefined;
+}
+
+/**
+ * State shared by the functions in this module. See {@link VideoState}.
+ */
+let _state = new VideoState();
+
+/**
+ * Reset any internal state maintained by the module.
+ *
+ * This is primarily meant as a way for stateful apps (e.g. photos) to clear any
+ * user specific state on logout.
+ */
+export const resetVideoState = () => {
+    // Note: We rely on [Note: Full reload on logout] to abort any in-flight
+    // requests.
+    _state = new VideoState();
+};
+
 export interface HLSPlaylistData {
     /** A data URL to a HLS playlist that streams the video. */
     playlistURL: string;
@@ -194,6 +239,10 @@ const blobToDataURL = (blob: Blob) =>
  * client, allowing us to create its streamable variant without needing to
  * redownload the video.
  *
+ * Note that this is an optimization. Even if we don't process the video at this
+ * time (e.g. if the video processor can't keep up with the uploads), we will
+ * eventually process it later as part of a backfill.
+ *
  * @param file The {@link EnteFile} that got uploaded (video or otherwise).
  *
  * @param uploadItem The item that was uploaded. This can be used to get at the
@@ -220,11 +269,30 @@ export const processVideoNewUpload = (
         }
     }
 
-    log.debug(() => ["gen-hls", { file, uploadItem }]);
+    if (_state.videoProcessingQueue.length > 1) {
+        // Drop new requests if the queue can't keep up to avoid the app running
+        // out of memory by keeping hold of too many (potentially huge) video
+        // blobs. These items will later get processed as part of a backfill.
+        log.info("Will process new video upload later (backlog too big)");
+        return;
+    }
 
-    // void worker().then((w) => w.onUpload(file, uploadItem));
+    // Enqueue.
+    _state.videoProcessingQueue.push({ file, uploadItem });
+
+    // Tickle.
+    _state.queueProcessor ??= processNextQueueItem();
 };
 
 export const isVideoProcessingEnabled = () =>
     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
+
+const processNextQueueItem = async () => {
+    while (_state.videoProcessingQueue.length) {
+        const { file, uploadItem } = _state.videoProcessingQueue.shift()!;
+        log.debug(() => ["gen-hls", { file, uploadItem }]);
+        await Promise.resolve(0);
+    }
+    _state.queueProcessor = undefined;
+};
