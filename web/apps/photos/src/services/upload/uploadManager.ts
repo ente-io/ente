@@ -14,6 +14,7 @@ import {
     type UploadPhase,
     type UploadResult,
 } from "ente-gallery/services/upload";
+import { processVideoNewUpload } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import {
     decryptFile,
@@ -647,6 +648,7 @@ class UploadManager {
                         uploadResult == "uploadedWithStaticThumbnail")
                 ) {
                     indexNewUpload(decryptedFile, uploadItem);
+                    processVideoNewUpload(decryptedFile, uploadItem);
                 }
                 this.updateExistingFiles(decryptedFile);
             }
@@ -657,7 +659,7 @@ class UploadManager {
             );
             return uploadResult;
         } catch (e) {
-            log.error("failed to do post file upload action", e);
+            log.error("Post file upload action failed", e);
             return "failed";
         }
     }
