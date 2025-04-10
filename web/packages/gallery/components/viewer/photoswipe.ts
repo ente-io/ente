@@ -6,7 +6,7 @@ import { settingsSnapshot } from "ente-new/photos/services/settings";
 import "hls-video-element";
 import { t } from "i18next";
 import "media-chrome";
-import { MediaMuteButton, MediaPlayButton } from "media-chrome";
+import { MediaMuteButton } from "media-chrome";
 import "media-chrome/menu";
 import { MediaChromeMenu, MediaChromeMenuButton } from "media-chrome/menu";
 import PhotoSwipe, { type SlideData } from "photoswipe";
@@ -570,10 +570,9 @@ export class FileViewerPhotoSwipe {
                 }
             }
 
-            // Autoplay
-            if (document.querySelector("media-controller[mediapaused]")) {
-                videoPlay();
-            }
+            // Autoplay (unless the video has ended).
+            const video = videoVideoEl;
+            if (video?.paused && !video.ended) void video.play();
         };
 
         /**
@@ -830,20 +829,6 @@ export class FileViewerPhotoSwipe {
             } else {
                 video.pause();
             }
-        };
-
-        /**
-         * Play the video that's being shown on the current slide.
-         */
-        const videoPlay = () => {
-            // Unlike `videoToggleMuteIfPossible`, there is no specific state
-            // update reason to go via the media chrome play button to start
-            // playing instead of querying for the video element and invoking
-            // play on it; but doing it this way doesn't hurt either, and also
-            // comes off a bit more consistent and future proof (were media
-            // chrome to add internal state in the future).
-            const playButton = document.querySelector("media-play-button");
-            if (playButton instanceof MediaPlayButton) playButton.handleClick();
         };
 
         /**
