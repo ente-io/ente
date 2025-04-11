@@ -1,4 +1,5 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { newID } from "ente-base/id";
 import log from "ente-base/log";
 import { PromiseQueue } from "ente-utils/promise";
 import {
@@ -26,7 +27,7 @@ const createFFmpeg = async () => {
         wasmURL: "https://assets.ente.io/ffmpeg-core-0.12.10/ffmpeg-core.wasm",
     });
     // This is too noisy to enable even during development. Uncomment to taste.
-    ffmpeg.on("log", (e) => log.debug(() => ["[ffmpeg]", e.message]));
+    // ffmpeg.on("log", (e) => log.debug(() => ["[ffmpeg]", e.message]));
     return ffmpeg;
 };
 
@@ -71,18 +72,11 @@ const ffmpegExec = async (
     outputFileExtension: string,
     blob: Blob,
 ) => {
-    const inputPath = "test.png"; //newID("in_") + ".png";
-    // const outputSuffix = outputFileExtension ? "." + outputFileExtension : "";
-    const outputPath = "out.txt"; //newID("out_") + outputSuffix;
+    const inputPath = newID("in_");
+    const outputSuffix = outputFileExtension ? "." + outputFileExtension : "";
+    const outputPath = newID("out_") + outputSuffix;
 
-    console.log(command, outputFileExtension);
-    // let cmd1 = substitutePlaceholders(command, inputPath, outputPath);
-    // // TODO(OCR): WIP
-    // if (command[0] == "FFPROBE") {
-    //     cmd = cmd
-    //         .slice(1)
-    //         .map((w) => (w == "INPUT_PROBE" ? `"movie=${inputPath},ocr"` : w));
-    // }
+    const cmd = substitutePlaceholders(command, inputPath, outputPath);
 
     const inputData = new Uint8Array(await blob.arrayBuffer());
 
@@ -92,38 +86,11 @@ const ffmpegExec = async (
         await ffmpeg.writeFile(inputPath, inputData);
 
         // returns `0` if no error, `!= 0` if timeout (1) or error.
-        // const status = await (command[0] == "FFPROBE"
-        // ? ffmpeg.ffprobe(cmd)
-        // : ffmpeg.exec(cmd));
-        // const status = await ffmpeg.exec(cmd);
-        // await ffmpeg.ffprobe([
-        //     "-v",
-        //     "error",
-        //     "-show_entries",
-        //     "format=duration",
-        //     "-of",
-        //     "default=noprint_wrappers=1:nokey=1",
-        //     "video.avi",
-        //     "-o",
-        //     "output.txt",
-        // ]);
-        // [debug] [ffmpeg] [lavfi @ 0xe313e0] No such filter: 'ocr'
-        const status = await ffmpeg.ffprobe([
-            "-v",
-            "error",
-            "-show_entries",
-            "frame_tags=lavfi.ocr.text",
-            "-f",
-            "lavfi",
-            "-i",
-            "movie=test.png,ocr",
-            "-o",
-            "out.txt",
-        ]);
+        const status = await ffmpeg.exec(cmd);
         if (status !== 0) {
-            // log.info(
-            //     `[wasm] ffmpeg command failed with exit code ${status}: ${cmd.join(" ")}`,
-            // );
+            log.info(
+                `[wasm] ffmpeg command failed with exit code ${status}: ${cmd.join(" ")}`,
+            );
             throw new Error(`ffmpeg command failed with exit code ${status}`);
         }
 

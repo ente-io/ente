@@ -5,7 +5,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
-import TextFieldsIcon from "@mui/icons-material/TextFields";
 import UnArchiveIcon from "@mui/icons-material/Unarchive";
 import {
     Dialog,
@@ -28,7 +27,6 @@ import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { isDevBuild } from "ente-base/env";
 import { lowercaseExtension } from "ente-base/file-name";
 import { formattedListJoin, pt, ut } from "ente-base/i18n";
 import type { LocalUser } from "ente-base/local-user";
@@ -55,7 +53,6 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { extractOCR } from "../../services/ffmpeg";
 import {
     fileInfoExifForFile,
     updateItemDataAlt,
@@ -449,17 +446,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             ])
             .catch(onGenericError);
     }, [onGenericError, handleMoreMenuCloseIfNeeded, activeAnnotatedFile]);
-
-    // TODO(OCR): WIP
-    const handleCopyText = useCallback(async () => {
-        handleMoreMenuCloseIfNeeded();
-        const imageBlob = activeAnnotatedFile?.itemData.originalImageBlob;
-        console.log(imageBlob);
-        if (imageBlob) {
-            const text = await extractOCR(imageBlob);
-            console.log(text);
-        }
-    }, [handleMoreMenuCloseIfNeeded, activeAnnotatedFile]);
 
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
@@ -954,17 +940,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
                     </MoreMenuItem>
                 )}
-                {isDevBuild &&
-                    process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING && (
-                        <MoreMenuItem onClick={handleCopyText}>
-                            <MoreMenuItemTitle>
-                                {pt("Copy text")}
-                            </MoreMenuItemTitle>
-                            <TextFieldsIcon
-                                sx={{ "&&": { fontSize: "18px" } }}
-                            />
-                        </MoreMenuItem>
-                    )}
                 {activeAnnotatedFile.annotation.showEditImage && (
                     <MoreMenuItem onClick={handleEditImage}>
                         <MoreMenuItemTitle>{t("edit_image")}</MoreMenuItemTitle>
