@@ -230,7 +230,16 @@ class MemoryHomeWidgetService {
             );
           }
           index++;
+
+          if (index >= 50) {
+            _logger.warning(">>> Max memory limit reached");
+            break;
+          }
         }
+      }
+
+      if (index >= 50) {
+        break;
       }
     }
 
