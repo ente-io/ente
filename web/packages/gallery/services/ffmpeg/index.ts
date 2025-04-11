@@ -322,3 +322,30 @@ const transcodeAndGenerateHLSPlaylistCommand = [
     "128k",
     outputPathPlaceholder,
 ];
+
+// TODO(OCR): WIP experiment
+export const extractOCR = async (blob: Blob) =>
+    ffmpegExecWeb(extractOCRCommand, blob, "txt");
+
+/**
+ * The FFmpeg command to use to create a preview variant of videos.
+ *
+ * Current parameters
+ *
+ * - H264
+ * - 720p width
+ * - 2000kbps bitrate
+ * - 30fps frame rate
+ */
+const extractOCRCommand = [
+    "FFPROBE",
+    "-show_entries",
+    "frame_tags=lavfi.ocr.text",
+    "-f",
+    "lavfi",
+    "-i",
+    // `"movie=${inputPathPlaceholder},ocr"`,
+    "INPUT_PROBE",
+    "-o",
+    outputPathPlaceholder,
+];
