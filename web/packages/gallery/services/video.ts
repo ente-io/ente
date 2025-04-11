@@ -281,18 +281,35 @@ export const processVideoNewUpload = (
     _state.videoProcessingQueue.push({ file, uploadItem });
 
     // Tickle.
-    _state.queueProcessor ??= processNextQueueItem();
+    _state.queueProcessor ??= processQueue();
 };
 
 export const isVideoProcessingEnabled = () =>
     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
 
-const processNextQueueItem = async () => {
+const processQueue = async () => {
     while (_state.videoProcessingQueue.length) {
-        const { file, uploadItem } = _state.videoProcessingQueue.shift()!;
-        log.debug(() => ["gen-hls", { file, uploadItem }]);
-        await Promise.resolve(0);
+        try {
+            await processQueueItem(_state.videoProcessingQueue.shift()!);
+        } catch (e) {
+            log.error("Video processing failed", e);
+            // Ignore this unprocessable item. Currently this function only runs
+            // post upload, so this item will later get processed as part of the
+            // backfill.
+            //
+            // TODO(HLS): When processing the backfill itself, we'll need a way
+            // to mark this item as failed.
+        }
     }
     _state.queueProcessor = undefined;
+};
+
+const processQueueItem = async ({
+    file,
+    uploadItem,
+}: VideoProcessingQueueItem) => {
+    log.debug(() => ["gen-hls", { file, uploadItem }]);
+
+    await Promise.resolve(0);
 };
