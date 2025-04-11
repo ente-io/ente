@@ -82,7 +82,15 @@ const ffmpegExec = async (
         const startTime = Date.now();
 
         await ffmpeg.writeFile(inputPath, inputData);
-        await ffmpeg.exec(cmd);
+
+        // returns `0` if no error, `!= 0` if timeout (1) or error.
+        const status = await ffmpeg.exec(cmd);
+        if (status !== 0) {
+            log.info(
+                `[wasm] ffmpeg command failed with exit code ${status}: ${cmd.join(" ")}`,
+            );
+            throw new Error(`ffmpeg command failed with exit code ${status}`);
+        }
 
         const result = await ffmpeg.readFile(outputPath);
         if (typeof result == "string") throw new Error("Expected binary data");
