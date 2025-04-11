@@ -82,7 +82,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   int? optimizedImageHeight;
   int? optimizedImageWidth;
   String? _localThumbnailQueueTaskId;
-  static const _maxLocalThumbnailRetries = 10;
+  static const _maxLocalThumbnailRetries = 8;
 
   @override
   void initState() {
