@@ -283,7 +283,7 @@ const convertToMP4Native = async (electron: Electron, blob: Blob) => {
  * @returns The output video blob containing the generated preview variant.
  */
 export const generateVideoPreviewVariantWeb = async (blob: Blob) =>
-    ffmpegExecWeb(generateVideoPreviewMetadataCommand, blob, "mp4");
+    ffmpegExecWeb(transcodeAndGenerateHLSPlaylistCommand, blob, "hls");
 
 /**
  * The FFmpeg command to use to create a preview variant of videos.
@@ -295,10 +295,13 @@ export const generateVideoPreviewVariantWeb = async (blob: Blob) =>
  * - 2000kbps bitrate
  * - 30fps frame rate
  */
-const generateVideoPreviewMetadataCommand = [
+const transcodeAndGenerateHLSPlaylistCommand = [
     ffmpegPathPlaceholder,
+    // Input file. We don't need any extra options that apply to the input file.
     "-i",
     inputPathPlaceholder,
+    // The remaining options apply to the next file, `outputPathPlaceholder`.
+    // ---
     // `-vf` creates a filter graph for the video stream.
     "-vf",
     // `-vf scale=720:-1` scales the video to 720p width, keeping aspect ratio.
