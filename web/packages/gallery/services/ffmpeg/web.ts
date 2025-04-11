@@ -26,6 +26,8 @@ const createFFmpeg = async () => {
         coreURL: "https://assets.ente.io/ffmpeg-core-0.12.10/ffmpeg-core.js",
         wasmURL: "https://assets.ente.io/ffmpeg-core-0.12.10/ffmpeg-core.wasm",
     });
+    // This is too noisy to enable even during development. Uncomment to taste.
+    // ffmpeg.on("log", (e) => log.debug(() => ["[ffmpeg]", e.message]));
     return ffmpeg;
 };
 
