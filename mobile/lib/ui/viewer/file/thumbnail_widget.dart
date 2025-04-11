@@ -305,7 +305,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         thumbnailSmallSize,
       );
     }).catchError((e) {
-      _logger.warning("Could not thumbnail from disk: ", e);
+      _logger.warning("Could not load thumbnail from disk: ", e);
       _errorLoadingLocalThumbnail = true;
     });
   }
