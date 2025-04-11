@@ -4,9 +4,9 @@ import "dart:io";
 
 import "package:computer/computer.dart";
 import 'package:exif/exif.dart';
-import "package:ffmpeg_kit_flutter_full_gpl/ffprobe_kit.dart";
-import "package:ffmpeg_kit_flutter_full_gpl/media_information.dart";
-import "package:ffmpeg_kit_flutter_full_gpl/media_information_session.dart";
+import "package:ffmpeg_kit_flutter/ffprobe_kit.dart";
+import "package:ffmpeg_kit_flutter/media_information.dart";
+import "package:ffmpeg_kit_flutter/media_information_session.dart";
 import "package:flutter/foundation.dart";
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';

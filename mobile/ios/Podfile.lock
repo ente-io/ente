@@ -14,12 +14,9 @@ PODS:
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
-  - ffmpeg-kit-ios-full-gpl (6.0)
-  - ffmpeg_kit_flutter_full_gpl (6.0.3):
-    - ffmpeg_kit_flutter_full_gpl/full-gpl (= 6.0.3)
-    - Flutter
-  - ffmpeg_kit_flutter_full_gpl/full-gpl (6.0.3):
-    - ffmpeg-kit-ios-full-gpl (= 6.0)
+  - ffmpeg_kit_custom (6.0.3)
+  - ffmpeg_kit_flutter (6.0.3):
+    - ffmpeg_kit_custom
     - Flutter
   - file_saver (0.0.1):
     - Flutter
@@ -250,7 +247,7 @@ DEPENDENCIES:
   - cupertino_http (from `.symlinks/plugins/cupertino_http/darwin`)
   - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
-  - ffmpeg_kit_flutter_full_gpl (from `.symlinks/plugins/ffmpeg_kit_flutter_full_gpl/ios`)
+  - ffmpeg_kit_flutter (from `.symlinks/plugins/ffmpeg_kit_flutter/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
@@ -301,8 +298,9 @@ DEPENDENCIES:
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
 
 SPEC REPOS:
+  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios:
+    - ffmpeg_kit_custom
   trunk:
-    - ffmpeg-kit-ios-full-gpl
     - Firebase
     - FirebaseCore
     - FirebaseCoreInternal
@@ -337,8 +335,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/dart_ui_isolate/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
-  ffmpeg_kit_flutter_full_gpl:
-    :path: ".symlinks/plugins/ffmpeg_kit_flutter_full_gpl/ios"
+  ffmpeg_kit_flutter:
+    :path: ".symlinks/plugins/ffmpeg_kit_flutter/ios"
   file_saver:
     :path: ".symlinks/plugins/file_saver/ios"
   firebase_core:
@@ -444,8 +442,8 @@ SPEC CHECKSUMS:
   cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
   dart_ui_isolate: 46f6714abe6891313267153ef6f9748d8ecfcab1
   device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
-  ffmpeg-kit-ios-full-gpl: 80adc341962e55ef709e36baa8ed9a70cf4ea62b
-  ffmpeg_kit_flutter_full_gpl: ce18b888487c05c46ed252cd2e7956812f2e3bd1
+  ffmpeg_kit_custom: 07a8fcdc3ac29b99383203a6da14bb44ba7253a5
+  ffmpeg_kit_flutter: 915b345acc97d4142e8a9a8549d177ff10f043f5
   file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
   Firebase: d80354ed7f6df5f9aca55e9eb47cc4b634735eaf
   firebase_core: 6cbed78b4f298ed103a9fd034e6dbc846320480f
@@ -513,6 +511,6 @@ SPEC CHECKSUMS:
   volume_controller: 3657a1f65bedb98fa41ff7dc5793537919f31b12
   wakelock_plus: 04623e3f525556020ebd4034310f20fe7fda8b49
 
-PODFILE CHECKSUM: 20e086e6008977d43a3d40260f3f9bffcac748dd
+PODFILE CHECKSUM: a8ef88ad74ba499756207e7592c6071a96756d18
 
 COCOAPODS: 1.16.2

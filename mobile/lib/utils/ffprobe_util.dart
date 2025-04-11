@@ -1,6 +1,6 @@
 // Adapted from: https://github.com/deckerst/aves
 
-import "package:ffmpeg_kit_flutter_full_gpl/media_information.dart";
+import "package:ffmpeg_kit_flutter/media_information.dart";
 import "package:logging/logging.dart";
 import "package:photos/models/ffmpeg/ffprobe_keys.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
