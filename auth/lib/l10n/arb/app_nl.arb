@@ -506,6 +506,8 @@
   "deleteDuplicates": "Dubbelen verwijderen",
   "plainHTML": "Alleen HTML",
   "tellUsWhatYouThink": "Vertel ons wat je vindt",
+  "dropReviewiOS": "Laat een beoordeling achter in de App Store",
+  "dropReviewAndroid": "Laat een beoordeling achter in de Play Store",
   "supportEnte": "Steun <bold-green>ente</bold-green>",
   "giveUsAStarOnGithub": "Geef ons een ster op Github",
   "free5GB": "5GB gratis op <bold-green>ente</bold-green> Photos",
