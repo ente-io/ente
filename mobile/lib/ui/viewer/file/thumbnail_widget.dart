@@ -314,13 +314,17 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     int retryAttempts = 0;
     while (retryAttempts <= _maxLocalThumbnailRetries) {
       try {
-        return _getLocalThumbnailUsingHeapPriorityQueue();
+        return await _getLocalThumbnailUsingHeapPriorityQueue();
       } catch (e) {
         // only retry for specific exceptions
         if (e is! TaskQueueTimeoutException &&
             e is! TaskQueueOverflowException &&
             e is! TaskQueueCancelledException) {
           rethrow;
+        }
+        //Do not retry if the widget is not mounted
+        if (!mounted) {
+          return null;
         }
 
         retryAttempts++;
@@ -329,7 +333,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         );
         if (retryAttempts <= _maxLocalThumbnailRetries) {
           _logger.warning(
-            "Error getting local thumbnail for ${widget.file.displayName}, retrying (attempt $retryAttempts) in $backoff ms",
+            "Error getting local thumbnail for ${widget.file.displayName}, retrying (attempt $retryAttempts) in ${backoff.inMilliseconds} ms",
             e,
           );
           await Future.delayed(backoff); // Exponential backoff
