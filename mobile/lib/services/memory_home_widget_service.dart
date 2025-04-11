@@ -145,7 +145,7 @@ class MemoryHomeWidgetService {
     final files = Map.fromEntries(
       memories.map((m) {
         return MapEntry(m.title, m.memories.map((e) => e.file).toList());
-      }).take(50),
+      }),
     );
 
     return files;
