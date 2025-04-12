@@ -163,7 +163,8 @@ func (h *PublicCollectionHandler) getFileForType(c *gin.Context, objectType ente
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, ""))
 		return
 	}
-	url, err := h.FileCtrl.GetPublicFileURL(c, fileID, objectType)
+	accessContext := auth.MustGetPublicAccessContext(c)
+	url, err := h.FileCtrl.GetPublicOrCastFileURL(c, fileID, objectType, accessContext.CollectionID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
