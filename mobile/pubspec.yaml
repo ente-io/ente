@@ -69,7 +69,7 @@ dependencies:
   fast_base58: ^0.2.1
   ffmpeg_kit_flutter:
     git:
-      url: https://github.com/ente-io/ffmpeg-kit-forked
+      url: https://github.com/ente-io/ffmpeg-kit
       path: flutter/flutter
       ref: flurrify
   figma_squircle: ^0.6.3
