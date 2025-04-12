@@ -1316,6 +1316,29 @@
     },
     {
       "title": "CoinSpot"
+    },
+    {
+      "title": "Allianz"
+    },
+    {
+      "title": "Basin",
+	  "altNames": [
+        "usebasin"
+      ]
+    },
+    {
+      "title": "Bitkub"
+    },
+    {
+      "title": "Rebrandly"
+    },
+    {
+      "title": "Sync.com",
+	  "slug": "sync_com"
+    },
+    {
+      "title": "Tally",
+	  "slug": "tally_form"
     }
   ]
 }
