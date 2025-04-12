@@ -1706,6 +1706,7 @@
   "feastingWithThem": "Feiern mit {name}",
   "selfiesWithThem": "Selfies mit {name}",
   "posingWithThem": "Posieren mit {name}",
+  "backgroundWithThem": "Schöne Ausblicke mit {name}",
   "sportsWithThem": "Sport mit {name}",
   "roadtripWithThem": "Roadtrip mit {name}",
   "spotlightOnYourself": "Spot auf dich selbst",
@@ -1728,5 +1729,11 @@
   "cLIcon": "Neues Icon",
   "cLIconDesc": "Endlich ein neues App-Icon, das unserer Meinung nach unser Werk am besten repräsentiert. Zudem ist es möglich, weiterhin das alte App-Icon zu verwenden.",
   "cLMemories": "Erinnerungen",
-  "cLWidgets": "Widgets"
+  "cLMemoriesDesc": "Entdecke Deine besonderen Momente neu – Spot auf Deine liebsten Personen, Deine Reisen und Urlaube, Deine besten Schnappschüsse und vieles mehr. Aktiviere das maschinelle Lernen, tagge Dich selbst und benenne Deine Freunde für die besten Ergebnisse.",
+  "cLWidgets": "Widgets",
+  "cLWidgetsDesc": "Homescreen-Widgets mit integrierten Erinnerungen sind nun verfügbar. Sie zeigen dir deine besonderen Momente an, ohne die App zu öffnen.",
+  "cLFamilyPlan": "Obergrenzen für den Familientarif",
+  "cLFamilyPlanDesc": "Du kannst jetzt festlegen, wie viel Speicherplatz deine Familienmitglieder nutzen können.",
+  "cLBulkEdit": "Massenbearbeitung von Datumsangaben",
+  "cLBulkEditDesc": "Du kannst jetzt mehrere Fotos auswählen, und das Datum/Uhrzeit für alle mit einer Aktion ändern. Das Verschieben von Daten wird auch unterstützt."
 }
