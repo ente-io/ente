@@ -570,6 +570,8 @@ func main() {
 
 	publicCollectionAPI.GET("/files/preview/:fileID", publicCollectionHandler.GetThumbnail)
 	publicCollectionAPI.GET("/files/download/:fileID", publicCollectionHandler.GetFile)
+	publicCollectionAPI.GET("/files/data/fetch", publicCollectionHandler.GetFileData)
+	publicCollectionAPI.GET("/files/data/preview", publicCollectionHandler.GetPreviewURL)
 	publicCollectionAPI.GET("/diff", publicCollectionHandler.GetDiff)
 	publicCollectionAPI.GET("/info", publicCollectionHandler.GetCollection)
 	publicCollectionAPI.GET("/upload-urls", publicCollectionHandler.GetUploadUrls)
