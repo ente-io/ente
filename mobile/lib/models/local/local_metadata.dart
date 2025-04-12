@@ -1,5 +1,17 @@
 import "package:photos/models/location/location.dart";
 
+class MetadataResult {
+  final DroidMetadata? droid;
+  final IOSMetadata? iOSMetadata;
+  final int processedState;
+
+  MetadataResult({
+    this.droid,
+    this.iOSMetadata,
+    required this.processedState,
+  });
+}
+
 class DroidMetadata {
   int creationTime;
   int modificationTime;
