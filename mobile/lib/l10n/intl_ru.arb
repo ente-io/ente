@@ -371,7 +371,7 @@
   "deleteFromBoth": "Удалить из обоих мест",
   "newAlbum": "Новый альбом",
   "albums": "Альбомы",
-  "memoryCount": "{count, plural, zero{нет воспоминаний}  one{{formattedCount} воспоминание} few{{formattedCount} воспоминания} other{{formattedCount} воспоминаний}}",
+  "memoryCount": "{count, plural, =0{нет воспоминаний} one{{formattedCount} воспоминание} few{{formattedCount} воспоминания} other{{formattedCount} воспоминаний}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -792,11 +792,11 @@
   "share": "Поделиться",
   "unhideToAlbum": "Перенести в альбом",
   "restoreToAlbum": "Восстановить в альбом",
-  "moveItem": "{count, plural, one {Переместить элементы} other {Переместить элементы}}",
+  "moveItem": "{count, plural, =1 {Переместить элемент} other {Переместить элементы}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, one {Добавить элементы} other {Добавить элементы}}",
+  "addItem": "{count, plural, =1 {Добавить элемент} other {Добавить элементы}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -897,7 +897,7 @@
   "authToViewYourMemories": "Пожалуйста, авторизуйтесь для просмотра воспоминаний",
   "unlock": "Разблокировать",
   "freeUpSpace": "Освободить место",
-  "freeUpSpaceSaving": "{count, plural, one {Их можно удалить с устройства, чтобы освободить {formattedSize}} other {Их можно удалить с устройства, чтобы освободить {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {Его можно удалить с устройства, чтобы освободить {formattedSize}} other {Их можно удалить с устройства, чтобы освободить {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {{formattedNumber} файл в этом альбоме был успешно сохранён} few{{formattedNumber} файла в этом альбоме были успешно сохранены} other {{formattedNumber} файлов в этом альбоме были успешно сохранены}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -931,7 +931,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Вы всё ещё сможете получить доступ к {count, plural, one {нему} other {ним}} в Ente, пока у вас активна подписка",
+  "freeUpAccessPostDelete": "Вы всё ещё сможете получить доступ к {count, plural, =1 {нему} other {ним}} в Ente, пока у вас активна подписка",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1267,8 +1267,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "С лёгкостью находите людей по имени",
-  "addViewers": "{count, plural, zero {Добавить зрителя} one {Добавить зрителя} other {Добавить зрителей}}",
-  "addCollaborators": "{count, plural, zero {Добавить соавтора} one {Добавить соавтора} other {Добавить соавторов}}",
+  "addViewers": "{count, plural, =0 {Добавить зрителя} =1 {Добавить зрителя} other {Добавить зрителей}}",
+  "addCollaborators": "{count, plural, =0 {Добавить соавтора} =1 {Добавить соавтора} other {Добавить соавторов}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Нажмите с удержанием на электронную почту для подтверждения сквозного шифрования.",
   "developerSettingsWarning": "Вы уверены, что хотите изменить настройки для разработчиков?",
   "developerSettings": "Настройки для разработчиков",
@@ -1400,7 +1400,7 @@
   "enableMachineLearningBanner": "Включите машинное обучение для магического поиска и распознавания лиц",
   "searchDiscoverEmptySection": "Изображения появятся здесь после завершения обработки и синхронизации",
   "searchPersonsEmptySection": "Люди появятся здесь после завершения обработки и синхронизации",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 зрителей} =1 {Добавлен 1 зритель} one{Добавлен {count} зритель} few{Добавлено {count} зрителя} other {Добавлено {count} зрителей}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 зрителей} =1 {Добавлен 1 зритель} other {Добавлено {count} зрителей}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1485,7 +1485,7 @@
   },
   "currentlyRunning": "выполняется",
   "ignored": "игнорируется",
-  "photosCount": "{count, plural, =0 {0 фото} =1 {1 фото} other {{count} фото}}",
+  "photosCount": "{count, plural, =0 {0 фотографий} =1 {1 фотография} one {{count} фотография} few {{count} фотографии} other {{count} фотографий}}",
   "@photosCount": {
     "placeholders": {
       "count": {

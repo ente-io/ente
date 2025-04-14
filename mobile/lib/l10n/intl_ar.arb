@@ -371,21 +371,6 @@
   "deleteFromBoth": "الحذف من كلاهما",
   "newAlbum": "ألبوم جديد",
   "albums": "الألبومات",
-  "memoryCount": "{count, plural, zero {لا ذكريات} \none {{formattedCount} ذِكرى واحدة} \nother {{formattedCount} ذكريات}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "تم اختيار {count}",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -725,6 +710,5 @@
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "يمكن لـ Ente تشفير وحفظ الملفات فقط إذا منحت حق الوصول إليها",
   "pleaseGrantPermissions": "الرجاء منح الأذونات",
   "grantPermission": "منح الأذن",
-  "privateSharing": "مشاركة خاصة",
-  "addViewers": "{count, plural, zero {إضافة مُشَاهِدِين} one {إضافة مُشَاهِد} other {إضافة مُشَاهِدِين}}"
+  "privateSharing": "مشاركة خاصة"
 }

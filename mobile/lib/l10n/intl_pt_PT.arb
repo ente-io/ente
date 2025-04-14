@@ -366,21 +366,6 @@
   "deleteFromBoth": "Apagar de ambos",
   "newAlbum": "Novo álbum",
   "albums": "Álbuns",
-  "memoryCount": "{count, plural, zero{sem memórias}\none{{formattedCount} memória}\nother{{formattedCount} memórias}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "{count} selecionado(s)",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -783,14 +768,6 @@
   "share": "Partilhar",
   "unhideToAlbum": "Mostrar para o álbum",
   "restoreToAlbum": "Restaurar para álbum",
-  "moveItem": "{count, plural, one {Mover item} other {Mover itens}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {Mover item} other {Mover itens}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Criar ou selecionar álbum",
   "selectAlbum": "Selecionar álbum",
   "searchByAlbumNameHint": "Nome do álbum",
@@ -888,7 +865,6 @@
   "authToViewYourMemories": "Por favor, autentique-se para ver suas memórias",
   "unlock": "Desbloquear",
   "freeUpSpace": "Libertar espaço",
-  "freeUpSpaceSaving": "{count, plural, one {Pode ser apagado do dispositivo para libertar {formattedSize}} other {Pode ser apagado do dispositivo para libertar {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 arquivo} other {{formattedNumber} arquivos}} neste álbum teve um backup seguro",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -916,18 +892,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Ainda pode aceder a {count, plural, one {ele} other {eles}} no Ente desde que tenha uma subscrição ativa",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1258,8 +1222,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Encontrar pessoas rapidamente pelo nome",
-  "addViewers": "{count, plural, zero {Adicionar visualizador} one {Adicionar visualizador} other {Adicionar Visualizadores}}",
-  "addCollaborators": "{count, plural, zero {Adicionar colaborador} one {Adicionar colaborador} other {Adicionar colaboradores}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Pressione e segure um e-mail para verificar a criptografia de ponta a ponta.",
   "developerSettingsWarning": "Tem a certeza de que pretende modificar as definições de programador?",
   "developerSettings": "Definições do programador",
@@ -1388,16 +1350,6 @@
   "onlyThem": "Apenas eles",
   "checkingModels": "A verificar modelos...",
   "enableMachineLearningBanner": "Habilitar aprendizagem automática para pesquisa mágica e reconhecimento de rosto",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 visualizadores} =1 {Adicionado 1 visualizador} other {Adicionado {count} visualizadores}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 colaboradores} =1 {Adicionado 1 colaborador} other {Adicionado {count} colaboradores}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
