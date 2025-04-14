@@ -89,7 +89,14 @@ class MemoriesCacheService {
   }
 
   bool get enableSmartMemories =>
-      flagService.hasGrantedMLConsent && localSettings.isMLLocalIndexingEnabled;
+      flagService.hasGrantedMLConsent &&
+      localSettings.isMLLocalIndexingEnabled &&
+      localSettings.isSmartMemoriesEnabled;
+
+  bool get curatedMemoriesOption =>
+      showAnyMemories &&
+      flagService.hasGrantedMLConsent &&
+      localSettings.isMLLocalIndexingEnabled;
 
   void _checkIfTimeToUpdateCache() {
     if (!enableSmartMemories) {
@@ -443,10 +450,12 @@ class MemoriesCacheService {
     }
   }
 
-  Future<void> clearMemoriesCache() async {
-    final file = File(await _getCachePath());
-    if (file.existsSync()) {
-      await file.delete();
+  Future<void> clearMemoriesCache({bool fromDisk = true}) async {
+    if (fromDisk) {
+      final file = File(await _getCachePath());
+      if (file.existsSync()) {
+        await file.delete();
+      }
     }
     _cachedMemories = null;
   }
