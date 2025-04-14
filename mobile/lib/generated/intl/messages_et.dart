@@ -66,6 +66,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Loo uus konto"),
         "creatingLink":
             MessageLookupByLibrary.simpleMessage("Lingi loomine..."),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "custom": MessageLookupByLibrary.simpleMessage("Kohandatud"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("Tume"),
         "dayToday": MessageLookupByLibrary.simpleMessage("Täna"),

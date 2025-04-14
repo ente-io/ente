@@ -1735,5 +1735,6 @@
   "cLFamilyPlan": "Limites de planos familiares",
   "cLFamilyPlanDesc": "Agora você pode definir um limite de quanto armazenamento os seus entes queridos podem usar.",
   "cLBulkEdit": "Editar todas as datas",
-  "cLBulkEditDesc": "Agora você pode selecionar várias fotos, editar data e hora de todos com um só clique. Alternar datas também são suportados."
+  "cLBulkEditDesc": "Agora você pode selecionar várias fotos, editar data e hora de todos com um só clique. Alternar datas também são suportados.",
+  "curatedMemories": "Curated memories"
 }

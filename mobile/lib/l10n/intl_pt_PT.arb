@@ -1388,5 +1388,6 @@
         "example": "no network"
       }
     }
-  }
+  },
+  "curatedMemories": "Curated memories"
 }

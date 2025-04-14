@@ -1,5 +1,5 @@
 // DO NOT EDIT. This is code generated via package:intl/generate_localized.dart
-// This is a library that provides messages for a pt locale. All the
+// This is a library that provides messages for a pt_BR locale. All the
 // messages from the main program should be duplicated here with the same
 // function name.
 
@@ -18,12 +18,12 @@ final messages = new MessageLookup();
 typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 
 class MessageLookup extends MessageLookupByLibrary {
-  String get localeName => 'pt';
+  String get localeName => 'pt_BR';
 
   static String m44(title) => "${title} (Eu)";
 
   static String m45(count) =>
-      "${Intl.plural(count, one: 'Adicionar colaborador', other: 'Adicionar colaboradores')}";
+      "${Intl.plural(count, zero: 'Adicionar colaborador', one: 'Adicionar colaborador', other: 'Adicionar colaboradores')}";
 
   static String m46(count) =>
       "${Intl.plural(count, one: 'Adicionar item', other: 'Adicionar itens')}";
@@ -32,7 +32,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Seu complemento ${storageAmount} é válido até ${endDate}";
 
   static String m47(count) =>
-      "${Intl.plural(count, one: 'Adicionar visualizador', other: 'Adicionar visualizadores')}";
+      "${Intl.plural(count, zero: 'Adicionar visualizador', one: 'Adicionar visualizador', other: 'Adicionar vizualizadores')}";
 
   static String m48(emailOrName) => "Adicionado por ${emailOrName}";
 
@@ -122,12 +122,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m14(endDate) => "A avaliação grátis acaba em ${endDate}";
 
   static String m66(count) =>
-      "Você ainda pode acessá-${Intl.plural(count, one: 'lo', other: 'los')} no Ente, contanto que você tenha uma assinatura ativa";
+      "Você ainda pode acessá${Intl.plural(count, one: '-lo', other: '-los')} no Ente se você tiver uma assinatura ativa";
 
   static String m67(sizeInMBorGB) => "Liberar ${sizeInMBorGB}";
 
   static String m68(count, formattedSize) =>
-      "${Intl.plural(count, one: 'Ele pode ser excluído do dispositivo para liberar ${formattedSize}', other: 'Eles podem ser excluídos do dispositivo para liberar ${formattedSize}')}";
+      "${Intl.plural(count, one: 'Ele pode excluído para liberar ${formattedSize}', other: 'Eles podem ser excluídos do dispositivo para liberar ${formattedSize}')}";
 
   static String m69(currentlyProcessing, totalCount) =>
       "Processando ${currentlyProcessing} / ${totalCount}";
@@ -304,7 +304,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m40(email) => "Verificar ${email}";
 
   static String m112(count) =>
-      "${Intl.plural(count, zero: 'Adicionado 0 visualizadores', one: 'Adicionado 1 visualizador', other: 'Adicionado ${count} visualizadores')}";
+      "${Intl.plural(count, zero: 'Adicionado 0 vizualizadores', one: 'Adicionado 1 visualizador', other: 'Adicionado ${count} visualizadores')}";
 
   static String m41(email) => "Enviamos um e-mail à <green>${email}</green>";
 

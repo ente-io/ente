@@ -1726,7 +1726,6 @@
   "onTheRoad": "On the road again",
   "food": "Culinary delight",
   "pets": "Furry companions",
-
   "cLIcon": "New Icon",
   "cLIconDesc": "Finally, a new app icon, that we think best represents our work. We've also added an icon-switcher so you can continue using the old icon.",
   "cLMemories": "Memories",
@@ -1735,7 +1734,7 @@
   "cLWidgetsDesc": "Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app.",
   "cLFamilyPlan": "Family Plan Limits",
   "cLFamilyPlanDesc": "You can now set limits on how much storage your family members can use.",
-
   "cLBulkEdit": "Bulk Edit dates",
-  "cLBulkEditDesc": "You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported."
+  "cLBulkEditDesc": "You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.",
+  "curatedMemories": "Curated memories"
 }

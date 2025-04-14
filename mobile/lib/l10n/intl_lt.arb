@@ -1469,5 +1469,6 @@
   "cLFamilyPlan": "Šeimos plano ribos",
   "cLFamilyPlanDesc": "Dabar galite nustatyti ribas, kiek saugyklos gali naudoti jūsų šeimos nariai.",
   "cLBulkEdit": "Masiškai redaguokite datas",
-  "cLBulkEditDesc": "Dabar galite pasirinkti kelias nuotraukas ir vienu sparčiu veiksmu redaguoti visų nuotraukų datą ir laiką. Taip pat palaikomas datų perkėlimas."
+  "cLBulkEditDesc": "Dabar galite pasirinkti kelias nuotraukas ir vienu sparčiu veiksmu redaguoti visų nuotraukų datą ir laiką. Taip pat palaikomas datų perkėlimas.",
+  "curatedMemories": "Curated memories"
 }

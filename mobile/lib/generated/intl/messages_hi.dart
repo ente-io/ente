@@ -35,6 +35,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "createAccount": MessageLookupByLibrary.simpleMessage("अकाउंट बनायें"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("नया अकाउंट बनाएँ"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "decrypting":
             MessageLookupByLibrary.simpleMessage("डिक्रिप्ट हो रहा है..."),
         "deleteAccount":

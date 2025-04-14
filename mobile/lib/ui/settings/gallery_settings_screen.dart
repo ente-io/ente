@@ -120,8 +120,8 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                       ),
                       memoriesCacheService.curatedMemoriesOption
                           ? MenuItemWidget(
-                              captionedTextWidget: const CaptionedTextWidget(
-                                title: "Curated memories",
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).curatedMemories,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               singleBorderRadius: 8,
