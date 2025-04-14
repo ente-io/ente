@@ -1,35 +1,3 @@
-import { isDesktop } from "@/base/app";
-import { SpacedRow } from "@/base/components/containers";
-import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { RowButton } from "@/base/components/RowButton";
-import { useIsTouchscreen } from "@/base/components/utils/hooks";
-import {
-    useModalVisibility,
-    type ModalVisibilityProps,
-} from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import { basename } from "@/base/file-name";
-import log from "@/base/log";
-import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
-import { useFileInput } from "@/gallery/components/utils/use-file-input";
-import type {
-    FileAndPath,
-    UploadItem,
-    UploadPhase,
-} from "@/gallery/services/upload";
-import type { Collection } from "@/media/collection";
-import type { EnteFile } from "@/media/file";
-import { UploaderNameInput } from "@/new/albums/components/UploaderNameInput";
-import { CollectionMappingChoice } from "@/new/photos/components/CollectionMappingChoice";
-import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
-import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
-import { getLatestCollections } from "@/new/photos/services/collections";
-import { exportMetadataDirectoryName } from "@/new/photos/services/export";
-import { redirectToCustomerPortal } from "@/new/photos/services/user-details";
-import { usePhotosAppContext } from "@/new/photos/types/context";
-import { firstNonEmpty } from "@/utils/array";
-import { CustomError } from "@ente/shared/error";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import GoogleIcon from "@mui/icons-material/Google";
@@ -46,6 +14,38 @@ import {
     Typography,
     type DialogProps,
 } from "@mui/material";
+import { isDesktop } from "ente-base/app";
+import { SpacedRow } from "ente-base/components/containers";
+import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { RowButton } from "ente-base/components/RowButton";
+import { useIsTouchscreen } from "ente-base/components/utils/hooks";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import { basename } from "ente-base/file-name";
+import log from "ente-base/log";
+import type { CollectionMapping, Electron, ZipItem } from "ente-base/types/ipc";
+import { useFileInput } from "ente-gallery/components/utils/use-file-input";
+import type {
+    FileAndPath,
+    UploadItem,
+    UploadPhase,
+} from "ente-gallery/services/upload";
+import type { Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
+import { UploaderNameInput } from "ente-new/albums/components/UploaderNameInput";
+import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMappingChoice";
+import type { CollectionSelectorAttributes } from "ente-new/photos/components/CollectionSelector";
+import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
+import { getLatestCollections } from "ente-new/photos/services/collections";
+import { exportMetadataDirectoryName } from "ente-new/photos/services/export";
+import { redirectToCustomerPortal } from "ente-new/photos/services/user-details";
+import { usePhotosAppContext } from "ente-new/photos/types/context";
+import { CustomError } from "ente-shared/error";
+import { firstNonEmpty } from "ente-utils/array";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, {
@@ -1092,7 +1092,7 @@ const setPendingUploads = async (
 
 type UploadTypeSelectorProps = ModalVisibilityProps & {
     /**
-     * The particular context / scenario in which this upload is occuring.
+     * The particular context / scenario in which this upload is occurring.
      */
     intent: UploadTypeSelectorIntent;
     /**
@@ -1186,7 +1186,7 @@ const UploadOptions: React.FC<UploadOptionsProps> = ({
     onSelect,
     onClose,
 }) => {
-    // [Note: Dialog state remains preseved on reopening]
+    // [Note: Dialog state remains preserved on reopening]
     //
     // Keep dialog content specific state here, in a separate component, so that
     // this state is not tied to the lifetime of the dialog.
@@ -1271,7 +1271,7 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
                         label={t("folder")}
                         onClick={() => onSelect("folders")}
                     />
-                    {intent !== "collect" && (
+                    {intent != "collect" && (
                         <RowButton
                             startIcon={<GoogleIcon />}
                             endIcon={<ChevronRightIcon />}

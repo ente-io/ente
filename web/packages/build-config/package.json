@@ -1,15 +1,18 @@
 {
-    "name": "@/build-config",
+    "name": "ente-build-config",
     "version": "0.0.0",
     "private": true,
     "type": "module",
     "devDependencies": {
-        "@eslint/js": "^9.21.0",
-        "eslint-plugin-react": "^7.37.4",
+        "@eslint/js": "^9.24.0",
+        "eslint": "^9.21.0",
+        "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-react-refresh": "^0.4.19",
+        "prettier": "^3.5.3",
         "prettier-plugin-organize-imports": "^4.1.0",
         "prettier-plugin-packagejson": "^2.5.10",
-        "typescript-eslint": "^8.26.0"
+        "typescript": "^5.8.2",
+        "typescript-eslint": "^8.29.1"
     }
 }

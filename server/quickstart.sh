@@ -7,7 +7,11 @@
 
 set -e
 
-dcv=`docker compose version --short 2>/dev/null`
+dcv=""
+if command -v docker >/dev/null
+then
+    dcv=`docker compose version --short 2>/dev/null`
+fi
 
 if test -z "$dcv"
 then
@@ -39,18 +43,18 @@ fi
 
 printf "\n - \033[1mH E L L O\033[0m - \033[1;32mE N T E\033[0m -\n\n"
 
-gen_user_suffix () { head -c 6 /dev/urandom | base64 -w 0; }
+gen_user_suffix () { head -c 6 /dev/urandom | base64 | tr -d '\n'; }
 
-gen_password () { head -c 21 /dev/urandom | base64 -w 0; }
+gen_password () { head -c 21 /dev/urandom | base64 | tr -d '\n'; }
 
 # crypto_secretbox_KEYBYTES = 32
-gen_key () { head -c 32 /dev/urandom | base64 -w 0; }
+gen_key () { head -c 32 /dev/urandom | base64 | tr -d '\n'; }
 
 # crypto_generichash_BYTES_MAX = 64
-gen_hash () { head -c 64 /dev/urandom | base64 -w 0; }
+gen_hash () { head -c 64 /dev/urandom | base64 | tr -d '\n'; }
 
 # Like gen_key but sodium_base64_VARIANT_URLSAFE which converts + to -, / to _
-gen_jwt_secret () { head -c 32 /dev/urandom | base64 -w 0 | tr '+/' '-_'; }
+gen_jwt_secret () { head -c 32 /dev/urandom | base64 | tr -d '\n' | tr '+/' '-_'; }
 
 pg_pass=`gen_password`
 minio_user=minio-user-$(gen_user_suffix)

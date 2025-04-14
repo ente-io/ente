@@ -1,54 +1,54 @@
-import { AccountsPageContents } from "@/accounts/components/layouts/centered-paper";
+import { AccountsPageContents } from "ente-accounts/components/layouts/centered-paper";
 import {
     AccountsPageFooterWithHost,
     PasswordHeader,
     VerifyingPasskey,
-} from "@/accounts/components/LoginComponents";
-import { SecondFactorChoice } from "@/accounts/components/SecondFactorChoice";
-import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
-import { useSecondFactorChoiceIfNeeded } from "@/accounts/components/utils/second-factor-choice";
+} from "ente-accounts/components/LoginComponents";
+import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice";
+import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
+import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
-} from "@/accounts/services/passkey";
+} from "ente-accounts/services/passkey";
 import {
     appHomeRoute,
     stashRedirect,
     unstashRedirect,
-} from "@/accounts/services/redirect";
-import { checkSessionValidity } from "@/accounts/services/session";
+} from "ente-accounts/services/redirect";
+import { checkSessionValidity } from "ente-accounts/services/session";
 import {
     configureSRP,
     generateSRPSetupAttributes,
     loginViaSRP,
-} from "@/accounts/services/srp";
-import type { SRPAttributes } from "@/accounts/services/srp-remote";
-import { getSRPAttributes } from "@/accounts/services/srp-remote";
-import { LinkButton } from "@/base/components/LinkButton";
-import { LoadingIndicator } from "@/base/components/loaders";
-import { useBaseContext } from "@/base/context";
-import { sharedCryptoWorker } from "@/base/crypto";
-import type { B64EncryptionResult } from "@/base/crypto/libsodium";
-import { clearLocalStorage } from "@/base/local-storage";
-import log from "@/base/log";
+} from "ente-accounts/services/srp";
+import type { SRPAttributes } from "ente-accounts/services/srp-remote";
+import { getSRPAttributes } from "ente-accounts/services/srp-remote";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { LoadingIndicator } from "ente-base/components/loaders";
+import { useBaseContext } from "ente-base/context";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
+import { clearLocalStorage } from "ente-base/local-storage";
+import log from "ente-base/log";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
-} from "@ente/shared/components/VerifyMasterPasswordForm";
+} from "ente-shared/components/VerifyMasterPasswordForm";
 import {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
     generateLoginSubKey,
     saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import { CustomError } from "@ente/shared/error";
-import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
+} from "ente-shared/crypto/helpers";
+import { CustomError } from "ente-shared/error";
+import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import {
     getToken,
     isFirstLogin,
     setIsFirstLogin,
-} from "@ente/shared/storage/localStorage/helpers";
-import { getKey, removeKey, setKey } from "@ente/shared/storage/sessionStorage";
-import type { KeyAttributes, User } from "@ente/shared/user/types";
+} from "ente-shared/storage/localStorage/helpers";
+import { getKey, removeKey, setKey } from "ente-shared/storage/sessionStorage";
+import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
@@ -90,7 +90,7 @@ const Page: React.FC = () => {
                     // Set a flag that causes new interactive key attributes to
                     // be generated.
                     setIsFirstLogin(true);
-                    // This should be a rare occurence, instead of building the
+                    // This should be a rare occurrence, instead of building the
                     // scaffolding to update all the in-memory state, just
                     // reload everything.
                     window.location.reload();

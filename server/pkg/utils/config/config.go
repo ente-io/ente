@@ -8,9 +8,11 @@
 //
 // The names of the OS environment variables should be
 //
-//   - prefixed with 'ENTE_'
+//   - prefixed with 'ENTE_',
 //
-//   - uppercased versions of the config file variable names
+//   - uppercased versions of the config file variable names,
+//
+//   - dashes are replaced with '_',
 //
 //   - for nested config variables, dots should be replaced with '_'.
 //
@@ -19,7 +21,7 @@
 //	foo:
 //	    bar-baz: quux
 //
-// would be `ENTE_FOO_BAR-BAZ`.
+// would be `ENTE_FOO_BAR_BAZ`.
 package config
 
 import (
@@ -39,7 +41,9 @@ func ConfigureViper(environment string) error {
 	// Set the prefix for the environment variables that Viper will look for.
 	viper.SetEnvPrefix("ENTE")
 	// Ask Viper to look for underscores (instead of dots) for nested configs.
-	viper.SetEnvKeyReplacer(strings.NewReplacer(`.`, `_`))
+	// Also replace "-" with underscores since "-" cannot be used in environment
+	// variable names.
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 
 	viper.SetConfigFile("configurations/" + environment + ".yaml")
 	err := viper.ReadInConfig()

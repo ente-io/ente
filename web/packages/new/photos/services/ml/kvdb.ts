@@ -1,4 +1,4 @@
-import { getKV, setKV } from "@/base/kv";
+import { getKV, setKV } from "ente-base/kv";
 import { z } from "zod";
 
 /**

@@ -1,9 +1,9 @@
-import { inWorker } from "@/base/env";
+import { inWorker } from "ente-base/env";
 import {
     parseMetadataDate,
     type ParsedMetadata,
     type ParsedMetadataDate,
-} from "@/media/file-metadata";
+} from "ente-media/file-metadata";
 import ExifReader from "exifreader";
 
 /**
@@ -365,7 +365,7 @@ const parseIPTCDate = (
  * file, taking into account any orientation tags that are also present.
  */
 const parseDimensions = (tags: RawExifTags) => {
-    // Go through all possiblities in order, returning the first pair with both
+    // Go through all possibilities in order, returning the first pair with both
     // the width and height defined, and non-zero.
 
     const pair = (w: number | undefined, h: number | undefined) =>
@@ -513,7 +513,7 @@ export type RawExifTags = Omit<ExifReader.ExpandedTags, "Thumbnail" | "xmp"> & {
  * the `includeUnknown` flag, but for our case it is useful since it acts as a
  * safeguard against extracting an unbounded amounts of data (for example, there
  * is an Exif tag for thumbnails. While we specifically filter out that
- * particular tag, it is not hard to imagine some other unforseen vendor
+ * particular tag, it is not hard to imagine some other unforeseen vendor
  * specific tag containing a similarly large amounts of embedded data).
  *
  * So we keep the default behaviour of returning only the tags that the library
@@ -593,7 +593,7 @@ export const extractRawExif = async (blob: Blob): Promise<RawExifTags> => {
  * Return a number from a raw Exif tag value.
  *
  * Some numeric Exif values are stored as arrays of two numbers [p, q]
- * represeting a rational number p/q. ExifReader usually converts this and for
+ * representing a rational number p/q. ExifReader usually converts this and for
  * us, but not always.
  *
  * This function takes such potentially ambiguous (already converted or not)

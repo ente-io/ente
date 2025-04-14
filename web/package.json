@@ -23,6 +23,10 @@
         "lint": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --check --log-level warn .\" \"yarn workspaces run eslint\" \"yarn workspaces run tsc\"",
         "lint-fix": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --write --log-level warn .\" \"yarn workspaces run eslint --fix\" \"yarn workspaces run tsc\""
     },
+    "resolutions": {
+        "@types/react": "^19.1.0",
+        "@types/react-dom": "^19.1.1"
+    },
     "devDependencies": {
         "concurrently": "^9.1.2",
         "eslint": "^9.21.0",

@@ -1,14 +1,14 @@
-import { clientPackageName } from "@/base/app";
-import { assertionFailed } from "@/base/assert";
-import { isHTTP4xxError } from "@/base/http";
-import log from "@/base/log";
-import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
-import type { ElectronMLWorker } from "@/base/types/ipc";
-import { isNetworkDownloadError } from "@/gallery/services/download";
-import type { UploadItem } from "@/gallery/services/upload";
-import { fileLogID, type EnteFile } from "@/media/file";
-import { wait } from "@/utils/promise";
 import { expose, wrap } from "comlink";
+import { clientPackageName } from "ente-base/app";
+import { assertionFailed } from "ente-base/assert";
+import { isHTTP4xxError } from "ente-base/http";
+import log from "ente-base/log";
+import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
+import type { ElectronMLWorker } from "ente-base/types/ipc";
+import { isNetworkDownloadError } from "ente-gallery/services/download";
+import type { UploadItem } from "ente-gallery/services/upload";
+import { fileLogID, type EnteFile } from "ente-media/file";
+import { wait } from "ente-utils/promise";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
 import {
     createImageBitmapAndData,
@@ -100,7 +100,7 @@ export class MLWorker {
     /** The last known state of the worker. */
     public state: WorkerState = "init";
     /** If the worker is currently clustering, then its last known progress. */
-    public clusteringProgess: ClusteringProgress | undefined;
+    public clusteringProgress: ClusteringProgress | undefined;
 
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
@@ -335,7 +335,7 @@ export class MLWorker {
     }
 
     private updateClusteringProgress(progress: ClusteringProgress | undefined) {
-        this.clusteringProgess = progress;
+        this.clusteringProgress = progress;
         this.delegate?.workerDidUpdateStatus();
     }
 

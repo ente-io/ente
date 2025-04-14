@@ -131,10 +131,8 @@ const makeCachedInferenceSession = (
     const createSession = (modelPath: string) =>
         createInferenceSession(modelPath);
 
-    const cachedInferenceSession = () => {
-        if (!session) session = download().then(createSession);
-        return session;
-    };
+    const cachedInferenceSession = () =>
+        (session ??= download().then(createSession));
 
     return cachedInferenceSession;
 };
@@ -261,10 +259,7 @@ const cachedCLIPTextSession = makeCachedInferenceSession(
 );
 
 let _tokenizer: Tokenizer | undefined;
-const getTokenizer = () => {
-    if (!_tokenizer) _tokenizer = new Tokenizer();
-    return _tokenizer;
-};
+const getTokenizer = () => (_tokenizer ??= new Tokenizer());
 
 /**
  * Compute CLIP embeddings for an text snippet.

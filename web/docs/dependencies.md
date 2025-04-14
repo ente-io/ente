@@ -11,8 +11,8 @@ baseline for how our code be in all the workspaces in this (yarn) monorepo.
 
 - [typescript](https://www.typescriptlang.org/) - Type checker
 
-They also need some support packages, which come from the leaf `@/build-config`
-package:
+They also need some support packages, which come from the leaf
+`ente-build-config` package:
 
 - [@eslint/js](https://eslint.org/) provides JavaScript ESLint functionality,
   and provides the configuration recommended the by ESLint team.
@@ -45,6 +45,18 @@ The root `package.json` also has a convenience dev dependency:
 
 - [concurrently](https://github.com/open-cli-tools/concurrently) for spawning
   parallel tasks when we invoke various yarn scripts.
+
+> [!NOTE]
+>
+> We need to repeat some of the dependencies in multiple `package.json`s to
+> avoid spurious missing peer dependency warnings.
+>
+> For example, ideally we'd just have specified the react dependencies in
+> _ente-base_, but that leads to missing peer dependency warnings in our other
+> packages, so we need to need to repeat them. For now, we manually ensure that
+> all of them use the same version. Additionally, we pin the versions of the
+> react types using the resolutions field in the top level `package.json`, to
+> avoid type errors because of multiple versions of react types being in scope.
 
 ## Cryptography
 
@@ -87,12 +99,6 @@ is our core framework. We also import its a sibling
 [react-dom](https://github.com/facebook/react) package that renders JSX to the
 DOM.
 
-> [!NOTE]
->
-> We need to repeat the dependency on react and its siblings in multiple
-> package.jsons to avoid the unmet peer dependency warnings printed by yarn.
-> Ideally, the react dependencies can be specified just in the _@/base_ package.
-
 ### MUI and Material Icons
 
 We use [MUI](https://mui.com)'s
@@ -114,9 +120,9 @@ which provides Material icons exported as React components (a `SvgIcon`).
 > For a similar reason as with react,
 >
 > - the `@mui/material` dependency is also repeated at more places - the one in
->   _@/base_ is the canonical one.
-> - we need to add an explicit dependency to `mui/system` in _@/new_ even though
->   we don't directly depend on it.
+>   _ente-base_ is the canonical one.
+> - we need to add an explicit dependency to `mui/system` in _ente-new_ even
+>   though we don't directly depend on it.
 
 ### Date pickers
 
@@ -143,6 +149,9 @@ For showing the app's UI in multiple languages, we use the
 
 Note that inspite of the "next" in the name of the library, it has nothing to do
 with Next.js.
+
+[get-user-locale](https://github.com/wojtekmaj/get-user-locale) is used for
+enumerating the user's locale's to find the best match.
 
 For more details, see [translations.md](translations.md).
 

@@ -1,9 +1,9 @@
-import { ensureOk, publicRequestHeaders } from "@/base/http";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import { ApiError, CustomError } from "@ente/shared/error";
-import HTTPService from "@ente/shared/network/HTTPService";
 import { HttpStatusCode } from "axios";
+import { ensureOk, publicRequestHeaders } from "ente-base/http";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import { ApiError, CustomError } from "ente-shared/error";
+import HTTPService from "ente-shared/network/HTTPService";
 import type { UpdatedKey, UserVerificationResponse } from "./user";
 
 export interface SRPAttributes {

@@ -7,6 +7,9 @@ on:
             - "web/**"
             - ".github/workflows/web-lint.yml"
 
+permissions:
+    contents: read
+
 # Cancel in-progress lint runs when a new commit is pushed.
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,7 +28,7 @@ jobs:
             - name: Setup node and enable yarn caching
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                  node-version: 22
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
 

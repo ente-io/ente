@@ -1,8 +1,8 @@
-import { CenteredRow } from "@/base/components/containers";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DoneIcon from "@mui/icons-material/Done";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { CenteredRow } from "ente-base/components/containers";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { t } from "i18next";
 import React, { useState } from "react";
 

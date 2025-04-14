@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart";
-import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
@@ -10,6 +8,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import "package:photos/ui/viewer/date/date_time_picker.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/separators_util.dart';
 import 'package:tuple/tuple.dart';
@@ -120,8 +119,13 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         final int expireAfterInMicroseconds = expiryOpiton.item2;
         // need to manually select time
         if (expireAfterInMicroseconds < 0) {
-          final timeInMicrosecondsFromEpoch =
-              await _showDateTimePicker(context);
+          final now = DateTime.now();
+          final DateTime? picked = await showDatePickerSheet(
+            context,
+            initialDate: now,
+            minDate: now,
+          );
+          final timeInMicrosecondsFromEpoch = picked?.microsecondsSinceEpoch;
           if (timeInMicrosecondsFromEpoch != null) {
             newValidTill = timeInMicrosecondsFromEpoch;
           }
@@ -133,37 +137,13 @@ class _ItemsWidgetState extends State<ItemsWidget> {
               DateTime.now().microsecondsSinceEpoch + expireAfterInMicroseconds;
         }
         if (newValidTill >= 0) {
-          debugPrint("Setting expirty $newValidTill");
+          debugPrint(
+            "Setting expire date to  ${DateTime.fromMicrosecondsSinceEpoch(newValidTill)}",
+          );
           await updateTime(newValidTill, context);
         }
       },
     );
-  }
-
-  // _showDateTimePicker return null if user doesn't select date-time
-  Future<int?> _showDateTimePicker(BuildContext context) async {
-    final dateResult = await DatePickerBdaya.showDatePicker(
-      context,
-      minTime: DateTime.now(),
-      currentTime: DateTime.now(),
-      locale: LocaleType.en,
-      theme: Theme.of(context).colorScheme.dateTimePickertheme,
-    );
-    if (dateResult == null) {
-      return null;
-    }
-    final dateWithTimeResult = await DatePickerBdaya.showTime12hPicker(
-      context,
-      showTitleActions: true,
-      currentTime: dateResult,
-      locale: LocaleType.en,
-      theme: Theme.of(context).colorScheme.dateTimePickertheme,
-    );
-    if (dateWithTimeResult == null) {
-      return null;
-    } else {
-      return dateWithTimeResult.microsecondsSinceEpoch;
-    }
   }
 
   Future<void> updateTime(int newValidTill, BuildContext context) async {

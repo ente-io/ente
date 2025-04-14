@@ -1,7 +1,7 @@
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import { isHTTP401Error } from "@/base/http";
-import log from "@/base/log";
 import { Stack, styled, Typography } from "@mui/material";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import { isHTTP401Error } from "ente-base/http";
+import log from "ente-base/log";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";

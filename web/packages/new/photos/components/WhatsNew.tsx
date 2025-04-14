@@ -1,7 +1,3 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import { ensureElectron } from "@/base/electron";
-import { ut } from "@/base/i18n";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
     Box,
@@ -14,6 +10,10 @@ import {
     Typography,
     styled,
 } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { ensureElectron } from "ente-base/electron";
+import { ut } from "ente-base/i18n";
 import React, { useEffect } from "react";
 import { didShowWhatsNew } from "../services/changelog";
 import { SlideUpTransition } from "./mui/SlideUpTransition";

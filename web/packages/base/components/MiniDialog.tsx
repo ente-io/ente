@@ -1,5 +1,3 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import type { ButtonProps, ModalProps } from "@mui/material";
 import {
     Box,
@@ -10,6 +8,8 @@ import {
     Typography,
     type DialogProps,
 } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { t } from "i18next";
 import React, { useState } from "react";
 import log from "../log";
@@ -91,7 +91,7 @@ export interface MiniDialogAttributes {
          * be shown on the button until the promise settles.
          *
          * If this function is not provided, or if the function completes /
-         * fullfills, then then the dialog is automatically closed.
+         * fulfills, then then the dialog is automatically closed.
          *
          * Otherwise (that is, if the provided function throws), the dialog
          * remains open, showing a generic error.

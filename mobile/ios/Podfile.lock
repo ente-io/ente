@@ -1,4 +1,6 @@
 PODS:
+  - app_links (0.0.2):
+    - Flutter
   - background_fetch (1.3.7):
     - Flutter
   - battery_info (0.0.1):
@@ -54,8 +56,6 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 8.0)
     - nanopb (~> 3.30910.0)
   - Flutter (1.0.0)
-  - flutter_app_icon_changer (0.0.1):
-    - Flutter
   - flutter_email_sender (0.0.1):
     - Flutter
   - flutter_image_compress_common (1.0.0):
@@ -110,8 +110,6 @@ PODS:
   - home_widget (0.0.1):
     - Flutter
   - image_editor_common (1.0.0):
-    - Flutter
-  - image_picker_ios (0.0.1):
     - Flutter
   - in_app_purchase_storekit (0.0.1):
     - Flutter
@@ -231,8 +229,6 @@ PODS:
     - Flutter
   - ua_client_hints (1.4.1):
     - Flutter
-  - uni_links (0.0.1):
-    - Flutter
   - url_launcher_ios (0.0.1):
     - Flutter
   - video_player_avfoundation (0.0.1):
@@ -247,6 +243,7 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
+  - app_links (from `.symlinks/plugins/app_links/ios`)
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - battery_info (from `.symlinks/plugins/battery_info/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
@@ -258,7 +255,6 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
-  - flutter_app_icon_changer (from `.symlinks/plugins/flutter_app_icon_changer/ios`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
   - flutter_image_compress_common (from `.symlinks/plugins/flutter_image_compress_common/ios`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
@@ -269,7 +265,6 @@ DEPENDENCIES:
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - home_widget (from `.symlinks/plugins/home_widget/ios`)
   - image_editor_common (from `.symlinks/plugins/image_editor_common/ios`)
-  - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - launcher_icon_switcher (from `.symlinks/plugins/launcher_icon_switcher/ios`)
@@ -299,7 +294,6 @@ DEPENDENCIES:
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - system_info_plus (from `.symlinks/plugins/system_info_plus/ios`)
   - ua_client_hints (from `.symlinks/plugins/ua_client_hints/ios`)
-  - uni_links (from `.symlinks/plugins/uni_links/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - video_thumbnail (from `.symlinks/plugins/video_thumbnail/ios`)
@@ -329,6 +323,8 @@ SPEC REPOS:
     - sqlite3
 
 EXTERNAL SOURCES:
+  app_links:
+    :path: ".symlinks/plugins/app_links/ios"
   background_fetch:
     :path: ".symlinks/plugins/background_fetch/ios"
   battery_info:
@@ -351,8 +347,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_messaging/ios"
   Flutter:
     :path: Flutter
-  flutter_app_icon_changer:
-    :path: ".symlinks/plugins/flutter_app_icon_changer/ios"
   flutter_email_sender:
     :path: ".symlinks/plugins/flutter_email_sender/ios"
   flutter_image_compress_common:
@@ -373,8 +367,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/home_widget/ios"
   image_editor_common:
     :path: ".symlinks/plugins/image_editor_common/ios"
-  image_picker_ios:
-    :path: ".symlinks/plugins/image_picker_ios/ios"
   in_app_purchase_storekit:
     :path: ".symlinks/plugins/in_app_purchase_storekit/darwin"
   integration_test:
@@ -433,8 +425,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/system_info_plus/ios"
   ua_client_hints:
     :path: ".symlinks/plugins/ua_client_hints/ios"
-  uni_links:
-    :path: ".symlinks/plugins/uni_links/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
   video_player_avfoundation:
@@ -447,6 +437,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock_plus/ios"
 
 SPEC CHECKSUMS:
+  app_links: f3e17e4ee5e357b39d8b95290a9b2c299fca71c6
   background_fetch: 39f11371c0dce04b001c4bfd5e782bcccb0a85e2
   battery_info: b6c551049266af31556b93c9d9b9452cfec0219f
   connectivity_plus: 2a701ffec2c0ae28a48cf7540e279787e77c447d
@@ -464,20 +455,18 @@ SPEC CHECKSUMS:
   FirebaseInstallations: 6c963bd2a86aca0481eef4f48f5a4df783ae5917
   FirebaseMessaging: 487b634ccdf6f7b7ff180fdcb2a9935490f764e8
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_app_icon_changer: e633ce623d36db4dd63c01e4b63fc8a5d44ed48d
   flutter_email_sender: e03bdda7637bcd3539bfe718fddd980e9508efaa
   flutter_image_compress_common: ec1d45c362c9d30a3f6a0426c297f47c52007e3e
   flutter_inappwebview_ios: 6f63631e2c62a7c350263b13fa5427aedefe81d4
   flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
   flutter_native_splash: f71420956eb811e6d310720fee915f1d42852e7a
-  flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
+  flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
   flutter_sodium: a00383520fc689c688b66fd3092984174712493e
   fluttertoast: 21eecd6935e7064cc1fcb733a4c5a428f3f24f0f
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
   home_widget: 0434835a4c9a75704264feff6be17ea40e0f0d57
   image_editor_common: d6f6644ae4a6de80481e89fe6d0a8c49e30b4b43
-  image_picker_ios: c560581cceedb403a6ff17f2f816d7fea1421fc1
   in_app_purchase_storekit: a1ce04056e23eecc666b086040239da7619cd783
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
   launcher_icon_switcher: 8e0ad2131a20c51c1dd939896ee32e70cd845b37
@@ -518,7 +507,6 @@ SPEC CHECKSUMS:
   sqlite3_flutter_libs: 069c435986dd4b63461aecd68f4b30be4a9e9daa
   system_info_plus: 5393c8da281d899950d751713575fbf91c7709aa
   ua_client_hints: aeabd123262c087f0ce151ef96fa3ab77bfc8b38
-  uni_links: 103d3319e3383ed8bce559b96b1e219fbf02ba96
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
   video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
   video_thumbnail: 94ba6705afbaa120b77287080424930f23ea0c40

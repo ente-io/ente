@@ -1,79 +1,97 @@
-import { isDesktop } from "@/base/app";
-import { blobCache, type BlobCache } from "@/base/blob-cache";
+import { blobCache, type BlobCache } from "ente-base/blob-cache";
 import {
     decryptStreamBytes,
     decryptStreamChunk,
     decryptThumbnail,
     initChunkDecryption,
-} from "@/base/crypto";
+} from "ente-base/crypto";
 import {
     authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
     publicRequestHeaders,
     retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
-} from "@/base/http";
-import { ensureAuthToken } from "@/base/local-user";
-import log from "@/base/log";
-import { customAPIOrigin } from "@/base/origins";
-import {
-    playableVideoBlob,
-    renderableImageBlob,
-} from "@/gallery/utils/convert";
-import type { EnteFile } from "@/media/file";
-import { FileType } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
-
-export interface LivePhotoSourceURL {
-    image: () => Promise<string | undefined>;
-    originalImageBlob: () => Blob | undefined;
-    video: () => Promise<string | undefined>;
-}
-
-export interface LoadedLivePhotoSourceURL {
-    image: string;
-    video: string;
-}
+} from "ente-base/http";
+import { ensureAuthToken } from "ente-base/local-user";
+import log from "ente-base/log";
+import { customAPIOrigin } from "ente-base/origins";
+import type { EnteFile } from "ente-media/file";
+import { FileType } from "ente-media/file-type";
+import { decodeLivePhoto } from "ente-media/live-photo";
+import { playableVideoURL, renderableImageBlob } from "./convert";
 
 /**
- * URL for the original image or video, but with potential conversions applied
- * to make it more likely that the browser (or desktop app) will be able to
- * render (or play) it.
+ * URL(s) for the original image or video, alongwith with potential conversions
+ * applied to make it more likely that the browser (or desktop app) will be able
+ * to render (or play) it.
  *
- * This structure originally arose as the source object URL, and a bunch of
- * associated metadata, that the file viewer needs when the user wants to see
- * the original file (as opposed to say, the thumbnail which we were showing
- * them earlier as the file is getting downloaded). It is now also used in other
- * places that need an as-close access to the original file as possible whilst
- * still applying almost necessary conversions to be able to use that data.
- *
- * The word "renderable" is not a guarantee, but rather a best effort indicator
- * as we might not always be able to convert all formats to something that the
- * browser (or desktop app) can show.
+ * The word "renderable" or "playable" is not a guarantee, but rather a best
+ * effort indicator as we might not always be able to convert all formats to
+ * something that the browser (or desktop app) can show.
  */
-export interface RenderableSourceURLs {
-    url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
-    originalImageBlob?: Blob | undefined;
-    type: "normal" | "livePhoto";
-    /**
-     * `true` if there is potential conversion that can still be applied.
-     *
-     * See: [Note: Forcing conversion of playable videos]
-     */
-    canForceConvert?: boolean;
-    /**
-     * Best effort attempt at obtaining the MIME type.
-     *
-     * It will only be present for images generally, which is also the only
-     * scenario where it is needed currently (by the image editor).
-     *
-     * Known cases where it is missing:
-     *
-     * - Live photos (these have a different code path for obtaining the URL).
-     * - A video that is passes the isPlayable test in the browser.
-     */
-    mimeType?: string;
-}
+export type RenderableSourceURLs =
+    | {
+          type: "image";
+          /**
+           * An object URL that can be directly provided to the browser to get
+           * it to render the image.
+           *
+           * This is a best effort basis. Not all images will be renderable in
+           * all browsers, so the file might still not be previewable.
+           *
+           * In cases where we detect that the browser can natively render this
+           * image, this can be just the an object URL created from
+           * {@link originalImageBlob}. In other cases, this will point to a
+           * separate, converted blob.
+           */
+          imageURL: string;
+          /**
+           * A {@link Blob} from the original image.
+           *
+           * This is useful for extracting the Exif.
+           */
+          originalImageBlob: Blob;
+          /**
+           * Best effort attempt at obtaining the MIME type.
+           *
+           * It should usually be present, but it is not guaranteed that we'll
+           * be able to detect the MIME type for all images. However, the only
+           * scenario where it is needed currently is by the image editor, where
+           * if we can't detect the MIME type, then the image can't be shown (or
+           * edited) in the current browser anyway.
+           */
+          mimeType?: string;
+      }
+    | {
+          type: "video";
+          /**
+           * An object URL that can be directly provided to the browser to get
+           * it to render the image.
+           *
+           * This is a best effort basis. Not all videos will be playable in all
+           * browsers, so the file might still not be previewable.
+           */
+          videoURL: string;
+      }
+    | {
+          type: "livePhoto";
+          /**
+           * Similar to the {@link imageURL} for type "image", except
+           * as a promise since we might want to operate on the different
+           * components of a live image in a staggered order.
+           */
+          imageURL: () => Promise<string>;
+          /**
+           * Similar to the {@link originalImageBlob} for type "image".
+           */
+          originalImageBlob: Blob;
+          /**
+           * Similar to the {@link videoURL} for type "video", except as
+           * a promise since we might want to operate on the different
+           * components of a live image in a staggered order.
+           */
+          videoURL: () => Promise<string>;
+      };
 
 /**
  * A class that tracks the state of in-progress downloads and conversions,
@@ -113,7 +131,7 @@ class DownloadManager {
      * Unlike {@link thumbnailURLPromises}, there is no guarantee that the
      * browser will be able to render the original file (e.g. it might be in an
      * unsupported format). If a renderable URL is needed for the file,
-     * {@link renderableSourceURL} should be used instead.
+     * {@link renderableSourceURLs} should be used instead.
      *
      * The entries are keyed by the file ID.
      */
@@ -121,10 +139,11 @@ class DownloadManager {
     /**
      * An in-memory cache for {@link RenderableSourceURLs} for a file.
      *
-     * These are saved as a result of invocation of {@link renderableSourceURL},
-     * which goes one step beyond {@link fileURLPromises}, and also attempts to
-     * convert the downloaded file into a URL that the browser (or the desktop
-     * app) is likely to be able to render or play.
+     * These are saved as a result of invocation of
+     * {@link renderableSourceURLs}, which goes one step beyond
+     * {@link fileURLPromises}, and also attempts to convert the downloaded file
+     * into a URL that the browser (or the desktop app) is likely to be able to
+     * render or play.
      *
      * The entries are keyed by file ID.
      */
@@ -296,28 +315,21 @@ class DownloadManager {
      * (if possible).
      *
      * See the documentation of {@link RenderableSourceURLs} for more details.
-     *
-     * The `forceConvert` option is true when the user presses the "Convert"
-     * button. See: [Note: Forcing conversion of playable videos].
      */
     renderableSourceURLs = async (
         file: EnteFile,
-        opts?: { forceConvert?: boolean },
     ): Promise<RenderableSourceURLs> => {
-        const forceConvert = opts?.forceConvert ?? false;
-        if (forceConvert || !this.renderableSourceURLPromises.has(file.id)) {
-            this.renderableSourceURLPromises.set(
-                file.id,
-                createRenderableSourceURLs(
-                    file,
-                    this.fileURLDownloadAndCacheIfNeeded(file),
-                    forceConvert,
-                ),
+        let promise = this.renderableSourceURLPromises.get(file.id);
+        if (!promise) {
+            promise = createRenderableSourceURLs(
+                file,
+                this.fileURLDownloadAndCacheIfNeeded(file),
             );
+            this.renderableSourceURLPromises.set(file.id, promise);
         }
 
         try {
-            return await this.renderableSourceURLPromises.get(file.id)!;
+            return await promise;
         } catch (e) {
             log.error("Failed to obtain renderableSourceURLs", e);
             this.renderableSourceURLPromises.delete(file.id);
@@ -582,126 +594,60 @@ const wrapErrors = <T>(op: () => Promise<T>) =>
  * Create and return a {@link RenderableSourceURLs} for the given {@link file},
  * where {@link originalFileURLPromise} is a promise that resolves with an
  * (object) URL to the contents of the original file.
- *
- * @param forceConvert `true` when the user presses the "Convert" button. See:
- * [Note: Forcing conversion of playable videos].
  */
 const createRenderableSourceURLs = async (
     file: EnteFile,
     originalFileURLPromise: Promise<string>,
-    forceConvert: boolean,
 ): Promise<RenderableSourceURLs> => {
     const originalFileURL = await originalFileURLPromise;
     const fileBlob = await fetch(originalFileURL).then((res) => res.blob());
-
-    const existingOrNewObjectURL = (convertedBlob: Blob | null | undefined) =>
-        convertedBlob
-            ? convertedBlob === fileBlob
-                ? originalFileURL
-                : URL.createObjectURL(convertedBlob)
-            : undefined;
-
-    let url: RenderableSourceURLs["url"] | undefined;
-    let originalImageBlob:
-        | RenderableSourceURLs["originalImageBlob"]
-        | undefined;
-    let type: RenderableSourceURLs["type"] = "normal";
-    let mimeType: string | undefined;
-    let canForceConvert = false;
-
     const fileName = file.metadata.title;
-    switch (file.metadata.fileType) {
+    const fileType = file.metadata.fileType;
+
+    switch (fileType) {
         case FileType.image: {
             const convertedBlob = await renderableImageBlob(fileBlob, fileName);
-            const convertedURL = existingOrNewObjectURL(convertedBlob);
-            url = convertedURL;
-            originalImageBlob = fileBlob;
-            mimeType = convertedBlob.type;
-            break;
+            const imageURL =
+                convertedBlob === fileBlob
+                    ? originalFileURL
+                    : URL.createObjectURL(convertedBlob);
+            const originalImageBlob = fileBlob;
+            const mimeType = convertedBlob.type;
+            return { type: "image", imageURL, originalImageBlob, mimeType };
         }
+
         case FileType.livePhoto: {
-            url = await getRenderableLivePhotoURL(file, fileBlob);
-            type = "livePhoto";
-            break;
+            const livePhoto = await decodeLivePhoto(fileName, fileBlob);
+            const originalImageBlob = new Blob([livePhoto.imageData]);
+
+            const imageURL = async () =>
+                URL.createObjectURL(
+                    await renderableImageBlob(
+                        originalImageBlob,
+                        livePhoto.imageFileName,
+                    ),
+                );
+
+            const videoURL = () =>
+                playableVideoURL(
+                    livePhoto.videoFileName,
+                    new Blob([livePhoto.videoData]),
+                    { fileType },
+                );
+
+            return { type: "livePhoto", imageURL, originalImageBlob, videoURL };
         }
+
         case FileType.video: {
-            const convertedBlob = await playableVideoBlob(
-                fileName,
-                fileBlob,
-                forceConvert,
-            );
-            const convertedURL = existingOrNewObjectURL(convertedBlob);
-            url = convertedURL;
-            mimeType = convertedBlob?.type;
-
-            const isOriginal = convertedURL === originalFileURL;
-            const isRenderable = !!convertedURL;
-            canForceConvert =
-                isDesktop && !forceConvert && isOriginal && isRenderable;
-
-            break;
+            const videoURL = await playableVideoURL(fileName, fileBlob);
+            return { type: "video", videoURL };
         }
+
         default: {
-            url = originalFileURL;
-            break;
+            throw new Error(`Unsupported file type ${fileType}`);
         }
     }
-
-    // TODO: Can we remove this non-null assertion and reflect it in the types?
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return { url: url!, originalImageBlob, type, mimeType, canForceConvert };
 };
-
-async function getRenderableLivePhotoURL(
-    file: EnteFile,
-    fileBlob: Blob,
-): Promise<LivePhotoSourceURL | undefined> {
-    const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
-
-    const getRenderableLivePhotoImageURL = async () => {
-        try {
-            const imageBlob = new Blob([livePhoto.imageData]);
-            return URL.createObjectURL(
-                await renderableImageBlob(imageBlob, livePhoto.imageFileName),
-            );
-        } catch {
-            //ignore and return null
-            return undefined;
-        }
-    };
-
-    const getOriginalImageBlob = () => {
-        try {
-            return new Blob([livePhoto.imageData]);
-        } catch {
-            //ignore and return null
-            return undefined;
-        }
-    };
-
-    const getRenderableLivePhotoVideoURL = async () => {
-        try {
-            const videoBlob = new Blob([livePhoto.videoData]);
-            const convertedVideoBlob = await playableVideoBlob(
-                livePhoto.videoFileName,
-                videoBlob,
-                false,
-            );
-            if (!convertedVideoBlob) return undefined;
-            return URL.createObjectURL(convertedVideoBlob);
-        } catch {
-            //ignore and return null
-            return undefined;
-        }
-    };
-
-    return {
-        image: getRenderableLivePhotoImageURL,
-        originalImageBlob: getOriginalImageBlob,
-        video: getRenderableLivePhotoVideoURL,
-    };
-}
 
 /**
  * The various photos_* functions are used for the actual downloads when

@@ -1,6 +1,6 @@
 {
     /* A base TSConfig for typechecking our Next.js apps and packages. */
-    "extends": "@/build-config/tsconfig-typecheck.json",
+    "extends": "ente-build-config/tsconfig-typecheck.json",
     "compilerOptions": {
         /* Next.js forcefully insists on adding these, which prevents us from
            enabling the isolatedDeclarations option. Sigh. */

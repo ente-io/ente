@@ -1,7 +1,3 @@
-import { FilledIconButton } from "@/base/components/mui";
-import { useBaseContext } from "@/base/context";
-import { type UploadPhase, type UploadResult } from "@/gallery/services/upload";
-import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
@@ -27,6 +23,13 @@ import {
     type DialogProps,
 } from "@mui/material";
 import ItemList from "components/ItemList";
+import { FilledIconButton } from "ente-base/components/mui";
+import { useBaseContext } from "ente-base/context";
+import {
+    type UploadPhase,
+    type UploadResult,
+} from "ente-gallery/services/upload";
+import { SpaceBetweenFlex } from "ente-shared/components/Container";
 import { t } from "i18next";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -287,7 +290,7 @@ function UploadProgressDialog() {
             <UploadProgressHeader />
             {(uploadPhase == "uploading" || uploadPhase == "done") && (
                 <DialogContent sx={{ "&&&": { px: 0 } }}>
-                    {uploadPhase === "uploading" && <InProgressSection />}
+                    {uploadPhase == "uploading" && <InProgressSection />}
                     <ResultSection
                         uploadResult="uploaded"
                         sectionTitle={t("SUCCESSFUL_UPLOADS")}

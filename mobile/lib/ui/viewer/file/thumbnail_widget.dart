@@ -16,6 +16,7 @@ import 'package:photos/services/favorites_service.dart';
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
+import "package:photos/utils/standalone/task_queue.dart";
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -102,6 +103,18 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       _reset();
     }
   }
+
+  static final smallLocalThumbnailQueue = TaskQueue<String>(
+    maxConcurrentTasks: 15,
+    taskTimeout: const Duration(minutes: 1),
+    maxQueueSize: 200,
+  );
+
+  static final largeLocalThumbnailQueue = TaskQueue<String>(
+    maxConcurrentTasks: 5,
+    taskTimeout: const Duration(minutes: 1),
+    maxQueueSize: 200,
+  );
 
   ///Assigned dimension will be the size of a grid item. The size will be
   ///assigned to the side which is smaller in dimension.

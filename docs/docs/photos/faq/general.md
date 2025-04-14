@@ -86,22 +86,11 @@ On Ente's mobile apps, you can add photos from an album that's shared with you,
 into one of your own albums. This will create a copy of the item that you fully
 own, and will count against your storage quota.
 
-## How do I ensure that the Ente desktop app stays up to date on my system?
-
-Ente desktop includes an auto-update feature, ensuring that whenever updates are
-deployed, the app will automatically download and install them. You don't need
-to manually update the software.
-
 ## Can I sync a folder containing multiple subfolders, each representing an album?
 
 Yes, when you drag and drop the folder onto the desktop app, the app will detect
 the multiple folders and prompt you to choose whether you want to create a
 single album or separate albums for each folder.
-
-## How do I identify which files experienced upload issues within the desktop app?
-
-Check the sections within the upload progress bar for "Failed Uploads," "Ignored
-Uploads," and "Unsuccessful Uploads."
 
 ## How do I keep NAS and Ente photos synced?
 
@@ -137,6 +126,7 @@ To do this, open the photo, tap the (i) button, and enter your description.
 If the app finds exact duplicates, it will show them in the deduplication. When you delete a duplicate, the app keeps one copy and creates a symlink for the other duplicate. This helps save storage space.
 
 ### What happens if I lose access to my email address? Can I use my recovery key to bypass email verification?
-No, the recovery key does not bypass email verification. For security reasons, we do not disable or bypass email verification unless the account owner reaches out to us and successfully verifies their identity by providing details about their account. 
+No, the recovery key does not bypass email verification. For security reasons, we do not disable or bypass email verification unless the account owner reaches out to us and successfully verifies their identity by providing details about their account.
 
-If you lose access to your email, please contact our support team at support@ente.io
+If you lose access to your email, please contact our support team at
+support@ente.io

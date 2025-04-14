@@ -5,11 +5,11 @@
  * written for use by the code that runs in our desktop app.
  */
 
-import { joinPath, nameAndExtension } from "@/base/file-name";
+import { joinPath, nameAndExtension } from "ente-base/file-name";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
-} from "@/new/photos/services/export";
+} from "ente-new/photos/services/export";
 import sanitize from "sanitize-filename";
 
 /**

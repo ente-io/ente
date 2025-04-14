@@ -1,9 +1,9 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import { FlexWrapper } from "@ente/shared/components/Container";
-import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
 import { FormHelperText } from "@mui/material";
 import TextField from "@mui/material/TextField";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import { FlexWrapper } from "ente-shared/components/Container";
+import ShowHidePassword from "ente-shared/components/Form/ShowHidePassword";
 import { Formik, type FormikHelpers, type FormikState } from "formik";
 import { t } from "i18next";
 import React, { useMemo, useState } from "react";
@@ -55,7 +55,7 @@ export interface SingleInputFormProps {
 }
 
 /**
- * Deprecated version, gradually migrate to use the one from @/base.
+ * Deprecated version, gradually migrate to use the one from ente-base.
  */
 export default function SingleInputForm(props: SingleInputFormProps) {
     const { submitButtonProps } = props;
@@ -143,7 +143,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                             input: {
                                 autoComplete:
                                     props.disableAutoComplete ||
-                                    props.fieldType === "password"
+                                    props.fieldType == "password"
                                         ? "off"
                                         : "on",
                                 endAdornment: props.fieldType ===

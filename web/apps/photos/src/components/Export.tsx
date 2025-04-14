@@ -1,20 +1,3 @@
-import { isDesktop } from "@/base/app";
-import { EnteSwitch } from "@/base/components/EnteSwitch";
-import { LinkButton } from "@/base/components/LinkButton";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@/base/components/OverflowMenu";
-import { EllipsizedTypography } from "@/base/components/Typography";
-import type { ButtonishProps } from "@/base/components/mui";
-import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import { ensureElectron } from "@/base/electron";
-import log from "@/base/log";
-import { EnteFile } from "@/media/file";
-import { SpaceBetweenFlex } from "@ente/shared/components/Container";
-import { CustomError } from "@ente/shared/error";
 import FolderIcon from "@mui/icons-material/Folder";
 import {
     Box,
@@ -27,6 +10,23 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
+import { isDesktop } from "ente-base/app";
+import { EnteSwitch } from "ente-base/components/EnteSwitch";
+import { LinkButton } from "ente-base/components/LinkButton";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "ente-base/components/OverflowMenu";
+import { EllipsizedTypography } from "ente-base/components/Typography";
+import type { ButtonishProps } from "ente-base/components/mui";
+import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import { ensureElectron } from "ente-base/electron";
+import log from "ente-base/log";
+import { EnteFile } from "ente-media/file";
+import { SpaceBetweenFlex } from "ente-shared/components/Container";
+import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";

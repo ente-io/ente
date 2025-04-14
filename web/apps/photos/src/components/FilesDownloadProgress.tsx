@@ -1,5 +1,5 @@
-import { useBaseContext } from "@/base/context";
-import { Notification } from "@/new/photos/components/Notification";
+import { useBaseContext } from "ente-base/context";
+import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext } from "react";

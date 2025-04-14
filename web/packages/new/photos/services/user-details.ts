@@ -1,13 +1,13 @@
-import { isDesktop } from "@/base/app";
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import { getKV, setKV } from "@/base/kv";
-import { apiURL } from "@/base/origins";
+import { isDesktop } from "ente-base/app";
+import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
+import { getKV, setKV } from "ente-base/kv";
+import { apiURL } from "ente-base/origins";
+import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import {
     nullishToEmpty,
     nullishToZero,
     nullToUndefined,
-} from "@/utils/transform";
-import { getData, setLSUser } from "@ente/shared/storage/localStorage";
+} from "ente-utils/transform";
 import { z } from "zod";
 
 /**
@@ -175,7 +175,7 @@ export const logoutUserDetails = () => {
 };
 
 /**
- * Read in the locally persisted settings into memory, otherwise initate a
+ * Read in the locally persisted settings into memory, otherwise initiate a
  * network requests to fetch the latest values (but don't wait for it to
  * complete).
  *

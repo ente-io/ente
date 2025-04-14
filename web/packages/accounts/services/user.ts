@@ -2,12 +2,12 @@ import {
     authenticatedRequestHeaders,
     ensureOk,
     publicRequestHeaders,
-} from "@/base/http";
-import { apiURL } from "@/base/origins";
-import { nullToUndefined } from "@/utils/transform";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import type { KeyAttributes } from "@ente/shared/user/types";
+} from "ente-base/http";
+import { apiURL } from "ente-base/origins";
+import HTTPService from "ente-shared/network/HTTPService";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
+import type { KeyAttributes } from "ente-shared/user/types";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
 export interface UserVerificationResponse {

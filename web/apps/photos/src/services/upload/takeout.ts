@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 /** @file Dealing with the JSON metadata sidecar files */
 
-import { ensureElectron } from "@/base/electron";
-import { nameAndExtension } from "@/base/file-name";
-import log from "@/base/log";
-import { type Location } from "@/base/types";
-import type { UploadItem } from "@/gallery/services/upload";
-import { readStream } from "@/gallery/utils/native-stream";
-import { maybeParseInt } from "@/utils/parse";
+import { ensureElectron } from "ente-base/electron";
+import { nameAndExtension } from "ente-base/file-name";
+import log from "ente-base/log";
+import { type Location } from "ente-base/types";
+import type { UploadItem } from "ente-gallery/services/upload";
+import { readStream } from "ente-gallery/utils/native-stream";
 
 /**
  * The data we read from the JSON metadata sidecar files.
@@ -190,14 +189,22 @@ const parseMetadataJSONText = (text: string) => {
  * seems to be in UTC and doesn't have the time zone either.
  */
 const parseGTTimestamp = (o: unknown): number | undefined => {
-    if (
-        o &&
-        typeof o == "object" &&
-        "timestamp" in o &&
-        typeof o.timestamp == "string"
-    ) {
-        const timestamp = maybeParseInt(o.timestamp);
-        if (timestamp) return timestamp * 1e6;
+    if (o && typeof o == "object" && "timestamp" in o) {
+        const ot = o.timestamp;
+        let timestamp: number | undefined;
+        if (typeof ot == "string") {
+            timestamp = parseInt(ot, 10);
+        } else if (typeof ot == "number") {
+            // Ente desktop 1.7.11 and earlier used to write out a number, which
+            // is the correct datatype, but that makes it inconsistent with the
+            // numbers-as-string that Google takeout writes.
+            //
+            // So now we write out strings, and read either.
+            timestamp = Math.floor(ot);
+        }
+        if (timestamp && !Number.isNaN(timestamp)) {
+            return timestamp * 1e6;
+        }
     }
     return undefined;
 };

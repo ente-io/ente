@@ -1,15 +1,15 @@
-import { ensureElectron } from "@/base/electron";
-import { joinPath } from "@/base/file-name";
-import log from "@/base/log";
-import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
+import { ensureElectron } from "ente-base/electron";
+import { joinPath } from "ente-base/file-name";
+import log from "ente-base/log";
+import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import {
     type Collection,
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadataProps,
     CollectionSubType,
-} from "@/media/collection";
-import { EnteFile } from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
+} from "ente-media/collection";
+import { EnteFile } from "ente-media/file";
+import { ItemVisibility } from "ente-media/file-metadata";
 import {
     DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
     HIDDEN_ITEMS_SECTION,
@@ -19,15 +19,18 @@ import {
     isIncomingShare,
     moveToCollection,
     restoreToCollection,
-} from "@/new/photos/services/collection";
+} from "ente-new/photos/services/collection";
 import {
     getAllLocalCollections,
     getLocalCollections,
-} from "@/new/photos/services/collections";
-import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
-import { safeDirectoryName } from "@/new/photos/utils/native-fs";
-import { getData } from "@ente/shared/storage/localStorage";
-import type { User } from "@ente/shared/user/types";
+} from "ente-new/photos/services/collections";
+import {
+    getAllLocalFiles,
+    getLocalFiles,
+} from "ente-new/photos/services/files";
+import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
+import { getData } from "ente-shared/storage/localStorage";
+import type { User } from "ente-shared/user/types";
 import { t } from "i18next";
 import {
     createAlbum,

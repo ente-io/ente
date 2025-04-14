@@ -371,7 +371,7 @@
   "deleteFromBoth": "Aus beidem löschen",
   "newAlbum": "Neues Album",
   "albums": "Alben",
-  "memoryCount": "{count, plural, zero{keine Erinnerungsstücke} one{{formattedCount} Erinnerung} other{{formattedCount} Erinnerungsstücke}}",
+  "memoryCount": "{count, plural, =0{keine Erinnerungen} one{{formattedCount} Erinnerung} other{{formattedCount} Erinnerungen}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -792,11 +792,11 @@
   "share": "Teilen",
   "unhideToAlbum": "Im Album anzeigen",
   "restoreToAlbum": "Album wiederherstellen",
-  "moveItem": "{count, plural, one{Element verschieben} other{Elemente verschieben}}",
+  "moveItem": "{count, plural, =1 {Element verschieben} other{Elemente verschieben}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, one {Element hinzufügen} other {Elemente hinzufügen}}",
+  "addItem": "{count, plural, =1 {Element hinzufügen} other {Elemente hinzufügen}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -897,7 +897,7 @@
   "authToViewYourMemories": "Bitte authentifizieren, um deine Erinnerungsstücke anzusehen",
   "unlock": "Jetzt freischalten",
   "freeUpSpace": "Speicherplatz freigeben",
-  "freeUpSpaceSaving": "{count, plural, one {Es kann vom Gerät gelöscht werden, um {formattedSize} freizugeben} other {Sie können vom Gerät gelöscht werden, um {formattedSize} freizugeben}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {Es kann vom Gerät gelöscht werden, um {formattedSize} freizugeben} other {Sie können vom Gerät gelöscht werden, um {formattedSize} freizugeben}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 Datei} other {{formattedNumber} Dateien}} in diesem Album wurde(n) sicher gespeichert",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -931,7 +931,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Du kannst immernoch über Ente {count, plural, one {darauf} other {auf sie}} zugreifen, solange du ein aktives Abo hast",
+  "freeUpAccessPostDelete": "Du hast {count, plural, =1 {darauf} other {auf sie}} weiterhin Zugriff, solange du ein aktives Abo hast",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1267,8 +1267,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Finde Personen schnell nach Namen",
-  "addViewers": "{count, plural, one {Betrachter} other {Betrachter}} hinzufügen",
-  "addCollaborators": "{count, plural, one {Teilnehmer} other {Teilnehmer}} hinzufügen",
+  "addViewers": "{count, plural, =0 {Betrachter hinzufügen} =1 {Betrachter hinzufügen} other {Betrachter hinzufügen}}",
+  "addCollaborators": "{count, plural, =0 {Bearbeiter hinzufügen} =1 {Bearbeiter hinzufügen} other {Bearbeiter hinzufügen}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Lange auf eine E-Mail drücken, um die Ende-zu-Ende-Verschlüsselung zu überprüfen.",
   "developerSettingsWarning": "Bist du sicher, dass du Entwicklereinstellungen bearbeiten willst?",
   "developerSettings": "Entwicklereinstellungen",
@@ -1400,7 +1400,7 @@
   "enableMachineLearningBanner": "Aktiviere maschinelles Lernen für die magische Suche und Gesichtserkennung",
   "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald Verarbeitung und Synchronisation abgeschlossen sind",
   "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald Verarbeitung und Synchronisierung abgeschlossen sind",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} =1 {1 Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 Betrachter hinzugefügt} =1 {Einen Betrachter hinzugefügt} other {{count} Betrachter hinzugefügt}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1476,7 +1476,6 @@
   },
   "currentlyRunning": "läuft gerade",
   "ignored": "ignoriert",
-
   "file": "Datei",
   "searchSectionsLengthMismatch": "Abschnittslänge stimmt nicht überein: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1689,6 +1688,7 @@
   "feastingWithThem": "Feiern mit {name}",
   "selfiesWithThem": "Selfies mit {name}",
   "posingWithThem": "Posieren mit {name}",
+  "backgroundWithThem": "Schöne Ausblicke mit {name}",
   "sportsWithThem": "Sport mit {name}",
   "roadtripWithThem": "Roadtrip mit {name}",
   "spotlightOnYourself": "Spot auf dich selbst",
@@ -1711,5 +1711,11 @@
   "cLIcon": "Neues Icon",
   "cLIconDesc": "Endlich ein neues App-Icon, das unserer Meinung nach unser Werk am besten repräsentiert. Zudem ist es möglich, weiterhin das alte App-Icon zu verwenden.",
   "cLMemories": "Erinnerungen",
-  "cLWidgets": "Widgets"
+  "cLMemoriesDesc": "Entdecke Deine besonderen Momente neu – Spot auf Deine liebsten Personen, Deine Reisen und Urlaube, Deine besten Schnappschüsse und vieles mehr. Aktiviere das maschinelle Lernen, tagge Dich selbst und benenne Deine Freunde für die besten Ergebnisse.",
+  "cLWidgets": "Widgets",
+  "cLWidgetsDesc": "Homescreen-Widgets mit integrierten Erinnerungen sind nun verfügbar. Sie zeigen dir deine besonderen Momente an, ohne die App zu öffnen.",
+  "cLFamilyPlan": "Obergrenzen für den Familientarif",
+  "cLFamilyPlanDesc": "Du kannst jetzt festlegen, wie viel Speicherplatz deine Familienmitglieder nutzen können.",
+  "cLBulkEdit": "Massenbearbeitung von Datumsangaben",
+  "cLBulkEditDesc": "Du kannst jetzt mehrere Fotos auswählen, und das Datum/Uhrzeit für alle mit einer Aktion ändern. Das Verschieben von Daten wird auch unterstützt."
 }

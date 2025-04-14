@@ -1,20 +1,3 @@
-import { SpacedRow } from "@/base/components/containers";
-import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import type { Collection } from "@/media/collection";
-import {
-    ItemCard,
-    LargeTileButton,
-    LargeTileCreateNewButton,
-    LargeTileTextOverlay,
-} from "@/new/photos/components/Tiles";
-import {
-    canAddToCollection,
-    canMoveToCollection,
-    CollectionSummaryOrder,
-    type CollectionSummaries,
-    type CollectionSummary,
-} from "@/new/photos/services/collection/ui";
 import {
     Dialog,
     DialogContent,
@@ -23,6 +6,23 @@ import {
     Typography,
     useMediaQuery,
 } from "@mui/material";
+import { SpacedRow } from "ente-base/components/containers";
+import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import type { Collection } from "ente-media/collection";
+import {
+    ItemCard,
+    LargeTileButton,
+    LargeTileCreateNewButton,
+    LargeTileTextOverlay,
+} from "ente-new/photos/components/Tiles";
+import {
+    canAddToCollection,
+    canMoveToCollection,
+    CollectionSummaryOrder,
+    type CollectionSummaries,
+    type CollectionSummary,
+} from "ente-new/photos/services/collection/ui";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 

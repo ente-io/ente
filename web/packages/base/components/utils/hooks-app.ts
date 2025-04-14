@@ -1,6 +1,6 @@
-import { setupI18n } from "@/base/i18n";
-import { disableDiskLogs } from "@/base/log";
-import { logUnhandledErrorsAndRejections } from "@/base/log-web";
+import { setupI18n } from "ente-base/i18n";
+import { disableDiskLogs } from "ente-base/log";
+import { logUnhandledErrorsAndRejections } from "ente-base/log-web";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
