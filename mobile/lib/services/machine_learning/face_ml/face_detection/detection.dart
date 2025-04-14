@@ -162,7 +162,8 @@ class FaceDetectionRelative extends Detection {
     );
   }
 
-  String toFaceID({required int fileID}) {
+  // todo: neeraj review later #localgallery
+  String toFaceID({required dynamic fileID}) {
     // Assert that the values are within the expected range
     assert(
       (xMinBox >= 0 && xMinBox <= 1) &&

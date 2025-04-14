@@ -10,6 +10,7 @@ import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
@@ -20,7 +21,6 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/face_db
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
-import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:photos/utils/ram_check_util.dart";
@@ -428,13 +428,14 @@ class MLService {
     }
   }
 
-  Future<bool> processImage(FileMLInstruction instruction) async {
+  Future<bool> processImage<T>(FileMLInstruction instruction) async {
     bool actuallyRanML = false;
 
     try {
       final String filePath = await getImagePathForML(instruction.file);
 
-      final MLResult? result = await MLIndexingIsolate.instance.analyzeImage(
+      final MLResult<T>? result =
+          await MLIndexingIsolate.instance.analyzeImage<T>(
         instruction,
         filePath,
       );
@@ -502,9 +503,13 @@ class MLService {
       // Storing results locally
       if (result.facesRan) await mlDataDB.bulkInsertFaces(faces);
       if (result.clipRan) {
-        await SemanticSearchService.instance.storeClipImageResult(
-          result.clip!,
-        );
+        await mlDataDB.putClip([
+          ClipEmbedding<int>(
+            fileID: result.clip!.fileID,
+            embedding: result.clip!.embedding,
+            version: clipMlVersion,
+          ),
+        ]);
       }
       _logger.info("ML results for fileID ${result.fileId} stored locally");
       return actuallyRanML;
@@ -526,9 +531,9 @@ class MLService {
         await mlDataDB.bulkInsertFaces(
           [Face.empty(instruction.file.uploadedFileID!, error: true)],
         );
-        await SemanticSearchService.instance.storeEmptyClipImageResult(
-          instruction.file,
-        );
+
+        await mlDataDB
+            .putClip([ClipEmbedding.empty(instruction.file.uploadedFileID!)]);
         return true;
       }
       _logger.severe(

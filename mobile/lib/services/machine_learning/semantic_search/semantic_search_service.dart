@@ -12,7 +12,6 @@ import "package:photos/db/ml/db.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/clip.dart";
-import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
@@ -235,20 +234,6 @@ class SemanticSearchService {
     _logger.info("Clip text model loaded");
   }
 
-  Future<void> storeClipImageResult(ClipResult clipResult) async {
-    final embedding = ClipEmbedding(
-      fileID: clipResult.fileID,
-      embedding: clipResult.embedding,
-      version: clipMlVersion,
-    );
-    await mlDataDB.putClip([embedding]);
-  }
-
-  Future<void> storeEmptyClipImageResult(EnteFile entefile) async {
-    final embedding = ClipEmbedding.empty(entefile.uploadedFileID!);
-    await mlDataDB.putClip([embedding]);
-  }
-
   Future<List<double>> _getTextEmbedding(String query) async {
     _logger.info("Searching for ${kDebugMode ? query : ''}");
     final cachedResult = _queryEmbeddingCache.get(query);
@@ -292,8 +277,8 @@ class SemanticSearchService {
     });
   }
 
-  static Future<ClipResult> runClipImage(
-    int enteFileID,
+  static Future<ClipResult<T>> runClipImage<T>(
+    T enteFileID,
     Image image,
     Uint8List rawRgbaBytes,
     int clipImageAddress,

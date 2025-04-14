@@ -71,8 +71,8 @@ class FaceRecognitionService {
     }
   }
 
-  static Future<List<FaceResult>> runFacesPipeline(
-    int enteFileID,
+  static Future<List<FaceResult>> runFacesPipeline<T>(
+    T enteFileID,
     Image image,
     Uint8List rawRgbaBytes,
     int faceDetectionAddress,
@@ -131,8 +131,8 @@ class FaceRecognitionService {
   }
 
   /// Runs face recognition on the given image data.
-  static Future<List<FaceDetectionRelative>> _detectFacesSync(
-    int fileID,
+  static Future<List<FaceDetectionRelative>> _detectFacesSync<T>(
+    T fileID,
     Image image,
     Uint8List rawRgbaBytes,
     int interpreterAddress,

@@ -221,7 +221,7 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
           fileMl.getClipEmbeddingIfCompatible(clipMlVersion);
       if (remoteClipEmbedding != null) {
         clipEmbeddings.add(
-          ClipEmbedding(
+          ClipEmbedding<int>(
             fileID: fileMl.fileID,
             embedding: remoteClipEmbedding.embedding,
             version: remoteClipEmbedding.version,
@@ -395,9 +395,9 @@ void normalizeEmbedding(List<double> embedding) {
   }
 }
 
-Future<MLResult> analyzeImageStatic(Map args) async {
+Future<MLResult<T>> analyzeImageStatic<T>(Map args) async {
   try {
-    final int enteFileID = args["enteFileID"] as int;
+    final T enteFileID = args["enteFileID"] as T;
     final String imagePath = args["filePath"] as String;
     final bool runFaces = args["runFaces"] as bool;
     final bool runClip = args["runClip"] as bool;
@@ -422,7 +422,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     String faceMsString = "", clipMsString = "";
     final pipelines = await Future.wait([
       runFaces
-          ? FaceRecognitionService.runFacesPipeline(
+          ? FaceRecognitionService.runFacesPipeline<T>(
               enteFileID,
               image,
               rawRgbaBytes,
@@ -435,7 +435,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
             })
           : Future.value(null),
       runClip
-          ? SemanticSearchService.runClipImage(
+          ? SemanticSearchService.runClipImage<T>(
               enteFileID,
               image,
               rawRgbaBytes,

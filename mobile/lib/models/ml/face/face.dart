@@ -16,7 +16,7 @@ class FileInfo {
   });
 }
 
-class Face {
+class Face<T> {
   final String faceID;
   final List<double> embedding;
   Detection detection;
@@ -26,7 +26,7 @@ class Face {
   ///#region Local DB fields
   // This is not stored on the server, using it for local DB row
   FileInfo? fileInfo;
-  final int fileID;
+  final T fileID;
 
   ///#endregion
 
@@ -48,7 +48,7 @@ class Face {
 
   factory Face.fromFaceResult(
     FaceResult faceResult,
-    int fileID,
+    T fileID,
     Dimensions decodedDimensions,
   ) {
     final detection = Detection(
@@ -81,7 +81,7 @@ class Face {
     );
   }
 
-  factory Face.empty(int fileID, {bool error = false}) {
+  static Face<T> empty<T>(T fileID, {bool error = false}) {
     return Face(
       "${fileID}_0_0_0_0",
       fileID,
@@ -92,9 +92,9 @@ class Face {
     );
   }
 
-  factory Face.fromJson(Map<String, dynamic> json) {
+  static Face<T> fromJson<T>(Map<String, dynamic> json) {
     final String faceID = json['faceID'] as String;
-    final int fileID = getFileIdFromFaceId<int>(faceID);
+    final T fileID = getFileIdFromFaceId(faceID);
     return Face(
       faceID,
       fileID,

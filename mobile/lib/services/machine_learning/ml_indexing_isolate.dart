@@ -55,11 +55,11 @@ class MLIndexingIsolate extends SuperIsolate {
   factory MLIndexingIsolate() => instance;
 
   /// Analyzes the given image data by running the full pipeline for faces, using [analyzeImageStatic] in the isolate.
-  Future<MLResult?> analyzeImage(
+  Future<MLResult<T>?> analyzeImage<T>(
     FileMLInstruction instruction,
     String filePath,
   ) async {
-    late MLResult result;
+    late MLResult<T> result;
 
     try {
       final resultJsonString =
@@ -78,7 +78,7 @@ class MLIndexingIsolate extends SuperIsolate {
         }
         return null;
       }
-      result = MLResult.fromJsonString(resultJsonString);
+      result = MLResult.fromJsonString<T>(resultJsonString);
     } catch (e, s) {
       _logger.severe(
         "Could not analyze image with ID ${instruction.file.uploadedFileID} \n",

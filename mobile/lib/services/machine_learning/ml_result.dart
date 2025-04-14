@@ -7,8 +7,8 @@ import 'package:photos/services/machine_learning/face_ml/face_alignment/alignmen
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 
-class MLResult {
-  int fileId;
+class MLResult<T> {
+  T fileId;
 
   List<FaceResult>? faces = <FaceResult>[];
   ClipResult? clip;
@@ -20,14 +20,14 @@ class MLResult {
   bool get clipRan => clip != null;
 
   MLResult({
-    this.fileId = -1,
+    required this.fileId,
     this.faces,
     this.clip,
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   });
 
   MLResult.fromEnteFileID(
-    fileID, {
+    T fileID, {
     this.decodedImageSize = const Dimensions(width: -1, height: -1),
   }) : fileId = fileID;
 
@@ -43,7 +43,9 @@ class MLResult {
 
   String toJsonString() => jsonEncode(_toJson());
 
-  static MLResult _fromJson(Map<String, dynamic> json) {
+  static MLResult<T> _fromJson<T>(
+    Map<String, dynamic> json,
+  ) {
     return MLResult(
       fileId: json['fileId'],
       faces: json['faces'] != null
@@ -70,13 +72,13 @@ class MLResult {
     );
   }
 
-  static MLResult fromJsonString(String jsonString) {
-    return _fromJson(jsonDecode(jsonString));
+  static MLResult<T> fromJsonString<T>(String jsonString) {
+    return _fromJson<T>(jsonDecode(jsonString));
   }
 }
 
-class ClipResult {
-  final int fileID;
+class ClipResult<T> {
+  final T fileID;
   final Embedding embedding;
 
   ClipResult({
@@ -97,12 +99,12 @@ class ClipResult {
   }
 }
 
-class FaceResult {
+class FaceResult<T> {
   late FaceDetectionRelative detection;
   late double blurValue;
   late AlignmentResult alignment;
   late Embedding embedding;
-  late int fileId;
+  late T fileId;
   late String faceId;
 
   bool get isBlurry => blurValue < kLaplacianHardThreshold;
@@ -118,7 +120,7 @@ class FaceResult {
 
   FaceResult.fromFaceDetection(
     FaceDetectionRelative faceDetection,
-    int fileID,
+    T fileID,
   ) {
     fileId = fileID;
     faceId = faceDetection.toFaceID(fileID: fileID);
@@ -146,7 +148,7 @@ class FaceResult {
   }
 }
 
-T getFileIdFromFaceId<T extends Object>(String faceId) {
+T getFileIdFromFaceId<T>(String faceId) {
   final String faceIdSplit = faceId.substring(0, faceId.indexOf('_'));
   if (T == int) {
     return int.parse(faceIdSplit) as T;
