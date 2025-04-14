@@ -29,6 +29,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("닫기"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("계정 삭제 확인"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("계정 삭제"),
         "deleteAccountPermanentlyButton":
             MessageLookupByLibrary.simpleMessage("계정을 영구적으로 삭제"),

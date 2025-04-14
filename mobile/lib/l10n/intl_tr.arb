@@ -1635,5 +1635,6 @@
       }
     }
   },
-  "appIcon": "Uygulama simgesi"
+  "appIcon": "Uygulama simgesi",
+  "curatedMemories": "Curated memories"
 }

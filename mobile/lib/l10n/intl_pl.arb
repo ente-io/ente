@@ -1534,5 +1534,6 @@
   "joinAlbumSubtextViewer": "aby dodać to do udostępnionych albumów",
   "join": "Dołącz",
   "linkEmail": "Połącz adres e-mail",
-  "noEnteAccountExclamation": "Brak konta Ente!"
+  "noEnteAccountExclamation": "Brak konta Ente!",
+  "curatedMemories": "Curated memories"
 }

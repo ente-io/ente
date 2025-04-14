@@ -231,5 +231,6 @@
   "selectDate": "Vybrat datum",
   "previous": "Předchozí",
   "cLIcon": "Nová ikona",
-  "cLMemories": "Vzpomínky"
+  "cLMemories": "Vzpomínky",
+  "curatedMemories": "Curated memories"
 }
