@@ -597,7 +597,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  const FieldLabel("TOTP", width: 60),
+                                  const FieldLabel("Type", width: 60),
                                   ToptSelectorWidget(
                                     currentTopt: _type,
                                     onSelected: (newTopt) async {
