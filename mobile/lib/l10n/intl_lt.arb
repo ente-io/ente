@@ -371,21 +371,6 @@
   "deleteFromBoth": "Ištrinti iš abiejų",
   "newAlbum": "Naujas albumas",
   "albums": "Albumai",
-  "memoryCount": "{count, plural, zero{nėra prisiminimų} one{{formattedCount} prisiminimas} few{{formattedCount} prisiminimai} many{{formattedCount} prisiminimo} other{{formattedCount} prisiminimų}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "{count} pasirinkta",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -772,14 +757,6 @@
   "hide": "Slėpti",
   "share": "Bendrinti",
   "restoreToAlbum": "Atkurti į albumą",
-  "moveItem": "{count, plural, one {Perkelti elementą} few {Perkelti elementus} many {Perkelti elemento} other {Perkelti elementų}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {Pridėti elementą} few {Pridėti elementus} many {Pridėti elemento} other {Pridėti elementų}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Kurkite arba pasirinkite albumą",
   "searchByAlbumNameHint": "Albumo pavadinimas",
   "albumTitle": "Albumo pavadinimas",
@@ -1078,8 +1055,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Greitai suraskite žmones pagal vardą",
-  "addViewers": "{count, plural, one {Pridėti žiūrėtoją} few {Pridėti žiūrėtojus} many {Pridėti žiūrėtojo} other {Pridėti žiūrėtojų}}",
-  "addCollaborators": "{count, plural, one {Pridėti bendradarbį} few {Pridėti bendradarbius} many {Pridėti bendradarbio} other {Pridėti bendradarbių}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Ilgai paspauskite el. paštą, kad patvirtintumėte visapusį šifravimą.",
   "developerSettingsWarning": "Ar tikrai norite modifikuoti kūrėjo nustatymus?",
   "developerSettings": "Kūrėjo nustatymai",
@@ -1208,16 +1183,6 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Pridėta 0 žiūrėtojų} =1 {Pridėtas 1 žiūrėtojas} other {Pridėta {count} žiūrėtojų}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Pridėta 0 bendradarbių} =1 {Pridėtas 1 bendradarbis} other {Pridėta {count} bendradarbių}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {

@@ -257,21 +257,6 @@
   "removeWithQuestionMark": "Fjern?",
   "keepPhotos": "Behold billeder",
   "newAlbum": "Nyt album",
-  "memoryCount": "{count, plural, zero{ingen minder} one{{formattedCount} minde} other{{formattedCount} minder}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "{count} valgt",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",

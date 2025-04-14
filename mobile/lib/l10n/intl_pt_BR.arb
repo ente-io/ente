@@ -371,7 +371,7 @@
   "deleteFromBoth": "Excluir de ambos",
   "newAlbum": "Novo álbum",
   "albums": "Álbuns",
-  "memoryCount": "{count, plural, zero{sem memórias}\none{{formattedCount} memória}\nother{{formattedCount} memórias}}",
+  "memoryCount": "{count, plural, =0{sem memórias} one{{formattedCount} memória} other{{formattedCount} memórias}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -792,11 +792,11 @@
   "share": "Compartilhar",
   "unhideToAlbum": "Desocultar para o álbum",
   "restoreToAlbum": "Restaurar para álbum",
-  "moveItem": "{count, plural, one {Mover item} other {Mover itens}}",
+  "moveItem": "{count, plural, =1 {Mover item} other {Mover itens}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, one {Adicionar item} other {Adicionar itens}}",
+  "addItem": "{count, plural,=1 {Adicionar item} other {Adicionar itens}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -897,7 +897,7 @@
   "authToViewYourMemories": "Autentique-se para ver suas memórias",
   "unlock": "Desbloquear",
   "freeUpSpace": "Liberar espaço",
-  "freeUpSpaceSaving": "{count, plural, one {Ele pode ser excluído do dispositivo para liberar {formattedSize}} other {Eles podem ser excluídos do dispositivo para liberar {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {Ele pode excluído para liberar {formattedSize}} other {Eles podem ser excluídos do dispositivo para liberar {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 arquivo} other {{formattedNumber} arquivos}} deste álbum foi copiado com segurança",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -931,7 +931,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Você ainda pode acessá-{count, plural, one {lo} other {los}} no Ente, contanto que você tenha uma assinatura ativa",
+  "freeUpAccessPostDelete": "Você ainda pode acessá{count, plural, =1 {-lo} other {-los}} no Ente se você tiver uma assinatura ativa",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1267,8 +1267,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Busque pessoas facilmente pelo nome",
-  "addViewers": "{count, plural, one {Adicionar visualizador} one {Adicionar visualizador} other {Adicionar visualizadores}}",
-  "addCollaborators": "{count, plural, one {Adicionar colaborador} one {Adicionar colaborador} other {Adicionar colaboradores}}",
+  "addViewers": "{count, plural, =0 {Adicionar visualizador} =1 {Adicionar visualizador} other {Adicionar vizualizadores}}",
+  "addCollaborators": "{count, plural, =0 {Adicionar colaborador} =1 {Adicionar colaborador} other {Adicionar colaboradores}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Pressione um e-mail para verificar a criptografia ponta a ponta.",
   "developerSettingsWarning": "Deseja modificar as Opções de Desenvolvedor?",
   "developerSettings": "Opções de desenvolvedor",
@@ -1400,7 +1400,7 @@
   "enableMachineLearningBanner": "Ativar aprendizagem de máquina para busca mágica e reconhecimento facial",
   "searchDiscoverEmptySection": "As imagens serão exibidas aqui quando o processamento e sincronização for concluído",
   "searchPersonsEmptySection": "As pessoas serão exibidas aqui quando o processamento e sincronização for concluído",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 visualizadores} =1 {Adicionado 1 visualizador} other {Adicionado {count} visualizadores}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Adicionado 0 vizualizadores} =1 {Adicionado 1 visualizador} other {Adicionado {count} visualizadores}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {

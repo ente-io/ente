@@ -1,10 +1,10 @@
-Ente é uma aplicação simples para fazer cópias de segurança e organizar automaticamente as suas fotos e vídeos.
+Ente é uma aplicação simples feita para fazer backup automaticamente e organizar as suas fotos e vídeos.
 
-Se tem procurado uma alternativa que respeite a privacidade para preservar as suas memórias, veio ao sítio certo. Com o Ente, são armazenados encriptados de ponta a ponta (e2ee). Isto significa que só o utilizador as pode ver.
+Se busca por uma alternativa mais privada para preservar as suas memórias, chegaste ao lugar correto. Com Ente, eles são armazenados em encriptação de ponta a ponta (e2ee). Isto significa que só vos podeis vê-las.
 
-Temos aplicações em todas as plataformas e as suas fotografias serão perfeitamente sincronizadas entre todos os seus dispositivos de uma forma encriptada de ponta a ponta (e2ee).
+Já temos aplicações em todas as plataformas, e as suas fotos sincronizam perfeitamente em todos os dispositivos numa maneira de encriptação de ponta a ponta (e2ee).
 
-O Ente também simplifica a partilha dos seus álbuns com os seus entes queridos. You can either share them directly with other Ente users, end-to-end encrypted; or with publicly viewable links.
+O Ente também simplifica a partilha de álbuns com os seus entes queridos. Também pode partilhá-los diretamente com outros utilizadores do Ente, encriptado de ponta a ponta; ou com ligações visíveis publicamente.
 
 Os seus dados encriptados são armazenados em vários locais, incluindo um abrigo de emergência em Paris. Levamos a posteridade a sério e facilitamos a tarefa de garantir que as suas memórias perdurem para além de si.
 
