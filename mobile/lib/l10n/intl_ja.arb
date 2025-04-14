@@ -371,21 +371,6 @@
   "deleteFromBoth": "両方から削除",
   "newAlbum": "新しいアルバム",
   "albums": "アルバム",
-  "memoryCount": "{count, plural, zero{思い出なし} one{{formattedCount} 思い出} other{{formattedCount} 思い出}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "{count} 個を選択",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -792,14 +777,6 @@
   "share": "共有",
   "unhideToAlbum": "アルバムを再表示する",
   "restoreToAlbum": "アルバムに戻す",
-  "moveItem": "{count, plural, one {項目を移動} other {項目を移動}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {項目を追加} other {項目を追加}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "アルバムを作成または選択",
   "selectAlbum": "アルバムを選択",
   "searchByAlbumNameHint": "アルバム名",
@@ -897,7 +874,6 @@
   "authToViewYourMemories": "思い出を閲覧するためには認証が必要です",
   "unlock": "ロック解除",
   "freeUpSpace": "スペースを解放する",
-  "freeUpSpaceSaving": "{count, plural, other {デバイスから削除して{formattedSize} 解放することができます}}",
   "filesBackedUpInAlbum": "{count, plural, other {{formattedNumber} ファイル}} が安全にバックアップされました",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -925,18 +901,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "あなたが有効なサブスクリプションを持っている限りEnte上の {count, plural, other {それらに}} アクセスできます",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1267,8 +1231,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "名前で人を探す",
-  "addViewers": "{count, plural, zero {ビューアーを追加} one {ビューアーを追加} other {ビューアーを追加}}",
-  "addCollaborators": "{count, plural, zero {共同編集者を追加} one {共同編集者を追加} other {共同編集者を追加}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "表示されているEメールアドレスを長押しして、暗号化を確認します。",
   "developerSettingsWarning": "開発者向け設定を変更してもよろしいですか？",
   "developerSettings": "開発者向け設定",
@@ -1400,16 +1362,6 @@
   "enableMachineLearningBanner": "マジック検索と顔認識のため、機械学習を有効にする",
   "searchDiscoverEmptySection": "処理と同期が完了すると、画像がここに表示されます",
   "searchPersonsEmptySection": "処理と同期が完了すると、ここに人々が表示されます",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {{count}人のビューアーを追加} =1 {{count}人のビューアーを追加} other {{count}人のビューアーを追加}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {{count}人のコラボレーターを追加} =1 {{count}人のコラボレーターを追加} other {{count}人のコラボレーターを追加}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1485,15 +1437,6 @@
   },
   "currentlyRunning": "現在実行中",
   "ignored": "無視された",
-  "photosCount": "{count, plural, =0 {0枚の写真} =1 {1枚の写真} other {{count} 枚の写真}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "ファイル",
   "searchSectionsLengthMismatch": "セクションの長さの不一致: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1735,5 +1678,6 @@
   "cLFamilyPlan": "ファミリープランの制限",
   "cLFamilyPlanDesc": "ファミリーメンバーが使用できるストレージ容量の制限を設定できるようになりました。",
   "cLBulkEdit": "日付を一括編集",
-  "cLBulkEditDesc": "複数の写真を、1回の操作で日付/時刻を編集することもできるようになりました。"
+  "cLBulkEditDesc": "複数の写真を、1回の操作で日付/時刻を編集することもできるようになりました。",
+  "curatedMemories": "Curated memories"
 }

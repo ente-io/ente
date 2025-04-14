@@ -12,5 +12,6 @@
   "feedback": "피드백",
   "confirmAccountDeletion": "계정 삭제 확인",
   "deleteAccountPermanentlyButton": "계정을 영구적으로 삭제",
-  "yourAccountHasBeenDeleted": "계정이 삭제되었습니다."
+  "yourAccountHasBeenDeleted": "계정이 삭제되었습니다.",
+  "curatedMemories": "Curated memories"
 }

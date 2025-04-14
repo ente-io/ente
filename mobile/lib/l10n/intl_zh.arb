@@ -371,7 +371,7 @@
   "deleteFromBoth": "同时从两者中删除",
   "newAlbum": "新建相册",
   "albums": "相册",
-  "memoryCount": "{count, plural, zero{没有回忆} one{{formattedCount} 个回忆} other{{formattedCount} 个回忆}}",
+  "memoryCount": "{count, plural, =0{暂无回忆} other{{formattedCount} 个回忆}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -792,11 +792,11 @@
   "share": "分享",
   "unhideToAlbum": "取消隐藏到相册",
   "restoreToAlbum": "恢复到相册",
-  "moveItem": "{count, plural, one {移动一个项目} other {移动一些项目}}",
+  "moveItem": "{count, plural, =1 {移动项目} other {移动数个项目}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, one {添加一个项目} other {添加一些项目}}",
+  "addItem": "{count, plural, =1 {添加项目} other {添加数个项目}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -897,7 +897,7 @@
   "authToViewYourMemories": "请验证以查看您的回忆",
   "unlock": "解锁",
   "freeUpSpace": "释放空间",
-  "freeUpSpaceSaving": "{count, plural, one {它可以从设备中删除以释放 {formattedSize}} other {它们可以从设备中删除以释放 {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {它可以从设备中删除以释放 {formattedSize}} other {它们可以从设备中删除以释放 {formattedSize}}}",
   "filesBackedUpInAlbum": "此相册中的 {count, plural, one {1 个文件} other {{formattedNumber} 个文件}} 已安全备份",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -931,7 +931,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "只要您有有效的订阅，您仍然可以在 Ente 上访问 {count, plural, one {它} other {它们}}",
+  "freeUpAccessPostDelete": "只要您拥有有效订阅，您仍然可以在 Ente 上访问 {count, plural, =1 {它} other {它们}}",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1267,8 +1267,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "按名称快速查找人物",
-  "addViewers": "{count, plural, zero {添加查看者} one {添加查看者} other {添加查看者}}",
-  "addCollaborators": "{count, plural, zero {添加协作者} one {添加协作者} other {添加协作者}}",
+  "addViewers": "{count, plural, =0 {添加查看者} =1 {添加查看者r} other {添加数个查看者}}",
+  "addCollaborators": "{count, plural, =0 {添加协作者} =1 {添加协作者} other {添加数个协作者}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "长按电子邮件以验证端到端加密。",
   "developerSettingsWarning": "您确定要修改开发者设置吗？",
   "developerSettings": "开发者设置",
@@ -1400,7 +1400,7 @@
   "enableMachineLearningBanner": "启用机器学习进行魔法搜索和面部识别",
   "searchDiscoverEmptySection": "处理和同步完成后，图像将显示在此处",
   "searchPersonsEmptySection": "处理和同步完成后，人物将显示在此处",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {已添加 0 位查看者} =1 {已添加 1 位查看者} other {已添加 {count} 位查看者}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {已添加0个查看者} =1 {已添加1个查看者} other {已添加 {count} 个查看者}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1485,7 +1485,7 @@
   },
   "currentlyRunning": "目前正在运行",
   "ignored": "已忽略",
-  "photosCount": "{count, plural, =0 {0 张照片} =1 {1 张照片} other {{count} 张照片}}",
+  "photosCount": "{count, plural, =0 {0张照片} =1 {1张照片} other {{count} 张照片}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1735,5 +1735,6 @@
   "cLFamilyPlan": "家庭计划存储限制",
   "cLFamilyPlanDesc": "你现在可以为家庭成员设置存储空间使用上限。",
   "cLBulkEdit": "批量编辑日期",
-  "cLBulkEditDesc": "你现在可以选择多张照片，一键批量修改日期/时间，并支持日期顺移。"
+  "cLBulkEditDesc": "你现在可以选择多张照片，一键批量修改日期/时间，并支持日期顺移。",
+  "curatedMemories": "Curated memories"
 }

@@ -371,21 +371,6 @@
   "deleteFromBoth": "Usuń z obu",
   "newAlbum": "Nowy album",
   "albums": "Albumy",
-  "memoryCount": "{count, plural, zero{brak wspomnień} one{{formattedCount} wspomnienie} few {{formattedCount} wspomnienia} other{{formattedCount} wspomnień}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "Wybrano {count}",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -791,14 +776,6 @@
   "share": "Udostępnij",
   "unhideToAlbum": "Odkryj do albumu",
   "restoreToAlbum": "Przywróć do albumu",
-  "moveItem": "{count, plural, one {Przenieś element} few {Przenieś elementy} other {Przenieś elementów}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {Dodaj element} few {Dodaj elementy} other {Dodaj elementów}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Utwórz lub wybierz album",
   "selectAlbum": "Wybierz album",
   "searchByAlbumNameHint": "Nazwa albumu",
@@ -896,7 +873,6 @@
   "authToViewYourMemories": "Prosimy uwierzytelnić się, aby wyświetlić swoje wspomnienia",
   "unlock": "Odblokuj",
   "freeUpSpace": "Zwolnij miejsce",
-  "freeUpSpaceSaving": "{count, plural, one {Można to usunąć z urządzenia, aby zwolnić {formattedSize}} other {Można je usunąć z urządzenia, aby zwolnić {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 plikowi} other {{formattedNumber} plikom}} w tym albumie została bezpiecznie utworzona kopia zapasowa",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -924,18 +900,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Nadal możesz mieć dostęp {count, plural, one {do tego} other {do tych}} na Ente tak długo, jak masz aktywną subskrypcję",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1266,8 +1230,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Szybko szukaj osób po imieniu",
-  "addViewers": "{count, plural, one {Dodaj widza} few {Dodaj widzów} many {Dodaj widzów} other {Dodaj widzów}}",
-  "addCollaborators": "{count, plural, one {Dodaj współuczestnika} few {Dodaj współuczestników} many {Dodaj współuczestników} other {Dodaj współuczestników}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Naciśnij i przytrzymaj e-mail, aby zweryfikować szyfrowanie end-to-end.",
   "developerSettingsWarning": "Czy na pewno chcesz zmodyfikować ustawienia programisty?",
   "developerSettings": "Ustawienia dla programistów",
@@ -1399,16 +1361,6 @@
   "enableMachineLearningBanner": "Włącz nauczanie maszynowe dla magicznego wyszukiwania i rozpoznawania twarzy",
   "searchDiscoverEmptySection": "Obrazy będą wyświetlane tutaj po zakończeniu przetwarzania i synchronizacji",
   "searchPersonsEmptySection": "Osoby będą wyświetlane tutaj po zakończeniu przetwarzania i synchronizacji",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Dodano 0 widzów} =1 {Dodano 1 widza}  other {Dodano {count} widzów}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Dodano 0 współuczestników} =1 {Dodano 1 współuczestnika} other {Dodano {count} współuczestników}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1484,15 +1436,6 @@
   },
   "currentlyRunning": "aktualnie uruchomiony",
   "ignored": "ignorowane",
-  "photosCount": "{count, plural, =0 {0 zdjęć} =1{1 zdjęcie} few {{count} zdjęcia} other{{count} zdjęć}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Plik",
   "searchSectionsLengthMismatch": "Niezgodność długości sekcji: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1591,5 +1534,6 @@
   "joinAlbumSubtextViewer": "aby dodać to do udostępnionych albumów",
   "join": "Dołącz",
   "linkEmail": "Połącz adres e-mail",
-  "noEnteAccountExclamation": "Brak konta Ente!"
+  "noEnteAccountExclamation": "Brak konta Ente!",
+  "curatedMemories": "Curated memories"
 }

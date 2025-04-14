@@ -280,48 +280,42 @@ const convertToMP4Native = async (electron: Electron, blob: Blob) => {
  *
  * @param blob The input video blob.
  *
- * @returns The data of the generated preview variant.
+ * @returns The output video blob containing the generated preview variant.
  */
 export const generateVideoPreviewVariantWeb = async (blob: Blob) =>
-    ffmpegExecWeb(generateVideoPreviewMetadataCommand, blob, "mp4");
+    ffmpegExecWeb(transcodeAndGenerateHLSPlaylistCommand, blob, "hls");
 
 /**
  * The FFmpeg command to use to create a preview variant of videos.
  *
  * Current parameters
  *
+ * - H264
  * - 720p width
  * - 2000kbps bitrate
  * - 30fps frame rate
- *
- * See: [Note: Preview variant of videos]
- *
- * Options:
- *
- * - `-vf` creates a filter graph for the video stream
- *
- * - `-vf scale=720:-1` scales the video to 720p width, keeping aspect ratio.
- *
- * - `-r` sets the frame rate.
- *
- * - `-c:v libx264` sets the codec for the video stream to H264.
- *
- * - `-b:v 2000k` sets the bitrate for the video stream.
- *
- * - `-c:a aac -b:a 128k` converts the audio stream to 128k bit AAC.
  */
-const generateVideoPreviewMetadataCommand = [
+const transcodeAndGenerateHLSPlaylistCommand = [
     ffmpegPathPlaceholder,
+    // Input file. We don't need any extra options that apply to the input file.
     "-i",
     inputPathPlaceholder,
+    // The remaining options apply to the next file, `outputPathPlaceholder`.
+    // ---
+    // `-vf` creates a filter graph for the video stream.
     "-vf",
+    // `-vf scale=720:-1` scales the video to 720p width, keeping aspect ratio.
     "scale=720:-1",
+    // `-r 30` sets the frame rate to 30 fps.
     "-r",
     "30",
+    // `-c:v libx264` sets the codec for the video stream to H264.
     "-c:v",
     "libx264",
+    // `-b:v 2000k` sets the bitrate for the video stream.
     "-b:v",
     "2000k",
+    // `-c:a aac -b:a 128k` converts the audio stream to 128k bit AAC.
     "-c:a",
     "aac",
     "-b:a",

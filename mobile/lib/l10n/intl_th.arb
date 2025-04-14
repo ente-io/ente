@@ -242,14 +242,6 @@
   "share": "แชร์",
   "unhideToAlbum": "เลิกซ่อนไปยังอัลบั้ม",
   "restoreToAlbum": "กู้คืนไปยังอัลบั้ม",
-  "moveItem": "{count, plural, other {ย้ายรายการ}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, other {เพิ่มรายการ}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "incorrectRecoveryKey": "คีย์การกู้คืนไม่ถูกต้อง",
   "theRecoveryKeyYouEnteredIsIncorrect": "คีย์การกู้คืนที่คุณป้อนไม่ถูกต้อง",
   "syncing": "กำลังซิงค์...",
@@ -295,5 +287,6 @@
     "description": "Label for the map view"
   },
   "maps": "แผนที่",
-  "enableMaps": "เปิดใช้งานแผนที่"
+  "enableMaps": "เปิดใช้งานแผนที่",
+  "curatedMemories": "Curated memories"
 }

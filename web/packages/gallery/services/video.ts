@@ -9,6 +9,8 @@ import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { gunzip } from "ente-new/photos/utils/gzip";
 import { ensurePrecondition } from "ente-utils/ensure";
 import { z } from "zod";
+import { downloadManager } from "./download";
+import { generateVideoPreviewVariantWeb } from "./ffmpeg";
 import { fetchFileData, fetchFilePreviewData } from "./file-data";
 import type { UploadItem } from "./upload";
 
@@ -277,22 +279,116 @@ export const processVideoNewUpload = (
         return;
     }
 
-    // Enqueue.
+    // Enqueue the item.
     _state.videoProcessingQueue.push({ file, uploadItem });
 
-    // Tickle.
-    _state.queueProcessor ??= processNextQueueItem();
+    // Tickle the processor if it isn't already running.
+    _state.queueProcessor ??= processQueue();
 };
 
 export const isVideoProcessingEnabled = () =>
     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
 
-const processNextQueueItem = async () => {
+const processQueue = async () => {
     while (_state.videoProcessingQueue.length) {
-        const { file, uploadItem } = _state.videoProcessingQueue.shift()!;
-        log.debug(() => ["gen-hls", { file, uploadItem }]);
-        await Promise.resolve(0);
+        try {
+            await processQueueItem(_state.videoProcessingQueue.shift()!);
+        } catch (e) {
+            log.error("Video processing failed", e);
+            // Ignore this unprocessable item. Currently this function only runs
+            // post upload, so this item will later get processed as part of the
+            // backfill.
+            //
+            // TODO(HLS): When processing the backfill itself, we'll need a way
+            // to mark this item as failed.
+        }
     }
     _state.queueProcessor = undefined;
+};
+
+/**
+ * Generate and upload a streamable variant of the given {@link EnteFile}.
+ *
+ * [Note: Preview variant of videos]
+ *
+ * A preview variant of a video is created by transcoding it into a smaller,
+ * streamable, and (more) widely supported format.
+ *
+ * 1. The video is transcoded into a format that is both smaller but is also
+ *    using a much more widely supported codec so that it can be played back
+ *    readily across browsers and OSes independent of the codec used by the
+ *    source video.
+ *
+ * 2. We use a format that can be streamed back by the client instead of needing
+ *    to download it all at once, and also generate an HLS playlist that refers
+ *    to the offsets in the generated video file.
+ *
+ * 3. Both the generated video and the HLS playlist are then uploaded, E2EE.
+ */
+const processQueueItem = async ({
+    file,
+    uploadItem,
+}: VideoProcessingQueueItem) => {
+    log.debug(() => ["gen-hls", { file, uploadItem }]);
+
+    const fileBlob = await fetchOriginalVideoBlob(file, uploadItem);
+    const previewFileData = await generateVideoPreviewVariantWeb(fileBlob);
+
+    console.log(previewFileData);
+
+    await Promise.resolve(0);
+};
+
+/**
+ * Return a blob containing the contents of the given video file.
+ *
+ * The blob is either constructed using the given {@link uploadItem} if present,
+ * otherwise it is downloaded from remote.
+ *
+ * @param file An {@link EnteFile} of type {@link FileType.video}.
+ *
+ * @param uploadItem If we're called during the upload process, then this will
+ * be set to the {@link UploadItem} that was uploaded. This way, we can directly
+ * use the on-disk file instead of needing to download the original from remote.
+ */
+const fetchOriginalVideoBlob = async (
+    file: EnteFile,
+    uploadItem: UploadItem | undefined,
+): Promise<Blob> =>
+    uploadItem
+        ? fetchOriginalVideoUploadItemBlob(file, uploadItem)
+        : await downloadManager.fileBlob(file);
+
+const fetchOriginalVideoUploadItemBlob = (
+    _: EnteFile,
+    uploadItem: UploadItem,
+) => {
+    // TODO(HLS): Commented below is the implementation that the eventual
+    // desktop only conversion would need to handle - the conversion logic would
+    // need to move to the desktop side to allow it to handle large videos.
+    //
+    // Meanwhile during development, we assume we're on the happy web-only cases
+    // (dragging and dropping a file). All this code is behind a development
+    // feature flag, so it is not going to impact end users.
+
+    if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
+        throw new Error("Not implemented");
+        // const { response, lastModifiedMs } = await readStream(
+        //     ensureElectron(),
+        //     uploadItem,
+        // );
+        // const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
+        // // This function will not be called for videos, and for images
+        // // it is reasonable to read the entire stream into memory here.
+        // return new File([await response.arrayBuffer()], basename(path), {
+        //     lastModified: lastModifiedMs,
+        // });
+    } else {
+        if (uploadItem instanceof File) {
+            return uploadItem;
+        } else {
+            return uploadItem.file;
+        }
+    }
 };
