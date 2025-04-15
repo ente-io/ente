@@ -646,6 +646,7 @@ export const clipMatches = (
 export interface AnnotatedFaceID {
     faceID: string;
     personID: string;
+    personName: string | undefined;
 }
 
 /**
@@ -667,12 +668,18 @@ export const getAnnotatedFacesForFile = async (
         const person = personByFaceID.get(faceID);
         if (!person) continue;
         sortableFaces.push([
-            { faceID, personID: person.id },
+            { faceID, personID: person.id, personName: person.name },
             person.fileIDs.length,
         ]);
     }
 
-    sortableFaces.sort(([, a], [, b]) => b - a);
+    sortableFaces.sort((a, b) => {
+        // If only one has a person name, prefer it.
+        if (a[0].personName && !b[0].personName) return -1;
+        if (!a[0].personName && b[0].personName) return 1;
+        // Otherwise (both named or both unnamed) sort by their number of files.
+        return b[1] - a[1];
+    });
     return sortableFaces.map(([f]) => f);
 };
 
