@@ -565,6 +565,7 @@ func main() {
 		Controller:             publicCollectionCtrl,
 		FileCtrl:               fileController,
 		CollectionCtrl:         collectionController,
+		FileDataCtrl:           fileDataCtrl,
 		StorageBonusController: storageBonusCtrl,
 	}
 
