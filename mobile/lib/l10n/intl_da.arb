@@ -207,16 +207,6 @@
   "after1Month": "Efter 1 måned",
   "after1Year": "Efter 1 år",
   "manageParticipants": "Administrer",
-  "albumParticipantsCount": "{count, plural, one {}=0 {Ingen Deltagere} =1 {1 Deltager} other {{count} Deltagere}}",
-  "@albumParticipantsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "5"
-      }
-    },
-    "description": "Number of participants in an album, including the album owner."
-  },
   "collabLinkSectionDescription": "Opret et link, så folk kan tilføje og se fotos i dit delte album uden at behøve en Ente-app eller konto. Fantastisk til at indsamle event fotos.",
   "collectPhotos": "Indsaml billeder",
   "collaborativeLink": "Kollaborativt link",
@@ -322,5 +312,6 @@
   "longPressAnEmailToVerifyEndToEndEncryption": "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen.",
   "developerSettingsWarning": "Er du sikker på, at du vil ændre udviklerindstillingerne?",
   "next": "Næste",
-  "enterPin": "Indtast PIN"
+  "enterPin": "Indtast PIN",
+  "curatedMemories": "Curated memories"
 }

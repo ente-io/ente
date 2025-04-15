@@ -255,9 +255,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m38(email) => "Ceci est l\'ID de vérification de ${email}";
 
-  static String m101(count) =>
-      "${Intl.plural(count, one: 'Cette semaine, ${count} il y a l\'année', other: 'Cette semaine, ${count} il y a des années')}";
-
   static String m102(dateFormat) => "${dateFormat} au fil des années";
 
   static String m103(count) =>
@@ -716,6 +713,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable": MessageLookupByLibrary.simpleMessage(
             "Mise à jour critique disponible"),
         "crop": MessageLookupByLibrary.simpleMessage("Rogner"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "currentUsageIs": MessageLookupByLibrary.simpleMessage(
             "L\'utilisation actuelle est de "),
         "currentlyRunning":
@@ -2033,7 +2032,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ceci est votre ID de vérification"),
         "thisWeekThroughTheYears": MessageLookupByLibrary.simpleMessage(
             "Cette semaine au fil des années"),
-        "thisWeekXYearsAgo": m101,
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Cela vous déconnectera de l\'appareil suivant :"),

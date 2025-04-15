@@ -906,6 +906,13 @@
       "title": "PostNL"
     },
     {
+      "title": "Postmark",
+      "slug": "postmarkapp",
+      "altNames": [
+        "postmarkapp"
+      ]
+    },
+    {
       "title": "PostScan Mail",
       "slug": "postscanmail",
       "altNames": [

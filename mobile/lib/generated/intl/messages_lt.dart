@@ -598,6 +598,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable":
             MessageLookupByLibrary.simpleMessage("Yra kritinis naujinimas"),
         "crop": MessageLookupByLibrary.simpleMessage("Apkirpti"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("Dabartinis naudojimas – "),
         "currentlyRunning":

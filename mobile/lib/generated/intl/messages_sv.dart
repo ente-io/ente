@@ -242,6 +242,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "createPublicLink":
             MessageLookupByLibrary.simpleMessage("Skapa offentlig länk"),
         "creatingLink": MessageLookupByLibrary.simpleMessage("Skapar länk..."),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "custom": MessageLookupByLibrary.simpleMessage("Anpassad"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("Mörkt"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Dekrypterar..."),

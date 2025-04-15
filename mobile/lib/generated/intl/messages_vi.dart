@@ -617,6 +617,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable":
             MessageLookupByLibrary.simpleMessage("Cập nhật quan trọng có sẵn"),
         "crop": MessageLookupByLibrary.simpleMessage("Cắt xén"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("Sử dụng hiện tại là "),
         "currentlyRunning": MessageLookupByLibrary.simpleMessage("đang chạy"),

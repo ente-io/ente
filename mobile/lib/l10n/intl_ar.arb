@@ -710,5 +710,6 @@
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "يمكن لـ Ente تشفير وحفظ الملفات فقط إذا منحت حق الوصول إليها",
   "pleaseGrantPermissions": "الرجاء منح الأذونات",
   "grantPermission": "منح الأذن",
-  "privateSharing": "مشاركة خاصة"
+  "privateSharing": "مشاركة خاصة",
+  "curatedMemories": "Curated memories"
 }

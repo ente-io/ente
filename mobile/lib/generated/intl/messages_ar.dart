@@ -350,6 +350,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("جارٍ إنشاء الرابط..."),
         "criticalUpdateAvailable":
             MessageLookupByLibrary.simpleMessage("يتوفر تحديث هام"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("استخدامك الحالي هو"),
         "custom": MessageLookupByLibrary.simpleMessage("مُخصّص"),

@@ -1678,5 +1678,6 @@
   "cLFamilyPlan": "Familieplan limieten",
   "cLFamilyPlanDesc": "Je kunt nu limieten instellen voor hoeveel opslag je familieleden kunnen gebruiken.",
   "cLBulkEdit": "Bulk datums wijzigen",
-  "cLBulkEditDesc": "Je kunt nu meerdere foto's selecteren en de datum/tijd van ze allemaal bewerken met één snelle actie. Verschuiven van datums wordt ook ondersteund."
+  "cLBulkEditDesc": "Je kunt nu meerdere foto's selecteren en de datum/tijd van ze allemaal bewerken met één snelle actie. Verschuiven van datums wordt ook ondersteund.",
+  "curatedMemories": "Curated memories"
 }

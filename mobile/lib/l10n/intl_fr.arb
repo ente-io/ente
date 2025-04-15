@@ -1640,7 +1640,6 @@
   "selectedItemsWillBeRemovedFromThisPerson": "Les éléments sélectionnés seront retirés de cette personne, mais pas supprimés de votre bibliothèque.",
   "throughTheYears": "{dateFormat} au fil des années",
   "thisWeekThroughTheYears": "Cette semaine au fil des années",
-  "thisWeekXYearsAgo": "{count, plural, one {}=1 {Cette semaine, {count} il y a l'année} other {Cette semaine, {count} il y a des années}}",
   "youAndThem": "Vous et {name}",
   "admiringThem": "Admirant {name}",
   "embracingThem": "Embrasse {name}",
@@ -1678,5 +1677,6 @@
   "cLFamilyPlan": "Limites pour le forfait Famille",
   "cLFamilyPlanDesc": "Vous pouvez maintenant fixer des limites sur la quantité de stockage que les membres de votre famille peuvent utiliser.",
   "cLBulkEdit": "Dates de modification multiples",
-  "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes celles-ci, en une seule action rapide. Les dates de décalage sont également prises en charge."
+  "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes celles-ci, en une seule action rapide. Les dates de décalage sont également prises en charge.",
+  "curatedMemories": "Curated memories"
 }

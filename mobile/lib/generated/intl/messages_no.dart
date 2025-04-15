@@ -692,6 +692,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable": MessageLookupByLibrary.simpleMessage(
             "Kritisk oppdatering er tilgjengelig"),
         "crop": MessageLookupByLibrary.simpleMessage("Beskjær"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("Nåværende bruk er "),
         "currentlyRunning":

@@ -27,11 +27,11 @@ class ClipImageEncoder extends MlModel {
   static final instance = ClipImageEncoder._privateConstructor();
   factory ClipImageEncoder() => instance;
 
-  static Future<List<double>> predict(
+  static Future<List<double>> predict<T>(
     Image image,
     Uint8List rawRgbaBytes,
     int sessionAddress, [
-    int? enteFileID,
+    T? enteFileID,
   ]) async {
     final startTime = DateTime.now();
     final inputList = await preprocessImageClip(image, rawRgbaBytes);

@@ -322,6 +322,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "creatingLink": MessageLookupByLibrary.simpleMessage("יוצר קישור..."),
         "criticalUpdateAvailable":
             MessageLookupByLibrary.simpleMessage("עדכון חשוב זמין"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "currentUsageIs": MessageLookupByLibrary.simpleMessage(
             "השימוש במקום האחסון כרגע הוא "),
         "custom": MessageLookupByLibrary.simpleMessage("מותאם אישית"),

@@ -620,6 +620,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable":
             MessageLookupByLibrary.simpleMessage("重要なアップデートがあります"),
         "crop": MessageLookupByLibrary.simpleMessage("クロップ"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "currentUsageIs": MessageLookupByLibrary.simpleMessage("現在の使用状況 "),
         "currentlyRunning": MessageLookupByLibrary.simpleMessage("現在実行中"),
         "custom": MessageLookupByLibrary.simpleMessage("カスタム"),

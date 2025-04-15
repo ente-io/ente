@@ -71,6 +71,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Vytvořit nový účet"),
         "crop": MessageLookupByLibrary.simpleMessage("Oříznout"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "dayToday": MessageLookupByLibrary.simpleMessage("Dnes"),
         "dayYesterday": MessageLookupByLibrary.simpleMessage("Včera"),
         "declineTrustInvite":

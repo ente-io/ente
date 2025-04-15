@@ -11765,6 +11765,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Curated memories`
+  String get curatedMemories {
+    return Intl.message(
+      'Curated memories',
+      name: 'curatedMemories',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

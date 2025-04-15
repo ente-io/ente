@@ -109,6 +109,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("สร้างบัญชีใหม่"),
         "createPublicLink":
             MessageLookupByLibrary.simpleMessage("สร้างลิงก์สาธารณะ"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "custom": MessageLookupByLibrary.simpleMessage("กำหนดเอง"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("มืด"),
         "decrypting": MessageLookupByLibrary.simpleMessage("กำลังถอดรหัส..."),

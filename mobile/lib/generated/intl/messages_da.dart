@@ -20,9 +20,6 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'da';
 
-  static String m1(count) =>
-      "${Intl.plural(count, zero: 'Ingen Deltagere', one: '1 Deltager', other: '${count} Deltagere')}";
-
   static String m3(user) =>
       "${user} vil ikke kunne tilføje flere billeder til dette album\n\nDe vil stadig kunne fjerne eksisterende billeder tilføjet af dem";
 
@@ -75,7 +72,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Week": MessageLookupByLibrary.simpleMessage("Efter 1 uge"),
         "after1Year": MessageLookupByLibrary.simpleMessage("Efter 1 år"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Ejer"),
-        "albumParticipantsCount": m1,
         "albumUpdated":
             MessageLookupByLibrary.simpleMessage("Album er opdateret"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
@@ -140,6 +136,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Opret et offentligt link"),
         "creatingLink":
             MessageLookupByLibrary.simpleMessage("Opretter link..."),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "custom": MessageLookupByLibrary.simpleMessage("Tilpasset"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Dekrypterer..."),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Slet konto"),

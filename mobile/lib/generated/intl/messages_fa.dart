@@ -132,6 +132,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ایجاد حساب کاربری جدید"),
         "criticalUpdateAvailable": MessageLookupByLibrary.simpleMessage(
             "به‌روزرسانی حیاتی در دسترس است"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "custom": MessageLookupByLibrary.simpleMessage("سفارشی"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("تیره"),
         "dayToday": MessageLookupByLibrary.simpleMessage("امروز"),

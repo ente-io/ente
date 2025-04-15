@@ -74,6 +74,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Стварыць уліковы запіс"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Стварыць новы ўліковы запіс"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("Цёмная"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Расшыфроўка..."),
         "deleteAccount":

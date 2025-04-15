@@ -31,6 +31,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "கணக்கு நீக்குதலை உறுதிப்படுத்தவும்"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
             "ஆம், எல்லா செயலிகளிலும் இந்தக் கணக்கையும் அதன் தரவையும் நிரந்தரமாக நீக்க விரும்புகிறேன்."),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("கணக்கை நீக்கு"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
             "நீங்கள் வெளியேறுவதை கண்டு வருந்துகிறோம். எங்களை மேம்படுத்த உதவ உங்கள் கருத்தைப் பகிரவும்."),

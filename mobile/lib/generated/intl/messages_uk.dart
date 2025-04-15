@@ -613,6 +613,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable":
             MessageLookupByLibrary.simpleMessage("Доступне важливе оновлення"),
         "crop": MessageLookupByLibrary.simpleMessage("Обрізати"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("Поточне використання "),
         "currentlyRunning":

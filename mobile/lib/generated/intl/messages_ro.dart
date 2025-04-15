@@ -626,6 +626,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable": MessageLookupByLibrary.simpleMessage(
             "Actualizare critică disponibilă"),
         "crop": MessageLookupByLibrary.simpleMessage("Decupare"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("Utilizarea actuală este "),
         "currentlyRunning":
