@@ -111,7 +111,7 @@ class _CollectionsFlexiGridViewWidgetState
             albumsCountInOneRow;
 
     final List<Widget> gridItems = [];
-    if (widget.shouldShowCreateAlbum) {
+    if (widget.shouldShowCreateAlbum && !isAnyAlbumSelected) {
       gridItems.add(
         NewAlbumRowItemWidget(
           height: sideOfThumbnail,
@@ -168,7 +168,7 @@ class _CollectionsFlexiGridViewWidgetState
   Widget _buildListView(BuildContext context, Key key) {
     final List<Widget> listItems = [];
 
-    if (widget.shouldShowCreateAlbum) {
+    if (widget.shouldShowCreateAlbum && !isAnyAlbumSelected) {
       listItems.add(
         GestureDetector(
           onTap: () async {
