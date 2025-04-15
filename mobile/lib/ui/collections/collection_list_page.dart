@@ -11,6 +11,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/components/searchable_appbar.dart";
 import "package:photos/utils/local_settings.dart";
 
 enum UISectionType {
@@ -45,6 +46,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
   List<Collection>? collections;
   AlbumSortKey? sortKey;
   AlbumViewType? albumViewType;
+  String _searchQuery = "";
 
   @override
   void initState() {
@@ -66,8 +68,8 @@ class _CollectionListPageState extends State<CollectionListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final displayLimitCount =
-        (collections?.length ?? 0) + (widget.tag.isEmpty ? 1 : 0);
+    final displayLimitCount = (collections?.length ?? 0) +
+        (widget.tag.isEmpty && _searchQuery.isEmpty ? 1 : 0);
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
@@ -76,19 +78,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
             initialScrollOffset: widget.initialScrollOffset ?? 0,
           ),
           slivers: [
-            SliverAppBar(
-              elevation: 0,
-              title: Hero(
-                tag: widget.tag,
-                child: widget.appTitle ?? const SizedBox.shrink(),
-              ),
-              floating: true,
-              actions: widget.sectionType == UISectionType.homeCollections
-                  ? [
-                      _sortMenu(collections!),
-                    ]
-                  : null,
-            ),
+            _buildAppBar(),
             CollectionsFlexiGridViewWidget(
               collections,
               displayLimitCount: displayLimitCount,
@@ -96,11 +86,35 @@ class _CollectionListPageState extends State<CollectionListPage> {
               enableSelectionMode:
                   widget.sectionType == UISectionType.homeCollections,
               albumViewType: albumViewType ?? AlbumViewType.grid,
-              shouldShowCreateAlbum: true,
+              shouldShowCreateAlbum:
+                  widget.sectionType == UISectionType.homeCollections,
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAppBar() {
+    return SearchableAppBar(
+      title: widget.appTitle ?? const SizedBox.shrink(),
+      heroTag: widget.tag,
+      onSearch: (value) {
+        setState(() {
+          _searchQuery = value;
+        });
+        refreshCollections();
+      },
+      onSearchClosed: () {
+        setState(() {
+          _searchQuery = '';
+        });
+        refreshCollections();
+      },
+      actions: [
+        const SizedBox(width: 8),
+        _sortMenu(collections!),
+      ],
     );
   }
 
@@ -187,15 +201,33 @@ class _CollectionListPageState extends State<CollectionListPage> {
     if (widget.sectionType == UISectionType.incomingCollections ||
         widget.sectionType == UISectionType.outgoingCollections) {
       final SharedCollections sharedCollections =
-          CollectionsService.instance.getSharedCollections();
+          await CollectionsService.instance.getSharedCollections();
       if (widget.sectionType == UISectionType.incomingCollections) {
         collections = sharedCollections.incoming;
       } else {
         collections = sharedCollections.outgoing;
       }
+      if (_searchQuery.isNotEmpty) {
+        collections = widget.collections
+            ?.where(
+              (c) => c.displayName
+                  .toLowerCase()
+                  .contains(_searchQuery.toLowerCase()),
+            )
+            .toList();
+      }
     } else if (widget.sectionType == UISectionType.homeCollections) {
       collections =
           await CollectionsService.instance.getCollectionForOnEnteSection();
+      if (_searchQuery.isNotEmpty) {
+        collections = widget.collections
+            ?.where(
+              (c) => c.displayName
+                  .toLowerCase()
+                  .contains(_searchQuery.toLowerCase()),
+            )
+            .toList();
+      }
     }
     if (mounted) {
       setState(() {});
