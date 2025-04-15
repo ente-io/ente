@@ -3,9 +3,9 @@ import "package:photos/services/machine_learning/face_ml/face_filtering/face_fil
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/standalone/parse.dart";
 
-class FaceWithoutEmbedding {
+class FaceWithoutEmbedding<T> {
   final String faceID;
-  final int fileID;
+  final T fileID;
   Detection detection;
   final double score;
   final double blur;
@@ -24,10 +24,10 @@ class FaceWithoutEmbedding {
     this.blur,
   );
 
-  factory FaceWithoutEmbedding.fromJson(Map<String, dynamic> json) {
+  static  FaceWithoutEmbedding fromJson<T>(Map<String, dynamic> json) {
     final String faceID = json['faceID'] as String;
-    final int fileID = getFileIdFromFaceId<int>(faceID);
-    return FaceWithoutEmbedding(
+    final T fileID = getFileIdFromFaceId<T>(faceID);
+    return FaceWithoutEmbedding<T>(
       faceID,
       fileID,
       parseIntOrDoubleAsDouble(json['score'])!,

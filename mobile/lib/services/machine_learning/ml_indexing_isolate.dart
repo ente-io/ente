@@ -58,13 +58,14 @@ class MLIndexingIsolate extends SuperIsolate {
   Future<MLResult<T>?> analyzeImage<T>(
     FileMLInstruction instruction,
     String filePath,
+    T fileID,
   ) async {
     late MLResult<T> result;
 
     try {
       final resultJsonString =
           await runInIsolate(IsolateOperation.analyzeImage, {
-        "enteFileID": instruction.file.uploadedFileID ?? -1,
+        "enteFileID": fileID,
         "filePath": filePath,
         "runFaces": instruction.shouldRunFaces,
         "runClip": instruction.shouldRunClip,
