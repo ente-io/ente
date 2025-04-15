@@ -475,7 +475,10 @@ const enqueueUpdates = async (
         // TODO(HLS):
         let hlsPlaylistData: HLSPlaylistData | undefined;
         if (shouldUsePlayerV2() && file.metadata.fileType == FileType.video) {
-            hlsPlaylistData = await hlsPlaylistDataForFile(file);
+            hlsPlaylistData = await hlsPlaylistDataForFile(
+                file,
+                downloadManager.publicAlbumsCredentials,
+            );
             // We have a HLS playlist, and the user didn't request the original.
             // Early return so that we don't initiate a fetch for the original.
             if (hlsPlaylistData && opts?.videoQuality != "original") {
