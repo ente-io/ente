@@ -2,6 +2,7 @@ import { isDesktop } from "ente-base/app";
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
 import { isDevBuild } from "ente-base/env";
+import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
@@ -74,6 +75,10 @@ export interface HLSPlaylistData {
  *
  * @param file An {@link EnteFile} of type video.
  *
+ * @param publicAlbumsCredentials Credentials to use for fetching the HLS
+ * playlist when we are running in the context of the public albums app. If
+ * these are not specified, then the credentials of the logged in user are used.
+ *
  * @returns The HLS playlist as a string (along with the dimensions of the video
  * it will play), or `undefined` if there is no video preview associated with
  * the given file.
@@ -82,10 +87,15 @@ export interface HLSPlaylistData {
  */
 export const hlsPlaylistDataForFile = async (
     file: EnteFile,
+    publicAlbumsCredentials?: PublicAlbumsCredentials,
 ): Promise<HLSPlaylistData | undefined> => {
     ensurePrecondition(file.metadata.fileType == FileType.video);
 
-    const playlistFileData = await fetchFileData("vid_preview", file.id);
+    const playlistFileData = await fetchFileData(
+        "vid_preview",
+        file.id,
+        publicAlbumsCredentials,
+    );
     if (!playlistFileData) return undefined;
 
     const {
@@ -105,7 +115,11 @@ export const hlsPlaylistDataForFile = async (
     // A playlist format the current client does not understand.
     if (type != "hls_video") return undefined;
 
-    const videoURL = await fetchFilePreviewData("vid_preview", file.id);
+    const videoURL = await fetchFilePreviewData(
+        "vid_preview",
+        file.id,
+        publicAlbumsCredentials,
+    );
     if (!videoURL) return undefined;
 
     // [Note: HLS playlist format]

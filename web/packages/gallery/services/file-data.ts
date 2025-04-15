@@ -1,9 +1,13 @@
 import { encryptBlobB64 } from "ente-base/crypto";
-import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
+import {
+    authenticatedPublicAlbumsRequestHeaders,
+    authenticatedRequestHeaders,
+    ensureOk,
+    type PublicAlbumsCredentials,
+} from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
 import { z } from "zod";
-
 /**
  * [Note: File data APIs]
  *
@@ -85,16 +89,32 @@ export const fetchFilesData = async (
  * Returns `undefined` if no file data of the given type has been uploaded for
  * this file yet (e.g. if type was "vid_preview", this would indicate that a
  * video preview has been generated for this file yet).
+ *
+ * @param publicAlbumsCredentials Credentials to use when we are running in the
+ * context of the public albums app. If these are not specified, then the
+ * credentials of the logged in user are used.
  */
 export const fetchFileData = async (
     type: FileDataType,
     fileID: number,
+    publicAlbumsCredentials?: PublicAlbumsCredentials,
 ): Promise<RemoteFileData | undefined> => {
     const params = new URLSearchParams({ type, fileID: fileID.toString() });
-    const url = await apiURL("/files/data/fetch");
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
+
+    let res: Response;
+    if (publicAlbumsCredentials) {
+        const url = await apiURL("/public-collection/files/data/fetch");
+        const headers = authenticatedPublicAlbumsRequestHeaders(
+            publicAlbumsCredentials,
+        );
+        res = await fetch(`${url}?${params.toString()}`, { headers });
+    } else {
+        const url = await apiURL("/files/data/fetch");
+        res = await fetch(`${url}?${params.toString()}`, {
+            headers: await authenticatedRequestHeaders(),
+        });
+    }
+
     if (res.status == 404) return undefined;
     ensureOk(res);
     return z.object({ data: RemoteFileData }).parse(await res.json()).data;
@@ -144,6 +164,10 @@ export const putFileData = async (
  *
  * @param fileIDs The id of the files for which we want the file preview data.
  *
+ * @param publicAlbumsCredentials Credentials to use when we are running in the
+ * context of the public albums app. If these are not specified, then the
+ * credentials of the logged in user are used.
+ *
  * @returns the (presigned) URL to the preview data, or undefined if there is
  * not preview data of the given type for the given file yet.
  *
@@ -177,12 +201,24 @@ export const putFileData = async (
 export const fetchFilePreviewData = async (
     type: FileDataType,
     fileID: number,
+    publicAlbumsCredentials?: PublicAlbumsCredentials,
 ): Promise<string | undefined> => {
     const params = new URLSearchParams({ type, fileID: fileID.toString() });
-    const url = await apiURL("/files/data/preview");
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
+
+    let res: Response;
+    if (publicAlbumsCredentials) {
+        const headers = authenticatedPublicAlbumsRequestHeaders(
+            publicAlbumsCredentials,
+        );
+        const url = await apiURL("/public-collection/files/data/preview");
+        res = await fetch(`${url}?${params.toString()}`, { headers });
+    } else {
+        const url = await apiURL("/files/data/preview");
+        res = await fetch(`${url}?${params.toString()}`, {
+            headers: await authenticatedRequestHeaders(),
+        });
+    }
+
     if (res.status == 404) return undefined;
     ensureOk(res);
     return z.object({ url: z.string() }).parse(await res.json()).url;
