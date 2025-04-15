@@ -35,7 +35,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 ///
 /// [clipTable] - Stores the embeddings of the CLIP model
 /// [fileDataTable] - Stores data about the files that are already processed by the ML models
-class MLDataDB with SqlDbBase implements IMLDataDB<int> {
+class OfflineMLDataDB with SqlDbBase implements IMLDataDB<String> {
   static final Logger _logger = Logger("MLDataDB");
 
   static const _databaseName = "ente.ml.db";
@@ -44,18 +44,18 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
   // static const _databaseVersion = 1;
 
-  MLDataDB._privateConstructor();
+  OfflineMLDataDB._privateConstructor();
 
-  static final MLDataDB instance = MLDataDB._privateConstructor();
+  static final OfflineMLDataDB instance = OfflineMLDataDB._privateConstructor();
 
   static final _migrationScripts = [
-    getCreateFacesTable(false),
+    getCreateFacesTable(true),
     createFaceClustersTable,
     createClusterPersonTable,
     createClusterSummaryTable,
     createNotPersonFeedbackTable,
     fcClusterIDIndex,
-    getCreateClipEmbeddingsTable(false),
+    getCreateClipEmbeddingsTable(true),
     createFileDataTable,
   ];
 
@@ -149,7 +149,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
   /// Returns a map of fileID to the indexed ML version
   @override
-  Future<Map<int, int>> faceIndexedFileIds({
+  Future<Map<String, int>> faceIndexedFileIds({
     int minimumMlVersion = faceMlVersion,
   }) async {
     final db = await instance.asyncDB;
@@ -159,9 +159,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         WHERE $mlVersionColumn >= $minimumMlVersion
       ''';
     final List<Map<String, dynamic>> maps = await db.getAll(query);
-    final Map<int, int> result = {};
+    final Map<String, int> result = {};
     for (final map in maps) {
-      result[map[fileIDColumn] as int] = map[mlVersionColumn] as int;
+      result[map[fileIDColumn] as String] = map[mlVersionColumn] as int;
     }
     return result;
   }
@@ -290,7 +290,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
   @override
   Future<Face?> getCoverFaceForPerson({
-    required int recentFileID,
+    required String recentFileID,
     String? personID,
     String? avatarFaceId,
     String? clusterID,
@@ -298,10 +298,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     // read person from db
     final db = await instance.asyncDB;
     if (personID != null) {
-      final List<int> fileId = [recentFileID];
-      int? avatarFileId;
+      final List<String> fileId = [recentFileID];
+      String? avatarFileId;
       if (avatarFaceId != null) {
-        avatarFileId = tryGetFileIdFromFaceId(avatarFaceId);
+        avatarFileId = getFileIdFromFaceId(avatarFaceId);
         if (avatarFileId != null) {
           fileId.add(avatarFileId);
         }
@@ -334,13 +334,13 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       if (faceMaps.isNotEmpty) {
         if (avatarFileId != null) {
           final row = faceMaps.firstWhereOrNull(
-            (element) => (element[fileIDColumn] as int) == avatarFileId,
+            (element) => (element[fileIDColumn] as String) == avatarFileId,
           );
           if (row != null) {
-            return mapRowToFace<int>(row);
+            return mapRowToFace<String>(row);
           }
         }
-        return mapRowToFace<int>(faceMaps.first);
+        return mapRowToFace<String>(faceMaps.first);
       }
     }
     if (clusterID != null) {
@@ -371,7 +371,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   @override
-  Future<List<Face>?> getFacesForGivenFileID(int fileUploadID) async {
+  Future<List<Face>?> getFacesForGivenFileID(String fileUploadID) async {
     final db = await instance.asyncDB;
     const String query = '''
       SELECT * FROM $facesTable
@@ -384,7 +384,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     if (maps.isEmpty) {
       return null;
     }
-    return maps.map((e) => mapRowToFace<int>(e)).toList();
+    return maps.map((e) => mapRowToFace<String>(e)).toList();
   }
 
   @override
@@ -401,7 +401,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     }
     final result = <int, List<FaceWithoutEmbedding>>{};
     for (final map in maps) {
-      final face = mapRowToFaceWithoutEmbedding<int>(map);
+      final face = mapRowToFaceWithoutEmbedding<String>(map);
       final fileID = map[fileIDColumn] as int;
       result.putIfAbsent(fileID, () => <FaceWithoutEmbedding>[]).add(face);
     }
@@ -578,8 +578,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   @override
-  Future<Map<int, Set<String>>> getFileIdToClusterIds() async {
-    final Map<int, Set<String>> result = {};
+  Future<Map<String, Set<String>>> getFileIdToClusterIds() async {
+    final Map<String, Set<String>> result = {};
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $clusterIDColumn, $faceIDColumn FROM $faceClustersTable',
@@ -588,7 +588,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     for (final map in maps) {
       final clusterID = map[clusterIDColumn] as String;
       final faceID = map[faceIDColumn] as String;
-      final fileID = getFileIdFromFaceId<int>(faceID);
+      final fileID = getFileIdFromFaceId<String>(faceID);
       result[fileID] = (result[fileID] ?? {})..add(clusterID);
     }
     return result;
@@ -764,16 +764,16 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   @override
-  Future<Set<int>> getErroredFileIDs() async {
+  Future<Set<String>> getErroredFileIDs() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT DISTINCT $fileIDColumn FROM $facesTable WHERE $faceScore < 0',
     );
-    return maps.map((e) => e[fileIDColumn] as int).toSet();
+    return maps.map((e) => e[fileIDColumn] as String).toSet();
   }
 
   @override
-  Future<void> deleteFaceIndexForFiles(List<int> fileIDs) async {
+  Future<void> deleteFaceIndexForFiles(List<String> fileIDs) async {
     final db = await instance.asyncDB;
     final String sql = '''
       DELETE FROM $facesTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})
@@ -920,7 +920,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
   // for a given personID, return a map of clusterID to fileIDs using join query
   @override
-  Future<Map<int, Set<String>>> getFileIdToClusterIDSet(String personID) {
+  Future<Map<String, Set<String>>> getFileIdToClusterIDSet(String personID) {
     final db = instance.asyncDB;
     return db.then((db) async {
       final List<Map<String, dynamic>> maps = await db.getAll(
@@ -930,11 +930,11 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         'WHERE $clusterPersonTable.$personIdColumn = ?',
         [personID],
       );
-      final Map<int, Set<String>> result = {};
+      final Map<String, Set<String>> result = {};
       for (final map in maps) {
         final clusterID = map[clusterIDColumn] as String;
         final String faceID = map[faceIDColumn] as String;
-        final fileID = getFileIdFromFaceId<int>(faceID);
+        final fileID = getFileIdFromFaceId<String>(faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
       }
       return result;
@@ -942,7 +942,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   @override
-  Future<Map<int, Set<String>>> getFileIdToClusterIDSetForCluster(
+  Future<Map<String, Set<String>>> getFileIdToClusterIDSetForCluster(
     Set<String> clusterIDs,
   ) {
     final db = instance.asyncDB;
@@ -955,11 +955,11 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   ''',
         [...clusterIDs],
       );
-      final Map<int, Set<String>> result = {};
+      final Map<String, Set<String>> result = {};
       for (final map in maps) {
         final clusterID = map[clusterIDColumn] as String;
         final faceID = map[faceIDColumn] as String;
-        final fileID = getFileIdFromFaceId<int>(faceID);
+        final fileID = getFileIdFromFaceId<String>(faceID);
         result[fileID] = (result[fileID] ?? {})..add(clusterID);
       }
       return result;
@@ -1060,7 +1060,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       final db = await instance.asyncDB;
       if (faces) {
         await db.execute(deleteFacesTable);
-        await db.execute(getCreateFacesTable(false));
+        await db.execute(getCreateFacesTable(true));
         await db.execute(deleteFaceClustersTable);
         await db.execute(createFaceClustersTable);
         await db.execute(fcClusterIDIndex);
@@ -1100,7 +1100,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   @override
-  Future<List<int>> getFileIDsOfPersonID(String personID) async {
+  Future<List<String>> getFileIDsOfPersonID(String personID) async {
     final db = await instance.asyncDB;
     final result = await db.getAll(
       '''
@@ -1117,7 +1117,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   @override
-  Future<List<int>> getFileIDsOfClusterID(String clusterID) async {
+  Future<List<String>> getFileIDsOfClusterID(String clusterID) async {
     final db = await instance.asyncDB;
     final result = await db.getAll(
       '''
@@ -1133,7 +1133,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   @override
-  Future<Set<int>> getAllFileIDsOfFaceIDsNotInAnyCluster() async {
+  Future<Set<String>> getAllFileIDsOfFaceIDsNotInAnyCluster() async {
     final db = await instance.asyncDB;
     final result = await db.getAll(
       '''
@@ -1143,11 +1143,11 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         WHERE face_clusters.face_id IS NULL;
     ''',
     );
-    return <int>{for (final row in result) row[fileIDColumn]};
+    return <String>{for (final row in result) row[fileIDColumn]};
   }
 
   @override
-  Future<Set<int>> getAllFilesAssociatedWithAllClusters({
+  Future<Set<String>> getAllFilesAssociatedWithAllClusters({
     List<String>? exceptClusters,
   }) async {
     final notInParam = exceptClusters?.map((e) => "'$e'").join(',') ?? '';
@@ -1159,7 +1159,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         WHERE $faceClustersTable.$clusterIDColumn NOT IN ($notInParam);
     ''');
 
-    return <int>{for (final row in result) row[fileIDColumn]};
+    return <String>{for (final row in result) row[fileIDColumn]};
   }
 
   @override
@@ -1227,7 +1227,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   @override
-  Future<void> deleteClipEmbeddings(List<int> fileIDs) async {
+  Future<void> deleteClipEmbeddings(List<String> fileIDs) async {
     final db = await instance.asyncDB;
     await db.execute(
       'DELETE FROM $clipTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})',

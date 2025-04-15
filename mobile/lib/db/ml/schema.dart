@@ -16,8 +16,9 @@ const mlVersionColumn = 'ml_version';
 const personIdColumn = 'person_id';
 const clusterIDColumn = 'cluster_id';
 
-const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
-  $fileIDColumn	INTEGER NOT NULL,
+String getCreateFacesTable(bool isOfflineDB) {
+  return '''CREATE TABLE IF NOT EXISTS $facesTable (
+  $fileIDColumn	${isOfflineDB ? 'TEXT' : 'INTEGER'} NOT NULL,
   $faceIDColumn  TEXT NOT NULL UNIQUE,
 	$faceDetectionColumn	TEXT NOT NULL,
   $embeddingColumn BLOB NOT NULL,
@@ -30,6 +31,7 @@ const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
   PRIMARY KEY($fileIDColumn, $faceIDColumn)
   );
   ''';
+}
 
 const deleteFacesTable = 'DELETE FROM $facesTable';
 // End of Faces Table Fields & Schema Queries
@@ -97,18 +99,20 @@ const deleteNotPersonFeedbackTable = 'DELETE FROM $notPersonFeedback';
 // ## CLIP EMBEDDINGS TABLE
 const clipTable = 'clip';
 
-const createClipEmbeddingsTable = '''
-CREATE TABLE IF NOT EXISTS $clipTable ( 
-  $fileIDColumn INTEGER NOT NULL,
+String getCreateClipEmbeddingsTable(bool isOfflineDB) {
+  return '''CREATE TABLE IF NOT EXISTS $clipTable ( 
+  $fileIDColumn	${isOfflineDB ? 'TEXT' : 'INTEGER'} NOT NULL,
   $embeddingColumn BLOB NOT NULL,
   $mlVersionColumn INTEGER NOT NULL,
-  PRIMARY KEY ($fileIDColumn)
+  PRIMARY KEY($fileIDColumn)
   );
-''';
+  ''';
+}
 
 const deleteClipEmbeddingsTable = 'DELETE FROM $clipTable';
 
 const fileDataTable = 'filedata';
+
 const createFileDataTable = '''
 CREATE TABLE IF NOT EXISTS $fileDataTable ( 
   $fileIDColumn INTEGER NOT NULL,

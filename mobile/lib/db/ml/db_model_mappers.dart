@@ -7,7 +7,7 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/ml_versions.dart";
 
-Map<String, dynamic> mapRemoteToFaceDB(Face face) {
+Map<String, dynamic> mapRemoteToFaceDB<T>(Face<T> face) {
   return {
     faceIDColumn: face.faceID,
     fileIDColumn: face.fileID,
@@ -24,10 +24,10 @@ Map<String, dynamic> mapRemoteToFaceDB(Face face) {
   };
 }
 
-Face mapRowToFace(Map<String, dynamic> row) {
+Face mapRowToFace<T>(Map<String, dynamic> row) {
   return Face(
     row[faceIDColumn] as String,
-    row[fileIDColumn] as int,
+    row[fileIDColumn] as T,
     EVector.fromBuffer(row[embeddingColumn] as List<int>).values,
     row[faceScore] as double,
     Detection.fromJson(json.decode(row[faceDetectionColumn] as String)),
@@ -39,10 +39,12 @@ Face mapRowToFace(Map<String, dynamic> row) {
   );
 }
 
-FaceWithoutEmbedding mapRowToFaceWithoutEmbedding(Map<String, dynamic> row) {
-  return FaceWithoutEmbedding(
+FaceWithoutEmbedding<T> mapRowToFaceWithoutEmbedding<T>(
+  Map<String, dynamic> row,
+) {
+  return FaceWithoutEmbedding<T>(
     row[faceIDColumn] as String,
-    row[fileIDColumn] as int,
+    row[fileIDColumn] as T,
     row[faceScore] as double,
     Detection.fromJson(json.decode(row[faceDetectionColumn] as String)),
     row[faceBlur] as double,

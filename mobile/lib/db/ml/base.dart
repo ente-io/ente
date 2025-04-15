@@ -9,7 +9,7 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/face_db
 abstract class IMLDataDB<T> {
   Future<void> bulkInsertFaces(List<Face> faces);
   Future<void> updateFaceIdToClusterId(Map<String, String> faceIDToClusterID);
-  Future<Map<int, int>> faceIndexedFileIds({int minimumMlVersion});
+  Future<Map<T, int>> faceIndexedFileIds({int minimumMlVersion});
   Future<int> getFaceIndexedFileCount({int minimumMlVersion});
   Future<Map<String, int>> clusterIdToFaceCount();
   Future<Set<String>> getPersonIgnoredClusters(String personID);
