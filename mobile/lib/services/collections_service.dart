@@ -388,7 +388,8 @@ class CollectionsService {
         .toList();
   }
 
-  SharedCollections getSharedCollections() {
+  Future<SharedCollections> getSharedCollections() async {
+    final AlbumSortKey sortKey = localSettings.albumSortKey();
     final List<Collection> outgoing = [];
     final List<Collection> incoming = [];
     final List<Collection> quickLinks = [];
@@ -408,9 +409,49 @@ class CollectionsService {
     incoming.sort((first, second) {
       return second.updationTime.compareTo(first.updationTime);
     });
-    outgoing.sort((first, second) {
-      return second.updationTime.compareTo(first.updationTime);
-    });
+
+    late Map<int, int> collectionIDToNewestPhotoTime;
+    if (sortKey == AlbumSortKey.newestPhoto) {
+      collectionIDToNewestPhotoTime =
+          await CollectionsService.instance.getCollectionIDToNewestFileTime();
+    }
+
+    incoming.sort(
+      (first, second) {
+        if (sortKey == AlbumSortKey.albumName) {
+          return compareAsciiLowerCaseNatural(
+            first.displayName,
+            second.displayName,
+          );
+        } else if (sortKey == AlbumSortKey.newestPhoto) {
+          return (collectionIDToNewestPhotoTime[second.id] ?? -1 * intMaxValue)
+              .compareTo(
+            collectionIDToNewestPhotoTime[first.id] ?? -1 * intMaxValue,
+          );
+        } else {
+          return second.updationTime.compareTo(first.updationTime);
+        }
+      },
+    );
+
+    outgoing.sort(
+      (first, second) {
+        if (sortKey == AlbumSortKey.albumName) {
+          return compareAsciiLowerCaseNatural(
+            first.displayName,
+            second.displayName,
+          );
+        } else if (sortKey == AlbumSortKey.newestPhoto) {
+          return (collectionIDToNewestPhotoTime[second.id] ?? -1 * intMaxValue)
+              .compareTo(
+            collectionIDToNewestPhotoTime[first.id] ?? -1 * intMaxValue,
+          );
+        } else {
+          return second.updationTime.compareTo(first.updationTime);
+        }
+      },
+    );
+
     return SharedCollections(outgoing, incoming, quickLinks);
   }
 
