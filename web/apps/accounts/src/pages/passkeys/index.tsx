@@ -1,25 +1,25 @@
-import { EnteLogo } from "@/base/components/EnteLogo";
-import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
-import { NavbarBase } from "@/base/components/Navbar";
-import {
-    RowButton,
-    RowButtonDivider,
-    RowButtonGroup,
-} from "@/base/components/RowButton";
-import { SingleInputDialog } from "@/base/components/SingleInputDialog";
-import { Titlebar } from "@/base/components/Titlebar";
-import { errorDialogAttributes } from "@/base/components/utils/dialog";
-import { useModalVisibility } from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import { formattedDateTime } from "@/base/i18n-date";
-import log from "@/base/log";
-import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
 import { Box, Paper, Stack, Typography, styled } from "@mui/material";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
+import { NavbarBase } from "ente-base/components/Navbar";
+import {
+    RowButton,
+    RowButtonDivider,
+    RowButtonGroup,
+} from "ente-base/components/RowButton";
+import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
+import { Titlebar } from "ente-base/components/Titlebar";
+import { errorDialogAttributes } from "ente-base/components/utils/dialog";
+import { useModalVisibility } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import { formattedDateTime } from "ente-base/i18n-date";
+import log from "ente-base/log";
+import SingleInputForm from "ente-shared/components/SingleInputForm";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -237,7 +237,7 @@ interface ManagePasskeyDrawerProps {
      */
     passkey: Passkey | undefined;
     /**
-     * Callback to invoke when the passkey in the modifed or deleted.
+     * Callback to invoke when the passkey in the modified or deleted.
      *
      * The passkey that the drawer is showing will be out of date at this point,
      * so the list of passkeys should be refreshed and the drawer closed.

@@ -1,18 +1,18 @@
-import { blobCache } from "@/base/blob-cache";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import type { Collection } from "@/media/collection";
+import { blobCache } from "ente-base/blob-cache";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import type { Collection } from "ente-media/collection";
 import {
     decryptFile,
     mergeMetadata,
     type EncryptedEnteFile,
     type EnteFile,
     type Trash,
-} from "@/media/file";
-import { metadataHash } from "@/media/file-metadata";
-import HTTPService from "@ente/shared/network/HTTPService";
-import localForage from "@ente/shared/storage/localForage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
+} from "ente-media/file";
+import { metadataHash } from "ente-media/file-metadata";
+import HTTPService from "ente-shared/network/HTTPService";
+import localForage from "ente-shared/storage/localForage";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
 import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,

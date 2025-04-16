@@ -366,21 +366,6 @@
   "deleteFromBoth": "Видалити з обох",
   "newAlbum": "Новий альбом",
   "albums": "Альбоми",
-  "memoryCount": "{count, plural, zero{немає спогадів} one{{formattedCount} спогад} other{{formattedCount} спогадів}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "{count} вибрано",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -786,14 +771,6 @@
   "share": "Поділитися",
   "unhideToAlbum": "Показати в альбомі",
   "restoreToAlbum": "Відновити в альбомі",
-  "moveItem": "{count, plural, one {Переміщення елемента} other {Переміщення елементів}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {Додавання елемента} other {Додавання елементів}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Створити або вибрати альбом",
   "selectAlbum": "Вибрати альбом",
   "searchByAlbumNameHint": "Назва альбому",
@@ -891,7 +868,6 @@
   "authToViewYourMemories": "Авторизуйтеся, щоб переглянути ваші спогади",
   "unlock": "Розблокувати",
   "freeUpSpace": "Звільнити місце",
-  "freeUpSpaceSaving": "{count, plural, one {Його можна видалити з пристрою, щоб звільнити {formattedSize}} other {Їх можна видалити з пристрою, щоб звільнити {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {Для 1 файлу} few {Для {formattedNumber} файлів} many {Для {formattedNumber} файлів} other {Для {formattedNumber} файлів}} у цьому альбомі було створено резервну копію",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -919,18 +895,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Ви все ще можете отримати доступ до {count, plural, one {нього} other {них}} в Ente, доки у вас активна передплата",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1261,8 +1225,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Швидко знаходьте людей за іменами",
-  "addViewers": "{count, plural, one {Додано глядача} other {Додано глядачів}}",
-  "addCollaborators": "{count, plural, one {Додано співавтора} other {Додано співавторів}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Довго утримуйте поштову адресу, щоб перевірити наскрізне шифрування.",
   "developerSettingsWarning": "Ви впевнені, що хочете змінити налаштування для розробників?",
   "developerSettings": "Налаштування для розробників",
@@ -1393,16 +1355,6 @@
   "enableMachineLearningBanner": "Увімкніть машинне навчання для магічного пошуку та розпізнавання облич",
   "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення оброблення та синхронізації",
   "searchPersonsEmptySection": "Люди будуть показані тут після завершення оброблення та синхронізації",
-  "viewersSuccessfullyAdded": "{count, plural, one {} few {Додано {count} користувача} many {Додано {count} користувачів}=0 {Додано 0 користувачів} =1 {Додано 1 користувач} other {Додано {count} користувачів}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
   "collaboratorsSuccessfullyAdded": "{count, plural, one {} few {Додано {count} співаторів} many {Додано {count} співаторів}=0 {Додано 0 співавторів} =1 {Додано 1 співавтор} other {Додано {count} співавторів}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1478,15 +1430,6 @@
   },
   "currentlyRunning": "зараз працює",
   "ignored": "ігнорується",
-  "photosCount": "{count, plural, one {} few {{count} фото} many {{count} фото}=0 {0 фото} =1 {1 фото} other {{count} фото}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Файл",
   "searchSectionsLengthMismatch": "Невідповідність довжини розділів: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1578,5 +1521,6 @@
   },
   "legacyInvite": "{email} запросив вас стати довіреною особою",
   "authToManageLegacy": "Авторизуйтесь, щоби керувати довіреними контактами",
-  "useDifferentPlayerInfo": "Виникли проблеми з відтворенням цього відео? Натисніть і утримуйте тут, щоб спробувати інший плеєр."
+  "useDifferentPlayerInfo": "Виникли проблеми з відтворенням цього відео? Натисніть і утримуйте тут, щоб спробувати інший плеєр.",
+  "curatedMemories": "Curated memories"
 }

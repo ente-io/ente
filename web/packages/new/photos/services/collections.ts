@@ -1,37 +1,36 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { sharedCryptoWorker } from "@/base/crypto";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
 import {
     type Collection,
     type CollectionMagicMetadata,
     type CollectionPublicMagicMetadata,
     type CollectionShareeMagicMetadata,
     type EncryptedCollection,
-} from "@/media/collection";
+} from "ente-media/collection";
 import {
     decryptFile,
     type EncryptedTrashItem,
     type EnteFile,
     type Trash,
-} from "@/media/file";
+} from "ente-media/file";
 import {
     getLocalTrash,
     getTrashedFiles,
     TRASH,
-} from "@/new/photos/services/files";
-import HTTPService from "@ente/shared/network/HTTPService";
-import localForage from "@ente/shared/storage/localForage";
-import { getData } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { getActualKey } from "@ente/shared/user";
+} from "ente-new/photos/services/files";
+import HTTPService from "ente-shared/network/HTTPService";
+import localForage from "ente-shared/storage/localForage";
+import { getData } from "ente-shared/storage/localStorage";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
+import { getActualKey } from "ente-shared/user";
 import { isHiddenCollection } from "./collection";
 
 const COLLECTION_TABLE = "collections";

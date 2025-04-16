@@ -1,20 +1,3 @@
-import { CenteredFill, SpacedRow } from "@/base/components/containers";
-import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@/base/components/OverflowMenu";
-import { EllipsizedTypography } from "@/base/components/Typography";
-import {
-    useModalVisibility,
-    type ModalVisibilityProps,
-} from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import { ensureElectron } from "@/base/electron";
-import { basename, dirname } from "@/base/file-name";
-import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
-import { CollectionMappingChoice } from "@/new/photos/components/CollectionMappingChoice";
 import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
@@ -29,6 +12,23 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
+import { CenteredFill, SpacedRow } from "ente-base/components/containers";
+import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "ente-base/components/OverflowMenu";
+import { EllipsizedTypography } from "ente-base/components/Typography";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import { ensureElectron } from "ente-base/electron";
+import { basename, dirname } from "ente-base/file-name";
+import type { CollectionMapping, FolderWatch } from "ente-base/types/ipc";
+import { CollectionMappingChoice } from "ente-new/photos/components/CollectionMappingChoice";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import watcher from "services/watch";
@@ -222,7 +222,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
     return (
         <SpacedRow sx={{ overflow: "hidden", flexShrink: 0 }}>
             <Stack direction="row" sx={{ overflow: "hidden", gap: 1.5 }}>
-                {watch.collectionMapping === "root" ? (
+                {watch.collectionMapping == "root" ? (
                     <Tooltip title={t("uploaded_to_single_collection")}>
                         <FolderOpenIcon color="secondary" />
                     </Tooltip>

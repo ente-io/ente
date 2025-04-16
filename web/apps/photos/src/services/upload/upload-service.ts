@@ -1,26 +1,26 @@
-import { streamEncryptionChunkSize } from "@/base/crypto/libsodium";
-import type { BytesOrB64 } from "@/base/crypto/types";
-import { type CryptoWorker } from "@/base/crypto/worker";
-import { ensureElectron } from "@/base/electron";
-import { basename, nameAndExtension } from "@/base/file-name";
-import type { PublicAlbumsCredentials } from "@/base/http";
-import log from "@/base/log";
-import { extractExif } from "@/gallery/services/exif";
-import { extractVideoMetadata } from "@/gallery/services/ffmpeg";
+import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
+import type { BytesOrB64 } from "ente-base/crypto/types";
+import { type CryptoWorker } from "ente-base/crypto/worker";
+import { ensureElectron } from "ente-base/electron";
+import { basename, nameAndExtension } from "ente-base/file-name";
+import type { PublicAlbumsCredentials } from "ente-base/http";
+import log from "ente-base/log";
+import { extractExif } from "ente-gallery/services/exif";
+import { extractVideoMetadata } from "ente-gallery/services/ffmpeg";
 import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
-} from "@/gallery/services/magic-metadata";
-import type { UploadItem } from "@/gallery/services/upload";
+} from "ente-gallery/services/magic-metadata";
+import type { UploadItem } from "ente-gallery/services/upload";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     type UploadResult,
-} from "@/gallery/services/upload";
+} from "ente-gallery/services/upload";
 import {
     detectFileTypeInfoFromChunk,
     isFileTypeNotSupportedError,
-} from "@/gallery/utils/detect-type";
-import { readStream } from "@/gallery/utils/native-stream";
+} from "ente-gallery/utils/detect-type";
+import { readStream } from "ente-gallery/utils/native-stream";
 import {
     EncryptedMagicMetadata,
     EnteFile,
@@ -29,19 +29,19 @@ import {
     type EncryptedEnteFile,
     type FilePublicMagicMetadata,
     type FilePublicMagicMetadataProps,
-} from "@/media/file";
+} from "ente-media/file";
 import {
     metadataHash,
     type Metadata,
     type ParsedMetadata,
     type PublicMagicMetadata,
-} from "@/media/file-metadata";
-import { FileType, type FileTypeInfo } from "@/media/file-type";
-import { encodeLivePhoto } from "@/media/live-photo";
-import { addToCollection } from "@/new/photos/services/collection";
-import { mergeUint8Arrays } from "@/utils/array";
-import { ensureInteger, ensureNumber } from "@/utils/ensure";
-import { CustomError, handleUploadError } from "@ente/shared/error";
+} from "ente-media/file-metadata";
+import { FileType, type FileTypeInfo } from "ente-media/file-type";
+import { encodeLivePhoto } from "ente-media/live-photo";
+import { addToCollection } from "ente-new/photos/services/collection";
+import { CustomError, handleUploadError } from "ente-shared/error";
+import { mergeUint8Arrays } from "ente-utils/array";
+import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import { type LivePhotoAssets } from "services/upload/uploadManager";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
@@ -236,6 +236,10 @@ export const uploadItemFileName = (uploadItem: UploadItem) => {
 
 /* -- Various intermediate type used during upload -- */
 
+export type ExternalParsedMetadata = ParsedMetadata & {
+    creationTime?: number | undefined;
+};
+
 export interface UploadAsset {
     /** `true` if this is a live photo. */
     isLivePhoto?: boolean;
@@ -254,7 +258,7 @@ export interface UploadAsset {
      *
      * This will not be present for live photos.
      */
-    externalParsedMetadata?: ParsedMetadata;
+    externalParsedMetadata?: ExternalParsedMetadata;
 }
 
 interface ThumbnailedFile {
@@ -547,7 +551,7 @@ export const uploader = async (
     worker: CryptoWorker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
-    makeProgessTracker: MakeProgressTracker,
+    makeProgressTracker: MakeProgressTracker,
 ): Promise<UploadResponse> => {
     log.info(`Upload ${fileName} | start`);
     try {
@@ -651,7 +655,7 @@ export const uploader = async (
 
         const backupedFile = await uploadToBucket(
             encryptedFilePieces,
-            makeProgessTracker,
+            makeProgressTracker,
             isCFUploadProxyDisabled,
             abortIfCancelled,
         );
@@ -732,7 +736,7 @@ export const uploader = async (
  *    also have access to the full path of this file.
  *
  * 3. In addition, when running in the desktop app we have the ability to
- *    initate programmatic access absolute paths on the user's file system. For
+ *    initiate programmatic access absolute paths on the user's file system. For
  *    example, if the user asks us to watch certain folders on their disk for
  *    changes, we'll be able to pick up new images being added, and in such
  *    cases, the parameter here will be a path. Another example is when resuming
@@ -973,7 +977,7 @@ const extractLivePhotoMetadata = async (
 
 const extractImageOrVideoMetadata = async (
     uploadItem: UploadItem,
-    externalParsedMetadata: ParsedMetadata | undefined,
+    externalParsedMetadata: ExternalParsedMetadata | undefined,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -983,7 +987,7 @@ const extractImageOrVideoMetadata = async (
     const fileName = uploadItemFileName(uploadItem);
     const { fileType } = fileTypeInfo;
 
-    let parsedMetadata: ParsedMetadata | undefined;
+    let parsedMetadata: (ParsedMetadata & ExternalParsedMetadata) | undefined;
     if (fileType == FileType.image) {
         parsedMetadata = await tryExtractImageMetadata(
             uploadItem,
@@ -1026,6 +1030,8 @@ const extractImageOrVideoMetadata = async (
         creationTime = timestamp;
         publicMagicMetadata.dateTime = dateTime;
         if (offset) publicMagicMetadata.offsetTime = offset;
+    } else if (parsedMetadata.creationTime) {
+        creationTime = parsedMetadata.creationTime;
     } else {
         creationTime =
             tryParseEpochMicrosecondsFromFileName(fileName) ?? modificationTime;
@@ -1383,7 +1389,7 @@ const encryptFileStream = async (
 
 const uploadToBucket = async (
     encryptedFilePieces: EncryptedFilePieces,
-    makeProgessTracker: MakeProgressTracker,
+    makeProgressTracker: MakeProgressTracker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
 ): Promise<BackupedFile> => {
@@ -1404,7 +1410,7 @@ const uploadToBucket = async (
                 await uploadStreamUsingMultipart(
                     localID,
                     encryptedData,
-                    makeProgessTracker,
+                    makeProgressTracker,
                     isCFUploadProxyDisabled,
                     abortIfCancelled,
                 ));
@@ -1415,7 +1421,7 @@ const uploadToBucket = async (
                     : await readEntireStream(encryptedData.stream);
             fileSize = data.length;
 
-            const progressTracker = makeProgessTracker(localID);
+            const progressTracker = makeProgressTracker(localID);
             const fileUploadURL = await uploadService.getUploadURL();
             if (!isCFUploadProxyDisabled) {
                 fileObjectKey = await UploadHttpClient.putFileV2(
@@ -1481,7 +1487,7 @@ interface PartEtag {
 async function uploadStreamUsingMultipart(
     fileLocalID: number,
     dataStream: EncryptedFileStream,
-    makeProgessTracker: MakeProgressTracker,
+    makeProgressTracker: MakeProgressTracker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
 ) {
@@ -1506,7 +1512,7 @@ async function uploadStreamUsingMultipart(
 
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
         fileSize += uploadChunk.length;
-        const progressTracker = makeProgessTracker(
+        const progressTracker = makeProgressTracker(
             fileLocalID,
             percentPerPart,
             index,

@@ -1,40 +1,3 @@
-import { SpacedRow } from "@/base/components/containers";
-import type { ButtonishProps } from "@/base/components/mui";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import {
-    errorDialogAttributes,
-    genericRetriableErrorDialogAttributes,
-} from "@/base/components/utils/dialog";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import log from "@/base/log";
-import { bytesInGB, formattedStorageByteSize } from "@/gallery/utils/units";
-import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
-import { useWrapAsyncOperation } from "@/new/photos/components/utils/use-wrap-async";
-import type {
-    Bonus,
-    Plan,
-    PlanPeriod,
-    PlansData,
-    Subscription,
-} from "@/new/photos/services/user-details";
-import {
-    activateStripeSubscription,
-    cancelStripeSubscription,
-    getFamilyPortalRedirectURL,
-    getPlansData,
-    isSubscriptionActive,
-    isSubscriptionActivePaid,
-    isSubscriptionCancelled,
-    isSubscriptionForPlan,
-    isSubscriptionFree,
-    isSubscriptionStripe,
-    planUsage,
-    redirectToCustomerPortal,
-    redirectToPaymentsApp,
-    userDetailsAddOnBonuses,
-} from "@/new/photos/services/user-details";
-import { openURL } from "@/new/photos/utils/web";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
@@ -54,6 +17,43 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { SpacedRow } from "ente-base/components/containers";
+import type { ButtonishProps } from "ente-base/components/mui";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    errorDialogAttributes,
+    genericRetriableErrorDialogAttributes,
+} from "ente-base/components/utils/dialog";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
+import { bytesInGB, formattedStorageByteSize } from "ente-gallery/utils/units";
+import { useUserDetailsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import { useWrapAsyncOperation } from "ente-new/photos/components/utils/use-wrap-async";
+import type {
+    Bonus,
+    Plan,
+    PlanPeriod,
+    PlansData,
+    Subscription,
+} from "ente-new/photos/services/user-details";
+import {
+    activateStripeSubscription,
+    cancelStripeSubscription,
+    getFamilyPortalRedirectURL,
+    getPlansData,
+    isSubscriptionActive,
+    isSubscriptionActivePaid,
+    isSubscriptionCancelled,
+    isSubscriptionForPlan,
+    isSubscriptionFree,
+    isSubscriptionStripe,
+    planUsage,
+    redirectToCustomerPortal,
+    redirectToPaymentsApp,
+    userDetailsAddOnBonuses,
+} from "ente-new/photos/services/user-details";
+import { openURL } from "ente-new/photos/utils/web";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -567,7 +567,7 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
                         <Typography variant="h6">{plan.price}</Typography>
                         <Typography variant="small" sx={{ opacity: 0.7 }}>
                             {`/ ${
-                                plan.period === "month"
+                                plan.period == "month"
                                     ? t("month_short")
                                     : t("year")
                             }`}

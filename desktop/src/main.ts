@@ -35,6 +35,7 @@ import log, { initLogging } from "./main/log";
 import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
 import { setupAutoUpdater } from "./main/services/app-update";
 import autoLauncher from "./main/services/auto-launcher";
+import { shouldHideDockIcon } from "./main/services/store";
 import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
 import { migrateLegacyWatchStoreIfNeeded } from "./main/stores/watch";
@@ -385,8 +386,8 @@ const createMainWindow = () => {
     const wasAutoLaunched = autoLauncher.wasAutoLaunched();
     if (wasAutoLaunched) {
         // Don't automatically show the app's window if we were auto-launched.
-        // On macOS, also hide the dock icon on macOS.
-        if (process.platform == "darwin") app.dock.hide();
+        // On macOS, also hide the dock icon.
+        app.dock?.hide();
     } else {
         // Show our window otherwise, maximizing it if we're not asked to set it
         // to a specific size.
@@ -421,14 +422,11 @@ const createMainWindow = () => {
 
     window.on("hide", () => {
         // On macOS, when hiding the window also hide the app's icon in the dock
-        // if the user has selected the Settings > Hide dock icon checkbox.
-        if (process.platform == "darwin" && userPreferences.get("hideDockIcon"))
-            app.dock.hide();
+        // unless the user has unchecked the Settings > Hide dock icon checkbox.
+        if (shouldHideDockIcon()) app.dock?.hide();
     });
 
-    window.on("show", () => {
-        if (process.platform == "darwin") void app.dock.show();
-    });
+    window.on("show", () => void app.dock?.show());
 
     // Let ipcRenderer know when mainWindow is in the foreground so that it can
     // in turn inform the renderer process.
@@ -609,7 +607,7 @@ const handleBackOnStripeCheckout = (window: BrowserWindow) =>
  *
  * But this is an issue for uploads in the self hosted apps (or when we
  * ourselves are trying to test things by with an arbitrary S3 bucket without
- * going via a worker). During upload, theer is no redirection, so the request
+ * going via a worker). During upload, there is no redirection, so the request
  * ACAO is "ente://app" but the response ACAO is `null` which don't match,
  * causing the request to fail.
  *

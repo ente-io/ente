@@ -1,32 +1,33 @@
-import { isDesktop } from "@/base/app";
-import { createComlinkCryptoWorker } from "@/base/crypto";
-import { type CryptoWorker } from "@/base/crypto/worker";
-import { lowercaseExtension, nameAndExtension } from "@/base/file-name";
-import type { PublicAlbumsCredentials } from "@/base/http";
-import log from "@/base/log";
-import type { Electron } from "@/base/types/ipc";
-import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import type { UploadItem } from "@/gallery/services/upload";
+import { Canceler } from "axios";
+import { isDesktop } from "ente-base/app";
+import { createComlinkCryptoWorker } from "ente-base/crypto";
+import { type CryptoWorker } from "ente-base/crypto/worker";
+import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
+import type { PublicAlbumsCredentials } from "ente-base/http";
+import log from "ente-base/log";
+import type { Electron } from "ente-base/types/ipc";
+import { ComlinkWorker } from "ente-base/worker/comlink-worker";
+import type { UploadItem } from "ente-gallery/services/upload";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     shouldDisableCFUploadProxy,
     type UploadPhase,
     type UploadResult,
-} from "@/gallery/services/upload";
-import type { Collection } from "@/media/collection";
+} from "ente-gallery/services/upload";
+import { processVideoNewUpload } from "ente-gallery/services/video";
+import type { Collection } from "ente-media/collection";
 import {
     decryptFile,
     type EncryptedEnteFile,
     type EnteFile,
-} from "@/media/file";
-import type { ParsedMetadata } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { potentialFileTypeFromExtension } from "@/media/live-photo";
-import { getLocalFiles } from "@/new/photos/services/files";
-import { indexNewUpload } from "@/new/photos/services/ml";
-import { wait } from "@/utils/promise";
-import { CustomError } from "@ente/shared/error";
-import { Canceler } from "axios";
+} from "ente-media/file";
+import type { ParsedMetadata } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { potentialFileTypeFromExtension } from "ente-media/live-photo";
+import { getLocalFiles } from "ente-new/photos/services/files";
+import { indexNewUpload } from "ente-new/photos/services/ml";
+import { CustomError } from "ente-shared/error";
+import { wait } from "ente-utils/promise";
 import {
     getLocalPublicFiles,
     getPublicCollectionUID,
@@ -370,7 +371,7 @@ class UploadManager {
      * Upload files
      *
      * This method waits for all the files to get uploaded (successfully or
-     * unsucessfully) before returning.
+     * unsuccessfully) before returning.
      *
      * It is an error to call this method when there is already an in-progress
      * upload.
@@ -465,20 +466,21 @@ class UploadManager {
         sourceEnteFile: EnteFile,
     ) {
         const timestamp = sourceEnteFile.metadata.creationTime;
-        const dateTime = sourceEnteFile.pubMagicMetadata.data.dateTime;
-        const offset = sourceEnteFile.pubMagicMetadata.data.offsetTime;
+        const dateTime = sourceEnteFile.pubMagicMetadata?.data.dateTime;
+        const offset = sourceEnteFile.pubMagicMetadata?.data.offsetTime;
 
-        const creationDate: ParsedMetadata["creationDate"] = {
-            timestamp,
-            dateTime,
-            offset,
-        };
+        const creationDate: ParsedMetadata["creationDate"] = dateTime
+            ? { timestamp, dateTime, offset }
+            : undefined;
+
+        // Fallback to the timestamp if a creationDate could not be constructed.
+        const creationTime = creationDate ? undefined : timestamp;
 
         const item = {
             uploadItem: file,
             localID: 1,
             collectionID: collection.id,
-            externalParsedMetadata: { creationDate },
+            externalParsedMetadata: { creationDate, creationTime },
         };
 
         return this.uploadItems([item], [collection]);
@@ -646,6 +648,7 @@ class UploadManager {
                         uploadResult == "uploadedWithStaticThumbnail")
                 ) {
                     indexNewUpload(decryptedFile, uploadItem);
+                    processVideoNewUpload(decryptedFile, uploadItem);
                 }
                 this.updateExistingFiles(decryptedFile);
             }
@@ -656,7 +659,7 @@ class UploadManager {
             );
             return uploadResult;
         } catch (e) {
-            log.error("failed to do post file upload action", e);
+            log.error("Post file upload action failed", e);
             return "failed";
         }
     }

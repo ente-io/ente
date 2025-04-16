@@ -1,34 +1,33 @@
-import { assertionFailed } from "@/base/assert";
-import { Overlay } from "@/base/components/containers";
-import { isSameDay } from "@/base/date";
-import { formattedDateRelative } from "@/base/i18n-date";
-import { downloadManager } from "@/gallery/services/download";
-import { EnteFile, enteFileDeletionDate } from "@/media/file";
-import { FileType } from "@/media/file-type";
-import {
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_HEIGHT,
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "@/new/photos/components/FileList";
-import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
-import {
-    LoadingThumbnail,
-    StaticThumbnail,
-} from "@/new/photos/components/PlaceholderThumbnails";
-import { TileBottomTextOverlay } from "@/new/photos/components/Tiles";
-import { TRASH_SECTION } from "@/new/photos/services/collection";
-import { FlexWrapper } from "@ente/shared/components/Container";
-import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
 import Avatar from "components/pages/gallery/Avatar";
+import { assertionFailed } from "ente-base/assert";
+import { Overlay } from "ente-base/components/containers";
+import { isSameDay } from "ente-base/date";
+import { formattedDateRelative } from "ente-base/i18n-date";
+import { downloadManager } from "ente-gallery/services/download";
+import { EnteFile, enteFileDeletionDate } from "ente-media/file";
+import { FileType } from "ente-media/file-type";
+import {
+    GAP_BTW_TILES,
+    IMAGE_CONTAINER_MAX_HEIGHT,
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+} from "ente-new/photos/components/FileList";
+import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
+import {
+    LoadingThumbnail,
+    StaticThumbnail,
+} from "ente-new/photos/components/PlaceholderThumbnails";
+import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
+import { TRASH_SECTION } from "ente-new/photos/services/collection";
+import { FlexWrapper } from "ente-shared/components/Container";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
     VariableSizeList as List,
@@ -681,13 +680,23 @@ export const FileList: React.FC<FileListProps> = ({
         handleSelectMulti(filesOnADay.map((af) => af.file))(isDateSelected);
     };
 
-    const handleSelect = handleSelectCreator(
-        setSelected,
-        mode,
-        galleryContext.user?.id,
-        activeCollectionID,
-        activePersonID,
-        setRangeStart,
+    const handleSelect = useMemo(
+        () =>
+            handleSelectCreator(
+                setSelected,
+                mode,
+                galleryContext.user?.id,
+                activeCollectionID,
+                activePersonID,
+                setRangeStart,
+            ),
+        [
+            setSelected,
+            mode,
+            galleryContext.user?.id,
+            activeCollectionID,
+            activePersonID,
+        ],
     );
 
     const onHoverOver = (index: number) => () => {
@@ -695,7 +704,7 @@ export const FileList: React.FC<FileListProps> = ({
     };
 
     const handleRangeSelect = (index: number) => () => {
-        if (typeof rangeStart !== "undefined" && rangeStart !== index) {
+        if (typeof rangeStart != "undefined" && rangeStart !== index) {
             const direction =
                 (index - rangeStart) / Math.abs(index - rangeStart);
             let checked = true;
@@ -719,13 +728,13 @@ export const FileList: React.FC<FileListProps> = ({
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Shift") {
+            if (e.key == "Shift") {
                 setIsShiftKeyPressed(true);
             }
         };
 
         const handleKeyUp = (e: KeyboardEvent) => {
-            if (e.key === "Shift") {
+            if (e.key == "Shift") {
                 setIsShiftKeyPressed(false);
             }
         };
@@ -1105,8 +1114,27 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     const galleryContext = useContext(GalleryContext);
 
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
+    const [isLongPressing, setIsLongPressing] = useState(false);
 
-    const longPress = useLongPress(() => onSelect(!selected), 500);
+    const longPressHandlers = useMemo(
+        () => ({
+            onMouseDown: () => setIsLongPressing(true),
+            onMouseUp: () => setIsLongPressing(false),
+            onMouseLeave: () => setIsLongPressing(false),
+            onTouchStart: () => setIsLongPressing(true),
+            onTouchEnd: () => setIsLongPressing(false),
+        }),
+        [],
+    );
+
+    useEffect(() => {
+        const timerID = isLongPressing
+            ? setTimeout(() => onSelect(!selected), 500)
+            : undefined;
+        return () => {
+            if (timerID) clearTimeout(timerID);
+        };
+    }, [selected, onSelect, isLongPressing]);
 
     useEffect(() => {
         let didCancel = false;
@@ -1152,7 +1180,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!imageURL}
-            {...(selectable ? longPress : {})}
+            {...(selectable ? longPressHandlers : {})}
         >
             {selectable && (
                 <Check

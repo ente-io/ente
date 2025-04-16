@@ -27,6 +27,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason":
             MessageLookupByLibrary.simpleMessage("Miért törli a fiókját?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Mégse"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Fiók törlése"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
             "Sajnáljuk, hogy távozik. Kérjük, ossza meg velünk visszajelzéseit, hogy segítsen nekünk a fejlődésben."),

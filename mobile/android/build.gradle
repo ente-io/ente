@@ -1,5 +1,6 @@
 ext {
-    appCompatVersion = '1.1.0' // for background_fetch
+    compileSdkVersion   = 35
+    targetSdkVersion    = 35
 }
 
 allprojects {

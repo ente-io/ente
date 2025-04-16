@@ -1,15 +1,3 @@
-import { FilledIconButton } from "@/base/components/mui";
-import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import { SlideUpTransition } from "@/new/photos/components/mui/SlideUpTransition";
-import {
-    ItemCard,
-    LargeTileButton,
-    LargeTileTextOverlay,
-} from "@/new/photos/components/Tiles";
-import type { CollectionSummary } from "@/new/photos/services/collection/ui";
-import { CollectionsSortBy } from "@/new/photos/services/collection/ui";
-import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";
-import useWindowSize from "@ente/shared/hooks/useWindowSize";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
@@ -22,14 +10,22 @@ import {
     Typography,
     useMediaQuery,
 } from "@mui/material";
+import { FilledIconButton } from "ente-base/components/mui";
+import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
+import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
+import {
+    ItemCard,
+    LargeTileButton,
+    LargeTileTextOverlay,
+} from "ente-new/photos/components/Tiles";
+import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
+import { CollectionsSortBy } from "ente-new/photos/services/collection/ui";
+import { FlexWrapper, FluidContainer } from "ente-shared/components/Container";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";
-import {
-    areEqual,
-    FixedSizeList as List,
-    ListChildComponentProps,
-} from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
+import { areEqual, FixedSizeList, ListChildComponentProps } from "react-window";
 
 interface AllAlbums {
     open: boolean;
@@ -84,7 +80,7 @@ export const AllAlbums: React.FC<AllAlbums> = ({
     );
 };
 
-export const AllCollectionMobileBreakpoint = 559;
+const Column3To2Breakpoint = 559;
 
 const AllAlbumsDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialog-container": { justifyContent: "flex-end" },
@@ -94,7 +90,7 @@ const AllAlbumsDialog = styled(Dialog)(({ theme }) => ({
         paddingRight: theme.spacing(1),
     },
     "& .MuiDialogContent-root": { padding: theme.spacing(2) },
-    [theme.breakpoints.down(AllCollectionMobileBreakpoint)]: {
+    [theme.breakpoints.down(Column3To2Breakpoint)]: {
         "& .MuiPaper-root": { width: "324px" },
         "& .MuiDialogContent-root": { padding: 6 },
     },
@@ -142,19 +138,7 @@ const Title = ({
     </DialogTitle>
 );
 
-const MobileColumns = 2;
-const DesktopColumns = 3;
-
 const CollectionRowItemSize = 154;
-
-const getCollectionRowListHeight = (
-    collectionRowList: CollectionSummary[][],
-    windowSize: { height: number; width: number },
-) =>
-    Math.min(
-        collectionRowList.length * CollectionRowItemSize + 32,
-        windowSize?.height - 177,
-    ) || 0;
 
 interface ItemData {
     collectionRowList: CollectionSummary[][];
@@ -211,15 +195,21 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     collectionSummaries,
     onCollectionClick,
 }) => {
+    const isTwoColumn = useMediaQuery(`(width < ${Column3To2Breakpoint}px)`);
+
     const refreshInProgress = useRef(false);
     const shouldRefresh = useRef(false);
 
     const [collectionRowList, setCollectionRowList] = useState([]);
 
-    const windowSize = useWindowSize();
+    const columns = isTwoColumn ? 2 : 3;
+    const maxListContentHeight =
+        Math.ceil(collectionSummaries.length / columns) *
+            CollectionRowItemSize +
+        32; /* padding above first and below last row */
 
     useEffect(() => {
-        if (!windowSize.width || !collectionSummaries) {
+        if (!collectionSummaries) {
             return;
         }
         const main = async () => {
@@ -231,10 +221,6 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
 
             const collectionRowList: CollectionSummary[][] = [];
             let index = 0;
-            const columns =
-                windowSize.width > AllCollectionMobileBreakpoint
-                    ? DesktopColumns
-                    : MobileColumns;
             while (index < collectionSummaries.length) {
                 const collectionRow: CollectionSummary[] = [];
                 for (
@@ -254,7 +240,7 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
             }
         };
         main();
-    }, [collectionSummaries, windowSize]);
+    }, [collectionSummaries, columns]);
 
     // Bundle additional data to list items using the "itemData" prop.
     // It will be accessible to item renderers as props.data.
@@ -262,19 +248,29 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     const itemData = createItemData(collectionRowList, onCollectionClick);
 
     return (
-        <DialogContent sx={{ "&&": { padding: 0 } }}>
-            <List
-                height={getCollectionRowListHeight(
-                    collectionRowList,
-                    windowSize,
+        <DialogContent
+            sx={{
+                "&&": { padding: 0 },
+                height: "min(80svh, var(--et-max-list-content-height))",
+            }}
+            style={
+                {
+                    "--et-max-list-content-height": `${maxListContentHeight}px`,
+                } as React.CSSProperties
+            }
+        >
+            <AutoSizer>
+                {({ width, height }) => (
+                    <FixedSizeList
+                        {...{ width, height }}
+                        itemCount={collectionRowList.length}
+                        itemSize={CollectionRowItemSize}
+                        itemData={itemData}
+                    >
+                        {AlbumsRow}
+                    </FixedSizeList>
                 )}
-                width={"100%"}
-                itemCount={collectionRowList.length}
-                itemSize={CollectionRowItemSize}
-                itemData={itemData}
-            >
-                {AlbumsRow}
-            </List>
+            </AutoSizer>
         </DialogContent>
     );
 };

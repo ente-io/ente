@@ -371,21 +371,6 @@
   "deleteFromBoth": "Ștergeți din ambele",
   "newAlbum": "Album nou",
   "albums": "Albume",
-  "memoryCount": "{count, plural, one{{formattedCount} amintire} few {{formattedCount} amintiri} other{{formattedCount} de amintiri}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "{count} selectate",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -791,14 +776,6 @@
   "share": "Distribuire",
   "unhideToAlbum": "Reafișare în album",
   "restoreToAlbum": "Restaurare în album",
-  "moveItem": "{count, plural, one {Mutați articolul} few {Mutați articole} other {Mutați articolele}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {Adăugați articolul} few {Adăugați articolele} other {Adăugați articolele}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Creați sau selectați un album",
   "selectAlbum": "Selectare album",
   "searchByAlbumNameHint": "Nume album",
@@ -896,7 +873,6 @@
   "authToViewYourMemories": "Vă rugăm să vă autentificați pentru a vă vizualiza amintirile",
   "unlock": "Deblocare",
   "freeUpSpace": "Eliberați spațiu",
-  "freeUpSpaceSaving": "{count, plural, one {Poate fi șters de pe dispozitiv pentru a elibera {formattedSize}} few {Pot fi șterse de pe dispozitiv pentru a elibera {formattedSize}} other {Pot fi șterse de pe dispozitiv pentru a elibera {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {Un fișier din acest album a fost deja salvat în siguranță} few {{formattedNumber} fișiere din acest album au fost deja salvate în siguranță} other {{formattedNumber} de fișiere din acest album au fost deja salvate în siguranță}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -924,18 +900,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Încă {count, plural, one {îl puteți} few {le puteți} other {le puteți}} accesa pe Ente cât timp aveți un abonament activ",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1266,8 +1230,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Găsiți rapid persoane după nume",
-  "addViewers": "{count, plural, one {Adăugați observator} few {Adăugați observatori} other {Adăugați observatori}}",
-  "addCollaborators": "{count, plural, one {Adăugați un colaborator} few {Adăugați colaboratori} other {Adăugați colaboratori}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Apăsați lung un e-mail pentru a verifica criptarea integrală.",
   "developerSettingsWarning": "Sunteți sigur că doriți să modificați setările pentru dezvoltatori?",
   "developerSettings": "Setări dezvoltator",
@@ -1464,15 +1426,6 @@
   },
   "currentlyRunning": "rulează în prezent",
   "ignored": "ignorat",
-  "photosCount": "{count, plural, =0 {Curând} =1 {O zi} other {{count} de zile}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Fișier",
   "searchSectionsLengthMismatch": "Lungimea secțiunilor nu se potrivesc: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1570,5 +1523,6 @@
   "joinAlbum": "Alăturați-vă albumului",
   "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
   "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
-  "join": "Alăturare"
+  "join": "Alăturare",
+  "curatedMemories": "Curated memories"
 }

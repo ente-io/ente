@@ -2,18 +2,18 @@
  * @file Main thread interface to the ML subsystem.
  */
 
-import { isDesktop } from "@/base/app";
-import { blobCache } from "@/base/blob-cache";
-import { ensureElectron } from "@/base/electron";
-import log from "@/base/log";
-import { masterKeyFromSession } from "@/base/session";
-import type { Electron } from "@/base/types/ipc";
-import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import type { UploadItem } from "@/gallery/services/upload";
-import type { EnteFile } from "@/media/file";
-import { FileType } from "@/media/file-type";
-import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
+import { isDesktop } from "ente-base/app";
+import { blobCache } from "ente-base/blob-cache";
+import { ensureElectron } from "ente-base/electron";
+import log from "ente-base/log";
+import { masterKeyFromSession } from "ente-base/session";
+import type { Electron } from "ente-base/types/ipc";
+import { ComlinkWorker } from "ente-base/worker/comlink-worker";
+import type { UploadItem } from "ente-gallery/services/upload";
+import type { EnteFile } from "ente-media/file";
+import { FileType } from "ente-media/file-type";
+import { throttled } from "ente-utils/promise";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import {
@@ -507,7 +507,7 @@ const getMLStatus = async (): Promise<MLStatus> => {
 
     // The worker has a clustering progress set iff it is clustering. This
     // overrides other behaviours.
-    const clusteringProgress = await w.clusteringProgess;
+    const clusteringProgress = await w.clusteringProgress;
     if (clusteringProgress) {
         return {
             phase: "clustering",
@@ -646,6 +646,7 @@ export const clipMatches = (
 export interface AnnotatedFaceID {
     faceID: string;
     personID: string;
+    personName: string | undefined;
 }
 
 /**
@@ -667,12 +668,18 @@ export const getAnnotatedFacesForFile = async (
         const person = personByFaceID.get(faceID);
         if (!person) continue;
         sortableFaces.push([
-            { faceID, personID: person.id },
+            { faceID, personID: person.id, personName: person.name },
             person.fileIDs.length,
         ]);
     }
 
-    sortableFaces.sort(([, a], [, b]) => b - a);
+    sortableFaces.sort((a, b) => {
+        // If only one has a person name, prefer it.
+        if (a[0].personName && !b[0].personName) return -1;
+        if (!a[0].personName && b[0].personName) return 1;
+        // Otherwise (both named or both unnamed) sort by their number of files.
+        return b[1] - a[1];
+    });
     return sortableFaces.map(([f]) => f);
 };
 

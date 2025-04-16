@@ -1,5 +1,5 @@
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import React from "react";
 import { SingleInputForm, type SingleInputFormProps } from "./SingleInputForm";
 

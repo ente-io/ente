@@ -1,60 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* TODO: Split this file to deal with the @/new/photos imports.
+/* TODO: Split this file to deal with the ente-new/photos imports.
 1. Move common components into FileInfoComponents.tsx
-2. Move the rest out to files in the apps themeselves:
+2. Move the rest out to files in the apps themselves:
    - albums/SharedFileInfo
   -  photos/FileInfo
 */
 
-import { LinkButtonUndecorated } from "@/base/components/LinkButton";
-import { type ButtonishProps } from "@/base/components/mui";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
-import { SingleInputForm } from "@/base/components/SingleInputForm";
-import { Titlebar } from "@/base/components/Titlebar";
-import { EllipsizedTypography } from "@/base/components/Typography";
-import {
-    useModalVisibility,
-    type ModalVisibilityProps,
-} from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import { haveWindow } from "@/base/env";
-import { nameAndExtension } from "@/base/file-name";
-import { formattedDate, formattedTime } from "@/base/i18n-date";
-import log from "@/base/log";
-import type { Location } from "@/base/types";
-import { CopyButton } from "@/gallery/components/FileInfoComponents";
-import { tagNumericValue, type RawExifTags } from "@/gallery/services/exif";
-import {
-    changeCaption,
-    changeFileName,
-    updateExistingFilePubMetadata,
-} from "@/gallery/services/file";
-import { formattedByteSize } from "@/gallery/utils/units";
-import { type EnteFile } from "@/media/file";
-import {
-    fileCaption,
-    fileCreationPhotoDate,
-    fileLocation,
-    filePublicMagicMetadata,
-    updateRemotePublicMagicMetadata,
-    type ParsedMetadata,
-    type ParsedMetadataDate,
-} from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { FileDateTimePicker } from "@/new/photos/components/FileDateTimePicker";
-import { FilePeopleList } from "@/new/photos/components/PeopleList";
-import {
-    confirmDisableMapsDialogAttributes,
-    confirmEnableMapsDialogAttributes,
-} from "@/new/photos/components/utils/dialog";
-import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
-import {
-    getAnnotatedFacesForFile,
-    isMLEnabled,
-    type AnnotatedFaceID,
-} from "@/new/photos/services/ml";
-import { updateMapEnabled } from "@/new/photos/services/settings";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -83,6 +34,55 @@ import {
     type ButtonProps,
     type DialogProps,
 } from "@mui/material";
+import { LinkButtonUndecorated } from "ente-base/components/LinkButton";
+import { type ButtonishProps } from "ente-base/components/mui";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
+import { SingleInputForm } from "ente-base/components/SingleInputForm";
+import { Titlebar } from "ente-base/components/Titlebar";
+import { EllipsizedTypography } from "ente-base/components/Typography";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import { haveWindow } from "ente-base/env";
+import { nameAndExtension } from "ente-base/file-name";
+import { formattedDate, formattedTime } from "ente-base/i18n-date";
+import log from "ente-base/log";
+import type { Location } from "ente-base/types";
+import { CopyButton } from "ente-gallery/components/FileInfoComponents";
+import { tagNumericValue, type RawExifTags } from "ente-gallery/services/exif";
+import {
+    changeCaption,
+    changeFileName,
+    updateExistingFilePubMetadata,
+} from "ente-gallery/services/file";
+import { formattedByteSize } from "ente-gallery/utils/units";
+import { type EnteFile } from "ente-media/file";
+import {
+    fileCaption,
+    fileCreationPhotoDate,
+    fileLocation,
+    filePublicMagicMetadata,
+    updateRemotePublicMagicMetadata,
+    type ParsedMetadata,
+    type ParsedMetadataDate,
+} from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { FileDateTimePicker } from "ente-new/photos/components/FileDateTimePicker";
+import { FilePeopleList } from "ente-new/photos/components/PeopleList";
+import {
+    confirmDisableMapsDialogAttributes,
+    confirmEnableMapsDialogAttributes,
+} from "ente-new/photos/components/utils/dialog";
+import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import {
+    getAnnotatedFacesForFile,
+    isMLEnabled,
+    type AnnotatedFaceID,
+} from "ente-new/photos/services/ml";
+import { updateMapEnabled } from "ente-new/photos/services/settings";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -215,6 +215,21 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     useEffect(() => {
         if (!isMLEnabled()) return;
 
+        // Take a dependency on open so that we refresh the list of people by
+        // calling `getAnnotatedFacesForFile` again when the file info dialog is
+        // closed and reopened.
+        //
+        // This covers a scenario like:
+        // - User opens file info panel
+        // - Selects one of the faces
+        // - Gives it a name
+        // - Then opens the same file again, and reopens the file info panel.
+        //
+        // Since the `file` hasn't changed, this hook wouldn't rerun. So we also
+        // take a dependency on the open state of the dialog, causing us to
+        // rerun whenever reopened (even if for the same file).
+        if (!open) return;
+
         let didCancel = false;
 
         void getAnnotatedFacesForFile(file).then(
@@ -224,7 +239,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         return () => {
             didCancel = true;
         };
-    }, [file]);
+    }, [file, open]);
 
     const openEnableMapConfirmationDialog = () =>
         showMiniDialog(

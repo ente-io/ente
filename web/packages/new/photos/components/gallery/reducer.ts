@@ -1,17 +1,17 @@
 import {
     isArchivedCollection,
     isPinnedCollection,
-} from "@/gallery/services/magic-metadata";
-import { type Collection } from "@/media/collection";
-import type { EnteFile, FilePrivateMagicMetadata } from "@/media/file";
-import { mergeMetadata } from "@/media/file";
-import { isArchivedFile } from "@/media/file-metadata";
+} from "ente-gallery/services/magic-metadata";
+import { type Collection } from "ente-media/collection";
+import type { EnteFile, FilePrivateMagicMetadata } from "ente-media/file";
+import { mergeMetadata } from "ente-media/file";
+import { isArchivedFile } from "ente-media/file-metadata";
 import {
     createCollectionNameByID,
     isHiddenCollection,
-} from "@/new/photos/services/collection";
-import { splitByPredicate } from "@/utils/array";
-import type { User } from "@ente/shared/user/types";
+} from "ente-new/photos/services/collection";
+import type { User } from "ente-shared/user/types";
+import { splitByPredicate } from "ente-utils/array";
 import { t } from "i18next";
 import React, { useReducer } from "react";
 import {
@@ -1433,7 +1433,7 @@ const findCoverFiles = (
 
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         const coverID = collection.pubMagicMetadata?.data?.coverID;
-        if (typeof coverID === "number" && coverID > 0) {
+        if (typeof coverID == "number" && coverID > 0) {
             coverFile = collectionFiles.find(({ id }) => id === coverID);
         }
 

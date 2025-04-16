@@ -371,21 +371,6 @@
   "deleteFromBoth": "Xóa khỏi cả hai",
   "newAlbum": "Album mới",
   "albums": "Album",
-  "memoryCount": "{count, plural, zero{không có kỷ niệm} one{{formattedCount} kỷ niệm} other{{formattedCount} kỷ niệm}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "{count} đã chọn",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -791,14 +776,6 @@
   "share": "Chia sẻ",
   "unhideToAlbum": "Hiện lại vào album",
   "restoreToAlbum": "Khôi phục vào album",
-  "moveItem": "{count, plural, one {Di chuyển mục} other {Di chuyển các mục}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {Thêm mục} other {Thêm các mục}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Tạo hoặc chọn album",
   "selectAlbum": "Chọn album",
   "searchByAlbumNameHint": "Tên album",
@@ -896,7 +873,6 @@
   "authToViewYourMemories": "Vui lòng xác thực để xem kỷ niệm của bạn",
   "unlock": "Mở khóa",
   "freeUpSpace": "Giải phóng không gian",
-  "freeUpSpaceSaving": "{count, plural, one {Nó có thể được xóa khỏi thiết bị để giải phóng {formattedSize}} other {Chúng có thể được xóa khỏi thiết bị để giải phóng {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 tệp} other {{formattedNumber} tệp}} trong album này đã được sao lưu an toàn",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -924,18 +900,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Bạn vẫn có thể truy cập {count, plural, one {nó} other {chúng}} trên Ente miễn là bạn có một đăng ký hoạt động",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1266,8 +1230,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Tìm người nhanh chóng theo tên",
-  "addViewers": "{count, plural, zero {Thêm người xem} one {Thêm người xem} other {Thêm người xem}}",
-  "addCollaborators": "{count, plural, zero {Thêm cộng tác viên} one {Thêm cộng tác viên} other {Thêm cộng tác viên}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Nhấn giữ một email để xác minh mã hóa đầu cuối.",
   "developerSettingsWarning": "Bạn có chắc chắn muốn thay đổi cài đặt Nhà phát triển không?",
   "developerSettings": "Cài đặt Nhà phát triển",
@@ -1399,16 +1361,6 @@
   "enableMachineLearningBanner": "Bật học máy cho tìm kiếm ma thuật và nhận diện khuôn mặt",
   "searchDiscoverEmptySection": "Hình ảnh sẽ được hiển thị ở đây sau khi hoàn tất xử lý và đồng bộ",
   "searchPersonsEmptySection": "Người sẽ được hiển thị ở đây sau khi hoàn tất xử lý và đồng bộ",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Đã thêm 0 người xem} =1 {Đã thêm 1 người xem} other {Đã thêm {count} người xem}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Đã thêm 0 cộng tác viên} =1 {Đã thêm 1 cộng tác viên} other {Đã thêm {count} cộng tác viên}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1484,15 +1436,6 @@
   },
   "currentlyRunning": "đang chạy",
   "ignored": "bỏ qua",
-  "photosCount": "{count, plural, =0 {không có hình ảnh} =1 {1 hình ảnh} other {{count} hình ảnh}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Tệp",
   "searchSectionsLengthMismatch": "Độ dài các phần không khớp: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1590,5 +1533,6 @@
   "joinAlbum": "Tham gia album",
   "joinAlbumSubtext": "để xem và thêm ảnh của bạn",
   "joinAlbumSubtextViewer": "thêm vào album được chia sẻ",
-  "join": "Tham gia"
+  "join": "Tham gia",
+  "curatedMemories": "Curated memories"
 }

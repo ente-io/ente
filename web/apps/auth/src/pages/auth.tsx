@@ -1,17 +1,3 @@
-import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
-import { stashRedirect } from "@/accounts/services/redirect";
-import { EnteLogo } from "@/base/components/EnteLogo";
-import { LoadingIndicator } from "@/base/components/loaders";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { NavbarBase } from "@/base/components/Navbar";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@/base/components/OverflowMenu";
-import { useBaseContext } from "@/base/context";
-import { isHTTP401Error } from "@/base/http";
-import log from "@/base/log";
-import { masterKeyFromSessionIfLoggedIn } from "@/base/session";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
     Box,
@@ -23,6 +9,20 @@ import {
     Typography,
     useTheme,
 } from "@mui/material";
+import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
+import { stashRedirect } from "ente-accounts/services/redirect";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import { LoadingIndicator } from "ente-base/components/loaders";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { NavbarBase } from "ente-base/components/Navbar";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "ente-base/components/OverflowMenu";
+import { useBaseContext } from "ente-base/context";
+import { isHTTP401Error } from "ente-base/http";
+import log from "ente-base/log";
+import { masterKeyFromSessionIfLoggedIn } from "ente-base/session";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";

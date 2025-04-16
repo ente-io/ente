@@ -84,14 +84,14 @@ class Configuration {
   late String _sharedDocumentsMediaDirectory;
   String? _volatilePassword;
 
-  final _secureStorageOptionsIOS = const IOSOptions(
-    accessibility: KeychainAccessibility.first_unlock_this_device,
-  );
-
   Future<void> init() async {
     try {
       _preferences = await SharedPreferences.getInstance();
-      _secureStorage = const FlutterSecureStorage();
+      _secureStorage = const FlutterSecureStorage(
+        iOptions: IOSOptions(
+          accessibility: KeychainAccessibility.first_unlock_this_device,
+        ),
+      );
       _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
       _tempDocumentsDirPath = _documentsDirectory + "/temp/";
       final tempDocumentsDir = Directory(_tempDocumentsDirPath);
@@ -104,15 +104,13 @@ class Configuration {
           _documentsDirectory + "/ente-shared-media";
       Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
       if (!_preferences.containsKey(tokenKey)) {
-        await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
+        await _secureStorage.deleteAll();
       } else {
         _key = await _secureStorage.read(
           key: keyKey,
-          iOptions: _secureStorageOptionsIOS,
         );
         _secretKey = await _secureStorage.read(
           key: secretKeyKey,
-          iOptions: _secureStorageOptionsIOS,
         );
         if (_key == null) {
           await logout(autoLogout: true);
@@ -191,7 +189,7 @@ class Configuration {
       }
     }
     await _preferences.clear();
-    await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
+    await _secureStorage.deleteAll();
     _key = null;
     _cachedToken = null;
     _secretKey = null;
@@ -499,13 +497,11 @@ class Configuration {
       // Used to clear key from secure storage
       await _secureStorage.delete(
         key: keyKey,
-        iOptions: _secureStorageOptionsIOS,
       );
     } else {
       await _secureStorage.write(
         key: keyKey,
         value: key,
-        iOptions: _secureStorageOptionsIOS,
       );
     }
   }
@@ -516,13 +512,11 @@ class Configuration {
       // Used to clear secret key from secure storage
       await _secureStorage.delete(
         key: secretKeyKey,
-        iOptions: _secureStorageOptionsIOS,
       );
     } else {
       await _secureStorage.write(
         key: secretKeyKey,
         value: secretKey,
-        iOptions: _secureStorageOptionsIOS,
       );
     }
   }
@@ -656,12 +650,10 @@ class Configuration {
       await _secureStorage.write(
         key: keyKey,
         value: _key,
-        iOptions: _secureStorageOptionsIOS,
       );
       await _secureStorage.write(
         key: secretKeyKey,
         value: _secretKey,
-        iOptions: _secureStorageOptionsIOS,
       );
       await _preferences.setBool(
         hasMigratedSecureStorageKey,

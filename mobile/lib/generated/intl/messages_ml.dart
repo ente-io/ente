@@ -42,6 +42,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("അക്കൗണ്ട് തുറക്കുക"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("പുതിയ അക്കൗണ്ട് തുറക്കുക"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "custom": MessageLookupByLibrary.simpleMessage("ഇഷ്‌ടാനുസൃതം"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("ഇരുണ്ട"),
         "deleteAccount":

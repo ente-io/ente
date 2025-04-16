@@ -1,9 +1,9 @@
-import { unstashRedirect } from "@/accounts/services/redirect";
-import { LoadingIndicator } from "@/base/components/loaders";
-import { fromB64URLSafeNoPaddingString } from "@/base/crypto/libsodium";
-import log from "@/base/log";
-import { nullToUndefined } from "@/utils/transform";
-import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
+import { unstashRedirect } from "ente-accounts/services/redirect";
+import { LoadingIndicator } from "ente-base/components/loaders";
+import { fromB64URLSafeNoPaddingString } from "ente-base/crypto/libsodium";
+import log from "ente-base/log";
+import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
+import { nullToUndefined } from "ente-utils/transform";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 

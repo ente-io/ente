@@ -426,14 +426,6 @@
   "shareLink": "Dela länk",
   "delete": "Radera",
   "share": "Dela",
-  "moveItem": "{count, plural, one {Flytta objekt} other {Flytta objekt}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {Lägg till objekt} other {Lägg till objekt}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Skapa eller välj album",
   "selectAlbum": "Välj album",
   "searchByAlbumNameHint": "Albumnamn",
@@ -539,5 +531,6 @@
   "sort": "Sortera",
   "newPerson": "Ny person",
   "addName": "Lägg till namn",
-  "add": "Lägg till"
+  "add": "Lägg till",
+  "curatedMemories": "Curated memories"
 }

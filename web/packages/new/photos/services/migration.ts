@@ -1,7 +1,7 @@
-import { isDesktop } from "@/base/app";
-import { getKVN, removeKV, setKV } from "@/base/kv";
-import log from "@/base/log";
-import localForage from "@ente/shared/storage/localForage";
+import { isDesktop } from "ente-base/app";
+import { getKVN, removeKV, setKV } from "ente-base/kv";
+import log from "ente-base/log";
+import localForage from "ente-shared/storage/localForage";
 import { deleteDB } from "idb";
 import { retryIndexingFailuresIfNeeded } from "./ml";
 

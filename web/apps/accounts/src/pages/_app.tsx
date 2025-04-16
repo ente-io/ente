@@ -1,15 +1,18 @@
-import { staticAppTitle } from "@/base/app";
-import { assertionFailed } from "@/base/assert";
-import { CustomHead } from "@/base/components/Head";
-import { LoadingIndicator } from "@/base/components/loaders";
-import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
-import { useSetupI18n, useSetupLogs } from "@/base/components/utils/hooks-app";
-import { photosTheme } from "@/base/components/utils/theme";
-import { BaseContext, deriveBaseContext } from "@/base/context";
 import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
+import { staticAppTitle } from "ente-base/app";
+import { assertionFailed } from "ente-base/assert";
+import { CustomHead } from "ente-base/components/Head";
+import { LoadingIndicator } from "ente-base/components/loaders";
+import { AttributedMiniDialog } from "ente-base/components/MiniDialog";
+import { useAttributedMiniDialog } from "ente-base/components/utils/dialog";
+import {
+    useSetupI18n,
+    useSetupLogs,
+} from "ente-base/components/utils/hooks-app";
+import { photosTheme } from "ente-base/components/utils/theme";
+import { BaseContext, deriveBaseContext } from "ente-base/context";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import React, { useMemo } from "react";
