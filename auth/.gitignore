@@ -42,6 +42,3 @@ lib/generated_plugin_registrant.dart
 
 android/key.properties
 dist/
-
-# FVM Version Cache
-.fvm/
