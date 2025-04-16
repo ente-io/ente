@@ -84,6 +84,28 @@ export interface HLSPlaylistData {
  * the given file.
  *
  * See: [Note: Video playlist and preview]
+ *
+ * ---
+ *
+ * [Note: Caching HLS playlist data]
+ *
+ * The playlist data can be cached in an asymmetric manner.
+ *
+ * - If a file has a corresponding HLS playlist, then currently there is no
+ *   scenario (apart from file deletion, where the playlist also gets deleted)
+ *   where the playlist is updated or deleted after being created. There is
+ *   still going to be a limit to the validity of the presigned chunk URLs
+ *   within the playlist we create which we do handle (see
+ *   `createHLSPlaylistItemDataValidity`), but the original playlist itself does
+ *   not change. In particular, a positive result ("this file has a playlist")
+ *   can be cached indefinitely.
+ *
+ * - If a file does not have a HLS playlist, and it is eligible for being
+ *   streamed (e.g. it is not too small where the streaming overhead is not
+ *   required), then a client (this one, or a different one) can process it at
+ *   any arbitrary time. So the negative result ("this file does not have a
+ *   playlist") cannot be cached.
+ *
  */
 export const hlsPlaylistDataForFile = async (
     file: EnteFile,
