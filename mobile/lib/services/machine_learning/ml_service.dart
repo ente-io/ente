@@ -54,8 +54,6 @@ class MLService {
   bool _shouldPauseIndexingAndClustering = false;
 
   static const _kForceClusteringFaceCount = 8000;
-  late final mlDataDB = MLDataDB.instance;
-  late final offlinemlDataDB = OfflineMLDataDB.instance;
 
   bool get isOffline => true;
 
@@ -127,7 +125,7 @@ class MLService {
 
   // localMode indicates if the function is called from the offline mode
   // in such cases, files are pulled from local device & indexes are kept locally
-  Future<void> runAllML({bool force = false, bool localMode = false}) async {
+  Future<void> runAllML({bool force = false, bool localMode = true}) async {
     try {
       if (force) {
         _mlControllerStatus = true;
@@ -135,10 +133,12 @@ class MLService {
       if (!_canRunMLFunction(function: "AllML") && !force) return;
       _isRunningML = true;
       await sync();
+      final mlDataDB = localMode
+          ? OfflineMLDataDB.instance as IMLDataDB
+          : MLDataDB.instance as IMLDataDB;
 
-      int unclusteredFacesCount = localMode
-          ? await offlinemlDataDB.getUnclusteredFaceCount()
-          : await mlDataDB.getUnclusteredFaceCount();
+      final int unclusteredFacesCount =
+          await mlDataDB.getUnclusteredFaceCount();
       if (unclusteredFacesCount > _kForceClusteringFaceCount) {
         _logger.info(
           "There are $unclusteredFacesCount unclustered faces, doing clustering first",
@@ -154,10 +154,7 @@ class MLService {
       if (canFetch()) {
         await fetchAndIndexAllImages(local: localMode);
       }
-      unclusteredFacesCount = localMode
-          ? await offlinemlDataDB.getUnclusteredFaceCount()
-          : await mlDataDB.getUnclusteredFaceCount();
-      if (unclusteredFacesCount > 0) {
+      if ((await mlDataDB.getUnclusteredFaceCount()) > 0) {
         await clusterAllImages(localMode: localMode);
       }
       if (_mlControllerStatus == true) {
@@ -198,14 +195,14 @@ class MLService {
   ///
   /// This function first fetches from remote and checks if the image has already been analyzed
   /// with the lastest faceMlVersion and stored on remote or local database. If so, it skips the image.
-  Future<void> fetchAndIndexAllImages({bool local = false}) async {
+  Future<void> fetchAndIndexAllImages({required bool local}) async {
     if (!_canRunMLFunction(function: "Indexing")) return;
 
     try {
       _isIndexingOrClusteringRunning = true;
       _logger.info('starting image indexing');
       final Stream<List<FileMLInstruction>> instructionStream =
-          fetchEmbeddingsAndInstructions(fileDownloadMlLimit);
+          fetchEmbeddingsAndInstructions(fileDownloadMlLimit, local);
 
       int fileAnalyzedCount = 0;
       final Stopwatch stopwatch = Stopwatch()..start();
@@ -232,9 +229,9 @@ class MLService {
 
           await MLIndexingIsolate.instance.ensureLoadedModels(instruction);
           if (local) {
-            futures.add(_processImage<String>(instruction));
+            futures.add(_processImage<String>(instruction, local));
           } else {
-            futures.add(_processImage<int>(instruction));
+            futures.add(_processImage<int>(instruction, local));
           }
         }
         final awaitedFutures = await Future.wait(futures);
@@ -252,7 +249,7 @@ class MLService {
       );
       _logStatus();
     } catch (e, s) {
-      _logger.severe("indexAllImages failed", e, s);
+      _logger.severe("indexAllImages failed offlineMode =$local", e, s);
     } finally {
       _isIndexingOrClusteringRunning = false;
       _cancelPauseIndexingAndClustering();
@@ -264,18 +261,14 @@ class MLService {
     bool force = false,
     bool localMode = false,
   }) async {
-    if (localMode) {
-      debugPrint("XXX skip clustering in offline mode");
-      return;
-    }
+    final mlDataDB = localMode
+        ? OfflineMLDataDB.instance as IMLDataDB
+        : MLDataDB.instance as IMLDataDB;
     if (!_canRunMLFunction(function: "Clustering") && !force) return;
     if (_clusteringIsHappening) {
       _logger.info("clusterAllImages() is already running, returning");
       return;
     }
-    final mlDB = localMode
-        ? OfflineMLDataDB.instance as IMLDataDB
-        : MLDataDB.instance as IMLDataDB;
 
     _logger.info("`clusterAllImages()` called");
     _isIndexingOrClusteringRunning = true;
@@ -299,12 +292,13 @@ class MLService {
 
     try {
       // Get a sense of the total number of faces in the database
-      final int totalFaces = await mlDB.getTotalFaceCount();
-      final fileIDToCreationTime =
-          await FilesDB.instance.getFileIDToCreationTime();
+      final int totalFaces = await mlDataDB.getTotalFaceCount();
+      final fileIDToCreationTime = localMode
+          ? await localDB.getIDToCreationTime()
+          : await FilesDB.instance.getFileIDToCreationTime();
       final startEmbeddingFetch = DateTime.now();
       // read all embeddings
-      final result = await mlDB.getFaceInfoForClustering(
+      final result = await mlDataDB.getFaceInfoForClustering(
         maxFaces: totalFaces,
       );
       final Set<int> missingFileIDs = {};
@@ -379,9 +373,9 @@ class MLService {
           }
 
           final clusteringResult =
-              await FaceClusteringService.instance.predictLinearIsolate(
+              await FaceClusteringService.instance.predictLinearIsolate<T>(
             faceInfoForClustering.toSet(),
-            fileIDToCreationTime: fileIDToCreationTime,
+            fileIDToCreationTime: fileIDToCreationTime as Map<T, int>,
             offset: offset,
             oldClusterSummaries: oldClusterSummaries,
           );
@@ -454,12 +448,19 @@ class MLService {
     }
   }
 
-  Future<bool> _processImage<T>(FileMLInstruction instruction) async {
+  Future<bool> _processImage<T>(
+    FileMLInstruction instruction,
+    bool offlineMode,
+  ) async {
     bool actuallyRanML = false;
-    final bool isOfflineProcessing = T is String;
+    final bool isOfflineProcessing = offlineMode;
+    _logger.info('processing offline $offlineMode');
     final T fileID = isOfflineProcessing
         ? instruction.file.localID! as T
         : instruction.file.uploadedFileID! as T;
+    final mlDataDB = isOfflineProcessing
+        ? OfflineMLDataDB.instance as IMLDataDB<String>
+        : MLDataDB.instance as IMLDataDB<int>;
 
     try {
       final String filePath = await getImagePathForML(instruction.file);
@@ -482,12 +483,7 @@ class MLService {
       actuallyRanML = result.ranML;
 
       if (!actuallyRanML) return actuallyRanML;
-      // Prepare storing data on remote
-      final FileDataEntity dataEntity = instruction.existingRemoteFileML ??
-          FileDataEntity.empty(
-            instruction.file.uploadedFileID ?? -1,
-            DataType.mlData,
-          );
+
       // Faces results
       final List<Face> faces = [];
       if (result.facesRan) {
@@ -505,45 +501,56 @@ class MLService {
             );
           }
         }
-        dataEntity.putFace(
-          RemoteFaceEmbedding(
-            faces,
-            faceMlVersion,
-            client: client,
-            height: result.decodedImageSize.height,
-            width: result.decodedImageSize.width,
-          ),
-        );
       }
-      // Clip results
-      if (result.clipRan) {
-        dataEntity.putClip(
-          RemoteClipEmbedding(
-            result.clip!.embedding,
-            version: clipMlVersion,
-            client: client,
-          ),
-        );
-      }
+
       // Storing results on remote
       if (!isOfflineProcessing) {
+        // Prepare storing data on remote
+        final FileDataEntity dataEntity = instruction.existingRemoteFileML ??
+            FileDataEntity.empty(
+              instruction.file.uploadedFileID ?? -1,
+              DataType.mlData,
+            );
+        if (result.facesRan) {
+          dataEntity.putFace(
+            RemoteFaceEmbedding(
+              faces,
+              faceMlVersion,
+              client: client,
+              height: result.decodedImageSize.height,
+              width: result.decodedImageSize.width,
+            ),
+          );
+        }
+        // Clip results
+        if (result.clipRan) {
+          dataEntity.putClip(
+            RemoteClipEmbedding(
+              result.clip!.embedding,
+              version: clipMlVersion,
+              client: client,
+            ),
+          );
+        }
         await FileDataService.instance.putFileData(
           instruction.file,
           dataEntity,
         );
         _logger.info("ML results for fileID ${result.fileId} stored on remote");
-        // Storing results locally
-        if (result.facesRan) await mlDataDB.bulkInsertFaces(faces);
-        if (result.clipRan) {
-          await mlDataDB.putClip([
-            ClipEmbedding<T>(
-              fileID: result.clip!.fileID,
-              embedding: result.clip!.embedding,
-              version: clipMlVersion,
-            ),
-          ]);
-        }
       }
+
+      // Storing results locally
+      if (result.facesRan) await mlDataDB.bulkInsertFaces(faces);
+      if (result.clipRan) {
+        await mlDataDB.putClip<T>([
+          ClipEmbedding<T>(
+            fileID: result.clip!.fileID,
+            embedding: result.clip!.embedding,
+            version: clipMlVersion,
+          ),
+        ]);
+      }
+
       _logger.info("ML results for fileID ${result.fileId} stored locally");
       return actuallyRanML;
     } catch (e, s) {
@@ -557,20 +564,19 @@ class MLService {
               errorString.contains('FileSizeTooLargeForMobileIndexing');
       if (acceptedIssue) {
         _logger.severe(
-          '$errorString for fileID ${instruction.file.uploadedFileID} (format $format, type $fileType, size $size), storing empty results so indexing does not get stuck',
+          '$errorString for fileID $fileID (format $format, type $fileType, size $size), storing empty results so indexing does not get stuck',
           e,
           s,
         );
         await mlDataDB.bulkInsertFaces(
-          [Face.empty(instruction.file.uploadedFileID!, error: true)],
+          [Face.empty(fileID, error: true)],
         );
 
-        await mlDataDB
-            .putClip([ClipEmbedding.empty(instruction.file.uploadedFileID!)]);
+        await mlDataDB.putClip<T>([ClipEmbedding<T>.empty(fileID)]);
         return true;
       }
       _logger.severe(
-        "Failed to index file for fileID ${instruction.file.uploadedFileID} (format $format, type $fileType, size $size). Not storing any results locally, which means it will be automatically retried later.",
+        "Failed to index file for fileID $fileID (format $format, type $fileType, size $size). Not storing any results locally, which means it will be automatically retried later.",
         e,
         s,
       );

@@ -93,9 +93,9 @@ class FaceClusteringService extends SuperIsolate {
   /// Runs the clustering algorithm [runLinearClustering] on the given [input], in an isolate.
   ///
   /// Returns the clustering result, which is a list of clusters, where each cluster is a list of indices of the dataset.
-  Future<ClusteringResult?> predictLinearIsolate(
+  Future<ClusteringResult?> predictLinearIsolate<T>(
     Set<FaceDbInfoForClustering> input, {
-    Map<int, int>? fileIDToCreationTime,
+    Map<T, int>? fileIDToCreationTime,
     double distanceThreshold = kRecommendedDistanceThreshold,
     double conservativeDistanceThreshold = kConservativeDistanceThreshold,
     bool useDynamicThreshold = true,

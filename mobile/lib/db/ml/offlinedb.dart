@@ -36,9 +36,9 @@ import 'package:sqlite_async/sqlite_async.dart';
 /// [clipTable] - Stores the embeddings of the CLIP model
 /// [fileDataTable] - Stores data about the files that are already processed by the ML models
 class OfflineMLDataDB with SqlDbBase implements IMLDataDB<String> {
-  static final Logger _logger = Logger("MLDataDB");
+  static final Logger _logger = Logger("OfflineMLDataDB");
 
-  static const _databaseName = "ente.ml.db";
+  static const _databaseName = "ente.offlineml.db";
 
   static Logger get logger => _logger;
 
@@ -1185,13 +1185,13 @@ class OfflineMLDataDB with SqlDbBase implements IMLDataDB<String> {
 
   // Get indexed FileIDs
   @override
-  Future<Map<int, int>> clipIndexedFileWithVersion() async {
+  Future<Map<String, int>> clipIndexedFileWithVersion() async {
     final db = await instance.asyncDB;
     final maps = await db
         .getAll('SELECT $fileIDColumn , $mlVersionColumn FROM $clipTable');
-    final Map<int, int> result = {};
+    final Map<String, int> result = {};
     for (final map in maps) {
-      result[map[fileIDColumn] as int] = map[mlVersionColumn] as int;
+      result[map[fileIDColumn] as String] = map[mlVersionColumn] as int;
     }
     return result;
   }
@@ -1208,7 +1208,7 @@ class OfflineMLDataDB with SqlDbBase implements IMLDataDB<String> {
   }
 
   @override
-  Future<void> putClip(List<ClipEmbedding> embeddings) async {
+  Future<void> putClip<String>(List<ClipEmbedding<String>> embeddings) async {
     if (embeddings.isEmpty) return;
     final db = await instance.asyncDB;
     if (embeddings.length == 1) {
@@ -1217,7 +1217,8 @@ class OfflineMLDataDB with SqlDbBase implements IMLDataDB<String> {
         _getRowFromEmbedding(embeddings.first),
       );
     } else {
-      final inputs = embeddings.map((e) => _getRowFromEmbedding(e)).toList();
+      final inputs =
+          embeddings.map((e) => _getRowFromEmbedding<String>(e)).toList();
       await db.executeBatch(
         'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) values(?, ?, ?)',
         inputs,
@@ -1242,7 +1243,7 @@ class OfflineMLDataDB with SqlDbBase implements IMLDataDB<String> {
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
-  List<Object?> _getRowFromEmbedding(ClipEmbedding embedding) {
+  List<Object?> _getRowFromEmbedding<T>(ClipEmbedding<T> embedding) {
     return [
       embedding.fileID,
       Float32List.fromList(embedding.embedding).buffer.asUint8List(),

@@ -6,6 +6,7 @@ import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
+import "package:photos/db/ml/offlinedb.dart";
 import "package:photos/extensions/list.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -104,15 +105,16 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     if (enteFile.skipIndex) {
       continue;
     }
-    if (queuedFiledIDs.contains(enteFile.uploadedFileID)) {
+    final int id = enteFile.uploadedFileID!;
+    if (queuedFiledIDs.contains(id)) {
       continue;
     }
-    queuedFiledIDs.add(enteFile.uploadedFileID!);
+    queuedFiledIDs.add(id);
 
     final shouldRunFaces =
-        _shouldRunIndexing(enteFile, faceIndexedFileIDs, faceMlVersion);
+        _shouldRunIndexing(id, faceIndexedFileIDs, faceMlVersion);
     final shouldRunClip =
-        _shouldRunIndexing(enteFile, clipIndexedFileIDs, clipMlVersion);
+        _shouldRunIndexing(id, clipIndexedFileIDs, clipMlVersion);
     if (!shouldRunFaces && !shouldRunClip) {
       continue;
     }
@@ -180,18 +182,65 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   return [...splitResult.matched, ...splitResult.unmatched];
 }
 
+Future<List<FileMLInstruction>> getOfflineFilesForMlIndexing() async {
+  final mlDataDB = OfflineMLDataDB.instance;
+  final time = DateTime.now();
+  // Get indexed fileIDs for each ML service
+  final Map<String, int> faceIndexedFileIDs =
+      await mlDataDB.faceIndexedFileIds();
+  final Map<String, int> clipIndexedFileIDs =
+      await mlDataDB.clipIndexedFileWithVersion();
+  final Set<String> queuedFiledIDs = {};
+
+  // Get all regular files and all hidden files
+  final enteFiles = await SearchService.instance.getAllFilesForSearch();
+  final List<FileMLInstruction> hiddenFilesToIndex = [];
+  for (final EnteFile enteFile in enteFiles) {
+    if (enteFile.localID == null) {
+      continue;
+    }
+    final String id = enteFile.localID!;
+    if (queuedFiledIDs.contains(id)) {
+      continue;
+    }
+    queuedFiledIDs.add(id);
+
+    final shouldRunFaces =
+        _shouldRunIndexing(id, faceIndexedFileIDs, faceMlVersion);
+    final shouldRunClip =
+        _shouldRunIndexing(id, clipIndexedFileIDs, clipMlVersion);
+    if (!shouldRunFaces && !shouldRunClip) {
+      continue;
+    }
+    final instruction = FileMLInstruction(
+      file: enteFile,
+      shouldRunFaces: shouldRunFaces,
+      shouldRunClip: shouldRunClip,
+    );
+    hiddenFilesToIndex.add(instruction);
+  }
+  _logger.info(
+    "Getting list of  ${hiddenFilesToIndex.length} offline files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
+  );
+  return hiddenFilesToIndex;
+}
+
 Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
   int yieldSize,
+  bool offlineMode,
 ) async* {
   final mlDataDB = MLDataDB.instance;
-  final List<FileMLInstruction> filesToIndex = await getFilesForMlIndexing();
+  final List<FileMLInstruction> filesToIndex = offlineMode
+      ? await getOfflineFilesForMlIndexing()
+      : await getFilesForMlIndexing();
   final List<List<FileMLInstruction>> chunks =
       filesToIndex.chunks(embeddingFetchLimit);
   List<FileMLInstruction> batchToYield = [];
 
   for (final chunk in chunks) {
-    if (!localSettings.remoteFetchEnabled) {
-      _logger.warning("remoteFetchEnabled is false, skiping embedding fetch");
+    if (!localSettings.remoteFetchEnabled || offlineMode) {
+      _logger.warning(
+          "remote ml fetch skipped, either disabled false or offline mode $offlineMode");
       final batches = chunk.chunks(yieldSize);
       for (final batch in batches) {
         yield batch;
@@ -375,12 +424,11 @@ Future<String> getImagePathForML(EnteFile enteFile) async {
   return imagePath;
 }
 
-bool _shouldRunIndexing(
-  EnteFile enteFile,
-  Map<int, int> indexedFileIds,
+bool _shouldRunIndexing<T>(
+  T id,
+  Map<T, int> indexedFileIds,
   int newestVersion,
 ) {
-  final id = enteFile.uploadedFileID!;
   return !indexedFileIds.containsKey(id) || indexedFileIds[id]! < newestVersion;
 }
 

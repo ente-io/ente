@@ -171,6 +171,17 @@ class LocalDB with SqlDbBase {
     return ids;
   }
 
+  Future<Map<String, int>> getIDToCreationTime() async {
+    final result = await _sqliteDB.execute(
+      "SELECT id, created_at FROM assets",
+    );
+    final idToCreationTime = <String, int>{};
+    for (var row in result) {
+      idToCreationTime[row["id"] as String] = row["created_at"] as int;
+    }
+    return idToCreationTime;
+  }
+
   Future<Map<String, Set<String>>> pathToAssetIDs() async {
     final result = await _sqliteDB
         .execute("SELECT path_id, asset_id FROM device_path_assets");

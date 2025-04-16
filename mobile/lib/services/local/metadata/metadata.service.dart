@@ -64,7 +64,7 @@ class LocalMetadataService {
       );
       return result;
     } catch (e) {
-      _logger.severe("failed to getMetadata", e);
+      _logger.severe("failed to getMetadata for $id", e);
       rethrow;
     }
   }

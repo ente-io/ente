@@ -1208,7 +1208,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   @override
-  Future<void> putClip(List<ClipEmbedding> embeddings) async {
+  Future<void> putClip<int>(List<ClipEmbedding> embeddings) async {
     if (embeddings.isEmpty) return;
     final db = await instance.asyncDB;
     if (embeddings.length == 1) {
