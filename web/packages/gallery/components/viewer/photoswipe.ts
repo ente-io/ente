@@ -1,5 +1,6 @@
 import { pt } from "ente-base/i18n";
 import log from "ente-base/log";
+import { albumsAppOrigin } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
@@ -166,7 +167,15 @@ export const moreMenuID = "ente-pswp-more-menu";
 // TODO(HLS):
 let _shouldUsePlayerV2: boolean | undefined;
 export const shouldUsePlayerV2 = () =>
-    (_shouldUsePlayerV2 ??= settingsSnapshot().isInternalUser);
+    // Enable for internal users and public albums
+    (_shouldUsePlayerV2 ??=
+        settingsSnapshot().isInternalUser || isPublicAlbumApp());
+
+const isPublicAlbumApp = () => {
+    const currentURL = new URL(window.location.href);
+    const albumsURL = new URL(albumsAppOrigin());
+    return currentURL.host == albumsURL.host;
+};
 
 /**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
