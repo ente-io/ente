@@ -4,9 +4,9 @@ import "dart:convert";
 import "dart:io";
 
 import "package:collection/collection.dart";
+import "package:computer/computer.dart";
 import "package:dio/dio.dart";
 import "package:encrypt/encrypt.dart" as enc;
-import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_session.dart";
 import "package:ffmpeg_kit_flutter/return_code.dart";
 import "package:flutter/foundation.dart";
@@ -31,6 +31,7 @@ import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/services/isolated_ffmpeg_service.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -225,50 +226,67 @@ class PreviewVideoStore {
 
       // case 1, if it's already a good stream
       if (bitrate != null && bitrate <= 4000 * 1000 && codecIsH264) {
-        session = await FFmpegKit.execute(
-          '-i "${file.path}" '
-          '-c:v copy -c:a copy '
-          '-f hls -hls_time 2 -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          '$prefix/output.m3u8',
+        session = await Computer.shared().compute(
+          IsolatedFfmpegService.ffmpegRun,
+          param: {
+            "command": '-i "${file.path}" '
+                '-c:v copy -c:a copy '
+                '-f hls -hls_time 2 -hls_flags single_file '
+                '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
+                '$prefix/output.m3u8',
+          },
         );
       } // case 2, if it's bitrate is good, but codec is not
       else if (bitrate != null &&
           codec != null &&
           bitrate <= 2000 * 1000 &&
           !codecIsH264) {
-        session = await FFmpegKit.execute(
-          '-i "${file.path}" '
-          '-vf "format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
-          '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
-          '-c:v libx264 -crf 23 -preset medium '
-          '-c:a copy '
-          '-f hls -hls_time 2 -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          '$prefix/output.m3u8',
+        session = await Computer.shared().compute(
+          IsolatedFfmpegService.ffmpegRun,
+          param: {
+            "command": '-i "${file.path}" '
+                '-vf "format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
+                '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
+                '-c:v libx264 -crf 23 -preset medium '
+                '-c:a copy '
+                '-f hls -hls_time 2 -hls_flags single_file '
+                '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
+                '$prefix/output.m3u8',
+          },
         );
       } // case 3, if it's color space is good
       else if (colorSpace != null && isColorGood) {
-        session = await FFmpegKit.execute(
-          '-i "${file.path}" '
-          '-vf "scale=-2:720,fps=30" '
-          '-c:v libx264 -b:v 2000k -crf 23 -preset medium '
-          '-c:a aac -b:a 128k -f hls -hls_time 2 -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          '$prefix/output.m3u8',
+        session = await Computer.shared().compute(
+          IsolatedFfmpegService.ffmpegRun,
+          param: {
+            "command": '-i "${file.path}" '
+                '-vf "scale=-2:720,fps=30" '
+                '-c:v libx264 -b:v 2000k -crf 23 -preset medium '
+                '-c:a aac -b:a 128k -f hls -hls_time 2 -hls_flags single_file '
+                '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
+                '$prefix/output.m3u8',
+          },
         );
       } // case 4, make it compatible
       else {
-        session = await FFmpegKit.execute(
-          '-i "${file.path}" '
-          '-vf "scale=-2:720,fps=30,format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
-          '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
-          '-x264-params "colorprim=bt709:transfer=bt709:colormatrix=bt709" '
-          '-c:v libx264 -b:v 2000k -crf 23 -preset medium '
-          '-c:a aac -b:a 128k -f hls -hls_time 2 -hls_flags single_file '
-          '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
-          '$prefix/output.m3u8',
+        session = await Computer.shared().compute(
+          IsolatedFfmpegService.ffmpegRun,
+          param: {
+            "command": '-i "${file.path}" '
+                '-vf "scale=-2:720,fps=30,format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
+                '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
+                '-x264-params "colorprim=bt709:transfer=bt709:colormatrix=bt709" '
+                '-c:v libx264 -b:v 2000k -crf 23 -preset medium '
+                '-c:a aac -b:a 128k -f hls -hls_time 2 -hls_flags single_file '
+                '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
+                '$prefix/output.m3u8',
+          },
         );
+      }
+
+      if (session == null) {
+        error = "Failed to create ffmpeg session";
+        return;
       }
 
       final returnCode = await session.getReturnCode();
@@ -296,8 +314,11 @@ class PreviewVideoStore {
           objectSize = result.$2;
 
           // Fetch resolution of generated stream by decrypting a single frame
-          final FFmpegSession session2 = await FFmpegKit.execute(
-            '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
+          final FFmpegSession session2 = await Computer.shared().compute(
+            IsolatedFfmpegService.ffmpegRun,
+            param: {
+              '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
+            },
           );
           final returnCode2 = await session2.getReturnCode();
           int? width, height;
