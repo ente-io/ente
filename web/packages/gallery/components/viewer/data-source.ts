@@ -145,6 +145,11 @@ export type ItemData = PhotoSwipeSlideData & {
      * original file could not be fetched because of an network error).
      */
     fetchFailed?: boolean;
+    /**
+     * This will be `true` if the item data for this particular file is
+     * considered transient, and should not be cached.
+     */
+    isTransient?: boolean;
 };
 
 /**
@@ -364,12 +369,33 @@ export const forgetItemDataForFileID = (fileID: number) => {
  * we can reset failures, if any, for a slide so that the fetch is tried again
  * when we come back to it.
  *
+ * [Note: File viewer preloading and contentDeactivate]
+ *
+ * Note that because of preloading, this will only have a user visible effect if
+ * the user moves out of the preload range. Let's take an example:
+ *
+ * - User opens slide at index `i`. Then the adjacent slides, `i - 1` and `i +
+ *   1`, also get preloaded.
+ *
+ * - User moves away from `i` (in either direction, but let us take the example
+ *   if they move `i - 1`).
+ *
+ * - This function will get called for `i` and will clear any failed or
+ *   transient state.
+ *
+ * - But since PhotoSwipe already has the slides ready for `i`, if the user then
+ *   moves back to `i` then PhotoSwipe will not attempt to recreate the slide
+ *   and so will not even try to get "itemData". So this will only have an
+ *   effect if they move out of preload range (e.g. `i - 1`, `i - 2`), and then
+ *   back (`i - 1`, `i`).
+ *
  * See: [Note: File viewer error handling]
  *
  * See: [Note: Caching HLS playlist data]
  */
 export const forgetItemDataForFileIDIfNeeded = (fileID: number) => {
-    if (_state.itemDataByFileID.get(fileID)?.fetchFailed)
+    const itemData = _state.itemDataByFileID.get(fileID);
+    if (itemData?.fetchFailed || itemData?.isTransient)
         forgetItemDataForFileID(fileID);
 };
 
@@ -441,7 +467,22 @@ const enqueueUpdates = async (
                 createHLSPlaylistItemDataValidity(),
             );
         } else {
-            update(videoURLD);
+            if (shouldUsePlayerV2()) {
+                // See: [Note: Caching HLS playlist data]
+                //
+                // TODO(HLS): As an optimization, we can handle the logged in vs
+                // public albums case separately once we have the status-diff
+                // state, we don't need to mark status-diff case as transient.
+                //
+                // Note that setting the transient flag is not too expensive,
+                // since the underlying videoURL is still cached by the download
+                // manager. So effectively, under normal circumstance, it just
+                // adds one API call (to recheck if an HLS playlist now exists
+                // for the given file).
+                update({ ...videoURLD, isTransient: true });
+            } else {
+                update(videoURLD);
+            }
         }
     };
 

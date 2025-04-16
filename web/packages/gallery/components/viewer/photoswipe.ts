@@ -710,8 +710,12 @@ export class FileViewerPhotoSwipe {
         const queryVideoElement = (element: HTMLElement | undefined) =>
             element?.querySelector<HTMLVideoElement>("video, hls-video");
 
-        // PhotoSwipe invokes this event when moving away from a slide.
         pswp.on("contentDeactivate", (e) => {
+            // PhotoSwipe invokes this event when moving away from a slide.
+            //
+            // However it might not have an effect until we move out of preload
+            // range. See: [Note: File viewer preloading and contentDeactivate].
+
             const fileID = asItemData(e.content.data).fileID;
             if (fileID) forgetItemDataForFileIDIfNeeded(fileID);
 
