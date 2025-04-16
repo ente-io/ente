@@ -106,7 +106,7 @@ class DownloadManager {
      * Credentials that should be used to download files when we're in the
      * context of the public albums app.
      */
-    private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
+    publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     /**
      * Local cache for thumbnail blobs.
      *
