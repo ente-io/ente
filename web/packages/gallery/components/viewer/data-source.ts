@@ -251,7 +251,7 @@ export const fileViewerDidClose = () => {
         resetState();
     } else {
         // Selectively clear.
-        forgetFailedItems();
+        forgetFailedOrTransientItems();
         forgetExif();
     }
 };
@@ -357,12 +357,18 @@ export const forgetItemDataForFileID = (fileID: number) => {
 };
 
 /**
- * Forget item data for the given {@link file} if its fetch had failed.
+ * Forget item data for the given {@link file} if its fetch had failed, or if it
+ * is caching something that is transient in nature.
  *
- * This is called when the user moves away from a slide so that we attempt a
- * full retry when they come back the next time.
+ * It is called when the user moves away from a slide. In particular, this way
+ * we can reset failures, if any, for a slide so that the fetch is tried again
+ * when we come back to it.
+ *
+ * See: [Note: File viewer error handling]
+ *
+ * See: [Note: Caching HLS playlist data]
  */
-export const forgetFailedItemDataForFileID = (fileID: number) => {
+export const forgetItemDataForFileIDIfNeeded = (fileID: number) => {
     if (_state.itemDataByFileID.get(fileID)?.fetchFailed)
         forgetItemDataForFileID(fileID);
 };
@@ -381,13 +387,17 @@ export const updateItemDataAlt = (updatedFile: EnteFile) => {
 };
 
 /**
- * Forget item data for the all files whose fetch had failed.
+ * Forget item data for the all files whose fetch had failed, or if the
+ * corresponding item data is transient and shouldn't be cached.
  *
- * This is called when the user closes the file viewer so that we attempt a full
- * retry when they reopen the viewer the next time.
+ * This is called when the user closes the file viewer; in particular, this way
+ * we attempt a full retry for previously failed files when the user reopens the
+ * viewer the next time.
  */
-const forgetFailedItems = () =>
-    [..._state.itemDataByFileID.keys()].forEach(forgetFailedItemDataForFileID);
+const forgetFailedOrTransientItems = () =>
+    [..._state.itemDataByFileID.keys()].forEach(
+        forgetItemDataForFileIDIfNeeded,
+    );
 
 const enqueueUpdates = async (
     file: EnteFile,

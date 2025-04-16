@@ -14,8 +14,8 @@ import {
     fileViewerDidClose,
     fileViewerWillOpen,
     forgetExifForItemData,
-    forgetFailedItemDataForFileID,
     forgetItemDataForFileID,
+    forgetItemDataForFileIDIfNeeded,
     itemDataForFile,
     updateFileInfoExifIfNeeded,
     type ItemData,
@@ -710,17 +710,10 @@ export class FileViewerPhotoSwipe {
         const queryVideoElement = (element: HTMLElement | undefined) =>
             element?.querySelector<HTMLVideoElement>("video, hls-video");
 
+        // PhotoSwipe invokes this event when moving away from a slide.
         pswp.on("contentDeactivate", (e) => {
-            // Reset failures, if any, for this file so that the fetch is tried
-            // again when we come back to it^.
-            //
-            // ^ Note that because of how the preloading works, this will have
-            //   an effect (i.e. the retry will happen) only if the user moves
-            //   more than 2 slides and then back, or if they reopen the viewer.
-            //
-            // See: [Note: File viewer error handling]
             const fileID = asItemData(e.content.data).fileID;
-            if (fileID) forgetFailedItemDataForFileID(fileID);
+            if (fileID) forgetItemDataForFileIDIfNeeded(fileID);
 
             // Pause the video element, if any, when we move away from the
             // slide.

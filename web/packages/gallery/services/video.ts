@@ -106,6 +106,21 @@ export interface HLSPlaylistData {
  *   any arbitrary time. So the negative result ("this file does not have a
  *   playlist") cannot be cached.
  *
+ * So while we can easily cache the first case ("this file has a playlist"), we
+ * need to deal with the second case ("this file does not have a playlist") a
+ * bit more intricately:
+ *
+ * - If running in the context of a logged in user (e.g. photos app), we can use
+ *   the "/files/data/status-diff" API to be notified of any modifications to
+ *   the second case for the user's own files. This status-diff happens during
+ *   the regular "sync", and we can use that as a cue to selectively prune cache
+ *   entries for the second case but can otherwise indefinitely cache it.
+ *
+ * - If the file is a shared file, the status-diff will not return it. And if
+ *   we're not running in the context of a logged in user (e.g. the public
+ *   albums app), then there is no status-diff to do. For these two scenarios,
+ *   we thus mark the cached values as "transient" and always recheck for a
+ *   playlist when opening the slide.
  */
 export const hlsPlaylistDataForFile = async (
     file: EnteFile,
