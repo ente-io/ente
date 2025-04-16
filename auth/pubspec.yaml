@@ -156,6 +156,7 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/generation-icons/icon-light-adaptive-fg.png"
   adaptive_icon_background: "assets/generation-icons/icon-light-adaptive-bg.png"
   adaptive_icon_monochrome: "assets/generation-icons/icon-monochrome.png"
+  adaptive_icon_foreground_inset: 0
 
   ios: true
   remove_alpha_ios: true
