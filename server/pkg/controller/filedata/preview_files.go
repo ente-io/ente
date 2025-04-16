@@ -8,11 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c *Controller) GetPreviewUrl(ctx *gin.Context, request filedata.GetPreviewURLRequest) (*string, error) {
+func (c *Controller) GetPreviewUrl(ctx *gin.Context, actorUser int64, request filedata.GetPreviewURLRequest) (*string, error) {
 	if err := request.Validate(); err != nil {
 		return nil, err
 	}
-	actorUser := auth.GetUserID(ctx.Request.Header)
 	if err := c._checkMetadataReadOrWritePerm(ctx, actorUser, []int64{request.FileID}); err != nil {
 		return nil, err
 	}

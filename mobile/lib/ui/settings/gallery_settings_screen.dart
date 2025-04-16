@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/hide_shared_items_from_home_gallery_event.dart";
+import "package:photos/events/memories_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/memory_home_widget_service.dart";
@@ -103,21 +104,42 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                         trailingWidget: ToggleSwitchWidget(
                           value: () => memoriesCacheService.showAnyMemories,
                           onChanged: () async {
-                            unawaited(
-                              memoriesCacheService.setShowAnyMemories(
-                                !memoriesCacheService.showAnyMemories,
-                              ),
+                            await memoriesCacheService.setShowAnyMemories(
+                              !memoriesCacheService.showAnyMemories,
                             );
                             unawaited(
                               MemoryHomeWidgetService.instance
                                   .initMemoryHW(true),
                             );
+                            setState(() {});
                           },
                         ),
                       ),
                       const SizedBox(
                         height: 24,
                       ),
+                      memoriesCacheService.curatedMemoriesOption
+                          ? MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).curatedMemories,
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () =>
+                                    localSettings.isSmartMemoriesEnabled,
+                                onChanged: () async {
+                                  unawaited(_toggleUpdateMemories());
+                                },
+                              ),
+                            )
+                          : const SizedBox(),
+                      memoriesCacheService.curatedMemoriesOption
+                          ? const SizedBox(
+                              height: 24,
+                            )
+                          : const SizedBox(),
                       MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
                           title: S.of(context).hideSharedItemsFromHomeGallery,
@@ -155,4 +177,15 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
       ),
     );
   }
+}
+
+Future<void> _toggleUpdateMemories() async {
+  await localSettings.setSmartMemories(
+    !localSettings.isSmartMemoriesEnabled,
+  );
+  await memoriesCacheService.clearMemoriesCache(
+    fromDisk: false,
+  );
+  await memoriesCacheService.getMemories();
+  Bus.instance.fire(MemoriesChangedEvent());
 }

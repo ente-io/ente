@@ -27,8 +27,8 @@ const subGalleryMultiplier = 10;
 // used to identify which ente file are available in app cache
 const String sharedMediaIdentifier = 'ente-shared-media://';
 
-const thumbnailDiskLoadDeferDuration = Duration(milliseconds: 40);
-const thumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
+const galleryThumbnailDiskLoadDeferDuration = Duration(milliseconds: 500);
+const galleryThumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
 
 // 256 bit key maps to 24 words
 // https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki#Generating_the_mnemonic

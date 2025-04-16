@@ -1,8 +1,8 @@
 import { basename } from "ente-base/file-name";
 import type { ElectronMLWorker } from "ente-base/types/ipc";
+import { renderableImageBlob } from "ente-gallery/services/convert";
 import { downloadManager } from "ente-gallery/services/download";
 import type { UploadItem } from "ente-gallery/services/upload";
-import { renderableImageBlob } from "ente-gallery/utils/convert";
 import { readStream } from "ente-gallery/utils/native-stream";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";

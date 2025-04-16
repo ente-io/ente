@@ -365,21 +365,6 @@
   "deleteFromBoth": "Hapus dari keduanya",
   "newAlbum": "Album baru",
   "albums": "Album",
-  "memoryCount": "{count, plural, zero{tiada kenangan} one{{formattedCount} kenangan} other{{formattedCount} kenangan}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "{count} terpilih",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -745,14 +730,6 @@
   "delete": "Hapus",
   "hide": "Sembunyikan",
   "share": "Bagikan",
-  "moveItem": "{count, plural, other {Pindahkan item}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, other {Tambahkan item}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Buat atau pilih album",
   "selectAlbum": "Pilih album",
   "searchByAlbumNameHint": "Nama album",
@@ -824,7 +801,6 @@
   "authToViewYourMemories": "Harap autentikasi untuk melihat kenanganmu",
   "unlock": "Buka",
   "freeUpSpace": "Bersihkan ruang",
-  "freeUpSpaceSaving": "{count, plural, other {File tersebut bisa dihapus dari perangkat ini untuk membersihkan {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, other {{formattedNumber} file}} dalam album ini telah berhasil dicadangkan",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -852,18 +828,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Kamu masih bisa mengakses {count, plural, other {filenya}} di Ente selama kamu masih berlangganan",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1095,7 +1059,6 @@
   "joinDiscord": "Bergabung ke Discord",
   "addAName": "Tambahkan nama",
   "findPeopleByName": "Telusuri orang dengan mudah menggunakan nama",
-  "addCollaborators": "{count, plural, other {Tambahkan kolaborator}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Tekan dan tahan email untuk membuktikan enkripsi ujung ke ujung.",
   "developerSettingsWarning": "Apakah kamu yakin ingin mengubah pengaturan pengembang?",
   "developerSettings": "Pengaturan pengembang",
@@ -1130,5 +1093,6 @@
   "rotate": "Putar",
   "left": "Kiri",
   "right": "Kanan",
-  "whatsNew": "Hal yang baru"
+  "whatsNew": "Hal yang baru",
+  "curatedMemories": "Curated memories"
 }

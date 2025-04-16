@@ -352,21 +352,6 @@
   "deleteFromBoth": "מחק משניהם",
   "newAlbum": "אלבום חדש",
   "albums": "אלבומים",
-  "memoryCount": "{count, plural, one{{formattedCount} זכרון} two {{formattedCount} זכרונות} many {{formattedCount} זכרונות} other{{formattedCount} זכרונות}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "{count} נבחרו",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -683,14 +668,6 @@
   "share": "שתף",
   "unhideToAlbum": "בטל הסתרה בחזרה לאלבום",
   "restoreToAlbum": "שחזר לאלבום",
-  "moveItem": "{count, plural, one {הזז פריט} two {הזז פריטים} many {הזז פריטים} other {הזז פריטים}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {הוסף פריט} two {הוסף פריטים} many {הוסף פריטים} other {הוסף פריטים}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "צור או בחר אלבום",
   "selectAlbum": "בחר אלבום",
   "searchByAlbumNameHint": "שם האלבום",
@@ -814,5 +791,6 @@
   "addPhotos": "הוסף תמונות",
   "create": "צור",
   "viewAll": "הצג הכל",
-  "hiding": "מחביא..."
+  "hiding": "מחביא...",
+  "curatedMemories": "Curated memories"
 }

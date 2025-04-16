@@ -212,7 +212,7 @@ interface UpdateStripeSubscriptionResponse {
 }
 
 /**
- * Make a request to museum to update an existing Stript subscription with
+ * Make a request to museum to update an existing Stripe subscription with
  * {@link productID} for the user.
  */
 async function updateStripeSubscription(

@@ -49,7 +49,7 @@ export const createShareeSuggestionEmails = (
 ): string[] => {
     const emails = collections
         .map(({ owner, sharees }) => {
-            if (owner.email && owner.id !== user.id) {
+            if (owner.email && owner.id != user.id) {
                 return [owner.email];
             } else {
                 // Not sure about its nullability currently, revisit after auditing the
@@ -67,5 +67,5 @@ export const createShareeSuggestionEmails = (
         emails.push(...family);
     }
 
-    return [...new Set(emails.filter((email) => email !== user.email))];
+    return [...new Set(emails.filter((email) => email != user.email))];
 };

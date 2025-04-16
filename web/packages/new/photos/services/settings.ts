@@ -2,12 +2,6 @@
  * @file Storage (in-memory, local, remote) and update of various settings.
  */
 
-// We want to map falsey values like empty strings to the default, for which
-// `||` is the appropriate operator, so turn off the eslint suggestion to use
-// `??` instead for this file.
-//
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-
 import { isDevBuild } from "ente-base/env";
 import { localUser } from "ente-base/local-user";
 import log from "ente-base/log";

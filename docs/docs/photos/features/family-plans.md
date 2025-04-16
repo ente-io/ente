@@ -24,7 +24,7 @@ In brief,
 
 ## Storage Limits
 
-If you're an admin of a family, you will be able to set storage limits  for the 
+If you're an admin of a family, you will be able to set storage limits for the 
 members in your family plan.
 
 In brief, 
@@ -38,15 +38,5 @@ In brief,
 - If the admin has set a limit for any user, that limit value will be prefilled
   in the input box. 
 
-- Incase, if you want to remove any storage limit from a members account, you 
+- If you want to remove any storage limit from a members account, you 
   can click on the "Remove Limit" and they can upload photos without any limit. 
-
-## FAQ
-
-- **Can you assign a storage quota for each individual member in the family
-  plan?**
-
-    Unfortunately, at this moment, assigning a storage quota for each individual
-    member in the family plan is not supported. For updates on this feature
-    request, please follow
-    [this thread](https://github.com/ente-io/ente/discussions/857).

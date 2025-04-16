@@ -18,7 +18,7 @@ export const shuffled = <T>(xs: T[]): T[] =>
  * Return the first non-empty string from the given list of strings.
  *
  * This function is needed because the `a ?? b` idiom doesn't do what you'd
- * expect when a is "". Perhaps the behaviour is wrong, perhaps the expecation
+ * expect when a is "". Perhaps the behaviour is wrong, perhaps the expectation
  * is wrong; this function papers over the differences.
  *
  * If none of the strings are non-empty, or if there are no strings in the given
@@ -63,7 +63,7 @@ export const batch = <T>(xs: T[], batchSize: number): T[][] => {
 };
 
 /**
- * Split an array into two arrays - those that satisify the given
+ * Split an array into two arrays - those that satisfy the given
  * {@link predicate}, and those that don't.
  *
  * @param xs The array to split.

@@ -5,7 +5,10 @@ import {
     getLocalFiles,
     groupFilesByCollectionID,
 } from "ente-new/photos/services/files";
-import { parseDateFromDigitGroups } from "services/upload/date";
+import {
+    parseDateFromDigitGroups,
+    tryParseEpochMicrosecondsFromFileName,
+} from "services/upload/date";
 import {
     matchTakeoutMetadata,
     metadataJSONMapKeyForJSON,
@@ -56,6 +59,13 @@ const DATE_TIME_PARSING_TEST_FILE_NAMES = [
     {
         fileName: "signal-2022-12-17-15-16-04-718.jpg",
         expectedDateTime: "2022-12-17 15:16:04",
+    },
+];
+
+const dateTimeParsingTestFilenames2 = [
+    {
+        fileName: "20170923_220934000_iOS.jpg",
+        expectedDateTime: "2017-09-23 22:09:34",
     },
 ];
 
@@ -406,6 +416,22 @@ function parseDateTimeFromFileNameTest() {
             }
         },
     );
+
+    dateTimeParsingTestFilenames2.forEach(({ fileName, expectedDateTime }) => {
+        const epochMicroseconds =
+            tryParseEpochMicrosecondsFromFileName(fileName);
+        const formattedDateTime = getFormattedDateTime(
+            new Date(epochMicroseconds / 1000),
+        );
+        if (formattedDateTime !== expectedDateTime) {
+            throw Error(
+                `parseDateTimeFromFileNameTest2 failed ❌ ,
+                    for ${fileName}
+                    expected: ${expectedDateTime} got: ${formattedDateTime}`,
+            );
+        }
+    });
+
     DATE_TIME_PARSING_TEST_FILE_NAMES_MUST_FAIL.forEach((fileName) => {
         const dateTime = parseDateFromDigitGroups(fileName);
         if (dateTime) {

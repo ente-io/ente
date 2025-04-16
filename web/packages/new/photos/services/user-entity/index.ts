@@ -263,7 +263,7 @@ const getOrCreateEntityKeyB64 = async (
 
     // Nada. Create a new one, put it to remote, save it locally, and return.
 
-    // As a sanity check, genarate the key but immediately encrypt it as if it
+    // As a sanity check, generate the key but immediately encrypt it as if it
     // were fetched from remote and then try to decrypt it before doing anything
     // with it.
     const generated = await generateEncryptedEntityKey(masterKey);

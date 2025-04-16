@@ -310,11 +310,15 @@ export const sidebar = [
                 text: "Troubleshooting",
                 items: [
                     {
+                        text: "General",
+                        link: "/self-hosting/troubleshooting/misc",
+                    },
+                    {
                         text: "Uploads",
                         link: "/self-hosting/troubleshooting/uploads",
                     },
                     {
-                        text: "Docker",
+                        text: "Docker / quickstart",
                         link: "/self-hosting/troubleshooting/docker",
                     },
                     {

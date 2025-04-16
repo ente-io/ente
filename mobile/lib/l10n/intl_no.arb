@@ -371,21 +371,6 @@
   "deleteFromBoth": "Slett fra begge",
   "newAlbum": "Nytt album",
   "albums": "Album",
-  "memoryCount": "{count, plural, zero{ingen minner} one{{formattedCount} minne} other{{formattedCount} minner}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "{count} valgt",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -792,14 +777,6 @@
   "share": "Del",
   "unhideToAlbum": "Gjør synlig i album",
   "restoreToAlbum": "Gjenopprett til album",
-  "moveItem": "{count, plural, one {Flytt elementet} other {Flytt elementene}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {Legg til element} other {Legg til elementene}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Opprett eller velg album",
   "selectAlbum": "Velg album",
   "searchByAlbumNameHint": "Albumnavn",
@@ -897,7 +874,6 @@
   "authToViewYourMemories": "Vennligst autentiser deg for å se minnene dine",
   "unlock": "Lås opp",
   "freeUpSpace": "Frigjør lagringsplass",
-  "freeUpSpaceSaving": "{count, plural, one {Det kan slettes fra enheten for å frigi {formattedSize}} other {De kan slettes fra enheten for å frigjøre {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 fil} other {{formattedNumber} filer}} I dette albumet har blitt sikkerhetskopiert",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -925,18 +901,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Du kan fortsatt få tilgang til {count, plural, one {det} other {dem}} på Ente så lenge du har et aktivt abonnement",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1267,8 +1231,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Finn folk raskt med navn",
-  "addViewers": "{count, plural, zero {Legg til seer} one {Legg til seer} other {Legg til seere}}",
-  "addCollaborators": "{count, plural, one {Legg til samarbeidspartner} other {Legg til samarbeidspartnere}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Trykk og hold på en e-post for å bekrefte ende-til-ende-kryptering.",
   "developerSettingsWarning": "Er du sikker på at du vil endre utviklerinnstillingene?",
   "developerSettings": "Utviklerinnstillinger",
@@ -1400,16 +1362,6 @@
   "enableMachineLearningBanner": "Aktiver maskinlæring for magisk søk og ansiktsgjenkjenning",
   "searchDiscoverEmptySection": "Bilder vil vises her når behandlingen og synkronisering er fullført",
   "searchPersonsEmptySection": "Folk vil vises her når behandling og synkronisering er fullført",
-  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {La til 0 seere} =1 {La til 1 seer} other {La til {count} seere}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
   "collaboratorsSuccessfullyAdded": "{count, plural, one {}=0 {La til 0 samarbeidspartner} =1 {La til 1 samarbeidspartner} other {Lagt til {count} samarbeidspartnere}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1485,15 +1437,6 @@
   },
   "currentlyRunning": "Kjører for øyeblikket",
   "ignored": "ignorert",
-  "photosCount": "{count, plural, =0 {0 bilder} =1 {1 bilde} other {{count} bilder}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Fil",
   "searchSectionsLengthMismatch": "Uoverensstemmelse i seksjonslengde: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1735,5 +1678,6 @@
   "cLFamilyPlan": "Begrensninger for familieabonnement",
   "cLFamilyPlanDesc": "Du kan nå sette grenser for hvor mye lagringsplass familiemedlemmer kan bruke.",
   "cLBulkEdit": "Masseendring av datoer",
-  "cLBulkEditDesc": "Du kan nå velge flere bilder, og redigere dato/klokkeslett for alle med en rask handling. Forskyving av datoer støttes også."
+  "cLBulkEditDesc": "Du kan nå velge flere bilder, og redigere dato/klokkeslett for alle med en rask handling. Forskyving av datoer støttes også.",
+  "curatedMemories": "Curated memories"
 }
