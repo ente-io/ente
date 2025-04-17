@@ -4,15 +4,15 @@ description: Getting started self hosting Ente Photos and/or Ente Auth
 ---
 
 
-## Ente from Source
+# Ente from Source
 
-#### Installing Docker
+## Installing Docker
 
 Refer to
 [How to install Docker from the APT repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
 for detailed instructions.
 
-#### Start the server
+## Start the server
 
 ```sh
 git clone https://github.com/ente-io/ente
@@ -56,36 +56,15 @@ apps and configure them to use your
 > If you want to build the mobile apps from source, see the instructions
 > [here](guides/mobile-build).
 
-
-
 > [!WARNING] NOTE
-> This page covers documentation around self-hosting the web app manually. If you
+> The below documentation will cover instructions about self-hosting the web app manually. If you
 > want to deploy Ente hassle free, please use the [one line](https://ente.io/blog/self-hosting-quickstart/) 
 > command to setup Ente. This guide might be deprecated in the near future.
 
-# Web app
+## Web app with Docker and Compose
 
-The getting started instructions mention using `yarn dev` (which is an alias of
-`yarn dev:photos`) to serve your web app.
-
->[!IMPORTANT]
-> Please note that Ente's Web App supports the Yarn version 1.22.xx or 1.22.22 specifically.
-> Make sure to install the right version or modify your yarn installation to meet the requirements. 
-> The user might end up into unknown version and dependency related errors if yarn
-> is on different version.
-
-```sh
-cd ente/web
-git submodule update --init --recursive
-yarn install
-NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev:photos
-```
-
-This is fine for trying the web app and verifying that your self-hosted server
-is working as expected etc. But if you would like to use the web app for a
-longer term, then it is recommended to follow the Docker approach.
-
-## With Docker/Docker Compose (Recommended)
+The instructoins in previous section were just a temporary way to run the web app locally. 
+To run the web apps as services, the user has to build a docker image manually. 
 
 > [!IMPORTANT]
 >
