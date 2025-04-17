@@ -1,6 +1,7 @@
 import pathToFfmpeg from "ffmpeg-static";
 import fs from "node:fs/promises";
 import type { ZipItem } from "../../types/ipc";
+import log from "../log";
 import { execAsync } from "../utils/electron";
 import {
     deleteTempFileIgnoringErrors,
@@ -153,8 +154,21 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  */
 export const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
-    outputFilePath: string,
+    outputPathPrefix: string,
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult> => {
+    // This is where we will ask ffmpeg to generate the HLS playlist.
+    const playlistPath = outputPathPrefix + ".m3u8";
+
+    // ffmpeg will automatically place the segments in a file with the same base
+    // name as the playlist, but with a ".ts" extension. Since we use the
+    // "single_file" option, all the segments will be placed in the same ".ts"
+    // file, and the playlist will use chunking to reference them.
+    const videoPath = outputPathPrefix + ".ts";
+
+    // The generated encryption key will be in a file with the same name and
+    // path as the playlist, but with an extra ".key" suffix.
+    const keyPath = playlistPath + ".key";
+
     // Current parameters
     //
     // - H264
@@ -162,12 +176,16 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     // - 2000kbps bitrate
     // - 30fps frame rate
     const command = [
-        ffmpegPathPlaceholder,
+        ffmpegBinaryPath(),
+
         // Input file. We don't need any extra options that apply to the input file.
         "-i",
-        inputPathPlaceholder,
-        // The remaining options apply to the next file, `outputPathPlaceholder`.
+        inputFilePath,
+
+        // The remaining options apply to the next output file (`playlistPath`).
+        //
         // ---
+        /*
         // `-vf` creates a filter graph for the video stream.
         "-vf",
         // `-vf scale=720:-1` scales the video to 720p width, keeping aspect ratio.
@@ -186,12 +204,29 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         "aac",
         "-b:a",
         "128k",
-        outputPathPlaceholder,
-    ];
+        */
+        // Generate a HLS playlist.
+        ["-f", "hls"],
+        // Place all the video segments within the same .ts file (with the same
+        // path as the playlist file but with a ".ts" extension).
+        ["-hls_flags", "single_file"],
+        // Encrypt the playlist. The encryption key - 16 binary bytes - will be
+        // placed in a binary file with the same path as the playlist file but
+        // with an extra ".key" suffix.
+        ["-hls_enc", "1"],
+        // Output path where the playlist should be generated.
+        playlistPath,
+    ].flat();
 
-    const cmd = substitutePlaceholders(command, inputFilePath, outputFilePath);
+    try {
+        await execAsync(command);
+    } catch (e) {
+        log.error("HLS generation failed", e);
+        await deleteTempFileIgnoringErrors(playlistPath);
+        await deleteTempFileIgnoringErrors(videoPath);
+    } finally {
+        await deleteTempFileIgnoringErrors(keyPath);
+    }
 
-    await execAsync(cmd);
-
-    throw new Error("TODO(HLS)");
+    return { playlistPath, videoPath };
 };
