@@ -117,7 +117,12 @@ And set `are_local_buckets` to false.  Check out [Configuring S3](/self-hosting/
 to understand more on how to configure S3 buckets and how the communication happens.
 
 MinIO makes use of the port `3200` for API Endpoints and the Client Web App is run over `:3201` 
-(both on localhost).
+(both on localhost). You can login to MinIO Console Web UI by accessing `localhost:3201` in your web-browser
+and setting up all the things related to regions there itself.
+
+If you face any issues related to uploads then checkout 
+[Troubleshooting Bucket CORS](/self-hosting/troubleshooting/bucket-cors) and 
+[Frequently Answered Error related to S3](/self-hosting/guides/configuring-s3#fae-frequently-answered-errors)
 
 ### App Endpoints
 
@@ -145,3 +150,9 @@ with `docker compose up -d`.
 Similarly, you can read the default [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml) 
 and build a functioning `museum.yaml` for many other functionalities like SMTP, Discord
 Notifications, Hardcoded-OTT's, etc.
+
+## Queries?
+
+If you need any help or support, do not hesitate to drop your queries on our community
+[discord channel](https://discord.gg/z2YVKkycX3) or create a 
+[Github Discussion](https://github.com/ente-io/ente/discussions) where 100s of self-hosters help each other :p.

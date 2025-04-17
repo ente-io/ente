@@ -280,24 +280,6 @@ export const sidebar = [
                 ],
             },
             {
-                text: "FAQ",
-                items: [
-                    { text: "General", link: "/self-hosting/faq/" },
-                    {
-                        text: "Verification code",
-                        link: "/self-hosting/faq/otp",
-                    },
-                    {
-                        text: "Shared albums",
-                        link: "/self-hosting/faq/sharing",
-                    },
-                    {
-                        text: "Backups",
-                        link: "/self-hosting/faq/backup",
-                    },
-                ],
-            },
-            {
                 text: "Troubleshooting",
                 items: [
                     {
@@ -323,6 +305,24 @@ export const sidebar = [
                     {
                         text: "Ente CLI Secrets",
                         link: "/self-hosting/troubleshooting/keyring",
+                    },
+                ],
+            },
+            {
+                text: "FAQ",
+                items: [
+                    { text: "General", link: "/self-hosting/faq/" },
+                    {
+                        text: "Verification code",
+                        link: "/self-hosting/faq/otp",
+                    },
+                    {
+                        text: "Shared albums",
+                        link: "/self-hosting/faq/sharing",
+                    },
+                    {
+                        text: "Backups",
+                        link: "/self-hosting/faq/backup",
                     },
                 ],
             },
