@@ -265,14 +265,15 @@ export const getFilePreviewDataUploadURL = async (file: EnteFile) => {
  * - The object ID of an (already uploaded) "file preview data" file containing
  *   the video segments.
  *
- * This function is similar to {@link putFileData}, except it will save or
- * update the both the playlist and the reference to its associated segment file
+ * This function is similar to {@link putFileData}, except it will save (or
+ * update) both the playlist, and the reference to its associated segment file,
  * associated with the given {@link file}. The playlist data will be end-to-end
  * encrypted using the given {@link file}'s key before uploading.
  *
  * @param file {@link EnteFile} which this data is associated with.
  *
- * @param playlistData The HLS playlist contents, as a {@link Blob}.
+ * @param playlistData The playlist data, suitably encoded in a form ready for
+ * encryption.
  *
  * @param objectID Object ID of an already uploaded "file preview data" (see
  * {@link getFilePreviewDataUploadURL}).

@@ -144,11 +144,11 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  * See: [Note: Preview variant of videos]
 
  * @param inputFilePath The path to a file on the user's local file system. This
- * is the video we want to convert.
+ * is the video we want to generate an streamable HLS playlist for.
  *
  * @param outputPathPrefix The path to unique, unused and temporary prefix on
- * the user's local file system - we should write the generated HLS playlist and
- * video segments under this prefix.
+ * the user's local file system. This function will write the generated HLS
+ * playlist and video segments under this prefix.
  *
  * @returns The paths to two files on the user's local file system - one
  * containing the generated HLS playlist, and the other containing the
@@ -165,9 +165,9 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     // name "output.m3u8".
     //
     // ffmpeg will automatically place the segments in a file with the same base
-    // name as the playlist, but with a ".ts" extension. Since we use the
-    // "single_file" option, all the segments will be placed in the same ".ts"
-    // file, which will be named "output.ts".
+    // name as the playlist, but with a ".ts" extension. And since we use the
+    // "single_file" option, all the segments will be placed in a file named
+    // "output.ts".
 
     await fs.mkdir(outputPathPrefix);
 
