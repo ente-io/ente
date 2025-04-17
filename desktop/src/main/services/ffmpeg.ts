@@ -1,4 +1,5 @@
 import pathToFfmpeg from "ffmpeg-static";
+import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import type { ZipItem } from "../../types/ipc";
 import log from "../log";
@@ -165,9 +166,25 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     // file, and the playlist will use chunking to reference them.
     const videoPath = outputPathPrefix + ".ts";
 
-    // The generated encryption key will be in a file with the same name and
-    // path as the playlist, but with an extra ".key" suffix.
+    // Generate a cryptographically secure random key (16 bytes).
+    const keyBytes = randomBytes(16);
+    const keyB64 = keyBytes.toString("base64");
+
+    // Convert it to a data: URI that will be added to the playlist.
+    const keyURI = `data:text/plain;base64,${keyB64}`;
+
+    // Determine two paths - one where we will write the key itself, and where
+    // we will write the "key info" that provides ffmpeg the `keyURI` and the
+    // `keyPath;.
     const keyPath = playlistPath + ".key";
+    const keyInfoPath = playlistPath + ".key-info";
+
+    // Generate a "key info":
+    //
+    // - the first line specifies the key URI that is written into the playlist.
+    // - the second line specifies the path to the local filesystem file from
+    //   where ffmpeg should read the key.
+    const keyInfo = [keyURI, keyPath].join("\n");
 
     // Current parameters
     //
@@ -210,37 +227,37 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         // Place all the video segments within the same .ts file (with the same
         // path as the playlist file but with a ".ts" extension).
         ["-hls_flags", "single_file"],
-        // Encrypt the playlist. The encryption key - 16 binary bytes - will be
-        // placed in a binary file with the same path as the playlist file but
-        // with an extra ".key" suffix.
+        // Encrypt the playlist.
         ["-hls_enc", "1"],
+        // Tell ffmpeg where to find the key, and the URI for the key to write
+        // into the generated playlist.
+        ["-hls_key_info_file", keyInfoPath],
         // Output path where the playlist should be generated.
         playlistPath,
     ].flat();
 
     try {
+        // Write the key and the keyInfo to their desired paths.
+        await Promise.all([
+            fs.writeFile(keyPath, keyBytes),
+            fs.writeFile(keyInfoPath, keyInfo, { encoding: "utf8" }),
+        ]);
+
         // Run the ffmpeg command to generate the HLS playlist and segments.
         //
         // Note: Depending on the size of the input file, this may take long!
         await execAsync(command);
-
-        // Read the generated key.
-        const key = await fs.readFile(keyPath);
-        const keyB64 = key.toString("base64");
-
-        // Inline the key into the generated playlist.
-        let playlist = await fs.readFile(playlistPath, { encoding: "utf8" });
-        playlist = playlist.replace(
-            keyPath,
-            `data:text/plain;base64,${keyB64}`,
-        );
-        await fs.writeFile(playlistPath, playlist);
     } catch (e) {
         log.error("HLS generation failed", e);
-        await deleteTempFileIgnoringErrors(playlistPath);
-        await deleteTempFileIgnoringErrors(videoPath);
+        await Promise.all([
+            deleteTempFileIgnoringErrors(playlistPath),
+            deleteTempFileIgnoringErrors(videoPath),
+        ]);
     } finally {
-        await deleteTempFileIgnoringErrors(keyPath);
+        await Promise.all([
+            deleteTempFileIgnoringErrors(keyInfoPath),
+            deleteTempFileIgnoringErrors(keyPath),
+        ]);
     }
 
     return { playlistPath, videoPath };

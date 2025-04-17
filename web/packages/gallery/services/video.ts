@@ -396,7 +396,7 @@ const processQueueItem = async (
         videoStreamDone(electron, playlistToken),
         videoStreamDone(electron, videoToken),
     ]);
-    console.log(electron, playlistBlob);
+    console.log(electron, await playlistBlob.text());
 };
 
 /**
