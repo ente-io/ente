@@ -1,7 +1,6 @@
 import pathToFfmpeg from "ffmpeg-static";
 import fs from "node:fs/promises";
 import type { ZipItem } from "../../types/ipc";
-import { ensure } from "../utils/common";
 import { execAsync } from "../utils/electron";
 import {
     deleteTempFileIgnoringErrors,
@@ -99,7 +98,7 @@ const ffmpegBinaryPath = () => {
     // This substitution of app.asar by app.asar.unpacked is suggested by the
     // ffmpeg-static library author themselves:
     // https://github.com/eugeneware/ffmpeg-static/issues/16
-    return ensure(pathToFfmpeg).replace("app.asar", "app.asar.unpacked");
+    return pathToFfmpeg!.replace("app.asar", "app.asar.unpacked");
 };
 
 /**
