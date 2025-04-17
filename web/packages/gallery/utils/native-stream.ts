@@ -7,6 +7,7 @@
  */
 
 import type { Electron, ElectronMLWorker, ZipItem } from "ente-base/types/ipc";
+import { z } from "zod";
 
 /**
  * Stream the given file or zip entry from the user's local file system.
@@ -137,14 +138,22 @@ type VideoStreamOp = "convert-to-mp4" | "generate-hls";
  * @param video The video to convert, as a {@link Blob} or a
  * {@link ReadableStream}.
  *
- * @returns a token that can then be passed to {@link readVideoStream} to read
- * back the processed video.
+ * @returns an array of token that can then be passed to {@link readVideoStream}
+ * to read back the processed video. The count (and semantics) of the tokens are
+ * dependent on the operation:
+ *
+ * - "convert-to-mp4" returns a single token (which can be used to retrieve the
+ *   converted MP4 file).
+ *
+ * - "generate-hls" returns two tokens, first one that can be used to retrieve
+ *   the generated HLS playlist, and the second one that can be used to retrieve
+ *   the video (segments).
  */
 export const writeVideoStream = async (
     _: Electron,
     op: VideoStreamOp,
     video: Blob | ReadableStream,
-) => {
+): Promise<string[]> => {
     const url = `stream://video?op=${op}`;
 
     const req = new Request(url, {
@@ -160,8 +169,7 @@ export const writeVideoStream = async (
     if (!res.ok)
         throw new Error(`Failed to write stream to ${url}: HTTP ${res.status}`);
 
-    const token = res.text();
-    return token;
+    return z.array(z.string()).parse(await res.json());
 };
 
 /**

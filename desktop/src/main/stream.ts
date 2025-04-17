@@ -7,7 +7,11 @@ import fs from "node:fs/promises";
 import { Writable } from "node:stream";
 import { pathToFileURL } from "node:url";
 import log from "./log";
-import { ffmpegConvertToMP4 } from "./services/ffmpeg";
+import {
+    ffmpegConvertToMP4,
+    ffmpegGenerateHLSPlaylistAndSegments,
+    type FFmpegGenerateHLSPlaylistAndSegmentsResult,
+} from "./services/ffmpeg";
 import { markClosableZip, openZip } from "./services/zip";
 import { writeStream } from "./utils/stream";
 import {
@@ -74,7 +78,7 @@ const handleStreamRequest = async (request: Request): Promise<Response> => {
                     case "convert-to-mp4":
                         return handleConvertToMP4Write(request);
                     case "generate-hls":
-                        return new Response("TODO", { status: 400 });
+                        return handleGenerateHLSWrite(request);
                     default:
                         return new Response(`Unknown op ${op}`, {
                             status: 404,
@@ -210,7 +214,7 @@ export const clearPendingVideoResults = () => pendingVideoResults.clear();
  *
  *     renderer → main  stream://video?op=convert-to-mp4
  *                      → request.body is the original video
- *                      ← response is a token
+ *                      ← response is [token]
  *
  *     renderer → main  stream://video?token=<token>
  *                      ← response.body is the converted video
@@ -242,7 +246,7 @@ const handleConvertToMP4Write = async (request: Request) => {
 
     const token = randomUUID();
     pendingVideoResults.set(token, outputTempFilePath);
-    return new Response(token, { status: 200 });
+    return new Response(JSON.stringify([token]), { status: 200 });
 };
 
 const handleVideoRead = async (token: string) => {
@@ -262,4 +266,43 @@ const handleVideoDone = async (token: string) => {
 
     pendingVideoResults.delete(token);
     return new Response("", { status: 200 });
+};
+
+/**
+ * Generate a HLS playlist for the given video.
+ *
+ * See: [Note: Convert to MP4] for the general architecture of commands that do
+ * renderer <-> main I/O using streams.
+ *
+ * The difference here is that we the conversion generates two streams - one for
+ * the HLS playlist itself, and one for the file containing the encrypted and
+ * transcoded video chunks. So instead of returning a single token, we return a
+ * JSON array containing two tokens so that the renderer can read them off
+ * separately.
+ */
+const handleGenerateHLSWrite = async (request: Request) => {
+    const inputTempFilePath = await makeTempFilePath();
+    await writeStream(inputTempFilePath, request.body!);
+
+    const outputFilePathPrefix = await makeTempFilePath();
+    let paths: FFmpegGenerateHLSPlaylistAndSegmentsResult;
+    try {
+        paths = await ffmpegGenerateHLSPlaylistAndSegments(
+            inputTempFilePath,
+            outputFilePathPrefix,
+        );
+    } catch (e) {
+        log.error("Generate HLS failed", e);
+        throw e;
+    } finally {
+        await deleteTempFileIgnoringErrors(inputTempFilePath);
+    }
+
+    const playlistToken = randomUUID();
+    const videoToken = randomUUID();
+    pendingVideoResults.set(playlistToken, paths.playlistPath);
+    pendingVideoResults.set(videoToken, paths.videoPath);
+    return new Response(JSON.stringify([playlistToken, videoToken]), {
+        status: 200,
+    });
 };

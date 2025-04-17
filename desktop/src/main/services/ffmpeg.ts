@@ -129,6 +129,11 @@ export const ffmpegConvertToMP4 = async (
     await execAsync(cmd);
 };
 
+export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
+    playlistPath: string;
+    videoPath: string;
+}
+
 /**
  * A bespoke variant of {@link ffmpegExec} for generation of HLS playlists for
  * videos.
@@ -138,17 +143,18 @@ export const ffmpegConvertToMP4 = async (
  * @param inputFilePath The path to a file on the user's local file system. This
  * is the video we want to convert.
  *
- * @param outputPlaylistPath The path to a file on the user's local file system
- * where we should write the generated HLS playlist.
+ * @param outputPathPrefix The path to unique and temporary prefix on the user's
+ * local file system - we should write the generated HLS playlist and video
+ * segments using this prefix and adding the necessary suffixes.
  *
- * @param outputVideoPath The path to a file on the user's local file system
- * where we should write the transcoded and encrypted video that the HLS
- * playlist refers to.
+ * @returns The paths to two files on the user's local file system - one
+ * containing the generated HLS playlist, and the other containing the
+ * transcoded and encrypted video segments that the HLS playlist refers to.
  */
-export const ffmpegGenerateHLSPlaylist = async (
+export const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputFilePath: string,
-): Promise<void> => {
+): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult> => {
     // Current parameters
     //
     // - H264
@@ -186,4 +192,6 @@ export const ffmpegGenerateHLSPlaylist = async (
     const cmd = substitutePlaceholders(command, inputFilePath, outputFilePath);
 
     await execAsync(cmd);
+
+    throw new Error("TODO(HLS)");
 };
