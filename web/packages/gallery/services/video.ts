@@ -1,9 +1,8 @@
-import { isDesktop } from "ente-base/app";
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
-import { isDevBuild } from "ente-base/env";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
+import type { Electron } from "ente-base/types/ipc";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
@@ -307,21 +306,17 @@ export const processVideoNewUpload = (
     // TODO(HLS):
     if (!isVideoProcessingEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
-    if (!isDesktop) {
+    if (!electron) {
         // Processing very large videos with the current ffmpeg Wasm
         // implementation can cause the app to crash, esp. on mobile devices
         // (e.g. https://github.com/ffmpegwasm/ffmpeg.wasm/issues/851).
         //
-        // So the video processing only happpens in the desktop app (which uses
-        // the much more efficient native ffmpeg integration).
-        if (process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING && isDevBuild) {
-            // TODO(HLS): Temporary dev convenience
-        } else {
-            return;
-        }
+        // So the video processing only happpens in the desktop app, which uses
+        // the much more efficient native ffmpeg integration.
+        return;
     }
 
-    if (_state.videoProcessingQueue.length > 1) {
+    if (_state.videoProcessingQueue.length > 50) {
         // Drop new requests if the queue can't keep up to avoid the app running
         // out of memory by keeping hold of too many (potentially huge) video
         // blobs. These items will later get processed as part of a backfill.
@@ -333,17 +328,20 @@ export const processVideoNewUpload = (
     _state.videoProcessingQueue.push({ file, uploadItem });
 
     // Tickle the processor if it isn't already running.
-    _state.queueProcessor ??= processQueue();
+    _state.queueProcessor ??= processQueue(electron);
 };
 
 export const isVideoProcessingEnabled = () =>
     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
 
-const processQueue = async () => {
+const processQueue = async (electron: Electron) => {
     while (_state.videoProcessingQueue.length) {
         try {
-            await processQueueItem(_state.videoProcessingQueue.shift()!);
+            await processQueueItem(
+                _state.videoProcessingQueue.shift()!,
+                electron,
+            );
         } catch (e) {
             log.error("Video processing failed", e);
             // Ignore this unprocessable item. Currently this function only runs
@@ -376,14 +374,21 @@ const processQueue = async () => {
  *
  * 3. Both the generated video and the HLS playlist are then uploaded, E2EE.
  */
-const processQueueItem = async ({
-    file,
-    uploadItem,
-}: VideoProcessingQueueItem) => {
+const processQueueItem = async (
+    { file, uploadItem }: VideoProcessingQueueItem,
+    electron: Electron,
+) => {
     log.debug(() => ["gen-hls", { file, uploadItem }]);
 
     const fileBlob = await fetchOriginalVideoBlob(file, uploadItem);
     const previewFileData = await generateVideoPreviewVariantWeb(fileBlob);
+
+    const convertToMP4Native = async (electron: Electron, blob: Blob) => {
+        const token = await writeConvertToMP4Stream(electron, blob);
+        const mp4Blob = await readConvertToMP4Stream(electron, token);
+        await readConvertToMP4Done(electron, token);
+        return mp4Blob;
+    };
 
     console.log(previewFileData);
 

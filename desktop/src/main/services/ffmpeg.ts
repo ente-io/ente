@@ -110,7 +110,8 @@ const ffmpegBinaryPath = () => {
 
  * @param inputFilePath The path to a file on the user's local file system. This
  * is the video we want to convert.
- * @param inputFilePath The path to a file on the user's local file system where
+ *
+ * @param outputFilePath The path to a file on the user's local file system where
  * we should write the converted MP4 video.
  */
 export const ffmpegConvertToMP4 = async (
@@ -123,6 +124,65 @@ export const ffmpegConvertToMP4 = async (
         inputPathPlaceholder,
         "-preset",
         "ultrafast",
+        outputPathPlaceholder,
+    ];
+
+    const cmd = substitutePlaceholders(command, inputFilePath, outputFilePath);
+
+    await execAsync(cmd);
+};
+
+/**
+ * A bespoke variant of {@link ffmpegExec} for generation of HLS playlists for
+ * videos.
+ *
+ * See: [Note: Preview variant of videos]
+
+ * @param inputFilePath The path to a file on the user's local file system. This
+ * is the video we want to convert.
+ *
+ * @param outputPlaylistPath The path to a file on the user's local file system
+ * where we should write the generated HLS playlist.
+ *
+ * @param outputVideoPath The path to a file on the user's local file system
+ * where we should write the transcoded and encrypted video that the HLS
+ * playlist refers to.
+ */
+export const ffmpegGenerateHLSPlaylist = async (
+    inputFilePath: string,
+    outputFilePath: string,
+): Promise<void> => {
+    // Current parameters
+    //
+    // - H264
+    // - 720p width
+    // - 2000kbps bitrate
+    // - 30fps frame rate
+    const command = [
+        ffmpegPathPlaceholder,
+        // Input file. We don't need any extra options that apply to the input file.
+        "-i",
+        inputPathPlaceholder,
+        // The remaining options apply to the next file, `outputPathPlaceholder`.
+        // ---
+        // `-vf` creates a filter graph for the video stream.
+        "-vf",
+        // `-vf scale=720:-1` scales the video to 720p width, keeping aspect ratio.
+        "scale=720:-1",
+        // `-r 30` sets the frame rate to 30 fps.
+        "-r",
+        "30",
+        // `-c:v libx264` sets the codec for the video stream to H264.
+        "-c:v",
+        "libx264",
+        // `-b:v 2000k` sets the bitrate for the video stream.
+        "-b:v",
+        "2000k",
+        // `-c:a aac -b:a 128k` converts the audio stream to 128k bit AAC.
+        "-c:a",
+        "aac",
+        "-b:a",
+        "128k",
         outputPathPlaceholder,
     ];
 
