@@ -31,6 +31,8 @@ class RemoteDB with SqlDbBase {
     devLog("RemoteDB init complete $path");
   }
 
+  SqliteDatabase get sqliteDB => _sqliteDB;
+
   Future<List<Collection>> getAllCollections() async {
     final result = <Collection>[];
     final cursor = await _sqliteDB.getAll("SELECT * FROM collections");

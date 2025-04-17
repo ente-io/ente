@@ -1276,15 +1276,6 @@ class FilesDB with SqlDbBase {
     });
   }
 
-  Future<int> collectionFileCount(int collectionID) async {
-    final db = await instance.sqliteAsyncDB;
-    final row = await db.get(
-      'SELECT COUNT(*) FROM $filesTable where $columnCollectionID = '
-      '$collectionID AND $columnUploadedFileID IS NOT -1',
-    );
-    return row['COUNT(*)'] as int;
-  }
-
   Future<int> archivedFilesCount(
     int visibility,
     int ownerID,

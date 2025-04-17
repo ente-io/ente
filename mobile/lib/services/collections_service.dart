@@ -18,6 +18,7 @@ import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/remote/db.dart";
+import "package:photos/db/remote/read/collection_files.dart";
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -349,7 +350,7 @@ class CollectionsService {
     if (_countCache.containsKey(c.id) && useCache) {
       return _countCache[c.id]!;
     } else {
-      final count = await _filesDB.collectionFileCount(c.id);
+      final count = await remoteDB.getCollectionFileCount(c.id);
       _countCache[c.id] = count;
       return count;
     }
