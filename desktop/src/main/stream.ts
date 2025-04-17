@@ -291,9 +291,6 @@ const handleGenerateHLSWrite = async (request: Request) => {
             inputTempFilePath,
             outputFilePathPrefix,
         );
-    } catch (e) {
-        log.error("Generate HLS failed", e);
-        throw e;
     } finally {
         await deleteTempFileIgnoringErrors(inputTempFilePath);
     }

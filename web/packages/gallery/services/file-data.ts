@@ -8,6 +8,7 @@ import {
 import { apiURL } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
 import { z } from "zod";
+
 /**
  * [Note: File data APIs]
  *
@@ -222,4 +223,54 @@ export const fetchFilePreviewData = async (
     if (res.status == 404) return undefined;
     ensureOk(res);
     return z.object({ url: z.string() }).parse(await res.json()).url;
+};
+
+/**
+ * Update the video data associated with the given file to remote.
+ *
+ * Video data refers to two things:
+ *
+ * - The encrypted HLS playlist ("file data" of type "vid_preview").
+ *
+ * - The object ID of an (already uploaded) "file preview data" file containing
+ *   the video segments.
+ *
+ * This function is similar to {@link putFileData}, except it will save or
+ * update the both the playlist and the reference to its associated segment file
+ * associated with the given {@link file}. The playlist data will be end-to-end
+ * encrypted using the given {@link file}'s key before uploading.
+ *
+ * @param file {@link EnteFile} which this data is associated with.
+ *
+ * @param playlistData The HLS playlist contents, as a {@link Blob}.
+ *
+ * @param objectID Object ID of an already uploaded "file preview data" (see
+ * {@link getFilePreviewDataUploadURL}).
+ *
+ * @param objectSize The size (in bytes) of the file corresponding to
+ * {@link objectID}.
+ */
+export const putVideoData = async (
+    file: EnteFile,
+    playlistData: Uint8Array,
+    objectID: string,
+    objectSize: number,
+) => {
+    const { encryptedData, decryptionHeader } = await encryptBlobB64(
+        playlistData,
+        file.key,
+    );
+
+    const res = await fetch(await apiURL("/files/video-data"), {
+        method: "PUT",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify({
+            fileID: file.id,
+            objectID,
+            objectSize,
+            playlist: encryptedData,
+            playlistHeader: decryptionHeader,
+        }),
+    });
+    ensureOk(res);
 };
