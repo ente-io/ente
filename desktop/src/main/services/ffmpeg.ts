@@ -1,6 +1,7 @@
 import pathToFfmpeg from "ffmpeg-static";
 import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
+import path from "node:path";
 import type { ZipItem } from "../../types/ipc";
 import log from "../log";
 import { execAsync } from "../utils/electron";
@@ -145,9 +146,9 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  * @param inputFilePath The path to a file on the user's local file system. This
  * is the video we want to convert.
  *
- * @param outputPathPrefix The path to unique and temporary prefix on the user's
- * local file system - we should write the generated HLS playlist and video
- * segments using this prefix and adding the necessary suffixes.
+ * @param outputPathPrefix The path to unique, unused and temporary prefix on
+ * the user's local file system - we should write the generated HLS playlist and
+ * video segments under this prefix.
  *
  * @returns The paths to two files on the user's local file system - one
  * containing the generated HLS playlist, and the other containing the
@@ -157,14 +158,21 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult> => {
-    // This is where we will ask ffmpeg to generate the HLS playlist.
-    const playlistPath = outputPathPrefix + ".m3u8";
-
+    // We want the generated playlist to refer to the chunks as "output.ts".
+    //
+    // So we arrange things accordingly: We use the `outputPathPrefix` as our
+    // working directory, and then ask ffmpeg to generate a playlist with the
+    // name "output.m3u8".
+    //
     // ffmpeg will automatically place the segments in a file with the same base
     // name as the playlist, but with a ".ts" extension. Since we use the
     // "single_file" option, all the segments will be placed in the same ".ts"
-    // file, and the playlist will use chunking to reference them.
-    const videoPath = outputPathPrefix + ".ts";
+    // file, which will be named "output.ts".
+
+    await fs.mkdir(outputPathPrefix);
+
+    const playlistPath = path.join(outputPathPrefix, "output.m3u8");
+    const videoPath = path.join(outputPathPrefix, "output.ts");
 
     // Generate a cryptographically secure random key (16 bytes).
     const keyBytes = randomBytes(16);

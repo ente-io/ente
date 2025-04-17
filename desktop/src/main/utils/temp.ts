@@ -29,7 +29,7 @@ const randomPrefix = () => {
  *
  * The function returns the path to a file in the system temp directory (in an
  * Ente specific folder therin) with a random prefix and an (optional)
- * {@link extension}.
+ * {@link extension}. The parent directory is guaranteed to exist.
  *
  * It ensures that there is no existing item with the same name already.
  *
