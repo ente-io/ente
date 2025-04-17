@@ -9,7 +9,6 @@ import { pathToFileURL } from "node:url";
 import log from "./log";
 import { ffmpegConvertToMP4 } from "./services/ffmpeg";
 import { markClosableZip, openZip } from "./services/zip";
-import { ensure } from "./utils/common";
 import { writeStream } from "./utils/stream";
 import {
     deleteTempFile,
@@ -57,16 +56,16 @@ const handleStreamRequest = async (request: Request): Promise<Response> => {
     const { host, searchParams } = new URL(url);
     switch (host) {
         case "read":
-            return handleRead(ensure(searchParams.get("path")));
+            return handleRead(searchParams.get("path")!);
 
         case "read-zip":
             return handleReadZip(
-                ensure(searchParams.get("zipPath")),
-                ensure(searchParams.get("entryName")),
+                searchParams.get("zipPath")!,
+                searchParams.get("entryName")!,
             );
 
         case "write":
-            return handleWrite(ensure(searchParams.get("path")), request);
+            return handleWrite(searchParams.get("path")!, request);
 
         case "video": {
             const op = searchParams.get("op");
@@ -77,14 +76,16 @@ const handleStreamRequest = async (request: Request): Promise<Response> => {
                     case "generate-hls":
                         return new Response("TODO", { status: 400 });
                     default:
-                        return new Response("", { status: 404 });
+                        return new Response(`Unknown op ${op}`, {
+                            status: 404,
+                        });
                 }
             }
 
             const token = searchParams.get("token");
             const done = searchParams.get("done") !== null;
             if (!token) {
-                return new Response("", { status: 404 });
+                return new Response("Missing token", { status: 404 });
             }
 
             return done ? handleVideoDone(token) : handleVideoRead(token);
@@ -178,7 +179,7 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
 };
 
 const handleWrite = async (path: string, request: Request) => {
-    await writeStream(path, ensure(request.body));
+    await writeStream(path, request.body!);
     return new Response("", { status: 200 });
 };
 
@@ -226,7 +227,7 @@ export const clearPendingVideoResults = () => pendingVideoResults.clear();
  */
 const handleConvertToMP4Write = async (request: Request) => {
     const inputTempFilePath = await makeTempFilePath();
-    await writeStream(inputTempFilePath, ensure(request.body));
+    await writeStream(inputTempFilePath, request.body!);
 
     const outputTempFilePath = await makeTempFilePath("mp4");
     try {

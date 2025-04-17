@@ -39,6 +39,10 @@ export default ts.config(
                 "error",
                 { allowTernary: true },
             ],
+            // Allow force unwrapping potentially optional values.
+            //
+            // See: [Note: non-null-assertions have better stack trace]
+            "@typescript-eslint/no-non-null-assertion": "off",
         },
     },
 );
