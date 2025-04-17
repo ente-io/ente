@@ -70,22 +70,54 @@ will be done by the web server sitting on your server machine.
 
 ![cloudflare](/cloudflare.png)
 
+### With Caddy
+
+Setting up a reverse proxy with Caddy is pretty easy and straightforward. Firstly, install Caddy
+on your server machine. 
+
+```sh
+sudo apt install caddy
+``` 
+
+After the installation is complete, a `Caddyfile` is created on the path `/etc/caddy/`. This file is
+used to configure reverse proxies and a whole lot of different things. 
+
+```yaml 
+# Caddyfile - myente.xyz is just an example.
+api.myente.xyz {
+    reverse_proxy http://localhost:8080
+}
+ente.myente.xyz {
+    reverse_proxy http://localhost:3000
+}
+```
+
+After a few hard-reloads, Ente Photos web app should be working on https://ente.myente.xyz. You can check out
+the documentation for any other reverse proxy tool (like nginx) you want to use. 
+
 ## Configuring `museum.yaml`
+
+> [!TIP]
+> Always do `docker compose down` inside `my-ente` directory, if you've made any changes to `museum.yaml`
+> and then restart the containers with `docker compose up -d ` to see the changes in action.
 
 `Museum.yaml` is a YAML configuration file used to configure various things for museum. 
 By default, [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml) 
-is also available, but  it is overridden if `museum.yaml` is found. We highly 
+is also available, but  it is overridden if `museum.yaml` file is found. We highly 
 recommend creating and building your own `museum.yaml` instead of editing `configurations/local.yaml`. 
 The `my-ente` directory will include a `museum.yaml` file with some configurations around encryption 
 keys and secrets, postgres DB, and MinIO.
 
 ### S3 Buckets
+
 By default, the `s3` section is configured to use local minIO buckets and for the same reason 
 `are_local_buckets`  is set to `true`.  If you wish to bring any external S3 provider, 
 you just have to edit the configuration with appropriate credentails and details given by the provider. 
 And set `are_local_buckets` to false.  Check out [Configuring S3](/self-hosting/guides/configuring-s3.md) 
 to understand more on how to configure S3 buckets and how the communication happens.
 
+MinIO makes use of the port `3200` for API Endpoints and the Client Web App is run over `:3201` 
+(both on localhost).
 
 ### App Endpoints
 
@@ -106,6 +138,6 @@ By default, all the values redirect to our publicly hosted production services.
 After you are done with filling the values, restart museum and the App will start utilizing
 those endpoints for everything instead of the Ente's prod instances.
 
-Similarly, you can read the default [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml)  
+Similarly, you can read the default [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml) 
 and build a functioning `museum.yaml` for many other functionalities like SMTP, Discord
- Notifications, Hardcoded-OTT's and etc.
+Notifications, Hardcoded-OTT's, etc.
