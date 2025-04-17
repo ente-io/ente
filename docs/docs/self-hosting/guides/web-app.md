@@ -5,6 +5,12 @@ description:
     server
 ---
 
+
+> [!WARNING] NOTE
+> This page covers documentation around self-hosting the web app manually. If you
+> want to deploy Ente hassle free, please use the [one line](https://ente.io/blog/self-hosting-quickstart/) 
+> command to setup Ente. This guide might be deprecated in the near future.
+
 # Web app
 
 The getting started instructions mention using `yarn dev` (which is an alias of
@@ -30,10 +36,6 @@ longer term, then it is recommended to follow the Docker approach.
 ## With Docker/Docker Compose (Recommended)
 
 > [!IMPORTANT]
->
-> This docker image is still in testing stage and it might show up with some
-> unknown variables in different scenarios. But this image has been tested on a
-> production Ente site.
 >
 > Recurring changes might be made by the team or from community if more
 > improvements can be made so that we are able to build a full-fledged docker
