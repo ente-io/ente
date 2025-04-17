@@ -238,24 +238,20 @@ export const sidebar = [
         items: [
             { text: "Getting started", link: "/self-hosting/" },
             {
+                text: "Configuring S3",
+                link: "/self-hosting/guides/configuring-s3",
+            },
+            {
+                text: "Connect to custom server",
+                link: "/self-hosting/guides/custom-server/",
+            },
+            {
                 text: "Guides",
                 items: [
                     { text: "Introduction", link: "/self-hosting/guides/" },
                     {
-                        text: "Connect to custom server",
-                        link: "/self-hosting/guides/custom-server/",
-                    },
-                    {
                         text: "Hosting Ente from source",
                         link: "/self-hosting/guides/from-source",
-                    },
-                    {
-                        text: "Configuring S3",
-                        link: "/self-hosting/guides/configuring-s3",
-                    },
-                    {
-                        text: "Hosting Ente with external S3 (Community)",
-                        link: "/self-hosting/guides/external-s3",
                     },
                     {
                         text: "DB migration",
