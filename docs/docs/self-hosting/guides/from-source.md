@@ -51,10 +51,10 @@ will be connecting to the server running on your local machine at
 
 For the mobile apps, you don't even need to build, and can install normal Ente
 apps and configure them to use your
-[custom self-hosted server](guides/custom-server/).
+[custom self-hosted server](/self-hosting/guides/custom-server/).
 
 > If you want to build the mobile apps from source, see the instructions
-> [here](guides/mobile-build).
+> [here](/self-hosting/guides/mobile-build).
 
 > [!WARNING] NOTE
 > The below documentation will cover instructions about self-hosting the web app manually. If you
