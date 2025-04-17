@@ -145,6 +145,11 @@ export type ItemData = PhotoSwipeSlideData & {
      * original file could not be fetched because of an network error).
      */
     fetchFailed?: boolean;
+    /**
+     * This will be `true` if the item data for this particular file is
+     * considered transient, and should not be cached.
+     */
+    isTransient?: boolean;
 };
 
 /**
@@ -251,7 +256,7 @@ export const fileViewerDidClose = () => {
         resetState();
     } else {
         // Selectively clear.
-        forgetFailedItems();
+        forgetFailedOrTransientItems();
         forgetExif();
     }
 };
@@ -357,13 +362,40 @@ export const forgetItemDataForFileID = (fileID: number) => {
 };
 
 /**
- * Forget item data for the given {@link file} if its fetch had failed.
+ * Forget item data for the given {@link file} if its fetch had failed, or if it
+ * is caching something that is transient in nature.
  *
- * This is called when the user moves away from a slide so that we attempt a
- * full retry when they come back the next time.
+ * It is called when the user moves away from a slide. In particular, this way
+ * we can reset failures, if any, for a slide so that the fetch is tried again
+ * when we come back to it.
+ *
+ * [Note: File viewer preloading and contentDeactivate]
+ *
+ * Note that because of preloading, this will only have a user visible effect if
+ * the user moves out of the preload range. Let's take an example:
+ *
+ * - User opens slide at index `i`. Then the adjacent slides, `i - 1` and `i +
+ *   1`, also get preloaded.
+ *
+ * - User moves away from `i` (in either direction, but let us take the example
+ *   if they move `i - 1`).
+ *
+ * - This function will get called for `i` and will clear any failed or
+ *   transient state.
+ *
+ * - But since PhotoSwipe already has the slides ready for `i`, if the user then
+ *   moves back to `i` then PhotoSwipe will not attempt to recreate the slide
+ *   and so will not even try to get "itemData". So this will only have an
+ *   effect if they move out of preload range (e.g. `i - 1`, `i - 2`), and then
+ *   back (`i - 1`, `i`).
+ *
+ * See: [Note: File viewer error handling]
+ *
+ * See: [Note: Caching HLS playlist data]
  */
-export const forgetFailedItemDataForFileID = (fileID: number) => {
-    if (_state.itemDataByFileID.get(fileID)?.fetchFailed)
+export const forgetItemDataForFileIDIfNeeded = (fileID: number) => {
+    const itemData = _state.itemDataByFileID.get(fileID);
+    if (itemData?.fetchFailed || itemData?.isTransient)
         forgetItemDataForFileID(fileID);
 };
 
@@ -381,13 +413,17 @@ export const updateItemDataAlt = (updatedFile: EnteFile) => {
 };
 
 /**
- * Forget item data for the all files whose fetch had failed.
+ * Forget item data for the all files whose fetch had failed, or if the
+ * corresponding item data is transient and shouldn't be cached.
  *
- * This is called when the user closes the file viewer so that we attempt a full
- * retry when they reopen the viewer the next time.
+ * This is called when the user closes the file viewer; in particular, this way
+ * we attempt a full retry for previously failed files when the user reopens the
+ * viewer the next time.
  */
-const forgetFailedItems = () =>
-    [..._state.itemDataByFileID.keys()].forEach(forgetFailedItemDataForFileID);
+const forgetFailedOrTransientItems = () =>
+    [..._state.itemDataByFileID.keys()].forEach(
+        forgetItemDataForFileIDIfNeeded,
+    );
 
 const enqueueUpdates = async (
     file: EnteFile,
@@ -431,7 +467,22 @@ const enqueueUpdates = async (
                 createHLSPlaylistItemDataValidity(),
             );
         } else {
-            update(videoURLD);
+            if (shouldUsePlayerV2()) {
+                // See: [Note: Caching HLS playlist data]
+                //
+                // TODO(HLS): As an optimization, we can handle the logged in vs
+                // public albums case separately once we have the status-diff
+                // state, we don't need to mark status-diff case as transient.
+                //
+                // Note that setting the transient flag is not too expensive,
+                // since the underlying videoURL is still cached by the download
+                // manager. So effectively, under normal circumstance, it just
+                // adds one API call (to recheck if an HLS playlist now exists
+                // for the given file).
+                update({ ...videoURLD, isTransient: true });
+            } else {
+                update(videoURLD);
+            }
         }
     };
 
@@ -475,7 +526,10 @@ const enqueueUpdates = async (
         // TODO(HLS):
         let hlsPlaylistData: HLSPlaylistData | undefined;
         if (shouldUsePlayerV2() && file.metadata.fileType == FileType.video) {
-            hlsPlaylistData = await hlsPlaylistDataForFile(file);
+            hlsPlaylistData = await hlsPlaylistDataForFile(
+                file,
+                downloadManager.publicAlbumsCredentials,
+            );
             // We have a HLS playlist, and the user didn't request the original.
             // Early return so that we don't initiate a fetch for the original.
             if (hlsPlaylistData && opts?.videoQuality != "original") {

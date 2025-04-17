@@ -1,5 +1,5 @@
-import { pt } from "ente-base/i18n";
 import log from "ente-base/log";
+import { albumsAppOrigin } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
@@ -14,8 +14,8 @@ import {
     fileViewerDidClose,
     fileViewerWillOpen,
     forgetExifForItemData,
-    forgetFailedItemDataForFileID,
     forgetItemDataForFileID,
+    forgetItemDataForFileIDIfNeeded,
     itemDataForFile,
     updateFileInfoExifIfNeeded,
     type ItemData,
@@ -166,7 +166,15 @@ export const moreMenuID = "ente-pswp-more-menu";
 // TODO(HLS):
 let _shouldUsePlayerV2: boolean | undefined;
 export const shouldUsePlayerV2 = () =>
-    (_shouldUsePlayerV2 ??= settingsSnapshot().isInternalUser);
+    // Enable for internal users and public albums
+    (_shouldUsePlayerV2 ??=
+        settingsSnapshot().isInternalUser || isPublicAlbumApp());
+
+const isPublicAlbumApp = () => {
+    const currentURL = new URL(window.location.href);
+    const albumsURL = new URL(albumsAppOrigin());
+    return currentURL.host == albumsURL.host;
+};
 
 /**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
@@ -554,8 +562,8 @@ export class FileViewerPhotoSwipe {
                 const value =
                     intendedVideoQualityForFileID(fileID) == "auto" &&
                     videoPlaylistURL
-                        ? pt("Auto")
-                        : pt("Original");
+                        ? t("auto")
+                        : t("original");
                 // Check first to avoid spurious updates.
                 if (qualityMenu.value != value) {
                     // Set a flag to avoid infinite update loop.
@@ -711,16 +719,13 @@ export class FileViewerPhotoSwipe {
             element?.querySelector<HTMLVideoElement>("video, hls-video");
 
         pswp.on("contentDeactivate", (e) => {
-            // Reset failures, if any, for this file so that the fetch is tried
-            // again when we come back to it^.
+            // PhotoSwipe invokes this event when moving away from a slide.
             //
-            // ^ Note that because of how the preloading works, this will have
-            //   an effect (i.e. the retry will happen) only if the user moves
-            //   more than 2 slides and then back, or if they reopen the viewer.
-            //
-            // See: [Note: File viewer error handling]
+            // However it might not have an effect until we move out of preload
+            // range. See: [Note: File viewer preloading and contentDeactivate].
+
             const fileID = asItemData(e.content.data).fileID;
-            if (fileID) forgetFailedItemDataForFileID(fileID);
+            if (fileID) forgetItemDataForFileIDIfNeeded(fileID);
 
             // Pause the video element, if any, when we move away from the
             // slide.
@@ -1505,9 +1510,6 @@ const videoHTML = (url: string, mediaControllerID: string) => `
  * To make these functional, the `media-control-bar` requires the
  * `mediacontroller="${mediaControllerID}"` attribute.
  *
- * - TODO(HLS): Add translations for all the pts
- * - TODO(HLS): Add "Toggle play", "Seek forward, backward" to list of shortcuts
- *
  * Notes:
  *
  * - Examples: https://media-chrome.mux.dev/examples/vanilla/
@@ -1537,17 +1539,17 @@ const hlsVideoControlsHTML = () => `
 <div>
   <media-settings-menu id="ente-settings-menu" hidden anchor="ente-settings-menu-btn">
     <media-settings-menu-item>
-      ${pt("Quality")}
+      ${t("quality")}
       <media-chrome-menu id="ente-quality-menu" slot="submenu" hidden>
-        <div slot="title">${pt("Quality")}</div>
-        <media-chrome-menu-item type="radio">${pt("Auto")}</media-chrome-menu-item>
-        <media-chrome-menu-item type="radio">${pt("Original")}</media-chrome-menu-item>
+        <div slot="title">${t("quality")}</div>
+        <media-chrome-menu-item type="radio">${t("auto")}</media-chrome-menu-item>
+        <media-chrome-menu-item type="radio">${t("original")}</media-chrome-menu-item>
       </media-chrome-menu>
     </media-settings-menu-item>
     <media-settings-menu-item>
-      ${pt("Speed")}
+      ${t("speed")}
       <media-playback-rate-menu slot="submenu" hidden>
-        <div slot="title">${pt("Speed")}</div>
+        <div slot="title">${t("speed")}</div>
       </media-playback-rate-menu>
     </media-settings-menu-item>
   </media-settings-menu>

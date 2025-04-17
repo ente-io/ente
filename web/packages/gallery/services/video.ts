@@ -2,6 +2,7 @@ import { isDesktop } from "ente-base/app";
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
 import { isDevBuild } from "ente-base/env";
+import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
@@ -74,18 +75,63 @@ export interface HLSPlaylistData {
  *
  * @param file An {@link EnteFile} of type video.
  *
+ * @param publicAlbumsCredentials Credentials to use for fetching the HLS
+ * playlist when we are running in the context of the public albums app. If
+ * these are not specified, then the credentials of the logged in user are used.
+ *
  * @returns The HLS playlist as a string (along with the dimensions of the video
  * it will play), or `undefined` if there is no video preview associated with
  * the given file.
  *
  * See: [Note: Video playlist and preview]
+ *
+ * ---
+ *
+ * [Note: Caching HLS playlist data]
+ *
+ * The playlist data can be cached in an asymmetric manner.
+ *
+ * - If a file has a corresponding HLS playlist, then currently there is no
+ *   scenario (apart from file deletion, where the playlist also gets deleted)
+ *   where the playlist is updated or deleted after being created. There is a
+ *   limit to the validity of the presigned chunk URLs within the playlist we
+ *   create which we do handle (`createHLSPlaylistItemDataValidity`), but the
+ *   original playlist itself does not change. In particular, a positive result
+ *   ("this file has a playlist") can be cached indefinitely.
+ *
+ * - If a file does not have a HLS playlist, and it is eligible for being
+ *   streamed (e.g. it is not too small where the streaming overhead is not
+ *   required), then a client (this one, or a different one) can process it at
+ *   any arbitrary time. So the negative result ("this file does not have a
+ *   playlist") cannot be cached.
+ *
+ * So while we can easily cache the first case ("this file has a playlist"), we
+ * need to deal with the second case ("this file does not have a playlist") a
+ * bit more intricately:
+ *
+ * - If running in the context of a logged in user (e.g. photos app), we can use
+ *   the "/files/data/status-diff" API to be notified of any modifications to
+ *   the second case for the user's own files. This status-diff happens during
+ *   the regular "sync", and we can use that as a cue to selectively prune cache
+ *   entries for the second case (but can otherwise indefinitely cache it).
+ *
+ * - If the file is a shared file, the status-diff will not return it. And if
+ *   we're not running in the context of a logged in user (e.g. the public
+ *   albums app), then there is no status-diff to do. For these two scenarios,
+ *   we thus mark the cached values as "transient" and always recheck for a
+ *   playlist when opening the slide.
  */
 export const hlsPlaylistDataForFile = async (
     file: EnteFile,
+    publicAlbumsCredentials?: PublicAlbumsCredentials,
 ): Promise<HLSPlaylistData | undefined> => {
     ensurePrecondition(file.metadata.fileType == FileType.video);
 
-    const playlistFileData = await fetchFileData("vid_preview", file.id);
+    const playlistFileData = await fetchFileData(
+        "vid_preview",
+        file.id,
+        publicAlbumsCredentials,
+    );
     if (!playlistFileData) return undefined;
 
     const {
@@ -105,7 +151,11 @@ export const hlsPlaylistDataForFile = async (
     // A playlist format the current client does not understand.
     if (type != "hls_video") return undefined;
 
-    const videoURL = await fetchFilePreviewData("vid_preview", file.id);
+    const videoURL = await fetchFilePreviewData(
+        "vid_preview",
+        file.id,
+        publicAlbumsCredentials,
+    );
     if (!videoURL) return undefined;
 
     // [Note: HLS playlist format]
