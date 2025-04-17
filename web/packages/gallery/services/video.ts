@@ -9,6 +9,11 @@ import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { gunzip } from "ente-new/photos/utils/gzip";
 import { ensurePrecondition } from "ente-utils/ensure";
 import { z } from "zod";
+import {
+    readVideoStream,
+    videoStreamDone,
+    writeVideoStream,
+} from "../utils/native-stream";
 import { downloadManager } from "./download";
 import { fetchFileData, fetchFilePreviewData } from "./file-data";
 import type { UploadItem } from "./upload";
@@ -381,14 +386,17 @@ const processQueueItem = async (
 
     const fileBlob = await fetchOriginalVideoBlob(file, uploadItem);
 
-    // const token = await writeConvertToMP4Stream(electron, blob);
-    // const mp4Blob = await readConvertToMP4Stream(electron, token);
-    // await readConvertToMP4Done(electron, token);
-    // return mp4Blob;
-
-    console.log(electron, fileBlob);
-
-    await Promise.resolve(0);
+    // TODO(HLS):
+    const tokens = await writeVideoStream(electron, "generate-hls", fileBlob!);
+    const [playlistToken, videoToken] = [tokens[0]!, tokens[1]!];
+    const playlistBlob = await readVideoStream(electron, playlistToken).then(
+        (res) => res.blob(),
+    );
+    await Promise.all([
+        videoStreamDone(electron, playlistToken),
+        videoStreamDone(electron, videoToken),
+    ]);
+    console.log(electron, playlistBlob);
 };
 
 /**
