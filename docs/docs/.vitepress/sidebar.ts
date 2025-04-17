@@ -248,8 +248,8 @@ export const sidebar = [
                         link: "/self-hosting/guides/custom-server/",
                     },
                     {
-                        text: "Hosting the web app",
-                        link: "/self-hosting/guides/web-app",
+                        text: "Hosting Ente from source",
+                        link: "/self-hosting/guides/from-source",
                     },
                     {
                         text: "Configuring S3",
