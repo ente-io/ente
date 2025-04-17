@@ -734,23 +734,6 @@ class FilesDB with SqlDbBase {
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
-  List<EnteFile> deduplicateByLocalID(List<EnteFile> files) {
-    final localIDs = <String>{};
-    final List<EnteFile> deduplicatedFiles = [];
-    for (final file in files) {
-      final id = file.localID;
-      if (id == null) {
-        continue;
-      }
-      if (localIDs.contains(id)) {
-        continue;
-      }
-      localIDs.add(id);
-      deduplicatedFiles.add(file);
-    }
-    return deduplicatedFiles;
-  }
-
   Future<FileLoadResult> getFilesInCollection(
     int collectionID,
     int startTime,

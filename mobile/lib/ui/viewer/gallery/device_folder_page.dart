@@ -196,13 +196,8 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   }
 
   Future<List<EnteFile>> _filesInDeviceCollection() async {
-    return (await FilesDB.instance.getFilesInDeviceCollection(
-      widget.deviceCollection,
-      Configuration.instance.getUserID(),
-      galleryLoadStartTime,
-      galleryLoadEndTime,
-    ))
-        .files;
+    return await LocalImportService.instance
+        .getAlbumFiles(widget.deviceCollection.id);
   }
 
   Future<bool> _hasIgnoredFiles(

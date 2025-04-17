@@ -1,15 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
-import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/upload_strategy.dart';
 import 'package:sqflite/sqlite_api.dart';
-import 'package:tuple/tuple.dart';
 
 extension DeviceFiles on FilesDB {
   static final Logger _logger = Logger("DeviceFilesDB");
@@ -119,35 +116,6 @@ extension DeviceFiles on FilesDB {
       [collectionID, pathID],
     );
     return;
-  }
-
-  Future<FileLoadResult> getFilesInDeviceCollection(
-    DeviceCollection deviceCollection,
-    int? ownerID,
-    int startTime,
-    int endTime, {
-    int? limit,
-    bool? asc,
-  }) async {
-    final db = await sqliteAsyncDB;
-    final order = (asc ?? false ? 'ASC' : 'DESC');
-    final String rawQuery = '''
-    SELECT *
-          FROM ${FilesDB.filesTable}
-          WHERE ${FilesDB.columnLocalID} IS NOT NULL AND
-          ${FilesDB.columnCreationTime} >= $startTime AND 
-          ${FilesDB.columnCreationTime} <= $endTime AND
-          (${FilesDB.columnOwnerID} IS NULL OR ${FilesDB.columnOwnerID} = 
-          $ownerID ) AND 
-          ${FilesDB.columnLocalID} IN 
-          (SELECT id FROM device_files where path_id = '${deviceCollection.id}' ) 
-          ORDER BY ${FilesDB.columnCreationTime} $order , ${FilesDB.columnModificationTime} $order
-         ''' +
-        (limit != null ? ' limit $limit;' : ';');
-    final results = await db.getAll(rawQuery);
-    final files = convertToFiles(results);
-    final dedupe = deduplicateByLocalID(files);
-    return FileLoadResult(dedupe, files.length == limit);
   }
 
   Future<BackedUpFileIDs> getBackedUpForDeviceCollection(
