@@ -1,18 +1,29 @@
-import { isDesktop } from "ente-base/app";
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
-import { isDevBuild } from "ente-base/env";
-import type { PublicAlbumsCredentials } from "ente-base/http";
+import {
+    retryEnsuringHTTPOkOr4xx,
+    type PublicAlbumsCredentials,
+} from "ente-base/http";
 import log from "ente-base/log";
+import type { Electron } from "ente-base/types/ipc";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
-import { gunzip } from "ente-new/photos/utils/gzip";
+import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { ensurePrecondition } from "ente-utils/ensure";
 import { z } from "zod";
+import {
+    readVideoStream,
+    videoStreamDone,
+    writeVideoStream,
+} from "../utils/native-stream";
 import { downloadManager } from "./download";
-import { generateVideoPreviewVariantWeb } from "./ffmpeg";
-import { fetchFileData, fetchFilePreviewData } from "./file-data";
+import {
+    fetchFileData,
+    fetchFilePreviewData,
+    getFilePreviewDataUploadURL,
+    putVideoData,
+} from "./file-data";
 import type { UploadItem } from "./upload";
 
 interface VideoProcessingQueueItem {
@@ -257,7 +268,14 @@ const PlaylistJSON = z.object({
      * The height of the video (px).
      */
     height: z.number(),
+    /**
+     * The size (in bytes) of the corresponding file containing the video
+     * segments that the playlist refers to.
+     */
+    size: z.number(),
 });
+
+type PlaylistJSON = z.infer<typeof PlaylistJSON>;
 
 const decryptPlaylistJSON = async (
     encryptedPlaylist: EncryptedBlob,
@@ -307,21 +325,17 @@ export const processVideoNewUpload = (
     // TODO(HLS):
     if (!isVideoProcessingEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
-    if (!isDesktop) {
+    if (!electron) {
         // Processing very large videos with the current ffmpeg Wasm
         // implementation can cause the app to crash, esp. on mobile devices
         // (e.g. https://github.com/ffmpegwasm/ffmpeg.wasm/issues/851).
         //
-        // So the video processing only happpens in the desktop app (which uses
-        // the much more efficient native ffmpeg integration).
-        if (process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING && isDevBuild) {
-            // TODO(HLS): Temporary dev convenience
-        } else {
-            return;
-        }
+        // So the video processing only happpens in the desktop app, which uses
+        // the much more efficient native ffmpeg integration.
+        return;
     }
 
-    if (_state.videoProcessingQueue.length > 1) {
+    if (_state.videoProcessingQueue.length > 50) {
         // Drop new requests if the queue can't keep up to avoid the app running
         // out of memory by keeping hold of too many (potentially huge) video
         // blobs. These items will later get processed as part of a backfill.
@@ -333,17 +347,20 @@ export const processVideoNewUpload = (
     _state.videoProcessingQueue.push({ file, uploadItem });
 
     // Tickle the processor if it isn't already running.
-    _state.queueProcessor ??= processQueue();
+    _state.queueProcessor ??= processQueue(electron);
 };
 
 export const isVideoProcessingEnabled = () =>
     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
 
-const processQueue = async () => {
+const processQueue = async (electron: Electron) => {
     while (_state.videoProcessingQueue.length) {
         try {
-            await processQueueItem(_state.videoProcessingQueue.shift()!);
+            await processQueueItem(
+                _state.videoProcessingQueue.shift()!,
+                electron,
+            );
         } catch (e) {
             log.error("Video processing failed", e);
             // Ignore this unprocessable item. Currently this function only runs
@@ -376,18 +393,58 @@ const processQueue = async () => {
  *
  * 3. Both the generated video and the HLS playlist are then uploaded, E2EE.
  */
-const processQueueItem = async ({
-    file,
-    uploadItem,
-}: VideoProcessingQueueItem) => {
+const processQueueItem = async (
+    { file, uploadItem }: VideoProcessingQueueItem,
+    electron: Electron,
+) => {
     log.debug(() => ["gen-hls", { file, uploadItem }]);
 
     const fileBlob = await fetchOriginalVideoBlob(file, uploadItem);
-    const previewFileData = await generateVideoPreviewVariantWeb(fileBlob);
 
-    console.log(previewFileData);
+    // TODO(HLS):
+    const tokens = await writeVideoStream(electron, "generate-hls", fileBlob!);
+    const [playlistToken, videoToken] = [tokens[0]!, tokens[1]!];
 
-    await Promise.resolve(0);
+    try {
+        const playlistBlob = await readVideoStream(
+            electron,
+            playlistToken,
+        ).then((res) => res.blob());
+
+        const { objectID, url: objectUploadURL } =
+            await getFilePreviewDataUploadURL(file);
+
+        // TOOD(HLS): Move this to the node side.
+        const videoBlob = await readVideoStream(electron, videoToken).then(
+            (res) => res.blob(),
+        );
+
+        const objectSize = videoBlob.size;
+
+        // Video conversion is non-trivial effort, and the video segment file
+        // we're uploading is potentially very large, so add retries to avoid
+        // the need to redo everything in case of transient errors.
+        await retryEnsuringHTTPOkOr4xx(() =>
+            fetch(objectUploadURL, { method: "PUT", body: videoBlob }),
+        );
+
+        const playlistData = await encodePlaylistJSON({
+            type: "hls_video",
+            playlist: await playlistBlob.text(),
+            // TODO(HLS): Critical, fix this before any use.
+            width: 1280,
+            // TODO(HLS): Critical, fix this before any use.
+            height: 720,
+            size: objectSize,
+        });
+
+        await putVideoData(file, playlistData, objectID, objectSize);
+    } finally {
+        await Promise.all([
+            videoStreamDone(electron, playlistToken),
+            videoStreamDone(electron, videoToken),
+        ]);
+    }
 };
 
 /**
@@ -405,10 +462,10 @@ const processQueueItem = async ({
 const fetchOriginalVideoBlob = async (
     file: EnteFile,
     uploadItem: UploadItem | undefined,
-): Promise<Blob> =>
+): Promise<Blob | ReadableStream | null> =>
     uploadItem
         ? fetchOriginalVideoUploadItemBlob(file, uploadItem)
-        : await downloadManager.fileBlob(file);
+        : await downloadManager.fileStream(file);
 
 const fetchOriginalVideoUploadItemBlob = (
     _: EnteFile,
@@ -442,3 +499,13 @@ const fetchOriginalVideoUploadItemBlob = (
         }
     }
 };
+
+/**
+ * A semi-sibling of {@link decryptPlaylistJSON}, which does the gzip but leaves
+ * the encryption up to the next layer.
+ *
+ * It is a trivial function, the main utility it provides is that it forces us
+ * to conform to the {@link PlaylistJSON} type.
+ */
+const encodePlaylistJSON = (playlistJSON: PlaylistJSON) =>
+    gzip(JSON.stringify(playlistJSON));
