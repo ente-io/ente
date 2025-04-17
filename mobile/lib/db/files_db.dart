@@ -1750,25 +1750,6 @@ class FilesDB with SqlDbBase {
     return deduplicatedFiles;
   }
 
-  Future<Map<FileType, int>> fetchFilesCountbyType(int userID) async {
-    final db = await instance.sqliteAsyncDB;
-    final result = await db.getAll(
-      '''
-      SELECT $columnFileType, COUNT(DISTINCT $columnUploadedFileID) 
-         FROM $filesTable WHERE $columnUploadedFileID != -1 AND 
-         $columnOwnerID IS $userID GROUP BY $columnFileType
-      ''',
-    );
-
-    final filesCount = <FileType, int>{};
-    for (var e in result) {
-      filesCount.addAll(
-        {getFileType(e[columnFileType] as int): e.values.last as int},
-      );
-    }
-    return filesCount;
-  }
-
   Future<FileLoadResult> fetchAllUploadedAndSharedFilesWithLocation(
     int startTime,
     int endTime, {
