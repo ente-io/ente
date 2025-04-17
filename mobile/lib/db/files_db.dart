@@ -1588,25 +1588,6 @@ class FilesDB with SqlDbBase {
     return files;
   }
 
-  Future<List<String>> getGeneratedIDForFilesOlderThan(
-    int cutOffTime,
-    int ownerID,
-  ) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT DISTINCT $columnGeneratedID FROM $filesTable
-      WHERE $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)
-    ''',
-      [cutOffTime, ownerID],
-    );
-    final result = <String>[];
-    for (final row in rows) {
-      result.add(row[columnGeneratedID].toString());
-    }
-    return result;
-  }
-
   // For givenUserID, get List of unique LocalIDs for files which are
   // uploaded by the given user and location is missing
   Future<List<String>> getLocalIDsForFilesWithoutLocation(int ownerID) async {
