@@ -28,7 +28,7 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { lowercaseExtension } from "ente-base/file-name";
-import { formattedListJoin, pt, ut } from "ente-base/i18n";
+import { formattedListJoin, ut } from "ente-base/i18n";
 import type { LocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import {
@@ -1155,7 +1155,7 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
                 shortcut={
                     // TODO(HLS):
                     shouldUsePlayerV2()
-                        ? `${formattedListJoin([ut("←"), ut("→")])} (Option/Alt)`
+                        ? `${formattedListJoin([ut("←"), ut("→")])} ${ut("(Option/Alt)")}`
                         : formattedListJoin([ut("←"), ut("→")])
                 }
             />
@@ -1163,7 +1163,7 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
                 /* TODO(HLS): */
                 shouldUsePlayerV2() && (
                     <Shortcut
-                        action={pt("Video seek")}
+                        action={t("video_seek")}
                         shortcut={formattedListJoin([ut("←"), ut("→")])}
                     />
                 )
@@ -1188,7 +1188,7 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
                 /* TODO(HLS): */
                 shouldUsePlayerV2() && (
                     <Shortcut
-                        action={pt("Play, Pause")}
+                        action={formattedListJoin([t("play"), t("pause")])}
                         shortcut={ut("Space")}
                     />
                 )

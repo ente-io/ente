@@ -760,8 +760,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<void> _trashCollection() async {
     // Fetch the count by-passing the cache to avoid any stale data
-    final int count =
-        await FilesDB.instance.collectionFileCount(widget.collection!.id);
+    final int count = await CollectionsService.instance.getFileCount(
+      widget.collection!,
+      useCache: false,
+    );
     final bool isEmptyCollection = count == 0;
     if (isEmptyCollection) {
       final dialog = createProgressDialog(

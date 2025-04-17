@@ -89,6 +89,7 @@ class AlbumsItemWidget extends StatelessWidget {
               if (c.isHidden()) {
                 return;
               }
+              // stop playing video when navigating to collection page
               Bus.instance.fire(PauseVideoEvent());
               routeToPage(
                 context,
