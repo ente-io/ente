@@ -1,12 +1,15 @@
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
-import type { PublicAlbumsCredentials } from "ente-base/http";
+import {
+    retryEnsuringHTTPOkOr4xx,
+    type PublicAlbumsCredentials,
+} from "ente-base/http";
 import log from "ente-base/log";
 import type { Electron } from "ente-base/types/ipc";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
-import { gunzip } from "ente-new/photos/utils/gzip";
+import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { ensurePrecondition } from "ente-utils/ensure";
 import { z } from "zod";
 import {
@@ -15,7 +18,12 @@ import {
     writeVideoStream,
 } from "../utils/native-stream";
 import { downloadManager } from "./download";
-import { fetchFileData, fetchFilePreviewData } from "./file-data";
+import {
+    fetchFileData,
+    fetchFilePreviewData,
+    getFilePreviewDataUploadURL,
+    putVideoData,
+} from "./file-data";
 import type { UploadItem } from "./upload";
 
 interface VideoProcessingQueueItem {
@@ -267,6 +275,8 @@ const PlaylistJSON = z.object({
     size: z.number(),
 });
 
+type PlaylistJSON = z.infer<typeof PlaylistJSON>;
+
 const decryptPlaylistJSON = async (
     encryptedPlaylist: EncryptedBlob,
     file: EnteFile,
@@ -394,14 +404,47 @@ const processQueueItem = async (
     // TODO(HLS):
     const tokens = await writeVideoStream(electron, "generate-hls", fileBlob!);
     const [playlistToken, videoToken] = [tokens[0]!, tokens[1]!];
-    const playlistBlob = await readVideoStream(electron, playlistToken).then(
-        (res) => res.blob(),
-    );
-    await Promise.all([
-        videoStreamDone(electron, playlistToken),
-        videoStreamDone(electron, videoToken),
-    ]);
-    console.log(electron, await playlistBlob.text());
+
+    try {
+        const playlistBlob = await readVideoStream(
+            electron,
+            playlistToken,
+        ).then((res) => res.blob());
+
+        const { objectID, url: objectUploadURL } =
+            await getFilePreviewDataUploadURL(file);
+
+        // TOOD(HLS): Move this to the node side.
+        const videoBlob = await readVideoStream(electron, videoToken).then(
+            (res) => res.blob(),
+        );
+
+        const objectSize = videoBlob.size;
+
+        // Video conversion is non-trivial effort, and the video segment file
+        // we're uploading is potentially very large, so add retries to avoid
+        // the need to redo everything in case of transient errors.
+        await retryEnsuringHTTPOkOr4xx(() =>
+            fetch(objectUploadURL, { method: "PUT", body: videoBlob }),
+        );
+
+        const playlistData = await encodePlaylistJSON({
+            type: "hls_video",
+            playlist: await playlistBlob.text(),
+            // TODO(HLS): Critical, fix this before any use.
+            width: 1280,
+            // TODO(HLS): Critical, fix this before any use.
+            height: 720,
+            size: objectSize,
+        });
+
+        await putVideoData(file, playlistData, objectID, objectSize);
+    } finally {
+        await Promise.all([
+            videoStreamDone(electron, playlistToken),
+            videoStreamDone(electron, videoToken),
+        ]);
+    }
 };
 
 /**
@@ -456,3 +499,13 @@ const fetchOriginalVideoUploadItemBlob = (
         }
     }
 };
+
+/**
+ * A semi-sibling of {@link decryptPlaylistJSON}, which does the gzip but leaves
+ * the encryption up to the next layer.
+ *
+ * It is a trivial function, the main utility it provides is that it forces us
+ * to conform to the {@link PlaylistJSON} type.
+ */
+const encodePlaylistJSON = (playlistJSON: PlaylistJSON) =>
+    gzip(JSON.stringify(playlistJSON));
