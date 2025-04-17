@@ -11,7 +11,6 @@ import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
-import "package:photos/models/ml/clip.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
