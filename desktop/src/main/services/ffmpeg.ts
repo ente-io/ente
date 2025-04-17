@@ -52,6 +52,8 @@ export const ffmpegExec = async (
         writeToTemporaryFile: writeToTemporaryInputFile,
     } = await makeFileForDataOrPathOrZipItem(dataOrPathOrZipItem);
 
+    let success = false;
+
     const outputFilePath = await makeTempFilePath(outputFileExtension);
     try {
         await writeToTemporaryInputFile();
@@ -63,12 +65,16 @@ export const ffmpegExec = async (
         );
 
         await execAsync(cmd);
+        // execAsync will throw on non-zero exitCode.
+        success = true;
 
         return await fs.readFile(outputFilePath);
     } finally {
         if (isInputFileTemporary)
             await deleteTempFileIgnoringErrors(inputFilePath);
-        await deleteTempFileIgnoringErrors(outputFilePath);
+        await deleteTempFileIgnoringErrors(outputFilePath, {
+            omitLog: !success,
+        });
     }
 };
 

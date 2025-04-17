@@ -67,12 +67,20 @@ export const deleteTempFile = async (tempFilePath: string) => {
  * A variant of {@link deleteTempFile} that suppresses any errors, making it
  * safe to call them in a sequence without needing to handle the scenario where
  * one of them failing causes the rest to be skipped.
+ *
+ * @param opts - {@link omitLog} If set, an error message will not be logged if
+ * the file cannot be deleted. This is convenient when we're trying to delete a
+ * file which might not even exist, and so the error is expected.
  */
-export const deleteTempFileIgnoringErrors = async (tempFilePath: string) => {
+export const deleteTempFileIgnoringErrors = async (
+    tempFilePath: string,
+    opts?: { omitLog?: boolean },
+) => {
     try {
         await deleteTempFile(tempFilePath);
     } catch (e) {
-        log.error(`Could not delete temporary file at path ${tempFilePath}`, e);
+        if (!opts?.omitLog)
+            log.error(`Failed to delete temporary file ${tempFilePath}`, e);
     }
 };
 
