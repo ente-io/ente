@@ -219,7 +219,22 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     ].flat();
 
     try {
+        // Run the ffmpeg command to generate the HLS playlist and segments.
+        //
+        // Note: Depending on the size of the input file, this may take long!
         await execAsync(command);
+
+        // Read the generated key.
+        const key = await fs.readFile(keyPath);
+        const keyB64 = key.toString("base64");
+
+        // Inline the key into the generated playlist.
+        let playlist = await fs.readFile(playlistPath, { encoding: "utf8" });
+        playlist = playlist.replace(
+            keyPath,
+            `data:text/plain;base64,${keyB64}`,
+        );
+        await fs.writeFile(playlistPath, playlist);
     } catch (e) {
         log.error("HLS generation failed", e);
         await deleteTempFileIgnoringErrors(playlistPath);
