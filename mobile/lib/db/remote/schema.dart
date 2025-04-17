@@ -1,4 +1,3 @@
-
 const collectionColumns =
     'id, owner, enc_key, enc_key_nonce, name, type, local_path, '
     'is_deleted, updation_time, sharees, public_urls, mmd_encoded_json, '
@@ -64,5 +63,24 @@ class RemoteDBMigration {
       trash_data TEXT
     )
     ''',
+    '''
+      CREATE TRIGGER delete_orphaned_files
+      AFTER DELETE ON collection_files
+      FOR EACH ROW
+      WHEN (
+          -- Only proceed if this file_id actually existed before deletion
+          OLD.file_id IS NOT NULL
+          -- And only if this was the last reference to the file
+          AND NOT EXISTS (
+              SELECT 1 
+              FROM collection_files 
+              WHERE file_id = OLD.file_id
+          )
+      )
+      BEGIN
+          -- Only then delete from files table
+          DELETE FROM files WHERE id = OLD.file_id;
+      END;
+''',
   ];
 }
