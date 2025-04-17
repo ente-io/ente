@@ -1,4 +1,3 @@
-import { pt } from "ente-base/i18n";
 import log from "ente-base/log";
 import { albumsAppOrigin } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
@@ -563,8 +562,8 @@ export class FileViewerPhotoSwipe {
                 const value =
                     intendedVideoQualityForFileID(fileID) == "auto" &&
                     videoPlaylistURL
-                        ? pt("Auto")
-                        : pt("Original");
+                        ? t("auto")
+                        : t("original");
                 // Check first to avoid spurious updates.
                 if (qualityMenu.value != value) {
                     // Set a flag to avoid infinite update loop.
@@ -1511,9 +1510,6 @@ const videoHTML = (url: string, mediaControllerID: string) => `
  * To make these functional, the `media-control-bar` requires the
  * `mediacontroller="${mediaControllerID}"` attribute.
  *
- * - TODO(HLS): Add translations for all the pts
- * - TODO(HLS): Add "Toggle play", "Seek forward, backward" to list of shortcuts
- *
  * Notes:
  *
  * - Examples: https://media-chrome.mux.dev/examples/vanilla/
@@ -1543,17 +1539,17 @@ const hlsVideoControlsHTML = () => `
 <div>
   <media-settings-menu id="ente-settings-menu" hidden anchor="ente-settings-menu-btn">
     <media-settings-menu-item>
-      ${pt("Quality")}
+      ${t("quality")}
       <media-chrome-menu id="ente-quality-menu" slot="submenu" hidden>
-        <div slot="title">${pt("Quality")}</div>
-        <media-chrome-menu-item type="radio">${pt("Auto")}</media-chrome-menu-item>
-        <media-chrome-menu-item type="radio">${pt("Original")}</media-chrome-menu-item>
+        <div slot="title">${t("quality")}</div>
+        <media-chrome-menu-item type="radio">${t("auto")}</media-chrome-menu-item>
+        <media-chrome-menu-item type="radio">${t("original")}</media-chrome-menu-item>
       </media-chrome-menu>
     </media-settings-menu-item>
     <media-settings-menu-item>
-      ${pt("Speed")}
+      ${t("speed")}
       <media-playback-rate-menu slot="submenu" hidden>
-        <div slot="title">${pt("Speed")}</div>
+        <div slot="title">${t("speed")}</div>
       </media-playback-rate-menu>
     </media-settings-menu-item>
   </media-settings-menu>
