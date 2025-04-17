@@ -112,8 +112,9 @@ const ffmpegExec = async (
         try {
             await ffmpeg.deleteFile(outputPath);
         } catch (e) {
-            // Output file might not even exist if the command did not succeed.
-            if (status !== 0) {
+            // Output file might not even exist if the command did not succeed,
+            // so only log on success.
+            if (status === 0) {
                 log.error(`Failed to remove output ${outputPath}`, e);
             }
         }
