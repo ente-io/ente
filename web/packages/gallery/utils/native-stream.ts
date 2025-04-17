@@ -177,12 +177,12 @@ export const writeVideoStream = async (
  *
  * @param token A token obtained from {@link writeVideoStream}.
  *
- * @returns the contents of the processed video.
+ * @returns a Response that contains the contents of the processed video.
  */
 export const readVideoStream = async (
     _: Electron,
     token: string,
-): Promise<Blob> => {
+): Promise<Response> => {
     const params = new URLSearchParams({ token });
     const url = new URL(`stream://video?${params.toString()}`);
 
@@ -194,7 +194,7 @@ export const readVideoStream = async (
             `Failed to read stream from ${url.href}: HTTP ${res.status}`,
         );
 
-    return res.blob();
+    return res;
 };
 
 /**

@@ -268,7 +268,9 @@ export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
 const convertToMP4Native = async (electron: Electron, blob: Blob) => {
     const tokens = await writeVideoStream(electron, "convert-to-mp4", blob);
     const token = tokens[0]!;
-    const mp4Blob = await readVideoStream(electron, token);
+    const mp4Blob = await readVideoStream(electron, token).then((res) =>
+        res.blob(),
+    );
     await videoStreamDone(electron, token);
     return mp4Blob;
 };
