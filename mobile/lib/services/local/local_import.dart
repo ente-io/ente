@@ -151,7 +151,11 @@ class LocalImportService {
     if (_isMetaScanRunning) {
       _log.info("metadata scan already in progress");
       return;
+    } else if (Platform.isIOS) {
+      _log.info("metadata scan not implemented on iOS yet");
+      return;
     }
+
     _isMetaScanRunning = true;
     try {
       final Set<String> pendingScan =
