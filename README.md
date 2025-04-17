@@ -35,7 +35,7 @@ Private sharing. Collaborative albums. Family plans. Easy import, easier export.
 Background uploads. The list goes on. And of course, all of this, while being
 fully end-to-end encrypted across platforms.
 
-Ente Photos is a paid service, but we offer 5GB of free storage.
+Ente Photos is a paid service, but we offer 10GB of free storage.
 You can also clone this repository and choose to self-host.
 
 <br />
@@ -95,8 +95,8 @@ please see our [support guide](SUPPORT.md).
 <img src=".github/assets/ente-ducky.png" width=200 alt="Ente's Mascot, Ducky,
     inviting people to Ente's source code repository" />
 
-Please visit our [community page](https://ente.io/community) for all the ways to
-connect with the community.
+Please visit the [community section](https://ente.io/about#community) for all the ways to
+connect with our community.
 
 [![Discord](https://img.shields.io/discord/948937918347608085?style=for-the-badge&logo=Discord&logoColor=white&label=Discord)](https://discord.gg/z2YVKkycX3)
 [![Ente's Blog RSS](https://img.shields.io/badge/blog-rss-F88900?style=for-the-badge&logo=rss&logoColor=white)](https://ente.io/blog/rss.xml)

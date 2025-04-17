@@ -7,8 +7,8 @@ import 'package:logging/logging.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
-import 'package:photos/utils/data_util.dart';
-import 'package:photos/utils/directory_content.dart';
+import 'package:photos/utils/standalone/data.dart';
+import 'package:photos/utils/standalone/directory_content.dart';
 
 class PathStorageItem {
   final String path;

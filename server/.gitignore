@@ -8,4 +8,5 @@ tmp/**
 museum.yaml
 bin/**
 data/
+my-ente/
 __debug_bin*

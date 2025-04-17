@@ -1,9 +1,9 @@
-import { boxSealOpen, generateKeyPair } from "@/base/crypto";
-import { ensureOk, publicRequestHeaders } from "@/base/http";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import { wait } from "@/utils/promise";
-import { nullToUndefined } from "@/utils/transform";
+import { boxSealOpen, generateKeyPair } from "ente-base/crypto";
+import { ensureOk, publicRequestHeaders } from "ente-base/http";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import { wait } from "ente-utils/promise";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
 export interface Registration {
@@ -110,9 +110,7 @@ const registerDevice = async (publicKey: string) => {
     const res = await fetch(await apiURL("/cast/device-info"), {
         method: "POST",
         headers: publicRequestHeaders(),
-        body: JSON.stringify({
-            publicKey,
-        }),
+        body: JSON.stringify({ publicKey }),
     });
     ensureOk(res);
     return z.object({ deviceCode: z.string() }).parse(await res.json())

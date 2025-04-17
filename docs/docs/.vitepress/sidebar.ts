@@ -142,6 +142,8 @@ export const sidebar = [
                         text: "Video streaming",
                         link: "/photos/faq/video-streaming",
                     },
+                    { text: "Desktop", link: "/photos/faq/desktop" },
+                    { text: "Misc", link: "/photos/faq/misc" },
                 ],
             },
             {
@@ -308,8 +310,16 @@ export const sidebar = [
                 text: "Troubleshooting",
                 items: [
                     {
+                        text: "General",
+                        link: "/self-hosting/troubleshooting/misc",
+                    },
+                    {
                         text: "Uploads",
                         link: "/self-hosting/troubleshooting/uploads",
+                    },
+                    {
+                        text: "Docker / quickstart",
+                        link: "/self-hosting/troubleshooting/docker",
                     },
                     {
                         text: "Yarn",

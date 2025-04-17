@@ -1,21 +1,20 @@
+import LockIcon from "@mui/icons-material/Lock";
+import { Stack, Typography } from "@mui/material";
 import {
     RowButton,
     RowButtonGroup,
     RowButtonGroupHint,
     RowSwitch,
-} from "@/base/components/RowButton";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+} from "ente-base/components/RowButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
-} from "@/base/components/mui/SidebarDrawer";
-import { useBaseContext } from "@/base/context";
-import { disable2FA, get2FAStatus } from "@/new/photos/services/user";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
-import LockIcon from "@mui/icons-material/Lock";
-import { Stack, Typography } from "@mui/material";
+} from "ente-base/components/mui/SidebarDrawer";
+import { useBaseContext } from "ente-base/context";
+import { disable2FA, get2FAStatus } from "ente-new/photos/services/user";
+import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import router, { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -29,7 +28,7 @@ export const TwoFactorSettings: React.FC<
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const isTwoFactorEnabled =
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            getData(LS_KEYS.USER).isTwoFactorEnabled ?? false;
+            getData("user").isTwoFactorEnabled ?? false;
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         setIsTwoFactorEnabled(isTwoFactorEnabled);
     }, []);
@@ -41,7 +40,7 @@ export const TwoFactorSettings: React.FC<
             setIsTwoFactorEnabled(isEnabled);
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             await setLSUser({
-                ...getData(LS_KEYS.USER),
+                ...getData("user"),
                 isTwoFactorEnabled: isEnabled,
             });
         })();
@@ -83,7 +82,7 @@ const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const configure = () => {
         onRootClose();
-        void router.push(PAGES.TWO_FACTOR_SETUP);
+        void router.push("/two-factor/setup");
     };
 
     return (
@@ -122,10 +121,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
     const disable = async () => {
         await disable2FA();
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        await setLSUser({
-            ...getData(LS_KEYS.USER),
-            isTwoFactorEnabled: false,
-        });
+        await setLSUser({ ...getData("user"), isTwoFactorEnabled: false });
         onRootClose();
     };
 
@@ -142,7 +138,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const reconfigure = async () => {
         onRootClose();
-        await router.push(PAGES.TWO_FACTOR_SETUP);
+        await router.push("/two-factor/setup");
     };
 
     return (

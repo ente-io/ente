@@ -1,14 +1,14 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "@ente/shared/components/Container";
 import {
     DialogActions,
     DialogContent,
     LinearProgress,
     Typography,
 } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    FlexWrapper,
+    VerticallyCentered,
+} from "ente-shared/components/Container";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 import { ExportStage, type ExportProgress } from "services/export";
@@ -23,11 +23,11 @@ interface Props {
 export default function ExportInProgress(props: Props) {
     const showIndeterminateProgress = () => {
         return (
-            props.exportStage === ExportStage.STARTING ||
-            props.exportStage === ExportStage.MIGRATION ||
-            props.exportStage === ExportStage.RENAMING_COLLECTION_FOLDERS ||
-            props.exportStage === ExportStage.TRASHING_DELETED_FILES ||
-            props.exportStage === ExportStage.TRASHING_DELETED_COLLECTIONS
+            props.exportStage === ExportStage.starting ||
+            props.exportStage === ExportStage.migration ||
+            props.exportStage === ExportStage.renamingCollectionFolders ||
+            props.exportStage === ExportStage.trashingDeletedFiles ||
+            props.exportStage === ExportStage.trashingDeletedCollections
         );
     };
     return (
@@ -35,18 +35,18 @@ export default function ExportInProgress(props: Props) {
             <DialogContent>
                 <VerticallyCentered>
                     <Typography sx={{ mb: 1.5 }}>
-                        {props.exportStage === ExportStage.STARTING ? (
+                        {props.exportStage === ExportStage.starting ? (
                             t("export_starting")
-                        ) : props.exportStage === ExportStage.MIGRATION ? (
+                        ) : props.exportStage === ExportStage.migration ? (
                             t("preparing")
                         ) : props.exportStage ===
-                          ExportStage.RENAMING_COLLECTION_FOLDERS ? (
+                          ExportStage.renamingCollectionFolders ? (
                             t("renaming_album_folders")
                         ) : props.exportStage ===
-                          ExportStage.TRASHING_DELETED_FILES ? (
+                          ExportStage.trashingDeletedFiles ? (
                             t("trashing_deleted_files")
                         ) : props.exportStage ===
-                          ExportStage.TRASHING_DELETED_COLLECTIONS ? (
+                          ExportStage.trashingDeletedCollections ? (
                             t("trashing_deleted_albums")
                         ) : (
                             <Typography
@@ -67,9 +67,7 @@ export default function ExportInProgress(props: Props) {
                                             />
                                         ),
                                     }}
-                                    values={{
-                                        progress: props.exportProgress,
-                                    }}
+                                    values={{ progress: props.exportProgress }}
                                 />
                             </Typography>
                         )}

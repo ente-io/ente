@@ -11,6 +11,7 @@ import "package:photos/services/machine_learning/face_ml/face_recognition_servic
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/memories_cache_service.dart";
+import "package:photos/services/permission/service.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/sync/trash_sync_service.dart";
@@ -142,4 +143,10 @@ FaceRecognitionService? _faceRecognitionService;
 FaceRecognitionService get faceRecognitionService {
   _faceRecognitionService ??= FaceRecognitionService();
   return _faceRecognitionService!;
+}
+
+PermissionService? _permissionService;
+PermissionService get permissionService {
+  _permissionService ??= PermissionService(ServiceLocator.instance.prefs);
+  return _permissionService!;
 }

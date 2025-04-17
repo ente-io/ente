@@ -1,7 +1,7 @@
-import log from "@/base/log";
-import { customAPIOrigin } from "@/base/origins";
-import type { ZipItem } from "@/base/types/ipc";
-import { nullToUndefined } from "@/utils/transform";
+import log from "ente-base/log";
+import { customAPIOrigin } from "ente-base/origins";
+import type { ZipItem } from "ente-base/types/ipc";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
 /**
@@ -94,17 +94,16 @@ export type UploadPhase =
     | "cancelling"
     | "done";
 
-export enum UPLOAD_RESULT {
-    FAILED,
-    ALREADY_UPLOADED,
-    UNSUPPORTED,
-    BLOCKED,
-    TOO_LARGE,
-    LARGER_THAN_AVAILABLE_STORAGE,
-    UPLOADED,
-    UPLOADED_WITH_STATIC_THUMBNAIL,
-    ADDED_SYMLINK,
-}
+export type UploadResult =
+    | "failed"
+    | "alreadyUploaded"
+    | "unsupported"
+    | "blocked"
+    | "tooLarge"
+    | "largerThanAvailableStorage"
+    | "uploaded"
+    | "uploadedWithStaticThumbnail"
+    | "addedSymlink";
 
 /**
  * Return true to disable the upload of files via Cloudflare Workers.
@@ -142,7 +141,6 @@ export const updateShouldDisableCFUploadProxy = async (
     savedPreference?: boolean,
 ) => {
     _state.shouldDisableCFUploadProxy =
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         savedPreference || (await computeShouldDisableCFUploadProxy());
 };
 

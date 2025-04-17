@@ -14,28 +14,20 @@ export default tseslint.config(
                 tsconfigRootDir: import.meta.dirname,
             },
         },
-        linterOptions: {
-            reportUnusedDisableDirectives: "error",
-        },
+        linterOptions: { reportUnusedDisableDirectives: "error" },
     },
-    {
-        ignores: ["eslint.config.mjs"],
-    },
+    { ignores: ["eslint.config.mjs"] },
     {
         rules: {
             // Allow numbers to be used in template literals.
             "@typescript-eslint/restrict-template-expressions": [
                 "error",
-                {
-                    allowNumber: true,
-                },
+                { allowNumber: true },
             ],
             // Allow void expressions as the entire body of an arrow function.
             "@typescript-eslint/no-confusing-void-expression": [
                 "error",
-                {
-                    ignoreArrowShorthand: true,
-                },
+                { ignoreArrowShorthand: true },
             ],
             // Allow async functions to be passed as JSX attributes expected to
             // be functions that return void (typically onFoo event handlers).
@@ -44,12 +36,7 @@ export default tseslint.config(
             // Promise handlers.
             "@typescript-eslint/no-misused-promises": [
                 "error",
-                {
-                    checksVoidReturn: {
-                        arguments: false,
-                        attributes: false,
-                    },
-                },
+                { checksVoidReturn: { arguments: false, attributes: false } },
             ],
             // Allow force unwrapping potentially optional values.
             //
@@ -69,6 +56,25 @@ export default tseslint.config(
                 "error",
                 { allowConstantLoopConditions: true },
             ],
+            // This one is a good suggestion in general, but it not always the
+            // one we want because there are cases where we'd intentionally want
+            // to map falsey values like empty strings to the default (e.g.
+            // remote might be returning a blank string to indicate a missing
+            // value), for which `||` is the appropriate operator, and doing it
+            // without using `||` is unnecessarily convoluted.
+            //
+            // So the next best thing would be for us to disable this piecemeal,
+            // and I tried that for a while. But that runs into a different
+            // problem: currently some of our code gets linted under different
+            // rules depending on the (pseudo-)package that is importing it.
+            // This rules being on by default but off in some cases means that
+            // for the same line of code, it is an error for some but not all
+            // invocations of eslint. And so eslint then starts complaining
+            // about us trying to squelch a non error.
+            //
+            // Given that (a) it is not always the right choice, and (b) it is
+            // not not usable for our current state, disabling it globally.
+            "@typescript-eslint/prefer-nullish-coalescing": "off",
         },
     },
 );

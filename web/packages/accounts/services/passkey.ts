@@ -1,24 +1,22 @@
-import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
-import { clientPackageName, isDesktop } from "@/base/app";
-import { sharedCryptoWorker } from "@/base/crypto";
-import { encryptToB64, generateEncryptionKey } from "@/base/crypto/libsodium";
+import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
+import { clientPackageName, isDesktop } from "ente-base/app";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import {
+    encryptToB64,
+    generateEncryptionKey,
+} from "ente-base/crypto/libsodium";
 import {
     authenticatedRequestHeaders,
     ensureOk,
     HTTPError,
     publicRequestHeaders,
-} from "@/base/http";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import { getRecoveryKey } from "@ente/shared/crypto/helpers";
-import HTTPService from "@ente/shared/network/HTTPService";
-import {
-    getData,
-    LS_KEYS,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
+} from "ente-base/http";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import { getRecoveryKey } from "ente-shared/crypto/helpers";
+import HTTPService from "ente-shared/network/HTTPService";
+import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { z } from "zod";
 import { unstashRedirect } from "./redirect";
 
@@ -146,12 +144,10 @@ export const isPasskeyRecoveryEnabled = async () => {
         const resp = await HTTPService.get(
             await apiURL("/users/two-factor/recovery-status"),
             {},
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
 
-        if (typeof resp.data === "undefined") {
+        if (typeof resp.data == "undefined") {
             throw Error("request failed");
         }
 
@@ -172,18 +168,12 @@ const configurePasskeyRecovery = async (
 
         const resp = await HTTPService.post(
             await apiURL("/users/two-factor/passkeys/configure-recovery"),
-            {
-                secret,
-                userSecretCipher,
-                userSecretNonce,
-            },
+            { secret, userSecretCipher, userSecretNonce },
             undefined,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
 
-        if (typeof resp.data === "undefined") {
+        if (typeof resp.data == "undefined") {
             throw Error("request failed");
         }
     } catch (e) {
@@ -207,7 +197,7 @@ const getAccountsTokenAndURL = async () => {
         .object({
             // The origin that serves the accounts app.
             accountsUrl: z.string(),
-            // A token that can be used to autheticate with the accounts app.
+            // A token that can be used to authenticate with the accounts app.
             accountsToken: z.string(),
         })
         .parse(await res.json());
@@ -273,12 +263,8 @@ export const saveCredentialsAndNavigateTo = async (
     // /passkeys/finish page.
     const { id, encryptedToken, keyAttributes } = response;
 
-    await setLSUser({
-        ...getData(LS_KEYS.USER),
-        encryptedToken,
-        id,
-    });
-    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
+    await setLSUser({ ...getData("user"), encryptedToken, id });
+    setData("keyAttributes", keyAttributes!);
 
     return unstashRedirect() ?? "/credentials";
 };

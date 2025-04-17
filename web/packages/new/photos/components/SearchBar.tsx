@@ -1,11 +1,3 @@
-import { assertionFailed } from "@/base/assert";
-import type { ButtonishProps } from "@/base/components/mui";
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
-import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
-import { searchOptionsForString } from "@/new/photos/services/search";
-import type { SearchOption } from "@/new/photos/services/search/types";
-import { nullToUndefined } from "@/utils/transform";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
@@ -21,6 +13,15 @@ import {
     useTheme,
     type Theme,
 } from "@mui/material";
+import { assertionFailed } from "ente-base/assert";
+import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
+import type { ButtonishProps } from "ente-base/components/mui";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
+import { isMLSupported, mlStatusSnapshot } from "ente-new/photos/services/ml";
+import { searchOptionsForString } from "ente-new/photos/services/search";
+import type { SearchOption } from "ente-new/photos/services/search/types";
+import { nullToUndefined } from "ente-utils/transform";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
 import React, { useMemo, useRef, useState } from "react";
@@ -120,7 +121,18 @@ interface MobileSearchAreaProps {
 }
 
 const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
-    <Stack direction="row" sx={{ justifyContent: "flex-end" }}>
+    <Stack direction="row" sx={{ alignItems: "center" }}>
+        <EnteLogoBox
+            sx={{
+                // Move to the center.
+                mx: "auto",
+                // Offset on the left by the visual size of the search icon to
+                // make it look visually centered.
+                pl: "24px",
+            }}
+        >
+            <EnteLogo height={15} />
+        </EnteLogoBox>
         <IconButton onClick={onSearch}>
             <SearchIcon />
         </IconButton>
@@ -289,16 +301,12 @@ const createSelectStyles = (
         ...style,
         padding: 0,
         backgroundColor: "transparent !important",
-        "& :hover": {
-            cursor: "pointer",
-        },
+        "& :hover": { cursor: "pointer" },
         // Elevate the focused option further.
         "& .option-contents": isFocused
             ? { backgroundColor: theme.vars.palette.fill.fainter }
             : {},
-        "&:last-child .MuiDivider-root": {
-            display: "none",
-        },
+        "&:last-child .MuiDivider-root": { display: "none" },
     }),
     placeholder: (style) => ({
         ...style,

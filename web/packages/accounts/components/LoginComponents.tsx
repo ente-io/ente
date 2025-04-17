@@ -1,16 +1,16 @@
-import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
+import { CircularProgress, Stack, Typography, styled } from "@mui/material";
+import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import {
     checkPasskeyVerificationStatus,
     passkeySessionExpiredErrorMessage,
     saveCredentialsAndNavigateTo,
-} from "@/accounts/services/passkey";
-import { LinkButton } from "@/base/components/LinkButton";
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { genericErrorDialogAttributes } from "@/base/components/utils/dialog";
-import log from "@/base/log";
-import { customAPIHost } from "@/base/origins";
-import { CircularProgress, Stack, Typography, styled } from "@mui/material";
+} from "ente-accounts/services/passkey";
+import { LinkButton } from "ente-base/components/LinkButton";
+import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { genericErrorDialogAttributes } from "ente-base/components/utils/dialog";
+import log from "ente-base/log";
+import { customAPIHost } from "ente-base/origins";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";

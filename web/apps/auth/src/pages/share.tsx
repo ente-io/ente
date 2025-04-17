@@ -1,6 +1,6 @@
-import { EnteLogo } from "@/base/components/EnteLogo";
-import { decryptMetadataJSON_New } from "@/base/crypto";
 import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import { decryptMetadataJSON_New } from "ente-base/crypto";
 import React, { useEffect, useMemo, useState } from "react";
 
 interface SharedCode {

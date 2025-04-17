@@ -1,32 +1,26 @@
+import { Link } from "@mui/material";
+import { HttpStatusCode } from "axios";
 import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
-} from "@/accounts/components/layouts/centered-paper";
-import { PAGES } from "@/accounts/constants/pages";
+} from "ente-accounts/components/layouts/centered-paper";
 import {
     recoverTwoFactor,
     removeTwoFactor,
     type TwoFactorType,
-} from "@/accounts/services/user";
-import { LinkButton } from "@/base/components/LinkButton";
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { useBaseContext } from "@/base/context";
-import { sharedCryptoWorker } from "@/base/crypto";
-import type { B64EncryptionResult } from "@/base/crypto/libsodium";
-import log from "@/base/log";
+} from "ente-accounts/services/user";
+import { LinkButton } from "ente-base/components/LinkButton";
+import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
+import { useBaseContext } from "ente-base/context";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
+import log from "ente-base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
-import { ApiError } from "@ente/shared/error";
-import {
-    LS_KEYS,
-    getData,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
-import { Link } from "@mui/material";
-import { HttpStatusCode } from "axios";
+} from "ente-shared/components/SingleInputForm";
+import { ApiError } from "ente-shared/error";
+import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -53,7 +47,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     const router = useRouter();
 
     useEffect(() => {
-        const user = getData(LS_KEYS.USER);
+        const user = getData("user");
         const sid = user.passkeySessionID || user.twoFactorSessionID;
         if (!user?.email || !sid) {
             void router.push("/");
@@ -61,7 +55,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
             !(user.isTwoFactorEnabled || user.isTwoFactorEnabledPasskey) &&
             (user.encryptedToken || user.token)
         ) {
-            void router.push(PAGES.GENERATE);
+            void router.push("/generate");
         } else {
             setSessionID(sid);
         }
@@ -128,14 +122,14 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
             );
             const { keyAttributes, encryptedToken, token, id } = resp;
             await setLSUser({
-                ...getData(LS_KEYS.USER),
+                ...getData("user"),
                 token,
                 encryptedToken,
                 id,
                 isTwoFactorEnabled: false,
             });
-            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-            void router.push(PAGES.CREDENTIALS);
+            setData("keyAttributes", keyAttributes);
+            void router.push("/credentials");
         } catch (e) {
             log.error("two factor recovery failed", e);
             setFieldError(t("incorrect_recovery_key"));
@@ -150,9 +144,7 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
             message: (
                 <Trans
                     i18nKey={"no_two_factor_recovery_key_message"}
-                    components={{
-                        a: <Link href="mailto:support@ente.io" />,
-                    }}
+                    components={{ a: <Link href="mailto:support@ente.io" /> }}
                     values={{ emailID: "support@ente.io" }}
                 />
             ),

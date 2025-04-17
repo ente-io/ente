@@ -9,10 +9,14 @@ import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/states/detail_page_state.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
@@ -55,6 +59,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
   final _scaleStateController = PhotoViewScaleStateController();
+  late final StreamSubscription<FileCaptionUpdatedEvent>
+      _captionUpdatedSubscription;
 
   @override
   void initState() {
@@ -70,12 +76,22 @@ class _ZoomableImageState extends State<ZoomableImage> {
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
+
+    _captionUpdatedSubscription =
+        Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
+      if (event.fileGeneratedID == _photo.generatedID) {
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     _photoViewController.dispose();
     _scaleStateController.dispose();
+    _captionUpdatedSubscription.cancel();
     super.dispose();
   }
 
@@ -95,6 +111,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
           key: ValueKey(_loadedFinalImage),
           imageProvider: _imageProvider,
           controller: _photoViewController,
+          filterQuality: FilterQuality.high,
           scaleStateController: _scaleStateController,
           scaleStateChangedCallback: _scaleStateChangedCallback,
           minScale: widget.shouldCover
@@ -167,7 +184,69 @@ class _ZoomableImageState extends State<ZoomableImage> {
                 };
     return GestureDetector(
       onVerticalDragUpdate: verticalDragCallback,
-      child: content,
+      child: widget.photo.caption?.isNotEmpty ?? false
+          ? Stack(
+              clipBehavior: Clip.none,
+              children: [
+                content,
+                Positioned(
+                  bottom: 72 + MediaQuery.paddingOf(context).bottom,
+                  left: 0,
+                  right: 0,
+                  child: ValueListenableBuilder<bool>(
+                    valueListenable: InheritedDetailPageState.maybeOf(context)
+                            ?.enableFullScreenNotifier ??
+                        ValueNotifier(false),
+                    builder: (context, doNotShowCaption, _) {
+                      return AnimatedOpacity(
+                        opacity: doNotShowCaption ? 0.0 : 1.0,
+                        duration: const Duration(milliseconds: 200),
+                        child: IgnorePointer(
+                          ignoring: doNotShowCaption,
+                          child: GestureDetector(
+                            onTap: () {
+                              showDetailsSheet(context, widget.photo);
+                            },
+                            child: Container(
+                              color: Colors.black.withOpacity(0.1),
+                              width: double.infinity,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0,
+                                      horizontal: 8.0,
+                                    ),
+                                    child: SizedBox(
+                                      width:
+                                          MediaQuery.sizeOf(context).width - 16,
+                                      child: Center(
+                                        child: Text(
+                                          widget.photo.caption!,
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: getEnteTextTheme(context)
+                                              .mini
+                                              .copyWith(
+                                                color: textBaseDark,
+                                              ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            )
+          : content,
     );
   }
 

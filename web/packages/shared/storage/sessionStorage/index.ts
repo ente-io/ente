@@ -1,16 +1,13 @@
-export enum SESSION_KEYS {
-    ENCRYPTION_KEY = "encryptionKey",
-    KEY_ENCRYPTION_KEY = "keyEncryptionKey",
-}
+export type SessionKey = "encryptionKey" | "keyEncryptionKey";
 
-export const setKey = (key: SESSION_KEYS, value: object) =>
+export const setKey = (key: SessionKey, value: object) =>
     sessionStorage.setItem(key, JSON.stringify(value));
 
-export const getKey = (key: SESSION_KEYS) => {
+export const getKey = (key: SessionKey) => {
     const value = sessionStorage.getItem(key);
     return value && JSON.parse(value);
 };
 
-export const removeKey = (key: SESSION_KEYS) => sessionStorage.removeItem(key);
+export const removeKey = (key: SessionKey) => sessionStorage.removeItem(key);
 
 export const clearKeys = () => sessionStorage.clear();

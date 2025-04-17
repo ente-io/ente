@@ -1,5 +1,3 @@
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import {
     Box,
@@ -9,6 +7,8 @@ import {
     Typography,
     useMediaQuery,
 } from "@mui/material";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import SingleInputForm from "ente-shared/components/SingleInputForm";
 import { t } from "i18next";
 
 type UploaderNameInput = ModalVisibilityProps & {
@@ -56,10 +56,7 @@ export const UploaderNameInput: React.FC<UploaderNameInput> = ({
             <Box
                 sx={(theme) => ({
                     padding: "24px 16px 0px 16px",
-                    svg: {
-                        width: "44px",
-                        height: "44px",
-                    },
+                    svg: { width: "44px", height: "44px" },
                     color: theme.vars.palette.stroke.muted,
                 })}
             >

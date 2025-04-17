@@ -9,11 +9,11 @@ description:
 
 > [!NOTE]
 >
-> This is a community contributed guide, and some of these steps might be out of
-> sync with the upstream documentation. If something is not working correctly,
-> please also see the latest
-> [READMEs](https://github.com/ente-io/ente/blob/main/server/README.md) in the
-> repository and/or other guides in [self-hosting](/self-hosting/).
+> This is a community contributed guide, and some of these steps ~~might be~~
+> ARE out of sync with the upstream changes. This document is retained for
+> reference purposes, but if something is not working correctly, please see the
+> latest [READMEs](https://github.com/ente-io/ente/blob/main/server/README.md)
+> in the repository and/or other guides in [self-hosting](/self-hosting/).
 
 This guide is for self hosting the server and the web application of Ente Photos
 using docker compose and an external S3 bucket. So we assume that you already
@@ -33,7 +33,6 @@ After cloning the main repository with
 git clone https://github.com/ente-io/ente.git
 # Or git clone git@github.com:ente-io/ente.git
 cd ente
-git submodule update --init --recursive
 ```
 
 Create a `compose.yaml` file at the root of the project with the following
@@ -301,7 +300,7 @@ or, if you just want to just set the `AllowedOrigins` Header, you can use the
 following command to do so.
 
 ```sh
-mc admin config set <your-minio>/<your-bucket-name> set "cors_allowed_origin=*"
+mc admin config set <your-minio>/<your-bucket-name> api cors_allow_origin="*"
 ```
 
 You can create also `.csv` file and dump the list of origins you would like to

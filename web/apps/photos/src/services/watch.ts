@@ -3,23 +3,23 @@
  * watch folders functionality.
  */
 
-import { ensureElectron } from "@/base/electron";
-import { basename, dirname } from "@/base/file-name";
-import log from "@/base/log";
+import debounce from "debounce";
+import { ensureElectron } from "ente-base/electron";
+import { basename, dirname } from "ente-base/file-name";
+import log from "ente-base/log";
 import type {
     CollectionMapping,
     FolderWatch,
     FolderWatchSyncedFile,
-} from "@/base/types/ipc";
-import { UPLOAD_RESULT } from "@/gallery/services/upload";
-import type { Collection } from "@/media/collection";
-import { EncryptedEnteFile } from "@/media/file";
+} from "ente-base/types/ipc";
+import { type UploadResult } from "ente-gallery/services/upload";
+import type { Collection } from "ente-media/collection";
+import { EncryptedEnteFile } from "ente-media/file";
 import {
     getLocalFiles,
     groupFilesByCollectionID,
-} from "@/new/photos/services/files";
-import { ensureString } from "@/utils/ensure";
-import debounce from "debounce";
+} from "ente-new/photos/services/files";
+import { ensureString } from "ente-utils/ensure";
 import uploadManager, {
     type UploadItemWithCollection,
 } from "services/upload/uploadManager";
@@ -112,7 +112,7 @@ class FolderWatcher {
     /**
      * Temporarily pause syncing and cancel any running uploads.
      *
-     * This frees up the uploader for handling user initated uploads.
+     * This frees up the uploader for handling user initiated uploads.
      */
     pauseRunningSync() {
         this.isPaused = true;
@@ -246,7 +246,7 @@ class FolderWatcher {
             return;
         }
 
-        if (event.action === "upload") {
+        if (event.action == "upload") {
             const paths = pathsToUpload(event.filePaths, watch);
             if (paths.length == 0) {
                 skip("none of the files need uploading");
@@ -324,7 +324,7 @@ class FolderWatcher {
      * {@link upload} gets uploaded.
      */
     async onFileUpload(
-        fileUploadResult: UPLOAD_RESULT,
+        fileUploadResult: UploadResult,
         item: UploadItemWithCollection,
         file: EncryptedEnteFile,
     ) {
@@ -333,10 +333,10 @@ class FolderWatcher {
         // file on disk).
         if (
             [
-                UPLOAD_RESULT.ADDED_SYMLINK,
-                UPLOAD_RESULT.UPLOADED,
-                UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL,
-                UPLOAD_RESULT.ALREADY_UPLOADED,
+                "addedSymlink",
+                "uploaded",
+                "uploadedWithStaticThumbnail",
+                "alreadyUploaded",
             ].includes(fileUploadResult)
         ) {
             if (item.isLivePhoto) {
@@ -354,11 +354,7 @@ class FolderWatcher {
                     file,
                 );
             }
-        } else if (
-            [UPLOAD_RESULT.UNSUPPORTED, UPLOAD_RESULT.TOO_LARGE].includes(
-                fileUploadResult,
-            )
-        ) {
+        } else if (["unsupported", "tooLarge"].includes(fileUploadResult)) {
             if (item.isLivePhoto) {
                 this.unUploadableFilePaths.add(
                     ensureString(item.livePhotoAssets.image),
@@ -385,11 +381,7 @@ class FolderWatcher {
 
         log.debug(() => [
             "watch/allFileUploadsDone",
-            JSON.stringify({
-                uploadItemsWithCollection,
-                collections,
-                watch,
-            }),
+            JSON.stringify({ uploadItemsWithCollection, collections, watch }),
         ]);
 
         const { syncedFiles, ignoredFiles } = this.deduceSyncedAndIgnored(
@@ -548,9 +540,7 @@ interface WatchEvent {
  * {@link action}, {@link folderPath} and {@link collectionName}. This allows us
  * to process all the affected {@link filePaths} in one shot.
  */
-type ClubbedWatchEvent = Omit<WatchEvent, "filePath"> & {
-    filePaths: string[];
-};
+type ClubbedWatchEvent = Omit<WatchEvent, "filePath"> & { filePaths: string[] };
 
 /**
  * Determine which events we need to process to synchronize the watched on-disk

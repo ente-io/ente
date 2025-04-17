@@ -1,9 +1,9 @@
 /* TODO: Audit this file */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { encryptMetadataJSON } from "@/base/crypto";
-import { apiURL } from "@/base/origins";
-import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
+import { encryptMetadataJSON } from "ente-base/crypto";
+import { apiURL } from "ente-base/origins";
+import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import type {
     EncryptedMagicMetadata,
     EnteFile,
@@ -11,10 +11,10 @@ import type {
     FilePublicMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
     FileWithUpdatedPublicMagicMetadata,
-} from "@/media/file";
-import { mergeMetadata } from "@/media/file";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
+} from "ente-media/file";
+import { mergeMetadata } from "ente-media/file";
+import HTTPService from "ente-shared/network/HTTPService";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
 
 export interface UpdateMagicMetadataRequest {
     id: number;
@@ -57,9 +57,7 @@ export const updateFileMagicMetadata = async (
         reqBody,
         // @ts-ignore
         null,
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );
     return fileWithUpdatedMagicMetadataList.map(
         ({ file, updatedMagicMetadata }): EnteFile => ({
@@ -105,9 +103,7 @@ export const updateFilePublicMagicMetadata = async (
         reqBody,
         // @ts-ignore
         null,
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );
     return fileWithUpdatedPublicMagicMetadataList.map(
         ({ file, updatedPublicMagicMetadata }): EnteFile => ({

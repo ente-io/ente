@@ -7,9 +7,9 @@ export const nullToUndefined = <T>(v: T | null | undefined): T | undefined =>
 /**
  * Convert `null` and `undefined` to `0`, passthrough everything else unchanged.
  */
-export const nullishToZero = (v: number | null | undefined) => v ?? 0;
+export const nullishToZero = (v: number | null | undefined): number => v ?? 0;
 
 /**
  * Convert `null` and `undefined` to `[]`, passthrough everything else unchanged.
  */
-export const nullishToEmpty = <T>(v: T[] | null | undefined) => v ?? [];
+export const nullishToEmpty = <T>(v: T[] | null | undefined): T[] => v ?? [];

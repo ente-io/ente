@@ -9,6 +9,10 @@ on:
             # Or the workflow itself is changed
             - ".github/workflows/mobile-crowdin.yml"
 
+permissions:
+    contents: write
+    pull-requests: write
+
 jobs:
     push-sources-to-crowdin:
         runs-on: ubuntu-latest

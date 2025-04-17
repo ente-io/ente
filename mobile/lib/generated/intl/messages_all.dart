@@ -39,11 +39,15 @@ import 'messages_ja.dart' as messages_ja;
 import 'messages_km.dart' as messages_km;
 import 'messages_ko.dart' as messages_ko;
 import 'messages_lt.dart' as messages_lt;
+import 'messages_lv.dart' as messages_lv;
 import 'messages_ml.dart' as messages_ml;
 import 'messages_nl.dart' as messages_nl;
 import 'messages_no.dart' as messages_no;
+import 'messages_or.dart' as messages_or;
 import 'messages_pl.dart' as messages_pl;
 import 'messages_pt.dart' as messages_pt;
+import 'messages_pt_BR.dart' as messages_pt_br;
+import 'messages_pt_PT.dart' as messages_pt_pt;
 import 'messages_ro.dart' as messages_ro;
 import 'messages_ru.dart' as messages_ru;
 import 'messages_sl.dart' as messages_sl;
@@ -82,11 +86,15 @@ Map<String, LibraryLoader> _deferredLibraries = {
   'km': () => new SynchronousFuture(null),
   'ko': () => new SynchronousFuture(null),
   'lt': () => new SynchronousFuture(null),
+  'lv': () => new SynchronousFuture(null),
   'ml': () => new SynchronousFuture(null),
   'nl': () => new SynchronousFuture(null),
   'no': () => new SynchronousFuture(null),
+  'or': () => new SynchronousFuture(null),
   'pl': () => new SynchronousFuture(null),
   'pt': () => new SynchronousFuture(null),
+  'pt_BR': () => new SynchronousFuture(null),
+  'pt_PT': () => new SynchronousFuture(null),
   'ro': () => new SynchronousFuture(null),
   'ru': () => new SynchronousFuture(null),
   'sl': () => new SynchronousFuture(null),
@@ -149,16 +157,24 @@ MessageLookupByLibrary? _findExact(String localeName) {
       return messages_ko.messages;
     case 'lt':
       return messages_lt.messages;
+    case 'lv':
+      return messages_lv.messages;
     case 'ml':
       return messages_ml.messages;
     case 'nl':
       return messages_nl.messages;
     case 'no':
       return messages_no.messages;
+    case 'or':
+      return messages_or.messages;
     case 'pl':
       return messages_pl.messages;
     case 'pt':
       return messages_pt.messages;
+    case 'pt_BR':
+      return messages_pt_br.messages;
+    case 'pt_PT':
+      return messages_pt_pt.messages;
     case 'ro':
       return messages_ro.messages;
     case 'ru':

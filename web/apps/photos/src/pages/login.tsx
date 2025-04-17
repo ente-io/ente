@@ -1,1 +1,1 @@
-export { default } from "@/accounts/pages/login";
+export { default } from "ente-accounts/pages/login";

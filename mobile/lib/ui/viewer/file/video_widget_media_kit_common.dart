@@ -5,9 +5,11 @@ import "package:media_kit_video/media_kit_video.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/actions/file/file_actions.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/preview_status_widget.dart";
-import "package:photos/utils/date_time_util.dart";
-import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/standalone/date_time.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class VideoWidget extends StatefulWidget {
   final EnteFile file;
@@ -43,6 +45,7 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   void initState() {
+    super.initState();
     _isPlayingStreamSubscription =
         widget.controller.player.stream.playing.listen((isPlaying) {
       if (isPlaying && !_isSeekingNotifier.value) {
@@ -54,7 +57,6 @@ class _VideoWidgetState extends State<VideoWidget> {
     });
 
     _isSeekingNotifier.addListener(isSeekingListener);
-    super.initState();
   }
 
   @override
@@ -130,27 +132,6 @@ class _VideoWidgetState extends State<VideoWidget> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              widget.file.caption != null
-                                  ? Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        16,
-                                        12,
-                                        16,
-                                        8,
-                                      ),
-                                      child: Text(
-                                        widget.file.caption!,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                        style: getEnteTextTheme(context)
-                                            .mini
-                                            .copyWith(
-                                              color: textBaseDark,
-                                            ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    )
-                                  : const SizedBox.shrink(),
                               PreviewStatusWidget(
                                 showControls: value,
                                 file: widget.file,
@@ -160,6 +141,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                               SeekBarAndDuration(
                                 controller: widget.controller,
                                 isSeekingNotifier: _isSeekingNotifier,
+                                file: widget.file,
                               ),
                             ],
                           ),
@@ -191,6 +173,8 @@ class PlayPauseButtonMediaKit extends StatefulWidget {
 class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
   bool _isPlaying = true;
   late final StreamSubscription<bool>? isPlayingStreamSubscription;
+  late StreamSubscription<bool>? _bufferStateSubscription;
+  late var buffering = widget.controller?.player.state.buffering ?? true;
 
   @override
   void initState() {
@@ -202,16 +186,24 @@ class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
         _isPlaying = isPlaying;
       });
     });
+
+    _bufferStateSubscription =
+        widget.controller?.player.stream.buffering.listen(
+      (event) => setState(() => buffering = event),
+    );
   }
 
   @override
   void dispose() {
     isPlayingStreamSubscription?.cancel();
+    _bufferStateSubscription?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (buffering) return const EnteLoadingWidget();
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -261,11 +253,13 @@ class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
 class SeekBarAndDuration extends StatelessWidget {
   final VideoController? controller;
   final ValueNotifier<bool> isSeekingNotifier;
+  final EnteFile file;
 
   const SeekBarAndDuration({
     super.key,
     required this.controller,
     required this.isSeekingNotifier,
+    required this.file,
   });
 
   @override
@@ -291,46 +285,73 @@ class SeekBarAndDuration extends StatelessWidget {
             width: 1,
           ),
         ),
-        child: Row(
+        child: Column(
           children: [
-            StreamBuilder(
-              stream: controller?.player.stream.position,
-              builder: (context, snapshot) {
-                if (snapshot.data == null) {
-                  return Text(
-                    "0:00",
-                    style: getEnteTextTheme(
-                      context,
-                    ).mini.copyWith(
-                          color: textBaseDark,
-                        ),
-                  );
-                }
-                return Text(
-                  secondsToDuration(snapshot.data!.inSeconds),
+            file.caption != null && file.caption!.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      0,
+                      8,
+                      0,
+                      12,
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        showDetailsSheet(context, file);
+                      },
+                      child: Text(
+                        file.caption!,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: getEnteTextTheme(context)
+                            .mini
+                            .copyWith(color: textBaseDark),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
+            Row(
+              children: [
+                StreamBuilder(
+                  stream: controller?.player.stream.position,
+                  builder: (context, snapshot) {
+                    if (snapshot.data == null) {
+                      return Text(
+                        "0:00",
+                        style: getEnteTextTheme(
+                          context,
+                        ).mini.copyWith(
+                              color: textBaseDark,
+                            ),
+                      );
+                    }
+                    return Text(
+                      secondsToDuration(snapshot.data!.inSeconds),
+                      style: getEnteTextTheme(
+                        context,
+                      ).mini.copyWith(
+                            color: textBaseDark,
+                          ),
+                    );
+                  },
+                ),
+                Expanded(
+                  child: SeekBar(
+                    controller!,
+                    isSeekingNotifier,
+                  ),
+                ),
+                Text(
+                  _secondsToDuration(
+                    controller!.player.state.duration.inSeconds,
+                  ),
                   style: getEnteTextTheme(
                     context,
                   ).mini.copyWith(
                         color: textBaseDark,
                       ),
-                );
-              },
-            ),
-            Expanded(
-              child: SeekBar(
-                controller!,
-                isSeekingNotifier,
-              ),
-            ),
-            Text(
-              _secondsToDuration(
-                controller!.player.state.duration.inSeconds,
-              ),
-              style: getEnteTextTheme(
-                context,
-              ).mini.copyWith(
-                    color: textBaseDark,
-                  ),
+                ),
+              ],
             ),
           ],
         ),

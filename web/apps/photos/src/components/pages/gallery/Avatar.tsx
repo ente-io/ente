@@ -1,11 +1,11 @@
-import log from "@/base/log";
-import { EnteFile } from "@/media/file";
+import { styled } from "@mui/material";
+import log from "ente-base/log";
+import { EnteFile } from "ente-media/file";
 import {
     avatarBackgroundColor,
     avatarBackgroundColorPublicCollectedFile,
     avatarTextColor,
-} from "@/new/photos/services/avatar";
-import { styled } from "@mui/material";
+} from "ente-new/photos/services/avatar";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useLayoutEffect, useState } from "react";
 

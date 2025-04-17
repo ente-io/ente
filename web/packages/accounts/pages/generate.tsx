@@ -2,33 +2,32 @@ import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
-} from "@/accounts/components/layouts/centered-paper";
-import { RecoveryKey } from "@/accounts/components/RecoveryKey";
+} from "ente-accounts/components/layouts/centered-paper";
+import { RecoveryKey } from "ente-accounts/components/RecoveryKey";
 import SetPasswordForm, {
     type SetPasswordFormProps,
-} from "@/accounts/components/SetPasswordForm";
-import { PAGES } from "@/accounts/constants/pages";
-import { appHomeRoute } from "@/accounts/services/redirect";
+} from "ente-accounts/components/SetPasswordForm";
+import { appHomeRoute } from "ente-accounts/services/redirect";
 import {
     configureSRP,
     generateKeyAndSRPAttributes,
-} from "@/accounts/services/srp";
-import { putAttributes } from "@/accounts/services/user";
-import { LinkButton } from "@/base/components/LinkButton";
-import { LoadingIndicator } from "@/base/components/loaders";
-import { useBaseContext } from "@/base/context";
-import log from "@/base/log";
+} from "ente-accounts/services/srp";
+import { putAttributes } from "ente-accounts/services/user";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { LoadingIndicator } from "ente-base/components/loaders";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
 import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+} from "ente-shared/crypto/helpers";
+import { getData } from "ente-shared/storage/localStorage";
 import {
     justSignedUp,
     setJustSignedUp,
-} from "@ente/shared/storage/localStorage/helpers";
-import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
-import type { KeyAttributes, User } from "@ente/shared/user/types";
+} from "ente-shared/storage/localStorage/helpers";
+import { getKey } from "ente-shared/storage/sessionStorage";
+import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -44,11 +43,9 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const key: string = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        const keyAttributes: KeyAttributes = getData(
-            LS_KEYS.ORIGINAL_KEY_ATTRIBUTES,
-        );
-        const user: User = getData(LS_KEYS.USER);
+        const key: string = getKey("encryptionKey");
+        const keyAttributes: KeyAttributes = getData("originalKeyAttributes");
+        const user: User = getData("user");
         setUser(user);
         if (!user?.token) {
             void router.push("/");
@@ -60,7 +57,7 @@ const Page: React.FC = () => {
                 void router.push(appHomeRoute);
             }
         } else if (keyAttributes?.encryptedKey) {
-            void router.push(PAGES.CREDENTIALS);
+            void router.push("/credentials");
         } else {
             setToken(user.token);
             setLoading(false);
@@ -83,7 +80,7 @@ const Page: React.FC = () => {
                 keyAttributes,
                 masterKey,
             );
-            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
+            await saveKeyInSessionStore("encryptionKey", masterKey);
             setJustSignedUp(true);
             setOpenRecoveryKey(true);
         } catch (e) {

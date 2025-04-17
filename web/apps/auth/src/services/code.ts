@@ -1,5 +1,5 @@
-import log from "@/base/log";
-import { nullToUndefined } from "@/utils/transform";
+import log from "ente-base/log";
+import { nullToUndefined } from "ente-utils/transform";
 import { HOTP, TOTP } from "otpauth";
 import { z } from "zod";
 import { Steam } from "./steam";
@@ -290,9 +290,7 @@ export const generateOTPs = (code: Code): [otp: string, nextOTP: string] => {
         }
 
         case "steam": {
-            const steam = new Steam({
-                secret: code.secret,
-            });
+            const steam = new Steam({ secret: code.secret });
             otp = steam.generate();
             nextOTP = steam.generate({
                 timestamp: Date.now() + code.period * 1000,

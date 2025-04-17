@@ -1,17 +1,17 @@
+import { Alert, Box, TextField } from "@mui/material";
 import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
-} from "@/accounts/components/layouts/centered-paper";
-import { appHomeRoute } from "@/accounts/services/redirect";
-import { changeEmail, sendOTT } from "@/accounts/services/user";
-import { LinkButton } from "@/base/components/LinkButton";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import { isHTTPErrorWithStatus } from "@/base/http";
-import log from "@/base/log";
-import { VerticallyCentered } from "@ente/shared/components/Container";
-import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
-import { Alert, Box, TextField } from "@mui/material";
+} from "ente-accounts/components/layouts/centered-paper";
+import { appHomeRoute } from "ente-accounts/services/redirect";
+import { changeEmail, sendOTT } from "ente-accounts/services/user";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import { isHTTPErrorWithStatus } from "ente-base/http";
+import log from "ente-base/log";
+import { VerticallyCentered } from "ente-shared/components/Container";
+import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -23,7 +23,7 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const user = getData(LS_KEYS.USER);
+        const user = getData("user");
         if (!user?.token) {
             void router.push("/");
         }
@@ -86,7 +86,7 @@ const ChangeEmailForm: React.FC = () => {
         try {
             setLoading(true);
             await changeEmail(email, ott!);
-            await setLSUser({ ...getData(LS_KEYS.USER), email });
+            await setLSUser({ ...getData("user"), email });
             setLoading(false);
             void goToApp();
         } catch (e) {
@@ -153,9 +153,7 @@ const ChangeEmailForm: React.FC = () => {
                                 autoFocus
                                 disabled={loading}
                                 slotProps={{
-                                    input: {
-                                        readOnly: ottInputVisible,
-                                    },
+                                    input: { readOnly: ottInputVisible },
                                 }}
                             />
                             {ottInputVisible && (

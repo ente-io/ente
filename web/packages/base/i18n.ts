@@ -1,6 +1,6 @@
-import { isDevBuild } from "@/base/env";
-import log from "@/base/log";
-import { includes } from "@/utils/type-guards";
+import { isDevBuild } from "ente-base/env";
+import log from "ente-base/log";
+import { includes } from "ente-utils/type-guards";
 import { getUserLocales } from "get-user-locale";
 import i18n from "i18next";
 import resourcesToBackend from "i18next-resources-to-backend";
@@ -49,7 +49,7 @@ const defaultLocale: SupportedLocale = "en-US";
  *
  * In addition to the base i18next package, we use two of its plugins:
  *
- * - i18next-http-backend, for loading the JSON files containin the translations
+ * - i18next-http-backend, for loading the JSON files containing the translations
  *   at runtime, and
  *
  * - react-i18next, which adds React specific APIs
@@ -234,6 +234,7 @@ export const setLocaleInUse = async (locale: SupportedLocale) => {
 };
 
 let _numberFormat: Intl.NumberFormat | undefined;
+
 /**
  * Lazily created, cached, instance of NumberFormat used by
  * {@link formattedNumber}.
@@ -252,6 +253,31 @@ const numberFormat = () =>
  * scenarios, this function can be used.
  */
 export const formattedNumber = (value: number) => numberFormat().format(value);
+
+let _listJoinFormat: Intl.ListFormat | undefined;
+
+/**
+ * Lazily created, cached, instance of NumberFormat used by
+ * {@link formattedListJoin}.
+ *
+ * See: [Note: Changing locale causes a full reload].
+ */
+const listJoinFormat = () =>
+    (_listJoinFormat ??= new Intl.ListFormat(i18n.language, {
+        style: "narrow",
+    }));
+
+/**
+ * Return the given {@link items} joined together into a single string using an
+ * locale specific "comma like" separator.
+ *
+ * Usually this will just use a comma (plus space) as the list item separator,
+ * but depending on the locale it might use a different separator too.
+ *
+ * e.g. ["Foo", "Bar"] becomes "Foo, Bar" in "en-US" and  "Foo、Bar" in "zh".
+ */
+export const formattedListJoin = (value: string[]) =>
+    listJoinFormat().format(value);
 
 /**
  * A no-op marker for strings that, for various reasons, pending addition to the

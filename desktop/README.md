@@ -10,19 +10,21 @@ To know more about Ente, see [our main README](../README.md) or visit
 
 ## Building from source
 
-Fetch submodules
+Clone this repository and change to this directory
 
 ```sh
-git submodule update --init --recursive
+git clone https://github.com/ente-io/ente
+cd ente/desktop
 ```
 
-Install dependencies
+Install dependencies (requires Yarn v1):
 
 ```sh
 yarn install
 ```
 
-Run in development mode (supports hot reload for the renderer process)
+Now you can run in development mode (supports hot reload for the renderer
+process)
 
 ```sh
 yarn dev

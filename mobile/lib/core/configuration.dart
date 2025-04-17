@@ -28,7 +28,6 @@ import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -81,22 +80,18 @@ class Configuration {
   late FlutterSecureStorage _secureStorage;
   late String _tempDocumentsDirPath;
   late String _thumbnailCacheDirectory;
-  // 6th July 22: Remove this after 3 months. Hopefully, active users
-  // will migrate to newer version of the app, where shared media is stored
-  // on appSupport directory which OS won't clean up automatically
-  late String _sharedTempMediaDirectory;
 
   late String _sharedDocumentsMediaDirectory;
   String? _volatilePassword;
 
-  final _secureStorageOptionsIOS = const IOSOptions(
-    accessibility: KeychainAccessibility.first_unlock_this_device,
-  );
-
   Future<void> init() async {
     try {
       _preferences = await SharedPreferences.getInstance();
-      _secureStorage = const FlutterSecureStorage();
+      _secureStorage = const FlutterSecureStorage(
+        iOptions: IOSOptions(
+          accessibility: KeychainAccessibility.first_unlock_this_device,
+        ),
+      );
       _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
       _tempDocumentsDirPath = _documentsDirectory + "/temp/";
       final tempDocumentsDir = Directory(_tempDocumentsDirPath);
@@ -105,21 +100,17 @@ class Configuration {
       final tempDirectoryPath = (await getTemporaryDirectory()).path;
       _thumbnailCacheDirectory = tempDirectoryPath + "/thumbnail-cache";
       Directory(_thumbnailCacheDirectory).createSync(recursive: true);
-      _sharedTempMediaDirectory = tempDirectoryPath + "/ente-shared-media";
-      Directory(_sharedTempMediaDirectory).createSync(recursive: true);
       _sharedDocumentsMediaDirectory =
           _documentsDirectory + "/ente-shared-media";
       Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
       if (!_preferences.containsKey(tokenKey)) {
-        await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
+        await _secureStorage.deleteAll();
       } else {
         _key = await _secureStorage.read(
           key: keyKey,
-          iOptions: _secureStorageOptionsIOS,
         );
         _secretKey = await _secureStorage.read(
           key: secretKeyKey,
-          iOptions: _secureStorageOptionsIOS,
         );
         if (_key == null) {
           await logout(autoLogout: true);
@@ -198,7 +189,7 @@ class Configuration {
       }
     }
     await _preferences.clear();
-    await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
+    await _secureStorage.deleteAll();
     _key = null;
     _cachedToken = null;
     _secretKey = null;
@@ -210,15 +201,14 @@ class Configuration {
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
+    unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
     if (!autoLogout) {
       // Following services won't be initialized if it's the case of autoLogout
       FileUploader.instance.clearCachedUploadURLs();
       CollectionsService.instance.clearCache();
       FavoritesService.instance.clearCache();
-      MemoriesService.instance.clearCache();
       SearchService.instance.clearCache();
       PersonService.instance.clearCache();
-      unawaited(HomeWidgetService.instance.clearHomeWidget());
       Bus.instance.fire(UserLoggedOutEvent());
     } else {
       await _preferences.setBool("auto_logout", true);
@@ -507,13 +497,11 @@ class Configuration {
       // Used to clear key from secure storage
       await _secureStorage.delete(
         key: keyKey,
-        iOptions: _secureStorageOptionsIOS,
       );
     } else {
       await _secureStorage.write(
         key: keyKey,
         value: key,
-        iOptions: _secureStorageOptionsIOS,
       );
     }
   }
@@ -524,13 +512,11 @@ class Configuration {
       // Used to clear secret key from secure storage
       await _secureStorage.delete(
         key: secretKeyKey,
-        iOptions: _secureStorageOptionsIOS,
       );
     } else {
       await _secureStorage.write(
         key: secretKeyKey,
         value: secretKey,
-        iOptions: _secureStorageOptionsIOS,
       );
     }
   }
@@ -559,10 +545,6 @@ class Configuration {
 
   String getThumbnailCacheDirectory() {
     return _thumbnailCacheDirectory;
-  }
-
-  String getOldSharedMediaCacheDirectory() {
-    return _sharedTempMediaDirectory;
   }
 
   String getSharedMediaDirectory() {
@@ -668,12 +650,10 @@ class Configuration {
       await _secureStorage.write(
         key: keyKey,
         value: _key,
-        iOptions: _secureStorageOptionsIOS,
       );
       await _secureStorage.write(
         key: secretKeyKey,
         value: _secretKey,
-        iOptions: _secureStorageOptionsIOS,
       );
       await _preferences.setBool(
         hasMigratedSecureStorageKey,

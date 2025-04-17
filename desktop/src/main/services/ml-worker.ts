@@ -131,10 +131,8 @@ const makeCachedInferenceSession = (
     const createSession = (modelPath: string) =>
         createInferenceSession(modelPath);
 
-    const cachedInferenceSession = () => {
-        if (!session) session = download().then(createSession);
-        return session;
-    };
+    const cachedInferenceSession = () =>
+        (session ??= download().then(createSession));
 
     return cachedInferenceSession;
 };
@@ -247,9 +245,7 @@ export const computeCLIPImageEmbedding = async (
 ) => {
     const session = await cachedCLIPImageSession();
     const inputArray = new Uint8Array(input.buffer);
-    const feeds = {
-        input: new ort.Tensor("uint8", inputArray, inputShape),
-    };
+    const feeds = { input: new ort.Tensor("uint8", inputArray, inputShape) };
     const t = Date.now();
     const results = await session.run(feeds);
     log.debugString(`ONNX/CLIP image embedding took ${Date.now() - t} ms`);
@@ -263,10 +259,7 @@ const cachedCLIPTextSession = makeCachedInferenceSession(
 );
 
 let _tokenizer: Tokenizer | undefined;
-const getTokenizer = () => {
-    if (!_tokenizer) _tokenizer = new Tokenizer();
-    return _tokenizer;
-};
+const getTokenizer = () => (_tokenizer ??= new Tokenizer());
 
 /**
  * Compute CLIP embeddings for an text snippet.
@@ -292,9 +285,7 @@ export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
     const session = sessionOrSkip;
     const tokenizer = getTokenizer();
     const tokenizedText = Int32Array.from(tokenizer.encodeForCLIP(text));
-    const feeds = {
-        input: new ort.Tensor("int32", tokenizedText, [1, 77]),
-    };
+    const feeds = { input: new ort.Tensor("int32", tokenizedText, [1, 77]) };
 
     const t = Date.now();
     const results = await session.run(feeds);
@@ -316,9 +307,7 @@ export const detectFaces = async (
 ) => {
     const session = await cachedFaceDetectionSession();
     const inputArray = new Uint8Array(input.buffer);
-    const feeds = {
-        input: new ort.Tensor("uint8", inputArray, inputShape),
-    };
+    const feeds = { input: new ort.Tensor("uint8", inputArray, inputShape) };
     const t = Date.now();
     const results = await session.run(feeds);
     log.debugString(`ONNX/YOLO face detection took ${Date.now() - t} ms`);

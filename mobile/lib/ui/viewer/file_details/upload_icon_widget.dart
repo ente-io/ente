@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -16,7 +17,7 @@ import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
 import "package:photos/services/sync/sync_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/utils/toast_util.dart";
+import "package:photos/ui/notification/toast.dart";
 
 class UploadIconWidget extends StatefulWidget {
   final EnteFile file;
@@ -30,6 +31,7 @@ class UploadIconWidget extends StatefulWidget {
 }
 
 class _UpdateIconWidgetState extends State<UploadIconWidget> {
+  final Logger _logger = Logger("_UpdateIconWidgetState");
   late StreamSubscription<CollectionUpdatedEvent> _firstImportEvent;
   late IgnoredFilesService ignoreService;
   bool isUploadedNow = false;
@@ -62,6 +64,9 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
   @override
   Widget build(BuildContext context) {
     if (SyncService.instance.isSyncInProgress()) {
+      if (!widget.file.isUploaded) {
+        _logger.fine("sync in progress ${widget.file.displayName}");
+      }
       return const SizedBox.shrink();
     }
     if (widget.file.isUploaded || isUploadedNow) {

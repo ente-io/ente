@@ -1,4 +1,4 @@
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
+import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { t } from "i18next";
 
 /**
@@ -17,9 +17,6 @@ export const sessionExpiredDialogAttributes = (
     message: t("session_expired_message"),
     nonClosable: true,
     nonReplaceable: true,
-    continue: {
-        text: t("login"),
-        action: onLogin,
-    },
+    continue: { text: t("login"), action: onLogin },
     cancel: false,
 });

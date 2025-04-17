@@ -1,9 +1,9 @@
-import { ensureOk, publicRequestHeaders } from "@/base/http";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import { ApiError, CustomError } from "@ente/shared/error";
-import HTTPService from "@ente/shared/network/HTTPService";
 import { HttpStatusCode } from "axios";
+import { ensureOk, publicRequestHeaders } from "ente-base/http";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import { ApiError, CustomError } from "ente-shared/error";
+import HTTPService from "ente-shared/network/HTTPService";
 import type { UpdatedKey, UserVerificationResponse } from "./user";
 
 export interface SRPAttributes {
@@ -79,9 +79,7 @@ export const getSRPAttributes = async (
     try {
         const resp = await HTTPService.get(
             await apiURL("/users/srp/attributes"),
-            {
-                email,
-            },
+            { email },
         );
         return (resp.data as GetSRPAttributesResponse).attributes;
     } catch (e) {
@@ -99,9 +97,7 @@ export const startSRPSetup = async (
             await apiURL("/users/srp/setup"),
             setupSRPRequest,
             undefined,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
 
         return resp.data as SetupSRPResponse;
@@ -120,9 +116,7 @@ export const completeSRPSetup = async (
             await apiURL("/users/srp/complete"),
             completeSRPSetupRequest,
             undefined,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
         return resp.data as CompleteSRPSetupResponse;
     } catch (e) {
@@ -151,11 +145,7 @@ export const verifySRPSession = async (
     try {
         const resp = await HTTPService.post(
             await apiURL("/users/srp/verify-session"),
-            {
-                sessionID,
-                srpUserID,
-                srpM1,
-            },
+            { sessionID, srpUserID, srpM1 },
             undefined,
         );
         return resp.data as SRPVerificationResponse;
@@ -182,9 +172,7 @@ export const updateSRPAndKeys = async (
             await apiURL("/users/srp/update"),
             updateSRPAndKeyRequest,
             undefined,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
         return resp.data as UpdateSRPAndKeysResponse;
     } catch (e) {

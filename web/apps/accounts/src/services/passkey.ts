@@ -1,14 +1,14 @@
-import { TwoFactorAuthorizationResponse } from "@/accounts/services/user";
-import { clientPackageName } from "@/base/app";
+import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
+import { clientPackageName } from "ente-base/app";
 import {
     fromB64URLSafeNoPadding,
     toB64URLSafeNoPadding,
     toB64URLSafeNoPaddingString,
-} from "@/base/crypto/libsodium";
-import { isDevBuild } from "@/base/env";
-import { ensureOk, HTTPError, publicRequestHeaders } from "@/base/http";
-import { apiURL } from "@/base/origins";
-import { nullToUndefined } from "@/utils/transform";
+} from "ente-base/crypto/libsodium";
+import { isDevBuild } from "ente-base/env";
+import { ensureOk, HTTPError, publicRequestHeaders } from "ente-base/http";
+import { apiURL } from "ente-base/origins";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
 /** Return true if the user's browser supports WebAuthn (Passkeys). */
@@ -139,9 +139,7 @@ interface BeginPasskeyRegistrationResponse {
      * Options that should be passed to `navigator.credential.create` when
      * creating the new {@link Credential}.
      */
-    options: {
-        publicKey: PublicKeyCredentialCreationOptions;
-    };
+    options: { publicKey: PublicKeyCredentialCreationOptions };
 }
 
 const beginPasskeyRegistration = async (token: string) => {
@@ -299,11 +297,7 @@ const finishPasskeyRegistration = async ({
             // anyways for transmission, we can just reuse the same string.
             rawId: credential.id,
             type: credential.type,
-            response: {
-                attestationObject,
-                clientDataJSON,
-                transports,
-            },
+            response: { attestationObject, clientDataJSON, transports },
         }),
     });
     ensureOk(res);
@@ -379,9 +373,7 @@ export interface BeginPasskeyAuthenticationResponse {
      * Options that should be passed to `navigator.credential.get` to obtain the
      * attested {@link Credential}.
      */
-    options: {
-        publicKey: PublicKeyCredentialRequestOptions;
-    };
+    options: { publicKey: PublicKeyCredentialRequestOptions };
 }
 
 /**

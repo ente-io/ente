@@ -1,18 +1,17 @@
+import { Input, Stack, Typography } from "@mui/material";
 import {
     AccountsPageFooter,
     AccountsPageTitle,
-} from "@/accounts/components/layouts/centered-paper";
-import { PAGES } from "@/accounts/constants/pages";
-import { getSRPAttributes } from "@/accounts/services/srp-remote";
-import { sendOTT } from "@/accounts/services/user";
-import { LinkButton } from "@/base/components/LinkButton";
-import { isMuseumHTTPError } from "@/base/http";
-import log from "@/base/log";
+} from "ente-accounts/components/layouts/centered-paper";
+import { getSRPAttributes } from "ente-accounts/services/srp-remote";
+import { sendOTT } from "ente-accounts/services/user";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { isMuseumHTTPError } from "ente-base/http";
+import log from "ente-base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
-import { LS_KEYS, setData, setLSUser } from "@ente/shared/storage/localStorage";
-import { Input, Stack, Typography } from "@mui/material";
+} from "ente-shared/components/SingleInputForm";
+import { setData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 
@@ -54,11 +53,11 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                     throw e;
                 }
                 await setLSUser({ email });
-                void router.push(PAGES.VERIFY);
+                void router.push("/verify");
             } else {
                 await setLSUser({ email });
-                setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
-                void router.push(PAGES.CREDENTIALS);
+                setData("srpAttributes", srpAttributes);
+                void router.push("/credentials");
             }
         } catch (e) {
             log.error("Login failed", e);

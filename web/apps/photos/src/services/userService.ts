@@ -1,12 +1,12 @@
-import { putAttributes } from "@/accounts/services/user";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import type { UserDetails } from "@/new/photos/services/user-details";
-import { ApiError } from "@ente/shared/error";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { HttpStatusCode } from "axios";
+import { putAttributes } from "ente-accounts/services/user";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import type { UserDetails } from "ente-new/photos/services/user-details";
+import { ApiError } from "ente-shared/error";
+import HTTPService from "ente-shared/network/HTTPService";
+import { getData } from "ente-shared/storage/localStorage";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
 
 const HAS_SET_KEYS = "hasSetKeys";
 
@@ -16,9 +16,7 @@ export const getPublicKey = async (email: string) => {
     const resp = await HTTPService.get(
         await apiURL("/users/public-key"),
         { email },
-        {
-            "X-Auth-Token": token,
-        },
+        { "X-Auth-Token": token },
     );
     return resp.data.publicKey;
 };
@@ -28,9 +26,7 @@ export const isTokenValid = async (token: string) => {
         const resp = await HTTPService.get(
             await apiURL("/users/session-validity/v2"),
             null,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
         try {
             if (resp.data[HAS_SET_KEYS] === undefined) {
@@ -40,7 +36,7 @@ export const isTokenValid = async (token: string) => {
                 try {
                     await putAttributes(
                         token,
-                        getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES),
+                        getData("originalKeyAttributes"),
                     );
                 } catch (e) {
                     log.error("put attribute failed", e);
@@ -70,9 +66,7 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
         const resp = await HTTPService.get(
             await apiURL("/users/details/v2"),
             null,
-            {
-                "X-Auth-Token": token,
-            },
+            { "X-Auth-Token": token },
         );
         return resp.data;
     } catch (e) {

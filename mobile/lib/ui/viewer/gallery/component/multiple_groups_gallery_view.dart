@@ -13,7 +13,7 @@ import 'package:photos/ui/viewer/gallery/component/group/lazy_group_gallery.dart
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
-import "package:photos/utils/data_util.dart";
+import "package:photos/utils/standalone/data.dart";
 import "package:scrollable_positioned_list/scrollable_positioned_list.dart";
 
 /*

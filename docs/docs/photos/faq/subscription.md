@@ -187,7 +187,7 @@ you can gain more value out of a single subscription.
 
 ## Is there a forever-free plan?
 
-Yes, we offer 5 GB of storage for free.
+Yes, we offer 10 GB of storage for free.
 
 ## What are the limitations of the free plan?
 

@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import { FileType } from "@/media/file-type";
-import { getLocalCollections } from "@/new/photos/services/collections";
+import { FileType } from "ente-media/file-type";
+import { getLocalCollections } from "ente-new/photos/services/collections";
 import {
     getLocalFiles,
     groupFilesByCollectionID,
-} from "@/new/photos/services/files";
-import { parseDateFromDigitGroups } from "services/upload/date";
+} from "ente-new/photos/services/files";
+import {
+    parseDateFromDigitGroups,
+    tryParseEpochMicrosecondsFromFileName,
+} from "services/upload/date";
 import {
     matchTakeoutMetadata,
     metadataJSONMapKeyForJSON,
@@ -25,10 +28,7 @@ const DATE_TIME_PARSING_TEST_FILE_NAMES = [
         fileName: "2022-02-18 16.00.12-DCMX.png",
         expectedDateTime: "2022-02-18 16:00:12",
     },
-    {
-        fileName: "20221107_231730",
-        expectedDateTime: "2022-11-07 23:17:30",
-    },
+    { fileName: "20221107_231730", expectedDateTime: "2022-11-07 23:17:30" },
     {
         fileName: "2020-11-01 02.31.02",
         expectedDateTime: "2020-11-01 02:31:02",
@@ -59,6 +59,13 @@ const DATE_TIME_PARSING_TEST_FILE_NAMES = [
     {
         fileName: "signal-2022-12-17-15-16-04-718.jpg",
         expectedDateTime: "2022-12-17 15:16:04",
+    },
+];
+
+const dateTimeParsingTestFilenames2 = [
+    {
+        fileName: "20170923_220934000_iOS.jpg",
+        expectedDateTime: "2017-09-23 22:09:34",
     },
 ];
 
@@ -409,6 +416,22 @@ function parseDateTimeFromFileNameTest() {
             }
         },
     );
+
+    dateTimeParsingTestFilenames2.forEach(({ fileName, expectedDateTime }) => {
+        const epochMicroseconds =
+            tryParseEpochMicrosecondsFromFileName(fileName);
+        const formattedDateTime = getFormattedDateTime(
+            new Date(epochMicroseconds / 1000),
+        );
+        if (formattedDateTime !== expectedDateTime) {
+            throw Error(
+                `parseDateTimeFromFileNameTest2 failed ❌ ,
+                    for ${fileName}
+                    expected: ${expectedDateTime} got: ${formattedDateTime}`,
+            );
+        }
+    });
+
     DATE_TIME_PARSING_TEST_FILE_NAMES_MUST_FAIL.forEach((fileName) => {
         const dateTime = parseDateFromDigitGroups(fileName);
         if (dateTime) {

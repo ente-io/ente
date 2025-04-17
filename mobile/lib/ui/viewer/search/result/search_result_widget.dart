@@ -164,6 +164,8 @@ class SearchResultWidget extends StatelessWidget {
         return "Shared";
       case ResultType.faces:
         return "Person";
+      case ResultType.uploader:
+        return "Uploaded by";
     }
   }
 }

@@ -1,90 +1,3 @@
-import { RecoveryKey } from "@/accounts/components/RecoveryKey";
-import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
-import { isDesktop } from "@/base/app";
-import { EnteLogo } from "@/base/components/EnteLogo";
-import { LinkButton } from "@/base/components/LinkButton";
-import {
-    RowButton,
-    RowButtonDivider,
-    RowButtonGroup,
-    RowButtonGroupHint,
-    RowSwitch,
-} from "@/base/components/RowButton";
-import { SpacedRow } from "@/base/components/containers";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
-import {
-    NestedSidebarDrawer,
-    SidebarDrawer,
-    SidebarDrawerTitlebar,
-    type NestedSidebarDrawerVisibilityProps,
-} from "@/base/components/mui/SidebarDrawer";
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import {
-    useModalVisibility,
-    type ModalVisibilityProps,
-} from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import {
-    getLocaleInUse,
-    setLocaleInUse,
-    supportedLocales,
-    ut,
-    type SupportedLocale,
-} from "@/base/i18n";
-import log from "@/base/log";
-import { savedLogs } from "@/base/log-web";
-import { customAPIHost } from "@/base/origins";
-import { downloadString } from "@/base/utils/web";
-import { DeleteAccount } from "@/new/photos/components/DeleteAccount";
-import { DropdownInput } from "@/new/photos/components/DropdownInput";
-import { MLSettings } from "@/new/photos/components/sidebar/MLSettings";
-import { TwoFactorSettings } from "@/new/photos/components/sidebar/TwoFactorSettings";
-import {
-    confirmDisableMapsDialogAttributes,
-    confirmEnableMapsDialogAttributes,
-} from "@/new/photos/components/utils/dialog";
-import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
-import {
-    useSettingsSnapshot,
-    useUserDetailsSnapshot,
-} from "@/new/photos/components/utils/use-snapshot";
-import {
-    ARCHIVE_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    TRASH_SECTION,
-} from "@/new/photos/services/collection";
-import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
-import { isMLSupported } from "@/new/photos/services/ml";
-import {
-    isDevBuildAndUser,
-    syncSettings,
-    updateCFProxyDisabledPreference,
-    updateMapEnabled,
-} from "@/new/photos/services/settings";
-import {
-    familyAdminEmail,
-    hasExceededStorageQuota,
-    isFamilyAdmin,
-    isPartOfFamily,
-    isSubscriptionActive,
-    isSubscriptionActivePaid,
-    isSubscriptionCancelled,
-    isSubscriptionFree,
-    isSubscriptionPastDue,
-    isSubscriptionStripe,
-    leaveFamily,
-    redirectToCustomerPortal,
-    syncUserDetails,
-    userDetailsAddOnBonuses,
-    type UserDetails,
-} from "@/new/photos/services/user-details";
-import { usePhotosAppContext } from "@/new/photos/types/context";
-import { initiateEmail, openURL } from "@/new/photos/utils/web";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "@ente/shared/components/Container";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -110,6 +23,93 @@ import {
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { WatchFolder } from "components/WatchFolder";
+import { RecoveryKey } from "ente-accounts/components/RecoveryKey";
+import { openAccountsManagePasskeysPage } from "ente-accounts/services/passkey";
+import { isDesktop } from "ente-base/app";
+import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
+import { LinkButton } from "ente-base/components/LinkButton";
+import {
+    RowButton,
+    RowButtonDivider,
+    RowButtonGroup,
+    RowButtonGroupHint,
+    RowSwitch,
+} from "ente-base/components/RowButton";
+import { SpacedRow } from "ente-base/components/containers";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import {
+    NestedSidebarDrawer,
+    SidebarDrawer,
+    SidebarDrawerTitlebar,
+    type NestedSidebarDrawerVisibilityProps,
+} from "ente-base/components/mui/SidebarDrawer";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import {
+    getLocaleInUse,
+    setLocaleInUse,
+    supportedLocales,
+    ut,
+    type SupportedLocale,
+} from "ente-base/i18n";
+import log from "ente-base/log";
+import { savedLogs } from "ente-base/log-web";
+import { customAPIHost } from "ente-base/origins";
+import { downloadString } from "ente-base/utils/web";
+import { DeleteAccount } from "ente-new/photos/components/DeleteAccount";
+import { DropdownInput } from "ente-new/photos/components/DropdownInput";
+import { MLSettings } from "ente-new/photos/components/sidebar/MLSettings";
+import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorSettings";
+import {
+    confirmDisableMapsDialogAttributes,
+    confirmEnableMapsDialogAttributes,
+} from "ente-new/photos/components/utils/dialog";
+import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
+import {
+    useSettingsSnapshot,
+    useUserDetailsSnapshot,
+} from "ente-new/photos/components/utils/use-snapshot";
+import {
+    ARCHIVE_SECTION,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    TRASH_SECTION,
+} from "ente-new/photos/services/collection";
+import type { CollectionSummaries } from "ente-new/photos/services/collection/ui";
+import { isMLSupported } from "ente-new/photos/services/ml";
+import {
+    isDevBuildAndUser,
+    syncSettings,
+    updateCFProxyDisabledPreference,
+    updateMapEnabled,
+} from "ente-new/photos/services/settings";
+import {
+    familyAdminEmail,
+    hasExceededStorageQuota,
+    isFamilyAdmin,
+    isPartOfFamily,
+    isSubscriptionActive,
+    isSubscriptionActivePaid,
+    isSubscriptionCancelled,
+    isSubscriptionFree,
+    isSubscriptionPastDue,
+    isSubscriptionStripe,
+    leaveFamily,
+    redirectToCustomerPortal,
+    syncUserDetails,
+    userDetailsAddOnBonuses,
+    type UserDetails,
+} from "ente-new/photos/services/user-details";
+import { usePhotosAppContext } from "ente-new/photos/types/context";
+import { initiateEmail, openURL } from "ente-new/photos/utils/web";
+import {
+    FlexWrapper,
+    VerticallyCentered,
+} from "ente-shared/components/Container";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
@@ -180,9 +180,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 );
 
 const RootSidebarDrawer = styled(SidebarDrawer)(({ theme }) => ({
-    "& .MuiPaper-root": {
-        padding: theme.spacing(1.5),
-    },
+    "& .MuiPaper-root": { padding: theme.spacing(1.5) },
 }));
 
 interface SectionProps {
@@ -190,8 +188,10 @@ interface SectionProps {
 }
 
 const HeaderSection: React.FC<SectionProps> = ({ onCloseSidebar }) => (
-    <SpacedRow sx={{ my: "4px 4px", pl: "12px" }}>
-        <EnteLogo />
+    <SpacedRow sx={{ mt: "6px", pl: "12px" }}>
+        <EnteLogoBox>
+            <EnteLogo height={16} />
+        </EnteLogoBox>
         <IconButton
             aria-label={t("close")}
             onClick={onCloseSidebar}
@@ -249,7 +249,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
 
     return (
         <>
-            <Box sx={{ px: 0.5, mt: 2, pb: 1.5, mb: 1 }}>
+            <Box sx={{ px: 0.5, mt: 1.5, pb: 1.5, mb: 1 }}>
                 <Typography sx={{ px: 1, pb: 1, color: "text.muted" }}>
                     {userDetails ? (
                         userDetails.email
@@ -342,9 +342,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
             message = (
                 <Trans
                     i18nKey={"subscription_info_expired"}
-                    components={{
-                        a: <LinkButton onClick={handleClick} />,
-                    }}
+                    components={{ a: <LinkButton onClick={handleClick} /> }}
                 />
             );
         }
@@ -354,9 +352,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         message = (
             <Trans
                 i18nKey={"subscription_info_storage_quota_exceeded"}
-                components={{
-                    a: <LinkButton onClick={handleClick} />,
-                }}
+                components={{ a: <LinkButton onClick={handleClick} /> }}
             />
         );
     }
@@ -368,10 +364,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
             <Typography
                 variant="small"
                 onClick={handleClick && handleClick}
-                sx={{
-                    color: "text.muted",
-                    cursor: handleClick && "pointer",
-                }}
+                sx={{ color: "text.muted", cursor: handleClick && "pointer" }}
             >
                 {message}
             </Typography>
@@ -1081,10 +1074,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         showMiniDialog({
             title: t("view_logs"),
             message: <Trans i18nKey={"view_logs_message"} />,
-            continue: {
-                text: t("view_logs"),
-                action: viewLogs,
-            },
+            continue: { text: t("view_logs"), action: viewLogs },
         });
 
     const viewLogs = () => {

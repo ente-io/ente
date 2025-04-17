@@ -6,7 +6,7 @@
  * See: [Note: IPC streams].
  */
 
-import type { Electron, ElectronMLWorker, ZipItem } from "@/base/types/ipc";
+import type { Electron, ElectronMLWorker, ZipItem } from "ente-base/types/ipc";
 
 /**
  * Stream the given file or zip entry from the user's local file system.

@@ -1,47 +1,48 @@
+import { Box, Typography } from "@mui/material";
+import { HttpStatusCode } from "axios";
 import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
-} from "@/accounts/components/layouts/centered-paper";
-import { VerifyingPasskey } from "@/accounts/components/LoginComponents";
-import { SecondFactorChoice } from "@/accounts/components/SecondFactorChoice";
-import { useSecondFactorChoiceIfNeeded } from "@/accounts/components/utils/second-factor-choice";
-import { PAGES } from "@/accounts/constants/pages";
+} from "ente-accounts/components/layouts/centered-paper";
+import { VerifyingPasskey } from "ente-accounts/components/LoginComponents";
+import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice";
+import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
-} from "@/accounts/services/passkey";
-import { stashedRedirect, unstashRedirect } from "@/accounts/services/redirect";
-import { configureSRP } from "@/accounts/services/srp";
+} from "ente-accounts/services/passkey";
+import {
+    stashedRedirect,
+    unstashRedirect,
+} from "ente-accounts/services/redirect";
+import { configureSRP } from "ente-accounts/services/srp";
 import type {
     SRPAttributes,
     SRPSetupAttributes,
-} from "@/accounts/services/srp-remote";
-import { getSRPAttributes } from "@/accounts/services/srp-remote";
-import { putAttributes, sendOTT, verifyEmail } from "@/accounts/services/user";
-import { LinkButton } from "@/base/components/LinkButton";
-import { LoadingIndicator } from "@/base/components/loaders";
-import { useBaseContext } from "@/base/context";
-import log from "@/base/log";
+} from "ente-accounts/services/srp-remote";
+import { getSRPAttributes } from "ente-accounts/services/srp-remote";
+import {
+    putAttributes,
+    sendOTT,
+    verifyEmail,
+} from "ente-accounts/services/user";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { LoadingIndicator } from "ente-base/components/loaders";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
-import { ApiError } from "@ente/shared/error";
-import localForage from "@ente/shared/storage/localForage";
-import {
-    getData,
-    LS_KEYS,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
+} from "ente-shared/components/SingleInputForm";
+import { ApiError } from "ente-shared/error";
+import localForage from "ente-shared/storage/localForage";
+import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import {
     getLocalReferralSource,
     setIsFirstLogin,
-} from "@ente/shared/storage/localStorage/helpers";
-import { clearKeys } from "@ente/shared/storage/sessionStorage";
-import type { KeyAttributes, User } from "@ente/shared/user/types";
-import { Box, Typography } from "@mui/material";
-import { HttpStatusCode } from "axios";
+} from "ente-shared/storage/localStorage/helpers";
+import { clearKeys } from "ente-shared/storage/sessionStorage";
+import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -64,7 +65,7 @@ const Page: React.FC = () => {
 
     useEffect(() => {
         const main = async () => {
-            const user: User = getData(LS_KEYS.USER);
+            const user: User = getData("user");
 
             const redirect = await redirectionIfNeeded(user);
             if (redirect) {
@@ -97,7 +98,7 @@ const Page: React.FC = () => {
                 await verifyEmail(email, ott, cleanedReferral),
             );
             if (passkeySessionID) {
-                const user = getData(LS_KEYS.USER);
+                const user = getData("user");
                 await setLSUser({
                     ...user,
                     passkeySessionID,
@@ -111,7 +112,7 @@ const Page: React.FC = () => {
                 // generated, so it has a functional impact we need.
                 setIsFirstLogin(true);
                 const url = passkeyVerificationRedirectURL(
-                    accountsUrl,
+                    accountsUrl!,
                     passkeySessionID,
                 );
                 setPasskeyVerificationData({ passkeySessionID, url });
@@ -123,7 +124,7 @@ const Page: React.FC = () => {
                     isTwoFactorEnabled: true,
                 });
                 setIsFirstLogin(true);
-                void router.push(PAGES.TWO_FACTOR_VERIFY);
+                void router.push("/two-factor/verify");
             } else {
                 await setLSUser({
                     email,
@@ -133,19 +134,18 @@ const Page: React.FC = () => {
                     isTwoFactorEnabled: false,
                 });
                 if (keyAttributes) {
-                    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-                    setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
+                    setData("keyAttributes", keyAttributes);
+                    setData("originalKeyAttributes", keyAttributes);
                 } else {
-                    if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
+                    if (getData("originalKeyAttributes")) {
                         await putAttributes(
                             token!,
-                            getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES),
+                            getData("originalKeyAttributes"),
                         );
                     }
-                    if (getData(LS_KEYS.SRP_SETUP_ATTRIBUTES)) {
-                        const srpSetupAttributes: SRPSetupAttributes = getData(
-                            LS_KEYS.SRP_SETUP_ATTRIBUTES,
-                        );
+                    if (getData("srpSetupAttributes")) {
+                        const srpSetupAttributes: SRPSetupAttributes =
+                            getData("srpSetupAttributes");
                         await configureSRP(srpSetupAttributes);
                     }
                 }
@@ -154,9 +154,9 @@ const Page: React.FC = () => {
                 const redirectURL = unstashRedirect();
                 if (keyAttributes?.encryptedKey) {
                     clearKeys();
-                    void router.push(redirectURL ?? PAGES.CREDENTIALS);
+                    void router.push(redirectURL ?? "/credentials");
                 } else {
-                    void router.push(redirectURL ?? PAGES.GENERATE);
+                    void router.push(redirectURL ?? "/generate");
                 }
             }
         } catch (e) {
@@ -272,14 +272,14 @@ const redirectionIfNeeded = async (user: User | undefined) => {
         return "/";
     }
 
-    const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+    const keyAttributes: KeyAttributes = getData("keyAttributes");
 
     if (keyAttributes?.encryptedKey && (user.token || user.encryptedToken)) {
-        return PAGES.CREDENTIALS;
+        return "/credentials";
     }
 
     // If we're coming here during the recover flow, do not redirect.
-    if (stashedRedirect() == PAGES.RECOVER) return undefined;
+    if (stashedRedirect() == "/recover") return undefined;
 
     // The user might have email verification disabled, but after previously
     // entering their email on the login screen, they might've closed the tab
@@ -292,14 +292,14 @@ const redirectionIfNeeded = async (user: User | undefined) => {
     // saved them). If they are present and indicate that email verification is
     // not required, redirect to the password verification page.
 
-    const srpAttributes: SRPAttributes = getData(LS_KEYS.SRP_ATTRIBUTES);
+    const srpAttributes: SRPAttributes = getData("srpAttributes");
     if (srpAttributes && !srpAttributes.isEmailMFAEnabled) {
         // Fetch the latest SRP attributes instead of relying on the potentially
         // stale stored values. This is an infrequent scenario path, so extra
         // API calls are fine.
         const latestSRPAttributes = await getSRPAttributes(email);
         if (latestSRPAttributes && !latestSRPAttributes.isEmailMFAEnabled) {
-            return PAGES.CREDENTIALS;
+            return "/credentials";
         }
     }
 

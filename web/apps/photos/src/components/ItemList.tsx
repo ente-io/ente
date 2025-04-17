@@ -48,10 +48,7 @@ const Row: <T>({
                     // the element on which the tooltip appears.
                     popper: {
                         modifiers: [
-                            {
-                                name: "offset",
-                                options: { offset: [0, -14] },
-                            },
+                            { name: "offset", options: { offset: [0, -14] } },
                         ],
                     },
                 }}

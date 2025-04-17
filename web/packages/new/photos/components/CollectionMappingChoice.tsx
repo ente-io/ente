@@ -1,8 +1,3 @@
-import { SpacedRow } from "@/base/components/containers";
-import { DialogCloseIconButton } from "@/base/components/mui/DialogCloseIconButton";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import type { CollectionMapping } from "@/base/types/ipc";
 import FolderIcon from "@mui/icons-material/Folder";
 import FolderCopyIcon from "@mui/icons-material/FolderCopy";
 import {
@@ -12,6 +7,11 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
+import { SpacedRow } from "ente-base/components/containers";
+import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import type { CollectionMapping } from "ente-base/types/ipc";
 import { t } from "i18next";
 import React from "react";
 

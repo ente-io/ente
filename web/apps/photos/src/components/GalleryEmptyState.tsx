@@ -1,11 +1,11 @@
-import { EnteLogo } from "@/base/components/EnteLogo";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "@ente/shared/components/Container";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import FolderIcon from "@mui/icons-material/FolderOutlined";
 import { Button, Stack, Typography, styled } from "@mui/material";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import {
+    FlexWrapper,
+    VerticallyCentered,
+} from "ente-shared/components/Container";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 import uploadManager from "services/upload/uploadManager";
@@ -54,12 +54,7 @@ export default function GalleryEmptyState({ openUploader }) {
                     color="accent"
                     onClick={() => openUploader("upload")}
                     disabled={!uploadManager.shouldAllowNewUpload()}
-                    sx={{
-                        mt: 1.5,
-                        p: 1,
-                        width: 320,
-                        borderRadius: 0.5,
-                    }}
+                    sx={{ mt: 1.5, p: 1, width: 320, borderRadius: 0.5 }}
                 >
                     <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
                         <AddPhotoAlternateIcon />
@@ -74,12 +69,7 @@ export default function GalleryEmptyState({ openUploader }) {
                     }}
                     onClick={() => openUploader("import")}
                     disabled={!uploadManager.shouldAllowNewUpload()}
-                    sx={{
-                        mt: 1.5,
-                        p: 1,
-                        width: 320,
-                        borderRadius: 0.5,
-                    }}
+                    sx={{ mt: 1.5, p: 1, width: 320, borderRadius: 0.5 }}
                 >
                     <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
                         <FolderIcon />

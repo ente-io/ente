@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -33,10 +34,11 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
             ),
             Container(
               alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: TitleBarTitleWidget(
-                  title: S.of(context).whatsNew,
+                  // title: S.of(context).whatsNew,
+                  title: "v1.0",
                 ),
               ),
             ),
@@ -100,18 +102,24 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "Deep Links",
-        "We have made public links even more powerful. Open links for Ente album directly in the app.\n\n"
-            "Join the album as a viewer or collaborator, and experience it like any other shared album.",
+        context.l10n.cLIcon,
+        context.l10n.cLIconDesc,
       ),
       ChangeLogEntry(
-          "Search Shared Files",
-          "Indexes will now be shared along with shared memories.\n\n"
-              "Which means you can now search for them using semantic search and label the people in shared photos. "),
+        context.l10n.cLMemories,
+        context.l10n.cLMemoriesDesc,
+      ),
       ChangeLogEntry(
-        "Link Contact with people",
-        "You dont have to deal with email addresses while sharing anymore.\n\n"
-            "Connect a contact with a face and name. Go to the contact or people section to get started.",
+        context.l10n.cLWidgets,
+        context.l10n.cLWidgetsDesc,
+      ),
+      ChangeLogEntry(
+        context.l10n.cLFamilyPlan,
+        context.l10n.cLFamilyPlanDesc,
+      ),
+      ChangeLogEntry(
+        context.l10n.cLBulkEdit,
+        context.l10n.cLBulkEditDesc,
       ),
     ]);
 

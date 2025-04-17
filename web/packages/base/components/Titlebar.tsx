@@ -1,7 +1,7 @@
-import { FlexWrapper } from "@ente/shared/components/Container";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { FlexWrapper } from "ente-shared/components/Container";
 import React from "react";
 
 interface TitlebarProps {

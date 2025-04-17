@@ -79,11 +79,7 @@ const stripePublishableKey = (accountCountry: StripeAccountCountry) => {
 /** Return the {@link StripeAccountCountry} for the user. */
 const getUserStripeAccountCountry = async (paymentToken: string) => {
     const url = `${apiOrigin}/billing/stripe-account-country`;
-    const res = await fetch(url, {
-        headers: {
-            "X-Auth-Token": paymentToken,
-        },
-    });
+    const res = await fetch(url, { headers: { "X-Auth-Token": paymentToken } });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     const json: unknown = await res.json();
     if (json && typeof json === "object" && "stripeAccountCountry" in json) {
@@ -138,11 +134,7 @@ const createCheckoutSession = async (
 ): Promise<string> => {
     const params = new URLSearchParams({ productID, redirectURL });
     const url = `${apiOrigin}/billing/stripe/checkout-session?${params.toString()}`;
-    const res = await fetch(url, {
-        headers: {
-            "X-Auth-Token": paymentToken,
-        },
-    });
+    const res = await fetch(url, { headers: { "X-Auth-Token": paymentToken } });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     const json: unknown = await res.json();
     if (json && typeof json == "object" && "sessionID" in json) {
@@ -220,7 +212,7 @@ interface UpdateStripeSubscriptionResponse {
 }
 
 /**
- * Make a request to museum to update an existing Stript subscription with
+ * Make a request to museum to update an existing Stripe subscription with
  * {@link productID} for the user.
  */
 async function updateStripeSubscription(
@@ -230,12 +222,8 @@ async function updateStripeSubscription(
     const url = `${apiOrigin}/billing/stripe/update-subscription`;
     const res = await fetch(url, {
         method: "POST",
-        headers: {
-            "X-Auth-Token": paymentToken,
-        },
-        body: JSON.stringify({
-            productID,
-        }),
+        headers: { "X-Auth-Token": paymentToken },
+        body: JSON.stringify({ productID }),
     });
     if (!res.ok) throw new Error(`Failed to fetch ${url}: HTTP ${res.status}`);
     const json: unknown = await res.json();

@@ -1,16 +1,16 @@
-import { checkSessionValidity } from "@/accounts/services/session";
+import { checkSessionValidity } from "ente-accounts/services/session";
 import {
     TitledMiniDialog,
     type MiniDialogAttributes,
-} from "@/base/components/MiniDialog";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import log from "@/base/log";
+} from "ente-base/components/MiniDialog";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
-} from "@ente/shared/components/VerifyMasterPasswordForm";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import type { KeyAttributes, User } from "@ente/shared/user/types";
+} from "ente-shared/components/VerifyMasterPasswordForm";
+import { getData } from "ente-shared/storage/localStorage";
+import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
 
@@ -60,12 +60,12 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
     useEffect(() => {
         const main = async () => {
             try {
-                const user = getData(LS_KEYS.USER);
+                const user = getData("user");
                 if (!user) {
                     throw Error("User not found");
                 }
                 setUser(user);
-                const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+                const keyAttributes = getData("keyAttributes");
                 if (
                     (!user?.token && !user?.encryptedToken) ||
                     (keyAttributes && !keyAttributes.memLimit)
@@ -126,9 +126,6 @@ const passwordChangedElsewhereDialogAttributes = (
 ): MiniDialogAttributes => ({
     title: t("password_changed_elsewhere"),
     message: t("password_changed_elsewhere_message"),
-    continue: {
-        text: t("login"),
-        action: onLogin,
-    },
+    continue: { text: t("login"), action: onLogin },
     cancel: false,
 });

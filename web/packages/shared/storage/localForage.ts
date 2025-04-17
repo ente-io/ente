@@ -1,4 +1,4 @@
-import { haveWindow } from "@/base/env";
+import { haveWindow } from "ente-base/env";
 
 import localForage from "localforage";
 

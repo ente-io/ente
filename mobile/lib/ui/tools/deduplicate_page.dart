@@ -14,10 +14,10 @@ import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
-import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/navigation_util.dart';
+import 'package:photos/utils/standalone/data.dart';
 
 class DeduplicatePage extends StatefulWidget {
   final List<DuplicateFiles> duplicates;
@@ -478,8 +478,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 borderRadius: BorderRadius.circular(4),
                 child: ThumbnailWidget(
                   file,
-                  diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-                  serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
+                  diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
+                  serverLoadDeferDuration:
+                      galleryThumbnailServerLoadDeferDuration,
                   shouldShowLivePhotoOverlay: true,
                   key: Key("deduplicate_" + file.tag),
                 ),

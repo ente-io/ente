@@ -55,8 +55,8 @@ class GalleryFileWidget extends StatelessWidget {
     final String heroTag = tag + file.tag;
     final Widget thumbnailWidget = ThumbnailWidget(
       file,
-      diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-      serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
+      diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
+      serverLoadDeferDuration: galleryThumbnailServerLoadDeferDuration,
       shouldShowLivePhotoOverlay: true,
       key: Key(heroTag),
       thumbnailSize: photoGridSize < photoGridSizeDefault

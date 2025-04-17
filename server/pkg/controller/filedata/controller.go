@@ -129,12 +129,11 @@ func (c *Controller) InsertOrUpdateMetadata(ctx *gin.Context, req *fileData.PutF
 	return nil
 }
 
-func (c *Controller) GetFileData(ctx *gin.Context, req fileData.GetFileData) (*fileData.Entity, error) {
-	userID := auth.GetUserID(ctx.Request.Header)
+func (c *Controller) GetFileData(ctx *gin.Context, actorUser int64, req fileData.GetFileData) (*fileData.Entity, error) {
 	if err := req.Validate(); err != nil {
 		return nil, stacktrace.Propagate(err, "validation failed")
 	}
-	if err := c._checkMetadataReadOrWritePerm(ctx, userID, []int64{req.FileID}); err != nil {
+	if err := c._checkMetadataReadOrWritePerm(ctx, actorUser, []int64{req.FileID}); err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
 	doRows, err := c.Repo.GetFilesData(ctx, req.Type, []int64{req.FileID})

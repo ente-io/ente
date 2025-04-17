@@ -3,14 +3,14 @@ import {
     authenticatedRequestHeaders,
     ensureOk,
     type PublicAlbumsCredentials,
-} from "@/base/http";
-import log from "@/base/log";
-import { apiURL, uploaderOrigin } from "@/base/origins";
-import { EnteFile } from "@/media/file";
-import { retryAsyncOperation } from "@/utils/promise";
-import { CustomError, handleUploadError } from "@ente/shared/error";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
+} from "ente-base/http";
+import log from "ente-base/log";
+import { apiURL, uploaderOrigin } from "ente-base/origins";
+import { EnteFile } from "ente-media/file";
+import { CustomError, handleUploadError } from "ente-shared/error";
+import HTTPService from "ente-shared/network/HTTPService";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
+import { retryAsyncOperation } from "ente-utils/promise";
 import { z } from "zod";
 import { MultipartUploadURLs, UploadFile } from "./upload-service";
 
@@ -26,9 +26,7 @@ const ObjectUploadURL = z.object({
 
 export type ObjectUploadURL = z.infer<typeof ObjectUploadURL>;
 
-const ObjectUploadURLResponse = z.object({
-    urls: ObjectUploadURL.array(),
-});
+const ObjectUploadURLResponse = z.object({ urls: ObjectUploadURL.array() });
 
 export class PhotosUploadHttpClient {
     async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
@@ -88,9 +86,7 @@ export class PhotosUploadHttpClient {
             }
             const response = await HTTPService.get(
                 await apiURL("/files/multipart-upload-urls"),
-                {
-                    count,
-                },
+                { count },
                 { "X-Auth-Token": token },
             );
 
@@ -139,9 +135,7 @@ export class PhotosUploadHttpClient {
                     `${origin}/file-upload`,
                     file,
                     null,
-                    {
-                        "UPLOAD-URL": fileUploadURL.url,
-                    },
+                    { "UPLOAD-URL": fileUploadURL.url },
                     progressTracker,
                 ),
             );
@@ -196,9 +190,7 @@ export class PhotosUploadHttpClient {
                     `${origin}/multipart-upload`,
                     filePart,
                     null,
-                    {
-                        "UPLOAD-URL": partUploadURL,
-                    },
+                    { "UPLOAD-URL": partUploadURL },
                     progressTracker,
                 );
                 if (!resp?.data?.etag) {
@@ -238,10 +230,7 @@ export class PhotosUploadHttpClient {
                     `${origin}/multipart-complete`,
                     reqBody,
                     null,
-                    {
-                        "content-type": "text/xml",
-                        "UPLOAD-URL": completeURL,
-                    },
+                    { "content-type": "text/xml", "UPLOAD-URL": completeURL },
                 ),
             );
         } catch (e) {
@@ -290,9 +279,6 @@ export class PublicUploadHttpClient {
         const params = new URLSearchParams({ count });
         const url = await apiURL("/public-collection/upload-urls");
         const res = await fetch(`${url}?${params.toString()}`, {
-            // TODO: Use authenticatedPublicAlbumsRequestHeaders after the public
-            // albums refactor branch is merged.
-            // headers: await authenticatedRequestHeaders(),
             headers: authenticatedPublicAlbumsRequestHeaders(credentials),
         });
         ensureOk(res);
@@ -315,9 +301,7 @@ export class PublicUploadHttpClient {
             }
             const response = await HTTPService.get(
                 await apiURL("/public-collection/multipart-upload-urls"),
-                {
-                    count,
-                },
+                { count },
                 {
                     "X-Auth-Access-Token": token,
                     ...(passwordToken && {

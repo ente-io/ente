@@ -2,24 +2,23 @@ import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
-} from "@/accounts/components/layouts/centered-paper";
-import { PAGES } from "@/accounts/constants/pages";
-import { appHomeRoute, stashRedirect } from "@/accounts/services/redirect";
-import { sendOTT } from "@/accounts/services/user";
-import { LinkButton } from "@/base/components/LinkButton";
-import { useBaseContext } from "@/base/context";
-import { sharedCryptoWorker } from "@/base/crypto";
-import log from "@/base/log";
+} from "ente-accounts/components/layouts/centered-paper";
+import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
+import { sendOTT } from "ente-accounts/services/user";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { useBaseContext } from "ente-base/context";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import log from "ente-base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
+} from "ente-shared/components/SingleInputForm";
 import {
     decryptAndStoreToken,
     saveKeyInSessionStore,
-} from "@ente/shared/crypto/helpers";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
-import type { KeyAttributes, User } from "@ente/shared/user/types";
+} from "ente-shared/crypto/helpers";
+import { getData, setData } from "ente-shared/storage/localStorage";
+import { getKey } from "ente-shared/storage/sessionStorage";
+import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -39,21 +38,21 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const user: User = getData(LS_KEYS.USER);
-        const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        const user: User = getData("user");
+        const keyAttributes: KeyAttributes = getData("keyAttributes");
+        const key = getKey("encryptionKey");
         if (!user?.email) {
             void router.push("/");
             return;
         }
         if (!user?.encryptedToken && !user?.token) {
             void sendOTT(user.email, undefined);
-            stashRedirect(PAGES.RECOVER);
-            void router.push(PAGES.VERIFY);
+            stashRedirect("/recover");
+            void router.push("/verify");
             return;
         }
         if (!keyAttributes) {
-            void router.push(PAGES.GENERATE);
+            void router.push("/generate");
         } else if (key) {
             void router.push(appHomeRoute);
         } else {
@@ -86,11 +85,11 @@ const Page: React.FC = () => {
                 keyAttr.masterKeyDecryptionNonce!,
                 await cryptoWorker.fromHex(recoveryKey),
             );
-            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
+            await saveKeyInSessionStore("encryptionKey", masterKey);
             await decryptAndStoreToken(keyAttr, masterKey);
 
-            setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
-            void router.push(PAGES.CHANGE_PASSWORD);
+            setData("showBackButton", { value: false });
+            void router.push("/change-password");
         } catch (e) {
             log.error("password recovery failed", e);
             setFieldError(t("incorrect_recovery_key"));

@@ -1,15 +1,15 @@
-import { CodeBlock } from "@/accounts/components/CodeBlock";
-import { Verify2FACodeForm } from "@/accounts/components/Verify2FACodeForm";
-import { appHomeRoute } from "@/accounts/services/redirect";
-import type { TwoFactorSecret } from "@/accounts/services/user";
-import { enableTwoFactor, setupTwoFactor } from "@/accounts/services/user";
-import { CenteredFill } from "@/base/components/containers";
-import { LinkButton } from "@/base/components/LinkButton";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
-import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
 import { Paper, Stack, styled, Typography } from "@mui/material";
+import { CodeBlock } from "ente-accounts/components/CodeBlock";
+import { Verify2FACodeForm } from "ente-accounts/components/Verify2FACodeForm";
+import { appHomeRoute } from "ente-accounts/services/redirect";
+import type { TwoFactorSecret } from "ente-accounts/services/user";
+import { enableTwoFactor, setupTwoFactor } from "ente-accounts/services/user";
+import { CenteredFill } from "ente-base/components/containers";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { encryptWithRecoveryKey } from "ente-shared/crypto/helpers";
+import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -35,10 +35,7 @@ const Page: React.FC = () => {
             encryptedTwoFactorSecret,
             twoFactorSecretDecryptionNonce,
         });
-        await setLSUser({
-            ...getData(LS_KEYS.USER),
-            isTwoFactorEnabled: true,
-        });
+        await setLSUser({ ...getData("user"), isTwoFactorEnabled: true });
         await router.push(appHomeRoute);
     };
 

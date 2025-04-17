@@ -14,7 +14,48 @@ the same code we use for our own cloud service.
 > [blog post](https://ente.io/blog/open-sourcing-our-server/) announcing the
 > open sourcing of our server useful.
 
-## Getting started
+## Getting started - Quickstart
+
+Install [Docker](https://www.docker.com). Then, paste the following command in a
+your terminal:
+
+```sh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
+```
+
+> [!TIP]
+>
+> For more details about what this does, see [the quickstart
+> README](https://github.com/ente-io/ente/blob/main/server/docs/quickstart.md).
+
+That's about it. If you open http://localhost:3000 from the machine where the
+server is running, you will be able to create an account on a Ente Photos web
+app. This web app will be connecting to the server running on your local machine
+at `localhost:8080`.
+
+To complete your account registration you need to enter a 6-digit verification
+code. These can be found in the server logs which should already be shown in
+your quickstart terminal. Otherwise you can open the server logs with the
+following command from inside the `my-ente` folder:
+
+```sh
+sudo docker compose logs
+```
+
+In the logs, find the code at the end of a message that resembles the following:
+```sh
+museum    | INFO[0102]email.go:130 sendViaTransmail Skipping sending email to email@example.com: *Verification code: 112089*
+```
+
+There are [prebuilt apps](https://ente.io/download) for iPad, iPhone, Android,
+Linux, Mac, and Windows. These can easily be configured to use your [custom
+self-hosted server](guides/custom-server/).
+
+## Getting started - From source
+
+The quickstart method above uses pre-built images. Alternatively, if you want to
+build the self hosted server images from source, you can use the steps in this
+section.
 
 #### Installing Docker
 
@@ -30,11 +71,6 @@ cd ente/server
 docker compose up --build
 ```
 
-> [!TIP]
->
-> You can also use a pre-built Docker image from `ghcr.io/ente-io/server`
-> ([More info](https://github.com/ente-io/ente/blob/main/server/docs/docker.md))
-
 Install the necessary dependencies for running the web client
 
 ```sh
@@ -49,19 +85,9 @@ Then in a separate terminal, you can run (e.g) the web client
 
 ```sh
 cd ente/web
-git submodule update --init --recursive
 yarn install
 NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev
 ```
-
-That's about it. If you open http://localhost:3000, you will be able to create
-an account on a Ente Photos web app running on your machine, and this web app
-will be connecting to the server running on your local machine at
-`localhost:8080`.
-
-For the mobile apps, you don't even need to build, and can install normal Ente
-apps and configure them to use your
-[custom self-hosted server](guides/custom-server/).
 
 > If you want to build the mobile apps from source, see the instructions
 > [here](guides/mobile-build).

@@ -13,10 +13,12 @@ import 'package:ente_auth/onboarding/view/common/field_label.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/algorithm_selector_widget.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/custom_icon_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/custom_icon_page.dart';
+import 'package:ente_auth/ui/topt_selector_widget.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
@@ -38,10 +40,14 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   final Logger _logger = Logger('_SetupEnterSecretKeyPageState');
   final int _notesLimit = 500;
   final int _otherTextLimit = 200;
+  final int defaultDigits = 6;
+  final int defaultPeriodInSeconds = 30;
   late TextEditingController _issuerController;
   late TextEditingController _accountController;
   late TextEditingController _secretController;
   late TextEditingController _notesController;
+  late TextEditingController _digitsController;
+  late TextEditingController _periodController;
   late bool _secretKeyObscured;
   late List<String> selectedTags = [...?widget.code?.display.tags];
   List<String> allTags = [];
@@ -49,6 +55,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   bool isCustomIcon = false;
   String _customIconID = "";
   late IconType _iconSrc;
+  late Algorithm _algorithm;
+  late Type _type;
+  final ValueNotifier<bool> showAdvancedOptions = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -65,6 +74,17 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     _notesController = TextEditingController(
       text: widget.code?.display.note,
     );
+    _digitsController = TextEditingController(
+      text: widget.code != null
+          ? widget.code!.digits.toString()
+          : defaultDigits.toString(),
+    );
+    _periodController = TextEditingController(
+      text: widget.code != null
+          ? widget.code!.period.toString()
+          : defaultPeriodInSeconds.toString(),
+    );
+
     _secretKeyObscured = widget.code != null;
     _loadTags();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
@@ -101,6 +121,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
         ? IconType.simpleIcon
         : IconType.customIcon;
 
+    _algorithm = widget.code == null ? Algorithm.sha1 : widget.code!.algorithm;
+    _type = widget.code == null ? Type.totp : widget.code!.type;
+
     super.initState();
   }
 
@@ -121,6 +144,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     _issuerController.dispose();
     _accountController.dispose();
     _notesController.dispose();
+    _digitsController.dispose();
+    _periodController.dispose();
     super.dispose();
   }
 
@@ -268,6 +293,10 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  widget.code == null
+                      ? advanceOptionWidget()
+                      : const SizedBox.shrink(),
+                  const SizedBox(height: 12),
                   Wrap(
                     spacing: 12,
                     alignment: WrapAlignment.start,
@@ -322,12 +351,47 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                         padding: const EdgeInsets.symmetric(vertical: 8),
                       ),
                       onPressed: () async {
+                        final digits =
+                            int.tryParse(_digitsController.text.trim());
+                        if (digits != null && (digits < 1 || digits > 10)) {
+                          String message = "Digits must be between 1 and 10";
+                          _showIncorrectDetailsDialog(
+                            context,
+                            message: message,
+                          );
+                          return;
+                        }
+
+                        final period =
+                            int.tryParse(_periodController.text.trim());
+                        if (period != null && (period < 10 || period > 60)) {
+                          String message =
+                              "Period must be between 10 and 60 seconds";
+                          _showIncorrectDetailsDialog(
+                            context,
+                            message: message,
+                          );
+                          return;
+                        }
+
                         if ((_accountController.text.trim().isEmpty &&
                                 _issuerController.text.trim().isEmpty) ||
-                            _secretController.text.trim().isEmpty) {
+                            _secretController.text.trim().isEmpty ||
+                            _digitsController.text.trim().isEmpty ||
+                            digits == null ||
+                            _periodController.text.trim().isEmpty ||
+                            period == null) {
                           String message;
                           if (_secretController.text.trim().isEmpty) {
                             message = context.l10n.secretCanNotBeEmpty;
+                          } else if (_digitsController.text.isEmpty) {
+                            message = "Digits cannot be empty";
+                          } else if (digits == null) {
+                            message = "Digits is not a integer";
+                          } else if (_periodController.text.isEmpty) {
+                            message = "Period cannot be empty";
+                          } else if (period == null) {
+                            message = "Period is not a integer";
                           } else {
                             message =
                                 context.l10n.bothIssuerAndAccountCanNotBeEmpty;
@@ -358,6 +422,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final issuer = _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
       final notes = _notesController.text.trim();
+      final digits = int.tryParse(_digitsController.text.trim());
+      final period = int.tryParse(_periodController.text.trim());
+
       final isStreamCode = issuer.toLowerCase() == "steam" ||
           issuer.toLowerCase().contains('steampowered.com');
       final CodeDisplay display =
@@ -393,19 +460,26 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
 
       final Code newCode = widget.code == null
           ? Code.fromAccountAndSecret(
-              isStreamCode ? Type.steam : Type.totp,
+              isStreamCode ? Type.steam : _type,
               account,
               issuer,
               secret,
               display,
-              isStreamCode ? Code.steamDigits : Code.defaultDigits,
+              isStreamCode ? Code.steamDigits : digits!,
+              algorithm: _algorithm,
+              period: period!,
             )
           : widget.code!.copyWith(
               account: account,
               issuer: issuer,
               secret: secret,
               display: display,
+              algorithm: _algorithm,
+              digits: digits!,
+              type: _type,
+              period: period,
             );
+
       // Verify the validity of the code
       getOTP(newCode);
       Navigator.of(context).pop(newCode);
@@ -448,5 +522,160 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       _customIconID = newCustomIcon.title;
       _iconSrc = newCustomIcon.type;
     });
+  }
+
+  Widget advanceOptionWidget() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () {
+              showAdvancedOptions.value = !showAdvancedOptions.value;
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Advanced',
+                ),
+                ValueListenableBuilder<bool>(
+                  valueListenable: showAdvancedOptions,
+                  builder: (context, isExpanded, child) {
+                    return Icon(
+                      isExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      size: 24,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+          ValueListenableBuilder<bool>(
+            valueListenable: showAdvancedOptions,
+            builder: (context, isExpanded, child) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) {
+                  return SizeTransition(
+                    sizeFactor: animation,
+                    child: child,
+                  );
+                },
+                child: isExpanded
+                    ? SizedBox(
+                        width: 400,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            top: 16,
+                          ),
+                          child: GridView.count(
+                            crossAxisCount: 2,
+                            shrinkWrap: true,
+                            childAspectRatio: 2.5,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 14,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const FieldLabel("Algorithm", width: 60),
+                                  AlgorithmSelectorWidget(
+                                    currentAlgorithm: _algorithm,
+                                    onSelected: (newAlgorithm) async {
+                                      setState(() {
+                                        _algorithm = newAlgorithm;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const FieldLabel("Type", width: 60),
+                                  ToptSelectorWidget(
+                                    currentTopt: _type,
+                                    onSelected: (newTopt) async {
+                                      setState(() {
+                                        _type = newTopt;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  const FieldLabel("Period", width: 60),
+                                  Expanded(
+                                    child: TextFormField(
+                                      keyboardType: TextInputType.number,
+                                      // The validator receives the text that the user has entered.
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return "Please enter a number";
+                                        }
+                                        final intValue = int.tryParse(value);
+                                        if (intValue == null) {
+                                          return "Only integers are allowed";
+                                        }
+                                        if (intValue < 1 || intValue > 60) {
+                                          return "Period must be between 1 and 60";
+                                        }
+                                        return null;
+                                      },
+                                      maxLines: 1,
+                                      style: getEnteTextTheme(
+                                        context,
+                                      ).small,
+                                      controller: _periodController,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  const FieldLabel("Digits", width: 60),
+                                  Expanded(
+                                    child: TextFormField(
+                                      keyboardType: TextInputType.number,
+                                      // The validator receives the text that the user has entered.
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return "Please enter a number";
+                                        }
+                                        final intValue = int.tryParse(value);
+                                        if (intValue == null) {
+                                          return "Only integers are allowed";
+                                        }
+                                        if (intValue < 1 || intValue > 10) {
+                                          return "OTP digits must be between 1 and 10";
+                                        }
+                                        return null;
+                                      },
+                                      maxLines: 1,
+                                      style: getEnteTextTheme(
+                                        context,
+                                      ).small,
+                                      controller: _digitsController,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
