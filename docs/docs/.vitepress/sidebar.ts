@@ -238,10 +238,6 @@ export const sidebar = [
         items: [
             { text: "Getting started", link: "/self-hosting/" },
             {
-                text: "System requirements",
-                link: "/self-hosting/guides/system-requirements",
-            },
-            {
                 text: "Guides",
                 items: [
                     { text: "Introduction", link: "/self-hosting/guides/" },

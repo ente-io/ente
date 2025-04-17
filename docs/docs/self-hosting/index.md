@@ -14,6 +14,14 @@ the same code we use for our own cloud service.
 > [blog post](https://ente.io/blog/open-sourcing-our-server/) announcing the
 > open sourcing of our server useful.
 
+
+## System Requirements 
+
+The server has minimal resource requirements, running as a lightweight Go binary 
+with no server-side ML. It performs well on small cloud instances, old laptops,
+and even [low-end embedded devices](https://github.com/ente-io/ente/discussions/594) 
+reported by community members. Virtually any reasonable hardware should be sufficient.
+
 ## Getting started
 
 Execute the below one-liner command in your terminal to setup Ente on your system. 
