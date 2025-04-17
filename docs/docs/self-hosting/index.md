@@ -96,10 +96,10 @@ For example,
 
 ```yaml
 apps:
-    public-albums:
-    cast:
-    accounts:
-    family:
+    public-albums: albums.myente.xyz
+    cast: cast.myente.xyz
+    accounts: accounts.myente.xyz
+    family: family.myente.xyz
 ```
 
 By default, all the values redirect to our publicly hosted production services. 
