@@ -97,16 +97,16 @@ the documentation for any other reverse proxy tool (like nginx) you want to use.
 
 ## Configuring `museum.yaml`
 
-> [!TIP]
-> Always do `docker compose down` inside `my-ente` directory, if you've made any changes to `museum.yaml`
-> and then restart the containers with `docker compose up -d ` to see the changes in action.
-
 `Museum.yaml` is a YAML configuration file used to configure various things for museum. 
 By default, [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml) 
 is also available, but  it is overridden if `museum.yaml` file is found. We highly 
 recommend creating and building your own `museum.yaml` instead of editing `configurations/local.yaml`. 
 The `my-ente` directory will include a `museum.yaml` file with some configurations around encryption 
 keys and secrets, postgres DB, and MinIO.
+
+> [!TIP]
+> Always do `docker compose down` inside `my-ente` directory, if you've made any changes to `museum.yaml`
+> and then restart the containers with `docker compose up -d ` to see the changes in action.
 
 ### S3 Buckets
 
@@ -137,6 +137,10 @@ apps:
 By default, all the values redirect to our publicly hosted production services. 
 After you are done with filling the values, restart museum and the App will start utilizing
 those endpoints for everything instead of the Ente's prod instances.
+
+Once you configure all the necessary endpoints, `cd` into `my-ente` and  stop all the docker 
+containers with `docker compose down` to completely stop all the containers and restart them 
+with `docker compose up -d`. 
 
 Similarly, you can read the default [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml) 
 and build a functioning `museum.yaml` for many other functionalities like SMTP, Discord

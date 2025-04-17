@@ -6,6 +6,11 @@ description: Getting started self hosting Ente Photos and/or Ente Auth
 
 # Ente from Source
 
+> [!WARNING] NOTE
+> The below documentation will cover instructions about self-hosting the web app manually. If you
+> want to deploy Ente hassle free, use the [one line](https://ente.io/blog/self-hosting-quickstart/) 
+> command to setup Ente. This guide might be deprecated in the near future.
+
 ## Installing Docker
 
 Refer to
@@ -55,11 +60,6 @@ apps and configure them to use your
 
 > If you want to build the mobile apps from source, see the instructions
 > [here](/self-hosting/guides/mobile-build).
-
-> [!WARNING] NOTE
-> The below documentation will cover instructions about self-hosting the web app manually. If you
-> want to deploy Ente hassle free, please use the [one line](https://ente.io/blog/self-hosting-quickstart/) 
-> command to setup Ente. This guide might be deprecated in the near future.
 
 ## Web app with Docker and Compose
 
@@ -144,9 +144,8 @@ docker build -t <image-name>:<tag> --no-cache --progress plain .
 You can always edit the Dockerfile and remove the steps for apps which you do
 not intend to install on your system (like auth or cast) and opt out of those.
 
-Regarding Albums App, please take a note that they are not web pages with
-navigable pages, if accessed on the web-browser they will simply redirect to
-ente.web.io.
+Regarding Albums App, take a note that they are not apps with navigable pages, 
+if accessed on the web-browser they will simply redirect to ente.web.io.
 
 ## compose.yaml
 
