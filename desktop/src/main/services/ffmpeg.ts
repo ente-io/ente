@@ -106,8 +106,6 @@ const ffmpegBinaryPath = () => {
  * A variant of {@link ffmpegExec} adapted to work with streams so that it can
  * handle the MP4 conversion of large video files.
  *
- * See: [Note: Convert to MP4]
-
  * @param inputFilePath The path to a file on the user's local file system. This
  * is the video we want to convert.
  *

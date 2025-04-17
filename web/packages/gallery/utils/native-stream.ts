@@ -118,19 +118,38 @@ export const writeStream = async (
 };
 
 /**
- * Variant of {@link writeStream} tailored for video conversion.
+ *  One of the predefined operations to perform when invoking
+ *  {@link writeVideoStream} or {@link readVideoStream}.
  *
- * @param blob The video to convert.
+ * - "convert-to-mp4" (See: [Note: Convert to MP4])
  *
- * @returns a token that can then be passed to {@link readConvertToMP4Stream} to
- * read back the converted video. See: [Note: Convert to MP4].
+ * - "generate-hls" (See: [Note: Preview variant of videos])
  */
-export const writeConvertToMP4Stream = async (_: Electron, blob: Blob) => {
-    const url = "stream://convert-to-mp4";
+type VideoStreamOp = "convert-to-mp4" | "generate-hls";
+
+/**
+ * Variant of {@link writeStream} tailored for video processing operations.
+ *
+ * @param op The operation to perform on this video (the result can then be
+ * later read back in via {@link readVideoStream}, and the sequence ended by
+ * using {@link videoStreamDone}).
+ *
+ * @param video The video to convert, as a {@link Blob} or a
+ * {@link ReadableStream}.
+ *
+ * @returns a token that can then be passed to {@link readVideoStream} to read
+ * back the processed video.
+ */
+export const writeVideoStream = async (
+    _: Electron,
+    op: VideoStreamOp,
+    video: Blob | ReadableStream,
+) => {
+    const url = `stream://video?op=${op}`;
 
     const req = new Request(url, {
         method: "POST",
-        body: blob,
+        body: video,
         // @ts-expect-error TypeScript's libdom.d.ts does not include the
         // "duplex" parameter, e.g. see
         // https://github.com/node-fetch/node-fetch/issues/1769.
@@ -148,16 +167,16 @@ export const writeConvertToMP4Stream = async (_: Electron, blob: Blob) => {
 /**
  * Variant of {@link readStream} tailored for video conversion.
  *
- * @param token A token obtained from {@link writeConvertToMP4Stream}.
+ * @param token A token obtained from {@link writeVideoStream}.
  *
- * @returns the contents of the converted video. See: [Note: Convert to MP4].
+ * @returns the contents of the processed video.
  */
-export const readConvertToMP4Stream = async (
+export const readVideoStream = async (
     _: Electron,
     token: string,
 ): Promise<Blob> => {
     const params = new URLSearchParams({ token });
-    const url = new URL(`stream://convert-to-mp4?${params.toString()}`);
+    const url = new URL(`stream://video?${params.toString()}`);
 
     const req = new Request(url, { method: "GET" });
 
@@ -172,18 +191,17 @@ export const readConvertToMP4Stream = async (
 
 /**
  * Sibling of {@link readConvertToMP4Stream} to let the native side know when we
- * are done reading the response, and they can dispose any temporary resources
- * it was using.
+ * are done reading the response, so it can dispose any temporary resources.
  *
- * @param token A token obtained from {@link writeConvertToMP4Stream}.
+ * @param token A token obtained from {@link writeVideoStream}.
  */
-export const readConvertToMP4Done = async (
+export const videoStreamDone = async (
     _: Electron,
     token: string,
 ): Promise<void> => {
     // The value for `done` is arbitrary, only its presence matters.
     const params = new URLSearchParams({ token, done: "1" });
-    const url = new URL(`stream://convert-to-mp4?${params.toString()}`);
+    const url = new URL(`stream://video?${params.toString()}`);
 
     const req = new Request(url, { method: "GET" });
     const res = await fetch(req);

@@ -68,9 +68,15 @@ const handleStreamRequest = async (request: Request): Promise<Response> => {
         case "write":
             return handleWrite(ensure(searchParams.get("path")), request);
 
-        case "convert-to-mp4": {
+        case "video": {
             const token = searchParams.get("token");
             const done = searchParams.get("done") !== null;
+            const op = searchParams.get("op");
+
+            if (op && op != "convert-to-mp4") {
+                return new Response("", { status: 404 });
+            }
+
             return token
                 ? done
                     ? handleConvertToMP4ReadDone(token)

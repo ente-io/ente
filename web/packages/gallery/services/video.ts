@@ -10,7 +10,6 @@ import { gunzip } from "ente-new/photos/utils/gzip";
 import { ensurePrecondition } from "ente-utils/ensure";
 import { z } from "zod";
 import { downloadManager } from "./download";
-import { generateVideoPreviewVariantWeb } from "./ffmpeg";
 import { fetchFileData, fetchFilePreviewData } from "./file-data";
 import type { UploadItem } from "./upload";
 
@@ -381,16 +380,13 @@ const processQueueItem = async (
     log.debug(() => ["gen-hls", { file, uploadItem }]);
 
     const fileBlob = await fetchOriginalVideoBlob(file, uploadItem);
-    const previewFileData = await generateVideoPreviewVariantWeb(fileBlob);
 
-    const convertToMP4Native = async (electron: Electron, blob: Blob) => {
-        const token = await writeConvertToMP4Stream(electron, blob);
-        const mp4Blob = await readConvertToMP4Stream(electron, token);
-        await readConvertToMP4Done(electron, token);
-        return mp4Blob;
-    };
+    // const token = await writeConvertToMP4Stream(electron, blob);
+    // const mp4Blob = await readConvertToMP4Stream(electron, token);
+    // await readConvertToMP4Done(electron, token);
+    // return mp4Blob;
 
-    console.log(previewFileData);
+    console.log(electron, fileBlob);
 
     await Promise.resolve(0);
 };
@@ -410,10 +406,10 @@ const processQueueItem = async (
 const fetchOriginalVideoBlob = async (
     file: EnteFile,
     uploadItem: UploadItem | undefined,
-): Promise<Blob> =>
+): Promise<Blob | ReadableStream | null> =>
     uploadItem
         ? fetchOriginalVideoUploadItemBlob(file, uploadItem)
-        : await downloadManager.fileBlob(file);
+        : await downloadManager.fileStream(file);
 
 const fetchOriginalVideoUploadItemBlob = (
     _: EnteFile,
