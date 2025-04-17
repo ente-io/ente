@@ -69,19 +69,25 @@ const handleStreamRequest = async (request: Request): Promise<Response> => {
             return handleWrite(ensure(searchParams.get("path")), request);
 
         case "video": {
+            const op = searchParams.get("op");
+            if (op) {
+                switch (op) {
+                    case "convert-to-mp4":
+                        return handleConvertToMP4Write(request);
+                    case "generate-hls":
+                        return new Response("TODO", { status: 400 });
+                    default:
+                        return new Response("", { status: 404 });
+                }
+            }
+
             const token = searchParams.get("token");
             const done = searchParams.get("done") !== null;
-            const op = searchParams.get("op");
-
-            if (op && op != "convert-to-mp4") {
+            if (!token) {
                 return new Response("", { status: 404 });
             }
 
-            return token
-                ? done
-                    ? handleConvertToMP4ReadDone(token)
-                    : handleConvertToMP4Read(token)
-                : handleConvertToMP4Write(request);
+            return done ? handleVideoDone(token) : handleVideoRead(token);
         }
 
         default:
@@ -177,16 +183,16 @@ const handleWrite = async (path: string, request: Request) => {
 };
 
 /**
- * A map from token to file paths for convert-to-mp4 requests that we have
- * received.
+ * A map from token to file paths generated as a result of stream://video
+ * requests we have received.
  */
-const convertToMP4Results = new Map<string, string>();
+const pendingVideoResults = new Map<string, string>();
 
 /**
- * Clear any in-memory state for in-flight convert-to-mp4 requests. Meant to be
- * called during logout.
+ * Clear any in-memory state for in-flight streamed video processing requests.
+ * Meant to be called during logout.
  */
-export const clearConvertToMP4Results = () => convertToMP4Results.clear();
+export const clearPendingVideoResults = () => pendingVideoResults.clear();
 
 /**
  * [Note: Convert to MP4]
@@ -201,20 +207,20 @@ export const clearConvertToMP4Results = () => convertToMP4Results.clear();
  * mode for the Web fetch API). So we need to simulate that using two different
  * streaming requests.
  *
- *     renderer → main  stream://convert-to-mp4
+ *     renderer → main  stream://video?op=convert-to-mp4
  *                      → request.body is the original video
  *                      ← response is a token
  *
- *     renderer → main  stream://convert-to-mp4?token=<token>
+ *     renderer → main  stream://video?token=<token>
  *                      ← response.body is the converted video
  *
- *     renderer → main  stream://convert-to-mp4?token=<token>&done
+ *     renderer → main  stream://video?token=<token>&done
  *                      ← 200 OK
  *
  * Note that the conversion itself is not streaming. The conversion still
- * happens in a single shot, we are just streaming the data across the IPC
- * boundary to allow us to pass large amounts of data without running out of
- * memory.
+ * happens in a single invocation of ffmpeg, we are just streaming the data
+ * across the IPC boundary to allow us to pass large amounts of data without
+ * running out of memory.
  *
  * See also: [Note: IPC streams]
  */
@@ -234,25 +240,25 @@ const handleConvertToMP4Write = async (request: Request) => {
     }
 
     const token = randomUUID();
-    convertToMP4Results.set(token, outputTempFilePath);
+    pendingVideoResults.set(token, outputTempFilePath);
     return new Response(token, { status: 200 });
 };
 
-const handleConvertToMP4Read = async (token: string) => {
-    const filePath = convertToMP4Results.get(token);
+const handleVideoRead = async (token: string) => {
+    const filePath = pendingVideoResults.get(token);
     if (!filePath)
         return new Response(`Unknown token ${token}`, { status: 404 });
 
     return net.fetch(pathToFileURL(filePath).toString());
 };
 
-const handleConvertToMP4ReadDone = async (token: string) => {
-    const filePath = convertToMP4Results.get(token);
+const handleVideoDone = async (token: string) => {
+    const filePath = pendingVideoResults.get(token);
     if (!filePath)
         return new Response(`Unknown token ${token}`, { status: 404 });
 
     await deleteTempFile(filePath);
 
-    convertToMP4Results.delete(token);
+    pendingVideoResults.delete(token);
     return new Response("", { status: 200 });
 };
