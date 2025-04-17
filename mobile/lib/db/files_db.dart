@@ -1643,23 +1643,6 @@ class FilesDB with SqlDbBase {
     return result;
   }
 
-  // For a given userID, return unique localID for all uploaded live photos
-  Future<List<String>> getLivePhotosForUser(int userId) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT DISTINCT $columnLocalID FROM $filesTable
-      WHERE $columnOwnerID = ? AND $columnFileType = ? AND $columnLocalID IS NOT NULL
-    ''',
-      [userId, getInt(FileType.livePhoto)],
-    );
-    final result = <String>[];
-    for (final row in rows) {
-      result.add(row[columnLocalID] as String);
-    }
-    return result;
-  }
-
   Future<List<String>> getLocalFilesBackedUpWithoutLocation(int userId) async {
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
