@@ -254,10 +254,6 @@ export const sidebar = [
                         link: "/self-hosting/guides/from-source",
                     },
                     {
-                        text: "DB migration",
-                        link: "/self-hosting/guides/db-migration",
-                    },
-                    {
                         text: "Hosting Ente without Docker",
                         link: "/self-hosting/guides/standalone-ente",
                     },
@@ -266,14 +262,17 @@ export const sidebar = [
                         link: "/self-hosting/guides/Tailscale.md",
                     },
                     {
+                        text: "Administering your server",
+                        link: "/self-hosting/guides/admin",
+                    },
+                    {
                         text: "Configure CLI for Self Hosted Instance",
                         link: "/self-hosting/guides/selfhost-cli",
                     },
                     {
-                        text: "Administering your server",
-                        link: "/self-hosting/guides/admin",
+                        text: "DB migration",
+                        link: "/self-hosting/guides/db-migration",
                     },
-
                     {
                         text: "Mobile build",
                         link: "/self-hosting/guides/mobile-build",
@@ -304,6 +303,10 @@ export const sidebar = [
                     {
                         text: "General",
                         link: "/self-hosting/troubleshooting/misc",
+                    },
+                    {
+                        text: "Bucket CORS",
+                        link: '/self-hosting/troubleshooting/bucket-cors'
                     },
                     {
                         text: "Uploads",
