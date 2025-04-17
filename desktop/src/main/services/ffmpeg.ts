@@ -265,6 +265,8 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         await Promise.all([
             deleteTempFileIgnoringErrors(keyInfoPath),
             deleteTempFileIgnoringErrors(keyPath),
+            // ffmpeg writes a /path/output.ts.tmp, clear it out too.
+            deleteTempFileIgnoringErrors(videoPath + ".tmp"),
         ]);
     }
 
