@@ -225,6 +225,36 @@ export const fetchFilePreviewData = async (
     return z.object({ url: z.string() }).parse(await res.json()).url;
 };
 
+const FilePrevieDataUploadURLResponse = z.object({
+    /**
+     * The objectID with which this uploaded data can be referred to post upload
+     * (e.g. when invoking {@link putVideoData}).
+     */
+    objectID: z.string(),
+    /**
+     * A presigned URL that can be used to upload the file.
+     */
+    url: z.string(),
+});
+
+/**
+ * Obtain a presigned URL that can be used to upload the "file preview data" of
+ * type "vid_preview" (the file containing the encrypted video segments which
+ * the "vid_preview" HLS playlist for the file would refer to).
+ */
+export const getFilePreviewDataUploadURL = async (file: EnteFile) => {
+    const params = new URLSearchParams({
+        fileID: `${file.id}`,
+        type: "vid_preview",
+    });
+    const url = await apiURL("/files/data/preview-upload-url");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return FilePrevieDataUploadURLResponse.parse(await res.json());
+};
+
 /**
  * Update the video data associated with the given file to remote.
  *

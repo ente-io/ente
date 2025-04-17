@@ -260,6 +260,11 @@ const PlaylistJSON = z.object({
      * The height of the video (px).
      */
     height: z.number(),
+    /**
+     * The size (in bytes) of the corresponding file containing the video
+     * segments that the playlist refers to.
+     */
+    size: z.number(),
 });
 
 const decryptPlaylistJSON = async (
