@@ -4,6 +4,7 @@ import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -12,24 +13,24 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 class AlbumListItemWidget extends StatelessWidget {
   final Collection collection;
-
-  final List<Collection> selectedAlbums;
   final void Function(Collection)? onTapCallback;
   final void Function(Collection)? onLongPressCallback;
+  final SelectedAlbums? selectedAlbums;
 
   const AlbumListItemWidget(
     this.collection, {
     super.key,
-    this.selectedAlbums = const [],
     this.onTapCallback,
     this.onLongPressCallback,
+    this.selectedAlbums,
   });
 
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-    final bool isSelected = selectedAlbums.contains(collection);
+    final bool isSelected =
+        selectedAlbums?.isAlbumSelected(collection) ?? false;
     const sideOfThumbnail = 60.0;
 
     return GestureDetector(

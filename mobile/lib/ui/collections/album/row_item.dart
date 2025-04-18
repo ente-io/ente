@@ -4,6 +4,7 @@ import "package:photos/core/configuration.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -21,9 +22,9 @@ class AlbumRowItemWidget extends StatelessWidget {
   final bool showFileCount;
   final String tag;
   final bool? hasVerifiedLock;
-  final List<Collection> selectedAlbums;
   final void Function(Collection)? onTapCallback;
   final void Function(Collection)? onLongPressCallback;
+  final SelectedAlbums? selectedAlbum;
 
   const AlbumRowItemWidget(
     this.c,
@@ -32,15 +33,15 @@ class AlbumRowItemWidget extends StatelessWidget {
     this.showFileCount = true,
     this.tag = "",
     this.hasVerifiedLock,
-    this.selectedAlbums = const [],
     this.onTapCallback,
     this.onLongPressCallback,
+    this.selectedAlbum,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final bool isSelected = selectedAlbums.contains(c);
+    final bool isSelected = selectedAlbum?.isAlbumSelected(c) ?? false;
     final bool isOwner = c.isOwner(Configuration.instance.getUserID()!);
     final String tagPrefix = (isOwner ? "collection" : "shared_collection") +
         tag +
