@@ -50,7 +50,7 @@ class RemoteDB with SqlDbBase {
       final List<List<Object?>> values =
           slice.map((e) => e.rowValiues()).toList();
       await _sqliteDB.executeBatch(
-        'INSERT OR REPLACE INTO collections ($collectionColumns) values($collectionValuePlaceHolder)',
+        'INSERT INTO collections ($collectionColumns) values($collectionValuePlaceHolder) ON CONFLICT(id) DO UPDATE SET $updateCollectionColumns',
         values,
       );
     });

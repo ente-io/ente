@@ -4,6 +4,12 @@ const collectionColumns =
     'mmd_ver, pub_mmd_encoded_json, pub_mmd_ver, shared_mmd_json, '
     'shared_mmd_ver';
 
+final String updateCollectionColumns = collectionColumns
+    .split(', ')
+    .where((column) => column != 'id') // Exclude primary key from update
+    .map((column) => '$column = excluded.$column') // Use excluded virtual table
+    .join(', ');
+
 const collectionFilesColumns =
     'collection_id, file_id, enc_key, enc_key_nonce, created_at, updated_at, is_deleted';
 
