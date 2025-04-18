@@ -195,6 +195,7 @@ class SyncService {
     if (localSyncOnly) {
       await LocalImportService.instance.incrementalSync();
       await LocalImportService.instance.fullSync();
+      await _remoteSyncService.sync();
       unawaited(LocalImportService.instance.metadataScan());
       return;
     }

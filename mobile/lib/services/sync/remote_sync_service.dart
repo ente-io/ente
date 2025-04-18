@@ -100,7 +100,7 @@ class RemoteSyncService {
   }
 
   Future<void> sync({bool silently = false}) async {
-    if (!_config.hasConfiguredAccount() || true) {
+    if (!_config.hasConfiguredAccount()) {
       _logger.info("Skipping remote sync since account is not configured");
       return;
     }
@@ -130,7 +130,7 @@ class RemoteSyncService {
         await syncDeviceCollectionFilesForUpload();
       }
       await _pullDiff();
-      await trashSyncService.syncTrash();
+      // await trashSyncService.syncTrash();
       if (!hasSyncedBefore) {
         await _prefs.setBool(_isFirstRemoteSyncDone, true);
         await syncDeviceCollectionFilesForUpload();
@@ -197,6 +197,8 @@ class RemoteSyncService {
         }
       }
     } finally {
+      _existingSync?.complete();
+      _existingSync = null;
       _isExistingSyncSilent = false;
     }
   }
@@ -219,6 +221,7 @@ class RemoteSyncService {
 
   Future<void> _pullDiff() async {
     await newService.syncFromRemote();
+    return;
     _logger.info("Pulling remote diff");
     final isFirstSync = !_collectionsService.hasSyncedCollections();
     if (isFirstSync && !_isExistingSyncSilent) {
