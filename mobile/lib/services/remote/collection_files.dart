@@ -109,7 +109,7 @@ class CollectionFilesService {
         final utfEncodedMmd = CryptoUtil.decryptChaChaSync(
           CryptoUtil.base642bin(item['magicMetadata']['data']),
           fileKey,
-          CryptoUtil.base642bin(item['magicMetadata']['decryptionHeader']),
+          CryptoUtil.base642bin(item['magicMetadata']['header']),
         );
         privateMagicMetadata = Metadata(
           data: jsonDecode(utf8.decode(utfEncodedMmd)),
