@@ -94,6 +94,24 @@
       padding: 4px !important;
       width: 24px !important;
     }
+
+    .desktop-section {
+      display: block;
+    }
+
+    .mobile-section {
+      display: none;
+    }
+
+    @media screen and (max-width: 600px) {
+      .desktop-section {
+        display: none;
+      }
+
+      .mobile-section {
+        display: block;
+      }
+    }
   </style>
 
   <body>
@@ -112,61 +130,93 @@
       <h2 style="text-align: center; margin-bottom: 16px">
         Verify your email address
       </h2>
-      <hr style="margin: 24px 0; border: none; border-top: 1px solid #ddd" />
-      <p style="text-align: center">
-        Click on the button to verify your email.
-      </p>
-      <center style="margin: 24px 0">
-        <a
-          href="https://verify.ente.io/?ott={{.VerificationCode}}"
-          style="
-            background-color: #00b33c;
-            border-radius: 3px;
-            text-decoration: none !important;
-            color: #fff !important;
-            font-weight: bold;
-            padding: 8px 30px;
-            display: inline-block;
-            text-align: center;
-          "
-          target="_blank"
-        >
-          Verify email
-        </a>
-      </center>
-      <div
-        style="
-          text-align: center;
-          font-size: 14px;
-          color: #666;
-          margin-top: 32px;
-          margin-bottom: 32px;
-        "
-      >
-        <p>— or enter the code manually —</p>
-        <center>
-          <div
+      <hr style="margin: 32px 0; border: none; border-top: 1px solid #ddd" />
+      <div class="mobile-section">
+        <p style="text-align: center">
+          Click on the button to verify your email.
+        </p>
+        <center style="margin: 24px 0">
+          <a
+            href="https://verify.ente.io/?ott={{.VerificationCode}}"
             style="
-              background-color: #f6f6f6;
-              border-radius: 6px;
-              color: #787878;
-              display: inline-block;
-              letter-spacing: 3px;
-              padding: 8px 14px;
-              text-align: center;
-              font-size: 18px;
+              background-color: #00b33c;
+              border-radius: 3px;
+              text-decoration: none !important;
+              color: #fff !important;
               font-weight: bold;
+              padding: 8px 30px;
+              display: inline-block;
+              text-align: center;
             "
             target="_blank"
           >
-            {{.VerificationCode}}
-          </div>
+            Verify email
+          </a>
         </center>
+        <div
+          style="
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-top: 32px;
+            margin-bottom: 32px;
+          "
+        >
+          <p>— or enter the code manually —</p>
+          <center>
+            <div
+              style="
+                background-color: #f6f6f6;
+                border-radius: 6px;
+                color: #787878;
+                display: inline-block;
+                letter-spacing: 3px;
+                padding: 8px 14px;
+                text-align: center;
+                font-size: 16px;
+                font-weight: bold;
+              "
+              target="_blank"
+            >
+              {{.VerificationCode}}
+            </div>
+          </center>
+        </div>
+      </div>
+      <div class="desktop-section">
+        <p style="text-align: center">Use this code to verify your email</p>
+        <div
+          style="
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+          "
+        >
+          <center>
+            <div
+              style="
+                background-color: #f6f6f6;
+                border-radius: 6px;
+                color: #787878;
+                display: inline-block;
+                letter-spacing: 3px;
+                padding: 8px 14px;
+                text-align: center;
+                font-size: 18px;
+                font-weight: bold;
+              "
+              target="_blank"
+            >
+              {{.VerificationCode}}
+            </div>
+          </center>
+        </div>
       </div>
       <hr
         style="
-          margin-top: 24px;
-          margin-bottom: 24px;
+          margin-top: 32px;
+          margin-bottom: 32px;
           border: none;
           border-top: 1px solid #ddd;
         "
