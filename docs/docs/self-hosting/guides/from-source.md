@@ -1,38 +1,70 @@
 ---
-title: Hosting the web apps
-description:
-    Building and hosting Ente's web apps, connecting it to your self-hosted
-    server
+title: Ente from Source
+description: Getting started self hosting Ente Photos and/or Ente Auth
 ---
 
 
+# Ente from Source
+
 > [!WARNING] NOTE
-> This page covers documentation around self-hosting the web app manually. If you
-> want to deploy Ente hassle free, please use the [one line](https://ente.io/blog/self-hosting-quickstart/) 
+> The below documentation will cover instructions about self-hosting the web app manually. If you
+> want to deploy Ente hassle free, use the [one line](https://ente.io/blog/self-hosting-quickstart/) 
 > command to setup Ente. This guide might be deprecated in the near future.
 
-# Web app
+## Installing Docker
 
-The getting started instructions mention using `yarn dev` (which is an alias of
-`yarn dev:photos`) to serve your web app.
+Refer to
+[How to install Docker from the APT repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
+for detailed instructions.
 
->[!IMPORTANT]
-> Please note that Ente's Web App supports the Yarn version 1.22.xx or 1.22.22 specifically.
-> Make sure to install the right version or modify your yarn installation to meet the requirements.
-> The user might end up into unknown version and dependency related errors if yarn
-> is on different version.
+## Start the server
+
+```sh
+git clone https://github.com/ente-io/ente
+cd ente/server
+docker compose up --build
+```
+
+> [!TIP]
+>
+> You can also use a pre-built Docker image from `ghcr.io/ente-io/server`
+> ([More info](https://github.com/ente-io/ente/blob/main/server/docs/docker.md))
+
+Install the necessary dependencies for running the web client
+
+```sh
+# installing npm and yarn
+
+sudo apt update
+sudo apt install nodejs npm
+sudo npm install -g yarn // to install yarn globally
+```
+
+Then in a separate terminal, you can run (e.g) the web client
 
 ```sh
 cd ente/web
+git submodule update --init --recursive
 yarn install
-NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev:photos
+NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev
 ```
 
-This is fine for trying the web app and verifying that your self-hosted server
-is working as expected etc. But if you would like to use the web app for a
-longer term, then it is recommended to follow the Docker approach.
+That's about it. If you open http://localhost:3000, you will be able to create
+an account on a Ente Photos web app running on your machine, and this web app
+will be connecting to the server running on your local machine at
+`localhost:8080`.
 
-## With Docker/Docker Compose (Recommended)
+For the mobile apps, you don't even need to build, and can install normal Ente
+apps and configure them to use your
+[custom self-hosted server](/self-hosting/guides/custom-server/).
+
+> If you want to build the mobile apps from source, see the instructions
+> [here](/self-hosting/guides/mobile-build).
+
+## Web app with Docker and Compose
+
+The instructoins in previous section were just a temporary way to run the web app locally. 
+To run the web apps as services, the user has to build a docker image manually. 
 
 > [!IMPORTANT]
 >
@@ -52,8 +84,8 @@ COPY apps/ .
 RUN corepack enable
 
 # Endpoint for Ente Server
-ENV NEXT_PUBLIC_ENTE_ENDPOINT=https://changeme.com
-ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://changeme.com
+ENV NEXT_PUBLIC_ENTE_ENDPOINT=https://your-ente-endpoint.com
+ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=https://your-albums-endpoint.com
 
 RUN yarn cache clean
 RUN yarn install --network-timeout 1000000000
@@ -112,9 +144,8 @@ docker build -t <image-name>:<tag> --no-cache --progress plain .
 You can always edit the Dockerfile and remove the steps for apps which you do
 not intend to install on your system (like auth or cast) and opt out of those.
 
-Regarding Albums App, please take a note that they are not web pages with
-navigable pages, if accessed on the web-browser they will simply redirect to
-ente.web.io.
+Regarding Albums App, take a note that they are not apps with navigable pages, 
+if accessed on the web-browser they will simply redirect to ente.web.io.
 
 ## compose.yaml
 
@@ -144,16 +175,16 @@ docker compose up -d # --build
 docker compose logs <container-name>
 ```
 
-## Configure App Endpoints
+## Configure App Endpoints 
 
-> [!NOTE]
+> [!NOTE] 
 > Previously, this was dependent on the env variables `NEXT_ENTE_PUBLIC_ACCOUNTS_ENDPOINT`
 > and etc. Please check the below documentation to update your setup configurations
 
 You can configure the web endpoints for the other apps including Accounts, Albums
-Family and Cast in your `museum.yaml` configuration file. Checkout
+Family and Cast in your `museum.yaml` configuration file. Checkout 
 [`local.yaml`](https://github.com/ente-io/ente/blob/543411254b2bb55bd00a0e515dcafa12d12d3b35/server/configurations/local.yaml#L76-L89)
-to configure the endpoints. Make sure to setup up your DNS Records accordingly to the
+to configure the endpoints. Make sure to setup up your DNS Records accordingly to the 
 similar URL's you set up in `museum.yaml`.
 
 Next part is to configure the web server.
