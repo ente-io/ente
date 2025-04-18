@@ -258,10 +258,6 @@ export const sidebar = [
                         link: "/self-hosting/guides/standalone-ente",
                     },
                     {
-                        text: "Ente via Tailscale (Community)",
-                        link: "/self-hosting/guides/Tailscale.md",
-                    },
-                    {
                         text: "Administering your server",
                         link: "/self-hosting/guides/admin",
                     },
@@ -307,6 +303,19 @@ export const sidebar = [
                         link: "/self-hosting/troubleshooting/keyring",
                     },
                 ],
+            },
+            {
+                text: "Community Guides",
+                items :[
+                    {
+                        text: "Ente via Tailscale",
+                        link: "/self-hosting/guides/Tailscale",
+                    },
+                    {
+                        text: "Ente with External S3",
+                        link: "/self-hosting/guides/external-s3",
+                    }                
+                ]
             },
             {
                 text: "FAQ",
