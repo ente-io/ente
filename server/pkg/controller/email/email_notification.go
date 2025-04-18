@@ -41,13 +41,13 @@ const (
 
 	StorageLimitExceedingID       = "90_percent_consumed"
 	StorageLimitExceedingTemplate = "ninety_percent_consumed.html"
-	StorageLimitExceedingSubject  = "Storage About to Exceed!!"
+	StorageLimitExceedingSubject  = "Your Ente storage is at 90% capacity"
 
 	LoginSuccessSubject  = "New login to your Ente account"
 	LoginSuccessTemplate = "on_login.html"
 
 	FamilyNudgeEmailTemplate = "family_nudge.html"
-	FamilyNudgeSubject       = "Invite your Family!"
+	FamilyNudgeSubject       = "Share your Ente Subscription with your Family!"
 	FamilyNudgeTemplateID    = "family_nudge"
 )
 
@@ -193,6 +193,7 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 		getListofSubscribers func() ([]ente.User, error)
 		template             string
 		subject              string
+		notifID				 string
 	}{
 		{
 			getListofSubscribers: func() ([]ente.User, error) {
@@ -200,6 +201,7 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 			},
 			template: StorageLimitExceedingTemplate,
 			subject:  StorageLimitExceedingSubject,
+			notifID: StorageLimitExceedingID,
 		},
 		{
 			getListofSubscribers: func() ([]ente.User, error) {
@@ -207,6 +209,7 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 			},
 			template: StorageLimitExceededTemplate,
 			subject:  StorageLimitExceededSubject,
+			notifID: StorageLimitExceededTemplateID,
 		},
 	}
 	for _, alertGroup := range storageAlertGroups {
@@ -216,7 +219,7 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 			continue
 		}
 		for _, u := range users {
-			lastNotificationTime, err := c.NotificationHistoryRepo.GetLastNotificationTime(u.ID, StorageLimitExceededTemplateID)
+			lastNotificationTime, err := c.NotificationHistoryRepo.GetLastNotificationTime(u.ID, alertGroup.notifID)
 			logger := log.WithFields(log.Fields{
 				"user_id": u.ID,
 			})
@@ -231,7 +234,7 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 					logger.Info("Error notifying", err)
 					continue
 				}
-				c.NotificationHistoryRepo.SetLastNotificationTimeToNow(u.ID, StorageLimitExceededTemplateID)
+				c.NotificationHistoryRepo.SetLastNotificationTimeToNow(u.ID, alertGroup.notifID)
 			}
 		}
 	}
@@ -277,12 +280,12 @@ func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 
 				if lastNudgeSent == 0 {
 					go func(userEmails []string) {
-						err := email.SendTemplatedEmail(userEmails, "team@ente.io", "team@ente.io", SubscriptionCancelledSubject, SubscriptionCancelledTemplate, nil, nil)
+						err := email.SendTemplatedEmail(userEmails, "team@ente.io", "team@ente.io", FamilyNudgeSubject, FamilyNudgeEmailTemplate, nil, nil)
 						if err != nil {
 							log.Error("Failed to send family nudge email: ", err)
 						}
 					}([]string{user.Email})
-					c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FilesCollectedTemplateID)
+					c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FamilyNudgeTemplateID)
 				}
 			}
 		}
