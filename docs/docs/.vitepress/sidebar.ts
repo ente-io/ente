@@ -238,12 +238,12 @@ export const sidebar = [
         items: [
             { text: "Getting started", link: "/self-hosting/" },
             {
-                text: "Configuring S3",
-                link: "/self-hosting/guides/configuring-s3",
-            },
-            {
                 text: "Connect to custom server",
                 link: "/self-hosting/guides/custom-server/",
+            },
+            {
+                text: "Configuring S3",
+                link: "/self-hosting/guides/configuring-s3",
             },
             {
                 text: "Guides",
