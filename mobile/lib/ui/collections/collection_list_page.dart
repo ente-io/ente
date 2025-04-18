@@ -7,11 +7,13 @@ import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
+import "package:photos/models/selected_albums.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/searchable_appbar.dart";
+import "package:photos/ui/viewer/actions/album_selection_overlay_bar.dart";
 import "package:photos/utils/local_settings.dart";
 
 enum UISectionType {
@@ -47,6 +49,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
   AlbumSortKey? sortKey;
   AlbumViewType? albumViewType;
   String _searchQuery = "";
+  final _selectedAlbum = SelectedAlbums();
 
   @override
   void initState() {
@@ -72,49 +75,54 @@ class _CollectionListPageState extends State<CollectionListPage> {
         (widget.tag.isEmpty && _searchQuery.isEmpty ? 1 : 0);
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          controller: ScrollController(
-            initialScrollOffset: widget.initialScrollOffset ?? 0,
-          ),
-          slivers: [
-            _buildAppBar(),
-            CollectionsFlexiGridViewWidget(
-              collections,
-              displayLimitCount: displayLimitCount,
-              tag: widget.tag,
-              enableSelectionMode:
-                  widget.sectionType == UISectionType.homeCollections,
-              albumViewType: albumViewType ?? AlbumViewType.grid,
-              shouldShowCreateAlbum:
-                  widget.sectionType == UISectionType.homeCollections,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              controller: ScrollController(
+                initialScrollOffset: widget.initialScrollOffset ?? 0,
+              ),
+              slivers: [
+                SearchableAppBar(
+                  title: widget.appTitle ?? const SizedBox.shrink(),
+                  heroTag: widget.tag,
+                  onSearch: (value) {
+                    setState(() {
+                      _searchQuery = value;
+                    });
+                    refreshCollections();
+                  },
+                  onSearchClosed: () {
+                    setState(() {
+                      _searchQuery = '';
+                    });
+                    refreshCollections();
+                  },
+                  actions: [
+                    const SizedBox(width: 8),
+                    _sortMenu(collections!),
+                  ],
+                ),
+                CollectionsFlexiGridViewWidget(
+                  collections,
+                  displayLimitCount: displayLimitCount,
+                  tag: widget.tag,
+                  enableSelectionMode:
+                      widget.sectionType == UISectionType.homeCollections,
+                  albumViewType: albumViewType ?? AlbumViewType.grid,
+                  shouldShowCreateAlbum:
+                      widget.sectionType == UISectionType.homeCollections,
+                  selectedAlbums: _selectedAlbum,
+                ),
+              ],
+            ),
+            AlbumSelectionOverlayBar(
+              _selectedAlbum,
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildAppBar() {
-    return SearchableAppBar(
-      title: widget.appTitle ?? const SizedBox.shrink(),
-      heroTag: widget.tag,
-      onSearch: (value) {
-        setState(() {
-          _searchQuery = value;
-        });
-        refreshCollections();
-      },
-      onSearchClosed: () {
-        setState(() {
-          _searchQuery = '';
-        });
-        refreshCollections();
-      },
-      actions: [
-        const SizedBox(width: 8),
-        _sortMenu(collections!),
-      ],
     );
   }
 

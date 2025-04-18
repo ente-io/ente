@@ -1,11 +1,15 @@
+import "dart:async";
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/clear_album_selections_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import "package:photos/models/collection/collection_items.dart";
+import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/collections/album/list_item.dart";
 import "package:photos/ui/collections/album/new_list_item.dart";
@@ -38,6 +42,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   final AlbumViewType albumViewType;
   final bool enableSelectionMode;
   final bool shouldShowCreateAlbum;
+  final SelectedAlbums? selectedAlbums;
 
   const CollectionsFlexiGridViewWidget(
     this.collections, {
@@ -48,6 +53,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
     super.key,
     this.albumViewType = AlbumViewType.grid,
     this.shouldShowCreateAlbum = false,
+    this.selectedAlbums,
   });
 
   @override
@@ -57,18 +63,34 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
 
 class _CollectionsFlexiGridViewWidgetState
     extends State<CollectionsFlexiGridViewWidget> {
-  List<Collection> selectedAlbums = [];
   bool isAnyAlbumSelected = false;
+  late StreamSubscription<ClearAlbumSelectionsEvent>
+      _clearAlbumSelectionSubscription;
+
+  @override
+  void initState() {
+    _clearAlbumSelectionSubscription =
+        Bus.instance.on<ClearAlbumSelectionsEvent>().listen((event) {
+      if (mounted) {
+        setState(() {
+          isAnyAlbumSelected = false;
+        });
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _clearAlbumSelectionSubscription.cancel();
+    super.dispose();
+  }
 
   Future<void> _toggleAlbumSelection(Collection c) async {
-    if (selectedAlbums.contains(c)) {
-      selectedAlbums.remove(c);
-    } else {
-      selectedAlbums.isEmpty ? await HapticFeedback.vibrate() : null;
-      selectedAlbums.add(c);
-    }
+    await HapticFeedback.lightImpact();
+    widget.selectedAlbums!.toggleSelection(c);
     setState(() {
-      isAnyAlbumSelected = selectedAlbums.isNotEmpty;
+      isAnyAlbumSelected = widget.selectedAlbums!.albums.isNotEmpty;
     });
   }
 
@@ -127,7 +149,7 @@ class _CollectionsFlexiGridViewWidgetState
             widget.collections![i],
             sideOfThumbnail,
             tag: widget.tag,
-            selectedAlbums: selectedAlbums,
+            selectedAlbum: widget.selectedAlbums,
             onTapCallback: (c) {
               isAnyAlbumSelected
                   ? _toggleAlbumSelection(c)
@@ -217,7 +239,7 @@ class _CollectionsFlexiGridViewWidgetState
         listItems.add(
           AlbumListItemWidget(
             collection,
-            selectedAlbums: selectedAlbums,
+            selectedAlbums: widget.selectedAlbums,
             onTapCallback: (c) {
               isAnyAlbumSelected
                   ? _toggleAlbumSelection(c)
