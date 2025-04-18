@@ -814,7 +814,7 @@ class OfflineMLDataDB with SqlDbBase implements IMLDataDB<String> {
 
   @override
   Future<double> getClusteredToIndexableFilesRatio() async {
-    final int indexableFiles = (await getIndexableFileIDs()).length;
+    final int indexableFiles = await getIndexableFileCount();
     final int clusteredFiles = await getClusteredOrFacelessFileCount();
 
     return clusteredFiles / indexableFiles;
