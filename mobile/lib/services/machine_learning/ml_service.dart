@@ -130,6 +130,7 @@ class MLService {
       if (force) {
         _mlControllerStatus = true;
       }
+      return;
       if (!_canRunMLFunction(function: "AllML") && !force) return;
       _isRunningML = true;
       await sync();

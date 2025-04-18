@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import "package:flutter/foundation.dart";
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
@@ -151,8 +152,8 @@ class LocalImportService {
     if (_isMetaScanRunning) {
       _log.info("metadata scan already in progress");
       return;
-    } else if (Platform.isIOS) {
-      _log.info("metadata scan not implemented on iOS yet");
+    } else if (kDebugMode) {
+      _log.info("metadata scan not implemented in kDebugMode yet");
       return;
     }
 
