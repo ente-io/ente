@@ -171,8 +171,8 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 	}
 
 	// all iz well
-	var usage int64
-	file, usage, err = c.FileRepo.Create(file, fileSize, thumbnailSize, fileSize+thumbnailSize, userID, app)
+	// var usage int64
+	file, _, err = c.FileRepo.Create(file, fileSize, thumbnailSize, fileSize+thumbnailSize, userID, app)
 	if err != nil {
 		if err == ente.ErrDuplicateFileObjectFound || err == ente.ErrDuplicateThumbnailObjectFound {
 			var existing ente.File
@@ -192,9 +192,10 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 		}
 		return file, stacktrace.Propagate(err, "")
 	}
-	if usage == fileSize+thumbnailSize {
-		go c.EmailNotificationCtrl.OnFirstFileUpload(file.OwnerID, userAgent)
-	}
+	// The OnFirstFileUpload Email trigger will not be used and replaced with EmailAfterSignUp
+	// if usage == fileSize+thumbnailSize {
+	// 	go c.EmailNotificationCtrl.OnFirstFileUpload(file.OwnerID, userAgent)
+	// }
 	return file, nil
 }
 
