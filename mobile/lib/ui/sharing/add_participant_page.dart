@@ -20,10 +20,22 @@ import 'package:photos/ui/sharing/user_avator_widget.dart';
 import "package:photos/ui/sharing/verify_identity_dialog.dart";
 
 class AddParticipantPage extends StatefulWidget {
-  final Collection collection;
+  final Collection? collection;
   final bool isAddingViewer;
+  final List<Collection>? collections;
 
-  const AddParticipantPage(this.collection, this.isAddingViewer, {super.key});
+  const AddParticipantPage(
+    this.collection,
+    this.isAddingViewer, {
+    super.key,
+    this.collections,
+  }) : assert(
+          collection != null || (collections != null),
+          'Either collection or non-empty collections must be provided',
+        );
+
+  bool get isMultipleCollections =>
+      collections != null && collections!.length > 1;
 
   @override
   State<StatefulWidget> createState() => _AddParticipantPage();
@@ -227,17 +239,21 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                     isDisabled: _selectedEmails.isEmpty,
                     onTap: () async {
                       final results = <bool>[];
+                      final collections = getAllCollections();
+
                       for (String email in _selectedEmails) {
-                        results.add(
-                          await collectionActions.addEmailToCollection(
-                            context,
-                            widget.collection,
-                            email,
-                            widget.isAddingViewer
-                                ? CollectionParticipantRole.viewer
-                                : CollectionParticipantRole.collaborator,
-                          ),
-                        );
+                        for (Collection collection in collections) {
+                          results.add(
+                            await collectionActions.addEmailToCollection(
+                              context,
+                              collection,
+                              email,
+                              widget.isAddingViewer
+                                  ? CollectionParticipantRole.viewer
+                                  : CollectionParticipantRole.collaborator,
+                            ),
+                          );
+                        }
                       }
 
                       final noOfSuccessfullAdds =
@@ -361,11 +377,24 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     );
   }
 
+  List<Collection> getAllCollections() {
+    if (widget.collections != null && widget.collections!.isNotEmpty) {
+      return widget.collections!;
+    } else if (widget.collection != null) {
+      return [widget.collection!];
+    }
+    return [];
+  }
+
   List<User> _getSuggestedUser() {
     final Set<String> existingEmails = {};
-    for (final User u in widget.collection.sharees) {
-      if (u.id != null && u.email.isNotEmpty) {
-        existingEmails.add(u.email);
+    final collections = getAllCollections();
+
+    for (final Collection collection in collections) {
+      for (final User u in collection.sharees) {
+        if (u.id != null && u.email.isNotEmpty) {
+          existingEmails.add(u.email);
+        }
       }
     }
 
