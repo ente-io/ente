@@ -73,6 +73,9 @@ class _CollectionListPageState extends State<CollectionListPage> {
   Widget build(BuildContext context) {
     final displayLimitCount = (collections?.length ?? 0) +
         (widget.tag.isEmpty && _searchQuery.isEmpty ? 1 : 0);
+    final bool enableSelectionMode =
+        widget.sectionType == UISectionType.homeCollections ||
+            widget.sectionType == UISectionType.outgoingCollections;
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -108,8 +111,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
                   collections,
                   displayLimitCount: displayLimitCount,
                   tag: widget.tag,
-                  enableSelectionMode:
-                      widget.sectionType == UISectionType.homeCollections,
+                  enableSelectionMode: enableSelectionMode,
                   albumViewType: albumViewType ?? AlbumViewType.grid,
                   shouldShowCreateAlbum:
                       widget.sectionType == UISectionType.homeCollections,
