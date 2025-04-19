@@ -5,8 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller/commonbilling"
 	"strconv"
+
+	"github.com/ente-io/museum/pkg/controller/commonbilling"
 
 	"github.com/ente-io/museum/pkg/repo/storagebonus"
 
@@ -38,6 +39,7 @@ type BillingController struct {
 	DiscordController      *discord.DiscordController
 	EmailNotificationCtrl  *email.EmailNotificationController
 	CommonBillCtrl         *commonbilling.Controller
+	NotificationHistory    *repo.NotificationHistoryRepository
 }
 
 // Return a new instance of BillingController
@@ -53,6 +55,7 @@ func NewBillingController(
 	usageRepo *repo.UsageRepository,
 	storageBonusRepo *storagebonus.Repository,
 	commonBillCtrl *commonbilling.Controller,
+	notificationHistory *repo.NotificationHistoryRepository,
 ) *BillingController {
 	return &BillingController{
 		BillingPlansPerAccount: plans,
@@ -66,6 +69,7 @@ func NewBillingController(
 		EmailNotificationCtrl:  emailNotificationCtrl,
 		StorageBonusRepo:       storageBonusRepo,
 		CommonBillCtrl:         commonBillCtrl,
+		NotificationHistory:    notificationHistory,
 	}
 }
 
@@ -366,6 +370,13 @@ func (c *BillingController) UpdateSubscription(r ente.UpdateSubscriptionRequest)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+
+	// Delete users entry from notification_history table on subscription update
+	err = c.NotificationHistory.DeleteLastNotificationTime(r.UserID, "90_percent_consumed")
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+
 	err = c.BillingRepo.LogAdminTriggeredSubscriptionUpdate(r)
 	return stacktrace.Propagate(err, "")
 }
