@@ -7,6 +7,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/models/file/remote/asset.dart";
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/service_locator.dart";
@@ -18,6 +19,7 @@ import 'package:photos/utils/standalone/date_time.dart';
 //Todo: files with no location data have lat and long set to 0.0. This should ideally be null.
 class EnteFile {
   AssetEntity? asset;
+  RemoteAsset? remoteAsset;
   int? generatedID;
   int? uploadedFileID;
   int? ownerID;
@@ -39,6 +41,8 @@ class EnteFile {
   String? encryptedKey;
   String? keyDecryptionNonce;
   String? fileDecryptionHeader;
+  @Deprecated(
+      'use remoteAsset.thumbHeader instead. This will be removed in future')
   String? thumbnailDecryptionHeader;
   String? metadataDecryptionHeader;
   int? fileSize;
@@ -100,6 +104,24 @@ class EnteFile {
     file.fileSubType = asset.subtype;
     file.metadataVersion = kCurrentMetadataVersion;
     file.duration = asset.duration;
+    return file;
+  }
+
+  static EnteFile fromRemoteAsset(RemoteAsset asset) {
+    final EnteFile file = EnteFile();
+    file.remoteAsset = asset;
+    file.uploadedFileID = asset.id;
+    file.ownerID = asset.ownerID;
+    file.title = asset.title;
+    file.deviceFolder = asset.deviceFolder;
+    file.location = asset.location;
+    file.fileType = asset.fileType;
+    file.creationTime = asset.creationTime;
+    file.modificationTime = asset.modificationTime;
+    file.fileSubType = asset.subType;
+    file.metadataVersion = kCurrentMetadataVersion;
+    file.duration = asset.durationInSec;
+    file.fileSize = asset.fileSize;
     return file;
   }
 
