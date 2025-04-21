@@ -1,8 +1,6 @@
 import log from "ente-base/log";
-import { albumsAppOrigin } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import "hls-video-element";
 import { t } from "i18next";
 import "media-chrome";
@@ -92,10 +90,7 @@ export interface FileViewerPhotoSwipeDelegate {
     ) => void;
 }
 
-type FileViewerPhotoSwipeOptions = Pick<
-    FileViewerProps,
-    "initialIndex" | "disableDownload"
-> & {
+type FileViewerPhotoSwipeOptions = Pick<FileViewerProps, "initialIndex"> & {
     /**
      * `true` if we're running in the context of a logged in user, and so
      * various actions that modify the file should be shown.
@@ -163,19 +158,6 @@ export const moreButtonID = "ente-pswp-more-button";
  */
 export const moreMenuID = "ente-pswp-more-menu";
 
-// TODO(HLS):
-let _shouldUsePlayerV2: boolean | undefined;
-export const shouldUsePlayerV2 = () =>
-    // Enable for internal users and public albums
-    (_shouldUsePlayerV2 ??=
-        settingsSnapshot().isInternalUser || isPublicAlbumApp());
-
-const isPublicAlbumApp = () => {
-    const currentURL = new URL(window.location.href);
-    const albumsURL = new URL(albumsAppOrigin());
-    return currentURL.host == albumsURL.host;
-};
-
 /**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
  * viewer.
@@ -206,7 +188,6 @@ export class FileViewerPhotoSwipe {
 
     constructor({
         initialIndex,
-        disableDownload,
         haveUser,
         delegate,
         onClose,
@@ -340,31 +321,19 @@ export class FileViewerPhotoSwipe {
 
             if (itemData.fileType === FileType.video) {
                 const { videoPlaylistURL, videoURL } = itemData;
-                if (
-                    videoPlaylistURL &&
-                    shouldUsePlayerV2() &&
-                    videoQuality == "auto"
-                ) {
+                if (videoPlaylistURL && videoQuality == "auto") {
                     const mcID = `ente-mc-hls-${file.id}`;
                     return {
                         ...itemData,
                         html: hlsVideoHTML(videoPlaylistURL, mcID),
                         mediaControllerID: mcID,
                     };
-                } else if (videoURL && shouldUsePlayerV2()) {
+                } else if (videoURL) {
                     const mcID = `ente-mc-orig-${file.id}`;
                     return {
                         ...itemData,
                         html: videoHTML(videoURL, mcID),
                         mediaControllerID: mcID,
-                    };
-                } else if (videoURL) {
-                    return {
-                        ...itemData,
-                        html: videoHTMLBrowserControls(
-                            videoURL,
-                            !!disableDownload,
-                        ),
                     };
                 }
             }
@@ -530,17 +499,6 @@ export class FileViewerPhotoSwipe {
                 } else {
                     control.removeAttribute("mediacontroller");
                 }
-            }
-
-            // TODO(HLS): Temporary gate
-            if (!shouldUsePlayerV2()) {
-                const qualityMenu =
-                    container?.querySelector("#ente-quality-menu");
-                if (qualityMenu instanceof MediaChromeMenu) {
-                    // Hide the auto option
-                    qualityMenu.radioGroupItems[0]!.hidden = true;
-                }
-                return;
             }
 
             const qualityMenu = container?.querySelector("#ente-quality-menu");
@@ -755,19 +713,6 @@ export class FileViewerPhotoSwipe {
          */
         let videoVideoEl: HTMLVideoElement | undefined;
 
-        /**
-         * Callback attached to video playback events when showing video files.
-         *
-         * These are needed to hide the caption when a video is playing on a
-         * file of type video.
-         */
-        let onVideoPlayback: (() => void) | undefined;
-
-        /**
-         * The DOM element showing the caption for the current file.
-         */
-        let captionElement: HTMLElement | undefined;
-
         pswp.on("change", () => {
             const itemData = currSlideData();
 
@@ -784,19 +729,6 @@ export class FileViewerPhotoSwipe {
                 }
             });
 
-            // Clear existing listeners, if any.
-            if (videoVideoEl && onVideoPlayback) {
-                videoVideoEl.removeEventListener("play", onVideoPlayback);
-                videoVideoEl.removeEventListener("pause", onVideoPlayback);
-                videoVideoEl.removeEventListener("ended", onVideoPlayback);
-                videoVideoEl = undefined;
-                onVideoPlayback = undefined;
-            }
-
-            // Reset.
-            showIf(captionElement!, true);
-
-            // Attach new listeners, if needed.
             if (itemData.fileType == FileType.video) {
                 // We use content.element instead of container here because
                 // pswp.currSlide.container.getElementsByTagName("video") does
@@ -807,17 +739,8 @@ export class FileViewerPhotoSwipe {
                 // pause the video in "contentDeactivate".
                 const contentElement = pswp.currSlide?.content.element;
                 videoVideoEl = queryVideoElement(contentElement) ?? undefined;
-
-                if (videoVideoEl) {
-                    onVideoPlayback = () => {
-                        if (!shouldUsePlayerV2())
-                            showIf(captionElement!, !!videoVideoEl?.paused);
-                    };
-
-                    videoVideoEl.addEventListener("play", onVideoPlayback);
-                    videoVideoEl.addEventListener("pause", onVideoPlayback);
-                    videoVideoEl.addEventListener("ended", onVideoPlayback);
-                }
+            } else {
+                videoVideoEl = undefined;
             }
         });
 
@@ -841,16 +764,6 @@ export class FileViewerPhotoSwipe {
          * the current slide.
          */
         const videoToggleMuteIfPossible = () => {
-            // TODO(HLS): Temporary gate
-            if (!shouldUsePlayerV2()) {
-                const video = videoVideoEl;
-                if (!video) return;
-
-                video.muted = !video.muted;
-
-                return;
-            }
-
             // Go via the media chrome mute button when muting, because
             // otherwise the local storage that the media chrome internally
             // manages ('media-chrome-pref-muted' which can be 'true' or
@@ -1131,7 +1044,6 @@ export class FileViewerPhotoSwipe {
                 // the p, and the padding on the div.
                 html: "<div><p></p></div>",
                 onInit: (element, pswp) => {
-                    captionElement = element;
                     pswp.on("change", () => {
                         const { fileType, alt } = currSlideData();
                         element.querySelector("p")!.innerText = alt ?? "";
@@ -1174,22 +1086,18 @@ export class FileViewerPhotoSwipe {
         const handleNextSlide = () => pswp.next();
 
         const handleSeekBackOrPreviousSlide = () => {
-            // TODO(HLS): Behind temporary flag
-            // const vid = videoVideoEl;
-            const vid = shouldUsePlayerV2() ? videoVideoEl : undefined;
-            if (vid) {
-                vid.currentTime = Math.max(vid.currentTime - 5, 0);
+            const video = videoVideoEl;
+            if (video) {
+                video.currentTime = Math.max(video.currentTime - 5, 0);
             } else {
                 handlePreviousSlide();
             }
         };
 
         const handleSeekForwardOrNextSlide = () => {
-            // TODO(HLS): Behind temporary flag
-            // const vid = videoVideoEl;
-            const vid = shouldUsePlayerV2() ? videoVideoEl : undefined;
-            if (vid) {
-                vid.currentTime = vid.currentTime + 5;
+            const video = videoVideoEl;
+            if (video) {
+                video.currentTime = video.currentTime + 5;
             } else {
                 handleNextSlide();
             }
@@ -1478,13 +1386,6 @@ export class FileViewerPhotoSwipe {
      */
     refreshCurrentSlideFavoriteButtonIfNeeded: () => void;
 }
-
-const videoHTMLBrowserControls = (url: string, disableDownload: boolean) => `
-<video controls ${disableDownload && "controlsList=nodownload"} oncontextmenu="return false;">
-  <source src="${url}" />
-  Your browser does not support video playback.
-</video>
-`;
 
 // Requires the following imports to register the Web components we use:
 //

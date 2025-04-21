@@ -2,6 +2,7 @@
 
 ## v1.7.12 (Unreleased)
 
+- Improved video player with streaming support (for processed videos).
 - .
 
 ## v1.7.11
