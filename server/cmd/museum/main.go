@@ -1002,7 +1002,6 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 	})
 
 	c.Start()
-	log.Infoln(c.Entry(17).Next)
 }
 
 func cors() gin.HandlerFunc {
