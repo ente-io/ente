@@ -286,11 +286,11 @@ function UploadProgressDialog() {
                     {uploadPhase == "uploading" && <InProgressSection />}
                     <ResultSection
                         uploadResult="uploaded"
-                        sectionTitle={t("SUCCESSFUL_UPLOADS")}
+                        sectionTitle={t("successful_uploads")}
                     />
                     <ResultSection
                         uploadResult="uploadedWithStaticThumbnail"
-                        sectionTitle={t("THUMBNAIL_GENERATION_FAILED_UPLOADS")}
+                        sectionTitle={t("thumbnail_generation_failed")}
                         sectionInfo={t("THUMBNAIL_GENERATION_FAILED_INFO")}
                     />
                     {uploadPhase == "done" && hasUnUploadedFiles && (
@@ -314,7 +314,7 @@ function UploadProgressDialog() {
                     />
                     <ResultSection
                         uploadResult="alreadyUploaded"
-                        sectionTitle={t("SKIPPED_FILES")}
+                        sectionTitle={t("ignored_uploads")}
                         sectionInfo={t("SKIPPED_INFO")}
                     />
                     <ResultSection
@@ -326,7 +326,7 @@ function UploadProgressDialog() {
                     />
                     <ResultSection
                         uploadResult="unsupported"
-                        sectionTitle={t("UNSUPPORTED_FILES")}
+                        sectionTitle={t("unsupported_files")}
                         sectionInfo={t("UNSUPPORTED_INFO")}
                     />
                     <ResultSection
