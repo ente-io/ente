@@ -24,7 +24,7 @@ class AlbumRowItemWidget extends StatelessWidget {
   final bool? hasVerifiedLock;
   final void Function(Collection)? onTapCallback;
   final void Function(Collection)? onLongPressCallback;
-  final SelectedAlbums? selectedAlbum;
+  final SelectedAlbums? selectedAlbums;
 
   const AlbumRowItemWidget(
     this.c,
@@ -35,13 +35,12 @@ class AlbumRowItemWidget extends StatelessWidget {
     this.hasVerifiedLock,
     this.onTapCallback,
     this.onLongPressCallback,
-    this.selectedAlbum,
+    this.selectedAlbums,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final bool isSelected = selectedAlbum?.isAlbumSelected(c) ?? false;
     final bool isOwner = c.isOwner(Configuration.instance.getUserID()!);
     final String tagPrefix = (isOwner ? "collection" : "shared_collection") +
         tag +
@@ -54,189 +53,198 @@ class AlbumRowItemWidget extends StatelessWidget {
             color: c.publicURLs.first.isExpired ? warning500 : strokeBaseDark,
           )
         : null;
-    return GestureDetector(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(1),
-                child: SizedBox(
-                  height: sideOfThumbnail,
-                  width: sideOfThumbnail,
-                  child: Stack(
-                    children: [
-                      FutureBuilder<EnteFile?>(
-                        future: CollectionsService.instance.getCover(c),
-                        builder: (context, snapshot) {
-                          EnteFile? thumbnail;
-                          if (snapshot.hasData) {
-                            thumbnail = snapshot.data!;
-                          } else {
-                            //Need to use cached thumbnail so that the hero
-                            //animation works as expected.
-                            thumbnail =
-                                CollectionsService.instance.getCoverCache(c);
-                          }
-                          if (thumbnail != null) {
-                            final String heroTag = tagPrefix + thumbnail.tag;
-                            return Hero(
-                              tag: heroTag,
+    return ListenableBuilder(
+      listenable: selectedAlbums ?? ValueNotifier(false),
+      builder: (context, _) {
+        final bool isSelected = selectedAlbums?.isAlbumSelected(c) ?? false;
+        return GestureDetector(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(1),
+                    child: SizedBox(
+                      height: sideOfThumbnail,
+                      width: sideOfThumbnail,
+                      child: Stack(
+                        children: [
+                          FutureBuilder<EnteFile?>(
+                            future: CollectionsService.instance.getCover(c),
+                            builder: (context, snapshot) {
+                              EnteFile? thumbnail;
+                              if (snapshot.hasData) {
+                                thumbnail = snapshot.data!;
+                              } else {
+                                //Need to use cached thumbnail so that the hero
+                                //animation works as expected.
+                                thumbnail = CollectionsService.instance
+                                    .getCoverCache(c);
+                              }
+                              if (thumbnail != null) {
+                                final String heroTag =
+                                    tagPrefix + thumbnail.tag;
+                                return Hero(
+                                  tag: heroTag,
+                                  transitionOnUserGestures: true,
+                                  child: ThumbnailWidget(
+                                    thumbnail,
+                                    shouldShowArchiveStatus: isOwner
+                                        ? c.isArchived()
+                                        : c.hasShareeArchived(),
+                                    showFavForAlbumOnly: true,
+                                    shouldShowSyncStatus: false,
+                                    shouldShowPinIcon: isOwner && c.isPinned,
+                                    key: Key(heroTag),
+                                  ),
+                                );
+                              } else {
+                                return const NoThumbnailWidget();
+                              }
+                            },
+                          ),
+                          if (isOwner && (c.hasSharees || c.hasLink))
+                            Hero(
+                              tag: tagPrefix + "_sharees",
                               transitionOnUserGestures: true,
-                              child: ThumbnailWidget(
-                                thumbnail,
-                                shouldShowArchiveStatus: isOwner
-                                    ? c.isArchived()
-                                    : c.hasShareeArchived(),
-                                showFavForAlbumOnly: true,
-                                shouldShowSyncStatus: false,
-                                shouldShowPinIcon: isOwner && c.isPinned,
-                                key: Key(heroTag),
+                              child: Align(
+                                alignment: Alignment.topLeft,
+                                child: AlbumSharesIcons(
+                                  sharees: c.getSharees(),
+                                  type: AvatarType.mini,
+                                  trailingWidget: linkIcon,
+                                ),
                               ),
-                            );
-                          } else {
-                            return const NoThumbnailWidget();
-                          }
-                        },
-                      ),
-                      if (isOwner && (c.hasSharees || c.hasLink))
-                        Hero(
-                          tag: tagPrefix + "_sharees",
-                          transitionOnUserGestures: true,
-                          child: Align(
-                            alignment: Alignment.topLeft,
-                            child: AlbumSharesIcons(
-                              sharees: c.getSharees(),
-                              type: AvatarType.mini,
-                              trailingWidget: linkIcon,
                             ),
-                          ),
-                        ),
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: Hero(
-                          tag: tagPrefix + "_album_selection",
-                          transitionOnUserGestures: true,
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 200),
-                            switchInCurve: Curves.easeOut,
-                            switchOutCurve: Curves.easeIn,
-                            child: isSelected
-                                ? IconButtonWidget(
-                                    key: const ValueKey("selected"),
-                                    icon: Icons.check_circle_rounded,
-                                    iconButtonType: IconButtonType.secondary,
-                                    iconColor: colorScheme.blurStrokeBase,
-                                  )
-                                : null,
-                          ),
-                        ),
-                      ),
-                      if (!isOwner)
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: Hero(
-                            tag: tagPrefix + "_owner_other",
-                            transitionOnUserGestures: true,
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                right: 8.0,
-                                bottom: 8.0,
-                              ),
-                              child: UserAvatarWidget(
-                                c.owner,
-                                thumbnailView: true,
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Hero(
+                              tag: tagPrefix + "_album_selection",
+                              transitionOnUserGestures: true,
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 200),
+                                switchInCurve: Curves.easeOut,
+                                switchOutCurve: Curves.easeIn,
+                                child: isSelected
+                                    ? IconButtonWidget(
+                                        key: const ValueKey("selected"),
+                                        icon: Icons.check_circle_rounded,
+                                        iconButtonType:
+                                            IconButtonType.secondary,
+                                        iconColor: colorScheme.blurStrokeBase,
+                                      )
+                                    : null,
                               ),
                             ),
                           ),
-                        ),
-                    ],
+                          if (!isOwner)
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: Hero(
+                                tag: tagPrefix + "_owner_other",
+                                transitionOnUserGestures: true,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    right: 8.0,
+                                    bottom: 8.0,
+                                  ),
+                                  child: UserAvatarWidget(
+                                    c.owner,
+                                    thumbnailView: true,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Hero(
+                tag: tagPrefix + "_title",
+                transitionOnUserGestures: true,
+                child: SizedBox(
+                  width: sideOfThumbnail,
+                  child: FutureBuilder<int>(
+                    future: showFileCount
+                        ? CollectionsService.instance.getFileCount(c)
+                        : Future.value(0),
+                    builder: (context, snapshot) {
+                      int? cachedCount;
+                      if (showFileCount) {
+                        if (snapshot.hasData) {
+                          cachedCount = snapshot.data;
+                        } else {
+                          //Need to use cached count so that the hero
+                          //animation works as expected without flickering.
+                          cachedCount =
+                              CollectionsService.instance.getCachedFileCount(c);
+                        }
+                      }
+                      if (cachedCount != null && cachedCount > 0) {
+                        final String textCount =
+                            NumberFormat().format(cachedCount);
+                        return Row(
+                          children: [
+                            Container(
+                              constraints: BoxConstraints(
+                                maxWidth: sideOfThumbnail -
+                                    ((textCount.length + 3) * 10),
+                              ),
+                              child: Text(
+                                c.displayName,
+                                style: enteTextTheme.small,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            RichText(
+                              text: TextSpan(
+                                style: enteTextTheme.smallMuted,
+                                children: [
+                                  TextSpan(text: '  \u2022  $textCount'),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      } else {
+                        return Text(
+                          c.displayName,
+                          style: enteTextTheme.small,
+                          overflow: TextOverflow.ellipsis,
+                        );
+                      }
+                    },
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Hero(
-            tag: tagPrefix + "_title",
-            transitionOnUserGestures: true,
-            child: SizedBox(
-              width: sideOfThumbnail,
-              child: FutureBuilder<int>(
-                future: showFileCount
-                    ? CollectionsService.instance.getFileCount(c)
-                    : Future.value(0),
-                builder: (context, snapshot) {
-                  int? cachedCount;
-                  if (showFileCount) {
-                    if (snapshot.hasData) {
-                      cachedCount = snapshot.data;
-                    } else {
-                      //Need to use cached count so that the hero
-                      //animation works as expected without flickering.
-                      cachedCount =
-                          CollectionsService.instance.getCachedFileCount(c);
-                    }
-                  }
-                  if (cachedCount != null && cachedCount > 0) {
-                    final String textCount = NumberFormat().format(cachedCount);
-                    return Row(
-                      children: [
-                        Container(
-                          constraints: BoxConstraints(
-                            maxWidth:
-                                sideOfThumbnail - ((textCount.length + 3) * 10),
-                          ),
-                          child: Text(
-                            c.displayName,
-                            style: enteTextTheme.small,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        RichText(
-                          text: TextSpan(
-                            style: enteTextTheme.smallMuted,
-                            children: [
-                              TextSpan(text: '  \u2022  $textCount'),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  } else {
-                    return Text(
-                      c.displayName,
-                      style: enteTextTheme.small,
-                      overflow: TextOverflow.ellipsis,
-                    );
-                  }
-                },
+          onTap: () async {
+            if (onTapCallback != null) {
+              onTapCallback!(c);
+              return;
+            }
+            final thumbnail = await CollectionsService.instance.getCover(c);
+            // ignore: unawaited_futures
+            routeToPage(
+              context,
+              CollectionPage(
+                CollectionWithThumbnail(c, thumbnail),
+                tagPrefix: tagPrefix,
+                hasVerifiedLock: hasVerifiedLock,
               ),
-            ),
-          ),
-        ],
-      ),
-      onTap: () async {
-        if (onTapCallback != null) {
-          onTapCallback!(c);
-          return;
-        }
-        final thumbnail = await CollectionsService.instance.getCover(c);
-        // ignore: unawaited_futures
-        routeToPage(
-          context,
-          CollectionPage(
-            CollectionWithThumbnail(c, thumbnail),
-            tagPrefix: tagPrefix,
-            hasVerifiedLock: hasVerifiedLock,
-          ),
+            );
+          },
+          onLongPress: () {
+            if (onLongPressCallback != null) {
+              onLongPressCallback!(c);
+            }
+          },
         );
-      },
-      onLongPress: () {
-        if (onLongPressCallback != null) {
-          onLongPressCallback!(c);
-        }
       },
     );
   }
