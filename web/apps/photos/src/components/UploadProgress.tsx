@@ -220,15 +220,19 @@ const subtitleText = (
 ) => {
     switch (uploadPhase) {
         case "preparing":
-            return t("UPLOAD_STAGE_MESSAGE.0");
+            return t("upload_preparing");
         case "readingMetadata":
-            return t("UPLOAD_STAGE_MESSAGE.1");
+            return t("upload_reading_metadata");
         case "uploading":
-            return t("UPLOAD_STAGE_MESSAGE.3", { uploadCounter });
+            return t("upload_processing", {
+                count: uploadCounter.finished,
+                total: uploadCounter.total,
+            });
         case "cancelling":
-            return t("UPLOAD_STAGE_MESSAGE.4");
+            return t("upload_cancelling");
         case "done":
-            return t("UPLOAD_STAGE_MESSAGE.5");
+            // TODO(MR):
+            return t("upload_done", { count: uploadCounter.finished });
     }
 };
 
