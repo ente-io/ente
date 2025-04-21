@@ -291,7 +291,7 @@ function UploadProgressDialog() {
                     <ResultSection
                         uploadResult="uploadedWithStaticThumbnail"
                         sectionTitle={t("thumbnail_generation_failed")}
-                        sectionInfo={t("THUMBNAIL_GENERATION_FAILED_INFO")}
+                        sectionInfo={t("thumbnail_generation_failed_hint")}
                     />
                     {uploadPhase == "done" && hasUnUploadedFiles && (
                         <NotUploadSectionHeader>
@@ -300,8 +300,8 @@ function UploadProgressDialog() {
                     )}
                     <ResultSection
                         uploadResult="blocked"
-                        sectionTitle={t("BLOCKED_UPLOADS")}
-                        sectionInfo={<Trans i18nKey={"etags_blocked"} />}
+                        sectionTitle={t("blocked_uploads")}
+                        sectionInfo={<Trans i18nKey={"blocked_uploads_hint"} />}
                     />
                     <ResultSection
                         uploadResult="failed"
@@ -315,24 +315,22 @@ function UploadProgressDialog() {
                     <ResultSection
                         uploadResult="alreadyUploaded"
                         sectionTitle={t("ignored_uploads")}
-                        sectionInfo={t("SKIPPED_INFO")}
+                        sectionInfo={t("ignored_uploads_hint")}
                     />
                     <ResultSection
                         uploadResult="largerThanAvailableStorage"
-                        sectionTitle={t(
-                            "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS",
-                        )}
-                        sectionInfo={t("LARGER_THAN_AVAILABLE_STORAGE_INFO")}
+                        sectionTitle={t("insufficient_storage")}
+                        sectionInfo={t("insufficient_storage_hint")}
                     />
                     <ResultSection
                         uploadResult="unsupported"
                         sectionTitle={t("unsupported_files")}
-                        sectionInfo={t("UNSUPPORTED_INFO")}
+                        sectionInfo={t("unsupported_files_hint")}
                     />
                     <ResultSection
                         uploadResult="tooLarge"
-                        sectionTitle={t("TOO_LARGE_UPLOADS")}
-                        sectionInfo={t("TOO_LARGE_INFO")}
+                        sectionTitle={t("large_files")}
+                        sectionInfo={t("large_files_hint")}
                     />
                 </DialogContent>
             )}
@@ -373,7 +371,7 @@ const InProgressSection: React.FC = () => {
         <SectionAccordion>
             <SectionAccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <TitleText
-                    title={t("INPROGRESS_UPLOADS")}
+                    title={t("uploads_in_progress")}
                     count={inProgressUploads?.length}
                 />
             </SectionAccordionSummary>
