@@ -160,24 +160,44 @@ const MinimizedUploadProgress: React.FC = () => (
     </Snackbar>
 );
 
-function UploadProgressHeader() {
-    return (
-        <>
-            <UploadProgressTitle />
-            <UploadProgressBar />
-        </>
-    );
-}
+const UploadProgressHeader: React.FC = () => (
+    <>
+        <UploadProgressTitle />
+        <UploadProgressBar />
+    </>
+);
 
-const UploadProgressTitleText = ({ expanded }) => {
+const UploadProgressTitle: React.FC = () => {
+    const { setExpanded, onClose, expanded } = useContext(
+        UploadProgressContext,
+    );
+    const toggleExpanded = () => setExpanded((expanded) => !expanded);
+
     return (
-        <Typography variant={expanded ? "h2" : "h3"}>
-            {t("FILE_UPLOAD")}
-        </Typography>
+        <DialogTitle>
+            <SpaceBetweenFlex>
+                <Box>
+                    <Typography variant={expanded ? "h2" : "h3"}>
+                        {t("FILE_UPLOAD")}
+                    </Typography>
+                    <UploadProgressSubtitleText />
+                </Box>
+                <Box>
+                    <Stack direction="row" sx={{ gap: 1 }}>
+                        <FilledIconButton onClick={toggleExpanded}>
+                            {expanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
+                        </FilledIconButton>
+                        <FilledIconButton onClick={onClose}>
+                            <CloseIcon />
+                        </FilledIconButton>
+                    </Stack>
+                </Box>
+            </SpaceBetweenFlex>
+        </DialogTitle>
     );
 };
 
-function UploadProgressSubtitleText() {
+const UploadProgressSubtitleText: React.FC = () => {
     const { uploadPhase, uploadCounter } = useContext(UploadProgressContext);
 
     return (
@@ -192,7 +212,7 @@ function UploadProgressSubtitleText() {
             {subtitleText(uploadPhase, uploadCounter)}
         </Typography>
     );
-}
+};
 
 const subtitleText = (
     uploadPhase: UploadPhase,
@@ -212,36 +232,9 @@ const subtitleText = (
     }
 };
 
-const UploadProgressTitle: React.FC = () => {
-    const { setExpanded, onClose, expanded } = useContext(
-        UploadProgressContext,
-    );
-    const toggleExpanded = () => setExpanded((expanded) => !expanded);
-
-    return (
-        <DialogTitle>
-            <SpaceBetweenFlex>
-                <Box>
-                    <UploadProgressTitleText expanded={expanded} />
-                    <UploadProgressSubtitleText />
-                </Box>
-                <Box>
-                    <Stack direction="row" sx={{ gap: 1 }}>
-                        <FilledIconButton onClick={toggleExpanded}>
-                            {expanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
-                        </FilledIconButton>
-                        <FilledIconButton onClick={onClose}>
-                            <CloseIcon />
-                        </FilledIconButton>
-                    </Stack>
-                </Box>
-            </SpaceBetweenFlex>
-        </DialogTitle>
-    );
-};
-
 const UploadProgressBar: React.FC = () => {
     const { uploadPhase, percentComplete } = useContext(UploadProgressContext);
+
     return (
         <Box>
             {(uploadPhase == "readingMetadata" ||
