@@ -12,9 +12,20 @@ final String updateCollectionColumns = collectionColumns
 
 const collectionFilesColumns =
     'collection_id, file_id, enc_key, enc_key_nonce, created_at, updated_at, is_deleted';
-
 const filesColumns =
-    'id, owner_id, file_header, thumb_header, metadata, priv_metadata, pub_metadata, info';
+    'id, owner_id, file_header, thumb_header, creation_time, modification_time, title, size, hash, lat, lng, '
+    'metadata, priv_metadata, pub_metadata, info, local_id, local_mapping_src';
+
+final String filesUpdateColumns = filesColumns
+    .split(', ')
+    .where(
+      (column) => (column != 'id' ||
+          column != 'local_id' ||
+          column != 'local_mapping_src'),
+    ) // Exclude primary key from update
+    .map((column) => '$column = excluded.$column') // Use excluded virtual table
+    .join(', ');
+
 const trashedFilesColumns =
     'id, owner_id, file_header, thumb_header, metadata, priv_metadata, pub_metadata, info, trash_data';
 
@@ -62,11 +73,19 @@ class RemoteDBMigration {
       owner_id INTEGER NOT NULL,
       file_header BLOB NOT NULL,
       thumb_header BLOB NOT NULL,
+      creation_time INTEGER NOT NULL,
+      modification_time INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      size INTEGER NOT NULL DEFAULT -1,
+      hash TEXT,
+      lat REAL DEFAULT NULL,
+      lng REAL DEFAULT NULL,
       metadata TEXT NOT NULL,
-      priv_metadata TEXT NOT NULL DEFAULT '{}',
-      pub_metadata TEXT NOT NULL DEFAULT '{}',
-      info TEXT DEFAULT '{}',
-      trash_data TEXT
+      priv_metadata TEXT,
+      pub_metadata TEXT,
+      info TEXT,
+      local_id TEXT DEFAULT NULL,
+      local_mapping_src TEXT DEFAULT NULL
     )
     ''',
     '''

@@ -78,7 +78,7 @@ class RemoteDB with SqlDbBase {
           collectionFileValues,
         ),
         _sqliteDB.executeBatch(
-          'INSERT OR REPLACE INTO files ($filesColumns) values(?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT INTO files ($filesColumns) values(${getParams(17)}) ON CONFLICT(id) DO UPDATE SET $filesUpdateColumns',
           fileValues,
         ),
       ]);

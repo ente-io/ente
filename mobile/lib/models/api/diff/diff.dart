@@ -1,5 +1,9 @@
 import "dart:convert";
+import "dart:io";
 import "dart:typed_data";
+
+import "package:photos/models/location/location.dart";
+import "package:photos/models/metadata/file_magic.dart";
 
 class Info {
   final int fileSize;
@@ -92,17 +96,74 @@ class FileItem {
   }
 
   List<Object?> rowValues() {
+    final Location? loc = location;
     return [
       fileID,
       ownerID,
       fileDecryotionHeader,
       thumnailDecryptionHeader,
+      creationTime,
+      modificationTime,
+      title,
+      fileSize,
+      hash,
+      loc?.latitude,
+      loc?.longitude,
       metadata?.toEncodedJson(),
       magicMetadata?.toEncodedJson(),
       pubMagicMetadata?.toEncodedJson(),
       info?.toEncodedJson(),
+      matchLocalID,
+      'remote_data',
     ];
   }
+
+  String get title =>
+      pubMagicMetadata?.data['editedName'] ?? metadata?.data['title'] ?? "";
+
+  String? get localID => metadata?.data['localID'];
+
+  String? get matchLocalID => localID == null || deviceFolder == null
+      ? null
+      : Platform.isIOS
+          ? localID
+          : '$localID-$deviceFolder-$title';
+
+  String? get deviceFolder => metadata?.data['deviceFolder'];
+
+  Location? get location {
+    if (pubMagicMetadata != null && pubMagicMetadata!.data[latKey] != null) {
+      return Location(
+        latitude: pubMagicMetadata!.data[latKey],
+        longitude: pubMagicMetadata!.data[longKey],
+      );
+    }
+    if (metadata != null && metadata!.data['latitude'] == null ||
+        metadata!.data['longitude'] == null) {
+      return null;
+    }
+    final latitude = double.tryParse(metadata!.data["latitude"].toString());
+    final longitude = double.tryParse(metadata!.data["longitude"].toString());
+    if (latitude == null || longitude == null) {
+      return null;
+    } else {
+      return Location(latitude: latitude, longitude: longitude);
+    }
+  }
+
+  int get creationTime =>
+      pubMagicMetadata?.data['editedTime'] ??
+      metadata?.data['creationTime'] ??
+      0;
+
+  int get modificationTime =>
+      metadata?.data['modificationTime'] ?? creationTime;
+
+  // note: during remote to local sync, older live photo hash format from desktop
+  // is already converted to the new format
+  String? get hash => metadata?.data['hash'];
+
+  int get fileSize => info?.fileSize ?? -1;
 }
 
 class CollectionFileItem {
