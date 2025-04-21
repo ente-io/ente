@@ -40,7 +40,7 @@ const (
 	ReferralSuccessfulSubject  = "You've earned 10 GB on Ente! 🎁"
 
 	StorageLimitExceedingID       = "90_percent_consumed"
-	StorageLimitExceedingTemplate = "ninety_percent_consumed.html"
+	StorageLimitExceedingTemplate = "90_percent_storage_consumed.html"
 	StorageLimitExceedingSubject  = "Your Ente storage is at 90% capacity"
 
 	LoginSuccessSubject  = "New login to your Ente account"
