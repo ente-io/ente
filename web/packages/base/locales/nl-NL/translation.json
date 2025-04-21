@@ -410,7 +410,7 @@
     "viewers": "Kijkers",
     "add_more": "Meer toevoegen",
     "or_add_existing": "Of kies een bestaande",
-    "NOT_FOUND": "404 - niet gevonden",
+    "not_found": "404 - Niet gevonden",
     "link_expired": "Link verlopen",
     "link_expired_message": "Deze link is verlopen of gedeactiveerd",
     "manage_link": "Link beheren",

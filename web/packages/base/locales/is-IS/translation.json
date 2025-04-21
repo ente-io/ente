@@ -410,7 +410,7 @@
     "viewers": "",
     "add_more": "",
     "or_add_existing": "",
-    "NOT_FOUND": "404 - fannst ekki",
+    "not_found": "404 - Fannst ekki",
     "link_expired": "Hlekkur rann út",
     "link_expired_message": "",
     "manage_link": "Stjórna hlekk",

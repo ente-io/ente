@@ -467,7 +467,7 @@ export default function PublicCollectionGallery() {
     } else if (!publicFiles || !credentials.current) {
         return (
             <Stack100vhCenter>
-                <Typography>{t("NOT_FOUND")}</Typography>
+                <Typography>{t("not_found")}</Typography>
             </Stack100vhCenter>
         );
     }
