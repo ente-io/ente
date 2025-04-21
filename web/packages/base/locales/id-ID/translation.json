@@ -55,7 +55,7 @@
     "add_photos_count_one": "Tambahkan item",
     "add_photos_count": "Tambahkan {{count, number}} item",
     "select_photos": "Pilih foto",
-    "file_upload": "Unggah File",
+    "file_upload": "Unggah file",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Bersiap untuk mengunggah",
         "1": "Membaca file metadata google",

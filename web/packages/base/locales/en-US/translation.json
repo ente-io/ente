@@ -55,7 +55,7 @@
     "add_photos_count_one": "Add 1 item",
     "add_photos_count": "Add {{count, number}} items",
     "select_photos": "Select photos",
-    "file_upload": "File Upload",
+    "file_upload": "File upload",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Preparing to upload",
         "1": "Reading google metadata files",
