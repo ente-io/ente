@@ -318,7 +318,7 @@
     "etags_blocked": "Seu navegador ou uma extensão está bloqueando o Ente de usar <code>eTags</code> para enviar arquivos grandes.",
     "live_photos_detected": "Os arquivos de vídeo e foto das suas Fotos Vivas foram mesclados num único arquivo",
     "retry_failed_uploads": "Repetir envios falhados",
-    "failed_uploads": "Envios falhados ",
+    "failed_uploads": "Envios falhados",
     "failed_uploads_hint": "Existirá uma opção para tentar novamente quando o envio finalizar",
     "SKIPPED_FILES": "Envios ignorados",
     "THUMBNAIL_GENERATION_FAILED_UPLOADS": "Falhou ao gerar miniaturas",

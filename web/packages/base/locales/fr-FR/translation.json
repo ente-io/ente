@@ -318,7 +318,7 @@
     "etags_blocked": "Votre navigateur ou un addon empêche Ente d'utiliser <code>eTags</code> pour charger des fichiers volumineux.",
     "live_photos_detected": "Les fichiers photos et vidéos depuis votre espace Live Photos ont été fusionnés en un seul fichier",
     "retry_failed_uploads": "Réessayer les chargements ayant échoués",
-    "failed_uploads": "Chargements échoués ",
+    "failed_uploads": "Chargements échoués",
     "failed_uploads_hint": "Il y aura une option pour retenter lorsque le chargement sera terminé",
     "SKIPPED_FILES": "Chargements ignorés",
     "THUMBNAIL_GENERATION_FAILED_UPLOADS": "Échec de création d'une miniature",

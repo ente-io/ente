@@ -318,7 +318,7 @@
     "etags_blocked": "متصفحك أو إضافة ما تمنع Ente من استخدام <code>eTags</code> لتحميل الملفات الكبيرة.",
     "live_photos_detected": "تم دمج ملفات الصور والفيديو من صورك الحية (Live Photos) في ملف واحد",
     "retry_failed_uploads": "إعادة محاولة التحميلات الفاشلة",
-    "failed_uploads": "التحميلات الفاشلة ",
+    "failed_uploads": "التحميلات الفاشلة",
     "failed_uploads_hint": "سيكون هناك خيار لإعادة محاولة هذه التحميلات عند انتهاء التحميل",
     "SKIPPED_FILES": "التحميلات التي تم تخطيها",
     "THUMBNAIL_GENERATION_FAILED_UPLOADS": "فشل إنشاء الصور المصغرة",

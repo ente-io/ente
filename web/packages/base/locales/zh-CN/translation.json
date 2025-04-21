@@ -318,7 +318,7 @@
     "etags_blocked": "您的浏览器或插件阻止 Ente 使用 <code>eTags</code> 上传大文件。",
     "live_photos_detected": "实况照片中的照片和视频文件已合并为一个文件",
     "retry_failed_uploads": "重试上传失败的文件",
-    "failed_uploads": "上传失败 ",
+    "failed_uploads": "上传失败",
     "failed_uploads_hint": "上传完成后将有一个重试选项",
     "SKIPPED_FILES": "已忽略的上传内容",
     "THUMBNAIL_GENERATION_FAILED_UPLOADS": "缩略图生成失败",

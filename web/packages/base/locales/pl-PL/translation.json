@@ -318,7 +318,7 @@
     "etags_blocked": "Twoja przeglądarka lub dodatek uniemożliwia Ente z używania <code>eTags</code> do przesyłania dużych plików.",
     "live_photos_detected": "Zdjęcia i pliki wideo ze zdjęć Live Photo zostały scalone w jeden plik",
     "retry_failed_uploads": "Ponów nieudane przesłania",
-    "failed_uploads": "Nieudane przesłania ",
+    "failed_uploads": "Nieudane przesłania",
     "failed_uploads_hint": "Po zakończeniu przesyłania będzie dostępna opcja do powtórzenia",
     "SKIPPED_FILES": "Zignorowane przesłania",
     "THUMBNAIL_GENERATION_FAILED_UPLOADS": "Generowanie miniatur nie powiodło się",

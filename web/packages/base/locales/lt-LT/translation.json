@@ -318,7 +318,7 @@
     "etags_blocked": "Jūsų naršyklė arba priedas neleidžia „Ente“ naudoti <code>„eTags“</code> dideliems failams įkelti.",
     "live_photos_detected": "Nuotraukų ir vaizdo įrašų failai iš Gyvosios nuotraukos buvo sujungti į vieną failą",
     "retry_failed_uploads": "Pakartoti nepavykusius įkėlimus",
-    "failed_uploads": "Nepavykę įkėlimai ",
+    "failed_uploads": "Nepavykę įkėlimai",
     "failed_uploads_hint": "Kai baigsis įkėlimas, bus parinktis bandyti tai pakartoti",
     "SKIPPED_FILES": "Ignoruoti įkėlimai",
     "THUMBNAIL_GENERATION_FAILED_UPLOADS": "Nepavyko sugeneruoti miniatiūrų",

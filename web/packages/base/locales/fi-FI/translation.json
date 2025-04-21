@@ -318,7 +318,7 @@
     "etags_blocked": "Selaimesi tai lisäosa estää Enteä käyttämästä <code>eTags</code> ladatakseen suuria tiedostoja.",
     "live_photos_detected": "Valokuva- ja videotiedostot Live Photo -kuvistasi on yhdistetty yhteen tiedostoon",
     "retry_failed_uploads": "Yritä uudelleen epäonnistuneita latauksia",
-    "failed_uploads": "Epäonnistuneet lataukset ",
+    "failed_uploads": "Epäonnistuneet lataukset",
     "failed_uploads_hint": "Kun lataus valmistuu, voit yrittää näitä uudelleen",
     "SKIPPED_FILES": "Ohitetut lataukset",
     "THUMBNAIL_GENERATION_FAILED_UPLOADS": "Pienoiskuvan luonti epäonnistui",

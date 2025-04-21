@@ -317,7 +317,7 @@
     "email_already_taken": "Email already taken",
     "etags_blocked": "Your browser or an addon is preventing Ente from using <code>eTags</code> to upload large files.",
     "live_photos_detected": "The photo and video files from your Live Photos have been merged into a single file",
-    "failed_uploads": "Failed uploads ",
+    "failed_uploads": "Failed uploads",
     "failed_uploads_hint": "There will be an option to retry these when the upload finishes",
     "retry_failed_uploads": "Retry failed uploads",
     "SKIPPED_FILES": "Ignored uploads",

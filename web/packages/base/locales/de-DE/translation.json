@@ -318,7 +318,7 @@
     "etags_blocked": "",
     "live_photos_detected": "Die Foto- und Videodateien deiner Live-Fotos wurden in einer einzigen Datei zusammengeführt",
     "retry_failed_uploads": "Fehlgeschlagene Uploads erneut probieren",
-    "failed_uploads": "Fehlgeschlagene Uploads ",
+    "failed_uploads": "Fehlgeschlagene Uploads",
     "failed_uploads_hint": "Es wird eine Option geben, diese zu wiederholen, wenn der Upload beendet ist",
     "SKIPPED_FILES": "Ignorierte Uploads",
     "THUMBNAIL_GENERATION_FAILED_UPLOADS": "Das Vorschaubild konnte nicht erzeugt werden",

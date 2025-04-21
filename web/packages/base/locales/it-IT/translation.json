@@ -318,7 +318,7 @@
     "etags_blocked": "",
     "live_photos_detected": "I file di foto e video dalle tue Live Photos sono stati uniti in un singolo file",
     "retry_failed_uploads": "Ritenta i caricamenti non andati a buon fine",
-    "failed_uploads": "Caricamento fallito ",
+    "failed_uploads": "Caricamento fallito",
     "failed_uploads_hint": "Ci sarà un'opzione per riprovare il caricamento di questi elementi quando il l'upload sarà finito",
     "SKIPPED_FILES": "Ignora caricamenti",
     "THUMBNAIL_GENERATION_FAILED_UPLOADS": "Generazione miniatura fallita",

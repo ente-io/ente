@@ -318,7 +318,7 @@
     "etags_blocked": "Tu navegador o un complemento impide a Ente usar <code>eTags</code> para subir archivos grandes.",
     "live_photos_detected": "Los archivos de foto y vídeo de tus fotos en vivo se han fusionado en un solo archivo",
     "retry_failed_uploads": "Reintentar subidas fallidas",
-    "failed_uploads": "Subidas fallidas ",
+    "failed_uploads": "Subidas fallidas",
     "failed_uploads_hint": "Habrá una opción para reintentarlo cuando termine la subida",
     "SKIPPED_FILES": "Subidas ignoradas",
     "THUMBNAIL_GENERATION_FAILED_UPLOADS": "Generación de miniaturas fallida",

@@ -318,7 +318,7 @@
     "etags_blocked": "Ваш браузер или расширение не позволяет Ente использовать <code>eTags</code> для загрузки больших файлов.",
     "live_photos_detected": "Фото- и видеофайлы из ваших Live Photos были объединены в один файл",
     "retry_failed_uploads": "Повторите попытку неудачной загрузки",
-    "failed_uploads": "Неудачная загрузка ",
+    "failed_uploads": "Неудачная загрузка",
     "failed_uploads_hint": "Будет возможность повторить попытку после завершения загрузки",
     "SKIPPED_FILES": "Игнорируемые загрузки",
     "THUMBNAIL_GENERATION_FAILED_UPLOADS": "Не удалось создать миниатюру",
