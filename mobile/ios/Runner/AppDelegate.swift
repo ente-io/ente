@@ -3,7 +3,7 @@ import Flutter
 import UIKit
 import app_links
 
-@UIApplicationMain
+@main
 @objc class AppDelegate: FlutterAppDelegate {
   override func application(
     _ application: UIApplication,
