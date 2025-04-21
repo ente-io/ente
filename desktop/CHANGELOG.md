@@ -2,6 +2,8 @@
 
 ## v1.7.12 (Unreleased)
 
+- Improved video player with streaming support (for processed videos).
+- Support Arabic translations.
 - .
 
 ## v1.7.11

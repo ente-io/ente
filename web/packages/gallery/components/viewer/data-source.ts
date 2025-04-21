@@ -10,7 +10,6 @@ import type { EnteFile } from "ente-media/file";
 import { fileCaption } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { ensureString } from "ente-utils/ensure";
-import { shouldUsePlayerV2 } from "./photoswipe";
 
 /**
  * This is a subset of the fields expected by PhotoSwipe itself (see the
@@ -467,22 +466,18 @@ const enqueueUpdates = async (
                 createHLSPlaylistItemDataValidity(),
             );
         } else {
-            if (shouldUsePlayerV2()) {
-                // See: [Note: Caching HLS playlist data]
-                //
-                // TODO(HLS): As an optimization, we can handle the logged in vs
-                // public albums case separately once we have the status-diff
-                // state, we don't need to mark status-diff case as transient.
-                //
-                // Note that setting the transient flag is not too expensive,
-                // since the underlying videoURL is still cached by the download
-                // manager. So effectively, under normal circumstance, it just
-                // adds one API call (to recheck if an HLS playlist now exists
-                // for the given file).
-                update({ ...videoURLD, isTransient: true });
-            } else {
-                update(videoURLD);
-            }
+            // See: [Note: Caching HLS playlist data]
+            //
+            // TODO(HLS): As an optimization, we can handle the logged in vs
+            // public albums case separately once we have the status-diff state,
+            // we don't need to mark status-diff case as transient.
+            //
+            // Note that setting the transient flag is not too expensive, since
+            // the underlying videoURL is still cached by the download manager.
+            // So effectively, under normal circumstance, it just adds one API
+            // call (to recheck if an HLS playlist now exists for the given
+            // file).
+            update({ ...videoURLD, isTransient: true });
         }
     };
 
@@ -523,9 +518,8 @@ const enqueueUpdates = async (
     }
 
     try {
-        // TODO(HLS):
         let hlsPlaylistData: HLSPlaylistData | undefined;
-        if (shouldUsePlayerV2() && file.metadata.fileType == FileType.video) {
+        if (file.metadata.fileType == FileType.video) {
             hlsPlaylistData = await hlsPlaylistDataForFile(
                 file,
                 downloadManager.publicAlbumsCredentials,
