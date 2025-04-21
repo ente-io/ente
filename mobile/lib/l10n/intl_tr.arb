@@ -1636,5 +1636,8 @@
     }
   },
   "appIcon": "Uygulama simgesi",
-  "curatedMemories": "Curated memories"
+  "cLIcon": "Yeni Simge",
+  "cLMemories": "Anılar",
+  "cLFamilyPlan": "Aile Planı Sınırları",
+  "cLFamilyPlanDesc": "Artık aile üyelerinizin ne kadar depolama alanı kullanabileceğine dair sınırlar belirleyebilirsiniz."
 }
