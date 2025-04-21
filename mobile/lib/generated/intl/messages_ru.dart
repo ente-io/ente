@@ -20,43 +20,43 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ru';
 
-  static String m44(title) => "${title} (Я)";
-
-  static String m45(count) =>
-      "${Intl.plural(count, zero: 'Добавить соавтора', one: 'Добавить соавтора', other: 'Добавить соавторов')}";
-
-  static String m46(count) =>
-      "${Intl.plural(count, one: 'Добавить элемент', other: 'Добавить элементы')}";
-
-  static String m0(storageAmount, endDate) =>
-      "Ваше дополнение на ${storageAmount} действительно до ${endDate}";
-
-  static String m47(count) =>
-      "${Intl.plural(count, zero: 'Добавить зрителя', one: 'Добавить зрителя', other: 'Добавить зрителей')}";
-
-  static String m48(emailOrName) => "Добавлено ${emailOrName}";
-
-  static String m49(albumName) => "Успешно добавлено в ${albumName}";
-
-  static String m50(name) => "Любуясь ${name}";
+  static String m0(title) => "${title} (Я)";
 
   static String m1(count) =>
+      "${Intl.plural(count, zero: 'Добавить соавтора', one: 'Добавить соавтора', other: 'Добавить соавторов')}";
+
+  static String m2(count) =>
+      "${Intl.plural(count, one: 'Добавить элемент', other: 'Добавить элементы')}";
+
+  static String m3(storageAmount, endDate) =>
+      "Ваше дополнение на ${storageAmount} действительно до ${endDate}";
+
+  static String m4(count) =>
+      "${Intl.plural(count, zero: 'Добавить зрителя', one: 'Добавить зрителя', other: 'Добавить зрителей')}";
+
+  static String m5(emailOrName) => "Добавлено ${emailOrName}";
+
+  static String m6(albumName) => "Успешно добавлено в ${albumName}";
+
+  static String m7(name) => "Любуясь ${name}";
+
+  static String m8(count) =>
       "${Intl.plural(count, zero: 'Нет участников', one: '${count} участник', few: '${count} участника', other: '${count} участников')}";
 
-  static String m51(versionValue) => "Версия: ${versionValue}";
+  static String m9(versionValue) => "Версия: ${versionValue}";
 
-  static String m52(freeAmount, storageUnit) =>
+  static String m10(freeAmount, storageUnit) =>
       "Свободно ${freeAmount} ${storageUnit}";
 
-  static String m53(name) => "Красивые виды с ${name}";
+  static String m11(name) => "Красивые виды с ${name}";
 
-  static String m2(paymentProvider) =>
+  static String m12(paymentProvider) =>
       "Пожалуйста, сначала отмените существующую подписку через ${paymentProvider}";
 
-  static String m3(user) =>
+  static String m13(user) =>
       "${user} не сможет добавлять новые фото в этот альбом\n\nЭтот пользователь всё ещё сможет удалять существующие фото, добавленные им";
 
-  static String m4(isFamilyMember, storageAmountInGb) =>
+  static String m14(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
             'true':
                 'Ваша семья получила ${storageAmountInGb} ГБ на данный момент',
@@ -64,257 +64,257 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': 'Вы получили ${storageAmountInGb} ГБ на данный момент!',
           })}";
 
-  static String m54(albumName) => "Совместная ссылка создана для ${albumName}";
+  static String m15(albumName) => "Совместная ссылка создана для ${albumName}";
 
-  static String m55(count) =>
+  static String m16(count) =>
       "${Intl.plural(count, zero: 'Добавлено 0 соавторов', one: 'Добавлен 1 соавтор', few: 'Добавлено ${count} соавтора', other: 'Добавлено ${count} соавторов')}";
 
-  static String m56(email, numOfDays) =>
+  static String m17(email, numOfDays) =>
       "Вы собираетесь добавить ${email} в качестве доверенного контакта. Доверенный контакт сможет восстановить ваш аккаунт, если вы будете отсутствовать ${numOfDays} дней.";
 
-  static String m5(familyAdminEmail) =>
+  static String m18(familyAdminEmail) =>
       "Пожалуйста, свяжитесь с <green>${familyAdminEmail}</green> для управления подпиской";
 
-  static String m6(provider) =>
+  static String m19(provider) =>
       "Пожалуйста, свяжитесь с нами по адресу support@ente.io для управления вашей подпиской ${provider}.";
 
-  static String m57(endpoint) => "Подключено к ${endpoint}";
+  static String m20(endpoint) => "Подключено к ${endpoint}";
 
-  static String m7(count) =>
+  static String m21(count) =>
       "${Intl.plural(count, one: 'Удалить ${count} элемент', few: 'Удалить ${count} элемента', other: 'Удалить ${count} элементов')}";
 
-  static String m58(currentlyDeleting, totalCount) =>
+  static String m22(currentlyDeleting, totalCount) =>
       "Удаление ${currentlyDeleting} / ${totalCount}";
 
-  static String m8(albumName) =>
+  static String m23(albumName) =>
       "Это удалит публичную ссылку для доступа к \"${albumName}\".";
 
-  static String m9(supportEmail) =>
+  static String m24(supportEmail) =>
       "Пожалуйста, отправьте письмо на ${supportEmail} с вашего зарегистрированного адреса электронной почты";
 
-  static String m10(count, storageSaved) =>
+  static String m25(count, storageSaved) =>
       "Вы удалили ${Intl.plural(count, one: '${count} дубликат', few: '${count} дубликата', other: '${count} дубликатов')}, освободив (${storageSaved}!)";
 
-  static String m11(count, formattedSize) =>
+  static String m26(count, formattedSize) =>
       "${count} файлов, по ${formattedSize} каждый";
 
-  static String m59(newEmail) => "Электронная почта изменена на ${newEmail}";
+  static String m27(newEmail) => "Электронная почта изменена на ${newEmail}";
 
-  static String m60(email) => "${email} не имеет аккаунта Ente.";
+  static String m28(email) => "${email} не имеет аккаунта Ente.";
 
-  static String m12(email) =>
+  static String m29(email) =>
       "У ${email} нет аккаунта Ente.\n\nОтправьте ему приглашение для обмена фото.";
 
-  static String m61(name) => "Обнимая ${name}";
+  static String m30(name) => "Обнимая ${name}";
 
-  static String m62(text) => "Дополнительные фото найдены для ${text}";
+  static String m31(text) => "Дополнительные фото найдены для ${text}";
 
-  static String m63(name) => "Пир с ${name}";
+  static String m32(name) => "Пир с ${name}";
 
-  static String m64(count, formattedNumber) =>
+  static String m33(count, formattedNumber) =>
       "${Intl.plural(count, one: '${formattedNumber} файл на этом устройстве был успешно сохранён', few: '${formattedNumber} файла на этом устройстве были успешно сохранены', other: '${formattedNumber} файлов на этом устройстве были успешно сохранены')}";
 
-  static String m65(count, formattedNumber) =>
+  static String m34(count, formattedNumber) =>
       "${Intl.plural(count, one: '${formattedNumber} файл в этом альбоме был успешно сохранён', few: '${formattedNumber} файла в этом альбоме были успешно сохранены', other: '${formattedNumber} файлов в этом альбоме были успешно сохранены')}";
 
-  static String m13(storageAmountInGB) =>
+  static String m35(storageAmountInGB) =>
       "${storageAmountInGB} ГБ каждый раз, когда кто-то подписывается на платный тариф и применяет ваш код";
 
-  static String m14(endDate) =>
+  static String m36(endDate) =>
       "Бесплатный пробный период действителен до ${endDate}";
 
-  static String m66(count) =>
+  static String m37(count) =>
       "Вы всё ещё сможете получить доступ к ${Intl.plural(count, one: 'нему', other: 'ним')} в Ente, пока у вас активна подписка";
 
-  static String m67(sizeInMBorGB) => "Освободить ${sizeInMBorGB}";
+  static String m38(sizeInMBorGB) => "Освободить ${sizeInMBorGB}";
 
-  static String m68(count, formattedSize) =>
+  static String m39(count, formattedSize) =>
       "${Intl.plural(count, one: 'Его можно удалить с устройства, чтобы освободить ${formattedSize}', other: 'Их можно удалить с устройства, чтобы освободить ${formattedSize}')}";
 
-  static String m69(currentlyProcessing, totalCount) =>
+  static String m40(currentlyProcessing, totalCount) =>
       "Обработка ${currentlyProcessing} / ${totalCount}";
 
-  static String m70(name) => "Поход с ${name}";
+  static String m41(name) => "Поход с ${name}";
 
-  static String m15(count) =>
+  static String m42(count) =>
       "${Intl.plural(count, one: '${count} элемент', few: '${count} элемента', other: '${count} элементов')}";
 
-  static String m71(name) => "В последний раз с ${name}";
+  static String m43(name) => "В последний раз с ${name}";
 
-  static String m72(email) =>
+  static String m44(email) =>
       "${email} пригласил вас стать доверенным контактом";
 
-  static String m16(expiryTime) => "Ссылка истечёт ${expiryTime}";
+  static String m45(expiryTime) => "Ссылка истечёт ${expiryTime}";
 
-  static String m73(email) => "Связать человека с ${email}";
+  static String m46(email) => "Связать человека с ${email}";
 
-  static String m74(personName, email) => "Это свяжет ${personName} с ${email}";
+  static String m47(personName, email) => "Это свяжет ${personName} с ${email}";
 
-  static String m75(count, formattedCount) =>
+  static String m48(count, formattedCount) =>
       "${Intl.plural(count, zero: 'нет воспоминаний', one: '${formattedCount} воспоминание', few: '${formattedCount} воспоминания', other: '${formattedCount} воспоминаний')}";
 
-  static String m76(count) =>
+  static String m49(count) =>
       "${Intl.plural(count, one: 'Переместить элемент', other: 'Переместить элементы')}";
 
-  static String m77(albumName) => "Успешно перемещено в ${albumName}";
+  static String m50(albumName) => "Успешно перемещено в ${albumName}";
 
-  static String m78(personName) => "Нет предложений для ${personName}";
+  static String m51(personName) => "Нет предложений для ${personName}";
 
-  static String m79(name) => "Не ${name}?";
+  static String m52(name) => "Не ${name}?";
 
-  static String m17(familyAdminEmail) =>
+  static String m53(familyAdminEmail) =>
       "Пожалуйста, свяжитесь с ${familyAdminEmail} для изменения кода.";
 
-  static String m80(name) => "Вечеринка с ${name}";
+  static String m54(name) => "Вечеринка с ${name}";
 
-  static String m18(passwordStrengthValue) =>
+  static String m55(passwordStrengthValue) =>
       "Надёжность пароля: ${passwordStrengthValue}";
 
-  static String m19(providerName) =>
+  static String m56(providerName) =>
       "Пожалуйста, обратитесь в поддержку ${providerName}, если с вас сняли деньги";
 
-  static String m81(name, age) => "${name} исполнилось ${age}!";
+  static String m57(name, age) => "${name} исполнилось ${age}!";
 
-  static String m82(name, age) => "${name} скоро исполнится ${age}";
+  static String m58(name, age) => "${name} скоро исполнится ${age}";
 
-  static String m83(count) =>
+  static String m59(count) =>
       "${Intl.plural(count, zero: 'Нет фото', one: '1 фото', other: '${count} фото')}";
 
-  static String m84(count) =>
+  static String m60(count) =>
       "${Intl.plural(count, zero: '0 фотографий', one: '1 фотография', few: '${count} фотографии', other: '${count} фотографий')}";
 
-  static String m20(endDate) =>
+  static String m61(endDate) =>
       "Бесплатный пробный период действителен до ${endDate}.\nПосле этого вы можете выбрать платный тариф.";
 
-  static String m85(toEmail) => "Пожалуйста, напишите нам на ${toEmail}";
+  static String m62(toEmail) => "Пожалуйста, напишите нам на ${toEmail}";
 
-  static String m86(toEmail) => "Пожалуйста, отправьте логи на \n${toEmail}";
+  static String m63(toEmail) => "Пожалуйста, отправьте логи на \n${toEmail}";
 
-  static String m87(name) => "Позируя с ${name}";
+  static String m64(name) => "Позируя с ${name}";
 
-  static String m88(folderName) => "Обработка ${folderName}...";
+  static String m65(folderName) => "Обработка ${folderName}...";
 
-  static String m21(storeName) => "Оцените нас в ${storeName}";
+  static String m66(storeName) => "Оцените нас в ${storeName}";
 
-  static String m89(name) => "Вы переназначены на ${name}";
+  static String m67(name) => "Вы переназначены на ${name}";
 
-  static String m90(days, email) =>
+  static String m68(days, email) =>
       "Вы сможете получить доступ к аккаунту через ${days} дней. Уведомление будет отправлено на ${email}.";
 
-  static String m91(email) =>
+  static String m69(email) =>
       "Теперь вы можете восстановить аккаунт ${email}, установив новый пароль.";
 
-  static String m92(email) => "${email} пытается восстановить ваш аккаунт.";
+  static String m70(email) => "${email} пытается восстановить ваш аккаунт.";
 
-  static String m22(storageInGB) =>
+  static String m71(storageInGB) =>
       "3. Вы оба получаете ${storageInGB} ГБ* бесплатно";
 
-  static String m23(userEmail) =>
+  static String m72(userEmail) =>
       "${userEmail} будет удалён из этого общего альбома\n\nВсе фото, добавленные этим пользователем, также будут удалены из альбома";
 
-  static String m24(endDate) => "Подписка будет продлена ${endDate}";
+  static String m73(endDate) => "Подписка будет продлена ${endDate}";
 
-  static String m93(name) => "Путешествие с ${name}";
+  static String m74(name) => "Путешествие с ${name}";
 
-  static String m94(count) =>
+  static String m113(count) =>
       "${Intl.plural(count, one: '${count} результат найден', few: '${count} результата найдено', other: '${count} результатов найдено')}";
 
-  static String m95(snapshotLength, searchLength) =>
+  static String m75(snapshotLength, searchLength) =>
       "Несоответствие длины разделов: ${snapshotLength} != ${searchLength}";
 
-  static String m25(count) => "${count} выбрано";
+  static String m76(count) => "${count} выбрано";
 
-  static String m26(count, yourCount) =>
+  static String m77(count, yourCount) =>
       "${count} выбрано (${yourCount} ваших)";
 
-  static String m96(name) => "Селфи с ${name}";
+  static String m78(name) => "Селфи с ${name}";
 
-  static String m27(verificationID) =>
+  static String m79(verificationID) =>
       "Вот мой идентификатор подтверждения: ${verificationID} для ente.io.";
 
-  static String m28(verificationID) =>
+  static String m80(verificationID) =>
       "Привет, можешь подтвердить, что это твой идентификатор подтверждения ente.io: ${verificationID}";
 
-  static String m29(referralCode, referralStorageInGB) =>
+  static String m81(referralCode, referralStorageInGB) =>
       "Реферальный код Ente: ${referralCode} \n\nПримените его в разделе «Настройки» → «Общие» → «Рефералы», чтобы получить ${referralStorageInGB} ГБ бесплатно после подписки на платный тариф\n\nhttps://ente.io";
 
-  static String m30(numberOfPeople) =>
+  static String m82(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'Поделиться с конкретными людьми', one: 'Доступно 1 человеку', other: 'Доступно ${numberOfPeople} людям')}";
 
-  static String m97(emailIDs) => "Доступен для ${emailIDs}";
+  static String m83(emailIDs) => "Доступен для ${emailIDs}";
 
-  static String m31(fileType) =>
+  static String m84(fileType) =>
       "Это ${fileType} будет удалено с вашего устройства.";
 
-  static String m32(fileType) =>
+  static String m85(fileType) =>
       "Это ${fileType} есть и в Ente, и на вашем устройстве.";
 
-  static String m33(fileType) => "Это ${fileType} будет удалено из Ente.";
+  static String m86(fileType) => "Это ${fileType} будет удалено из Ente.";
 
-  static String m98(name) => "Спорт с ${name}";
+  static String m87(name) => "Спорт с ${name}";
 
-  static String m99(name) => "В центре внимания ${name}";
+  static String m88(name) => "В центре внимания ${name}";
 
-  static String m34(storageAmountInGB) => "${storageAmountInGB} ГБ";
+  static String m89(storageAmountInGB) => "${storageAmountInGB} ГБ";
 
-  static String m100(
+  static String m90(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "Использовано ${usedAmount} ${usedStorageUnit} из ${totalAmount} ${totalStorageUnit}";
 
-  static String m35(id) =>
+  static String m91(id) =>
       "Ваш ${id} уже связан с другим аккаунтом Ente.\nЕсли вы хотите использовать ${id} с этим аккаунтом, пожалуйста, свяжитесь с нашей службой поддержки";
 
-  static String m36(endDate) => "Ваша подписка будет отменена ${endDate}";
+  static String m92(endDate) => "Ваша подписка будет отменена ${endDate}";
 
-  static String m101(completed, total) =>
+  static String m93(completed, total) =>
       "${completed}/${total} воспоминаний сохранено";
 
-  static String m102(ignoreReason) =>
+  static String m94(ignoreReason) =>
       "Нажмите для загрузки. Загрузка игнорируется из-за ${ignoreReason}";
 
-  static String m37(storageAmountInGB) =>
+  static String m95(storageAmountInGB) =>
       "Они тоже получат ${storageAmountInGB} ГБ";
 
-  static String m38(email) => "Это идентификатор подтверждения ${email}";
+  static String m96(email) => "Это идентификатор подтверждения ${email}";
 
-  static String m103(count) =>
+  static String m97(count) =>
       "${Intl.plural(count, one: 'Эта неделя, ${count} год назад', few: 'Эта неделя, ${count} года назад', other: 'Эта неделя, ${count} лет назад')}";
 
-  static String m104(dateFormat) => "${dateFormat} сквозь годы";
+  static String m98(dateFormat) => "${dateFormat} сквозь годы";
 
-  static String m105(count) =>
+  static String m99(count) =>
       "${Intl.plural(count, zero: 'Скоро', one: '1 день', few: '${count} дня', other: '${count} дней')}";
 
-  static String m106(year) => "Поездка в ${year}";
+  static String m100(year) => "Поездка в ${year}";
 
-  static String m107(location) => "Поездка в ${location}";
+  static String m101(location) => "Поездка в ${location}";
 
-  static String m108(email) =>
+  static String m102(email) =>
       "Вы приглашены стать доверенным контактом ${email}.";
 
-  static String m109(galleryType) =>
+  static String m103(galleryType) =>
       "Тип галереи ${galleryType} не поддерживает переименование";
 
-  static String m110(ignoreReason) =>
+  static String m104(ignoreReason) =>
       "Загрузка игнорируется из-за ${ignoreReason}";
 
-  static String m111(count) => "Сохранение ${count} воспоминаний...";
+  static String m105(count) => "Сохранение ${count} воспоминаний...";
 
-  static String m39(endDate) => "Действительно до ${endDate}";
+  static String m106(endDate) => "Действительно до ${endDate}";
 
-  static String m40(email) => "Подтвердить ${email}";
+  static String m107(email) => "Подтвердить ${email}";
 
-  static String m112(count) =>
+  static String m108(count) =>
       "${Intl.plural(count, zero: 'Добавлено 0 зрителей', one: 'Добавлен 1 зритель', other: 'Добавлено ${count} зрителей')}";
 
-  static String m41(email) => "Мы отправили письмо на <green>${email}</green>";
+  static String m109(email) => "Мы отправили письмо на <green>${email}</green>";
 
-  static String m42(count) =>
+  static String m110(count) =>
       "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', other: '${count} лет назад')}";
 
-  static String m113(name) => "Вы и ${name}";
+  static String m111(name) => "Вы и ${name}";
 
-  static String m43(storageSaved) => "Вы успешно освободили ${storageSaved}!";
+  static String m112(storageSaved) => "Вы успешно освободили ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -326,7 +326,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "account": MessageLookupByLibrary.simpleMessage("Аккаунт"),
         "accountIsAlreadyConfigured":
             MessageLookupByLibrary.simpleMessage("Аккаунт уже настроен."),
-        "accountOwnerPersonAppbarTitle": m44,
+        "accountOwnerPersonAppbarTitle": m0,
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("С возвращением!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
@@ -339,11 +339,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Добавьте новую электронную почту"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Добавить соавтора"),
-        "addCollaborators": m45,
+        "addCollaborators": m1,
         "addFiles": MessageLookupByLibrary.simpleMessage("Добавить файлы"),
         "addFromDevice":
             MessageLookupByLibrary.simpleMessage("Добавить с устройства"),
-        "addItem": m46,
+        "addItem": m2,
         "addLocation":
             MessageLookupByLibrary.simpleMessage("Добавить местоположение"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Добавить"),
@@ -356,7 +356,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Добавить нового человека"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Подробности дополнений"),
-        "addOnValidTill": m0,
+        "addOnValidTill": m3,
         "addOns": MessageLookupByLibrary.simpleMessage("Дополнения"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Добавить фото"),
         "addSelected":
@@ -368,15 +368,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "addTrustedContact":
             MessageLookupByLibrary.simpleMessage("Добавить доверенный контакт"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Добавить зрителя"),
-        "addViewers": m47,
+        "addViewers": m4,
         "addYourPhotosNow":
             MessageLookupByLibrary.simpleMessage("Добавьте ваши фото"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Добавлен как"),
-        "addedBy": m48,
-        "addedSuccessfullyTo": m49,
+        "addedBy": m5,
+        "addedSuccessfullyTo": m6,
         "addingToFavorites":
             MessageLookupByLibrary.simpleMessage("Добавление в избранное..."),
-        "admiringThem": m50,
+        "admiringThem": m7,
         "advanced": MessageLookupByLibrary.simpleMessage("Расширенные"),
         "advancedSettings": MessageLookupByLibrary.simpleMessage("Расширенные"),
         "after1Day": MessageLookupByLibrary.simpleMessage("Через 1 день"),
@@ -385,7 +385,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Week": MessageLookupByLibrary.simpleMessage("Через 1 неделю"),
         "after1Year": MessageLookupByLibrary.simpleMessage("Через 1 год"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Владелец"),
-        "albumParticipantsCount": m1,
+        "albumParticipantsCount": m8,
         "albumTitle": MessageLookupByLibrary.simpleMessage("Название альбома"),
         "albumUpdated": MessageLookupByLibrary.simpleMessage("Альбом обновлён"),
         "albums": MessageLookupByLibrary.simpleMessage("Альбомы"),
@@ -437,7 +437,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Блокировка приложения"),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "Выберите между экраном блокировки устройства и пользовательским с PIN-кодом или паролем."),
-        "appVersion": m51,
+        "appVersion": m9,
         "appleId": MessageLookupByLibrary.simpleMessage("Идентификатор Apple"),
         "apply": MessageLookupByLibrary.simpleMessage("Применить"),
         "applyCodeTitle": MessageLookupByLibrary.simpleMessage("Применить код"),
@@ -519,10 +519,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoPairDesc": MessageLookupByLibrary.simpleMessage(
             "Автоподключение работает только с устройствами, поддерживающими Chromecast."),
         "available": MessageLookupByLibrary.simpleMessage("Доступно"),
-        "availableStorageSpace": m52,
+        "availableStorageSpace": m10,
         "backedUpFolders": MessageLookupByLibrary.simpleMessage(
             "Папки для резервного копирования"),
-        "backgroundWithThem": m53,
+        "backgroundWithThem": m11,
         "backup": MessageLookupByLibrary.simpleMessage("Резервное копирование"),
         "backupFailed": MessageLookupByLibrary.simpleMessage(
             "Резервное копирование не удалось"),
@@ -580,10 +580,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Отменить восстановление"),
         "cancelAccountRecoveryBody": MessageLookupByLibrary.simpleMessage(
             "Вы уверены, что хотите отменить восстановление?"),
-        "cancelOtherSubscription": m2,
+        "cancelOtherSubscription": m12,
         "cancelSubscription":
             MessageLookupByLibrary.simpleMessage("Отменить подписку"),
-        "cannotAddMorePhotosAfterBecomingViewer": m3,
+        "cannotAddMorePhotosAfterBecomingViewer": m13,
         "cannotDeleteSharedFiles":
             MessageLookupByLibrary.simpleMessage("Нельзя удалить общие файлы"),
         "castAlbum":
@@ -622,7 +622,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Получить бесплатное хранилище"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Получите больше!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Получено"),
-        "claimedStorageSoFar": m4,
+        "claimedStorageSoFar": m14,
         "cleanUncategorized":
             MessageLookupByLibrary.simpleMessage("Очистить «Без категории»"),
         "cleanUncategorizedDescription": MessageLookupByLibrary.simpleMessage(
@@ -651,12 +651,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Создайте ссылку, чтобы люди могли добавлять и просматривать фото в вашем общем альбоме без использования приложения или аккаунта Ente. Это отлично подходит для сбора фото с мероприятий."),
         "collaborativeLink":
             MessageLookupByLibrary.simpleMessage("Совместная ссылка"),
-        "collaborativeLinkCreatedFor": m54,
+        "collaborativeLinkCreatedFor": m15,
         "collaborator": MessageLookupByLibrary.simpleMessage("Соавтор"),
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Соавторы могут добавлять фото и видео в общий альбом."),
-        "collaboratorsSuccessfullyAdded": m55,
+        "collaboratorsSuccessfullyAdded": m16,
         "collageLayout": MessageLookupByLibrary.simpleMessage("Макет"),
         "collageSaved":
             MessageLookupByLibrary.simpleMessage("Коллаж сохранён в галерее"),
@@ -673,7 +673,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Вы уверены, что хотите отключить двухфакторную аутентификацию?"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Подтвердить удаление аккаунта"),
-        "confirmAddingTrustedContact": m56,
+        "confirmAddingTrustedContact": m17,
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
             "Да, я хочу навсегда удалить этот аккаунт и все его данные во всех приложениях."),
         "confirmPassword":
@@ -686,10 +686,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Подтвердите ваш ключ восстановления"),
         "connectToDevice":
             MessageLookupByLibrary.simpleMessage("Подключиться к устройству"),
-        "contactFamilyAdmin": m5,
+        "contactFamilyAdmin": m18,
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Связаться с поддержкой"),
-        "contactToManageSubscription": m6,
+        "contactToManageSubscription": m19,
         "contacts": MessageLookupByLibrary.simpleMessage("Контакты"),
         "contents": MessageLookupByLibrary.simpleMessage("Содержимое"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("Продолжить"),
@@ -731,13 +731,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable": MessageLookupByLibrary.simpleMessage(
             "Доступно критическое обновление"),
         "crop": MessageLookupByLibrary.simpleMessage("Обрезать"),
-        "curatedMemories":
-            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "currentUsageIs": MessageLookupByLibrary.simpleMessage(
             "Текущее использование составляет "),
         "currentlyRunning": MessageLookupByLibrary.simpleMessage("выполняется"),
         "custom": MessageLookupByLibrary.simpleMessage("Пользовательский"),
-        "customEndpoint": m57,
+        "customEndpoint": m20,
         "darkTheme": MessageLookupByLibrary.simpleMessage("Тёмная"),
         "dayToday": MessageLookupByLibrary.simpleMessage("Сегодня"),
         "dayYesterday": MessageLookupByLibrary.simpleMessage("Вчера"),
@@ -775,11 +773,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Удалить с устройства"),
         "deleteFromEnte":
             MessageLookupByLibrary.simpleMessage("Удалить из Ente"),
-        "deleteItemCount": m7,
+        "deleteItemCount": m21,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Удалить местоположение"),
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Удалить фото"),
-        "deleteProgress": m58,
+        "deleteProgress": m22,
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "Отсутствует необходимая функция"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
@@ -819,7 +817,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Зрители всё ещё могут делать скриншоты или сохранять копии ваших фото с помощью внешних инструментов"),
         "disableDownloadWarningTitle":
             MessageLookupByLibrary.simpleMessage("Обратите внимание"),
-        "disableLinkMessage": m8,
+        "disableLinkMessage": m23,
         "disableTwofactor": MessageLookupByLibrary.simpleMessage(
             "Отключить двухфакторную аутентификацию"),
         "disablingTwofactorAuthentication":
@@ -861,9 +859,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "downloadFailed":
             MessageLookupByLibrary.simpleMessage("Скачивание не удалось"),
         "downloading": MessageLookupByLibrary.simpleMessage("Скачивание..."),
-        "dropSupportEmail": m9,
-        "duplicateFileCountWithStorageSaved": m10,
-        "duplicateItemsGroup": m11,
+        "dropSupportEmail": m24,
+        "duplicateFileCountWithStorageSaved": m25,
+        "duplicateItemsGroup": m26,
         "edit": MessageLookupByLibrary.simpleMessage("Редактировать"),
         "editLocation":
             MessageLookupByLibrary.simpleMessage("Изменить местоположение"),
@@ -881,16 +879,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "email": MessageLookupByLibrary.simpleMessage("Электронная почта"),
         "emailAlreadyRegistered": MessageLookupByLibrary.simpleMessage(
             "Электронная почта уже зарегистрирована."),
-        "emailChangedTo": m59,
-        "emailDoesNotHaveEnteAccount": m60,
-        "emailNoEnteAccount": m12,
+        "emailChangedTo": m27,
+        "emailDoesNotHaveEnteAccount": m28,
+        "emailNoEnteAccount": m29,
         "emailNotRegistered": MessageLookupByLibrary.simpleMessage(
             "Электронная почта не зарегистрирована."),
         "emailVerificationToggle": MessageLookupByLibrary.simpleMessage(
             "Подтверждение входа по почте"),
         "emailYourLogs": MessageLookupByLibrary.simpleMessage(
             "Отправить логи по электронной почте"),
-        "embracingThem": m61,
+        "embracingThem": m30,
         "emergencyContacts":
             MessageLookupByLibrary.simpleMessage("Экстренные контакты"),
         "empty": MessageLookupByLibrary.simpleMessage("Очистить"),
@@ -968,7 +966,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Экспортировать ваши данные"),
         "extraPhotosFound":
             MessageLookupByLibrary.simpleMessage("Найдены дополнительные фото"),
-        "extraPhotosFoundFor": m62,
+        "extraPhotosFoundFor": m31,
         "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
             "Лицо ещё не кластеризовано. Пожалуйста, попробуйте позже"),
         "faceRecognition":
@@ -1006,7 +1004,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "faqs":
             MessageLookupByLibrary.simpleMessage("Часто задаваемые вопросы"),
         "favorite": MessageLookupByLibrary.simpleMessage("В избранное"),
-        "feastingWithThem": m63,
+        "feastingWithThem": m32,
         "feedback": MessageLookupByLibrary.simpleMessage("Обратная связь"),
         "file": MessageLookupByLibrary.simpleMessage("Файл"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
@@ -1020,8 +1018,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "fileTypes": MessageLookupByLibrary.simpleMessage("Типы файлов"),
         "fileTypesAndNames":
             MessageLookupByLibrary.simpleMessage("Типы и названия файлов"),
-        "filesBackedUpFromDevice": m64,
-        "filesBackedUpInAlbum": m65,
+        "filesBackedUpFromDevice": m33,
+        "filesBackedUpInAlbum": m34,
         "filesDeleted": MessageLookupByLibrary.simpleMessage("Файлы удалены"),
         "filesSavedToGallery":
             MessageLookupByLibrary.simpleMessage("Файлы сохранены в галерею"),
@@ -1037,27 +1035,27 @@ class MessageLookup extends MessageLookupByLibrary {
         "foundFaces": MessageLookupByLibrary.simpleMessage("Найденные лица"),
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
             "Полученное бесплатное хранилище"),
-        "freeStorageOnReferralSuccess": m13,
+        "freeStorageOnReferralSuccess": m35,
         "freeStorageUsable": MessageLookupByLibrary.simpleMessage(
             "Доступное бесплатное хранилище"),
         "freeTrial":
             MessageLookupByLibrary.simpleMessage("Бесплатный пробный период"),
-        "freeTrialValidTill": m14,
-        "freeUpAccessPostDelete": m66,
-        "freeUpAmount": m67,
+        "freeTrialValidTill": m36,
+        "freeUpAccessPostDelete": m37,
+        "freeUpAmount": m38,
         "freeUpDeviceSpace": MessageLookupByLibrary.simpleMessage(
             "Освободить место на устройстве"),
         "freeUpDeviceSpaceDesc": MessageLookupByLibrary.simpleMessage(
             "Освободите место на устройстве, удалив файлы, которые уже сохранены в резервной копии."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Освободить место"),
-        "freeUpSpaceSaving": m68,
+        "freeUpSpaceSaving": m39,
         "gallery": MessageLookupByLibrary.simpleMessage("Галерея"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "В галерее отображается до 1000 воспоминаний"),
         "general": MessageLookupByLibrary.simpleMessage("Общие"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Генерация ключей шифрования..."),
-        "genericProgress": m69,
+        "genericProgress": m40,
         "goToSettings":
             MessageLookupByLibrary.simpleMessage("Перейти в настройки"),
         "googlePlayId":
@@ -1088,7 +1086,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "hideSharedItemsFromHomeGallery": MessageLookupByLibrary.simpleMessage(
             "Скрыть общие элементы из основной галереи"),
         "hiding": MessageLookupByLibrary.simpleMessage("Скрытие..."),
-        "hikingWithThem": m70,
+        "hikingWithThem": m41,
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Размещено на OSM France"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Как это работает"),
@@ -1146,7 +1144,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "Похоже, что-то пошло не так. Пожалуйста, повторите попытку через некоторое время. Если ошибка сохраняется, обратитесь в нашу службу поддержки."),
-        "itemCount": m15,
+        "itemCount": m42,
         "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion":
             MessageLookupByLibrary.simpleMessage(
                 "На элементах отображается количество дней, оставшихся до их безвозвратного удаления"),
@@ -1168,7 +1166,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, помогите нам с этой информацией"),
         "language": MessageLookupByLibrary.simpleMessage("Язык"),
-        "lastTimeWithThem": m71,
+        "lastTimeWithThem": m43,
         "lastUpdated":
             MessageLookupByLibrary.simpleMessage("Последнее обновление"),
         "lastYearsTrip":
@@ -1182,7 +1180,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "legacy": MessageLookupByLibrary.simpleMessage("Наследие"),
         "legacyAccounts":
             MessageLookupByLibrary.simpleMessage("Наследуемые аккаунты"),
-        "legacyInvite": m72,
+        "legacyInvite": m44,
         "legacyPageDesc": MessageLookupByLibrary.simpleMessage(
             "Наследие позволяет доверенным контактам получить доступ к вашему аккаунту в ваше отсутствие."),
         "legacyPageDesc2": MessageLookupByLibrary.simpleMessage(
@@ -1200,7 +1198,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("чтобы быстрее делиться"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Включена"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Истекла"),
-        "linkExpiresOn": m16,
+        "linkExpiresOn": m45,
         "linkExpiry":
             MessageLookupByLibrary.simpleMessage("Срок действия ссылки"),
         "linkHasExpired":
@@ -1209,8 +1207,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkPerson": MessageLookupByLibrary.simpleMessage("Связать человека"),
         "linkPersonCaption":
             MessageLookupByLibrary.simpleMessage("чтобы было удобнее делиться"),
-        "linkPersonToEmail": m73,
-        "linkPersonToEmailConfirmation": m74,
+        "linkPersonToEmail": m46,
+        "linkPersonToEmailConfirmation": m47,
         "livePhotos": MessageLookupByLibrary.simpleMessage("Живые фото"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Вы можете поделиться подпиской с вашей семьёй"),
@@ -1301,7 +1299,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "me": MessageLookupByLibrary.simpleMessage("Я"),
-        "memoryCount": m75,
+        "memoryCount": m48,
         "merchandise": MessageLookupByLibrary.simpleMessage("Мерч"),
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Объединить с существующим"),
@@ -1334,14 +1332,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "mostRelevant":
             MessageLookupByLibrary.simpleMessage("Самые актуальные"),
         "mountains": MessageLookupByLibrary.simpleMessage("За холмами"),
-        "moveItem": m76,
+        "moveItem": m49,
         "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
             "Переместите выбранные фото на одну дату"),
         "moveToAlbum":
             MessageLookupByLibrary.simpleMessage("Переместить в альбом"),
         "moveToHiddenAlbum": MessageLookupByLibrary.simpleMessage(
             "Переместить в скрытый альбом"),
-        "movedSuccessfullyTo": m77,
+        "movedSuccessfullyTo": m50,
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Перемещено в корзину"),
         "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
@@ -1396,10 +1394,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("Нет результатов"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("Нет результатов"),
-        "noSuggestionsForPerson": m78,
+        "noSuggestionsForPerson": m51,
         "noSystemLockFound": MessageLookupByLibrary.simpleMessage(
             "Системная блокировка не найдена"),
-        "notPersonLabel": m79,
+        "notPersonLabel": m52,
         "notThisPerson":
             MessageLookupByLibrary.simpleMessage("Не этот человек?"),
         "nothingSharedWithYouYet": MessageLookupByLibrary.simpleMessage(
@@ -1412,7 +1410,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte":
             MessageLookupByLibrary.simpleMessage("В <branding>ente</branding>"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("Снова в пути"),
-        "onlyFamilyAdminCanChangeCode": m17,
+        "onlyFamilyAdminCanChangeCode": m53,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Только он(а)"),
         "oops": MessageLookupByLibrary.simpleMessage("Ой"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
@@ -1443,7 +1441,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pairingComplete":
             MessageLookupByLibrary.simpleMessage("Подключение завершено"),
         "panorama": MessageLookupByLibrary.simpleMessage("Панорама"),
-        "partyWithThem": m80,
+        "partyWithThem": m54,
         "passKeyPendingVerification":
             MessageLookupByLibrary.simpleMessage("Проверка всё ещё ожидается"),
         "passkey": MessageLookupByLibrary.simpleMessage("Ключ доступа"),
@@ -1453,7 +1451,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("Пароль успешно изменён"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("Защита паролем"),
-        "passwordStrength": m18,
+        "passwordStrength": m55,
         "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
             "Надёжность пароля определяется его длиной, используемыми символами и присутствием среди 10000 самых популярных паролей"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
@@ -1464,7 +1462,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Платёж не удался"),
         "paymentFailedMessage": MessageLookupByLibrary.simpleMessage(
             "К сожалению, ваш платёж не удался. Пожалуйста, свяжитесь с поддержкой, и мы вам поможем!"),
-        "paymentFailedTalkToProvider": m19,
+        "paymentFailedTalkToProvider": m56,
         "pendingItems":
             MessageLookupByLibrary.simpleMessage("Элементы в очереди"),
         "pendingSync":
@@ -1478,21 +1476,21 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Удалить безвозвратно"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Удалить с устройства безвозвратно?"),
-        "personIsAge": m81,
+        "personIsAge": m57,
         "personName": MessageLookupByLibrary.simpleMessage("Имя человека"),
-        "personTurningAge": m82,
+        "personTurningAge": m58,
         "pets": MessageLookupByLibrary.simpleMessage("Пушистые спутники"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Описания фото"),
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("Размер сетки фото"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("фото"),
-        "photocountPhotos": m83,
+        "photocountPhotos": m59,
         "photos": MessageLookupByLibrary.simpleMessage("Фото"),
         "photosAddedByYouWillBeRemovedFromTheAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Добавленные вами фото будут удалены из альбома"),
-        "photosCount": m84,
+        "photosCount": m60,
         "photosKeepRelativeTimeDifference":
             MessageLookupByLibrary.simpleMessage(
                 "Фото сохранят относительную разницу во времени"),
@@ -1504,7 +1502,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Воспроизвести альбом на ТВ"),
         "playOriginal":
             MessageLookupByLibrary.simpleMessage("Воспроизвести оригинал"),
-        "playStoreFreeTrialValidTill": m20,
+        "playStoreFreeTrialValidTill": m61,
         "playStream":
             MessageLookupByLibrary.simpleMessage("Воспроизвести поток"),
         "playstoreSubscription":
@@ -1518,14 +1516,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseContactSupportIfTheProblemPersists":
             MessageLookupByLibrary.simpleMessage(
                 "Пожалуйста, обратитесь в поддержку, если проблема сохраняется"),
-        "pleaseEmailUsAt": m85,
+        "pleaseEmailUsAt": m62,
         "pleaseGrantPermissions": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, предоставьте разрешения"),
         "pleaseLoginAgain":
             MessageLookupByLibrary.simpleMessage("Пожалуйста, войдите снова"),
         "pleaseSelectQuickLinksToRemove": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, выберите быстрые ссылки для удаления"),
-        "pleaseSendTheLogsTo": m86,
+        "pleaseSendTheLogsTo": m63,
         "pleaseTryAgain": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, попробуйте снова"),
         "pleaseVerifyTheCodeYouHaveEntered":
@@ -1540,7 +1538,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Пожалуйста, подождите некоторое время перед повторной попыткой"),
         "pleaseWaitThisWillTakeAWhile": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, подождите, это займёт некоторое время."),
-        "posingWithThem": m87,
+        "posingWithThem": m64,
         "preparingLogs":
             MessageLookupByLibrary.simpleMessage("Подготовка логов..."),
         "preserveMore":
@@ -1560,7 +1558,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "proceed": MessageLookupByLibrary.simpleMessage("Продолжить"),
         "processed": MessageLookupByLibrary.simpleMessage("Обработано"),
         "processing": MessageLookupByLibrary.simpleMessage("Обработка"),
-        "processingImport": m88,
+        "processingImport": m65,
         "processingVideos":
             MessageLookupByLibrary.simpleMessage("Обработка видео"),
         "publicLinkCreated":
@@ -1574,10 +1572,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "rateTheApp":
             MessageLookupByLibrary.simpleMessage("Оценить приложение"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Оцените нас"),
-        "rateUsOnStore": m21,
+        "rateUsOnStore": m66,
         "reassignMe":
             MessageLookupByLibrary.simpleMessage("Переназначить \"Меня\""),
-        "reassignedToName": m89,
+        "reassignedToName": m67,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Переназначение..."),
         "recover": MessageLookupByLibrary.simpleMessage("Восстановить"),
@@ -1588,7 +1586,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Восстановить аккаунт"),
         "recoveryInitiated":
             MessageLookupByLibrary.simpleMessage("Восстановление начато"),
-        "recoveryInitiatedDesc": m90,
+        "recoveryInitiatedDesc": m68,
         "recoveryKey":
             MessageLookupByLibrary.simpleMessage("Ключ восстановления"),
         "recoveryKeyCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
@@ -1603,12 +1601,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ключ восстановления подтверждён"),
         "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
             "Ваш ключ восстановления — единственный способ восстановить ваши фото, если вы забудете пароль. Вы можете найти ключ восстановления в разделе «Настройки» → «Аккаунт».\n\nПожалуйста, введите ваш ключ восстановления здесь, чтобы убедиться, что вы сохранили его правильно."),
-        "recoveryReady": m91,
+        "recoveryReady": m69,
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Успешное восстановление!"),
         "recoveryWarning": MessageLookupByLibrary.simpleMessage(
             "Доверенный контакт пытается получить доступ к вашему аккаунту"),
-        "recoveryWarningBody": m92,
+        "recoveryWarningBody": m70,
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
             "Текущее устройство недостаточно мощное для проверки вашего пароля, но мы можем сгенерировать его снова так, чтобы он работал на всех устройствах.\n\nПожалуйста, войдите, используя ваш ключ восстановления, и сгенерируйте пароль (при желании вы можете использовать тот же самый)."),
         "recreatePasswordTitle":
@@ -1624,7 +1622,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "1. Даёте этот код своим друзьям"),
         "referralStep2": MessageLookupByLibrary.simpleMessage(
             "2. Они подписываются на платный тариф"),
-        "referralStep3": m22,
+        "referralStep3": m71,
         "referrals": MessageLookupByLibrary.simpleMessage("Рефералы"),
         "referralsAreCurrentlyPaused": MessageLookupByLibrary.simpleMessage(
             "Реферальная программа временно приостановлена"),
@@ -1656,7 +1654,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeLink": MessageLookupByLibrary.simpleMessage("Удалить ссылку"),
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Удалить участника"),
-        "removeParticipantBody": m23,
+        "removeParticipantBody": m72,
         "removePersonLabel":
             MessageLookupByLibrary.simpleMessage("Удалить метку человека"),
         "removePublicLink":
@@ -1678,7 +1676,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Переименовать файл"),
         "renewSubscription":
             MessageLookupByLibrary.simpleMessage("Продлить подписку"),
-        "renewsOn": m24,
+        "renewsOn": m73,
         "reportABug":
             MessageLookupByLibrary.simpleMessage("Сообщить об ошибке"),
         "reportBug": MessageLookupByLibrary.simpleMessage("Сообщить об ошибке"),
@@ -1705,7 +1703,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reviewSuggestions":
             MessageLookupByLibrary.simpleMessage("Посмотреть предложения"),
         "right": MessageLookupByLibrary.simpleMessage("Вправо"),
-        "roadtripWithThem": m93,
+        "roadtripWithThem": m74,
         "rotate": MessageLookupByLibrary.simpleMessage("Повернуть"),
         "rotateLeft": MessageLookupByLibrary.simpleMessage("Повернуть влево"),
         "rotateRight": MessageLookupByLibrary.simpleMessage("Повернуть вправо"),
@@ -1762,8 +1760,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Приглашайте людей, и здесь появятся все фото, которыми они поделились"),
         "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
             "Люди появятся здесь после завершения обработки и синхронизации"),
-        "searchResultCount": m94,
-        "searchSectionsLengthMismatch": m95,
+        "searchResultCount": m113,
+        "searchSectionsLengthMismatch": m75,
         "security": MessageLookupByLibrary.simpleMessage("Безопасность"),
         "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
             "Просматривать публичные ссылки на альбомы в приложении"),
@@ -1812,9 +1810,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeRemovedFromThisPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Выбранные элементы будут отвязаны от этого человека, но не удалены из вашей библиотеки."),
-        "selectedPhotos": m25,
-        "selectedPhotosWithYours": m26,
-        "selfiesWithThem": m96,
+        "selectedPhotos": m76,
+        "selectedPhotosWithYours": m77,
+        "selfiesWithThem": m78,
         "send": MessageLookupByLibrary.simpleMessage("Отправить"),
         "sendEmail": MessageLookupByLibrary.simpleMessage(
             "Отправить электронное письмо"),
@@ -1849,16 +1847,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareAnAlbumNow":
             MessageLookupByLibrary.simpleMessage("Поделиться альбомом"),
         "shareLink": MessageLookupByLibrary.simpleMessage("Поделиться ссылкой"),
-        "shareMyVerificationID": m27,
+        "shareMyVerificationID": m79,
         "shareOnlyWithThePeopleYouWant": MessageLookupByLibrary.simpleMessage(
             "Делитесь только с теми, с кем хотите"),
-        "shareTextConfirmOthersVerificationID": m28,
+        "shareTextConfirmOthersVerificationID": m80,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Скачай Ente, чтобы мы могли легко делиться фото и видео в оригинальном качестве\n\nhttps://ente.io"),
-        "shareTextReferralCode": m29,
+        "shareTextReferralCode": m81,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Поделиться с пользователями, не использующими Ente"),
-        "shareWithPeopleSectionTitle": m30,
+        "shareWithPeopleSectionTitle": m82,
         "shareYourFirstAlbum": MessageLookupByLibrary.simpleMessage(
             "Поделитесь своим первым альбомом"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
@@ -1869,7 +1867,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Новые общие фото"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
             "Получать уведомления, когда кто-то добавляет фото в общий альбом, в котором вы состоите"),
-        "sharedWith": m97,
+        "sharedWith": m83,
         "sharedWithMe":
             MessageLookupByLibrary.simpleMessage("Со мной поделились"),
         "sharedWithYou":
@@ -1888,11 +1886,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Выйти с других устройств"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Я согласен с <u-terms>условиями предоставления услуг</u-terms> и <u-policy>политикой конфиденциальности</u-policy>"),
-        "singleFileDeleteFromDevice": m31,
+        "singleFileDeleteFromDevice": m84,
         "singleFileDeleteHighlight": MessageLookupByLibrary.simpleMessage(
             "Оно будет удалено из всех альбомов."),
-        "singleFileInBothLocalAndRemote": m32,
-        "singleFileInRemoteOnly": m33,
+        "singleFileInBothLocalAndRemote": m85,
+        "singleFileInRemoteOnly": m86,
         "skip": MessageLookupByLibrary.simpleMessage("Пропустить"),
         "social": MessageLookupByLibrary.simpleMessage("Социальные сети"),
         "someItemsAreInBothEnteAndYourDevice": MessageLookupByLibrary.simpleMessage(
@@ -1927,8 +1925,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortOldestFirst":
             MessageLookupByLibrary.simpleMessage("Сначала старые"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Успех"),
-        "sportsWithThem": m98,
-        "spotlightOnThem": m99,
+        "sportsWithThem": m87,
+        "spotlightOnThem": m88,
         "spotlightOnYourself":
             MessageLookupByLibrary.simpleMessage("Вы в центре внимания"),
         "startAccountRecoveryTitle":
@@ -1943,15 +1941,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "storage": MessageLookupByLibrary.simpleMessage("Хранилище"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("Семья"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Вы"),
-        "storageInGB": m34,
+        "storageInGB": m89,
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("Превышен лимит хранилища"),
-        "storageUsageInfo": m100,
+        "storageUsageInfo": m90,
         "streamDetails":
             MessageLookupByLibrary.simpleMessage("Информация о потоке"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("Высокая"),
-        "subAlreadyLinkedErrMessage": m35,
-        "subWillBeCancelledOn": m36,
+        "subAlreadyLinkedErrMessage": m91,
+        "subWillBeCancelledOn": m92,
         "subscribe": MessageLookupByLibrary.simpleMessage("Подписаться"),
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
             "Вам нужна активная платная подписка, чтобы включить общий доступ."),
@@ -1969,7 +1967,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Предложить идею"),
         "sunrise": MessageLookupByLibrary.simpleMessage("На горизонте"),
         "support": MessageLookupByLibrary.simpleMessage("Поддержка"),
-        "syncProgress": m101,
+        "syncProgress": m93,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Синхронизация остановлена"),
         "syncing": MessageLookupByLibrary.simpleMessage("Синхронизация..."),
@@ -1982,7 +1980,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Нажмите для разблокировки"),
         "tapToUpload":
             MessageLookupByLibrary.simpleMessage("Нажмите для загрузки"),
-        "tapToUploadIsIgnoredDue": m102,
+        "tapToUploadIsIgnoredDue": m94,
         "tempErrorContactSupportIfPersists": MessageLookupByLibrary.simpleMessage(
             "Похоже, что-то пошло не так. Пожалуйста, повторите попытку через некоторое время. Если ошибка сохраняется, обратитесь в нашу службу поддержки."),
         "terminate": MessageLookupByLibrary.simpleMessage("Завершить"),
@@ -2006,7 +2004,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "theseItemsWillBeDeletedFromYourDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Эти элементы будут удалены с вашего устройства."),
-        "theyAlsoGetXGb": m37,
+        "theyAlsoGetXGb": m95,
         "theyWillBeDeletedFromAllAlbums": MessageLookupByLibrary.simpleMessage(
             "Они будут удалены из всех альбомов."),
         "thisActionCannotBeUndone": MessageLookupByLibrary.simpleMessage(
@@ -2023,12 +2021,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisImageHasNoExifData": MessageLookupByLibrary.simpleMessage(
             "Это фото не имеет данных EXIF"),
         "thisIsMeExclamation": MessageLookupByLibrary.simpleMessage("Это я!"),
-        "thisIsPersonVerificationId": m38,
+        "thisIsPersonVerificationId": m96,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "Это ваш идентификатор подтверждения"),
         "thisWeekThroughTheYears":
             MessageLookupByLibrary.simpleMessage("Эта неделя сквозь годы"),
-        "thisWeekXYearsAgo": m103,
+        "thisWeekXYearsAgo": m97,
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Это завершит ваш сеанс на следующем устройстве:"),
@@ -2040,7 +2038,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
             MessageLookupByLibrary.simpleMessage(
                 "Это удалит публичные ссылки всех выбранных быстрых ссылок."),
-        "throughTheYears": m104,
+        "throughTheYears": m98,
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(
                 "Для блокировки приложения, пожалуйста, настройте код или экран блокировки в настройках устройства."),
@@ -2054,13 +2052,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "total": MessageLookupByLibrary.simpleMessage("всего"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Общий размер"),
         "trash": MessageLookupByLibrary.simpleMessage("Корзина"),
-        "trashDaysLeft": m105,
+        "trashDaysLeft": m99,
         "trim": MessageLookupByLibrary.simpleMessage("Сократить"),
-        "tripInYear": m106,
-        "tripToLocation": m107,
+        "tripInYear": m100,
+        "tripToLocation": m101,
         "trustedContacts":
             MessageLookupByLibrary.simpleMessage("Доверенные контакты"),
-        "trustedInviteBody": m108,
+        "trustedInviteBody": m102,
         "tryAgain": MessageLookupByLibrary.simpleMessage("Попробовать снова"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "Включите резервное копирование, чтобы автоматически загружать файлы из этой папки на устройстве в Ente."),
@@ -2079,7 +2077,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Двухфакторная аутентификация успешно сброшена"),
         "twofactorSetup": MessageLookupByLibrary.simpleMessage(
             "Настройка двухфакторной аутентификации"),
-        "typeOfGallerGallerytypeIsNotSupportedForRename": m109,
+        "typeOfGallerGallerytypeIsNotSupportedForRename": m103,
         "unarchive": MessageLookupByLibrary.simpleMessage("Извлечь из архива"),
         "unarchiveAlbum":
             MessageLookupByLibrary.simpleMessage("Извлечь альбом из архива"),
@@ -2102,10 +2100,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "updatingFolderSelection":
             MessageLookupByLibrary.simpleMessage("Обновление выбора папок..."),
         "upgrade": MessageLookupByLibrary.simpleMessage("Улучшить"),
-        "uploadIsIgnoredDueToIgnorereason": m110,
+        "uploadIsIgnoredDueToIgnorereason": m104,
         "uploadingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Загрузка файлов в альбом..."),
-        "uploadingMultipleMemories": m111,
+        "uploadingMultipleMemories": m105,
         "uploadingSingleMemory": MessageLookupByLibrary.simpleMessage(
             "Сохранение 1 воспоминания..."),
         "upto50OffUntil4thDec":
@@ -2124,7 +2122,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useSelectedPhoto":
             MessageLookupByLibrary.simpleMessage("Использовать выбранное фото"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("Использовано места"),
-        "validTill": m39,
+        "validTill": m106,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Проверка не удалась, пожалуйста, попробуйте снова"),
@@ -2133,7 +2131,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("Подтвердить"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage(
             "Подтвердить электронную почту"),
-        "verifyEmailID": m40,
+        "verifyEmailID": m107,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Подтвердить"),
         "verifyPasskey":
             MessageLookupByLibrary.simpleMessage("Подтвердить ключ доступа"),
@@ -2161,7 +2159,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Увидеть ключ восстановления"),
         "viewer": MessageLookupByLibrary.simpleMessage("Зритель"),
-        "viewersSuccessfullyAdded": m112,
+        "viewersSuccessfullyAdded": m108,
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Пожалуйста, посетите web.ente.io для управления вашей подпиской"),
         "waitingForVerification":
@@ -2174,7 +2172,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
             MessageLookupByLibrary.simpleMessage(
                 "Мы не поддерживаем редактирование фото и альбомов, которые вам пока не принадлежат"),
-        "weHaveSendEmailTo": m41,
+        "weHaveSendEmailTo": m109,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Низкая"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("С возвращением!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("Что нового"),
@@ -2182,7 +2180,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Доверенный контакт может помочь в восстановлении ваших данных."),
         "yearShort": MessageLookupByLibrary.simpleMessage("год"),
         "yearly": MessageLookupByLibrary.simpleMessage("Ежегодно"),
-        "yearsAgo": m42,
+        "yearsAgo": m110,
         "yes": MessageLookupByLibrary.simpleMessage("Да"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Да, отменить"),
         "yesConvertToViewer":
@@ -2196,7 +2194,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesResetPerson": MessageLookupByLibrary.simpleMessage(
             "Да, сбросить данные человека"),
         "you": MessageLookupByLibrary.simpleMessage("Вы"),
-        "youAndThem": m113,
+        "youAndThem": m111,
         "youAreOnAFamilyPlan":
             MessageLookupByLibrary.simpleMessage("Вы на семейном тарифе!"),
         "youAreOnTheLatestVersion": MessageLookupByLibrary.simpleMessage(
@@ -2215,7 +2213,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Вы не можете поделиться с самим собой"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "У вас нет архивных элементов."),
-        "youHaveSuccessfullyFreedUp": m43,
+        "youHaveSuccessfullyFreedUp": m112,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Ваш аккаунт был удалён"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Ваша карта"),
