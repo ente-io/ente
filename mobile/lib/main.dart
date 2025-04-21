@@ -276,12 +276,30 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       MLDataDB.instance,
       preferences,
     );
+    logLocalSettings();
     initComplete = true;
     _logger.info("Initialization done $tlog");
   } catch (e, s) {
     _logger.severe("Error in init ", e, s);
     rethrow;
   }
+}
+
+void logLocalSettings() {
+  _logger.info("Show memories: ${memoriesCacheService.showAnyMemories}");
+  _logger
+      .info("Smart memories enabled: ${localSettings.isSmartMemoriesEnabled}");
+  _logger.info("Ml is enabled: ${flagService.hasGrantedMLConsent}");
+  _logger.info(
+    "ML local indexing is enabled: ${localSettings.isMLLocalIndexingEnabled}",
+  );
+  _logger.info(
+    "Multipart upload is enabled: ${localSettings.userEnabledMultiplePart}",
+  );
+  _logger.info("Gallery grid size: ${localSettings.getPhotoGridSize()}");
+  _logger.info(
+    "Video streaming is enalbed: ${PreviewVideoStore.instance.isVideoStreamingEnabled}",
+  );
 }
 
 void _heartBeatOnInit(int i) {
