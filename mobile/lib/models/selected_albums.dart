@@ -16,13 +16,6 @@ class SelectedAlbums extends ChangeNotifier {
     } else {
       albums.add(albumToToggle);
     }
-
-    if (alreadySelected != null) {
-      print('Album "${alreadySelected.displayName}" removed.');
-    } else {
-      print('Album "${albumToToggle.displayName}" added.');
-    }
-
     notifyListeners();
   }
 

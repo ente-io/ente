@@ -121,6 +121,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
             ),
             AlbumSelectionOverlayBar(
               _selectedAlbum,
+              collections!,
             ),
           ],
         ),

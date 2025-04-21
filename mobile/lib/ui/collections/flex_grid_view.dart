@@ -149,7 +149,7 @@ class _CollectionsFlexiGridViewWidgetState
             widget.collections![i],
             sideOfThumbnail,
             tag: widget.tag,
-            selectedAlbum: widget.selectedAlbums,
+            selectedAlbums: widget.selectedAlbums,
             onTapCallback: (c) {
               isAnyAlbumSelected
                   ? _toggleAlbumSelection(c)
