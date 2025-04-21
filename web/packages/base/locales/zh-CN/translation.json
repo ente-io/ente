@@ -55,7 +55,7 @@
     "add_photos_count_one": "添加1个项目",
     "add_photos_count": "添加 {{count, number}} 个项目",
     "select_photos": "选择照片",
-    "FILE_UPLOAD": "上传文件",
+    "file_upload": "上传文件",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "正在准备上传",
         "1": "正在读取 Google 元数据文件",

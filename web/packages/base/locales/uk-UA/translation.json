@@ -55,7 +55,7 @@
     "add_photos_count_one": "Додати 1 елемент",
     "add_photos_count": "Додати {{count, number}} елементів",
     "select_photos": "Виберіть фото",
-    "FILE_UPLOAD": "Вивантаження файлу",
+    "file_upload": "Вивантаження файлу",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Підготовка до вивантаження",
         "1": "Читання файлів метаданих Google",

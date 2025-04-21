@@ -55,7 +55,7 @@
     "add_photos_count_one": "Přidat 1 položku",
     "add_photos_count": "Přidat {{count, number}} předměty",
     "select_photos": "Vybrat fotografii",
-    "FILE_UPLOAD": "Nahrát soubor",
+    "file_upload": "Nahrát soubor",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Připravuji se na nahrání",
         "1": "Čtení souborů metadat Google",

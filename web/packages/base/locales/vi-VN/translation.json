@@ -55,7 +55,7 @@
     "add_photos_count_one": "Thêm 1 mục",
     "add_photos_count": "Thêm {{count, number}} mục",
     "select_photos": "Chọn ảnh",
-    "FILE_UPLOAD": "Tải tệp lên",
+    "file_upload": "Tải tệp lên",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Chuẩn bị tải lên",
         "1": "Đang đọc tệp siêu dữ liệu google",

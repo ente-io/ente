@@ -55,7 +55,7 @@
     "add_photos_count_one": "Aggiungi elemento",
     "add_photos_count": "Aggiungi {{count, number}} elementi",
     "select_photos": "Seleziona foto",
-    "FILE_UPLOAD": "Carica file",
+    "file_upload": "Carica file",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Preparazione all'upload",
         "1": "Lettura dei file metadati di google",

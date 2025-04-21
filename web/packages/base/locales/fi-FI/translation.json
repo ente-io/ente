@@ -55,7 +55,7 @@
     "add_photos_count_one": "Lisää yksi kohde",
     "add_photos_count": "Lisää {{count, number}} kohdetta",
     "select_photos": "Valitse kuvat",
-    "FILE_UPLOAD": "Tiedoston lataaminen",
+    "file_upload": "Tiedoston lataaminen",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Valmistellaan latausta",
         "1": "Luetaan googlen metatietotiedostoja",

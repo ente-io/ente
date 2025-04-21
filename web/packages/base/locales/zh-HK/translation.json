@@ -55,7 +55,7 @@
     "add_photos_count_one": "新增 1 個項目",
     "add_photos_count": "新增 {count, number} 個項目",
     "select_photos": "選擇照片",
-    "FILE_UPLOAD": "上傳檔案",
+    "file_upload": "上傳檔案",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "正在準備上載",
         "1": "",

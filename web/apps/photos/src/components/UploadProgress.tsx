@@ -178,7 +178,7 @@ const UploadProgressTitle: React.FC = () => {
             <SpaceBetweenFlex>
                 <Box>
                     <Typography variant={expanded ? "h2" : "h3"}>
-                        {t("FILE_UPLOAD")}
+                        {t("file_upload")}
                     </Typography>
                     <UploadProgressSubtitleText />
                 </Box>

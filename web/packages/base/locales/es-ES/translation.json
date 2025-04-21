@@ -55,7 +55,7 @@
     "add_photos_count_one": "Añadir 1 foto",
     "add_photos_count": "Añadir {{count, number}} fotos",
     "select_photos": "Seleccionar fotos",
-    "FILE_UPLOAD": "Subir archivo",
+    "file_upload": "Subir archivo",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Preparando la subida",
         "1": "Leyendo archivos de metadatos de google",

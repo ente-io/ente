@@ -55,7 +55,7 @@
     "add_photos_count_one": "Eine Datei hinzufügen",
     "add_photos_count": "{{count, number}} Dateien hinzufügen",
     "select_photos": "Foto auswählen",
-    "FILE_UPLOAD": "Datei hochladen",
+    "file_upload": "Datei hochladen",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Hochladen wird vorbereitet",
         "1": "Lese Google-Metadaten",

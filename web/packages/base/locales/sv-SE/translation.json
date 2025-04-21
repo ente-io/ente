@@ -55,7 +55,7 @@
     "add_photos_count_one": "Lägg till 1 objekt",
     "add_photos_count": "Lägg till {{count, number}} objekt",
     "select_photos": "Välj bilder",
-    "FILE_UPLOAD": "Ladda upp",
+    "file_upload": "Ladda upp",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Förbereder att ladda upp",
         "1": "Läser Google metadatafiler",

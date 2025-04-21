@@ -55,7 +55,7 @@
     "add_photos_count_one": "一つのアイテムを追加",
     "add_photos_count": "{{count, number}} アイテムを追加",
     "select_photos": "写真を選択",
-    "FILE_UPLOAD": "ファイルをアップロード",
+    "file_upload": "ファイルをアップロード",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "アップロードの準備中",
         "1": "Googleメタデータファイルを読み込み中",

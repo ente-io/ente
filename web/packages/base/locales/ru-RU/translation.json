@@ -55,7 +55,7 @@
     "add_photos_count_one": "Добавить 1 элемент",
     "add_photos_count": "Добавить {{count, number}} элементов",
     "select_photos": "Выбрать фотографии",
-    "FILE_UPLOAD": "Загрузка файла",
+    "file_upload": "Загрузка файла",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Подготовка к загрузке",
         "1": "Чтение файлов метаданных Google",

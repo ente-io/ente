@@ -55,7 +55,7 @@
     "add_photos_count_one": "إضافة عنصر واحد",
     "add_photos_count": "إضافة {{count, number}} عناصر",
     "select_photos": "تحديد الصور",
-    "FILE_UPLOAD": "تحميل الملف",
+    "file_upload": "تحميل الملف",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "الإعداد للتحميل",
         "1": "قراءة ملفات بيانات تعريف جوجل",

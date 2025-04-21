@@ -55,7 +55,7 @@
     "add_photos_count_one": "아이템 하나 추가",
     "add_photos_count": "아이템 {{count, number}} 개 추가하기",
     "select_photos": "사진 선택하기",
-    "FILE_UPLOAD": "파일 업로드",
+    "file_upload": "파일 업로드",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "업로드 준비중",
         "1": "구글 메타데이타 파일들 읽는중",

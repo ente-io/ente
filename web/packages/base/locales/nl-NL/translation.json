@@ -55,7 +55,7 @@
     "add_photos_count_one": "1 foto toevoegen",
     "add_photos_count": "{{count, number}} foto's toevoegen",
     "select_photos": "Selecteer foto's",
-    "FILE_UPLOAD": "Bestand uploaden",
+    "file_upload": "Bestand uploaden",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Upload wordt voorbereid",
         "1": "Lezen van Google metadata bestanden",

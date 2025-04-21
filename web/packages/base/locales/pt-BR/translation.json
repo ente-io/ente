@@ -55,7 +55,7 @@
     "add_photos_count_one": "Adicionar um item",
     "add_photos_count": "Adicionar {{count, number}} itens",
     "select_photos": "Selecionar fotos",
-    "FILE_UPLOAD": "Envio de arquivos",
+    "file_upload": "Envio de arquivos",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Preparando para enviar",
         "1": "Lendo arquivos de metadados da Google",

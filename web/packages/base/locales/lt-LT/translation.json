@@ -55,7 +55,7 @@
     "add_photos_count_one": "Įtraukti elementą",
     "add_photos_count": "Įtraukti {{count, number}} elementus (-ų)",
     "select_photos": "Pasirinkti nuotraukas",
-    "FILE_UPLOAD": "Failų įkėlimas",
+    "file_upload": "Failų įkėlimas",
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Ruošima įkelti",
         "1": "Skaitomi „Google“ metaduomenų failai",
