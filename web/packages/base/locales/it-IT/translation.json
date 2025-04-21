@@ -56,7 +56,7 @@
     "add_photos_count": "Aggiungi {{count, number}} elementi",
     "select_photos": "Seleziona foto",
     "file_upload": "Carica file",
-    "upload_preparing": "Preparazione",
+    "preparing": "Preparazione",
     "upload_reading_metadata_files": "Lettura dei file metadati",
     "upload_processing": "{{count, number}} / {{total, number}} file salvati",
     "upload_cancelling": "Annullamento dei caricamenti rimanenti",

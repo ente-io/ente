@@ -56,7 +56,7 @@
     "add_photos_count": "Adicionar {{count, number}} itens",
     "select_photos": "Selecionar fotos",
     "file_upload": "Envio de arquivos",
-    "upload_preparing": "Preparando",
+    "preparing": "Preparando",
     "upload_reading_metadata_files": "Lendo arquivos de metadados",
     "upload_processing": "{{count, number}} / {{total, number}} arquivos processados",
     "upload_cancelling": "Cancelando envios restantes",

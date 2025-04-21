@@ -56,7 +56,7 @@
     "add_photos_count": "Dodaj {{count, number}} elementów",
     "select_photos": "Wybierz zdjęcia",
     "file_upload": "Przesył plików",
-    "upload_preparing": "Przygotowywanie",
+    "preparing": "Przygotowywanie",
     "upload_processing": "{{count, number}} / {{total, number}} plików przetworzonych",
     "upload_cancelling": "Anulowanie pozostałych przesłań",
     "file_not_uploaded_list": "Następujące pliki nie zostały przesłane",

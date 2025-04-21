@@ -220,7 +220,7 @@ const subtitleText = (
 ) => {
     switch (uploadPhase) {
         case "preparing":
-            return t("upload_preparing");
+            return t("preparing");
         case "readingMetadata":
             return t("upload_reading_metadata");
         case "uploading":

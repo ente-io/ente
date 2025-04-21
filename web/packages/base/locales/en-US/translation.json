@@ -56,7 +56,7 @@
     "add_photos_count": "Add {{count, number}} items",
     "select_photos": "Select photos",
     "file_upload": "File upload",
-    "upload_preparing": "Preparing",
+    "preparing": "Preparing",
     "upload_reading_metadata_files": "Reading metadata files",
     "upload_processing": "{{count, number}} / {{total, number}} files processed",
     "upload_cancelling": "Cancelling remaining uploads",

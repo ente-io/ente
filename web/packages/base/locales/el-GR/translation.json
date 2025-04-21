@@ -56,7 +56,7 @@
     "add_photos_count": "Προσθήκη {{count, number}} αντικειμένων",
     "select_photos": "Επιλογή φωτογραφιών",
     "file_upload": "Μεταφόρτωση αρχείου",
-    "upload_preparing": "Προετοιμασία",
+    "preparing": "Προετοιμασία",
     "upload_processing": "{{count, number}} / {{total, number}} αρχεία επεξεργάζονται",
     "upload_cancelling": "Ακύρωση των υπολειπόμενων μεταφορτώσεων",
     "file_not_uploaded_list": "Τα ακόλουθα αρχεία δεν μεταφορτώθηκαν",

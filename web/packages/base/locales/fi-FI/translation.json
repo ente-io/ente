@@ -56,7 +56,7 @@
     "add_photos_count": "Lisää {{count, number}} kohdetta",
     "select_photos": "Valitse kuvat",
     "file_upload": "Tiedoston lataaminen",
-    "upload_preparing": "Valmistellaan",
+    "preparing": "Valmistellaan",
     "upload_reading_metadata_files": "Luetaan metatietotiedostoja",
     "upload_processing": "{{count, number}} / {{total, number}} tiedostoa käsitelty",
     "upload_cancelling": "Peruutetaan jäljellä olevat lataukset",

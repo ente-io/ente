@@ -56,7 +56,7 @@
     "add_photos_count": "{{count, number}} foto's toevoegen",
     "select_photos": "Selecteer foto's",
     "file_upload": "Bestand uploaden",
-    "upload_preparing": "Voorbereiden",
+    "preparing": "Voorbereiden",
     "upload_processing": "{{count, number}} / {{total, number}} bestanden geback-upt",
     "upload_cancelling": "Resterende uploads worden geannuleerd",
     "file_not_uploaded_list": "De volgende bestanden zijn niet geüpload",

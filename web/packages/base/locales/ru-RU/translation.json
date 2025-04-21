@@ -56,7 +56,7 @@
     "add_photos_count": "Добавить {{count, number}} элементов",
     "select_photos": "Выбрать фотографии",
     "file_upload": "Загрузка файла",
-    "upload_preparing": "Подготовка",
+    "preparing": "Подготовка",
     "upload_processing": "{{count, number}} / {{total, number}} файлов обработано",
     "upload_cancelling": "Отмена оставшихся загрузок",
     "file_not_uploaded_list": "Следующие файлы не были загружены",
