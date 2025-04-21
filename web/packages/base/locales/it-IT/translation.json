@@ -410,7 +410,7 @@
     "viewers": "Visualizzatori",
     "add_more": "Aggiungi altri",
     "or_add_existing": "Oppure scegline uno esistente",
-    "NOT_FOUND": "404 - non trovato",
+    "not_found": "404 - Non trovato",
     "link_expired": "Link scaduto",
     "link_expired_message": "",
     "manage_link": "Gestisci link",

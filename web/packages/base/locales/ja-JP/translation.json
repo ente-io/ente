@@ -410,7 +410,7 @@
     "viewers": "ビューアー",
     "add_more": "さらに追加",
     "or_add_existing": "または既存のものを選択",
-    "NOT_FOUND": "404 - 見つかりません",
+    "not_found": "404 - 見つかりません",
     "link_expired": "リンクは有効期限切れです",
     "link_expired_message": "このリンクは有効期限が切れているか無効になっています",
     "manage_link": "リンクを管理",

@@ -410,7 +410,7 @@
     "viewers": "Người xem",
     "add_more": "Thêm nhiều hơn",
     "or_add_existing": "Hoặc chọn một cái có sẵn",
-    "NOT_FOUND": "404 - không tìm thấy",
+    "not_found": "404 - Không tìm thấy",
     "link_expired": "Liên kết đã hết hạn",
     "link_expired_message": "Liên kết này đã hết hạn hoặc đã bị vô hiệu hóa",
     "manage_link": "Quản lý liên kết",

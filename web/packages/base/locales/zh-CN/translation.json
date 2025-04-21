@@ -410,7 +410,7 @@
     "viewers": "查看者",
     "add_more": "添加更多",
     "or_add_existing": "或选择一个现有的",
-    "NOT_FOUND": "404 - 未找到",
+    "not_found": "404 - 未找到",
     "link_expired": "链接已过期",
     "link_expired_message": "此链接已过期或被禁用",
     "manage_link": "管理链接",

@@ -410,7 +410,7 @@
     "viewers": "Žiūrėtojai",
     "add_more": "Įtraukti daugiau",
     "or_add_existing": "Arba pasirinkite esamą",
-    "NOT_FOUND": "404 – nerasta.",
+    "not_found": "404 – Nerasta.",
     "link_expired": "Nuoroda nebegalioja",
     "link_expired_message": "Ši nuoroda nebegalioja arba yra išjungta.",
     "manage_link": "Tvarkyti nuorodą",

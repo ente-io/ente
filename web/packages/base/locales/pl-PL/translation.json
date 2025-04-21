@@ -410,7 +410,7 @@
     "viewers": "Widzowie",
     "add_more": "Dodaj więcej",
     "or_add_existing": "Lub wybierz istniejący",
-    "NOT_FOUND": "404 - nie znaleziono",
+    "not_found": "404 - Nie znaleziono",
     "link_expired": "Link wygasł",
     "link_expired_message": "Ten link wygasł lub został wyłączony",
     "manage_link": "Zarządzaj linkiem",
