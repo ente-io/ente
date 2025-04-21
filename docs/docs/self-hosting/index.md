@@ -155,4 +155,4 @@ Notifications, Hardcoded-OTT's, etc.
 
 If you need any help or support, do not hesitate to drop your queries on our community
 [discord channel](https://discord.gg/z2YVKkycX3) or create a 
-[Github Discussion](https://github.com/ente-io/ente/discussions) where 100s of self-hosters help each other :p.
+[Github Discussion](https://github.com/ente-io/ente/discussions) where 100s of self-hosters help each other.
