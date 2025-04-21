@@ -25,6 +25,7 @@ import {
 import ItemList from "components/ItemList";
 import { FilledIconButton } from "ente-base/components/mui";
 import { useBaseContext } from "ente-base/context";
+import { formattedListJoin } from "ente-base/i18n";
 import {
     type UploadPhase,
     type UploadResult,
@@ -198,7 +199,9 @@ const UploadProgressTitle: React.FC = () => {
 };
 
 const UploadProgressSubtitleText: React.FC = () => {
-    const { uploadPhase, uploadCounter } = useContext(UploadProgressContext);
+    const { uploadPhase, uploadCounter, finishedUploads } = useContext(
+        UploadProgressContext,
+    );
 
     return (
         <Typography
@@ -209,7 +212,7 @@ const UploadProgressSubtitleText: React.FC = () => {
                 marginTop: "4px",
             }}
         >
-            {subtitleText(uploadPhase, uploadCounter)}
+            {subtitleText(uploadPhase, uploadCounter, finishedUploads)}
         </Typography>
     );
 };
@@ -217,6 +220,7 @@ const UploadProgressSubtitleText: React.FC = () => {
 const subtitleText = (
     uploadPhase: UploadPhase,
     uploadCounter: UploadCounter,
+    finishedUploads: SegregatedFinishedUploads | null | undefined,
 ) => {
     switch (uploadPhase) {
         case "preparing":
@@ -230,10 +234,47 @@ const subtitleText = (
             });
         case "cancelling":
             return t("upload_cancelling");
-        case "done":
-            // TODO(MR):
-            return t("upload_done", { count: uploadCounter.finished });
+        case "done": {
+            const count = uploadedFileCount(finishedUploads);
+            const notCount = notUploadedFileCount(finishedUploads);
+            const items: string[] = [];
+            if (count) items.push(t("upload_done", { count }));
+            if (notCount) items.push(t("upload_skipped", { count: notCount }));
+            if (!items.length) {
+                return t("upload_done", { count });
+            } else {
+                return formattedListJoin(items);
+            }
+        }
     }
+};
+
+const uploadedFileCount = (
+    finishedUploads: SegregatedFinishedUploads | null | undefined,
+) => {
+    if (!finishedUploads) return 0;
+
+    let c = 0;
+    c += finishedUploads.get("uploaded")?.length ?? 0;
+    c += finishedUploads.get("uploadedWithStaticThumbnail")?.length ?? 0;
+    c += finishedUploads.get("addedSymlink")?.length ?? 0;
+
+    return c;
+};
+
+const notUploadedFileCount = (
+    finishedUploads: SegregatedFinishedUploads | null | undefined,
+) => {
+    if (!finishedUploads) return 0;
+
+    let c = 0;
+    c += finishedUploads.get("alreadyUploaded")?.length ?? 0;
+    c += finishedUploads.get("blocked")?.length ?? 0;
+    c += finishedUploads.get("failed")?.length ?? 0;
+    c += finishedUploads.get("largerThanAvailableStorage")?.length ?? 0;
+    c += finishedUploads.get("tooLarge")?.length ?? 0;
+    c += finishedUploads.get("unsupported")?.length ?? 0;
+    return c;
 };
 
 const UploadProgressBar: React.FC = () => {
@@ -264,18 +305,7 @@ function UploadProgressDialog() {
     const [hasUnUploadedFiles, setHasUnUploadedFiles] = useState(false);
 
     useEffect(() => {
-        if (
-            finishedUploads.get("alreadyUploaded")?.length > 0 ||
-            finishedUploads.get("blocked")?.length > 0 ||
-            finishedUploads.get("failed")?.length > 0 ||
-            finishedUploads.get("largerThanAvailableStorage")?.length > 0 ||
-            finishedUploads.get("tooLarge")?.length > 0 ||
-            finishedUploads.get("unsupported")?.length > 0
-        ) {
-            setHasUnUploadedFiles(true);
-        } else {
-            setHasUnUploadedFiles(false);
-        }
+        setHasUnUploadedFiles(notUploadedFileCount(finishedUploads) > 0);
     }, [finishedUploads]);
 
     const handleClose: DialogProps["onClose"] = (_, reason) => {
