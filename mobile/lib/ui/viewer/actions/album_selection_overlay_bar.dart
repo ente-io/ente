@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection/collection.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/theme/effects.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/bottom_action_bar/album_bottom_action_bar_widget.dart";
 
 class AlbumSelectionOverlayBar extends StatefulWidget {
   final VoidCallback? onClose;
-  final SelectedAlbums selectedAlbum;
+  final SelectedAlbums selectedAlbums;
+  final List<Collection> collections;
   final Color? backgroundColor;
 
   const AlbumSelectionOverlayBar(
-    this.selectedAlbum, {
+    this.selectedAlbums,
+    this.collections, {
     super.key,
     this.onClose,
     this.backgroundColor,
@@ -26,12 +31,12 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
   @override
   void initState() {
     super.initState();
-    widget.selectedAlbum.addListener(_selectedAlbumsListener);
+    widget.selectedAlbums.addListener(_selectedAlbumsListener);
   }
 
   @override
   void dispose() {
-    widget.selectedAlbum.removeListener(_selectedAlbumsListener);
+    widget.selectedAlbums.removeListener(_selectedAlbumsListener);
     super.dispose();
   }
 
@@ -52,13 +57,22 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: SelectAllAlbumsButton(
+                  widget.selectedAlbums,
+                  widget.collections,
+                  backgroundColor: widget.backgroundColor,
+                ),
+              ),
+              const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(boxShadow: shadowFloatFaintLight),
                 child: AlbumBottomActionBarWidget(
-                  widget.selectedAlbum,
+                  widget.selectedAlbums,
                   onCancel: () {
-                    if (widget.selectedAlbum.albums.isNotEmpty) {
-                      widget.selectedAlbum.clearAll();
+                    if (widget.selectedAlbums.albums.isNotEmpty) {
+                      widget.selectedAlbums.clearAll();
                     }
                   },
                   backgroundColor: widget.backgroundColor,
@@ -73,6 +87,91 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
   }
 
   _selectedAlbumsListener() {
-    _hasSelectedAlbumsNotifier.value = widget.selectedAlbum.albums.isNotEmpty;
+    _hasSelectedAlbumsNotifier.value = widget.selectedAlbums.albums.isNotEmpty;
+  }
+}
+
+class SelectAllAlbumsButton extends StatefulWidget {
+  final SelectedAlbums selectedAlbums;
+  final List<Collection> collections;
+  final Color? backgroundColor;
+
+  const SelectAllAlbumsButton(
+    this.selectedAlbums,
+    this.collections, {
+    super.key,
+    this.backgroundColor,
+  });
+
+  @override
+  State<SelectAllAlbumsButton> createState() => _SelectAllAlbumsButtonState();
+}
+
+class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
+  bool _allSelected = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (_allSelected) {
+            widget.selectedAlbums.clearAll();
+          } else {
+            widget.selectedAlbums.selectAll(
+              widget.collections.toSet(),
+            );
+          }
+          _allSelected = !_allSelected;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, -1),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                S.of(context).selectAllShort,
+                style: getEnteTextTheme(context).miniMuted,
+              ),
+              const SizedBox(width: 4),
+              ListenableBuilder(
+                listenable: widget.selectedAlbums,
+                builder: (context, _) {
+                  if (widget.selectedAlbums.albums.length ==
+                      widget.collections.length) {
+                    _allSelected = true;
+                  } else {
+                    _allSelected = false;
+                  }
+                  return Icon(
+                    _allSelected
+                        ? Icons.check_circle
+                        : Icons.check_circle_outline,
+                    color: _allSelected ? null : colorScheme.strokeMuted,
+                    size: 18,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
