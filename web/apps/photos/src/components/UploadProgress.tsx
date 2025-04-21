@@ -295,17 +295,17 @@ function UploadProgressDialog() {
                     />
                     {uploadPhase == "done" && hasUnUploadedFiles && (
                         <NotUploadSectionHeader>
-                            {t("FILE_NOT_UPLOADED_LIST")}
+                            {t("file_not_uploaded_list")}
                         </NotUploadSectionHeader>
                     )}
                     <ResultSection
                         uploadResult="blocked"
                         sectionTitle={t("BLOCKED_UPLOADS")}
-                        sectionInfo={<Trans i18nKey={"ETAGS_BLOCKED"} />}
+                        sectionInfo={<Trans i18nKey={"etags_blocked"} />}
                     />
                     <ResultSection
                         uploadResult="failed"
-                        sectionTitle={t("FAILED_UPLOADS")}
+                        sectionTitle={t("failed_uploads")}
                         sectionInfo={
                             uploadPhase == "done"
                                 ? undefined
@@ -379,7 +379,7 @@ const InProgressSection: React.FC = () => {
             </SectionAccordionSummary>
             <SectionAccordionDetails>
                 {hasLivePhotos && (
-                    <SectionInfo>{t("LIVE_PHOTOS_DETECTED")}</SectionInfo>
+                    <SectionInfo>{t("live_photos_detected")}</SectionInfo>
                 )}
                 <ItemList
                     items={fileList}
@@ -546,7 +546,7 @@ const DoneFooter: React.FC = () => {
                 (finishedUploads?.get("failed")?.length > 0 ||
                 finishedUploads?.get("blocked")?.length > 0 ? (
                     <Button fullWidth onClick={retryFailed}>
-                        {t("RETRY_FAILED")}
+                        {t("retry_failed_uploads")}
                     </Button>
                 ) : (
                     <Button fullWidth onClick={onClose}>

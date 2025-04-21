@@ -90,7 +90,7 @@ const Page: React.FC = () => {
             log.error("Local storage is not accessible", e);
             showMiniDialog({
                 title: t("error"),
-                message: t("LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE"),
+                message: t("local_storage_not_accessible"),
                 nonClosable: true,
                 cancel: false,
             });
