@@ -56,13 +56,8 @@
     "add_photos_count": "Thêm {{count, number}} mục",
     "select_photos": "Chọn ảnh",
     "file_upload": "Tải tệp lên",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Chuẩn bị tải lên",
-        "1": "Đang đọc tệp siêu dữ liệu google",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} tệp đã được xử lý",
-        "4": "Hủy bỏ các tải lên còn lại",
-        "5": "Sao lưu hoàn tất"
-    },
+    "upload_processing": "{{count, number}} / {{total, number}} tệp đã được xử lý",
+    "upload_cancelling": "Hủy bỏ các tải lên còn lại",
     "file_not_uploaded_list": "Các tệp sau không được tải lên",
     "initial_load_delay_warning": "Tải lần đầu có thể mất một chút thời gian",
     "no_account": "Không có tài khoản",

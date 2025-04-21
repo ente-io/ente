@@ -56,13 +56,10 @@
     "add_photos_count": "Lisää {{count, number}} kohdetta",
     "select_photos": "Valitse kuvat",
     "file_upload": "Tiedoston lataaminen",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Valmistellaan latausta",
-        "1": "Luetaan googlen metatietotiedostoja",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} tiedostoa käsitelty",
-        "4": "Peruutetaan jäljellä olevat lataukset",
-        "5": "Varmuuskopiointi on valmis"
-    },
+    "upload_preparing": "Valmistellaan",
+    "upload_reading_metadata_files": "Luetaan metatietotiedostoja",
+    "upload_processing": "{{count, number}} / {{total, number}} tiedostoa käsitelty",
+    "upload_cancelling": "Peruutetaan jäljellä olevat lataukset",
     "file_not_uploaded_list": "Seuraavia tiedostoja ei ladattu",
     "initial_load_delay_warning": "Ensimmäinen lataus voi kestää jonkin aikaa",
     "no_account": "Ei tiliä",

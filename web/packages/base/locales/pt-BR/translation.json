@@ -56,13 +56,10 @@
     "add_photos_count": "Adicionar {{count, number}} itens",
     "select_photos": "Selecionar fotos",
     "file_upload": "Envio de arquivos",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Preparando para enviar",
-        "1": "Lendo arquivos de metadados da Google",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} arquivos processados",
-        "4": "Cancelando envios restantes",
-        "5": "Cópia de segurança concluído"
-    },
+    "upload_preparing": "Preparando",
+    "upload_reading_metadata_files": "Lendo arquivos de metadados",
+    "upload_processing": "{{count, number}} / {{total, number}} arquivos processados",
+    "upload_cancelling": "Cancelando envios restantes",
     "file_not_uploaded_list": "Os seguintes arquivos não foram enviados",
     "initial_load_delay_warning": "Ao carregar pela primeira vez talvez possa levar algum tempo",
     "no_account": "Não possui uma conta",

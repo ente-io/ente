@@ -56,13 +56,7 @@
     "add_photos_count": "Añadir {{count, number}} fotos",
     "select_photos": "Seleccionar fotos",
     "file_upload": "Subir archivo",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Preparando la subida",
-        "1": "Leyendo archivos de metadatos de google",
-        "3": "{{uploadCounter.finished}} / {{uploadCounter.total}} archivos metadatos extraídos",
-        "4": "Cancelar subidas restantes",
-        "5": "Copia de seguridad completa"
-    },
+    "upload_cancelling": "Cancelar subidas restantes",
     "file_not_uploaded_list": "Los siguientes archivos no se han subido",
     "initial_load_delay_warning": "La primera carga puede tomar algún tiempo",
     "no_account": "No tienes una cuenta",

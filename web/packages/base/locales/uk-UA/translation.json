@@ -56,13 +56,8 @@
     "add_photos_count": "Додати {{count, number}} елементів",
     "select_photos": "Виберіть фото",
     "file_upload": "Вивантаження файлу",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Підготовка до вивантаження",
-        "1": "Читання файлів метаданих Google",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} файлів оброблено",
-        "4": "Скасування завантажень, яку залишилися",
-        "5": "Резервне копіювання завершено"
-    },
+    "upload_processing": "{{count, number}} / {{total, number}} файлів оброблено",
+    "upload_cancelling": "Скасування завантажень, яку залишилися",
     "file_not_uploaded_list": "Наступні файли не були вивантаженні",
     "initial_load_delay_warning": "Перше завантаження може зайняти деякий час",
     "no_account": "Не маєте облікового запису",

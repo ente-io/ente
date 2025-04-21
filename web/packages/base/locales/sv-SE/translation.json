@@ -56,13 +56,9 @@
     "add_photos_count": "Lägg till {{count, number}} objekt",
     "select_photos": "Välj bilder",
     "file_upload": "Ladda upp",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Förbereder att ladda upp",
-        "1": "Läser Google metadatafiler",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} filer behandlade",
-        "4": "Avbryter återstående uppladdningar",
-        "5": "Säkerhetskopiering slutförd"
-    },
+    "upload_reading_metadata_files": "Läser metadatafiler",
+    "upload_processing": "{{count, number}} / {{total, number}} filer behandlade",
+    "upload_cancelling": "Avbryter återstående uppladdningar",
     "file_not_uploaded_list": "Följande filer laddades ej upp",
     "initial_load_delay_warning": "",
     "no_account": "",

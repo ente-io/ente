@@ -56,13 +56,9 @@
     "add_photos_count": "{{count, number}} foto's toevoegen",
     "select_photos": "Selecteer foto's",
     "file_upload": "Bestand uploaden",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Upload wordt voorbereid",
-        "1": "Lezen van Google metadata bestanden",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} bestanden geback-upt",
-        "4": "Resterende uploads worden geannuleerd",
-        "5": "Back-up voltooid"
-    },
+    "upload_preparing": "Voorbereiden",
+    "upload_processing": "{{count, number}} / {{total, number}} bestanden geback-upt",
+    "upload_cancelling": "Resterende uploads worden geannuleerd",
     "file_not_uploaded_list": "De volgende bestanden zijn niet geüpload",
     "initial_load_delay_warning": "Eerste keer laden kan enige tijd duren",
     "no_account": "Heb nog geen account",

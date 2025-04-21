@@ -56,13 +56,8 @@
     "add_photos_count": "Tambahkan {{count, number}} item",
     "select_photos": "Pilih foto",
     "file_upload": "Unggah file",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Bersiap untuk mengunggah",
-        "1": "Membaca file metadata google",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} file diproses",
-        "4": "Membatalkan sisa upload",
-        "5": "Cadangan selesai"
-    },
+    "upload_processing": "{{count, number}} / {{total, number}} file diproses",
+    "upload_cancelling": "Membatalkan sisa upload",
     "file_not_uploaded_list": "File berikut tidak terunggah",
     "initial_load_delay_warning": "Pemuatan pertama mungkin memakan waktu",
     "no_account": "Belum memiliki akun",

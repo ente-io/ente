@@ -56,13 +56,8 @@
     "add_photos_count": "아이템 {{count, number}} 개 추가하기",
     "select_photos": "사진 선택하기",
     "file_upload": "파일 업로드",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "업로드 준비중",
-        "1": "구글 메타데이타 파일들 읽는중",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} 파일이 처리되었습니다",
-        "4": "남은 업로드 취소중",
-        "5": "백업 완료"
-    },
+    "upload_processing": "{{count, number}} / {{total, number}} 파일이 처리되었습니다",
+    "upload_cancelling": "남은 업로드 취소중",
     "file_not_uploaded_list": "아래 파일들은 업로드 되지 않았습니다",
     "initial_load_delay_warning": "처음 로딩시 다소 시간이 걸릴 수 있습니다",
     "no_account": "계정이 없습니다",

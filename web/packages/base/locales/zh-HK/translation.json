@@ -56,13 +56,8 @@
     "add_photos_count": "新增 {count, number} 個項目",
     "select_photos": "選擇照片",
     "file_upload": "上傳檔案",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "正在準備上載",
-        "1": "",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} 個檔案已完成",
-        "4": "取消剩餘上傳項目",
-        "5": "備份完成"
-    },
+    "upload_processing": "{{count, number}} / {{total, number}} 個檔案已完成",
+    "upload_cancelling": "取消剩餘上傳項目",
     "file_not_uploaded_list": "以下檔案未上傳",
     "initial_load_delay_warning": "首次載入需時",
     "no_account": "未有帳戶",

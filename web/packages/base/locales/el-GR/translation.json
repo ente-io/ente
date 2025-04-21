@@ -56,13 +56,9 @@
     "add_photos_count": "Προσθήκη {{count, number}} αντικειμένων",
     "select_photos": "Επιλογή φωτογραφιών",
     "file_upload": "Μεταφόρτωση αρχείου",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Προετοιμασία για μεταφόρτωση",
-        "1": "Ανάγνωση αρχείων μεταδεδομένων google",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} αρχεία επεξεργάζονται",
-        "4": "Ακύρωση των υπολειπόμενων μεταφορτώσεων",
-        "5": "Το αντίγραφο ασφαλείας ολοκληρώθηκε"
-    },
+    "upload_preparing": "Προετοιμασία",
+    "upload_processing": "{{count, number}} / {{total, number}} αρχεία επεξεργάζονται",
+    "upload_cancelling": "Ακύρωση των υπολειπόμενων μεταφορτώσεων",
     "file_not_uploaded_list": "Τα ακόλουθα αρχεία δεν μεταφορτώθηκαν",
     "initial_load_delay_warning": "Η πρώτη φόρτωση μπορεί να πάρει κάποιο χρόνο",
     "no_account": "Δεν έχετε λογαριασμό",

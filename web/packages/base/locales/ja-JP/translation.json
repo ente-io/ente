@@ -56,13 +56,8 @@
     "add_photos_count": "{{count, number}} アイテムを追加",
     "select_photos": "写真を選択",
     "file_upload": "ファイルをアップロード",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "アップロードの準備中",
-        "1": "Googleメタデータファイルを読み込み中",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} ファイルが処理されました",
-        "4": "残りのアップロードをキャンセル",
-        "5": "バックアップが完了しました"
-    },
+    "upload_processing": "{{count, number}} / {{total, number}} ファイルが処理されました",
+    "upload_cancelling": "残りのアップロードをキャンセル",
     "file_not_uploaded_list": "次のファイルはアップロードされませんでした",
     "initial_load_delay_warning": "最初の読み込みには時間がかかる場合があります",
     "no_account": "アカウントがありませんか",

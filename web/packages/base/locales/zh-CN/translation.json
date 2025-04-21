@@ -56,13 +56,8 @@
     "add_photos_count": "添加 {{count, number}} 个项目",
     "select_photos": "选择照片",
     "file_upload": "上传文件",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "正在准备上传",
-        "1": "正在读取 Google 元数据文件",
-        "3": "已处理 {{uploadCounter.finished, number}} / {{uploadCounter.total, number}} 个文件",
-        "4": "正在取消剩余的上传内容",
-        "5": "备份完成"
-    },
+    "upload_processing": "已处理 {{count, number}} / {{total, number}} 个文件",
+    "upload_cancelling": "正在取消剩余的上传内容",
     "file_not_uploaded_list": "以下文件未上传",
     "initial_load_delay_warning": "第一次加载可能需要一些时间",
     "no_account": "没有账号",

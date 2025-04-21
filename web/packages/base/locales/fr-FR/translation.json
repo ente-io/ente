@@ -56,13 +56,8 @@
     "add_photos_count": "Ajouter {{count, number}} éléments",
     "select_photos": "Sélectionner des photos",
     "file_upload": "Fichier chargé",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Préparation du chargement",
-        "1": "Lecture des fichiers de métadonnées de Google",
-        "3": "{{uploadCounter.finished}} / {{uploadCounter.total}} fichiers sauvegardés",
-        "4": "Annulation des chargements restants",
-        "5": "Sauvegarde terminée"
-    },
+    "upload_processing": "{{count, number}} / {{total, number}} fichiers sauvegardés",
+    "upload_cancelling": "Annulation des chargements restants",
     "file_not_uploaded_list": "Les fichiers suivants n'ont pas été chargés",
     "initial_load_delay_warning": "Le premier affichage peut prendre du temps",
     "no_account": "Je n'ai pas de compte",

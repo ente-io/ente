@@ -56,13 +56,9 @@
     "add_photos_count": "Добавить {{count, number}} элементов",
     "select_photos": "Выбрать фотографии",
     "file_upload": "Загрузка файла",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Подготовка к загрузке",
-        "1": "Чтение файлов метаданных Google",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} файлов обработано",
-        "4": "Отмена оставшихся загрузок",
-        "5": "Резервное копирование завершено"
-    },
+    "upload_preparing": "Подготовка",
+    "upload_processing": "{{count, number}} / {{total, number}} файлов обработано",
+    "upload_cancelling": "Отмена оставшихся загрузок",
     "file_not_uploaded_list": "Следующие файлы не были загружены",
     "initial_load_delay_warning": "Первая загрузка может занять некоторое время",
     "no_account": "У меня нет учетной записи",

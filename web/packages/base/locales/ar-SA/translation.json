@@ -56,13 +56,8 @@
     "add_photos_count": "إضافة {{count, number}} عناصر",
     "select_photos": "تحديد الصور",
     "file_upload": "تحميل الملف",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "الإعداد للتحميل",
-        "1": "قراءة ملفات بيانات تعريف جوجل",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} ملف تمت معالجته",
-        "4": "إلغاء التحميلات المتبقية",
-        "5": "اكتمل النسخ الاحتياطي"
-    },
+    "upload_processing": "{{count, number}} / {{total, number}} ملف تمت معالجته",
+    "upload_cancelling": "إلغاء التحميلات المتبقية",
     "file_not_uploaded_list": "لم يتم تحميل الملفات التالية",
     "initial_load_delay_warning": "التحميل الأول قد يستغرق بعض الوقت",
     "no_account": "ليس لديك حساب",

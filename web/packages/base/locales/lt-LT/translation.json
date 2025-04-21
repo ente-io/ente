@@ -56,13 +56,8 @@
     "add_photos_count": "Įtraukti {{count, number}} elementus (-ų)",
     "select_photos": "Pasirinkti nuotraukas",
     "file_upload": "Failų įkėlimas",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Ruošima įkelti",
-        "1": "Skaitomi „Google“ metaduomenų failai",
-        "3": "{{uploadCounter.finished, number}} / {{{uploadCounter.total, number}} apdoroti failai",
-        "4": "Atšaukiami likę įkėlimai",
-        "5": "Atsarginės kopijos kūrimas baigtas"
-    },
+    "upload_processing": "{{count, number}} / {{{total, number}} apdoroti failai",
+    "upload_cancelling": "Atšaukiami likę įkėlimai",
     "file_not_uploaded_list": "Toliau nurodyti failai nebuvo įkelti",
     "initial_load_delay_warning": "Pirmasis įkėlimas gali šiek tiek užtrukti",
     "no_account": "Neturiu paskyros",

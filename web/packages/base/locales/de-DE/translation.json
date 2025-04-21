@@ -56,13 +56,8 @@
     "add_photos_count": "{{count, number}} Dateien hinzufügen",
     "select_photos": "Foto auswählen",
     "file_upload": "Datei hochladen",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Hochladen wird vorbereitet",
-        "1": "Lese Google-Metadaten",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} Dateien verarbeitet",
-        "4": "Verbleibende Uploads werden abgebrochen",
-        "5": "Sicherung abgeschlossen"
-    },
+    "upload_processing": "{{count, number}} / {{total, number}} Dateien verarbeitet",
+    "upload_cancelling": "Verbleibende Uploads werden abgebrochen",
     "file_not_uploaded_list": "Die folgenden Dateien wurden nicht hochgeladen",
     "initial_load_delay_warning": "Das erste Laden kann einige Zeit in Anspruch nehmen",
     "no_account": "Kein Konto vorhanden",

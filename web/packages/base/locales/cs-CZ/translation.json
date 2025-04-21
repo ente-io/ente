@@ -56,13 +56,8 @@
     "add_photos_count": "Přidat {{count, number}} předměty",
     "select_photos": "Vybrat fotografii",
     "file_upload": "Nahrát soubor",
-    "UPLOAD_STAGE_MESSAGE": {
-        "0": "Připravuji se na nahrání",
-        "1": "Čtení souborů metadat Google",
-        "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} souboru zpracováno",
-        "4": "Ruší se zbývající nahrávání",
-        "5": "Zálohování bylo dokončeno"
-    },
+    "upload_processing": "{{count, number}} / {{total, number}} souboru zpracováno",
+    "upload_cancelling": "Ruší se zbývající nahrávání",
     "file_not_uploaded_list": "Následující soubory nebyly nahrány",
     "initial_load_delay_warning": "První načitení může chvíli trvat",
     "no_account": "Nemáte účet",
