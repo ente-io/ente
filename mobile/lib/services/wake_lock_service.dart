@@ -5,6 +5,7 @@ enum WakeLockFor {
   videoPlayback,
   fasterBackupsOniOSByKeepingScreenAwake,
   machineLearningSettingsScreen,
+  handlingMediaKitEdgeCase,
 }
 
 /// Use this class to enable/disable wakelock. This class makes sure that
@@ -34,7 +35,8 @@ class EnteWakeLockService {
     required bool enable,
     required WakeLockFor wakeLockFor,
   }) {
-    if (wakeLockFor == WakeLockFor.fasterBackupsOniOSByKeepingScreenAwake) {
+    if (wakeLockFor == WakeLockFor.fasterBackupsOniOSByKeepingScreenAwake ||
+        wakeLockFor == WakeLockFor.handlingMediaKitEdgeCase) {
       WakelockPlus.toggle(enable: enable);
       _prefs.setBool(kKeepAppAwakeAcrossSessions, enable);
     } else {
