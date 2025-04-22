@@ -891,16 +891,6 @@ class FilesDB with SqlDbBase {
     return files;
   }
 
-  Future<List<EnteFile>> getUnUploadedLocalFiles() async {
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE ($columnUploadedFileID IS NULL OR '
-      '$columnUploadedFileID IS -1) AND $columnLocalID IS NOT NULL '
-      'GROUP BY $columnLocalID ORDER BY $columnCreationTime DESC',
-    );
-    return convertToFiles(results);
-  }
-
   Future<List<int>> getUploadedFileIDsToBeUpdated(int ownerID) async {
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
