@@ -713,6 +713,11 @@ export class FileViewerPhotoSwipe {
          */
         let videoVideoEl: HTMLVideoElement | undefined;
 
+        /**
+         * The epoch time (milliseconds) when the latest slide change happened.
+         */
+        let lastSlideChangeEpochMilli = Date.now();
+
         pswp.on("change", () => {
             const itemData = currSlideData();
 
@@ -742,6 +747,8 @@ export class FileViewerPhotoSwipe {
             } else {
                 videoVideoEl = undefined;
             }
+
+            lastSlideChangeEpochMilli = Date.now();
         });
 
         /**
@@ -1085,9 +1092,25 @@ export class FileViewerPhotoSwipe {
 
         const handleNextSlide = () => pswp.next();
 
+        /**
+         * The arrow keys are used both for navigating through slides, and for
+         * scrubbing through the video.
+         *
+         * When on a video, the navigation requires the option prefix (since
+         * scrubbing through the video is a more common requirement). However
+         * this breaks the user's flow when they are navigating between slides
+         * fast by using the arrow keys - they land on a video and the
+         * navigation stops.
+         *
+         * So as a special case, we keep using arrow keys for navigation for the
+         * first 1s when the user lands on a slide.
+         */
+        const isUserLikelyNavigatingBetweenSlides = () =>
+            Date.now() - lastSlideChangeEpochMilli < 1000; /* ms */
+
         const handleSeekBackOrPreviousSlide = () => {
             const video = videoVideoEl;
-            if (video) {
+            if (video && !isUserLikelyNavigatingBetweenSlides()) {
                 video.currentTime = Math.max(video.currentTime - 5, 0);
             } else {
                 handlePreviousSlide();
@@ -1096,7 +1119,7 @@ export class FileViewerPhotoSwipe {
 
         const handleSeekForwardOrNextSlide = () => {
             const video = videoVideoEl;
-            if (video) {
+            if (video && !isUserLikelyNavigatingBetweenSlides()) {
                 video.currentTime = video.currentTime + 5;
             } else {
                 handleNextSlide();
