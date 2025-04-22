@@ -1197,7 +1197,7 @@ const PublicShare: React.FC<PublicShareProps> = ({
         }
     }, [publicShareProp]);
 
-    const copyToClipboardHelper = () => {
+    const handleCopyLink = () => {
         navigator.clipboard.writeText(publicShareUrl);
     };
 
@@ -1220,7 +1220,7 @@ const PublicShare: React.FC<PublicShareProps> = ({
             )}
             <PublicLinkCreated
                 {...publicLinkCreatedVisibilityProps}
-                onCopyLink={copyToClipboardHelper}
+                onCopyLink={handleCopyLink}
             />
         </>
     );
@@ -1245,8 +1245,6 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
 
     const [copied, handleCopyLink] = useClipboardCopy(publicShareUrl);
 
-    const CopyableIcon = copied ? DoneIcon : ContentCopyIcon;
-
     const closeManageShare = () => setManageShareView(false);
     const openManageShare = () => setManageShareView(true);
 
@@ -1267,7 +1265,13 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                         />
                     ) : (
                         <RowButton
-                            startIcon={<CopyableIcon />}
+                            startIcon={
+                                copied ? (
+                                    <DoneIcon sx={{ color: "accent.main" }} />
+                                ) : (
+                                    <ContentCopyIcon />
+                                )
+                            }
                             onClick={handleCopyLink}
                             disabled={isLinkExpired(publicShareProp.validTill)}
                             label={t("copy_link")}
@@ -1322,6 +1326,8 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
 
     const [sharableLinkError, setSharableLinkError] = useState(null);
 
+    const [copied, handleCopyLink] = useClipboardCopy(publicShareUrl);
+
     const handleRootClose = () => {
         onClose();
         onRootClose();
@@ -1353,10 +1359,6 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
         } finally {
             galleryContext.setBlockingLoad(false);
         }
-    };
-
-    const copyToClipboardHelper = (text: string) => () => {
-        navigator.clipboard.writeText(text);
     };
 
     return (
@@ -1411,8 +1413,14 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                     </RowButtonGroup>
                     <RowButtonGroup>
                         <RowButton
-                            startIcon={<ContentCopyIcon />}
-                            onClick={copyToClipboardHelper(publicShareUrl)}
+                            startIcon={
+                                copied ? (
+                                    <DoneIcon sx={{ color: "accent.main" }} />
+                                ) : (
+                                    <ContentCopyIcon />
+                                )
+                            }
+                            onClick={handleCopyLink}
                             label={t("copy_link")}
                         />
                     </RowButtonGroup>
