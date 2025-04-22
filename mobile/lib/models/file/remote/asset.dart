@@ -53,7 +53,9 @@ class RemoteAsset {
     }
     final latitude = double.tryParse(metadata.data["latitude"].toString());
     final longitude = double.tryParse(metadata.data["longitude"].toString());
-    if (latitude == null || longitude == null) {
+    if (latitude == null ||
+        longitude == null ||
+        (latitude == 0.0 && longitude == 0.0)) {
       return null;
     } else {
       return Location(latitude: latitude, longitude: longitude);
