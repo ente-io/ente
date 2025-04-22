@@ -3,6 +3,7 @@
  */
 
 import { proxy, transfer } from "comlink";
+import debounce from "debounce";
 import { isDesktop } from "ente-base/app";
 import { blobCache } from "ente-base/blob-cache";
 import { ensureElectron } from "ente-base/electron";
@@ -385,8 +386,6 @@ export const mlSync = async () => {
     _state.isSyncing = false;
 };
 
-const workerDidUnawaitedIndex = () => void updateClustersAndPeople();
-
 const updateClustersAndPeople = async () => {
     const masterKey = await masterKeyFromSession();
 
@@ -399,6 +398,28 @@ const updateClustersAndPeople = async () => {
     // Update the people shown in the UI.
     await updatePeopleState();
 };
+
+/**
+ * A debounced variant of {@link updateClustersAndPeople} suitable for use
+ * during potential in-progress uploads.
+ *
+ * The debounce uses a long interval (30 seconds) to avoid unnecessary reruns of
+ * the expensive clustering as individual files get uploaded. Usually we
+ * wouldn't get here as the live queue will keep getting refilled and the worker
+ * would keep ticking, but it is possible, depending on timing, for the queue to
+ * drain in the middle of uploads too.
+ *
+ * Ideally, we'd like to do the cluster update just once when the upload has
+ * completed, however currently we don't have access to {@link uploadManager}
+ * from here. So this gets us near that ideal, without adding too much impact or
+ * requiring us to be aware of the uploadManager status.
+ */
+const debounceUpdateClustersAndPeople = debounce(
+    updateClustersAndPeople,
+    30 * 1e3,
+);
+
+const workerDidUnawaitedIndex = () => void debounceUpdateClustersAndPeople();
 
 /**
  * Run indexing on a file which was uploaded from this client.
