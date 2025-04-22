@@ -39,6 +39,7 @@ import {
     RowSwitch,
 } from "ente-base/components/RowButton";
 import { Titlebar } from "ente-base/components/Titlebar";
+import { useClipboardCopy } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { sharedCryptoWorker } from "ente-base/crypto";
@@ -1209,7 +1210,6 @@ const PublicShare: React.FC<PublicShareProps> = ({
                     collection={collection}
                     publicShareUrl={publicShareUrl}
                     onRootClose={onRootClose}
-                    copyToClipboardHelper={copyToClipboardHelper}
                 />
             ) : (
                 <EnablePublicShareOptions
@@ -1232,7 +1232,6 @@ interface ManagePublicShareProps {
     setPublicShareProp: SetPublicShareProp;
     onRootClose: () => void;
     publicShareUrl: string;
-    copyToClipboardHelper: () => void;
 }
 
 const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
@@ -1241,11 +1240,16 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
     collection,
     onRootClose,
     publicShareUrl,
-    copyToClipboardHelper,
 }) => {
     const [manageShareView, setManageShareView] = useState(false);
+
+    const [copied, handleCopyLink] = useClipboardCopy(publicShareUrl);
+
+    const CopyableIcon = copied ? DoneIcon : ContentCopyIcon;
+
     const closeManageShare = () => setManageShareView(false);
     const openManageShare = () => setManageShareView(true);
+
     return (
         <>
             <Stack>
@@ -1263,8 +1267,8 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
                         />
                     ) : (
                         <RowButton
-                            startIcon={<ContentCopyIcon />}
-                            onClick={copyToClipboardHelper}
+                            startIcon={<CopyableIcon />}
+                            onClick={handleCopyLink}
                             disabled={isLinkExpired(publicShareProp.validTill)}
                             label={t("copy_link")}
                         />
