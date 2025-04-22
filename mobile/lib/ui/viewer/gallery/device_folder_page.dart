@@ -5,6 +5,7 @@ import 'package:photos/core/constants.dart';
 import "package:photos/core/event_bus.dart";
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/local/schema.dart";
 import 'package:photos/events/files_updated_event.dart';
 import "package:photos/events/v1/LocalAssetChangedEvent.dart";
 import "package:photos/generated/l10n.dart";
@@ -13,6 +14,7 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/local/device_albums.dart";
 import "package:photos/services/local/local_import.dart";
@@ -38,9 +40,18 @@ class DeviceFolderPage extends StatelessWidget {
   Widget build(Object context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final files = await LocalImportService.instance
-            .getAlbumFiles(deviceCollection.id);
-        return FileLoadResult(files, false);
+        final files = await localDB.getPathAssets(
+          deviceCollection.id,
+          params: LocalAssertsParam(
+            limit: limit,
+            isAsc: asc ?? false,
+            createAtRange: (creationStartTime, creationEndTime),
+          ),
+        );
+        return FileLoadResult(
+          files,
+          limit != null && files.length <= limit,
+        );
       },
       forceReloadEvents: [Bus.instance.on<LocalAssetChangedEvent>()],
       removalEventTypes: const {

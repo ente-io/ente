@@ -88,9 +88,15 @@ class LocalDB with SqlDbBase {
     return result.map((row) => LocalDBMappers.assetRowToEnteFile(row)).toList();
   }
 
-  Future<List<EnteFile>> getPathAssets(String pathID) async {
+  Future<List<EnteFile>> getPathAssets(
+    String pathID, {
+    LocalAssertsParam? params,
+  }) async {
+    final String query =
+        "SELECT * FROM assets WHERE id IN (SELECT asset_id FROM device_path_assets WHERE path_id = ?) ${params != null ? 'AND ${params.whereClause()}' : "order by created_at desc"}";
+    debugPrint(query);
     final result = await _sqliteDB.execute(
-      "SELECT * FROM assets WHERE id IN (SELECT asset_id FROM device_path_assets WHERE path_id = ?) ORDER BY created_at DESC",
+      query,
       [pathID],
     );
     return result.map((row) => LocalDBMappers.assetRowToEnteFile(row)).toList();
@@ -104,7 +110,7 @@ class LocalDB with SqlDbBase {
       final List<List<Object?>> values =
           slice.map((e) => LocalDBMappers.devicePathRow(e)).toList();
       await _sqliteDB.executeBatch(
-        'INSERT  INTO device_path ($devicePathColumns) values(${getParams(5)}) ON CONFLICT(path_id) DO UPDATE SET $updateDevicePathColumns',
+        'INSERT INTO device_path ($devicePathColumns) values(${getParams(5)}) ON CONFLICT(path_id) DO UPDATE SET $updateDevicePathColumns',
         values,
       );
     });

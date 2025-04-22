@@ -69,7 +69,7 @@ class LocalAssertsParam {
   int? limit;
   int? offset;
   String? orderByColumn;
-  bool? isAsc;
+  bool isAsc;
   (int?, int?)? createAtRange;
 
   LocalAssertsParam({
@@ -82,7 +82,7 @@ class LocalAssertsParam {
 
   String get orderBy => orderByColumn == null
       ? ""
-      : "ORDER BY $orderByColumn ${isAsc! ? "ASC" : "DESC"}";
+      : "ORDER BY $orderByColumn ${isAsc ? "ASC" : "DESC"}";
 
   String get limitOffset => (limit != null && offset != null)
       ? "LIMIT $limit +  OFFSET $offset)"
@@ -101,7 +101,11 @@ class LocalAssertsParam {
       where.add(createAtRangeStr);
     }
 
-    return (where.isEmpty ? "" : where.join(" AND ")) + " " + limitOffset;
+    return (where.isEmpty ? "" : where.join(" AND ")) +
+        " " +
+        orderBy +
+        " " +
+        limitOffset;
   }
 }
 
