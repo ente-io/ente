@@ -30,30 +30,31 @@ class AlbumListItemWidget extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     const sideOfThumbnail = 60.0;
+    final bool isFavCollection = collection.type == CollectionType.favorites;
 
-    return ListenableBuilder(
-      listenable: selectedAlbums!,
-      builder: (context, _) {
-        final isSelected = selectedAlbums?.isAlbumSelected(collection) ?? false;
-
-        return GestureDetector(
-          onTap: () {
-            if (onTapCallback != null) {
-              onTapCallback!(collection);
-            }
-          },
-          onLongPress: () {
-            if (onLongPressCallback != null) {
-              onLongPressCallback!(collection);
-            }
-          },
-          behavior: HitTestBehavior.opaque,
-          child: AnimatedContainer(
+    return GestureDetector(
+      onTap: () {
+        if (onTapCallback != null) {
+          onTapCallback!(collection);
+        }
+      },
+      onLongPress: () {
+        if (onLongPressCallback != null) {
+          onLongPressCallback!(collection);
+        }
+      },
+      behavior: HitTestBehavior.opaque,
+      child: ListenableBuilder(
+        listenable: selectedAlbums!,
+        builder: (context, _) {
+          final isSelected =
+              selectedAlbums?.isAlbumSelected(collection) ?? false;
+          return AnimatedContainer(
             curve: Curves.easeOut,
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               border: Border.all(
-                color: isSelected
+                color: isSelected & !isFavCollection
                     ? colorScheme.strokeMuted
                     : colorScheme.strokeFainter,
               ),
@@ -81,7 +82,6 @@ class AlbumListItemWidget extends StatelessWidget {
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
                                 final thumbnail = snapshot.data!;
-
                                 return ThumbnailWidget(
                                   thumbnail,
                                   showFavForAlbumOnly: true,
@@ -143,29 +143,37 @@ class AlbumListItemWidget extends StatelessWidget {
                 ),
                 Flexible(
                   flex: 1,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    child: isSelected
-                        ? IconButtonWidget(
-                            key: const ValueKey("selected"),
-                            icon: Icons.check_circle_rounded,
-                            iconButtonType: IconButtonType.secondary,
-                            iconColor: colorScheme.blurStrokeBase,
-                          )
-                        : const IconButtonWidget(
-                            key: ValueKey("unselected"),
-                            icon: Icons.chevron_right_outlined,
-                            iconButtonType: IconButtonType.secondary,
-                          ),
+                  child: ListenableBuilder(
+                    listenable: selectedAlbums!,
+                    builder: (context, _) {
+                      final isSelected =
+                          selectedAlbums?.isAlbumSelected(collection) ?? false;
+
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        child: isSelected & !isFavCollection
+                            ? IconButtonWidget(
+                                key: const ValueKey("selected"),
+                                icon: Icons.check_circle_rounded,
+                                iconButtonType: IconButtonType.secondary,
+                                iconColor: colorScheme.blurStrokeBase,
+                              )
+                            : const IconButtonWidget(
+                                key: ValueKey("unselected"),
+                                icon: Icons.chevron_right_outlined,
+                                iconButtonType: IconButtonType.secondary,
+                              ),
+                      );
+                    },
                   ),
                 ),
               ],
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

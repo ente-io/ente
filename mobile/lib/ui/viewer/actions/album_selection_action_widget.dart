@@ -122,6 +122,8 @@ class _AlbumSelectionActionWidgetState
           _logger.warning("failed to trash collection", e, s);
           await showGenericErrorDialog(context: context, error: e);
         }
+      } else if (collection.type == CollectionType.favorites) {
+        continue;
       } else {
         nonEmptyCollection.add(collection);
       }
@@ -143,7 +145,10 @@ class _AlbumSelectionActionWidgetState
 
   Future<void> _onPinClick() async {
     for (final collection in widget.selectedAlbums.albums) {
-      if (collection.isPinned) continue;
+      if (collection.type == CollectionType.favorites || collection.isPinned) {
+        continue;
+      }
+
       await updateOrder(
         context,
         collection,
@@ -155,6 +160,9 @@ class _AlbumSelectionActionWidgetState
 
   Future<void> _onHideClick() async {
     for (final collection in widget.selectedAlbums.albums) {
+      if (collection.type == CollectionType.favorites) {
+        continue;
+      }
       final isHidden = collection.isHidden();
       final int prevVisiblity = isHidden ? hiddenVisibility : visibleVisibility;
       final int newVisiblity = isHidden ? visibleVisibility : hiddenVisibility;
