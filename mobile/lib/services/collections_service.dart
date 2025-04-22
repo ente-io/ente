@@ -1453,7 +1453,7 @@ class CollectionsService {
     final containsUploadedFile = files.any((e) => e.isUploaded);
     if (containsUploadedFile) {
       final existingFileIDsInCollection =
-          await FilesDB.instance.getUploadedFileIDs(collectionID);
+          await remoteDB.getUploadedFileIDs(collectionID);
       files.removeWhere(
         (element) =>
             element.uploadedFileID != null &&
@@ -1529,7 +1529,7 @@ class CollectionsService {
       throw ArgumentError('Can only add uploaded files silently');
     }
     final existingFileIDsInCollection =
-        await FilesDB.instance.getUploadedFileIDs(collectionID);
+        await remoteDB.getUploadedFileIDs(collectionID);
     files.removeWhere(
       (element) => existingFileIDsInCollection.contains(element.uploadedFileID),
     );
@@ -1853,7 +1853,7 @@ class CollectionsService {
     );
     // insert new files in the toCollection which are not part of the toCollection
     final existingUploadedIDs =
-        await FilesDB.instance.getUploadedFileIDs(toCollectionID);
+        await remoteDB.getUploadedFileIDs(toCollectionID);
     files.removeWhere(
       (element) => existingUploadedIDs.contains(element.uploadedFileID),
     );

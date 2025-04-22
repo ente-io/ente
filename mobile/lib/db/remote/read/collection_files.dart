@@ -9,6 +9,18 @@ extension CollectionFileRead on RemoteDB {
     return row["count"] as int;
   }
 
+  Future<Set<int>> getUploadedFileIDs(int collectionID) async {
+    final rows = await sqliteDB.getAll(
+      "SELECT file_id FROM collection_files WHERE collection_id = ?",
+      [collectionID],
+    );
+    final Set<int> fileIDs = {};
+    for (var row in rows) {
+      fileIDs.add(row["file_id"] as int);
+    }
+    return fileIDs;
+  }
+
   Future<Set<int>> getAllCollectionIDsOfFile(int fileID) async {
     final rows = await sqliteDB.getAll(
       "SELECT collection_id FROM collection_files WHERE file_id = ?",

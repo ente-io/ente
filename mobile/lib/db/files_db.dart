@@ -571,22 +571,6 @@ class FilesDB with SqlDbBase {
     return convertToFiles(results)[0];
   }
 
-  Future<Set<int>> getUploadedFileIDs(int collectionID) async {
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      'SELECT $columnUploadedFileID FROM $filesTable'
-      ' WHERE $columnCollectionID = ? AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
-      [
-        collectionID,
-      ],
-    );
-    final ids = <int>{};
-    for (final result in results) {
-      ids.add(result[columnUploadedFileID] as int);
-    }
-    return ids;
-  }
-
   Future<(Set<int>, Map<String, int>)> getUploadAndHash(
     int collectionID,
   ) async {
