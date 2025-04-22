@@ -251,10 +251,6 @@ func (c *StripeController) handleCheckoutSessionCompleted(event stripe.Event, co
 			currentSubscription.ID,
 			newSubscription,
 		)
-		err = c.NotificationCtrl.DeleteLastNotificationTime(currentSubscription.UserID, "90_percent_consumed")
-		if err != nil {
-			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-		}
 		isUpgradingFromFreePlan := currentSubscription.ProductID == ente.FreePlanProductID
 		if isUpgradingFromFreePlan {
 			go func() {
@@ -267,8 +263,14 @@ func (c *StripeController) handleCheckoutSessionCompleted(event stripe.Event, co
 			}()
 		}
 		if err != nil {
-			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
+			return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, stacktrace.Propagate(err, "Failed to change subscription")
 		}
+		
+		// Execute DeleteLastNotificationTime entry after successful execution of ReplaceSubscription
+		err = c.NotificationCtrl.DeleteLastNotificationTime(newSubscription.UserID, "90_percent_consumed")
+		if err != nil {
+			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
+		} 
 		return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, nil
 	} else {
 		priceID, err := c.getPriceIDFromSession(session.ID)
