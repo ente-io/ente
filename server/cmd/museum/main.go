@@ -864,7 +864,7 @@ func setupDatabase() *sql.DB {
 	}
 
 	db.SetMaxIdleConns(6)
-	db.SetMaxOpenConns(30)
+	db.SetMaxOpenConns(45)
 
 	log.Println("Database was configured successfully.")
 

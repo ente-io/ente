@@ -20,26 +20,26 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'fa';
 
-  static String m51(versionValue) => "نسخه: ${versionValue}";
+  static String m9(versionValue) => "نسخه: ${versionValue}";
 
-  static String m52(freeAmount, storageUnit) =>
+  static String m10(freeAmount, storageUnit) =>
       "${freeAmount} ${storageUnit} رایگان";
 
-  static String m9(supportEmail) =>
+  static String m24(supportEmail) =>
       "لطفا یک ایمیل از آدرس ایمیلی که ثبت نام کردید به ${supportEmail} ارسال کنید";
 
-  static String m18(passwordStrengthValue) =>
+  static String m55(passwordStrengthValue) =>
       "قدرت رمز عبور: ${passwordStrengthValue}";
 
-  static String m21(storeName) => "به ما در ${storeName} امتیاز دهید";
+  static String m66(storeName) => "به ما در ${storeName} امتیاز دهید";
 
-  static String m98(
+  static String m90(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "${usedAmount} ${usedStorageUnit} از ${totalAmount} ${totalStorageUnit} استفاده شده";
 
-  static String m40(email) => "تایید ${email}";
+  static String m107(email) => "تایید ${email}";
 
-  static String m41(email) =>
+  static String m109(email) =>
       "ما یک ایمیل به <green>${email}</green> ارسال کرده‌ایم";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -75,7 +75,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidCancelButton": MessageLookupByLibrary.simpleMessage("لغو"),
         "androidIosWebDesktop": MessageLookupByLibrary.simpleMessage(
             "اندروید، آی‌اواس، وب، رایانه رومیزی"),
-        "appVersion": m51,
+        "appVersion": m9,
         "archive": MessageLookupByLibrary.simpleMessage("بایگانی"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "آیا برای خارج شدن مطمئن هستید؟"),
@@ -86,7 +86,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "لطفاً برای مشاهده دستگاه‌های فعال خود احراز هویت کنید"),
         "available": MessageLookupByLibrary.simpleMessage("در دسترس"),
-        "availableStorageSpace": m52,
+        "availableStorageSpace": m10,
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("پوشه‌های پشتیبان گیری شده"),
         "backup": MessageLookupByLibrary.simpleMessage("پشتیبان گیری"),
@@ -132,8 +132,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ایجاد حساب کاربری جدید"),
         "criticalUpdateAvailable": MessageLookupByLibrary.simpleMessage(
             "به‌روزرسانی حیاتی در دسترس است"),
-        "curatedMemories":
-            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "custom": MessageLookupByLibrary.simpleMessage("سفارشی"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("تیره"),
         "dayToday": MessageLookupByLibrary.simpleMessage("امروز"),
@@ -168,7 +166,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "discord": MessageLookupByLibrary.simpleMessage("دیسکورد"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("بعداً انجام شود"),
         "downloading": MessageLookupByLibrary.simpleMessage("در حال دانلود..."),
-        "dropSupportEmail": m9,
+        "dropSupportEmail": m24,
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("ویرایش مکان"),
         "email": MessageLookupByLibrary.simpleMessage("ایمیل"),
@@ -274,7 +272,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "password": MessageLookupByLibrary.simpleMessage("رمز عبور"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "رمز عبور با موفقیت تغییر کرد"),
-        "passwordStrength": m18,
+        "passwordStrength": m55,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "ما این رمز عبور را ذخیره نمی‌کنیم، بنابراین اگر فراموش کنید، <underline>نمی‌توانیم اطلاعات شما را رمزگشایی کنیم</underline>"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("عکس"),
@@ -294,7 +292,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("پشتیبان گیری خصوصی"),
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("اشتراک گذاری خصوصی"),
-        "rateUsOnStore": m21,
+        "rateUsOnStore": m66,
         "recover": MessageLookupByLibrary.simpleMessage("بازیابی"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("بازیابی حساب کاربری"),
@@ -370,7 +368,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("خانوادگی"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("شما"),
-        "storageUsageInfo": m98,
+        "storageUsageInfo": m90,
         "strongStrength": MessageLookupByLibrary.simpleMessage("قوی"),
         "support": MessageLookupByLibrary.simpleMessage("پشتیبانی"),
         "systemTheme": MessageLookupByLibrary.simpleMessage("سیستم"),
@@ -411,7 +409,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "از کلید بازیابی استفاده کنید"),
         "verify": MessageLookupByLibrary.simpleMessage("تایید"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("تایید ایمیل"),
-        "verifyEmailID": m40,
+        "verifyEmailID": m107,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("تایید"),
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("تایید رمز عبور"),
@@ -424,7 +422,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("بیننده"),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("ما متن‌باز هستیم!"),
-        "weHaveSendEmailTo": m41,
+        "weHaveSendEmailTo": m109,
         "weakStrength": MessageLookupByLibrary.simpleMessage("ضعیف"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("خوش آمدید!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("تغییرات جدید"),

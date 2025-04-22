@@ -371,6 +371,21 @@
   "deleteFromBoth": "Ištrinti iš abiejų",
   "newAlbum": "Naujas albumas",
   "albums": "Albumai",
+  "memoryCount": "{count, plural, =0 {nėra prisiminimų} one {{formattedCount} prisiminimas} few {{formattedCount} prisiminimai} many {{formattedCount} prisiminimo} other {{formattedCount} prisiminimų}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
+      }
+    }
+  },
   "selectedPhotos": "{count} pasirinkta",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -642,6 +657,7 @@
   "yourPurchaseWasSuccessful": "Jūsų pirkimas buvo sėkmingas",
   "yourPlanWasSuccessfullyUpgraded": "Jūsų planas sėkmingai pakeistas",
   "yourPlanWasSuccessfullyDowngraded": "Jūsų planas sėkmingai pakeistas į žemesnį",
+  "yourSubscriptionWasUpdatedSuccessfully": "Jūsų prenumerata buvo sėkmingai atnaujinta",
   "googlePlayId": "„Google Play“ ID",
   "appleId": "„Apple ID“",
   "playstoreSubscription": "„PlayStore“ prenumerata",
@@ -675,6 +691,8 @@
   "leave": "Palikti",
   "rateTheApp": "Vertinti programą",
   "startBackup": "Pradėti kurti atsarginę kopiją",
+  "noPhotosAreBeingBackedUpRightNow": "Šiuo metu nekuriamos atsarginės nuotraukų kopijos",
+  "preserveMore": "Išsaugoti daugiau",
   "allowPermTitle": "Leisti prieigą prie nuotraukų",
   "allowPermBody": "Iš nustatymų leiskite prieigą prie nuotraukų, kad „Ente“ galėtų rodyti ir kurti atsargines bibliotekos kopijas.",
   "existingUser": "Esamas naudotojas",
@@ -748,15 +766,28 @@
     "description": "Display text for an action which triggers a restore of item from trash",
     "type": "text"
   },
+  "moveToAlbum": "Perkelti į albumą",
+  "unhide": "Rodyti",
   "unarchive": "Išarchyvuoti",
+  "favorite": "Pamėgti",
   "removeFromFavorite": "Šalinti iš mėgstamų",
   "shareLink": "Bendrinti nuorodą",
+  "createCollage": "Kurti koliažą",
+  "saveCollage": "Išsaugoti koliažą",
   "addToEnte": "Pridėti į „Ente“",
   "addToAlbum": "Pridėti į albumą",
   "delete": "Ištrinti",
   "hide": "Slėpti",
   "share": "Bendrinti",
   "restoreToAlbum": "Atkurti į albumą",
+  "moveItem": "{count, plural, one {Perkelti elementą} few {Perkelti elementus} many {Perkelti elemento} =1 {Perkelti elementą} other {Perkelti elementų}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, one {Pridėti elementą} few {Pridėti elementus} many {Pridėti elemento} =1 {Pridėti elementą} other {Pridėti elementų}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Kurkite arba pasirinkite albumą",
   "searchByAlbumNameHint": "Albumo pavadinimas",
   "albumTitle": "Albumo pavadinimas",
@@ -798,6 +829,7 @@
   "archiveAlbum": "Archyvuoti albumą",
   "searchByExamples": "• Albumų pavadinimai (pvz., „Fotoaparatas“)\n• Failų tipai (pvz., „Vaizdo įrašai“, „.gif“)\n• Metai ir mėnesiai (pvz., „2022“, „sausis“)\n• Šventės (pvz., „Kalėdos“)\n• Nuotraukų aprašymai (pvz., „#džiaugsmas“)",
   "noResultsFound": "Rezultatų nerasta.",
+  "viewAllExifData": "Peržiūrėti visus EXIF duomenis",
   "noExifData": "Nėra EXIF duomenų",
   "thisImageHasNoExifData": "Šis vaizdas neturi Exif duomenų",
   "exif": "EXIF",
@@ -808,13 +840,25 @@
   "setAs": "Nustatyti kaip",
   "fileSavedToGallery": "Failas išsaugotas į galeriją",
   "filesSavedToGallery": "Failai išsaugoti į galeriją",
+  "fileFailedToSaveToGallery": "Nepavyko išsaugoti failo į galeriją",
   "download": "Atsisiųsti",
   "pressAndHoldToPlayVideo": "Paspauskite ir palaikykite, kad paleistumėte vaizdo įrašą",
   "pressAndHoldToPlayVideoDetailed": "Paspauskite ir palaikykite vaizdą, kad paleistumėte vaizdo įrašą",
   "downloadFailed": "Atsisiuntimas nepavyko.",
   "deduplicateFiles": "Atdubliuoti failus",
+  "deselectAll": "Naikinti visų pasirinkimą",
   "reviewDeduplicateItems": "Peržiūrėkite ir ištrinkite elementus, kurie, jūsų manymu, yra dublikatai.",
   "unlock": "Atrakinti",
+  "freeUpSpace": "Atlaisvinti vietos",
+  "freeUpAccessPostDelete": "Vis dar galite pasiekti {count, plural, one {jį} few {juos} many {juos} =1 {jį} other {jų}} platformoje „Ente“, kol turite aktyvų prenumeratą.",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      }
+    }
+  },
   "freeUpAmount": "Atlaisvinti {sizeInMBorGB}",
   "thisEmailIsAlreadyInUse": "Šis el. paštas jau naudojamas.",
   "incorrectCode": "Neteisingas kodas.",
@@ -824,6 +868,7 @@
   "authenticationSuccessful": "Tapatybės nustatymas sėkmingas.",
   "incorrectRecoveryKey": "Neteisingas atkūrimo raktas",
   "theRecoveryKeyYouEnteredIsIncorrect": "Įvestas atkūrimo raktas yra neteisingas.",
+  "twofactorAuthenticationSuccessfullyReset": "Dvigubas tapatybės nustatymas sėkmingai iš naujo nustatytas.",
   "pleaseVerifyTheCodeYouHaveEntered": "Patvirtinkite įvestą kodą.",
   "yourVerificationCodeHasExpired": "Jūsų patvirtinimo kodas nebegaliojantis.",
   "emailChangedTo": "El. paštas pakeistas į {newEmail}",
@@ -930,6 +975,7 @@
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
   "familyPlanPortalTitle": "Šeima",
+  "familyPlanOverview": "Įtraukite 5 šeimos narius į jūsų esamą planą nemokėdami papildomai.\n\nKiekvienas narys gauna savo asmeninę vietą ir negali matyti vienas kito failų, nebent jie bendrinami.\n\nŠeimos planai pasiekiami klientams, kurie turi mokamą „Ente“ prenumeratą.\n\nPrenumeruokite dabar, kad pradėtumėte!",
   "androidBiometricHint": "Patvirtinkite tapatybę",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -1055,6 +1101,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Greitai suraskite žmones pagal vardą",
+  "addViewers": "{count, plural, one {Pridėti žiūrėtoją} few {Pridėti žiūrėtojus} many {Pridėti žiūrėtojo} =0 {Pridėti žiūrėtojų} =1 {Pridėti žiūrėtoją} other {Pridėti žiūrėtojų}}",
+  "addCollaborators": "{count, plural, one {Pridėti bendradarbį} few {Pridėti bendradarbius} many {Pridėti bendradarbio} =0 {Pridėti bendradarbių} =1 {Pridėti bendradarbį} other {Pridėti bendradarbių}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Ilgai paspauskite el. paštą, kad patvirtintumėte visapusį šifravimą.",
   "developerSettingsWarning": "Ar tikrai norite modifikuoti kūrėjo nustatymus?",
   "developerSettings": "Kūrėjo nustatymai",
@@ -1183,6 +1231,16 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
+  "viewersSuccessfullyAdded": "{count, plural, one {Pridėtas {count} žiūrėtojas} few {Pridėti {count} žiūrėtojai} many {Pridėta {count} žiūrėtojo} =0 {Pridėta 0 žiūrėtojų} =1 {Pridėtas 1 žiūrėtojas} other {Pridėta {count} žiūrėtojų}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Pridėta 0 bendradarbių} =1 {Pridėtas 1 bendradarbis} other {Pridėta {count} bendradarbių}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1258,6 +1316,15 @@
   },
   "currentlyRunning": "šiuo metu vykdoma",
   "ignored": "ignoruota",
+  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "file": "Failas",
   "searchSectionsLengthMismatch": "Sekcijų ilgio neatitikimas: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1461,5 +1528,5 @@
   "cLFamilyPlanDesc": "Dabar galite nustatyti ribas, kiek saugyklos gali naudoti jūsų šeimos nariai.",
   "cLBulkEdit": "Masiškai redaguokite datas",
   "cLBulkEditDesc": "Dabar galite pasirinkti kelias nuotraukas ir vienu sparčiu veiksmu redaguoti visų nuotraukų datą ir laiką. Taip pat palaikomas datų perkėlimas.",
-  "curatedMemories": "Curated memories"
+  "curatedMemories": "Kuruoti prisiminimai"
 }

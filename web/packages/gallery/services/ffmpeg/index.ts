@@ -7,9 +7,9 @@ import {
     type UploadItem,
 } from "ente-gallery/services/upload";
 import {
-    readConvertToMP4Done,
-    readConvertToMP4Stream,
-    writeConvertToMP4Stream,
+    readVideoStream,
+    videoStreamDone,
+    writeVideoStream,
 } from "ente-gallery/utils/native-stream";
 import {
     parseMetadataDate,
@@ -266,59 +266,11 @@ export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
 };
 
 const convertToMP4Native = async (electron: Electron, blob: Blob) => {
-    const token = await writeConvertToMP4Stream(electron, blob);
-    const mp4Blob = await readConvertToMP4Stream(electron, token);
-    await readConvertToMP4Done(electron, token);
+    const tokens = await writeVideoStream(electron, "convert-to-mp4", blob);
+    const token = tokens[0]!;
+    const mp4Blob = await readVideoStream(electron, token).then((res) =>
+        res.blob(),
+    );
+    await videoStreamDone(electron, token);
     return mp4Blob;
 };
-
-/**
- * Generate a preview variant of for the given video using a Wasm FFmpeg running
- * in a web worker.
- *
- * See: [Note: Preview variant of videos].
- *
- * @param blob The input video blob.
- *
- * @returns The output video blob containing the generated preview variant.
- */
-export const generateVideoPreviewVariantWeb = async (blob: Blob) =>
-    ffmpegExecWeb(transcodeAndGenerateHLSPlaylistCommand, blob, "hls");
-
-/**
- * The FFmpeg command to use to create a preview variant of videos.
- *
- * Current parameters
- *
- * - H264
- * - 720p width
- * - 2000kbps bitrate
- * - 30fps frame rate
- */
-const transcodeAndGenerateHLSPlaylistCommand = [
-    ffmpegPathPlaceholder,
-    // Input file. We don't need any extra options that apply to the input file.
-    "-i",
-    inputPathPlaceholder,
-    // The remaining options apply to the next file, `outputPathPlaceholder`.
-    // ---
-    // `-vf` creates a filter graph for the video stream.
-    "-vf",
-    // `-vf scale=720:-1` scales the video to 720p width, keeping aspect ratio.
-    "scale=720:-1",
-    // `-r 30` sets the frame rate to 30 fps.
-    "-r",
-    "30",
-    // `-c:v libx264` sets the codec for the video stream to H264.
-    "-c:v",
-    "libx264",
-    // `-b:v 2000k` sets the bitrate for the video stream.
-    "-b:v",
-    "2000k",
-    // `-c:a aac -b:a 128k` converts the audio stream to 128k bit AAC.
-    "-c:a",
-    "aac",
-    "-b:a",
-    "128k",
-    outputPathPlaceholder,
-];

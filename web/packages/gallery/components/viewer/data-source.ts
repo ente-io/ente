@@ -7,10 +7,9 @@ import {
     type HLSPlaylistData,
 } from "ente-gallery/services/video";
 import type { EnteFile } from "ente-media/file";
-import { fileCaption } from "ente-media/file-metadata";
+import { fileCaption, filePublicMagicMetadata } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { ensureString } from "ente-utils/ensure";
-import { shouldUsePlayerV2 } from "./photoswipe";
 
 /**
  * This is a subset of the fields expected by PhotoSwipe itself (see the
@@ -467,22 +466,18 @@ const enqueueUpdates = async (
                 createHLSPlaylistItemDataValidity(),
             );
         } else {
-            if (shouldUsePlayerV2()) {
-                // See: [Note: Caching HLS playlist data]
-                //
-                // TODO(HLS): As an optimization, we can handle the logged in vs
-                // public albums case separately once we have the status-diff
-                // state, we don't need to mark status-diff case as transient.
-                //
-                // Note that setting the transient flag is not too expensive,
-                // since the underlying videoURL is still cached by the download
-                // manager. So effectively, under normal circumstance, it just
-                // adds one API call (to recheck if an HLS playlist now exists
-                // for the given file).
-                update({ ...videoURLD, isTransient: true });
-            } else {
-                update(videoURLD);
-            }
+            // See: [Note: Caching HLS playlist data]
+            //
+            // TODO(HLS): As an optimization, we can handle the logged in vs
+            // public albums case separately once we have the status-diff state,
+            // we don't need to mark status-diff case as transient.
+            //
+            // Note that setting the transient flag is not too expensive, since
+            // the underlying videoURL is still cached by the download manager.
+            // So effectively, under normal circumstance, it just adds one API
+            // call (to recheck if an HLS playlist now exists for the given
+            // file).
+            update({ ...videoURLD, isTransient: true });
         }
     };
 
@@ -503,8 +498,16 @@ const enqueueUpdates = async (
         const thumbnailData = await withDimensionsIfPossible(
             ensureString(thumbnailURL),
         );
+
+        // If the aspect ratio of the original file matches the aspect ratio of
+        // the thumbnail, then render the thumbnail using the original's
+        // dimensions for a better visual experience.
+        const { width, height } = thumbnailDimensions(thumbnailData, file);
+
         update({
             ...thumbnailData,
+            width,
+            height,
             isContentLoading: true,
             isContentZoomable: false,
         });
@@ -523,9 +526,8 @@ const enqueueUpdates = async (
     }
 
     try {
-        // TODO(HLS):
         let hlsPlaylistData: HLSPlaylistData | undefined;
-        if (shouldUsePlayerV2() && file.metadata.fileType == FileType.video) {
+        if (file.metadata.fileType == FileType.video) {
             hlsPlaylistData = await hlsPlaylistDataForFile(
                 file,
                 downloadManager.publicAlbumsCredentials,
@@ -630,6 +632,29 @@ const withDimensionsIfPossible = (
         image.src = imageURL;
     });
 
+/**
+ * Return the dimensions to use for the thumbnail associated with {@link file}.
+ *
+ * If the aspect ratio of the thumbnail is (approximately) equal to that of the
+ * dimensions we have on record for the original image (obtained from the file
+ * metadata), then use the dimensions of the original image in lieu of the
+ * thumbnail dimensions for a more graceful transition during image loads.
+ */
+const thumbnailDimensions = (
+    { width: thumbnailWidth, height: thumbnailHeight }: Partial<ItemData>,
+    file: EnteFile,
+) => {
+    const { w: imageWidth, h: imageHeight } =
+        filePublicMagicMetadata(file) ?? {};
+    if (thumbnailWidth && thumbnailHeight && imageWidth && imageHeight) {
+        const arThumb = thumbnailWidth / thumbnailHeight;
+        const arImage = imageWidth / imageHeight;
+        if (Math.abs(arThumb - arImage) < 0.1) {
+            return { width: imageWidth, height: imageHeight };
+        }
+    }
+    return { width: thumbnailWidth, height: thumbnailHeight };
+};
 /**
  * Return a new validity for a HLS playlist containing presigned URLs.
  *

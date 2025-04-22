@@ -5,7 +5,6 @@ import path from "node:path";
 import type { ZipItem } from "../../types/ipc";
 import log from "../log";
 import { markClosableZip, openZip } from "../services/zip";
-import { ensure } from "./common";
 
 /**
  * Our very own directory within the system temp directory. Go crazy, but
@@ -20,7 +19,7 @@ const enteTempDirPath = async () => {
 /** Generate a random string suitable for being used as a file name prefix */
 const randomPrefix = () => {
     const ch = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    const randomChar = () => ensure(ch[Math.floor(Math.random() * ch.length)]);
+    const randomChar = () => ch[Math.floor(Math.random() * ch.length)]!;
 
     return Array(10).fill("").map(randomChar).join("");
 };
@@ -30,7 +29,7 @@ const randomPrefix = () => {
  *
  * The function returns the path to a file in the system temp directory (in an
  * Ente specific folder therin) with a random prefix and an (optional)
- * {@link extension}.
+ * {@link extension}. The parent directory is guaranteed to exist.
  *
  * It ensures that there is no existing item with the same name already.
  *

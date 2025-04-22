@@ -14,100 +14,145 @@ the same code we use for our own cloud service.
 > [blog post](https://ente.io/blog/open-sourcing-our-server/) announcing the
 > open sourcing of our server useful.
 
-## Getting started - Quickstart
 
-Install [Docker](https://www.docker.com). Then, paste the following command in a
-your terminal:
+## System Requirements 
+
+The server has minimal resource requirements, running as a lightweight Go binary 
+with no server-side ML. It performs well on small cloud instances, old laptops,
+and even [low-end embedded devices](https://github.com/ente-io/ente/discussions/594) 
+reported by community members. Virtually any reasonable hardware should be sufficient.
+
+## Getting started
+
+Execute the below one-liner command in your terminal to setup Ente on your system. 
 
 ```sh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
 ```
 
-> [!TIP]
->
-> For more details about what this does, see [the quickstart
-> README](https://github.com/ente-io/ente/blob/main/server/docs/quickstart.md).
+The above `curl` command is a simple shell-script, which pulls the docker images, 
+creates a directory `my-ente` in the current working directory and starts all the 
+containers required to run Ente on your system.
 
-That's about it. If you open http://localhost:3000 from the machine where the
-server is running, you will be able to create an account on a Ente Photos web
-app. This web app will be connecting to the server running on your local machine
-at `localhost:8080`.
+![quickstart](/quickstart.png)
 
-To complete your account registration you need to enter a 6-digit verification
-code. These can be found in the server logs which should already be shown in
-your quickstart terminal. Otherwise you can open the server logs with the
-following command from inside the `my-ente` folder:
+The docker containers will be up and listening on their desired ports. The Ente Photos 
+web app will be accessible on `http://localhost:3000`. Open the URL in your browser 
+and proceed with creating an account. By default, the API Endpoint will be `localhost:8080`
+as Museum (our server endpoint) will listen on `:8080`.
 
-```sh
+![endpoint](/endpoint.png)
+
+To complete your account registration you need to enter a 6-digit verification code. 
+This can be found in the server logs, which should already be shown in your quickstart
+terminal. Alternatively, you can open the server logs with the following command from 
+inside the `my-ente` folder:
+
+```sh 
 sudo docker compose logs
 ```
 
-In the logs, find the code at the end of a message that resembles the following:
-```sh
-museum    | INFO[0102]email.go:130 sendViaTransmail Skipping sending email to email@example.com: *Verification code: 112089*
-```
+## Reverse Proxy
 
-There are [prebuilt apps](https://ente.io/download) for iPad, iPhone, Android,
-Linux, Mac, and Windows. These can easily be configured to use your [custom
-self-hosted server](guides/custom-server/).
+This step isn't really the direct next step after creating an account. It is
+one of the most essential steps to avoid certain CORS errors and will help you through 
+the configuration coming ahead. 
 
-## Getting started - From source
+Museum runs on port `:8080`, Ente Photos web app runs on `:3000` and so on the other apps
+are lined up after each other from ports `3001-3004`.
 
-The quickstart method above uses pre-built images. Alternatively, if you want to
-build the self hosted server images from source, you can use the steps in this
-section.
+We highly recommend using HTTPS for Museum (`8080`). Primarily, because for security reasons Museum
+won't accept any incoming HTTP traffic. Hence, all the requests will fail.
 
-#### Installing Docker
+Head over to your DNS Management Dashboard and setup the appropriate records for the endpoints.
+Mostly, `A` or `AAAA` records targeting towards your server's IP address should be sufficient. The rest of the work
+will be done by the web server sitting on your server machine.
 
-Refer to
-[How to install Docker from the APT repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
-for detailed instructions.
+![cloudflare](/cloudflare.png)
 
-#### Start the server
+### With Caddy
 
-```sh
-git clone https://github.com/ente-io/ente
-cd ente/server
-docker compose up --build
-```
-
-Install the necessary dependencies for running the web client
+Setting up a reverse proxy with Caddy is pretty easy and straightforward. Firstly, install Caddy
+on your server machine. 
 
 ```sh
-# installing npm and yarn
+sudo apt install caddy
+``` 
 
-sudo apt update
-sudo apt install nodejs npm
-sudo npm install -g yarn // to install yarn globally
+After the installation is complete, a `Caddyfile` is created on the path `/etc/caddy/`. This file is
+used to configure reverse proxies and a whole lot of different things. 
+
+```yaml 
+# Caddyfile - myente.xyz is just an example.
+api.myente.xyz {
+    reverse_proxy http://localhost:8080
+}
+ente.myente.xyz {
+    reverse_proxy http://localhost:3000
+}
 ```
 
-Then in a separate terminal, you can run (e.g) the web client
+After a few hard-reloads, Ente Photos web app should be working on https://ente.myente.xyz. You can check out
+the documentation for any other reverse proxy tool (like nginx) you want to use. 
 
-```sh
-cd ente/web
-yarn install
-NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev
+## Configuring `museum.yaml`
+
+`Museum.yaml` is a YAML configuration file used to configure various things for museum. 
+By default, [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml) 
+is also available, but  it is overridden if `museum.yaml` file is found. We highly 
+recommend creating and building your own `museum.yaml` instead of editing `configurations/local.yaml`. 
+The `my-ente` directory will include a `museum.yaml` file with some configurations around encryption 
+keys and secrets, postgres DB, and MinIO.
+
+> [!TIP]
+> Always do `docker compose down` inside `my-ente` directory, if you've made any changes to `museum.yaml`
+> and then restart the containers with `docker compose up -d ` to see the changes in action.
+
+### S3 Buckets
+
+By default, the `s3` section is configured to use local minIO buckets and for the same reason 
+`are_local_buckets`  is set to `true`.  If you wish to bring any external S3 provider, 
+you just have to edit the configuration with appropriate credentails and details given by the provider. 
+And set `are_local_buckets` to false.  Check out [Configuring S3](/self-hosting/guides/configuring-s3.md) 
+to understand more on how to configure S3 buckets and how the communication happens.
+
+MinIO makes use of the port `3200` for API Endpoints and the Client Web App is run over `:3201` 
+(both on localhost). You can login to MinIO Console Web UI by accessing `localhost:3201` in your web-browser
+and setting up all the things related to regions there itself.
+
+If you face any issues related to uploads then checkout 
+[Troubleshooting Bucket CORS](/self-hosting/troubleshooting/bucket-cors) and 
+[Frequently Answered Error related to S3](/self-hosting/guides/configuring-s3#fae-frequently-answered-errors)
+
+### App Endpoints
+
+Ente Photos Web app is divided into multiple sub-apps like albums, cast, auth, etc.
+These endpoints are configurable in the museum.yaml under the `apps.*` section.
+
+For example, 
+
+```yaml
+apps:
+    public-albums: albums.myente.xyz
+    cast: cast.myente.xyz
+    accounts: accounts.myente.xyz
+    family: family.myente.xyz
 ```
 
-> If you want to build the mobile apps from source, see the instructions
-> [here](guides/mobile-build).
+By default, all the values redirect to our publicly hosted production services. 
+After you are done with filling the values, restart museum and the App will start utilizing
+those endpoints for everything instead of the Ente's prod instances.
 
-## Next steps
+Once you configure all the necessary endpoints, `cd` into `my-ente` and  stop all the docker 
+containers with `docker compose down` to completely stop all the containers and restart them 
+with `docker compose up -d`. 
 
-- More details about the server are in its
-  [README](https://github.com/ente-io/ente/tree/main/server#readme)
+Similarly, you can read the default [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml) 
+and build a functioning `museum.yaml` for many other functionalities like SMTP, Discord
+Notifications, Hardcoded-OTT's, etc.
 
-- More details about running the server (with or without Docker) are in
-  [RUNNING](https://github.com/ente-io/ente/blob/main/server/RUNNING.md)
+## Queries?
 
-- If you have questions around self-hosting that are not answered in any of the
-  existing documentation, you can ask in our
-  [GitHub Discussions](https://github.com/ente-io/ente/discussions). **Please
-  remember to search first if the query has been already asked and answered.**
-
-## Contributing!
-
-One particular way in which you can help is by adding new [guides](guides/) on
-this help site. The documentation is written in Markdown and adding new pages is
-[easy](https://github.com/ente-io/ente/tree/main/docs#readme). Editing existing
-pages is even easier: at the bottom of each page is an _Edit this page_ link.
+If you need any help or support, do not hesitate to drop your queries on our community
+[discord channel](https://discord.gg/z2YVKkycX3) or create a 
+[Github Discussion](https://github.com/ente-io/ente/discussions) where 100s of self-hosters help each other.
