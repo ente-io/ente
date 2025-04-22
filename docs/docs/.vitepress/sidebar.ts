@@ -242,11 +242,24 @@ export const sidebar = [
                 link: "/self-hosting/guides/custom-server/",
             },
             {
+                text: "Creating Accounts",
+                link: "/self-hosting/creating-accounts",
+            },
+            {
+                text: "Reverse Proxy",
+                link: "/self-hosting/reverse-proxy",
+            },
+            {
+                text: "Building your museum.yaml",
+                link: "/self-hosting/museum",
+            },
+            {
                 text: "Configuring S3",
                 link: "/self-hosting/guides/configuring-s3",
             },
             {
                 text: "Guides",
+                collapsed: true,
                 items: [
                     { text: "Introduction", link: "/self-hosting/guides/" },
                     {
