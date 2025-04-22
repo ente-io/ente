@@ -296,6 +296,10 @@ func (c *BillingController) VerifySubscription(
 	if err != nil {
 		return ente.Subscription{}, stacktrace.Propagate(err, "")
 	}
+	err = c.NotificationHistory.DeleteLastNotificationTime(currentSubscription.UserID, "90_percent_consumed")
+	if err != nil {
+		return ente.Subscription{}, stacktrace.Propagate(err, "")
+	}
 	log.Info("Replaced subscription")
 	newSubscription.ID = currentSubscription.ID
 	if paymentProvider == ente.PlayStore &&

@@ -41,12 +41,25 @@ type StripeController struct {
 	EmailNotificationCtrl  *emailCtrl.EmailNotificationController
 	OfferController        *offer.OfferController
 	CommonBillCtrl         *commonbilling.Controller
+	NotificationCtrl       *repo.NotificationHistoryRepository
 }
 
 const BufferPeriodOnPaymentFailureInDays = 7
 
 // Return a new instance of StripeController
-func NewStripeController(plans ente.BillingPlansPerAccount, stripeClients ente.StripeClientPerAccount, billingRepo *repo.BillingRepository, fileRepo *repo.FileRepository, userRepo *repo.UserRepository, storageBonusRepo *storagebonus.Repository, discordController *discord.DiscordController, emailNotificationController *emailCtrl.EmailNotificationController, offerController *offer.OfferController, commonBillCtrl *commonbilling.Controller) *StripeController {
+func NewStripeController(
+	plans ente.BillingPlansPerAccount,
+	stripeClients ente.StripeClientPerAccount,
+	billingRepo *repo.BillingRepository,
+	fileRepo *repo.FileRepository,
+	userRepo *repo.UserRepository,
+	storageBonusRepo *storagebonus.Repository,
+	discordController *discord.DiscordController,
+	emailNotificationController *emailCtrl.EmailNotificationController,
+	offerController *offer.OfferController,
+	commonBillCtrl *commonbilling.Controller,
+	notificationCtrl *repo.NotificationHistoryRepository,
+) *StripeController {
 	return &StripeController{
 		StripeClients:          stripeClients,
 		BillingRepo:            billingRepo,
@@ -58,6 +71,7 @@ func NewStripeController(plans ente.BillingPlansPerAccount, stripeClients ente.S
 		EmailNotificationCtrl:  emailNotificationController,
 		OfferController:        offerController,
 		CommonBillCtrl:         commonBillCtrl,
+		NotificationCtrl:       notificationCtrl,
 	}
 }
 
@@ -237,6 +251,10 @@ func (c *StripeController) handleCheckoutSessionCompleted(event stripe.Event, co
 			currentSubscription.ID,
 			newSubscription,
 		)
+		err = c.NotificationCtrl.DeleteLastNotificationTime(currentSubscription.UserID, "90_percent_consumed")
+		if err != nil {
+			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
+		}
 		isUpgradingFromFreePlan := currentSubscription.ProductID == ente.FreePlanProductID
 		if isUpgradingFromFreePlan {
 			go func() {
@@ -293,6 +311,10 @@ func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event,
 	// events to update the state
 	if currentSubscription.ProductID != newSubscription.ProductID {
 		c.BillingRepo.ReplaceSubscription(currentSubscription.ID, newSubscription)
+		err := c.NotificationCtrl.DeleteLastNotificationTime(currentSubscription.UserID, "90_percent_consumed")
+		if err != nil {
+			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
+		}
 	}
 
 	fullStripeSub, err := c.getStripeSubscriptionWithPaymentMethod(currentSubscription)
