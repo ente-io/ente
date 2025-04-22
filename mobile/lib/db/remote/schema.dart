@@ -109,3 +109,55 @@ class RemoteDBMigration {
 ''',
   ];
 }
+
+class FilterQueryParam {
+  int? collectionID;
+  int? limit;
+  int? offset;
+  String? orderByColumn;
+  bool isAsc;
+  (int?, int?)? createAtRange;
+
+  FilterQueryParam({
+    this.limit,
+    this.offset,
+    this.collectionID,
+    this.orderByColumn = "creation_time",
+    this.isAsc = false,
+    this.createAtRange,
+  });
+
+  String get orderBy => orderByColumn == null
+      ? ""
+      : "ORDER BY $orderByColumn ${isAsc ? "ASC" : "DESC"}";
+
+  String get limitOffset => (limit != null && offset != null)
+      ? "LIMIT $limit +  OFFSET $offset)"
+      : (limit != null)
+          ? "LIMIT $limit"
+          : "";
+
+  String get collectionFilter =>
+      (collectionID == null) ? "" : "collection_id = $collectionID";
+
+  String get createAtRangeStr => (createAtRange == null ||
+          createAtRange!.$1 == null)
+      ? ""
+      : "(creation_time BETWEEN ${createAtRange!.$1} AND ${createAtRange!.$2})";
+
+  String whereClause() {
+    final where = <String>[];
+    if (collectionFilter.isNotEmpty) {
+      where.add(collectionFilter);
+    }
+    if (createAtRangeStr.isNotEmpty) {
+      where.add(createAtRangeStr);
+    }
+
+    return (where.isEmpty ? "" : where.join(" AND ")) +
+        " " +
+        orderBy +
+        " " +
+        limitOffset;
+  }
+}

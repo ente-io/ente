@@ -18,4 +18,13 @@ class CollectionFileEntry {
     required this.createdAt,
     required this.isDeleted,
   });
+
+  CollectionFileEntry.fromMap(Map<String, dynamic> map)
+      : collectionID = map["collection_id"] as int,
+        fileID = map["file_id"] as int,
+        fileKey = map["enc_key"] as Uint8List,
+        fileKeyNonce = map["enc_key_nonce"] as Uint8List,
+        updatedAt = map["updated_at"] as int,
+        createdAt = map["created_at"] as int,
+        isDeleted = (map["is_deleted"] as int) == 1;
 }

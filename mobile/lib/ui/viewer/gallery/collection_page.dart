@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/remote/schema.dart";
 import "package:photos/events/collection_meta_event.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -12,6 +13,8 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/search/hierarchical/album_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
+import "package:photos/services/filter/filter.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/collect_photos_bottom_buttons.dart";
@@ -46,7 +49,6 @@ class CollectionPage extends StatelessWidget {
     if (hasVerifiedLock == false && c.collection.isHidden()) {
       return const EmptyState();
     }
-
     final galleryType = getGalleryType(
       c.collection,
       Configuration.instance.getUserID()!,
@@ -55,14 +57,16 @@ class CollectionPage extends StatelessWidget {
         c.thumbnail != null ? [c.thumbnail!] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final FileLoadResult result =
-            await FilesDB.instance.getFilesInCollection(
-          c.collection.id,
-          creationStartTime,
-          creationEndTime,
-          limit: limit,
-          asc: asc,
+        final files = await remoteCache.getCollectionFiles(
+          FilterQueryParam(
+            collectionID: c.collection.id,
+            isAsc: asc ?? false,
+            createAtRange: (creationStartTime, creationEndTime),
+            limit: limit,
+          ),
         );
+        final FileLoadResult result =
+            FileLoadResult(files, limit != null && files.length <= limit);
         // hide ignored files from home page UI
         final ignoredIDs =
             await IgnoredFilesService.instance.idToIgnoreReasonMap;

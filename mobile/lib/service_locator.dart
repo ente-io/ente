@@ -14,6 +14,7 @@ import "package:photos/services/machine_learning/machine_learning_controller.dar
 import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/memories_cache_service.dart";
 import "package:photos/services/permission/service.dart";
+import "package:photos/services/remote/assets/remote_cache.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/sync/trash_sync_service.dart";
@@ -163,4 +164,10 @@ LocalDB? _localDB;
 LocalDB get localDB {
   _localDB ??= LocalDB();
   return _localDB!;
+}
+
+RemoteCache? _remoteCache;
+RemoteCache get remoteCache {
+  _remoteCache ??= RemoteCache();
+  return _remoteCache!;
 }

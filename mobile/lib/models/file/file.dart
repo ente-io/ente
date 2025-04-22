@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import "package:ente_crypto/ente_crypto.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
@@ -8,6 +9,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/remote/asset.dart";
+import "package:photos/models/file/remote/file_entry.dart";
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/service_locator.dart";
@@ -107,7 +109,10 @@ class EnteFile {
     return file;
   }
 
-  static EnteFile fromRemoteAsset(RemoteAsset asset) {
+  static EnteFile fromRemoteAsset(
+    RemoteAsset asset,
+    CollectionFileEntry collection,
+  ) {
     final EnteFile file = EnteFile();
     file.remoteAsset = asset;
     file.uploadedFileID = asset.id;
@@ -122,6 +127,11 @@ class EnteFile {
     file.metadataVersion = kCurrentMetadataVersion;
     file.duration = asset.durationInSec;
     file.fileSize = asset.fileSize;
+    file.collectionID = collection.collectionID;
+    file.encryptedKey = CryptoUtil.bin2base64(collection.fileKey);
+    file.keyDecryptionNonce = CryptoUtil.bin2base64(collection.fileKeyNonce);
+    file.pubMagicMetadata =
+        PubMagicMetadata.fromMap(asset.publicMetadata?.data);
     return file;
   }
 

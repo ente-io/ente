@@ -114,7 +114,7 @@ Future<File?> downloadAndDecrypt(
   _logger
       .info('$logPrefix starting download ${formatBytes(file.fileSize ?? 0)}');
   final String tempDir = Configuration.instance.getTempDirectory();
-  final String encryptedFilePath = "$tempDir${file.generatedID}.encrypted";
+  final String encryptedFilePath = "$tempDir${file.uploadedFileID}.encrypted";
   final encryptedFile = File(encryptedFilePath);
 
   final startTime = DateTime.now().millisecondsSinceEpoch;
@@ -149,7 +149,7 @@ Future<File?> downloadAndDecrypt(
       '$logPrefix download completed: ${formatBytes(sizeInBytes)}, avg speed: ${speedInKBps.toStringAsFixed(2)} KB/s',
     );
 
-    final String decryptedFilePath = "$tempDir${file.generatedID}.decrypted";
+    final String decryptedFilePath = "$tempDir${file.uploadedFileID}.decrypted";
     // As decryption can take time, emit fake progress for large files during
     // decryption
     final FakePeriodicProgress? fakeProgress = file.fileType == FileType.video
@@ -166,12 +166,12 @@ Future<File?> downloadAndDecrypt(
       await CryptoUtil.decryptFile(
         encryptedFilePath,
         decryptedFilePath,
-        CryptoUtil.base642bin(file.fileDecryptionHeader!),
+        file.remoteAsset!.fileHeader,
         getFileKey(file),
       );
       fakeProgress?.stop();
       _logger
-          .info('$logPrefix decryption completed (genID ${file.generatedID})');
+          .info('$logPrefix decryption completed (genID ${file.uploadedFileID})');
     } catch (e, s) {
       fakeProgress?.stop();
       _logger.severe("Critical: $logPrefix failed to decrypt", e, s);

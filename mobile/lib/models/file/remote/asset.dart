@@ -63,11 +63,11 @@ class RemoteAsset {
   }
 
   FileType get fileType {
-    return getFileType(metadata.data['mediaType'] ?? -1);
+    return getFileType(metadata.data['fileType'] ?? -1);
   }
 
   int get subType {
-    return metadata.data['subtype'] ?? -1;
+    return metadata.data['subType'] ?? -1;
   }
 
   int get durationInSec => metadata.data['duration'] ?? 0;

@@ -5,10 +5,12 @@ import "package:flutter/foundation.dart";
 import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/db/common/base.dart";
+import "package:photos/db/remote/mappers.dart";
 import "package:photos/db/remote/schema.dart";
 import "package:photos/log/devlog.dart";
 import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/collection/collection.dart";
+import "package:photos/models/file/remote/asset.dart";
 import "package:sqlite_async/sqlite_async.dart";
 
 // ignore: constant_identifier_names
@@ -38,6 +40,15 @@ class RemoteDB with SqlDbBase {
     final cursor = await _sqliteDB.getAll("SELECT * FROM collections");
     for (final row in cursor) {
       result.add(Collection.fromRow(row));
+    }
+    return result;
+  }
+
+  Future<List<RemoteAsset>> getAllFiles() async {
+    final result = <RemoteAsset>[];
+    final cursor = await _sqliteDB.getAll("SELECT * FROM files");
+    for (final row in cursor) {
+      result.add(fromRow(row));
     }
     return result;
   }

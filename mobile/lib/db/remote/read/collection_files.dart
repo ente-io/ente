@@ -1,4 +1,6 @@
 import "package:photos/db/remote/db.dart";
+import "package:photos/db/remote/schema.dart";
+import "package:photos/models/file/remote/file_entry.dart";
 
 extension CollectionFileRead on RemoteDB {
   Future<int> getCollectionFileCount(int collectionID) async {
@@ -40,5 +42,16 @@ extension CollectionFileRead on RemoteDB {
       collectionIdToFileCount[collectionId] = count;
     }
     return collectionIdToFileCount;
+  }
+
+  Future<List<CollectionFileEntry>> getCollectionFiles(
+    FilterQueryParam? params,
+  ) async {
+    final rows = await sqliteDB.getAll(
+      "SELECT * FROM collection_files  JOIN files on collection_files.file_id=files.id WHERE ${params?.whereClause() ?? "order by creation_time desc"}",
+    );
+    return rows
+        .map((row) => CollectionFileEntry.fromMap(row))
+        .toList(growable: false);
   }
 }
