@@ -226,7 +226,7 @@ const subtitleText = (
         case "preparing":
             return t("preparing");
         case "readingMetadata":
-            return t("upload_reading_metadata");
+            return t("upload_reading_metadata_files");
         case "uploading":
             return t("processed_counts", {
                 count: uploadCounter.finished,
