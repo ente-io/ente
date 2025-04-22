@@ -8,4 +8,12 @@ extension CollectionFileRead on RemoteDB {
     );
     return row["count"] as int;
   }
+
+  Future<Set<int>> getAllCollectionIDsOfFile(int fileID) async {
+    final rows = await sqliteDB.getAll(
+      "SELECT collection_id FROM collection_files WHERE file_id = ?",
+      [fileID],
+    );
+    return rows.map((row) => row["collection_id"] as int).toSet();
+  }
 }

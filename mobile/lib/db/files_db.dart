@@ -1509,24 +1509,6 @@ class FilesDB with SqlDbBase {
     return result;
   }
 
-  Future<Set<int>> getAllCollectionIDsOfFile(
-    int uploadedFileID,
-  ) async {
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      '''
-      SELECT DISTINCT $columnCollectionID FROM $filesTable
-      WHERE $columnUploadedFileID = ? AND $columnCollectionID != -1
-    ''',
-      [uploadedFileID],
-    );
-    final collectionIDsOfFile = <int>{};
-    for (var result in results) {
-      collectionIDsOfFile.add(result['collection_id'] as int);
-    }
-    return collectionIDsOfFile;
-  }
-
   ///Each collectionIDs in list aren't necessarily unique
   Future<List<int>> getAllCollectionIDsOfFiles(
     List<int> uploadedFileIDs,

@@ -1,12 +1,13 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/files_db.dart";
+import "package:photos/db/remote/read/collection_files.dart";
 import "package:photos/events/pause_video_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
@@ -30,7 +31,7 @@ class AlbumsItemWidget extends StatelessWidget {
     final Future<Set<String>> allDeviceFoldersOfFile =
         Future.sync(() => {file.deviceFolder ?? ''});
     if (fileIsBackedup) {
-      allCollectionIDsOfFile = FilesDB.instance.getAllCollectionIDsOfFile(
+      allCollectionIDsOfFile = remoteDB.getAllCollectionIDsOfFile(
         file.uploadedFileID!,
       );
     }
