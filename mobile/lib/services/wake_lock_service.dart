@@ -8,11 +8,11 @@ enum WakeLockFor {
   handlingMediaKitEdgeCase,
 }
 
-/// Use this class to enable/disable wakelock. This class makes sure that
-/// the wakelock setting across sessions if set is respected when wakelock is
-/// updated for other non across session purposes.
+/// Use this wrapper to use wakelock. This class makes sure that the wakelock
+/// setting across sessions if set is respected when wakelock is updated for
+/// other non across session purposes.
 /// Only place where this wrapper is not used for accessing wakelock APIs is
-/// in media_kit video player.
+/// in media_kit package.
 class EnteWakeLockService {
   static const String kKeepAppAwakeAcrossSessions =
       "keepAppAwakeAcrossSessions";
