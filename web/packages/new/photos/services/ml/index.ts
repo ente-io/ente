@@ -3,7 +3,6 @@
  */
 
 import { proxy, transfer } from "comlink";
-import debounce from "debounce";
 import { isDesktop } from "ente-base/app";
 import { blobCache } from "ente-base/blob-cache";
 import { ensureElectron } from "ente-base/electron";
@@ -15,6 +14,7 @@ import type { UploadItem } from "ente-gallery/services/upload";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { throttled } from "ente-utils/promise";
+import pDebounce from "p-debounce";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import {
@@ -414,7 +414,7 @@ const updateClustersAndPeople = async () => {
  * from here. So this gets us near that ideal, without adding too much impact or
  * requiring us to be aware of the uploadManager status.
  */
-const debounceUpdateClustersAndPeople = debounce(
+const debounceUpdateClustersAndPeople = pDebounce(
     updateClustersAndPeople,
     30 * 1e3,
 );
