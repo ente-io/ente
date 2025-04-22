@@ -33,7 +33,6 @@ import "package:photos/services/notification_service.dart";
 import "package:photos/services/preview_video_store.dart";
 import "package:photos/services/remote/fetch/collection_files.dart";
 import "package:photos/services/remote/fetch/diff.dart";
-import 'package:photos/services/sync/diff_fetcher.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
@@ -45,7 +44,6 @@ class RemoteSyncService {
   final FileUploader _uploader = FileUploader.instance;
   final Configuration _config = Configuration.instance;
   final CollectionsService _collectionsService = CollectionsService.instance;
-  final DiffFetcher _diffFetcher = DiffFetcher();
   final LocalFileUpdateService _localFileUpdateService =
       LocalFileUpdateService.instance;
   int _completedUploads = 0;
@@ -221,23 +219,13 @@ class RemoteSyncService {
 
   Future<void> _pullDiff() async {
     await newService.syncFromRemote();
-    return;
+    // return;
     _logger.info("Pulling remote diff");
     final isFirstSync = !_collectionsService.hasSyncedCollections();
     if (isFirstSync && !_isExistingSyncSilent) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
     }
     await _collectionsService.sync();
-    // check and reset user's collection syncTime in past for older clients
-    if (isFirstSync) {
-      // not need reset syncTime, mark all flags as done if firstSync
-      await _markResetSyncTimeAsDone();
-    } else if (_shouldResetSyncTime()) {
-      _logger.warning('Resetting syncTime for for the client');
-      await _resetAllCollectionsSyncTime();
-      await _markResetSyncTimeAsDone();
-    }
-
     final idsToRemoteUpdationTimeMap =
         await _collectionsService.getCollectionIDsToBeSynced();
     await _syncUpdatedCollections(idsToRemoteUpdationTimeMap);
@@ -262,17 +250,6 @@ class RemoteSyncService {
     }
     _logger.info("All updated collections synced");
     Bus.instance.fire(DiffSyncCompleteEvent());
-  }
-
-  Future<void> _resetAllCollectionsSyncTime() async {
-    final resetSyncTime = _getSinceTimeForReSync();
-    _logger.info('re-setting all collections syncTime to: $resetSyncTime');
-    final collections = _collectionsService.getActiveCollections();
-    for (final c in collections) {
-      final int newSyncTime =
-          min(_collectionsService.getCollectionSyncTime(c.id), resetSyncTime);
-      await _collectionsService.setCollectionSyncTime(c.id, newSyncTime);
-    }
   }
 
   Future<void> _syncCollectionFiles(int collectionID, int sinceTime) async {
@@ -851,31 +828,6 @@ class RemoteSyncService {
       return false;
     }
     return false;
-  }
-
-  // return true if the client needs to re-sync the collections from previous
-  // version
-  bool _shouldResetSyncTime() {
-    return !_prefs.containsKey(kHasSyncedEditTime) ||
-        !_prefs.containsKey(kHasSyncedArchiveKey);
-  }
-
-  Future<void> _markResetSyncTimeAsDone() async {
-    await _prefs.setBool(kHasSyncedArchiveKey, true);
-    await _prefs.setBool(kHasSyncedEditTime, true);
-    // Check to avoid regression because of change or additions of keys
-    if (_shouldResetSyncTime()) {
-      throw Exception("_shouldResetSyncTime should return false now");
-    }
-  }
-
-  int _getSinceTimeForReSync() {
-    // re-sync from archive feature time if the client still hasn't synced
-    // since the feature release.
-    if (!_prefs.containsKey(kHasSyncedArchiveKey)) {
-      return kArchiveFeatureReleaseTime;
-    }
-    return kEditTimeFeatureReleaseTime;
   }
 
   bool _shouldThrottleSync() {
