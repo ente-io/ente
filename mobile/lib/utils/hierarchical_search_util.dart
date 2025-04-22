@@ -4,6 +4,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/remote/read/collection_files.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -217,20 +218,13 @@ Future<List<AlbumFilter>> _curateAlbumFilters(
   List<EnteFile> files,
 ) async {
   final albumFilters = <AlbumFilter>[];
-  final idToOccurrence = <int, int>{};
   final uploadedIDs = <int>[];
   for (EnteFile file in files) {
     if (file.uploadedFileID != null && file.uploadedFileID != -1) {
       uploadedIDs.add(file.uploadedFileID!);
     }
   }
-  final collectionIDsOfFiles =
-      await FilesDB.instance.getAllCollectionIDsOfFiles(uploadedIDs);
-
-  for (int collectionID in collectionIDsOfFiles) {
-    idToOccurrence[collectionID] = (idToOccurrence[collectionID] ?? 0) + 1;
-  }
-
+  final idToOccurrence = await remoteDB.getCollectionIdToFileCount(uploadedIDs);
   for (int id in idToOccurrence.keys) {
     final collection = CollectionsService.instance.getCollectionByID(id);
     if (collection == null) {
