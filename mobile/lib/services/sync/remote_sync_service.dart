@@ -283,44 +283,6 @@ class RemoteSyncService {
     if (!_isExistingSyncSilent) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
     }
-    final diff =
-        await _diffFetcher.getEncryptedFilesDiff(collectionID, sinceTime);
-    if (diff.deletedFiles.isNotEmpty) {
-      await _syncCollectionDiffDelete(diff, collectionID);
-    }
-    if (diff.updatedFiles.isNotEmpty) {
-      await _storeDiff(diff.updatedFiles, collectionID);
-      _logger.info(
-        "[Collection-$collectionID] Updated ${diff.updatedFiles.length} files"
-        " from remote",
-      );
-      Bus.instance.fire(
-        LocalPhotosUpdatedEvent(
-          diff.updatedFiles,
-          source: "syncUpdateFromRemote",
-        ),
-      );
-      Bus.instance.fire(
-        CollectionUpdatedEvent(
-          collectionID,
-          diff.updatedFiles,
-          "syncUpdateFromRemote",
-        ),
-      );
-    }
-
-    if (diff.latestUpdatedAtTime > 0) {
-      await _collectionsService.setCollectionSyncTime(
-        collectionID,
-        diff.latestUpdatedAtTime,
-      );
-    }
-    if (diff.hasMore) {
-      return await _syncCollectionFiles(
-        collectionID,
-        _collectionsService.getCollectionSyncTime(collectionID),
-      );
-    }
     _logger.info("[Collection-$collectionID] synced");
   }
 
@@ -331,32 +293,6 @@ class RemoteSyncService {
     await _collectionsService.joinPublicCollection(context, collectionID);
     await _collectionsService.sync();
     await _syncCollectionFiles(collectionID, 0);
-  }
-
-  Future<void> _syncCollectionDiffDelete(Diff diff, int collectionID) async {
-    final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID!).toList();
-    final localDeleteCount =
-        await _db.deleteFilesFromCollection(collectionID, fileIDs);
-    if (localDeleteCount > 0) {
-      final collectionFiles =
-          (await _db.getFileIDToFileFromIDs(fileIDs)).values.toList();
-      collectionFiles.removeWhere((f) => f.collectionID != collectionID);
-      Bus.instance.fire(
-        CollectionUpdatedEvent(
-          collectionID,
-          collectionFiles,
-          "syncDeleteFromRemote",
-          type: EventType.deletedFromRemote,
-        ),
-      );
-      Bus.instance.fire(
-        LocalPhotosUpdatedEvent(
-          collectionFiles,
-          type: EventType.deletedFromRemote,
-          source: "syncDeleteFromRemote",
-        ),
-      );
-    }
   }
 
   Future<void> syncDeviceCollectionFilesForUpload() async {

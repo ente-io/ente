@@ -73,6 +73,7 @@ class RemoteDiffService {
       );
       await remoteDB.deleteCollectionFilesDiff(diff.deletedItems);
       await remoteDB.insertCollectionFilesDiff(diff.updatedItems);
+      // todo:(rewrite) neeraj add logic to refresh home gallery when time or visibility changes
       final int nextSyncFrom = max(diff.maxUpdatedAtTime, currentSinceTime);
       await _collectionsService.setCollectionSyncTime(
         collectionID,
