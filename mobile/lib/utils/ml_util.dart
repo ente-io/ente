@@ -7,6 +7,7 @@ import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
 import "package:photos/db/ml/offlinedb.dart";
+import "package:photos/db/remote/db.dart";
 import "package:photos/extensions/list.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -370,7 +371,7 @@ bool _shouldDiscardRemoteEmbedding(FileDataEntity fileML) {
 }
 
 Future<int> getIndexableFileCount() async {
-  return FilesDB.instance.remoteFileCount();
+  return remoteDB.rowCount(RemoteTable.files);
 }
 
 Future<String> getImagePathForML(EnteFile enteFile) async {

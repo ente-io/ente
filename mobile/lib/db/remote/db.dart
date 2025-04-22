@@ -115,6 +115,15 @@ class RemoteDB with SqlDbBase {
     );
   }
 
+  Future<int> rowCount(
+    RemoteTable table,
+  ) async {
+    final row = await _sqliteDB.get(
+      'SELECT COUNT(*) as count FROM ${table.name}',
+    );
+    return row['count'] as int;
+  }
+
   Future<Set<T>> _getByIds<T>(
     Set<int> ids,
     String table,

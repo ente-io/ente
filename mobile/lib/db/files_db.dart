@@ -1661,19 +1661,6 @@ class FilesDB with SqlDbBase {
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
-  Future<int> remoteFileCount() async {
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll('''
-      SELECT DISTINCT $columnUploadedFileID FROM $filesTable
-      WHERE  $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1    
-    ''');
-    final ids = <int>{};
-    for (final result in results) {
-      ids.add(result[columnUploadedFileID] as int);
-    }
-    return ids.length;
-  }
-
   ///Returns "columnName1 = ?, columnName2 = ?, ..."
   String _generateUpdateAssignmentsWithPlaceholders({
     required int? fileGenId,
