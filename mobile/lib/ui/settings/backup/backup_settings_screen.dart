@@ -136,12 +136,12 @@ class BackupSettingsScreen extends StatelessWidget {
                                     menuItemColor: colorScheme.fillFaint,
                                     trailingWidget: ToggleSwitchWidget(
                                       value: () => EnteWakeLockService.instance
-                                          .shouldKeepAppAwakeAcrossSessions(),
+                                          .shouldKeepAppAwakeAcrossSessions,
                                       onChanged: () async {
                                         EnteWakeLockService.instance
                                             .updateWakeLock(
                                           enable: !EnteWakeLockService.instance
-                                              .shouldKeepAppAwakeAcrossSessions(),
+                                              .shouldKeepAppAwakeAcrossSessions,
                                           wakeLockFor: WakeLockFor
                                               .fasterBackupsOniOSByKeepingScreenAwake,
                                         );

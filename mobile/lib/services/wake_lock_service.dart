@@ -40,16 +40,12 @@ class EnteWakeLockService {
       WakelockPlus.toggle(enable: enable);
       _prefs.setBool(kKeepAppAwakeAcrossSessions, enable);
     } else {
-      final keepAppAwakeAcrossSessions =
-          _prefs.getBool(kKeepAppAwakeAcrossSessions) ?? false;
-
-      if (!keepAppAwakeAcrossSessions) {
+      if (!shouldKeepAppAwakeAcrossSessions) {
         WakelockPlus.toggle(enable: enable);
       }
     }
   }
 
-  bool shouldKeepAppAwakeAcrossSessions() {
-    return _prefs.getBool(kKeepAppAwakeAcrossSessions) ?? false;
-  }
+  bool get shouldKeepAppAwakeAcrossSessions =>
+      _prefs.getBool(kKeepAppAwakeAcrossSessions) ?? false;
 }

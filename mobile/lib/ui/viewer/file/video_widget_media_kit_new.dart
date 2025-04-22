@@ -162,7 +162,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     WidgetsBinding.instance.removeObserver(this);
     player.dispose();
     _captionUpdatedSubscription.cancel();
-    if (EnteWakeLockService.instance.shouldKeepAppAwakeAcrossSessions()) {
+    if (EnteWakeLockService.instance.shouldKeepAppAwakeAcrossSessions) {
       EnteWakeLockService.instance.updateWakeLock(
         enable: true,
         wakeLockFor: WakeLockFor.handlingMediaKitEdgeCase,
