@@ -93,20 +93,15 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	// Purpose of OTT is Sign up
-	if purpose == ente.SignUpOTTPurpose {
-		if isComplete && purpose == ente.SignUpOTTPurpose {
-			return stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
-		}
-		if !isComplete && purpose == ente.SignUpOTTPurpose && viper.GetBool("internal.disable-registration") {
-			return stacktrace.Propagate(ente.ErrPermissionDenied, "registration is disabled")
-		}
+	if isComplete && purpose == ente.SignUpOTTPurpose {
+		return stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
 	}
-	// Purpose of OTT is Login
-	if purpose == ente.LoginOTTPurpose {
-		if !isComplete && purpose == ente.LoginOTTPurpose {
-			return stacktrace.Propagate(ente.ErrUserNotRegistered, "user has not completed sign up process")
-		}
+	if !isComplete && purpose == ente.SignUpOTTPurpose && viper.GetBool("internal.disable-registration") {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "registration is disabled")
+	}
+
+	if !isComplete && purpose == ente.LoginOTTPurpose {
+		return stacktrace.Propagate(ente.ErrUserNotRegistered, "user has not completed sign up process")
 	}
 
 	ott, err := random.GenerateSixDigitOtp()
