@@ -194,12 +194,16 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     //   where ffmpeg should read the key.
     const keyInfo = [keyURI, keyPath].join("\n");
 
-    // Current parameters
+    // Overview:
     //
-    // - H264
-    // - 720p width
-    // - 2000kbps bitrate
-    // - 30fps frame rate
+    // - H.264 video 720p 30fps.
+    // - AAC audio 128kbps.
+    // - Encrypted HLS playlist with a single file containing all the chunks.
+    //
+    // Reference:
+    // - `man ffmpeg-all`
+    // - https://trac.ffmpeg.org/wiki/Encode/H.264
+    //
     const command = [
         ffmpegBinaryPath(),
 
@@ -210,26 +214,41 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         // The remaining options apply to the next output file (`playlistPath`).
         //
         // ---
-        /*
-        // `-vf` creates a filter graph for the video stream.
-        "-vf",
-        // `-vf scale=720:-1` scales the video to 720p width, keeping aspect ratio.
-        "scale=720:-1",
-        // `-r 30` sets the frame rate to 30 fps.
-        "-r",
-        "30",
-        // `-c:v libx264` sets the codec for the video stream to H264.
-        "-c:v",
-        "libx264",
-        // `-b:v 2000k` sets the bitrate for the video stream.
-        "-b:v",
-        "2000k",
-        // `-c:a aac -b:a 128k` converts the audio stream to 128k bit AAC.
-        "-c:a",
-        "aac",
-        "-b:a",
-        "128k",
-        */
+        //
+        // `-vf` creates a filter graph for the video stream. This is a string
+        // of the form `filter1=key=value:key=value.filter2=key=value`, that is,
+        // a comma separated list of filters chained together.
+        [
+            "-vf",
+            [
+                // Scales the video to maximum 720p height, keeping aspect
+                // ratio, and keeping the calculated dimension divisible by 2
+                // (some of the other operations require an even pixel count).
+                "scale=-2:720",
+                // Convert the video to a constant 30 fps, duplicating or
+                // dropping frames as necessary.
+                "fps=30",
+                // Output to YUV planar color space with "limited" but most
+                // compatible 4:2:0 chroma subsampling (if not specified, ffmpeg
+                // may output to a pixel format that is not widely supported).
+                "format=yuv420p",
+            ].join(","),
+        ],
+        // Video codec H.264
+        //
+        // - `-c:v libx264` converts the video stream to use the H.264 codec.
+        //
+        // - We don't supply a bitrate, instead it uses the default CRF ("23")
+        //   as recommended in the ffmpeg trac.
+        //
+        // - We don't supply a preset, it'll use the default ("medium")
+        ["-c:v", "libx264"],
+        // Audio codec AAC
+        //
+        // - `-c:a aac` converts the audio stream to use the AAC codec
+        //
+        // - We don't supply a bitrate, it'll use the AAC default 128k bps.
+        ["-c:a", "aac"],
         // Generate a HLS playlist.
         ["-f", "hls"],
         // Place all the video segments within the same .ts file (with the same
