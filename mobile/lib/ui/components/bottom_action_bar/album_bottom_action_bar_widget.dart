@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/components/bottom_action_bar/album_action_bar_widget.dart";
 import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/viewer/actions/album_selection_action_widget.dart";
@@ -10,9 +11,11 @@ class AlbumBottomActionBarWidget extends StatelessWidget {
   final SelectedAlbums selectedAlbums;
   final VoidCallback? onCancel;
   final Color? backgroundColor;
+  final UISectionType sectionType;
 
   const AlbumBottomActionBarWidget(
-    this.selectedAlbums, {
+    this.selectedAlbums,
+    this.sectionType, {
     super.key,
     this.backgroundColor,
     this.onCancel,
@@ -43,7 +46,7 @@ class AlbumBottomActionBarWidget extends StatelessWidget {
       child: Column(
         children: [
           const SizedBox(height: 8),
-          AlbumSelectionActionWidget(selectedAlbums),
+          AlbumSelectionActionWidget(selectedAlbums, sectionType),
           const DividerWidget(dividerType: DividerType.bottomBar),
           AlbumActionBarWidget(
             selectedAlbums: selectedAlbums,

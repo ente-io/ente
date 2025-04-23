@@ -4,6 +4,7 @@ import "package:photos/models/collection/collection.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/components/bottom_action_bar/album_bottom_action_bar_widget.dart";
 
 class AlbumSelectionOverlayBar extends StatefulWidget {
@@ -11,9 +12,11 @@ class AlbumSelectionOverlayBar extends StatefulWidget {
   final SelectedAlbums selectedAlbums;
   final List<Collection> collections;
   final Color? backgroundColor;
+  final UISectionType sectionType;
 
   const AlbumSelectionOverlayBar(
     this.selectedAlbums,
+    this.sectionType,
     this.collections, {
     super.key,
     this.onClose,
@@ -70,6 +73,7 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
                 decoration: BoxDecoration(boxShadow: shadowFloatFaintLight),
                 child: AlbumBottomActionBarWidget(
                   widget.selectedAlbums,
+                  widget.sectionType,
                   onCancel: () {
                     if (widget.selectedAlbums.albums.isNotEmpty) {
                       widget.selectedAlbums.clearAll();

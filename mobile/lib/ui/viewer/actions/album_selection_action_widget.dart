@@ -7,14 +7,21 @@ import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
+import "package:photos/ui/collections/collection_list_page.dart";
+import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/magic_util.dart";
 
 class AlbumSelectionActionWidget extends StatefulWidget {
   final SelectedAlbums selectedAlbums;
+  final UISectionType sectionType;
+
   const AlbumSelectionActionWidget(
-    this.selectedAlbums, {
+    this.selectedAlbums,
+    this.sectionType, {
     super.key,
   });
 
@@ -40,34 +47,57 @@ class _AlbumSelectionActionWidgetState
       return const SizedBox();
     }
     final List<SelectionActionButton> items = [];
+
+    if (widget.sectionType == UISectionType.homeCollections ||
+        widget.sectionType == UISectionType.outgoingCollections) {
+      items.add(
+        SelectionActionButton(
+          labelText: S.of(context).share,
+          icon: Icons.adaptive.share,
+          onTap: _shareCollection,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: "Pin",
+          icon: Icons.push_pin_rounded,
+          onTap: _onPinClick,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: S.of(context).delete,
+          icon: Icons.delete_outline,
+          onTap: _trashCollection,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: S.of(context).hide,
+          icon: Icons.visibility_off_outlined,
+          onTap: _onHideClick,
+        ),
+      );
+    }
+
     items.add(
       SelectionActionButton(
-        labelText: S.of(context).share,
-        icon: Icons.adaptive.share,
-        onTap: _shareCollection,
+        labelText: S.of(context).archive,
+        icon: Icons.archive_outlined,
+        onTap: _archiveClick,
       ),
     );
-    items.add(
-      SelectionActionButton(
-        labelText: "Pin",
-        icon: Icons.push_pin_rounded,
-        onTap: _onPinClick,
-      ),
-    );
-    items.add(
-      SelectionActionButton(
-        labelText: S.of(context).delete,
-        icon: Icons.delete_outline,
-        onTap: _trashCollection,
-      ),
-    );
-    items.add(
-      SelectionActionButton(
-        labelText: S.of(context).hide,
-        icon: Icons.visibility_off_outlined,
-        onTap: _onHideClick,
-      ),
-    );
+
+    if (widget.sectionType == UISectionType.incomingCollections) {
+      items.add(
+        SelectionActionButton(
+          labelText: S.of(context).leaveAlbum,
+          icon: Icons.logout,
+          onTap: _leaveAlbum,
+        ),
+      );
+    }
+
     final scrollController = ScrollController();
 
     return MediaQuery(
@@ -175,5 +205,89 @@ class _AlbumSelectionActionWidgetState
       );
     }
     widget.selectedAlbums.clearAll();
+  }
+
+  Future<void> _archiveClick() async {
+    for (final collection in widget.selectedAlbums.albums) {
+      if (collection.type == CollectionType.favorites) {
+        continue;
+      }
+      if (widget.sectionType == UISectionType.incomingCollections) {
+        final hasShareeArchived = collection.hasShareeArchived();
+        final int prevVisiblity =
+            hasShareeArchived ? archiveVisibility : visibleVisibility;
+        final int newVisiblity =
+            hasShareeArchived ? visibleVisibility : archiveVisibility;
+
+        await changeCollectionVisibility(
+          context,
+          collection: collection,
+          newVisibility: newVisiblity,
+          prevVisibility: prevVisiblity,
+          isOwner: false,
+        );
+      } else {
+        final isArchived = collection.isArchived();
+        final int prevVisiblity =
+            isArchived ? archiveVisibility : visibleVisibility;
+        final int newVisiblity =
+            isArchived ? visibleVisibility : archiveVisibility;
+
+        await changeCollectionVisibility(
+          context,
+          collection: collection,
+          newVisibility: newVisiblity,
+          prevVisibility: prevVisiblity,
+        );
+      }
+      if (mounted) {
+        setState(() {});
+      }
+    }
+    widget.selectedAlbums.clearAll();
+  }
+
+  Future<void> _leaveAlbum() async {
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: S.of(context).leaveAlbum,
+          onTap: () async {
+            for (final collection in widget.selectedAlbums.albums) {
+              if (collection.type == CollectionType.favorites) {
+                continue;
+              }
+              await CollectionsService.instance.leaveAlbum(collection);
+            }
+            widget.selectedAlbums.clearAll();
+          },
+        ),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: S.of(context).cancel,
+        ),
+      ],
+      title: S.of(context).leaveSharedAlbum,
+      body: S.of(context).photosAddedByYouWillBeRemovedFromTheAlbum,
+    );
+    if (actionResult?.action != null && mounted) {
+      if (actionResult!.action == ButtonAction.error) {
+        await showGenericErrorDialog(
+          context: context,
+          error: actionResult.exception,
+        );
+      } else if (actionResult.action == ButtonAction.first) {
+        Navigator.of(context).pop();
+      }
+    }
   }
 }

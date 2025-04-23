@@ -75,7 +75,8 @@ class _CollectionListPageState extends State<CollectionListPage> {
         (widget.tag.isEmpty && _searchQuery.isEmpty ? 1 : 0);
     final bool enableSelectionMode =
         widget.sectionType == UISectionType.homeCollections ||
-            widget.sectionType == UISectionType.outgoingCollections;
+            widget.sectionType == UISectionType.outgoingCollections ||
+            widget.sectionType == UISectionType.incomingCollections;
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -121,6 +122,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
             ),
             AlbumSelectionOverlayBar(
               _selectedAlbum,
+              widget.sectionType,
               collections!,
             ),
           ],
