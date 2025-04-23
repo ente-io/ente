@@ -194,12 +194,12 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     //   where ffmpeg should read the key.
     const keyInfo = [keyURI, keyPath].join("\n");
 
-    // Current parameters
+    // Overview:
     //
-    // - H264
-    // - 720p width
-    // - 2000kbps bitrate
-    // - 30fps frame rate
+    // - H.264 720p 30fps video 2000kbps.
+    // - AAC audio 128kbps.
+    // - Encrypted HLS playlist with a single file containing all the chunks.
+    //
     const command = [
         ffmpegBinaryPath(),
 
@@ -218,18 +218,19 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         // `-r 30` sets the frame rate to 30 fps.
         "-r",
         "30",
-        // `-c:v libx264` sets the codec for the video stream to H264.
-        "-c:v",
-        "libx264",
-        // `-b:v 2000k` sets the bitrate for the video stream.
-        "-b:v",
-        "2000k",
-        // `-c:a aac -b:a 128k` converts the audio stream to 128k bit AAC.
-        "-c:a",
-        "aac",
-        "-b:a",
-        "128k",
         */
+        // Video codec H.264 2000kbps
+        //
+        // `-c:v libx264` sets the codec for the video stream to H.264.
+        //
+        // `-b:v 2000k` sets the bitrate for the video stream.
+        ["-c:v", "libx264", "-b:v", "2000k"],
+        // Audio codec AAC
+        //
+        // `-c:a aac -b:a 128k` converts the audio stream to 128k bit AAC.
+        //
+        // - 128 is the default, we specify it anyway.
+        ["-c:a", "aac", "-b:a", "128k"],
         // Generate a HLS playlist.
         ["-f", "hls"],
         // Place all the video segments within the same .ts file (with the same
