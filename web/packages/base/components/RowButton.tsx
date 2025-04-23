@@ -1,5 +1,3 @@
-import { EnteSwitch } from "@/base/components/EnteSwitch";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     Box,
     Divider,
@@ -9,6 +7,8 @@ import {
     type ButtonProps,
     type TypographyProps,
 } from "@mui/material";
+import { EnteSwitch } from "ente-base/components/EnteSwitch";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import React from "react";
 
 interface RowButtonGroupTitleProps {
@@ -134,7 +134,7 @@ interface RowButtonProps {
      * except we only support two cases for this row button component:
      *
      * - "primary" (default): A row button that uses "text.base" as the color of
-     *   the text (and an approprite background color, if needed, based on the
+     *   the text (and an appropriate background color, if needed, based on the
      *   value of the {@link variant}).
      *
      * - "critical": A row button that uses "critical.main" as the color of the
@@ -236,14 +236,18 @@ export const RowButton: React.FC<RowButtonProps> = ({
             <Stack direction="row" sx={{ py: "14px", gap: "10px" }}>
                 {startIcon && startIcon}
                 <Box sx={{ px: "2px" }}>
-                    {typeof label !== "string" ? (
+                    {typeof label != "string" ? (
                         label
                     ) : caption ? (
                         <Stack
                             direction="row"
                             sx={{ gap: "4px", alignItems: "center" }}
                         >
-                            <Typography>{label}</Typography>
+                            {/* Don't shrink the main label, instead let the
+                                caption grow into two lines if it needs to. */}
+                            <Typography sx={{ flexShrink: 0 }}>
+                                {label}
+                            </Typography>
                             <CaptionTypography color={color}>
                                 {"•"}
                             </CaptionTypography>

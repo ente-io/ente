@@ -2,18 +2,18 @@
  * @file Main thread interface to the ML subsystem.
  */
 
-import { isDesktop } from "@/base/app";
-import { blobCache } from "@/base/blob-cache";
-import { ensureElectron } from "@/base/electron";
-import log from "@/base/log";
-import { masterKeyFromSession } from "@/base/session";
-import type { Electron } from "@/base/types/ipc";
-import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import type { UploadItem } from "@/gallery/services/upload";
-import type { EnteFile } from "@/media/file";
-import { FileType } from "@/media/file-type";
-import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
+import { isDesktop } from "ente-base/app";
+import { blobCache } from "ente-base/blob-cache";
+import { ensureElectron } from "ente-base/electron";
+import log from "ente-base/log";
+import { masterKeyFromSession } from "ente-base/session";
+import type { Electron } from "ente-base/types/ipc";
+import { ComlinkWorker } from "ente-base/worker/comlink-worker";
+import type { UploadItem } from "ente-gallery/services/upload";
+import type { EnteFile } from "ente-media/file";
+import { FileType } from "ente-media/file-type";
+import { throttled } from "ente-utils/promise";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import {
@@ -507,7 +507,7 @@ const getMLStatus = async (): Promise<MLStatus> => {
 
     // The worker has a clustering progress set iff it is clustering. This
     // overrides other behaviours.
-    const clusteringProgress = await w.clusteringProgess;
+    const clusteringProgress = await w.clusteringProgress;
     if (clusteringProgress) {
         return {
             phase: "clustering",

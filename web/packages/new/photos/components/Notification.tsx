@@ -1,7 +1,3 @@
-import { EllipsizedTypography } from "@/base/components/Typography";
-import { RippleDisabledButton } from "@/base/components/mui/FocusVisibleButton";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import { isSxArray } from "@/base/components/utils/sx";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
 import {
@@ -13,6 +9,10 @@ import {
     type SxProps,
     type Theme,
 } from "@mui/material";
+import { EllipsizedTypography } from "ente-base/components/Typography";
+import { RippleDisabledButton } from "ente-base/components/mui/FocusVisibleButton";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { isSxArray } from "ente-base/components/utils/sx";
 import React from "react";
 
 /**

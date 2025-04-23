@@ -1,13 +1,13 @@
-import { logUnhandledErrorsAndRejectionsInWorker } from "@/base/log-web";
 import { expose } from "comlink";
+import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
 import type { StateAddress } from "libsodium-wrappers-sumo";
 import * as ei from "./ente-impl";
 import * as libsodium from "./libsodium";
 
 /**
  * A web worker that exposes some of the functions defined in either the Ente
- * specific layer (@/base/crypto) or the libsodium layer
- * (@/base/crypto/libsodium.ts).
+ * specific layer (ente-base/crypto) or the libsodium layer
+ * (ente-base/crypto/libsodium.ts).
  *
  * See: [Note: Crypto code hierarchy].
  *

@@ -1,12 +1,12 @@
-import { setRecoveryKey } from "@/accounts/services/user";
-import { sharedCryptoWorker } from "@/base/crypto";
-import log from "@/base/log";
-import { masterKeyFromSession } from "@/base/session";
-import { getData, setData, setLSUser } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { type SessionKey, setKey } from "@ente/shared/storage/sessionStorage";
-import { getActualKey } from "@ente/shared/user";
-import type { KeyAttributes } from "@ente/shared/user/types";
+import { setRecoveryKey } from "ente-accounts/services/user";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import log from "ente-base/log";
+import { masterKeyFromSession } from "ente-base/session";
+import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
+import { type SessionKey, setKey } from "ente-shared/storage/sessionStorage";
+import { getActualKey } from "ente-shared/user";
+import type { KeyAttributes } from "ente-shared/user/types";
 
 const LOGIN_SUB_KEY_LENGTH = 32;
 const LOGIN_SUB_KEY_ID = 1;

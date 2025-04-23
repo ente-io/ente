@@ -1,8 +1,8 @@
-import { EnteLogo } from "@/base/components/EnteLogo";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import log from "@/base/log";
 import { Box, Stack, styled, Typography } from "@mui/material";
 import { PairingCode } from "components/PairingCode";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import log from "ente-base/log";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { readCastData, storeCastData } from "services/cast-data";

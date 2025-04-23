@@ -1,14 +1,16 @@
-import log from "@/base/log";
-import type { FileInfoExif } from "@/gallery/components/FileInfo";
+import log from "ente-base/log";
+import type { FileInfoExif } from "ente-gallery/components/FileInfo";
+import { downloadManager } from "ente-gallery/services/download";
+import { extractRawExif, parseExif } from "ente-gallery/services/exif";
 import {
-    downloadManager,
-    type LivePhotoSourceURL,
-} from "@/gallery/services/download";
-import { extractRawExif, parseExif } from "@/gallery/services/exif";
-import type { EnteFile } from "@/media/file";
-import { fileCaption } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { ensureString } from "@/utils/ensure";
+    hlsPlaylistDataForFile,
+    type HLSPlaylistData,
+} from "ente-gallery/services/video";
+import type { EnteFile } from "ente-media/file";
+import { fileCaption } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { ensureString } from "ente-utils/ensure";
+import { shouldUsePlayerV2 } from "./photoswipe";
 
 /**
  * This is a subset of the fields expected by PhotoSwipe itself (see the
@@ -91,11 +93,34 @@ export type ItemData = PhotoSwipeSlideData & {
      * The renderable object URL of the video associated with the file.
      *
      * - For images, this will not be defined.
-     * - For videos, this will be the object URL of a renderable video.
+     * - For videos, this will be the object URL of a renderable video (but only
+     *   if {@link videoPlaylistURL} is not set).
      * - For live photos, this will be a renderable object URL of the video
      *   portion of the live photo.
      */
     videoURL?: string;
+    /**
+     * The object URL to an HLS playlist that can be used to play the video
+     * associated with the file in a streaming manner.
+     *
+     * This will only be defined for videos for which a corresponding streamable
+     * version has been created.
+     *
+     * Only one of {@link videoURL} or {@link videoPlaylistURL} will be set at a
+     * time.
+     */
+    videoPlaylistURL?: string;
+    /**
+     * The DOM element ID of the `media-controller` element that is showing the
+     * video for the current item.
+     *
+     * If present, this value will be used to display controls for controlling
+     * the video wrapped by the media-controller.
+     *
+     * This is only set for videos that are streamed using HLS (i.e. videos for
+     * which {@link videoPlaylistURL} has also been set).
+     */
+    mediaControllerID?: string;
     /**
      * `true` if we should indicate to the user that we're still fetching data
      * for this file.
@@ -149,6 +174,11 @@ class FileViewerDataSourceState {
      * The best data we have for a particular file (ID).
      */
     itemDataByFileID = new Map<number, ItemData>();
+    /**
+     * The validity (if applicable) for the corresponding entry in
+     * {@link itemDataByFileID}.
+     */
+    itemDataValidTillByFileID = new Map<number, Date>();
     /**
      * The latest callback registered for notifications of better data being
      * available for a particular file (ID).
@@ -227,6 +257,13 @@ export const fileViewerDidClose = () => {
 };
 
 /**
+ * Options to modify the default behaviour of {@link itemDataForFile}.
+ */
+export interface ItemDataOpts {
+    videoQuality?: "auto" | "original";
+}
+
+/**
  * Return the best available {@link ItemData} for rendering the given
  * {@link file}.
  *
@@ -236,6 +273,8 @@ export const fileViewerDidClose = () => {
  *
  * At each step, we call the provided callback so that file viewer can call us
  * again to get the updated data.
+ *
+ * @param opts Options to modify the default behaviours.
  *
  * ---
  *
@@ -261,7 +300,10 @@ export const fileViewerDidClose = () => {
  *
  * Then it'll continue fetching the original.
  *
- * - For images and videos, this will be the single original.
+ * - For images this will be the single original.
+ *
+ * - For videos this will be either the HLS playlist to a streamable variant of
+ *   the video (if the video has one available), or the original video itself.
  *
  * - For live photos, this will also be a two step process, first fetching the
  *   video component, then fetching the image component.
@@ -274,9 +316,19 @@ export const fileViewerDidClose = () => {
  * next time the data is requested we repeat the process instead of continuing
  * to serve the incomplete result.
  */
-export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
+export const itemDataForFile = (
+    file: EnteFile,
+    opts: ItemDataOpts | undefined,
+    needsRefresh: () => void,
+) => {
     const fileID = file.id;
     const fileType = file.metadata.fileType;
+
+    const validTill = _state.itemDataValidTillByFileID.get(fileID);
+    if (validTill && validTill < new Date()) {
+        // Don't use the cached entry if it has become stale.
+        forgetItemDataForFileID(fileID);
+    }
 
     let itemData = _state.itemDataByFileID.get(fileID);
 
@@ -287,10 +339,21 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
     if (!itemData) {
         itemData = { fileID, fileType, isContentLoading: true };
         _state.itemDataByFileID.set(file.id, itemData);
-        void enqueueUpdates(file);
+        void enqueueUpdates(file, opts);
     }
 
     return itemData;
+};
+
+/**
+ * Forget item data for the given {@link file}.
+ *
+ * This is called when we change the options passed to {@link itemDataForFile},
+ * and so would like to clear any previously cached data.
+ */
+export const forgetItemDataForFileID = (fileID: number) => {
+    _state.itemDataByFileID.delete(fileID);
+    _state.itemDataValidTillByFileID.delete(fileID);
 };
 
 /**
@@ -300,9 +363,8 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
  * full retry when they come back the next time.
  */
 export const forgetFailedItemDataForFileID = (fileID: number) => {
-    if (_state.itemDataByFileID.get(fileID)?.fetchFailed) {
-        _state.itemDataByFileID.delete(fileID);
-    }
+    if (_state.itemDataByFileID.get(fileID)?.fetchFailed)
+        forgetItemDataForFileID(fileID);
 };
 
 /**
@@ -327,11 +389,14 @@ export const updateItemDataAlt = (updatedFile: EnteFile) => {
 const forgetFailedItems = () =>
     [..._state.itemDataByFileID.keys()].forEach(forgetFailedItemDataForFileID);
 
-const enqueueUpdates = async (file: EnteFile) => {
+const enqueueUpdates = async (
+    file: EnteFile,
+    opts: ItemDataOpts | undefined,
+) => {
     const fileID = file.id;
     const fileType = file.metadata.fileType;
 
-    const update = (itemData: Partial<ItemData>) => {
+    const update = (itemData: Partial<ItemData>, validTill?: Date) => {
         // Use the file's caption as its alt text (in addition to using it as
         // the visible caption).
         const alt = fileCaption(file);
@@ -342,7 +407,32 @@ const enqueueUpdates = async (file: EnteFile) => {
             fileID,
             alt,
         });
+        if (validTill) {
+            _state.itemDataValidTillByFileID.set(file.id, validTill);
+        } else {
+            _state.itemDataValidTillByFileID.delete(file.id);
+        }
         _state.needsRefreshByFileID.get(file.id)?.();
+    };
+
+    const updateVideo = (
+        videoURL: string | undefined,
+        hlsPlaylistData: HLSPlaylistData | undefined,
+    ) => {
+        const videoURLD = videoURL ? { videoURL } : {};
+        if (hlsPlaylistData) {
+            const {
+                playlistURL: videoPlaylistURL,
+                width,
+                height,
+            } = hlsPlaylistData;
+            update(
+                { ...videoURLD, videoPlaylistURL, width, height },
+                createHLSPlaylistItemDataValidity(),
+            );
+        } else {
+            update(videoURLD);
+        }
     };
 
     // Use the last best available data, but stop showing the loading indicator
@@ -382,49 +472,55 @@ const enqueueUpdates = async (file: EnteFile) => {
     }
 
     try {
-        switch (fileType) {
-            case FileType.image: {
-                const sourceURLs =
-                    await downloadManager.renderableSourceURLs(file);
-                const imageURL = ensureString(sourceURLs.url);
-                const originalImageBlob = sourceURLs.originalImageBlob!;
+        // TODO(HLS):
+        let hlsPlaylistData: HLSPlaylistData | undefined;
+        if (shouldUsePlayerV2() && file.metadata.fileType == FileType.video) {
+            hlsPlaylistData = await hlsPlaylistDataForFile(
+                file,
+                downloadManager.publicAlbumsCredentials,
+            );
+            // We have a HLS playlist, and the user didn't request the original.
+            // Early return so that we don't initiate a fetch for the original.
+            if (hlsPlaylistData && opts?.videoQuality != "original") {
+                updateVideo(undefined, hlsPlaylistData);
+                return;
+            }
+        }
+
+        const sourceURLs = await downloadManager.renderableSourceURLs(file);
+
+        switch (sourceURLs.type) {
+            case "image": {
+                const { imageURL, originalImageBlob } = sourceURLs;
                 const itemData = await withDimensionsIfPossible(imageURL);
                 update({ ...itemData, imageURL, originalImageBlob });
                 break;
             }
 
-            case FileType.video: {
-                const sourceURLs =
-                    await downloadManager.renderableSourceURLs(file);
-                update({ videoURL: sourceURLs.url as string });
+            case "video": {
+                const { videoURL } = sourceURLs;
+                updateVideo(videoURL, hlsPlaylistData);
                 break;
             }
 
-            case FileType.livePhoto: {
-                const sourceURLs =
-                    await downloadManager.renderableSourceURLs(file);
-                const livePhotoSourceURLs =
-                    sourceURLs.url as LivePhotoSourceURL;
+            case "livePhoto": {
                 // The image component of a live photo usually is an HEIC file,
-                // which cannot be displayed natively by browsers and needs a
-                // conversion, which is slow on web (faster on desktop). We
+                // which cannot be displayed natively by many browsers and needs
+                // a conversion, which is slow on web (faster on desktop). We
                 // already have both components available since they're part of
                 // the same zip. And in the UI, the first (default) interaction
                 // is to loop the live video.
                 //
                 // For these reasons, we resolve with the video first, then
                 // resolve with the image.
-                const videoURL = await livePhotoSourceURLs.video();
+                const videoURL = await sourceURLs.videoURL();
                 update({
                     videoURL,
                     isContentLoading: true,
                     isContentZoomable: false,
                 });
-                const imageURL = ensureString(
-                    await livePhotoSourceURLs.image(),
-                );
-                const originalImageBlob =
-                    livePhotoSourceURLs.originalImageBlob()!;
+                const imageURL = await sourceURLs.imageURL();
+                const originalImageBlob = sourceURLs.originalImageBlob;
                 update({
                     ...(await withDimensionsIfPossible(imageURL)),
                     imageURL,
@@ -482,6 +578,18 @@ const withDimensionsIfPossible = (
         image.onerror = () => resolve({ src: imageURL });
         image.src = imageURL;
     });
+
+/**
+ * Return a new validity for a HLS playlist containing presigned URLs.
+ *
+ * The content chunks in HLS playlist generated by
+ * {@link hlsPlaylistDataForFile} use presigned URLs generated by remote (see
+ * `PreSignedRequestValidityDuration` in the museum source). These have a
+ * validity of 7 days. We keep a 2 day buffer, and consider any item data that
+ * uses such playlist as stale after 5 days.
+ */
+const createHLSPlaylistItemDataValidity = () =>
+    new Date(Date.now() + 5 * 24 * 60 * 60 * 1000); /* 5 days */
 
 /**
  * Return the cached Exif data for the given {@link file}.

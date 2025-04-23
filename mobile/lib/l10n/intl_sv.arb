@@ -426,14 +426,6 @@
   "shareLink": "Dela länk",
   "delete": "Radera",
   "share": "Dela",
-  "moveItem": "{count, plural, one {Flytta objekt} other {Flytta objekt}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {Lägg till objekt} other {Lägg till objekt}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Skapa eller välj album",
   "selectAlbum": "Välj album",
   "searchByAlbumNameHint": "Albumnamn",
@@ -540,22 +532,5 @@
   "newPerson": "Ny person",
   "addName": "Lägg till namn",
   "add": "Lägg till",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos",
-  "notThisPerson": "Not this person?",
-  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
-  "thisWeekThroughTheYears": "This week through the years",
-  "spotlightOnYourself": "Spotlight on yourself"
+  "curatedMemories": "Curated memories"
 }

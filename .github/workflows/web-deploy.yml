@@ -19,6 +19,9 @@ on:
     # Also allow manually running the workflow
     workflow_dispatch:
 
+permissions:
+    contents: read
+
 jobs:
     deploy:
         runs-on: ubuntu-latest
@@ -34,7 +37,7 @@ jobs:
             - name: Setup node and enable yarn caching
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                  node-version: 22
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
 

@@ -3,7 +3,7 @@
   "enterYourEmailAddress": "Entrez votre adresse e-mail",
   "accountWelcomeBack": "Bon retour parmi nous !",
   "emailAlreadyRegistered": "Email déjà enregistré.",
-  "emailNotRegistered": "Email inconnu.",
+  "emailNotRegistered": "E-mail non enregistré.",
   "email": "E-mail",
   "cancel": "Annuler",
   "verify": "Vérifier",
@@ -371,21 +371,6 @@
   "deleteFromBoth": "Supprimer des deux",
   "newAlbum": "Nouvel album",
   "albums": "Albums",
-  "memoryCount": "{count, plural, one{{formattedCount} souvenir} other{{formattedCount} souvenirs}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "{count} sélectionné(s)",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -525,6 +510,7 @@
   "viewLargeFiles": "Fichiers volumineux",
   "viewLargeFilesDesc": "Affichez les fichiers qui consomment le plus de stockage.",
   "noDuplicates": "✨ Aucun doublon",
+  "youveNoDuplicateFilesThatCanBeCleared": "Vous n'avez aucun fichier dupliqué pouvant être nettoyé",
   "success": "Succès",
   "rateUs": "Évaluez-nous",
   "remindToEmptyDeviceTrash": "Également vide \"récemment supprimé\" de \"Paramètres\" -> \"Stockage\" pour réclamer l'espace libéré",
@@ -791,14 +777,6 @@
   "share": "Partager",
   "unhideToAlbum": "Afficher dans l'album",
   "restoreToAlbum": "Restaurer vers l'album",
-  "moveItem": "{count, plural, one {Déplacez l'objet} other {Déplacez des objets}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {Ajoutez un objet} other {Ajoutez des objets}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Créez ou sélectionnez un album",
   "selectAlbum": "Sélectionner album",
   "searchByAlbumNameHint": "Nom de l'album",
@@ -896,7 +874,6 @@
   "authToViewYourMemories": "Authentifiez-vous pour voir vos souvenirs",
   "unlock": "Déverrouiller",
   "freeUpSpace": "Libérer de l'espace",
-  "freeUpSpaceSaving": "{count, plural, one {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 fichier dans cet album a été sauvegardé en toute sécurité} other {{formattedNumber} fichiers dans cet album ont été sauvegardés en toute sécurité}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -924,18 +901,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, one {y} other {y}} accéder sur Ente tant que vous avez un abonnement actif",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1266,8 +1231,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Trouver des personnes rapidement par leur nom",
-  "addViewers": "{count, plural, zero {Ajouter un observateur} one {Ajouter un observateur} other {Ajouter des observateurs}}",
-  "addCollaborators": "{count, plural, zero {Ajouter un collaborateur} one {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Appuyez longuement sur un email pour vérifier le chiffrement de bout en bout.",
   "developerSettingsWarning": "Êtes-vous sûr de vouloir modifier les paramètres du développeur ?",
   "developerSettings": "Paramètres du développeur",
@@ -1399,16 +1362,6 @@
   "enableMachineLearningBanner": "Activer l'apprentissage automatique pour la reconnaissance des visages et la recherche magique",
   "searchDiscoverEmptySection": "Les images seront affichées ici une fois le traitement terminé",
   "searchPersonsEmptySection": "Les personnes seront affichées ici une fois le traitement terminé",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 observateur ajouté} =1 {1 observateur ajouté} other {{count} observateurs ajoutés}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 collaborateur ajouté} =1 {1 collaborateur ajouté} other {{count} collaborateurs ajoutés}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1484,15 +1437,6 @@
   },
   "currentlyRunning": "en cours d'exécution",
   "ignored": "ignoré",
-  "photosCount": "{count, plural, =0 {0 photo} =1 {1 photo} other {{count} photos}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Fichier",
   "searchSectionsLengthMismatch": "Incompatibilité de longueur des sections : {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1513,12 +1457,6 @@
   "@selectAllShort": {
     "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
   },
-  "changeLogMagicSearchImprovementTitle": "Amélioration de la recherche magique",
-  "changeLogMagicSearchImprovementContent": "Nous avons amélioré la recherche magique pour qu'elle soit beaucoup plus rapide. N'attendez plus pour trouver ce que vous cherchez.",
-  "changeLogBackupStatusTitle": "Statut de la Sauvegarde",
-  "changeLogBackupStatusContent": "Nous avons ajouté un journal de tous les fichiers qui ont été envoyés vers Ente, y compris les échecs et la file d'attente.",
-  "changeLogDiscoverTitle": "Découverte",
-  "changeLogDiscoverContent": "Vous cherchez des photos de vos papiers d'identité, des notes ou même des \"memes\" ? Rendez-vous dans l'onglet de recherche et explorez la fonction Découverte. Grâce à notre recherche sémantique vous trouverez des photos qui pourraient être importantes pour vous.\\n\\nDisponible uniquement si vous avez activé l'apprentissage automatique.",
   "selectCoverPhoto": "Sélectionnez la photo de couverture",
   "newLocation": "Nouveau lieu",
   "faceNotClusteredYet": "Ce visage n'a pas encore été regroupé, veuillez revenir plus tard",
@@ -1674,36 +1612,72 @@
   "playStream": "Lire le stream",
   "playOriginal": "Lire l'original",
   "joinAlbumConfirmationDialogBody": "Rejoindre un album rendra votre e-mail visible à ses participants.",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos",
-  "notThisPerson": "Not this person?",
-  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
-  "thisWeekThroughTheYears": "This week through the years",
-  "spotlightOnYourself": "Spotlight on yourself",
-  "cLIcon": "Nouvelle icône",
-  "cLIconDesc": "Enfin, une nouvelle icône d'application que nous pensons représenter au mieux notre travail. Nous avons également ajouté un sélecteur d'icône pour que vous puissiez continuer à utiliser l'ancienne icône.",
-
+  "pleaseWaitThisWillTakeAWhile": "Veuillez patienter, cela prendra un peu de temps.",
+  "editTime": "Modifier l'heure",
+  "selectTime": "Sélectionner l'heure",
+  "selectDate": "Sélectionner la date",
+  "previous": "Précédent",
+  "selectOneDateAndTimeForAll": "Sélectionnez une date et une heure pour tous",
+  "selectStartOfRange": "Sélectionner le début de la plage",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "Cela rendra la date et l'heure identique à toutes les photos sélectionnées.",
+  "allWillShiftRangeBasedOnFirst": "C'est la première dans le groupe. Les autres photos sélectionnées se déplaceront automatiquement en fonction de cette nouvelle date",
+  "newRange": "Nouvelle plage",
+  "selectOneDateAndTime": "Sélectionner une date et une heure",
+  "moveSelectedPhotosToOneDate": "Déplacer les photos sélectionnées vers une date",
+  "shiftDatesAndTime": "Dates et heure de décalage",
+  "photosKeepRelativeTimeDifference": "Les photos gardent une différence de temps relative",
+  "photocountPhotos": "{count, plural, =0 {No photos} =1 {1 photo} other {{count} photos}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "appIcon": "Icône de l'appli",
+  "notThisPerson": "Ce n'est pas cette personne ?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Les éléments sélectionnés seront retirés de cette personne, mais pas supprimés de votre bibliothèque.",
+  "throughTheYears": "{dateFormat} au fil des années",
+  "thisWeekThroughTheYears": "Cette semaine au fil des années",
+  "thisWeekXYearsAgo": "{count, plural, one {}=1 {Cette semaine, {count} il y a l'année} other {Cette semaine, {count} il y a des années}}",
+  "youAndThem": "Vous et {name}",
+  "admiringThem": "Admirant {name}",
+  "embracingThem": "Embrasse {name}",
+  "partyWithThem": "En soirée avec {name}",
+  "hikingWithThem": "Randonnée avec {name}",
+  "feastingWithThem": "Fête avec {name}",
+  "selfiesWithThem": "Selfies avec {name}",
+  "posingWithThem": "Pose avec {name}",
+  "backgroundWithThem": "Magnifiques vues avec {name}",
+  "sportsWithThem": "Sports avec {name}",
+  "roadtripWithThem": "En route avec {name}",
+  "spotlightOnYourself": "Éclairage sur vous-même",
+  "spotlightOnThem": "Spotlight sur {name}",
+  "personIsAge": "{name} a {age}!",
+  "personTurningAge": "{name} aura bientôt {age}",
+  "lastTimeWithThem": "Dernière fois avec {name}",
+  "tripToLocation": "Voyage vers {location}",
+  "tripInYear": "Voyage en {year}",
+  "lastYearsTrip": "Voyage de l'an dernier",
+  "sunrise": "À l'horizon",
+  "mountains": "Au-dessus des collines",
+  "greenery": "La vie au vert",
+  "beach": "Sable et mer",
+  "city": "Dans la ville",
+  "moon": "Au clair de lune",
+  "onTheRoad": "De nouveau sur la route",
+  "food": "Plaisir culinaire",
+  "pets": "Compagnons à quatre pattes",
+  "cLIcon": "Nouvel icône",
+  "cLIconDesc": "Finalement, création d'un nouvel icône d'application qui, selon nous, représente au mieux notre travail. Nous avons également ajouté un changeur d'icône pour que vous puissiez continuer à utiliser l'ancien.",
   "cLMemories": "Souvenirs",
-  "cLMemoriesDesc": "Redécouvrez vos moments spéciaux - mettez en avant vos personnes préférées, vos voyages et vacances, vos meilleurs clichés et bien plus encore. Activez l'apprentissage automatique, identifiez-vous et nommez vos amis pour une expérience optimale.",
-
+  "cLMemoriesDesc": "Redécouvrez vos précieux souvenirs - focus sur vos connaissances préférées, vos voyages et vos vacances, vos meilleurs clics et bien plus encore. Activez l'apprentissage automatique, taguez-vous et nommez vos amis pour une meilleure expérience.",
   "cLWidgets": "Widgets",
-  "cLWidgetsDesc": "Les widgets de l'écran d'accueil intégrés aux souvenirs sont désormais disponibles. Ils afficheront vos moments spéciaux sans ouvrir l'application.",
-
-  "cLFamilyPlan": "Limites du plan familial",
-  "cLFamilyPlanDesc": "Vous pouvez maintenant définir des limites sur la quantité de stockage que les membres de votre famille peuvent utiliser.",
-
-  "cLBulkEdit": "Modification en masse des dates",
-  "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes en une seule action rapide. Le décalage des dates est également pris en charge."
+  "cLWidgetsDesc": "Les widgets (ou gadgets) de l'écran d'accueil, qui sont intégrés à des souvenirs, sont maintenant disponibles. Ils montreront vos moments spéciaux sans nécessité d'ouvrir l'application.",
+  "cLFamilyPlan": "Limites pour le forfait Famille",
+  "cLFamilyPlanDesc": "Vous pouvez maintenant fixer des limites sur la quantité de stockage que les membres de votre famille peuvent utiliser.",
+  "cLBulkEdit": "Dates de modification multiples",
+  "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes celles-ci, en une seule action rapide. Les dates de décalage sont également prises en charge.",
+  "curatedMemories": "Curated memories"
 }

@@ -1,18 +1,3 @@
-import { TitledMiniDialog } from "@/base/components/MiniDialog";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import {
-    DropdownInput,
-    type DropdownOption,
-} from "@/new/photos/components/DropdownInput";
-import {
-    deleteAccount,
-    getAccountDeleteChallenge,
-} from "@/new/photos/services/user";
-import { initiateEmail } from "@/new/photos/utils/web";
-import { decryptDeleteAccountChallenge } from "@ente/shared/crypto/helpers";
 import {
     Checkbox,
     FormControlLabel,
@@ -22,6 +7,21 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import { TitledMiniDialog } from "ente-base/components/MiniDialog";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import {
+    DropdownInput,
+    type DropdownOption,
+} from "ente-new/photos/components/DropdownInput";
+import {
+    deleteAccount,
+    getAccountDeleteChallenge,
+} from "ente-new/photos/services/user";
+import { initiateEmail } from "ente-new/photos/utils/web";
+import { decryptDeleteAccountChallenge } from "ente-shared/crypto/helpers";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useState } from "react";

@@ -7,9 +7,9 @@
  * there.
  */
 
-import { CenteredFill } from "@/base/components/containers";
-import type { SearchSuggestion } from "@/new/photos/services/search/types";
 import { Paper, Stack, Typography } from "@mui/material";
+import { CenteredFill } from "ente-base/components/containers";
+import type { SearchSuggestion } from "ente-new/photos/services/search/types";
 import { t } from "i18next";
 import React, { useState } from "react";
 import { enableML } from "../../services/ml";

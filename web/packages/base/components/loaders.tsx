@@ -1,6 +1,6 @@
-import { Stack100vhCenter } from "@/base/components/containers";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Backdrop } from "@mui/material";
+import { Stack100vhCenter } from "ente-base/components/containers";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import React from "react";
 
 /**

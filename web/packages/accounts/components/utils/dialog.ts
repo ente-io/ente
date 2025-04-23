@@ -1,4 +1,4 @@
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
+import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { t } from "i18next";
 
 /**

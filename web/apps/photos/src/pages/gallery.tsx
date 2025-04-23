@@ -1,84 +1,3 @@
-import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
-import { stashRedirect } from "@/accounts/services/redirect";
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { NavbarBase } from "@/base/components/Navbar";
-import { CenteredRow } from "@/base/components/containers";
-import { TranslucentLoadingOverlay } from "@/base/components/loaders";
-import type { ButtonishProps } from "@/base/components/mui";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { errorDialogAttributes } from "@/base/components/utils/dialog";
-import { useIsSmallWidth } from "@/base/components/utils/hooks";
-import { useModalVisibility } from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import log from "@/base/log";
-import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
-import { type Collection } from "@/media/collection";
-import { type EnteFile } from "@/media/file";
-import {
-    updateRemotePrivateMagicMetadata,
-    type ItemVisibility,
-} from "@/media/file-metadata";
-import {
-    CollectionSelector,
-    type CollectionSelectorAttributes,
-} from "@/new/photos/components/CollectionSelector";
-import { PlanSelector } from "@/new/photos/components/PlanSelector";
-import {
-    SearchBar,
-    type SearchBarProps,
-} from "@/new/photos/components/SearchBar";
-import { WhatsNew } from "@/new/photos/components/WhatsNew";
-import {
-    PeopleEmptyState,
-    SearchResultsHeader,
-} from "@/new/photos/components/gallery";
-import {
-    useGalleryReducer,
-    type GalleryBarMode,
-} from "@/new/photos/components/gallery/reducer";
-import { useIsOffline } from "@/new/photos/components/utils/use-is-offline";
-import { usePeopleStateSnapshot } from "@/new/photos/components/utils/use-snapshot";
-import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
-import {
-    ALL_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-} from "@/new/photos/services/collection";
-import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
-import { getAllLocalCollections } from "@/new/photos/services/collections";
-import {
-    getLocalFiles,
-    getLocalTrashedFiles,
-} from "@/new/photos/services/files";
-import {
-    filterSearchableFiles,
-    setSearchCollectionsAndFiles,
-} from "@/new/photos/services/search";
-import type { SearchOption } from "@/new/photos/services/search/types";
-import { initSettings } from "@/new/photos/services/settings";
-import {
-    postCollectionAndFilesSync,
-    preCollectionAndFilesSync,
-    syncCollectionAndFiles,
-} from "@/new/photos/services/sync";
-import {
-    initUserDetailsOrTriggerSync,
-    redirectToCustomerPortal,
-    userDetailsSnapshot,
-    verifyStripeSubscription,
-} from "@/new/photos/services/user-details";
-import { usePhotosAppContext } from "@/new/photos/types/context";
-import { FlexWrapper } from "@ente/shared/components/Container";
-import { getRecoveryKey } from "@ente/shared/crypto/helpers";
-import { CustomError } from "@ente/shared/error";
-import { getData } from "@ente/shared/storage/localStorage";
-import {
-    getToken,
-    isFirstLogin,
-    justSignedUp,
-    setIsFirstLogin,
-    setJustSignedUp,
-} from "@ente/shared/storage/localStorage/helpers";
-import { clearKeys, getKey } from "@ente/shared/storage/sessionStorage";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -100,6 +19,91 @@ import GalleryEmptyState from "components/GalleryEmptyState";
 import { Sidebar } from "components/Sidebar";
 import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
+import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
+import { stashRedirect } from "ente-accounts/services/redirect";
+import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
+import { NavbarBase } from "ente-base/components/Navbar";
+import { CenteredRow } from "ente-base/components/containers";
+import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
+import type { ButtonishProps } from "ente-base/components/mui";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { errorDialogAttributes } from "ente-base/components/utils/dialog";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { useModalVisibility } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
+import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
+import { type Collection } from "ente-media/collection";
+import { type EnteFile } from "ente-media/file";
+import {
+    updateRemotePrivateMagicMetadata,
+    type ItemVisibility,
+} from "ente-media/file-metadata";
+import {
+    CollectionSelector,
+    type CollectionSelectorAttributes,
+} from "ente-new/photos/components/CollectionSelector";
+import { PlanSelector } from "ente-new/photos/components/PlanSelector";
+import {
+    SearchBar,
+    type SearchBarProps,
+} from "ente-new/photos/components/SearchBar";
+import { WhatsNew } from "ente-new/photos/components/WhatsNew";
+import {
+    PeopleEmptyState,
+    SearchResultsHeader,
+} from "ente-new/photos/components/gallery";
+import {
+    constructUserIDToEmailMap,
+    createShareeSuggestionEmails,
+} from "ente-new/photos/components/gallery/helpers";
+import {
+    useGalleryReducer,
+    type GalleryBarMode,
+} from "ente-new/photos/components/gallery/reducer";
+import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
+import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
+import {
+    ALL_SECTION,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+} from "ente-new/photos/services/collection";
+import { areOnlySystemCollections } from "ente-new/photos/services/collection/ui";
+import { getAllLocalCollections } from "ente-new/photos/services/collections";
+import {
+    getLocalFiles,
+    getLocalTrashedFiles,
+} from "ente-new/photos/services/files";
+import {
+    filterSearchableFiles,
+    setSearchCollectionsAndFiles,
+} from "ente-new/photos/services/search";
+import type { SearchOption } from "ente-new/photos/services/search/types";
+import { initSettings } from "ente-new/photos/services/settings";
+import {
+    postCollectionAndFilesSync,
+    preCollectionAndFilesSync,
+    syncCollectionAndFiles,
+} from "ente-new/photos/services/sync";
+import {
+    initUserDetailsOrTriggerSync,
+    redirectToCustomerPortal,
+    userDetailsSnapshot,
+    verifyStripeSubscription,
+} from "ente-new/photos/services/user-details";
+import { usePhotosAppContext } from "ente-new/photos/types/context";
+import { FlexWrapper } from "ente-shared/components/Container";
+import { getRecoveryKey } from "ente-shared/crypto/helpers";
+import { CustomError } from "ente-shared/error";
+import { getData } from "ente-shared/storage/localStorage";
+import {
+    getToken,
+    isFirstLogin,
+    justSignedUp,
+    setIsFirstLogin,
+    setJustSignedUp,
+} from "ente-shared/storage/localStorage/helpers";
+import { clearKeys, getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
@@ -107,8 +111,6 @@ import { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import {
     addToFavorites,
-    constructEmailList,
-    constructUserIDToEmailMap,
     createAlbum,
     createUnCategorizedCollection,
     removeFromFavorites,
@@ -363,23 +365,10 @@ const Page: React.FC = () => {
         if (!user || !normalCollections) {
             return;
         }
-        const userIdToEmailMap = constructUserIDToEmailMap(
-            user,
-            normalCollections,
+        setUserIDToEmailMap(constructUserIDToEmailMap(user, normalCollections));
+        setEmailList(
+            createShareeSuggestionEmails(user, normalCollections, familyData),
         );
-        setUserIDToEmailMap(userIdToEmailMap);
-    }, [user, normalCollections]);
-
-    useEffect(() => {
-        if (!user || !normalCollections) {
-            return;
-        }
-        const emailList = constructEmailList(
-            user,
-            normalCollections,
-            familyData,
-        );
-        setEmailList(emailList);
     }, [user, normalCollections, familyData]);
 
     useEffect(() => {
@@ -387,7 +376,7 @@ const Page: React.FC = () => {
     }, [collectionNamerAttributes]);
 
     useEffect(() => {
-        if (typeof activeCollectionID === "undefined" || !router.isReady) {
+        if (typeof activeCollectionID == "undefined" || !router.isReady) {
             return;
         }
         let collectionURL = "";
@@ -652,7 +641,7 @@ const Page: React.FC = () => {
                 setFilesDownloadProgressAttributesList((prev) => {
                     const attributes = prev?.find((attr) => attr.id === id);
                     const updatedAttributes =
-                        typeof value === "function"
+                        typeof value == "function"
                             ? value(attributes)
                             : { ...attributes, ...value };
                     const updatedAttributesList = attributes

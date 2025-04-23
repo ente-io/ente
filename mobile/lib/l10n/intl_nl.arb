@@ -371,21 +371,6 @@
   "deleteFromBoth": "Verwijder van beide",
   "newAlbum": "Nieuw album",
   "albums": "Albums",
-  "memoryCount": "{count, plural, zero{geen herinneringen} one{{formattedCount} herinnering} other{{formattedCount} herinneringen}}",
-  "@memoryCount": {
-    "description": "The text to display the number of memories",
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
-      },
-      "formattedCount": {
-        "type": "String",
-        "example": "11.513, 11,511"
-      }
-    }
-  },
   "selectedPhotos": "{count} geselecteerd",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -525,6 +510,7 @@
   "viewLargeFiles": "Grote bestanden",
   "viewLargeFilesDesc": "Bekijk bestanden die de meeste opslagruimte verbruiken.",
   "noDuplicates": "✨ Geen duplicaten",
+  "youveNoDuplicateFilesThatCanBeCleared": "Je hebt geen dubbele bestanden die kunnen worden gewist",
   "success": "Succes",
   "rateUs": "Beoordeel ons",
   "remindToEmptyDeviceTrash": "Leeg ook \"Onlangs verwijderd\" uit \"Instellingen\" -> \"Opslag\" om de vrij gekomen ruimte te benutten",
@@ -791,14 +777,6 @@
   "share": "Delen",
   "unhideToAlbum": "Zichtbaar maken in album",
   "restoreToAlbum": "Terugzetten naar album",
-  "moveItem": "{count, plural, one {Bestand verplaatsen} other {Bestanden verplaatsen}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
-  "addItem": "{count, plural, one {Bestand toevoegen} other {Bestanden toevoegen}}",
-  "@addItem": {
-    "description": "Page title while adding one or more items to album"
-  },
   "createOrSelectAlbum": "Maak of selecteer album",
   "selectAlbum": "Album selecteren",
   "searchByAlbumNameHint": "Albumnaam",
@@ -896,7 +874,6 @@
   "authToViewYourMemories": "Graag verifiëren om uw herinneringen te bekijken",
   "unlock": "Ontgrendelen",
   "freeUpSpace": "Ruimte vrijmaken",
-  "freeUpSpaceSaving": "{count, plural, one {Het kan verwijderd worden van het apparaat om {formattedSize} vrij te maken} other {Ze kunnen verwijderd worden van het apparaat om {formattedSize} vrij te maken}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 bestand} other {{formattedNumber} bestanden}} in dit album is veilig geback-upt",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -924,18 +901,6 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
-      }
-    }
-  },
-  "@freeUpSpaceSaving": {
-    "description": "Text to tell user how much space they can free up by deleting items from the device"
-  },
-  "freeUpAccessPostDelete": "Je hebt nog steeds toegang tot {count, plural, one {het} other {ze}} op Ente zolang je een actief abonnement hebt",
-  "@freeUpAccessPostDelete": {
-    "placeholders": {
-      "count": {
-        "example": "1",
-        "type": "int"
       }
     }
   },
@@ -1266,8 +1231,6 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Mensen snel op naam zoeken",
-  "addViewers": "{count, plural, one {Voeg kijker toe} other {Voeg kijkers toe}}",
-  "addCollaborators": "{count, plural, zero {Voeg samenwerker toe} one {Voeg samenwerker toe} other {Voeg samenwerkers toe}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Druk lang op een e-mail om de versleuteling te verifiëren.",
   "developerSettingsWarning": "Weet je zeker dat je de ontwikkelaarsinstellingen wilt wijzigen?",
   "developerSettings": "Ontwikkelaarsinstellingen",
@@ -1399,16 +1362,6 @@
   "enableMachineLearningBanner": "Schakel machine learning in voor magische zoekopdrachten en gezichtsherkenning",
   "searchDiscoverEmptySection": "Afbeeldingen worden hier getoond zodra verwerking en synchroniseren voltooid is",
   "searchPersonsEmptySection": "Personen worden hier getoond zodra verwerking en synchroniseren voltooid is",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 kijkers toegevoegd} =1 {1 kijker toegevoegd} other {{count} kijkers toegevoegd}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 samenwerkers toegevoegd} =1 {1 samenwerker toegevoegd} other {{count} samenwerkers toegevoegd}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1484,15 +1437,6 @@
   },
   "currentlyRunning": "momenteel bezig",
   "ignored": "genegeerd",
-  "photosCount": "{count, plural, =0 {0 foto's} =1 {1 foto} other {{count} foto's}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Bestand",
   "searchSectionsLengthMismatch": "Lengte van secties komt niet overeen: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1513,12 +1457,6 @@
   "@selectAllShort": {
     "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
   },
-  "changeLogMagicSearchImprovementTitle": "Magisch zoeken verbetering",
-  "changeLogMagicSearchImprovementContent": "We hebben magische zoekopdrachten veel sneller gemaakt zodat je niet hoeft te wachten om te vinden wat je zoekt.",
-  "changeLogBackupStatusTitle": "Back-up status",
-  "changeLogBackupStatusContent": "We hebben een logboek toegevoegd van alle bestanden die zijn geüpload naar Ente, inclusief fouten en wachtrij.",
-  "changeLogDiscoverTitle": "Ontdek",
-  "changeLogDiscoverContent": "Op zoek naar foto's van je identiteitskaarten, notities of zelfs herinneringen? Ga naar het tabblad Zoeken en bekijk ontdekking. Op basis van onze semantische zoekopdracht is het een plek om foto's te vinden die belangrijk voor jou kunnen zijn.\\n\\nAlleen beschikbaar als je Machine Learning hebt ingeschakeld.",
   "selectCoverPhoto": "Selecteer omslagfoto",
   "newLocation": "Nieuwe locatie",
   "faceNotClusteredYet": "Gezicht nog niet geclusterd, kom later terug",
@@ -1674,36 +1612,72 @@
   "playStream": "Stream afspelen",
   "playOriginal": "Origineel afspelen",
   "joinAlbumConfirmationDialogBody": "Deelnemen aan een album maakt je e-mail zichtbaar voor de deelnemers.",
-  "editTime": "Edit time",
-  "selectTime": "Select time",
-  "selectDate": "Select date",
-  "previous": "Previous",
-  "selectOneDateAndTimeForAll": "Select one date and time for all",
-  "selectStartOfRange": "Select start of range",
-  "thisWillMakeTheDateAndTimeOfAllSelected": "This will make the date and time of all selected photos the same.",
-  "allWillShiftRangeBasedOnFirst": "This is the first in the group. Other selected photos will automatically shift based on this new date",
-  "newRange": "New range",
-  "selectOneDateAndTime": "Select one date and time",
-  "moveSelectedPhotosToOneDate": "Move selected photos to one date",
-  "shiftDatesAndTime": "Shift dates and time",
-  "photosKeepRelativeTimeDifference": "Photos keep relative time difference",
-  "photocountPhotos": "$photoCount photos",
-  "notThisPerson": "Not this person?",
-  "selectedItemsWillBeRemovedFromThisPerson": "Selected items will be removed from this person, but not deleted from your library.",
-  "thisWeekThroughTheYears": "This week through the years",
-  "spotlightOnYourself": "Spotlight on yourself",
-  "cLIcon": "Nieuw pictogram",
-  "cLIconDesc": "Eindelijk een nieuw app-pictogram dat volgens ons ons werk het beste vertegenwoordigt. We hebben ook een pictogramwisselaar toegevoegd, zodat u het oude pictogram kunt blijven gebruiken.",
-
+  "pleaseWaitThisWillTakeAWhile": "Een ogenblik geduld, dit zal even duren.",
+  "editTime": "Tijd bewerken",
+  "selectTime": "Tijd selecteren",
+  "selectDate": "Selecteer datum",
+  "previous": "Vorige",
+  "selectOneDateAndTimeForAll": "Selecteer één datum en tijd voor allen",
+  "selectStartOfRange": "Selecteer start van reeks",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "Dit maakt de datum en tijd van alle geselecteerde foto's hetzelfde.",
+  "allWillShiftRangeBasedOnFirst": "Dit is de eerste in de groep. Andere geselecteerde foto's worden automatisch verschoven op basis van deze nieuwe datum",
+  "newRange": "Nieuwe reeks",
+  "selectOneDateAndTime": "Selecteer één datum en tijd",
+  "moveSelectedPhotosToOneDate": "Verplaats de geselecteerde foto's naar één datum",
+  "shiftDatesAndTime": "Verschuif datum en tijd",
+  "photosKeepRelativeTimeDifference": "Foto's behouden relatief tijdsverschil",
+  "photocountPhotos": "{count, plural, =0 {Geen foto's} =1 {1 foto} other {{count} foto's}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "appIcon": "App icoon",
+  "notThisPerson": "Niet dezelfde persoon?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Geselecteerde bestanden worden van deze persoon verwijderd, maar niet uit uw bibliotheek verwijderd.",
+  "throughTheYears": "{dateFormat} door de jaren",
+  "thisWeekThroughTheYears": "Deze week door de jaren",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Deze week, {count} jaar geleden} other {Deze week, {count} jaren geleden}}",
+  "youAndThem": "Jij en {name}",
+  "admiringThem": "{name} bewonderen",
+  "embracingThem": "{name} omarmen",
+  "partyWithThem": "Feest met {name}",
+  "hikingWithThem": "Wandelen met {name}",
+  "feastingWithThem": "Feestmaal met {name}",
+  "selfiesWithThem": "Selfies met {name}",
+  "posingWithThem": "Poseren met {name}",
+  "backgroundWithThem": "Prachtige uitzichten met {name}",
+  "sportsWithThem": "Sporten met {name}",
+  "roadtripWithThem": "Roadtrip met {name}",
+  "spotlightOnYourself": "Spotlicht op jezelf",
+  "spotlightOnThem": "Spotlicht op {name}",
+  "personIsAge": "{name} is {age}!",
+  "personTurningAge": "{name} wordt binnenkort {age}",
+  "lastTimeWithThem": "Laatste keer met {name}",
+  "tripToLocation": "Reis naar {location}",
+  "tripInYear": "Reis in {year}",
+  "lastYearsTrip": "Reis van vorig jaar",
+  "sunrise": "Aan de horizon",
+  "mountains": "Over de heuvels",
+  "greenery": "Het groene leven",
+  "beach": "Zand en zee",
+  "city": "In de stad",
+  "moon": "In het maanlicht",
+  "onTheRoad": "Onderweg",
+  "food": "Culinaire vreugde",
+  "pets": "Harige kameraden",
+  "cLIcon": "Nieuw icoon",
+  "cLIconDesc": "Tot slot, een nieuwe app icoon waarvan we denken dat het ons werk het beste weergeeft. We hebben ook een icon-switcher toegevoegd zodat je het oude icoon kunt blijven gebruiken.",
   "cLMemories": "Herinneringen",
-  "cLMemoriesDesc": "Herontdek uw speciale momenten - in de schijnwerpers staan uw favoriete mensen, uw reizen en vakanties, uw beste foto's en nog veel meer. Schakel machine learning in, tag uzelf en noem uw vrienden voor de beste ervaring.",
-
+  "cLMemoriesDesc": "Ontdek nog eens je speciale momenten - spotlicht op je favoriete mensen, op je reizen en vakanties, op de beste plaatjes, en nog veel meer. Zet Machine Learning aan, tag jezelf en benoem je vrienden voor de beste ervaring.",
   "cLWidgets": "Widgets",
-  "cLWidgetsDesc": "Startscherm-widgets die zijn geïntegreerd met herinneringen zijn nu beschikbaar. Ze laten uw speciale momenten zien zonder de app te openen.",
-
-  "cLFamilyPlan": "Gezinsplanlimieten",
-  "cLFamilyPlanDesc": "U kunt nu limieten instellen voor hoeveel opslagruimte uw familieleden kunnen gebruiken.",
-
-  "cLBulkEdit": "Bewerken van datums in bulk",
-  "cLBulkEditDesc": "U kunt nu meerdere foto's selecteren en de datum/tijd voor allemaal in één snelle actie bewerken. Het verschuiven van datums wordt ook ondersteund."
+  "cLWidgetsDesc": "Widgets die zijn geïntegreerd met herinneringen zijn nu beschikbaar. Ze tonen je speciale momenten zonder de app te openen.",
+  "cLFamilyPlan": "Familieplan limieten",
+  "cLFamilyPlanDesc": "Je kunt nu limieten instellen voor hoeveel opslag je familieleden kunnen gebruiken.",
+  "cLBulkEdit": "Bulk datums wijzigen",
+  "cLBulkEditDesc": "Je kunt nu meerdere foto's selecteren en de datum/tijd van ze allemaal bewerken met één snelle actie. Verschuiven van datums wordt ook ondersteund.",
+  "curatedMemories": "Curated memories"
 }

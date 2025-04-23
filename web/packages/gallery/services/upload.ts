@@ -1,7 +1,7 @@
-import log from "@/base/log";
-import { customAPIOrigin } from "@/base/origins";
-import type { ZipItem } from "@/base/types/ipc";
-import { nullToUndefined } from "@/utils/transform";
+import log from "ente-base/log";
+import { customAPIOrigin } from "ente-base/origins";
+import type { ZipItem } from "ente-base/types/ipc";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
 /**
@@ -141,7 +141,6 @@ export const updateShouldDisableCFUploadProxy = async (
     savedPreference?: boolean,
 ) => {
     _state.shouldDisableCFUploadProxy =
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         savedPreference || (await computeShouldDisableCFUploadProxy());
 };
 

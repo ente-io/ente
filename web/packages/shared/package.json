@@ -1,12 +1,12 @@
 {
-    "name": "@ente/shared",
+    "name": "ente-shared",
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/base": "*",
-        "axios": "^1.8.2"
+        "axios": "^1.8.4",
+        "ente-base": "*"
     },
     "devDependencies": {
-        "@/build-config": "*"
+        "ente-build-config": "*"
     }
 }

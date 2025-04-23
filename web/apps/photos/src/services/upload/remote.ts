@@ -3,14 +3,14 @@ import {
     authenticatedRequestHeaders,
     ensureOk,
     type PublicAlbumsCredentials,
-} from "@/base/http";
-import log from "@/base/log";
-import { apiURL, uploaderOrigin } from "@/base/origins";
-import { EnteFile } from "@/media/file";
-import { retryAsyncOperation } from "@/utils/promise";
-import { CustomError, handleUploadError } from "@ente/shared/error";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
+} from "ente-base/http";
+import log from "ente-base/log";
+import { apiURL, uploaderOrigin } from "ente-base/origins";
+import { EnteFile } from "ente-media/file";
+import { CustomError, handleUploadError } from "ente-shared/error";
+import HTTPService from "ente-shared/network/HTTPService";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
+import { retryAsyncOperation } from "ente-utils/promise";
 import { z } from "zod";
 import { MultipartUploadURLs, UploadFile } from "./upload-service";
 
@@ -279,9 +279,6 @@ export class PublicUploadHttpClient {
         const params = new URLSearchParams({ count });
         const url = await apiURL("/public-collection/upload-urls");
         const res = await fetch(`${url}?${params.toString()}`, {
-            // TODO: Use authenticatedPublicAlbumsRequestHeaders after the public
-            // albums refactor branch is merged.
-            // headers: await authenticatedRequestHeaders(),
             headers: authenticatedPublicAlbumsRequestHeaders(credentials),
         });
         ensureOk(res);

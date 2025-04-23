@@ -1,15 +1,15 @@
-import log from "@/base/log";
-import { type Electron } from "@/base/types/ipc";
-import * as ffmpeg from "@/gallery/services/ffmpeg";
+import log from "ente-base/log";
+import { type Electron } from "ente-base/types/ipc";
+import * as ffmpeg from "ente-gallery/services/ffmpeg";
 import {
     toDataOrPathOrZipEntry,
     type DesktopUploadItem,
-} from "@/gallery/services/upload";
-import { FileType, type FileTypeInfo } from "@/media/file-type";
-import { isHEICExtension } from "@/media/formats";
-import { heicToJPEG } from "@/media/heic-convert";
-import { scaledImageDimensions } from "@/media/image";
-import { withTimeout } from "@/utils/promise";
+} from "ente-gallery/services/upload";
+import { FileType, type FileTypeInfo } from "ente-media/file-type";
+import { isHEICExtension } from "ente-media/formats";
+import { heicToJPEG } from "ente-media/heic-convert";
+import { scaledImageDimensions } from "ente-media/image";
+import { withTimeout } from "ente-utils/promise";
 
 /** Maximum width or height of the generated thumbnail */
 const maxThumbnailDimension = 720;

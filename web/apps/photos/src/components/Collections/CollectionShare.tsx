@@ -1,40 +1,3 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import {
-    NestedSidebarDrawer,
-    SidebarDrawer,
-} from "@/base/components/mui/SidebarDrawer";
-import {
-    RowButton,
-    RowButtonDivider,
-    RowButtonGroup,
-    RowButtonGroupHint,
-    RowButtonGroupTitle,
-    RowLabel,
-    RowSwitch,
-} from "@/base/components/RowButton";
-import { Titlebar } from "@/base/components/Titlebar";
-import { useModalVisibility } from "@/base/components/utils/modal";
-import { useBaseContext } from "@/base/context";
-import { sharedCryptoWorker } from "@/base/crypto";
-import { formattedDateTime } from "@/base/i18n-date";
-import log from "@/base/log";
-import { appendCollectionKeyToShareURL } from "@/gallery/services/share";
-import type {
-    Collection,
-    PublicURL,
-    UpdatePublicURL,
-} from "@/media/collection";
-import { type CollectionUser } from "@/media/collection";
-import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreated";
-import { avatarTextColor } from "@/new/photos/services/avatar";
-import type { CollectionSummary } from "@/new/photos/services/collection/ui";
-import { usePhotosAppContext } from "@/new/photos/types/context";
-import { FlexWrapper } from "@ente/shared/components/Container";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
-import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import BlockIcon from "@mui/icons-material/Block";
@@ -60,6 +23,43 @@ import {
 import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Avatar from "components/pages/gallery/Avatar";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import {
+    NestedSidebarDrawer,
+    SidebarDrawer,
+} from "ente-base/components/mui/SidebarDrawer";
+import {
+    RowButton,
+    RowButtonDivider,
+    RowButtonGroup,
+    RowButtonGroupHint,
+    RowButtonGroupTitle,
+    RowLabel,
+    RowSwitch,
+} from "ente-base/components/RowButton";
+import { Titlebar } from "ente-base/components/Titlebar";
+import { useModalVisibility } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import { formattedDateTime } from "ente-base/i18n-date";
+import log from "ente-base/log";
+import { appendCollectionKeyToShareURL } from "ente-gallery/services/share";
+import type {
+    Collection,
+    PublicURL,
+    UpdatePublicURL,
+} from "ente-media/collection";
+import { type CollectionUser } from "ente-media/collection";
+import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCreated";
+import { avatarTextColor } from "ente-new/photos/services/avatar";
+import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
+import { usePhotosAppContext } from "ente-new/photos/types/context";
+import { FlexWrapper } from "ente-shared/components/Container";
+import SingleInputForm, {
+    type SingleInputFormProps,
+} from "ente-shared/components/SingleInputForm";
+import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -1034,7 +1034,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
         let contentText;
         let buttonText;
 
-        if (newRole === "VIEWER") {
+        if (newRole == "VIEWER") {
             contentText = (
                 <Trans
                     i18nKey="change_permission_to_viewer"
@@ -1043,7 +1043,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
             );
 
             buttonText = t("confirm_convert_to_viewer");
-        } else if (newRole === "COLLABORATOR") {
+        } else if (newRole == "COLLABORATOR") {
             contentText = t("change_permission_to_collaborator", {
                 selectedEmail,
             });
@@ -1124,7 +1124,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
                                 label={"Viewer"}
                                 startIcon={<PhotoIcon />}
                                 endIcon={
-                                    selectedParticipant.role === "VIEWER" && (
+                                    selectedParticipant.role == "VIEWER" && (
                                         <DoneIcon />
                                     )
                                 }
@@ -1526,9 +1526,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                         isLinkExpired(publicShareProp?.validTill)
                             ? t("link_expired")
                             : publicShareProp?.validTill
-                              ? formattedDateTime(
-                                    publicShareProp.validTill / 1000,
-                                )
+                              ? formattedDateTime(publicShareProp.validTill)
                               : t("never")
                     }
                 />

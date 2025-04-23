@@ -1,4 +1,4 @@
-import { retryAsyncOperation } from "@/utils/promise";
+import { retryAsyncOperation } from "ente-utils/promise";
 import { z } from "zod";
 import { clientPackageName } from "./app";
 import { ensureAuthToken } from "./local-user";

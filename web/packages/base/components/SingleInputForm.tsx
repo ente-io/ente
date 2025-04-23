@@ -1,7 +1,7 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import log from "@/base/log";
 import { Stack, TextField, type TextFieldProps } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import log from "ente-base/log";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React from "react";

@@ -1,12 +1,12 @@
-import { basename } from "@/base/file-name";
-import type { ElectronMLWorker } from "@/base/types/ipc";
-import { downloadManager } from "@/gallery/services/download";
-import type { UploadItem } from "@/gallery/services/upload";
-import { renderableImageBlob } from "@/gallery/utils/convert";
-import { readStream } from "@/gallery/utils/native-stream";
-import type { EnteFile } from "@/media/file";
-import { FileType } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
+import { basename } from "ente-base/file-name";
+import type { ElectronMLWorker } from "ente-base/types/ipc";
+import { renderableImageBlob } from "ente-gallery/services/convert";
+import { downloadManager } from "ente-gallery/services/download";
+import type { UploadItem } from "ente-gallery/services/upload";
+import { readStream } from "ente-gallery/utils/native-stream";
+import type { EnteFile } from "ente-media/file";
+import { FileType } from "ente-media/file-type";
+import { decodeLivePhoto } from "ente-media/live-photo";
 
 /**
  * An image bitmap and its RGBA data.

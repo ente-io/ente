@@ -2,17 +2,11 @@
  * @file Storage (in-memory, local, remote) and update of various settings.
  */
 
-// We want to map falsey values like empty strings to the default, for which
-// `||` is the appropriate operator, so turn off the eslint suggestion to use
-// `??` instead for this file.
-//
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-
-import { isDevBuild } from "@/base/env";
-import { localUser } from "@/base/local-user";
-import log from "@/base/log";
-import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
-import { nullToUndefined } from "@/utils/transform";
+import { isDevBuild } from "ente-base/env";
+import { localUser } from "ente-base/local-user";
+import log from "ente-base/log";
+import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
 

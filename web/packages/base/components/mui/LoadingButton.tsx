@@ -1,6 +1,6 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { isSxArray } from "@/base/components/utils/sx";
 import { CircularProgress, type ButtonProps } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { isSxArray } from "ente-base/components/utils/sx";
 import React from "react";
 
 /**

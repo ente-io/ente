@@ -1,5 +1,5 @@
-import type { PublicAlbumsCredentials } from "@/base/http";
 import { TimeStampListItem } from "components/FileList";
+import type { PublicAlbumsCredentials } from "ente-base/http";
 import { createContext } from "react";
 
 export interface PublicCollectionGalleryContextType {

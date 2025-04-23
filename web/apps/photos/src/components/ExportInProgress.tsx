@@ -1,14 +1,14 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "@ente/shared/components/Container";
 import {
     DialogActions,
     DialogContent,
     LinearProgress,
     Typography,
 } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    FlexWrapper,
+    VerticallyCentered,
+} from "ente-shared/components/Container";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 import { ExportStage, type ExportProgress } from "services/export";

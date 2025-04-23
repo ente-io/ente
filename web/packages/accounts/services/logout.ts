@@ -1,9 +1,9 @@
-import { clearBlobCaches } from "@/base/blob-cache";
-import { clearKVDB } from "@/base/kv";
-import { clearLocalStorage } from "@/base/local-storage";
-import log from "@/base/log";
-import localForage from "@ente/shared/storage/localForage";
-import { clearKeys } from "@ente/shared/storage/sessionStorage";
+import { clearBlobCaches } from "ente-base/blob-cache";
+import { clearKVDB } from "ente-base/kv";
+import { clearLocalStorage } from "ente-base/local-storage";
+import log from "ente-base/log";
+import localForage from "ente-shared/storage/localForage";
+import { clearKeys } from "ente-shared/storage/sessionStorage";
 import { clearStashedRedirect } from "./redirect";
 import { remoteLogoutIfNeeded } from "./user";
 

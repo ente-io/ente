@@ -1,7 +1,7 @@
-import { type SelectionContext } from "@/new/photos/components/gallery";
-import type { User } from "@ente/shared/user/types";
 import { TimeStampListItem } from "components/FileList";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
+import { type SelectionContext } from "ente-new/photos/components/gallery";
+import type { User } from "ente-shared/user/types";
 
 export interface SelectedState {
     [k: number]: boolean;

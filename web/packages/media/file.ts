@@ -1,6 +1,6 @@
-import { sharedCryptoWorker } from "@/base/crypto";
-import { dateFromEpochMicroseconds } from "@/base/date";
-import log from "@/base/log";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import { dateFromEpochMicroseconds } from "ente-base/date";
+import log from "ente-base/log";
 import { type Metadata, ItemVisibility } from "./file-metadata";
 import { FileType } from "./file-type";
 
@@ -122,7 +122,7 @@ export interface EncryptedEnteFile {
      * the collection to which it belongs.
      *
      * (note: This is always present. retaining this note until we remove
-     * nullability uncertainity from the types).
+     * nullability uncertainty from the types).
      */
     encryptedKey: string;
     /**
@@ -130,7 +130,7 @@ export interface EncryptedEnteFile {
      * encryption key.
      *
      * (note: This is always present. retaining this note until we remove
-     * nullability uncertainity from the types).
+     * nullability uncertainty from the types).
      */
     keyDecryptionNonce: string;
     isDeleted: boolean;

@@ -115,7 +115,7 @@
 
 .pswp-ente button.pswp-ente-off .pswp__icn {
     /* PhotoSwipe already uses the CSS opacity, so reduce the color's opacity */
-    fill: rgba(255 255 255 / 0.6);
+    fill: rgb(255 255 255 / 0.6);
 }
 
 /* Make the controls fit the top bar on mobile sized screens */
@@ -155,27 +155,51 @@
     bottom: 0px;
     right: 0;
     margin: 20px 24px;
-    padding: 6px 16px;
-    border-radius: 2px;
+    padding-inline: 16px;
+    border-radius: 3px;
     /* Same opacity as the other controls. */
-    color: rgba(255 255 255 / 0.85);
-    background-color: rgba(0 0 0 / 0.2);
+    color: rgb(255 255 255 / 0.85);
+    background-color: rgb(0 0 0 / 0.2);
     backdrop-filter: blur(10px);
-    /* 4 lines max, ellipsis on overflow. */
-    word-break: break-word;
     text-align: right;
     max-width: 375px;
     max-height: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
+    p {
+        /* 4 lines max, ellipsis on overflow. */
+        word-break: break-word;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+        line-clamp: 4;
+    }
 }
 
-/* Change the cursor on the thumbnail to the default arrow to indicate that it is
-   not interactable (PhotoSwipe by default shows the zoom out icon). */
+.pswp-ente .pswp__caption.ente-video {
+    /* Add extra offset for video captions so that they do not overlap with the
+       video controls. The constant was picked such that it lay above the media
+       controls. */
+    bottom: 48px;
+    /* Adding a caption with a blur backdrop filter above the video element
+       contained in a media-controller causes a subtle tint to be overlaid on
+       the entire video. This is visible on both Chrome and Firefox as of
+       writing.
+
+       We'll hide the caption anyways when hovering on the controls or when the
+       video is playing, so remove the backdrop filter and rely on the
+       translucent background. Note that usually the video might not even extent
+       to this part of the screen on desktop sized screens. */
+    backdrop-filter: none;
+    /* Since there is too much going on in this part of the screen now, also
+      reduce the maximum number of lines for the caption. */
+    p {
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+}
+
+/* Change the cursor on the thumbnail to the default arrow to indicate that it
+   is not interactable (PhotoSwipe by default shows the zoom out icon). */
 .pswp-ente .pswp__img {
     cursor: auto;
 }
@@ -187,4 +211,154 @@
 .pswp-ente video[controls] {
     width: 100%;
     height: 100%;
+}
+
+/*
+  I tried various ways to get media-controller to embed a normal video, but in
+  all methods I kept getting a flickering at the edges on Chrome. My best guess
+  is that it happens when the resolved size of the video is a fractional value.
+
+  This is the current magic incantation that seems to get them to play without
+  the video's frame jittering. Note that the streaming hls-video elements work
+  fine without any workarounds, it is only the vanilla video elements that have
+  this issue and necessitate this workaround. The downside is that clicking
+  "outside" the video works for hls-video, but not for vanilla videos.
+ */
+.pswp-ente media-controller.ente-vanilla-video {
+    width: 100%;
+    height: 100%;
+
+    video {
+        width: calc(100% - 1px);
+        height: calc(100% - 1px);
+    }
+}
+
+/*
+  Style the custom video controls we provide.
+
+  The media-controller itself is center positioned (shrinking if needed) by
+  PhotoSwipe using the width and height of the video that we provide to it.
+
+  The controls are absolutely position at the bottom of the screen instead of
+  being attached to the video.
+ */
+.pswp-ente .pswp__media-controls {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+
+    background: linear-gradient(transparent, rgb(0 0 0 / 0.8));
+
+    /* Similar to our other controls */
+    --media-icon-color: rgb(255 255 255 / 0.8);
+    /* NB: We don't reset the font-weight, so this'll be using 400 instead of
+       the 500 we use elsewhere. See: [Note: Font weights].
+
+       We don't reset it because on this screen the 400 looks better (for now).
+      */
+    --media-font-family: "Inter Variable", sans-serif;
+    --media-control-background: transparent;
+    --media-control-hover-background: rgb(255 255 255 / 0.12);
+    /*
+      Prevent menus from occluding clicks on other controls when hidden.
+
+      [Note: Showing menus outside of media-controller]
+
+      This is all very hacky. The standalone control example
+      (https://media-chrome.mux.dev/examples/vanilla/standalone-controls.html),
+      doesn't (as of now) include a menu, so it is possible this is just not
+      supported. None of the media controller examples I could find show menus
+      work for our specific scenario (the controls detached from the the media
+      controller itself, and shown at the bottom of the screen).
+
+      As such, a lot of undocumented and arbitrary tweaks are needed. This is a
+      house of cards, and might fall when the media-chrome version is updated;
+      on the other hand, they might also add better support for our scenario, in
+      which case this should be possible straightforwardly.
+      */
+    --media-menu-hidden-max-height: 1px;
+    --media-menu-max-height: 1000px;
+}
+
+/*
+  Stack controls rows vertically.
+ */
+.pswp-ente .pswp__media-controls > div {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hide the controls if they're not associated to a media-controller. */
+media-control-bar:not([mediacontroller]) {
+    display: none;
+}
+
+media-control-bar {
+    padding-inline: 12px;
+}
+
+media-control-bar:last-child {
+    padding-block-end: 4px;
+}
+
+media-loading-indicator {
+    /* Similar to the top bar loading indicator */
+    --media-icon-color: rgb(255 255 255 / 0.6);
+}
+
+/* Used as a spacer. */
+media-text-display {
+    flex-grow: 1;
+}
+
+media-time-range {
+    --media-range-bar-color: red;
+    --media-range-thumb-background: var(--media-range-bar-color);
+    --media-control-hover-background: transparent;
+    --media-control-padding: 0px;
+}
+
+media-time-range:hover {
+    --media-range-track-height: 5px;
+    --media-range-thumb-transform: scale(1.1);
+}
+
+/*
+  Hide specific controls when the user's browser doesn't support the feature
+  they trigger.
+ */
+media-pip-button[mediapipunavailable],
+media-fullscreen-button[mediafullscreenunavailable] {
+    display: none;
+}
+
+media-settings-menu {
+    /*
+      Restore the background for the settings menu (we made it transparent). The
+      default is var(--_menu-bg), which is rgb(20 20 30 / .8).
+     */
+    --media-control-background: var(--mui-palette-fixed-dark-background-paper);
+    /* Regular, but since the rest of media controls use 400, it
+       appears heavier. */
+    --media-font-weight: 500;
+    /*
+      Bring it above the rest of our controls.
+
+      See: [Note: Showing menus outside of media-controller]
+     */
+    z-index: 1;
+}
+
+/* Hide the caption when hovering over the video controls (and when the settings
+   menu is open) since they occupy similar real estate as the caption. */
+body:has(
+        media-time-range[mediapreviewtime],
+        media-controller:not([mediapaused]),
+        media-settings-menu:not([hidden])
+    ) {
+    & .pswp-ente .pswp__caption {
+        display: none;
+    }
 }

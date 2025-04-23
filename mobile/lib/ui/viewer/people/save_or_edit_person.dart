@@ -35,6 +35,7 @@ import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
 import "package:photos/ui/viewer/people/link_email_screen.dart";
+import "package:photos/ui/viewer/people/people_util.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
 import "package:photos/ui/viewer/people/person_row_item.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
@@ -845,7 +846,7 @@ class _EmailSectionState extends State<_EmailSection> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: FutureBuilder<bool>(
-                    future: _isMeAssigned(),
+                    future: isMeAssigned(),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         final isMeAssigned = snapshot.data!;
@@ -961,20 +962,6 @@ class _EmailSectionState extends State<_EmailSection> {
             curve: Curves.easeInOutQuad,
           );
     }
-  }
-
-  Future<bool> _isMeAssigned() async {
-    final personEntities = await PersonService.instance.getPersons();
-    final currentUserEmail = Configuration.instance.getEmail();
-
-    bool isAssigned = false;
-    for (final personEntity in personEntities) {
-      if (personEntity.data.email == currentUserEmail) {
-        isAssigned = true;
-        break;
-      }
-    }
-    return isAssigned;
   }
 
   void _updateEmailField(String? newEmail) {

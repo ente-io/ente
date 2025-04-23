@@ -286,6 +286,15 @@
       "slug": "csgoroll"
     },
     {
+      "title": "Cwallet",
+      "altNames": [
+        "cwallet",
+        "c-wallet",
+        "c wallet",
+        "cwallet.com"
+      ]
+    },
+    {
       "title": "DCS",
       "altNames": [
         "Digital Combat Simulator"
@@ -659,6 +668,14 @@
       ]
     },
     {
+      "title": "Mbin",
+      "altNames": [
+        "kbin",
+        "thebrainbin",
+        "gehirneimer"
+      ]
+    },
+    {
       "title": "Mercado Livre",
       "slug": "mercado_livre",
       "altNames": [
@@ -843,6 +860,10 @@
       "title": "Parsec"
     },
     {
+      "title": "Patient Access",
+      "slug": "patient_access"
+    },
+    {
       "title": "PayPal"
     },
     {
@@ -868,6 +889,10 @@
       "title": "Pingvin Share"
     },
     {
+      "title": "Pionex",
+      "slug": "pionex"
+    },
+    {
       "title": "Plutus",
       "hex": "DEC685"
     },
@@ -879,6 +904,13 @@
     },
     {
       "title": "PostNL"
+    },
+    {
+      "title": "Postmark",
+      "slug": "postmarkapp",
+      "altNames": [
+        "postmarkapp"
+      ]
     },
     {
       "title": "PostScan Mail",
@@ -943,6 +975,15 @@
       "title": "RealVNC",
       "slug": "realvnc",
       "hex": "488aec"
+    },
+    {
+      "title": "RedotPay",
+      "altNames": [
+        "redotpay",
+        "redot pay",
+        "redot-pay",
+        "redotpay.com"
+      ]
     },
     {
       "title": "Registro br",

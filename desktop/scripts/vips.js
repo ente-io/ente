@@ -24,7 +24,7 @@
  *
  * Note that `vips.js` would've already run once `beforeBuild.js` is run, but on
  * our CI we prepare builds for multiple architectures in one go, so we need to
- * unconditonally replace the binary with the relevant one for the current
+ * unconditionally replace the binary with the relevant one for the current
  * architecture being built (which might be different from the one we're running
  * on). `beforeBuild.js` runs for each architecture being built.
  *

@@ -1,4 +1,4 @@
-## @/new
+## ente-new
 
 This package only exists so that we can write code that works with TypeScript
 strict mode. This provides a gradual way of migrating the existing apps code to

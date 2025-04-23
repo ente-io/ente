@@ -31,6 +31,9 @@ on:
 env:
     FLUTTER_VERSION: "3.24.3"
 
+permissions:
+    contents: write
+
 jobs:
     build-linux-latest:
         runs-on: ubuntu-latest

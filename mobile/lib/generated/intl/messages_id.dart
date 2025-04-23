@@ -20,33 +20,28 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'id';
 
-  static String m11(count) =>
-      "${Intl.plural(count, other: 'Tambahkan kolaborator')}";
-
-  static String m12(count) => "${Intl.plural(count, other: 'Tambahkan item')}";
-
-  static String m13(storageAmount, endDate) =>
+  static String m0(storageAmount, endDate) =>
       "Add-on ${storageAmount} kamu berlaku sampai ${endDate}";
 
-  static String m15(emailOrName) => "Ditambahkan oleh ${emailOrName}";
+  static String m48(emailOrName) => "Ditambahkan oleh ${emailOrName}";
 
-  static String m16(albumName) => "Berhasil ditambahkan ke ${albumName}";
+  static String m49(albumName) => "Berhasil ditambahkan ke ${albumName}";
 
-  static String m17(count) =>
+  static String m1(count) =>
       "${Intl.plural(count, zero: '0 Peserta', one: '1 Peserta', other: '${count} Peserta')}";
 
-  static String m18(versionValue) => "Versi: ${versionValue}";
+  static String m51(versionValue) => "Versi: ${versionValue}";
 
-  static String m19(freeAmount, storageUnit) =>
+  static String m52(freeAmount, storageUnit) =>
       "${freeAmount} ${storageUnit} tersedia";
 
-  static String m20(paymentProvider) =>
+  static String m2(paymentProvider) =>
       "Harap batalkan langganan kamu di ${paymentProvider} terlebih dahulu";
 
-  static String m4(user) =>
+  static String m3(user) =>
       "${user} tidak akan dapat menambahkan foto lagi ke album ini\n\nIa masih dapat menghapus foto yang ditambahkan olehnya sendiri";
 
-  static String m21(isFamilyMember, storageAmountInGb) =>
+  static String m4(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
             'true':
                 'Keluargamu saat ini telah memperoleh ${storageAmountInGb} GB',
@@ -54,155 +49,142 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': 'Kamu saat ini telah memperoleh ${storageAmountInGb} GB!',
           })}";
 
-  static String m22(albumName) => "Link kolaborasi terbuat untuk ${albumName}";
+  static String m54(albumName) => "Link kolaborasi terbuat untuk ${albumName}";
 
-  static String m25(familyAdminEmail) =>
+  static String m5(familyAdminEmail) =>
       "Silakan hubungi <green>${familyAdminEmail}</green> untuk mengatur langgananmu";
 
-  static String m26(provider) =>
+  static String m6(provider) =>
       "Silakan hubungi kami di support@ente.io untuk mengatur langganan ${provider} kamu.";
 
-  static String m27(endpoint) => "Terhubung ke ${endpoint}";
+  static String m57(endpoint) => "Terhubung ke ${endpoint}";
 
-  static String m28(count) =>
+  static String m7(count) =>
       "${Intl.plural(count, one: 'Hapus ${count} item', other: 'Hapus ${count} item')}";
 
-  static String m29(currentlyDeleting, totalCount) =>
+  static String m58(currentlyDeleting, totalCount) =>
       "Menghapus ${currentlyDeleting} / ${totalCount}";
 
-  static String m30(albumName) =>
+  static String m8(albumName) =>
       "Ini akan menghapus link publik yang digunakan untuk mengakses \"${albumName}\".";
 
-  static String m31(supportEmail) =>
+  static String m9(supportEmail) =>
       "Silakan kirimkan email ke ${supportEmail} dari alamat email terdaftar kamu";
 
-  static String m32(count, storageSaved) =>
+  static String m10(count, storageSaved) =>
       "Kamu telah menghapus ${Intl.plural(count, other: '${count} file duplikat')} dan membersihkan (${storageSaved}!)";
 
-  static String m34(newEmail) => "Email diubah menjadi ${newEmail}";
+  static String m59(newEmail) => "Email diubah menjadi ${newEmail}";
 
-  static String m36(email) =>
+  static String m12(email) =>
       "${email} tidak punya akun Ente.\n\nUndang dia untuk berbagi foto.";
 
-  static String m38(count, formattedNumber) =>
+  static String m64(count, formattedNumber) =>
       "${Intl.plural(count, other: '${formattedNumber} file')} di perangkat ini telah berhasil dicadangkan";
 
-  static String m39(count, formattedNumber) =>
+  static String m65(count, formattedNumber) =>
       "${Intl.plural(count, other: '${formattedNumber} file')} dalam album ini telah berhasil dicadangkan";
 
-  static String m5(storageAmountInGB) =>
+  static String m13(storageAmountInGB) =>
       "${storageAmountInGB} GB setiap kali orang mendaftar dengan paket berbayar lalu menerapkan kode milikmu";
 
-  static String m40(endDate) => "Percobaan gratis berlaku hingga ${endDate}";
+  static String m14(endDate) => "Percobaan gratis berlaku hingga ${endDate}";
 
-  static String m41(count) =>
-      "Kamu masih bisa mengakses ${Intl.plural(count, other: 'filenya')} di Ente selama kamu masih berlangganan";
+  static String m67(sizeInMBorGB) => "Bersihkan ${sizeInMBorGB}";
 
-  static String m42(sizeInMBorGB) => "Bersihkan ${sizeInMBorGB}";
-
-  static String m43(count, formattedSize) =>
-      "${Intl.plural(count, other: 'File tersebut bisa dihapus dari perangkat ini untuk membersihkan ${formattedSize}')}";
-
-  static String m44(currentlyProcessing, totalCount) =>
+  static String m69(currentlyProcessing, totalCount) =>
       "Memproses ${currentlyProcessing} / ${totalCount}";
 
-  static String m45(count) => "${Intl.plural(count, other: '${count} item')}";
+  static String m15(count) => "${Intl.plural(count, other: '${count} item')}";
 
-  static String m47(expiryTime) => "Link akan kedaluwarsa pada ${expiryTime}";
+  static String m16(expiryTime) => "Link akan kedaluwarsa pada ${expiryTime}";
 
-  static String m6(count, formattedCount) =>
-      "${Intl.plural(count, zero: 'tiada kenangan', one: '${formattedCount} kenangan', other: '${formattedCount} kenangan')}";
+  static String m77(albumName) => "Berhasil dipindahkan ke ${albumName}";
 
-  static String m50(count) => "${Intl.plural(count, other: 'Pindahkan item')}";
-
-  static String m51(albumName) => "Berhasil dipindahkan ke ${albumName}";
-
-  static String m54(familyAdminEmail) =>
+  static String m17(familyAdminEmail) =>
       "Harap hubungi ${familyAdminEmail} untuk mengubah kode kamu.";
 
-  static String m0(passwordStrengthValue) =>
+  static String m18(passwordStrengthValue) =>
       "Keamanan sandi: ${passwordStrengthValue}";
 
-  static String m55(providerName) =>
+  static String m19(providerName) =>
       "Harap hubungi dukungan ${providerName} jika kamu dikenai biaya";
 
-  static String m1(count) => "\$photoCount photos";
-
-  static String m57(endDate) =>
+  static String m20(endDate) =>
       "Percobaan gratis berlaku hingga ${endDate}.\nKamu dapat memilih paket berbayar setelahnya.";
 
-  static String m58(toEmail) => "Silakan kirimi kami email di ${toEmail}";
+  static String m85(toEmail) => "Silakan kirimi kami email di ${toEmail}";
 
-  static String m59(toEmail) => "Silakan kirim log-nya ke \n${toEmail}";
+  static String m86(toEmail) => "Silakan kirim log-nya ke \n${toEmail}";
 
-  static String m61(storeName) => "Beri nilai di ${storeName}";
+  static String m21(storeName) => "Beri nilai di ${storeName}";
 
-  static String m66(storageInGB) =>
+  static String m22(storageInGB) =>
       "3. Kalian berdua mendapat ${storageInGB} GB* gratis";
 
-  static String m67(userEmail) =>
+  static String m23(userEmail) =>
       "${userEmail} akan dikeluarkan dari album berbagi ini\n\nSemua foto yang ia tambahkan juga akan dihapus dari album ini";
 
-  static String m68(endDate) => "Langganan akan diperpanjang pada ${endDate}";
+  static String m24(endDate) => "Langganan akan diperpanjang pada ${endDate}";
 
-  static String m69(count) =>
+  static String m94(count) =>
       "${Intl.plural(count, other: '${count} hasil ditemukan')}";
 
-  static String m7(count) => "${count} terpilih";
+  static String m25(count) => "${count} terpilih";
 
-  static String m71(count, yourCount) =>
+  static String m26(count, yourCount) =>
       "${count} dipilih (${yourCount} milikmu)";
 
-  static String m72(verificationID) =>
+  static String m27(verificationID) =>
       "Ini ID Verifikasi saya di ente.io: ${verificationID}.";
 
-  static String m8(verificationID) =>
+  static String m28(verificationID) =>
       "Halo, bisakah kamu pastikan bahwa ini adalah ID Verifikasi ente.io milikmu: ${verificationID}";
 
-  static String m73(referralCode, referralStorageInGB) =>
+  static String m29(referralCode, referralStorageInGB) =>
       "Kode rujukan Ente: ${referralCode} \n\nTerapkan pada Pengaturan → Umum → Rujukan untuk mendapatkan ${referralStorageInGB} GB gratis setelah kamu mendaftar paket berbayar\n\nhttps://ente.io";
 
-  static String m74(numberOfPeople) =>
+  static String m30(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'Bagikan dengan orang tertentu', one: 'Berbagi dengan 1 orang', other: 'Berbagi dengan ${numberOfPeople} orang')}";
 
-  static String m75(emailIDs) => "Dibagikan dengan ${emailIDs}";
+  static String m97(emailIDs) => "Dibagikan dengan ${emailIDs}";
 
-  static String m76(fileType) =>
+  static String m31(fileType) =>
       "${fileType} ini akan dihapus dari perangkat ini.";
 
-  static String m77(fileType) =>
+  static String m32(fileType) =>
       "${fileType} ini tersimpan di Ente dan juga di perangkat ini.";
 
-  static String m78(fileType) => "${fileType} ini akan dihapus dari Ente.";
+  static String m33(fileType) => "${fileType} ini akan dihapus dari Ente.";
 
-  static String m2(storageAmountInGB) => "${storageAmountInGB} GB";
+  static String m34(storageAmountInGB) => "${storageAmountInGB} GB";
 
-  static String m79(
+  static String m100(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "${usedAmount} ${usedStorageUnit} dari ${totalAmount} ${totalStorageUnit} terpakai";
 
-  static String m80(id) =>
+  static String m35(id) =>
       "${id} kamu telah terhubung dengan akun Ente lain.\nJika kamu ingin menggunakan ${id} kamu untuk akun ini, silahkan hubungi tim bantuan kami";
 
-  static String m81(endDate) =>
+  static String m36(endDate) =>
       "Langganan kamu akan dibatalkan pada ${endDate}";
 
-  static String m9(storageAmountInGB) =>
+  static String m37(storageAmountInGB) =>
       "Ia juga mendapat ${storageAmountInGB} GB";
 
-  static String m84(email) => "Ini adalah ID Verifikasi milik ${email}";
+  static String m38(email) => "Ini adalah ID Verifikasi milik ${email}";
 
-  static String m90(endDate) => "Berlaku hingga ${endDate}";
+  static String m39(endDate) => "Berlaku hingga ${endDate}";
 
-  static String m91(email) => "Verifikasi ${email}";
+  static String m40(email) => "Verifikasi ${email}";
 
-  static String m3(email) =>
+  static String m41(email) =>
       "Kami telah mengirimkan email ke <green>${email}</green>";
 
-  static String m93(count) =>
+  static String m42(count) =>
       "${Intl.plural(count, other: '${count} tahun lalu')}";
 
-  static String m94(storageSaved) =>
+  static String m43(storageSaved) =>
       "Kamu telah berhasil membersihkan ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -221,14 +203,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tambah email baru"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Tambah kolaborator"),
-        "addCollaborators": m11,
         "addFromDevice":
             MessageLookupByLibrary.simpleMessage("Tambahkan dari perangkat"),
-        "addItem": m12,
         "addLocation": MessageLookupByLibrary.simpleMessage("Tambah tempat"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Tambah"),
         "addMore": MessageLookupByLibrary.simpleMessage("Tambah lagi"),
-        "addOnValidTill": m13,
+        "addOnValidTill": m0,
         "addPhotos": MessageLookupByLibrary.simpleMessage("Tambah foto"),
         "addSelected":
             MessageLookupByLibrary.simpleMessage("Tambahkan yang dipilih"),
@@ -238,8 +218,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tambah ke album tersembunyi"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Tambahkan pemirsa"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Ditambahkan sebagai"),
-        "addedBy": m15,
-        "addedSuccessfullyTo": m16,
+        "addedBy": m48,
+        "addedSuccessfullyTo": m49,
         "addingToFavorites":
             MessageLookupByLibrary.simpleMessage("Menambahkan ke favorit..."),
         "advanced": MessageLookupByLibrary.simpleMessage("Lanjutan"),
@@ -250,7 +230,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Week": MessageLookupByLibrary.simpleMessage("Setelah 1 minggu"),
         "after1Year": MessageLookupByLibrary.simpleMessage("Setelah 1 tahun"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Pemilik"),
-        "albumParticipantsCount": m17,
+        "albumParticipantsCount": m1,
         "albumTitle": MessageLookupByLibrary.simpleMessage("Judul album"),
         "albumUpdated":
             MessageLookupByLibrary.simpleMessage("Album diperbarui"),
@@ -258,8 +238,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ Sudah bersih"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("Semua kenangan terpelihara"),
-        "allWillShiftRangeBasedOnFirst": MessageLookupByLibrary.simpleMessage(
-            "This is the first in the group. Other selected photos will automatically shift based on this new date"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Izinkan orang yang memiliki link untuk menambahkan foto ke album berbagi ini."),
         "allowAddingPhotos":
@@ -283,7 +261,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Android, iOS, Web, Desktop"),
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Autentikasi diperlukan"),
-        "appVersion": m18,
+        "appVersion": m51,
         "appleId": MessageLookupByLibrary.simpleMessage("ID Apple"),
         "apply": MessageLookupByLibrary.simpleMessage("Terapkan"),
         "applyCodeTitle": MessageLookupByLibrary.simpleMessage("Terapkan kode"),
@@ -349,7 +327,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoPairDesc": MessageLookupByLibrary.simpleMessage(
             "Taut otomatis hanya tersedia di perangkat yang mendukung Chromecast."),
         "available": MessageLookupByLibrary.simpleMessage("Tersedia"),
-        "availableStorageSpace": m19,
+        "availableStorageSpace": m52,
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Folder yang dicadangkan"),
         "backup": MessageLookupByLibrary.simpleMessage("Pencadangan"),
@@ -372,10 +350,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "canOnlyRemoveFilesOwnedByYou": MessageLookupByLibrary.simpleMessage(
             "Hanya dapat menghapus berkas yang dimiliki oleh mu"),
         "cancel": MessageLookupByLibrary.simpleMessage("Batal"),
-        "cancelOtherSubscription": m20,
+        "cancelOtherSubscription": m2,
         "cancelSubscription":
             MessageLookupByLibrary.simpleMessage("Batalkan langganan"),
-        "cannotAddMorePhotosAfterBecomingViewer": m4,
+        "cannotAddMorePhotosAfterBecomingViewer": m3,
         "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
             "Tidak dapat menghapus file berbagi"),
         "castIPMismatchBody": MessageLookupByLibrary.simpleMessage(
@@ -405,7 +383,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimMore":
             MessageLookupByLibrary.simpleMessage("Peroleh lebih banyak!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Diperoleh"),
-        "claimedStorageSoFar": m21,
+        "claimedStorageSoFar": m4,
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Hapus indeks"),
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
         "close": MessageLookupByLibrary.simpleMessage("Tutup"),
@@ -421,7 +399,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Buat link untuk memungkinkan orang lain menambahkan dan melihat foto yang ada pada album bersama kamu tanpa memerlukan app atau akun Ente. Ideal untuk mengumpulkan foto pada suatu acara."),
         "collaborativeLink":
             MessageLookupByLibrary.simpleMessage("Link kolaborasi"),
-        "collaborativeLinkCreatedFor": m22,
+        "collaborativeLinkCreatedFor": m54,
         "collaborator": MessageLookupByLibrary.simpleMessage("Kolaborator"),
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
@@ -447,10 +425,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Konfirmasi kunci pemulihan kamu"),
         "connectToDevice":
             MessageLookupByLibrary.simpleMessage("Hubungkan ke perangkat"),
-        "contactFamilyAdmin": m25,
+        "contactFamilyAdmin": m5,
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Hubungi dukungan"),
-        "contactToManageSubscription": m26,
+        "contactToManageSubscription": m6,
         "contacts": MessageLookupByLibrary.simpleMessage("Kontak"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("Lanjut"),
         "continueOnFreeTrial": MessageLookupByLibrary.simpleMessage(
@@ -488,10 +466,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable":
             MessageLookupByLibrary.simpleMessage("Pembaruan penting tersedia"),
         "crop": MessageLookupByLibrary.simpleMessage("Potong"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("Pemakaian saat ini sebesar "),
         "custom": MessageLookupByLibrary.simpleMessage("Kustom"),
-        "customEndpoint": m27,
+        "customEndpoint": m57,
         "darkTheme": MessageLookupByLibrary.simpleMessage("Gelap"),
         "dayToday": MessageLookupByLibrary.simpleMessage("Hari Ini"),
         "dayYesterday": MessageLookupByLibrary.simpleMessage("Kemarin"),
@@ -520,9 +500,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Hapus dari perangkat ini"),
         "deleteFromEnte":
             MessageLookupByLibrary.simpleMessage("Hapus dari Ente"),
-        "deleteItemCount": m28,
+        "deleteItemCount": m7,
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Hapus foto"),
-        "deleteProgress": m29,
+        "deleteProgress": m58,
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "Fitur penting yang saya perlukan tidak ada"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
@@ -558,7 +538,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Orang yang melihat masih bisa mengambil tangkapan layar atau menyalin foto kamu menggunakan alat eksternal"),
         "disableDownloadWarningTitle":
             MessageLookupByLibrary.simpleMessage("Perlu diketahui"),
-        "disableLinkMessage": m30,
+        "disableLinkMessage": m8,
         "disableTwofactor": MessageLookupByLibrary.simpleMessage(
             "Nonaktifkan autentikasi dua langkah"),
         "disablingTwofactorAuthentication":
@@ -593,13 +573,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "downloadFailed":
             MessageLookupByLibrary.simpleMessage("Gagal mengunduh"),
         "downloading": MessageLookupByLibrary.simpleMessage("Mengunduh..."),
-        "dropSupportEmail": m31,
-        "duplicateFileCountWithStorageSaved": m32,
+        "dropSupportEmail": m9,
+        "duplicateFileCountWithStorageSaved": m10,
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "editLocation": MessageLookupByLibrary.simpleMessage("Edit lokasi"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Edit lokasi"),
-        "editTime": MessageLookupByLibrary.simpleMessage("Edit time"),
         "editsSaved":
             MessageLookupByLibrary.simpleMessage("Perubahan tersimpan"),
         "editsToLocationWillOnlyBeSeenWithinEnte":
@@ -607,8 +586,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Perubahan lokasi hanya akan terlihat di Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("memenuhi syarat"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
-        "emailChangedTo": m34,
-        "emailNoEnteAccount": m36,
+        "emailChangedTo": m59,
+        "emailNoEnteAccount": m12,
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("Verifikasi email"),
         "empty": MessageLookupByLibrary.simpleMessage("Kosongkan"),
@@ -705,8 +684,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "fileTypes": MessageLookupByLibrary.simpleMessage("Jenis file"),
         "fileTypesAndNames":
             MessageLookupByLibrary.simpleMessage("Nama dan jenis file"),
-        "filesBackedUpFromDevice": m38,
-        "filesBackedUpInAlbum": m39,
+        "filesBackedUpFromDevice": m64,
+        "filesBackedUpInAlbum": m65,
         "filesDeleted": MessageLookupByLibrary.simpleMessage("File terhapus"),
         "filesSavedToGallery":
             MessageLookupByLibrary.simpleMessage("File tersimpan ke galeri"),
@@ -720,23 +699,21 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Wajah yang ditemukan"),
         "freeStorageClaimed":
             MessageLookupByLibrary.simpleMessage("Kuota gratis diperoleh"),
-        "freeStorageOnReferralSuccess": m5,
+        "freeStorageOnReferralSuccess": m13,
         "freeStorageUsable": MessageLookupByLibrary.simpleMessage(
             "Kuota gratis yang dapat digunakan"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("Percobaan gratis"),
-        "freeTrialValidTill": m40,
-        "freeUpAccessPostDelete": m41,
-        "freeUpAmount": m42,
+        "freeTrialValidTill": m14,
+        "freeUpAmount": m67,
         "freeUpDeviceSpace": MessageLookupByLibrary.simpleMessage(
             "Bersihkan penyimpanan perangkat"),
         "freeUpDeviceSpaceDesc": MessageLookupByLibrary.simpleMessage(
             "Hemat ruang penyimpanan di perangkatmu dengan membersihkan file yang sudah tercadangkan."),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Bersihkan ruang"),
-        "freeUpSpaceSaving": m43,
         "general": MessageLookupByLibrary.simpleMessage("Umum"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Menghasilkan kunci enkripsi..."),
-        "genericProgress": m44,
+        "genericProgress": m69,
         "goToSettings": MessageLookupByLibrary.simpleMessage("Buka pengaturan"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("ID Google Play"),
         "grantFullAccessPrompt": MessageLookupByLibrary.simpleMessage(
@@ -796,7 +773,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "Sepertinya terjadi kesalahan. Silakan coba lagi setelah beberapa saat. Jika kesalahan terus terjadi, silakan hubungi tim dukungan kami."),
-        "itemCount": m45,
+        "itemCount": m15,
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Item yang dipilih akan dihapus dari album ini"),
         "joinDiscord":
@@ -823,7 +800,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Batas perangkat"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Aktif"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Kedaluwarsa"),
-        "linkExpiresOn": m47,
+        "linkExpiresOn": m16,
         "linkExpiry":
             MessageLookupByLibrary.simpleMessage("Waktu kedaluwarsa link"),
         "linkHasExpired":
@@ -884,7 +861,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "maps": MessageLookupByLibrary.simpleMessage("Peta"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
-        "memoryCount": m6,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Aktifkan pemelajaran mesin"),
@@ -903,12 +879,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Sedang"),
         "moments": MessageLookupByLibrary.simpleMessage("Momen"),
         "monthly": MessageLookupByLibrary.simpleMessage("Bulanan"),
-        "moveItem": m50,
-        "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
-            "Move selected photos to one date"),
         "moveToHiddenAlbum": MessageLookupByLibrary.simpleMessage(
             "Pindahkan ke album tersembunyi"),
-        "movedSuccessfullyTo": m51,
+        "movedSuccessfullyTo": m77,
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Pindah ke sampah"),
         "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
@@ -920,7 +893,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tidak dapat terhubung dengan Ente, harap periksa pengaturan jaringan kamu dan hubungi dukungan jika masalah berlanjut."),
         "never": MessageLookupByLibrary.simpleMessage("Tidak pernah"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Album baru"),
-        "newRange": MessageLookupByLibrary.simpleMessage("New range"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Baru di Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Terbaru"),
         "no": MessageLookupByLibrary.simpleMessage("Tidak"),
@@ -951,8 +923,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("Tidak ada hasil"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("Tidak ditemukan hasil"),
-        "notThisPerson":
-            MessageLookupByLibrary.simpleMessage("Not this person?"),
         "nothingSharedWithYouYet": MessageLookupByLibrary.simpleMessage(
             "Belum ada yang dibagikan denganmu"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage(
@@ -962,7 +932,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("Di perangkat ini"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Di <branding>ente</branding>"),
-        "onlyFamilyAdminCanChangeCode": m54,
+        "onlyFamilyAdminCanChangeCode": m17,
         "oops": MessageLookupByLibrary.simpleMessage("Aduh"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Aduh, tidak dapat menyimpan perubahan"),
@@ -989,7 +959,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sandi berhasil diubah"),
         "passwordLock":
             MessageLookupByLibrary.simpleMessage("Kunci dengan sandi"),
-        "passwordStrength": m0,
+        "passwordStrength": m18,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Kami tidak menyimpan sandi ini, jadi jika kamu melupakannya, <underline>kami tidak akan bisa mendekripsi data kamu</underline>"),
         "paymentDetails":
@@ -998,7 +968,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pembayaran gagal"),
         "paymentFailedMessage": MessageLookupByLibrary.simpleMessage(
             "Sayangnya, pembayaranmu gagal. Silakan hubungi tim bantuan agar dapat kami bantu!"),
-        "paymentFailedTalkToProvider": m55,
+        "paymentFailedTalkToProvider": m19,
         "pendingItems": MessageLookupByLibrary.simpleMessage("Item menunggu"),
         "pendingSync":
             MessageLookupByLibrary.simpleMessage("Sinkronisasi tertunda"),
@@ -1016,16 +986,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("Ukuran kotak foto"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("foto"),
-        "photocountPhotos": m1,
         "photos": MessageLookupByLibrary.simpleMessage("Foto"),
         "photosAddedByYouWillBeRemovedFromTheAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Foto yang telah kamu tambahkan akan dihapus dari album ini"),
-        "photosKeepRelativeTimeDifference":
-            MessageLookupByLibrary.simpleMessage(
-                "Photos keep relative time difference"),
         "playOnTv": MessageLookupByLibrary.simpleMessage("Putar album di TV"),
-        "playStoreFreeTrialValidTill": m57,
+        "playStoreFreeTrialValidTill": m20,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("Langganan PlayStore"),
         "pleaseCheckYourInternetConnectionAndTryAgain":
@@ -1037,12 +1003,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseContactSupportIfTheProblemPersists":
             MessageLookupByLibrary.simpleMessage(
                 "Silakan hubungi tim bantuan jika masalah terus terjadi"),
-        "pleaseEmailUsAt": m58,
+        "pleaseEmailUsAt": m85,
         "pleaseGrantPermissions":
             MessageLookupByLibrary.simpleMessage("Harap berikan izin"),
         "pleaseLoginAgain":
             MessageLookupByLibrary.simpleMessage("Silakan masuk akun lagi"),
-        "pleaseSendTheLogsTo": m59,
+        "pleaseSendTheLogsTo": m86,
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Silakan coba lagi"),
         "pleaseVerifyTheCodeYouHaveEntered":
@@ -1060,7 +1026,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tekan dan tahan untuk memutar video"),
         "pressAndHoldToPlayVideoDetailed": MessageLookupByLibrary.simpleMessage(
             "Tekan dan tahan gambar untuk memutar video"),
-        "previous": MessageLookupByLibrary.simpleMessage("Previous"),
         "privacy": MessageLookupByLibrary.simpleMessage("Privasi"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Kebijakan Privasi"),
@@ -1077,7 +1042,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Buat tiket dukungan"),
         "rateTheApp": MessageLookupByLibrary.simpleMessage("Nilai app ini"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Beri kami nilai"),
-        "rateUsOnStore": m61,
+        "rateUsOnStore": m21,
         "recover": MessageLookupByLibrary.simpleMessage("Pulihkan"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("Pulihkan akun"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Pulihkan"),
@@ -1105,7 +1070,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "1. Berikan kode ini ke teman kamu"),
         "referralStep2": MessageLookupByLibrary.simpleMessage(
             "2. Ia perlu daftar ke paket berbayar"),
-        "referralStep3": m66,
+        "referralStep3": m22,
         "referrals": MessageLookupByLibrary.simpleMessage("Referensi"),
         "referralsAreCurrentlyPaused":
             MessageLookupByLibrary.simpleMessage("Rujukan sedang dijeda"),
@@ -1127,7 +1092,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeLink": MessageLookupByLibrary.simpleMessage("Hapus link"),
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Hapus peserta"),
-        "removeParticipantBody": m67,
+        "removeParticipantBody": m23,
         "removePersonLabel":
             MessageLookupByLibrary.simpleMessage("Hapus label orang"),
         "removePublicLink":
@@ -1143,7 +1108,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "renameFile": MessageLookupByLibrary.simpleMessage("Ubah nama file"),
         "renewSubscription":
             MessageLookupByLibrary.simpleMessage("Perpanjang langganan"),
-        "renewsOn": m68,
+        "renewsOn": m24,
         "reportABug": MessageLookupByLibrary.simpleMessage("Laporkan bug"),
         "reportBug": MessageLookupByLibrary.simpleMessage("Laporkan bug"),
         "resendEmail":
@@ -1194,14 +1159,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Album, nama dan jenis file"),
         "searchHint5": MessageLookupByLibrary.simpleMessage(
             "Segera tiba: Penelusuran wajah & ajaib ✨"),
-        "searchResultCount": m69,
+        "searchResultCount": m94,
         "security": MessageLookupByLibrary.simpleMessage("Keamanan"),
         "selectALocation": MessageLookupByLibrary.simpleMessage("Pilih lokasi"),
         "selectALocationFirst": MessageLookupByLibrary.simpleMessage(
             "Pilih lokasi terlebih dahulu"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("Pilih album"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Pilih semua"),
-        "selectDate": MessageLookupByLibrary.simpleMessage("Select date"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(
             "Pilih folder yang perlu dicadangkan"),
         "selectItemsToAdd": MessageLookupByLibrary.simpleMessage(
@@ -1209,14 +1173,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectLanguage": MessageLookupByLibrary.simpleMessage("Pilih Bahasa"),
         "selectMorePhotos":
             MessageLookupByLibrary.simpleMessage("Pilih lebih banyak foto"),
-        "selectOneDateAndTime":
-            MessageLookupByLibrary.simpleMessage("Select one date and time"),
-        "selectOneDateAndTimeForAll": MessageLookupByLibrary.simpleMessage(
-            "Select one date and time for all"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Pilih alasan"),
-        "selectStartOfRange":
-            MessageLookupByLibrary.simpleMessage("Select start of range"),
-        "selectTime": MessageLookupByLibrary.simpleMessage("Select time"),
         "selectYourPlan":
             MessageLookupByLibrary.simpleMessage("Pilih paket kamu"),
         "selectedFilesAreNotOnEnte": MessageLookupByLibrary.simpleMessage(
@@ -1227,11 +1184,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
                 "Item terpilih akan dihapus dari semua album dan dipindahkan ke sampah."),
-        "selectedItemsWillBeRemovedFromThisPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Selected items will be removed from this person, but not deleted from your library."),
-        "selectedPhotos": m7,
-        "selectedPhotosWithYours": m71,
+        "selectedPhotos": m25,
+        "selectedPhotosWithYours": m26,
         "send": MessageLookupByLibrary.simpleMessage("Kirim"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Kirim email"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("Kirim undangan"),
@@ -1252,16 +1206,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareAnAlbumNow":
             MessageLookupByLibrary.simpleMessage("Bagikan album sekarang"),
         "shareLink": MessageLookupByLibrary.simpleMessage("Bagikan link"),
-        "shareMyVerificationID": m72,
+        "shareMyVerificationID": m27,
         "shareOnlyWithThePeopleYouWant": MessageLookupByLibrary.simpleMessage(
             "Bagikan hanya dengan orang yang kamu inginkan"),
-        "shareTextConfirmOthersVerificationID": m8,
+        "shareTextConfirmOthersVerificationID": m28,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Unduh Ente agar kita bisa berbagi foto dan video kualitas asli dengan mudah\n\nhttps://ente.io"),
-        "shareTextReferralCode": m73,
+        "shareTextReferralCode": m29,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Bagikan ke pengguna non-Ente"),
-        "shareWithPeopleSectionTitle": m74,
+        "shareWithPeopleSectionTitle": m30,
         "shareYourFirstAlbum":
             MessageLookupByLibrary.simpleMessage("Bagikan album pertamamu"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
@@ -1274,14 +1228,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Foto terbagi baru"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
             "Terima notifikasi apabila seseorang menambahkan foto ke album bersama yang kamu ikuti"),
-        "sharedWith": m75,
+        "sharedWith": m97,
         "sharedWithMe":
             MessageLookupByLibrary.simpleMessage("Dibagikan dengan saya"),
         "sharedWithYou":
             MessageLookupByLibrary.simpleMessage("Dibagikan dengan kamu"),
         "sharing": MessageLookupByLibrary.simpleMessage("Membagikan..."),
-        "shiftDatesAndTime":
-            MessageLookupByLibrary.simpleMessage("Shift dates and time"),
         "showMemories": MessageLookupByLibrary.simpleMessage("Lihat kenangan"),
         "signOutFromOtherDevices": MessageLookupByLibrary.simpleMessage(
             "Keluarkan akun dari perangkat lain"),
@@ -1291,11 +1243,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Keluar di perangkat lain"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Saya menyetujui <u-terms>ketentuan layanan</u-terms> dan <u-policy>kebijakan privasi</u-policy> Ente"),
-        "singleFileDeleteFromDevice": m76,
+        "singleFileDeleteFromDevice": m31,
         "singleFileDeleteHighlight": MessageLookupByLibrary.simpleMessage(
             "Ia akan dihapus dari semua album."),
-        "singleFileInBothLocalAndRemote": m77,
-        "singleFileInRemoteOnly": m78,
+        "singleFileInBothLocalAndRemote": m32,
+        "singleFileInRemoteOnly": m33,
         "skip": MessageLookupByLibrary.simpleMessage("Lewati"),
         "social": MessageLookupByLibrary.simpleMessage("Sosial"),
         "someItemsAreInBothEnteAndYourDevice":
@@ -1326,8 +1278,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("Terbaru dulu"),
         "sortOldestFirst": MessageLookupByLibrary.simpleMessage("Terlama dulu"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Berhasil"),
-        "spotlightOnYourself":
-            MessageLookupByLibrary.simpleMessage("Spotlight on yourself"),
         "startBackup":
             MessageLookupByLibrary.simpleMessage("Mulai pencadangan"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
@@ -1339,13 +1289,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("Keluarga"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Kamu"),
-        "storageInGB": m2,
+        "storageInGB": m34,
         "storageLimitExceeded": MessageLookupByLibrary.simpleMessage(
             "Batas penyimpanan terlampaui"),
-        "storageUsageInfo": m79,
+        "storageUsageInfo": m100,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Kuat"),
-        "subAlreadyLinkedErrMessage": m80,
-        "subWillBeCancelledOn": m81,
+        "subAlreadyLinkedErrMessage": m35,
+        "subWillBeCancelledOn": m36,
         "subscribe": MessageLookupByLibrary.simpleMessage("Berlangganan"),
         "subscription": MessageLookupByLibrary.simpleMessage("Langganan"),
         "success": MessageLookupByLibrary.simpleMessage("Berhasil"),
@@ -1385,7 +1335,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "theseItemsWillBeDeletedFromYourDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Item ini akan dihapus dari perangkat ini."),
-        "theyAlsoGetXGb": m9,
+        "theyAlsoGetXGb": m37,
         "thisActionCannotBeUndone": MessageLookupByLibrary.simpleMessage(
             "Tindakan ini tidak dapat dibatalkan"),
         "thisAlbumAlreadyHDACollaborativeLink":
@@ -1399,19 +1349,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Email ini telah digunakan"),
         "thisImageHasNoExifData": MessageLookupByLibrary.simpleMessage(
             "Gambar ini tidak memiliki data exif"),
-        "thisIsPersonVerificationId": m84,
+        "thisIsPersonVerificationId": m38,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "Ini adalah ID Verifikasi kamu"),
-        "thisWeekThroughTheYears":
-            MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Ini akan mengeluarkan akunmu dari perangkat berikut:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Ini akan mengeluarkan akunmu dari perangkat ini!"),
-        "thisWillMakeTheDateAndTimeOfAllSelected":
-            MessageLookupByLibrary.simpleMessage(
-                "This will make the date and time of all selected photos the same."),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage(
             "Untuk menyembunyikan foto atau video"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
@@ -1470,14 +1415,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Gunakan kunci pemulihan"),
         "useSelectedPhoto":
             MessageLookupByLibrary.simpleMessage("Gunakan foto terpilih"),
-        "validTill": m90,
+        "validTill": m39,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Verifikasi gagal, silakan coba lagi"),
         "verificationId": MessageLookupByLibrary.simpleMessage("ID Verifikasi"),
         "verify": MessageLookupByLibrary.simpleMessage("Verifikasi"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Verifikasi email"),
-        "verifyEmailID": m91,
+        "verifyEmailID": m40,
         "verifyPasskey":
             MessageLookupByLibrary.simpleMessage("Verifikasi passkey"),
         "verifyPassword":
@@ -1507,13 +1452,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Menunggu WiFi..."),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("Kode sumber kami terbuka!"),
-        "weHaveSendEmailTo": m3,
+        "weHaveSendEmailTo": m41,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Lemah"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Selamat datang kembali!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("Hal yang baru"),
         "yearly": MessageLookupByLibrary.simpleMessage("Tahunan"),
-        "yearsAgo": m93,
+        "yearsAgo": m42,
         "yes": MessageLookupByLibrary.simpleMessage("Ya"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Ya, batalkan"),
         "yesConvertToViewer":
@@ -1540,7 +1485,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Kamu tidak bisa berbagi dengan dirimu sendiri"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "Kamu tidak memiliki item di arsip."),
-        "youHaveSuccessfullyFreedUp": m94,
+        "youHaveSuccessfullyFreedUp": m43,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Akunmu telah dihapus"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Peta kamu"),

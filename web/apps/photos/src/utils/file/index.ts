@@ -1,24 +1,27 @@
-import { joinPath } from "@/base/file-name";
-import log from "@/base/log";
-import { type Electron } from "@/base/types/ipc";
-import { downloadAndRevokeObjectURL } from "@/base/utils/web";
-import { downloadManager } from "@/gallery/services/download";
-import { updateFileMagicMetadata } from "@/gallery/services/file";
-import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
-import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
-import { writeStream } from "@/gallery/utils/native-stream";
+import { joinPath } from "ente-base/file-name";
+import log from "ente-base/log";
+import { type Electron } from "ente-base/types/ipc";
+import { downloadAndRevokeObjectURL } from "ente-base/utils/web";
+import { downloadManager } from "ente-gallery/services/download";
+import { updateFileMagicMetadata } from "ente-gallery/services/file";
+import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
+import { detectFileTypeInfo } from "ente-gallery/utils/detect-type";
+import { writeStream } from "ente-gallery/utils/native-stream";
 import {
     EnteFile,
     FileMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
-} from "@/media/file";
-import { ItemVisibility, isArchivedFile } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
-import { deleteFromTrash, moveToTrash } from "@/new/photos/services/collection";
-import { safeFileName } from "@/new/photos/utils/native-fs";
-import { getData } from "@ente/shared/storage/localStorage";
-import type { User } from "@ente/shared/user/types";
+} from "ente-media/file";
+import { ItemVisibility, isArchivedFile } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { decodeLivePhoto } from "ente-media/live-photo";
+import {
+    deleteFromTrash,
+    moveToTrash,
+} from "ente-new/photos/services/collection";
+import { safeFileName } from "ente-new/photos/utils/native-fs";
+import { getData } from "ente-shared/storage/localStorage";
+import type { User } from "ente-shared/user/types";
 import { t } from "i18next";
 import {
     addMultipleToFavorites,
@@ -75,7 +78,7 @@ export async function downloadFile(file: EnteFile) {
 function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
     for (const [key, val] of Object.entries(selectedFiles)) {
-        if (typeof val === "boolean" && val) {
+        if (typeof val == "boolean" && val) {
             filesIDs.push(Number(key));
         }
     }
