@@ -353,7 +353,11 @@ class CollectionActions {
           onTap: () async {
             await routeToPage(
               bContext,
-              AddParticipantPage(collection[0], true),
+              AddParticipantPage(
+                collection[0],
+                true,
+                collections: collection,
+              ),
             );
           },
         ),
@@ -367,7 +371,11 @@ class CollectionActions {
           onTap: () async {
             await routeToPage(
               bContext,
-              AddParticipantPage(collection[0], false),
+              AddParticipantPage(
+                collection[0],
+                false,
+                collections: collection,
+              ),
             );
           },
         ),
