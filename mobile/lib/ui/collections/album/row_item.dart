@@ -8,7 +8,6 @@ import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
@@ -40,7 +39,6 @@ class AlbumRowItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final bool isOwner = c.isOwner(Configuration.instance.getUserID()!);
     final String tagPrefix = (isOwner ? "collection" : "shared_collection") +
         tag +
@@ -53,7 +51,6 @@ class AlbumRowItemWidget extends StatelessWidget {
             color: c.publicURLs.first.isExpired ? warning500 : strokeBaseDark,
           )
         : null;
-    final bool isFavCollection = c.type == CollectionType.favorites;
 
     return GestureDetector(
       child: Column(
@@ -81,20 +78,33 @@ class AlbumRowItemWidget extends StatelessWidget {
                                 CollectionsService.instance.getCoverCache(c);
                           }
                           if (thumbnail != null) {
+                            final bool isSelected =
+                                selectedAlbums?.isAlbumSelected(c) ?? false;
                             final String heroTag = tagPrefix + thumbnail.tag;
+                            final thumbnailWidget = ThumbnailWidget(
+                              thumbnail,
+                              shouldShowArchiveStatus: isOwner
+                                  ? c.isArchived()
+                                  : c.hasShareeArchived(),
+                              showFavForAlbumOnly: true,
+                              shouldShowSyncStatus: false,
+                              shouldShowPinIcon: isOwner && c.isPinned,
+                              key: Key(heroTag),
+                            );
                             return Hero(
                               tag: heroTag,
                               transitionOnUserGestures: true,
-                              child: ThumbnailWidget(
-                                thumbnail,
-                                shouldShowArchiveStatus: isOwner
-                                    ? c.isArchived()
-                                    : c.hasShareeArchived(),
-                                showFavForAlbumOnly: true,
-                                shouldShowSyncStatus: false,
-                                shouldShowPinIcon: isOwner && c.isPinned,
-                                key: Key(heroTag),
-                              ),
+                              child: isSelected
+                                  ? ColorFiltered(
+                                      colorFilter: ColorFilter.mode(
+                                        Colors.black.withOpacity(
+                                          0.4,
+                                        ),
+                                        BlendMode.darken,
+                                      ),
+                                      child: thumbnailWidget,
+                                    )
+                                  : thumbnailWidget,
                             );
                           } else {
                             return const NoThumbnailWidget();
@@ -114,8 +124,9 @@ class AlbumRowItemWidget extends StatelessWidget {
                             ),
                           ),
                         ),
-                      Align(
-                        alignment: Alignment.topRight,
+                      Positioned(
+                        top: 6,
+                        right: 6,
                         child: Hero(
                           tag: tagPrefix + "_album_selection",
                           transitionOnUserGestures: true,
@@ -128,13 +139,11 @@ class AlbumRowItemWidget extends StatelessWidget {
                                 duration: const Duration(milliseconds: 200),
                                 switchInCurve: Curves.easeOut,
                                 switchOutCurve: Curves.easeIn,
-                                child: isSelected && !isFavCollection
-                                    ? IconButtonWidget(
-                                        key: const ValueKey("selected"),
-                                        icon: Icons.check_circle_rounded,
-                                        iconButtonType:
-                                            IconButtonType.secondary,
-                                        iconColor: colorScheme.blurStrokeBase,
+                                child: isSelected
+                                    ? const Icon(
+                                        Icons.check_circle_rounded,
+                                        color: Colors.white,
+                                        size: 22,
                                       )
                                     : null,
                               );

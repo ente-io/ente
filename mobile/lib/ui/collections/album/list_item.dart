@@ -30,7 +30,6 @@ class AlbumListItemWidget extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     const sideOfThumbnail = 60.0;
-    final bool isFavCollection = collection.type == CollectionType.favorites;
 
     return GestureDetector(
       onTap: () {
@@ -54,7 +53,7 @@ class AlbumListItemWidget extends StatelessWidget {
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               border: Border.all(
-                color: isSelected & !isFavCollection
+                color: isSelected
                     ? colorScheme.strokeMuted
                     : colorScheme.strokeFainter,
               ),
@@ -153,7 +152,7 @@ class AlbumListItemWidget extends StatelessWidget {
                         duration: const Duration(milliseconds: 200),
                         switchInCurve: Curves.easeOut,
                         switchOutCurve: Curves.easeIn,
-                        child: isSelected & !isFavCollection
+                        child: isSelected
                             ? IconButtonWidget(
                                 key: const ValueKey("selected"),
                                 icon: Icons.check_circle_rounded,

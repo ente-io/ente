@@ -1,3 +1,4 @@
+import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
@@ -12,6 +13,7 @@ import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/magic_util.dart";
 
@@ -34,11 +36,19 @@ class _AlbumSelectionActionWidgetState
     extends State<AlbumSelectionActionWidget> {
   final _logger = Logger("AlbumSelectionActionWidgetState");
   late CollectionActions collectionActions;
+  bool hasFavorites = false;
 
   @override
   initState() {
     collectionActions = CollectionActions(CollectionsService.instance);
+    widget.selectedAlbums.addListener(_selectionChangedListener);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.selectedAlbums.removeListener(_selectionChangedListener);
+    super.dispose();
   }
 
   @override
@@ -47,6 +57,10 @@ class _AlbumSelectionActionWidgetState
       return const SizedBox();
     }
     final List<SelectionActionButton> items = [];
+    final hasPinnedAlbum =
+        widget.selectedAlbums.albums.any((album) => album.isPinned);
+    final hasUnpinnedAlbum =
+        widget.selectedAlbums.albums.any((album) => !album.isPinned);
 
     if (widget.sectionType == UISectionType.homeCollections ||
         widget.sectionType == UISectionType.outgoingCollections) {
@@ -62,8 +76,19 @@ class _AlbumSelectionActionWidgetState
           labelText: "Pin",
           icon: Icons.push_pin_rounded,
           onTap: _onPinClick,
+          shouldShow: hasUnpinnedAlbum,
         ),
       );
+
+      items.add(
+        SelectionActionButton(
+          labelText: "Unpin",
+          icon: CupertinoIcons.pin_slash,
+          onTap: _onUnpinClick,
+          shouldShow: hasPinnedAlbum,
+        ),
+      );
+
       items.add(
         SelectionActionButton(
           labelText: S.of(context).delete,
@@ -135,6 +160,9 @@ class _AlbumSelectionActionWidgetState
       context,
       widget.selectedAlbums.albums.toList(),
     );
+    if (hasFavorites) {
+      _showFavToast();
+    }
     widget.selectedAlbums.clearAll();
   }
 
@@ -170,6 +198,9 @@ class _AlbumSelectionActionWidgetState
         debugPrint("No pop");
       }
     }
+    if (hasFavorites) {
+      _showFavToast();
+    }
     widget.selectedAlbums.clearAll();
   }
 
@@ -184,6 +215,27 @@ class _AlbumSelectionActionWidgetState
         collection,
         collection.isPinned ? 1 : 1,
       );
+    }
+    if (hasFavorites) {
+      _showFavToast();
+    }
+    widget.selectedAlbums.clearAll();
+  }
+
+  Future<void> _onUnpinClick() async {
+    for (final collection in widget.selectedAlbums.albums) {
+      if (collection.type == CollectionType.favorites || !collection.isPinned) {
+        continue;
+      }
+
+      await updateOrder(
+        context,
+        collection,
+        collection.isPinned ? 0 : 0,
+      );
+    }
+    if (hasFavorites) {
+      _showFavToast();
     }
     widget.selectedAlbums.clearAll();
   }
@@ -203,6 +255,9 @@ class _AlbumSelectionActionWidgetState
         newVisibility: newVisiblity,
         prevVisibility: prevVisiblity,
       );
+    }
+    if (hasFavorites) {
+      _showFavToast();
     }
     widget.selectedAlbums.clearAll();
   }
@@ -239,6 +294,9 @@ class _AlbumSelectionActionWidgetState
           newVisibility: newVisiblity,
           prevVisibility: prevVisiblity,
         );
+      }
+      if (hasFavorites) {
+        _showFavToast();
       }
       if (mounted) {
         setState(() {});
@@ -289,5 +347,20 @@ class _AlbumSelectionActionWidgetState
         Navigator.of(context).pop();
       }
     }
+  }
+
+  void _selectionChangedListener() {
+    if (mounted) {
+      hasFavorites = widget.selectedAlbums.albums
+          .any((album) => album.type == CollectionType.favorites);
+      setState(() {});
+    }
+  }
+
+  void _showFavToast() {
+    showShortToast(
+      context,
+      "The Favorites album cannot be modified",
+    );
   }
 }
