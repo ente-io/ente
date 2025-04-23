@@ -13,9 +13,9 @@ development, here is a recommended workflow:
    some examples:
 
     - OS agnostic: Install [NVM](https://github.com/nvm-sh/nvm), then
-      `nvm install 20 && corepack enable`.
+      `nvm install 22 && corepack enable`.
 
-    - macOS: `brew install node@20`
+    - macOS: `brew install node@22`
 
     - Ubuntu: `sudo apt install nodejs npm && sudo npm i -g corepack`
 

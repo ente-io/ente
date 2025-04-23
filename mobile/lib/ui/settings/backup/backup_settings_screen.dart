@@ -1,9 +1,10 @@
-import 'dart:io';
+import "dart:io";
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/wake_lock_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -134,13 +135,15 @@ class BackupSettingsScreen extends StatelessWidget {
                                     ),
                                     menuItemColor: colorScheme.fillFaint,
                                     trailingWidget: ToggleSwitchWidget(
-                                      value: () => Configuration.instance
-                                          .shouldKeepDeviceAwake(),
-                                      onChanged: () {
-                                        return Configuration.instance
-                                            .setShouldKeepDeviceAwake(
-                                          !Configuration.instance
-                                              .shouldKeepDeviceAwake(),
+                                      value: () => EnteWakeLockService.instance
+                                          .shouldKeepAppAwakeAcrossSessions,
+                                      onChanged: () async {
+                                        EnteWakeLockService.instance
+                                            .updateWakeLock(
+                                          enable: !EnteWakeLockService.instance
+                                              .shouldKeepAppAwakeAcrossSessions,
+                                          wakeLockFor: WakeLockFor
+                                              .fasterBackupsOniOSByKeepingScreenAwake,
                                         );
                                       },
                                     ),

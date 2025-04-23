@@ -897,6 +897,8 @@ const localeName = (locale: SupportedLocale) => {
             return "Tiếng Việt";
         case "ja-JP":
             return "日本語";
+        case "ar-SA":
+            return "اَلْعَرَبِيَّةُ";
     }
 };
 

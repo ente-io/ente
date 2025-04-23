@@ -54,7 +54,7 @@
          */
         "moduleResolution": "bundler",
 
-        /* Allow use of `.tsx` files, but don't tranform them */
+        /* Allow use of `.tsx` files, but don't transform them */
         "jsx": "preserve",
 
         /* Ask TypeScript to warn us if we use TypeScript features that cannot

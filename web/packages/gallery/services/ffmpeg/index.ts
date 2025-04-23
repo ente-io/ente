@@ -7,9 +7,9 @@ import {
     type UploadItem,
 } from "ente-gallery/services/upload";
 import {
-    readConvertToMP4Done,
-    readConvertToMP4Stream,
-    writeConvertToMP4Stream,
+    readVideoStream,
+    videoStreamDone,
+    writeVideoStream,
 } from "ente-gallery/utils/native-stream";
 import {
     parseMetadataDate,
@@ -103,7 +103,7 @@ const makeGenThumbnailCommand = (seekTime: number) => [
  * of videos that the user is uploading.
  *
  * @param uploadItem A {@link File}, or the absolute path to a file on the
- * user's local file sytem. A path can only be provided when we're running in
+ * user's local file system. A path can only be provided when we're running in
  * the context of our desktop app.
  */
 export const extractVideoMetadata = async (
@@ -266,65 +266,11 @@ export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
 };
 
 const convertToMP4Native = async (electron: Electron, blob: Blob) => {
-    const token = await writeConvertToMP4Stream(electron, blob);
-    const mp4Blob = await readConvertToMP4Stream(electron, token);
-    await readConvertToMP4Done(electron, token);
+    const tokens = await writeVideoStream(electron, "convert-to-mp4", blob);
+    const token = tokens[0]!;
+    const mp4Blob = await readVideoStream(electron, token).then((res) =>
+        res.blob(),
+    );
+    await videoStreamDone(electron, token);
     return mp4Blob;
 };
-
-/**
- * Generate a preview variant of for the given video using a Wasm FFmpeg running
- * in a web worker.
- *
- * See: [Note: Preview variant of videos].
- *
- * @param blob The input video blob.
- *
- * @returns The data of the generated preview variant.
- */
-export const generateVideoPreviewVariantWeb = async (blob: Blob) =>
-    ffmpegExecWeb(generateVideoPreviewMetadataCommand, blob, "mp4");
-
-/**
- * The FFmpeg command to use to create a preview variant of videos.
- *
- * Current parameters
- *
- * - 720p width
- * - 2000kbps bitrate
- * - 30fps frame rate
- *
- * See: [Note: Preview variant of videos]
- *
- * Options:
- *
- * - `-vf` creates a filter graph for the video stream
- *
- * - `-vf scale=720:-1` scales the video to 720p width, keeping aspect ratio.
- *
- * - `-r` sets the frame rate.
- *
- * - `-c:v libx264` sets the codec for the video stream to H264.
- *
- * - `-b:v 2000k` sets the bitrate for the video stream.
- *
- * - `-c:a aac -b:a 128k` converts the audio stream to 128k bit AAC.
- */
-const generateVideoPreviewMetadataCommand = [
-    ffmpegPathPlaceholder,
-    "-i",
-    inputPathPlaceholder,
-    "-vf",
-    "scale=720:-1",
-    "-r",
-    "30",
-    "-c:v",
-    "libx264",
-    "-b:v",
-    "2000k",
-    "-c:a",
-    "aac",
-    "-b:a",
-    "128k",
-    outputPathPlaceholder,
-];

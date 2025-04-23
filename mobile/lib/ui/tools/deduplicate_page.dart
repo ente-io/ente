@@ -478,8 +478,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 borderRadius: BorderRadius.circular(4),
                 child: ThumbnailWidget(
                   file,
-                  diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-                  serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
+                  diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
+                  serverLoadDeferDuration:
+                      galleryThumbnailServerLoadDeferDuration,
                   shouldShowLivePhotoOverlay: true,
                   key: Key("deduplicate_" + file.tag),
                 ),

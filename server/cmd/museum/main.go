@@ -565,11 +565,14 @@ func main() {
 		Controller:             publicCollectionCtrl,
 		FileCtrl:               fileController,
 		CollectionCtrl:         collectionController,
+		FileDataCtrl:           fileDataCtrl,
 		StorageBonusController: storageBonusCtrl,
 	}
 
 	publicCollectionAPI.GET("/files/preview/:fileID", publicCollectionHandler.GetThumbnail)
 	publicCollectionAPI.GET("/files/download/:fileID", publicCollectionHandler.GetFile)
+	publicCollectionAPI.GET("/files/data/fetch", publicCollectionHandler.GetFileData)
+	publicCollectionAPI.GET("/files/data/preview", publicCollectionHandler.GetPreviewURL)
 	publicCollectionAPI.GET("/diff", publicCollectionHandler.GetDiff)
 	publicCollectionAPI.GET("/info", publicCollectionHandler.GetCollection)
 	publicCollectionAPI.GET("/upload-urls", publicCollectionHandler.GetUploadUrls)
@@ -861,7 +864,7 @@ func setupDatabase() *sql.DB {
 	}
 
 	db.SetMaxIdleConns(6)
-	db.SetMaxOpenConns(30)
+	db.SetMaxOpenConns(45)
 
 	log.Println("Database was configured successfully.")
 

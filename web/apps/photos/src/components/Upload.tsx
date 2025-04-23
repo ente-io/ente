@@ -1092,7 +1092,7 @@ const setPendingUploads = async (
 
 type UploadTypeSelectorProps = ModalVisibilityProps & {
     /**
-     * The particular context / scenario in which this upload is occuring.
+     * The particular context / scenario in which this upload is occurring.
      */
     intent: UploadTypeSelectorIntent;
     /**
@@ -1186,7 +1186,7 @@ const UploadOptions: React.FC<UploadOptionsProps> = ({
     onSelect,
     onClose,
 }) => {
-    // [Note: Dialog state remains preseved on reopening]
+    // [Note: Dialog state remains preserved on reopening]
     //
     // Keep dialog content specific state here, in a separate component, so that
     // this state is not tied to the lifetime of the dialog.
@@ -1271,7 +1271,7 @@ const DefaultOptions: React.FC<UploadOptionsProps> = ({
                         label={t("folder")}
                         onClick={() => onSelect("folders")}
                     />
-                    {intent !== "collect" && (
+                    {intent != "collect" && (
                         <RowButton
                             startIcon={<GoogleIcon />}
                             endIcon={<ChevronRightIcon />}

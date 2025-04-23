@@ -14,7 +14,7 @@ export const handleSelectCreator =
     ) =>
     ({ id, ownerID }: { id: number; ownerID: number }, index?: number) =>
     (checked: boolean) => {
-        if (typeof index !== "undefined") {
+        if (typeof index != "undefined") {
             if (checked) {
                 setRangeStart(index);
             } else {

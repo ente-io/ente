@@ -46,6 +46,18 @@ The root `package.json` also has a convenience dev dependency:
 - [concurrently](https://github.com/open-cli-tools/concurrently) for spawning
   parallel tasks when we invoke various yarn scripts.
 
+> [!NOTE]
+>
+> We need to repeat some of the dependencies in multiple `package.json`s to
+> avoid spurious missing peer dependency warnings.
+>
+> For example, ideally we'd just have specified the react dependencies in
+> _ente-base_, but that leads to missing peer dependency warnings in our other
+> packages, so we need to need to repeat them. For now, we manually ensure that
+> all of them use the same version. Additionally, we pin the versions of the
+> react types using the resolutions field in the top level `package.json`, to
+> avoid type errors because of multiple versions of react types being in scope.
+
 ## Cryptography
 
 We use [libsodium](https://libsodium.gitbook.io/doc/) for our cryptography
@@ -86,13 +98,6 @@ dynamic SSR.
 is our core framework. We also import its a sibling
 [react-dom](https://github.com/facebook/react) package that renders JSX to the
 DOM.
-
-> [!NOTE]
->
-> We need to repeat the dependency on react and its siblings in multiple
-> package.jsons to avoid the unmet peer dependency warnings printed by yarn.
-> Ideally, the react dependencies can be specified just in the _ente-base_
-> package.
 
 ### MUI and Material Icons
 
@@ -144,6 +149,9 @@ For showing the app's UI in multiple languages, we use the
 
 Note that inspite of the "next" in the name of the library, it has nothing to do
 with Next.js.
+
+[get-user-locale](https://github.com/wojtekmaj/get-user-locale) is used for
+enumerating the user's locale's to find the best match.
 
 For more details, see [translations.md](translations.md).
 

@@ -90,7 +90,7 @@ const Page: React.FC = () => {
                     // Set a flag that causes new interactive key attributes to
                     // be generated.
                     setIsFirstLogin(true);
-                    // This should be a rare occurence, instead of building the
+                    // This should be a rare occurrence, instead of building the
                     // scaffolding to update all the in-memory state, just
                     // reload everything.
                     window.location.reload();

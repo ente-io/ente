@@ -52,7 +52,7 @@ jobs:
             - name: Setup node
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                  node-version: 22
 
             - name: Increase yarn timeout
               # `yarn install` times out sometimes on the Windows runner,

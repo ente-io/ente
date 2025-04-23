@@ -174,7 +174,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
     };
 
     const handleDragStart: React.MouseEventHandler = (e) => {
-        if (currentTab !== "crop") return;
+        if (currentTab != "crop") return;
 
         const rect = cropBoxRef.current!.getBoundingClientRect();
         const offsetX = e.pageX - rect.left - rect.width / 2;
@@ -292,7 +292,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
     }, [brightness, contrast, blur, saturation, invert, canvasRef, fileURL]);
 
     useEffect(() => {
-        if (currentTab !== "crop") return;
+        if (currentTab != "crop") return;
         resetCropBox();
         setShowControlsDrawer(false);
     }, [currentTab]);
@@ -378,14 +378,14 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
             const ctx = canvasRef.current.getContext("2d")!;
             ctx.imageSmoothingEnabled = false;
             if (!fileURL) {
-                const srcURLs =
+                const sourceURLs =
                     await downloadManager.renderableSourceURLs(file);
-                img.src = srcURLs.url as string;
-                setFileURL(srcURLs.url as string);
-                // The image editing works for images (not live photos or
-                // video), where we should generally also get the MIME type from
-                // our lower layers.
-                setMIMEType(srcURLs.mimeType);
+                if (sourceURLs.type != "image") {
+                    throw new Error("Image editor invoked for non-image file");
+                }
+                img.src = sourceURLs.imageURL;
+                setFileURL(sourceURLs.imageURL);
+                setMIMEType(sourceURLs.mimeType);
             } else {
                 img.src = fileURL;
             }
@@ -601,7 +601,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                                 style={{ display: "none" }}
                             />
 
-                            {currentTab === "crop" && (
+                            {currentTab == "crop" && (
                                 <FreehandCropRegion
                                     cropBox={cropBox}
                                     ref={cropBoxRef}
@@ -609,7 +609,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                                 />
                             )}
                         </Stack>
-                        {currentTab === "crop" && (
+                        {currentTab == "crop" && (
                             <CenteredFlex marginTop="1rem">
                                 <Button
                                     color="accent"
@@ -670,7 +670,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                         onClick={() => void loadCanvas()}
                     />
                 </RowButtonGroup>
-                {currentTab === "crop" && (
+                {currentTab == "crop" && (
                     <CropMenu
                         {...menuProps}
                         previewScale={previewCanvasScale}
@@ -679,8 +679,8 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                         resetCropBox={resetCropBox}
                     />
                 )}
-                {currentTab === "transform" && <TransformMenu {...menuProps} />}
-                {currentTab === "colors" && (
+                {currentTab == "transform" && <TransformMenu {...menuProps} />}
+                {currentTab == "colors" && (
                     <ColoursMenu
                         brightness={brightness}
                         contrast={contrast}
@@ -1096,7 +1096,7 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
 
             context.save();
 
-            if (direction === "horizontal") {
+            if (direction == "horizontal") {
                 context.translate(canvas.width, 0);
                 context.scale(-1, 1);
             } else {
@@ -1174,10 +1174,10 @@ const TransformMenu: React.FC<CommonMenuProps> = ({
     const createRotationHandler = (rotation: "left" | "right") => () => {
         try {
             setCanvasLoading(true);
-            rotateCanvas(canvasRef.current!, rotation === "left" ? -90 : 90);
+            rotateCanvas(canvasRef.current!, rotation == "left" ? -90 : 90);
             rotateCanvas(
                 originalSizeCanvasRef.current!,
-                rotation === "left" ? -90 : 90,
+                rotation == "left" ? -90 : 90,
             );
             setCanvasLoading(false);
             setTransformationPerformed(true);

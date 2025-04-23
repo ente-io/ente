@@ -279,9 +279,6 @@ export class PublicUploadHttpClient {
         const params = new URLSearchParams({ count });
         const url = await apiURL("/public-collection/upload-urls");
         const res = await fetch(`${url}?${params.toString()}`, {
-            // TODO: Use authenticatedPublicAlbumsRequestHeaders after the public
-            // albums refactor branch is merged.
-            // headers: await authenticatedRequestHeaders(),
             headers: authenticatedPublicAlbumsRequestHeaders(credentials),
         });
         ensureOk(res);

@@ -286,6 +286,15 @@
       "slug": "csgoroll"
     },
     {
+      "title": "Cwallet",
+      "altNames": [
+        "cwallet",
+        "c-wallet",
+        "c wallet",
+        "cwallet.com"
+      ]
+    },
+    {
       "title": "DCS",
       "altNames": [
         "Digital Combat Simulator"
@@ -377,6 +386,13 @@
       "hex": "858585"
     },
     {
+      "title": "Fanatical",
+      "slug": "fanatical",
+      "altNames": [
+        "FANATICAL"
+      ]
+    },
+    {
       "title": "Fastmail"
     },
     {
@@ -404,6 +420,9 @@
     {
       "title": "Firefox",
       "slug": "mozilla"
+    },
+    {
+      "title": "fortrabbit"
     },
     {
       "title": "ForUsAll"
@@ -659,6 +678,14 @@
       ]
     },
     {
+      "title": "Mbin",
+      "altNames": [
+        "kbin",
+        "thebrainbin",
+        "gehirneimer"
+      ]
+    },
+    {
       "title": "Mercado Livre",
       "slug": "mercado_livre",
       "altNames": [
@@ -889,6 +916,13 @@
       "title": "PostNL"
     },
     {
+      "title": "Postmark",
+      "slug": "postmarkapp",
+      "altNames": [
+        "postmarkapp"
+      ]
+    },
+    {
       "title": "PostScan Mail",
       "slug": "postscanmail",
       "altNames": [
@@ -951,6 +985,15 @@
       "title": "RealVNC",
       "slug": "realvnc",
       "hex": "488aec"
+    },
+    {
+      "title": "RedotPay",
+      "altNames": [
+        "redotpay",
+        "redot pay",
+        "redot-pay",
+        "redotpay.com"
+      ]
     },
     {
       "title": "Registro br",

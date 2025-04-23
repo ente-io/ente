@@ -78,7 +78,7 @@ export async function downloadFile(file: EnteFile) {
 function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
     for (const [key, val] of Object.entries(selectedFiles)) {
-        if (typeof val === "boolean" && val) {
+        if (typeof val == "boolean" && val) {
             filesIDs.push(Number(key));
         }
     }

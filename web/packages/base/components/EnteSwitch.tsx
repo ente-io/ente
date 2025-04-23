@@ -47,7 +47,7 @@ export const EnteSwitch: React.FC<SwitchProps> = styled((props) => (
         outline: `2px solid ${theme.vars.palette.stroke.muted}`,
         outlineOffset: "-2px",
     },
-    // Same for when the switch is actived.
+    // Same for when the switch is active.
     ".MuiSwitch-switchBase:active + .MuiSwitch-track": {
         outline: `1px solid ${theme.vars.palette.stroke.faint}`,
         outlineOffset: "-1px",

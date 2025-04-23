@@ -1401,11 +1401,11 @@ const getGoogleLikeMetadataFile = (
     const result: Record<string, unknown> = {
         title: fileExportName,
         creationTime: {
-            timestamp: creationTime,
+            timestamp: `${creationTime}`,
             formatted: dateTimeFormatter.format(creationTime * 1000),
         },
         modificationTime: {
-            timestamp: modificationTime,
+            timestamp: `${modificationTime}`,
             formatted: dateTimeFormatter.format(modificationTime * 1000),
         },
     };

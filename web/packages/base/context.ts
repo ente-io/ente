@@ -18,7 +18,7 @@ export interface BaseContextT {
      * Show a "mini dialog" with the given attributes.
      *
      * Mini dialogs (see {@link AttributedMiniDialog}) are meant for simple
-     * confirmation or notications. Their appearance and functionality can be
+     * confirmation or notifications. Their appearance and functionality can be
      * customized by providing appropriate {@link MiniDialogAttributes}.
      */
     showMiniDialog: (attributes: MiniDialogAttributes) => void;

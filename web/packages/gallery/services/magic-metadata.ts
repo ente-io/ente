@@ -28,8 +28,8 @@ export function isPinnedCollection(item: Collection) {
         !item ||
         !item.magicMetadata ||
         !item.magicMetadata.data ||
-        typeof item.magicMetadata.data === "string" ||
-        typeof item.magicMetadata.data.order === "undefined"
+        typeof item.magicMetadata.data == "string" ||
+        typeof item.magicMetadata.data.order == "undefined"
     ) {
         return false;
     }
@@ -47,7 +47,7 @@ export async function updateMagicMetadata<T>(
         originalMagicMetadata = getNewMagicMetadata<T>();
     }
 
-    if (typeof originalMagicMetadata?.data === "string") {
+    if (typeof originalMagicMetadata?.data == "string") {
         // TODO: When converting this (and other parses of magic metadata) to
         // use zod, remember to use passthrough.
         //
