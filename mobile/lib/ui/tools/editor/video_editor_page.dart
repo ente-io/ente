@@ -52,6 +52,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
   @override
   void initState() {
+    _logger.info("Initializing video editor page");
     super.initState();
 
     Future.microtask(() {
@@ -97,6 +98,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
   @override
   Widget build(BuildContext context) {
+    _logger.info("Bulding video editor page");
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
