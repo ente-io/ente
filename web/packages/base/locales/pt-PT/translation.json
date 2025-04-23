@@ -512,8 +512,6 @@
     "enter_name": "Introduza o nome",
     "uploader_name_hint": "Adicione um nome para que os seus amigos saibam a quem agradecer por estas ótimas fotos!",
     "name_placeholder": "Nome...",
-    "root_level_file_with_folder_not_allowed": "Não foi possível criar álbuns a partir da mistura de arquivos/pastas",
-    "root_level_file_with_folder_not_allowed_message": "<p>Arrastou e largou uma mistura de ficheiros e pastas.</p><p>Por favor, forneça apenas ficheiros ou apenas pastas quando selecionar a opção para criar álbuns separados</p>",
     "more_details": "Mais detalhes",
     "ml_search": "Aprendizagem automática",
     "ml_search_description": "O Ente suporta a aprendizagem automática no dispositivo para reconhecimento facial, pesquisa mágica e outras funcionalidades de pesquisa avançadas",

@@ -512,8 +512,6 @@
     "enter_name": "输入名字",
     "uploader_name_hint": "请添加一个名字，以便您的朋友知晓该感谢谁拍摄了这些精美的照片！",
     "name_placeholder": "名称...",
-    "root_level_file_with_folder_not_allowed": "无法从文件/文件夹组合中创建相册",
-    "root_level_file_with_folder_not_allowed_message": "<p>你已拖放了文件和文件夹的组合。</p><p>选择创建单独相册的选项时，请只提供文件或只提供文件夹</p>",
     "more_details": "更多详情",
     "ml_search": "机器学习",
     "ml_search_description": "Ente 支持设备上的机器学习，实现面部识别、魔法搜索和其他高级搜索功能",
