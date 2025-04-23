@@ -512,8 +512,6 @@
     "enter_name": "Inserisci il nome",
     "uploader_name_hint": "Aggiungi un nome in modo che i tuoi amici sappiano chi ringraziare per queste fantastiche foto!",
     "name_placeholder": "Nome...",
-    "root_level_file_with_folder_not_allowed": "Impossibile creare gli album dal mix di file/cartelle",
-    "root_level_file_with_folder_not_allowed_message": "<p>Hai trascinato un mix di file e cartelle.</p><p>Si prega di fornire solo i file, o solo le cartelle quando si seleziona l'opzione per creare album separati</p>",
     "more_details": "Più dettagli",
     "ml_search": "Apprendimento automatico (ML)",
     "ml_search_description": "Ente supporta l'apprendimento automatico (ML) in locale sul dispositivo per il riconoscimento dei volti, la ricerca magica e altre funzioni di ricerca avanzate",
