@@ -130,10 +130,13 @@ func (repo *UserRepository) GetAll(sinceTime int64, tillTime int64) ([]ente.User
 }
 
 // GetSubscribedUsers will return the list of all subscribed.
-func (repo *UserRepository) GetSubscribedUsersWithoutFamily() ([]ente.User, error) {
-	rows, err := repo.DB.Query(`SELECT u.user_id, u.encrypted_email, u.email_decryption_nonce, u.email_hash, s.created_at FROM subscriptions 
-	s INNER JOIN users u ON s.user_id = u.user_id 
-	WHERE u.family_admin_id IS NULL AND s.product_id != 'free'`)
+func (repo *UserRepository) GetSubscribedUsersWithoutFamily(duration string) ([]ente.User, error) {
+	rows, err := repo.DB.Query(`SELECT u.user_id, u.encrypted_email, u.email_decryption_nonce, u.email_hash, s.created_at 
+	FROM subscriptions s 
+	INNER JOIN users u ON s.user_id = u.user_id 
+	WHERE s.created_at >= $1
+	AND u.family_admin_id IS NULL 
+	AND s.product_id != 'free'`, duration)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}

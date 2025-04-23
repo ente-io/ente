@@ -46,7 +46,7 @@ const (
 	LoginSuccessSubject  = "New login to your Ente account"
 	LoginSuccessTemplate = "on_login.html"
 
-	FamilyNudgeEmailTemplate = "family_nudge.html"
+	FamilyNudgeEmailTemplate = "nudge_for_family.html"
 	FamilyNudgeSubject       = "Share your Ente Subscription with your Family!"
 	FamilyNudgeTemplateID    = "family_nudge"
 )
@@ -193,7 +193,7 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 		getListofSubscribers func() ([]ente.User, error)
 		template             string
 		subject              string
-		notifID				 string
+		notifID              string
 	}{
 		{
 			getListofSubscribers: func() ([]ente.User, error) {
@@ -201,7 +201,7 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 			},
 			template: StorageLimitExceedingTemplate,
 			subject:  StorageLimitExceedingSubject,
-			notifID: StorageLimitExceedingID,
+			notifID:  StorageLimitExceedingID,
 		},
 		{
 			getListofSubscribers: func() ([]ente.User, error) {
@@ -209,7 +209,7 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 			},
 			template: StorageLimitExceededTemplate,
 			subject:  StorageLimitExceededSubject,
-			notifID: StorageLimitExceededTemplateID,
+			notifID:  StorageLimitExceededTemplateID,
 		},
 	}
 	for _, alertGroup := range storageAlertGroups {
@@ -245,11 +245,14 @@ func (c *EmailNotificationController) setStorageLimitExceededMailerJobStatus(isS
 }
 
 func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
-	subscribedUsers, subUsersErr := c.UserRepo.GetSubscribedUsersWithoutFamily()
+	thirtyDaysDuration := 30 * 24 * t.Hour
+	thirtyDaysAgo := t.Now().Add(-thirtyDaysDuration)
+	formattedTime := thirtyDaysAgo.Format("2006-01-02 15:04:05.999999")
+
+	subscribedUsers, subUsersErr := c.UserRepo.GetSubscribedUsersWithoutFamily(formattedTime)
 	if subUsersErr != nil {
 		return stacktrace.Propagate(subUsersErr, "Failed to get subscribers")
 	}
-
 	batchSize := 100
 	totalSubUsers := len(subscribedUsers)
 
@@ -268,11 +271,9 @@ func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 				break
 			}
 
-			thirtyDays := 30 * 24 * t.Hour
 			creationTime := t.Unix(0, user.CreationTime)
 			timeSinceCreation := t.Since(creationTime)
-
-			if timeSinceCreation >= thirtyDays {
+			if timeSinceCreation >= thirtyDaysDuration {
 				lastNudgeSent, err := c.NotificationHistoryRepo.GetLastNotificationTime(user.ID, FilesCollectedTemplateID)
 				if err != nil {
 					log.Error("Failed to set Notification History")
