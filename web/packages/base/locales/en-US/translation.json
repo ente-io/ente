@@ -512,8 +512,6 @@
     "enter_name": "Enter name",
     "uploader_name_hint": "Add a name so that your friends know who to thank for these great photos!",
     "name_placeholder": "Name...",
-    "root_level_file_with_folder_not_allowed": "Cannot create albums from file/folder mix",
-    "root_level_file_with_folder_not_allowed_message": "<p>You have dragged and dropped a mixture of files and folders.</p><p>Please provide either only files, or only folders when selecting option to create separate albums</p>",
     "more_details": "More details",
     "ml_search": "Machine learning",
     "ml_search_description": "Ente supports on-device machine learning for face recognition, magic search and other advanced search features",
