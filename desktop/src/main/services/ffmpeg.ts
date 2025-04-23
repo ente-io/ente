@@ -200,6 +200,8 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     // - AAC audio 128kbps.
     // - Encrypted HLS playlist with a single file containing all the chunks.
     //
+    // Reference: `man ffmpeg-all`
+    //
     const command = [
         ffmpegBinaryPath(),
 
@@ -210,15 +212,21 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         // The remaining options apply to the next output file (`playlistPath`).
         //
         // ---
-        /*
-        // `-vf` creates a filter graph for the video stream.
-        "-vf",
-        // `-vf scale=720:-1` scales the video to 720p width, keeping aspect ratio.
-        "scale=720:-1",
-        // `-r 30` sets the frame rate to 30 fps.
-        "-r",
-        "30",
-        */
+        //
+        // `-vf` creates a filter graph for the video stream. This is a string
+        // of the form `filter1=key=value:key=value.filter2=key=value`, that is,
+        // a comma separated list of filters chained together.
+        [
+            "-vf",
+            [
+                // Scales the video to maximum 720p height, keeping aspect
+                // ratio, and keeping the calculated dimension divisible by 2.
+                "scale=-2:720",
+                // Convert the video to a constant 30 fps, duplicating or
+                // dropping frames as necessary.
+                "fps=30",
+            ].join(","),
+        ],
         // Video codec H.264 2000kbps
         //
         // `-c:v libx264` sets the codec for the video stream to H.264.
