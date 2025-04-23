@@ -196,11 +196,13 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
 
     // Overview:
     //
-    // - H.264 720p 30fps video 2000kbps.
+    // - H.264 video 720p 30fps.
     // - AAC audio 128kbps.
     // - Encrypted HLS playlist with a single file containing all the chunks.
     //
-    // Reference: `man ffmpeg-all`
+    // Reference:
+    // - `man ffmpeg-all`
+    // - https://trac.ffmpeg.org/wiki/Encode/H.264
     //
     const command = [
         ffmpegBinaryPath(),
@@ -220,25 +222,33 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
             "-vf",
             [
                 // Scales the video to maximum 720p height, keeping aspect
-                // ratio, and keeping the calculated dimension divisible by 2.
+                // ratio, and keeping the calculated dimension divisible by 2
+                // (some of the other operations require an even pixel count).
                 "scale=-2:720",
                 // Convert the video to a constant 30 fps, duplicating or
                 // dropping frames as necessary.
                 "fps=30",
+                // Output to YUV planar color space with "limited" but most
+                // compatible 4:2:0 chroma subsampling (if not specified, ffmpeg
+                // may output to a pixel format that is not widely supported).
+                "format=yuv420p",
             ].join(","),
         ],
-        // Video codec H.264 2000kbps
+        // Video codec H.264
         //
-        // `-c:v libx264` sets the codec for the video stream to H.264.
+        // - `-c:v libx264` converts the video stream to use the H.264 codec.
         //
-        // `-b:v 2000k` sets the bitrate for the video stream.
-        ["-c:v", "libx264", "-b:v", "2000k"],
+        // - We don't supply a bitrate, instead it uses the default CRF ("23")
+        //   as recommended in the ffmpeg trac.
+        //
+        // - We don't supply a preset, it'll use the default ("medium")
+        ["-c:v", "libx264"],
         // Audio codec AAC
         //
-        // `-c:a aac -b:a 128k` converts the audio stream to 128k bit AAC.
+        // - `-c:a aac` converts the audio stream to use the AAC codec
         //
-        // - 128 is the default, we specify it anyway.
-        ["-c:a", "aac", "-b:a", "128k"],
+        // - We don't supply a bitrate, it'll use the AAC default 128k bps.
+        ["-c:a", "aac"],
         // Generate a HLS playlist.
         ["-f", "hls"],
         // Place all the video segments within the same .ts file (with the same
