@@ -10,6 +10,7 @@ import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -106,6 +107,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         SectionTitle(title: S.of(context).sharedWithYou);
     final SectionTitle sharedByYou =
         SectionTitle(title: S.of(context).sharedByYou);
+    final colorTheme = getEnteColorScheme(context);
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Container(
@@ -136,9 +138,10 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                         : null,
                     Hero(tag: "incoming", child: sharedWithYou),
                     trailingWidget: collections.incoming.isNotEmpty
-                        ? const IconButtonWidget(
+                        ? IconButtonWidget(
                             icon: Icons.chevron_right,
                             iconButtonType: IconButtonType.secondary,
+                            iconColor: colorTheme.blurStrokePressed,
                           )
                         : null,
                   ),
@@ -158,6 +161,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                                   collections.incoming[index],
                                   maxThumbnailWidth,
                                   tag: "incoming",
+                                  showFileCount: false,
                                 ),
                               );
                             },
@@ -192,9 +196,10 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                         : null,
                     Hero(tag: "outgoing", child: sharedByYou),
                     trailingWidget: collections.outgoing.isNotEmpty
-                        ? const IconButtonWidget(
+                        ? IconButtonWidget(
                             icon: Icons.chevron_right,
                             iconButtonType: IconButtonType.secondary,
+                            iconColor: colorTheme.blurStrokePressed,
                           )
                         : null,
                   ),
@@ -214,6 +219,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                                   collections.outgoing[index],
                                   maxThumbnailWidth,
                                   tag: "outgoing",
+                                  showFileCount: false,
                                 ),
                               );
                             },
@@ -252,9 +258,10 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                             ),
                           ),
                           trailingWidget: numberOfQuickLinks > maxQuickLinks
-                              ? const IconButtonWidget(
+                              ? IconButtonWidget(
                                   icon: Icons.chevron_right,
                                   iconButtonType: IconButtonType.secondary,
+                                  iconColor: colorTheme.blurStrokePressed,
                                 )
                               : null,
                         ),

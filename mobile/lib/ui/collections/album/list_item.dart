@@ -160,10 +160,11 @@ class AlbumListItemWidget extends StatelessWidget {
                                 iconButtonType: IconButtonType.secondary,
                                 iconColor: colorScheme.blurStrokeBase,
                               )
-                            : const IconButtonWidget(
-                                key: ValueKey("unselected"),
+                            : IconButtonWidget(
+                                key: const ValueKey("unselected"),
                                 icon: Icons.chevron_right_outlined,
                                 iconButtonType: IconButtonType.secondary,
+                                iconColor: colorScheme.blurStrokePressed,
                               ),
                       );
                     },

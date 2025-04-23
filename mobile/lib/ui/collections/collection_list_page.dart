@@ -10,6 +10,7 @@ import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/selected_albums.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/searchable_appbar.dart";
@@ -104,7 +105,6 @@ class _CollectionListPageState extends State<CollectionListPage> {
                     refreshCollections();
                   },
                   actions: [
-                    const SizedBox(width: 8),
                     _sortMenu(collections!),
                   ],
                 ),
@@ -130,6 +130,8 @@ class _CollectionListPageState extends State<CollectionListPage> {
   }
 
   Widget _sortMenu(List<Collection> collections) {
+    final colorTheme = getEnteColorScheme(context);
+
     Text sortOptionText(AlbumSortKey key) {
       String text = key.toString();
       switch (key) {
@@ -163,6 +165,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
                 ? Icons.view_list_outlined
                 : Icons.grid_view_outlined,
             iconButtonType: IconButtonType.secondary,
+            iconColor: colorTheme.blurStrokePressed,
             onTap: () async {
               setState(() {
                 albumViewType = albumViewType == AlbumViewType.grid
@@ -172,7 +175,6 @@ class _CollectionListPageState extends State<CollectionListPage> {
               await localSettings.setAlbumViewType(albumViewType!);
             },
           ),
-          const SizedBox(width: 8),
           GestureDetector(
             onTapDown: (TapDownDetails details) async {
               final int? selectedValue = await showMenu<int>(
@@ -198,9 +200,10 @@ class _CollectionListPageState extends State<CollectionListPage> {
                 Bus.instance.fire(AlbumSortOrderChangeEvent());
               }
             },
-            child: const IconButtonWidget(
+            child: IconButtonWidget(
               icon: Icons.sort_outlined,
               iconButtonType: IconButtonType.secondary,
+              iconColor: colorTheme.blurStrokePressed,
             ),
           ),
         ],

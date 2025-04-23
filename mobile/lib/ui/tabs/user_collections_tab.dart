@@ -146,9 +146,10 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               tag: "OnDeviceAppTitle",
               child: SectionTitle(title: S.of(context).onDevice),
             ),
-            trailingWidget: const IconButtonWidget(
+            trailingWidget: IconButtonWidget(
               icon: Icons.chevron_right,
               iconButtonType: IconButtonType.secondary,
+              iconColor: getEnteColorScheme(context).blurStrokePressed,
             ),
           ),
         ),
@@ -171,9 +172,10 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
               );
             },
             SectionTitle(titleWithBrand: getOnEnteSection(context)),
-            trailingWidget: const IconButtonWidget(
+            trailingWidget: IconButtonWidget(
               icon: Icons.chevron_right,
               iconButtonType: IconButtonType.secondary,
+              iconColor: getEnteColorScheme(context).blurStrokePressed,
             ),
             padding: const EdgeInsets.only(left: 12, right: 6),
           ),
