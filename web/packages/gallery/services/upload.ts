@@ -141,7 +141,6 @@ export const updateShouldDisableCFUploadProxy = async (
     savedPreference?: boolean,
 ) => {
     _state.shouldDisableCFUploadProxy =
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         savedPreference || (await computeShouldDisableCFUploadProxy());
 };
 

@@ -148,12 +148,17 @@ flutter:
       fonts:
         - asset: fonts/Montserrat-Bold.ttf
 
-flutter_icons:
+# run "dart run flutter_launcher_icons" to generate icons
+flutter_launcher_icons:
+  image_path: "assets/generation-icons/icon-light.png"
+
   android: "launcher_icon"
   adaptive_icon_foreground: "assets/generation-icons/icon-light-adaptive-fg.png"
   adaptive_icon_background: "assets/generation-icons/icon-light-adaptive-bg.png"
+  adaptive_icon_monochrome: "assets/generation-icons/icon-monochrome.png"
+  adaptive_icon_foreground_inset: 0
+
   ios: true
-  image_path: "assets/generation-icons/icon-light.png"
   remove_alpha_ios: true
 
 flutter_native_splash:

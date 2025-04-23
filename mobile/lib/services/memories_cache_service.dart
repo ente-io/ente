@@ -88,7 +88,15 @@ class MemoriesCacheService {
     Bus.instance.fire(MemoriesSettingChanged());
   }
 
-  bool get enableSmartMemories => flagService.hasGrantedMLConsent;
+  bool get enableSmartMemories =>
+      flagService.hasGrantedMLConsent &&
+      localSettings.isMLLocalIndexingEnabled &&
+      localSettings.isSmartMemoriesEnabled;
+
+  bool get curatedMemoriesOption =>
+      showAnyMemories &&
+      flagService.hasGrantedMLConsent &&
+      localSettings.isMLLocalIndexingEnabled;
 
   void _checkIfTimeToUpdateCache() {
     if (!enableSmartMemories) {
@@ -428,15 +436,27 @@ class MemoriesCacheService {
         allFileIdsToFile[file.uploadedFileID!] = file;
       }
     }
-    final jsonString = file.readAsStringSync();
-    return MemoriesCache.decodeFromJsonString(jsonString, allFileIdsToFile);
+    try {
+      final bytes = await file.readAsBytes();
+      final jsonString = String.fromCharCodes(bytes);
+      final cache =
+          MemoriesCache.decodeFromJsonString(jsonString, allFileIdsToFile);
+      _logger.info("Reading memories cache result from disk done");
+      return cache;
+    } catch (e, s) {
+      _logger.severe("Error reading or decoding cache file", e, s);
+      await file.delete();
+      return null;
+    }
   }
 
-  Future<void> clearMemoriesCache() async {
-    final file = File(await _getCachePath());
+  Future<void> clearMemoriesCache({bool fromDisk = true}) async {
+    if (fromDisk) {
+      final file = File(await _getCachePath());
       if (file.existsSync()) {
         await file.delete();
       }
+    }
     _cachedMemories = null;
   }
 }

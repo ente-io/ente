@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ente-io/museum/ente"
 	fileData "github.com/ente-io/museum/ente/filedata"
+	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -98,7 +99,8 @@ func (h *FileHandler) GetFileData(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, ente.NewBadRequestWithMessage(err.Error()))
 		return
 	}
-	resp, err := h.FileDataCtrl.GetFileData(ctx, req)
+	actorUser := auth.GetUserID(ctx.Request.Header)
+	resp, err := h.FileDataCtrl.GetFileData(ctx, actorUser, req)
 	if err != nil {
 		handler.Error(ctx, err)
 		return
@@ -128,7 +130,8 @@ func (h *FileHandler) GetPreviewURL(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}
-	url, err := h.FileDataCtrl.GetPreviewUrl(c, request)
+	actorUser := auth.GetUserID(c.Request.Header)
+	url, err := h.FileDataCtrl.GetPreviewUrl(c, actorUser, request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

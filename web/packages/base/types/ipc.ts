@@ -403,7 +403,7 @@ export interface Electron {
         /**
          * Return the list of folder watches, pruning non-existing directories.
          *
-         * The list of folder paths (and auxillary details) is persisted in the
+         * The list of folder paths (and auxiliary details) is persisted in the
          * Node.js layer. The implementation of this function goes through the
          * list, permanently removes any watches whose on-disk directory is no
          * longer present, and returns this pruned list of watches.

@@ -27,10 +27,10 @@ export const removeData = (key: LocalStorageKey) =>
 export const getData = (key: LocalStorageKey) => {
     try {
         if (
-            typeof localStorage === "undefined" ||
-            typeof key === "undefined" ||
-            typeof localStorage.getItem(key) === "undefined" ||
-            localStorage.getItem(key) === "undefined"
+            typeof localStorage == "undefined" ||
+            typeof key == "undefined" ||
+            typeof localStorage.getItem(key) == "undefined" ||
+            localStorage.getItem(key) == "undefined"
         ) {
             return null;
         }

@@ -1,14 +1,13 @@
-import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import type { FileInfoExif } from "ente-gallery/components/FileInfo";
-import {
-    downloadManager,
-    type LivePhotoSourceURL,
-} from "ente-gallery/services/download";
+import { downloadManager } from "ente-gallery/services/download";
 import { extractRawExif, parseExif } from "ente-gallery/services/exif";
-import { hlsPlaylistDataForFile } from "ente-gallery/services/video";
+import {
+    hlsPlaylistDataForFile,
+    type HLSPlaylistData,
+} from "ente-gallery/services/video";
 import type { EnteFile } from "ente-media/file";
-import { fileCaption } from "ente-media/file-metadata";
+import { fileCaption, filePublicMagicMetadata } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { ensureString } from "ente-utils/ensure";
 
@@ -145,6 +144,11 @@ export type ItemData = PhotoSwipeSlideData & {
      * original file could not be fetched because of an network error).
      */
     fetchFailed?: boolean;
+    /**
+     * This will be `true` if the item data for this particular file is
+     * considered transient, and should not be cached.
+     */
+    isTransient?: boolean;
 };
 
 /**
@@ -174,6 +178,11 @@ class FileViewerDataSourceState {
      * The best data we have for a particular file (ID).
      */
     itemDataByFileID = new Map<number, ItemData>();
+    /**
+     * The validity (if applicable) for the corresponding entry in
+     * {@link itemDataByFileID}.
+     */
+    itemDataValidTillByFileID = new Map<number, Date>();
     /**
      * The latest callback registered for notifications of better data being
      * available for a particular file (ID).
@@ -246,10 +255,17 @@ export const fileViewerDidClose = () => {
         resetState();
     } else {
         // Selectively clear.
-        forgetFailedItems();
+        forgetFailedOrTransientItems();
         forgetExif();
     }
 };
+
+/**
+ * Options to modify the default behaviour of {@link itemDataForFile}.
+ */
+export interface ItemDataOpts {
+    videoQuality?: "auto" | "original";
+}
 
 /**
  * Return the best available {@link ItemData} for rendering the given
@@ -261,6 +277,8 @@ export const fileViewerDidClose = () => {
  *
  * At each step, we call the provided callback so that file viewer can call us
  * again to get the updated data.
+ *
+ * @param opts Options to modify the default behaviours.
  *
  * ---
  *
@@ -286,7 +304,10 @@ export const fileViewerDidClose = () => {
  *
  * Then it'll continue fetching the original.
  *
- * - For images and videos, this will be the single original.
+ * - For images this will be the single original.
+ *
+ * - For videos this will be either the HLS playlist to a streamable variant of
+ *   the video (if the video has one available), or the original video itself.
  *
  * - For live photos, this will also be a two step process, first fetching the
  *   video component, then fetching the image component.
@@ -299,9 +320,19 @@ export const fileViewerDidClose = () => {
  * next time the data is requested we repeat the process instead of continuing
  * to serve the incomplete result.
  */
-export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
+export const itemDataForFile = (
+    file: EnteFile,
+    opts: ItemDataOpts | undefined,
+    needsRefresh: () => void,
+) => {
     const fileID = file.id;
     const fileType = file.metadata.fileType;
+
+    const validTill = _state.itemDataValidTillByFileID.get(fileID);
+    if (validTill && validTill < new Date()) {
+        // Don't use the cached entry if it has become stale.
+        forgetItemDataForFileID(fileID);
+    }
 
     let itemData = _state.itemDataByFileID.get(fileID);
 
@@ -312,22 +343,59 @@ export const itemDataForFile = (file: EnteFile, needsRefresh: () => void) => {
     if (!itemData) {
         itemData = { fileID, fileType, isContentLoading: true };
         _state.itemDataByFileID.set(file.id, itemData);
-        void enqueueUpdates(file);
+        void enqueueUpdates(file, opts);
     }
 
     return itemData;
 };
 
 /**
- * Forget item data for the given {@link file} if its fetch had failed.
+ * Forget item data for the given {@link file}.
  *
- * This is called when the user moves away from a slide so that we attempt a
- * full retry when they come back the next time.
+ * This is called when we change the options passed to {@link itemDataForFile},
+ * and so would like to clear any previously cached data.
  */
-export const forgetFailedItemDataForFileID = (fileID: number) => {
-    if (_state.itemDataByFileID.get(fileID)?.fetchFailed) {
-        _state.itemDataByFileID.delete(fileID);
-    }
+export const forgetItemDataForFileID = (fileID: number) => {
+    _state.itemDataByFileID.delete(fileID);
+    _state.itemDataValidTillByFileID.delete(fileID);
+};
+
+/**
+ * Forget item data for the given {@link file} if its fetch had failed, or if it
+ * is caching something that is transient in nature.
+ *
+ * It is called when the user moves away from a slide. In particular, this way
+ * we can reset failures, if any, for a slide so that the fetch is tried again
+ * when we come back to it.
+ *
+ * [Note: File viewer preloading and contentDeactivate]
+ *
+ * Note that because of preloading, this will only have a user visible effect if
+ * the user moves out of the preload range. Let's take an example:
+ *
+ * - User opens slide at index `i`. Then the adjacent slides, `i - 1` and `i +
+ *   1`, also get preloaded.
+ *
+ * - User moves away from `i` (in either direction, but let us take the example
+ *   if they move `i - 1`).
+ *
+ * - This function will get called for `i` and will clear any failed or
+ *   transient state.
+ *
+ * - But since PhotoSwipe already has the slides ready for `i`, if the user then
+ *   moves back to `i` then PhotoSwipe will not attempt to recreate the slide
+ *   and so will not even try to get "itemData". So this will only have an
+ *   effect if they move out of preload range (e.g. `i - 1`, `i - 2`), and then
+ *   back (`i - 1`, `i`).
+ *
+ * See: [Note: File viewer error handling]
+ *
+ * See: [Note: Caching HLS playlist data]
+ */
+export const forgetItemDataForFileIDIfNeeded = (fileID: number) => {
+    const itemData = _state.itemDataByFileID.get(fileID);
+    if (itemData?.fetchFailed || itemData?.isTransient)
+        forgetItemDataForFileID(fileID);
 };
 
 /**
@@ -344,19 +412,26 @@ export const updateItemDataAlt = (updatedFile: EnteFile) => {
 };
 
 /**
- * Forget item data for the all files whose fetch had failed.
+ * Forget item data for the all files whose fetch had failed, or if the
+ * corresponding item data is transient and shouldn't be cached.
  *
- * This is called when the user closes the file viewer so that we attempt a full
- * retry when they reopen the viewer the next time.
+ * This is called when the user closes the file viewer; in particular, this way
+ * we attempt a full retry for previously failed files when the user reopens the
+ * viewer the next time.
  */
-const forgetFailedItems = () =>
-    [..._state.itemDataByFileID.keys()].forEach(forgetFailedItemDataForFileID);
+const forgetFailedOrTransientItems = () =>
+    [..._state.itemDataByFileID.keys()].forEach(
+        forgetItemDataForFileIDIfNeeded,
+    );
 
-const enqueueUpdates = async (file: EnteFile) => {
+const enqueueUpdates = async (
+    file: EnteFile,
+    opts: ItemDataOpts | undefined,
+) => {
     const fileID = file.id;
     const fileType = file.metadata.fileType;
 
-    const update = (itemData: Partial<ItemData>) => {
+    const update = (itemData: Partial<ItemData>, validTill?: Date) => {
         // Use the file's caption as its alt text (in addition to using it as
         // the visible caption).
         const alt = fileCaption(file);
@@ -367,7 +442,43 @@ const enqueueUpdates = async (file: EnteFile) => {
             fileID,
             alt,
         });
+        if (validTill) {
+            _state.itemDataValidTillByFileID.set(file.id, validTill);
+        } else {
+            _state.itemDataValidTillByFileID.delete(file.id);
+        }
         _state.needsRefreshByFileID.get(file.id)?.();
+    };
+
+    const updateVideo = (
+        videoURL: string | undefined,
+        hlsPlaylistData: HLSPlaylistData | undefined,
+    ) => {
+        const videoURLD = videoURL ? { videoURL } : {};
+        if (hlsPlaylistData) {
+            const {
+                playlistURL: videoPlaylistURL,
+                width,
+                height,
+            } = hlsPlaylistData;
+            update(
+                { ...videoURLD, videoPlaylistURL, width, height },
+                createHLSPlaylistItemDataValidity(),
+            );
+        } else {
+            // See: [Note: Caching HLS playlist data]
+            //
+            // TODO(HLS): As an optimization, we can handle the logged in vs
+            // public albums case separately once we have the status-diff state,
+            // we don't need to mark status-diff case as transient.
+            //
+            // Note that setting the transient flag is not too expensive, since
+            // the underlying videoURL is still cached by the download manager.
+            // So effectively, under normal circumstance, it just adds one API
+            // call (to recheck if an HLS playlist now exists for the given
+            // file).
+            update({ ...videoURLD, isTransient: true });
+        }
     };
 
     // Use the last best available data, but stop showing the loading indicator
@@ -387,8 +498,16 @@ const enqueueUpdates = async (file: EnteFile) => {
         const thumbnailData = await withDimensionsIfPossible(
             ensureString(thumbnailURL),
         );
+
+        // If the aspect ratio of the original file matches the aspect ratio of
+        // the thumbnail, then render the thumbnail using the original's
+        // dimensions for a better visual experience.
+        const { width, height } = thumbnailDimensions(thumbnailData, file);
+
         update({
             ...thumbnailData,
+            width,
+            height,
             isContentLoading: true,
             isContentZoomable: false,
         });
@@ -407,67 +526,54 @@ const enqueueUpdates = async (file: EnteFile) => {
     }
 
     try {
-        switch (fileType) {
-            case FileType.image: {
-                const sourceURLs =
-                    await downloadManager.renderableSourceURLs(file);
-                const imageURL = ensureString(sourceURLs.url);
-                const originalImageBlob = sourceURLs.originalImageBlob!;
+        let hlsPlaylistData: HLSPlaylistData | undefined;
+        if (file.metadata.fileType == FileType.video) {
+            hlsPlaylistData = await hlsPlaylistDataForFile(
+                file,
+                downloadManager.publicAlbumsCredentials,
+            );
+            // We have a HLS playlist, and the user didn't request the original.
+            // Early return so that we don't initiate a fetch for the original.
+            if (hlsPlaylistData && opts?.videoQuality != "original") {
+                updateVideo(undefined, hlsPlaylistData);
+                return;
+            }
+        }
+
+        const sourceURLs = await downloadManager.renderableSourceURLs(file);
+
+        switch (sourceURLs.type) {
+            case "image": {
+                const { imageURL, originalImageBlob } = sourceURLs;
                 const itemData = await withDimensionsIfPossible(imageURL);
                 update({ ...itemData, imageURL, originalImageBlob });
                 break;
             }
 
-            case FileType.video: {
-                if (
-                    isDevBuild &&
-                    process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING
-                ) {
-                    if (file.metadata.fileType == FileType.video) {
-                        const playlistData = await hlsPlaylistDataForFile(file);
-                        if (playlistData) {
-                            const {
-                                playlistURL: videoPlaylistURL,
-                                width,
-                                height,
-                            } = playlistData;
-                            update({ videoPlaylistURL, width, height });
-                            break;
-                        }
-                    }
-                }
-
-                const sourceURLs =
-                    await downloadManager.renderableSourceURLs(file);
-                update({ videoURL: sourceURLs.url as string });
+            case "video": {
+                const { videoURL } = sourceURLs;
+                updateVideo(videoURL, hlsPlaylistData);
                 break;
             }
 
-            case FileType.livePhoto: {
-                const sourceURLs =
-                    await downloadManager.renderableSourceURLs(file);
-                const livePhotoSourceURLs =
-                    sourceURLs.url as LivePhotoSourceURL;
+            case "livePhoto": {
                 // The image component of a live photo usually is an HEIC file,
-                // which cannot be displayed natively by browsers and needs a
-                // conversion, which is slow on web (faster on desktop). We
+                // which cannot be displayed natively by many browsers and needs
+                // a conversion, which is slow on web (faster on desktop). We
                 // already have both components available since they're part of
                 // the same zip. And in the UI, the first (default) interaction
                 // is to loop the live video.
                 //
                 // For these reasons, we resolve with the video first, then
                 // resolve with the image.
-                const videoURL = await livePhotoSourceURLs.video();
+                const videoURL = await sourceURLs.videoURL();
                 update({
                     videoURL,
                     isContentLoading: true,
                     isContentZoomable: false,
                 });
-                const imageURL = ensureString(
-                    await livePhotoSourceURLs.image(),
-                );
-                const originalImageBlob =
-                    livePhotoSourceURLs.originalImageBlob()!;
+                const imageURL = await sourceURLs.imageURL();
+                const originalImageBlob = sourceURLs.originalImageBlob;
                 update({
                     ...(await withDimensionsIfPossible(imageURL)),
                     imageURL,
@@ -525,6 +631,41 @@ const withDimensionsIfPossible = (
         image.onerror = () => resolve({ src: imageURL });
         image.src = imageURL;
     });
+
+/**
+ * Return the dimensions to use for the thumbnail associated with {@link file}.
+ *
+ * If the aspect ratio of the thumbnail is (approximately) equal to that of the
+ * dimensions we have on record for the original image (obtained from the file
+ * metadata), then use the dimensions of the original image in lieu of the
+ * thumbnail dimensions for a more graceful transition during image loads.
+ */
+const thumbnailDimensions = (
+    { width: thumbnailWidth, height: thumbnailHeight }: Partial<ItemData>,
+    file: EnteFile,
+) => {
+    const { w: imageWidth, h: imageHeight } =
+        filePublicMagicMetadata(file) ?? {};
+    if (thumbnailWidth && thumbnailHeight && imageWidth && imageHeight) {
+        const arThumb = thumbnailWidth / thumbnailHeight;
+        const arImage = imageWidth / imageHeight;
+        if (Math.abs(arThumb - arImage) < 0.1) {
+            return { width: imageWidth, height: imageHeight };
+        }
+    }
+    return { width: thumbnailWidth, height: thumbnailHeight };
+};
+/**
+ * Return a new validity for a HLS playlist containing presigned URLs.
+ *
+ * The content chunks in HLS playlist generated by
+ * {@link hlsPlaylistDataForFile} use presigned URLs generated by remote (see
+ * `PreSignedRequestValidityDuration` in the museum source). These have a
+ * validity of 7 days. We keep a 2 day buffer, and consider any item data that
+ * uses such playlist as stale after 5 days.
+ */
+const createHLSPlaylistItemDataValidity = () =>
+    new Date(Date.now() + 5 * 24 * 60 * 60 * 1000); /* 5 days */
 
 /**
  * Return the cached Exif data for the given {@link file}.

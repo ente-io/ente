@@ -115,7 +115,7 @@ export const logToDisk = (message: string) => {
         localStorage.setItem(lsKey, JSON.stringify({ logs }));
     } catch (e) {
         console.error("Failed to persist log", e);
-        if (e instanceof Error && e.name === "QuotaExceededError") {
+        if (e instanceof Error && e.name == "QuotaExceededError") {
             localStorage.removeItem(lsKey);
         }
     }

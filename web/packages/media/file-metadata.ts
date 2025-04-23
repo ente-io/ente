@@ -286,7 +286,7 @@ export interface PublicMagicMetadata {
  * [Note: Use passthrough for metadata Zod schemas]
  *
  * It is important to (recursively) use the {@link passthrough} option when
- * definining Zod schemas for the various metadata types (the plaintext JSON
+ * defining Zod schemas for the various metadata types (the plaintext JSON
  * objects) because we want to retain all the fields we get from remote. There
  * might be other, newer, clients out there adding fields that the current
  * client might not we aware of, and we don't want to overwrite them.
@@ -718,7 +718,7 @@ export const isArchivedFile = (item: EnteFile) =>
 export const fileLocation = (file: EnteFile): Location | undefined => {
     // TODO: EnteFile types. Need to verify that metadata itself, and
     // metadata.lat/lng can not be null (I think they likely can, if so need to
-    // update the types). Need to supress the linter meanwhile.
+    // update the types). Need to suppress the linter meanwhile.
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!file.metadata) return undefined;
@@ -765,7 +765,7 @@ export const fileCaption = (file: EnteFile): string | undefined =>
  * The disadvantage is that it increases the network payload (anything attached
  * to an {@link EnteFile} comes back in the diff response), and thus latency and
  * local storage costs for all clients. Thus, we need to curate what gets
- * preseved within the {@link EnteFile}'s metadatum.
+ * preserved within the {@link EnteFile}'s metadatum.
  */
 export interface ParsedMetadata {
     /** The width of the image, in pixels. */
@@ -796,7 +796,7 @@ export interface ParsedMetadata {
  * UTC offset of their local data/time.
  *
  * This is beginning to change with smartphone cameras, and is even reflected in
- * the standards. e.g. Exif metadata now has auxillary "OffsetTime*" tags for
+ * the standards. e.g. Exif metadata now has auxiliary "OffsetTime*" tags for
  * indicating the UTC offset of the local date/time in the existing Exif tags
  * (See: [Note: Exif dates]).
  *

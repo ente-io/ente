@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 
 class FieldLabel extends StatelessWidget {
   final String label;
+  final double width;
 
   const FieldLabel(
     this.label, {
     super.key,
+    this.width = 80,
   });
 
   @override
@@ -14,7 +16,7 @@ class FieldLabel extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 12.0),
       child: SizedBox(
-        width: 80,
+        width: width,
         child: Text(
           label,
           style: getEnteTextTheme(context).miniBoldMuted,

@@ -567,7 +567,7 @@ const PlanRow: React.FC<PlanRowProps> = ({ plan, onPlanSelect, disabled }) => {
                         <Typography variant="h6">{plan.price}</Typography>
                         <Typography variant="small" sx={{ opacity: 0.7 }}>
                             {`/ ${
-                                plan.period === "month"
+                                plan.period == "month"
                                     ? t("month_short")
                                     : t("year")
                             }`}

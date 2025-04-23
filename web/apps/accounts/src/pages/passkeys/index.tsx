@@ -237,7 +237,7 @@ interface ManagePasskeyDrawerProps {
      */
     passkey: Passkey | undefined;
     /**
-     * Callback to invoke when the passkey in the modifed or deleted.
+     * Callback to invoke when the passkey in the modified or deleted.
      *
      * The passkey that the drawer is showing will be out of date at this point,
      * so the list of passkeys should be refreshed and the drawer closed.

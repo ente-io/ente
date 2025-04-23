@@ -222,7 +222,7 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
     return (
         <SpacedRow sx={{ overflow: "hidden", flexShrink: 0 }}>
             <Stack direction="row" sx={{ overflow: "hidden", gap: 1.5 }}>
-                {watch.collectionMapping === "root" ? (
+                {watch.collectionMapping == "root" ? (
                     <Tooltip title={t("uploaded_to_single_collection")}>
                         <FolderOpenIcon color="secondary" />
                     </Tooltip>

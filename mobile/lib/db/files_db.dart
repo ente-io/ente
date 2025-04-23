@@ -1588,25 +1588,6 @@ class FilesDB with SqlDbBase {
     return files;
   }
 
-  Future<List<String>> getGeneratedIDForFilesOlderThan(
-    int cutOffTime,
-    int ownerID,
-  ) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT DISTINCT $columnGeneratedID FROM $filesTable
-      WHERE $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)
-    ''',
-      [cutOffTime, ownerID],
-    );
-    final result = <String>[];
-    for (final row in rows) {
-      result.add(row[columnGeneratedID].toString());
-    }
-    return result;
-  }
-
   // For givenUserID, get List of unique LocalIDs for files which are
   // uploaded by the given user and location is missing
   Future<List<String>> getLocalIDsForFilesWithoutLocation(int ownerID) async {
@@ -1639,23 +1620,6 @@ class FilesDB with SqlDbBase {
     final result = <int>[];
     for (final row in rows) {
       result.add(row[columnUploadedFileID] as int);
-    }
-    return result;
-  }
-
-  // For a given userID, return unique localID for all uploaded live photos
-  Future<List<String>> getLivePhotosForUser(int userId) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT DISTINCT $columnLocalID FROM $filesTable
-      WHERE $columnOwnerID = ? AND $columnFileType = ? AND $columnLocalID IS NOT NULL
-    ''',
-      [userId, getInt(FileType.livePhoto)],
-    );
-    final result = <String>[];
-    for (final row in rows) {
-      result.add(row[columnLocalID] as String);
     }
     return result;
   }
@@ -1750,25 +1714,6 @@ class FilesDB with SqlDbBase {
     return deduplicatedFiles;
   }
 
-  Future<Map<FileType, int>> fetchFilesCountbyType(int userID) async {
-    final db = await instance.sqliteAsyncDB;
-    final result = await db.getAll(
-      '''
-      SELECT $columnFileType, COUNT(DISTINCT $columnUploadedFileID) 
-         FROM $filesTable WHERE $columnUploadedFileID != -1 AND 
-         $columnOwnerID IS $userID GROUP BY $columnFileType
-      ''',
-    );
-
-    final filesCount = <FileType, int>{};
-    for (var e in result) {
-      filesCount.addAll(
-        {getFileType(e[columnFileType] as int): e.values.last as int},
-      );
-    }
-    return filesCount;
-  }
-
   Future<FileLoadResult> fetchAllUploadedAndSharedFilesWithLocation(
     int startTime,
     int endTime, {
@@ -1805,17 +1750,17 @@ class FilesDB with SqlDbBase {
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
-  Future<List<int>> getAllFileIDs() async {
+  Future<int> remoteFileCount() async {
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll('''
       SELECT DISTINCT $columnUploadedFileID FROM $filesTable
       WHERE  $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1    
     ''');
-    final ids = <int>[];
+    final ids = <int>{};
     for (final result in results) {
       ids.add(result[columnUploadedFileID] as int);
     }
-    return ids;
+    return ids.length;
   }
 
   ///Returns "columnName1 = ?, columnName2 = ?, ..."

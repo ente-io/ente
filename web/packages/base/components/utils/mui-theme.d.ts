@@ -82,7 +82,7 @@ declare module "@mui/material/styles" {
          */
         critical: PaletteColor;
         /**
-         * Neutral tranparent colors for the stroke of icons and other outlines.
+         * Neutral transparent colors for the stroke of icons and other outlines.
          *
          * These change with the color scheme.
          *

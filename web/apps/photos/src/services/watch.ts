@@ -112,7 +112,7 @@ class FolderWatcher {
     /**
      * Temporarily pause syncing and cancel any running uploads.
      *
-     * This frees up the uploader for handling user initated uploads.
+     * This frees up the uploader for handling user initiated uploads.
      */
     pauseRunningSync() {
         this.isPaused = true;
@@ -246,7 +246,7 @@ class FolderWatcher {
             return;
         }
 
-        if (event.action === "upload") {
+        if (event.action == "upload") {
             const paths = pathsToUpload(event.filePaths, watch);
             if (paths.length == 0) {
                 skip("none of the files need uploading");

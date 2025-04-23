@@ -93,7 +93,7 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                 }}
             >
                 {message && <Typography>{message}</Typography>}
-                {step === "running" && <Progress {...progress} />}
+                {step == "running" && <Progress {...progress} />}
                 <OptionsForm {...{ step: step, onSubmit, onClose }} />
             </DialogContent>
         </Dialog>
@@ -172,7 +172,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
 
     return (
         <>
-            {(step === undefined || step === "completed-with-errors") && (
+            {(step === undefined || step == "completed-with-errors") && (
                 <form onSubmit={handleSubmit}>
                     <FormControl>
                         <FormLabel>{t("fix_creation_time_options")}</FormLabel>

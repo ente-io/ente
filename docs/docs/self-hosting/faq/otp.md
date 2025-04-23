@@ -12,6 +12,19 @@ verification code by:
 
 - Reading it from the DB (otts table)
 
+The easiest option when getting started is to look for it in the server (museum)
+logs. If you're already running the docker compose cluster using the quickstart
+script, you should be already seeing the logs in your terminal. Otherwise you
+can go to the folder (e.g. `my-ente`) where your `compose.yaml` is, then run
+`docker compose logs museum --follow`. Once you can see the logs, look for a
+line like:
+
+```
+... Skipping sending email to email@example.com: *Verification code: 112089*
+```
+
+That is the verification code.
+
 > [!TIP]
 >
 > You can also configure your instance to send out emails so that you can get
