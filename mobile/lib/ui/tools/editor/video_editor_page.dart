@@ -24,6 +24,7 @@ import "package:photos/ui/tools/editor/video_rotate_page.dart";
 import "package:photos/ui/tools/editor/video_trim_page.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:video_editor/video_editor.dart";
 
@@ -47,6 +48,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   final _exportingProgress = ValueNotifier<double>(0.0);
   final _isExporting = ValueNotifier<bool>(false);
   final _logger = Logger("VideoEditor");
+  int? _quarterTurnsForRotationCorrection;
 
   VideoEditorController? _controller;
 
@@ -85,6 +87,15 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         test: (e) => e is VideoMinDurationError,
       );
     });
+
+    getVideoPropsAsync(widget.ioFile).then((props) async {
+      if (props?.rotation != null) {
+        _quarterTurnsForRotationCorrection = -(props!.rotation! / 90).round();
+      } else {
+        _quarterTurnsForRotationCorrection = 0;
+      }
+      setState(() {});
+    });
   }
 
   @override
@@ -98,7 +109,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Bulding video editor page");
+    _logger.info("Building video editor page");
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -115,7 +126,9 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           elevation: 0,
           toolbarHeight: 0,
         ),
-        body: _controller != null && _controller!.initialized
+        body: _controller != null &&
+                _controller!.initialized &&
+                _quarterTurnsForRotationCorrection != null
             ? SafeArea(
                 child: Stack(
                   children: [
@@ -127,8 +140,12 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                               Expanded(
                                 child: Hero(
                                   tag: "video-editor-preview",
-                                  child: CropGridViewer.preview(
-                                    controller: _controller!,
+                                  child: RotatedBox(
+                                    quarterTurns:
+                                        _quarterTurnsForRotationCorrection!,
+                                    child: CropGridViewer.preview(
+                                      controller: _controller!,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -146,6 +163,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                       MaterialPageRoute<void>(
                                         builder: (context) => VideoTrimPage(
                                           controller: _controller!,
+                                          quarterTurnsForRotationCorrection:
+                                              _quarterTurnsForRotationCorrection!,
                                         ),
                                       ),
                                     ),
@@ -160,6 +179,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                       MaterialPageRoute<void>(
                                         builder: (context) => VideoCropPage(
                                           controller: _controller!,
+                                          quarterTurnsForRotationCorrection:
+                                              _quarterTurnsForRotationCorrection!,
                                         ),
                                       ),
                                     ),
@@ -174,6 +195,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                       MaterialPageRoute<void>(
                                         builder: (context) => VideoRotatePage(
                                           controller: _controller!,
+                                          quarterTurnsForRotationCorrection:
+                                              _quarterTurnsForRotationCorrection!,
                                         ),
                                       ),
                                     ),

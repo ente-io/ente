@@ -6,7 +6,12 @@ import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.
 import 'package:video_editor/video_editor.dart';
 
 class VideoTrimPage extends StatefulWidget {
-  const VideoTrimPage({super.key, required this.controller});
+  final int quarterTurnsForRotationCorrection;
+  const VideoTrimPage({
+    super.key,
+    required this.controller,
+    required this.quarterTurnsForRotationCorrection,
+  });
 
   final VideoEditorController controller;
 
@@ -30,16 +35,19 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
       body: SafeArea(
         child: Column(
           children: [
+            VideoEditorPlayerControl(
+              controller: widget.controller,
+            ),
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: CropGridViewer.preview(
-                  controller: widget.controller,
+                child: RotatedBox(
+                  quarterTurns: widget.quarterTurnsForRotationCorrection,
+                  child: CropGridViewer.preview(
+                    controller: widget.controller,
+                  ),
                 ),
               ),
-            ),
-            VideoEditorPlayerControl(
-              controller: widget.controller,
             ),
             ..._trimSlider(),
             const SizedBox(height: 40),
