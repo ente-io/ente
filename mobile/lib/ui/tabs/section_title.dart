@@ -66,7 +66,7 @@ class SectionOptions extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(alignment: Alignment.centerLeft, child: title),
+              Align(alignment: Alignment.centerLeft, child: title),
               trailingWidget!,
             ],
           ),
