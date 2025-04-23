@@ -114,8 +114,6 @@ class _CollectionListPageState extends State<CollectionListPage> {
                   tag: widget.tag,
                   enableSelectionMode: enableSelectionMode,
                   albumViewType: albumViewType ?? AlbumViewType.grid,
-                  shouldShowCreateAlbum:
-                      widget.sectionType == UISectionType.homeCollections,
                   selectedAlbums: _selectedAlbum,
                 ),
               ],
