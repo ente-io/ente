@@ -126,6 +126,15 @@ class Collection {
     return mMdVersion > 0 && (magicMetadata.visibility == hiddenVisibility);
   }
 
+  int get visibility {
+    if (isHidden()) {
+      return hiddenVisibility;
+    } else if (isArchived() || hasShareeArchived()) {
+      return archiveVisibility;
+    }
+    return 0;
+  }
+
   bool isDefaultHidden() {
     return (magicMetadata.subType ?? 0) == subTypeDefaultHidden;
   }

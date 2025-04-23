@@ -321,18 +321,7 @@ class CollectionsService {
     if (kDebugMode) {
       debugPrint("getCover for collection ${c.id} ${c.displayName}");
     }
-    if (c.hasCover) {
-      final coverID = c.pubMagicMetadata.coverID ?? 0;
-      final EnteFile? cover = await filesDB.getUploadedFile(coverID, c.id);
-      if (cover != null) {
-        _coverCache[coverKey] = cover;
-        return Future.value(cover);
-      }
-    }
-    final coverFile = await filesDB.getCollectionFileFirstOrLast(
-      c.id,
-      c.pubMagicMetadata.asc ?? false,
-    );
+    final coverFile = await remoteCache.getAlbumCover(c);
     if (coverFile != null) {
       _coverCache[coverKey] = coverFile;
       return Future.value(coverFile);

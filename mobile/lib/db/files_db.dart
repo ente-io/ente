@@ -1363,30 +1363,6 @@ class FilesDB with SqlDbBase {
     return result;
   }
 
-  // getCollectionFileFirstOrLast returns the first or last uploaded file in
-  // the collection based on the given collectionID and the order.
-  Future<EnteFile?> getCollectionFileFirstOrLast(
-    int collectionID,
-    bool sortAsc,
-  ) async {
-    final db = await instance.sqliteAsyncDB;
-    final order = sortAsc ? 'ASC' : 'DESC';
-    final rows = await db.getAll(
-      '''
-      SELECT * FROM $filesTable
-      WHERE $columnCollectionID = ? AND ($columnUploadedFileID IS NOT NULL
-      AND $columnUploadedFileID IS NOT -1)
-      ORDER BY $columnCreationTime $order, $columnModificationTime $order
-      LIMIT 1;
-    ''',
-      [collectionID],
-    );
-    if (rows.isEmpty) {
-      return null;
-    }
-    return convertToFiles(rows).first;
-  }
-
   Future<void> markForReUploadIfLocationMissing(List<String> localIDs) async {
     if (localIDs.isEmpty) {
       return;

@@ -54,4 +54,29 @@ extension CollectionFileRead on RemoteDB {
         .map((row) => CollectionFileEntry.fromMap(row))
         .toList(growable: false);
   }
+
+  Future<CollectionFileEntry?> coverFile(
+    int collectionID,
+    int? fileID, {
+    bool sortInAsc = false,
+  }) async {
+    if (fileID != null) {
+      final row = await sqliteDB.getOptional(
+        "SELECT * FROM collection_files WHERE collection_id = ? AND file_id = ?",
+        [collectionID, fileID],
+      );
+      if (row != null) {
+        return CollectionFileEntry.fromMap(row);
+      }
+    }
+    final sortedRow = await sqliteDB.getOptional(
+      "SELECT * FROM collection_files join files on files.id= collection_files.file_id WHERE collection_id = ? ORDER BY files.creation_time ${sortInAsc ? 'ASC' : 'DESC'} LIMIT 1",
+      [collectionID],
+    );
+    if (sortedRow != null) {
+      return CollectionFileEntry.fromMap(sortedRow);
+    }
+
+    return null;
+  }
 }
