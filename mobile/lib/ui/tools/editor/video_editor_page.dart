@@ -49,10 +49,10 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   final _isExporting = ValueNotifier<bool>(false);
   final _logger = Logger("VideoEditor");
 
-  /// Some videos have a 'rotation' property in exif that is not 0 which
-  /// causes the video to appear rotated in the video editor preview on Andoird.
+  /// Some videos have a non-zero 'rotation' property in exif which causes the
+  /// video to appear rotated in the video editor preview on Andoird.
   /// This variable is used as a workaround to rotate the video back to its
-  /// expected orientation.
+  /// expected orientation in the viewer.
   int? _quarterTurnsForRotationCorrection;
 
   VideoEditorController? _controller;
