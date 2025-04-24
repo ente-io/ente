@@ -243,11 +243,11 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     //
     const command = [
         ffmpegBinaryPath(),
-
+        // Reduce the amount of output lines we have to parse.
+        ["-hide_banner"],
         // Input file. We don't need any extra options that apply to the input file.
         "-i",
         inputFilePath,
-
         // The remaining options apply to the next output file (`playlistPath`).
         //
         // ---
