@@ -253,41 +253,25 @@ func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 	if subUsersErr != nil {
 		return stacktrace.Propagate(subUsersErr, "Failed to get subscribers")
 	}
-	batchSize := 100
-	totalSubUsers := len(subscribedUsers)
 
-	for i := range totalSubUsers {
-		end := i + batchSize
-		if end > totalSubUsers {
-			end = totalSubUsers
-		}
-		batchUsers := subscribedUsers[i:end]
-		for _, user := range batchUsers {
-			isFamilyAdmin, err := c.UserRepo.GetFamilyAdminID(user.ID)
+	for _, user := range subscribedUsers {
+
+		creationTime := t.Unix(0, user.CreationTime)
+		timeSinceCreation := t.Since(creationTime)
+		if timeSinceCreation >= thirtyDaysDuration {
+			lastNudgeSent, err := c.NotificationHistoryRepo.GetLastNotificationTime(user.ID, FilesCollectedTemplateID)
 			if err != nil {
-				return stacktrace.Propagate(err, "User is a family admin")
-			}
-			if isFamilyAdmin != nil {
-				break
+				log.Error("Failed to set Notification History")
 			}
 
-			creationTime := t.Unix(0, user.CreationTime)
-			timeSinceCreation := t.Since(creationTime)
-			if timeSinceCreation >= thirtyDaysDuration {
-				lastNudgeSent, err := c.NotificationHistoryRepo.GetLastNotificationTime(user.ID, FilesCollectedTemplateID)
-				if err != nil {
-					log.Error("Failed to set Notification History")
-				}
-
-				if lastNudgeSent == 0 {
-					go func(userEmails []string) {
-						err := email.SendTemplatedEmail(userEmails, "team@ente.io", "team@ente.io", FamilyNudgeSubject, FamilyNudgeEmailTemplate, nil, nil)
-						if err != nil {
-							log.Error("Failed to send family nudge email: ", err)
-						}
-					}([]string{user.Email})
-					c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FamilyNudgeTemplateID)
-				}
+			if lastNudgeSent == 0 {
+				go func(userEmails []string) {
+					err := email.SendTemplatedEmail(userEmails, "team@ente.io", "team@ente.io", FamilyNudgeSubject, FamilyNudgeEmailTemplate, nil, nil)
+					if err != nil {
+						log.Error("Failed to send family nudge email: ", err)
+					}
+				}([]string{user.Email})
+				c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FamilyNudgeTemplateID)
 			}
 		}
 	}
