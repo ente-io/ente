@@ -158,6 +158,10 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult> => {
+    // Determine the input colorspace.
+    const test = await pseudoFFProbeVideo(inputFilePath);
+    console.log(test);
+
     // We want the generated playlist to refer to the chunks as "output.ts".
     //
     // So we arrange things accordingly: We use the `outputPathPrefix` as our
@@ -290,4 +294,37 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     }
 
     return { playlistPath, videoPath };
+};
+
+/**
+ * We don't have the ffprobe binary at hand, so we make do by grepping the log
+ * output of ffmpeg.
+ *
+ * > [ffmpeg update caution]
+ * >
+ * > Needless to say, while this works currently, this is liable to break in the
+ * > future. So if something stops working after updating ffmpeg, look here!
+ *
+ * @returns the stderr of ffmpeg after running it on the input file. The exact
+ * command we run is:
+ *
+ *     ffmpeg -i in.mov -an -frames:v 0 -f null - 2>info.txt
+ *
+ * And the returned string is the contents of the `info.txt` thus produced.
+ */
+const pseudoFFProbeVideo = async (videoPath: string) => {
+    const command = [
+        ffmpegPathPlaceholder,
+        ["-i", inputPathPlaceholder],
+        "-an",
+        ["-frames:v", "0"],
+        ["-f", "null"],
+        "-",
+    ].flat();
+
+    const cmd = substitutePlaceholders(command, videoPath, /* NA */ "");
+
+    const { stderr } = await execAsync(cmd);
+
+    return stderr;
 };
