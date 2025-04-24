@@ -158,9 +158,16 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult> => {
-    // Determine the input colorspace.
-    const test = await pseudoFFProbeVideo(inputFilePath);
-    console.log(test);
+    // Determine the input colorspace for scanning the ffmpeg info output for a
+    // line that looks like (e.g),
+    //
+    //   Stream #0:0: Video: h264 (High 10) ([27][0][0][0] / 0x001B), yuv420p10le(tv, bt2020nc/bt2020/arib-std-b67), 1920x1080, 30 fps, 30 tbr, 90k tbn
+    //
+    const videoInfo = await pseudoFFProbeVideo(inputFilePath);
+    const videoStreamLine = /Stream #.+: Video:(.+)\n/.exec(videoInfo)?.at(1);
+
+    const isBT709 = !!videoStreamLine?.includes("bt709");
+    console.log(videoStreamLine, isBT709);
 
     // We want the generated playlist to refer to the chunks as "output.ts".
     //
