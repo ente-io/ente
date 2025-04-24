@@ -44,6 +44,7 @@ import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
+import "package:photos/services/wake_lock_service.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import "package:photos/utils/email_util.dart";
@@ -276,6 +277,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       MLDataDB.instance,
       preferences,
     );
+    EnteWakeLockService.instance.init(preferences);
     logLocalSettings();
     initComplete = true;
     _logger.info("Initialization done $tlog");
