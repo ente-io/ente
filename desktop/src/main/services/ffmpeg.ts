@@ -158,6 +158,43 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult> => {
+    // [Note: Tonemapping HDR to HD]
+    //
+    // BT.709 ("HD") is a standard that describes things like how color is
+    // encoded, the range of values, and their "meaning" - i.e. how to map the
+    // values in the video to the pixels on the screen.
+    //
+    // It is not the only such standard, there are three common examples:
+    //
+    // - BT.601 ("Standard-Definition" or SD)
+    // - BT.709 ("High-Definition" or HD)
+    // - BT.2020 ("Ultra-High-Definition" or UHD, aka HDR^).
+    //
+    // ^ HDR ("High-Dynamic-Range") is an addendum to BT.2020, but for our
+    //   purpose here we can treat it as as alias.
+    //
+    // BT.709 is the most common amongst these for older files out stored on
+    // computers, and they conform mostly to the standard (one notable exception
+    // is that the BT.709 standard also recommends using the yuv422p pixel
+    // format, but de facto yuv420p is used because many video players only
+    // support yuv420p).
+    //
+    // Since BT.709 is the most widely supported standard, we use it when
+    // generating the HLS playlist so to allow playback across the widest
+    // possible hardware/OS/browser combinations.
+    //
+    // If we convert HDR to HD without naively, then the colors look washed out
+    // compared to the original. To resolve this, we use a ffmpeg filterchain
+    // that uses the tonemap filter.
+    //
+    // However applying this tonemap to videos that are already HD leads to a
+    // brightness drop. So we conditionally apply this filter chain only if the
+    // colorspace is not already BT.709.
+    //
+    // Reference:
+    // - https://trac.ffmpeg.org/wiki/colorspace
+    const isBT709 = await detectIsBT709(inputFilePath);
+
     // We want the generated playlist to refer to the chunks as "output.ts".
     //
     // So we arrange things accordingly: We use the `outputPathPrefix` as our
@@ -196,7 +233,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
 
     // Overview:
     //
-    // - H.264 video 720p 30fps.
+    // - H.264 video HD 720p 30fps.
     // - AAC audio 128kbps.
     // - Encrypted HLS playlist with a single file containing all the chunks.
     //
@@ -228,11 +265,39 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
                 // Convert the video to a constant 30 fps, duplicating or
                 // dropping frames as necessary.
                 "fps=30",
-                // Output to YUV planar color space with "limited" but most
-                // compatible 4:2:0 chroma subsampling (if not specified, ffmpeg
-                // may output to a pixel format that is not widely supported).
+                // If the video is not in the HD color space (bt709), convert
+                // it. Before conversion, tone map colors so that they work the
+                // same across the change in the dyamic range.
+                //
+                // 1. The tonemap filter only works linear light, so we first
+                //    use zscale with transfer=linear to linearize the input.
+                //
+                // 2. Then we use the tonemap, with the hable option that is
+                //    best for preserving details. desat=0 turns off the default
+                //    desaturation.
+                //
+                // 3. Use zscale again to "convert to BT.709" by asking it to
+                //    set the all three of color primaries, transfer
+                //    characteristics and colorspace matrix to 709 (Note: the
+                //    constants specified in the tonemap filter help do not
+                //    include the "bt" prefix)
+                //
+                // See: https://ffmpeg.org/ffmpeg-filters.html#tonemap-1
+                //
+                // See: [Note: Tonemapping HDR to HD]
+                isBT709
+                    ? []
+                    : [
+                          "zscale=transfer=linear",
+                          "tonemap=tonemap=hable:desat=0",
+                          "zscale=primaries=709:transfer=709:matrix=709",
+                      ],
+                // Output using the most widely supported pixel format: 8-bit
+                // YUV planar color space with 4:2:0 chroma subsampling.
                 "format=yuv420p",
-            ].join(","),
+            ]
+                .flat()
+                .join(","),
         ],
         // Video codec H.264
         //
@@ -273,7 +338,12 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         // Run the ffmpeg command to generate the HLS playlist and segments.
         //
         // Note: Depending on the size of the input file, this may take long!
-        await execAsync(command);
+        const { stderr: conversionStderr } = await execAsync(command);
+
+        // Determine the dimensions of the generated video from the stderr
+        // output produced by ffmpeg during the conversion.
+        const [width, height] = detectVideoDimensions(conversionStderr);
+        console.log(playlistPath, width, height);
     } catch (e) {
         log.error("HLS generation failed", e);
         await Promise.all([
@@ -290,4 +360,118 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     }
 
     return { playlistPath, videoPath };
+};
+
+/**
+ * A regex that matches the first line of the form
+ *
+ *     Stream #0:0: Video: h264 (High 10) ([27][0][0][0] / 0x001B), yuv420p10le(tv, bt2020nc/bt2020/arib-std-b67), 1920x1080, 30 fps, 30 tbr, 90k tbn
+ *
+ * The part after Video: is the first capture group.
+ */
+const videoStreamLineRegex = /Stream #.+: Video:(.+)\n/;
+
+/** {@link videoStreamLineRegex}, but global. */
+const videoStreamLinesRegex = /Stream #.+: Video:(.+)\n/g;
+
+/**
+ * A regex that matches <digits>x<digits> pair preceded by a space and followed
+ * by a trailing comma. See {@link videoStreamLineRegex} for the context in
+ * which it is used.
+ */
+const videoDimensionsRegex = / (\d+)x(\d+),/;
+
+/**
+ * Heuristically determine if the given video uses the BT.709 colorspace.
+ *
+ * This function tries to determine the input colorspace by scanning the ffmpeg
+ * info output for the video stream line, and checking if it contains the string
+ * "bt709". See: [Note: Parsing CLI output might break on ffmpeg updates].
+ */
+const detectIsBT709 = async (inputFilePath: string) => {
+    const videoInfo = await pseudoFFProbeVideo(inputFilePath);
+    const videoStreamLine = videoStreamLineRegex.exec(videoInfo)?.at(1);
+    return !!videoStreamLine?.includes("bt709");
+};
+
+/**
+ * Heuristically detect the dimensions of the given video from the log output of
+ * the ffmpeg invocation during the HLS playlist generation.
+ *
+ * This function tries to determine the width and height of the generated video
+ * from the output log written by ffmpeg on its stderr during the generation
+ * process, scanning it for the last video stream line, and trying to match a
+ * "<digits>x<digits>" regex.
+ *
+ * See: [Note: Parsing CLI output might break on ffmpeg updates].
+ */
+const detectVideoDimensions = (conversionStderr: string) => {
+    // There is a nicer way to do it - by running `pseudoFFProbeVideo` on the
+    // generated playlist. However, that playlist includes a data URL that
+    // specifies the encryption info, and ffmpeg refuses to read that unless we
+    // specify the "-allowed_extensions ALL" or something to that effect.
+    //
+    // Unfortunately, our current ffmpeg binary (5.x) does not support that
+    // option. So we instead parse the conversion output itself.
+    //
+    // This is also nice, since it saves on an extra ffmpeg invocation. But we
+    // now need to be careful to find the right video stream line, since the
+    // conversion output includes both the input and output video stream lines.
+    //
+    // To match the right (output) video stream line, we use a global regex, and
+    // use the last match since that'd correspond to the single video stream
+    // written in the output.
+    const videoStreamLine = Array.from(
+        conversionStderr.matchAll(videoStreamLinesRegex),
+    )
+        .at(-1) /* Last Stream...: Video: line in the output */
+        ?.at(1); /* First capture group */
+    if (videoStreamLine) {
+        const [, ws, hs] = videoDimensionsRegex.exec(videoStreamLine) ?? [];
+        if (ws && hs) {
+            const w = parseInt(ws);
+            const h = parseInt(hs);
+            if (w && h) {
+                return [w, h] as const;
+            }
+        }
+    }
+    throw new Error(
+        `Unable to detect video dimensions from stream line [${videoStreamLine ?? ""}]`,
+    );
+};
+
+/**
+ * We don't have the ffprobe binary at hand, so we make do by grepping the log
+ * output of ffmpeg.
+ *
+ * > [Note: Parsing CLI output might break on ffmpeg updates]
+ * >
+ * > Needless to say, while this works currently, this is liable to break in the
+ * > future. So if something stops working after updating ffmpeg, look here!
+ *
+ * @returns the stderr of ffmpeg after running it on the input file. The exact
+ * command we run is:
+ *
+ *     ffmpeg -i in.mov -an -frames:v 0 -f null - 2>info.txt
+ *
+ * And the returned string is the contents of the `info.txt` thus produced.
+ */
+const pseudoFFProbeVideo = async (inputFilePath: string) => {
+    const command = [
+        ffmpegPathPlaceholder,
+        // Reduce the amount of output lines we have to parse.
+        ["-hide_banner"],
+        ["-i", inputPathPlaceholder],
+        "-an",
+        ["-frames:v", "0"],
+        ["-f", "null"],
+        "-",
+    ].flat();
+
+    const cmd = substitutePlaceholders(command, inputFilePath, /* NA */ "");
+
+    const { stderr } = await execAsync(cmd);
+
+    return stderr;
 };

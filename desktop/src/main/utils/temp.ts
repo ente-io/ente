@@ -25,11 +25,15 @@ const randomPrefix = () => {
 };
 
 /**
- * Return the path to a temporary file with the given {@link suffix}.
+ * Return the path to a temporary file with an optional {@link extension}.
  *
  * The function returns the path to a file in the system temp directory (in an
  * Ente specific folder therin) with a random prefix and an (optional)
  * {@link extension}. The parent directory is guaranteed to exist.
+ *
+ * @param extension A string, if provided, is used as the extension for the
+ * generated path. It will be automatically prefixed by a dot, so don't include
+ * the dot in the provided string.
  *
  * It ensures that there is no existing item with the same name already.
  *
