@@ -50,7 +50,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   final _logger = Logger("VideoEditor");
 
   /// Some videos have a 'rotation' property in exif that is not 0 which
-  /// causes the video to appear rotated in the video editor preview.
+  /// causes the video to appear rotated in the video editor preview on Andoird.
   /// This variable is used as a workaround to rotate the video back to its
   /// expected orientation.
   int? _quarterTurnsForRotationCorrection;
@@ -93,14 +93,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       );
     });
 
-    getVideoPropsAsync(widget.ioFile).then((props) async {
-      if (props?.rotation != null) {
-        _quarterTurnsForRotationCorrection = -(props!.rotation! / 90).round();
-      } else {
-        _quarterTurnsForRotationCorrection = 0;
-      }
-      setState(() {});
-    });
+    _doRotationCorrectionIfAndroid();
   }
 
   @override
@@ -344,6 +337,21 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       Navigator.of(dialogKey.currentContext!).pop('dialog');
     } finally {
       await PhotoManager.startChangeNotify();
+    }
+  }
+
+  void _doRotationCorrectionIfAndroid() {
+    if (Platform.isAndroid) {
+      getVideoPropsAsync(widget.ioFile).then((props) async {
+        if (props?.rotation != null) {
+          _quarterTurnsForRotationCorrection = -(props!.rotation! / 90).round();
+        } else {
+          _quarterTurnsForRotationCorrection = 0;
+        }
+        setState(() {});
+      });
+    } else {
+      _quarterTurnsForRotationCorrection = 0;
     }
   }
 }
