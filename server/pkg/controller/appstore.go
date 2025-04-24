@@ -29,7 +29,6 @@ type AppStoreController struct {
 	UserRepo               *repo.UserRepository
 	BillingPlansPerCountry ente.BillingPlansPerCountry
 	CommonBillCtrl         *commonbilling.Controller
-	NotificationCtrl       *repo.NotificationHistoryRepository
 	// appStoreSharedPassword is the password to be used to access AppStore APIs
 	appStoreSharedPassword string
 }
@@ -41,7 +40,6 @@ func NewAppStoreController(
 	fileRepo *repo.FileRepository,
 	userRepo *repo.UserRepository,
 	commonBillCtrl *commonbilling.Controller,
-	notificationCtrl *repo.NotificationHistoryRepository,
 ) *AppStoreController {
 	appleSharedSecret := viper.GetString("apple.shared-secret")
 	return &AppStoreController{
@@ -52,7 +50,6 @@ func NewAppStoreController(
 		BillingPlansPerCountry: plans,
 		appStoreSharedPassword: appleSharedSecret,
 		CommonBillCtrl:         commonBillCtrl,
-		NotificationCtrl:       notificationCtrl,
 	}
 }
 
@@ -118,10 +115,6 @@ func (c *AppStoreController) HandleNotification(ctx *gin.Context, notification a
 				subscription.ID,
 				newSubscription,
 			)
-			if err != nil {
-				return stacktrace.Propagate(err, "")
-			}
-			err = c.NotificationCtrl.DeleteLastNotificationTime(subscription.UserID, "90_percent_consumed")
 			if err != nil {
 				return stacktrace.Propagate(err, "")
 			}

@@ -29,7 +29,6 @@ type PlayStoreController struct {
 	StorageBonusRepo       *storagebonus.Repository
 	BillingPlansPerCountry ente.BillingPlansPerCountry
 	CommonBillCtrl         *commonbilling.Controller
-	NotificationCtrl       *repo.NotificationHistoryRepository
 }
 
 // PlayStorePackageName is the package name of the PlayStore item
@@ -43,7 +42,6 @@ func NewPlayStoreController(
 	userRepo *repo.UserRepository,
 	storageBonusRepo *storagebonus.Repository,
 	commonBillCtrl *commonbilling.Controller,
-	notificationCtrl *repo.NotificationHistoryRepository,
 ) *PlayStoreController {
 	playStoreClient, err := newPlayStoreClient()
 	if err != nil {
@@ -61,7 +59,6 @@ func NewPlayStoreController(
 		BillingPlansPerCountry: plans,
 		StorageBonusRepo:       storageBonusRepo,
 		CommonBillCtrl:         commonBillCtrl,
-		NotificationCtrl:       notificationCtrl,
 	}
 }
 
@@ -184,10 +181,6 @@ func (c *PlayStoreController) HandleNotification(notification playstore.Develope
 			subscription.ID,
 			newSubscription,
 		)
-		if err != nil {
-			return stacktrace.Propagate(err, "")
-		}
-		err = c.NotificationCtrl.DeleteLastNotificationTime(subscription.UserID, "90_percent_consumed")
 		if err != nil {
 			return stacktrace.Propagate(err, "")
 		}

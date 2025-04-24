@@ -208,12 +208,12 @@ func main() {
 	stripeClients := billing.GetStripeClients()
 	commonBillController := commonbilling.NewController(emailNotificationCtrl, storagBonusRepo, userRepo, usageRepo, billingRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
-		billingRepo, fileRepo, userRepo, commonBillController, notificationHistoryRepo)
+		billingRepo, fileRepo, userRepo, commonBillController)
 	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository}
 	playStoreController := controller.NewPlayStoreController(defaultPlan,
-		billingRepo, fileRepo, userRepo, storagBonusRepo, commonBillController, notificationHistoryRepo)
+		billingRepo, fileRepo, userRepo, storagBonusRepo, commonBillController)
 	stripeController := controller.NewStripeController(plans, stripeClients,
-		billingRepo, fileRepo, userRepo, storagBonusRepo, discordController, emailNotificationCtrl, offerController, commonBillController, notificationHistoryRepo)
+		billingRepo, fileRepo, userRepo, storagBonusRepo, discordController, emailNotificationCtrl, offerController, commonBillController)
 	billingController := controller.NewBillingController(plans,
 		appStoreController, playStoreController, stripeController,
 		discordController, emailNotificationCtrl,

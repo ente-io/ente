@@ -41,7 +41,6 @@ type StripeController struct {
 	EmailNotificationCtrl  *emailCtrl.EmailNotificationController
 	OfferController        *offer.OfferController
 	CommonBillCtrl         *commonbilling.Controller
-	NotificationCtrl       *repo.NotificationHistoryRepository
 }
 
 const BufferPeriodOnPaymentFailureInDays = 7
@@ -58,7 +57,6 @@ func NewStripeController(
 	emailNotificationController *emailCtrl.EmailNotificationController,
 	offerController *offer.OfferController,
 	commonBillCtrl *commonbilling.Controller,
-	notificationCtrl *repo.NotificationHistoryRepository,
 ) *StripeController {
 	return &StripeController{
 		StripeClients:          stripeClients,
@@ -71,7 +69,6 @@ func NewStripeController(
 		EmailNotificationCtrl:  emailNotificationController,
 		OfferController:        offerController,
 		CommonBillCtrl:         commonBillCtrl,
-		NotificationCtrl:       notificationCtrl,
 	}
 }
 
@@ -265,12 +262,8 @@ func (c *StripeController) handleCheckoutSessionCompleted(event stripe.Event, co
 		if err != nil {
 			return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, stacktrace.Propagate(err, "Failed to change subscription")
 		}
-		
+
 		// Execute DeleteLastNotificationTime entry after successful execution of ReplaceSubscription
-		err = c.NotificationCtrl.DeleteLastNotificationTime(newSubscription.UserID, "90_percent_consumed")
-		if err != nil {
-			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-		} 
 		return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, nil
 	} else {
 		priceID, err := c.getPriceIDFromSession(session.ID)
@@ -313,10 +306,7 @@ func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event,
 	// events to update the state
 	if currentSubscription.ProductID != newSubscription.ProductID {
 		c.BillingRepo.ReplaceSubscription(currentSubscription.ID, newSubscription)
-		err := c.NotificationCtrl.DeleteLastNotificationTime(currentSubscription.UserID, "90_percent_consumed")
-		if err != nil {
-			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
-		}
+
 	}
 
 	fullStripeSub, err := c.getStripeSubscriptionWithPaymentMethod(currentSubscription)
