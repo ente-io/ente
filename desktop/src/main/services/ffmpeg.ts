@@ -329,7 +329,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         playlistPath,
     ].flat();
 
-    let dimensions!: ReturnType<typeof detectVideoDimensions>;
+    let dimensions: ReturnType<typeof detectVideoDimensions>;
 
     try {
         // Write the key and the keyInfo to their desired paths.
@@ -352,6 +352,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
             deleteTempFileIgnoringErrors(playlistPath),
             deleteTempFileIgnoringErrors(videoPath),
         ]);
+        throw e;
     } finally {
         await Promise.all([
             deleteTempFileIgnoringErrors(keyInfoPath),
