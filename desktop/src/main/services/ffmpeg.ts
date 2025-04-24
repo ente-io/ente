@@ -319,6 +319,8 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         // Tell ffmpeg where to find the key, and the URI for the key to write
         // into the generated playlist. Implies "-hls_enc 1".
         ["-hls_key_info_file", keyInfoPath],
+        // Generate as many playlist entries as needed (default limit is 5).
+        ["-hls_list_size", "0"],
         // Place all the video segments within the same .ts file (with the same
         // path as the playlist file but with a ".ts" extension).
         ["-hls_flags", "single_file"],
