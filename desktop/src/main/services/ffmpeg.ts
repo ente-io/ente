@@ -182,12 +182,10 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     //   purpose here we can treat it as as alias.
     //
     // BT.709 is the most common amongst these for older files out stored on
-    // computers, and they conform mostly to the standard with two caveats:
-    //
-    // 1. The files might not be properly "tagged" with the metadata of which
-    //    colorspace etc they are using, and
-    // 2. The standard recommends using the yuv422p format, but de facto yuv420p
-    //    is used (primarily because many video players only support yuv420p).
+    // computers, and they conform mostly to the standard (one notable exception
+    // is that the BT.709 standard also recommends using the yuv422p pixel
+    // format, but de facto yuv420p is used because many video players only
+    // support yuv420p).
     //
     // Since BT.709 is the most widely supported standard, we use it when
     // generating the HLS playlist so to allow playback across the widest
@@ -198,8 +196,8 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     // that uses the tonemap filter.
     //
     // However applying this tonemap to videos that are already HD leads to a
-    // brightness drop. So we conditionally apply it if the colorspace is not
-    // already BT.709.
+    // brightness drop. So we conditionally apply this filter chain only if the
+    // colorspace is not already BT.709.
     //
     // Reference:
     // - https://trac.ffmpeg.org/wiki/colorspace
@@ -276,11 +274,39 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
                 // Convert the video to a constant 30 fps, duplicating or
                 // dropping frames as necessary.
                 "fps=30",
-                // Output to YUV planar color space with "limited" but most
-                // compatible 4:2:0 chroma subsampling (if not specified, ffmpeg
-                // may output to a pixel format that is not widely supported).
+                // If the video is not in the HD color space (bt709), convert
+                // it. Before conversion, tone map colors so that they work the
+                // same across the change in the dyamic range.
+                //
+                // 1. The tonemap filter only works linear light, so we first
+                //    use zscale with transfer=linear to linearize the input.
+                //
+                // 2. Then we use the tonemap, with the hable option that is
+                //    best for preserving details.
+                //
+                // 3. Use zscale again to "convert to BT.709" by asking it to
+                //    set the all three of color primaries, transfer
+                //    characteristics and colorspace matrix to 709 (Note: the
+                //    constants specified in the tonemap filter help do not
+                //    include the "bt" prefix)
+                //
+                // See: https://ffmpeg.org/ffmpeg-filters.html#tonemap-1
+                //
+                // See: [Note: Tonemapping HDR to HD]
+                //
+                isBT709
+                    ? []
+                    : [
+                          "zscale=transfer=linear",
+                          "tonemap=tonemap=hable",
+                          "zscale=primaries=709:transfer=709:matrix=709",
+                      ],
+                // Use the most widely supported pixel format: 8-bit YUV planar
+                // color space with 4:2:0 chroma subsampling.
                 "format=yuv420p",
-            ].join(","),
+            ]
+                .flat()
+                .join(","),
         ],
         // Video codec H.264
         //
