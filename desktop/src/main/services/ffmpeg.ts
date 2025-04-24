@@ -158,14 +158,6 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult> => {
-    // Determine the input colorspace for scanning the ffmpeg info output for a
-    // line that looks like (e.g),
-    //
-    //   Stream #0:0: Video: h264 (High 10) ([27][0][0][0] / 0x001B), yuv420p10le(tv, bt2020nc/bt2020/arib-std-b67), 1920x1080, 30 fps, 30 tbr, 90k tbn
-    //
-    const videoInfo = await pseudoFFProbeVideo(inputFilePath);
-    const videoStreamLine = /Stream #.+: Video:(.+)\n/.exec(videoInfo)?.at(1);
-
     // [Note: Tonemapping HDR to HD]
     //
     // BT.709 ("HD") is a standard that describes things like how color is
@@ -201,8 +193,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     //
     // Reference:
     // - https://trac.ffmpeg.org/wiki/colorspace
-    const isBT709 = !!videoStreamLine?.includes("bt709");
-    console.log(videoStreamLine, isBT709);
+    const isBT709 = await detectIsBT709(inputFilePath);
 
     // We want the generated playlist to refer to the chunks as "output.ts".
     //
@@ -242,7 +233,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
 
     // Overview:
     //
-    // - H.264 video 720p 30fps.
+    // - H.264 video HD 720p 30fps.
     // - AAC audio 128kbps.
     // - Encrypted HLS playlist with a single file containing all the chunks.
     //
@@ -348,6 +339,10 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         //
         // Note: Depending on the size of the input file, this may take long!
         await execAsync(command);
+
+        // Determine the dimensions of the generated video.
+        const [width, height] = await detectVideoDimensions(playlistPath);
+        console.log(playlistPath, width, height);
     } catch (e) {
         log.error("HLS generation failed", e);
         await Promise.all([
@@ -367,10 +362,67 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
 };
 
 /**
+ * A regex that matches the first line of the form
+ *
+ *     Stream #0:0: Video: h264 (High 10) ([27][0][0][0] / 0x001B), yuv420p10le(tv, bt2020nc/bt2020/arib-std-b67), 1920x1080, 30 fps, 30 tbr, 90k tbn
+ *
+ * The part after Video: is the first capture group.
+ */
+const _videoStreamLineRegex = /Stream #.+: Video:(.+)\n/;
+
+/**
+ * A regex that matches <digits>x<digits> pair preceded by a space and followed
+ * by a trailing comma. See {@link _videoStreamLineRegex} for the context in
+ * which it is used.
+ */
+const _videoDimensionsRegex = / (\d+)x(\d+),/;
+
+/**
+ * Heuristically determine if the given video uses the BT.709 colorspace.
+ *
+ * This function tries to determine the input colorspace by scanning the ffmpeg
+ * info output for the video stream line, and checking if it contains the string
+ * "bt709". See: [Note: Parsing CLI output might break on ffmpeg updates].
+ */
+const detectIsBT709 = async (inputFilePath: string) => {
+    const videoInfo = await pseudoFFProbeVideo(inputFilePath);
+    const videoStreamLine = _videoStreamLineRegex.exec(videoInfo)?.at(1);
+    return !!videoStreamLine?.includes("bt709");
+};
+
+/**
+ * Heuristically detect the dimensions of the given video.
+ *
+ * This function tries to determine the width and height of video or video
+ * playlist at the given {@link inputFilePath} by scanning the ffmpeg info
+ * output for the first video stream line, and trying to match a
+ * "<digits>x<digits>" regex.
+ *
+ * See: [Note: Parsing CLI output might break on ffmpeg updates].
+ */
+const detectVideoDimensions = async (inputFilePath: string) => {
+    const videoInfo = await pseudoFFProbeVideo(inputFilePath);
+    const videoStreamLine = _videoStreamLineRegex.exec(videoInfo)?.at(1);
+    if (videoStreamLine) {
+        const [, ws, hs] = _videoDimensionsRegex.exec(videoStreamLine) ?? [];
+        if (ws && hs) {
+            const w = parseInt(ws);
+            const h = parseInt(hs);
+            if (w && h) {
+                return [w, h] as const;
+            }
+        }
+    }
+    throw new Error(
+        `Unable to detect video dimensions from stream line [${videoStreamLine ?? ""}]`,
+    );
+};
+
+/**
  * We don't have the ffprobe binary at hand, so we make do by grepping the log
  * output of ffmpeg.
  *
- * > [ffmpeg update caution]
+ * > [Note: Parsing CLI output might break on ffmpeg updates]
  * >
  * > Needless to say, while this works currently, this is liable to break in the
  * > future. So if something stops working after updating ffmpeg, look here!
@@ -382,7 +434,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
  *
  * And the returned string is the contents of the `info.txt` thus produced.
  */
-const pseudoFFProbeVideo = async (videoPath: string) => {
+const pseudoFFProbeVideo = async (inputFilePath: string) => {
     const command = [
         ffmpegPathPlaceholder,
         ["-i", inputPathPlaceholder],
@@ -392,7 +444,7 @@ const pseudoFFProbeVideo = async (videoPath: string) => {
         "-",
     ].flat();
 
-    const cmd = substitutePlaceholders(command, videoPath, /* NA */ "");
+    const cmd = substitutePlaceholders(command, inputFilePath, /* NA */ "");
 
     const { stderr } = await execAsync(cmd);
 
