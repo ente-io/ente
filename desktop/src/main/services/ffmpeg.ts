@@ -166,6 +166,43 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     const videoInfo = await pseudoFFProbeVideo(inputFilePath);
     const videoStreamLine = /Stream #.+: Video:(.+)\n/.exec(videoInfo)?.at(1);
 
+    // [Note: Tonemapping HDR to HD]
+    //
+    // BT.709 ("HD") is a standard that describes things like how color is
+    // encoded, the range of values, and their "meaning" - i.e. how to map the
+    // values in the video to the pixels on the screen.
+    //
+    // It is not the only such standard, there are three common examples:
+    //
+    // - BT.601 ("Standard-Definition" or SD)
+    // - BT.709 ("High-Definition" or HD)
+    // - BT.2020 ("Ultra-High-Definition" or UHD, aka HDR^).
+    //
+    // ^ HDR ("High-Dynamic-Range") is an addendum to BT.2020, but for our
+    //   purpose here we can treat it as as alias.
+    //
+    // BT.709 is the most common amongst these for older files out stored on
+    // computers, and they conform mostly to the standard with two caveats:
+    //
+    // 1. The files might not be properly "tagged" with the metadata of which
+    //    colorspace etc they are using, and
+    // 2. The standard recommends using the yuv422p format, but de facto yuv420p
+    //    is used (primarily because many video players only support yuv420p).
+    //
+    // Since BT.709 is the most widely supported standard, we use it when
+    // generating the HLS playlist so to allow playback across the widest
+    // possible hardware/OS/browser combinations.
+    //
+    // If we convert HDR to HD without naively, then the colors look washed out
+    // compared to the original. To resolve this, we use a ffmpeg filterchain
+    // that uses the tonemap filter.
+    //
+    // However applying this tonemap to videos that are already HD leads to a
+    // brightness drop. So we conditionally apply it if the colorspace is not
+    // already BT.709.
+    //
+    // Reference:
+    // - https://trac.ffmpeg.org/wiki/colorspace
     const isBT709 = !!videoStreamLine?.includes("bt709");
     console.log(videoStreamLine, isBT709);
 
