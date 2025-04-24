@@ -437,6 +437,13 @@ const detectVideoDimensions = async (inputFilePath: string) => {
 const pseudoFFProbeVideo = async (inputFilePath: string) => {
     const command = [
         ffmpegPathPlaceholder,
+        // Reduce the amount of output lines we have to parse.
+        ["-hide_banner"],
+        // This function is also used for parsing the dimennsions of the
+        // encrypted HLS playlists. These playlists contain a data URL
+        // specifying the encryption info, but we also need to ask ffmpeg to
+        // allow reading them by specifying the allowed_extensions.
+        ["-allowed_extensions", "ALL"],
         ["-i", inputPathPlaceholder],
         "-an",
         ["-frames:v", "0"],
