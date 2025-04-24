@@ -135,6 +135,7 @@ export const ffmpegConvertToMP4 = async (
 export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
     playlistPath: string;
     videoPath: string;
+    dimensions: { width: number; height: number };
 }
 
 /**
@@ -328,6 +329,8 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         playlistPath,
     ].flat();
 
+    let dimensions!: ReturnType<typeof detectVideoDimensions>;
+
     try {
         // Write the key and the keyInfo to their desired paths.
         await Promise.all([
@@ -342,8 +345,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
 
         // Determine the dimensions of the generated video from the stderr
         // output produced by ffmpeg during the conversion.
-        const [width, height] = detectVideoDimensions(conversionStderr);
-        console.log(playlistPath, width, height);
+        dimensions = detectVideoDimensions(conversionStderr);
     } catch (e) {
         log.error("HLS generation failed", e);
         await Promise.all([
@@ -359,7 +361,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         ]);
     }
 
-    return { playlistPath, videoPath };
+    return { playlistPath, videoPath, dimensions };
 };
 
 /**
@@ -432,7 +434,7 @@ const detectVideoDimensions = (conversionStderr: string) => {
             const w = parseInt(ws);
             const h = parseInt(hs);
             if (w && h) {
-                return [w, h] as const;
+                return { width: w, height: h };
             }
         }
     }
