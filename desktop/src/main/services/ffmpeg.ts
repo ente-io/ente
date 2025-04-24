@@ -282,7 +282,8 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
                 //    use zscale with transfer=linear to linearize the input.
                 //
                 // 2. Then we use the tonemap, with the hable option that is
-                //    best for preserving details.
+                //    best for preserving details. desat=0 turns off the default
+                //    desaturation.
                 //
                 // 3. Use zscale again to "convert to BT.709" by asking it to
                 //    set the all three of color primaries, transfer
@@ -293,16 +294,15 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
                 // See: https://ffmpeg.org/ffmpeg-filters.html#tonemap-1
                 //
                 // See: [Note: Tonemapping HDR to HD]
-                //
                 isBT709
                     ? []
                     : [
                           "zscale=transfer=linear",
-                          "tonemap=tonemap=hable",
+                          "tonemap=tonemap=hable:desat=0",
                           "zscale=primaries=709:transfer=709:matrix=709",
                       ],
-                // Use the most widely supported pixel format: 8-bit YUV planar
-                // color space with 4:2:0 chroma subsampling.
+                // Output using the most widely supported pixel format: 8-bit
+                // YUV planar color space with 4:2:0 chroma subsampling.
                 "format=yuv420p",
             ]
                 .flat()
