@@ -316,14 +316,12 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         ["-c:a", "aac"],
         // Generate a HLS playlist.
         ["-f", "hls"],
+        // Tell ffmpeg where to find the key, and the URI for the key to write
+        // into the generated playlist. Implies "-hls_enc 1".
+        ["-hls_key_info_file", keyInfoPath],
         // Place all the video segments within the same .ts file (with the same
         // path as the playlist file but with a ".ts" extension).
         ["-hls_flags", "single_file"],
-        // Encrypt the playlist.
-        ["-hls_enc", "1"],
-        // Tell ffmpeg where to find the key, and the URI for the key to write
-        // into the generated playlist.
-        ["-hls_key_info_file", keyInfoPath],
         // Output path where the playlist should be generated.
         playlistPath,
     ].flat();
