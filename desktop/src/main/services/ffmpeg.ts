@@ -338,10 +338,11 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         // Run the ffmpeg command to generate the HLS playlist and segments.
         //
         // Note: Depending on the size of the input file, this may take long!
-        await execAsync(command);
+        const { stderr: conversionStderr } = await execAsync(command);
 
-        // Determine the dimensions of the generated video.
-        const [width, height] = await detectVideoDimensions(playlistPath);
+        // Determine the dimensions of the generated video from the stderr
+        // output produced by ffmpeg during the conversion.
+        const [width, height] = detectVideoDimensions(conversionStderr);
         console.log(playlistPath, width, height);
     } catch (e) {
         log.error("HLS generation failed", e);
@@ -368,14 +369,17 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
  *
  * The part after Video: is the first capture group.
  */
-const _videoStreamLineRegex = /Stream #.+: Video:(.+)\n/;
+const videoStreamLineRegex = /Stream #.+: Video:(.+)\n/;
+
+/** {@link videoStreamLineRegex}, but global. */
+const videoStreamLinesRegex = /Stream #.+: Video:(.+)\n/g;
 
 /**
  * A regex that matches <digits>x<digits> pair preceded by a space and followed
- * by a trailing comma. See {@link _videoStreamLineRegex} for the context in
+ * by a trailing comma. See {@link videoStreamLineRegex} for the context in
  * which it is used.
  */
-const _videoDimensionsRegex = / (\d+)x(\d+),/;
+const videoDimensionsRegex = / (\d+)x(\d+),/;
 
 /**
  * Heuristically determine if the given video uses the BT.709 colorspace.
@@ -386,25 +390,44 @@ const _videoDimensionsRegex = / (\d+)x(\d+),/;
  */
 const detectIsBT709 = async (inputFilePath: string) => {
     const videoInfo = await pseudoFFProbeVideo(inputFilePath);
-    const videoStreamLine = _videoStreamLineRegex.exec(videoInfo)?.at(1);
+    const videoStreamLine = videoStreamLineRegex.exec(videoInfo)?.at(1);
     return !!videoStreamLine?.includes("bt709");
 };
 
 /**
- * Heuristically detect the dimensions of the given video.
+ * Heuristically detect the dimensions of the given video from the log output of
+ * the ffmpeg invocation during the HLS playlist generation.
  *
- * This function tries to determine the width and height of video or video
- * playlist at the given {@link inputFilePath} by scanning the ffmpeg info
- * output for the first video stream line, and trying to match a
+ * This function tries to determine the width and height of the generated video
+ * from the output log written by ffmpeg on its stderr during the generation
+ * process, scanning it for the last video stream line, and trying to match a
  * "<digits>x<digits>" regex.
  *
  * See: [Note: Parsing CLI output might break on ffmpeg updates].
  */
-const detectVideoDimensions = async (inputFilePath: string) => {
-    const videoInfo = await pseudoFFProbeVideo(inputFilePath);
-    const videoStreamLine = _videoStreamLineRegex.exec(videoInfo)?.at(1);
+const detectVideoDimensions = (conversionStderr: string) => {
+    // There is a nicer way to do it - by running `pseudoFFProbeVideo` on the
+    // generated playlist. However, that playlist includes a data URL that
+    // specifies the encryption info, and ffmpeg refuses to read that unless we
+    // specify the "-allowed_extensions ALL" or something to that effect.
+    //
+    // Unfortunately, our current ffmpeg binary (5.x) does not support that
+    // option. So we instead parse the conversion output itself.
+    //
+    // This is also nice, since it saves on an extra ffmpeg invocation. But we
+    // now need to be careful to find the right video stream line, since the
+    // conversion output includes both the input and output video stream lines.
+    //
+    // To match the right (output) video stream line, we use a global regex, and
+    // use the last match since that'd correspond to the single video stream
+    // written in the output.
+    const videoStreamLine = Array.from(
+        conversionStderr.matchAll(videoStreamLinesRegex),
+    )
+        .at(-1) /* Last Stream...: Video: line in the output */
+        ?.at(1); /* First capture group */
     if (videoStreamLine) {
-        const [, ws, hs] = _videoDimensionsRegex.exec(videoStreamLine) ?? [];
+        const [, ws, hs] = videoDimensionsRegex.exec(videoStreamLine) ?? [];
         if (ws && hs) {
             const w = parseInt(ws);
             const h = parseInt(hs);
@@ -439,11 +462,6 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
         ffmpegPathPlaceholder,
         // Reduce the amount of output lines we have to parse.
         ["-hide_banner"],
-        // This function is also used for parsing the dimennsions of the
-        // encrypted HLS playlists. These playlists contain a data URL
-        // specifying the encryption info, but we also need to ask ffmpeg to
-        // allow reading them by specifying the allowed_extensions.
-        ["-allowed_extensions", "ALL"],
         ["-i", inputPathPlaceholder],
         "-an",
         ["-frames:v", "0"],
