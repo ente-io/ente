@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/theme/ente_theme.dart";
 
 class LinearProgressDialog extends StatefulWidget {
   final String message;
@@ -32,9 +33,7 @@ class LinearProgressDialogState extends State<LinearProgressDialog> {
       child: AlertDialog(
         title: Text(
           widget.message,
-          style: const TextStyle(
-            fontSize: 16,
-          ),
+          style: getEnteTextTheme(context).smallMuted,
           textAlign: TextAlign.center,
         ),
         content: LinearProgressIndicator(
