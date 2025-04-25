@@ -247,20 +247,25 @@ func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 	if subUsersErr != nil {
 		return stacktrace.Propagate(subUsersErr, "Failed to get subscribers")
 	}
+	log.Infof("Found %d subscribers to nudge for family", len(subscribedUsers))
 	for _, user := range subscribedUsers {
-		lastNudgeSent, err := c.NotificationHistoryRepo.GetLastNotificationTime(user.ID, FilesCollectedTemplateID)
-		if err != nil {
-			log.Error("Failed to set Notification History")
+		lastNudgeSent, lastNudgeErr := c.NotificationHistoryRepo.GetLastNotificationTime(user.ID, FamilyNudgeTemplateID)
+		if lastNudgeErr != nil {
+			log.WithError(lastNudgeErr).Error("Failed to set Notification History")
+			continue
 		}
-
 		if lastNudgeSent == 0 {
-			go func(userEmails []string) {
-				err := email.SendTemplatedEmail(userEmails, "team@ente.io", "team@ente.io", FamilyNudgeSubject, FamilyNudgeEmailTemplate, nil, nil)
+			go func() {
+				err := email.SendTemplatedEmail([]string{user.Email}, "team@ente.io", "team@ente.io", FamilyNudgeSubject, FamilyNudgeEmailTemplate, nil, nil)
 				if err != nil {
 					log.Error("Failed to send family nudge email: ", err)
+					return
 				}
-			}([]string{user.Email})
-			c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FamilyNudgeTemplateID)
+				err = c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FamilyNudgeTemplateID)
+				if err != nil {
+					log.Error("Failed to set Notification History")
+				}
+			}()
 		}
 	}
 	return nil
