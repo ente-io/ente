@@ -300,12 +300,33 @@ func (c *UserController) NotifyAccountDeletion(userID int64, userEmail string, i
 	}
 
 	templateData := make(map[string]interface{})
-	templateData["RecoverLink"] = fmt.Sprintf("%s/user/recover-account?token=%s", "https://api.ente.io", recoverToken)
+	templateData["AccountRecoveryLink"] = fmt.Sprintf("%s/users/recover-account?token=%s", "https://api.ente.io", recoverToken)
+	logrus.Info("account recovery link: ", templateData["AccountRecoveryLink"])
 	err := email.SendTemplatedEmail([]string{userEmail}, "ente", "team@ente.io",
 		AccountDeletedEmailSubject, template, templateData, nil)
 	if err != nil {
 		logrus.WithError(err).Errorf("Failed to send the account deletion email to %s", userEmail)
 	}
+}
+func (c *UserController) HandleSelfAccountRecovery(ctx *gin.Context, token string) error {
+	jwtToken, err := c.ValidateJWTToken(token, enteJWT.RestoreAccount)
+	if err != nil {
+		return err
+	}
+	if jwtToken.UserID == 0 || jwtToken.Email == "" {
+		return stacktrace.Propagate(ente.NewBadRequestError(&ente.ApiErrorParams{
+			Message: "Invalid token",
+		}), "userID or email is empty")
+	}
+	if jwtToken.ExpiryTime < time.Microseconds() {
+		return stacktrace.Propagate(ente.NewBadRequestError(&ente.ApiErrorParams{
+			Message: "Token expired",
+		}), "")
+	}
+	return c.HandleAccountRecovery(ctx, ente.RecoverAccountRequest{
+		UserID:  jwtToken.UserID,
+		EmailID: jwtToken.Email,
+	})
 }
 
 func (c *UserController) HandleAccountRecovery(ctx *gin.Context, req ente.RecoverAccountRequest) error {
@@ -319,7 +340,7 @@ func (c *UserController) HandleAccountRecovery(ctx *gin.Context, req ente.Recove
 	_, err := c.UserRepo.Get(req.UserID)
 	if err == nil {
 		return stacktrace.Propagate(ente.NewBadRequestError(&ente.ApiErrorParams{
-			Message: "User ID is linked to an active account account",
+			Message: "Either account already recovered or User ID is linked to an active account account",
 		}), "")
 	}
 	if !errors.Is(err, ente.ErrUserDeleted) {
