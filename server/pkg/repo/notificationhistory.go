@@ -31,11 +31,12 @@ func (repo *NotificationHistoryRepository) SetLastNotificationTimeToNow(userID i
 	return stacktrace.Propagate(err, "")
 }
 
+// DeleteLastNotificationTime deletes the last notification time for a user and template.
+// This will be used in the upcoming PR for resetting storage alerts notifications.
 func (repo *NotificationHistoryRepository) DeleteLastNotificationTime(userID int64, templateID string) error {
-	_, err := repo.DB.Exec(`DELETE FROM notification_history WHERE user_id=$1 AND template_id='$2'`)
+	_, err := repo.DB.Exec(`DELETE FROM notification_history WHERE user_id=$1 AND template_id='$2'`, userID, templateID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-
 	return nil
 }
