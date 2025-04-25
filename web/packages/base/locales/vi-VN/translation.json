@@ -512,8 +512,6 @@
     "enter_name": "Nhập tên",
     "uploader_name_hint": "Thêm một tên để bạn bè biết ai là người đáng cảm ơn cho những bức ảnh tuyệt vời này!",
     "name_placeholder": "Tên...",
-    "root_level_file_with_folder_not_allowed": "Không thể tạo album từ sự kết hợp tệp/thư mục",
-    "root_level_file_with_folder_not_allowed_message": "<p>Bạn đã kéo và thả một sự kết hợp của các tệp và thư mục.</p><p>Vui lòng cung cấp chỉ các tệp hoặc chỉ các thư mục khi chọn tùy chọn để tạo album riêng biệt</p>",
     "more_details": "Thêm chi tiết",
     "ml_search": "Học máy",
     "ml_search_description": "Ente hỗ trợ học máy trên thiết bị cho nhận diện khuôn mặt, tìm kiếm kỳ diệu và các tính năng tìm kiếm nâng cao khác",
