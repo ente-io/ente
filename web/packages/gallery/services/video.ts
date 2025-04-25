@@ -422,7 +422,15 @@ const processQueueItem = async (
         // we're uploading is potentially very large, so add retries to avoid
         // the need to redo everything in case of transient errors.
         await retryEnsuringHTTPOkOr4xx(() =>
-            fetch(objectUploadURL, { method: "PUT", body: videoRes.body }),
+            fetch(objectUploadURL, {
+                method: "PUT",
+                // Need to specify the duplex option since body is a stream.
+                //
+                // @ts-expect-error TypeScript's libdom.d.ts does not include
+                // the duplex option.
+                duplex: "half",
+                body: videoRes.clone().body
+            }),
         );
 
         const playlistData = await encodePlaylistJSON({
