@@ -27,10 +27,8 @@ import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/payment/subscription.dart';
-import "package:photos/ui/sharing/add_participant_page.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
-import "package:photos/utils/navigation_util.dart";
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/standalone/date_time.dart';
 import "package:styled_text/styled_text.dart";
@@ -333,80 +331,6 @@ class CollectionActions {
         return false;
       }
     }
-  }
-
-  Future<bool> shareMultipleCollectionSheet(
-    BuildContext bContext,
-    List<Collection> collection,
-  ) async {
-    final textTheme = getEnteTextTheme(bContext);
-    final actionResult = await showActionSheet(
-      context: bContext,
-      buttons: [
-        ButtonWidget(
-          labelText: S.of(bContext).addViewer,
-          buttonType: ButtonType.primary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.first,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-          onTap: () async {
-            await routeToPage(
-              bContext,
-              AddParticipantPage(
-                collection[0],
-                true,
-                collections: collection,
-              ),
-            );
-          },
-        ),
-        ButtonWidget(
-          labelText: S.of(bContext).addCollaborator,
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-          onTap: () async {
-            await routeToPage(
-              bContext,
-              AddParticipantPage(
-                collection[0],
-                false,
-                collections: collection,
-              ),
-            );
-          },
-        ),
-      ],
-      bodyWidget: StyledText(
-        text:
-            "<bold>Share ${collection.length} ${collection.length == 1 ? 'album' : 'albums'}</bold>",
-        style: textTheme.body.copyWith(color: textMutedDark),
-        tags: {
-          'bold': StyledTextTag(
-            style: textTheme.body.copyWith(color: textBaseDark),
-          ),
-        },
-      ),
-      actionSheetType: ActionSheetType.defaultActionSheet,
-    );
-
-    if (actionResult?.action != null &&
-        actionResult!.action == ButtonAction.error) {
-      await showGenericErrorDialog(
-        context: bContext,
-        error: actionResult.exception,
-      );
-      return false;
-    }
-    if ((actionResult?.action != null) &&
-        (actionResult!.action == ButtonAction.first ||
-            actionResult.action == ButtonAction.second)) {
-      return true;
-    }
-    return false;
   }
 
   Future<bool> deleteMultipleCollectionSheet(

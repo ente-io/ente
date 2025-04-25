@@ -14,8 +14,10 @@ import "package:photos/ui/components/bottom_action_bar/selection_action_button_w
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/sharing/add_participant_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/magic_util.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class AlbumSelectionActionWidget extends StatefulWidget {
   final SelectedAlbums selectedAlbums;
@@ -156,9 +158,13 @@ class _AlbumSelectionActionWidgetState
   }
 
   Future<void> _shareCollection() async {
-    await collectionActions.shareMultipleCollectionSheet(
+    await routeToPage(
       context,
-      widget.selectedAlbums.albums.toList(),
+      AddParticipantPage(
+        widget.selectedAlbums.albums.toList().first,
+        false,
+        collections: widget.selectedAlbums.albums.toList(),
+      ),
     );
     if (hasFavorites) {
       _showFavToast();
