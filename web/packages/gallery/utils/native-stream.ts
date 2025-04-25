@@ -179,17 +179,17 @@ export const writeVideoStream = async (
     queryParams?: URLSearchParams,
 ): Promise<Response> => {
     let url = `stream://video?op=${op}`;
-    if (queryParams) {
-        url += `&${queryParams.toString()}`;
-    }
+    if (queryParams) url += `&${queryParams.toString()}`;
 
     const req = new Request(url, {
         method: "POST",
-        body: video,
+        // The duplex option is required when body is a stream.
+        //
         // @ts-expect-error TypeScript's libdom.d.ts does not include the
         // "duplex" parameter, e.g. see
         // https://github.com/node-fetch/node-fetch/issues/1769.
         duplex: "half",
+        body: video,
     });
 
     const res = await fetch(req);

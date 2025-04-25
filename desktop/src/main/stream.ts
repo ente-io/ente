@@ -300,20 +300,23 @@ const handleGenerateHLSWrite = async (
             outputFilePathPrefix,
         );
 
-        const videoFilePath = result.videoPath;
+        const { playlistPath, videoPath } = result;
         try {
-            await uploadVideoSegments(videoFilePath, objectUploadURL);
+            await uploadVideoSegments(videoPath, objectUploadURL);
 
             const playlistToken = randomUUID();
-            pendingVideoResults.set(playlistToken, result.playlistPath);
+            pendingVideoResults.set(playlistToken, playlistPath);
 
             const { dimensions, videoSize } = result;
             return new Response(
                 JSON.stringify({ playlistToken, dimensions, videoSize }),
                 { status: 200 },
             );
+        } catch (e) {
+            await deleteTempFileIgnoringErrors(playlistPath);
+            throw e;
         } finally {
-            await deleteTempFileIgnoringErrors(videoFilePath);
+            await deleteTempFileIgnoringErrors(videoPath);
         }
     } finally {
         await deleteTempFileIgnoringErrors(inputTempFilePath);
