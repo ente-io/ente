@@ -13,6 +13,7 @@ import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { ensurePrecondition } from "ente-utils/ensure";
 import { z } from "zod";
 import {
+    GenerateHLSResult,
     readVideoStream,
     videoStreamDone,
     writeVideoStream,
@@ -399,11 +400,13 @@ const processQueueItem = async (
 ) => {
     log.debug(() => ["gen-hls", { file, uploadItem }]);
 
+    // TODO(HLS):
     const fileBlob = await fetchOriginalVideoBlob(file, uploadItem);
 
-    // TODO(HLS):
-    const tokens = await writeVideoStream(electron, "generate-hls", fileBlob!);
-    const [playlistToken, videoToken] = [tokens[0]!, tokens[1]!];
+    const res = await writeVideoStream(electron, "generate-hls", fileBlob!);
+    const { playlistToken, videoToken, dimensions } = GenerateHLSResult.parse(
+        await res.json(),
+    );
 
     try {
         const playlistBlob = await readVideoStream(
@@ -431,10 +434,7 @@ const processQueueItem = async (
         const playlistData = await encodePlaylistJSON({
             type: "hls_video",
             playlist: await playlistBlob.text(),
-            // TODO(HLS): Critical, fix this before any use.
-            width: 1280,
-            // TODO(HLS): Critical, fix this before any use.
-            height: 720,
+            ...dimensions,
             size: objectSize,
         });
 

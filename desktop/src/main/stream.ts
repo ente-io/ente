@@ -246,7 +246,7 @@ const handleConvertToMP4Write = async (request: Request) => {
 
     const token = randomUUID();
     pendingVideoResults.set(token, outputTempFilePath);
-    return new Response(JSON.stringify([token]), { status: 200 });
+    return new Response(token, { status: 200 });
 };
 
 const handleVideoRead = async (token: string) => {
@@ -277,17 +277,17 @@ const handleVideoDone = async (token: string) => {
  * The difference here is that we the conversion generates two streams - one for
  * the HLS playlist itself, and one for the file containing the encrypted and
  * transcoded video chunks. So instead of returning a single token, we return a
- * JSON array containing two tokens so that the renderer can read them off
- * separately.
+ * JSON object containing two tokens (aand other metadata) so that the renderer
+ * can read them off separately.
  */
 const handleGenerateHLSWrite = async (request: Request) => {
     const inputTempFilePath = await makeTempFilePath();
     await writeStream(inputTempFilePath, request.body!);
 
     const outputFilePathPrefix = await makeTempFilePath();
-    let paths: FFmpegGenerateHLSPlaylistAndSegmentsResult;
+    let result: FFmpegGenerateHLSPlaylistAndSegmentsResult;
     try {
-        paths = await ffmpegGenerateHLSPlaylistAndSegments(
+        result = await ffmpegGenerateHLSPlaylistAndSegments(
             inputTempFilePath,
             outputFilePathPrefix,
         );
@@ -297,9 +297,12 @@ const handleGenerateHLSWrite = async (request: Request) => {
 
     const playlistToken = randomUUID();
     const videoToken = randomUUID();
-    pendingVideoResults.set(playlistToken, paths.playlistPath);
-    pendingVideoResults.set(videoToken, paths.videoPath);
-    return new Response(JSON.stringify([playlistToken, videoToken]), {
-        status: 200,
-    });
+    pendingVideoResults.set(playlistToken, result.playlistPath);
+    pendingVideoResults.set(videoToken, result.videoPath);
+
+    const { dimensions } = result;
+    return new Response(
+        JSON.stringify({ playlistToken, videoToken, dimensions }),
+        { status: 200 },
+    );
 };
