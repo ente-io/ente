@@ -992,9 +992,9 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		pushController.ClearExpiredTokens()
 	})
 
-	schedule(c, "@every 24h", func() {
-		emailNotificationCtrl.SendFamilyNudgeEmail()
-	})
+	// schedule(c, "@every 3s", func() {
+	// 	emailNotificationCtrl.SendFamilyNudgeEmail()
+	// })
 
 	scheduleAndRun(c, "@every 60m", func() {
 		emergencyCtrl.SendRecoveryReminder()
