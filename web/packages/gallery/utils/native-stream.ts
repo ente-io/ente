@@ -119,6 +119,31 @@ export const writeStream = async (
 };
 
 /**
+ * Initate a conversion to MP4, streaming the video contents to the node side.
+ *
+ * This is a variant of {@link writeStream} tailored for the conversion to MP4.
+ *
+ * @param _ An {@link Electron} instance, witness to the fact that we're running
+ * in the context of the desktop app. It is otherwise not used.
+ *
+ * @param video A {@link Blob} containing the video to convert.
+ *
+ * @returns return a token that can then be passed to {@link readVideoStream} to
+ * retrieve the converted MP4 file. This three step sequence (write/read/done)
+ * can then be ended by using {@link videoStreamDone}).
+ */
+export const initiateConvertToMP4 = async (
+    _: Electron,
+    video: Blob,
+): Promise<string> => {
+    const url = "stream://video?op=convert-to-mp4";
+    const res = await fetch(url, { method: "POST", body: video });
+    if (!res.ok)
+        throw new Error(`Failed to write stream to ${url}: HTTP ${res.status}`);
+    return res.text();
+};
+
+/**
  *  One of the predefined operations to perform when invoking
  *  {@link writeVideoStream} or {@link readVideoStream}.
  *
