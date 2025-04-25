@@ -323,7 +323,7 @@ func (repo *UserRepository) GetUsersWithExceedingStorages(percentageThreshold in
 		INNER JOIN usage 
 		ON users.user_id = usage.user_id 
 		INNER JOIN subscriptions 
-		ON users.user_id = subscriptions.user_id AND usage.storage_consumed >= (subscriptions.storage * $1 / 100) AND users.encrypted_email is not null AND users.family_admin_id is NULL
+		ON users.user_id = subscriptions.user_id AND usage.storage_consumed >= (subscriptions.storage * ($1 / 100.0) AND users.encrypted_email IS NOT NULL AND users.family_admin_id is NULL
 		`, percentageThreshold)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -338,7 +338,7 @@ func (repo *UserRepository) GetUsersWithExceedingStorages(percentageThreshold in
 		var user ente.User
 		var encryptedEmail, nonce []byte
 		var storageConsumed, subStorage int64
-		err := rows.Scan(&user.ID, &encryptedEmail, &nonce, &user.Hash, &storageConsumed, &subStorage)
+		err = rows.Scan(&user.ID, &encryptedEmail, &nonce, &user.Hash, &storageConsumed, &subStorage)
 		if err != nil {
 			return users, stacktrace.Propagate(err, "")
 		}
@@ -351,28 +351,28 @@ func (repo *UserRepository) GetUsersWithExceedingStorages(percentageThreshold in
 
 		if bonus, ok := refBonus[user.ID]; ok {
 			refBonusStorage = bonus
-			addOnBonusStorage := addOnBonus[user.ID]
+			addOnBonusStorage = addOnBonus[user.ID]
 			// cap usable ref bonus to the subscription storage + addOnBonus
 			if refBonusStorage > (subStorage + addOnBonusStorage) {
 				refBonusStorage = subStorage + addOnBonusStorage
 			}
 		}
-
 		totalStorage := refBonusStorage + subStorage + addOnBonusStorage
-
-		// The percentageThreshold comes as a parameter.
-		// This perctentageThreshold mechanism was used to avoid duplicating the same function
-		// to get the list of users differently who have exceeded 90% storage and <100% storage.
-		if (percentageThreshold == 90 && storageConsumed >= (totalStorage*90/100) && storageConsumed < totalStorage) ||
-			(percentageThreshold != 90 && storageConsumed > totalStorage) {
-
-			email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
-			if err != nil {
-				return users, stacktrace.Propagate(err, "")
-			}
-			user.Email = email
-			users = append(users, user)
+		usagePercentage := (storageConsumed * 100.0) / totalStorage
+		if percentageThreshold >= 100 && usagePercentage < 100.0 {
+			continue
 		}
+		// when required percentage is below 100, skip email if the usage is below
+		// percentageThreshold or usage above 100% (which means user has used all the storage)
+		if percentageThreshold < 100 && (usagePercentage < percentageThreshold || usagePercentage >= 100.0) {
+			continue
+		}
+		email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+		if err != nil {
+			return users, stacktrace.Propagate(err, "")
+		}
+		user.Email = email
+		users = append(users, user)
 
 	}
 	return users, nil
