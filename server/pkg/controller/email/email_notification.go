@@ -246,16 +246,11 @@ func (c *EmailNotificationController) setStorageLimitExceededMailerJobStatus(isS
 
 func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 	thirtyDaysDuration := 30 * 24 * t.Hour
-	thirtyDaysAgo := t.Now().Add(-thirtyDaysDuration)
-	formattedTime := thirtyDaysAgo.Format("2006-01-02 15:04:05.999999")
-
-	subscribedUsers, subUsersErr := c.UserRepo.GetSubscribedUsersWithoutFamily(formattedTime)
+	subscribedUsers, subUsersErr := c.UserRepo.GetSubscribedUsersWithoutFamily((30))
 	if subUsersErr != nil {
 		return stacktrace.Propagate(subUsersErr, "Failed to get subscribers")
 	}
-
 	for _, user := range subscribedUsers {
-
 		creationTime := t.Unix(0, user.CreationTime)
 		timeSinceCreation := t.Since(creationTime)
 		if timeSinceCreation >= thirtyDaysDuration {
