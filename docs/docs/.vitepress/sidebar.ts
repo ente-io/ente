@@ -180,6 +180,7 @@ export const sidebar = [
         text: "Auth",
         items: [
             { text: "Introduction", link: "/auth/" },
+            { text: "Features", link: "/auth/features/" },
             {
                 text: "FAQ",
                 collapsed: true,
