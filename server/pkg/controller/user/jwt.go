@@ -2,7 +2,7 @@ package user
 
 import (
 	"fmt"
-
+	"github.com/ente-io/museum/ente"
 	enteJWT "github.com/ente-io/museum/ente/jwt"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
@@ -46,6 +46,9 @@ func (c *UserController) ValidateJWTToken(jwtToken string, scope enteJWT.ClaimSc
 		return c.JwtSecret, nil
 	})
 	if err != nil {
+		if ve, ok := err.(*jwt.ValidationError); ok && ve.Error() == "token expired" {
+			return nil, stacktrace.Propagate(ente.NewBadRequestWithMessage("token expired"), "")
+		}
 		return nil, stacktrace.Propagate(err, "JWT parsed failed")
 	}
 	claims, ok := token.Claims.(*enteJWT.WebCommonJWTClaim)

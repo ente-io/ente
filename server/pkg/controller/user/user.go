@@ -290,7 +290,7 @@ func (c *UserController) NotifyAccountDeletion(userID int64, userEmail string, i
 	}
 	recoverToken, err2 := c.GetJWTTokenForClaim(&enteJWT.WebCommonJWTClaim{
 		UserID:     userID,
-		ExpiryTime: time.NDaysFromNow(7),
+		ExpiryTime: time.Microseconds(),
 		ClaimScope: enteJWT.RestoreAccount.Ptr(),
 		Email:      userEmail,
 	})
@@ -301,6 +301,7 @@ func (c *UserController) NotifyAccountDeletion(userID int64, userEmail string, i
 
 	templateData := make(map[string]interface{})
 	templateData["AccountRecoveryLink"] = fmt.Sprintf("%s/users/recover-account?token=%s", "https://api.ente.io", recoverToken)
+	logrus.Infof("Account recovery link: %s", templateData["AccountRecoveryLink"])
 	err := email.SendTemplatedEmail([]string{userEmail}, "ente", "team@ente.io",
 		AccountDeletedEmailSubject, template, templateData, nil)
 	if err != nil {
@@ -310,7 +311,7 @@ func (c *UserController) NotifyAccountDeletion(userID int64, userEmail string, i
 func (c *UserController) HandleSelfAccountRecovery(ctx *gin.Context, token string) error {
 	jwtToken, err := c.ValidateJWTToken(token, enteJWT.RestoreAccount)
 	if err != nil {
-		return err
+		return stacktrace.Propagate(ente.NewPermissionDeniedError("invalid token"), fmt.Sprintf("failed to validate jwt token: %s", err.Error()))
 	}
 	if jwtToken.UserID == 0 || jwtToken.Email == "" {
 		return stacktrace.Propagate(ente.NewBadRequestError(&ente.ApiErrorParams{
