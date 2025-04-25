@@ -118,7 +118,6 @@ func (c *AppStoreController) HandleNotification(ctx *gin.Context, notification a
 			if err != nil {
 				return stacktrace.Propagate(err, "")
 			}
-
 		} else {
 			if notification.NotificationType == appstore.NotificationTypeDidChangeRenewalStatus {
 				err := c.BillingRepo.UpdateSubscriptionCancellationStatus(subscription.UserID, notification.AutoRenewStatus == "false")

@@ -217,7 +217,7 @@ func main() {
 	billingController := controller.NewBillingController(plans,
 		appStoreController, playStoreController, stripeController,
 		discordController, emailNotificationCtrl,
-		billingRepo, userRepo, usageRepo, storagBonusRepo, commonBillController, notificationHistoryRepo)
+		billingRepo, userRepo, usageRepo, storagBonusRepo, commonBillController)
 	pushController := controller.NewPushController(pushRepo, taskLockingRepo, hostName)
 	mailingListsController := controller.NewMailingListsController()
 

@@ -54,7 +54,6 @@ type EmailNotificationController struct {
 	LockController                     *lock.LockController
 	NotificationHistoryRepo            *repo.NotificationHistoryRepository
 	isSendingStorageLimitExceededMails bool
-	FamilyRepo                         *repo.FamilyRepository
 }
 
 func (c *EmailNotificationController) OnFirstFileUpload(userID int64, userAgent string) {

@@ -54,7 +54,6 @@ func NewBillingController(
 	usageRepo *repo.UsageRepository,
 	storageBonusRepo *storagebonus.Repository,
 	commonBillCtrl *commonbilling.Controller,
-	notificationHistoryRepo *repo.NotificationHistoryRepository,
 ) *BillingController {
 	return &BillingController{
 		BillingPlansPerAccount: plans,
