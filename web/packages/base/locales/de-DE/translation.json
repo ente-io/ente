@@ -512,8 +512,6 @@
     "enter_name": "Name eingeben",
     "uploader_name_hint": "Füge einen Namen hinzu, damit deine Freunde wissen, wem sie für diese tollen Fotos zu danken haben!",
     "name_placeholder": "Name...",
-    "root_level_file_with_folder_not_allowed": "Alben können nicht aus Datei/Ordnermix erstellt werden",
-    "root_level_file_with_folder_not_allowed_message": "<p>Du hast sowohl Dateien als auch Ordner in das Ente-Fenster gezogen.</p><p>Bitte wähle entweder nur Dateien oder nur Ordner aus, wenn separate Alben erstellt werden sollen</p>",
     "more_details": "Weitere Details",
     "ml_search": "Maschinelles Lernen",
     "ml_search_description": "Ente unterstützt geräteinternes maschinelles Lernen für Gesichtserkennung, magische Suche und andere erweiterte Suchfunktionen",

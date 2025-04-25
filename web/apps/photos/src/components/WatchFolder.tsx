@@ -245,21 +245,22 @@ interface EntryHeadingProps {
     watch: FolderWatch;
 }
 
-const EntryHeading: React.FC<EntryHeadingProps> = ({ watch }) => {
-    const folderPath = watch.folderPath;
-
-    return (
-        <Stack
-            direction="row"
-            sx={{ gap: 1, alignItems: "center", justifyContent: "flex-start" }}
-        >
-            <Typography sx={{ flex: 1 }}>{basename(folderPath)}</Typography>
-            {watcher.isSyncingFolder(folderPath) && (
-                <CircularProgress size={15} sx={{ color: "stroke.muted" }} />
-            )}
-        </Stack>
-    );
-};
+const EntryHeading: React.FC<EntryHeadingProps> = ({
+    watch: { folderPath },
+}) => (
+    <Stack
+        direction="row"
+        sx={{ gap: 1.5, alignItems: "center", justifyContent: "flex-start" }}
+    >
+        <Typography>{basename(folderPath)}</Typography>
+        {watcher.isSyncingFolder(folderPath) && (
+            <CircularProgress
+                size={15}
+                sx={{ flexShrink: 0, color: "stroke.muted" }}
+            />
+        )}
+    </Stack>
+);
 
 const FolderPath: React.FC<React.PropsWithChildren> = ({ children }) => (
     <EllipsizedTypography variant="small" color="text.muted">

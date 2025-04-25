@@ -150,11 +150,7 @@ const UploadProgressContext = createContext<UploadProgressContextT>({
 });
 
 const MinimizedUploadProgress: React.FC = () => (
-    <Snackbar
-        open
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        sx={(theme) => ({ boxShadow: theme.vars.palette.boxShadow.menu })}
-    >
+    <Snackbar open anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
         <Paper sx={{ width: "min(360px, 100svw)" }}>
             <UploadProgressHeader />
         </Paper>
@@ -178,9 +174,7 @@ const UploadProgressTitle: React.FC = () => {
         <DialogTitle>
             <SpaceBetweenFlex>
                 <Box>
-                    <Typography variant={expanded ? "h2" : "h3"}>
-                        {t("file_upload")}
-                    </Typography>
+                    <Typography variant="h3">{t("file_upload")}</Typography>
                     <UploadProgressSubtitleText />
                 </Box>
                 <Box>
