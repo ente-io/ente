@@ -49,6 +49,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
   List<Collection>? collections;
   AlbumSortKey? sortKey;
   AlbumViewType? albumViewType;
+  AlbumSortDirection? albumSortDirection;
   String _searchQuery = "";
   final _selectedAlbum = SelectedAlbums();
 
@@ -62,6 +63,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
     });
     sortKey = localSettings.albumSortKey();
     albumViewType = localSettings.albumViewType();
+    albumSortDirection = localSettings.albumSortDirection();
   }
 
   @override
@@ -132,24 +134,37 @@ class _CollectionListPageState extends State<CollectionListPage> {
   Widget _sortMenu(List<Collection> collections) {
     final colorTheme = getEnteColorScheme(context);
 
-    Text sortOptionText(AlbumSortKey key) {
+    Widget sortOptionText(AlbumSortKey key) {
       String text = key.toString();
       switch (key) {
         case AlbumSortKey.albumName:
           text = S.of(context).name;
           break;
         case AlbumSortKey.newestPhoto:
-          text = S.of(context).newest;
+          text = "Date Created";
           break;
         case AlbumSortKey.lastUpdated:
-          text = S.of(context).lastUpdated;
+          text = "Date Modified";
       }
-      return Text(
-        text,
-        style: Theme.of(context).textTheme.titleMedium!.copyWith(
-              fontSize: 14,
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
-            ),
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            text,
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  fontSize: 14,
+                  color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
+                ),
+          ),
+          Icon(
+            sortKey == key
+                ? (albumSortDirection == AlbumSortDirection.ascending
+                    ? Icons.arrow_upward_outlined
+                    : Icons.arrow_downward_outlined)
+                : null,
+            color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
+          ),
+        ],
       );
     }
 
@@ -195,6 +210,11 @@ class _CollectionListPageState extends State<CollectionListPage> {
               if (selectedValue != null) {
                 sortKey = AlbumSortKey.values[selectedValue];
                 await localSettings.setAlbumSortKey(sortKey!);
+                albumSortDirection =
+                    albumSortDirection == AlbumSortDirection.ascending
+                        ? AlbumSortDirection.descending
+                        : AlbumSortDirection.ascending;
+                await localSettings.setAlbumSortDirection(albumSortDirection!);
                 await refreshCollections();
                 setState(() {});
                 Bus.instance.fire(AlbumSortOrderChangeEvent());

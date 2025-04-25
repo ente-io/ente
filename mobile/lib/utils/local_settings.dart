@@ -8,6 +8,11 @@ enum AlbumSortKey {
   lastUpdated,
 }
 
+enum AlbumSortDirection {
+  ascending,
+  descending,
+}
+
 enum AlbumViewType {
   grid,
   list,
@@ -29,6 +34,7 @@ class LocalSettings {
   static const _hideSharedItemsFromHomeGalleryTag =
       "hide_shared_items_from_home_gallery";
   static const kCollectionViewType = "collection_view_type";
+  static const kCollectionSortDirection = "collection_sort_direction";
 
   final SharedPreferences _prefs;
 
@@ -49,6 +55,15 @@ class LocalSettings {
   AlbumViewType albumViewType() {
     final index = _prefs.getInt(kCollectionViewType) ?? 0;
     return AlbumViewType.values[index];
+  }
+
+  AlbumSortDirection albumSortDirection() {
+    return AlbumSortDirection
+        .values[_prefs.getInt(kCollectionSortDirection) ?? 1];
+  }
+
+  Future<bool> setAlbumSortDirection(AlbumSortDirection direction) {
+    return _prefs.setInt(kCollectionSortDirection, direction.index);
   }
 
   int getPhotoGridSize() {
