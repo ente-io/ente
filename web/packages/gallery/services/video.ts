@@ -10,10 +10,9 @@ import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { ensurePrecondition } from "ente-utils/ensure";
 import { z } from "zod";
 import {
-    GenerateHLSResult,
+    initiateGenerateHLS,
     readVideoStream,
     videoStreamDone,
-    writeVideoStream,
 } from "../utils/native-stream";
 import { downloadManager } from "./download";
 import {
@@ -31,9 +30,12 @@ interface VideoProcessingQueueItem {
      */
     file: EnteFile;
     /**
-     * The contents of the {@link file} as the newly uploaded {@link UploadItem}.
+     * The {@link UploadItem} if available for the newly uploaded {@link file}.
+     *
+     * If present, this serves as an optimization allowing us to directly read
+     * the file off the user's filesystem.
      */
-    uploadItem: UploadItem;
+    uploadItem: UploadItem | undefined;
 }
 
 /**
@@ -398,7 +400,8 @@ const processQueueItem = async (
     log.debug(() => ["gen-hls", { file, uploadItem }]);
 
     // TODO(HLS):
-    const fileBlob = await fetchOriginalVideoBlob(file, uploadItem);
+    // const sourceVideo = uploadItem ?? (await downloadManager.fileStream(file));
+    const sourceVideo = await downloadManager.fileStream(file);
 
     const { objectID, url: objectUploadURL } =
         await getFilePreviewDataUploadURL(file);
@@ -421,15 +424,10 @@ const processQueueItem = async (
     // it can directly upload the generated video segments.
     const queryParams = new URLSearchParams({ objectUploadURL });
 
-    const res = await writeVideoStream(
+    const { playlistToken, dimensions, videoSize } = await initiateGenerateHLS(
         electron,
-        "generate-hls",
-        fileBlob!,
+        sourceVideo!,
         queryParams,
-    );
-
-    const { playlistToken, dimensions, videoSize } = GenerateHLSResult.parse(
-        await res.json(),
     );
 
     try {
@@ -449,59 +447,6 @@ const processQueueItem = async (
         log.info(`Generate HLS for ${fileLogID(file)} | done`);
     } finally {
         await Promise.all([videoStreamDone(electron, playlistToken)]);
-    }
-};
-
-/**
- * Return a blob containing the contents of the given video file.
- *
- * The blob is either constructed using the given {@link uploadItem} if present,
- * otherwise it is downloaded from remote.
- *
- * @param file An {@link EnteFile} of type {@link FileType.video}.
- *
- * @param uploadItem If we're called during the upload process, then this will
- * be set to the {@link UploadItem} that was uploaded. This way, we can directly
- * use the on-disk file instead of needing to download the original from remote.
- */
-const fetchOriginalVideoBlob = async (
-    file: EnteFile,
-    uploadItem: UploadItem | undefined,
-): Promise<Blob | ReadableStream | null> =>
-    uploadItem
-        ? fetchOriginalVideoUploadItemBlob(file, uploadItem)
-        : await downloadManager.fileStream(file);
-
-const fetchOriginalVideoUploadItemBlob = (
-    _: EnteFile,
-    uploadItem: UploadItem,
-) => {
-    // TODO(HLS): Commented below is the implementation that the eventual
-    // desktop only conversion would need to handle - the conversion logic would
-    // need to move to the desktop side to allow it to handle large videos.
-    //
-    // Meanwhile during development, we assume we're on the happy web-only cases
-    // (dragging and dropping a file). All this code is behind a development
-    // feature flag, so it is not going to impact end users.
-
-    if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
-        throw new Error("Not implemented");
-        // const { response, lastModifiedMs } = await readStream(
-        //     ensureElectron(),
-        //     uploadItem,
-        // );
-        // const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
-        // // This function will not be called for videos, and for images
-        // // it is reasonable to read the entire stream into memory here.
-        // return new File([await response.arrayBuffer()], basename(path), {
-        //     lastModified: lastModifiedMs,
-        // });
-    } else {
-        if (uploadItem instanceof File) {
-            return uploadItem;
-        } else {
-            return uploadItem.file;
-        }
     }
 };
 

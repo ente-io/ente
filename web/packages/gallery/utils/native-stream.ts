@@ -8,6 +8,7 @@
 
 import type { Electron, ElectronMLWorker, ZipItem } from "ente-base/types/ipc";
 import { z } from "zod";
+import type { UploadItem } from "../services/upload";
 
 /**
  * Stream the given file or zip entry from the user's local file system.
@@ -128,9 +129,11 @@ export const writeStream = async (
  *
  * @param video A {@link Blob} containing the video to convert.
  *
- * @returns return a token that can then be passed to {@link readVideoStream} to
+ * @returns a token that can then be passed to {@link readVideoStream} to
  * retrieve the converted MP4 file. This three step sequence (write/read/done)
  * can then be ended by using {@link videoStreamDone}).
+ *
+ * See: [Note: Convert to MP4].
  */
 export const initiateConvertToMP4 = async (
     _: Electron,
@@ -143,21 +146,7 @@ export const initiateConvertToMP4 = async (
     return res.text();
 };
 
-/**
- *  One of the predefined operations to perform when invoking
- *  {@link writeVideoStream} or {@link readVideoStream}.
- *
- * - "convert-to-mp4" (See: [Note: Convert to MP4])
- *
- * - "generate-hls" (See: [Note: Preview variant of videos])
- */
-type VideoStreamOp = "convert-to-mp4" | "generate-hls";
-
-/**
- * The contents of the {@link Response} body returned by
- * {@link writeVideoStream} for op "generate-hls".
- */
-export const GenerateHLSResult = z.object({
+const GenerateHLSResult = z.object({
     /**
      * A token that can be used to passed to {@link readVideoStream} to retrieve
      * the generated HLS playlist.
@@ -173,40 +162,46 @@ export const GenerateHLSResult = z.object({
     videoSize: z.number(),
 });
 
-/**
- * Variant of {@link writeStream} tailored for video processing operations.
- *
- * @param op The operation to perform on this video (the result can then be
- * later read back in via {@link readVideoStream}, and the sequence ended by
- * using {@link videoStreamDone}).
- *
- * @param video The video to convert, as a {@link Blob} or a
- * {@link ReadableStream}.
- *
- * @param queryParams Optional additional {@link URLSearchParams} params to pass
- * along with the request.
- *
- * @returns the successful (2xx) HTTP response received from the node side (An
- * exception is thrown otherwise). The contents of the response body are
- * dependent on the operation:
- *
- * - "convert-to-mp4" returns a plain string which is a token that can then be
- *   passed to {@link readVideoStream} to retrieve the converted MP4 file.
- *
- * - "generate-hls" returns a token that can be used to retrieve the generated
- *   HLS playlist, and metadata about the generated video (its byte size and
- *   dimensions). See {@link GenerateHLSResult}.
- */
-export const writeVideoStream = async (
-    _: Electron,
-    op: VideoStreamOp,
-    video: Blob | ReadableStream,
-    queryParams?: URLSearchParams,
-): Promise<Response> => {
-    let url = `stream://video?op=${op}`;
-    if (queryParams) url += `&${queryParams.toString()}`;
+export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
 
-    const req = new Request(url, {
+/**
+ * Initate the generation of a HLS stream, streaming the source video contents
+ * to the node side.
+ *
+ * This is a variant of {@link writeStream} tailored for the HLS generation. It
+ * is similar to {@link initiateConvertToMP4}, but also supports streaming
+ * {@link UploadItem}s and {@link ReadableStream}s.
+ *
+ * @param _ An {@link Electron} instance, witness to the fact that we're running
+ * in the context of the desktop app. It is otherwise not used.
+ *
+ * @param video The video to convert.
+ *
+ * - If we're called during the upload process, then this will be set to the
+ *   {@link UploadItem} that was uploaded. This way, we can directly use the
+ *   on-disk file instead of needing to download the original from remote.
+ *
+ * - Otherwise it should be a {@link ReadableStream} of the video contents.
+ *
+ * @param queryParams Additional {@link URLSearchParams} to pass along with the
+ * request.
+ *
+ * @returns a token that can be used to retrieve the generated HLS playlist, and
+ * metadata about the generated video (its byte size and dimensions). See {@link
+ * GenerateHLSResult.
+ *
+ * See: [Note: Preview variant of videos].
+ */
+export const initiateGenerateHLS = async (
+    _: Electron,
+    video: UploadItem | ReadableStream,
+    queryParams: URLSearchParams,
+): Promise<GenerateHLSResult> => {
+    // TODO(HLS):
+    if (!(video instanceof ReadableStream)) throw new Error("TODO(HLS)");
+
+    const url = `stream://video?op=generate-hls&${queryParams.toString()}`;
+    const res = await fetch(url, {
         method: "POST",
         // The duplex option is required when body is a stream.
         //
@@ -216,12 +211,10 @@ export const writeVideoStream = async (
         duplex: "half",
         body: video,
     });
-
-    const res = await fetch(req);
     if (!res.ok)
         throw new Error(`Failed to write stream to ${url}: HTTP ${res.status}`);
 
-    return res;
+    return GenerateHLSResult.parse(await res.json());
 };
 
 /**
