@@ -399,14 +399,7 @@ const processQueueItem = async (
 ) => {
     log.debug(() => ["gen-hls", { file, uploadItem }]);
 
-    // TODO(HLS):
-    // const sourceVideo = uploadItem ?? (await downloadManager.fileStream(file));
-    const sourceVideo = await downloadManager.fileStream(file);
-
-    const { objectID, url: objectUploadURL } =
-        await getFilePreviewDataUploadURL(file);
-
-    log.info(`Generate HLS for ${fileLogID(file)} | start`);
+    const sourceVideo = uploadItem ?? (await downloadManager.fileStream(file));
 
     // [Note: Upload HLS video segment from node side]
     //
@@ -422,12 +415,15 @@ const processQueueItem = async (
     //
     // So instead we provide the presigned upload URL to the node side so that
     // it can directly upload the generated video segments.
-    const queryParams = new URLSearchParams({ objectUploadURL });
+    const { objectID, url: objectUploadURL } =
+        await getFilePreviewDataUploadURL(file);
+
+    log.info(`Generate HLS for ${fileLogID(file)} | start`);
 
     const { playlistToken, dimensions, videoSize } = await initiateGenerateHLS(
         electron,
         sourceVideo!,
-        queryParams,
+        objectUploadURL,
     );
 
     try {

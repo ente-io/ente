@@ -183,8 +183,8 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
  *
  * - Otherwise it should be a {@link ReadableStream} of the video contents.
  *
- * @param queryParams Additional {@link URLSearchParams} to pass along with the
- * request.
+ * @param objectUploadURL A presigned URL where the video segments should be
+ * uploaded to.
  *
  * @returns a token that can be used to retrieve the generated HLS playlist, and
  * metadata about the generated video (its byte size and dimensions). See {@link
@@ -195,12 +195,36 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
 export const initiateGenerateHLS = async (
     _: Electron,
     video: UploadItem | ReadableStream,
-    queryParams: URLSearchParams,
+    objectUploadURL: string,
 ): Promise<GenerateHLSResult> => {
-    // TODO(HLS):
-    if (!(video instanceof ReadableStream)) throw new Error("TODO(HLS)");
+    const params = new URLSearchParams({ op: "generate-hls", objectUploadURL });
 
-    const url = `stream://video?op=generate-hls&${queryParams.toString()}`;
+    let body: ReadableStream | null;
+    if (video instanceof ReadableStream) {
+        body = video;
+    } else {
+        // video is an UploadItem
+        body = null;
+        if (typeof video == "string") {
+            // Path to a regular file on the user's filesystem.
+            params.set("path", video);
+        } else if (Array.isArray(video)) {
+            // Path within a zip file on the user's filesystem.
+            const [zipPath, entryName] = video;
+            params.set("zipPath", zipPath);
+            params.set("entryName", entryName);
+        } else if (video instanceof File) {
+            // A drag and dropped file, but without a path. This is a browser
+            // specific case which shouldn't happen when we're running in the
+            // desktop app. Bail.
+            throw new Error("Unexpected file without path");
+        } else {
+            // A File with a path. Use the path.
+            params.set("path", video.path);
+        }
+    }
+
+    const url = `stream://video?${params.toString()}`;
     const res = await fetch(url, {
         method: "POST",
         // The duplex option is required when body is a stream.
@@ -209,7 +233,7 @@ export const initiateGenerateHLS = async (
         // "duplex" parameter, e.g. see
         // https://github.com/node-fetch/node-fetch/issues/1769.
         duplex: "half",
-        body: video,
+        body,
     });
     if (!res.ok)
         throw new Error(`Failed to write stream to ${url}: HTTP ${res.status}`);
