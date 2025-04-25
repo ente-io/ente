@@ -139,11 +139,6 @@ export const GenerateHLSResult = z.object({
      */
     playlistToken: z.string(),
     /**
-     * A token that can be used to passed to {@link readVideoStream} to retrieve
-     * the video segments.
-     */
-    videoToken: z.string(),
-    /**
      * The dimensions (width and height in pixels) of the generated video stream.
      */
     dimensions: z.object({ width: z.number(), height: z.number() }),
@@ -163,6 +158,9 @@ export const GenerateHLSResult = z.object({
  * @param video The video to convert, as a {@link Blob} or a
  * {@link ReadableStream}.
  *
+ * @param queryParams Optional additional {@link URLSearchParams} params to pass
+ * along with the request.
+ *
  * @returns the successful (2xx) HTTP response received from the node side (An
  * exception is thrown otherwise). The contents of the response body are
  * dependent on the operation:
@@ -170,17 +168,20 @@ export const GenerateHLSResult = z.object({
  * - "convert-to-mp4" returns a plain string which is a token that can then be
  *   passed to {@link readVideoStream} to retrieve the converted MP4 file.
  *
- * - "generate-hls" returns two tokens, first one that can be used to retrieve
- *   the generated HLS playlist, and the second one that can be used to retrieve
- *   the video (segments). It also returns the dimensions of the generated
- *   video. See {@link GenerateHLSResult}.
+ * - "generate-hls" returns a token that can be used to retrieve the generated
+ *   HLS playlist, and metadata about the generated video (its byte size and
+ *   dimensions). See {@link GenerateHLSResult}.
  */
 export const writeVideoStream = async (
     _: Electron,
     op: VideoStreamOp,
     video: Blob | ReadableStream,
+    queryParams?: URLSearchParams,
 ): Promise<Response> => {
-    const url = `stream://video?op=${op}`;
+    let url = `stream://video?op=${op}`;
+    if (queryParams) {
+        url += `&${queryParams.toString()}`;
+    }
 
     const req = new Request(url, {
         method: "POST",

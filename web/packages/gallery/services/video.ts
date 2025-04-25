@@ -1,12 +1,9 @@
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
-import {
-    retryEnsuringHTTPOkOr4xx,
-    type PublicAlbumsCredentials,
-} from "ente-base/http";
+import { type PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import type { Electron } from "ente-base/types/ipc";
-import type { EnteFile } from "ente-media/file";
+import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
@@ -406,46 +403,52 @@ const processQueueItem = async (
     const { objectID, url: objectUploadURL } =
         await getFilePreviewDataUploadURL(file);
 
-    const res = await writeVideoStream(electron, "generate-hls", fileBlob!);
-    const { playlistToken, videoToken, dimensions, videoSize } =
-        GenerateHLSResult.parse(await res.json());
+    log.info(`HLS gen ${fileLogID(file)} | start`);
+
+    // [Note: Upload HLS video segment from node side]
+    //
+    // The generated video can be huge (multi-GB), too large to read it into
+    // memory as an arrayBuffer.
+    //
+    // One option was to chain the video stream response (from the node side)
+    // directly into a fetch request to `objectUploadURL`, however that requires
+    // HTTP/2 (our servers support it, but self hosters' might not). Also that
+    // approach won't work with retries on transient failures unless we
+    // duplicate the stream beforehand, which invalidates the point of
+    // streaming.
+    //
+    // So instead we provide the presigned upload URL to the node side so that
+    // it can directly upload the generated video segments.
+    const queryParams = new URLSearchParams(objectUploadURL);
+
+    const res = await writeVideoStream(
+        electron,
+        "generate-hls",
+        fileBlob!,
+        queryParams,
+    );
+
+    const { playlistToken, dimensions, videoSize } = GenerateHLSResult.parse(
+        await res.json(),
+    );
 
     try {
-        const playlistBlob = await readVideoStream(
-            electron,
-            playlistToken,
-        ).then((res) => res.blob());
-
-        const videoRes = await readVideoStream(electron, videoToken);
-
-        // Video conversion is non-trivial effort, and the video segment file
-        // we're uploading is potentially very large, so add retries to avoid
-        // the need to redo everything in case of transient errors.
-        await retryEnsuringHTTPOkOr4xx(() =>
-            fetch(objectUploadURL, {
-                method: "PUT",
-                // Need to specify the duplex option since body is a stream.
-                //
-                // @ts-expect-error TypeScript's libdom.d.ts does not include
-                // the duplex option.
-                duplex: "half",
-                body: videoRes.clone().body
-            }),
+        const playlist = await readVideoStream(electron, playlistToken).then(
+            (res) => res.text(),
         );
 
         const playlistData = await encodePlaylistJSON({
             type: "hls_video",
-            playlist: await playlistBlob.text(),
+            playlist,
             ...dimensions,
             size: videoSize,
         });
 
         await putVideoData(file, playlistData, objectID, videoSize);
+
+        log.info(`HLS gen ${fileLogID(file)} | done`);
     } finally {
-        await Promise.all([
-            videoStreamDone(electron, playlistToken),
-            videoStreamDone(electron, videoToken),
-        ]);
+        await Promise.all([videoStreamDone(electron, playlistToken)]);
     }
 };
 
