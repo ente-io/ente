@@ -7,7 +7,7 @@ import log from "../log";
 import { execAsync } from "../utils/electron";
 import {
     deleteTempFileIgnoringErrors,
-    makeFileForDataOrPathOrZipItem,
+    makeFileForDataOrStreamOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils/temp";
 
@@ -52,7 +52,7 @@ export const ffmpegExec = async (
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
         writeToTemporaryFile: writeToTemporaryInputFile,
-    } = await makeFileForDataOrPathOrZipItem(dataOrPathOrZipItem);
+    } = await makeFileForDataOrStreamOrPathOrZipItem(dataOrPathOrZipItem);
 
     const outputFilePath = await makeTempFilePath(outputFileExtension);
     try {
