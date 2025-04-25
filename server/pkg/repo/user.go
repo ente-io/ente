@@ -129,14 +129,15 @@ func (repo *UserRepository) GetAll(sinceTime int64, tillTime int64) ([]ente.User
 	return users, nil
 }
 
-// GetSubscribedUsers will return the list of all subscribed.
+// GetSubscribedUsersWithoutFamily returns notification candidates who are on paid plan
+// but not part of any family plan.
 func (repo *UserRepository) GetSubscribedUsersWithoutFamily(accountAgeInDays int64) ([]ente.User, error) {
 	rows, err := repo.DB.Query(`SELECT u.user_id, u.encrypted_email, u.email_decryption_nonce, u.email_hash, s.created_at 
         FROM subscriptions s 
         INNER JOIN users u ON s.user_id = u.user_id 
         WHERE u.creation_time <= $1 AND u.family_admin_id IS NULL 
         AND s.product_id != 'free'
-        AND u.email_hash NOT LIKE 'deleted+'`, time.MicrosecondBeforeDays(int(accountAgeInDays)))
+        AND u.encrypted_email IS NOT NULL`, time.MicrosecondBeforeDays(int(accountAgeInDays)))
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}

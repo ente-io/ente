@@ -2,9 +2,6 @@ package email
 
 import (
 	"fmt"
-	"strconv"
-	t "time"
-
 	"github.com/avct/uasurfer"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/lock"
@@ -13,6 +10,7 @@ import (
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	log "github.com/sirupsen/logrus"
+	"strconv"
 )
 
 const (
@@ -245,29 +243,24 @@ func (c *EmailNotificationController) setStorageLimitExceededMailerJobStatus(isS
 }
 
 func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
-	thirtyDaysDuration := 30 * 24 * t.Hour
-	subscribedUsers, subUsersErr := c.UserRepo.GetSubscribedUsersWithoutFamily((30))
+	subscribedUsers, subUsersErr := c.UserRepo.GetSubscribedUsersWithoutFamily(30)
 	if subUsersErr != nil {
 		return stacktrace.Propagate(subUsersErr, "Failed to get subscribers")
 	}
 	for _, user := range subscribedUsers {
-		creationTime := t.Unix(0, user.CreationTime)
-		timeSinceCreation := t.Since(creationTime)
-		if timeSinceCreation >= thirtyDaysDuration {
-			lastNudgeSent, err := c.NotificationHistoryRepo.GetLastNotificationTime(user.ID, FilesCollectedTemplateID)
-			if err != nil {
-				log.Error("Failed to set Notification History")
-			}
+		lastNudgeSent, err := c.NotificationHistoryRepo.GetLastNotificationTime(user.ID, FilesCollectedTemplateID)
+		if err != nil {
+			log.Error("Failed to set Notification History")
+		}
 
-			if lastNudgeSent == 0 {
-				go func(userEmails []string) {
-					err := email.SendTemplatedEmail(userEmails, "team@ente.io", "team@ente.io", FamilyNudgeSubject, FamilyNudgeEmailTemplate, nil, nil)
-					if err != nil {
-						log.Error("Failed to send family nudge email: ", err)
-					}
-				}([]string{user.Email})
-				c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FamilyNudgeTemplateID)
-			}
+		if lastNudgeSent == 0 {
+			go func(userEmails []string) {
+				err := email.SendTemplatedEmail(userEmails, "team@ente.io", "team@ente.io", FamilyNudgeSubject, FamilyNudgeEmailTemplate, nil, nil)
+				if err != nil {
+					log.Error("Failed to send family nudge email: ", err)
+				}
+			}([]string{user.Email})
+			c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FamilyNudgeTemplateID)
 		}
 	}
 	return nil
