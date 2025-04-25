@@ -1,1 +1,1 @@
-export { default } from "@/accounts/pages/change-password";
+export { default } from "ente-accounts/pages/change-password";

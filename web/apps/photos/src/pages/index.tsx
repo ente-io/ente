@@ -1,20 +1,19 @@
-import { LoginContents } from "@/accounts/components/LoginContents";
-import { SignUpContents } from "@/accounts/components/SignUpContents";
-import { CenteredFill, CenteredRow } from "@/base/components/containers";
-import { EnteLogo } from "@/base/components/EnteLogo";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { useBaseContext } from "@/base/context";
-import log from "@/base/log";
-import { albumsAppOrigin, customAPIHost } from "@/base/origins";
-import { DevSettings } from "@/new/photos/components/DevSettings";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
-import localForage from "@ente/shared/storage/localForage";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
 import { Box, Stack, Typography, styled } from "@mui/material";
+import { LoginContents } from "ente-accounts/components/LoginContents";
+import { SignUpContents } from "ente-accounts/components/SignUpContents";
+import { CenteredFill, CenteredRow } from "ente-base/components/containers";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
+import { albumsAppOrigin, customAPIHost } from "ente-base/origins";
+import { DevSettings } from "ente-new/photos/components/DevSettings";
+import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
+import localForage from "ente-shared/storage/localForage";
+import { getData } from "ente-shared/storage/localStorage";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
+import { getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -41,7 +40,7 @@ const Page: React.FC = () => {
         currentURL.pathname = router.pathname;
         if (
             currentURL.host === albumsURL.host &&
-            currentURL.pathname !== PAGES.SHARED_ALBUMS
+            currentURL.pathname != "/shared-albums"
         ) {
             handleAlbumsRedirect(currentURL);
         } else {
@@ -53,7 +52,7 @@ const Page: React.FC = () => {
         const end = currentURL.hash.lastIndexOf("&");
         const hash = currentURL.hash.slice(1, end !== -1 ? end : undefined);
         await router.replace({
-            pathname: PAGES.SHARED_ALBUMS,
+            pathname: "/shared-albums",
             search: currentURL.search,
             hash: hash,
         });
@@ -61,8 +60,8 @@ const Page: React.FC = () => {
     };
 
     const handleNormalRedirect = async () => {
-        const user = getData(LS_KEYS.USER);
-        let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        const user = getData("user");
+        let key = getKey("encryptionKey");
         const electron = globalThis.electron;
         if (!key && electron) {
             try {
@@ -71,18 +70,14 @@ const Page: React.FC = () => {
                 log.error("Failed to read master key from safe storage", e);
             }
             if (key) {
-                await saveKeyInSessionStore(
-                    SESSION_KEYS.ENCRYPTION_KEY,
-                    key,
-                    true,
-                );
+                await saveKeyInSessionStore("encryptionKey", key, true);
             }
         }
         const token = getToken();
         if (key && token) {
-            await router.push(PAGES.GALLERY);
+            await router.push("/gallery");
         } else if (user?.email) {
-            await router.push(PAGES.VERIFY);
+            await router.push("/verify");
         }
         await initLocalForage();
         setLoading(false);
@@ -95,7 +90,7 @@ const Page: React.FC = () => {
             log.error("Local storage is not accessible", e);
             showMiniDialog({
                 title: t("error"),
-                message: t("LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE"),
+                message: t("local_storage_not_accessible"),
                 nonClosable: true,
                 cancel: false,
             });
@@ -107,8 +102,8 @@ const Page: React.FC = () => {
     const signUp = () => setShowLogin(false);
     const login = () => setShowLogin(true);
 
-    const redirectToSignupPage = () => router.push(PAGES.SIGNUP);
-    const redirectToLoginPage = () => router.push(PAGES.LOGIN);
+    const redirectToSignupPage = () => router.push("/signup");
+    const redirectToLoginPage = () => router.push("/login");
 
     return (
         <TappableContainer onMaybeChangeHost={refreshHost}>

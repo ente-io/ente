@@ -1,20 +1,26 @@
 {
-    "name": "@/gallery",
+    "name": "ente-gallery",
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/base": "*",
-        "@/utils": "*",
-        "@ffmpeg/ffmpeg": "^0.12.10",
+        "@ffmpeg/ffmpeg": "^0.12.15",
         "bs58": "^6.0.0",
-        "exifreader": "^4.26.2",
+        "ente-base": "*",
+        "ente-utils": "*",
+        "exifreader": "^4.28.0",
+        "hls-video-element": "^1.5.0",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.2",
+        "media-chrome": "^4.9.0",
         "photoswipe": "^5.4.4",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
         "react-dropzone": "14.2.10"
     },
     "devDependencies": {
-        "@/build-config": "*",
-        "@types/leaflet": "^1.9.16"
+        "@types/leaflet": "^1.9.17",
+        "@types/react": "^19.1.0",
+        "@types/react-dom": "^19.1.1",
+        "ente-build-config": "*"
     }
 }

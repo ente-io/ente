@@ -15,7 +15,6 @@ import "package:photos/db/ml/db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/user.dart";
-import "package:photos/models/base_location.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/file/extensions/file_props.dart";
@@ -25,6 +24,7 @@ import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/memories/memory.dart";
+import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
@@ -35,6 +35,7 @@ import "package:photos/models/search/hierarchical/hierarchical_search_filter.dar
 import "package:photos/models/search/hierarchical/location_filter.dart";
 import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/models/search/hierarchical/top_level_generic_filter.dart";
+import "package:photos/models/search/hierarchical/uploader_filter.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
@@ -551,12 +552,20 @@ class SearchService {
     final List<EnteFile> allFiles = await getAllFilesForSearch();
     final List<EnteFile> captionMatch = <EnteFile>[];
     final List<EnteFile> displayNameMatch = <EnteFile>[];
+    final Map<String, List<EnteFile>> uploaderToFile = {};
     for (EnteFile eachFile in allFiles) {
       if (eachFile.caption != null && pattern.hasMatch(eachFile.caption!)) {
         captionMatch.add(eachFile);
       }
       if (pattern.hasMatch(eachFile.displayName)) {
         displayNameMatch.add(eachFile);
+      }
+      if (eachFile.uploaderName != null &&
+          pattern.hasMatch(eachFile.uploaderName!)) {
+        if (!uploaderToFile.containsKey(eachFile.uploaderName!)) {
+          uploaderToFile[eachFile.uploaderName!] = [];
+        }
+        uploaderToFile[eachFile.uploaderName!]!.add(eachFile);
       }
     }
     if (captionMatch.isNotEmpty) {
@@ -589,6 +598,22 @@ class SearchService {
           ),
         ),
       );
+    }
+    if (uploaderToFile.isNotEmpty) {
+      for (MapEntry<String, List<EnteFile>> entry in uploaderToFile.entries) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.uploader,
+            entry.key,
+            entry.value,
+            hierarchicalSearchFilter: UploaderFilter(
+              uploaderName: entry.key,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
+            ),
+          ),
+        );
+      }
     }
     return searchResults;
   }
@@ -1051,39 +1076,39 @@ class SearchService {
       }
       // Add the found base locations from the location/memories service
       // TODO: lau: Add base location names
-      if (limit == null || tagSearchResults.length < limit) {
-        for (final BaseLocation base in locationService.baseLocations) {
-          final a = (baseRadius * scaleFactor(base.location.latitude!)) /
-              kilometersPerDegree;
-          const b = baseRadius / kilometersPerDegree;
-          tagSearchResults.add(
-            GenericSearchResult(
-              ResultType.location,
-              "Base",
-              base.files,
-              onResultTap: (ctx) {
-                showAddLocationSheet(
-                  ctx,
-                  base.location,
-                  name: "Base",
-                  radius: baseRadius,
-                );
-              },
-              hierarchicalSearchFilter: LocationFilter(
-                locationTag: LocationTag(
-                  name: "Base",
-                  radius: baseRadius,
-                  centerPoint: base.location,
-                  aSquare: a * a,
-                  bSquare: b * b,
-                ),
-                occurrence: kMostRelevantFilter,
-                matchedUploadedIDs: filesToUploadedFileIDs(base.files),
-              ),
-            ),
-          );
-        }
-      }
+      // if (limit == null || tagSearchResults.length < limit) {
+      //   for (final BaseLocation base in locationService.baseLocations) {
+      //     final a = (baseRadius * scaleFactor(base.location.latitude!)) /
+      //         kilometersPerDegree;
+      //     const b = baseRadius / kilometersPerDegree;
+      //     tagSearchResults.add(
+      //       GenericSearchResult(
+      //         ResultType.location,
+      //         "Base",
+      //         base.files,
+      //         onResultTap: (ctx) {
+      //           showAddLocationSheet(
+      //             ctx,
+      //             base.location,
+      //             name: "Base",
+      //             radius: baseRadius,
+      //           );
+      //         },
+      //         hierarchicalSearchFilter: LocationFilter(
+      //           locationTag: LocationTag(
+      //             name: "Base",
+      //             radius: baseRadius,
+      //             centerPoint: base.location,
+      //             aSquare: a * a,
+      //             bSquare: b * b,
+      //           ),
+      //           occurrence: kMostRelevantFilter,
+      //           matchedUploadedIDs: filesToUploadedFileIDs(base.files),
+      //         ),
+      //       ),
+      //     );
+      //   }
+      // }
 
       if (limit == null || tagSearchResults.length < limit) {
         final results =
@@ -1231,9 +1256,12 @@ class SearchService {
     int? limit,
   ) async {
     DateTime calcTime = DateTime.now();
-    // await two seconds to let new page load first
-    await Future.delayed(const Duration(seconds: 1));
-    if (limit == null) {
+    late List<SmartMemory> memories;
+    if (limit != null) {
+      memories = await memoriesCacheService.getMemories();
+    } else {
+      // await two seconds to let new page load first
+      await Future.delayed(const Duration(seconds: 1));
       final DateTime? pickedTime = await showDatePicker(
         context: context,
         initialDate: DateTime.now(),
@@ -1241,18 +1269,20 @@ class SearchService {
         lastDate: DateTime(2100),
       );
       if (pickedTime != null) calcTime = pickedTime;
+
+      final cache = await memoriesCacheService.debugCacheForTesting();
+      final memoriesResult = await smartMemoriesService
+          .calcMemories(calcTime, cache, debugSurfaceAll: true);
+      locationService.baseLocations = memoriesResult.baseLocations;
+      memories = memoriesResult.memories;
     }
-    final cache = await memoriesCacheService.debugCacheForTesting();
-    final memoriesResult = await smartMemoriesService
-        .calcMemories(calcTime, cache, debugSurfaceAll: true);
-    locationService.baseLocations = memoriesResult.baseLocations;
     final searchResults = <GenericSearchResult>[];
-    for (final memory in memoriesResult.memories) {
+    for (final memory in memories) {
       final files = Memory.filesFromMemories(memory.memories);
       searchResults.add(
         GenericSearchResult(
           ResultType.event,
-          memory.title,
+          memory.title + "(I)",
           files,
           hierarchicalSearchFilter: TopLevelGenericFilter(
             filterName: memory.title,

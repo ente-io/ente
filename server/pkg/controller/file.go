@@ -376,30 +376,24 @@ func (c *FileController) CleanUpStaleCollectionFiles(userID int64, fileID int64)
 
 }
 
-// GetPublicFileURL verifies permissions and returns a presigned url to the requested file
-func (c *FileController) GetPublicFileURL(ctx *gin.Context, fileID int64, objType ente.ObjectType) (string, error) {
-	accessContext := auth.MustGetPublicAccessContext(ctx)
-	accessible, err := c.CollectionRepo.DoesFileExistInCollections(fileID, []int64{accessContext.CollectionID})
-	if err != nil {
+// GetPublicOrCastFileURL verifies permissions and returns a presigned url to the requested file
+func (c *FileController) GetPublicOrCastFileURL(ctx *gin.Context, fileID int64, objType ente.ObjectType, collectionID int64) (string, error) {
+	// validate that the given fileID is present in the corresponding collection for public album or cast session
+	if err := c.DoesFileExistInCollection(ctx, fileID, collectionID); err != nil {
 		return "", stacktrace.Propagate(err, "")
-	}
-	if !accessible {
-		return "", stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
 	return c.getSignedURLForType(ctx, fileID, objType)
 }
 
-// GetCastFileUrl verifies permissions and returns a presigned url to the requested file
-func (c *FileController) GetCastFileUrl(ctx *gin.Context, fileID int64, objType ente.ObjectType) (string, error) {
-	castCtx := auth.GetCastCtx(ctx)
-	accessible, err := c.CollectionRepo.DoesFileExistInCollections(fileID, []int64{castCtx.CollectionID})
+func (c *FileController) DoesFileExistInCollection(ctx *gin.Context, fileID int64, collectionID int64) error {
+	accessible, err := c.CollectionRepo.DoesFileExistInCollections(fileID, []int64{collectionID})
 	if err != nil {
-		return "", stacktrace.Propagate(err, "")
+		return stacktrace.Propagate(err, "")
 	}
 	if !accessible {
-		return "", stacktrace.Propagate(ente.ErrPermissionDenied, "")
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
-	return c.getSignedURLForType(ctx, fileID, objType)
+	return nil
 }
 
 func (c *FileController) getSignedURLForType(ctx *gin.Context, fileID int64, objType ente.ObjectType) (string, error) {

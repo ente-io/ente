@@ -1,11 +1,11 @@
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@/base/components/OverflowMenu";
-import type { CollectionsSortBy } from "@/new/photos/services/collection/ui";
 import TickIcon from "@mui/icons-material/Done";
 import SortIcon from "@mui/icons-material/Sort";
 import SvgIcon from "@mui/material/SvgIcon";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "ente-base/components/OverflowMenu";
+import type { CollectionsSortBy } from "ente-new/photos/services/collection/ui";
 import { t } from "i18next";
 import React from "react";
 

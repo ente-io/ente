@@ -41,7 +41,10 @@ class BaseLocation {
     Map<int, EnteFile> filesMap,
   ) {
     return BaseLocation(
-      (json['fileIDs'] as List).map((e) => filesMap[e]!).toList(),
+      (json['fileIDs'] as List)
+          .where((uploadID) => filesMap[uploadID] != null)
+          .map((uploadID) => filesMap[uploadID]!)
+          .toList(),
       Location(
         latitude: json['location']['latitude'],
         longitude: json['location']['longitude'],

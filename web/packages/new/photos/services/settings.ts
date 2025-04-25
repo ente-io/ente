@@ -2,17 +2,11 @@
  * @file Storage (in-memory, local, remote) and update of various settings.
  */
 
-// We want to map falsey values like empty strings to the default, for which
-// `||` is the appropriate operator, so turn off the eslint suggestion to use
-// `??` instead for this file.
-//
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
-
-import { isDevBuild } from "@/base/env";
-import { localUser } from "@/base/local-user";
-import log from "@/base/log";
-import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
-import { nullToUndefined } from "@/utils/transform";
+import { isDevBuild } from "ente-base/env";
+import { localUser } from "ente-base/local-user";
+import log from "ente-base/log";
+import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
 
@@ -128,6 +122,8 @@ export const logoutSettings = () => {
  */
 export const syncSettings = async () => {
     const jsonString = await fetchFeatureFlags().then((res) => res.text());
+    // Do a parse as a sanity check before saving the string contents.
+    FeatureFlags.parse(JSON.parse(jsonString));
     saveRemoteFeatureFlagsJSONString(jsonString);
     syncSettingsSnapshotWithLocalStorage();
 };
@@ -138,7 +134,12 @@ const saveRemoteFeatureFlagsJSONString = (s: string) =>
 const savedRemoteFeatureFlags = () => {
     const s = localStorage.getItem("remoteFeatureFlags");
     if (!s) return undefined;
-    return FeatureFlags.parse(JSON.parse(s));
+    try {
+        return FeatureFlags.parse(JSON.parse(s));
+    } catch (e) {
+        log.warn("Ignoring unparseable saved remoteFeatureFlags", e);
+        return undefined;
+    }
 };
 
 const FeatureFlags = z.object({

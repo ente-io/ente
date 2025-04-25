@@ -102,7 +102,6 @@ class MapBoxTilesLayer extends StatelessWidget {
       fallbackUrl: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
       subdomains: const ['a', 'b', 'c'],
       backgroundColor: Colors.transparent,
-    
       userAgentPackageName: _userAgent,
       tileProvider: CachedNetworkTileProvider(),
       additionalOptions: const {

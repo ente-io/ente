@@ -1,12 +1,11 @@
-import type { ParsedMetadataDate } from "@/media/file-metadata";
 import {
     LocalizationProvider,
     MobileDateTimePicker,
 } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
+import type { ParsedMetadataDate } from "ente-media/file-metadata";
 import React, { useState } from "react";
-import { aboveFileViewerContentZ } from "./utils/z-index";
 
 interface FileDateTimePickerProps {
     /**
@@ -58,7 +57,6 @@ export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
     };
 
     const handleClose = () => {
-        console.log("handleClose");
         setOpen(false);
         onDidClose?.();
     };
@@ -93,11 +91,6 @@ export const FileDateTimePicker: React.FC<FileDateTimePickerProps> = ({
                     layout: {
                         sx: { ".MuiTimeClock-root": { minHeight: "336px" } },
                     },
-
-                    /* We also get opened from the info drawer in the photo
-                       viewer, so give our dialog a higher z-index than both the
-                       photo viewer and the info drawer */
-                    dialog: { sx: { zIndex: aboveFileViewerContentZ } },
                 }}
             />
         </LocalizationProvider>

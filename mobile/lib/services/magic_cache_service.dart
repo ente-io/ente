@@ -305,12 +305,22 @@ class MagicCacheService {
       _logger.info("No magic cache found");
       return [];
     }
-    final jsonString = file.readAsStringSync();
-    return MagicCache.decodeJsonToList(jsonString);
+    try {
+      final bytes = await file.readAsBytes();
+      final jsonString = String.fromCharCodes(bytes);
+      return MagicCache.decodeJsonToList(jsonString);
+    } catch (e, s) {
+      _logger.severe("Error reading or decoding cache file", e, s);
+      await file.delete();
+      rethrow;
+    }
   }
 
   Future<void> clearMagicCache() async {
-    await File(await _getCachePath()).delete();
+    final file = File(await _getCachePath());
+    if (file.existsSync()) {
+      await file.delete();
+    }
   }
 
   Future<List<GenericSearchResult>> getMagicGenericSearchResult(
@@ -393,14 +403,17 @@ class MagicCacheService {
   Future<List<MagicCache>> _nonEmptyMagicResults(
     List<Prompt> magicPromptsData,
   ) async {
+    final TimeLogger t = TimeLogger();
     final results = <MagicCache>[];
     final List<int> matchCount = [];
+    final Map<String, double> queryToScore = {};
     for (Prompt prompt in magicPromptsData) {
-      final fileUploadedIDs =
-          await SemanticSearchService.instance.getMatchingFileIDs(
-        prompt.query,
-        prompt.minScore,
-      );
+      queryToScore[prompt.query] = prompt.minScore;
+    }
+    final clipResults =
+        await SemanticSearchService.instance.getMatchingFileIDs(queryToScore);
+    for (Prompt prompt in magicPromptsData) {
+      final List<int> fileUploadedIDs = clipResults[prompt.query] ?? [];
       if (fileUploadedIDs.isNotEmpty) {
         results.add(
           MagicCache(prompt.title, fileUploadedIDs),
@@ -408,7 +421,7 @@ class MagicCacheService {
       }
       matchCount.add(fileUploadedIDs.length);
     }
-    _logger.info('magic result count $matchCount');
+    _logger.info('magic result count $matchCount $t');
     return results;
   }
 }

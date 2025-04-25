@@ -26,6 +26,20 @@ body:
           label: Version
           description: The version can be seen at the bottom of settings.
           placeholder: e.g. v1.2.3
+    - type: input
+      attributes:
+          label: Last working version
+          description: >
+              The version where the feature was last known to be working. It is
+              fine if you don't remember the exact version (mention roughly
+              then), but if there just isn't a last known working version, then
+              it is likely that what is being reported is not an issue but a
+              feature request. The difference between the two categories is not
+              just semantic - feature requests use GitHub discussions and so can
+              be [upvoted by the
+              community](https://github.com/ente-io/ente/discussions/categories/feature-requests)
+              (issues can't be).
+          placeholder: e.g. v1.2.3
     - type: dropdown
       attributes:
           label: What product are you using?

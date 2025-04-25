@@ -35,6 +35,7 @@ import log, { initLogging } from "./main/log";
 import { createApplicationMenu, createTrayContextMenu } from "./main/menu";
 import { setupAutoUpdater } from "./main/services/app-update";
 import autoLauncher from "./main/services/auto-launcher";
+import { shouldHideDockIcon } from "./main/services/store";
 import { createWatcher } from "./main/services/watch";
 import { userPreferences } from "./main/stores/user-preferences";
 import { migrateLegacyWatchStoreIfNeeded } from "./main/stores/watch";
@@ -385,8 +386,8 @@ const createMainWindow = () => {
     const wasAutoLaunched = autoLauncher.wasAutoLaunched();
     if (wasAutoLaunched) {
         // Don't automatically show the app's window if we were auto-launched.
-        // On macOS, also hide the dock icon on macOS.
-        if (process.platform == "darwin") app.dock.hide();
+        // On macOS, also hide the dock icon.
+        app.dock?.hide();
     } else {
         // Show our window otherwise, maximizing it if we're not asked to set it
         // to a specific size.
@@ -404,10 +405,11 @@ const createMainWindow = () => {
     // "The unresponsive event is fired when Chromium detects that your
     //  webContents is not responding to input messages for > 30 seconds."
     window.webContents.on("unresponsive", () => {
-        log.error(
-            "MainWindow's webContents are unresponsive, will restart the renderer process",
-        );
-        window.webContents.forcefullyCrashRenderer();
+        // There is a known case when this can happen: When the user to select a
+        // folder to upload (Upload > Folder), the browser callback to us takes
+        // some time. When trying to upload very large folders on slower Windows
+        // machines, this can take up to 30 seconds.
+        log.warn("MainWindow's webContents are unresponsive");
     });
 
     window.on("close", (event) => {
@@ -420,14 +422,18 @@ const createMainWindow = () => {
 
     window.on("hide", () => {
         // On macOS, when hiding the window also hide the app's icon in the dock
-        // if the user has selected the Settings > Hide dock icon checkbox.
-        if (process.platform == "darwin" && userPreferences.get("hideDockIcon"))
-            app.dock.hide();
+        // unless the user has unchecked the Settings > Hide dock icon checkbox.
+        if (shouldHideDockIcon()) {
+            // macOS emits a window "hide" event when going fullscreen, and if
+            // we hide the dock icon there then the window disappears. So ignore
+            // this scenario.
+            if (!window.isFullScreen()) {
+                app.dock?.hide();
+            }
+        }
     });
 
-    window.on("show", () => {
-        if (process.platform == "darwin") void app.dock.show();
-    });
+    window.on("show", () => void app.dock?.show());
 
     // Let ipcRenderer know when mainWindow is in the foreground so that it can
     // in turn inform the renderer process.
@@ -608,7 +614,7 @@ const handleBackOnStripeCheckout = (window: BrowserWindow) =>
  *
  * But this is an issue for uploads in the self hosted apps (or when we
  * ourselves are trying to test things by with an arbitrary S3 bucket without
- * going via a worker). During upload, theer is no redirection, so the request
+ * going via a worker). During upload, there is no redirection, so the request
  * ACAO is "ente://app" but the response ACAO is `null` which don't match,
  * causing the request to fail.
  *

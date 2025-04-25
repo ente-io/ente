@@ -7,6 +7,7 @@ import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
 import "package:photos/events/stream_switched_event.dart";
@@ -15,6 +16,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
+import "package:photos/services/wake_lock_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -60,6 +62,8 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   bool _isGuestView = false;
   StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
+  late final StreamSubscription<FileCaptionUpdatedEvent>
+      _captionUpdatedSubscription;
 
   @override
   void initState() {
@@ -84,6 +88,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
         _isGuestView = event.isGuestView;
       });
     });
+
     _streamSwitchedSubscription =
         Bus.instance.on<StreamSwitchedEvent>().listen((event) {
       if (event.type != PlayerType.mediaKit || !mounted) return;
@@ -91,6 +96,15 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
         loadPreview();
       } else {
         loadOriginal();
+      }
+    });
+
+    _captionUpdatedSubscription =
+        Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
+      if (event.fileGeneratedID == widget.file.generatedID) {
+        if (mounted) {
+          setState(() {});
+        }
       }
     });
   }
@@ -147,6 +161,13 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
     player.dispose();
+    _captionUpdatedSubscription.cancel();
+    if (EnteWakeLockService.instance.shouldKeepAppAwakeAcrossSessions) {
+      EnteWakeLockService.instance.updateWakeLock(
+        enable: true,
+        wakeLockFor: WakeLockFor.handlingMediaKitEdgeCase,
+      );
+    }
     super.dispose();
   }
 

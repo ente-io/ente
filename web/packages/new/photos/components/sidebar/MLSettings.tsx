@@ -1,13 +1,3 @@
-import { RowButtonGroup, RowSwitch } from "@/base/components/RowButton";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import {
-    NestedSidebarDrawer,
-    SidebarDrawerTitlebar,
-    type NestedSidebarDrawerVisibilityProps,
-} from "@/base/components/mui/SidebarDrawer";
-import { useBaseContext } from "@/base/context";
-import { disableML, enableML, type MLStatus } from "@/new/photos/services/ml";
 import {
     Box,
     Button,
@@ -19,6 +9,20 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
+import { RowButtonGroup, RowSwitch } from "ente-base/components/RowButton";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    NestedSidebarDrawer,
+    SidebarDrawerTitlebar,
+    type NestedSidebarDrawerVisibilityProps,
+} from "ente-base/components/mui/SidebarDrawer";
+import { useBaseContext } from "ente-base/context";
+import {
+    disableML,
+    enableML,
+    type MLStatus,
+} from "ente-new/photos/services/ml";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { Trans } from "react-i18next";

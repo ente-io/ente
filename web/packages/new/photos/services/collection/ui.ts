@@ -1,12 +1,10 @@
-import type { EnteFile } from "@/media/file";
+import type { CollectionType } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
 
 export type CollectionSummaryType =
-    | "folder"
-    | "favorites"
-    | "album"
+    | CollectionType
     | "archive"
     | "trash"
-    | "uncategorized"
     | "all"
     | "outgoingShare"
     | "incomingShareViewer"

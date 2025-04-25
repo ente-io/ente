@@ -1,63 +1,62 @@
-import {
-    AccountsPageContents,
-    AccountsPageTitle,
-} from "@/accounts/components/layouts/centered-paper";
-import { SpacedRow, Stack100vhCenter } from "@/base/components/containers";
-import { EnteLogo } from "@/base/components/EnteLogo";
-import {
-    LoadingIndicator,
-    TranslucentLoadingOverlay,
-} from "@/base/components/loaders";
-import type { ButtonishProps } from "@/base/components/mui";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { NavbarBase } from "@/base/components/Navbar";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@/base/components/OverflowMenu";
-import {
-    useIsSmallWidth,
-    useIsTouchscreen,
-} from "@/base/components/utils/hooks";
-import { useBaseContext } from "@/base/context";
-import { isHTTP401Error, PublicAlbumsCredentials } from "@/base/http";
-import log from "@/base/log";
-import { FullScreenDropZone } from "@/gallery/components/FullScreenDropZone";
-import { downloadManager } from "@/gallery/services/download";
-import { extractCollectionKeyFromShareURL } from "@/gallery/services/share";
-import { updateShouldDisableCFUploadProxy } from "@/gallery/services/upload";
-import type { Collection } from "@/media/collection";
-import { mergeMetadata, type EnteFile } from "@/media/file";
-import { verifyPublicAlbumPassword } from "@/new/albums/services/publicCollection";
-import {
-    GalleryItemsHeaderAdapter,
-    GalleryItemsSummary,
-} from "@/new/photos/components/gallery/ListHeader";
-import {
-    ALL_SECTION,
-    isHiddenCollection,
-} from "@/new/photos/services/collection";
-import { sortFiles } from "@/new/photos/services/files";
-import { usePhotosAppContext } from "@/new/photos/types/context";
-import { CenteredFlex } from "@ente/shared/components/Container";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import { TimeStampListItem } from "components/FileList";
+import { FileListWithViewer } from "components/FileListWithViewer";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
-import PhotoFrame from "components/PhotoFrame";
-import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { Upload } from "components/Upload";
+import {
+    AccountsPageContents,
+    AccountsPageTitle,
+} from "ente-accounts/components/layouts/centered-paper";
+import { SpacedRow, Stack100vhCenter } from "ente-base/components/containers";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import {
+    LoadingIndicator,
+    TranslucentLoadingOverlay,
+} from "ente-base/components/loaders";
+import type { ButtonishProps } from "ente-base/components/mui";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { NavbarBase } from "ente-base/components/Navbar";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "ente-base/components/OverflowMenu";
+import {
+    useIsSmallWidth,
+    useIsTouchscreen,
+} from "ente-base/components/utils/hooks";
+import { useBaseContext } from "ente-base/context";
+import { isHTTP401Error, PublicAlbumsCredentials } from "ente-base/http";
+import log from "ente-base/log";
+import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
+import { downloadManager } from "ente-gallery/services/download";
+import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
+import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
+import type { Collection } from "ente-media/collection";
+import { mergeMetadata, type EnteFile } from "ente-media/file";
+import { verifyPublicAlbumPassword } from "ente-new/albums/services/publicCollection";
+import {
+    GalleryItemsHeaderAdapter,
+    GalleryItemsSummary,
+} from "ente-new/photos/components/gallery/ListHeader";
+import {
+    ALL_SECTION,
+    isHiddenCollection,
+} from "ente-new/photos/services/collection";
+import { sortFiles } from "ente-new/photos/services/files";
+import { usePhotosAppContext } from "ente-new/photos/types/context";
+import { CenteredFlex } from "ente-shared/components/Container";
+import SingleInputForm, {
+    type SingleInputFormProps,
+} from "ente-shared/components/SingleInputForm";
+import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -130,7 +129,7 @@ export default function PublicCollectionGallery() {
                 setFilesDownloadProgressAttributesList((prev) => {
                     const attributes = prev?.find((attr) => attr.id === id);
                     const updatedAttributes =
-                        typeof value === "function"
+                        typeof value == "function"
                             ? value(attributes)
                             : { ...attributes, ...value };
                     const updatedAttributesList = attributes
@@ -182,10 +181,10 @@ export default function PublicCollectionGallery() {
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
-        if (currentURL.pathname !== "/") {
+        if (currentURL.pathname != "/") {
             router.replace(
                 {
-                    pathname: PAGES.SHARED_ALBUMS,
+                    pathname: "/shared-albums",
                     search: currentURL.search,
                     hash: currentURL.hash,
                 },
@@ -266,7 +265,7 @@ export default function PublicCollectionGallery() {
                         }}
                     />
                 ),
-                itemType: ITEM_TYPE.HEADER,
+                tag: "header",
                 height: 68,
             });
     }, [publicCollection, publicFiles]);
@@ -280,7 +279,6 @@ export default function PublicCollectionGallery() {
                               <AddMorePhotosButton onClick={onAddPhotos} />
                           </CenteredFlex>
                       ),
-                      itemType: ITEM_TYPE.FOOTER,
                       height: 104,
                   }
                 : null,
@@ -371,6 +369,12 @@ export default function PublicCollectionGallery() {
 
     // TODO: See gallery
     const syncWithRemote = handleSyncWithRemote;
+
+    // See: [Note: Visual feedback to acknowledge user actions]
+    const handleVisualFeedback = useCallback(() => {
+        showLoadingBar();
+        setTimeout(hideLoadingBar, 0);
+    }, [showLoadingBar, hideLoadingBar]);
 
     const verifyLinkPassword: SingleInputFormProps["callback"] = async (
         password,
@@ -463,7 +467,7 @@ export default function PublicCollectionGallery() {
     } else if (!publicFiles || !credentials.current) {
         return (
             <Stack100vhCenter>
-                <Typography>{t("NOT_FOUND")}</Typography>
+                <Typography>{t("not_found")}</Typography>
             </Stack100vhCenter>
         );
     }
@@ -509,19 +513,18 @@ export default function PublicCollectionGallery() {
                     )}
                 </NavbarBase>
 
-                <PhotoFrame
+                <FileListWithViewer
                     files={publicFiles}
-                    onSyncWithRemote={handleSyncWithRemote}
-                    setSelected={setSelected}
-                    selected={selected}
-                    activeCollectionID={ALL_SECTION}
                     enableDownload={downloadEnabled}
-                    fileCollectionIDs={undefined}
-                    allCollectionsNameByID={undefined}
+                    selectable={downloadEnabled}
+                    selected={selected}
+                    setSelected={setSelected}
+                    activeCollectionID={ALL_SECTION}
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
-                    selectable={downloadEnabled}
+                    onSyncWithRemote={handleSyncWithRemote}
+                    onVisualFeedback={handleVisualFeedback}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
                 <Upload

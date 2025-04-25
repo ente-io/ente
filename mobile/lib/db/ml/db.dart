@@ -7,13 +7,15 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/common/base.dart";
 import "package:photos/db/ml/base.dart";
-import 'package:photos/db/ml/db_fields.dart';
 import "package:photos/db/ml/db_model_mappers.dart";
+import 'package:photos/db/ml/schema.dart';
 import "package:photos/events/embedding_updated_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
@@ -33,7 +35,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 ///
 /// [clipTable] - Stores the embeddings of the CLIP model
 /// [fileDataTable] - Stores data about the files that are already processed by the ML models
-class MLDataDB extends IMLDataDB<int> {
+class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   static final Logger _logger = Logger("MLDataDB");
 
   static const _databaseName = "ente.ml.db";
@@ -74,40 +76,13 @@ class MLDataDB extends IMLDataDB<int> {
         SqliteDatabase(path: databaseDirectory, maxReaders: 2);
     final stopwatch = Stopwatch()..start();
     _logger.info("MLDataDB: Starting migration");
-    await _migrate(asyncDBConnection);
+    await migrate(asyncDBConnection, _migrationScripts);
     _logger.info(
       "MLDataDB Migration took ${stopwatch.elapsedMilliseconds} ms",
     );
     stopwatch.stop();
 
     return asyncDBConnection;
-  }
-
-  Future<void> _migrate(
-    SqliteDatabase database,
-  ) async {
-    final result = await database.execute('PRAGMA user_version');
-    final currentVersion = result[0]['user_version'] as int;
-    final toVersion = _migrationScripts.length;
-
-    if (currentVersion < toVersion) {
-      _logger.info("Migrating database from $currentVersion to $toVersion");
-      await database.writeTransaction((tx) async {
-        for (int i = currentVersion + 1; i <= toVersion; i++) {
-          try {
-            await tx.execute(_migrationScripts[i - 1]);
-          } catch (e) {
-            _logger.severe("Error running migration script index ${i - 1}", e);
-            rethrow;
-          }
-        }
-        await tx.execute('PRAGMA user_version = $toVersion');
-      });
-    } else if (currentVersion > toVersion) {
-      throw AssertionError(
-        "currentVersion($currentVersion) cannot be greater than toVersion($toVersion)",
-      );
-    }
   }
 
   // bulkInsertFaces inserts the faces in the database in batches of 1000.
@@ -412,24 +387,23 @@ class MLDataDB extends IMLDataDB<int> {
     return maps.map((e) => mapRowToFace(e)).toList();
   }
 
-  Future<Map<int, List<Face>>> getFacesForFileIDs(
-    Iterable<int> fileUploadIDs,
-  ) async {
+  @override
+  Future<Map<int, List<FaceWithoutEmbedding>>>
+      getFileIDsToFacesWithoutEmbedding() async {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       '''
-      SELECT * FROM $facesTable
-      WHERE $fileIDColumn IN (${fileUploadIDs.map((id) => "'$id'").join(",")})
+      SELECT $faceIDColumn, $fileIDColumn, $faceScore, $faceDetectionColumn, $faceBlur FROM $facesTable
     ''',
     );
     if (maps.isEmpty) {
       return {};
     }
-    final result = <int, List<Face>>{};
+    final result = <int, List<FaceWithoutEmbedding>>{};
     for (final map in maps) {
-      final face = mapRowToFace(map);
+      final face = mapRowToFaceWithoutEmbedding(map);
       final fileID = map[fileIDColumn] as int;
-      result.putIfAbsent(fileID, () => <Face>[]).add(face);
+      result.putIfAbsent(fileID, () => <FaceWithoutEmbedding>[]).add(face);
     }
     return result;
   }
@@ -840,7 +814,7 @@ class MLDataDB extends IMLDataDB<int> {
 
   @override
   Future<double> getClusteredToIndexableFilesRatio() async {
-    final int indexableFiles = (await getIndexableFileIDs()).length;
+    final int indexableFiles = await getIndexableFileCount();
     final int clusteredFiles = await getClusteredOrFacelessFileCount();
 
     return clusteredFiles / indexableFiles;
@@ -1192,8 +1166,21 @@ class MLDataDB extends IMLDataDB<int> {
   Future<List<EmbeddingVector>> getAllClipVectors() async {
     Logger("ClipDB").info("reading all embeddings from DB");
     final db = await instance.asyncDB;
-    final results = await db.getAll('SELECT * FROM $clipTable');
-    return _convertToVectors(results);
+    final results = await db
+        .getAll('SELECT $fileIDColumn, $embeddingColumn FROM $clipTable');
+
+    // Convert rows to vectors
+    final List<EmbeddingVector> embeddings = [];
+    for (final result in results) {
+      // Convert to EmbeddingVector
+      final embedding = EmbeddingVector(
+        fileID: result[fileIDColumn],
+        embedding: Float32List.view(result[embeddingColumn].buffer),
+      );
+      if (embedding.isEmpty) continue;
+      embeddings.add(embedding);
+    }
+    return embeddings;
   }
 
   // Get indexed FileIDs
@@ -1253,23 +1240,6 @@ class MLDataDB extends IMLDataDB<int> {
     final db = await instance.asyncDB;
     await db.execute('DELETE FROM $clipTable');
     Bus.instance.fire(EmbeddingUpdatedEvent());
-  }
-
-  List<EmbeddingVector> _convertToVectors(List<Map<String, dynamic>> results) {
-    final List<EmbeddingVector> embeddings = [];
-    for (final result in results) {
-      final embedding = _getVectorFromRow(result);
-      if (embedding.isEmpty) continue;
-      embeddings.add(embedding);
-    }
-    return embeddings;
-  }
-
-  EmbeddingVector _getVectorFromRow(Map<String, dynamic> row) {
-    final fileID = row[fileIDColumn] as int;
-    final bytes = row[embeddingColumn] as Uint8List;
-    final list = Float32List.view(bytes.buffer);
-    return EmbeddingVector(fileID: fileID, embedding: list);
   }
 
   List<Object?> _getRowFromEmbedding(ClipEmbedding embedding) {

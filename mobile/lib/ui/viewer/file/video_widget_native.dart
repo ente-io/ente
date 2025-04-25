@@ -8,6 +8,7 @@ import "package:logging/logging.dart";
 import "package:native_video_player/native_video_player.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/events/pause_video_event.dart";
 import "package:photos/events/seekbar_triggered_event.dart";
@@ -19,6 +20,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
+import "package:photos/services/wake_lock_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -80,6 +82,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   final _elTooltipController = ElTooltipController();
   StreamSubscription<PlaybackEvent>? _subscription;
   StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
+  late final StreamSubscription<FileCaptionUpdatedEvent>
+      _captionUpdatedSubscription;
   int position = 0;
 
   @override
@@ -114,6 +118,18 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         loadOriginal(update: true);
       }
     });
+
+    _captionUpdatedSubscription =
+        Bus.instance.on<FileCaptionUpdatedEvent>().listen((event) {
+      if (event.fileGeneratedID == widget.file.generatedID) {
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    });
+
+    EnteWakeLockService.instance
+        .updateWakeLock(enable: true, wakeLockFor: WakeLockFor.videoPlayback);
   }
 
   Future<void> setVideoSource() async {
@@ -207,6 +223,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _isSeeking.dispose();
     _debouncer.cancelDebounceTimer();
     _elTooltipController.dispose();
+    _captionUpdatedSubscription.cancel();
+    EnteWakeLockService.instance
+        .updateWakeLock(enable: false, wakeLockFor: WakeLockFor.videoPlayback);
     super.dispose();
   }
 
@@ -357,6 +376,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                             showControls: _showControls,
                                             isSeeking: _isSeeking,
                                             position: position,
+                                            file: widget.file,
                                           )
                                         : const SizedBox();
                                   },
@@ -464,6 +484,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         widget.playbackCallback!(false);
       }
     }
+
+    _handleWakeLockOnPlaybackChanges();
   }
 
   void _onError(String errorMessage) {
@@ -527,6 +549,21 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           setState(() {});
         }
       });
+    }
+  }
+
+  void _handleWakeLockOnPlaybackChanges() {
+    final playbackStatus = _controller?.playbackStatus;
+    if (playbackStatus == PlaybackStatus.playing) {
+      EnteWakeLockService.instance.updateWakeLock(
+        enable: true,
+        wakeLockFor: WakeLockFor.videoPlayback,
+      );
+    } else {
+      EnteWakeLockService.instance.updateWakeLock(
+        enable: false,
+        wakeLockFor: WakeLockFor.videoPlayback,
+      );
     }
   }
 
@@ -644,6 +681,7 @@ class _SeekBarAndDuration extends StatelessWidget {
   final ValueNotifier<bool> showControls;
   final ValueNotifier<bool> isSeeking;
   final int position;
+  final EnteFile file;
 
   const _SeekBarAndDuration({
     required this.controller,
@@ -651,6 +689,7 @@ class _SeekBarAndDuration extends StatelessWidget {
     required this.showControls,
     required this.isSeeking,
     required this.position,
+    required this.file,
   });
 
   @override
@@ -691,34 +730,61 @@ class _SeekBarAndDuration extends StatelessWidget {
                     width: 1,
                   ),
                 ),
-                child: Row(
+                child: Column(
                   children: [
-                    AnimatedSize(
-                      duration: const Duration(
-                        seconds: 5,
-                      ),
-                      curve: Curves.easeInOut,
-                      child: Text(
-                        secondsToDuration(position ~/ 1000),
-                        style: getEnteTextTheme(
-                          context,
-                        ).mini.copyWith(
-                              color: textBaseDark,
+                    file.caption != null && file.caption!.isNotEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              0,
+                              8,
+                              0,
+                              12,
                             ),
-                      ),
-                    ),
-                    Expanded(
-                      child: SeekBar(
-                        controller!,
-                        durationToSeconds(duration),
-                        isSeeking,
-                      ),
-                    ),
-                    Text(
-                      duration ?? "0:00",
-                      style: getEnteTextTheme(context).mini.copyWith(
-                            color: textBaseDark,
+                            child: GestureDetector(
+                              onTap: () {
+                                showDetailsSheet(context, file);
+                              },
+                              child: Text(
+                                file.caption!,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                                style: getEnteTextTheme(context)
+                                    .mini
+                                    .copyWith(color: textBaseDark),
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                    Row(
+                      children: [
+                        AnimatedSize(
+                          duration: const Duration(
+                            seconds: 5,
                           ),
+                          curve: Curves.easeInOut,
+                          child: Text(
+                            secondsToDuration(position ~/ 1000),
+                            style: getEnteTextTheme(
+                              context,
+                            ).mini.copyWith(
+                                  color: textBaseDark,
+                                ),
+                          ),
+                        ),
+                        Expanded(
+                          child: SeekBar(
+                            controller!,
+                            durationToSeconds(duration),
+                            isSeeking,
+                          ),
+                        ),
+                        Text(
+                          duration ?? "0:00",
+                          style: getEnteTextTheme(context).mini.copyWith(
+                                color: textBaseDark,
+                              ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -748,115 +814,85 @@ class _VideoDescriptionAndSwitchToMediaKitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: Platform.isAndroid
-          ? MainAxisAlignment.spaceBetween
-          : MainAxisAlignment.center,
-      children: [
-        file.caption?.isNotEmpty ?? false
-            ? Expanded(
-                child: ValueListenableBuilder(
-                  valueListenable: showControls,
-                  builder: (context, value, _) {
-                    return AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInQuad,
-                      opacity: value ? 1 : 0,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                        child: Text(
-                          file.caption!,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: getEnteTextTheme(context)
-                              .mini
-                              .copyWith(color: textBaseDark),
-                          textAlign: TextAlign.center,
-                        ),
+    return Platform.isAndroid && !selectedPreview
+        ? Align(
+            alignment: Alignment.centerRight,
+            child: ValueListenableBuilder(
+              valueListenable: showControls,
+              builder: (context, value, _) {
+                return IgnorePointer(
+                  ignoring: !value,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInQuad,
+                    opacity: value ? 1 : 0,
+                    child: ElTooltip(
+                      padding: const EdgeInsets.all(12),
+                      distance: 4,
+                      controller: elTooltipController,
+                      content: GestureDetector(
+                        onLongPress: () {
+                          Bus.instance.fire(
+                            UseMediaKitForVideo(),
+                          );
+                          HapticFeedback.vibrate();
+                          elTooltipController.hide();
+                        },
+                        child: Text(S.of(context).useDifferentPlayerInfo),
                       ),
-                    );
-                  },
-                ),
-              )
-            : const SizedBox.shrink(),
-        Platform.isAndroid && !selectedPreview
-            ? ValueListenableBuilder(
-                valueListenable: showControls,
-                builder: (context, value, _) {
-                  return IgnorePointer(
-                    ignoring: !value,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInQuad,
-                      opacity: value ? 1 : 0,
-                      child: ElTooltip(
-                        padding: const EdgeInsets.all(12),
-                        distance: 4,
-                        controller: elTooltipController,
-                        content: GestureDetector(
-                          onLongPress: () {
-                            Bus.instance.fire(
-                              UseMediaKitForVideo(),
-                            );
-                            HapticFeedback.vibrate();
+                      position: ElTooltipPosition.topEnd,
+                      color: backgroundElevatedDark,
+                      appearAnimationDuration: const Duration(
+                        milliseconds: 200,
+                      ),
+                      disappearAnimationDuration: const Duration(
+                        milliseconds: 200,
+                      ),
+                      child: GestureDetector(
+                        onTap: () {
+                          if (elTooltipController.value ==
+                              ElTooltipStatus.hidden) {
+                            elTooltipController.show();
+                          } else {
                             elTooltipController.hide();
-                          },
-                          child: Text(S.of(context).useDifferentPlayerInfo),
-                        ),
-                        position: ElTooltipPosition.topEnd,
-                        color: backgroundElevatedDark,
-                        appearAnimationDuration: const Duration(
-                          milliseconds: 200,
-                        ),
-                        disappearAnimationDuration: const Duration(
-                          milliseconds: 200,
-                        ),
-                        child: GestureDetector(
-                          onTap: () {
-                            if (elTooltipController.value ==
-                                ElTooltipStatus.hidden) {
-                              elTooltipController.show();
-                            } else {
-                              elTooltipController.hide();
-                            }
-                            controller?.pause();
-                          },
-                          behavior: HitTestBehavior.translucent,
-                          onLongPress: () {
-                            Bus.instance.fire(
-                              UseMediaKitForVideo(),
-                            );
-                            HapticFeedback.vibrate();
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 0, 0, 4),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              child: Stack(
-                                alignment: Alignment.bottomRight,
-                                children: [
-                                  Icon(
-                                    Icons.play_arrow_outlined,
-                                    size: 24,
-                                    color: Colors.white.withOpacity(0.2),
-                                  ),
-                                  Icon(
-                                    Icons.question_mark_rounded,
-                                    size: 10,
-                                    color: Colors.white.withOpacity(0.2),
-                                  ),
-                                ],
-                              ),
+                          }
+                          controller?.pause();
+                        },
+                        behavior: HitTestBehavior.translucent,
+                        onLongPress: () {
+                          Bus.instance.fire(
+                            UseMediaKitForVideo(),
+                          );
+                          HapticFeedback.vibrate();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 0, 4),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            child: Stack(
+                              alignment: Alignment.bottomRight,
+                              children: [
+                                Icon(
+                                  Icons.play_arrow_outlined,
+                                  size: 24,
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
+                                Icon(
+                                  Icons.question_mark_rounded,
+                                  size: 10,
+                                  color: Colors.white.withOpacity(0.2),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
                     ),
-                  );
-                },
-              )
-            : const SizedBox.shrink(),
-      ],
-    );
+                  ),
+                );
+              },
+            ),
+          )
+        : const SizedBox.shrink();
   }
 }

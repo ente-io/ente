@@ -2,6 +2,7 @@ import "dart:developer" as dev;
 
 import "package:cast/cast.dart";
 import "package:ente_cast/ente_cast.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 
 class CastServiceImpl extends CastService {
@@ -35,7 +36,9 @@ class CastServiceImpl extends CastService {
             },
           );
         } else {
-          print('receive message: $message');
+          if (kDebugMode) {
+            print('receive message: $message');
+          }
         }
       }
     });

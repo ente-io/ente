@@ -1,49 +1,48 @@
-import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import { UpdateMagicMetadataRequest } from "@/gallery/services/file";
-import { updateMagicMetadata } from "@/gallery/services/magic-metadata";
+import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import { UpdateMagicMetadataRequest } from "ente-gallery/services/file";
+import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
 import {
     Collection,
     CollectionMagicMetadata,
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadata,
-    CollectionType,
+    CollectionSubType,
+    type CollectionType,
     CreatePublicAccessTokenRequest,
     EncryptedCollection,
     PublicURL,
     RemoveFromCollectionRequest,
-    SUB_TYPE,
     UpdatePublicURL,
-} from "@/media/collection";
-import { EncryptedMagicMetadata, EnteFile } from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
+} from "ente-media/collection";
+import { EncryptedMagicMetadata, EnteFile } from "ente-media/file";
+import { ItemVisibility } from "ente-media/file-metadata";
 import {
     addToCollection,
     isDefaultHiddenCollection,
     moveToCollection,
-} from "@/new/photos/services/collection";
-import type { CollectionSummary } from "@/new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection";
+import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import {
     CollectionSummaryOrder,
     CollectionsSortBy,
-} from "@/new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection/ui";
 import {
     getCollectionWithSecrets,
     getLocalCollections,
-} from "@/new/photos/services/collections";
+} from "ente-new/photos/services/collections";
 import {
     getLocalFiles,
     groupFilesByCollectionID,
     sortFiles,
-} from "@/new/photos/services/files";
-import type { FamilyData } from "@/new/photos/services/user-details";
-import { batch } from "@/utils/array";
-import HTTPService from "@ente/shared/network/HTTPService";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { getActualKey } from "@ente/shared/user";
-import type { User } from "@ente/shared/user/types";
+} from "ente-new/photos/services/files";
+import HTTPService from "ente-shared/network/HTTPService";
+import { getData } from "ente-shared/storage/localStorage";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
+import { getActualKey } from "ente-shared/user";
+import type { User } from "ente-shared/user/types";
+import { batch } from "ente-utils/array";
 import {
     changeCollectionSubType,
     isQuickLinkCollection,
@@ -58,7 +57,7 @@ const FAVORITE_COLLECTION_NAME = "Favorites";
 const REQUEST_BATCH_SIZE = 1000;
 
 export const createAlbum = (albumName: string) => {
-    return createCollection(albumName, CollectionType.album);
+    return createCollection(albumName, "album");
 };
 
 const createCollection = async (
@@ -136,7 +135,7 @@ const postCollection = async (
 };
 
 export const createFavoritesCollection = () => {
-    return createCollection(FAVORITE_COLLECTION_NAME, CollectionType.favorites);
+    return createCollection(FAVORITE_COLLECTION_NAME, "favorites");
 };
 
 export const addToFavorites = async (
@@ -190,7 +189,7 @@ export const removeFromCollection = async (
     allFiles?: EnteFile[],
 ) => {
     try {
-        const user: User = getData(LS_KEYS.USER);
+        const user: User = getData("user");
         const nonUserFiles = [];
         const userFiles = [];
         for (const file of toRemoveFiles) {
@@ -232,7 +231,7 @@ export const removeUserFiles = async (
 
         const collections = await getLocalCollections();
         const collectionsMap = new Map(collections.map((c) => [c.id, c]));
-        const user: User = getData(LS_KEYS.USER);
+        const user: User = getData("user");
 
         for (const [targetCollectionID, files] of groupedFiles.entries()) {
             const targetCollection = collectionsMap.get(targetCollectionID);
@@ -469,7 +468,7 @@ export const renameCollection = async (
 ) => {
     if (isQuickLinkCollection(collection)) {
         // Convert quick link collection to normal collection on rename
-        await changeCollectionSubType(collection, SUB_TYPE.DEFAULT);
+        await changeCollectionSubType(collection, CollectionSubType.default);
     }
     const token = getToken();
     const cryptoWorker = await sharedCryptoWorker();
@@ -604,7 +603,7 @@ export const updateShareableURL = async (
 export const getFavCollection = async () => {
     const collections = await getLocalCollections();
     for (const collection of collections) {
-        if (collection.type === CollectionType.favorites) {
+        if (collection.type == "favorites") {
             return collection;
         }
     }
@@ -662,17 +661,14 @@ export async function getUncategorizedCollection(
         collections = await getLocalCollections();
     }
     const uncategorizedCollection = collections.find(
-        (collection) => collection.type === CollectionType.uncategorized,
+        (collection) => collection.type == "uncategorized",
     );
 
     return uncategorizedCollection;
 }
 
 export function createUnCategorizedCollection() {
-    return createCollection(
-        UNCATEGORIZED_COLLECTION_NAME,
-        CollectionType.uncategorized,
-    );
+    return createCollection(UNCATEGORIZED_COLLECTION_NAME, "uncategorized");
 }
 
 export async function getDefaultHiddenCollection(): Promise<Collection> {
@@ -685,8 +681,8 @@ export async function getDefaultHiddenCollection(): Promise<Collection> {
 }
 
 export function createHiddenCollection() {
-    return createCollection(HIDDEN_COLLECTION_NAME, CollectionType.album, {
-        subType: SUB_TYPE.DEFAULT_HIDDEN,
+    return createCollection(HIDDEN_COLLECTION_NAME, "album", {
+        subType: CollectionSubType.defaultHidden,
         visibility: ItemVisibility.hidden,
     });
 }
@@ -727,58 +723,3 @@ export async function unhideToCollection(
         throw e;
     }
 }
-
-export const constructUserIDToEmailMap = (
-    user: User,
-    collections: Collection[],
-): Map<number, string> => {
-    try {
-        const userIDToEmailMap = new Map<number, string>();
-        collections.forEach((item) => {
-            const { owner, sharees } = item;
-            if (user.id !== owner.id && owner.email) {
-                userIDToEmailMap.set(owner.id, owner.email);
-            }
-            if (sharees) {
-                sharees.forEach((item) => {
-                    if (item.id !== user.id)
-                        userIDToEmailMap.set(item.id, item.email);
-                });
-            }
-        });
-        return userIDToEmailMap;
-    } catch (e) {
-        log.error("Error Mapping UserId to email:", e);
-        return new Map<number, string>();
-    }
-};
-
-export const constructEmailList = (
-    user: User,
-    collections: Collection[],
-    familyData: FamilyData,
-): string[] => {
-    const emails = collections
-        .map((item) => {
-            const { owner, sharees } = item;
-            if (owner.email && item.owner.id !== user.id) {
-                return [item.owner.email];
-            } else {
-                if (!sharees?.length) {
-                    return [];
-                }
-                const shareeEmails = item.sharees
-                    .filter((sharee) => sharee.email !== user.email)
-                    .map((sharee) => sharee.email);
-                return shareeEmails;
-            }
-        })
-        .flat();
-
-    // adding family members
-    if (familyData) {
-        const family = familyData.members.map((member) => member.email);
-        emails.push(...family);
-    }
-    return Array.from(new Set(emails));
-};

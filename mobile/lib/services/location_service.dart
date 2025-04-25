@@ -34,6 +34,7 @@ class LocationService {
 
   List<City> _cities = [];
 
+  // TODO: lau: consider actually using this in location section
   List<BaseLocation> baseLocations = [];
 
   LocationService(this.prefs) {
@@ -67,7 +68,8 @@ class LocationService {
     List<EnteFile> allFiles,
     String query,
   ) async {
-    if (allFiles.isEmpty && query.isEmpty) {
+    // check if the cities where not loaded when discovery section was loaded
+    if (allFiles.isNotEmpty && _cities.isEmpty && query.isEmpty) {
       reloadLocationDiscoverySection = true;
     }
     final EnteWatch w = EnteWatch("cities_search")..start();
@@ -87,17 +89,11 @@ class LocationService {
     return result;
   }
 
-  /// WARNING: This method does not use computer, consider using [getFilesInCity] instead
-  Map<City, List<EnteFile>> getFilesInCitySync(
-    List<EnteFile> allFiles,
-  ) {
-    if (allFiles.isEmpty) reloadLocationDiscoverySection = true;
-    final result = getCityResults({
-      "query": '',
-      "cities": _cities,
-      "files": allFiles,
-    });
-    return result;
+  Future<List<City>> getCities() async {
+    if (_cities.isEmpty) {
+      await _loadCities();
+    }
+    return _cities;
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> getLocationTags() {

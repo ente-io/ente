@@ -1,8 +1,11 @@
-import { assertionFailed } from "@/base/assert";
-import { newID } from "@/base/id";
-import { ensureLocalUser } from "@/base/local-user";
-import type { EnteFile } from "@/media/file";
-import { filePublicMagicMetadata, metadataHash } from "@/media/file-metadata";
+import { assertionFailed } from "ente-base/assert";
+import { newID } from "ente-base/id";
+import { ensureLocalUser } from "ente-base/local-user";
+import type { EnteFile } from "ente-media/file";
+import {
+    filePublicMagicMetadata,
+    metadataHash,
+} from "ente-media/file-metadata";
 import {
     addToCollection,
     createCollectionNameByID,
@@ -10,7 +13,7 @@ import {
 } from "./collection";
 import { getLocalCollections } from "./collections";
 import { getLocalFiles } from "./files";
-import { syncFilesAndCollections } from "./sync";
+import { syncCollectionAndFiles } from "./sync";
 
 /**
  * A group of duplicates as shown in the UI.
@@ -293,7 +296,7 @@ export const removeSelectedDuplicateGroups = async (
     }
 
     // Sync our local state.
-    await syncFilesAndCollections();
+    await syncCollectionAndFiles();
     tickProgress();
 
     return new Set(selectedDuplicateGroups.map((g) => g.id));

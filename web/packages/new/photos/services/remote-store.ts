@@ -1,5 +1,5 @@
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import { apiURL } from "@/base/origins";
+import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
+import { apiURL } from "ente-base/origins";
 import { z } from "zod";
 
 /**

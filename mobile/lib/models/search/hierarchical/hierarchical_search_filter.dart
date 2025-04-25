@@ -12,6 +12,7 @@ enum FilterTypeNames {
   locationFilter,
   magicFilter,
   topLevelGenericFilter,
+  uploaderFilter,
   onlyThemFilter,
 }
 

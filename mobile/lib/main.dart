@@ -16,7 +16,6 @@ import "package:media_kit/media_kit.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/app.dart';
-import "package:photos/audio_session_handler.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
@@ -38,7 +37,6 @@ import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
-import 'package:photos/services/memories_service.dart';
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/push_service.dart';
@@ -46,6 +44,7 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
+import "package:photos/services/wake_lock_service.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import "package:photos/utils/email_util.dart";
@@ -68,10 +67,6 @@ const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
-  //For audio to work on vidoes in iOS when in silent mode.
-  if (Platform.isIOS) {
-    unawaited(AudioSessionHandler.setAudioSessionCategory());
-  }
   MediaKit.ensureInitialized();
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
@@ -110,9 +105,6 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
-    if (Platform.isAndroid) {
-      unawaited(_scheduleFGHomeWidgetSync());
-    }
     unawaited(_scheduleFGSync('appStart in FG'));
   });
 }
@@ -125,13 +117,10 @@ ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
 }
 
 Future<void> _homeWidgetSync() async {
-  if (!Platform.isAndroid) return;
   try {
-    if (await HomeWidgetService.instance.countHomeWidgets() != 0) {
-      await HomeWidgetService.instance.initHomeWidget();
-    }
+    await HomeWidgetService.instance.initHomeWidget();
   } catch (e, s) {
-    _logger.severe("Error in initSlideshowWidget", e, s);
+    _logger.severe("Error in syncing home widget", e, s);
   }
 }
 
@@ -246,7 +235,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("CollectionsService init done $tlog");
 
     FavoritesService.instance.initFav().ignore();
-    MemoriesService.instance.init(preferences);
     LocalFileUpdateService.instance.init(preferences);
     SearchService.instance.init();
     FileDataService.instance.init(preferences);
@@ -260,16 +248,16 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("LocalSyncService init done $tlog");
 
     RemoteSyncService.instance.init(preferences);
+    _logger.info("RemoteFileMLService done $tlog");
 
     _logger.info("SyncService init $tlog");
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
-    _logger.info("RemoteFileMLService done $tlog");
-    if (!isBackground &&
-        Platform.isAndroid &&
-        await HomeWidgetService.instance.countHomeWidgets() == 0) {
-      unawaited(HomeWidgetService.instance.initHomeWidget());
+    await HomeWidgetService.instance.init(preferences);
+
+    if (!isBackground) {
+      await _scheduleFGHomeWidgetSync();
     }
 
     if (Platform.isIOS) {
@@ -289,12 +277,31 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       MLDataDB.instance,
       preferences,
     );
+    EnteWakeLockService.instance.init(preferences);
+    logLocalSettings();
     initComplete = true;
     _logger.info("Initialization done $tlog");
   } catch (e, s) {
     _logger.severe("Error in init ", e, s);
     rethrow;
   }
+}
+
+void logLocalSettings() {
+  _logger.info("Show memories: ${memoriesCacheService.showAnyMemories}");
+  _logger
+      .info("Smart memories enabled: ${localSettings.isSmartMemoriesEnabled}");
+  _logger.info("Ml is enabled: ${flagService.hasGrantedMLConsent}");
+  _logger.info(
+    "ML local indexing is enabled: ${localSettings.isMLLocalIndexingEnabled}",
+  );
+  _logger.info(
+    "Multipart upload is enabled: ${localSettings.userEnabledMultiplePart}",
+  );
+  _logger.info("Gallery grid size: ${localSettings.getPhotoGridSize()}");
+  _logger.info(
+    "Video streaming is enalbed: ${PreviewVideoStore.instance.isVideoStreamingEnabled}",
+  );
 }
 
 void _heartBeatOnInit(int i) {

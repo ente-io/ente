@@ -7,9 +7,9 @@
  * there.
  */
 
-import { CenteredFill } from "@/base/components/containers";
-import type { SearchSuggestion } from "@/new/photos/services/search/types";
 import { Paper, Stack, Typography } from "@mui/material";
+import { CenteredFill } from "ente-base/components/containers";
+import type { SearchSuggestion } from "ente-new/photos/services/search/types";
 import { t } from "i18next";
 import React, { useState } from "react";
 import { enableML } from "../../services/ml";
@@ -100,7 +100,10 @@ export const PeopleEmptyStateDisabled: React.FC = () => {
 
     return (
         <Stack sx={{ alignItems: "center", flex: 1, overflow: "auto" }}>
-            <Paper sx={{ maxWidth: "390px", padding: "4px", mb: "2rem" }}>
+            <Paper
+                // Top margin is to prevent clipping of the shadow.
+                sx={{ maxWidth: "390px", padding: "4px", mt: 1, mb: "2rem" }}
+            >
                 {!showConsent ? (
                     <EnableML onEnable={() => setShowConsent(true)} />
                 ) : (

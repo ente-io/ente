@@ -26,6 +26,7 @@ import "package:photos/utils/share_util.dart";
 enum ResultType {
   collection,
   file,
+  uploader,
   location,
   locationSuggestion,
   month,

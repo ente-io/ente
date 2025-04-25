@@ -1,5 +1,5 @@
-import type { SelectionContext } from "@/new/photos/components/gallery";
-import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
+import type { SelectionContext } from "ente-new/photos/components/gallery";
+import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
 import { SetSelectedState, type SelectedState } from "types/gallery";
 
 // TODO: All this is unnecessarily complex, and needs reworking.
@@ -14,7 +14,7 @@ export const handleSelectCreator =
     ) =>
     ({ id, ownerID }: { id: number; ownerID: number }, index?: number) =>
     (checked: boolean) => {
-        if (typeof index !== "undefined") {
+        if (typeof index != "undefined") {
             if (checked) {
                 setRangeStart(index);
             } else {

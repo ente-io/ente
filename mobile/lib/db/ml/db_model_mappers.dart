@@ -1,9 +1,10 @@
 import "dart:convert";
 
-import 'package:photos/db/ml/db_fields.dart';
+import 'package:photos/db/ml/schema.dart';
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/ml/face/detection.dart";
 import "package:photos/models/ml/face/face.dart";
+import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/ml_versions.dart";
 
 Map<String, dynamic> mapRemoteToFaceDB(Face face) {
@@ -35,5 +36,15 @@ Face mapRowToFace(Map<String, dynamic> row) {
       imageWidth: row[imageWidth] as int,
       imageHeight: row[imageHeight] as int,
     ),
+  );
+}
+
+FaceWithoutEmbedding mapRowToFaceWithoutEmbedding(Map<String, dynamic> row) {
+  return FaceWithoutEmbedding(
+    row[faceIDColumn] as String,
+    row[fileIDColumn] as int,
+    row[faceScore] as double,
+    Detection.fromJson(json.decode(row[faceDetectionColumn] as String)),
+    row[faceBlur] as double,
   );
 }

@@ -1,17 +1,10 @@
 // TODO: Review this file
 /* eslint-disable @typescript-eslint/prefer-optional-chain */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-import { sharedCryptoWorker } from "@/base/crypto";
-import type { Collection } from "@/media/collection";
-import type { EnteFile, MagicMetadataCore } from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
-
-export function isArchivedFile(item: EnteFile): boolean {
-    if (!item || !item.magicMetadata || !item.magicMetadata.data) {
-        return false;
-    }
-    return item.magicMetadata.data.visibility === ItemVisibility.archived;
-}
+import { sharedCryptoWorker } from "ente-base/crypto";
+import type { Collection } from "ente-media/collection";
+import { type MagicMetadataCore } from "ente-media/file";
+import { ItemVisibility } from "ente-media/file-metadata";
 
 export const isArchivedCollection = (item: Collection) => {
     if (!item) {
@@ -35,8 +28,8 @@ export function isPinnedCollection(item: Collection) {
         !item ||
         !item.magicMetadata ||
         !item.magicMetadata.data ||
-        typeof item.magicMetadata.data === "string" ||
-        typeof item.magicMetadata.data.order === "undefined"
+        typeof item.magicMetadata.data == "string" ||
+        typeof item.magicMetadata.data.order == "undefined"
     ) {
         return false;
     }
@@ -54,7 +47,7 @@ export async function updateMagicMetadata<T>(
         originalMagicMetadata = getNewMagicMetadata<T>();
     }
 
-    if (typeof originalMagicMetadata?.data === "string") {
+    if (typeof originalMagicMetadata?.data == "string") {
         // TODO: When converting this (and other parses of magic metadata) to
         // use zod, remember to use passthrough.
         //

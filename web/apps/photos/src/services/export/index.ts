@@ -1,27 +1,30 @@
-import { ensureElectron } from "@/base/electron";
-import { joinPath } from "@/base/file-name";
-import log from "@/base/log";
-import { downloadManager } from "@/gallery/services/download";
-import { writeStream } from "@/gallery/utils/native-stream";
-import type { Collection } from "@/media/collection";
-import { mergeMetadata, type EnteFile } from "@/media/file";
-import { fileLocation, type Metadata } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
+import { ensureElectron } from "ente-base/electron";
+import { joinPath } from "ente-base/file-name";
+import log from "ente-base/log";
+import { downloadManager } from "ente-gallery/services/download";
+import { writeStream } from "ente-gallery/utils/native-stream";
+import type { Collection } from "ente-media/collection";
+import { mergeMetadata, type EnteFile } from "ente-media/file";
+import { fileLocation, type Metadata } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { decodeLivePhoto } from "ente-media/live-photo";
 import {
     createCollectionNameByID,
     getCollectionUserFacingName,
-} from "@/new/photos/services/collection";
-import { getAllLocalCollections } from "@/new/photos/services/collections";
+} from "ente-new/photos/services/collection";
+import { getAllLocalCollections } from "ente-new/photos/services/collections";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
-} from "@/new/photos/services/export";
-import { getAllLocalFiles } from "@/new/photos/services/files";
-import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
-import { PromiseQueue } from "@/utils/promise";
-import { CustomError } from "@ente/shared/error";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+} from "ente-new/photos/services/export";
+import { getAllLocalFiles } from "ente-new/photos/services/files";
+import {
+    safeDirectoryName,
+    safeFileName,
+} from "ente-new/photos/utils/native-fs";
+import { CustomError } from "ente-shared/error";
+import { getData, setData } from "ente-shared/storage/localStorage";
+import { PromiseQueue } from "ente-utils/promise";
 import i18n from "i18next";
 import { migrateExport, type ExportRecord } from "./migration";
 
@@ -34,16 +37,18 @@ const exportRecordFileName = "export_status.json";
  */
 const exportDirectoryName = "Ente Photos";
 
-export enum ExportStage {
-    INIT = 0,
-    MIGRATION = 1,
-    STARTING = 2,
-    EXPORTING_FILES = 3,
-    TRASHING_DELETED_FILES = 4,
-    RENAMING_COLLECTION_FOLDERS = 5,
-    TRASHING_DELETED_COLLECTIONS = 6,
-    FINISHED = 7,
-}
+export const ExportStage = {
+    init: 0,
+    migration: 1,
+    starting: 2,
+    exportingFiles: 3,
+    trashingDeletedFiles: 4,
+    renamingCollectionFolders: 5,
+    trashingDeletedCollections: 6,
+    finished: 7,
+} as const;
+
+export type ExportStage = (typeof ExportStage)[keyof typeof ExportStage];
 
 export interface ExportProgress {
     success: number;
@@ -63,7 +68,7 @@ export type FileExportNames = Record<string, string>;
 export const NULL_EXPORT_RECORD: ExportRecord = {
     version: 3,
     lastAttemptTimestamp: null,
-    stage: ExportStage.INIT,
+    stage: ExportStage.init,
     fileExportNames: {},
     collectionExportNames: {},
 };
@@ -120,7 +125,7 @@ class ExportService {
             if (this.exportSettings) {
                 return this.exportSettings;
             }
-            const exportSettings = getData(LS_KEYS.EXPORT);
+            const exportSettings = getData("export");
             this.exportSettings = exportSettings;
             return exportSettings;
         } catch (e) {
@@ -134,7 +139,7 @@ class ExportService {
             const exportSettings = this.getExportSettings();
             const newSettings = { ...exportSettings, ...newData };
             this.exportSettings = newSettings;
-            setData(LS_KEYS.EXPORT, newSettings);
+            setData("export", newSettings);
         } catch (e) {
             log.error("updateExportSettings failed", e);
             throw e;
@@ -239,23 +244,23 @@ class ExportService {
     async preExport(exportFolder: string) {
         await this.verifyExportFolderExists(exportFolder);
         const exportRecord = await this.getExportRecord(exportFolder);
-        await this.updateExportStage(ExportStage.MIGRATION);
+        await this.updateExportStage(ExportStage.migration);
         await this.runMigration(
             exportFolder,
             exportRecord,
             this.updateExportProgress.bind(this),
         );
-        await this.updateExportStage(ExportStage.STARTING);
+        await this.updateExportStage(ExportStage.starting);
     }
 
     async postExport() {
         try {
             const exportFolder = this.getExportSettings()?.folder;
             if (!(await this.exportFolderExists(exportFolder))) {
-                this.uiUpdater.setExportStage(ExportStage.INIT);
+                this.uiUpdater.setExportStage(ExportStage.init);
                 return;
             }
-            await this.updateExportStage(ExportStage.FINISHED);
+            await this.updateExportStage(ExportStage.finished);
             await this.updateLastExportTime(Date.now());
 
             const exportRecord = await this.getExportRecord(exportFolder);
@@ -401,7 +406,7 @@ class ExportService {
                 });
             };
             if (renamedCollections?.length > 0) {
-                this.updateExportStage(ExportStage.RENAMING_COLLECTION_FOLDERS);
+                this.updateExportStage(ExportStage.renamingCollectionFolders);
                 log.info(`renaming ${renamedCollections.length} collections`);
                 await this.collectionRenamer(
                     exportFolder,
@@ -412,7 +417,7 @@ class ExportService {
             }
 
             if (removedFileUIDs?.length > 0) {
-                this.updateExportStage(ExportStage.TRASHING_DELETED_FILES);
+                this.updateExportStage(ExportStage.trashingDeletedFiles);
                 log.info(`trashing ${removedFileUIDs.length} files`);
                 await this.fileTrasher(
                     exportFolder,
@@ -422,7 +427,7 @@ class ExportService {
                 );
             }
             if (filesToExport?.length > 0) {
-                this.updateExportStage(ExportStage.EXPORTING_FILES);
+                this.updateExportStage(ExportStage.exportingFiles);
                 log.info(`exporting ${filesToExport.length} files`);
                 await this.fileExporter(
                     filesToExport,
@@ -435,9 +440,7 @@ class ExportService {
                 );
             }
             if (deletedExportedCollections?.length > 0) {
-                this.updateExportStage(
-                    ExportStage.TRASHING_DELETED_COLLECTIONS,
-                );
+                this.updateExportStage(ExportStage.trashingDeletedCollections);
                 log.info(
                     `removing ${deletedExportedCollections.length} collections`,
                 );
@@ -1398,11 +1401,11 @@ const getGoogleLikeMetadataFile = (
     const result: Record<string, unknown> = {
         title: fileExportName,
         creationTime: {
-            timestamp: creationTime,
+            timestamp: `${creationTime}`,
             formatted: dateTimeFormatter.format(creationTime * 1000),
         },
         modificationTime: {
-            timestamp: modificationTime,
+            timestamp: `${modificationTime}`,
             formatted: dateTimeFormatter.format(modificationTime * 1000),
         },
     };
@@ -1449,7 +1452,7 @@ const parseLivePhotoExportName = (
 };
 
 const isExportInProgress = (exportStage: ExportStage) =>
-    exportStage > ExportStage.INIT && exportStage < ExportStage.FINISHED;
+    exportStage > ExportStage.init && exportStage < ExportStage.finished;
 
 /**
  * Move {@link fileName} in {@link collectionName} to the special per-collection

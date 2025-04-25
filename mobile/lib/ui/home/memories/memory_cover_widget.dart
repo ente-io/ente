@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
@@ -19,7 +18,7 @@ class MemoryCoverWidget extends StatefulWidget {
   static const aspectRatio = 0.68;
   static const horizontalPadding = 2.5;
   final double maxScaleOffsetX;
-  final String? title;
+  final String title;
 
   const MemoryCoverWidget({
     required this.memories,
@@ -28,7 +27,7 @@ class MemoryCoverWidget extends StatefulWidget {
     required this.maxHeight,
     required this.maxWidth,
     required this.maxScaleOffsetX,
-    this.title,
+    required this.title,
     super.key,
   });
 
@@ -47,12 +46,8 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
 
     final widthOfScreen = MediaQuery.sizeOf(context).width;
     final index = _getNextMemoryIndex();
-    // TODO: lau: remove (I) from name when opening up the feature flag
-    final title = widget.title != null
-        ? widget.title! == "filler"
-            ? _getTitle(widget.memories[index]) + "(I)"
-            : widget.title! + "(I)"
-        : _getTitle(widget.memories[index]);
+    final title = widget.title;
+
     final memory = widget.memories[index];
     final isSeen = memory.isSeen();
     final brightness =
@@ -246,12 +241,5 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
       return 0;
     }
     return lastSeenIndex + 1;
-  }
-
-  String _getTitle(Memory memory) {
-    final present = DateTime.now();
-    final then = DateTime.fromMicrosecondsSinceEpoch(memory.file.creationTime!);
-    final diffInYears = present.year - then.year;
-    return S.of(context).yearsAgo(diffInYears);
   }
 }

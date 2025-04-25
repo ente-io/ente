@@ -1,5 +1,3 @@
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import type { ButtonProps, ModalProps } from "@mui/material";
 import {
     Box,
@@ -10,6 +8,8 @@ import {
     Typography,
     type DialogProps,
 } from "@mui/material";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { t } from "i18next";
 import React, { useState } from "react";
 import log from "../log";
@@ -91,7 +91,7 @@ export interface MiniDialogAttributes {
          * be shown on the button until the promise settles.
          *
          * If this function is not provided, or if the function completes /
-         * fullfills, then then the dialog is automatically closed.
+         * fulfills, then then the dialog is automatically closed.
          *
          * Otherwise (that is, if the provided function throws), the dialog
          * remains open, showing a generic error.
@@ -153,7 +153,7 @@ export interface MiniDialogAttributes {
     buttonDirection?: "row" | "column";
 }
 
-type MiniDialogProps = Pick<DialogProps, "open" | "sx"> & {
+type MiniDialogProps = Pick<DialogProps, "open"> & {
     onClose: () => void;
     attributes?: MiniDialogAttributes;
 };
@@ -168,7 +168,7 @@ type MiniDialogProps = Pick<DialogProps, "open" | "sx"> & {
  */
 export const AttributedMiniDialog: React.FC<
     React.PropsWithChildren<MiniDialogProps>
-> = ({ open, onClose, sx, attributes, children }) => {
+> = ({ open, onClose, attributes, children }) => {
     const [phase, setPhase] = useState<
         "loading" | "secondary-loading" | "failed" | undefined
     >();
@@ -268,7 +268,7 @@ export const AttributedMiniDialog: React.FC<
 
     return (
         <Dialog
-            {...{ open, sx }}
+            {...{ open }}
             onClose={handleClose}
             fullWidth
             slotProps={{ paper: { sx: { maxWidth: "360px" } } }}

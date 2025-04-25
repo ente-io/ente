@@ -2892,7 +2892,7 @@ class S {
     );
   }
 
-  /// `{count, plural, zero{no memories} one{{formattedCount} memory} other{{formattedCount} memories}}`
+  /// `{count, plural, =0{no memories} one{{formattedCount} memory} other{{formattedCount} memories}}`
   String memoryCount(int count, String formattedCount) {
     return Intl.plural(
       count,
@@ -5648,7 +5648,7 @@ class S {
     );
   }
 
-  /// `{count, plural, one {Move item} other {Move items}}`
+  /// `{count, plural, =1 {Move item} other {Move items}}`
   String moveItem(num count) {
     return Intl.plural(
       count,
@@ -5660,7 +5660,7 @@ class S {
     );
   }
 
-  /// `{count, plural, one {Add item} other {Add items}}`
+  /// `{count, plural, =1 {Add item} other {Add items}}`
   String addItem(num count) {
     return Intl.plural(
       count,
@@ -6526,7 +6526,7 @@ class S {
     );
   }
 
-  /// `{count, plural, one {It can be deleted from the device to free up {formattedSize}} other {They can be deleted from the device to free up {formattedSize}}}`
+  /// `{count, plural, =1 {It can be deleted from the device to free up {formattedSize}} other {They can be deleted from the device to free up {formattedSize}}}`
   String freeUpSpaceSaving(num count, Object formattedSize) {
     return Intl.plural(
       count,
@@ -6560,7 +6560,7 @@ class S {
     );
   }
 
-  /// `You can still access {count, plural, one {it} other {them}} on Ente as long as you have an active subscription`
+  /// `You can still access {count, plural, =1 {it} other {them}} on Ente as long as you have an active subscription`
   String freeUpAccessPostDelete(int count) {
     return Intl.message(
       'You can still access ${Intl.plural(count, one: 'it', other: 'them')} on Ente as long as you have an active subscription',
@@ -8950,7 +8950,7 @@ class S {
     );
   }
 
-  /// `{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}`
+  /// `{count, plural, =0 {Add viewer} =1 {Add viewer} other {Add viewers}}`
   String addViewers(num count) {
     return Intl.plural(
       count,
@@ -8963,7 +8963,7 @@ class S {
     );
   }
 
-  /// `{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}`
+  /// `{count, plural, =0 {Add collaborator} =1 {Add collaborator} other {Add collaborators}}`
   String addCollaborators(num count) {
     return Intl.plural(
       count,
@@ -10127,11 +10127,11 @@ class S {
     );
   }
 
-  /// `{count, plural, =0 {Added 0 viewer} =1 {Added 1 viewer} other {Added {count} viewers}}`
+  /// `{count, plural, =0 {Added 0 viewers} =1 {Added 1 viewer} other {Added {count} viewers}}`
   String viewersSuccessfullyAdded(int count) {
     return Intl.plural(
       count,
-      zero: 'Added 0 viewer',
+      zero: 'Added 0 viewers',
       one: 'Added 1 viewer',
       other: 'Added $count viewers',
       name: 'viewersSuccessfullyAdded',
@@ -10355,11 +10355,11 @@ class S {
     );
   }
 
-  /// `{count, plural, =0 {0 photo} =1 {1 photo} other {{count} photos}}`
+  /// `{count, plural, =0 {0 photos} =1 {1 photo} other {{count} photos}}`
   String photosCount(int count) {
     return Intl.plural(
       count,
-      zero: '0 photo',
+      zero: '0 photos',
       one: '1 photo',
       other: '$count photos',
       name: 'photosCount',
@@ -10405,66 +10405,6 @@ class S {
       name: 'selectAllShort',
       desc:
           'Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos.',
-      args: [],
-    );
-  }
-
-  /// `Magic Search Improvement`
-  String get changeLogMagicSearchImprovementTitle {
-    return Intl.message(
-      'Magic Search Improvement',
-      name: 'changeLogMagicSearchImprovementTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `We have improved magic search to become much faster, so you don\'t have to wait to find what you\'re looking for.`
-  String get changeLogMagicSearchImprovementContent {
-    return Intl.message(
-      'We have improved magic search to become much faster, so you don\\\'t have to wait to find what you\\\'re looking for.',
-      name: 'changeLogMagicSearchImprovementContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Backup Status`
-  String get changeLogBackupStatusTitle {
-    return Intl.message(
-      'Backup Status',
-      name: 'changeLogBackupStatusTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `We\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.`
-  String get changeLogBackupStatusContent {
-    return Intl.message(
-      'We\\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.',
-      name: 'changeLogBackupStatusContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Discover`
-  String get changeLogDiscoverTitle {
-    return Intl.message(
-      'Discover',
-      name: 'changeLogDiscoverTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\'s a place to find photos that might be important for you.\n\nOnly available if you have enabled Machine Learning.`
-  String get changeLogDiscoverContent {
-    return Intl.message(
-      'Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning.',
-      name: 'changeLogDiscoverContent',
-      desc: '',
       args: [],
     );
   }
@@ -11240,6 +11180,601 @@ class S {
       args: [],
     );
   }
+
+  /// `Edit time`
+  String get editTime {
+    return Intl.message(
+      'Edit time',
+      name: 'editTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select time`
+  String get selectTime {
+    return Intl.message(
+      'Select time',
+      name: 'selectTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select date`
+  String get selectDate {
+    return Intl.message(
+      'Select date',
+      name: 'selectDate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Previous`
+  String get previous {
+    return Intl.message(
+      'Previous',
+      name: 'previous',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select one date and time for all`
+  String get selectOneDateAndTimeForAll {
+    return Intl.message(
+      'Select one date and time for all',
+      name: 'selectOneDateAndTimeForAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select start of range`
+  String get selectStartOfRange {
+    return Intl.message(
+      'Select start of range',
+      name: 'selectStartOfRange',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This will make the date and time of all selected photos the same.`
+  String get thisWillMakeTheDateAndTimeOfAllSelected {
+    return Intl.message(
+      'This will make the date and time of all selected photos the same.',
+      name: 'thisWillMakeTheDateAndTimeOfAllSelected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This is the first in the group. Other selected photos will automatically shift based on this new date`
+  String get allWillShiftRangeBasedOnFirst {
+    return Intl.message(
+      'This is the first in the group. Other selected photos will automatically shift based on this new date',
+      name: 'allWillShiftRangeBasedOnFirst',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New range`
+  String get newRange {
+    return Intl.message(
+      'New range',
+      name: 'newRange',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select one date and time`
+  String get selectOneDateAndTime {
+    return Intl.message(
+      'Select one date and time',
+      name: 'selectOneDateAndTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Move selected photos to one date`
+  String get moveSelectedPhotosToOneDate {
+    return Intl.message(
+      'Move selected photos to one date',
+      name: 'moveSelectedPhotosToOneDate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shift dates and time`
+  String get shiftDatesAndTime {
+    return Intl.message(
+      'Shift dates and time',
+      name: 'shiftDatesAndTime',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Photos keep relative time difference`
+  String get photosKeepRelativeTimeDifference {
+    return Intl.message(
+      'Photos keep relative time difference',
+      name: 'photosKeepRelativeTimeDifference',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =0 {No photos} =1 {1 photo} other {{count} photos}}`
+  String photocountPhotos(int count) {
+    return Intl.plural(
+      count,
+      zero: 'No photos',
+      one: '1 photo',
+      other: '$count photos',
+      name: 'photocountPhotos',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `App icon`
+  String get appIcon {
+    return Intl.message(
+      'App icon',
+      name: 'appIcon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not this person?`
+  String get notThisPerson {
+    return Intl.message(
+      'Not this person?',
+      name: 'notThisPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Selected items will be removed from this person, but not deleted from your library.`
+  String get selectedItemsWillBeRemovedFromThisPerson {
+    return Intl.message(
+      'Selected items will be removed from this person, but not deleted from your library.',
+      name: 'selectedItemsWillBeRemovedFromThisPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{dateFormat} through the years`
+  String throughTheYears(Object dateFormat) {
+    return Intl.message(
+      '$dateFormat through the years',
+      name: 'throughTheYears',
+      desc: '',
+      args: [dateFormat],
+    );
+  }
+
+  /// `This week through the years`
+  String get thisWeekThroughTheYears {
+    return Intl.message(
+      'This week through the years',
+      name: 'thisWeekThroughTheYears',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1 {This week, {count} year ago} other {This week, {count} years ago}}`
+  String thisWeekXYearsAgo(num count) {
+    return Intl.plural(
+      count,
+      one: 'This week, $count year ago',
+      other: 'This week, $count years ago',
+      name: 'thisWeekXYearsAgo',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `You and {name}`
+  String youAndThem(Object name) {
+    return Intl.message(
+      'You and $name',
+      name: 'youAndThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Admiring {name}`
+  String admiringThem(Object name) {
+    return Intl.message(
+      'Admiring $name',
+      name: 'admiringThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Embracing {name}`
+  String embracingThem(Object name) {
+    return Intl.message(
+      'Embracing $name',
+      name: 'embracingThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Party with {name}`
+  String partyWithThem(Object name) {
+    return Intl.message(
+      'Party with $name',
+      name: 'partyWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Hiking with {name}`
+  String hikingWithThem(Object name) {
+    return Intl.message(
+      'Hiking with $name',
+      name: 'hikingWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Feasting with {name}`
+  String feastingWithThem(Object name) {
+    return Intl.message(
+      'Feasting with $name',
+      name: 'feastingWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Selfies with {name}`
+  String selfiesWithThem(Object name) {
+    return Intl.message(
+      'Selfies with $name',
+      name: 'selfiesWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Posing with {name}`
+  String posingWithThem(Object name) {
+    return Intl.message(
+      'Posing with $name',
+      name: 'posingWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Beautiful views with {name}`
+  String backgroundWithThem(Object name) {
+    return Intl.message(
+      'Beautiful views with $name',
+      name: 'backgroundWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Sports with {name}`
+  String sportsWithThem(Object name) {
+    return Intl.message(
+      'Sports with $name',
+      name: 'sportsWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Road trip with {name}`
+  String roadtripWithThem(Object name) {
+    return Intl.message(
+      'Road trip with $name',
+      name: 'roadtripWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Spotlight on yourself`
+  String get spotlightOnYourself {
+    return Intl.message(
+      'Spotlight on yourself',
+      name: 'spotlightOnYourself',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Spotlight on {name}`
+  String spotlightOnThem(Object name) {
+    return Intl.message(
+      'Spotlight on $name',
+      name: 'spotlightOnThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `{name} is {age}!`
+  String personIsAge(Object name, Object age) {
+    return Intl.message(
+      '$name is $age!',
+      name: 'personIsAge',
+      desc: '',
+      args: [name, age],
+    );
+  }
+
+  /// `{name} turning {age} soon`
+  String personTurningAge(Object name, Object age) {
+    return Intl.message(
+      '$name turning $age soon',
+      name: 'personTurningAge',
+      desc: '',
+      args: [name, age],
+    );
+  }
+
+  /// `Last time with {name}`
+  String lastTimeWithThem(Object name) {
+    return Intl.message(
+      'Last time with $name',
+      name: 'lastTimeWithThem',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Trip to {location}`
+  String tripToLocation(Object location) {
+    return Intl.message(
+      'Trip to $location',
+      name: 'tripToLocation',
+      desc: '',
+      args: [location],
+    );
+  }
+
+  /// `Trip in {year}`
+  String tripInYear(Object year) {
+    return Intl.message(
+      'Trip in $year',
+      name: 'tripInYear',
+      desc: '',
+      args: [year],
+    );
+  }
+
+  /// `Last year's trip`
+  String get lastYearsTrip {
+    return Intl.message(
+      'Last year\'s trip',
+      name: 'lastYearsTrip',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On the horizon`
+  String get sunrise {
+    return Intl.message(
+      'On the horizon',
+      name: 'sunrise',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Over the hills`
+  String get mountains {
+    return Intl.message(
+      'Over the hills',
+      name: 'mountains',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The green life`
+  String get greenery {
+    return Intl.message(
+      'The green life',
+      name: 'greenery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sand and sea`
+  String get beach {
+    return Intl.message(
+      'Sand and sea',
+      name: 'beach',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In the city`
+  String get city {
+    return Intl.message(
+      'In the city',
+      name: 'city',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `In the moonlight`
+  String get moon {
+    return Intl.message(
+      'In the moonlight',
+      name: 'moon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On the road again`
+  String get onTheRoad {
+    return Intl.message(
+      'On the road again',
+      name: 'onTheRoad',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Culinary delight`
+  String get food {
+    return Intl.message(
+      'Culinary delight',
+      name: 'food',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Furry companions`
+  String get pets {
+    return Intl.message(
+      'Furry companions',
+      name: 'pets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New Icon`
+  String get cLIcon {
+    return Intl.message(
+      'New Icon',
+      name: 'cLIcon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Finally, a new app icon, that we think best represents our work. We've also added an icon-switcher so you can continue using the old icon.`
+  String get cLIconDesc {
+    return Intl.message(
+      'Finally, a new app icon, that we think best represents our work. We\'ve also added an icon-switcher so you can continue using the old icon.',
+      name: 'cLIconDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Memories`
+  String get cLMemories {
+    return Intl.message(
+      'Memories',
+      name: 'cLMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Rediscover your special moments - spotlight on your favorite people, your trips and holidays, your best clicks, and much more. Turn on machine learning, tag yourself and name your friends for the best experience.`
+  String get cLMemoriesDesc {
+    return Intl.message(
+      'Rediscover your special moments - spotlight on your favorite people, your trips and holidays, your best clicks, and much more. Turn on machine learning, tag yourself and name your friends for the best experience.',
+      name: 'cLMemoriesDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Widgets`
+  String get cLWidgets {
+    return Intl.message(
+      'Widgets',
+      name: 'cLWidgets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app.`
+  String get cLWidgetsDesc {
+    return Intl.message(
+      'Home screen widgets that are integrated with memories are now available. They will show your special moments without opening the app.',
+      name: 'cLWidgetsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Family Plan Limits`
+  String get cLFamilyPlan {
+    return Intl.message(
+      'Family Plan Limits',
+      name: 'cLFamilyPlan',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can now set limits on how much storage your family members can use.`
+  String get cLFamilyPlanDesc {
+    return Intl.message(
+      'You can now set limits on how much storage your family members can use.',
+      name: 'cLFamilyPlanDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bulk Edit dates`
+  String get cLBulkEdit {
+    return Intl.message(
+      'Bulk Edit dates',
+      name: 'cLBulkEdit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.`
+  String get cLBulkEditDesc {
+    return Intl.message(
+      'You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.',
+      name: 'cLBulkEditDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Curated memories`
+  String get curatedMemories {
+    return Intl.message(
+      'Curated memories',
+      name: 'curatedMemories',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -11270,11 +11805,15 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'km'),
       Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'lt'),
+      Locale.fromSubtags(languageCode: 'lv'),
       Locale.fromSubtags(languageCode: 'ml'),
       Locale.fromSubtags(languageCode: 'nl'),
       Locale.fromSubtags(languageCode: 'no'),
+      Locale.fromSubtags(languageCode: 'or'),
       Locale.fromSubtags(languageCode: 'pl'),
       Locale.fromSubtags(languageCode: 'pt'),
+      Locale.fromSubtags(languageCode: 'pt', countryCode: 'BR'),
+      Locale.fromSubtags(languageCode: 'pt', countryCode: 'PT'),
       Locale.fromSubtags(languageCode: 'ro'),
       Locale.fromSubtags(languageCode: 'ru'),
       Locale.fromSubtags(languageCode: 'sl'),

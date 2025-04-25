@@ -1,8 +1,8 @@
-import { TitledMiniDialog } from "@/base/components/MiniDialog";
-import log from "@/base/log";
+import { TitledMiniDialog } from "ente-base/components/MiniDialog";
+import log from "ente-base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
-} from "@ente/shared/components/SingleInputForm";
+} from "ente-shared/components/SingleInputForm";
 import { t } from "i18next";
 import React from "react";
 

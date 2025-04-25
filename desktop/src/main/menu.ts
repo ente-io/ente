@@ -7,7 +7,7 @@ import {
 } from "electron";
 import { allowWindowClose } from "../main";
 import { forceCheckForAppUpdates } from "./services/app-update";
-import { userPreferences } from "./stores/user-preferences";
+import { setShouldHideDockIcon, shouldHideDockIcon } from "./services/store";
 
 /** Create and return the entries in the app's main menu bar */
 export const createApplicationMenu = (mainWindow: BrowserWindow) => {
@@ -15,7 +15,7 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
     //
     // Whenever the menu is redrawn the current value of these variables is used
     // to set the checked state for the various settings checkboxes.
-    let shouldHideDockIcon = !!userPreferences.get("hideDockIcon");
+    let hideDockIcon = shouldHideDockIcon();
 
     const macOSOnly = (options: MenuItemConstructorOptions[]) =>
         process.platform == "darwin" ? options : [];
@@ -24,9 +24,9 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
 
     const toggleHideDockIcon = () => {
         // Persist
-        userPreferences.set("hideDockIcon", !shouldHideDockIcon);
+        setShouldHideDockIcon(!hideDockIcon);
         // And update the in-memory state
-        shouldHideDockIcon = !shouldHideDockIcon;
+        hideDockIcon = !hideDockIcon;
     };
 
     const handleHelp = () =>
@@ -48,7 +48,7 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
                             {
                                 label: "Hide Dock Icon",
                                 type: "checkbox",
-                                checked: shouldHideDockIcon,
+                                checked: hideDockIcon,
                                 click: toggleHideDockIcon,
                             },
                         ],

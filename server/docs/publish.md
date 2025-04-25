@@ -16,7 +16,7 @@ use this new image (see [deploy/README](../scripts/deploy/README.md)).
 
 ## External
 
-Periodically, we can republish a new image from an existing known-to-be-good
+Periodically, we republish a new image from an existing known-to-be-good
 commit to the GitHub Container Registry (GHCR) so that it can be used by folks
 without needing to clone our repository just for building an image. For more
 details about the use case, see [docker.md](docker.md).
@@ -37,7 +37,7 @@ Once the workflow completes, the resultant image will be available at
 `ghcr.io/ente-io/server`. The image will be tagged by the commit SHA. The latest
 image will also be tagged, well, "latest".
 
-The workflow will also update the branch `server/ghcr` to point to the commit it
+The workflow will also update the branch `ghcr/server` to point to the commit it
 used to build the image. This branch will be overwritten on each publish; thus
-`server/ghcr` will always points to the code from which the most recent ghcr
+`ghcr/server` will always points to the code from which the most recent ghcr
 docker image for museum has been built.

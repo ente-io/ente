@@ -1,8 +1,8 @@
-import type { AppName } from "@/base/app";
 import type { Theme } from "@mui/material";
 import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
+import type { AppName } from "ente-base/app";
 
 const getTheme = (appName: AppName): Theme => {
     const colors = getColors(appName);
@@ -412,7 +412,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
  * value, we alias it the same weight as regular, 500).
  */
 const typography: TypographyOptions = {
-    fontFamily: "Inter Variable, sans-serif",
+    fontFamily: '"Inter Variable", sans-serif',
     fontWeightLight: 500,
     fontWeightRegular: 500 /* CSS baseline reset sets this as the default */,
     fontWeightMedium: 600,

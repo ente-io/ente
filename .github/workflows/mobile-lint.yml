@@ -8,8 +8,10 @@ on:
             - ".github/workflows/mobile-lint.yml"
 
 env:
-
     FLUTTER_VERSION: "3.24.3"
+
+permissions:
+    contents: read
 
 jobs:
     lint:

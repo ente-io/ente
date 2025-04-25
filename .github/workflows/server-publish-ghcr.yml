@@ -1,0 +1,45 @@
+name: "Publish ghcr (server)"
+
+on:
+    # Run automatically on 15th of every month, at 05:00 UTC.
+    schedule:
+        - cron: '0 5 15 * *'
+    # Run manually if needed to publish out of schedule.
+    workflow_dispatch:
+
+permissions:
+    contents: write  # for pushing the `ghcr/server` branch
+    packages: write
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Determine commit from prod museum
+              run: |
+                  echo "museum_commit=$(curl -s https://api.ente.io/ping | jq -r .id)" >> $GITHUB_ENV
+
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ env.museum_commit }}
+
+            - name: Build and push
+              uses: mr-smithers-excellent/docker-build-push@v6
+              with:
+                  dockerfile: server/Dockerfile
+                  directory: server
+                  # Resultant package name will be ghcr.io/ente-io/server
+                  image: server
+                  registry: ghcr.io
+                  enableBuildKit: true
+                  multiPlatform: true
+                  platform: linux/amd64,linux/arm64
+                  buildArgs: GIT_COMMIT=${{ env.museum_commit }}
+                  tags: ${{ env.museum_commit }}, latest
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Update branch ghcr/server to point to source commit
+              run: |
+                  git push -f origin HEAD:refs/heads/ghcr/server

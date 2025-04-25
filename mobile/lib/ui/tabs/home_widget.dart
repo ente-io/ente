@@ -2,6 +2,7 @@ import 'dart:async';
 import "dart:convert";
 import "dart:io";
 
+import "package:app_links/app_links.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -38,6 +39,7 @@ import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/sync/diff_fetcher.dart";
 import 'package:photos/services/sync/local_sync_service.dart';
@@ -71,7 +73,6 @@ import "package:photos/utils/collection_util.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
@@ -122,6 +123,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     _logger.info("Building initstate");
     super.initState();
+
+    if (LocalSyncService.instance.hasCompletedFirstImport()) {
+      MemoryHomeWidgetService.instance.checkPendingMemorySync();
+    }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       _selectedTabIndex = event.selectedIndex;
@@ -181,13 +186,11 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
         Future.delayed(
           delayInRefresh,
-          () => {
-            if (mounted)
-              {
-                setState(
-                  () {},
-                ),
-              },
+          () {
+            if (mounted) {
+              setState(() {});
+              MemoryHomeWidgetService.instance.checkPendingMemorySync();
+            }
           },
         );
       }
@@ -446,53 +449,57 @@ class _HomeWidgetState extends State<HomeWidget> {
           return;
         }
 
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              actions: [
-                const SizedBox(height: 24),
-                ButtonWidget(
-                  labelText: S.of(context).openFile,
-                  buttonType: ButtonType.primary,
-                  onTap: () async {
-                    Navigator.of(context).pop(true);
+        if (value.isNotEmpty &&
+            (value[0].mimeType == "image/*" ||
+                value[0].mimeType == "video/*")) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                actions: [
+                  const SizedBox(height: 24),
+                  ButtonWidget(
+                    labelText: S.of(context).openFile,
+                    buttonType: ButtonType.primary,
+                    onTap: () async {
+                      Navigator.of(context).pop(true);
+                    },
+                  ),
+                  const SizedBox(
+                    height: 12,
+                  ),
+                  ButtonWidget(
+                    buttonType: ButtonType.secondary,
+                    labelText: S.of(context).backupFile,
+                    onTap: () async {
+                      Navigator.of(context).pop(false);
+                    },
+                  ),
+                ],
+              );
+            },
+          ).then((shouldOpenFile) {
+            if (shouldOpenFile) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) {
+                    return FileViewer(
+                      sharedMediaFile: value[0],
+                    );
                   },
                 ),
-                const SizedBox(
-                  height: 12,
-                ),
-                ButtonWidget(
-                  buttonType: ButtonType.secondary,
-                  labelText: S.of(context).backupFile,
-                  onTap: () async {
-                    Navigator.of(context).pop(false);
-                  },
-                ),
-              ],
-            );
-          },
-        ).then((shouldOpenFile) {
-          if (shouldOpenFile) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) {
-                  return FileViewer(
-                    sharedMediaFile: value[0],
-                  );
-                },
-              ),
-            );
-          } else {
-            if (mounted) {
-              setState(() {
-                _shouldRenderCreateCollectionSheet = true;
-                _sharedFiles = value;
-              });
+              );
+            } else {
+              if (mounted) {
+                setState(() {
+                  _shouldRenderCreateCollectionSheet = true;
+                  _sharedFiles = value;
+                });
+              }
             }
-          }
-        });
+          });
+        }
       },
       onError: (err) {
         _logger.severe("getIntentDataStream error: $err");
@@ -533,8 +540,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
+    final appLinks = AppLinks();
     try {
-      final initialUri = await getInitialUri();
+      final initialUri = await appLinks.getInitialLink();
       if (initialUri != null) {
         if (initialUri.toString().contains("albums.ente.io")) {
           await _handlePublicAlbumLink(initialUri);
@@ -552,7 +560,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _logger.severe("Error while getting initial public album deep link: $e");
     }
 
-    _publicAlbumLinkSubscription = uriLinkStream.listen(
+    _publicAlbumLinkSubscription = appLinks.uriLinkStream.listen(
       (Uri? uri) {
         if (uri != null) {
           if (uri.toString().contains("albums.ente.io")) {
@@ -581,7 +589,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     return UserDetailsStateWidget(
       child: PopScope(
         canPop: false,
-        onPopInvoked: (didPop) async {
+        onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
           if (_selectedTabIndex == 0) {
             if (_selectedFiles.files.isNotEmpty) {
@@ -769,12 +777,13 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<bool> _initDeepLinks() async {
     // Platform messages may fail, so we use a try/catch PlatformException.
+    final appLinks = AppLinks();
     try {
-      final String? initialLink = await getInitialLink();
+      final initialLink = await appLinks.getInitialLink();
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {
-        _logger.info("Initial link received: " + initialLink);
+        _logger.info("Initial link received: " + initialLink.toString());
         _getCredentials(context, initialLink);
         return true;
       } else {
@@ -787,9 +796,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     // Attach a listener to the stream
-    linkStream.listen(
-      (String? link) {
-        _logger.info("Link received: " + link!);
+    appLinks.uriLinkStream.listen(
+      (link) {
+        _logger.info("Link received: " + link.toString());
         _getCredentials(context, link);
       },
       onError: (err) {
@@ -799,11 +808,11 @@ class _HomeWidgetState extends State<HomeWidget> {
     return false;
   }
 
-  void _getCredentials(BuildContext context, String? link) {
+  void _getCredentials(BuildContext context, Uri? link) {
     if (Configuration.instance.hasConfiguredAccount()) {
       return;
     }
-    final ott = Uri.parse(link!).queryParameters["ott"]!;
+    final ott = link!.queryParameters["ott"]!;
     UserService.instance.verifyEmail(context, ott);
   }
 
