@@ -133,8 +133,7 @@ class _CollectionsFlexiGridViewWidgetState
             albumsCountInOneRow;
 
     final int totalCollections = widget.collections!.length;
-    final bool showCreateAlbum =
-        widget.shouldShowCreateAlbum && !isAnyAlbumSelected;
+    final bool showCreateAlbum = widget.shouldShowCreateAlbum;
     final int totalItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
     final int displayItemCount = min(totalItemCount, widget.displayLimitCount);
 
