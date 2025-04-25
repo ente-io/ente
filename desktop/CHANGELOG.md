@@ -1,10 +1,9 @@
 # CHANGELOG
 
-## v1.7.12 (Unreleased)
+## v1.7.12
 
-- Improved video player with streaming support (for processed videos).
+- Improved video player with streaming support (for already processed videos).
 - Support Arabic translations.
-- .
 
 ## v1.7.11
 
