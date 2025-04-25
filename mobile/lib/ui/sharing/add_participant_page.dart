@@ -325,7 +325,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         ),
         const SizedBox(height: 8),
         ButtonWidget(
-          buttonType: ButtonType.primary,
+          buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           labelText: S.of(context).addCollaborators(_selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,

@@ -185,7 +185,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                   iconButtonType: IconButtonType.secondary,
                   iconColor: getEnteColorScheme(context).blurStrokePressed,
                 ),
-                padding: const EdgeInsets.only(left: 12, right: 6),
               ),
             ),
             SliverToBoxAdapter(child: DeleteEmptyAlbums(collections)),
