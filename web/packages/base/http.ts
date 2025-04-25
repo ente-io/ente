@@ -184,7 +184,6 @@ export const retryEnsuringHTTPOk = (request: () => Promise<Response>) =>
  *
  * This is similar to {@link retryEnsuringHTTPOk}, except it stops retrying if
  * remote responds with a 4xx HTTP status.
-
  */
 export const retryEnsuringHTTPOkOr4xx = (request: () => Promise<Response>) =>
     retryAsyncOperation(

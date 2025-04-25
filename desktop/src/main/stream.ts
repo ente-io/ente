@@ -13,6 +13,7 @@ import {
     type FFmpegGenerateHLSPlaylistAndSegmentsResult,
 } from "./services/ffmpeg";
 import { markClosableZip, openZip } from "./services/zip";
+import { wait } from "./utils/common";
 import { writeStream } from "./utils/stream";
 import {
     deleteTempFile,
@@ -78,7 +79,10 @@ const handleStreamRequest = async (request: Request): Promise<Response> => {
                     case "convert-to-mp4":
                         return handleConvertToMP4Write(request);
                     case "generate-hls":
-                        return handleGenerateHLSWrite(request);
+                        return handleGenerateHLSWrite(
+                            request,
+                            searchParams.get("objectUploadURL")!,
+                        );
                     default:
                         return new Response(`Unknown op ${op}`, {
                             status: 404,
@@ -276,11 +280,14 @@ const handleVideoDone = async (token: string) => {
  *
  * The difference here is that we the conversion generates two streams - one for
  * the HLS playlist itself, and one for the file containing the encrypted and
- * transcoded video chunks. So instead of returning a single token, we return a
- * JSON object containing two tokens (aand other metadata) so that the renderer
- * can read them off separately.
+ * transcoded video chunks. The video stream we write to the provided
+ * {@link objectUploadURL}, and then return a JSON object containing the token
+ * for the playlist, and other metadata for use by the renderer.
  */
-const handleGenerateHLSWrite = async (request: Request) => {
+const handleGenerateHLSWrite = async (
+    request: Request,
+    objectUploadURL: string,
+) => {
     const inputTempFilePath = await makeTempFilePath();
     await writeStream(inputTempFilePath, request.body!);
 
@@ -295,14 +302,76 @@ const handleGenerateHLSWrite = async (request: Request) => {
         await deleteTempFileIgnoringErrors(inputTempFilePath);
     }
 
+    await uploadVideoSegments(result.videoPath, objectUploadURL);
+
     const playlistToken = randomUUID();
-    const videoToken = randomUUID();
     pendingVideoResults.set(playlistToken, result.playlistPath);
-    pendingVideoResults.set(videoToken, result.videoPath);
 
     const { dimensions, videoSize } = result;
     return new Response(
-        JSON.stringify({ playlistToken, videoToken, dimensions, videoSize }),
+        JSON.stringify({ playlistToken, dimensions, videoSize }),
         { status: 200 },
     );
+};
+
+/**
+ * Upload the file at the given {@link videoFilePath} to the provided presigned
+ * {@link objectUploadURL} using a HTTP PUT request.
+ *
+ * In case on non-HTTP-4xx errors, retry up to 3 times with exponential backoff.
+ *
+ * See: [Note: Upload HLS video segment from node side].
+ *
+ * ---
+ *
+ * This is an inlined reimplementation of `retryEnsuringHTTPOkOr4xx` from
+ * `web/packages/base/http.ts`.
+ *
+ * It is included here for the specific use of uploading videos since generating
+ * the HLS stream is a fairly expensive operation, so a retry to discount
+ * transient network issues is called for.
+ *
+ * We don't currently have rest of the scaffolding used by
+ * `retryEnsuringHTTPOkOr4xx`, which is why we just inline it bespoke.
+ */
+export const uploadVideoSegments = async (
+    videoFilePath: string,
+    objectUploadURL: string,
+) => {
+    const waitTimeBeforeNextTry = [2000, 5000, 10000];
+
+    while (true) {
+        let abort = false;
+        try {
+            const res = await net.fetch(objectUploadURL, {
+                method: "PUT",
+                // TODO(HLS):
+                body: await fs.readFile(videoFilePath),
+            });
+
+            if (res.ok) {
+                /* success */ return;
+            }
+            if (res.status >= 400 && res.status < 500) {
+                abort = true; /* 4xx */
+            }
+            throw new Error(
+                `Failed to upload generated HLS video: HTTP ${res.status} ${res.statusText}`,
+            );
+        } catch (e) {
+            if (abort) {
+                throw e;
+            }
+            const t = waitTimeBeforeNextTry.shift();
+            if (!t) {
+                throw e;
+            } else {
+                log.warn(
+                    "Ignoring potentially transient failure when uploading video",
+                    e,
+                );
+            }
+            await wait(t);
+        }
+    }
 };
