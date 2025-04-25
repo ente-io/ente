@@ -215,6 +215,21 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     useEffect(() => {
         if (!isMLEnabled()) return;
 
+        // Take a dependency on open so that we refresh the list of people by
+        // calling `getAnnotatedFacesForFile` again when the file info dialog is
+        // closed and reopened.
+        //
+        // This covers a scenario like:
+        // - User opens file info panel
+        // - Selects one of the faces
+        // - Gives it a name
+        // - Then opens the same file again, and reopens the file info panel.
+        //
+        // Since the `file` hasn't changed, this hook wouldn't rerun. So we also
+        // take a dependency on the open state of the dialog, causing us to
+        // rerun whenever reopened (even if for the same file).
+        if (!open) return;
+
         let didCancel = false;
 
         void getAnnotatedFacesForFile(file).then(
@@ -224,7 +239,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         return () => {
             didCancel = true;
         };
-    }, [file]);
+    }, [file, open]);
 
     const openEnableMapConfirmationDialog = () =>
         showMiniDialog(

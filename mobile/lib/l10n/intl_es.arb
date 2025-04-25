@@ -1660,6 +1660,5 @@
   "cLWidgetsDesc": "Ya están disponibles los widgets de pantalla de inicio con tus recuerdos. Podrás ver tus momentos especiales sin abrir la aplicación.",
   "cLFamilyPlan": "Límites de plan familiar",
   "cLFamilyPlanDesc": "Ahora puede establecer límites en cuanto al almacenamiento que los miembros de tu familia pueden utilizar.",
-  "cLBulkEditDesc": "Ahora puedes seleccionar múltiples fotos y editar la fecha/hora para todas ellas con una acción rápida. También es posible cambiar las fechas.",
-  "curatedMemories": "Curated memories"
+  "cLBulkEditDesc": "Ahora puedes seleccionar múltiples fotos y editar la fecha/hora para todas ellas con una acción rápida. También es posible cambiar las fechas."
 }

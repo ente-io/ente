@@ -386,6 +386,13 @@
       "hex": "858585"
     },
     {
+      "title": "Fanatical",
+      "slug": "fanatical",
+      "altNames": [
+        "FANATICAL"
+      ]
+    },
+    {
       "title": "Fastmail"
     },
     {
@@ -413,6 +420,9 @@
     {
       "title": "Firefox",
       "slug": "mozilla"
+    },
+    {
+      "title": "fortrabbit"
     },
     {
       "title": "ForUsAll"

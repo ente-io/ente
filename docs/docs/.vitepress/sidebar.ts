@@ -182,6 +182,7 @@ export const sidebar = [
         text: "Auth",
         items: [
             { text: "Introduction", link: "/auth/" },
+            { text: "Features", link: "/auth/features/" },
             {
                 text: "FAQ",
                 collapsed: true,
@@ -238,71 +239,53 @@ export const sidebar = [
         items: [
             { text: "Getting started", link: "/self-hosting/" },
             {
-                text: "System requirements",
-                link: "/self-hosting/guides/system-requirements",
+                text: "Connect to custom server",
+                link: "/self-hosting/guides/custom-server/",
+            },
+            {
+                text: "Creating Accounts",
+                link: "/self-hosting/creating-accounts",
+            },
+            {
+                text: "Reverse Proxy",
+                link: "/self-hosting/reverse-proxy",
+            },
+            {
+                text: "Building your museum.yaml",
+                link: "/self-hosting/museum",
+            },
+            {
+                text: "Configuring S3",
+                link: "/self-hosting/guides/configuring-s3",
             },
             {
                 text: "Guides",
+                collapsed: true,
                 items: [
                     { text: "Introduction", link: "/self-hosting/guides/" },
                     {
-                        text: "Connect to custom server",
-                        link: "/self-hosting/guides/custom-server/",
-                    },
-                    {
-                        text: "Hosting the web app",
-                        link: "/self-hosting/guides/web-app",
-                    },
-                    {
-                        text: "Configuring S3",
-                        link: "/self-hosting/guides/configuring-s3",
-                    },
-                    {
-                        text: "Hosting Ente with external S3 (Community)",
-                        link: "/self-hosting/guides/external-s3",
-                    },
-                    {
-                        text: "DB migration",
-                        link: "/self-hosting/guides/db-migration",
+                        text: "Hosting Ente from source",
+                        link: "/self-hosting/guides/from-source",
                     },
                     {
                         text: "Hosting Ente without Docker",
                         link: "/self-hosting/guides/standalone-ente",
                     },
                     {
-                        text: "Ente via Tailscale (Community)",
-                        link: "/self-hosting/guides/Tailscale.md",
+                        text: "Administering your server",
+                        link: "/self-hosting/guides/admin",
                     },
                     {
                         text: "Configure CLI for Self Hosted Instance",
                         link: "/self-hosting/guides/selfhost-cli",
                     },
                     {
-                        text: "Administering your server",
-                        link: "/self-hosting/guides/admin",
+                        text: "DB migration",
+                        link: "/self-hosting/guides/db-migration",
                     },
-
                     {
                         text: "Mobile build",
                         link: "/self-hosting/guides/mobile-build",
-                    },
-                ],
-            },
-            {
-                text: "FAQ",
-                items: [
-                    { text: "General", link: "/self-hosting/faq/" },
-                    {
-                        text: "Verification code",
-                        link: "/self-hosting/faq/otp",
-                    },
-                    {
-                        text: "Shared albums",
-                        link: "/self-hosting/faq/sharing",
-                    },
-                    {
-                        text: "Backups",
-                        link: "/self-hosting/faq/backup",
                     },
                 ],
             },
@@ -312,6 +295,10 @@ export const sidebar = [
                     {
                         text: "General",
                         link: "/self-hosting/troubleshooting/misc",
+                    },
+                    {
+                        text: "Bucket CORS",
+                        link: '/self-hosting/troubleshooting/bucket-cors'
                     },
                     {
                         text: "Uploads",
@@ -328,6 +315,37 @@ export const sidebar = [
                     {
                         text: "Ente CLI Secrets",
                         link: "/self-hosting/troubleshooting/keyring",
+                    },
+                ],
+            },
+            {
+                text: "Community Guides",
+                items :[
+                    {
+                        text: "Ente via Tailscale",
+                        link: "/self-hosting/guides/Tailscale",
+                    },
+                    {
+                        text: "Ente with External S3",
+                        link: "/self-hosting/guides/external-s3",
+                    }                
+                ]
+            },
+            {
+                text: "FAQ",
+                items: [
+                    { text: "General", link: "/self-hosting/faq/" },
+                    {
+                        text: "Verification code",
+                        link: "/self-hosting/faq/otp",
+                    },
+                    {
+                        text: "Shared albums",
+                        link: "/self-hosting/faq/sharing",
+                    },
+                    {
+                        text: "Backups",
+                        link: "/self-hosting/faq/backup",
                     },
                 ],
             },
