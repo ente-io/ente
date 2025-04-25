@@ -85,6 +85,7 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
                 icon: Icons.search,
                 iconButtonType: IconButtonType.secondary,
                 onTap: _activateSearch,
+                iconColor: getEnteColorScheme(context).blurStrokePressed,
               ),
               ...?widget.actions,
             ],

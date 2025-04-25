@@ -73,13 +73,13 @@ class NewAlbumRowItemWidget extends StatelessWidget {
               dashPattern: const [3.75, 3.75],
               radius: const Radius.circular(2.35),
               padding: EdgeInsets.zero,
-              color: enteColorScheme.strokeFaint,
+              color: enteColorScheme.blurStrokePressed,
               child: SizedBox(
                 height: height,
                 width: width,
                 child: Icon(
                   Icons.add,
-                  color: enteColorScheme.strokeFaint,
+                  color: enteColorScheme.blurStrokePressed,
                 ),
               ),
             ),

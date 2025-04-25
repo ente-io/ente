@@ -10,6 +10,7 @@ import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/selected_albums.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/searchable_appbar.dart";
@@ -48,6 +49,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
   List<Collection>? collections;
   AlbumSortKey? sortKey;
   AlbumViewType? albumViewType;
+  AlbumSortDirection? albumSortDirection;
   String _searchQuery = "";
   final _selectedAlbum = SelectedAlbums();
 
@@ -61,6 +63,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
     });
     sortKey = localSettings.albumSortKey();
     albumViewType = localSettings.albumViewType();
+    albumSortDirection = localSettings.albumSortDirection();
   }
 
   @override
@@ -104,7 +107,6 @@ class _CollectionListPageState extends State<CollectionListPage> {
                     refreshCollections();
                   },
                   actions: [
-                    const SizedBox(width: 8),
                     _sortMenu(collections!),
                   ],
                 ),
@@ -114,8 +116,6 @@ class _CollectionListPageState extends State<CollectionListPage> {
                   tag: widget.tag,
                   enableSelectionMode: enableSelectionMode,
                   albumViewType: albumViewType ?? AlbumViewType.grid,
-                  shouldShowCreateAlbum:
-                      widget.sectionType == UISectionType.homeCollections,
                   selectedAlbums: _selectedAlbum,
                 ),
               ],
@@ -132,24 +132,39 @@ class _CollectionListPageState extends State<CollectionListPage> {
   }
 
   Widget _sortMenu(List<Collection> collections) {
-    Text sortOptionText(AlbumSortKey key) {
+    final colorTheme = getEnteColorScheme(context);
+
+    Widget sortOptionText(AlbumSortKey key) {
       String text = key.toString();
       switch (key) {
         case AlbumSortKey.albumName:
           text = S.of(context).name;
           break;
         case AlbumSortKey.newestPhoto:
-          text = S.of(context).newest;
+          text = "Date Created";
           break;
         case AlbumSortKey.lastUpdated:
-          text = S.of(context).lastUpdated;
+          text = "Date Modified";
       }
-      return Text(
-        text,
-        style: Theme.of(context).textTheme.titleMedium!.copyWith(
-              fontSize: 14,
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
-            ),
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            text,
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  fontSize: 14,
+                  color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
+                ),
+          ),
+          Icon(
+            sortKey == key
+                ? (albumSortDirection == AlbumSortDirection.ascending
+                    ? Icons.arrow_upward_outlined
+                    : Icons.arrow_downward_outlined)
+                : null,
+            color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
+          ),
+        ],
       );
     }
 
@@ -165,6 +180,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
                 ? Icons.view_list_outlined
                 : Icons.grid_view_outlined,
             iconButtonType: IconButtonType.secondary,
+            iconColor: colorTheme.blurStrokePressed,
             onTap: () async {
               setState(() {
                 albumViewType = albumViewType == AlbumViewType.grid
@@ -174,7 +190,6 @@ class _CollectionListPageState extends State<CollectionListPage> {
               await localSettings.setAlbumViewType(albumViewType!);
             },
           ),
-          const SizedBox(width: 8),
           GestureDetector(
             onTapDown: (TapDownDetails details) async {
               final int? selectedValue = await showMenu<int>(
@@ -195,14 +210,20 @@ class _CollectionListPageState extends State<CollectionListPage> {
               if (selectedValue != null) {
                 sortKey = AlbumSortKey.values[selectedValue];
                 await localSettings.setAlbumSortKey(sortKey!);
+                albumSortDirection =
+                    albumSortDirection == AlbumSortDirection.ascending
+                        ? AlbumSortDirection.descending
+                        : AlbumSortDirection.ascending;
+                await localSettings.setAlbumSortDirection(albumSortDirection!);
                 await refreshCollections();
                 setState(() {});
                 Bus.instance.fire(AlbumSortOrderChangeEvent());
               }
             },
-            child: const IconButtonWidget(
+            child: IconButtonWidget(
               icon: Icons.sort_outlined,
               iconButtonType: IconButtonType.secondary,
+              iconColor: colorTheme.blurStrokePressed,
             ),
           ),
         ],

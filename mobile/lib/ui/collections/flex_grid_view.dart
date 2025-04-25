@@ -88,9 +88,6 @@ class _CollectionsFlexiGridViewWidgetState
 
   Future<void> _toggleAlbumSelection(Collection c) async {
     await HapticFeedback.lightImpact();
-    if (c.type == CollectionType.favorites) {
-      return;
-    }
     widget.selectedAlbums!.toggleSelection(c);
     setState(() {
       isAnyAlbumSelected = widget.selectedAlbums!.albums.isNotEmpty;
@@ -136,8 +133,7 @@ class _CollectionsFlexiGridViewWidgetState
             albumsCountInOneRow;
 
     final int totalCollections = widget.collections!.length;
-    final bool showCreateAlbum =
-        widget.shouldShowCreateAlbum && !isAnyAlbumSelected;
+    final bool showCreateAlbum = widget.shouldShowCreateAlbum;
     final int totalItemCount = totalCollections + (showCreateAlbum ? 1 : 0);
     final int displayItemCount = min(totalItemCount, widget.displayLimitCount);
 
@@ -160,6 +156,7 @@ class _CollectionsFlexiGridViewWidgetState
               sideOfThumbnail,
               tag: widget.tag,
               selectedAlbums: widget.selectedAlbums,
+              showFileCount: false,
               onTapCallback: (c) {
                 isAnyAlbumSelected
                     ? _toggleAlbumSelection(c)
