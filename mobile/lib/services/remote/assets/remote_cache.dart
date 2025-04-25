@@ -1,4 +1,3 @@
-import "package:flutter/foundation.dart";
 import "package:photos/db/remote/read/collection_files.dart";
 import "package:photos/db/remote/schema.dart";
 import "package:photos/models/collection/collection.dart";

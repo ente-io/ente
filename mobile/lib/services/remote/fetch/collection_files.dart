@@ -59,6 +59,7 @@ class CollectionFilesService {
     int latestUpdatedAtTime = 0;
     final deletedFiles = <CollectionFileItem>[];
     final updatedFiles = <CollectionFileItem>[];
+    final int defaultCreatedAt = DateTime.now().millisecondsSinceEpoch;
 
     for (final item in diff) {
       final int fileID = item["id"] as int;
@@ -72,7 +73,7 @@ class CollectionFilesService {
           collectionID: collectionID,
           updatedAt: collectionUpdationTime,
           isDeleted: true,
-          createdAt: item["createdAt"] ?? DateTime.now().millisecondsSinceEpoch,
+          createdAt: item["createdAt"] ?? defaultCreatedAt,
           fileItem: FileItem.deleted(fileID, ownerID),
         );
         deletedFiles.add(deletedItem);
@@ -137,7 +138,7 @@ class CollectionFilesService {
         encFileKey: encFileKey,
         encFileKeyNonce: encFileKeyNonce,
         isDeleted: false,
-        createdAt: item["createdAt"],
+        createdAt: item["createdAt"] ?? defaultCreatedAt,
         fileItem: FileItem(
           fileID: fileID,
           ownerID: ownerID,

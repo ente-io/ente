@@ -144,7 +144,9 @@ class FileItem {
     }
     final latitude = double.tryParse(metadata!.data["latitude"].toString());
     final longitude = double.tryParse(metadata!.data["longitude"].toString());
-    if (latitude == null || longitude == null) {
+    if (latitude == null ||
+        longitude == null ||
+        (latitude == 0.0 && longitude == 0.0)) {
       return null;
     } else {
       return Location(latitude: latitude, longitude: longitude);
@@ -194,7 +196,6 @@ class CollectionFileItem {
       encFileKeyNonce,
       createdAt,
       updatedAt,
-      isDeleted ? 1 : 0,
     ];
   }
 }
