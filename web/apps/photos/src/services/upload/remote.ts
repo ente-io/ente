@@ -10,7 +10,7 @@ import { EnteFile } from "ente-media/file";
 import { CustomError, handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
-import { retryAsyncOperation } from "ente-utils/promise";
+import { retryAsyncOperation } from "ente-base/http";
 import { z } from "zod";
 import { MultipartUploadURLs, UploadFile } from "./upload-service";
 

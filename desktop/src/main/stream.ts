@@ -366,10 +366,7 @@ export const uploadVideoSegments = async (
             if (!t) {
                 throw e;
             } else {
-                log.warn(
-                    "Ignoring potentially transient failure when uploading video",
-                    e,
-                );
+                log.warn("Will retry potentially transient request failure", e);
             }
             await wait(t);
         }
