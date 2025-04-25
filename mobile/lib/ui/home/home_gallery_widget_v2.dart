@@ -4,15 +4,18 @@ import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/db/local/schema.dart";
+import "package:photos/db/remote/schema.dart";
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import "package:photos/events/hide_shared_items_from_home_gallery_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/models/file/file.dart";
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
+import "package:photos/services/remote/localMapper/merge.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
@@ -76,7 +79,7 @@ class _HomeGalleryWidgetV2State extends State<HomeGalleryWidgetV2> {
       key: ValueKey(_shouldHideSharedItems),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         Logger("_HomeGalleryWidgetV2State").info("Loading home gallery files");
-        final enteFiles = await localDB.getAssets(
+        final localFiles = await localDB.getAssets(
           params: LocalAssertsParam(
             limit: limit,
             isAsc: asc ?? false,
@@ -84,12 +87,27 @@ class _HomeGalleryWidgetV2State extends State<HomeGalleryWidgetV2> {
           ),
         );
 
+        final enteFiles = await remoteCache.getCollectionFiles(
+          FilterQueryParam(
+            limit: limit,
+            isAsc: asc ?? false,
+            createAtRange: (creationStartTime, creationEndTime),
+          ),
+        );
+
+        final List<EnteFile> allFiles = merge(
+          localFiles: localFiles,
+          remoteFiles: enteFiles,
+        );
+        // merge
+
         Logger("_HomeGalleryWidgetV2State").info(
           "Load home gallery files ${enteFiles.length} files",
         );
         return FileLoadResult(
-          enteFiles,
-          limit != null && enteFiles.length <= limit,
+          allFiles,
+          limit != null &&
+              (enteFiles.length <= limit || localFiles.length <= limit),
         );
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
