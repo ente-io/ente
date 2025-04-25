@@ -5,6 +5,7 @@ import path from "node:path";
 import type { ZipItem } from "../../types/ipc";
 import log from "../log";
 import { markClosableZip, openZip } from "../services/zip";
+import { writeStream } from "./stream";
 
 /**
  * Our very own directory within the system temp directory. Go crazy, but
@@ -111,7 +112,7 @@ interface FileForDataOrPathOrZipItem {
  * a zip file, name of an entry within that zip file) tuple.
  */
 export const makeFileForDataOrStreamOrPathOrZipItem = async (
-    item: Uint8Array | string | ZipItem,
+    item: Uint8Array | ReadableStream | string | ZipItem,
 ): Promise<FileForDataOrPathOrZipItem> => {
     let path: string;
     let isFileTemporary: boolean;
@@ -127,6 +128,8 @@ export const makeFileForDataOrStreamOrPathOrZipItem = async (
         isFileTemporary = true;
         if (item instanceof Uint8Array) {
             writeToTemporaryFile = () => fs.writeFile(path, item);
+        } else if (item instanceof ReadableStream) {
+            writeToTemporaryFile = () => writeStream(path, item);
         } else {
             writeToTemporaryFile = async () => {
                 const [zipPath, entryName] = item;

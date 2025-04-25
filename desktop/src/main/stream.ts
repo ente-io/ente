@@ -19,6 +19,7 @@ import { writeStream } from "./utils/stream";
 import {
     deleteTempFile,
     deleteTempFileIgnoringErrors,
+    makeFileForDataOrStreamOrPathOrZipItem,
     makeTempFilePath,
 } from "./utils/temp";
 
@@ -80,10 +81,7 @@ const handleStreamRequest = async (request: Request): Promise<Response> => {
                     case "convert-to-mp4":
                         return handleConvertToMP4Write(request);
                     case "generate-hls":
-                        return handleGenerateHLSWrite(
-                            request,
-                            searchParams.get("objectUploadURL")!,
-                        );
+                        return handleGenerateHLSWrite(request, searchParams);
                     default:
                         return new Response(`Unknown op ${op}`, {
                             status: 404,
@@ -281,22 +279,46 @@ const handleVideoDone = async (token: string) => {
  *
  * The difference here is that we the conversion generates two streams - one for
  * the HLS playlist itself, and one for the file containing the encrypted and
- * transcoded video chunks. The video stream we write to the provided
- * {@link objectUploadURL}, and then return a JSON object containing the token
- * for the playlist, and other metadata for use by the renderer.
+ * transcoded video chunks. The video stream we write to the objectUploadURL
+ * (provided via {@link params}), and then we return a JSON object containing
+ * the token for the playlist, and other metadata for use by the renderer.
  */
 const handleGenerateHLSWrite = async (
     request: Request,
-    objectUploadURL: string,
+    params: URLSearchParams,
 ) => {
-    const inputTempFilePath = await makeTempFilePath();
-    await writeStream(inputTempFilePath, request.body!);
+    const objectUploadURL = params.get("objectUploadURL");
+    if (!objectUploadURL) throw new Error("Missing objectUploadURL");
+
+    let inputItem: Parameters<typeof makeFileForDataOrStreamOrPathOrZipItem>[0];
+    const path = params.get("path");
+    if (path) {
+        inputItem = path;
+    } else {
+        const zipPath = params.get("zipPath");
+        const entryName = params.get("entryName");
+        if (zipPath && entryName) {
+            inputItem = [zipPath, entryName];
+        } else {
+            const body = request.body;
+            if (!body) throw new Error("Missing body");
+            inputItem = body;
+        }
+    }
+
+    const {
+        path: inputFilePath,
+        isFileTemporary: isInputFileTemporary,
+        writeToTemporaryFile: writeToTemporaryInputFile,
+    } = await makeFileForDataOrStreamOrPathOrZipItem(inputItem);
 
     const outputFilePathPrefix = await makeTempFilePath();
     let result: FFmpegGenerateHLSPlaylistAndSegmentsResult;
     try {
+        await writeToTemporaryInputFile();
+
         result = await ffmpegGenerateHLSPlaylistAndSegments(
-            inputTempFilePath,
+            inputFilePath,
             outputFilePathPrefix,
         );
 
@@ -319,7 +341,8 @@ const handleGenerateHLSWrite = async (
             await deleteTempFileIgnoringErrors(videoPath);
         }
     } finally {
-        await deleteTempFileIgnoringErrors(inputTempFilePath);
+        if (isInputFileTemporary)
+            await deleteTempFileIgnoringErrors(inputFilePath);
     }
 };
 
