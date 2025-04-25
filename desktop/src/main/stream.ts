@@ -300,9 +300,9 @@ const handleGenerateHLSWrite = async (request: Request) => {
     pendingVideoResults.set(playlistToken, result.playlistPath);
     pendingVideoResults.set(videoToken, result.videoPath);
 
-    const { dimensions } = result;
+    const { dimensions, videoSize } = result;
     return new Response(
-        JSON.stringify({ playlistToken, videoToken, dimensions }),
+        JSON.stringify({ playlistToken, videoToken, dimensions, videoSize }),
         { status: 200 },
     );
 };

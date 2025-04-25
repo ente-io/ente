@@ -147,6 +147,10 @@ export const GenerateHLSResult = z.object({
      * The dimensions (width and height in pixels) of the generated video stream.
      */
     dimensions: z.object({ width: z.number(), height: z.number() }),
+    /**
+     * The size (in bytes) of the file containing the encrypted video segments.
+     */
+    videoSize: z.number(),
 });
 
 /**

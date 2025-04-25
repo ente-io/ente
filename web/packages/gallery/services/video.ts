@@ -403,10 +403,12 @@ const processQueueItem = async (
     // TODO(HLS):
     const fileBlob = await fetchOriginalVideoBlob(file, uploadItem);
 
+    const { objectID, url: objectUploadURL } =
+        await getFilePreviewDataUploadURL(file);
+
     const res = await writeVideoStream(electron, "generate-hls", fileBlob!);
-    const { playlistToken, videoToken, dimensions } = GenerateHLSResult.parse(
-        await res.json(),
-    );
+    const { playlistToken, videoToken, dimensions, videoSize } =
+        GenerateHLSResult.parse(await res.json());
 
     try {
         const playlistBlob = await readVideoStream(
@@ -414,31 +416,23 @@ const processQueueItem = async (
             playlistToken,
         ).then((res) => res.blob());
 
-        const { objectID, url: objectUploadURL } =
-            await getFilePreviewDataUploadURL(file);
-
-        // TOOD(HLS): Move this to the node side.
-        const videoBlob = await readVideoStream(electron, videoToken).then(
-            (res) => res.blob(),
-        );
-
-        const objectSize = videoBlob.size;
+        const videoRes = await readVideoStream(electron, videoToken);
 
         // Video conversion is non-trivial effort, and the video segment file
         // we're uploading is potentially very large, so add retries to avoid
         // the need to redo everything in case of transient errors.
         await retryEnsuringHTTPOkOr4xx(() =>
-            fetch(objectUploadURL, { method: "PUT", body: videoBlob }),
+            fetch(objectUploadURL, { method: "PUT", body: videoRes.body }),
         );
 
         const playlistData = await encodePlaylistJSON({
             type: "hls_video",
             playlist: await playlistBlob.text(),
             ...dimensions,
-            size: objectSize,
+            size: videoSize,
         });
 
-        await putVideoData(file, playlistData, objectID, objectSize);
+        await putVideoData(file, playlistData, objectID, videoSize);
     } finally {
         await Promise.all([
             videoStreamDone(electron, playlistToken),
