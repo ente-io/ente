@@ -322,7 +322,7 @@ func (repo *UserRepository) GetUsersWithExceedingStorages(percentageThreshold in
 		INNER JOIN usage 
 		ON users.user_id = usage.user_id 
 		INNER JOIN subscriptions 
-		ON users.user_id = subscriptions.user_id AND usage.storage_consumed = (subscriptions.storage * $1 / 100) AND users.encrypted_email is not null AND users.family_admin_id is NULL;
+		ON users.user_id = subscriptions.user_id AND usage.storage_consumed >= (subscriptions.storage * $1 / 100) AND users.encrypted_email is not null AND users.family_admin_id is NULL
 		`, percentageThreshold)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -359,28 +359,20 @@ func (repo *UserRepository) GetUsersWithExceedingStorages(percentageThreshold in
 
 		totalStorage := refBonusStorage + subStorage + addOnBonusStorage
 
-		// the percentageThreshold comes from the function where this function is called.
-		// This percentageThreshold mechanism was used to avoid duplicating the same function
-		// to get the list of users differently who have exceeded 90% storage and 100% storage.
-		if percentageThreshold == 90 {
-			if storageConsumed >= (totalStorage*90/100) && storageConsumed < (totalStorage) {
-				email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
-				if err != nil {
-					return users, stacktrace.Propagate(err, "")
-				}
-				user.Email = email
-				users = append(users, user)
+		// The percentageThreshold comes as a parameter.
+		// This perctentageThreshold mechanism was used to avoid duplicating the same function
+		// to get the list of users differently who have exceeded 90% storage and <100% storage.
+		if (percentageThreshold == 90 && storageConsumed >= (totalStorage*90/100) && storageConsumed < totalStorage) ||
+			(percentageThreshold != 90 && storageConsumed > totalStorage) {
+
+			email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+			if err != nil {
+				return users, stacktrace.Propagate(err, "")
 			}
-		} else {
-			if (storageConsumed) > totalStorage {
-				email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
-				if err != nil {
-					return users, stacktrace.Propagate(err, "")
-				}
-				user.Email = email
-				users = append(users, user)
-			}
+			user.Email = email
+			users = append(users, user)
 		}
+
 	}
 	return users, nil
 }
