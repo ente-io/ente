@@ -3,8 +3,9 @@
  */
 import { net, protocol } from "electron/main";
 import { randomUUID } from "node:crypto";
+import fs_ from "node:fs";
 import fs from "node:fs/promises";
-import { Writable } from "node:stream";
+import { Readable, Writable } from "node:stream";
 import { pathToFileURL } from "node:url";
 import log from "./log";
 import {
@@ -347,10 +348,18 @@ export const uploadVideoSegments = async (
     while (true) {
         let abort = false;
         try {
+            const nodeStream = fs_.createReadStream(videoFilePath);
+            const webStream = Readable.toWeb(nodeStream);
+
             const res = await net.fetch(objectUploadURL, {
                 method: "PUT",
-                // TODO(HLS):
-                body: await fs.readFile(videoFilePath),
+                // The duplex option is required since we're passing a stream.
+                //
+                // @ts-expect-error TypeScript's libdom.d.ts does not include
+                // the "duplex" parameter, e.g. see
+                // https://github.com/node-fetch/node-fetch/issues/1769.
+                duplex: "half",
+                body: webStream,
             });
 
             if (res.ok) {
