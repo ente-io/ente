@@ -92,6 +92,18 @@ class LocalSettings {
   bool get userEnabledMultiplePart =>
       _prefs.getBool(kEnableMultiplePart) ?? false;
 
+  Future<void> autoEnableMultiplePart(int rolloutPercentage) async {
+    if (_prefs.containsKey(kEnableMultiplePart)) {
+      return;
+    }
+    rolloutPercentage = rolloutPercentage.clamp(0, 100);
+    final randomValue = DateTime.now().millisecondsSinceEpoch % 100;
+    await _prefs.setBool(
+      kEnableMultiplePart,
+      randomValue < rolloutPercentage,
+    );
+  }
+
   Future<bool> setUserEnabledMultiplePart(bool value) async {
     await _prefs.setBool(kEnableMultiplePart, value);
     return value;
