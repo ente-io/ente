@@ -301,7 +301,6 @@ func (c *UserController) NotifyAccountDeletion(userID int64, userEmail string, i
 
 	templateData := make(map[string]interface{})
 	templateData["AccountRecoveryLink"] = fmt.Sprintf("%s/users/recover-account?token=%s", "https://api.ente.io", recoverToken)
-	logrus.Info("account recovery link: ", templateData["AccountRecoveryLink"])
 	err := email.SendTemplatedEmail([]string{userEmail}, "ente", "team@ente.io",
 		AccountDeletedEmailSubject, template, templateData, nil)
 	if err != nil {
@@ -336,11 +335,11 @@ func (c *UserController) HandleAccountRecovery(ctx *gin.Context, req ente.Recove
 		"email":   req.EmailID,
 		"userID":  req.UserID,
 	})
-	logger.Info("recover account request")
+	logger.Info("initiating account recovery")
 	_, err := c.UserRepo.Get(req.UserID)
 	if err == nil {
 		return stacktrace.Propagate(ente.NewBadRequestError(&ente.ApiErrorParams{
-			Message: "Either account already recovered or User ID is linked to an active account account",
+			Message: "account is already recovered or userID is linked to another active account",
 		}), "")
 	}
 	if !errors.Is(err, ente.ErrUserDeleted) {
