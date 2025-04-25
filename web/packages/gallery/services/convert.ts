@@ -1,12 +1,12 @@
 import { isDesktop } from "ente-base/app";
 import log from "ente-base/log";
 import { workerBridge } from "ente-base/worker/worker-bridge";
+import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
 import { detectFileTypeInfo } from "../utils/detect-type";
 import { convertToMP4 } from "./ffmpeg";
-import type { EnteFile } from "ente-media/file";
 
 /**
  * Return a new {@link Blob} containing an image's data in a format that the
