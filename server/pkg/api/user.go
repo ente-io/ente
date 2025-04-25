@@ -540,7 +540,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *UserHandler) SelfRecoverAccount(c *gin.Context) {
+func (h *UserHandler) SelfAccountRecovery(c *gin.Context) {
 	token := c.Query("token")
 	if token == "" {
 		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("token missing"), "token is required"))
