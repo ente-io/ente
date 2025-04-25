@@ -298,20 +298,25 @@ const handleGenerateHLSWrite = async (
             inputTempFilePath,
             outputFilePathPrefix,
         );
+
+        const videoFilePath = result.videoPath;
+        try {
+            await uploadVideoSegments(videoFilePath, objectUploadURL);
+
+            const playlistToken = randomUUID();
+            pendingVideoResults.set(playlistToken, result.playlistPath);
+
+            const { dimensions, videoSize } = result;
+            return new Response(
+                JSON.stringify({ playlistToken, dimensions, videoSize }),
+                { status: 200 },
+            );
+        } finally {
+            await deleteTempFileIgnoringErrors(videoFilePath);
+        }
     } finally {
         await deleteTempFileIgnoringErrors(inputTempFilePath);
     }
-
-    await uploadVideoSegments(result.videoPath, objectUploadURL);
-
-    const playlistToken = randomUUID();
-    pendingVideoResults.set(playlistToken, result.playlistPath);
-
-    const { dimensions, videoSize } = result;
-    return new Response(
-        JSON.stringify({ playlistToken, dimensions, videoSize }),
-        { status: 200 },
-    );
 };
 
 /**
@@ -324,21 +329,20 @@ const handleGenerateHLSWrite = async (
  *
  * ---
  *
- * This is an inlined reimplementation of `retryEnsuringHTTPOkOr4xx` from
- * `web/packages/base/http.ts`.
+ * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOkOr4xx`
+ * from `web/packages/base/http.ts` (we don't have the rest of the scaffolding
+ * used by that function, which is why it is inlined bespoked).
  *
- * It is included here for the specific use of uploading videos since generating
- * the HLS stream is a fairly expensive operation, so a retry to discount
- * transient network issues is called for.
- *
- * We don't currently have rest of the scaffolding used by
- * `retryEnsuringHTTPOkOr4xx`, which is why we just inline it bespoke.
+ * It handles the specific use case of uploading videos since generating the HLS
+ * stream is a fairly expensive operation, so a retry to discount transient
+ * network issues is called for. There are only 2 retries for a total of 3
+ * attempts, and the retry gaps are more spaced out.
  */
 export const uploadVideoSegments = async (
     videoFilePath: string,
     objectUploadURL: string,
 ) => {
-    const waitTimeBeforeNextTry = [2000, 5000, 10000];
+    const waitTimeBeforeNextTry = [5000, 20000];
 
     while (true) {
         let abort = false;
@@ -350,10 +354,12 @@ export const uploadVideoSegments = async (
             });
 
             if (res.ok) {
-                /* success */ return;
+                // Success.
+                return;
             }
             if (res.status >= 400 && res.status < 500) {
-                abort = true; /* 4xx */
+                // HTTP 4xx.
+                abort = true;
             }
             throw new Error(
                 `Failed to upload generated HLS video: HTTP ${res.status} ${res.statusText}`,

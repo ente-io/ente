@@ -195,7 +195,7 @@ export const retryAsyncOperation = async <T>(
             }
             const t = waitTimeBeforeNextTry.shift();
             if (!t) throw e;
-            log.info("Will retry potentially transient request failure", e);
+            log.warn("Will retry potentially transient request failure", e);
             await wait(t);
         }
     }

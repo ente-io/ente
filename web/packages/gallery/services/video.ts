@@ -403,7 +403,7 @@ const processQueueItem = async (
     const { objectID, url: objectUploadURL } =
         await getFilePreviewDataUploadURL(file);
 
-    log.info(`HLS gen ${fileLogID(file)} | start`);
+    log.info(`Generate HLS for ${fileLogID(file)} | start`);
 
     // [Note: Upload HLS video segment from node side]
     //
@@ -419,7 +419,7 @@ const processQueueItem = async (
     //
     // So instead we provide the presigned upload URL to the node side so that
     // it can directly upload the generated video segments.
-    const queryParams = new URLSearchParams(objectUploadURL);
+    const queryParams = new URLSearchParams({ objectUploadURL });
 
     const res = await writeVideoStream(
         electron,
@@ -446,7 +446,7 @@ const processQueueItem = async (
 
         await putVideoData(file, playlistData, objectID, videoSize);
 
-        log.info(`HLS gen ${fileLogID(file)} | done`);
+        log.info(`Generate HLS for ${fileLogID(file)} | done`);
     } finally {
         await Promise.all([videoStreamDone(electron, playlistToken)]);
     }
