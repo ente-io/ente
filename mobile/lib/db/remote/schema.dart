@@ -11,10 +11,21 @@ final String updateCollectionColumns = collectionColumns
     .join(', ');
 
 const collectionFilesColumns =
-    'collection_id, file_id, enc_key, enc_key_nonce, created_at, updated_at, is_deleted';
+    'collection_id, file_id, enc_key, enc_key_nonce, created_at, updated_at';
+
+final String collectionFilesUpdateColumns = collectionFilesColumns
+    .split(', ')
+    .where(
+      (column) =>
+          column != 'collection_id' ||
+          column != 'file_id' ||
+          column != 'created_at',
+    )
+    .map((column) => '$column = excluded.$column') // Use excluded virtual table
+    .join(', ');
 const filesColumns =
     'id, owner_id, file_header, thumb_header, creation_time, modification_time, title, size, hash, lat, lng, '
-    'metadata, priv_metadata, pub_metadata, info, local_id, local_mapping_src';
+    'metadata, priv_metadata, pub_metadata, info';
 
 final String filesUpdateColumns = filesColumns
     .split(', ')
@@ -83,9 +94,7 @@ class RemoteDBMigration {
       metadata TEXT NOT NULL,
       priv_metadata TEXT,
       pub_metadata TEXT,
-      info TEXT,
-      local_id TEXT DEFAULT NULL,
-      local_mapping_src TEXT DEFAULT NULL
+      info TEXT
     )
     ''',
     '''
@@ -107,6 +116,14 @@ class RemoteDBMigration {
           DELETE FROM files WHERE id = OLD.file_id;
       END;
 ''',
+    '''
+    CREATE TABLE upload_mapping (
+      file_id INTEGER PRIMARY KEY,
+      local_id TEXT DEFAULT NOT NULL,
+      -- icloud identifier if available
+      local_clould_id TEXT,
+      local_mapping_src TEXT DEFAULT NULL
+    )'''
   ];
 }
 

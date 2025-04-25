@@ -85,11 +85,11 @@ class RemoteDB with SqlDbBase {
       }
       await Future.wait([
         _sqliteDB.executeBatch(
-          'INSERT OR REPLACE INTO collection_files ($collectionFilesColumns) values(?, ?, ?, ?, ?, ?, ?)',
+          'INSERT INTO collection_files ($collectionFilesColumns) values(?, ?, ?, ?, ?, ?) ON CONFLICT(file_id, collection_id) DO UPDATE SET $collectionFilesUpdateColumns',
           collectionFileValues,
         ),
         _sqliteDB.executeBatch(
-          'INSERT INTO files ($filesColumns) values(${getParams(17)}) ON CONFLICT(id) DO UPDATE SET $filesUpdateColumns',
+          'INSERT INTO files ($filesColumns) values(${getParams(15)}) ON CONFLICT(id) DO UPDATE SET $filesUpdateColumns',
           fileValues,
         ),
       ]);
