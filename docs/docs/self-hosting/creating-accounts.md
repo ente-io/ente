@@ -1,9 +1,9 @@
 ---
-title: Creating Accounts
+title: Creating accounts
 description: Creating accounts on your deployment
 ---
 
-# Creating Accounts 
+# Creating accounts 
 
 Once the docker containers are up and running on their desired ports. The Ente Photos 
 web app will be accessible on `http://localhost:3000`. Open the URL in your browser 
