@@ -224,6 +224,7 @@ export const sidebar = [
             },
             {
                 text: "Troubleshooting",
+                collapsed: true,
                 items: [
                     {
                         text: "Windows login",
@@ -239,24 +240,24 @@ export const sidebar = [
         items: [
             { text: "Getting started", link: "/self-hosting/" },
             {
-                text: "Connect to custom server",
+                text: "Connecting to custom server",
                 link: "/self-hosting/guides/custom-server/",
             },
             {
-                text: "Creating Accounts",
+                text: "Creating accounts",
                 link: "/self-hosting/creating-accounts",
             },
             {
-                text: "Reverse Proxy",
-                link: "/self-hosting/reverse-proxy",
-            },
-            {
-                text: "Building your museum.yaml",
+                text: "Configuring your server",
                 link: "/self-hosting/museum",
             },
             {
                 text: "Configuring S3",
                 link: "/self-hosting/guides/configuring-s3",
+            },
+            {
+                text: "Reverse proxy",
+                link: "/self-hosting/reverse-proxy",
             },
             {
                 text: "Guides",
@@ -276,7 +277,7 @@ export const sidebar = [
                         link: "/self-hosting/guides/admin",
                     },
                     {
-                        text: "Configure CLI for Self Hosted Instance",
+                        text: "Configure CLI for self hosted instance",
                         link: "/self-hosting/guides/selfhost-cli",
                     },
                     {
@@ -313,7 +314,7 @@ export const sidebar = [
                         link: "/self-hosting/troubleshooting/yarn",
                     },
                     {
-                        text: "Ente CLI Secrets",
+                        text: "Ente CLI secrets",
                         link: "/self-hosting/troubleshooting/keyring",
                     },
                 ],
