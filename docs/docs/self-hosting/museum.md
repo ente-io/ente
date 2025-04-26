@@ -39,11 +39,11 @@ If you face any issues related to uploads then checkout [Troubleshooting bucket
 CORS](/self-hosting/troubleshooting/bucket-cors) and [Frequently encountered S3
 errors](/self-hosting/guides/configuring-s3#frequently-encountered-errors).
 
-## App endpoints
+## Web apps
 
-Ente Photos Web app is divided into multiple sub-apps like albums, cast, auth,
-etc. These endpoints are configurable in the museum.yaml under the `apps.*`
-section.
+The web apps for Ente Photos is divided into multiple sub-apps like albums,
+cast, auth, etc. These endpoints are configurable in the museum.yaml under the
+`apps.*` section.
 
 For example, 
 
