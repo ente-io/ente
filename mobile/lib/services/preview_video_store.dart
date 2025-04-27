@@ -670,6 +670,13 @@ class PreviewVideoStore {
 
           final codec = videoData["codec_name"]?.toString().toLowerCase();
           skipFile = codec?.contains("h264") ?? false;
+
+          if (skipFile) {
+            _logger.info(
+              "[init] Ignoring file ${enteFile.displayName} for preview due to codec",
+            );
+            return (props, skipFile, file);
+          }
         }
       }
 
@@ -688,8 +695,11 @@ class PreviewVideoStore {
       }
 
       if ((size == null || duration == null) ||
-          (size <= 500 * 1024 * 1024 && duration <= 60)) {
+          (size >= 500 * 1024 * 1024 || duration > 60)) {
         skipFile = true;
+        _logger.info(
+          "[init] Ignoring file ${enteFile.displayName} for preview due to size: $size and duration: $duration",
+        );
       }
     } catch (e, sT) {
       _logger.warning("Failed to check props", e, sT);
@@ -756,6 +766,9 @@ class PreviewVideoStore {
         );
       }
       if (result || isFailure) {
+        _logger.info(
+          "[init] Ignoring file ${enteFile.displayName} for preview",
+        );
         allFiles.removeAt(i);
         n--;
         continue;
