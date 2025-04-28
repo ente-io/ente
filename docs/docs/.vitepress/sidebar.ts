@@ -302,10 +302,6 @@ export const sidebar = [
                         link: "/self-hosting/troubleshooting/docker",
                     },
                     {
-                        text: "Yarn",
-                        link: "/self-hosting/troubleshooting/yarn",
-                    },
-                    {
                         text: "Ente CLI secrets",
                         link: "/self-hosting/troubleshooting/keyring",
                     },
