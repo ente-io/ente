@@ -1215,7 +1215,7 @@
   "searchHint4": "الموقع",
   "searchHint5": "قريبًا: الوجوه والبحث السحري ✨",
   "addYourPhotosNow": "أضف صورك الآن",
-  "searchResultCount": "{count, plural, one{{count} النتائج التي تم العثور عليها} other{{{count} النتائج التي تم العثور عليها}}",
+  "searchResultCount": "{count, plural, one{{count} النتائج التي تم العثور عليها} other{{count} النتائج التي تم العثور عليها}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
