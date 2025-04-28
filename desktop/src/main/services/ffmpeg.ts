@@ -7,7 +7,7 @@ import log from "../log";
 import { execAsync } from "../utils/electron";
 import {
     deleteTempFileIgnoringErrors,
-    makeFileForDataOrPathOrZipItem,
+    makeFileForDataOrStreamOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils/temp";
 
@@ -52,7 +52,7 @@ export const ffmpegExec = async (
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
         writeToTemporaryFile: writeToTemporaryInputFile,
-    } = await makeFileForDataOrPathOrZipItem(dataOrPathOrZipItem);
+    } = await makeFileForDataOrStreamOrPathOrZipItem(dataOrPathOrZipItem);
 
     const outputFilePath = await makeTempFilePath(outputFileExtension);
     try {
@@ -136,6 +136,7 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
     playlistPath: string;
     videoPath: string;
     dimensions: { width: number; height: number };
+    videoSize: number;
 }
 
 /**
@@ -330,6 +331,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     ].flat();
 
     let dimensions: ReturnType<typeof detectVideoDimensions>;
+    let videoSize: number;
 
     try {
         // Write the key and the keyInfo to their desired paths.
@@ -346,6 +348,10 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         // Determine the dimensions of the generated video from the stderr
         // output produced by ffmpeg during the conversion.
         dimensions = detectVideoDimensions(conversionStderr);
+
+        // Find the size of the generated video segments by reading the size of
+        // the generated .ts file.
+        videoSize = await fs.stat(videoPath).then((st) => st.size);
     } catch (e) {
         log.error("HLS generation failed", e);
         await Promise.all([
@@ -362,7 +368,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         ]);
     }
 
-    return { playlistPath, videoPath, dimensions };
+    return { playlistPath, videoPath, dimensions, videoSize };
 };
 
 /**
