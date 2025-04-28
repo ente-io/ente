@@ -2,7 +2,7 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "أدخل عنوان بريدك الإلكتروني",
   "accountWelcomeBack": "مرحبًا مجددًا!",
-  "emailAlreadyRegistered": "البريد الإلكتروني مُسجل من قبل.",
+  "emailAlreadyRegistered": "البريد الإلكتروني مُسَجَّل من قبل.",
   "emailNotRegistered": "البريد الإلكتروني غير مسجل.",
   "email": "البريد الإلكتروني",
   "cancel": "إلغاء",
@@ -10,7 +10,7 @@
   "invalidEmailAddress": "عنوان البريد الإلكتروني غير صالح",
   "enterValidEmail": "يرجى إدخال عنوان بريد إلكتروني صالح.",
   "deleteAccount": "حذف الحساب",
-  "askDeleteReason": "ما السبب الرئيسي لحذف حسابك؟",
+  "askDeleteReason": "ما السبب الرئيس لحذف حسابك؟",
   "deleteAccountFeedbackPrompt": "نأسف لمغادرتك. نرجو مشاركة ملاحظاتك لمساعدتنا على التحسين.",
   "feedback": "ملاحظات",
   "kindlyHelpUsWithThisInformation": "يرجى مساعدتنا بهذه المعلومات",
@@ -19,8 +19,8 @@
   "deleteAccountPermanentlyButton": "حذف الحساب نهائيًا",
   "yourAccountHasBeenDeleted": "تم حذف حسابك بنجاح.",
   "selectReason": "اختر سببًا",
-  "deleteReason1": "تفتقد إلى ميزة أساسية أحتاجها",
-  "deleteReason2": "التطبيق أو ميزة معينة لا تعمل كما هو متوقع",
+  "deleteReason1": "تفتقر إلى مِيزة أساسية أحتاج إليها",
+  "deleteReason2": "التطبيق أو مِيزة معينة لا تعمل كما هو متوقع",
   "deleteReason3": "وجدت خدمة أخرى أفضل",
   "deleteReason4": "سببي غير مدرج",
   "sendEmail": "إرسال بريد إلكتروني",
@@ -49,7 +49,7 @@
   "enterYourRecoveryKey": "أدخل مفتاح الاسترداد",
   "noRecoveryKey": "لا تملك مفتاح استرداد؟",
   "sorry": "عفوًا",
-  "noRecoveryKeyNoDecryption": "نظرًا لطبيعة التشفير الكامل من طرف إلى طرف، لا يمكن فك تشفير بياناتك بدون كلمة المرور أو مفتاح الاسترداد الخاص بك.",
+  "noRecoveryKeyNoDecryption": "نظرًا لطبيعة التشفير الكامل من طرف إلى طرف، لا يمكن فك تشفير بياناتك دون كلمة المرور أو مفتاح الاسترداد الخاص بك",
   "verifyEmail": "التحقق من البريد الإلكتروني",
   "toResetVerifyEmail": "لإعادة تعيين كلمة المرور، يرجى التحقق من بريدك الإلكتروني أولاً.",
   "checkInboxAndSpamFolder": "تحقق من صندوق الوارد ومجلد البريد غير الهام (Spam) لإكمال التحقق",
@@ -1215,6 +1215,16 @@
   "searchHint4": "الموقع",
   "searchHint5": "قريبًا: الوجوه والبحث السحري ✨",
   "addYourPhotosNow": "أضف صورك الآن",
+  "searchResultCount": "{count, plural, one{{count} النتائج التي تم العثور عليها} other{{{count} النتائج التي تم العثور عليها}}",
+  "@searchResultCount": {
+    "description": "Text to tell user how many results were found for their search query",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
   "faces": "الوجوه",
   "people": "الأشخاص",
   "contents": "المحتويات",
