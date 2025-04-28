@@ -72,7 +72,7 @@ Future<File?> _getLocalDiskFile(
   EnteFile file, {
   bool liveVideo = false,
   bool isOrigin = false,
-}) async {
+}) {
   if (file.isSharedMediaToAppSandbox) {
     final localFile = File(getSharedMediaFilePath(file));
     return localFile.exists().then((exist) {

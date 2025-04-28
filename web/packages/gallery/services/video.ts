@@ -1,21 +1,18 @@
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
-import {
-    retryEnsuringHTTPOkOr4xx,
-    type PublicAlbumsCredentials,
-} from "ente-base/http";
+import { type PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import type { Electron } from "ente-base/types/ipc";
-import type { EnteFile } from "ente-media/file";
+import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { ensurePrecondition } from "ente-utils/ensure";
 import { z } from "zod";
 import {
+    initiateGenerateHLS,
     readVideoStream,
     videoStreamDone,
-    writeVideoStream,
 } from "../utils/native-stream";
 import { downloadManager } from "./download";
 import {
@@ -33,9 +30,12 @@ interface VideoProcessingQueueItem {
      */
     file: EnteFile;
     /**
-     * The contents of the {@link file} as the newly uploaded {@link UploadItem}.
+     * The {@link UploadItem} if available for the newly uploaded {@link file}.
+     *
+     * If present, this serves as an optimization allowing us to directly read
+     * the file off the user's filesystem.
      */
-    uploadItem: UploadItem;
+    uploadItem: UploadItem | undefined;
 }
 
 /**
@@ -399,104 +399,50 @@ const processQueueItem = async (
 ) => {
     log.debug(() => ["gen-hls", { file, uploadItem }]);
 
-    const fileBlob = await fetchOriginalVideoBlob(file, uploadItem);
+    const sourceVideo = uploadItem ?? (await downloadManager.fileStream(file));
 
-    // TODO(HLS):
-    const tokens = await writeVideoStream(electron, "generate-hls", fileBlob!);
-    const [playlistToken, videoToken] = [tokens[0]!, tokens[1]!];
+    // [Note: Upload HLS video segment from node side]
+    //
+    // The generated video can be huge (multi-GB), too large to read it into
+    // memory as an arrayBuffer.
+    //
+    // One option was to chain the video stream response (from the node side)
+    // directly into a fetch request to `objectUploadURL`, however that requires
+    // HTTP/2 (our servers support it, but self hosters' might not). Also that
+    // approach won't work with retries on transient failures unless we
+    // duplicate the stream beforehand, which invalidates the point of
+    // streaming.
+    //
+    // So instead we provide the presigned upload URL to the node side so that
+    // it can directly upload the generated video segments.
+    const { objectID, url: objectUploadURL } =
+        await getFilePreviewDataUploadURL(file);
+
+    log.info(`Generate HLS for ${fileLogID(file)} | start`);
+
+    const { playlistToken, dimensions, videoSize } = await initiateGenerateHLS(
+        electron,
+        sourceVideo!,
+        objectUploadURL,
+    );
 
     try {
-        const playlistBlob = await readVideoStream(
-            electron,
-            playlistToken,
-        ).then((res) => res.blob());
-
-        const { objectID, url: objectUploadURL } =
-            await getFilePreviewDataUploadURL(file);
-
-        // TOOD(HLS): Move this to the node side.
-        const videoBlob = await readVideoStream(electron, videoToken).then(
-            (res) => res.blob(),
-        );
-
-        const objectSize = videoBlob.size;
-
-        // Video conversion is non-trivial effort, and the video segment file
-        // we're uploading is potentially very large, so add retries to avoid
-        // the need to redo everything in case of transient errors.
-        await retryEnsuringHTTPOkOr4xx(() =>
-            fetch(objectUploadURL, { method: "PUT", body: videoBlob }),
+        const playlist = await readVideoStream(electron, playlistToken).then(
+            (res) => res.text(),
         );
 
         const playlistData = await encodePlaylistJSON({
             type: "hls_video",
-            playlist: await playlistBlob.text(),
-            // TODO(HLS): Critical, fix this before any use.
-            width: 1280,
-            // TODO(HLS): Critical, fix this before any use.
-            height: 720,
-            size: objectSize,
+            playlist,
+            ...dimensions,
+            size: videoSize,
         });
 
-        await putVideoData(file, playlistData, objectID, objectSize);
+        await putVideoData(file, playlistData, objectID, videoSize);
+
+        log.info(`Generate HLS for ${fileLogID(file)} | done`);
     } finally {
-        await Promise.all([
-            videoStreamDone(electron, playlistToken),
-            videoStreamDone(electron, videoToken),
-        ]);
-    }
-};
-
-/**
- * Return a blob containing the contents of the given video file.
- *
- * The blob is either constructed using the given {@link uploadItem} if present,
- * otherwise it is downloaded from remote.
- *
- * @param file An {@link EnteFile} of type {@link FileType.video}.
- *
- * @param uploadItem If we're called during the upload process, then this will
- * be set to the {@link UploadItem} that was uploaded. This way, we can directly
- * use the on-disk file instead of needing to download the original from remote.
- */
-const fetchOriginalVideoBlob = async (
-    file: EnteFile,
-    uploadItem: UploadItem | undefined,
-): Promise<Blob | ReadableStream | null> =>
-    uploadItem
-        ? fetchOriginalVideoUploadItemBlob(file, uploadItem)
-        : await downloadManager.fileStream(file);
-
-const fetchOriginalVideoUploadItemBlob = (
-    _: EnteFile,
-    uploadItem: UploadItem,
-) => {
-    // TODO(HLS): Commented below is the implementation that the eventual
-    // desktop only conversion would need to handle - the conversion logic would
-    // need to move to the desktop side to allow it to handle large videos.
-    //
-    // Meanwhile during development, we assume we're on the happy web-only cases
-    // (dragging and dropping a file). All this code is behind a development
-    // feature flag, so it is not going to impact end users.
-
-    if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
-        throw new Error("Not implemented");
-        // const { response, lastModifiedMs } = await readStream(
-        //     ensureElectron(),
-        //     uploadItem,
-        // );
-        // const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
-        // // This function will not be called for videos, and for images
-        // // it is reasonable to read the entire stream into memory here.
-        // return new File([await response.arrayBuffer()], basename(path), {
-        //     lastModified: lastModifiedMs,
-        // });
-    } else {
-        if (uploadItem instanceof File) {
-            return uploadItem;
-        } else {
-            return uploadItem.file;
-        }
+        await Promise.all([videoStreamDone(electron, playlistToken)]);
     }
 };
 

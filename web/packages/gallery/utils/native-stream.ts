@@ -8,6 +8,7 @@
 
 import type { Electron, ElectronMLWorker, ZipItem } from "ente-base/types/ipc";
 import { z } from "zod";
+import type { UploadItem } from "../services/upload";
 
 /**
  * Stream the given file or zip entry from the user's local file system.
@@ -119,57 +120,125 @@ export const writeStream = async (
 };
 
 /**
- *  One of the predefined operations to perform when invoking
- *  {@link writeVideoStream} or {@link readVideoStream}.
+ * Initate a conversion to MP4, streaming the video contents to the node side.
  *
- * - "convert-to-mp4" (See: [Note: Convert to MP4])
+ * This is a variant of {@link writeStream} tailored for the conversion to MP4.
  *
- * - "generate-hls" (See: [Note: Preview variant of videos])
+ * @param _ An {@link Electron} instance, witness to the fact that we're running
+ * in the context of the desktop app. It is otherwise not used.
+ *
+ * @param video A {@link Blob} containing the video to convert.
+ *
+ * @returns a token that can then be passed to {@link readVideoStream} to
+ * retrieve the converted MP4 file. This three step sequence (write/read/done)
+ * can then be ended by using {@link videoStreamDone}).
+ *
+ * See: [Note: Convert to MP4].
  */
-type VideoStreamOp = "convert-to-mp4" | "generate-hls";
+export const initiateConvertToMP4 = async (
+    _: Electron,
+    video: Blob,
+): Promise<string> => {
+    const url = "stream://video?op=convert-to-mp4";
+    const res = await fetch(url, { method: "POST", body: video });
+    if (!res.ok)
+        throw new Error(`Failed to write stream to ${url}: HTTP ${res.status}`);
+    return res.text();
+};
+
+const GenerateHLSResult = z.object({
+    /**
+     * A token that can be used to passed to {@link readVideoStream} to retrieve
+     * the generated HLS playlist.
+     */
+    playlistToken: z.string(),
+    /**
+     * The dimensions (width and height in pixels) of the generated video stream.
+     */
+    dimensions: z.object({ width: z.number(), height: z.number() }),
+    /**
+     * The size (in bytes) of the file containing the encrypted video segments.
+     */
+    videoSize: z.number(),
+});
+
+export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
 
 /**
- * Variant of {@link writeStream} tailored for video processing operations.
+ * Initate the generation of a HLS stream, streaming the source video contents
+ * to the node side.
  *
- * @param op The operation to perform on this video (the result can then be
- * later read back in via {@link readVideoStream}, and the sequence ended by
- * using {@link videoStreamDone}).
+ * This is a variant of {@link writeStream} tailored for the HLS generation. It
+ * is similar to {@link initiateConvertToMP4}, but also supports streaming
+ * {@link UploadItem}s and {@link ReadableStream}s.
  *
- * @param video The video to convert, as a {@link Blob} or a
- * {@link ReadableStream}.
+ * @param _ An {@link Electron} instance, witness to the fact that we're running
+ * in the context of the desktop app. It is otherwise not used.
  *
- * @returns an array of token that can then be passed to {@link readVideoStream}
- * to read back the processed video. The count (and semantics) of the tokens are
- * dependent on the operation:
+ * @param video The video to convert.
  *
- * - "convert-to-mp4" returns a single token (which can be used to retrieve the
- *   converted MP4 file).
+ * - If we're called during the upload process, then this will be set to the
+ *   {@link UploadItem} that was uploaded. This way, we can directly use the
+ *   on-disk file instead of needing to download the original from remote.
  *
- * - "generate-hls" returns two tokens, first one that can be used to retrieve
- *   the generated HLS playlist, and the second one that can be used to retrieve
- *   the video (segments).
+ * - Otherwise it should be a {@link ReadableStream} of the video contents.
+ *
+ * @param objectUploadURL A presigned URL where the video segments should be
+ * uploaded to.
+ *
+ * @returns a token that can be used to retrieve the generated HLS playlist, and
+ * metadata about the generated video (its byte size and dimensions). See {@link
+ * GenerateHLSResult.
+ *
+ * See: [Note: Preview variant of videos].
  */
-export const writeVideoStream = async (
+export const initiateGenerateHLS = async (
     _: Electron,
-    op: VideoStreamOp,
-    video: Blob | ReadableStream,
-): Promise<string[]> => {
-    const url = `stream://video?op=${op}`;
+    video: UploadItem | ReadableStream,
+    objectUploadURL: string,
+): Promise<GenerateHLSResult> => {
+    const params = new URLSearchParams({ op: "generate-hls", objectUploadURL });
 
-    const req = new Request(url, {
+    let body: ReadableStream | null;
+    if (video instanceof ReadableStream) {
+        body = video;
+    } else {
+        // video is an UploadItem
+        body = null;
+        if (typeof video == "string") {
+            // Path to a regular file on the user's filesystem.
+            params.set("path", video);
+        } else if (Array.isArray(video)) {
+            // Path within a zip file on the user's filesystem.
+            const [zipPath, entryName] = video;
+            params.set("zipPath", zipPath);
+            params.set("entryName", entryName);
+        } else if (video instanceof File) {
+            // A drag and dropped file, but without a path. This is a browser
+            // specific case which shouldn't happen when we're running in the
+            // desktop app. Bail.
+            throw new Error("Unexpected file without path");
+        } else {
+            // A File with a path. Use the path.
+            params.set("path", video.path);
+        }
+    }
+
+    const url = `stream://video?${params.toString()}`;
+    const res = await fetch(url, {
         method: "POST",
-        body: video,
+        // The duplex option is required when body is a stream.
+        //
         // @ts-expect-error TypeScript's libdom.d.ts does not include the
         // "duplex" parameter, e.g. see
         // https://github.com/node-fetch/node-fetch/issues/1769.
         duplex: "half",
+        body,
     });
-
-    const res = await fetch(req);
     if (!res.ok)
         throw new Error(`Failed to write stream to ${url}: HTTP ${res.status}`);
 
-    return z.array(z.string()).parse(await res.json());
+    return GenerateHLSResult.parse(await res.json());
 };
 
 /**

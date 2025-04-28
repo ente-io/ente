@@ -1103,10 +1103,10 @@ export class FileViewerPhotoSwipe {
          * navigation stops.
          *
          * So as a special case, we keep using arrow keys for navigation for the
-         * first 1s when the user lands on a slide.
+         * first 700 milliseconds when the user lands on a slide.
          */
         const isUserLikelyNavigatingBetweenSlides = () =>
-            Date.now() - lastSlideChangeEpochMilli < 1000; /* ms */
+            Date.now() - lastSlideChangeEpochMilli < 700; /* ms */
 
         const handleSeekBackOrPreviousSlide = () => {
             const video = videoVideoEl;

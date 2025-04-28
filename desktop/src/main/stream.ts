@@ -3,8 +3,9 @@
  */
 import { net, protocol } from "electron/main";
 import { randomUUID } from "node:crypto";
+import fs_ from "node:fs";
 import fs from "node:fs/promises";
-import { Writable } from "node:stream";
+import { Readable, Writable } from "node:stream";
 import { pathToFileURL } from "node:url";
 import log from "./log";
 import {
@@ -13,10 +14,12 @@ import {
     type FFmpegGenerateHLSPlaylistAndSegmentsResult,
 } from "./services/ffmpeg";
 import { markClosableZip, openZip } from "./services/zip";
+import { wait } from "./utils/common";
 import { writeStream } from "./utils/stream";
 import {
     deleteTempFile,
     deleteTempFileIgnoringErrors,
+    makeFileForDataOrStreamOrPathOrZipItem,
     makeTempFilePath,
 } from "./utils/temp";
 
@@ -78,7 +81,7 @@ const handleStreamRequest = async (request: Request): Promise<Response> => {
                     case "convert-to-mp4":
                         return handleConvertToMP4Write(request);
                     case "generate-hls":
-                        return handleGenerateHLSWrite(request);
+                        return handleGenerateHLSWrite(request, searchParams);
                     default:
                         return new Response(`Unknown op ${op}`, {
                             status: 404,
@@ -246,7 +249,7 @@ const handleConvertToMP4Write = async (request: Request) => {
 
     const token = randomUUID();
     pendingVideoResults.set(token, outputTempFilePath);
-    return new Response(JSON.stringify([token]), { status: 200 });
+    return new Response(token, { status: 200 });
 };
 
 const handleVideoRead = async (token: string) => {
@@ -276,30 +279,137 @@ const handleVideoDone = async (token: string) => {
  *
  * The difference here is that we the conversion generates two streams - one for
  * the HLS playlist itself, and one for the file containing the encrypted and
- * transcoded video chunks. So instead of returning a single token, we return a
- * JSON array containing two tokens so that the renderer can read them off
- * separately.
+ * transcoded video chunks. The video stream we write to the objectUploadURL
+ * (provided via {@link params}), and then we return a JSON object containing
+ * the token for the playlist, and other metadata for use by the renderer.
  */
-const handleGenerateHLSWrite = async (request: Request) => {
-    const inputTempFilePath = await makeTempFilePath();
-    await writeStream(inputTempFilePath, request.body!);
+const handleGenerateHLSWrite = async (
+    request: Request,
+    params: URLSearchParams,
+) => {
+    const objectUploadURL = params.get("objectUploadURL");
+    if (!objectUploadURL) throw new Error("Missing objectUploadURL");
 
-    const outputFilePathPrefix = await makeTempFilePath();
-    let paths: FFmpegGenerateHLSPlaylistAndSegmentsResult;
-    try {
-        paths = await ffmpegGenerateHLSPlaylistAndSegments(
-            inputTempFilePath,
-            outputFilePathPrefix,
-        );
-    } finally {
-        await deleteTempFileIgnoringErrors(inputTempFilePath);
+    let inputItem: Parameters<typeof makeFileForDataOrStreamOrPathOrZipItem>[0];
+    const path = params.get("path");
+    if (path) {
+        inputItem = path;
+    } else {
+        const zipPath = params.get("zipPath");
+        const entryName = params.get("entryName");
+        if (zipPath && entryName) {
+            inputItem = [zipPath, entryName];
+        } else {
+            const body = request.body;
+            if (!body) throw new Error("Missing body");
+            inputItem = body;
+        }
     }
 
-    const playlistToken = randomUUID();
-    const videoToken = randomUUID();
-    pendingVideoResults.set(playlistToken, paths.playlistPath);
-    pendingVideoResults.set(videoToken, paths.videoPath);
-    return new Response(JSON.stringify([playlistToken, videoToken]), {
-        status: 200,
-    });
+    const {
+        path: inputFilePath,
+        isFileTemporary: isInputFileTemporary,
+        writeToTemporaryFile: writeToTemporaryInputFile,
+    } = await makeFileForDataOrStreamOrPathOrZipItem(inputItem);
+
+    const outputFilePathPrefix = await makeTempFilePath();
+    let result: FFmpegGenerateHLSPlaylistAndSegmentsResult;
+    try {
+        await writeToTemporaryInputFile();
+
+        result = await ffmpegGenerateHLSPlaylistAndSegments(
+            inputFilePath,
+            outputFilePathPrefix,
+        );
+
+        const { playlistPath, videoPath } = result;
+        try {
+            await uploadVideoSegments(videoPath, objectUploadURL);
+
+            const playlistToken = randomUUID();
+            pendingVideoResults.set(playlistToken, playlistPath);
+
+            const { dimensions, videoSize } = result;
+            return new Response(
+                JSON.stringify({ playlistToken, dimensions, videoSize }),
+                { status: 200 },
+            );
+        } catch (e) {
+            await deleteTempFileIgnoringErrors(playlistPath);
+            throw e;
+        } finally {
+            await deleteTempFileIgnoringErrors(videoPath);
+        }
+    } finally {
+        if (isInputFileTemporary)
+            await deleteTempFileIgnoringErrors(inputFilePath);
+    }
+};
+
+/**
+ * Upload the file at the given {@link videoFilePath} to the provided presigned
+ * {@link objectUploadURL} using a HTTP PUT request.
+ *
+ * In case on non-HTTP-4xx errors, retry up to 3 times with exponential backoff.
+ *
+ * See: [Note: Upload HLS video segment from node side].
+ *
+ * ---
+ *
+ * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOkOr4xx`
+ * from `web/packages/base/http.ts` (we don't have the rest of the scaffolding
+ * used by that function, which is why it is inlined bespoked).
+ *
+ * It handles the specific use case of uploading videos since generating the HLS
+ * stream is a fairly expensive operation, so a retry to discount transient
+ * network issues is called for. There are only 2 retries for a total of 3
+ * attempts, and the retry gaps are more spaced out.
+ */
+export const uploadVideoSegments = async (
+    videoFilePath: string,
+    objectUploadURL: string,
+) => {
+    const waitTimeBeforeNextTry = [5000, 20000];
+
+    while (true) {
+        let abort = false;
+        try {
+            const nodeStream = fs_.createReadStream(videoFilePath);
+            const webStream = Readable.toWeb(nodeStream);
+
+            const res = await net.fetch(objectUploadURL, {
+                method: "PUT",
+                // The duplex option is required since we're passing a stream.
+                //
+                // @ts-expect-error TypeScript's libdom.d.ts does not include
+                // the "duplex" parameter, e.g. see
+                // https://github.com/node-fetch/node-fetch/issues/1769.
+                duplex: "half",
+                body: webStream,
+            });
+
+            if (res.ok) {
+                // Success.
+                return;
+            }
+            if (res.status >= 400 && res.status < 500) {
+                // HTTP 4xx.
+                abort = true;
+            }
+            throw new Error(
+                `Failed to upload generated HLS video: HTTP ${res.status} ${res.statusText}`,
+            );
+        } catch (e) {
+            if (abort) {
+                throw e;
+            }
+            const t = waitTimeBeforeNextTry.shift();
+            if (!t) {
+                throw e;
+            } else {
+                log.warn("Will retry potentially transient request failure", e);
+            }
+            await wait(t);
+        }
+    }
 };

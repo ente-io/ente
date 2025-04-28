@@ -1636,8 +1636,18 @@
     }
   },
   "appIcon": "Uygulama simgesi",
+  "notThisPerson": "Bu kişi değil mi?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Seçilen öğeler bu kişiden kaldırılacak, ancak kitaplığınızdan silinmeyecektir.",
+  "throughTheYears": "{dateFormat} yıllar boyunca",
+  "thisWeekThroughTheYears": "Yıllar boyunca bu hafta",
   "cLIcon": "Yeni Simge",
+  "cLIconDesc": "Son olarak, çalışmalarımızı en iyi şekilde temsil ettiğini düşündüğümüz yeni bir uygulama simgesi. Eski simgeyi kullanmaya devam edebilmeniz için bir simge değiştirici de ekledik.",
   "cLMemories": "Anılar",
+  "cLMemoriesDesc": "Özel anlarınızı yeniden keşfedin - en sevdiğiniz kişilere, seyahatlerinize ve tatillerinize, en iyi tıklamalarınıza ve çok daha fazlasına odaklanın. En iyi deneyim için makine öğrenimini açın, kendinizi etiketleyin ve arkadaşlarınızı adlandırın.",
+  "cLWidgets": "Widget'lar",
+  "cLWidgetsDesc": "Anılarla entegre edilmiş ana ekran widget'ları artık kullanılabilir. Uygulamayı açmadan özel anlarınızı gösterecekler.",
   "cLFamilyPlan": "Aile Planı Sınırları",
-  "cLFamilyPlanDesc": "Artık aile üyelerinizin ne kadar depolama alanı kullanabileceğine dair sınırlar belirleyebilirsiniz."
+  "cLFamilyPlanDesc": "Artık aile üyelerinizin ne kadar depolama alanı kullanabileceğine dair sınırlar belirleyebilirsiniz.",
+  "cLBulkEditDesc": "Artık birden fazla fotoğraf seçebilir ve tek bir hızlı işlemle hepsi için tarih/saat düzenleyebilirsiniz. Tarih kaydırma da desteklenmektedir.",
+  "curatedMemories": "Seçilmiş anılar"
 }

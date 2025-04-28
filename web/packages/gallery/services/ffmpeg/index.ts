@@ -7,9 +7,9 @@ import {
     type UploadItem,
 } from "ente-gallery/services/upload";
 import {
+    initiateConvertToMP4,
     readVideoStream,
     videoStreamDone,
-    writeVideoStream,
 } from "ente-gallery/utils/native-stream";
 import {
     parseMetadataDate,
@@ -266,8 +266,7 @@ export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
 };
 
 const convertToMP4Native = async (electron: Electron, blob: Blob) => {
-    const tokens = await writeVideoStream(electron, "convert-to-mp4", blob);
-    const token = tokens[0]!;
+    const token = await initiateConvertToMP4(electron, blob);
     const mp4Blob = await readVideoStream(electron, token).then((res) =>
         res.blob(),
     );

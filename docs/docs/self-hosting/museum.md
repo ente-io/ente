@@ -1,41 +1,49 @@
 ---
-title: Building your Museum.yaml
+title: Configuring your server
 description: Guide to writing a museum.yaml
 ---
 
-## Configuring `museum.yaml`
+# Configuring your server
 
-`Museum.yaml` is a YAML configuration file used to configure various things for museum. 
-By default, [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml) 
-is also available, but  it is overridden if `museum.yaml` file is found. We highly 
-recommend creating and building your own `museum.yaml` instead of editing `configurations/local.yaml`. 
-The `my-ente` directory will include a `museum.yaml` file with some configurations around encryption 
-keys and secrets, postgres DB, and MinIO.
+Ente's monolithic server is called **museum**.
+
+`museum.yaml` is a YAML configuration file used to configure museum. By default,
+[`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml)
+is provided, but its settings are overridden with those from `museum.yaml`.
+
+If you used our quickstart script, your `my-ente` directory will include a
+`museum.yaml` file with preset configurations for encryption keys, secrets,
+PostgreSQL and MinIO.
 
 > [!TIP]
-> Always do `docker compose down` inside `my-ente` directory, if you've made any changes to `museum.yaml`
-> and then restart the containers with `docker compose up -d ` to see the changes in action.
+> 
+> Always do `docker compose down` inside your `my-ente` directory. If you've
+> made changes to `museum.yaml`, restart the containers with `docker compose up
+> -d ` to see your changes in action.
 
-### S3 Buckets
+## S3 buckets
 
-By default, the `s3` section is configured to use local minIO buckets and for the same reason 
-`are_local_buckets`  is set to `true`.  If you wish to bring any external S3 provider, 
-you just have to edit the configuration with appropriate credentails and details given by the provider. 
-And set `are_local_buckets` to false.  Check out [Configuring S3](/self-hosting/guides/configuring-s3.md) 
-to understand more on how to configure S3 buckets and how the communication happens.
+The `s3` section within `museum.yaml` is by default configured to use local
+MinIO buckets.
 
-MinIO makes use of the port `3200` for API Endpoints and the Client Web App is run over `:3201` 
-(both on localhost). You can login to MinIO Console Web UI by accessing `localhost:3201` in your web-browser
-and setting up all the things related to regions there itself.
+If you wish to use an external S3 provider, you can edit the configuration with
+your provider's credentials, and set `are_local_buckets` to `false`.
 
-If you face any issues related to uploads then checkout 
-[Troubleshooting Bucket CORS](/self-hosting/troubleshooting/bucket-cors) and 
-[Frequently Answered Error related to S3](/self-hosting/guides/configuring-s3#fae-frequently-answered-errors)
+Check out [Configuring S3](/self-hosting/guides/configuring-s3.md) to understand
+more about configuring S3 buckets.
 
-### App Endpoints
+MinIO uses the port `3200` for API Endpoints and their web app runs over
+`:3201`. You can login to MinIO Web Console by opening `localhost:3201` in your browser.
 
-Ente Photos Web app is divided into multiple sub-apps like albums, cast, auth, etc.
-These endpoints are configurable in the museum.yaml under the `apps.*` section.
+If you face any issues related to uploads then checkout [Troubleshooting bucket
+CORS](/self-hosting/troubleshooting/bucket-cors) and [Frequently encountered S3
+errors](/self-hosting/guides/configuring-s3#frequently-encountered-errors).
+
+## Web apps
+
+The web apps for Ente Photos is divided into multiple sub-apps like albums,
+cast, auth, etc. These endpoints are configurable in the museum.yaml under the
+`apps.*` section.
 
 For example, 
 
@@ -47,14 +55,15 @@ apps:
     family: family.myente.xyz
 ```
 
-By default, all the values redirect to our publicly hosted production services. 
-After you are done with filling the values, restart museum and the App will start utilizing
-those endpoints for everything instead of the Ente's prod instances.
+By default, all the values redirect to our publicly hosted production services.
+After you are done with filling the values, restart museum and the app will
+start utilizing those endpoints instead of Ente's production instances.
 
-Once you configure all the necessary endpoints, `cd` into `my-ente` and  stop all the docker 
-containers with `docker compose down` to completely stop all the containers and restart them 
-with `docker compose up -d`. 
+Once you have configured all the necessary endpoints, `cd` into `my-ente` and
+stop all the Docker containers with `docker compose down` and restart them with
+`docker compose up -d`. 
 
-Similarly, you can read the default [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml) 
-and build a functioning `museum.yaml` for many other functionalities like SMTP, Discord
-Notifications, Hardcoded-OTT's, etc.
+Similarly, you can use the default
+[`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml)
+as a reference for building a functioning `museum.yaml` for many other
+functionalities like SMTP, Discord notifications, Hardcoded-OTTs, etc.
