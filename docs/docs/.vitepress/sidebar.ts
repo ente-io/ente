@@ -265,14 +265,6 @@ export const sidebar = [
                 items: [
                     { text: "Introduction", link: "/self-hosting/guides/" },
                     {
-                        text: "Hosting Ente from source",
-                        link: "/self-hosting/guides/from-source",
-                    },
-                    {
-                        text: "Hosting Ente without Docker",
-                        link: "/self-hosting/guides/standalone-ente",
-                    },
-                    {
                         text: "Administering your server",
                         link: "/self-hosting/guides/admin",
                     },
@@ -281,12 +273,12 @@ export const sidebar = [
                         link: "/self-hosting/guides/selfhost-cli",
                     },
                     {
-                        text: "DB migration",
-                        link: "/self-hosting/guides/db-migration",
+                        text: "Hosting Ente from source",
+                        link: "/self-hosting/guides/from-source",
                     },
                     {
-                        text: "Mobile build",
-                        link: "/self-hosting/guides/mobile-build",
+                        text: "Hosting Ente without Docker",
+                        link: "/self-hosting/guides/standalone-ente",
                     },
                 ],
             },
