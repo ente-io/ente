@@ -255,8 +255,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (Platform.isAndroid &&
         !localSettings.hasConfiguredInAppLinkPermissions() &&
         RemoteSyncService.instance.isFirstRemoteSyncDone() &&
-        Configuration.instance.getHttpEndpoint() ==
-            kDefaultProductionEndpoint) {
+        Configuration.instance.isEnteProduction()) {
       PackageInfo.fromPlatform().then((packageInfo) {
         final packageName = packageInfo.packageName;
         if (packageName == 'io.ente.photos.independent' ||
