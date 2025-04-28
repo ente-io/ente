@@ -20,6 +20,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
+import "package:photos/services/wake_lock_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -126,6 +127,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         }
       }
     });
+
+    EnteWakeLockService.instance
+        .updateWakeLock(enable: true, wakeLockFor: WakeLockFor.videoPlayback);
   }
 
   Future<void> setVideoSource() async {
@@ -220,6 +224,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _debouncer.cancelDebounceTimer();
     _elTooltipController.dispose();
     _captionUpdatedSubscription.cancel();
+    EnteWakeLockService.instance
+        .updateWakeLock(enable: false, wakeLockFor: WakeLockFor.videoPlayback);
     super.dispose();
   }
 
@@ -478,6 +484,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         widget.playbackCallback!(false);
       }
     }
+
+    _handleWakeLockOnPlaybackChanges();
   }
 
   void _onError(String errorMessage) {
@@ -541,6 +549,21 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           setState(() {});
         }
       });
+    }
+  }
+
+  void _handleWakeLockOnPlaybackChanges() {
+    final playbackStatus = _controller?.playbackStatus;
+    if (playbackStatus == PlaybackStatus.playing) {
+      EnteWakeLockService.instance.updateWakeLock(
+        enable: true,
+        wakeLockFor: WakeLockFor.videoPlayback,
+      );
+    } else {
+      EnteWakeLockService.instance.updateWakeLock(
+        enable: false,
+        wakeLockFor: WakeLockFor.videoPlayback,
+      );
     }
   }
 

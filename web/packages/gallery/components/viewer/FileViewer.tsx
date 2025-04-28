@@ -28,7 +28,7 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { lowercaseExtension } from "ente-base/file-name";
-import { formattedListJoin, pt, ut } from "ente-base/i18n";
+import { formattedListJoin, ut } from "ente-base/i18n";
 import type { LocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import {
@@ -63,7 +63,6 @@ import {
     moreButtonID,
     moreMenuID,
     resetMoreMenuButtonOnMenuClose,
-    shouldUsePlayerV2,
     type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
 
@@ -829,7 +828,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
-                disableDownload,
                 haveUser,
                 delegate: delegateRef.current!,
                 onClose: () => {
@@ -1152,22 +1150,12 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
             <Shortcut action={t("close")} shortcut={ut("Esc")} />
             <Shortcut
                 action={formattedListJoin([t("previous"), t("next")])}
-                shortcut={
-                    // TODO(HLS):
-                    shouldUsePlayerV2()
-                        ? `${formattedListJoin([ut("←"), ut("→")])} (Option/Alt)`
-                        : formattedListJoin([ut("←"), ut("→")])
-                }
+                shortcut={`${formattedListJoin([ut("←"), ut("→")])} ${ut("(Option/Alt)")}`}
             />
-            {
-                /* TODO(HLS): */
-                shouldUsePlayerV2() && (
-                    <Shortcut
-                        action={pt("Video seek")}
-                        shortcut={formattedListJoin([ut("←"), ut("→")])}
-                    />
-                )
-            }
+            <Shortcut
+                action={t("video_seek")}
+                shortcut={formattedListJoin([ut("←"), ut("→")])}
+            />
             <Shortcut
                 action={t("zoom")}
                 shortcut={formattedListJoin([t("mouse_scroll"), t("pinch")])}
@@ -1184,15 +1172,10 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
                 action={t("pan")}
                 shortcut={formattedListJoin([ut("W A S D"), t("drag")])}
             />
-            {
-                /* TODO(HLS): */
-                shouldUsePlayerV2() && (
-                    <Shortcut
-                        action={pt("Play, Pause")}
-                        shortcut={ut("Space")}
-                    />
-                )
-            }
+            <Shortcut
+                action={formattedListJoin([t("play"), t("pause")])}
+                shortcut={ut("Space")}
+            />
             <Shortcut action={t("toggle_live")} shortcut={ut("Space")} />
             <Shortcut action={t("toggle_audio")} shortcut={ut("M")} />
             {haveUser && (
