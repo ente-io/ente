@@ -134,6 +134,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         return 'Nederlands';
       case 'pl':
         return 'Polski';
+      case 'no':
+        return 'Norsk';
       case 'pt':
         if (locale.countryCode == 'BR') {
           return 'Português (Brasil)';
