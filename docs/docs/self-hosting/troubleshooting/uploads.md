@@ -7,7 +7,6 @@ description: Fixing upload errors when trying to self host Ente
 
 Here are some errors our community members frequently encountered with the
 context and potential fixes.
-\
 
 Fundamentally in most situations, the problem is because of minor mistakes or
 misconfiguration. Please make sure to reverse proxy museum and minIO API 
