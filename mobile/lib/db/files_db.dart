@@ -1450,25 +1450,6 @@ class FilesDB with SqlDbBase {
     return files;
   }
 
-  // For givenUserID, get List of unique LocalIDs for files which are
-  // uploaded by the given user and location is missing
-  Future<List<String>> getLocalIDsForFilesWithoutLocation(int ownerID) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT DISTINCT $columnLocalID FROM $filesTable
-      WHERE $columnOwnerID = ? AND $columnLocalID IS NOT NULL AND 
-      ($columnLatitude IS NULL OR $columnLongitude IS NULL OR $columnLatitude = 0.0 or $columnLongitude = 0.0)
-    ''',
-      [ownerID],
-    );
-    final result = <String>[];
-    for (final row in rows) {
-      result.add(row[columnLocalID].toString());
-    }
-    return result;
-  }
-
   // For a given userID, return unique uploadedFileId for the given userID
   Future<List<int>> getUploadIDsWithMissingSize(int userId) async {
     final db = await instance.sqliteAsyncDB;
