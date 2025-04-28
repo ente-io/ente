@@ -16,7 +16,7 @@ file for any minor misconfigurations.
 
 It is also suggested that the user setups bucket CORS on MinIO or any external
 S3 service provider they are connecting to. To setup bucket CORS, please [read
-this](/self-hosting/guides/external-s3#_5-fix-potential-cors-issue-with-your-bucket).
+this](/self-hosting/troubleshooting/bucket-cors).
 
 ## What is S3 and how is it incorporated in Ente ?
 
@@ -30,7 +30,7 @@ dump all the uploaded files as encrypted object blobs.
 
 ## 403 Forbidden
 
-If museum (`2`) is able to make a network connection to your S3 bucket (`3`) but
+If museum is able to make a network connection to your S3 bucket but
 uploads are still failing, it could be a credentials or permissions issue.
 
 A telltale sign of this is that in the museum logs you can see `403 Forbidden`
@@ -50,7 +50,6 @@ This could be because
 
 ## Mismatch in file size 
 
-The "Mismatch in file size" error mostly occurs in a situation where the client
-(`1`) is re-uploading a file which is already in the bucket with a different
+The "Mismatch in file size" error mostly occurs in a situation where the client is re-uploading a file which is already in the bucket with a different
 file size. The reason for re-upload could be anything including network issue,
 sudden killing of app before the upload is complete and etc. 
