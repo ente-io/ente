@@ -1,12 +1,10 @@
 {
     "icons": [
         {
-            "title": "Agentur für Arbeit",
-            "hex": "ec1c23"
+            "title": "Bundesagentur für Arbeit"
         },
         {
-            "title": "bonify",
-            "hex": "2eacbd"
+            "title": "bonify"
         },
         {
             "title": "ente",
@@ -17,12 +15,7 @@
             "hex": "858585"
         },
         {
-            "title": "ImmoScout24",
-            "hex": "00ffd0"
-        },
-        {
-            "title": "LinkedIn",
-            "hex": "007ebb"
+            "title": "ImmoScout24"
         }
     ]
 }
