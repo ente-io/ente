@@ -242,7 +242,7 @@ class PreviewVideoStore {
           '-vf "format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
           '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
           '-c:v libx264 -crf 23 -preset medium '
-          '-c:a copy '
+          '-c:a aac -b:a 128k '
           '-f hls -hls_time 2 -hls_flags single_file '
           '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
           '$prefix/output.m3u8',
