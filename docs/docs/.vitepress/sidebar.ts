@@ -269,7 +269,7 @@ export const sidebar = [
                         link: "/self-hosting/guides/admin",
                     },
                     {
-                        text: "Configure CLI for self hosted instance",
+                        text: "Configure CLI for your instance",
                         link: "/self-hosting/guides/selfhost-cli",
                     },
                     {
@@ -284,6 +284,7 @@ export const sidebar = [
             },
             {
                 text: "Troubleshooting",
+                collapsed: true,
                 items: [
                     {
                         text: "General",
@@ -309,6 +310,7 @@ export const sidebar = [
             },
             {
                 text: "Community Guides",
+                collapsed: true,
                 items :[
                     {
                         text: "Ente via Tailscale",
@@ -322,6 +324,7 @@ export const sidebar = [
             },
             {
                 text: "FAQ",
+                collapsed: true,
                 items: [
                     { text: "General", link: "/self-hosting/faq/" },
                     {
