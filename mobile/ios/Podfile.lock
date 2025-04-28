@@ -298,7 +298,7 @@ DEPENDENCIES:
   - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
 
 SPEC REPOS:
-  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios.git:
+  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios:
     - ffmpeg_kit_custom
   trunk:
     - Firebase
