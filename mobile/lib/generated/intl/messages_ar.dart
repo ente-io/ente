@@ -216,7 +216,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m74(name) => "رحلة برية مع ${name}";
 
   static String m75(count) =>
-      "{count, plural, one{${count} النتائج التي تم العثور عليها} other{{${count} النتائج التي تم العثور عليها}}";
+      "${Intl.plural(count, one: '${count} النتائج التي تم العثور عليها', other: '${count} النتائج التي تم العثور عليها')}";
 
   static String m76(snapshotLength, searchLength) =>
       "عدم تطابق طول الأقسام: ${snapshotLength} != ${searchLength}";
