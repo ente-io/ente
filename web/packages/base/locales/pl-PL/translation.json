@@ -512,8 +512,6 @@
     "enter_name": "Wprowadź nazwę",
     "uploader_name_hint": "Dodaj imię, aby Twoi znajomi wiedzieli, kto będzie mógł podziękować za te wspaniałe zdjęcia!",
     "name_placeholder": "Nazwa...",
-    "root_level_file_with_folder_not_allowed": "Nie można utworzyć albumów z mieszanki plików/folderów",
-    "root_level_file_with_folder_not_allowed_message": "<p>Przeciągnąłeś i upuściłeś mieszankę plików i folderów.</p><p>Prosimy podać tylko pliki lub tylko foldery podczas wybierania opcji tworzenia oddzielnych albumów</p>",
     "more_details": "Więcej szczegółów",
     "ml_search": "Nauczanie maszynowe",
     "ml_search_description": "Ente obsługuje nauczanie maszynowe na urządzeniu dla rozpoznawania twarzy, wyszukiwania magicznego i innych zaawansowanych funkcji wyszukiwania",

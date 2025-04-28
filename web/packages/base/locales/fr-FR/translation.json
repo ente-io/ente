@@ -512,8 +512,6 @@
     "enter_name": "Saisir un nom",
     "uploader_name_hint": "Ajouter un nom afin que vos amis sachent qui remercier pour ces magnifiques photos!",
     "name_placeholder": "Nom...",
-    "root_level_file_with_folder_not_allowed": "Impossible de créer des albums depuis un mix fichier/dossier",
-    "root_level_file_with_folder_not_allowed_message": "<p>Vous avez glissé déposé un mélange de fichiers et dossiers.</p><p>Veuillez sélectionner soit uniquement des fichiers, ou des dossiers lors du choix d'options pour créer des albums séparés</p>",
     "more_details": "Plus de détails",
     "ml_search": "Apprentissage automatique",
     "ml_search_description": "Ente prend en charge l'apprentissage automatique sur l'appareil pour la reconnaissance faciale, la recherche magique et d'autres fonctionnalités de recherche avancée",

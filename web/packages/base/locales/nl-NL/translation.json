@@ -512,8 +512,6 @@
     "enter_name": "Naam invoeren",
     "uploader_name_hint": "Voeg een naam toe zodat je vrienden weten wie ze moeten bedanken voor deze geweldige foto's!",
     "name_placeholder": "Naam...",
-    "root_level_file_with_folder_not_allowed": "Kan geen albums maken uit bestand/map mix",
-    "root_level_file_with_folder_not_allowed_message": "<p>Je hebt een mix van bestanden en mappen gesleept en laten vallen.</p><p>Geef ofwel alleen bestanden aan, of alleen mappen bij het selecteren van de optie om afzonderlijke albums te maken</p>",
     "more_details": "Meer details",
     "ml_search": "Machine Learning",
     "ml_search_description": "Ente ondersteunt machine learning lokaal op het apparaat voor gezichtsherkenning, magische zoekopdrachten en andere geavanceerde zoekfuncties",
