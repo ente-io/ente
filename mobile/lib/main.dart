@@ -33,7 +33,6 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/home_widget_service.dart';
-import "package:photos/services/isolated_ffmpeg_service.dart";
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
@@ -212,8 +211,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     // Start workers asynchronously. No need to wait for them to start
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
-
-    IsolatedFfmpegService.init();
 
     _logger.info("Lockscreen init $tlog");
     unawaited(LockScreenSettings.instance.init(preferences));
