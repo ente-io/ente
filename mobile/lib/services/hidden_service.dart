@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/db/files_db.dart";
+import "package:photos/db/remote/schema.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
@@ -17,6 +18,7 @@ import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/models/metadata/common_keys.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -64,12 +66,9 @@ extension HiddenService on CollectionsService {
         if (hidden.id == defaultHidden.id) {
           continue;
         }
-        final filesInCollection = (await FilesDB.instance.getFilesInCollection(
-          hidden.id,
-          galleryLoadStartTime,
-          galleryLoadEndTime,
-        ))
-            .files;
+        final filesInCollection = await remoteCache
+            .getCollectionFiles(FilterQueryParam(collectionID: hidden.id));
+
         await move(
           filesInCollection,
           toCollectionID: defaultHidden.id,

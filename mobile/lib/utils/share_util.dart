@@ -9,10 +9,12 @@ import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/db/files_db.dart";
+import "package:photos/db/remote/schema.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/ui/sharing/show_images_prevew.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/exif_util.dart';
@@ -254,13 +256,11 @@ Future<void> shareAlbumLinkWithPlaceholder(
   GlobalKey key,
 ) async {
   final ScreenshotController screenshotController = ScreenshotController();
-  final List<EnteFile> filesInCollection =
-      (await FilesDB.instance.getFilesInCollection(
-    collection.id,
-    galleryLoadStartTime,
-    galleryLoadEndTime,
-  ))
-          .files;
+  final List<EnteFile> filesInCollection = await remoteCache.getCollectionFiles(
+    FilterQueryParam(
+      collectionID: collection.id,
+    ),
+  );
 
   final dialog = createProgressDialog(
     context,

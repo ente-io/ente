@@ -3,6 +3,7 @@ import "package:photos/db/remote/schema.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/remote/asset.dart";
+import "package:photos/models/file_load_result.dart";
 import "package:photos/service_locator.dart";
 
 class RemoteCache {
@@ -20,6 +21,21 @@ class RemoteCache {
       }
     }
     return files;
+  }
+
+  Future<FileLoadResult> getCollectionFilesResult(
+    FilterQueryParam? params,
+  ) async {
+    final cf = await remoteDB.getCollectionFiles(params);
+    final _ = isLoaded ?? await _load();
+    final List<EnteFile> files = [];
+    for (final file in cf) {
+      final asset = remoteAssets[file.fileID];
+      if (asset != null) {
+        files.add(EnteFile.fromRemoteAsset(asset, file));
+      }
+    }
+    return FileLoadResult(files, params?.limit == files.length);
   }
 
   Future<void> _load() async {

@@ -4,11 +4,13 @@ import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/remote/schema.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/selected_files.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -91,12 +93,16 @@ class PickCoverPhotoWidget extends StatelessWidget {
                                 asc,
                               }) async {
                                 final FileLoadResult result =
-                                    await FilesDB.instance.getFilesInCollection(
-                                  collection.id,
-                                  creationStartTime,
-                                  creationEndTime,
-                                  limit: limit,
-                                  asc: asc,
+                                    await remoteCache.getCollectionFilesResult(
+                                  FilterQueryParam(
+                                    collectionID: collection.id,
+                                    createAtRange: (
+                                      creationStartTime,
+                                      creationEndTime
+                                    ),
+                                    limit: limit,
+                                    isAsc: asc ?? false,
+                                  ),
                                 );
                                 // hide ignored files from home page UI
                                 final ignoredIDs = await IgnoredFilesService

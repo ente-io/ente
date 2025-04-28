@@ -718,31 +718,6 @@ class FilesDB with SqlDbBase {
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
-  Future<FileLoadResult> getFilesInCollection(
-    int collectionID,
-    int startTime,
-    int endTime, {
-    int? limit,
-    bool? asc,
-    int visibility = visibleVisibility,
-  }) async {
-    final db = await instance.sqliteAsyncDB;
-    final order = (asc ?? false ? 'ASC' : 'DESC');
-    String query =
-        'SELECT * FROM $filesTable WHERE $columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? ORDER BY $columnCreationTime $order, $columnModificationTime $order';
-    final List<Object> args = [collectionID, startTime, endTime];
-    if (limit != null) {
-      query += ' LIMIT ?';
-      args.add(limit);
-    }
-    final results = await db.getAll(
-      query,
-      args,
-    );
-    final files = convertToFiles(results);
-    return FileLoadResult(files, files.length == limit);
-  }
-
   Future<List<EnteFile>> getAllFilesCollection(int collectionID) async {
     final db = await instance.sqliteAsyncDB;
     const String whereClause = '$columnCollectionID = ?';
