@@ -442,6 +442,10 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
  *     Stream #0:0: Video: h264 (High 10) ([27][0][0][0] / 0x001B), yuv420p10le(tv, bt2020nc/bt2020/arib-std-b67), 1920x1080, 30 fps, 30 tbr, 90k tbn
  *
  * The part after Video: is the first capture group.
+ *
+ * Another example:
+ *
+ *     Stream #0:1[0x2](und): Video: h264 (Constrained Baseline) (avc1 / 0x31637661), yuv420p(progressive), 480x270 [SAR 1:1 DAR 16:9], 539 kb/s, 29.97 fps, 29.97 tbr, 30k tbn (default)
  */
 const videoStreamLineRegex = /Stream #.+: Video:(.+)\n/;
 
@@ -449,18 +453,20 @@ const videoStreamLineRegex = /Stream #.+: Video:(.+)\n/;
 const videoStreamLinesRegex = /Stream #.+: Video:(.+)\n/g;
 
 /**
- * A regex that matches "<digits> kb/s" preceded by a space and followed by a
- * trailing comma. See {@link videoStreamLineRegex} for the context in which it
- * is used.
+ * A regex that matches "<digits> kb/s" preceded by a space. See
+ * {@link videoStreamLineRegex} for the context in which it is used.
  */
-const videoBitrateRegex = / (\d+) kb\/s,/;
+const videoBitrateRegex = / ([1-9]\d*) kb\/s/;
 
 /**
- * A regex that matches <digits>x<digits> pair preceded by a space and followed
- * by a trailing comma. See {@link videoStreamLineRegex} for the context in
- * which it is used.
+ * A regex that matches <digits>x<digits> pair preceded by a space. See
+ * {@link videoStreamLineRegex} for the context in which it is used.
+ *
+ * We constrain the digit sequence not to begin with 0 to exclude hexadecimal
+ * representations of various constants that ffmpeg prints on this line (e.g.
+ * "avc1 / 0x31637661").
  */
-const videoDimensionsRegex = / (\d+)x(\d+),/;
+const videoDimensionsRegex = / ([1-9]\d*)x([1-9]\d*)/;
 
 interface VideoCharacteristics {
     isH264: boolean;
