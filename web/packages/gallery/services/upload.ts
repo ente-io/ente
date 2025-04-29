@@ -32,27 +32,31 @@ export const resetUploadState = () => {
 /**
  * An item to upload is one of the following:
  *
- * 1. A file drag-and-dropped or selected by the user when we are running in the
- *    web browser. These is the {@link File} case.
+ * 1. [web] A file drag-and-dropped or selected by the user when we are running
+ *    in the web browser. These is the {@link File} case.
  *
- * 2. A file drag-and-dropped or selected by the user when we are running in the
- *    context of our desktop app. In such cases, we also have the absolute path
- *    of the file in the user's local file system. This is the
+ * 2. [desktop] A file drag-and-dropped or selected by the user when we are
+ *    running in the context of our desktop app. In such cases, we also have the
+ *    absolute path of the file in the user's local file system. This is the
  *    {@link FileAndPath} case.
  *
- * 3. A file path programmatically requested by the desktop app. For example, we
- *    might be resuming a previously interrupted upload after an app restart
- *    (thus we no longer have access to the {@link File} from case 2). Or we
- *    could be uploading a file this is in one of the folders the user has asked
- *    us to watch for changes. This is the `string` case.
+ * 3. [desktop] A file path programmatically requested by the desktop app. For
+ *    example, we might be resuming a previously interrupted upload after an app
+ *    restart (thus we no longer have access to the {@link File} from case 2).
+ *    Or we could be uploading a file this is in one of the folders the user has
+ *    asked us to watch for changes. This is the `string` case.
  *
- * 4. A file within a zip file on the user's local file system. This too is only
- *    possible when we are running in the context of our desktop app. The user
- *    might have drag-and-dropped or selected a zip file, or it might be a zip
- *    file that they'd previously selected but we now are resuming an
- *    interrupted upload of. Either ways, what we have is a tuple containing the
- *    (path to zip file, and the name of an entry within that zip file). This is
- *    the {@link ZipItem} case.
+ * 4. [desktop] A file within a zip file on the user's local file system. This
+ *    too is only possible when we are running in the context of our desktop
+ *    app. The user might have drag-and-dropped or selected a zip file, or it
+ *    might be a zip file that they'd previously selected but we now are
+ *    resuming an interrupted upload of. Either ways, what we have is a tuple
+ *    containing the (path to zip file, and the name of an entry within that zip
+ *    file). This is the {@link ZipItem} case.
+ *
+ * Only case 1 is possible when we're running in the web app.
+ *
+ * Only case 2, 3 and 4 are possible when we're running in the desktop app.
  *
  * Also see: [Note: Reading a UploadItem].
  */
