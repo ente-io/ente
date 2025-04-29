@@ -58,9 +58,14 @@ export const ffmpegExec = async (
     try {
         await writeToTemporaryInputFile();
 
-        const resolvedCommand = Array.isArray(command)
-            ? command
-            : command.default;
+        let resolvedCommand: string[];
+        if (Array.isArray(command)) {
+            resolvedCommand = command;
+        } else {
+            const isHDR = await isHDRVideo(inputFilePath);
+            log.debug(() => [basename(inputFilePath), { isHDR }]);
+            resolvedCommand = isHDR ? command.hdr : command.default;
+        }
 
         const cmd = substitutePlaceholders(
             resolvedCommand,
