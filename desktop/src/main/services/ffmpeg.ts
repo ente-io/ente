@@ -1,7 +1,7 @@
 import pathToFfmpeg from "ffmpeg-static";
 import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
-import path from "node:path";
+import path, { basename } from "node:path";
 import type { ZipItem } from "../../types/ipc";
 import log from "../log";
 import { execAsync } from "../utils/electron";
@@ -166,11 +166,14 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  * @returns The paths to two files on the user's local file system - one
  * containing the generated HLS playlist, and the other containing the
  * transcoded and encrypted video segments that the HLS playlist refers to.
+ *
+ * If the video is such that it doesn't require stream generation, then this
+ * function returns `undefined`.
  */
 export const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
-): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult> => {
+): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined> => {
     // [Note: Tonemapping HDR to HD]
     //
     // BT.709 ("HD") is a standard that describes things like how color is
@@ -209,6 +212,8 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     const { isH264, isBT709, bitrate } =
         await detectVideoCharacteristics(inputFilePath);
 
+    log.debug(() => [basename(inputFilePath), { isH264, isBT709, bitrate }]);
+
     // If the video is smaller than 10 MB, and already H.264 (the codec we are
     // going to use for the conversion), then a streaming variant is not much
     // use. Skip such cases.
@@ -234,8 +239,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
             .stat(inputFilePath)
             .then((st) => st.size);
         if (inputVideoSize <= 10 * 1024 * 1024 /* 10 MB */) {
-            // TODO(HLS):
-            console.log("Potential skip");
+            return undefined;
         }
     }
 
