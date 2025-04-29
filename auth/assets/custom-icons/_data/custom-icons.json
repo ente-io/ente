@@ -188,6 +188,9 @@
       "slug": "blue_sky"
     },
     {
+      "title": "bonify"
+    },
+    {
       "title": "Booking",
       "altNames": [
         "Booking.com"
@@ -211,6 +214,13 @@
     },
     {
       "title": "Bugzilla"
+    },
+    {
+      "title": "Bundesagentur für Arbeit",
+      "slug": "bundesagentur_fur_arbeit",
+      "altNames": [
+        "Agentur für Arbeit"
+      ]
     },
     {
       "title": "ButterflyMX",
@@ -520,6 +530,13 @@
     {
       "title": "ID.me",
       "slug": "id_me"
+    },
+    {
+      "title": "ImmoScout24",
+      "slug": "immo_scout_24",
+      "altNames": [
+        "ImmobilienScout24"
+      ]
     },
     {
       "title": "Infomaniak"
