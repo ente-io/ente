@@ -37,7 +37,7 @@ import { ffmpegExecWeb } from "./web";
  */
 export const generateVideoThumbnailWeb = async (blob: Blob) =>
     _generateVideoThumbnail((seekTime: number) =>
-        ffmpegExecWeb(makeGenThumbnailCommand(seekTime, false), blob, "jpeg"),
+        ffmpegExecWeb(makeGenThumbnailCommand(seekTime), blob, "jpeg"),
     );
 
 const _generateVideoThumbnail = async (
@@ -73,16 +73,18 @@ export const generateVideoThumbnailNative = async (
 ) =>
     _generateVideoThumbnail((seekTime: number) =>
         electron.ffmpegExec(
-            {
-                default: makeGenThumbnailCommand(seekTime, false),
-                hdr: makeGenThumbnailCommand(seekTime, true),
-            },
+            makeGenThumbnailCommand(seekTime),
             toDataOrPathOrZipEntry(desktopUploadItem),
             "jpeg",
         ),
     );
 
-const makeGenThumbnailCommand = (seekTime: number, forHDR: boolean) => [
+const makeGenThumbnailCommand = (seekTime: number) => ({
+    default: _makeGenThumbnailCommand(seekTime, false),
+    hdr: _makeGenThumbnailCommand(seekTime, true),
+});
+
+const _makeGenThumbnailCommand = (seekTime: number, forHDR: boolean) => [
     ffmpegPathPlaceholder,
     "-i",
     inputPathPlaceholder,

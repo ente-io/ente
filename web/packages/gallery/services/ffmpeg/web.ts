@@ -1,6 +1,7 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { newID } from "ente-base/id";
 import log from "ente-base/log";
+import type { FFmpegCommand } from "ente-base/types/ipc";
 import { PromiseQueue } from "ente-utils/promise";
 import {
     ffmpegPathPlaceholder,
@@ -51,7 +52,7 @@ const createFFmpeg = async () => {
  * {@link command} on {@link blob}.
  */
 export const ffmpegExecWeb = async (
-    command: string[],
+    command: FFmpegCommand,
     blob: Blob,
     outputFileExtension: string,
 ): Promise<Uint8Array> => {
@@ -68,15 +69,13 @@ export const ffmpegExecWeb = async (
 
 const ffmpegExec = async (
     ffmpeg: FFmpeg,
-    command: string[],
+    command: FFmpegCommand,
     outputFileExtension: string,
     blob: Blob,
 ) => {
     const inputPath = newID("in_");
     const outputSuffix = outputFileExtension ? "." + outputFileExtension : "";
     const outputPath = newID("out_") + outputSuffix;
-
-    const cmd = substitutePlaceholders(command, inputPath, outputPath);
 
     const inputData = new Uint8Array(await blob.arrayBuffer());
 
@@ -88,6 +87,16 @@ const ffmpegExec = async (
         const startTime = Date.now();
 
         await ffmpeg.writeFile(inputPath, inputData);
+
+        const resolvedCommand = Array.isArray(command)
+            ? command
+            : command.default;
+
+        const cmd = substitutePlaceholders(
+            resolvedCommand,
+            inputPath,
+            outputPath,
+        );
 
         status = await ffmpeg.exec(cmd);
         if (status !== 0) {
