@@ -519,6 +519,7 @@ func main() {
 	privateAPI.DELETE("/users/session", userHandler.TerminateSession)
 	privateAPI.GET("/users/delete-challenge", userHandler.GetDeleteChallenge)
 	privateAPI.DELETE("/users/delete", userHandler.DeleteUser)
+	publicAPI.GET("/users/recover-account", userHandler.SelfAccountRecovery)
 
 	accountsJwtAuthAPI := server.Group("/")
 	accountsJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.ACCOUNTS.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
@@ -864,7 +865,7 @@ func setupDatabase() *sql.DB {
 	}
 
 	db.SetMaxIdleConns(6)
-	db.SetMaxOpenConns(30)
+	db.SetMaxOpenConns(45)
 
 	log.Println("Database was configured successfully.")
 

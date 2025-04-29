@@ -9,7 +9,12 @@ import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.
 import 'package:video_editor/video_editor.dart';
 
 class VideoCropPage extends StatefulWidget {
-  const VideoCropPage({super.key, required this.controller});
+  final int quarterTurnsForRotationCorrection;
+  const VideoCropPage({
+    super.key,
+    required this.controller,
+    required this.quarterTurnsForRotationCorrection,
+  });
 
   final VideoEditorController controller;
 
@@ -31,10 +36,13 @@ class _VideoCropPageState extends State<VideoCropPage> {
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: CropGridViewer.edit(
-                  controller: widget.controller,
-                  rotateCropArea: false,
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                child: RotatedBox(
+                  quarterTurns: widget.quarterTurnsForRotationCorrection,
+                  child: CropGridViewer.edit(
+                    controller: widget.controller,
+                    rotateCropArea: false,
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                  ),
                 ),
               ),
             ),

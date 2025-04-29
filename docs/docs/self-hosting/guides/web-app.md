@@ -5,6 +5,12 @@ description:
     server
 ---
 
+
+> [!WARNING] NOTE
+> This page covers documentation around self-hosting the web app manually. If you
+> want to deploy Ente hassle free, please use the [one line](https://ente.io/blog/self-hosting-quickstart/) 
+> command to setup Ente. This guide might be deprecated in the near future.
+
 # Web app
 
 The getting started instructions mention using `yarn dev` (which is an alias of

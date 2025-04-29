@@ -1,6 +1,6 @@
-Ente é um aplicativo simples para fazer backup automático e organizar suas fotos e vídeos.
+Ente é uma aplicação simples feita para fazer backup automaticamente e organizar as suas fotos e vídeos.
 
-Se tem procurado uma alternativa que respeite a privacidade para preservar as suas memórias, veio ao sítio certo. Com o Ente, são armazenados encriptados de ponta a ponta (e2ee). Isto significa que só o utilizador as pode ver.
+Se busca por uma alternativa mais privada para preservar as suas memórias, chegaste ao lugar correto. Com Ente, eles são armazenados em encriptação de ponta a ponta (e2ee). Isto significa que só vos podeis vê-las.
 
 Temos aplicações para Android, iOS, Web e ambiente de trabalho, e as suas fotografias serão perfeitamente sincronizadas entre todos os seus dispositivos de uma forma encriptada de ponta a ponta (e2ee).
 

@@ -39,6 +39,15 @@ export default ts.config(
                 "error",
                 { allowTernary: true },
             ],
+            // Allow force unwrapping potentially optional values.
+            //
+            // See: [Note: non-null-assertions have better stack trace]
+            "@typescript-eslint/no-non-null-assertion": "off",
+            // Allow `while(true)` etc.
+            "@typescript-eslint/no-unnecessary-condition": [
+                "error",
+                { allowConstantLoopConditions: true },
+            ],
         },
     },
 );

@@ -20,28 +20,28 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ro';
 
-  static String m0(storageAmount, endDate) =>
+  static String m3(storageAmount, endDate) =>
       "Suplimentul de ${storageAmount} este valabil până pe ${endDate}";
 
-  static String m48(emailOrName) => "Adăugat de ${emailOrName}";
+  static String m5(emailOrName) => "Adăugat de ${emailOrName}";
 
-  static String m49(albumName) => "S-au adăugat cu succes la ${albumName}";
+  static String m6(albumName) => "S-au adăugat cu succes la ${albumName}";
 
-  static String m1(count) =>
+  static String m8(count) =>
       "${Intl.plural(count, zero: 'Fără participanți', one: '1 participant', other: '${count} de participanți')}";
 
-  static String m51(versionValue) => "Versiune: ${versionValue}";
+  static String m9(versionValue) => "Versiune: ${versionValue}";
 
-  static String m52(freeAmount, storageUnit) =>
+  static String m10(freeAmount, storageUnit) =>
       "${freeAmount} ${storageUnit} liber";
 
-  static String m2(paymentProvider) =>
+  static String m12(paymentProvider) =>
       "Vă rugăm să vă anulați mai întâi abonamentul existent de la ${paymentProvider}";
 
-  static String m3(user) =>
+  static String m13(user) =>
       "${user} nu va putea să mai adauge fotografii la acest album\n\nVa putea să elimine fotografii existente adăugate de el/ea";
 
-  static String m4(isFamilyMember, storageAmountInGb) =>
+  static String m14(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
             'true':
                 'Familia dvs. a revendicat ${storageAmountInGb} GB până acum',
@@ -49,193 +49,193 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': 'Ați revendicat ${storageAmountInGb} de GB până acum!',
           })}";
 
-  static String m54(albumName) => "Link colaborativ creat pentru ${albumName}";
+  static String m15(albumName) => "Link colaborativ creat pentru ${albumName}";
 
-  static String m56(email, numOfDays) =>
+  static String m17(email, numOfDays) =>
       "Sunteți pe cale să adăugați ${email} ca persoană de contact de încredere. Acesta va putea să vă recupereze contul dacă lipsiți timp de ${numOfDays} de zile.";
 
-  static String m5(familyAdminEmail) =>
+  static String m18(familyAdminEmail) =>
       "Vă rugăm să contactați <green>${familyAdminEmail}</green> pentru a gestiona abonamentul";
 
-  static String m6(provider) =>
+  static String m19(provider) =>
       "Vă rugăm să ne contactați la support@ente.io pentru a vă gestiona abonamentul ${provider}.";
 
-  static String m57(endpoint) => "Conectat la ${endpoint}";
+  static String m20(endpoint) => "Conectat la ${endpoint}";
 
-  static String m7(count) =>
+  static String m21(count) =>
       "${Intl.plural(count, one: 'Ștergeți ${count} articol', other: 'Ștergeți ${count} de articole')}";
 
-  static String m58(currentlyDeleting, totalCount) =>
+  static String m22(currentlyDeleting, totalCount) =>
       "Se șterg ${currentlyDeleting} / ${totalCount}";
 
-  static String m8(albumName) =>
+  static String m23(albumName) =>
       "Urmează să eliminați linkul public pentru accesarea „${albumName}”.";
 
-  static String m9(supportEmail) =>
+  static String m24(supportEmail) =>
       "Vă rugăm să trimiteți un e-mail la ${supportEmail} de pe adresa de e-mail înregistrată";
 
-  static String m10(count, storageSaved) =>
+  static String m25(count, storageSaved) =>
       "Ați curățat ${Intl.plural(count, one: '${count} dublură', few: '${count} dubluri', other: '${count} de dubluri')}, economisind (${storageSaved}!)";
 
-  static String m11(count, formattedSize) =>
+  static String m26(count, formattedSize) =>
       "${count} fișiere, ${formattedSize} fiecare";
 
-  static String m59(newEmail) => "E-mail modificat în ${newEmail}";
+  static String m27(newEmail) => "E-mail modificat în ${newEmail}";
 
-  static String m12(email) =>
+  static String m29(email) =>
       "${email} nu are un cont Ente.\n\nTrimiteți-le o invitație pentru a distribui fotografii.";
 
-  static String m62(text) => "S-au găsit fotografii extra pentru ${text}";
+  static String m31(text) => "S-au găsit fotografii extra pentru ${text}";
 
-  static String m64(count, formattedNumber) =>
+  static String m33(count, formattedNumber) =>
       "${Intl.plural(count, one: 'Un fișier de pe acest dispozitiv a fost deja salvat în siguranță', few: '${formattedNumber} fișiere de pe acest dispozitiv au fost deja salvate în siguranță', other: '${formattedNumber} de fișiere de pe acest dispozitiv fost deja salvate în siguranță')}";
 
-  static String m65(count, formattedNumber) =>
+  static String m34(count, formattedNumber) =>
       "${Intl.plural(count, one: 'Un fișier din acest album a fost deja salvat în siguranță', few: '${formattedNumber} fișiere din acest album au fost deja salvate în siguranță', other: '${formattedNumber} de fișiere din acest album au fost deja salvate în siguranță')}";
 
-  static String m13(storageAmountInGB) =>
+  static String m35(storageAmountInGB) =>
       "${storageAmountInGB} GB de fiecare dată când cineva se înscrie pentru un plan plătit și aplică codul dvs.";
 
-  static String m14(endDate) =>
+  static String m36(endDate) =>
       "Perioadă de încercare valabilă până pe ${endDate}";
 
-  static String m67(sizeInMBorGB) => "Eliberați ${sizeInMBorGB}";
+  static String m38(sizeInMBorGB) => "Eliberați ${sizeInMBorGB}";
 
-  static String m69(currentlyProcessing, totalCount) =>
+  static String m40(currentlyProcessing, totalCount) =>
       "Se procesează ${currentlyProcessing} / ${totalCount}";
 
-  static String m15(count) =>
+  static String m42(count) =>
       "${Intl.plural(count, one: '${count} articol', few: '${count} articole', other: '${count} de articole')}";
 
-  static String m72(email) =>
+  static String m44(email) =>
       "${email} v-a invitat să fiți un contact de încredere";
 
-  static String m16(expiryTime) => "Linkul va expira pe ${expiryTime}";
+  static String m45(expiryTime) => "Linkul va expira pe ${expiryTime}";
 
-  static String m77(albumName) => "S-au mutat cu succes în ${albumName}";
+  static String m50(albumName) => "S-au mutat cu succes în ${albumName}";
 
-  static String m78(personName) => "Nicio sugestie pentru ${personName}";
+  static String m51(personName) => "Nicio sugestie pentru ${personName}";
 
-  static String m79(name) => "Nu este ${name}?";
+  static String m52(name) => "Nu este ${name}?";
 
-  static String m17(familyAdminEmail) =>
+  static String m53(familyAdminEmail) =>
       "Vă rugăm să contactați ${familyAdminEmail} pentru a vă schimba codul.";
 
-  static String m18(passwordStrengthValue) =>
+  static String m55(passwordStrengthValue) =>
       "Complexitatea parolei: ${passwordStrengthValue}";
 
-  static String m19(providerName) =>
+  static String m56(providerName) =>
       "Vă rugăm să vorbiți cu asistența ${providerName} dacă ați fost taxat";
 
-  static String m20(endDate) =>
+  static String m61(endDate) =>
       "Perioada de încercare gratuită valabilă până pe ${endDate}.\nUlterior, puteți opta pentru un plan plătit.";
 
-  static String m85(toEmail) =>
+  static String m62(toEmail) =>
       "Vă rugăm să ne trimiteți un e-mail la ${toEmail}";
 
-  static String m86(toEmail) =>
+  static String m63(toEmail) =>
       "Vă rugăm să trimiteți jurnalele la \n${toEmail}";
 
-  static String m88(folderName) => "Se procesează ${folderName}...";
+  static String m65(folderName) => "Se procesează ${folderName}...";
 
-  static String m21(storeName) => "Evaluați-ne pe ${storeName}";
+  static String m66(storeName) => "Evaluați-ne pe ${storeName}";
 
-  static String m90(days, email) =>
+  static String m68(days, email) =>
       "Puteți accesa contul după ${days} zile. O notificare va fi trimisă la ${email}.";
 
-  static String m91(email) =>
+  static String m69(email) =>
       "Acum puteți recupera contul ${email} setând o nouă parolă.";
 
-  static String m92(email) => "${email} încearcă să vă recupereze contul.";
+  static String m70(email) => "${email} încearcă să vă recupereze contul.";
 
-  static String m22(storageInGB) =>
+  static String m71(storageInGB) =>
       "3. Amândoi primiți ${storageInGB} GB* gratuit";
 
-  static String m23(userEmail) =>
+  static String m72(userEmail) =>
       "${userEmail} va fi eliminat din acest album distribuit\n\nOrice fotografii adăugate de acesta vor fi, de asemenea, eliminate din album";
 
-  static String m24(endDate) => "Abonamentul se reînnoiește pe ${endDate}";
+  static String m73(endDate) => "Abonamentul se reînnoiește pe ${endDate}";
 
-  static String m94(count) =>
+  static String m113(count) =>
       "${Intl.plural(count, one: '${count} rezultat găsit', few: '${count} rezultate găsite', other: '${count} de rezultate găsite')}";
 
-  static String m95(snapshotLength, searchLength) =>
+  static String m75(snapshotLength, searchLength) =>
       "Lungimea secțiunilor nu se potrivesc: ${snapshotLength} != ${searchLength}";
 
-  static String m25(count) => "${count} selectate";
+  static String m76(count) => "${count} selectate";
 
-  static String m26(count, yourCount) =>
+  static String m77(count, yourCount) =>
       "${count} selectate (${yourCount} ale dvs.)";
 
-  static String m27(verificationID) =>
+  static String m79(verificationID) =>
       "Acesta este ID-ul meu de verificare: ${verificationID} pentru ente.io.";
 
-  static String m28(verificationID) =>
+  static String m80(verificationID) =>
       "Poți confirma că acesta este ID-ul tău de verificare ente.io: ${verificationID}";
 
-  static String m29(referralCode, referralStorageInGB) =>
+  static String m81(referralCode, referralStorageInGB) =>
       "Codul de recomandare Ente: ${referralCode}\n\nAplică-l în Setări → General → Recomandări pentru a obține ${referralStorageInGB} GB gratuit după ce te înscrii pentru un plan plătit\n\nhttps://ente.io";
 
-  static String m30(numberOfPeople) =>
+  static String m82(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'Distribuiți cu anumite persoane', one: 'Distribuit cu o persoană', other: 'Distribuit cu ${numberOfPeople} de persoane')}";
 
-  static String m97(emailIDs) => "Distribuit cu ${emailIDs}";
+  static String m83(emailIDs) => "Distribuit cu ${emailIDs}";
 
-  static String m31(fileType) =>
+  static String m84(fileType) =>
       "Fișierul de tip ${fileType} va fi șters din dispozitivul dvs.";
 
-  static String m32(fileType) =>
+  static String m85(fileType) =>
       "Fișierul de tip ${fileType} este atât în Ente, cât și în dispozitivul dvs.";
 
-  static String m33(fileType) =>
+  static String m86(fileType) =>
       "Fișierul de tip ${fileType} va fi șters din Ente.";
 
-  static String m34(storageAmountInGB) => "${storageAmountInGB} GB";
+  static String m89(storageAmountInGB) => "${storageAmountInGB} GB";
 
-  static String m100(
+  static String m90(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "${usedAmount} ${usedStorageUnit} din ${totalAmount} ${totalStorageUnit} utilizat";
 
-  static String m35(id) =>
+  static String m91(id) =>
       "${id} este deja legat la un alt cont Ente.\nDacă doriți să folosiți ${id} cu acest cont, vă rugăm să contactați asistența noastră";
 
-  static String m36(endDate) => "Abonamentul dvs. va fi anulat pe ${endDate}";
+  static String m92(endDate) => "Abonamentul dvs. va fi anulat pe ${endDate}";
 
-  static String m101(completed, total) =>
+  static String m93(completed, total) =>
       "${completed}/${total} amintiri salvate";
 
-  static String m102(ignoreReason) =>
+  static String m94(ignoreReason) =>
       "Atingeți pentru a încărca, încărcarea este ignorată în prezent datorită ${ignoreReason}";
 
-  static String m37(storageAmountInGB) =>
+  static String m95(storageAmountInGB) =>
       "De asemenea, va primii ${storageAmountInGB} GB";
 
-  static String m38(email) => "Acesta este ID-ul de verificare al ${email}";
+  static String m96(email) => "Acesta este ID-ul de verificare al ${email}";
 
-  static String m105(count) =>
+  static String m99(count) =>
       "${Intl.plural(count, zero: 'Curând', one: 'O zi', other: '${count} de zile')}";
 
-  static String m108(email) =>
+  static String m102(email) =>
       "Ați fost învitat să fiți un contact de moștenire de către ${email}.";
 
-  static String m109(galleryType) =>
+  static String m103(galleryType) =>
       "Tipul de galerie ${galleryType} nu este acceptat pentru redenumire";
 
-  static String m110(ignoreReason) =>
+  static String m104(ignoreReason) =>
       "Încărcare ignorată din motivul ${ignoreReason}";
 
-  static String m111(count) => "Se salvează ${count} amintiri...";
+  static String m105(count) => "Se salvează ${count} amintiri...";
 
-  static String m39(endDate) => "Valabil până pe ${endDate}";
+  static String m106(endDate) => "Valabil până pe ${endDate}";
 
-  static String m40(email) => "Verificare ${email}";
+  static String m107(email) => "Verificare ${email}";
 
-  static String m41(email) => "Am trimis un e-mail la <green>${email}</green>";
+  static String m109(email) => "Am trimis un e-mail la <green>${email}</green>";
 
-  static String m42(count) =>
+  static String m110(count) =>
       "${Intl.plural(count, one: 'acum ${count} an', few: 'acum ${count} ani', other: 'acum ${count} de ani')}";
 
-  static String m43(storageSaved) => "Ați eliberat cu succes ${storageSaved}!";
+  static String m112(storageSaved) => "Ați eliberat cu succes ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -273,7 +273,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Adăugare persoană nouă"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Detaliile suplimentelor"),
-        "addOnValidTill": m0,
+        "addOnValidTill": m3,
         "addOns": MessageLookupByLibrary.simpleMessage("Suplimente"),
         "addPhotos":
             MessageLookupByLibrary.simpleMessage("Adăugați fotografii"),
@@ -290,8 +290,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addYourPhotosNow": MessageLookupByLibrary.simpleMessage(
             "Adăugați-vă fotografiile acum"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Adăugat ca"),
-        "addedBy": m48,
-        "addedSuccessfullyTo": m49,
+        "addedBy": m5,
+        "addedSuccessfullyTo": m6,
         "addingToFavorites":
             MessageLookupByLibrary.simpleMessage("Se adaugă la favorite..."),
         "advanced": MessageLookupByLibrary.simpleMessage("Avansat"),
@@ -302,7 +302,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Week": MessageLookupByLibrary.simpleMessage("După o săptămâna"),
         "after1Year": MessageLookupByLibrary.simpleMessage("După un an"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Proprietar"),
-        "albumParticipantsCount": m1,
+        "albumParticipantsCount": m8,
         "albumTitle": MessageLookupByLibrary.simpleMessage("Titlu album"),
         "albumUpdated":
             MessageLookupByLibrary.simpleMessage("Album actualizat"),
@@ -351,7 +351,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "appLock": MessageLookupByLibrary.simpleMessage("Blocare aplicație"),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "Alegeți între ecranul de blocare implicit al dispozitivului dvs. și un ecran de blocare personalizat cu PIN sau parolă."),
-        "appVersion": m51,
+        "appVersion": m9,
         "appleId": MessageLookupByLibrary.simpleMessage("Apple ID"),
         "apply": MessageLookupByLibrary.simpleMessage("Aplicare"),
         "applyCodeTitle":
@@ -434,7 +434,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoPairDesc": MessageLookupByLibrary.simpleMessage(
             "Asocierea automată funcționează numai cu dispozitive care acceptă Chromecast."),
         "available": MessageLookupByLibrary.simpleMessage("Disponibil"),
-        "availableStorageSpace": m52,
+        "availableStorageSpace": m10,
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Foldere salvate"),
         "backup": MessageLookupByLibrary.simpleMessage("Copie de rezervă"),
@@ -475,10 +475,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Anulare recuperare"),
         "cancelAccountRecoveryBody": MessageLookupByLibrary.simpleMessage(
             "Sunteți sigur că doriți să anulați recuperarea?"),
-        "cancelOtherSubscription": m2,
+        "cancelOtherSubscription": m12,
         "cancelSubscription":
             MessageLookupByLibrary.simpleMessage("Anulare abonament"),
-        "cannotAddMorePhotosAfterBecomingViewer": m3,
+        "cannotAddMorePhotosAfterBecomingViewer": m13,
         "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
             "Nu se pot șterge fișierele distribuite"),
         "castAlbum": MessageLookupByLibrary.simpleMessage("Difuzați albumul"),
@@ -516,7 +516,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimMore":
             MessageLookupByLibrary.simpleMessage("Revendicați mai multe!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Revendicat"),
-        "claimedStorageSoFar": m4,
+        "claimedStorageSoFar": m14,
         "cleanUncategorized":
             MessageLookupByLibrary.simpleMessage("Curățare Necategorisite"),
         "cleanUncategorizedDescription": MessageLookupByLibrary.simpleMessage(
@@ -547,7 +547,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Creați un link pentru a permite oamenilor să adauge și să vizualizeze fotografii în albumul dvs. distribuit, fără a avea nevoie de o aplicație sau un cont Ente. Excelent pentru colectarea fotografiilor de la evenimente."),
         "collaborativeLink":
             MessageLookupByLibrary.simpleMessage("Link colaborativ"),
-        "collaborativeLinkCreatedFor": m54,
+        "collaborativeLinkCreatedFor": m15,
         "collaborator": MessageLookupByLibrary.simpleMessage("Colaborator"),
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
@@ -569,7 +569,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sigur doriți dezactivarea autentificării cu doi factori?"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Confirmați ștergerea contului"),
-        "confirmAddingTrustedContact": m56,
+        "confirmAddingTrustedContact": m17,
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
             "Da, doresc să șterg definitiv acest cont și toate datele sale din toate aplicațiile."),
         "confirmPassword":
@@ -582,10 +582,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Confirmați cheia de recuperare"),
         "connectToDevice":
             MessageLookupByLibrary.simpleMessage("Conectați-vă la dispozitiv"),
-        "contactFamilyAdmin": m5,
+        "contactFamilyAdmin": m18,
         "contactSupport": MessageLookupByLibrary.simpleMessage(
             "Contactați serviciul de asistență"),
-        "contactToManageSubscription": m6,
+        "contactToManageSubscription": m19,
         "contacts": MessageLookupByLibrary.simpleMessage("Contacte"),
         "contents": MessageLookupByLibrary.simpleMessage("Conținuturi"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("Continuare"),
@@ -626,14 +626,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable": MessageLookupByLibrary.simpleMessage(
             "Actualizare critică disponibilă"),
         "crop": MessageLookupByLibrary.simpleMessage("Decupare"),
-        "curatedMemories":
-            MessageLookupByLibrary.simpleMessage("Curated memories"),
         "currentUsageIs":
             MessageLookupByLibrary.simpleMessage("Utilizarea actuală este "),
         "currentlyRunning":
             MessageLookupByLibrary.simpleMessage("rulează în prezent"),
         "custom": MessageLookupByLibrary.simpleMessage("Particularizat"),
-        "customEndpoint": m57,
+        "customEndpoint": m20,
         "darkTheme": MessageLookupByLibrary.simpleMessage("Întunecată"),
         "dayToday": MessageLookupByLibrary.simpleMessage("Astăzi"),
         "dayYesterday": MessageLookupByLibrary.simpleMessage("Ieri"),
@@ -670,12 +668,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ștergeți de pe dispozitiv"),
         "deleteFromEnte":
             MessageLookupByLibrary.simpleMessage("Ștergeți din Ente"),
-        "deleteItemCount": m7,
+        "deleteItemCount": m21,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Ștergeți locația"),
         "deletePhotos":
             MessageLookupByLibrary.simpleMessage("Ștergeți fotografiile"),
-        "deleteProgress": m58,
+        "deleteProgress": m22,
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "Lipsește o funcție cheie de care am nevoie"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
@@ -716,7 +714,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Observatorii pot să facă capturi de ecran sau să salveze o copie a fotografiilor dvs. folosind instrumente externe"),
         "disableDownloadWarningTitle":
             MessageLookupByLibrary.simpleMessage("Rețineți"),
-        "disableLinkMessage": m8,
+        "disableLinkMessage": m23,
         "disableTwofactor": MessageLookupByLibrary.simpleMessage(
             "Dezactivați al doilea factor"),
         "disablingTwofactorAuthentication":
@@ -757,9 +755,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "downloadFailed":
             MessageLookupByLibrary.simpleMessage("Descărcarea nu a reușit"),
         "downloading": MessageLookupByLibrary.simpleMessage("Se descarcă..."),
-        "dropSupportEmail": m9,
-        "duplicateFileCountWithStorageSaved": m10,
-        "duplicateItemsGroup": m11,
+        "dropSupportEmail": m24,
+        "duplicateFileCountWithStorageSaved": m25,
+        "duplicateItemsGroup": m26,
         "edit": MessageLookupByLibrary.simpleMessage("Editare"),
         "editLocation": MessageLookupByLibrary.simpleMessage("Editare locaţie"),
         "editLocationTagTitle":
@@ -773,8 +771,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "email": MessageLookupByLibrary.simpleMessage("E-mail"),
         "emailAlreadyRegistered":
             MessageLookupByLibrary.simpleMessage("E-mail deja înregistrat."),
-        "emailChangedTo": m59,
-        "emailNoEnteAccount": m12,
+        "emailChangedTo": m27,
+        "emailNoEnteAccount": m29,
         "emailNotRegistered": MessageLookupByLibrary.simpleMessage(
             "E-mailul nu este înregistrat."),
         "emailVerificationToggle": MessageLookupByLibrary.simpleMessage(
@@ -861,7 +859,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Export de date"),
         "extraPhotosFound":
             MessageLookupByLibrary.simpleMessage("S-au găsit fotografii extra"),
-        "extraPhotosFoundFor": m62,
+        "extraPhotosFoundFor": m31,
         "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
             "Fața nu este încă grupată, vă rugăm să reveniți mai târziu"),
         "faceRecognition":
@@ -912,8 +910,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "fileTypes": MessageLookupByLibrary.simpleMessage("Tipuri de fișiere"),
         "fileTypesAndNames": MessageLookupByLibrary.simpleMessage(
             "Tipuri de fișiere și denumiri"),
-        "filesBackedUpFromDevice": m64,
-        "filesBackedUpInAlbum": m65,
+        "filesBackedUpFromDevice": m33,
+        "filesBackedUpInAlbum": m34,
         "filesDeleted": MessageLookupByLibrary.simpleMessage("Fișiere șterse"),
         "filesSavedToGallery":
             MessageLookupByLibrary.simpleMessage("Fișiere salvate în galerie"),
@@ -928,13 +926,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "foundFaces": MessageLookupByLibrary.simpleMessage("S-au găsit fețe"),
         "freeStorageClaimed":
             MessageLookupByLibrary.simpleMessage("Spațiu gratuit revendicat"),
-        "freeStorageOnReferralSuccess": m13,
+        "freeStorageOnReferralSuccess": m35,
         "freeStorageUsable":
             MessageLookupByLibrary.simpleMessage("Spațiu gratuit utilizabil"),
         "freeTrial": MessageLookupByLibrary.simpleMessage(
             "Perioadă de încercare gratuită"),
-        "freeTrialValidTill": m14,
-        "freeUpAmount": m67,
+        "freeTrialValidTill": m36,
+        "freeUpAmount": m38,
         "freeUpDeviceSpace": MessageLookupByLibrary.simpleMessage(
             "Eliberați spațiu pe dispozitiv"),
         "freeUpDeviceSpaceDesc": MessageLookupByLibrary.simpleMessage(
@@ -946,7 +944,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "general": MessageLookupByLibrary.simpleMessage("General"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Se generează cheile de criptare..."),
-        "genericProgress": m69,
+        "genericProgress": m40,
         "goToSettings":
             MessageLookupByLibrary.simpleMessage("Mergeți la setări"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("ID Google Play"),
@@ -1030,7 +1028,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "Se pare că ceva nu a mers bine. Vă rugăm să încercați din nou după ceva timp. Dacă eroarea persistă, vă rugăm să contactați echipa noastră de asistență."),
-        "itemCount": m15,
+        "itemCount": m42,
         "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion":
             MessageLookupByLibrary.simpleMessage(
                 "Articolele afișează numărul de zile rămase până la ștergerea definitivă"),
@@ -1062,7 +1060,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "legacy": MessageLookupByLibrary.simpleMessage("Moștenire"),
         "legacyAccounts":
             MessageLookupByLibrary.simpleMessage("Conturi de moștenire"),
-        "legacyInvite": m72,
+        "legacyInvite": m44,
         "legacyPageDesc": MessageLookupByLibrary.simpleMessage(
             "Moștenirea permite contactelor de încredere să vă acceseze contul în absența dvs."),
         "legacyPageDesc2": MessageLookupByLibrary.simpleMessage(
@@ -1075,7 +1073,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Limită de dispozitive"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("Activat"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("Expirat"),
-        "linkExpiresOn": m16,
+        "linkExpiresOn": m45,
         "linkExpiry":
             MessageLookupByLibrary.simpleMessage("Expirarea linkului"),
         "linkHasExpired":
@@ -1205,7 +1203,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("Mutare în album"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Mutați în albumul ascuns"),
-        "movedSuccessfullyTo": m77,
+        "movedSuccessfullyTo": m50,
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("S-a mutat în coșul de gunoi"),
         "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
@@ -1257,10 +1255,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("Niciun rezultat"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("Nu s-au găsit rezultate"),
-        "noSuggestionsForPerson": m78,
+        "noSuggestionsForPerson": m51,
         "noSystemLockFound": MessageLookupByLibrary.simpleMessage(
             "Nu s-a găsit nicio blocare de sistem"),
-        "notPersonLabel": m79,
+        "notPersonLabel": m52,
         "nothingSharedWithYouYet": MessageLookupByLibrary.simpleMessage(
             "Nimic distribuit cu dvs. încă"),
         "nothingToSeeHere":
@@ -1270,7 +1268,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("Pe dispozitiv"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Pe <branding>ente</branding>"),
-        "onlyFamilyAdminCanChangeCode": m17,
+        "onlyFamilyAdminCanChangeCode": m53,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Numai el/ea"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
@@ -1309,7 +1307,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Parola a fost schimbată cu succes"),
         "passwordLock":
             MessageLookupByLibrary.simpleMessage("Blocare cu parolă"),
-        "passwordStrength": m18,
+        "passwordStrength": m55,
         "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
             "Puterea parolei este calculată luând în considerare lungimea parolei, caracterele utilizate și dacă parola apare sau nu în top 10.000 cele mai utilizate parole"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
@@ -1320,7 +1318,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Plata nu a reușit"),
         "paymentFailedMessage": MessageLookupByLibrary.simpleMessage(
             "Din păcate, plata dvs. nu a reușit. Vă rugăm să contactați asistență și vom fi bucuroși să vă ajutăm!"),
-        "paymentFailedTalkToProvider": m19,
+        "paymentFailedTalkToProvider": m56,
         "pendingItems":
             MessageLookupByLibrary.simpleMessage("Elemente în așteptare"),
         "pendingSync":
@@ -1349,7 +1347,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pinAlbum": MessageLookupByLibrary.simpleMessage("Fixați albumul"),
         "pinLock": MessageLookupByLibrary.simpleMessage("Blocare PIN"),
         "playOnTv": MessageLookupByLibrary.simpleMessage("Redare album pe TV"),
-        "playStoreFreeTrialValidTill": m20,
+        "playStoreFreeTrialValidTill": m61,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("Abonament PlayStore"),
         "pleaseCheckYourInternetConnectionAndTryAgain":
@@ -1361,14 +1359,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseContactSupportIfTheProblemPersists":
             MessageLookupByLibrary.simpleMessage(
                 "Vă rugăm să contactați asistența dacă problema persistă"),
-        "pleaseEmailUsAt": m85,
+        "pleaseEmailUsAt": m62,
         "pleaseGrantPermissions": MessageLookupByLibrary.simpleMessage(
             "Vă rugăm să acordați permisiuni"),
         "pleaseLoginAgain": MessageLookupByLibrary.simpleMessage(
             "Vă rugăm, autentificați-vă din nou"),
         "pleaseSelectQuickLinksToRemove": MessageLookupByLibrary.simpleMessage(
             "Vă rugăm să selectați linkurile rapide de eliminat"),
-        "pleaseSendTheLogsTo": m86,
+        "pleaseSendTheLogsTo": m63,
         "pleaseTryAgain": MessageLookupByLibrary.simpleMessage(
             "Vă rugăm să încercați din nou"),
         "pleaseVerifyTheCodeYouHaveEntered":
@@ -1398,7 +1396,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Distribuire privată"),
         "proceed": MessageLookupByLibrary.simpleMessage("Continuați"),
         "processed": MessageLookupByLibrary.simpleMessage("Procesate"),
-        "processingImport": m88,
+        "processingImport": m65,
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Link public creat"),
         "publicLinkEnabled":
@@ -1410,7 +1408,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "rateTheApp":
             MessageLookupByLibrary.simpleMessage("Evaluați aplicația"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Evaluați-ne"),
-        "rateUsOnStore": m21,
+        "rateUsOnStore": m66,
         "recover": MessageLookupByLibrary.simpleMessage("Recuperare"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Recuperare cont"),
@@ -1419,7 +1417,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Recuperare cont"),
         "recoveryInitiated":
             MessageLookupByLibrary.simpleMessage("Recuperare inițiată"),
-        "recoveryInitiatedDesc": m90,
+        "recoveryInitiatedDesc": m68,
         "recoveryKey":
             MessageLookupByLibrary.simpleMessage("Cheie de recuperare"),
         "recoveryKeyCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
@@ -1434,12 +1432,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Cheie de recuperare verificată"),
         "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
             "Cheia dvs. de recuperare este singura modalitate de a vă recupera fotografiile dacă uitați parola. Puteți găsi cheia dvs. de recuperare în Setări > Cont.\n\nVă rugăm să introduceți aici cheia de recuperare pentru a verifica dacă ați salvat-o corect."),
-        "recoveryReady": m91,
+        "recoveryReady": m69,
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Recuperare reușită!"),
         "recoveryWarning": MessageLookupByLibrary.simpleMessage(
             "Un contact de încredere încearcă să vă acceseze contul"),
-        "recoveryWarningBody": m92,
+        "recoveryWarningBody": m70,
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
             "Dispozitivul actual nu este suficient de puternic pentru a vă verifica parola, dar o putem regenera într-un mod care să funcționeze cu toate dispozitivele.\n\nVă rugăm să vă conectați utilizând cheia de recuperare și să vă regenerați parola (dacă doriți, o puteți utiliza din nou pe aceeași)."),
         "recreatePasswordTitle":
@@ -1455,7 +1453,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "1. Dați acest cod prietenilor"),
         "referralStep2": MessageLookupByLibrary.simpleMessage(
             "2. Aceștia se înscriu la un plan cu plată"),
-        "referralStep3": m22,
+        "referralStep3": m71,
         "referrals": MessageLookupByLibrary.simpleMessage("Recomandări"),
         "referralsAreCurrentlyPaused": MessageLookupByLibrary.simpleMessage(
             "Recomandările sunt momentan întrerupte"),
@@ -1487,7 +1485,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removeLink": MessageLookupByLibrary.simpleMessage("Eliminați linkul"),
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Eliminați participantul"),
-        "removeParticipantBody": m23,
+        "removeParticipantBody": m72,
         "removePersonLabel": MessageLookupByLibrary.simpleMessage(
             "Eliminați eticheta persoanei"),
         "removePublicLink":
@@ -1508,7 +1506,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Redenumiți fișierul"),
         "renewSubscription":
             MessageLookupByLibrary.simpleMessage("Reînnoire abonament"),
-        "renewsOn": m24,
+        "renewsOn": m73,
         "reportABug":
             MessageLookupByLibrary.simpleMessage("Raportați o eroare"),
         "reportBug": MessageLookupByLibrary.simpleMessage("Raportare eroare"),
@@ -1589,8 +1587,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Invitați persoane și veți vedea aici toate fotografiile distribuite de acestea"),
         "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
             "Persoanele vor fi afișate aici odată ce procesarea și sincronizarea este completă"),
-        "searchResultCount": m94,
-        "searchSectionsLengthMismatch": m95,
+        "searchResultCount": m113,
+        "searchSectionsLengthMismatch": m75,
         "security": MessageLookupByLibrary.simpleMessage("Securitate"),
         "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
             "Vedeți linkurile albumelor publice în aplicație"),
@@ -1625,8 +1623,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
                 "Articolele selectate vor fi șterse din toate albumele și mutate în coșul de gunoi."),
-        "selectedPhotos": m25,
-        "selectedPhotosWithYours": m26,
+        "selectedPhotos": m76,
+        "selectedPhotosWithYours": m77,
         "send": MessageLookupByLibrary.simpleMessage("Trimitere"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Trimiteți e-mail"),
         "sendInvite":
@@ -1659,16 +1657,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareAnAlbumNow":
             MessageLookupByLibrary.simpleMessage("Distribuiți un album acum"),
         "shareLink": MessageLookupByLibrary.simpleMessage("Distribuiți linkul"),
-        "shareMyVerificationID": m27,
+        "shareMyVerificationID": m79,
         "shareOnlyWithThePeopleYouWant": MessageLookupByLibrary.simpleMessage(
             "Distribuiți numai cu persoanele pe care le doriți"),
-        "shareTextConfirmOthersVerificationID": m28,
+        "shareTextConfirmOthersVerificationID": m80,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Descarcă Ente pentru a putea distribui cu ușurință fotografii și videoclipuri în calitate originală\n\nhttps://ente.io"),
-        "shareTextReferralCode": m29,
+        "shareTextReferralCode": m81,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Distribuiți cu utilizatori din afara Ente"),
-        "shareWithPeopleSectionTitle": m30,
+        "shareWithPeopleSectionTitle": m82,
         "shareYourFirstAlbum":
             MessageLookupByLibrary.simpleMessage("Distribuiți primul album"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
@@ -1681,7 +1679,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Fotografii partajate noi"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
             "Primiți notificări atunci când cineva adaugă o fotografie la un album distribuit din care faceți parte"),
-        "sharedWith": m97,
+        "sharedWith": m83,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Distribuit mie"),
         "sharedWithYou":
             MessageLookupByLibrary.simpleMessage("Distribuite cu dvs."),
@@ -1697,11 +1695,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Deconectați alte dispozitive"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Sunt de acord cu <u-terms>termenii de prestare ai serviciului</u-terms> și <u-policy>politica de confidențialitate</u-policy>"),
-        "singleFileDeleteFromDevice": m31,
+        "singleFileDeleteFromDevice": m84,
         "singleFileDeleteHighlight": MessageLookupByLibrary.simpleMessage(
             "Acesta va fi șters din toate albumele."),
-        "singleFileInBothLocalAndRemote": m32,
-        "singleFileInRemoteOnly": m33,
+        "singleFileInBothLocalAndRemote": m85,
+        "singleFileInRemoteOnly": m86,
         "skip": MessageLookupByLibrary.simpleMessage("Omiteți"),
         "social": MessageLookupByLibrary.simpleMessage("Rețele socializare"),
         "someItemsAreInBothEnteAndYourDevice":
@@ -1749,13 +1747,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "storage": MessageLookupByLibrary.simpleMessage("Spațiu"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("Familie"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Dvs."),
-        "storageInGB": m34,
+        "storageInGB": m89,
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("Limita de spațiu depășită"),
-        "storageUsageInfo": m100,
+        "storageUsageInfo": m90,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Puternică"),
-        "subAlreadyLinkedErrMessage": m35,
-        "subWillBeCancelledOn": m36,
+        "subAlreadyLinkedErrMessage": m91,
+        "subWillBeCancelledOn": m92,
         "subscribe": MessageLookupByLibrary.simpleMessage("Abonare"),
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
             "Aveți nevoie de un abonament plătit activ pentru a activa distribuirea."),
@@ -1772,7 +1770,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Sugerați funcționalități"),
         "support": MessageLookupByLibrary.simpleMessage("Asistență"),
-        "syncProgress": m101,
+        "syncProgress": m93,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Sincronizare oprită"),
         "syncing": MessageLookupByLibrary.simpleMessage("Sincronizare..."),
@@ -1785,7 +1783,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Atingeți pentru a debloca"),
         "tapToUpload":
             MessageLookupByLibrary.simpleMessage("Atingeți pentru a încărca"),
-        "tapToUploadIsIgnoredDue": m102,
+        "tapToUploadIsIgnoredDue": m94,
         "tempErrorContactSupportIfPersists": MessageLookupByLibrary.simpleMessage(
             "Se pare că ceva nu a mers bine. Vă rugăm să încercați din nou după ceva timp. Dacă eroarea persistă, vă rugăm să contactați echipa noastră de asistență."),
         "terminate": MessageLookupByLibrary.simpleMessage("Terminare"),
@@ -1808,7 +1806,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "theseItemsWillBeDeletedFromYourDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Aceste articole vor fi șterse din dispozitivul dvs."),
-        "theyAlsoGetXGb": m37,
+        "theyAlsoGetXGb": m95,
         "theyWillBeDeletedFromAllAlbums": MessageLookupByLibrary.simpleMessage(
             "Acestea vor fi șterse din toate albumele."),
         "thisActionCannotBeUndone": MessageLookupByLibrary.simpleMessage(
@@ -1824,7 +1822,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Această adresă de e-mail este deja folosită"),
         "thisImageHasNoExifData": MessageLookupByLibrary.simpleMessage(
             "Această imagine nu are date exif"),
-        "thisIsPersonVerificationId": m38,
+        "thisIsPersonVerificationId": m96,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "Acesta este ID-ul dvs. de verificare"),
         "thisWillLogYouOutOfTheFollowingDevice":
@@ -1849,11 +1847,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "total": MessageLookupByLibrary.simpleMessage("total"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Dimensiune totală"),
         "trash": MessageLookupByLibrary.simpleMessage("Coș de gunoi"),
-        "trashDaysLeft": m105,
+        "trashDaysLeft": m99,
         "trim": MessageLookupByLibrary.simpleMessage("Decupare"),
         "trustedContacts":
             MessageLookupByLibrary.simpleMessage("Contacte de încredere"),
-        "trustedInviteBody": m108,
+        "trustedInviteBody": m102,
         "tryAgain": MessageLookupByLibrary.simpleMessage("Încercați din nou"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "Activați copia de rezervă pentru a încărca automat fișierele adăugate la acest dosar de pe dispozitiv în Ente."),
@@ -1872,7 +1870,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Autentificarea cu doi factori a fost resetată cu succes"),
         "twofactorSetup":
             MessageLookupByLibrary.simpleMessage("Configurare doi factori"),
-        "typeOfGallerGallerytypeIsNotSupportedForRename": m109,
+        "typeOfGallerGallerytypeIsNotSupportedForRename": m103,
         "unarchive": MessageLookupByLibrary.simpleMessage("Dezarhivare"),
         "unarchiveAlbum":
             MessageLookupByLibrary.simpleMessage("Dezarhivare album"),
@@ -1898,10 +1896,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "updatingFolderSelection": MessageLookupByLibrary.simpleMessage(
             "Se actualizează selecția dosarelor..."),
         "upgrade": MessageLookupByLibrary.simpleMessage("Îmbunătățire"),
-        "uploadIsIgnoredDueToIgnorereason": m110,
+        "uploadIsIgnoredDueToIgnorereason": m104,
         "uploadingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Se încarcă fișiere în album..."),
-        "uploadingMultipleMemories": m111,
+        "uploadingMultipleMemories": m105,
         "uploadingSingleMemory":
             MessageLookupByLibrary.simpleMessage("Se salvează o amintire..."),
         "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(
@@ -1919,7 +1917,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useSelectedPhoto": MessageLookupByLibrary.simpleMessage(
             "Folosiți fotografia selectată"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("Spațiu utilizat"),
-        "validTill": m39,
+        "validTill": m106,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Verificare eșuată, încercați din nou"),
@@ -1928,7 +1926,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("Verificare"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("Verificare e-mail"),
-        "verifyEmailID": m40,
+        "verifyEmailID": m107,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Verificare"),
         "verifyPasskey":
             MessageLookupByLibrary.simpleMessage("Verificați cheia de acces"),
@@ -1966,7 +1964,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
             MessageLookupByLibrary.simpleMessage(
                 "Nu se acceptă editarea fotografiilor sau albumelor pe care nu le dețineți încă"),
-        "weHaveSendEmailTo": m41,
+        "weHaveSendEmailTo": m109,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Slabă"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Bine ați revenit!"),
@@ -1975,7 +1973,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Contactul de încredere vă poate ajuta la recuperarea datelor."),
         "yearShort": MessageLookupByLibrary.simpleMessage("an"),
         "yearly": MessageLookupByLibrary.simpleMessage("Anual"),
-        "yearsAgo": m42,
+        "yearsAgo": m110,
         "yes": MessageLookupByLibrary.simpleMessage("Da"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Da, anulează"),
         "yesConvertToViewer":
@@ -2007,7 +2005,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nu poți distribui cu tine însuți"),
         "youDontHaveAnyArchivedItems":
             MessageLookupByLibrary.simpleMessage("Nu aveți articole arhivate."),
-        "youHaveSuccessfullyFreedUp": m43,
+        "youHaveSuccessfullyFreedUp": m112,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Contul dvs. a fost șters"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Harta dvs."),

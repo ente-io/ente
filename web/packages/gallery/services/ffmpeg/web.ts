@@ -80,13 +80,16 @@ const ffmpegExec = async (
 
     const inputData = new Uint8Array(await blob.arrayBuffer());
 
+    // Exit status of the ffmpeg.exec invocation.
+    // `0` if no error, `!= 0` if timeout (1) or error.
+    let status: number | undefined;
+
     try {
         const startTime = Date.now();
 
         await ffmpeg.writeFile(inputPath, inputData);
 
-        // returns `0` if no error, `!= 0` if timeout (1) or error.
-        const status = await ffmpeg.exec(cmd);
+        status = await ffmpeg.exec(cmd);
         if (status !== 0) {
             log.info(
                 `[wasm] ffmpeg command failed with exit code ${status}: ${cmd.join(" ")}`,
@@ -109,7 +112,11 @@ const ffmpegExec = async (
         try {
             await ffmpeg.deleteFile(outputPath);
         } catch (e) {
-            log.error(`Failed to remove output ${outputPath}`, e);
+            // Output file might not even exist if the command did not succeed,
+            // so only log on success.
+            if (status === 0) {
+                log.error(`Failed to remove output ${outputPath}`, e);
+            }
         }
     }
 };

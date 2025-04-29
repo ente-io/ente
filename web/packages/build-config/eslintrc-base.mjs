@@ -40,16 +40,19 @@ export default tseslint.config(
             ],
             // Allow force unwrapping potentially optional values.
             //
-            // It is best if these can be avoided by restructuring the code, but
-            // there do arise legitimate scenarios where we know from code logic
-            // that the value should be present. Of course, the surrounding code
-            // might change causing that expectation to be falsified, but in
-            // certain cases there isn't much we can do other than throwing an
-            // exception.
+            // [Note: non-null-assertions have better stack trace]
+            //
+            // It is best if non-null assertions can be avoided by restructuring
+            // the code, but there do arise legitimate scenarios where we know
+            // from code logic that the value should be present. Of course, the
+            // surrounding code might change causing that expectation to be
+            // falsified, but in certain cases there isn't much we can do other
+            // than throwing an exception.
             //
             // Instead of rolling our own such exception (which we in fact used
-            // to do at one point), rely on the JS's native undefined property
-            // access exception since that conveys more information in the logs.
+            // to do at, look in git history a utility function named "ensure"),
+            // it is better rely on the JS's native undefined property access
+            // exception since that conveys more information in the logs.
             "@typescript-eslint/no-non-null-assertion": "off",
             // Allow `while(true)` etc.
             "@typescript-eslint/no-unnecessary-condition": [

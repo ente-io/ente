@@ -423,7 +423,14 @@ const createMainWindow = () => {
     window.on("hide", () => {
         // On macOS, when hiding the window also hide the app's icon in the dock
         // unless the user has unchecked the Settings > Hide dock icon checkbox.
-        if (shouldHideDockIcon()) app.dock?.hide();
+        if (shouldHideDockIcon()) {
+            // macOS emits a window "hide" event when going fullscreen, and if
+            // we hide the dock icon there then the window disappears. So ignore
+            // this scenario.
+            if (!window.isFullScreen()) {
+                app.dock?.hide();
+            }
+        }
     });
 
     window.on("show", () => void app.dock?.show());

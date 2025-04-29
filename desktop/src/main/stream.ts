@@ -3,17 +3,23 @@
  */
 import { net, protocol } from "electron/main";
 import { randomUUID } from "node:crypto";
+import fs_ from "node:fs";
 import fs from "node:fs/promises";
-import { Writable } from "node:stream";
+import { Readable, Writable } from "node:stream";
 import { pathToFileURL } from "node:url";
 import log from "./log";
-import { ffmpegConvertToMP4 } from "./services/ffmpeg";
+import {
+    ffmpegConvertToMP4,
+    ffmpegGenerateHLSPlaylistAndSegments,
+    type FFmpegGenerateHLSPlaylistAndSegmentsResult,
+} from "./services/ffmpeg";
 import { markClosableZip, openZip } from "./services/zip";
-import { ensure } from "./utils/common";
+import { wait } from "./utils/common";
 import { writeStream } from "./utils/stream";
 import {
     deleteTempFile,
     deleteTempFileIgnoringErrors,
+    makeFileForDataOrStreamOrPathOrZipItem,
     makeTempFilePath,
 } from "./utils/temp";
 
@@ -57,25 +63,39 @@ const handleStreamRequest = async (request: Request): Promise<Response> => {
     const { host, searchParams } = new URL(url);
     switch (host) {
         case "read":
-            return handleRead(ensure(searchParams.get("path")));
+            return handleRead(searchParams.get("path")!);
 
         case "read-zip":
             return handleReadZip(
-                ensure(searchParams.get("zipPath")),
-                ensure(searchParams.get("entryName")),
+                searchParams.get("zipPath")!,
+                searchParams.get("entryName")!,
             );
 
         case "write":
-            return handleWrite(ensure(searchParams.get("path")), request);
+            return handleWrite(searchParams.get("path")!, request);
 
-        case "convert-to-mp4": {
+        case "video": {
+            const op = searchParams.get("op");
+            if (op) {
+                switch (op) {
+                    case "convert-to-mp4":
+                        return handleConvertToMP4Write(request);
+                    case "generate-hls":
+                        return handleGenerateHLSWrite(request, searchParams);
+                    default:
+                        return new Response(`Unknown op ${op}`, {
+                            status: 404,
+                        });
+                }
+            }
+
             const token = searchParams.get("token");
             const done = searchParams.get("done") !== null;
-            return token
-                ? done
-                    ? handleConvertToMP4ReadDone(token)
-                    : handleConvertToMP4Read(token)
-                : handleConvertToMP4Write(request);
+            if (!token) {
+                return new Response("Missing token", { status: 404 });
+            }
+
+            return done ? handleVideoDone(token) : handleVideoRead(token);
         }
 
         default:
@@ -166,21 +186,21 @@ const handleReadZip = async (zipPath: string, entryName: string) => {
 };
 
 const handleWrite = async (path: string, request: Request) => {
-    await writeStream(path, ensure(request.body));
+    await writeStream(path, request.body!);
     return new Response("", { status: 200 });
 };
 
 /**
- * A map from token to file paths for convert-to-mp4 requests that we have
- * received.
+ * A map from token to file paths generated as a result of stream://video
+ * requests we have received.
  */
-const convertToMP4Results = new Map<string, string>();
+const pendingVideoResults = new Map<string, string>();
 
 /**
- * Clear any in-memory state for in-flight convert-to-mp4 requests. Meant to be
- * called during logout.
+ * Clear any in-memory state for in-flight streamed video processing requests.
+ * Meant to be called during logout.
  */
-export const clearConvertToMP4Results = () => convertToMP4Results.clear();
+export const clearPendingVideoResults = () => pendingVideoResults.clear();
 
 /**
  * [Note: Convert to MP4]
@@ -195,26 +215,26 @@ export const clearConvertToMP4Results = () => convertToMP4Results.clear();
  * mode for the Web fetch API). So we need to simulate that using two different
  * streaming requests.
  *
- *     renderer → main  stream://convert-to-mp4
+ *     renderer → main  stream://video?op=convert-to-mp4
  *                      → request.body is the original video
- *                      ← response is a token
+ *                      ← response is [token]
  *
- *     renderer → main  stream://convert-to-mp4?token=<token>
+ *     renderer → main  stream://video?token=<token>
  *                      ← response.body is the converted video
  *
- *     renderer → main  stream://convert-to-mp4?token=<token>&done
+ *     renderer → main  stream://video?token=<token>&done
  *                      ← 200 OK
  *
  * Note that the conversion itself is not streaming. The conversion still
- * happens in a single shot, we are just streaming the data across the IPC
- * boundary to allow us to pass large amounts of data without running out of
- * memory.
+ * happens in a single invocation of ffmpeg, we are just streaming the data
+ * across the IPC boundary to allow us to pass large amounts of data without
+ * running out of memory.
  *
  * See also: [Note: IPC streams]
  */
 const handleConvertToMP4Write = async (request: Request) => {
     const inputTempFilePath = await makeTempFilePath();
-    await writeStream(inputTempFilePath, ensure(request.body));
+    await writeStream(inputTempFilePath, request.body!);
 
     const outputTempFilePath = await makeTempFilePath("mp4");
     try {
@@ -228,25 +248,168 @@ const handleConvertToMP4Write = async (request: Request) => {
     }
 
     const token = randomUUID();
-    convertToMP4Results.set(token, outputTempFilePath);
+    pendingVideoResults.set(token, outputTempFilePath);
     return new Response(token, { status: 200 });
 };
 
-const handleConvertToMP4Read = async (token: string) => {
-    const filePath = convertToMP4Results.get(token);
+const handleVideoRead = async (token: string) => {
+    const filePath = pendingVideoResults.get(token);
     if (!filePath)
         return new Response(`Unknown token ${token}`, { status: 404 });
 
     return net.fetch(pathToFileURL(filePath).toString());
 };
 
-const handleConvertToMP4ReadDone = async (token: string) => {
-    const filePath = convertToMP4Results.get(token);
+const handleVideoDone = async (token: string) => {
+    const filePath = pendingVideoResults.get(token);
     if (!filePath)
         return new Response(`Unknown token ${token}`, { status: 404 });
 
     await deleteTempFile(filePath);
 
-    convertToMP4Results.delete(token);
+    pendingVideoResults.delete(token);
     return new Response("", { status: 200 });
+};
+
+/**
+ * Generate a HLS playlist for the given video.
+ *
+ * See: [Note: Convert to MP4] for the general architecture of commands that do
+ * renderer <-> main I/O using streams.
+ *
+ * The difference here is that we the conversion generates two streams - one for
+ * the HLS playlist itself, and one for the file containing the encrypted and
+ * transcoded video chunks. The video stream we write to the objectUploadURL
+ * (provided via {@link params}), and then we return a JSON object containing
+ * the token for the playlist, and other metadata for use by the renderer.
+ */
+const handleGenerateHLSWrite = async (
+    request: Request,
+    params: URLSearchParams,
+) => {
+    const objectUploadURL = params.get("objectUploadURL");
+    if (!objectUploadURL) throw new Error("Missing objectUploadURL");
+
+    let inputItem: Parameters<typeof makeFileForDataOrStreamOrPathOrZipItem>[0];
+    const path = params.get("path");
+    if (path) {
+        inputItem = path;
+    } else {
+        const zipPath = params.get("zipPath");
+        const entryName = params.get("entryName");
+        if (zipPath && entryName) {
+            inputItem = [zipPath, entryName];
+        } else {
+            const body = request.body;
+            if (!body) throw new Error("Missing body");
+            inputItem = body;
+        }
+    }
+
+    const {
+        path: inputFilePath,
+        isFileTemporary: isInputFileTemporary,
+        writeToTemporaryFile: writeToTemporaryInputFile,
+    } = await makeFileForDataOrStreamOrPathOrZipItem(inputItem);
+
+    const outputFilePathPrefix = await makeTempFilePath();
+    let result: FFmpegGenerateHLSPlaylistAndSegmentsResult;
+    try {
+        await writeToTemporaryInputFile();
+
+        result = await ffmpegGenerateHLSPlaylistAndSegments(
+            inputFilePath,
+            outputFilePathPrefix,
+        );
+
+        const { playlistPath, videoPath } = result;
+        try {
+            await uploadVideoSegments(videoPath, objectUploadURL);
+
+            const playlistToken = randomUUID();
+            pendingVideoResults.set(playlistToken, playlistPath);
+
+            const { dimensions, videoSize } = result;
+            return new Response(
+                JSON.stringify({ playlistToken, dimensions, videoSize }),
+                { status: 200 },
+            );
+        } catch (e) {
+            await deleteTempFileIgnoringErrors(playlistPath);
+            throw e;
+        } finally {
+            await deleteTempFileIgnoringErrors(videoPath);
+        }
+    } finally {
+        if (isInputFileTemporary)
+            await deleteTempFileIgnoringErrors(inputFilePath);
+    }
+};
+
+/**
+ * Upload the file at the given {@link videoFilePath} to the provided presigned
+ * {@link objectUploadURL} using a HTTP PUT request.
+ *
+ * In case on non-HTTP-4xx errors, retry up to 3 times with exponential backoff.
+ *
+ * See: [Note: Upload HLS video segment from node side].
+ *
+ * ---
+ *
+ * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOkOr4xx`
+ * from `web/packages/base/http.ts` (we don't have the rest of the scaffolding
+ * used by that function, which is why it is inlined bespoked).
+ *
+ * It handles the specific use case of uploading videos since generating the HLS
+ * stream is a fairly expensive operation, so a retry to discount transient
+ * network issues is called for. There are only 2 retries for a total of 3
+ * attempts, and the retry gaps are more spaced out.
+ */
+export const uploadVideoSegments = async (
+    videoFilePath: string,
+    objectUploadURL: string,
+) => {
+    const waitTimeBeforeNextTry = [5000, 20000];
+
+    while (true) {
+        let abort = false;
+        try {
+            const nodeStream = fs_.createReadStream(videoFilePath);
+            const webStream = Readable.toWeb(nodeStream);
+
+            const res = await net.fetch(objectUploadURL, {
+                method: "PUT",
+                // The duplex option is required since we're passing a stream.
+                //
+                // @ts-expect-error TypeScript's libdom.d.ts does not include
+                // the "duplex" parameter, e.g. see
+                // https://github.com/node-fetch/node-fetch/issues/1769.
+                duplex: "half",
+                body: webStream,
+            });
+
+            if (res.ok) {
+                // Success.
+                return;
+            }
+            if (res.status >= 400 && res.status < 500) {
+                // HTTP 4xx.
+                abort = true;
+            }
+            throw new Error(
+                `Failed to upload generated HLS video: HTTP ${res.status} ${res.statusText}`,
+            );
+        } catch (e) {
+            if (abort) {
+                throw e;
+            }
+            const t = waitTimeBeforeNextTry.shift();
+            if (!t) {
+                throw e;
+            } else {
+                log.warn("Will retry potentially transient request failure", e);
+            }
+            await wait(t);
+        }
+    }
 };
