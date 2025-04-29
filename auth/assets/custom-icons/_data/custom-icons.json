@@ -125,6 +125,10 @@
       "title": "Binance TR",
       "slug": "binance_tr"
     },
+     {
+      "title": "BinanceTH",
+      "slug": "binance_th"
+    },
     {
       "title": "BinanceUS",
       "slug": "binance_us",
@@ -163,6 +167,10 @@
     },
     {
       "title": "Bitwarden"
+    },
+    {
+      "title": "Bitkub",
+      "slug": "bitkub"
     },
     {
       "title": "Blockchain",
