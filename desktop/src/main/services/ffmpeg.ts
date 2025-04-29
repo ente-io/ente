@@ -143,8 +143,19 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  * A bespoke variant of {@link ffmpegExec} for generation of HLS playlists for
  * videos.
  *
+ * Overview of the cases:
+ *
+ *     H.264, <= 10 MB             - Skip
+ *     H.264, <= 4000 kb/s bitrate - Don't re-encode video stream
+ *     <= 2000 kb/s bitrate        - Don't apply the scale+fps filter
+ *     !BT.709                     - Apply tonemap (zscale+tonemap+zscale)
+ *
+ * Example invocation:
+ *
+ *     ffmpeg -i in.mov -vf 'scale=-2:720,fps=30,zscale=transfer=linear,tonemap=tonemap=hable:desat=0,zscale=primaries=709:transfer=709:matrix=709,format=yuv420p' -c:v libx264 -c:a aac -f hls -hls_key_info_file out.m3u8.info -hls_list_size 0 -hls_flags single_file out.m3u8
+ *
  * See: [Note: Preview variant of videos]
-
+ *
  * @param inputFilePath The path to a file on the user's local file system. This
  * is the video we want to generate an streamable HLS playlist for.
  *
