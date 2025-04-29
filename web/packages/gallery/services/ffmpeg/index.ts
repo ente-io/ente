@@ -92,8 +92,9 @@ const makeGenThumbnailCommand = (seekTime: number) => [
     // Apply a filter to this frame
     "-vf",
     [
-        // - Scale it to a maximum height of 720 keeping aspect ratio
-        "scale=-1:720",
+        // - Scale it to a maximum height of 720 keeping aspect ratio, ensuring
+        //   that the dimensions are even (subsequent filters require this).
+        "scale=-2:720",
         // - Apply a tonemap to ensure that thumbnails of HDR videos do not look
         //   washed out. See: [Note: Tonemapping HDR to HD].
         "zscale=transfer=linear",
