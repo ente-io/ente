@@ -254,17 +254,15 @@ func (c *EmailNotificationController) SendFamilyNudgeEmail() error {
 			continue
 		}
 		if lastNudgeSent == 0 {
-			go func() {
-				err := email.SendTemplatedEmail([]string{user.Email}, "team@ente.io", "team@ente.io", FamilyNudgeSubject, FamilyNudgeEmailTemplate, nil, nil)
-				if err != nil {
-					log.Error("Failed to send family nudge email: ", err)
-					return
-				}
-				err = c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FamilyNudgeTemplateID)
-				if err != nil {
-					log.Error("Failed to set Notification History")
-				}
-			}()
+			err := email.SendTemplatedEmail([]string{user.Email}, "team@ente.io", "team@ente.io", FamilyNudgeSubject, FamilyNudgeEmailTemplate, nil, nil)
+			if err != nil {
+				log.Error("Failed to send family nudge email: ", err)
+				continue
+			}
+			err = c.NotificationHistoryRepo.SetLastNotificationTimeToNow(user.ID, FamilyNudgeTemplateID)
+			if err != nil {
+				log.Error("Failed to set Notification History")
+			}
 		}
 	}
 	return nil
