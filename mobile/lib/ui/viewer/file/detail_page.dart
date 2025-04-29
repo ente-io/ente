@@ -16,7 +16,9 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/local_authentication_service.dart";
+import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/tools/editor/image_editor_page.dart';
 import "package:photos/ui/tools/editor/video_editor_page.dart";
 import "package:photos/ui/viewer/file/file_app_bar.dart";
@@ -28,7 +30,6 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/thumbnail_util.dart";
-import 'package:photos/utils/toast_util.dart';
 
 enum DetailPageMode {
   minimalistic,
@@ -77,7 +78,6 @@ class _DetailPageState extends State<DetailPage> {
   List<EnteFile>? _files;
   late PageController _pageController;
   final _selectedIndexNotifier = ValueNotifier(0);
-  final _enableFullScreenNotifier = ValueNotifier(false);
   bool _isFirstOpened = true;
   bool isGuestView = false;
   bool swipeLocked = false;
@@ -103,7 +103,6 @@ class _DetailPageState extends State<DetailPage> {
   void dispose() {
     _guestViewEventSubscription.cancel();
     _pageController.dispose();
-    _enableFullScreenNotifier.dispose();
     _selectedIndexNotifier.dispose();
     super.dispose();
 
@@ -137,96 +136,102 @@ class _DetailPageState extends State<DetailPage> {
           _files!.length.toString() +
           " files .",
     );
-    return PopScope(
-      canPop: !isGuestView,
-      onPopInvoked: (didPop) async {
-        if (isGuestView) {
-          final authenticated = await _requestAuthentication();
-          if (authenticated) {
-            Bus.instance.fire(GuestViewEvent(false, false));
-            await localSettings.setOnGuestView(false);
+    return InheritedDetailPageState(
+      child: PopScope(
+        canPop: !isGuestView,
+        onPopInvokedWithResult: (didPop, _) async {
+          if (isGuestView) {
+            final authenticated = await _requestAuthentication();
+            if (authenticated) {
+              Bus.instance.fire(GuestViewEvent(false, false));
+              await localSettings.setOnGuestView(false);
+            }
           }
-        }
-      },
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(80),
-          child: ValueListenableBuilder(
-            builder: (BuildContext context, int selectedIndex, _) {
-              return FileAppBar(
-                _files![selectedIndex],
-                _onFileRemoved,
-                widget.config.mode == DetailPageMode.full,
-                enableFullScreenNotifier: _enableFullScreenNotifier,
-              );
-            },
-            valueListenable: _selectedIndexNotifier,
+        },
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(80),
+            child: ValueListenableBuilder(
+              builder: (BuildContext context, int selectedIndex, _) {
+                return FileAppBar(
+                  _files![selectedIndex],
+                  _onFileRemoved,
+                  widget.config.mode == DetailPageMode.full,
+                  enableFullScreenNotifier: InheritedDetailPageState.of(context)
+                      .enableFullScreenNotifier,
+                );
+              },
+              valueListenable: _selectedIndexNotifier,
+            ),
           ),
-        ),
-        extendBodyBehindAppBar: true,
-        resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.black,
-        body: Center(
-          child: Stack(
-            children: [
-              _buildPageView(context),
-              ValueListenableBuilder(
-                builder: (BuildContext context, int selectedIndex, _) {
-                  return FileBottomBar(
-                    _files![selectedIndex],
-                    _onEditFileRequested,
-                    widget.config.mode == DetailPageMode.minimalistic &&
-                        !isGuestView,
-                    onFileRemoved: _onFileRemoved,
-                    userID: Configuration.instance.getUserID(),
-                    enableFullScreenNotifier: _enableFullScreenNotifier,
-                  );
-                },
-                valueListenable: _selectedIndexNotifier,
-              ),
-              ValueListenableBuilder(
-                valueListenable: _selectedIndexNotifier,
-                builder: (BuildContext context, int selectedIndex, _) {
-                  if (_files![selectedIndex].isPanorama() == true) {
-                    return ValueListenableBuilder(
-                      valueListenable: _enableFullScreenNotifier,
-                      builder: (context, value, child) {
-                        return IgnorePointer(
-                          ignoring: value,
-                          child: AnimatedOpacity(
-                            duration: const Duration(milliseconds: 200),
-                            opacity: !value ? 1.0 : 0.0,
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: Tooltip(
-                                message: S.of(context).panorama,
-                                child: IconButton(
-                                  style: IconButton.styleFrom(
-                                    backgroundColor: const Color(0xAA252525),
-                                    fixedSize: const Size(44, 44),
+          extendBodyBehindAppBar: true,
+          resizeToAvoidBottomInset: false,
+          backgroundColor: Colors.black,
+          body: Center(
+            child: Stack(
+              children: [
+                _buildPageView(),
+                ValueListenableBuilder(
+                  builder: (BuildContext context, int selectedIndex, _) {
+                    return FileBottomBar(
+                      _files![selectedIndex],
+                      _onEditFileRequested,
+                      widget.config.mode == DetailPageMode.minimalistic &&
+                          !isGuestView,
+                      onFileRemoved: _onFileRemoved,
+                      userID: Configuration.instance.getUserID(),
+                      enableFullScreenNotifier:
+                          InheritedDetailPageState.of(context)
+                              .enableFullScreenNotifier,
+                    );
+                  },
+                  valueListenable: _selectedIndexNotifier,
+                ),
+                ValueListenableBuilder(
+                  valueListenable: _selectedIndexNotifier,
+                  builder: (BuildContext context, int selectedIndex, _) {
+                    if (_files![selectedIndex].isPanorama() == true) {
+                      return ValueListenableBuilder(
+                        valueListenable: InheritedDetailPageState.of(context)
+                            .enableFullScreenNotifier,
+                        builder: (context, value, child) {
+                          return IgnorePointer(
+                            ignoring: value,
+                            child: AnimatedOpacity(
+                              duration: const Duration(milliseconds: 200),
+                              opacity: !value ? 1.0 : 0.0,
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Tooltip(
+                                  message: S.of(context).panorama,
+                                  child: IconButton(
+                                    style: IconButton.styleFrom(
+                                      backgroundColor: const Color(0xAA252525),
+                                      fixedSize: const Size(44, 44),
+                                    ),
+                                    icon: const Icon(
+                                      Icons.threesixty,
+                                      color: Colors.white,
+                                      size: 26,
+                                    ),
+                                    onPressed: () async {
+                                      await openPanoramaViewerPage(
+                                        _files![selectedIndex],
+                                      );
+                                    },
                                   ),
-                                  icon: const Icon(
-                                    Icons.threesixty,
-                                    color: Colors.white,
-                                    size: 26,
-                                  ),
-                                  onPressed: () async {
-                                    await openPanoramaViewerPage(
-                                      _files![selectedIndex],
-                                    );
-                                  },
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  }
-                  return const SizedBox();
-                },
-              ),
-            ],
+                          );
+                        },
+                      );
+                    }
+                    return const SizedBox();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -251,7 +256,7 @@ class _DetailPageState extends State<DetailPage> {
     ).ignore();
   }
 
-  Widget _buildPageView(BuildContext context) {
+  Widget _buildPageView() {
     return PageView.builder(
       clipBehavior: Clip.none,
       itemBuilder: (context, index) {
@@ -271,14 +276,17 @@ class _DetailPageState extends State<DetailPage> {
           },
           playbackCallback: (isPlaying) {
             Future.delayed(Duration.zero, () {
-              _toggleFullScreen(shouldEnable: isPlaying);
+              InheritedDetailPageState.of(context)
+                  .toggleFullScreen(shouldEnable: isPlaying);
             });
           },
           backgroundDecoration: const BoxDecoration(color: Colors.black),
         );
         return GestureDetector(
           onTap: () {
-            file.fileType != FileType.video ? _toggleFullScreen() : null;
+            file.fileType != FileType.video
+                ? InheritedDetailPageState.of(context).toggleFullScreen()
+                : null;
           },
           child: fileContent,
         );
@@ -311,26 +319,6 @@ class _DetailPageState extends State<DetailPage> {
       return true;
     }
     return false;
-  }
-
-  void _toggleFullScreen({bool? shouldEnable}) {
-    if (shouldEnable != null) {
-      if (_enableFullScreenNotifier.value == shouldEnable) return;
-    }
-    _enableFullScreenNotifier.value = !_enableFullScreenNotifier.value;
-    if (_enableFullScreenNotifier.value) {
-      Future.delayed(const Duration(milliseconds: 200), () {
-        SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.manual,
-          overlays: [],
-        );
-      });
-    } else {
-      SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.edgeToEdge,
-        overlays: SystemUiOverlay.values,
-      );
-    }
   }
 
   void _preloadFiles(int index) {

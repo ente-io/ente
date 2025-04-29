@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import "package:photos/db/enum/conflict_algo.dart";
+import "package:photos/db/common/base.dart";
+import "package:photos/db/common/conflict_algo.dart";
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file/file.dart';
@@ -18,7 +19,7 @@ import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 
-class FilesDB {
+class FilesDB with SqlDbBase {
   /*
   Note: columnUploadedFileID and columnCollectionID have to be compared against
   both NULL and -1 because older clients might have entries where the DEFAULT
@@ -75,7 +76,7 @@ class FilesDB {
 //If adding or removing a new column, make sure to update the `_columnNames` list
 //and update `_generateColumnsAndPlaceholdersForInsert` and
 //`_generateUpdateAssignmentsWithPlaceholders`
-  static final migrationScripts = [
+  static final _migrationScripts = [
     ...createTable(filesTable),
     ...alterDeviceFolderToAllowNULL(),
     ...alterTimestampColumnTypes(),
@@ -145,31 +146,8 @@ class FilesDB {
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     final database = SqliteDatabase(path: path);
-    await _migrate(database);
-
+    await migrate(database, _migrationScripts);
     return database;
-  }
-
-  Future<void> _migrate(
-    SqliteDatabase database,
-  ) async {
-    final result = await database.execute('PRAGMA user_version');
-    final currentVersion = result[0]['user_version'] as int;
-    final toVersion = migrationScripts.length;
-
-    if (currentVersion < toVersion) {
-      _logger.info("Migrating database from $currentVersion to $toVersion");
-      await database.writeTransaction((tx) async {
-        for (int i = currentVersion + 1; i <= toVersion; i++) {
-          await tx.execute(migrationScripts[i - 1]);
-        }
-        await tx.execute('PRAGMA user_version = $toVersion');
-      });
-    } else if (currentVersion > toVersion) {
-      throw AssertionError(
-        "currentVersion($currentVersion) cannot be greater than toVersion($toVersion)",
-      );
-    }
   }
 
   // SQL code to create the database table
@@ -1260,15 +1238,26 @@ class FilesDB {
     );
   }
 
-  Future<List<EnteFile>> getLocalFiles(List<String> localIDs) async {
+  Future<List<EnteFile>> getLocalFiles(
+    List<String> localIDs, {
+    bool dedupeByLocalID = false,
+  }) async {
+    late final String query;
     final inParam = localIDs.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      '''
+    if (dedupeByLocalID) {
+      query = '''
+      SELECT * FROM $filesTable
+      WHERE $columnLocalID IN ($inParam)
+      GROUP BY $columnLocalID;
+    ''';
+    } else {
+      query = '''
       SELECT * FROM $filesTable
       WHERE $columnLocalID IN ($inParam);
-    ''',
-    );
+    ''';
+    }
+    final results = await db.getAll(query);
     return convertToFiles(results);
   }
 
@@ -1599,25 +1588,6 @@ class FilesDB {
     return files;
   }
 
-  Future<List<String>> getGeneratedIDForFilesOlderThan(
-    int cutOffTime,
-    int ownerID,
-  ) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT DISTINCT $columnGeneratedID FROM $filesTable
-      WHERE $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)
-    ''',
-      [cutOffTime, ownerID],
-    );
-    final result = <String>[];
-    for (final row in rows) {
-      result.add(row[columnGeneratedID].toString());
-    }
-    return result;
-  }
-
   // For givenUserID, get List of unique LocalIDs for files which are
   // uploaded by the given user and location is missing
   Future<List<String>> getLocalIDsForFilesWithoutLocation(int ownerID) async {
@@ -1650,23 +1620,6 @@ class FilesDB {
     final result = <int>[];
     for (final row in rows) {
       result.add(row[columnUploadedFileID] as int);
-    }
-    return result;
-  }
-
-  // For a given userID, return unique localID for all uploaded live photos
-  Future<List<String>> getLivePhotosForUser(int userId) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT DISTINCT $columnLocalID FROM $filesTable
-      WHERE $columnOwnerID = ? AND $columnFileType = ? AND $columnLocalID IS NOT NULL
-    ''',
-      [userId, getInt(FileType.livePhoto)],
-    );
-    final result = <String>[];
-    for (final row in rows) {
-      result.add(row[columnLocalID] as String);
     }
     return result;
   }
@@ -1761,25 +1714,6 @@ class FilesDB {
     return deduplicatedFiles;
   }
 
-  Future<Map<FileType, int>> fetchFilesCountbyType(int userID) async {
-    final db = await instance.sqliteAsyncDB;
-    final result = await db.getAll(
-      '''
-      SELECT $columnFileType, COUNT(DISTINCT $columnUploadedFileID) 
-         FROM $filesTable WHERE $columnUploadedFileID != -1 AND 
-         $columnOwnerID IS $userID GROUP BY $columnFileType
-      ''',
-    );
-
-    final filesCount = <FileType, int>{};
-    for (var e in result) {
-      filesCount.addAll(
-        {getFileType(e[columnFileType] as int): e.values.last as int},
-      );
-    }
-    return filesCount;
-  }
-
   Future<FileLoadResult> fetchAllUploadedAndSharedFilesWithLocation(
     int startTime,
     int endTime, {
@@ -1816,17 +1750,17 @@ class FilesDB {
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
-  Future<List<int>> getAllFileIDs() async {
+  Future<int> remoteFileCount() async {
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll('''
       SELECT DISTINCT $columnUploadedFileID FROM $filesTable
       WHERE  $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1    
     ''');
-    final ids = <int>[];
+    final ids = <int>{};
     for (final result in results) {
       ids.add(result[columnUploadedFileID] as int);
     }
-    return ids;
+    return ids.length;
   }
 
   ///Returns "columnName1 = ?, columnName2 = ?, ..."

@@ -8,7 +8,12 @@ import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.
 import 'package:video_editor/video_editor.dart';
 
 class VideoRotatePage extends StatelessWidget {
-  const VideoRotatePage({super.key, required this.controller});
+  final int quarterTurnsForRotationCorrection;
+  const VideoRotatePage({
+    super.key,
+    required this.controller,
+    required this.quarterTurnsForRotationCorrection,
+  });
 
   final VideoEditorController controller;
 
@@ -26,8 +31,11 @@ class VideoRotatePage extends StatelessWidget {
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: CropGridViewer.preview(
-                  controller: controller,
+                child: RotatedBox(
+                  quarterTurns: quarterTurnsForRotationCorrection,
+                  child: CropGridViewer.preview(
+                    controller: controller,
+                  ),
                 ),
               ),
             ),

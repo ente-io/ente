@@ -7,7 +7,7 @@ import {
 } from "electron";
 import { allowWindowClose } from "../main";
 import { forceCheckForAppUpdates } from "./services/app-update";
-import { userPreferences } from "./stores/user-preferences";
+import { setShouldHideDockIcon, shouldHideDockIcon } from "./services/store";
 
 /** Create and return the entries in the app's main menu bar */
 export const createApplicationMenu = (mainWindow: BrowserWindow) => {
@@ -15,7 +15,7 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
     //
     // Whenever the menu is redrawn the current value of these variables is used
     // to set the checked state for the various settings checkboxes.
-    let shouldHideDockIcon = !!userPreferences.get("hideDockIcon");
+    let hideDockIcon = shouldHideDockIcon();
 
     const macOSOnly = (options: MenuItemConstructorOptions[]) =>
         process.platform == "darwin" ? options : [];
@@ -24,9 +24,9 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
 
     const toggleHideDockIcon = () => {
         // Persist
-        userPreferences.set("hideDockIcon", !shouldHideDockIcon);
+        setShouldHideDockIcon(!hideDockIcon);
         // And update the in-memory state
-        shouldHideDockIcon = !shouldHideDockIcon;
+        hideDockIcon = !hideDockIcon;
     };
 
     const handleHelp = () =>
@@ -36,17 +36,9 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
         {
             label: "Ente Photos",
             submenu: [
-                ...macOSOnly([
-                    {
-                        label: "About Ente",
-                        role: "about",
-                    },
-                ]),
+                ...macOSOnly([{ label: "About Ente", role: "about" }]),
                 { type: "separator" },
-                {
-                    label: "Check for Updates...",
-                    click: handleCheckForUpdates,
-                },
+                { label: "Check for Updates...", click: handleCheckForUpdates },
                 { type: "separator" },
 
                 ...macOSOnly([
@@ -56,7 +48,7 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
                             {
                                 label: "Hide Dock Icon",
                                 type: "checkbox",
-                                checked: shouldHideDockIcon,
+                                checked: hideDockIcon,
                                 click: toggleHideDockIcon,
                             },
                         ],
@@ -65,20 +57,11 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
 
                 { type: "separator" },
                 ...macOSOnly([
-                    {
-                        label: "Hide Ente",
-                        role: "hide",
-                    },
-                    {
-                        label: "Hide Others",
-                        role: "hideOthers",
-                    },
+                    { label: "Hide Ente", role: "hide" },
+                    { label: "Hide Others", role: "hideOthers" },
                     { type: "separator" },
                 ]),
-                {
-                    label: "Quit",
-                    role: "quit",
-                },
+                { label: "Quit", role: "quit" },
             ],
         },
         {
@@ -96,14 +79,8 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
                     {
                         label: "Speech",
                         submenu: [
-                            {
-                                role: "startSpeaking",
-                                label: "Start Speaking",
-                            },
-                            {
-                                role: "stopSpeaking",
-                                label: "Stop Speaking",
-                            },
+                            { role: "startSpeaking", label: "Start Speaking" },
+                            { role: "stopSpeaking", label: "Stop Speaking" },
                         ],
                     },
                 ]),
@@ -132,15 +109,7 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
                 ]),
             ],
         },
-        {
-            label: "Help",
-            submenu: [
-                {
-                    label: "Ente Help",
-                    click: handleHelp,
-                },
-            ],
-        },
+        { label: "Help", submenu: [{ label: "Ente Help", click: handleHelp }] },
     ]);
 };
 
@@ -159,13 +128,7 @@ export const createTrayContextMenu = (mainWindow: BrowserWindow) => {
     };
 
     return Menu.buildFromTemplate([
-        {
-            label: "Open Ente",
-            click: handleOpen,
-        },
-        {
-            label: "Quit Ente",
-            click: handleClose,
-        },
+        { label: "Open Ente", click: handleOpen },
+        { label: "Quit Ente", click: handleClose },
     ]);
 };

@@ -33,7 +33,7 @@ export const haveCredentialsInSession = () =>
  * logged in, otherwise return `undefined`.
  */
 export const masterKeyFromSessionIfLoggedIn = async () => {
-    // TODO: Same value as the deprecated SESSION_KEYS.ENCRYPTION_KEY.
+    // TODO: Same value as the deprecated getKey("encryptionKey")
     const value = sessionStorage.getItem("encryptionKey");
     if (!value) return undefined;
 

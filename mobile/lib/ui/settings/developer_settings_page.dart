@@ -4,8 +4,8 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/ui/common/gradient_button.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/toast_util.dart";
 
 class DeveloperSettingsPage extends StatefulWidget {
   const DeveloperSettingsPage({super.key});

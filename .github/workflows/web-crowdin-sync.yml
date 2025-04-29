@@ -22,6 +22,15 @@ on:
     # Also allow manually running the workflow.
     workflow_dispatch:
 
+# "In order to push translations and create pull requests, the Crowdin GitHub
+#  action requires the `GITHUB_TOKEN` to have write permission on the `contents`
+#  and `pull-requests`.
+#
+# - https://github.com/crowdin/github-action?tab=readme-ov-file#permissions
+permissions:
+    contents: write
+    pull-requests: write
+
 jobs:
     synchronize-with-crowdin:
         runs-on: ubuntu-latest

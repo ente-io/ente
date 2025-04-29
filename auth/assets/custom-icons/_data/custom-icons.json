@@ -286,6 +286,15 @@
       "slug": "csgoroll"
     },
     {
+      "title": "Cwallet",
+      "altNames": [
+        "cwallet",
+        "c-wallet",
+        "c wallet",
+        "cwallet.com"
+      ]
+    },
+    {
       "title": "DCS",
       "altNames": [
         "Digital Combat Simulator"
@@ -377,7 +386,22 @@
       "hex": "858585"
     },
     {
+      "title": "Fanatical",
+      "slug": "fanatical",
+      "altNames": [
+        "FANATICAL"
+      ]
+    },
+    {
       "title": "Fastmail"
+    },
+    {
+      "title": "Federal Student Aid",
+      "slug": "federal_student_aid",
+      "altNames": [
+        "FSA",
+        "FAFSA"
+      ]
     },
     {
       "title": "Fidelity",
@@ -396,6 +420,9 @@
     {
       "title": "Firefox",
       "slug": "mozilla"
+    },
+    {
+      "title": "fortrabbit"
     },
     {
       "title": "ForUsAll"
@@ -482,6 +509,9 @@
     {
       "title": "IceDrive",
       "slug": "ice_drive"
+    },
+    {
+      "title": "ICONOMI"
     },
     {
       "title": "ID.me",
@@ -594,6 +624,11 @@
       "title": "Letterboxd"
     },
     {
+      "title": "LinkedIn",
+      "slug": "linkedin",
+      "hex": "2596be"
+    },
+    {
       "title": "Linux.Do",
       "slug": "linux_do",
       "altNames": [
@@ -613,6 +648,14 @@
     {
       "title": "Login.gov",
       "slug": "login_gov"
+    },
+    {
+      "title": "Luma",
+      "slug": "luma",
+      "altNames": [
+        "luma",
+        "lu.ma"
+      ]
     },
     {
       "title": "Marketplace.tf",
@@ -635,6 +678,14 @@
       ]
     },
     {
+      "title": "Mbin",
+      "altNames": [
+        "kbin",
+        "thebrainbin",
+        "gehirneimer"
+      ]
+    },
+    {
       "title": "Mercado Livre",
       "slug": "mercado_livre",
       "altNames": [
@@ -642,6 +693,9 @@
         "MercadoLibre",
         "MercadoLivre"
       ]
+    },
+    {
+      "title": "MEXC"
     },
     {
       "title": "microsoft"
@@ -816,6 +870,10 @@
       "title": "Parsec"
     },
     {
+      "title": "Patient Access",
+      "slug": "patient_access"
+    },
+    {
       "title": "PayPal"
     },
     {
@@ -841,6 +899,10 @@
       "title": "Pingvin Share"
     },
     {
+      "title": "Pionex",
+      "slug": "pionex"
+    },
+    {
       "title": "Plutus",
       "hex": "DEC685"
     },
@@ -852,6 +914,13 @@
     },
     {
       "title": "PostNL"
+    },
+    {
+      "title": "Postmark",
+      "slug": "postmarkapp",
+      "altNames": [
+        "postmarkapp"
+      ]
     },
     {
       "title": "PostScan Mail",
@@ -918,6 +987,15 @@
       "hex": "488aec"
     },
     {
+      "title": "RedotPay",
+      "altNames": [
+        "redotpay",
+        "redot pay",
+        "redot-pay",
+        "redotpay.com"
+      ]
+    },
+    {
       "title": "Registro br",
       "slug": "registro_br",
       "altNames": [
@@ -951,6 +1029,10 @@
     },
     {
       "title": "RuneMate"
+    },
+    {
+      "title": "RuneScape Wiki",
+      "slug": "runescape_wiki"
     },
     {
       "title": "Rust Language Forum",

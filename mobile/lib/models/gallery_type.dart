@@ -115,10 +115,10 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.locationTag:
       case GalleryType.quickLink:
       case GalleryType.peopleTag:
+      case GalleryType.cluster:
       case GalleryType.magic:
         return true;
       case GalleryType.trash:
-      case GalleryType.cluster:
       case GalleryType.sharedCollection:
       case GalleryType.sharedPublicCollection:
         return false;
@@ -284,6 +284,10 @@ extension GalleyTypeExtension on GalleryType {
   }
 
   bool showEditLocation() {
+    return this != GalleryType.sharedCollection && this != GalleryType.cluster;
+  }
+
+  bool showBulkEditTime() {
     return this != GalleryType.sharedCollection && this != GalleryType.cluster;
   }
 }

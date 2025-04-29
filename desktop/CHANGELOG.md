@@ -1,8 +1,18 @@
 # CHANGELOG
 
-## v1.7.11 (Unreleased)
+## v1.7.13 (Unreleased)
 
 - .
+
+## v1.7.12
+
+- Improved video player with streaming support (for already processed videos).
+- Support Arabic translations.
+
+## v1.7.11
+
+- Improved file viewer.
+- Improved live photo experience.
 
 ## v1.7.10
 

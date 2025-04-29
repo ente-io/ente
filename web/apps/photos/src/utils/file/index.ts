@@ -1,28 +1,27 @@
-import { joinPath } from "@/base/file-name";
-import log from "@/base/log";
-import { type Electron } from "@/base/types/ipc";
-import { downloadAndRevokeObjectURL } from "@/base/utils/web";
-import { downloadManager } from "@/gallery/services/download";
-import { updateFileMagicMetadata } from "@/gallery/services/file";
-import {
-    isArchivedFile,
-    updateMagicMetadata,
-} from "@/gallery/services/magic-metadata";
-import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
-import { writeStream } from "@/gallery/utils/native-stream";
+import { joinPath } from "ente-base/file-name";
+import log from "ente-base/log";
+import { type Electron } from "ente-base/types/ipc";
+import { downloadAndRevokeObjectURL } from "ente-base/utils/web";
+import { downloadManager } from "ente-gallery/services/download";
+import { updateFileMagicMetadata } from "ente-gallery/services/file";
+import { updateMagicMetadata } from "ente-gallery/services/magic-metadata";
+import { detectFileTypeInfo } from "ente-gallery/utils/detect-type";
+import { writeStream } from "ente-gallery/utils/native-stream";
 import {
     EnteFile,
     FileMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
-} from "@/media/file";
-import { ItemVisibility } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
-import { deleteFromTrash, moveToTrash } from "@/new/photos/services/collection";
-import { safeFileName } from "@/new/photos/utils/native-fs";
-import { withTimeout } from "@/utils/promise";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import type { User } from "@ente/shared/user/types";
+} from "ente-media/file";
+import { ItemVisibility, isArchivedFile } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { decodeLivePhoto } from "ente-media/live-photo";
+import {
+    deleteFromTrash,
+    moveToTrash,
+} from "ente-new/photos/services/collection";
+import { safeFileName } from "ente-new/photos/utils/native-fs";
+import { getData } from "ente-shared/storage/localStorage";
+import type { User } from "ente-shared/user/types";
 import { t } from "i18next";
 import {
     addMultipleToFavorites,
@@ -34,16 +33,15 @@ import {
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
 
-export enum FILE_OPS_TYPE {
-    DOWNLOAD,
-    FIX_TIME,
-    ARCHIVE,
-    UNARCHIVE,
-    HIDE,
-    TRASH,
-    DELETE_PERMANENTLY,
-    SET_FAVORITE,
-}
+export type FileOp =
+    | "download"
+    | "fixTime"
+    | "favorite"
+    | "archive"
+    | "unarchive"
+    | "hide"
+    | "trash"
+    | "deletePermanently";
 
 export async function downloadFile(file: EnteFile) {
     try {
@@ -80,7 +78,7 @@ export async function downloadFile(file: EnteFile) {
 function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
     for (const [key, val] of Object.entries(selectedFiles)) {
-        if (typeof val === "boolean" && val) {
+        if (typeof val == "boolean" && val) {
             filesIDs.push(Number(key));
         }
     }
@@ -321,7 +319,7 @@ async function downloadFileDesktop(
 }
 
 export const isImageOrVideo = (fileType: FileType) =>
-    [FileType.image, FileType.video].includes(fileType);
+    fileType == FileType.image || fileType == FileType.video;
 
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(isArchivedFile).map((file) => file.id);
@@ -333,44 +331,11 @@ export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
 };
 
 export const getUserOwnedFiles = (files: EnteFile[]) => {
-    const user: User = getData(LS_KEYS.USER);
+    const user: User = getData("user");
     if (!user?.id) {
         throw Error("user missing");
     }
     return files.filter((file) => file.ownerID === user.id);
-};
-
-// doesn't work on firefox
-export const copyFileToClipboard = async (fileURL: string) => {
-    const canvas = document.createElement("canvas");
-    const canvasCTX = canvas.getContext("2d");
-    const image = new Image();
-
-    const blobPromise = new Promise<Blob>((resolve, reject) => {
-        try {
-            image.setAttribute("src", fileURL);
-            image.onload = () => {
-                canvas.width = image.width;
-                canvas.height = image.height;
-                canvasCTX.drawImage(image, 0, 0, image.width, image.height);
-                canvas.toBlob(
-                    (blob) => {
-                        resolve(blob);
-                    },
-                    "image/png",
-                    1,
-                );
-            };
-        } catch (e) {
-            log.error("Failed to copy to clipboard", e);
-            reject(e);
-        }
-    });
-
-    const blob = await withTimeout(blobPromise, 30 * 1000);
-
-    const { ClipboardItem } = window;
-    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
 };
 
 export function getPersonalFiles(
@@ -412,8 +377,8 @@ export const shouldShowAvatar = (file: EnteFile, user: User) => {
     }
 };
 
-export const handleFileOps = async (
-    ops: FILE_OPS_TYPE,
+export const handleFileOp = async (
+    op: FileOp,
     files: EnteFile[],
     markTempDeleted: (files: EnteFile[]) => void,
     clearTempDeleted: () => void,
@@ -422,35 +387,8 @@ export const handleFileOps = async (
     fixCreationTime: (files: EnteFile[]) => void,
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
 ) => {
-    switch (ops) {
-        case FILE_OPS_TYPE.TRASH:
-            try {
-                markTempDeleted(files);
-                await moveToTrash(files);
-            } catch (e) {
-                clearTempDeleted();
-                throw e;
-            }
-            break;
-        case FILE_OPS_TYPE.DELETE_PERMANENTLY:
-            try {
-                markTempDeleted(files);
-                await deleteFromTrash(files.map((file) => file.id));
-            } catch (e) {
-                clearTempDeleted();
-                throw e;
-            }
-            break;
-        case FILE_OPS_TYPE.HIDE:
-            try {
-                markTempHidden(files);
-                await moveToHiddenCollection(files);
-            } catch (e) {
-                clearTempHidden();
-                throw e;
-            }
-            break;
-        case FILE_OPS_TYPE.DOWNLOAD: {
+    switch (op) {
+        case "download": {
             const setSelectedFileDownloadProgressAttributes =
                 setFilesDownloadProgressAttributesCreator(
                     t("files_count", { count: files.length }),
@@ -461,17 +399,44 @@ export const handleFileOps = async (
             );
             break;
         }
-        case FILE_OPS_TYPE.FIX_TIME:
+        case "fixTime":
             fixCreationTime(files);
             break;
-        case FILE_OPS_TYPE.ARCHIVE:
+        case "favorite":
+            await addMultipleToFavorites(files);
+            break;
+        case "archive":
             await changeFilesVisibility(files, ItemVisibility.archived);
             break;
-        case FILE_OPS_TYPE.UNARCHIVE:
+        case "unarchive":
             await changeFilesVisibility(files, ItemVisibility.visible);
             break;
-        case FILE_OPS_TYPE.SET_FAVORITE:
-            await addMultipleToFavorites(files);
+        case "hide":
+            try {
+                markTempHidden(files);
+                await moveToHiddenCollection(files);
+            } catch (e) {
+                clearTempHidden();
+                throw e;
+            }
+            break;
+        case "trash":
+            try {
+                markTempDeleted(files);
+                await moveToTrash(files);
+            } catch (e) {
+                clearTempDeleted();
+                throw e;
+            }
+            break;
+        case "deletePermanently":
+            try {
+                markTempDeleted(files);
+                await deleteFromTrash(files.map((file) => file.id));
+            } catch (e) {
+                clearTempDeleted();
+                throw e;
+            }
             break;
     }
 };

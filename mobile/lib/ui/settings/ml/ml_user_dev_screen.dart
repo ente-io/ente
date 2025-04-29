@@ -16,13 +16,14 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/toast_util.dart";
 
 final Logger _logger = Logger("MLUserDeveloperOptions");
 
 class MLUserDeveloperOptions extends StatefulWidget {
-  const MLUserDeveloperOptions({super.key});
+  final bool mlIsEnabled;
+  const MLUserDeveloperOptions({super.key, this.mlIsEnabled = true});
 
   @override
   State<MLUserDeveloperOptions> createState() => _MLUserDeveloperOptionsState();
@@ -56,23 +57,23 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
                           ),
                     ),
                     const SizedBox(height: 48),
-                    ButtonWidget(
+                    widget.mlIsEnabled ? ButtonWidget(
                       buttonType: ButtonType.neutral,
                       labelText: "Purge empty indices",
                       onTap: () async {
                         await deleteEmptyIndices(context);
                       },
-                    ),
-                    const SizedBox(height: 24),
-                    ButtonWidget(
+                    ) : const SizedBox(),
+                    widget.mlIsEnabled ? const SizedBox(height: 24) : const SizedBox(),
+                    widget.mlIsEnabled ? ButtonWidget(
                       buttonType: ButtonType.neutral,
                       labelText: "Reset all local ML",
                       onTap: () async {
                         await deleteAllLocalML(context);
                       },
-                    ),
-                    const SizedBox(height: 24),
-                    MenuItemWidget(
+                    ) : const SizedBox(),
+                    widget.mlIsEnabled ? const SizedBox(height: 24) : const SizedBox(),
+                    widget.mlIsEnabled ? MenuItemWidget(
                       captionedTextWidget: const CaptionedTextWidget(
                         title: "Remote fetch",
                       ),
@@ -105,8 +106,8 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
                       alignCaptionedTextToLeft: true,
                       isBottomBorderRadiusRemoved: true,
                       isGestureDetectorDisabled: true,
-                    ),
-                    const SizedBox(height: 24),
+                    ) : const SizedBox(),
+                    widget.mlIsEnabled ? const SizedBox(height: 24) : const SizedBox.shrink(),
                     ButtonWidget(
                       buttonType: ButtonType.neutral,
                       labelText: "Load face detection model",

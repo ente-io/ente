@@ -91,6 +91,7 @@ class CollectionsService {
     for (final collection in collections) {
       // using deprecated method because the path is stored in encrypted
       // format in the DB
+      // ignore: deprecated_member_use_from_same_package
       _cacheCollectionAttributes(collection);
     }
     Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
@@ -313,8 +314,8 @@ class CollectionsService {
     return _coverCache[coverKey];
   }
 
-  Future<int> getFileCount(Collection c) async {
-    if (_countCache.containsKey(c.id)) {
+  Future<int> getFileCount(Collection c, {bool useCache = true}) async {
+    if (_countCache.containsKey(c.id) && useCache) {
       return _countCache[c.id]!;
     } else {
       final count = await _filesDB.collectionFileCount(c.id);

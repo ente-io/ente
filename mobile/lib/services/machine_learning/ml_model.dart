@@ -125,11 +125,13 @@ abstract class MlModel {
     String modelPath,
   ) async {
     final OnnxDart plugin = OnnxDart();
+    final String? ortVersionString = await plugin.getPlatformVersion();
     final bool? initResult = await plugin.init(modelName, modelPath);
     if (initResult == null || !initResult) {
       isolateLogger.severe("Failed to initialize $modelName with EntePlugin.");
       throw Exception("Failed to initialize $modelName with EntePlugin.");
     }
+    isolateLogger.info("Initialized $modelName on $ortVersionString");
     return 0;
   }
 

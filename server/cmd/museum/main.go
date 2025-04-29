@@ -520,6 +520,7 @@ func main() {
 	privateAPI.DELETE("/users/session", userHandler.TerminateSession)
 	privateAPI.GET("/users/delete-challenge", userHandler.GetDeleteChallenge)
 	privateAPI.DELETE("/users/delete", userHandler.DeleteUser)
+	publicAPI.GET("/users/recover-account", userHandler.SelfAccountRecovery)
 
 	accountsJwtAuthAPI := server.Group("/")
 	accountsJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.ACCOUNTS.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
@@ -566,11 +567,14 @@ func main() {
 		Controller:             publicCollectionCtrl,
 		FileCtrl:               fileController,
 		CollectionCtrl:         collectionController,
+		FileDataCtrl:           fileDataCtrl,
 		StorageBonusController: storageBonusCtrl,
 	}
 
 	publicCollectionAPI.GET("/files/preview/:fileID", publicCollectionHandler.GetThumbnail)
 	publicCollectionAPI.GET("/files/download/:fileID", publicCollectionHandler.GetFile)
+	publicCollectionAPI.GET("/files/data/fetch", publicCollectionHandler.GetFileData)
+	publicCollectionAPI.GET("/files/data/preview", publicCollectionHandler.GetPreviewURL)
 	publicCollectionAPI.GET("/diff", publicCollectionHandler.GetDiff)
 	publicCollectionAPI.GET("/info", publicCollectionHandler.GetCollection)
 	publicCollectionAPI.GET("/upload-urls", publicCollectionHandler.GetUploadUrls)
@@ -862,7 +866,7 @@ func setupDatabase() *sql.DB {
 	}
 
 	db.SetMaxIdleConns(6)
-	db.SetMaxOpenConns(30)
+	db.SetMaxOpenConns(45)
 
 	log.Println("Database was configured successfully.")
 

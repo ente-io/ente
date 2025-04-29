@@ -2,7 +2,9 @@ package api
 
 import (
 	"fmt"
+	fileData "github.com/ente-io/museum/ente/filedata"
 	"github.com/ente-io/museum/pkg/controller/collections"
+	"github.com/ente-io/museum/pkg/controller/filedata"
 	"net/http"
 	"strconv"
 
@@ -21,6 +23,7 @@ type PublicCollectionHandler struct {
 	Controller             *controller.PublicCollectionController
 	FileCtrl               *controller.FileController
 	CollectionCtrl         *collections.CollectionController
+	FileDataCtrl           *filedata.Controller
 	StorageBonusController *storagebonus.Controller
 }
 
@@ -32,6 +35,65 @@ func (h *PublicCollectionHandler) GetThumbnail(c *gin.Context) {
 // GetFile redirects the request to the file location
 func (h *PublicCollectionHandler) GetFile(c *gin.Context) {
 	h.getFileForType(c, ente.FILE)
+}
+
+func (h *PublicCollectionHandler) GetPreviewURL(c *gin.Context) {
+	var req fileData.GetPreviewURLRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+		return
+	}
+	collectionOwner, err := h.getCollectionOwnerAndVerifyAccess(c, req.FileID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	url, err := h.FileDataCtrl.GetPreviewUrl(c, *collectionOwner, req)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"url": url,
+	})
+}
+
+func (h *PublicCollectionHandler) GetFileData(c *gin.Context) {
+	var req fileData.GetFileData
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, ente.NewBadRequestWithMessage(err.Error()))
+		return
+	}
+	if req.Type != ente.PreviewVideo {
+		errorMessage := fmt.Sprintf("unsupported object type %s", req.Type)
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage(errorMessage), ""))
+		return
+	}
+	collectionOwner, err := h.getCollectionOwnerAndVerifyAccess(c, req.FileID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	resp, err := h.FileDataCtrl.GetFileData(c, *collectionOwner, req)
+	if err != nil {
+		handler.Error(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"data": resp,
+	})
+}
+
+func (h *PublicCollectionHandler) getCollectionOwnerAndVerifyAccess(c *gin.Context, fileID int64) (*int64, error) {
+	accessContext := auth.MustGetPublicAccessContext(c)
+	if accessErr := h.FileCtrl.DoesFileExistInCollection(c, fileID, accessContext.CollectionID); accessErr != nil {
+		return nil, stacktrace.Propagate(accessErr, "")
+	}
+	collection, err := h.Controller.GetPublicCollection(c, false)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return &collection.Owner.ID, nil
 }
 
 // GetCollection redirects the request to the collection location
@@ -163,7 +225,8 @@ func (h *PublicCollectionHandler) getFileForType(c *gin.Context, objectType ente
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, ""))
 		return
 	}
-	url, err := h.FileCtrl.GetPublicFileURL(c, fileID, objectType)
+	accessContext := auth.MustGetPublicAccessContext(c)
+	url, err := h.FileCtrl.GetPublicOrCastFileURL(c, fileID, objectType, accessContext.CollectionID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

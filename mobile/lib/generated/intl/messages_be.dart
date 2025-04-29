@@ -20,12 +20,12 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'be';
 
-  static String m0(passwordStrengthValue) =>
+  static String m55(passwordStrengthValue) =>
       "Надзейнасць пароля: ${passwordStrengthValue}";
 
-  static String m1(storageAmountInGB) => "${storageAmountInGB} Гб";
+  static String m89(storageAmountInGB) => "${storageAmountInGB} Гб";
 
-  static String m2(email) =>
+  static String m109(email) =>
       "Ліст адпраўлены на электронную пошту <green>${email}</green>";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -38,6 +38,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Актыўныя сеансы"),
         "addMore": MessageLookupByLibrary.simpleMessage("Дадаць яшчэ"),
+        "addViewer": MessageLookupByLibrary.simpleMessage("Дадаць гледача"),
         "after1Day": MessageLookupByLibrary.simpleMessage("Праз 1 дзень"),
         "after1Hour": MessageLookupByLibrary.simpleMessage("Праз 1 гадзіну"),
         "after1Month": MessageLookupByLibrary.simpleMessage("Праз 1 месяц"),
@@ -130,6 +131,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Увядзіце свой ключ аднаўлення"),
         "familyPlans":
             MessageLookupByLibrary.simpleMessage("Сямейныя тарыфныя планы"),
+        "faq": MessageLookupByLibrary.simpleMessage("Частыя пытанні"),
         "faqs": MessageLookupByLibrary.simpleMessage("Частыя пытанні"),
         "feedback": MessageLookupByLibrary.simpleMessage("Водгук"),
         "forgotPassword":
@@ -153,14 +155,19 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Усталяваць уручную"),
         "invalidEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Памылковы адрас электроннай пошты"),
+        "invalidKey": MessageLookupByLibrary.simpleMessage("Няправільны ключ"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Калі ласка, дапамажыце нам з гэтай інфармацыяй"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Светлая"),
+        "linkExpired": MessageLookupByLibrary.simpleMessage("Пратэрмінавана"),
+        "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Ніколі"),
+        "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Замкнуць"),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Экран блакіроўкі"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Увайсці"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Націскаючы ўвайсці, я пагаджаюся з <u-terms>умовамі абслугоўвання</u-terms> і <u-policy>палітыкай прыватнасці</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("Выйсці"),
+        "lostDevice": MessageLookupByLibrary.simpleMessage("Згубілі прыладу?"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Магічны пошук"),
         "manage": MessageLookupByLibrary.simpleMessage("Кіраванне"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Кіраванне"),
@@ -175,10 +182,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "notifications": MessageLookupByLibrary.simpleMessage("Апавяшчэнні"),
         "ok": MessageLookupByLibrary.simpleMessage("Добра"),
         "oops": MessageLookupByLibrary.simpleMessage("Вой"),
+        "oopsSomethingWentWrong":
+            MessageLookupByLibrary.simpleMessage("Штосьці пайшло не так"),
         "password": MessageLookupByLibrary.simpleMessage("Пароль"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("Пароль паспяхова зменены"),
-        "passwordStrength": m0,
+        "passwordStrength": m55,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Мы не захоўваем гэты пароль і <underline>мы не зможам расшыфраваць вашы даныя</underline>, калі вы забудзеце яго"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("фота"),
@@ -240,10 +249,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Немагчыма згенерыраваць ключы бяспекі на гэтай прыладзе.\n\nЗарэгіструйцеся з іншай прылады."),
         "status": MessageLookupByLibrary.simpleMessage("Стан"),
-        "storageInGB": m1,
+        "storageInGB": m89,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Надзейны"),
         "support": MessageLookupByLibrary.simpleMessage("Падтрымка"),
         "systemTheme": MessageLookupByLibrary.simpleMessage("Сістэма"),
+        "tapToCopy":
+            MessageLookupByLibrary.simpleMessage("націсніце, каб скапіяваць"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("Націсніце, каб увесці код"),
         "terminate": MessageLookupByLibrary.simpleMessage("Перарваць"),
@@ -277,7 +288,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("відэа"),
         "viewLargeFiles": MessageLookupByLibrary.simpleMessage("Вялікія файлы"),
         "viewer": MessageLookupByLibrary.simpleMessage("Праглядальнік"),
-        "weHaveSendEmailTo": m2,
+        "weHaveSendEmailTo": m109,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Ненадзейны"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("З вяртаннем!"),
         "yesDelete": MessageLookupByLibrary.simpleMessage("Так, выдаліць"),

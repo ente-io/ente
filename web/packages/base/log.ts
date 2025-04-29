@@ -1,4 +1,4 @@
-import { inWorker } from "@/base/env";
+import { inWorker } from "ente-base/env";
 import { isDevBuild } from "./env";
 import { logToDisk as webLogToDisk } from "./log-web";
 import { workerBridge } from "./worker/worker-bridge";

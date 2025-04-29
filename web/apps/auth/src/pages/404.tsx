@@ -1,1 +1,1 @@
-export { default } from "@/base/components/pages/404";
+export { default } from "ente-base/components/pages/404";

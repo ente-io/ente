@@ -54,7 +54,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     }
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         final shouldPop = await _buildPageExitWidget(context);
         if (shouldPop) {

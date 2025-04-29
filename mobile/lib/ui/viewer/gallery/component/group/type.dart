@@ -3,7 +3,7 @@ import "package:intl/intl.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/utils/date_time_util.dart";
+import "package:photos/utils/standalone/date_time.dart";
 
 enum GroupType {
   day,

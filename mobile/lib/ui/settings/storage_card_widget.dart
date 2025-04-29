@@ -11,7 +11,7 @@ import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/settings/storage_progress_widget.dart';
-import 'package:photos/utils/data_util.dart';
+import 'package:photos/utils/standalone/data.dart';
 
 class StorageCardWidget extends StatefulWidget {
   const StorageCardWidget({super.key});

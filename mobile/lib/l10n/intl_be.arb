@@ -120,9 +120,13 @@
   "recover": "Аднавіць",
   "enterCode": "Увядзіце код",
   "scanCode": "Сканіраваць код",
+  "tapToCopy": "націсніце, каб скапіяваць",
   "confirm": "Пацвердзіць",
   "setupComplete": "Наладжванне завершана",
   "twofactorAuthenticationPageTitle": "Двухфактарная аўтэнтыфікацыя",
+  "lostDevice": "Згубілі прыладу?",
+  "invalidKey": "Няправільны ключ",
+  "addViewer": "Дадаць гледача",
   "albumOwner": "Уладальнік",
   "@albumOwner": {
     "description": "Role of the album owner"
@@ -139,6 +143,9 @@
     "description": "menuSectionTitle for removing a participant"
   },
   "manage": "Кіраванне",
+  "linkExpired": "Пратэрмінавана",
+  "linkNeverExpires": "Ніколі",
+  "lockButtonLabel": "Замкнуць",
   "never": "Ніколі",
   "after1Hour": "Праз 1 гадзіну",
   "after1Day": "Праз 1 дзень",
@@ -154,6 +161,8 @@
   "change": "Змяніць",
   "storageInGB": "{storageAmountInGB} Гб",
   "details": "Падрабязнасці",
+  "faq": "Частыя пытанні",
+  "oopsSomethingWentWrong": "Штосьці пайшло не так",
   "deleteAlbum": "Выдаліць альбом",
   "yesRemove": "Так, выдаліць",
   "removeWithQuestionMark": "Выдаліць?",

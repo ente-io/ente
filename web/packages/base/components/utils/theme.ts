@@ -1,8 +1,8 @@
-import type { AppName } from "@/base/app";
 import type { Theme } from "@mui/material";
 import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
+import type { AppName } from "ente-base/app";
 
 const getTheme = (appName: AppName): Theme => {
     const colors = getColors(appName);
@@ -11,9 +11,7 @@ const getTheme = (appName: AppName): Theme => {
     const colorSchemes =
         appName == "cast" ? { ...cs, light: cs.dark } : { ...cs };
     return createTheme({
-        cssVariables: {
-            colorSchemeSelector: "class",
-        },
+        cssVariables: { colorSchemeSelector: "class" },
         colorSchemes,
         typography,
         components,
@@ -118,6 +116,16 @@ const getTheme = (appName: AppName): Theme => {
 const getColors = (appName: AppName) => ({
     ..._colors,
     ...{
+        fixed: {
+            ..._colors.fixed,
+            dark: {
+                background: _colors.dark.background,
+                text: _colors.dark.text,
+                divider: _colors.dark.stroke.faint,
+            },
+        },
+    },
+    ...{
         accent: appName == "auth" ? _colors.accentAuth : _colors.accentPhotos,
     },
 });
@@ -130,26 +138,14 @@ const getColors = (appName: AppName) => ({
  * reusable colors.
  */
 const _colors = {
-    accentPhotos: {
-        dark: "#00b33c",
-        main: "#1db954",
-        light: "#01de4d",
-    },
-    accentAuth: {
-        dark: "#8e0fcb",
-        main: "#9610d6",
-        light: "#8e2de2",
-    },
+    accentPhotos: { dark: "#00b33c", main: "#1db954", light: "#01de4d" },
+    accentAuth: { dark: "#8e0fcb", main: "#9610d6", light: "#8e2de2" },
     fixed: {
         white: "#fff",
         black: "#000",
         success: "#1db954",
         golden: "#ffc107",
-        danger: {
-            dark: "#f53434",
-            main: "#ea3f3f",
-            light: "#ff6565",
-        },
+        danger: { dark: "#f53434", main: "#ea3f3f", light: "#ff6565" },
         switchOn: "#2eca45",
     },
     light: {
@@ -180,10 +176,7 @@ const _colors = {
         // MUI (as of v6.4) doesn't like it if we specify a non-solid color for
         // primary.main or secondary.main, or don't specify it using the #nnnnnn
         // notation; it seems to mess with the derivation of the color channels.
-        secondary: {
-            main: "#f5f5f5",
-            hover: "#e9e9e9",
-        },
+        secondary: { main: "#f5f5f5", hover: "#e9e9e9" },
         stroke: {
             base: "#000",
             muted: "rgba(0 0 0 / 0.24)",
@@ -220,10 +213,7 @@ const _colors = {
             faintHover: "rgba(255 255 255 / 0.16)",
             fainter: "rgba(255 255 255 / 0.05)",
         },
-        secondary: {
-            main: "#2b2b2b",
-            hover: "#373737",
-        },
+        secondary: { main: "#2b2b2b", hover: "#373737" },
         stroke: {
             base: "#fff",
             muted: "rgba(255 255 255 / 0.24)",
@@ -422,36 +412,24 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
  * value, we alias it the same weight as regular, 500).
  */
 const typography: TypographyOptions = {
-    fontFamily: "Inter Variable, sans-serif",
+    fontFamily: '"Inter Variable", sans-serif',
     fontWeightLight: 500,
     fontWeightRegular: 500 /* CSS baseline reset sets this as the default */,
     fontWeightMedium: 600,
     fontWeightBold: 700,
-    h1: {
-        fontSize: "48px",
-        lineHeight: "58px",
-        fontWeight: 600 /* Medium */,
-    },
+    h1: { fontSize: "48px", lineHeight: "58px", fontWeight: 600 /* Medium */ },
     h2: {
         fontSize: "32px",
         lineHeight: "39px",
         fontWeight: 500 /* Reset to regular to override MUI's default theme */,
     },
-    h3: {
-        fontSize: "24px",
-        lineHeight: "29px",
-        fontWeight: 600 /* Medium */,
-    },
+    h3: { fontSize: "24px", lineHeight: "29px", fontWeight: 600 /* Medium */ },
     h4: {
         fontSize: "22px",
         lineHeight: "27px",
         fontWeight: 500 /* Reset to regular to override MUI's default theme */,
     },
-    h5: {
-        fontSize: "20px",
-        lineHeight: "25px",
-        fontWeight: 600 /* Medium */,
-    },
+    h5: { fontSize: "20px", lineHeight: "25px", fontWeight: 600 /* Medium */ },
     // h6 is the default variant used by MUI's DialogTitle.
     h6: {
         // The font size and line height below is the same as large.
@@ -459,22 +437,10 @@ const typography: TypographyOptions = {
         lineHeight: "22px",
         fontWeight: 600 /* Medium */,
     },
-    body: {
-        fontSize: "16px",
-        lineHeight: "20px",
-    },
-    small: {
-        fontSize: "14px",
-        lineHeight: "17px",
-    },
-    mini: {
-        fontSize: "12px",
-        lineHeight: "15px",
-    },
-    tiny: {
-        fontSize: "10px",
-        lineHeight: "12px",
-    },
+    body: { fontSize: "16px", lineHeight: "20px" },
+    small: { fontSize: "14px", lineHeight: "17px" },
+    mini: { fontSize: "12px", lineHeight: "15px" },
+    tiny: { fontSize: "10px", lineHeight: "12px" },
 };
 
 /**
@@ -508,12 +474,7 @@ const components: Components = {
             // body1, which is "body".
             variant: "body",
             // Map all our custom variants to <p>.
-            variantMapping: {
-                body: "p",
-                small: "p",
-                mini: "p",
-                tiny: "p",
-            },
+            variantMapping: { body: "p", small: "p", mini: "p", tiny: "p" },
         },
     },
 
@@ -522,9 +483,7 @@ const components: Components = {
             root: {
                 // A workaround to prevent stuck modals from blocking clicks.
                 // https://github.com/mui/material-ui/issues/32286#issuecomment-1287951109
-                '&:has(> div[style*="opacity: 0"])': {
-                    pointerEvents: "none",
-                },
+                '&:has(> div[style*="opacity: 0"])': { pointerEvents: "none" },
             },
         },
     },
@@ -611,15 +570,9 @@ const components: Components = {
     // We additionally disable the underline, and add a hover indication by
     // switching its color to the main accent.
     MuiLink: {
-        defaultProps: {
-            underline: "none",
-        },
+        defaultProps: { underline: "none" },
         styleOverrides: {
-            root: {
-                "&:hover": {
-                    color: "var(--mui-palette-accent-main)",
-                },
-            },
+            root: { "&:hover": { color: "var(--mui-palette-accent-main)" } },
         },
     },
 
@@ -643,18 +596,8 @@ const components: Components = {
                 lineHeight: typography.body?.lineHeight,
                 fontWeight: 600,
             },
-            startIcon: {
-                marginRight: "12px",
-                "&& >svg": {
-                    fontSize: "20px",
-                },
-            },
-            endIcon: {
-                marginLeft: "12px",
-                "&& >svg": {
-                    fontSize: "20px",
-                },
-            },
+            startIcon: { marginRight: "12px", "&& >svg": { fontSize: "20px" } },
+            endIcon: { marginLeft: "12px", "&& >svg": { fontSize: "20px" } },
         },
     },
 
@@ -670,9 +613,7 @@ const components: Components = {
                 overflow: "hidden",
                 // Hide the bottom border that always appears for the "filled"
                 // variant of input used inside TextFields.
-                "::before": {
-                    borderBottom: "none !important",
-                },
+                "::before": { borderBottom: "none !important" },
             },
         },
     },
@@ -689,11 +630,7 @@ const components: Components = {
             margin: "dense",
         },
         styleOverrides: {
-            root: {
-                "& .MuiInputAdornment-root": {
-                    marginRight: "8px",
-                },
-            },
+            root: { "& .MuiInputAdornment-root": { marginRight: "8px" } },
         },
     },
 

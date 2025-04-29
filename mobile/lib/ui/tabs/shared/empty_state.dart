@@ -7,9 +7,9 @@ import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/empty_state_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/collection_util.dart";
 import "package:photos/utils/share_util.dart";
-import "package:photos/utils/toast_util.dart";
 
 class SharedEmptyStateWidget extends StatelessWidget {
   const SharedEmptyStateWidget({super.key});

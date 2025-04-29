@@ -1,14 +1,16 @@
 import {
     accountLogout,
     logoutClearStateAgain,
-} from "@/accounts/services/logout";
-import log from "@/base/log";
-import { downloadManager } from "@/gallery/services/download";
-import { resetUploadState } from "@/gallery/services/upload";
-import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
-import { logoutSearch } from "@/new/photos/services/search";
-import { logoutSettings } from "@/new/photos/services/settings";
-import { logoutUserDetails } from "@/new/photos/services/user-details";
+} from "ente-accounts/services/logout";
+import log from "ente-base/log";
+import { logoutFileViewerDataSource } from "ente-gallery/components/viewer/data-source";
+import { downloadManager } from "ente-gallery/services/download";
+import { resetUploadState } from "ente-gallery/services/upload";
+import { resetVideoState } from "ente-gallery/services/video";
+import { logoutML, terminateMLWorker } from "ente-new/photos/services/ml";
+import { logoutSearch } from "ente-new/photos/services/search";
+import { logoutSettings } from "ente-new/photos/services/settings";
+import { logoutUserDetails } from "ente-new/photos/services/user-details";
 import exportService from "./export";
 import uploadManager from "./upload/uploadManager";
 
@@ -78,6 +80,18 @@ export const photosLogout = async () => {
         ignoreError("Search", e);
     }
 
+    try {
+        resetVideoState();
+    } catch (e) {
+        ignoreError("Video", e);
+    }
+
+    try {
+        logoutFileViewerDataSource();
+    } catch (e) {
+        ignoreError("File viewer", e);
+    }
+
     // - Desktop
 
     const electron = globalThis.electron;
@@ -106,6 +120,8 @@ export const photosLogout = async () => {
 
     await logoutClearStateAgain();
 
+    // [Note: Full reload on logout]
+    //
     // Do a full reload to discard any in-flight requests that might still
     // remain.
 

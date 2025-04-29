@@ -1,13 +1,13 @@
-import { isDesktop } from "@/base/app";
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import { getKV, setKV } from "@/base/kv";
-import { apiURL } from "@/base/origins";
+import { isDesktop } from "ente-base/app";
+import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
+import { getKV, setKV } from "ente-base/kv";
+import { apiURL } from "ente-base/origins";
+import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import {
     nullishToEmpty,
     nullishToZero,
     nullToUndefined,
-} from "@/utils/transform";
-import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
+} from "ente-utils/transform";
 import { z } from "zod";
 
 /**
@@ -175,7 +175,7 @@ export const logoutUserDetails = () => {
 };
 
 /**
- * Read in the locally persisted settings into memory, otherwise initate a
+ * Read in the locally persisted settings into memory, otherwise initiate a
  * network requests to fetch the latest values (but don't wait for it to
  * complete).
  *
@@ -243,7 +243,7 @@ export const syncUserDetails = async () => {
     //
     // Added Nov 2024, and can be removed after a while (tag: Migration).
 
-    const oldLSUser = getData(LS_KEYS.USER) as unknown;
+    const oldLSUser = getData("user") as unknown;
     const hasMatchingEmail =
         oldLSUser &&
         typeof oldLSUser == "object" &&
@@ -253,10 +253,7 @@ export const syncUserDetails = async () => {
 
     if (!hasMatchingEmail) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        await setLSUser({
-            ...getData(LS_KEYS.USER),
-            email: userDetails.email,
-        });
+        await setLSUser({ ...getData("user"), email: userDetails.email });
         throw new Error("Email in local storage did not match user details");
     }
 };

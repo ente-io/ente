@@ -1,16 +1,3 @@
-import { useRedirectIfNeedsCredentials } from "@/accounts/components/utils/use-redirect";
-import { CenteredFill, SpacedRow } from "@/base/components/containers";
-import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import {
-    OverflowMenu,
-    OverflowMenuOption,
-} from "@/base/components/OverflowMenu";
-import { Ellipsized2LineTypography } from "@/base/components/Typography";
-import { useBaseContext } from "@/base/context";
-import log from "@/base/log";
-import { formattedByteSize } from "@/gallery/utils/units";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DoneIcon from "@mui/icons-material/Done";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
@@ -26,6 +13,19 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
+import { useRedirectIfNeedsCredentials } from "ente-accounts/components/utils/use-redirect";
+import { CenteredFill, SpacedRow } from "ente-base/components/containers";
+import { ActivityErrorIndicator } from "ente-base/components/ErrorIndicator";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import {
+    OverflowMenu,
+    OverflowMenuOption,
+} from "ente-base/components/OverflowMenu";
+import { Ellipsized2LineTypography } from "ente-base/components/Typography";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
+import { formattedByteSize } from "ente-gallery/utils/units";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, {
@@ -227,11 +227,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
                 state.duplicateGroups,
                 sortOrder,
             );
-            return {
-                ...state,
-                sortOrder,
-                duplicateGroups,
-            };
+            return { ...state, sortOrder, duplicateGroups };
         }
 
         case "toggleSelection": {
@@ -240,12 +236,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
             duplicateGroup.isSelected = !duplicateGroup.isSelected;
             const { prunableCount, prunableSize } =
                 deducePrunableCountAndSize(duplicateGroups);
-            return {
-                ...state,
-                duplicateGroups,
-                prunableCount,
-                prunableSize,
-            };
+            return { ...state, duplicateGroups, prunableCount, prunableSize };
         }
 
         case "deselectAll": {
@@ -254,12 +245,7 @@ const dedupReducer: React.Reducer<DedupState, DedupAction> = (
             );
             const { prunableCount, prunableSize } =
                 deducePrunableCountAndSize(duplicateGroups);
-            return {
-                ...state,
-                duplicateGroups,
-                prunableCount,
-                prunableSize,
-            };
+            return { ...state, duplicateGroups, prunableCount, prunableSize };
         }
 
         case "dedupe":
@@ -490,9 +476,7 @@ interface DuplicatesListProps {
 type DuplicatesListItemData = Pick<
     DuplicatesListProps,
     "duplicateGroups" | "onToggleSelection"
-> & {
-    layoutParams: ThumbnailGridLayoutParams;
-};
+> & { layoutParams: ThumbnailGridLayoutParams };
 
 const DuplicatesList: React.FC<DuplicatesListProps> = ({
     width,

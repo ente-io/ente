@@ -11,6 +11,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import "package:photos/models/selected_files.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/theme/colors.dart";
@@ -25,7 +26,6 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/photo_manager_util.dart";
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 Future<dynamic> showAddPhotosSheet(
@@ -191,7 +191,8 @@ class AddPhotosPhotoWidget extends StatelessWidget {
       }
     } catch (e) {
       if (e is StateError) {
-        final PermissionState ps = await requestPhotoMangerPermissions();
+        final PermissionState ps =
+            await permissionService.requestPhotoMangerPermissions();
         if (ps != PermissionState.authorized && ps != PermissionState.limited) {
           await showChoiceDialog(
             context,

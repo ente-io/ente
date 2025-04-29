@@ -27,9 +27,9 @@ import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/tabs/section_title.dart";
 import "package:photos/ui/viewer/actions/delete_empty_albums.dart";
 import "package:photos/ui/viewer/gallery/empty_state.dart";
-import "package:photos/utils/debouncer.dart";
 import 'package:photos/utils/local_settings.dart';
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class UserCollectionsTab extends StatefulWidget {
   const UserCollectionsTab({super.key});

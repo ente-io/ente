@@ -6,6 +6,9 @@ on:
 env:
     FLUTTER_VERSION: "3.24.3"
 
+permissions:
+    contents: write
+
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -54,7 +57,7 @@ jobs:
                   packageName: io.ente.photos
                   releaseFiles: mobile/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
-            
+
             - name: Notify Discord
               uses: sarisia/actions-status-discord@v1
               with:

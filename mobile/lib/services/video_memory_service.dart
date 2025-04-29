@@ -2,17 +2,17 @@ import "dart:async";
 import "dart:io";
 import "dart:typed_data";
 
-import "package:ffmpeg_kit_flutter_full_gpl/ffmpeg_kit.dart";
-import "package:ffmpeg_kit_flutter_full_gpl/return_code.dart";
+import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
+import "package:ffmpeg_kit_flutter/return_code.dart";
 import "package:flutter/cupertino.dart";
 import "package:image/image.dart" as img;
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
-import "package:photos/utils/toast_util.dart";
 
 final _logger = Logger("VideoMemoryService");
 
@@ -216,7 +216,7 @@ String _buildFFmpegCommand(
     command.write(
       '[$i:v]scale=$scaledWidth:$scaledHeight:force_original_aspect_ratio=decrease,'
       'pad=$screenWidth:$screenHeight:(ow-iw)/2:(oh-ih)/2,'
-      'zoompan=z=\'zoom+0.001\':x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':d=150:s=${screenWidth}x${screenHeight}:fps=60[v$i];',
+      'zoompan=z=\'zoom+0.001\':x=\'iw/2-(iw/zoom/2)\':y=\'ih/2-(ih/zoom/2)\':d=150:s=${screenWidth}x$screenHeight:fps=60[v$i];',
     );
   }
 

@@ -5,21 +5,11 @@ import config from "./eslintrc-base.mjs";
 
 export default [
     ...config,
+    { files: ["**/*.{jsx,tsx}"], ...reactPlugin.configs.flat.recommended },
+    { files: ["**/*.{jsx,tsx}"], ...reactPlugin.configs.flat["jsx-runtime"] },
     {
         files: ["**/*.{jsx,tsx}"],
-        ...reactPlugin.configs.flat.recommended,
-    },
-    {
-        files: ["**/*.{jsx,tsx}"],
-        ...reactPlugin.configs.flat["jsx-runtime"],
-    },
-    {
-        files: ["**/*.{jsx,tsx}"],
-        settings: {
-            react: {
-                version: "detect",
-            },
-        },
+        settings: { react: { version: "detect" } },
         rules: {
             // The rule is misguided - only the opener should be omitted, not
             // the referrer.

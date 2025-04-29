@@ -1,46 +1,44 @@
-import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
-import { CenteredRow } from "@/base/components/containers";
-import { CustomHead } from "@/base/components/Head";
-import {
-    LoadingIndicator,
-    TranslucentLoadingOverlay,
-} from "@/base/components/loaders";
-import { AttributedMiniDialog } from "@/base/components/MiniDialog";
-import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
-import {
-    useIsRouteChangeInProgress,
-    useSetupI18n,
-    useSetupLogs,
-} from "@/base/components/utils/hooks-app";
-import { photosTheme } from "@/base/components/utils/theme";
-import { BaseContext, deriveBaseContext } from "@/base/context";
-import log from "@/base/log";
-import { logStartupBanner } from "@/base/log-web";
-import { AppUpdate } from "@/base/types/ipc";
-import { Notification } from "@/new/photos/components/Notification";
-import { ThemedLoadingBar } from "@/new/photos/components/ThemedLoadingBar";
-import {
-    updateAvailableForDownloadDialogAttributes,
-    updateReadyToInstallDialogAttributes,
-} from "@/new/photos/components/utils/download";
-import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
-import { aboveFileViewerContentZ } from "@/new/photos/components/utils/z-index";
-import { runMigrations } from "@/new/photos/services/migration";
-import { initML, isMLSupported } from "@/new/photos/services/ml";
-import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
-import { PhotosAppContext } from "@/new/photos/types/context";
-import HTTPService from "@ente/shared/network/HTTPService";
-import {
-    getData,
-    isLocalStorageAndIndexedDBMismatch,
-    LS_KEYS,
-} from "@ente/shared/storage/localStorage";
-import type { User } from "@ente/shared/user/types";
 import "@fontsource-variable/inter";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, Typography } from "@mui/material";
 import { styled, ThemeProvider } from "@mui/material/styles";
 import { useNotification } from "components/utils/hooks-app";
+import { clientPackageName, isDesktop, staticAppTitle } from "ente-base/app";
+import { CenteredRow } from "ente-base/components/containers";
+import { CustomHead } from "ente-base/components/Head";
+import {
+    LoadingIndicator,
+    TranslucentLoadingOverlay,
+} from "ente-base/components/loaders";
+import { AttributedMiniDialog } from "ente-base/components/MiniDialog";
+import { useAttributedMiniDialog } from "ente-base/components/utils/dialog";
+import {
+    useIsRouteChangeInProgress,
+    useSetupI18n,
+    useSetupLogs,
+} from "ente-base/components/utils/hooks-app";
+import { photosTheme } from "ente-base/components/utils/theme";
+import { BaseContext, deriveBaseContext } from "ente-base/context";
+import log from "ente-base/log";
+import { logStartupBanner } from "ente-base/log-web";
+import { AppUpdate } from "ente-base/types/ipc";
+import { Notification } from "ente-new/photos/components/Notification";
+import { ThemedLoadingBar } from "ente-new/photos/components/ThemedLoadingBar";
+import {
+    updateAvailableForDownloadDialogAttributes,
+    updateReadyToInstallDialogAttributes,
+} from "ente-new/photos/components/utils/download";
+import { useLoadingBar } from "ente-new/photos/components/utils/use-loading-bar";
+import { runMigrations } from "ente-new/photos/services/migration";
+import { initML, isMLSupported } from "ente-new/photos/services/ml";
+import { getFamilyPortalRedirectURL } from "ente-new/photos/services/user-details";
+import { PhotosAppContext } from "ente-new/photos/types/context";
+import HTTPService from "ente-shared/network/HTTPService";
+import {
+    getData,
+    isLocalStorageAndIndexedDBMismatch,
+} from "ente-shared/storage/localStorage";
+import type { User } from "ente-shared/user/types";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
@@ -49,10 +47,8 @@ import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 
 import "photoswipe/dist/photoswipe.css";
-// TODO(PS): Note, auto hide only works with the new CSS.
-// import "../../../../packages/gallery/components/viewer/ps5/dist/photoswipe.css";
-
 import "styles/global.css";
+import "styles/photoswipe.css";
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
@@ -69,7 +65,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const logout = useCallback(() => void photosLogout(), []);
 
     useEffect(() => {
-        const user = getData(LS_KEYS.USER) as User | undefined | null;
+        const user = getData("user") as User | undefined | null;
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
@@ -129,11 +125,11 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         const needsFamilyRedirect = query.get("redirect") == "families";
-        if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token)
+        if (needsFamilyRedirect && getData("user")?.token)
             redirectToFamilyPortal();
 
         router.events.on("routeChangeStart", () => {
-            if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token) {
+            if (needsFamilyRedirect && getData("user")?.token) {
                 redirectToFamilyPortal();
 
                 // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
@@ -170,13 +166,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         <ThemeProvider theme={photosTheme}>
             <CustomHead {...{ title }} />
             <CssBaseline enableColorScheme />
+
             <ThemedLoadingBar ref={loadingBarRef} />
-
-            <AttributedMiniDialog
-                sx={{ zIndex: aboveFileViewerContentZ }}
-                {...miniDialogProps}
-            />
-
+            <AttributedMiniDialog {...miniDialogProps} />
             <Notification {...notificationProps} />
 
             {isDesktop && <WindowTitlebar>{title}</WindowTitlebar>}

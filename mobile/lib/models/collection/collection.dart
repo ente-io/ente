@@ -60,10 +60,12 @@ class Collection {
 
   set sharedMagicMetadata(ShareeMagicMetadata? val) => _sharedMmd = val;
 
+  // ignore: deprecated_member_use_from_same_package
   String get displayName => decryptedName ?? name ?? "Unnamed Album";
 
   // set the value for both name and decryptedName till we finish migration
   void setName(String newName) {
+    // ignore: deprecated_member_use_from_same_package
     name = newName;
     decryptedName = newName;
   }
@@ -204,6 +206,7 @@ class Collection {
       owner ?? this.owner,
       encryptedKey ?? this.encryptedKey,
       keyDecryptionNonce ?? this.keyDecryptionNonce,
+      // ignore: deprecated_member_use_from_same_package
       name ?? this.name,
       encryptedName ?? this.encryptedName,
       nameDecryptionNonce ?? this.nameDecryptionNonce,

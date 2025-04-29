@@ -1,4 +1,4 @@
-import { retryAsyncOperation } from "@/utils/promise";
+import { retryAsyncOperation } from "ente-utils/promise";
 import { z } from "zod";
 import { clientPackageName } from "./app";
 import { ensureAuthToken } from "./local-user";
@@ -61,9 +61,7 @@ export const authenticatedPublicAlbumsRequestHeaders = ({
     accessTokenJWT,
 }: PublicAlbumsCredentials) => ({
     "X-Auth-Access-Token": accessToken,
-    ...(accessTokenJWT && {
-        "X-Auth-Access-Token-JWT": accessTokenJWT,
-    }),
+    ...(accessTokenJWT && { "X-Auth-Access-Token-JWT": accessTokenJWT }),
     "X-Client-Package": clientPackageName,
 });
 
@@ -165,6 +163,7 @@ export const isMuseumHTTPError = async (
     }
     return false;
 };
+
 /**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
  *
@@ -178,3 +177,23 @@ export const retryEnsuringHTTPOk = (request: () => Promise<Response>) =>
         ensureOk(r);
         return r;
     });
+
+/**
+ * A helper function to {@link retryAsyncOperation} for HTTP fetches, but
+ * considering any 4xx HTTP responses as irrecoverable failures.
+ *
+ * This is similar to {@link retryEnsuringHTTPOk}, except it stops retrying if
+ * remote responds with a 4xx HTTP status.
+
+ */
+export const retryEnsuringHTTPOkOr4xx = (request: () => Promise<Response>) =>
+    retryAsyncOperation(
+        async () => {
+            const r = await request();
+            ensureOk(r);
+            return r;
+        },
+        (e) => {
+            if (isHTTP4xxError(e)) throw e;
+        },
+    );

@@ -27,24 +27,22 @@ export default ts.config(
             // Allow numbers to be used in template literals.
             "@typescript-eslint/restrict-template-expressions": [
                 "error",
-                {
-                    allowNumber: true,
-                },
+                { allowNumber: true },
             ],
             // Allow void expressions as the entire body of an arrow function.
             "@typescript-eslint/no-confusing-void-expression": [
                 "error",
-                {
-                    ignoreArrowShorthand: true,
-                },
+                { ignoreArrowShorthand: true },
             ],
             // Allow free standing ternary expressions.
             "@typescript-eslint/no-unused-expressions": [
                 "error",
-                {
-                    allowTernary: true,
-                },
+                { allowTernary: true },
             ],
+            // Allow force unwrapping potentially optional values.
+            //
+            // See: [Note: non-null-assertions have better stack trace]
+            "@typescript-eslint/no-non-null-assertion": "off",
         },
     },
 );

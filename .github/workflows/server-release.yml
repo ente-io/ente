@@ -3,6 +3,9 @@ name: "Release (server)"
 on:
     workflow_dispatch: # Run manually
 
+permissions:
+    contents: read
+
 jobs:
     build:
         runs-on: ubuntu-latest

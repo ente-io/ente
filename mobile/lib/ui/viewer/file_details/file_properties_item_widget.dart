@@ -4,10 +4,10 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
-import "package:photos/utils/data_util.dart";
-import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
+import "package:photos/utils/standalone/data.dart";
+import "package:photos/utils/standalone/date_time.dart";
 
 class FilePropertiesItemWidget extends StatefulWidget {
   final EnteFile file;

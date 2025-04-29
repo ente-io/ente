@@ -1,6 +1,6 @@
-import { Stack100vhCenter } from "@/base/components/containers";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Backdrop } from "@mui/material";
+import { Stack100vhCenter } from "ente-base/components/containers";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import React from "react";
 
 /**
@@ -32,10 +32,9 @@ export const TranslucentLoadingOverlay: React.FC = () => (
         sx={{
             backgroundColor: "var(--mui-palette-backdrop-muted)",
             backdropFilter: "blur(30px) opacity(95%)",
-            // This is `aboveFileViewerContentZ + delta`. Cannot use a constant
-            // here since this is used outside photos too. Eventually just get
-            // rid of this component, merging it to specific uses.
-            zIndex: 2000 /* aboveFileViewerContentZ + delta */,
+            /* Above the highest possible MUI z-index, that of the MUI tooltip
+               See: https://mui.com/material-ui/customization/default-theme/ */
+            zIndex: "calc(var(--mui-zIndex-tooltip) + 1)",
         }}
     >
         <ActivityIndicator />

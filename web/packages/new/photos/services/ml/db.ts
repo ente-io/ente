@@ -1,4 +1,4 @@
-import log from "@/base/log";
+import log from "ente-base/log";
 import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
 import type { FaceCluster } from "./cluster";
@@ -43,23 +43,11 @@ interface MLDBSchema extends DBSchema {
         value: FileStatus;
         indexes: { status: FileStatus["status"] };
     };
-    "face-index": {
-        key: number;
-        value: LocalFaceIndex;
-    };
-    "clip-index": {
-        key: number;
-        value: LocalCLIPIndex;
-    };
-    "face-cluster": {
-        key: string;
-        value: FaceCluster;
-    };
+    "face-index": { key: number; value: LocalFaceIndex };
+    "clip-index": { key: number; value: LocalCLIPIndex };
+    "face-cluster": { key: string; value: FaceCluster };
     /* Unused */
-    "cluster-group": {
-        key: string;
-        value: unknown;
-    };
+    "cluster-group": { key: string; value: unknown };
 }
 
 interface FileStatus {
@@ -182,11 +170,9 @@ export const saveIndexes = async (
     );
 
     await Promise.all([
-        tx.objectStore("file-status").put({
-            fileID,
-            status: "indexed",
-            failureCount: 0,
-        }),
+        tx
+            .objectStore("file-status")
+            .put({ fileID, status: "indexed", failureCount: 0 }),
         tx.objectStore("face-index").put(faceIndex),
         tx.objectStore("clip-index").put(clipIndex),
         tx.done,

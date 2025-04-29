@@ -3,8 +3,8 @@ import {
     encryptBlobB64,
     encryptBoxB64,
     generateBlobOrStreamKey,
-} from "@/base/crypto";
-import { nullishToEmpty, nullToUndefined } from "@/utils/transform";
+} from "ente-base/crypto";
+import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import { gunzip, gzip } from "../../utils/gzip";
 import type { CGroupUserEntityData } from "../ml/people";
@@ -50,14 +50,13 @@ export type EntityType =
  * Zod schema for the fields of interest in the location tag that we get from
  * remote.
  */
-const RemoteLocationTagData = z.object({
-    name: z.string(),
-    radius: z.number(),
-    centerPoint: z.object({
-        latitude: z.number(),
-        longitude: z.number(),
-    }),
-});
+const RemoteLocationTagData = z
+    .object({
+        name: z.string(),
+        radius: z.number(),
+        centerPoint: z.object({ latitude: z.number(), longitude: z.number() }),
+    })
+    .passthrough();
 
 /**
  * A view of the location tag data suitable for use by the rest of the app.
@@ -72,23 +71,32 @@ export const savedLocationTags = (): Promise<LocationTag[]> =>
         es.map((e) => RemoteLocationTagData.parse(e.data)),
     );
 
-const RemoteFaceCluster = z.object({
-    id: z.string(),
-    faces: z.string().array(),
-});
+const RemoteFaceCluster = z
+    .object({ id: z.string(), faces: z.string().array() })
+    .passthrough();
 
 /**
  * Zod schema for the fields of interest in the cgroup that we get from remote.
  *
  * See also: {@link CGroupUserEntityData}.
+ *
+ * See: [Note: Use passthrough for metadata Zod schemas].
  */
-const RemoteCGroupData = z.object({
-    name: z.string().nullish().transform(nullToUndefined),
-    assigned: z.array(RemoteFaceCluster).nullish().transform(nullishToEmpty),
-    rejectedFaceIDs: z.array(z.string()).nullish().transform(nullishToEmpty),
-    isHidden: z.boolean(),
-    avatarFaceID: z.string().nullish().transform(nullToUndefined),
-});
+const RemoteCGroupData = z
+    .object({
+        name: z.string().nullish().transform(nullToUndefined),
+        assigned: z
+            .array(RemoteFaceCluster)
+            .nullish()
+            .transform(nullishToEmpty),
+        rejectedFaceIDs: z
+            .array(z.string())
+            .nullish()
+            .transform(nullishToEmpty),
+        isHidden: z.boolean(),
+        avatarFaceID: z.string().nullish().transform(nullToUndefined),
+    })
+    .passthrough();
 
 /**
  * A "cgroup" user entity.
@@ -255,7 +263,7 @@ const getOrCreateEntityKeyB64 = async (
 
     // Nada. Create a new one, put it to remote, save it locally, and return.
 
-    // As a sanity check, genarate the key but immediately encrypt it as if it
+    // As a sanity check, generate the key but immediately encrypt it as if it
     // were fetched from remote and then try to decrypt it before doing anything
     // with it.
     const generated = await generateEncryptedEntityKey(masterKey);

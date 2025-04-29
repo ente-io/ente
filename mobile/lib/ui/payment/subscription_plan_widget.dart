@@ -6,7 +6,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import 'package:photos/utils/data_util.dart';
+import 'package:photos/utils/standalone/data.dart';
 
 class SubscriptionPlanWidget extends StatefulWidget {
   const SubscriptionPlanWidget({
@@ -176,7 +176,10 @@ class _Price extends StatelessWidget {
         children: [
           if (isPlayStore)
             Text(
-              currencySymbol + pricePerMonthString + ' / ' + S.of(context).month,
+              currencySymbol +
+                  pricePerMonthString +
+                  ' / ' +
+                  S.of(context).month,
               style: textTheme.largeBold.copyWith(color: textBaseLight),
             ),
           if (isPlayStore)
@@ -186,7 +189,10 @@ class _Price extends StatelessWidget {
             ),
           if (!isPlayStore)
             Text(
-              currencySymbol + pricePerMonthString + ' / ' + S.of(context).month,
+              currencySymbol +
+                  pricePerMonthString +
+                  ' / ' +
+                  S.of(context).month,
               style: textTheme.largeBold.copyWith(color: textBaseLight),
             ),
           if (!isPlayStore)

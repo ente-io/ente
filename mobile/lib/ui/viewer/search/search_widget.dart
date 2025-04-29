@@ -13,8 +13,8 @@ import "package:photos/models/search/search_result.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
-import "package:photos/utils/date_time_util.dart";
-import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/standalone/date_time.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class SearchWidget extends StatefulWidget {
   const SearchWidget({super.key});

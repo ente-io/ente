@@ -4,3 +4,4 @@
 -keepattributes LineNumberTable,SourceFile
 
 -keep class org.chromium.net.** { *; }
+-keep class org.xmlpull.v1.** { *; }

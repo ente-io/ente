@@ -1,11 +1,15 @@
-import { useModalVisibility } from "@/base/components/utils/modal";
-import type { Collection } from "@/media/collection";
+import { AllAlbums } from "components/Collections/AllAlbums";
+import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
+import { CollectionShare } from "components/Collections/CollectionShare";
+import { TimeStampListItem } from "components/FileList";
+import { useModalVisibility } from "ente-base/components/utils/modal";
+import type { Collection } from "ente-media/collection";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
-} from "@/new/photos/components/gallery/BarImpl";
-import { PeopleHeader } from "@/new/photos/components/gallery/PeopleHeader";
-import { ALL_SECTION } from "@/new/photos/services/collection";
+} from "ente-new/photos/components/gallery/BarImpl";
+import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
+import { ALL_SECTION } from "ente-new/photos/services/collection";
 import {
     areOnlySystemCollections,
     collectionsSortBy,
@@ -13,17 +17,9 @@ import {
     shouldShowOnCollectionBar,
     type CollectionsSortBy,
     type CollectionSummaries,
-} from "@/new/photos/services/collection/ui";
-import { includes } from "@/utils/type-guards";
-import {
-    getData,
-    LS_KEYS,
-    removeData,
-} from "@ente/shared/storage/localStorage";
-import { AllAlbums } from "components/Collections/AllAlbums";
-import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
-import { CollectionShare } from "components/Collections/CollectionShare";
-import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
+} from "ente-new/photos/services/collection/ui";
+import { getData, removeData } from "ente-shared/storage/localStorage";
+import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
@@ -167,7 +163,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 ) : (
                     <></>
                 ),
-            itemType: ITEM_TYPE.HEADER,
+            tag: "header",
             height: 68,
         });
     }, [
@@ -252,7 +248,7 @@ const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
             //
             // This migration added Sep 2024, can be removed after a bit (esp
             // since it effectively runs on each app start). (tag: Migration).
-            const oldData = getData(LS_KEYS.COLLECTION_SORT_BY);
+            const oldData = getData("collectionSortBy");
             if (oldData) {
                 let newValue: CollectionsSortBy | undefined;
                 switch (oldData.value) {
@@ -270,7 +266,7 @@ const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
                     localStorage.setItem(key, newValue);
                     setValue(newValue);
                 }
-                removeData(LS_KEYS.COLLECTION_SORT_BY);
+                removeData("collectionSortBy");
             }
         }
     }, []);

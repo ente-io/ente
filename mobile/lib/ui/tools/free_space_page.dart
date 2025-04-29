@@ -1,11 +1,14 @@
+import "dart:io";
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/ui/common/gradient_button.dart';
-import 'package:photos/utils/data_util.dart';
+import "package:photos/ui/notification/toast.dart";
 import 'package:photos/utils/delete_file_util.dart';
+import 'package:photos/utils/standalone/data.dart';
 
 class FreeSpacePage extends StatefulWidget {
   final BackupStatus status;
@@ -163,9 +166,24 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
   }
 
   Future<void> _freeStorage(BackupStatus status) async {
-    final result = await deleteLocalFiles(context, status.localIDs);
-    if (result) {
+    bool isSuccess = await deleteLocalFiles(context, status.localIDs);
+
+    if (isSuccess == false) {
+      isSuccess = await deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
+        context,
+        status.localIDs,
+      );
+    }
+
+    if (isSuccess == false && Platform.isAndroid) {
+      isSuccess =
+          await retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(context);
+    }
+
+    if (isSuccess) {
       Navigator.of(context).pop(true);
+    } else {
+      showToast(context, S.of(context).couldNotFreeUpSpace);
     }
   }
 }
