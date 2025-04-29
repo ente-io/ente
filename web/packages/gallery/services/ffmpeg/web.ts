@@ -89,9 +89,14 @@ const ffmpegExec = async (
 
         await ffmpeg.writeFile(inputPath, inputData);
 
-        const resolvedCommand = Array.isArray(command)
-            ? command
-            : command.default;
+        let resolvedCommand: string[];
+        if (Array.isArray(command)) {
+            resolvedCommand = command;
+        } else {
+            const isHDR = await isHDRVideo(ffmpeg, inputPath);
+            log.debug(() => `[wasm] input file is ${isHDR ? "" : "not "}HDR`);
+            resolvedCommand = isHDR ? command.hdr : command.default;
+        }
 
         const cmd = substitutePlaceholders(
             resolvedCommand,
@@ -174,11 +179,12 @@ const isHDRVideo = async (ffmpeg: FFmpeg, inputFilePath: string) => {
                 ["-i", inputFilePath],
                 // Show information about streams.
                 "-show_streams",
-                // Select the first video stream (This is not necessarily
-                // correct in a multi stream file since the highest resolution
-                // stream will be used in the automatic mapping). But this is a
-                // heuristic check anyway.
-                ["-select_streams", "v:1"],
+                // Select the first video stream. This is not necessarily
+                // correct in a multi stream file because the ffmpeg automatic
+                // mapping will use the highest resolution stream, but short of
+                // reinventing ffmpeg's resolution mechanism, it is a reasonable
+                // assumption for our current, heuristic, check.
+                ["-select_streams", "v:0"],
                 // Output JSON
                 ["-of", "json"],
                 ["-o", "output.json"],
