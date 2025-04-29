@@ -1,6 +1,6 @@
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
-import type { ZipItem } from "ente-base/types/ipc";
+import type { Electron, ZipItem } from "ente-base/types/ipc";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
@@ -78,6 +78,30 @@ export interface FileAndPath {
  * context of our desktop app.
  */
 export type DesktopUploadItem = Exclude<UploadItem, File>;
+
+/**
+ * Assert that the given {@link UploadItem} is, in fact, an {@link DesktopUploadItem}.
+ *
+ * @param electron A witness to the fact that we're running in the context of
+ * the desktop app. The electron instance is not actually used by this function.
+ *
+ * @param uploadItem The upload item we obtained from an arbitrary place in the app.
+ *
+ * @returns The same {@link uploadItem}, but after excluding the cases that can
+ * only happen when running in the web app.
+ */
+export const toDesktopUploadItem = (
+    electron: Electron,
+    uploadItem: UploadItem,
+): DesktopUploadItem => {
+    if (uploadItem instanceof File) {
+        log.warn("Invalid combination", { electron, uploadItem });
+        throw new Error(
+            "Found a File upload item even though we're running in the desktop app",
+        );
+    }
+    return uploadItem;
+};
 
 /**
  * For each of cases of {@link UploadItem} that apply when we're running in the
