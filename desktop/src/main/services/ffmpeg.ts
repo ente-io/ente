@@ -2,7 +2,7 @@ import pathToFfmpeg from "ffmpeg-static";
 import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import path, { basename } from "node:path";
-import type { ZipItem } from "../../types/ipc";
+import type { FFmpegCommand, ZipItem } from "../../types/ipc";
 import log from "../log";
 import { execAsync } from "../utils/electron";
 import {
@@ -44,7 +44,7 @@ const outputPathPlaceholder = "OUTPUT";
  * But I'm not sure if our code is supposed to be able to use it, and how.
  */
 export const ffmpegExec = async (
-    command: string[],
+    command: FFmpegCommand,
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
 ): Promise<Uint8Array> => {
@@ -58,8 +58,12 @@ export const ffmpegExec = async (
     try {
         await writeToTemporaryInputFile();
 
+        const resolvedCommand = Array.isArray(command)
+            ? command
+            : command.default;
+
         const cmd = substitutePlaceholders(
-            command,
+            resolvedCommand,
             inputFilePath,
             outputFilePath,
         );
@@ -250,6 +254,9 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     // However applying this tonemap to videos that are already HD leads to a
     // brightness drop. So we conditionally apply this filter chain only if the
     // colorspace is not already BT.709.
+    //
+    // See also: [Note: Alternative FFmpeg command for HDR videos], although
+    // that uses a allow-list based check (while here we use deny-list).
     //
     // Reference:
     // - https://trac.ffmpeg.org/wiki/colorspace

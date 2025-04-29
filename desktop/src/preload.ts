@@ -66,6 +66,7 @@ import type { IpcRendererEvent } from "electron";
 import type {
     AppUpdate,
     CollectionMapping,
+    FFmpegCommand,
     FolderWatch,
     PendingUploads,
     ZipItem,
@@ -201,7 +202,7 @@ const generateImageThumbnail = (
     );
 
 const ffmpegExec = (
-    command: string[],
+    command: FFmpegCommand,
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
 ) =>

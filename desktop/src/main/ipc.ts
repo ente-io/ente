@@ -13,6 +13,7 @@ import type { BrowserWindow } from "electron";
 import { ipcMain } from "electron/main";
 import type {
     CollectionMapping,
+    FFmpegCommand,
     FolderWatch,
     PendingUploads,
     ZipItem,
@@ -187,7 +188,7 @@ export const attachIPCHandlers = () => {
         "ffmpegExec",
         (
             _,
-            command: string[],
+            command: FFmpegCommand,
             dataOrPathOrZipItem: Uint8Array | string | ZipItem,
             outputFileExtension: string,
         ) => ffmpegExec(command, dataOrPathOrZipItem, outputFileExtension),
