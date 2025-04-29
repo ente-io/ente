@@ -391,11 +391,32 @@ const videoStreamLinesRegex = /Stream #.+: Video:(.+)\n/g;
 const videoDimensionsRegex = / (\d+)x(\d+),/;
 
 /**
- * Heuristically determine if the given video uses the BT.709 colorspace.
+ * Heuristically determine information about the video at the given
+ * {@link inputFilePath}:
  *
- * This function tries to determine the input colorspace by scanning the ffmpeg
- * info output for the video stream line, and checking if it contains the string
- * "bt709". See: [Note: Parsing CLI output might break on ffmpeg updates].
+ * - If is encoded using H.264 codec.
+ * - If it uses the BT.709 colorspace.
+ * - If its bitrate is less than
+ *
+ * [Note: Parsing CLI output might break on ffmpeg updates]
+ *
+ * This function tries to determine the these bits of information about the
+ * given video by scanning the ffmpeg info output for the video stream line, and
+ * doing various string matches and regex extractions.
+ *
+ * Needless to say, while this works currently, this is liable to break in the
+ * future. So if something stops working after updating ffmpeg, look here!
+ *
+ * Ideally, we'd have done this using `ffprobe`, but we don't have the ffprobe
+ * binary at hand, so we make do by grepping the log output of ffmpeg.
+ *
+ * For reference,
+ *
+ * - codec and colorspace are printed by the `avcodec_string` function in the
+ *   ffmpeg source:
+ *   https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/avcodec.c
+ *
+ * - bitrate is printed by the `dump_stream_format` function in `dump.c`.
  */
 const detectIsBT709 = async (inputFilePath: string) => {
     const videoInfo = await pseudoFFProbeVideo(inputFilePath);
@@ -451,13 +472,11 @@ const detectVideoDimensions = (conversionStderr: string) => {
 };
 
 /**
- * We don't have the ffprobe binary at hand, so we make do by grepping the log
- * output of ffmpeg.
+ * Return the stderr of ffmpeg in an attempt to gain information about the video
+ * at the given {@link inputFilePath}.
  *
- * > [Note: Parsing CLI output might break on ffmpeg updates]
- * >
- * > Needless to say, while this works currently, this is liable to break in the
- * > future. So if something stops working after updating ffmpeg, look here!
+ * We don't have the ffprobe binary at hand, which is why we need to use this
+ * alternative. See: [Note: Parsing CLI output might break on ffmpeg updates]
  *
  * @returns the stderr of ffmpeg after running it on the input file. The exact
  * command we run is:
