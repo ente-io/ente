@@ -204,7 +204,9 @@ const ffprobeOutput = async (
 
     try {
         status = await ffmpeg.ffprobe(cmd);
-        if (status !== 0) {
+        // Currently, ffprobe incorrectly returns status -1 on success.
+        // https://github.com/ffmpegwasm/ffmpeg.wasm/issues/817
+        if (status !== 0 && status != -1) {
             log.info(
                 `[wasm] ffprobe command failed with exit code ${status}: ${cmd.join(" ")}`,
             );
@@ -221,7 +223,7 @@ const ffprobeOutput = async (
         } catch (e) {
             // Output file might not even exist if the command did not succeed,
             // so only log on success.
-            if (status === 0) {
+            if (status !== 0 && status != -1) {
                 log.error(`Failed to remove output ${outputPath}`, e);
             }
         }
