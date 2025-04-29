@@ -1,0 +1,16 @@
+[Unit]
+Documentation=https://prometheus.io/docs/prometheus/
+Requires=docker.service
+After=docker.service
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ExecStartPre=docker pull prom/prometheus
+ExecStartPre=-docker stop prometheus
+ExecStartPre=-docker rm prometheus
+ExecStart=docker run --name prometheus \
+    --add-host=host.docker.internal:host-gateway \
+    -v /root/prometheus.yml:/etc/prometheus/prometheus.yml:ro \
+    prom/prometheus

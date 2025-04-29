@@ -1,0 +1,31 @@
+display_name: Ente Auth
+package_name: enteauth
+license: GPLv3
+
+metainfo: linux/packaging/enteauth.appdata.xml
+
+icon: assets/icons/auth-icon.png
+
+keywords:
+  - Authentication
+  - 2FA
+
+generic_name: Ente Auth
+
+categories:
+  - Utility
+
+startup_notify: false
+
+# You can specify the shared libraries that you want to bundle with your app
+#
+# flutter_distributor automatically detects the shared libraries that your app
+# depends on, but you can also specify them manually here.
+#
+# The following example shows how to bundle the libcurl library with your app.
+#
+# include:
+#   - libcurl.so.4
+
+supported_mime_type:
+  - x-scheme-handler/enteauth

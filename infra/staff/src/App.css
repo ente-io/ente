@@ -1,0 +1,268 @@
+.container {
+    max-width: 1200px;
+    height: auto;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.center-table {
+    display: table;
+}
+
+.fetch-button-container button {
+    background-color: #00b33c;
+    color: white;
+    border: none;
+    width: 199px;
+    height: 56px;
+}
+
+.fetch-button-container button:hover {
+    background-color: #007c6c;
+}
+
+.link-text {
+    display: flex;
+    align-items: center;
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit color from parent */
+    font-weight: bold; /* Make the text bold */
+    font-size: 40px;
+}
+
+.duckie-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Adjust as necessary */
+    position: relative;
+}
+
+.error-message {
+    color: red;
+    font-size: 1.5em;
+}
+
+.duckie-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.input-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    margin: 20px;
+}
+
+.horizontal-group {
+    display: flex;
+    align-items: center;
+    background-color: #fcfcfc;
+    padding: 20px; /* Add padding around content */
+    border-radius: 10px;
+    margin-top: 90px;
+    width: 1200px;
+    justify-content: space-around;
+}
+
+.text-fields {
+    display: flex;
+    justify-content: row;
+    gap: 20px;
+}
+.fetch-button-container button {
+    background-color: #00b33c;
+    color: white;
+    border: none;
+    width: 199px;
+    height: 56px;
+}
+
+.fetch-button-container button:hover {
+    background-color: #007c6c;
+}
+
+.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.duckie-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fetch-button-container button {
+    background-color: #00b33c;
+    color: white;
+    border: none;
+    width: 150px;
+    height: 56px;
+}
+
+.fetch-button-container button:hover {
+    background-color: #007c6c;
+}
+
+.center-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.duckie-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dialog-popup-container {
+    /* Styles for the overlay/background */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dialog-popup {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.dialog-popup-header h2 {
+    margin-bottom: 20px; /* Add space between heading and fields */
+}
+
+.dialog-popup-field {
+    margin-bottom: 15px;
+}
+
+.dialog-popup-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.dialog-popup-field input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.submit-button {
+    background-color: #4caf50; /* Green */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* Specific styles for each field to match the image */
+.name-field input,
+.shortname-field input,
+.code-field input {
+    width: calc(100% - 100px); /* Adjust as needed */
+}
+
+.active-field input {
+    width: 50px;
+}
+/* Add to App.css or your CSS file */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    width: 100%;
+}
+
+.fetch-button-container {
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.error-message {
+    color: red;
+    font-weight: bold;
+    margin-top: 16px;
+}
+
+/* MUi Component Custom CSS */
+css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input {
+    padding: none;
+    margin: none;
+}
+
+/* Mobile */
+@media screen and (max-width: 475px) {
+    .link-text {
+        font-size: 30px;
+        text-align: center;
+    }
+    .input-form {
+        max-width: 400px;
+        align-items: center;
+        gap: 20px;
+        flex-direction: row;
+    }
+    .horizontal-group {
+        width: 500px;
+        flex-direction: column;
+        gap: 25px;
+    }
+    .text-fields {
+        width: fit-content;
+        flex-direction: column;
+        gap: 20px;
+        justify-content: center;
+    }
+    .text-fields label {
+        padding: 0;
+        margin: none;
+    }
+}
+
+@media screen and (max-width: 576px) {
+}
+
+@media screen and (max-width: 900px) {
+}
+
+@media screen and (max-width: 1200px) {
+}

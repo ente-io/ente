@@ -1,0 +1,15 @@
+{
+    "name": "ente-media",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "ente-base": "*",
+        "file-type": "16.5.4",
+        "heic-convert": "^2.1.0",
+        "jszip": "^3.10.1"
+    },
+    "devDependencies": {
+        "@types/heic-convert": "^2.1.0",
+        "ente-build-config": "*"
+    }
+}

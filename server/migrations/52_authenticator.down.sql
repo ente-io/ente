@@ -1,0 +1,6 @@
+DROP TRIGGER IF EXISTS update_authenticator_entity_updated_at ON authenticator_entity;
+DROP INDEX IF EXISTS authenticator_entity_updated_at_time_index;
+DROP INDEX IF EXISTS authenticator_entity_state_constraint;
+DROP TRIGGER IF EXISTS trigger_authenticator_key_updated_time_on_authenticator_entity_updation on authenticator_entity;
+DROP TABLE IF EXISTS authenticator_entity;
+DROP TABLE IF EXISTS authenticator_key;

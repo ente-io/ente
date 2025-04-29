@@ -1,0 +1,1 @@
+Ente Photos is an open source photos app, that provides end-to-end encrypted backups for your photos and videos.

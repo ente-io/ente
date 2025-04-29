@@ -1,0 +1,58 @@
+name: "Release (cli)"
+
+on:
+    push:
+        # Run when a tag matching the pattern "cli-v*"" is pushed
+        #
+        # Tip: to test this workflow, push at tag with a pre-release version,
+        # e.g. `cli-v1.2.3-test`, where 1.2.3 is the expected version number of
+        # the next release that'll go out.
+        #
+        # See: [Note: Testing release workflows that are triggered by tags]
+        tags:
+            - "cli-v*"
+
+permissions:
+    contents: write
+    packages: write
+
+jobs:
+    draft-release:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Create a draft GitHub release
+              uses: ncipollo/release-action@v1
+              with:
+                  draft: true
+
+    build:
+        runs-on: ubuntu-latest
+        needs: draft-release
+
+        strategy:
+            matrix:
+                goos: [linux, windows, darwin]
+                goarch: ["386", amd64, arm64]
+                exclude:
+                    - goarch: "386"
+                      goos: darwin
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Build binaries and add to the release
+              uses: wangyoucao577/go-release-action@v1
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  goos: ${{ matrix.goos }}
+                  goarch: ${{ matrix.goarch }}
+                  asset_name: ente-${{ github.ref_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
+                  release_name: ${{ github.ref_name }}
+                  goversion: "1.23"
+                  project_path: "./cli"
+                  pre_command: export CGO_ENABLED=0
+                  build_flags: "-trimpath"
+                  ldflags: "-X main.AppVersion=${{ github.ref_name }} -s -w"
+                  md5sum: false
+                  sha256sum: true

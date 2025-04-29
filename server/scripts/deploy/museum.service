@@ -1,0 +1,20 @@
+[Unit]
+Documentation=https://github.com/ente-io/ente/tree/main/server#readme
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=on-failure
+ExecStartPre=docker pull rg.fr-par.scw.cloud/ente/museum-prod
+ExecStartPre=-docker stop museum
+ExecStartPre=-docker rm museum
+ExecStart=docker run --name museum \
+     -e ENVIRONMENT=production \
+     --hostname "%H" \
+     -p 443:443 \
+     -p 2112:2112 \
+     -v /root/museum/credentials:/credentials:ro \
+     -v /root/museum/credentials.yaml:/credentials.yaml:ro \
+     -v /root/museum/data:/data:ro \
+     -v /root/var:/var \
+     rg.fr-par.scw.cloud/ente/museum-prod

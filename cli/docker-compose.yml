@@ -1,0 +1,16 @@
+services:
+  ente-cli:
+    build: 
+      context: .
+      tags:
+        - ente-cli:latest
+    command: /bin/sh
+    volumes:
+      # This is mandatory to mount the local directory to the container at /cli-data
+      # CLI will use this directory to store the data required for syncing export
+      - /path/to/local/directory/cli/:/cli-data:rw
+      # You can add additional volumes to mount the export directory to the container
+      # While adding account for export, you can use /data as the export directory.
+      - /path/to/local/directory/export:/data:rw
+    stdin_open: true
+    tty: true

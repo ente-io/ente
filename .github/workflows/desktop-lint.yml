@@ -1,0 +1,32 @@
+name: "Lint (desktop)"
+
+on:
+    # Run on every pull request (open or push to it) that changes desktop/
+    pull_request:
+        paths:
+            - "desktop/**"
+            - ".github/workflows/desktop-lint.yml"
+
+permissions:
+    contents: read
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: desktop
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: "yarn"
+                  cache-dependency-path: "desktop/yarn.lock"
+
+            - run: yarn install
+
+            - run: yarn lint

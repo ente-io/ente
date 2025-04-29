@@ -1,130 +1,114 @@
-# ente Authenticator
+<div align="center">
 
-ente's Authenticator app helps you generate and store 2 step verification (2FA)
-tokens on your mobile devices.
+<img src=".github/assets/ente-rocketship.png" width="400"/>
 
-[Download now](#-download)
+Fully open source end-to-end encrypted photos, authenticators and more.
 
-![App Screenshots](./screenshots/screenshots.png)
+</div>
 
-## ✨ Features
+# Ente
 
-### Secure Backups
+Ente is a service that provides a fully open source, end-to-end encrypted
+platform for you to store your data in the cloud without needing to trust the
+service provider. On top of this platform, we have built two apps so far: Ente
+Photos (an alternative to Apple and Google Photos) and Ente Auth (a 2FA
+alternative to the deprecated Authy).
 
-ente provides end-to-end encrypted cloud backups so that you don't have to worry
-about losing your tokens. We use the same protocols [ente
-Photos](https://ente.io) uses to encrypt and preserve your data.
+This monorepo contains all our source code - the client apps (iOS / Android /
+F-Droid / Web / Linux / macOS / Windows) for both the products (and more planned
+future ones!), and the server that powers them.
 
+Our source code and cryptography have been externally audited by Cure53 (a
+German cybersecurity firm, arguably the world's best), Symbolic Software (French
+cryptography experts) and Fallible (an Indian penetration testing firm).
 
-### Multi Device Synchronization
+Learn more at [ente.io](https://ente.io).
 
-ente will automatically sync the 2FA tokens you add to your account, across all
-your devices. Every new device you sign into will have access to these tokens.
+<br />
 
+## Ente Photos
 
-### Offline Mode
+![Screenshots of Ente Photos](.github/assets/photos.png)
 
-ente generates 2FA tokens offline, so your network connectivity will not get in
-the way of your workflow.
+Our flagship product. 3x data replication. Face detection. Semantic search.
+Private sharing. Collaborative albums. Family plans. Easy import, easier export.
+Background uploads. The list goes on. And of course, all of this, while being
+fully end-to-end encrypted across platforms.
 
-### Import and Export Tokens
+Ente Photos is a paid service, but we offer 10GB of free storage.
+You can also clone this repository and choose to self-host.
 
-You can add tokens to ente by one of the following methods:
-1. Scanning a QR code
-2. Manually entering (copy-pasting) a 2FA secret
-3. Bulk importing from a file that contains a list of codes in the following
-   format:
-```
-otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET
-```
-The codes maybe separated by new lines or commas.
+<br />
 
-You can also export the codes you have added to ente, to an **unencrypted** text
-file, that adheres to the above format.
+<div align="center">
 
+[<img height="40" src=".github/assets/app-store-badge.svg">](https://apps.apple.com/app/id1542026904)
+[<img height="40" src=".github/assets/play-store-badge.png">](https://play.google.com/store/apps/details?id=io.ente.photos)
+[<img height="40" src=".github/assets/f-droid-badge.png">](https://f-droid.org/packages/io.ente.photos.fdroid/)
+[<img height="40" src=".github/assets/obtainium-badge.png">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22io.ente.photos.independent%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fente-io%2Fente%22%2C%22author%22%3A%22ente-io%22%2C%22name%22%3A%22Ente%20Photos%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Afalse%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22filterReleaseNotesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22verifyLatestTag%5C%22%3Afalse%2C%5C%22dontSortReleasesList%5C%22%3Atrue%2C%5C%22useLatestAssetDateAsReleaseDate%5C%22%3Afalse%2C%5C%22releaseTitleAsVersion%5C%22%3Afalse%2C%5C%22trackOnly%5C%22%3Afalse%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%5C%22%2C%5C%22versionDetection%5C%22%3Atrue%2C%5C%22releaseDateAsVersion%5C%22%3Afalse%2C%5C%22useVersionCodeAsOSVersion%5C%22%3Afalse%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22ente-photos*%5C%22%2C%5C%22invertAPKFilter%5C%22%3Afalse%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22%5C%22%2C%5C%22shizukuPretendToBeGooglePlay%5C%22%3Afalse%2C%5C%22allowInsecure%5C%22%3Afalse%2C%5C%22exemptFromBackgroundUpdates%5C%22%3Afalse%2C%5C%22skipUpdateNotifications%5C%22%3Afalse%2C%5C%22about%5C%22%3A%5C%22%5C%22%7D%22%2C%22overrideSource%22%3Anull%7D)
+[<img height="40" src=".github/assets/desktop-badge.png">](https://ente.io/download/desktop)
+[<img height="40" src=".github/assets/web-badge.svg">](https://web.ente.io)
 
-## 📲 Download
+</div>
 
-### Android
+<br />
 
-This repository's [GitHub
-releases](https://github.com/ente-io/auth/releases/latest/download/ente-auth.apk)
-contains APKs, built straight from source. These builds keep themselves updated,
-without relying on third party stores.
+## Ente Auth
 
-You can alternatively install the build from PlayStore or F-Droid.
+![Screenshots of Ente Photos](.github/assets/auth.png)
 
-<a href="https://play.google.com/store/apps/details?id=io.ente.auth"> <img
-  width="197" alt="Get it on Google Play"
-src="https://ente.io/static/ed265c3abdcd3efa5e29f64b927bcb44/e230a/play-store-badge.webp">
-</a>
+Our labour of love. Two years ago, while building Ente Photos, we realized that
+there was no open source end-to-end encrypted authenticator app. We already had
+the building blocks, so we built one.
 
-<a href="https://f-droid.org/packages/io.ente.auth/">
-  <img width="197" alt="Get it on F-Droid" src="https://ente.io/static/5378d3de690a04a5011268b9caf739f5/e230a/f-droid-badge.webp">
-</a>
+Ente Auth is free, and will remain free forever. If you like the service and
+want to give back, please check out Ente Photos or spread the word.
 
-### iPhone / Apple Silicon
+<br />
 
+<div align="center">
 
-<a href="https://apps.apple.com/us/app/ente-authenticator/id6444121398"> <img
-  width="197" alt="Download on AppStore"
-src="https://user-images.githubusercontent.com/1161789/154795157-c4468ff9-97fd-46f3-87fe-dca789d8733a.png">
-</a>
+[<img height="40" src=".github/assets/app-store-badge.svg">](https://apps.apple.com/app/id6444121398)
+[<img height="40" src=".github/assets/play-store-badge.png">](https://play.google.com/store/apps/details?id=io.ente.auth)
+[<img height="40" src=".github/assets/f-droid-badge.png">](https://f-droid.org/packages/io.ente.auth/)
+[<img height="40" src=".github/assets/obtainium-badge.png">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22io.ente.auth.independent%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fente-io%2Fente%22%2C%22author%22%3A%22ente-io%22%2C%22name%22%3A%22Ente%20Auth%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Afalse%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22filterReleaseNotesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22verifyLatestTag%5C%22%3Afalse%2C%5C%22dontSortReleasesList%5C%22%3Atrue%2C%5C%22useLatestAssetDateAsReleaseDate%5C%22%3Afalse%2C%5C%22releaseTitleAsVersion%5C%22%3Afalse%2C%5C%22trackOnly%5C%22%3Afalse%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%5C%22%2C%5C%22versionDetection%5C%22%3Atrue%2C%5C%22releaseDateAsVersion%5C%22%3Afalse%2C%5C%22useVersionCodeAsOSVersion%5C%22%3Afalse%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22ente-auth*%5C%22%2C%5C%22invertAPKFilter%5C%22%3Afalse%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22%5C%22%2C%5C%22shizukuPretendToBeGooglePlay%5C%22%3Afalse%2C%5C%22allowInsecure%5C%22%3Afalse%2C%5C%22exemptFromBackgroundUpdates%5C%22%3Afalse%2C%5C%22skipUpdateNotifications%5C%22%3Afalse%2C%5C%22about%5C%22%3A%5C%22%5C%22%7D%22%2C%22overrideSource%22%3Anull%7D)
+[<img height="40" src=".github/assets/desktop-badge.png">](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v4)
+[<img height="40" src=".github/assets/web-badge.svg">](https://auth.ente.io)
 
-### Web
+</div>
 
-You can view your 2FA codes at [auth.ente.io](https://auth.ente.io). For adding or managing your secrets, please use our mobile app.
+<br />
 
-### Desktop
+## Contributing
 
-Support for desktop platforms (Linux, Windows and older Macs) is a [work in
-progress](https://github.com/ente-io/auth/tree/desktop).
+Want to get aboard the Ente hype train? Welcome along! Don't hesitate if you're
+not a developer, there are many other important ways in which [you can
+contribute](CONTRIBUTING.md).
 
-Please ⭐ this repo to be notified of updates.
+## Support
 
+We are never more than an email away. For the various ways to ask for help,
+please see our [support guide](SUPPORT.md).
 
-## 🔩 Architecture
+## Community
 
-The architecture that powers end-to-end encrypted storage and sync of your
-tokens has been documented [here](architecture/README.md).
+<img src=".github/assets/ente-ducky.png" width=200 alt="Ente's Mascot, Ducky,
+    inviting people to Ente's source code repository" />
 
+Please visit the [community section](https://ente.io/about#community) for all the ways to
+connect with our community.
 
-## 🧑‍💻 Building from source
+[![Discord](https://img.shields.io/discord/948937918347608085?style=for-the-badge&logo=Discord&logoColor=white&label=Discord)](https://discord.gg/z2YVKkycX3)
+[![Ente's Blog RSS](https://img.shields.io/badge/blog-rss-F88900?style=for-the-badge&logo=rss&logoColor=white)](https://ente.io/blog/rss.xml)
 
-1. [Install Flutter](https://flutter.dev/docs/get-started/install)
-2. Clone this repository with `git clone git@github.com:ente-io/auth.git` 
-3. Pull in all submodules with `git submodule update --init --recursive`
-4. For Android, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`
-5. For iOS, run `flutter build ios` 
+[![Twitter](.github/assets/twitter.svg)](https://twitter.com/enteio) &nbsp; [![Mastodon](.github/assets/mastodon.svg)](https://fosstodon.org/@ente)
 
-For maintainers, there is [additional documentation](RELEASES.md) on
-automatically publishing the main branch to App store, Play store and GitHub
-releases.
+---
 
-## 🙂 Icons
+## Security
 
-ente Auth supports the icon pack provided by
-[simple-icons](https://github.com/simple-icons/simple-icons).
-
-If you would like to add your own custom icon, please create a pull-request with
-an SVG for your service that matches the contents within `assets/custom-icons`.
-
-## 🙋‍♂️ Support
-
-If you need help, please reach out to support@ente.io, and a human will get in
-touch with you.
-
-If you have feature requests, please create a [GitHub issue](https://github.com/ente-io/auth/issues/).
-
-If you wish to support us, please ⭐
-[star](https://github.com/ente-io/auth/stargazers) this project.
-
-## 🙌 Translation
-[![Crowdin](https://badges.crowdin.net/ente-authenticator-app/localized.svg)](https://crowdin.com/project/ente-authenticator-app)
-
-If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-authenticator-app) to get started. Thank you for your support.
-
-## 💜 Community
-
-- Follow us on [Twitter](https://twitter.com/enteio) / [Mastodon](https://mstdn.social/@ente)
-- Join us on [Discord](https://ente.io/discord) / [Matrix](https://ente.io/matrix)
+If you believe you have found a security vulnerability, please responsibly
+disclose it by emailing security@ente.io or [using this
+link](https://github.com/ente-io/ente/security/advisories/new) instead of
+opening a public issue. We will investigate all legitimate reports. To know
+more, please see our [security policy](SECURITY.md).

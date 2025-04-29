@@ -1,0 +1,21 @@
+[Unit]
+Documentation=https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/
+Requires=docker.service
+After=docker.service
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+ExecStartPre=docker pull nginx
+ExecStartPre=-docker stop nginx
+ExecStartPre=-docker rm nginx
+ExecStart=docker run --name nginx \
+    --add-host=host.docker.internal:host-gateway \
+    -p 443:443 \
+    -v /root/nginx/cert.pem:/etc/ssl/certs/cert.pem:ro \
+    -v /root/nginx/key.pem:/etc/ssl/private/key.pem:ro \
+    -v /root/nginx/conf.d:/etc/nginx/conf.d:ro \
+    --log-opt max-size=1g \
+    nginx
+ExecReload=docker exec nginx nginx -s reload

@@ -1,0 +1,13 @@
+{
+    "name": "accounts",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "ente-accounts": "*",
+        "ente-base": "*",
+        "ente-shared": "*"
+    },
+    "devDependencies": {
+        "ente-build-config": "*"
+    }
+}

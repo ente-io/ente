@@ -1,0 +1,5 @@
+{
+    "extends": "ente-build-config/tsconfig-vite.json",
+    "include": ["src"],
+    "references": [{ "path": "./tsconfig.node.json" }]
+}

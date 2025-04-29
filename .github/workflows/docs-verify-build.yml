@@ -1,0 +1,39 @@
+name: "Verify build (docs)"
+
+# Preflight build of docs. This allows us to ensure that yarn build is
+# succeeding before we merge the PR into main.
+
+on:
+    # Run on every pull request (open or push to it) that changes docs/
+    pull_request:
+        paths:
+            - "docs/**"
+            - ".github/workflows/docs-verify-build.yml"
+
+permissions:
+    contents: read
+
+jobs:
+    verify-build:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: docs
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: "yarn"
+                  cache-dependency-path: "docs/yarn.lock"
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Build production site
+              run: yarn build

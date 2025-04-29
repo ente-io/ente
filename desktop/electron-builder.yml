@@ -1,0 +1,37 @@
+appId: io.ente.bhari-frame
+artifactName: ${productName}-${version}-${arch}.${ext}
+files:
+    - app/**/*
+    - out
+extraFiles:
+    - from: build
+      to: resources
+beforeBuild: scripts/beforeBuild.js
+protocols:
+    - name: Ente
+      schemes: ["ente"]
+win:
+    target:
+        - target: nsis
+          arch: [x64, arm64]
+nsis:
+    deleteAppDataOnUninstall: true
+linux:
+    target:
+        - target: AppImage
+          arch: [x64, arm64]
+        - target: deb
+          arch: [x64, arm64]
+        - target: rpm
+          arch: [x64, arm64]
+        - target: pacman
+          arch: [x64, arm64]
+    category: Photography
+    icon: ./build/icon.icns
+mac:
+    target:
+        target: default
+        arch: [universal]
+    category: public.app-category.photography
+    hardenedRuntime: true
+    mergeASARs: false

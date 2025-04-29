@@ -1,0 +1,22 @@
+{
+    "name": "ente-new",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@mui/material": "^6.4.10",
+        "@mui/system": "^6.4.10",
+        "@mui/x-date-pickers": "^7.28.3",
+        "dayjs": "^1.11.13",
+        "ente-base": "*",
+        "ente-gallery": "*",
+        "ente-shared": "*",
+        "ente-utils": "*",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0"
+    },
+    "devDependencies": {
+        "@types/react": "^19.1.0",
+        "@types/react-dom": "^19.1.1",
+        "ente-build-config": "*"
+    }
+}

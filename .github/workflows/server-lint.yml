@@ -1,0 +1,34 @@
+name: "Lint (server)"
+
+on:
+    # Run on every pull request (open or push to it) that changes server/
+    pull_request:
+        paths:
+            - "server/**"
+            - ".github/workflows/server-lint.yml"
+
+permissions:
+    contents: read
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: server
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup go
+              uses: actions/setup-go@v5
+              with:
+                  go-version-file: server/go.mod
+                  cache-dependency-path: server/go.sum
+                  cache: true
+
+            - name: Install dependencies
+              run: sudo apt-get update && sudo apt-get install libsodium-dev
+
+            - name: Lint
+              run: "./scripts/lint.sh"

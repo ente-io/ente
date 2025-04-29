@@ -1,0 +1,23 @@
+# Node
+node_modules/
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+
+# Local env files
+.env*.local
+
+# tsc
+*.tsbuildinfo
+
+# Vite
+dist
+
+# Next.js
+.next/
+.next-desktop/
+out/
+next-env.d.ts

@@ -1,0 +1,15 @@
+{
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "vitepress dev docs",
+        "build": "vitepress build docs",
+        "preview": "vitepress preview docs",
+        "pretty": "prettier --write ."
+    },
+    "devDependencies": {
+        "prettier": "^3.3.4",
+        "vitepress": "^1.5.0"
+    },
+    "packageManager": "yarn@1.22.22"
+}

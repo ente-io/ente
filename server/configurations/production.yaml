@@ -1,0 +1,9 @@
+log-file: /var/logs/museum.log
+
+http:
+    use-tls: true
+
+stripe:
+    path:
+        success: ?status=success&session_id={CHECKOUT_SESSION_ID}
+        cancel: ?status=fail&reason=canceled

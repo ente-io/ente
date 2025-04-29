@@ -1,0 +1,617 @@
+/**
+ * @file Interface with the Node.js layer of our desktop app to provide the
+ * watch folders functionality.
+ */
+
+import debounce from "debounce";
+import { ensureElectron } from "ente-base/electron";
+import { basename, dirname } from "ente-base/file-name";
+import log from "ente-base/log";
+import type {
+    CollectionMapping,
+    FolderWatch,
+    FolderWatchSyncedFile,
+} from "ente-base/types/ipc";
+import { type UploadResult } from "ente-gallery/services/upload";
+import type { Collection } from "ente-media/collection";
+import { EncryptedEnteFile } from "ente-media/file";
+import {
+    getLocalFiles,
+    groupFilesByCollectionID,
+} from "ente-new/photos/services/files";
+import { ensureString } from "ente-utils/ensure";
+import uploadManager, {
+    type UploadItemWithCollection,
+} from "services/upload/uploadManager";
+import { removeFromCollection } from "./collectionService";
+
+/**
+ * Watch for file system folders and automatically update the corresponding Ente
+ * collections.
+ *
+ * This class relies on APIs exposed over the Electron IPC layer, and thus only
+ * works when we're running inside our desktop app.
+ */
+class FolderWatcher {
+    /** Pending file system events that we need to process. */
+    private eventQueue: WatchEvent[] = [];
+    /** The folder watch whose event we're currently processing */
+    private activeWatch: FolderWatch | undefined;
+    /**
+     * If the file system directory corresponding to the (root) folder path of a
+     * folder watch is deleted on disk, we note down that in this queue so that
+     * we can ignore any file system events that come for it next.
+     */
+    private deletedFolderPaths: string[] = [];
+    /** `true` if we are using the uploader. */
+    private uploadRunning = false;
+    /** `true` if we are temporarily paused to let a user upload go through. */
+    private isPaused = false;
+    /**
+     * A map from file paths to an Ente file for files that were uploaded (or
+     * symlinked) as part of the most recent upload attempt.
+     */
+    private uploadedFileForPath = new Map<string, EncryptedEnteFile>();
+    /**
+     * A set of file paths that could not be uploaded in the most recent upload
+     * attempt. These are the uploads that failed due to a permanent error that
+     * a retry will not fix.
+     */
+    private unUploadableFilePaths = new Set<string>();
+
+    /**
+     * A function to call when we want to enqueue a new upload of the given list
+     * of file paths to the given Ente collection.
+     *
+     * This is passed as a param to {@link init}.
+     */
+    private upload: (collectionName: string, filePaths: string[]) => void;
+    /**
+     * A function to call when we want to sync with the backend. It will
+     * initiate the sync but will not await its completion.
+     *
+     * This is passed as a param to {@link init}.
+     */
+    private requestSyncWithRemote: () => void;
+
+    /** A helper function that debounces invocations of {@link runNextEvent}. */
+    private debouncedRunNextEvent: () => void;
+
+    constructor() {
+        this.debouncedRunNextEvent = debounce(() => this.runNextEvent(), 1000);
+    }
+
+    /**
+     * Initialize the watcher and start processing file system events.
+     *
+     * This is only called when we're running in the context of our desktop app.
+     *
+     * The caller provides us with the hooks we can use to actually upload the
+     * files, and to sync with remote (say after deletion).
+     */
+    init(
+        upload: (collectionName: string, filePaths: string[]) => void,
+        requestSyncWithRemote: () => void,
+    ) {
+        this.upload = upload;
+        this.requestSyncWithRemote = requestSyncWithRemote;
+        this.registerListeners();
+        this.syncWithDisk();
+    }
+
+    /** Return `true` if we are currently using the uploader. */
+    isUploadRunning() {
+        return this.uploadRunning;
+    }
+
+    /** Return `true` if syncing has been temporarily paused. */
+    isSyncPaused() {
+        return this.isPaused;
+    }
+
+    /**
+     * Temporarily pause syncing and cancel any running uploads.
+     *
+     * This frees up the uploader for handling user initiated uploads.
+     */
+    pauseRunningSync() {
+        this.isPaused = true;
+        uploadManager.cancelRunningUpload();
+    }
+
+    /**
+     * Resume from a temporary pause, resyncing from disk.
+     *
+     * Sibling of {@link pauseRunningSync}.
+     */
+    resumePausedSync() {
+        this.isPaused = false;
+        this.syncWithDisk();
+    }
+
+    /** Return the list of folders we are watching for changes. */
+    async getWatches(): Promise<FolderWatch[]> {
+        return await ensureElectron().watch.get();
+    }
+
+    /**
+     * Return true if we are currently syncing files that belong to the given
+     * {@link folderPath}.
+     */
+    isSyncingFolder(folderPath: string) {
+        return this.activeWatch?.folderPath == folderPath;
+    }
+
+    /**
+     * Add a new folder watch for the given root {@link folderPath}
+     *
+     * @param mapping The {@link CollectionMapping} to use to decide which
+     * collection do files belonging to nested directories go to.
+     *
+     * @returns The updated list of watches.
+     */
+    async addWatch(folderPath: string, mapping: CollectionMapping) {
+        const watches = await ensureElectron().watch.add(folderPath, mapping);
+        this.syncWithDisk();
+        return watches;
+    }
+
+    /**
+     * Remove the folder watch for the given root {@link folderPath}.
+     *
+     * @returns The updated list of watches.
+     */
+    async removeWatch(folderPath: string) {
+        return await ensureElectron().watch.remove(folderPath);
+    }
+
+    private async syncWithDisk() {
+        try {
+            const watches = await this.getWatches();
+            if (!watches) return;
+
+            this.eventQueue = [];
+            const events = await deduceEvents(watches);
+            log.info(`Folder watch deduced ${events.length} events`);
+            this.eventQueue = this.eventQueue.concat(events);
+
+            this.debouncedRunNextEvent();
+        } catch (e) {
+            log.error("Ignoring error while syncing watched folders", e);
+        }
+    }
+
+    pushEvent(event: WatchEvent) {
+        this.eventQueue.push(event);
+        log.info("Folder watch event", event);
+        this.debouncedRunNextEvent();
+    }
+
+    private registerListeners() {
+        const watch = ensureElectron().watch;
+
+        // [Note: File renames during folder watch]
+        //
+        // Renames come as two file system events - an `onAddFile` + an
+        // `onRemoveFile` - in an arbitrary order.
+
+        watch.onAddFile((path: string, watch: FolderWatch) => {
+            this.pushEvent({
+                action: "upload",
+                collectionName: collectionNameForPath(path, watch),
+                folderPath: watch.folderPath,
+                filePath: path,
+            });
+        });
+
+        watch.onRemoveFile((path: string, watch: FolderWatch) => {
+            this.pushEvent({
+                action: "trash",
+                collectionName: collectionNameForPath(path, watch),
+                folderPath: watch.folderPath,
+                filePath: path,
+            });
+        });
+
+        watch.onRemoveDir((path: string, watch: FolderWatch) => {
+            if (path == watch.folderPath) {
+                log.info(
+                    `Received file system delete event for a watched folder at ${path}`,
+                );
+                this.deletedFolderPaths.push(path);
+            }
+        });
+    }
+
+    private async runNextEvent() {
+        if (this.eventQueue.length == 0 || this.activeWatch || this.isPaused)
+            return;
+
+        const skip = (reason: string) => {
+            log.info(`Ignoring event since ${reason}`);
+            this.debouncedRunNextEvent();
+        };
+
+        const event = this.dequeueClubbedEvent();
+        log.info(
+            `Processing ${event.action} event for folder watch ${event.folderPath} (collectionName ${event.collectionName}, ${event.filePaths.length} files)`,
+        );
+
+        const watch = (await this.getWatches()).find(
+            (watch) => watch.folderPath == event.folderPath,
+        );
+        if (!watch) {
+            // Possibly stale
+            skip(`no folder watch for found for ${event.folderPath}`);
+            return;
+        }
+
+        if (event.action == "upload") {
+            const paths = pathsToUpload(event.filePaths, watch);
+            if (paths.length == 0) {
+                skip("none of the files need uploading");
+                return;
+            }
+
+            // Here we pass control to the uploader. When the upload is done,
+            // the uploader will notify us by calling allFileUploadsDone.
+
+            this.activeWatch = watch;
+            this.uploadRunning = true;
+
+            const collectionName = event.collectionName;
+            log.info(
+                `Folder watch requested upload of ${paths.length} files to collection ${collectionName}`,
+            );
+
+            this.upload(collectionName, paths);
+        } else {
+            if (this.pruneFileEventsFromDeletedFolderPaths()) {
+                skip("event was from a deleted folder path");
+                return;
+            }
+
+            const [removed, rest] = watch.syncedFiles.reduce(
+                ([removed, rest], syncedFile) => {
+                    (event.filePaths.includes(syncedFile.path)
+                        ? removed
+                        : rest
+                    ).push(syncedFile);
+                    return [removed, rest];
+                },
+                [[], []],
+            );
+
+            this.activeWatch = watch;
+
+            await this.moveToTrash(removed);
+
+            await ensureElectron().watch.updateSyncedFiles(
+                rest,
+                watch.folderPath,
+            );
+
+            this.activeWatch = undefined;
+
+            this.debouncedRunNextEvent();
+        }
+    }
+
+    /**
+     * Batch the next run of events with the same action, collection and folder
+     * path into a single clubbed event that contains the list of all effected
+     * file paths from the individual events.
+     */
+    private dequeueClubbedEvent(): ClubbedWatchEvent | undefined {
+        const event = this.eventQueue.shift();
+        if (!event) return undefined;
+
+        const filePaths = [event.filePath];
+        while (
+            this.eventQueue.length > 0 &&
+            event.action === this.eventQueue[0].action &&
+            event.folderPath === this.eventQueue[0].folderPath &&
+            event.collectionName === this.eventQueue[0].collectionName
+        ) {
+            filePaths.push(this.eventQueue[0].filePath);
+            this.eventQueue.shift();
+        }
+        return { ...event, filePaths };
+    }
+
+    /**
+     * Callback invoked by the uploader whenever a item we requested to
+     * {@link upload} gets uploaded.
+     */
+    async onFileUpload(
+        fileUploadResult: UploadResult,
+        item: UploadItemWithCollection,
+        file: EncryptedEnteFile,
+    ) {
+        // Re the usage of ensureString: For desktop watch, the only possibility
+        // for a UploadItem is for it to be a string (the absolute path to a
+        // file on disk).
+        if (
+            [
+                "addedSymlink",
+                "uploaded",
+                "uploadedWithStaticThumbnail",
+                "alreadyUploaded",
+            ].includes(fileUploadResult)
+        ) {
+            if (item.isLivePhoto) {
+                this.uploadedFileForPath.set(
+                    ensureString(item.livePhotoAssets.image),
+                    file,
+                );
+                this.uploadedFileForPath.set(
+                    ensureString(item.livePhotoAssets.video),
+                    file,
+                );
+            } else {
+                this.uploadedFileForPath.set(
+                    ensureString(item.uploadItem),
+                    file,
+                );
+            }
+        } else if (["unsupported", "tooLarge"].includes(fileUploadResult)) {
+            if (item.isLivePhoto) {
+                this.unUploadableFilePaths.add(
+                    ensureString(item.livePhotoAssets.image),
+                );
+                this.unUploadableFilePaths.add(
+                    ensureString(item.livePhotoAssets.video),
+                );
+            } else {
+                this.unUploadableFilePaths.add(ensureString(item.uploadItem));
+            }
+        }
+    }
+
+    /**
+     * Callback invoked by the uploader whenever all the files we requested to
+     * {@link upload} get uploaded.
+     */
+    async allFileUploadsDone(
+        uploadItemsWithCollection: UploadItemWithCollection[],
+        collections: Collection[],
+    ) {
+        const electron = ensureElectron();
+        const watch = this.activeWatch;
+
+        log.debug(() => [
+            "watch/allFileUploadsDone",
+            JSON.stringify({ uploadItemsWithCollection, collections, watch }),
+        ]);
+
+        const { syncedFiles, ignoredFiles } = this.deduceSyncedAndIgnored(
+            uploadItemsWithCollection,
+        );
+
+        if (syncedFiles.length > 0)
+            await electron.watch.updateSyncedFiles(
+                watch.syncedFiles.concat(syncedFiles),
+                watch.folderPath,
+            );
+
+        if (ignoredFiles.length > 0)
+            await electron.watch.updateIgnoredFiles(
+                watch.ignoredFiles.concat(ignoredFiles),
+                watch.folderPath,
+            );
+
+        this.activeWatch = undefined;
+        this.uploadRunning = false;
+
+        this.debouncedRunNextEvent();
+    }
+
+    private deduceSyncedAndIgnored(
+        uploadItemsWithCollection: UploadItemWithCollection[],
+    ) {
+        const syncedFiles: FolderWatch["syncedFiles"] = [];
+        const ignoredFiles: FolderWatch["ignoredFiles"] = [];
+
+        const markSynced = (file: EncryptedEnteFile, path: string) => {
+            syncedFiles.push({
+                path,
+                uploadedFileID: file.id,
+                collectionID: file.collectionID,
+            });
+            this.uploadedFileForPath.delete(path);
+        };
+
+        const markIgnored = (path: string) => {
+            log.debug(() => `Permanently ignoring file at ${path}`);
+            ignoredFiles.push(path);
+            this.unUploadableFilePaths.delete(path);
+        };
+
+        for (const item of uploadItemsWithCollection) {
+            // Re the usage of ensureString: For desktop watch, the only
+            // possibility for a UploadItem is for it to be a string (the
+            // absolute path to a file on disk).
+            if (item.isLivePhoto) {
+                const imagePath = ensureString(item.livePhotoAssets.image);
+                const videoPath = ensureString(item.livePhotoAssets.video);
+
+                const imageFile = this.uploadedFileForPath.get(imagePath);
+                const videoFile = this.uploadedFileForPath.get(videoPath);
+
+                if (imageFile && videoFile) {
+                    markSynced(imageFile, imagePath);
+                    markSynced(videoFile, videoPath);
+                } else if (
+                    this.unUploadableFilePaths.has(imagePath) &&
+                    this.unUploadableFilePaths.has(videoPath)
+                ) {
+                    markIgnored(imagePath);
+                    markIgnored(videoPath);
+                }
+            } else {
+                const path = ensureString(item.uploadItem);
+                const file = this.uploadedFileForPath.get(path);
+                if (file) {
+                    markSynced(file, path);
+                } else if (this.unUploadableFilePaths.has(path)) {
+                    markIgnored(path);
+                }
+            }
+        }
+
+        return { syncedFiles, ignoredFiles };
+    }
+
+    private pruneFileEventsFromDeletedFolderPaths() {
+        const deletedFolderPath = this.deletedFolderPaths.shift();
+        if (!deletedFolderPath) return false;
+
+        this.eventQueue = this.eventQueue.filter(
+            (event) => !event.filePath.startsWith(deletedFolderPath),
+        );
+
+        return true;
+    }
+
+    private async moveToTrash(syncedFiles: FolderWatch["syncedFiles"]) {
+        const syncedFileForID = new Map<number, FolderWatchSyncedFile>();
+        for (const file of syncedFiles)
+            syncedFileForID.set(file.uploadedFileID, file);
+
+        const files = await getLocalFiles();
+        const filesToTrash = files.filter((file) => {
+            const correspondingSyncedFile = syncedFileForID.get(file.id);
+            if (
+                correspondingSyncedFile &&
+                correspondingSyncedFile.collectionID == file.collectionID
+            ) {
+                return true;
+            }
+            return false;
+        });
+
+        const filesByCollectionID = groupFilesByCollectionID(filesToTrash);
+        for (const [id, files] of filesByCollectionID.entries()) {
+            await removeFromCollection(id, files);
+        }
+
+        this.requestSyncWithRemote();
+    }
+}
+
+/** The singleton instance of {@link FolderWatcher}. */
+const watcher = new FolderWatcher();
+
+export default watcher;
+
+/**
+ * A file system watch event encapsulates a change that has occurred on disk
+ * that needs us to take some action within Ente to synchronize with the user's
+ * Ente collections.
+ *
+ * Events get added in two ways:
+ *
+ * - When the app starts, it reads the current state of files on disk and
+ *   compares that with its last known state to determine what all events it
+ *   missed. This is easier than it sounds as we have only two events: add and
+ *   remove.
+ *
+ * - When the app is running, it gets live notifications from our file system
+ *   watcher (from the Node.js layer) about changes that have happened on disk,
+ *   which the app then enqueues onto the event queue if they pertain to the
+ *   files we're interested in.
+ */
+interface WatchEvent {
+    /** The action to take */
+    action: "upload" | "trash";
+    /** The path of the root folder corresponding to the {@link FolderWatch}. */
+    folderPath: string;
+    /** The name of the Ente collection the file belongs to. */
+    collectionName: string;
+    /** The absolute path to the file under consideration. */
+    filePath: string;
+}
+
+/**
+ * A composite of multiple {@link WatchEvent}s that only differ in their
+ * {@link filePath}.
+ *
+ * When processing events, we combine a run of events with the same
+ * {@link action}, {@link folderPath} and {@link collectionName}. This allows us
+ * to process all the affected {@link filePaths} in one shot.
+ */
+type ClubbedWatchEvent = Omit<WatchEvent, "filePath"> & { filePaths: string[] };
+
+/**
+ * Determine which events we need to process to synchronize the watched on-disk
+ * folders to their corresponding collections.
+ */
+const deduceEvents = async (watches: FolderWatch[]): Promise<WatchEvent[]> => {
+    const electron = ensureElectron();
+    const events: WatchEvent[] = [];
+
+    for (const watch of watches) {
+        const folderPath = watch.folderPath;
+
+        const filePaths = await electron.fs.findFiles(folderPath);
+
+        // Files that are on disk but not yet synced.
+        for (const filePath of pathsToUpload(filePaths, watch))
+            events.push({
+                action: "upload",
+                folderPath,
+                collectionName: collectionNameForPath(filePath, watch),
+                filePath,
+            });
+
+        // Previously synced files that are no longer on disk.
+        for (const filePath of pathsToRemove(filePaths, watch))
+            events.push({
+                action: "trash",
+                folderPath,
+                collectionName: collectionNameForPath(filePath, watch),
+                filePath,
+            });
+    }
+
+    return events;
+};
+
+/**
+ * Filter out hidden files and previously synced or ignored paths from
+ * {@link paths} to get the list of paths that need to be uploaded to the Ente
+ * collection.
+ */
+const pathsToUpload = (paths: string[], watch: FolderWatch) =>
+    paths
+        // Filter out hidden files (files whose names begins with a dot)
+        .filter((path) => !isHiddenFile(path))
+        // Files that are on disk but not yet synced or ignored.
+        .filter((path) => !isSyncedOrIgnoredPath(path, watch));
+
+/**
+ * Return true if the file at the given {@link path} is hidden.
+ *
+ * Hidden files are those whose names begin with a "." (dot).
+ */
+const isHiddenFile = (path: string) => basename(path).startsWith(".");
+
+/**
+ * Return the paths to previously synced files that are no longer on disk and so
+ * must be removed from the Ente collection.
+ */
+const pathsToRemove = (paths: string[], watch: FolderWatch) =>
+    watch.syncedFiles
+        .map((f) => f.path)
+        .filter((path) => !paths.includes(path));
+
+const isSyncedOrIgnoredPath = (path: string, watch: FolderWatch) =>
+    watch.ignoredFiles.includes(path) ||
+    watch.syncedFiles.find((f) => f.path === path);
+
+const collectionNameForPath = (path: string, watch: FolderWatch) =>
+    watch.collectionMapping == "root"
+        ? basename(watch.folderPath)
+        : parentDirectoryName(path);
+
+const parentDirectoryName = (path: string) => basename(dirname(path));

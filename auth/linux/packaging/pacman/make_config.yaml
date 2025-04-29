@@ -1,0 +1,47 @@
+display_name: Ente Auth
+package_name: enteauth
+maintainer:
+  name: Ente.io Developers
+  email: auth@ente.io
+licenses:
+  - GPLv3
+icon: assets/icons/auth-icon.png
+installed_size: 36000
+
+metainfo: linux/packaging/enteauth.appdata.xml
+
+dependencies:
+  - sqlite
+  - libsecret
+  - libappindicator-gtk3
+
+keywords:
+  - Authentication
+  - 2FA
+
+generic_name: Ente Authenticator
+
+categories:
+  - Utility
+
+supported_mime_type:
+  - x-scheme-handler/enteauth
+
+postinstall_scripts:
+  - gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
+  - update-desktop-database -q
+  - if [ ! -e /usr/lib/libsodium.so.23 ]; then
+  - "   ln -s /usr/lib/libsodium.so /usr/lib/libsodium.so.23"
+  - fi
+
+postupgrade_scripts:
+  - post_install
+
+postremove_scripts:
+  - gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
+  - update-desktop-database -q
+  - if [ -e /usr/lib/libsodium.so.23 ]; then
+  - rm /usr/lib/libsodium.so.23
+  - fi
+
+startup_notify: false

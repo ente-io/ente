@@ -1,0 +1,12 @@
+# You can put this configuration file in the following locations:
+# - $HOME/.ente/config.yaml
+# - config.yaml in the current working directory
+# - $ENTE_CLI_CONFIG_DIR/config.yaml
+
+endpoint:
+  api: "http://localhost:8080"
+  # Endpoint for the account service for passkey
+  accounts: "http://localhost:3001"
+
+log:
+ http: false # log status code & time taken by requests

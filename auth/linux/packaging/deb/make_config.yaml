@@ -1,0 +1,37 @@
+display_name: Ente Auth
+package_name: enteauth
+include_build_number: false
+
+maintainer:
+  name: Ente.io Developers
+  email: auth@ente.io
+priority: optional
+section: x11
+essential: false
+license: GPLv3
+icon: assets/icons/auth-icon.png
+installed_size: 36000
+
+metainfo: linux/packaging/enteauth.appdata.xml
+
+dependencies:
+  - libsqlite3-0
+  - libsodium23
+  - libsecret-1-0
+  - libappindicator3-1 | libayatana-appindicator3-1
+  - gir1.2-appindicator3-0.1 | gir1.2-ayatanaappindicator3-0.1
+  - libayatana-ido3-0.4-0
+
+keywords:
+  - Authentication
+  - 2FA
+
+generic_name: Ente Authenticator
+
+categories:
+  - Utility
+
+startup_notify: false
+
+supported_mime_type:
+  - x-scheme-handler/enteauth

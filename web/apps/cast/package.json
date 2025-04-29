@@ -1,0 +1,15 @@
+{
+    "name": "cast",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "ente-accounts": "*",
+        "ente-base": "*",
+        "ente-media": "*",
+        "ente-shared": "*"
+    },
+    "devDependencies": {
+        "@types/chromecast-caf-receiver": "^6.0.21",
+        "ente-build-config": "*"
+    }
+}

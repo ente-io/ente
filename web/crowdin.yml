@@ -1,0 +1,5 @@
+api_token_env: CROWDIN_PERSONAL_TOKEN
+
+files:
+    - source: /packages/base/locales/en-US/translation.json
+      translation: /packages/base/locales/%locale%/translation.json

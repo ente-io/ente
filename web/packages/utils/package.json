@@ -1,0 +1,8 @@
+{
+    "name": "ente-utils",
+    "version": "0.0.0",
+    "private": true,
+    "devDependencies": {
+        "ente-build-config": "*"
+    }
+}

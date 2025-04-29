@@ -1,0 +1,61 @@
+name: "Lint (auth)"
+
+on:
+    # Run on every pull request (open or push to it) that changes auth/
+    pull_request:
+        paths:
+            - "auth/**"
+            - ".github/workflows/auth-lint.yml"
+
+env:
+    FLUTTER_VERSION: "3.24.3"
+
+permissions:
+    contents: read
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: auth
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Verify custom icons are lowercase including optional understores, and end with .svg
+              run: |
+                  find assets/custom-icons -type f -name "*.svg" | while read -r file; do
+                      if [[ "$(basename "$file")" != "$(basename "$file" | tr '[:upper:]' '[:lower:]' | tr ' ' '_')" ]]; then
+                          echo "File name is not lowercase: $file"
+                          exit 1
+                      fi
+                  done
+
+            - name: Verify all icons are less than 20KB
+              run: |
+                  find assets/custom-icons -type f -name "*.svg" | while read -r file; do
+                      if [[ "$file" == "assets/custom-icons/icons/bbs_nga.svg" ]]; then
+                          continue
+                      fi
+                      if [[ "$(stat --printf="%s" "$file")" -gt 20480 ]]; then
+                          echo "File size is greater than 20KB: $file ($file_size bytes)"
+                          exit 1
+                      fi
+                  done
+
+            - name: Verify custom icon JSON
+              run: cat assets/custom-icons/_data/custom-icons.json | jq empty
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  cache: true
+
+            - run: flutter pub get
+
+            - run: flutter analyze --no-fatal-infos

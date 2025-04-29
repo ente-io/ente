@@ -1,0 +1,22 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Models
+*/onnx_models/
+*.pt
+*.onnx
+*.tflite
+
+# Imported repos
+CLIP/mobileclip_repo/
+
+# Data
+data/flickr8k_captions.txt
