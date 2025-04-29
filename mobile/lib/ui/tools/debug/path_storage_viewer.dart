@@ -114,19 +114,20 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
           await Clipboard.setData(ClipboardData(text: widget.item.path));
           debugPrint(widget.item.path);
         }
-
+      },
+      onDoubleTap: () async {
+        if (widget.item.allowCacheClear && widget.enableDoubleTapClear) {
+          await deleteDirectoryContents(widget.item.path);
+          _safeRefresh();
+        }
+      },
+      onLongPress: () async {
         if (widget.item.title == S.of(context).pendingSync) {
           await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => const PendingSyncInfoScreen(),
             ),
           );
-        }
-      },
-      onDoubleTap: () async {
-        if (widget.item.allowCacheClear && widget.enableDoubleTapClear) {
-          await deleteDirectoryContents(widget.item.path);
-          _safeRefresh();
         }
       },
     );
