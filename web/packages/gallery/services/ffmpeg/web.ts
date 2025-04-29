@@ -148,3 +148,82 @@ const substitutePlaceholders = (
             }
         })
         .filter((s) => s !== undefined);
+
+/**
+ * A variant of the {@link isHDRVideo} function in the desktop app source (see
+ * `ffmpeg.ts`), except here we have access to ffprobe and can use that instead
+ * of parsing the ffmpeg stderr.
+ *
+ * See: [Note: Alternative FFmpeg command for HDR videos]
+ *
+ * @param inputFilePath The path to a video file on the FFmpeg FS.
+ *
+ * @returns `true` if this file is likely a HDR video. Exceptions are treated as
+ * `false` to make this function safe to invoke without breaking the happy path.
+ */
+const isHDRVideo = async (ffmpeg: FFmpeg, inputFilePath: string) => {
+    try {
+        const data = await ffprobeOutput(
+            ffmpeg,
+            [
+                ["-i", inputFilePath],
+                "-show_streams",
+                ["-of", "json"],
+                ["-o", "output.json"],
+            ].flat(),
+            "output.json",
+        );
+
+        // const videoInfo = await pseudoFFProbeVideo(inputFilePath);
+        // const vs = videoStreamLineRegex.exec(videoInfo)?.at(1);
+        // if (!vs) return false;
+        // return vs.includes("smpte2084") || vs.includes("arib-std-b67");
+        console.log("ffprobe", data);
+        return false;
+    } catch (e) {
+        log.warn(`Could not detect HDR status of ${inputFilePath}`, e);
+        return false;
+    }
+};
+
+/**
+ * Return the textual output produced by verbatim invoking the given ffprobe
+ * {@link cmd} that is expected to writes to a file named {@link outputFilePath}
+ * in the FFmpeg FS.
+ *
+ * The file generated at {@link outputFilePath} is removed in all cases.
+ */
+const ffprobeOutput = async (
+    ffmpeg: FFmpeg,
+    cmd: string[],
+    outputPath: string,
+) => {
+    // Exit status of the ffmpeg.ffprobe invocation.
+    // `0` if no error, `!= 0` if timeout (1) or error.
+    let status: number | undefined;
+
+    try {
+        status = await ffmpeg.ffprobe(cmd);
+        if (status !== 0) {
+            log.info(
+                `[wasm] ffprobe command failed with exit code ${status}: ${cmd.join(" ")}`,
+            );
+            throw new Error(`ffprobe command failed with exit code ${status}`);
+        }
+
+        const result = await ffmpeg.readFile(outputPath, "utf8");
+        if (typeof result != "string") throw new Error("Expected text data");
+
+        return result;
+    } finally {
+        try {
+            await ffmpeg.deleteFile(outputPath);
+        } catch (e) {
+            // Output file might not even exist if the command did not succeed,
+            // so only log on success.
+            if (status === 0) {
+                log.error(`Failed to remove output ${outputPath}`, e);
+            }
+        }
+    }
+};

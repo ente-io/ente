@@ -629,13 +629,19 @@ const detectVideoDimensions = (conversionStderr: string) => {
  *
  * @param inputFilePath The path to a video file on the user's machine.
  *
- * @returns `true` if this file is likely a HDR video.
+ * @returns `true` if this file is likely a HDR video. Exceptions are treated as
+ * `false` to make this function safe to invoke without breaking the happy path.
  */
 const isHDRVideo = async (inputFilePath: string) => {
-    const videoInfo = await pseudoFFProbeVideo(inputFilePath);
-    const vs = videoStreamLineRegex.exec(videoInfo)?.at(1);
-    if (!vs) return false;
-    return vs.includes("smpte2084") || vs.includes("arib-std-b67");
+    try {
+        const videoInfo = await pseudoFFProbeVideo(inputFilePath);
+        const vs = videoStreamLineRegex.exec(videoInfo)?.at(1);
+        if (!vs) return false;
+        return vs.includes("smpte2084") || vs.includes("arib-std-b67");
+    } catch (e) {
+        log.warn(`Could not detect HDR status of ${inputFilePath}`, e);
+        return false;
+    }
 };
 
 /**
