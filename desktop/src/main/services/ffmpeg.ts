@@ -195,7 +195,36 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     //
     // Reference:
     // - https://trac.ffmpeg.org/wiki/colorspace
-    const { isBT709 } = await detectVideoCharacteristics(inputFilePath);
+    const { isH264, isBT709 } = await detectVideoCharacteristics(inputFilePath);
+
+    // If the video is smaller than 10 MB, and already H.264 (the codec we are
+    // going to use for the conversion), then a streaming variant is not much
+    // use. Skip such cases.
+    //
+    // ---
+    //
+    // [Note: HEVC/H.265 issues]
+    //
+    // We've observed two issues out in the wild with HEVC videos:
+    //
+    // 1. On Linux, HEVC video streams don't play. However, since the audio
+    //    stream plays, the browser tells us that the "video" itself is
+    //    playable, but the user sees a blank screen with only audio.
+    //
+    // 2. HEVC + HDR videos taken on an iPhone have a rotation that Chrome (and
+    //    thus Electron) doesn't take into account, so these play upside down.
+    //
+    // Not fully related to this case, but mentioning here as to why both the
+    // size and codec need to be checked before skipping stream generation.
+    if (isH264) {
+        const inputVideoSize = await fs
+            .stat(inputFilePath)
+            .then((st) => st.size);
+        if (inputVideoSize < 10 * 1024 * 1024 /* 10 MB */) {
+            // TODO(HLS):
+            console.log("Potential skip");
+        }
+    }
 
     // We want the generated playlist to refer to the chunks as "output.ts".
     //
