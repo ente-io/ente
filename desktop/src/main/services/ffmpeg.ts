@@ -599,6 +599,41 @@ const detectVideoDimensions = (conversionStderr: string) => {
 };
 
 /**
+ * Heuristically detect if the file at given path is a HDR video.
+ *
+ * This is similar to {@link detectVideoCharacteristics}, and see that
+ * function's documentation for all the caveats. However, this function uses an
+ * allow-list instead, and considers any file with color transfer "smpte2084" or
+ * "arib-std-b67" to be HDR. While this is in some sense a more exact check, it
+ * comes with different caveats:
+ *
+ * - These particular constants are not guaranteed to be correct; these are just
+ *   what I saw on the internet as being used / recommended for detecting HDR.
+ *
+ * - Since we don't have ffprobe, we're not checking the color space value
+ *   itself but a substring of the stream line in the ffmpeg stderr output.
+ *
+ * In particular, we use this more exact check for places where we have less
+ * leeway. e.g. when generating thumbnails, if we apply the tonemapping to any
+ * non-BT.709 file (as the HLS stream generation does), we start getting the
+ * "code 3074: no path between colorspaces" error during the JPEG conversion
+ * (this is not a problem in the H.264 conversion).
+ *
+ * - See: [Note: Alternative FFmpeg command for HDR videos]
+ * - See: [Note: Tonemapping HDR to HD]
+ *
+ * @param inputFilePath The path to a video file on the user's machine.
+ *
+ * @returns `true` if this file is likely a HDR video.
+ */
+const isHDRVideo = async (inputFilePath: string) => {
+    const videoInfo = await pseudoFFProbeVideo(inputFilePath);
+    const vs = videoStreamLineRegex.exec(videoInfo)?.at(1);
+    if (!vs) return false;
+    return vs.includes("smpte2084") || vs.includes("arib-std-b67");
+};
+
+/**
  * Return the stderr of ffmpeg in an attempt to gain information about the video
  * at the given {@link inputFilePath}.
  *
