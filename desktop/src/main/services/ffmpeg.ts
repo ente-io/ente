@@ -228,15 +228,15 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         }
     }
 
-    // If the video is already H.264 / BT.709, and has a bitrate less than 4000
-    // kbps, then we do not need to reencode the video stream (by _far_ the
-    // costliest part of the HLS stream generation).
-    const reencodeVideo = !(
-        isH264 &&
-        isBT709 &&
-        bitrate &&
-        bitrate <= 4000 * 1000
-    );
+    // If the video is already H.264 with a bitrate less than 4000 kbps, then we
+    // do not need to reencode the video stream (by _far_ the costliest part of
+    // the HLS stream generation).
+    const reencodeVideo = !(isH264 && bitrate && bitrate <= 4000 * 1000);
+
+    // If the bitrate is not too high, then we don't need to rescale the video
+    // when generating the video stream. This is not a performance optimization,
+    // but more for avoiding making the video size smaller unnecessarily.
+    const rescaleVideo = !(bitrate && bitrate <= 2000 * 1000);
 
     // We want the generated playlist to refer to the chunks as "output.ts".
     //
@@ -299,13 +299,18 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
                   // `filter1=key=value:key=value.filter2=key=value`.
                   "-vf",
                   [
-                      // Scales the video to maximum 720p height, keeping aspect
-                      // ratio and the calculated dimension divisible by 2 (some
-                      // of the other operations require an even pixel count).
-                      "scale=-2:720",
-                      // Convert the video to a constant 30 fps, duplicating or
-                      // dropping frames as necessary.
-                      "fps=30",
+                      rescaleVideo
+                          ? [
+                                // Scales the video to maximum 720p height,
+                                // keeping aspect ratio and the calculated
+                                // dimension divisible by 2 (some of the other
+                                // operations require an even pixel count).
+                                "scale=-2:720",
+                                // Convert the video to a constant 30 fps,
+                                // duplicating or dropping frames as necessary.
+                                "fps=30",
+                            ]
+                          : [],
                       // Convert the colorspace if the video is not in the HD
                       // color space (bt709). Before conversion, tone map colors
                       // so that they work the same across the change in the
