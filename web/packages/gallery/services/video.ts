@@ -420,12 +420,18 @@ const processQueueItem = async (
 
     log.info(`Generate HLS for ${fileLogID(file)} | start`);
 
-    const { playlistToken, dimensions, videoSize } = await initiateGenerateHLS(
+    const res = await initiateGenerateHLS(
         electron,
         sourceVideo!,
         objectUploadURL,
     );
 
+    if (!res) {
+        log.info(`Generate HLS for ${fileLogID(file)} | not-required`);
+        return;
+    }
+
+    const { playlistToken, dimensions, videoSize } = res;
     try {
         const playlist = await readVideoStream(electron, playlistToken).then(
             (res) => res.text(),

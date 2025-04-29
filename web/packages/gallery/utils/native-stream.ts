@@ -190,13 +190,17 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
  * metadata about the generated video (its byte size and dimensions). See {@link
  * GenerateHLSResult.
  *
+ * In case the video is such that it doesn't require a separate stream to be
+ * generated (e.g. it is a small video using an already compatible codec), then
+ * this function will return `undefined`.
+ *
  * See: [Note: Preview variant of videos].
  */
 export const initiateGenerateHLS = async (
     _: Electron,
     video: UploadItem | ReadableStream,
     objectUploadURL: string,
-): Promise<GenerateHLSResult> => {
+): Promise<GenerateHLSResult | undefined> => {
     const params = new URLSearchParams({ op: "generate-hls", objectUploadURL });
 
     let body: ReadableStream | null;
@@ -237,6 +241,8 @@ export const initiateGenerateHLS = async (
     });
     if (!res.ok)
         throw new Error(`Failed to write stream to ${url}: HTTP ${res.status}`);
+
+    if (res.status == 204) return undefined;
 
     return GenerateHLSResult.parse(await res.json());
 };

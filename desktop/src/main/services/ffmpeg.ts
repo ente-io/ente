@@ -1,7 +1,7 @@
 import pathToFfmpeg from "ffmpeg-static";
 import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
-import path from "node:path";
+import path, { basename } from "node:path";
 import type { ZipItem } from "../../types/ipc";
 import log from "../log";
 import { execAsync } from "../utils/electron";
@@ -143,8 +143,19 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  * A bespoke variant of {@link ffmpegExec} for generation of HLS playlists for
  * videos.
  *
+ * Overview of the cases:
+ *
+ *     H.264, <= 10 MB             - Skip
+ *     H.264, <= 4000 kb/s bitrate - Don't re-encode video stream
+ *     <= 2000 kb/s bitrate        - Don't apply the scale+fps filter
+ *     !BT.709                     - Apply tonemap (zscale+tonemap+zscale)
+ *
+ * Example invocation:
+ *
+ *     ffmpeg -i in.mov -vf 'scale=-2:720,fps=30,zscale=transfer=linear,tonemap=tonemap=hable:desat=0,zscale=primaries=709:transfer=709:matrix=709,format=yuv420p' -c:v libx264 -c:a aac -f hls -hls_key_info_file out.m3u8.info -hls_list_size 0 -hls_flags single_file out.m3u8
+ *
  * See: [Note: Preview variant of videos]
-
+ *
  * @param inputFilePath The path to a file on the user's local file system. This
  * is the video we want to generate an streamable HLS playlist for.
  *
@@ -155,11 +166,14 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  * @returns The paths to two files on the user's local file system - one
  * containing the generated HLS playlist, and the other containing the
  * transcoded and encrypted video segments that the HLS playlist refers to.
+ *
+ * If the video is such that it doesn't require stream generation, then this
+ * function returns `undefined`.
  */
 export const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
-): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult> => {
+): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined> => {
     // [Note: Tonemapping HDR to HD]
     //
     // BT.709 ("HD") is a standard that describes things like how color is
@@ -195,7 +209,49 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     //
     // Reference:
     // - https://trac.ffmpeg.org/wiki/colorspace
-    const isBT709 = await detectIsBT709(inputFilePath);
+    const { isH264, isBT709, bitrate } =
+        await detectVideoCharacteristics(inputFilePath);
+
+    log.debug(() => [basename(inputFilePath), { isH264, isBT709, bitrate }]);
+
+    // If the video is smaller than 10 MB, and already H.264 (the codec we are
+    // going to use for the conversion), then a streaming variant is not much
+    // use. Skip such cases.
+    //
+    // ---
+    //
+    // [Note: HEVC/H.265 issues]
+    //
+    // We've observed two issues out in the wild with HEVC videos:
+    //
+    // 1. On Linux, HEVC video streams don't play. However, since the audio
+    //    stream plays, the browser tells us that the "video" itself is
+    //    playable, but the user sees a blank screen with only audio.
+    //
+    // 2. HEVC + HDR videos taken on an iPhone have a rotation (`Side data:
+    //    displaymatrix` in the ffmpeg output) that Chrome (and thus Electron)
+    //    doesn't take into account, so these play upside down.
+    //
+    // Not fully related to this case, but mentioning here as to why both the
+    // size and codec need to be checked before skipping stream generation.
+    if (isH264) {
+        const inputVideoSize = await fs
+            .stat(inputFilePath)
+            .then((st) => st.size);
+        if (inputVideoSize <= 10 * 1024 * 1024 /* 10 MB */) {
+            return undefined;
+        }
+    }
+
+    // If the video is already H.264 with a bitrate less than 4000 kbps, then we
+    // do not need to reencode the video stream (by _far_ the costliest part of
+    // the HLS stream generation).
+    const reencodeVideo = !(isH264 && bitrate && bitrate <= 4000 * 1000);
+
+    // If the bitrate is not too high, then we don't need to rescale the video
+    // when generating the video stream. This is not a performance optimization,
+    // but more for avoiding making the video size smaller unnecessarily.
+    const rescaleVideo = !(bitrate && bitrate <= 2000 * 1000);
 
     // We want the generated playlist to refer to the chunks as "output.ts".
     //
@@ -235,8 +291,8 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
 
     // Overview:
     //
-    // - H.264 video HD 720p 30fps.
-    // - AAC audio 128kbps.
+    // - Video H.264 HD 720p 30fps.
+    // - Audio AAC 128kbps.
     // - Encrypted HLS playlist with a single file containing all the chunks.
     //
     // Reference:
@@ -251,65 +307,74 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         "-i",
         inputFilePath,
         // The remaining options apply to the next output file (`playlistPath`).
-        //
-        // ---
-        //
-        // `-vf` creates a filter graph for the video stream. This is a string
-        // of the form `filter1=key=value:key=value.filter2=key=value`, that is,
-        // a comma separated list of filters chained together.
-        [
-            "-vf",
-            [
-                // Scales the video to maximum 720p height, keeping aspect
-                // ratio, and keeping the calculated dimension divisible by 2
-                // (some of the other operations require an even pixel count).
-                "scale=-2:720",
-                // Convert the video to a constant 30 fps, duplicating or
-                // dropping frames as necessary.
-                "fps=30",
-                // If the video is not in the HD color space (bt709), convert
-                // it. Before conversion, tone map colors so that they work the
-                // same across the change in the dyamic range.
-                //
-                // 1. The tonemap filter only works linear light, so we first
-                //    use zscale with transfer=linear to linearize the input.
-                //
-                // 2. Then we use the tonemap, with the hable option that is
-                //    best for preserving details. desat=0 turns off the default
-                //    desaturation.
-                //
-                // 3. Use zscale again to "convert to BT.709" by asking it to
-                //    set the all three of color primaries, transfer
-                //    characteristics and colorspace matrix to 709 (Note: the
-                //    constants specified in the tonemap filter help do not
-                //    include the "bt" prefix)
-                //
-                // See: https://ffmpeg.org/ffmpeg-filters.html#tonemap-1
-                //
-                // See: [Note: Tonemapping HDR to HD]
-                isBT709
-                    ? []
-                    : [
-                          "zscale=transfer=linear",
-                          "tonemap=tonemap=hable:desat=0",
-                          "zscale=primaries=709:transfer=709:matrix=709",
-                      ],
-                // Output using the most widely supported pixel format: 8-bit
-                // YUV planar color space with 4:2:0 chroma subsampling.
-                "format=yuv420p",
-            ]
-                .flat()
-                .join(","),
-        ],
-        // Video codec H.264
-        //
-        // - `-c:v libx264` converts the video stream to use the H.264 codec.
-        //
-        // - We don't supply a bitrate, instead it uses the default CRF ("23")
-        //   as recommended in the ffmpeg trac.
-        //
-        // - We don't supply a preset, it'll use the default ("medium")
-        ["-c:v", "libx264"],
+        reencodeVideo
+            ? [
+                  // `-vf` creates a filter graph for the video stream. It is a
+                  // comma separated list of filters chained together, e.g.
+                  // `filter1=key=value:key=value.filter2=key=value`.
+                  "-vf",
+                  [
+                      rescaleVideo
+                          ? [
+                                // Scales the video to maximum 720p height,
+                                // keeping aspect ratio and the calculated
+                                // dimension divisible by 2 (some of the other
+                                // operations require an even pixel count).
+                                "scale=-2:720",
+                                // Convert the video to a constant 30 fps,
+                                // duplicating or dropping frames as necessary.
+                                "fps=30",
+                            ]
+                          : [],
+                      // Convert the colorspace if the video is not in the HD
+                      // color space (bt709). Before conversion, tone map colors
+                      // so that they work the same across the change in the
+                      // dyamic range.
+                      //
+                      // 1. The tonemap filter only works linear light, so we
+                      //    first use zscale with transfer=linear to linearize
+                      //    the input.
+                      //
+                      // 2. Then we use the tonemap, with the hable option that
+                      //    is best for preserving details. desat=0 turns off
+                      //    the default desaturation.
+                      //
+                      // 3. Use zscale again to "convert to BT.709" by asking it
+                      //    to set the all three of color primaries, transfer
+                      //    characteristics and colorspace matrix to 709 (Note:
+                      //    the constants specified in the tonemap filter help
+                      //    do not include the "bt" prefix)
+                      //
+                      // See: https://ffmpeg.org/ffmpeg-filters.html#tonemap-1
+                      //
+                      // See: [Note: Tonemapping HDR to HD]
+                      isBT709
+                          ? []
+                          : [
+                                "zscale=transfer=linear",
+                                "tonemap=tonemap=hable:desat=0",
+                                "zscale=primaries=709:transfer=709:matrix=709",
+                            ],
+                      // Output using the well supported pixel format: 8-bit YUV
+                      // planar color space with 4:2:0 chroma subsampling.
+                      "format=yuv420p",
+                  ]
+                      .flat()
+                      .join(","),
+              ]
+            : [],
+        reencodeVideo
+            ? // Video codec H.264
+              //
+              // - `-c:v libx264` converts the video stream to the H.264 codec.
+              //
+              // - We don't supply a bitrate, instead it uses the default CRF
+              //   ("23") as recommended in the ffmpeg trac.
+              //
+              // - We don't supply a preset, it'll use the default ("medium").
+              ["-c:v", "libx264"]
+            : // Keep the video stream unchanged
+              ["-c:v", "copy"],
         // Audio codec AAC
         //
         // - `-c:a aac` converts the audio stream to use the AAC codec
@@ -377,6 +442,10 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
  *     Stream #0:0: Video: h264 (High 10) ([27][0][0][0] / 0x001B), yuv420p10le(tv, bt2020nc/bt2020/arib-std-b67), 1920x1080, 30 fps, 30 tbr, 90k tbn
  *
  * The part after Video: is the first capture group.
+ *
+ * Another example:
+ *
+ *     Stream #0:1[0x2](und): Video: h264 (Constrained Baseline) (avc1 / 0x31637661), yuv420p(progressive), 480x270 [SAR 1:1 DAR 16:9], 539 kb/s, 29.97 fps, 29.97 tbr, 30k tbn (default)
  */
 const videoStreamLineRegex = /Stream #.+: Video:(.+)\n/;
 
@@ -384,23 +453,84 @@ const videoStreamLineRegex = /Stream #.+: Video:(.+)\n/;
 const videoStreamLinesRegex = /Stream #.+: Video:(.+)\n/g;
 
 /**
- * A regex that matches <digits>x<digits> pair preceded by a space and followed
- * by a trailing comma. See {@link videoStreamLineRegex} for the context in
- * which it is used.
+ * A regex that matches "<digits> kb/s" preceded by a space. See
+ * {@link videoStreamLineRegex} for the context in which it is used.
  */
-const videoDimensionsRegex = / (\d+)x(\d+),/;
+const videoBitrateRegex = / ([1-9]\d*) kb\/s/;
 
 /**
- * Heuristically determine if the given video uses the BT.709 colorspace.
+ * A regex that matches <digits>x<digits> pair preceded by a space. See
+ * {@link videoStreamLineRegex} for the context in which it is used.
  *
- * This function tries to determine the input colorspace by scanning the ffmpeg
- * info output for the video stream line, and checking if it contains the string
- * "bt709". See: [Note: Parsing CLI output might break on ffmpeg updates].
+ * We constrain the digit sequence not to begin with 0 to exclude hexadecimal
+ * representations of various constants that ffmpeg prints on this line (e.g.
+ * "avc1 / 0x31637661").
  */
-const detectIsBT709 = async (inputFilePath: string) => {
+const videoDimensionsRegex = / ([1-9]\d*)x([1-9]\d*)/;
+
+interface VideoCharacteristics {
+    isH264: boolean;
+    isBT709: boolean;
+    bitrate: number | undefined;
+}
+/**
+ * Heuristically determine information about the video at the given
+ * {@link inputFilePath}:
+ *
+ * - If is encoded using H.264 codec.
+ * - If it uses the BT.709 colorspace.
+ * - Its bitrate.
+ *
+ * The defaults are tailored for the cases in which these conditions are used,
+ * so that even if we get the detection wrong we'll only end up encoding videos
+ * that could've possibly been skipped as an optimization.
+ *
+ * [Note: Parsing CLI output might break on ffmpeg updates]
+ *
+ * This function tries to determine the these bits of information about the
+ * given video by scanning the ffmpeg info output for the video stream line, and
+ * doing various string matches and regex extractions.
+ *
+ * Needless to say, while this works currently, this is liable to break in the
+ * future. So if something stops working after updating ffmpeg, look here!
+ *
+ * Ideally, we'd have done this using `ffprobe`, but we don't have the ffprobe
+ * binary at hand, so we make do by grepping the log output of ffmpeg.
+ *
+ * For reference,
+ *
+ * - codec and colorspace are printed by the `avcodec_string` function in the
+ *   ffmpeg source:
+ *   https://github.com/FFmpeg/FFmpeg/blob/master/libavcodec/avcodec.c
+ *
+ * - bitrate is printed by the `dump_stream_format` function in `dump.c`.
+ */
+const detectVideoCharacteristics = async (inputFilePath: string) => {
     const videoInfo = await pseudoFFProbeVideo(inputFilePath);
-    const videoStreamLine = videoStreamLineRegex.exec(videoInfo)?.at(1);
-    return !!videoStreamLine?.includes("bt709");
+    const videoStreamLine = videoStreamLineRegex.exec(videoInfo)?.at(1)?.trim();
+
+    // Since the checks are heuristic, start with defaults that would cause the
+    // codec conversion to happen, even if it is unnecessary.
+    const res: VideoCharacteristics = {
+        isH264: false,
+        isBT709: false,
+        bitrate: undefined,
+    };
+    if (!videoStreamLine) return res;
+
+    res.isH264 = videoStreamLine.startsWith("h264 ");
+    res.isBT709 = videoStreamLine.includes("bt709");
+    // The regex matches "\d kb/s", but there can be other units for the
+    // bitrate. However, (a) "kb/s" is the most common for videos out in the
+    // wild, and (b) even if we guess wrong it we'll just do "-v:c x264" instead
+    // of "-v:c copy", so only unnecessary processing but no change in output.
+    const brs = videoBitrateRegex.exec(videoStreamLine)?.at(0);
+    if (brs) {
+        const br = parseInt(brs, 10);
+        if (br) res.bitrate = br;
+    }
+
+    return res;
 };
 
 /**
@@ -438,8 +568,8 @@ const detectVideoDimensions = (conversionStderr: string) => {
     if (videoStreamLine) {
         const [, ws, hs] = videoDimensionsRegex.exec(videoStreamLine) ?? [];
         if (ws && hs) {
-            const w = parseInt(ws);
-            const h = parseInt(hs);
+            const w = parseInt(ws, 10);
+            const h = parseInt(hs, 10);
             if (w && h) {
                 return { width: w, height: h };
             }
@@ -451,13 +581,11 @@ const detectVideoDimensions = (conversionStderr: string) => {
 };
 
 /**
- * We don't have the ffprobe binary at hand, so we make do by grepping the log
- * output of ffmpeg.
+ * Return the stderr of ffmpeg in an attempt to gain information about the video
+ * at the given {@link inputFilePath}.
  *
- * > [Note: Parsing CLI output might break on ffmpeg updates]
- * >
- * > Needless to say, while this works currently, this is liable to break in the
- * > future. So if something stops working after updating ffmpeg, look here!
+ * We don't have the ffprobe binary at hand, which is why we need to use this
+ * alternative. See: [Note: Parsing CLI output might break on ffmpeg updates]
  *
  * @returns the stderr of ffmpeg after running it on the input file. The exact
  * command we run is:
