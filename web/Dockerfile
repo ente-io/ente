@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Docs - https://github.com/ente-io/ente/blob/main/web/docs/docker.md
 
 FROM node:22-alpine AS builder

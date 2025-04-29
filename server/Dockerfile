@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM golang:1.23.4-alpine3.21 AS builder
 RUN apk add --no-cache gcc musl-dev git build-base pkgconfig libsodium-dev
 
