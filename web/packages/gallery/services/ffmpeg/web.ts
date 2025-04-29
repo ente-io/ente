@@ -3,6 +3,7 @@ import { newID } from "ente-base/id";
 import log from "ente-base/log";
 import type { FFmpegCommand } from "ente-base/types/ipc";
 import { PromiseQueue } from "ente-utils/promise";
+import z from "zod";
 import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,
@@ -149,6 +150,10 @@ const substitutePlaceholders = (
         })
         .filter((s) => s !== undefined);
 
+const isHDRVideoFFProbeOutput = z.object({
+    streams: z.array(z.object({ color_transfer: z.string().optional() })),
+});
+
 /**
  * A variant of the {@link isHDRVideo} function in the desktop app source (see
  * `ffmpeg.ts`), except here we have access to ffprobe and can use that instead
@@ -163,23 +168,32 @@ const substitutePlaceholders = (
  */
 const isHDRVideo = async (ffmpeg: FFmpeg, inputFilePath: string) => {
     try {
-        const data = await ffprobeOutput(
+        const jsonString = await ffprobeOutput(
             ffmpeg,
             [
                 ["-i", inputFilePath],
+                // Show information about streams.
                 "-show_streams",
+                // Select the first video stream (This is not necessarily
+                // correct in a multi stream file since the highest resolution
+                // stream will be used in the automatic mapping). But this is a
+                // heuristic check anyway.
+                ["-select_streams", "v:1"],
+                // Output JSON
                 ["-of", "json"],
                 ["-o", "output.json"],
             ].flat(),
             "output.json",
         );
 
-        // const videoInfo = await pseudoFFProbeVideo(inputFilePath);
-        // const vs = videoStreamLineRegex.exec(videoInfo)?.at(1);
-        // if (!vs) return false;
-        // return vs.includes("smpte2084") || vs.includes("arib-std-b67");
-        console.log("ffprobe", data);
-        return false;
+        const output = isHDRVideoFFProbeOutput.parse(JSON.parse(jsonString));
+        switch (output.streams[0]?.color_transfer) {
+            case "smpte2084":
+            case "arib-std-b67":
+                return true;
+            default:
+                return false;
+        }
     } catch (e) {
         log.warn(`Could not detect HDR status of ${inputFilePath}`, e);
         return false;
