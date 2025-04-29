@@ -83,12 +83,23 @@ const makeGenThumbnailCommand = (seekTime: number) => [
     ffmpegPathPlaceholder,
     "-i",
     inputPathPlaceholder,
+    // Seek to seekTime in the video.
     "-ss",
     `00:00:0${seekTime}`,
+    // Take the first frame
     "-vframes",
     "1",
+    // Apply a filter to this frame
     "-vf",
-    "scale=-1:720",
+    [
+        // - Scale it to a maximum height of 720 keeping aspect ratio
+        "scale=-1:720",
+        // - Apply a tonemap to ensure that thumbnails of HDR videos do not look
+        //   washed out. See: [Note: Tonemapping HDR to HD].
+        "zscale=transfer=linear",
+        "tonemap=tonemap=hable:desat=0",
+        "zscale=primaries=709:transfer=709:matrix=709",
+    ].join(","),
     outputPathPlaceholder,
 ];
 
