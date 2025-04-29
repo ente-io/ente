@@ -328,7 +328,7 @@ const handleGenerateHLSWrite = async (
 
         if (!result) {
             // This video doesn't require stream generation.
-            return new Response("", { status: 204 });
+            return new Response(null, { status: 204 });
         }
 
         const { playlistPath, videoPath } = result;
