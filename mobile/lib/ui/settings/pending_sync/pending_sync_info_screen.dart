@@ -55,7 +55,7 @@ class _PendingSyncInfoScreenState extends State<PendingSyncInfoScreen> {
       PathInfoStorageItem.name(
         tempDownload,
         "Encrypted Upload (File)",
-        "_file.encrpyted",
+        "_file.encrypted",
         allowCacheClear: false,
       ),
       PathInfoStorageItem.name(
