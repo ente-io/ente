@@ -195,7 +195,8 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     //
     // Reference:
     // - https://trac.ffmpeg.org/wiki/colorspace
-    const { isH264, isBT709 } = await detectVideoCharacteristics(inputFilePath);
+    const { isH264, isBT709, bitrate } =
+        await detectVideoCharacteristics(inputFilePath);
 
     // If the video is smaller than 10 MB, and already H.264 (the codec we are
     // going to use for the conversion), then a streaming variant is not much
@@ -211,8 +212,9 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     //    stream plays, the browser tells us that the "video" itself is
     //    playable, but the user sees a blank screen with only audio.
     //
-    // 2. HEVC + HDR videos taken on an iPhone have a rotation that Chrome (and
-    //    thus Electron) doesn't take into account, so these play upside down.
+    // 2. HEVC + HDR videos taken on an iPhone have a rotation (`Side data:
+    //    displaymatrix` in the ffmpeg output) that Chrome (and thus Electron)
+    //    doesn't take into account, so these play upside down.
     //
     // Not fully related to this case, but mentioning here as to why both the
     // size and codec need to be checked before skipping stream generation.
@@ -220,11 +222,21 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         const inputVideoSize = await fs
             .stat(inputFilePath)
             .then((st) => st.size);
-        if (inputVideoSize < 10 * 1024 * 1024 /* 10 MB */) {
+        if (inputVideoSize <= 10 * 1024 * 1024 /* 10 MB */) {
             // TODO(HLS):
             console.log("Potential skip");
         }
     }
+
+    // If the video is already H.264 / BT.709, and has a bitrate less than 4000
+    // kbps, then we do not need to reencode the video stream (by _far_ the
+    // costliest part of the HLS stream generation).
+    const reencodeVideo = !(
+        isH264 &&
+        isBT709 &&
+        bitrate &&
+        bitrate <= 4000 * 1000
+    );
 
     // We want the generated playlist to refer to the chunks as "output.ts".
     //
@@ -264,8 +276,8 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
 
     // Overview:
     //
-    // - H.264 video HD 720p 30fps.
-    // - AAC audio 128kbps.
+    // - Video H.264 HD 720p 30fps.
+    // - Audio AAC 128kbps.
     // - Encrypted HLS playlist with a single file containing all the chunks.
     //
     // Reference:
@@ -280,65 +292,69 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
         "-i",
         inputFilePath,
         // The remaining options apply to the next output file (`playlistPath`).
-        //
-        // ---
-        //
-        // `-vf` creates a filter graph for the video stream. This is a string
-        // of the form `filter1=key=value:key=value.filter2=key=value`, that is,
-        // a comma separated list of filters chained together.
-        [
-            "-vf",
-            [
-                // Scales the video to maximum 720p height, keeping aspect
-                // ratio, and keeping the calculated dimension divisible by 2
-                // (some of the other operations require an even pixel count).
-                "scale=-2:720",
-                // Convert the video to a constant 30 fps, duplicating or
-                // dropping frames as necessary.
-                "fps=30",
-                // If the video is not in the HD color space (bt709), convert
-                // it. Before conversion, tone map colors so that they work the
-                // same across the change in the dyamic range.
-                //
-                // 1. The tonemap filter only works linear light, so we first
-                //    use zscale with transfer=linear to linearize the input.
-                //
-                // 2. Then we use the tonemap, with the hable option that is
-                //    best for preserving details. desat=0 turns off the default
-                //    desaturation.
-                //
-                // 3. Use zscale again to "convert to BT.709" by asking it to
-                //    set the all three of color primaries, transfer
-                //    characteristics and colorspace matrix to 709 (Note: the
-                //    constants specified in the tonemap filter help do not
-                //    include the "bt" prefix)
-                //
-                // See: https://ffmpeg.org/ffmpeg-filters.html#tonemap-1
-                //
-                // See: [Note: Tonemapping HDR to HD]
-                isBT709
-                    ? []
-                    : [
-                          "zscale=transfer=linear",
-                          "tonemap=tonemap=hable:desat=0",
-                          "zscale=primaries=709:transfer=709:matrix=709",
-                      ],
-                // Output using the most widely supported pixel format: 8-bit
-                // YUV planar color space with 4:2:0 chroma subsampling.
-                "format=yuv420p",
-            ]
-                .flat()
-                .join(","),
-        ],
-        // Video codec H.264
-        //
-        // - `-c:v libx264` converts the video stream to use the H.264 codec.
-        //
-        // - We don't supply a bitrate, instead it uses the default CRF ("23")
-        //   as recommended in the ffmpeg trac.
-        //
-        // - We don't supply a preset, it'll use the default ("medium")
-        ["-c:v", "libx264"],
+        reencodeVideo
+            ? [
+                  // `-vf` creates a filter graph for the video stream. It is a
+                  // comma separated list of filters chained together, e.g.
+                  // `filter1=key=value:key=value.filter2=key=value`.
+                  "-vf",
+                  [
+                      // Scales the video to maximum 720p height, keeping aspect
+                      // ratio and the calculated dimension divisible by 2 (some
+                      // of the other operations require an even pixel count).
+                      "scale=-2:720",
+                      // Convert the video to a constant 30 fps, duplicating or
+                      // dropping frames as necessary.
+                      "fps=30",
+                      // Convert the colorspace if the video is not in the HD
+                      // color space (bt709). Before conversion, tone map colors
+                      // so that they work the same across the change in the
+                      // dyamic range.
+                      //
+                      // 1. The tonemap filter only works linear light, so we
+                      //    first use zscale with transfer=linear to linearize
+                      //    the input.
+                      //
+                      // 2. Then we use the tonemap, with the hable option that
+                      //    is best for preserving details. desat=0 turns off
+                      //    the default desaturation.
+                      //
+                      // 3. Use zscale again to "convert to BT.709" by asking it
+                      //    to set the all three of color primaries, transfer
+                      //    characteristics and colorspace matrix to 709 (Note:
+                      //    the constants specified in the tonemap filter help
+                      //    do not include the "bt" prefix)
+                      //
+                      // See: https://ffmpeg.org/ffmpeg-filters.html#tonemap-1
+                      //
+                      // See: [Note: Tonemapping HDR to HD]
+                      isBT709
+                          ? []
+                          : [
+                                "zscale=transfer=linear",
+                                "tonemap=tonemap=hable:desat=0",
+                                "zscale=primaries=709:transfer=709:matrix=709",
+                            ],
+                      // Output using the well supported pixel format: 8-bit YUV
+                      // planar color space with 4:2:0 chroma subsampling.
+                      "format=yuv420p",
+                  ]
+                      .flat()
+                      .join(","),
+              ]
+            : [],
+        reencodeVideo
+            ? // Video codec H.264
+              //
+              // - `-c:v libx264` converts the video stream to the H.264 codec.
+              //
+              // - We don't supply a bitrate, instead it uses the default CRF
+              //   ("23") as recommended in the ffmpeg trac.
+              //
+              // - We don't supply a preset, it'll use the default ("medium").
+              ["-c:v", "libx264"]
+            : // Keep the video stream unchanged
+              ["-c:v", "copy"],
         // Audio codec AAC
         //
         // - `-c:a aac` converts the audio stream to use the AAC codec
