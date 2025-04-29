@@ -195,7 +195,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     //
     // Reference:
     // - https://trac.ffmpeg.org/wiki/colorspace
-    const isBT709 = await detectIsBT709(inputFilePath);
+    const { isBT709 } = await detectVideoCharacteristics(inputFilePath);
 
     // We want the generated playlist to refer to the chunks as "output.ts".
     //
@@ -418,10 +418,16 @@ const videoDimensionsRegex = / (\d+)x(\d+),/;
  *
  * - bitrate is printed by the `dump_stream_format` function in `dump.c`.
  */
-const detectIsBT709 = async (inputFilePath: string) => {
+const detectVideoCharacteristics = async (inputFilePath: string) => {
     const videoInfo = await pseudoFFProbeVideo(inputFilePath);
-    const videoStreamLine = videoStreamLineRegex.exec(videoInfo)?.at(1);
-    return !!videoStreamLine?.includes("bt709");
+    const videoStreamLine = videoStreamLineRegex.exec(videoInfo)?.at(1)?.trim();
+    // Since the checks are heuristic, start with defaults that would cause the
+    // codec conversion to happen, even if it is unnecessary.
+    const res = { isH264: false, isBT709: false, bitrate: undefined };
+    if (!videoStreamLine) return res;
+    res.isH264 = videoStreamLine.startsWith("h264 ");
+    res.isBT709 = videoStreamLine.includes("bt709");
+    return res;
 };
 
 /**
