@@ -2,7 +2,7 @@ import pathToFfmpeg from "ffmpeg-static";
 import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import path, { basename } from "node:path";
-import type { ZipItem } from "../../types/ipc";
+import type { FFmpegCommand, ZipItem } from "../../types/ipc";
 import log from "../log";
 import { execAsync } from "../utils/electron";
 import {
@@ -44,7 +44,7 @@ const outputPathPlaceholder = "OUTPUT";
  * But I'm not sure if our code is supposed to be able to use it, and how.
  */
 export const ffmpegExec = async (
-    command: string[],
+    command: FFmpegCommand,
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
 ): Promise<Uint8Array> => {
@@ -58,8 +58,17 @@ export const ffmpegExec = async (
     try {
         await writeToTemporaryInputFile();
 
+        let resolvedCommand: string[];
+        if (Array.isArray(command)) {
+            resolvedCommand = command;
+        } else {
+            const isHDR = await isHDRVideo(inputFilePath);
+            log.debug(() => [basename(inputFilePath), { isHDR }]);
+            resolvedCommand = isHDR ? command.hdr : command.default;
+        }
+
         const cmd = substitutePlaceholders(
-            command,
+            resolvedCommand,
             inputFilePath,
             outputFilePath,
         );
@@ -145,10 +154,10 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  *
  * Overview of the cases:
  *
- *     H.264, <= 10 MB             - Skip
- *     H.264, <= 4000 kb/s bitrate - Don't re-encode video stream
- *     <= 2000 kb/s bitrate        - Don't apply the scale+fps filter
- *     !BT.709                     - Apply tonemap (zscale+tonemap+zscale)
+ *     H.264, <= 10 MB              - Skip
+ *     H.264, <= 4000 kb/s bitrate  - Don't re-encode video stream
+ *     BT.709, <= 2000 kb/s bitrate - Don't apply the scale+fps filter
+ *     !BT.709                      - Apply tonemap (zscale+tonemap+zscale)
  *
  * Example invocation:
  *
@@ -174,41 +183,6 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined> => {
-    // [Note: Tonemapping HDR to HD]
-    //
-    // BT.709 ("HD") is a standard that describes things like how color is
-    // encoded, the range of values, and their "meaning" - i.e. how to map the
-    // values in the video to the pixels on the screen.
-    //
-    // It is not the only such standard, there are three common examples:
-    //
-    // - BT.601 ("Standard-Definition" or SD)
-    // - BT.709 ("High-Definition" or HD)
-    // - BT.2020 ("Ultra-High-Definition" or UHD, aka HDR^).
-    //
-    // ^ HDR ("High-Dynamic-Range") is an addendum to BT.2020, but for our
-    //   purpose here we can treat it as as alias.
-    //
-    // BT.709 is the most common amongst these for older files out stored on
-    // computers, and they conform mostly to the standard (one notable exception
-    // is that the BT.709 standard also recommends using the yuv422p pixel
-    // format, but de facto yuv420p is used because many video players only
-    // support yuv420p).
-    //
-    // Since BT.709 is the most widely supported standard, we use it when
-    // generating the HLS playlist so to allow playback across the widest
-    // possible hardware/OS/browser combinations.
-    //
-    // If we convert HDR to HD without naively, then the colors look washed out
-    // compared to the original. To resolve this, we use a ffmpeg filterchain
-    // that uses the tonemap filter.
-    //
-    // However applying this tonemap to videos that are already HD leads to a
-    // brightness drop. So we conditionally apply this filter chain only if the
-    // colorspace is not already BT.709.
-    //
-    // Reference:
-    // - https://trac.ffmpeg.org/wiki/colorspace
     const { isH264, isBT709, bitrate } =
         await detectVideoCharacteristics(inputFilePath);
 
@@ -252,6 +226,46 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     // when generating the video stream. This is not a performance optimization,
     // but more for avoiding making the video size smaller unnecessarily.
     const rescaleVideo = !(bitrate && bitrate <= 2000 * 1000);
+
+    // [Note: Tonemapping HDR to HD]
+    //
+    // BT.709 ("HD") is a standard that describes things like how color is
+    // encoded, the range of values, and their "meaning" - i.e. how to map the
+    // values in the video to the pixels on the screen.
+    //
+    // It is not the only such standard, there are three common examples:
+    //
+    // - BT.601 ("Standard-Definition" or SD)
+    // - BT.709 ("High-Definition" or HD)
+    // - BT.2020 ("Ultra-High-Definition" or UHD, aka HDR^).
+    //
+    // ^ HDR ("High-Dynamic-Range") is an addendum to BT.2020, but for our
+    //   purpose here we can treat it as as alias.
+    //
+    // BT.709 is the most common amongst these for older files out stored on
+    // computers, and they conform mostly to the standard (one notable exception
+    // is that the BT.709 standard also recommends using the yuv422p pixel
+    // format, but de facto yuv420p is used because many video players only
+    // support yuv420p).
+    //
+    // Since BT.709 is the most widely supported standard, we use it when
+    // generating the HLS playlist so to allow playback across the widest
+    // possible hardware/OS/browser combinations.
+    //
+    // If we convert HDR to HD without naively, then the colors look washed out
+    // compared to the original. To resolve this, we use a ffmpeg filterchain
+    // that uses the tonemap filter.
+    //
+    // However applying this tonemap to videos that are already HD leads to a
+    // brightness drop. So we conditionally apply this filter chain only if the
+    // colorspace is not already BT.709.
+    //
+    // See also: [Note: Alternative FFmpeg command for HDR videos], although
+    // that uses a allow-list based check (while here we use deny-list).
+    //
+    // Reference:
+    // - https://trac.ffmpeg.org/wiki/colorspace
+    const tonemap = !isBT709;
 
     // We want the generated playlist to refer to the chunks as "output.ts".
     //
@@ -314,7 +328,16 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
                   // `filter1=key=value:key=value.filter2=key=value`.
                   "-vf",
                   [
-                      rescaleVideo
+                      // Do the rescaling to even number of pixels always if the
+                      // tonemapping is going to be applied subsequently,
+                      // otherwise the tonemapping will fail with "image
+                      // dimensions must be divisible by subsampling factor".
+                      //
+                      // While we add the extra condition here for completeness,
+                      // it won't usually matter since a non-BT.709 video is
+                      // likely using a new codec, and as such would've a high
+                      // enough bitrate to require rescaling anyways.
+                      rescaleVideo || tonemap
                           ? [
                                 // Scales the video to maximum 720p height,
                                 // keeping aspect ratio and the calculated
@@ -348,13 +371,13 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
                       // See: https://ffmpeg.org/ffmpeg-filters.html#tonemap-1
                       //
                       // See: [Note: Tonemapping HDR to HD]
-                      isBT709
-                          ? []
-                          : [
+                      tonemap
+                          ? [
                                 "zscale=transfer=linear",
                                 "tonemap=tonemap=hable:desat=0",
                                 "zscale=primaries=709:transfer=709:matrix=709",
-                            ],
+                            ]
+                          : [],
                       // Output using the well supported pixel format: 8-bit YUV
                       // planar color space with 4:2:0 chroma subsampling.
                       "format=yuv420p",
@@ -578,6 +601,47 @@ const detectVideoDimensions = (conversionStderr: string) => {
     throw new Error(
         `Unable to detect video dimensions from stream line [${videoStreamLine ?? ""}]`,
     );
+};
+
+/**
+ * Heuristically detect if the file at given path is a HDR video.
+ *
+ * This is similar to {@link detectVideoCharacteristics}, and see that
+ * function's documentation for all the caveats. However, this function uses an
+ * allow-list instead, and considers any file with color transfer "smpte2084" or
+ * "arib-std-b67" to be HDR. While this is in some sense a more exact check, it
+ * comes with different caveats:
+ *
+ * - These particular constants are not guaranteed to be correct; these are just
+ *   what I saw on the internet as being used / recommended for detecting HDR.
+ *
+ * - Since we don't have ffprobe, we're not checking the color space value
+ *   itself but a substring of the stream line in the ffmpeg stderr output.
+ *
+ * In particular, we use this more exact check for places where we have less
+ * leeway. e.g. when generating thumbnails, if we apply the tonemapping to any
+ * non-BT.709 file (as the HLS stream generation does), we start getting the
+ * "code 3074: no path between colorspaces" error during the JPEG conversion
+ * (this is not a problem in the H.264 conversion).
+ *
+ * - See: [Note: Alternative FFmpeg command for HDR videos]
+ * - See: [Note: Tonemapping HDR to HD]
+ *
+ * @param inputFilePath The path to a video file on the user's machine.
+ *
+ * @returns `true` if this file is likely a HDR video. Exceptions are treated as
+ * `false` to make this function safe to invoke without breaking the happy path.
+ */
+const isHDRVideo = async (inputFilePath: string) => {
+    try {
+        const videoInfo = await pseudoFFProbeVideo(inputFilePath);
+        const vs = videoStreamLineRegex.exec(videoInfo)?.at(1);
+        if (!vs) return false;
+        return vs.includes("smpte2084") || vs.includes("arib-std-b67");
+    } catch (e) {
+        log.warn(`Could not detect HDR status of ${inputFilePath}`, e);
+        return false;
+    }
 };
 
 /**

@@ -325,6 +325,8 @@ export const processVideoNewUpload = (
     // TODO(HLS):
     if (!isVideoProcessingEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
+
+    const electron = globalThis.electron;
     if (!electron) {
         // Processing very large videos with the current ffmpeg Wasm
         // implementation can cause the app to crash, esp. on mobile devices
