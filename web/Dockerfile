@@ -3,7 +3,7 @@
 FROM node:22-alpine AS builder
 
 WORKDIR /build
-COPY . .
+COPY --link . .
 
 ENV NEXT_PUBLIC_ENTE_ENDPOINT=ENTE_API_ORIGIN_PLACEHOLDER
 ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=ENTE_ALBUMS_ORIGIN_PLACEHOLDER
@@ -21,12 +21,12 @@ FROM nginx
 
 WORKDIR /out
 
-COPY --from=builder /build/apps/photos/out /out/photos
-COPY --from=builder /build/apps/accounts/out /out/accounts
-COPY --from=builder /build/apps/auth/out /out/auth
-COPY --from=builder /build/apps/cast/out /out/cast
+COPY --link --from=builder /build/apps/photos/out /out/photos
+COPY --link --from=builder /build/apps/accounts/out /out/accounts
+COPY --link --from=builder /build/apps/auth/out /out/auth
+COPY --link --from=builder /build/apps/cast/out /out/cast
 
-COPY <<EOF /etc/nginx/conf.d/default.conf
+COPY --link <<EOF /etc/nginx/conf.d/default.conf
 server {
     listen 3000; root /out/photos;
     location / { try_files \$uri \$uri.html /index.html; }
@@ -58,7 +58,7 @@ EXPOSE 3004
 ENV ENTE_API_ORIGIN=http://localhost:8080
 ENV ENTE_ALBUMS_ORIGIN=https://localhost:3002
 
-COPY <<EOF /docker-entrypoint.d/90-replace-ente-env.sh
+COPY --link <<EOF /docker-entrypoint.d/90-replace-ente-env.sh
 find /out -name '*.js' |
     xargs sed -i'' "s#ENTE_API_ORIGIN_PLACEHOLDER#\$ENTE_API_ORIGIN#g"
 find /out/photos -name '*.js' |

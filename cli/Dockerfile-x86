@@ -10,11 +10,11 @@ ENV GOOS=linux
 
 WORKDIR /etc/ente/
 RUN uname -a
-COPY go.mod .
-COPY go.sum .
+COPY --link go.mod .
+COPY --link go.sum .
 RUN go mod download
 
 
-COPY . .
+COPY --link . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
      go build -o ente-cli main.go

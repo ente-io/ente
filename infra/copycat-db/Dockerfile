@@ -22,7 +22,7 @@ RUN apt-get install -y jq
 RUN apt-get install -y unzip
 RUN curl https://rclone.org/install.sh | bash
 
-COPY src /
+COPY --link src /
 
 ENTRYPOINT ["tini", "--"]
 

@@ -5,20 +5,20 @@ ENV GOOS=linux
 
 WORKDIR /etc/ente/
 
-COPY go.mod .
-COPY go.sum .
+COPY --link go.mod .
+COPY --link go.sum .
 RUN go mod download
 
-COPY . .
+COPY --link . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
   go build -o museum cmd/museum/main.go
 
 FROM alpine:3.21
-COPY --from=builder /usr/lib/libsodium.so* /usr/lib
-COPY --from=builder /etc/ente/museum .
-COPY configurations configurations
-COPY migrations migrations
-COPY mail-templates mail-templates
+COPY --link --from=builder /usr/lib/libsodium.so* /usr/lib
+COPY --link --from=builder /etc/ente/museum .
+COPY --link configurations configurations
+COPY --link migrations migrations
+COPY --link mail-templates mail-templates
 
 ARG GIT_COMMIT
 ENV GIT_COMMIT=$GIT_COMMIT
