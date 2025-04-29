@@ -95,7 +95,7 @@ export const toDesktopUploadItem = (
     uploadItem: UploadItem,
 ): DesktopUploadItem => {
     if (uploadItem instanceof File) {
-        log.warn("Invalid combination", { electron, uploadItem });
+        log.info(`Invalid upload item (electron: ${!!electron})`, uploadItem);
         throw new Error(
             "Found a File upload item even though we're running in the desktop app",
         );

@@ -8,7 +8,7 @@
 
 import type { Electron, ElectronMLWorker, ZipItem } from "ente-base/types/ipc";
 import { z } from "zod";
-import type { UploadItem } from "../services/upload";
+import type { DesktopUploadItem } from "../services/upload";
 
 /**
  * Stream the given file or zip entry from the user's local file system.
@@ -188,7 +188,7 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
  *
  * @returns a token that can be used to retrieve the generated HLS playlist, and
  * metadata about the generated video (its byte size and dimensions). See {@link
- * GenerateHLSResult.
+ * GenerateHLSResult}.
  *
  * In case the video is such that it doesn't require a separate stream to be
  * generated (e.g. it is a small video using an already compatible codec), then
@@ -198,7 +198,7 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
  */
 export const initiateGenerateHLS = async (
     _: Electron,
-    video: UploadItem | ReadableStream,
+    video: DesktopUploadItem | ReadableStream,
     objectUploadURL: string,
 ): Promise<GenerateHLSResult | undefined> => {
     const params = new URLSearchParams({ op: "generate-hls", objectUploadURL });
@@ -217,11 +217,6 @@ export const initiateGenerateHLS = async (
             const [zipPath, entryName] = video;
             params.set("zipPath", zipPath);
             params.set("entryName", entryName);
-        } else if (video instanceof File) {
-            // A drag and dropped file, but without a path. This is a browser
-            // specific case which shouldn't happen when we're running in the
-            // desktop app. Bail.
-            throw new Error("Unexpected file without path");
         } else {
             // A File with a path. Use the path.
             params.set("path", video.path);
