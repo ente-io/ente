@@ -384,19 +384,35 @@ const videoStreamLineRegex = /Stream #.+: Video:(.+)\n/;
 const videoStreamLinesRegex = /Stream #.+: Video:(.+)\n/g;
 
 /**
+ * A regex that matches "<digits> kb/s" preceded by a space and followed by a
+ * trailing comma. See {@link videoStreamLineRegex} for the context in which it
+ * is used.
+ */
+const videoBitrateRegex = / (\d+) kb\/s,/;
+
+/**
  * A regex that matches <digits>x<digits> pair preceded by a space and followed
  * by a trailing comma. See {@link videoStreamLineRegex} for the context in
  * which it is used.
  */
 const videoDimensionsRegex = / (\d+)x(\d+),/;
 
+interface VideoCharacteristics {
+    isH264: boolean;
+    isBT709: boolean;
+    bitrate: number | undefined;
+}
 /**
  * Heuristically determine information about the video at the given
  * {@link inputFilePath}:
  *
  * - If is encoded using H.264 codec.
  * - If it uses the BT.709 colorspace.
- * - If its bitrate is less than
+ * - Its bitrate.
+ *
+ * The defaults are tailored for the cases in which these conditions are used,
+ * so that even if we get the detection wrong we'll only end up encoding videos
+ * that could've possibly been skipped as an optimization.
  *
  * [Note: Parsing CLI output might break on ffmpeg updates]
  *
@@ -421,12 +437,28 @@ const videoDimensionsRegex = / (\d+)x(\d+),/;
 const detectVideoCharacteristics = async (inputFilePath: string) => {
     const videoInfo = await pseudoFFProbeVideo(inputFilePath);
     const videoStreamLine = videoStreamLineRegex.exec(videoInfo)?.at(1)?.trim();
+
     // Since the checks are heuristic, start with defaults that would cause the
     // codec conversion to happen, even if it is unnecessary.
-    const res = { isH264: false, isBT709: false, bitrate: undefined };
+    const res: VideoCharacteristics = {
+        isH264: false,
+        isBT709: false,
+        bitrate: undefined,
+    };
     if (!videoStreamLine) return res;
+
     res.isH264 = videoStreamLine.startsWith("h264 ");
     res.isBT709 = videoStreamLine.includes("bt709");
+    // The regex matches "\d kb/s", but there can be other units for the
+    // bitrate. However, (a) "kb/s" is the most common for videos out in the
+    // wild, and (b) even if we guess wrong it we'll just do "-v:c x264" instead
+    // of "-v:c copy", so only unnecessary processing but no change in output.
+    const brs = videoBitrateRegex.exec(videoStreamLine)?.at(0);
+    if (brs) {
+        const br = parseInt(brs, 10);
+        if (br) res.bitrate = br;
+    }
+
     return res;
 };
 
@@ -465,8 +497,8 @@ const detectVideoDimensions = (conversionStderr: string) => {
     if (videoStreamLine) {
         const [, ws, hs] = videoDimensionsRegex.exec(videoStreamLine) ?? [];
         if (ws && hs) {
-            const w = parseInt(ws);
-            const h = parseInt(hs);
+            const w = parseInt(ws, 10);
+            const h = parseInt(hs, 10);
             if (w && h) {
                 return { width: w, height: h };
             }
