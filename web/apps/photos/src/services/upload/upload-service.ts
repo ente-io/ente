@@ -42,7 +42,7 @@ import { addToCollection } from "ente-new/photos/services/collection";
 import { CustomError, handleUploadError } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
-import { type LivePhotoAssets } from "services/upload/uploadManager";
+import { type LivePhotoAssets } from "ente-gallery/services/upload-impl";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {

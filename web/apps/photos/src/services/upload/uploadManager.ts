@@ -5,9 +5,8 @@ import { type CryptoWorker } from "ente-base/crypto/worker";
 import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
-import type { Electron } from "ente-base/types/ipc";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import type { UploadItem } from "ente-gallery/services/upload";
+import { type ClusteredUploadItem, markUploaded } from "ente-gallery/services/upload-impl";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     shouldDisableCFUploadProxy,
@@ -98,10 +97,6 @@ export type UploadItemWithCollection = UploadAsset & {
     collectionID: number;
 };
 
-export interface LivePhotoAssets {
-    image: UploadItem;
-    video: UploadItem;
-}
 
 interface UploadCancelStatus {
     value: boolean;
@@ -774,19 +769,6 @@ const makeUploadItemWithCollectionIDAndName = (
     externalParsedMetadata: f.externalParsedMetadata,
 });
 
-/**
- * An upload item with both parts of a live photo clubbed together.
- *
- * See: [Note: Intermediate file types during upload].
- */
-interface ClusteredUploadItem {
-    localID: number;
-    collectionID: number;
-    fileName: string;
-    isLivePhoto: boolean;
-    uploadItem?: UploadItem;
-    livePhotoAssets?: LivePhotoAssets;
-}
 
 /**
  * The file that we hand off to the uploader. Essentially
@@ -813,52 +795,6 @@ const splitMetadataAndMediaItems = (
         [[], []],
     );
 
-const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
-    if (item.isLivePhoto) {
-        const [p0, p1] = [
-            item.livePhotoAssets.image,
-            item.livePhotoAssets.video,
-        ];
-        if (Array.isArray(p0) && Array.isArray(p1)) {
-            return electron.markUploadedZipItem(p0, p1);
-        } else if (typeof p0 == "string" && typeof p1 == "string") {
-            return electron.markUploadedFile(p0, p1);
-        } else if (
-            p0 &&
-            typeof p0 == "object" &&
-            "path" in p0 &&
-            p1 &&
-            typeof p1 == "object" &&
-            "path" in p1
-        ) {
-            electron.markUploadedFiles([p0.path, p1.path]);
-        } else {
-            throw new Error(
-                "Attempting to mark upload completion of unexpected desktop upload items",
-            );
-        }
-    } else {
-        const p = item.uploadItem!;
-        if (Array.isArray(p)) {
-            electron.markUploadedZipItems([p]);
-        } else if (typeof p == "string") {
-            electron.markUploadedFiles([p]);
-        } else if (p && typeof p == "object" && "path" in p) {
-            electron.markUploadedFiles([p.path]);
-        } else {
-            // We can come here when the user saves an image they've edited, in
-            // which case `item` will be a web File object which won't have a
-            // path. Such a la carte uploads don't mark the file as pending
-            // anyways, so there isn't anything to do also.
-            //
-            // Keeping a log here, though really the upper layers of the code
-            // need to be reworked so that we don't even get here in such cases.
-            log.info(
-                "Ignoring attempt to mark upload completion of (likely edited) item",
-            );
-        }
-    }
-};
 
 /**
  * Go through the given files, combining any sibling image + video assets into a
