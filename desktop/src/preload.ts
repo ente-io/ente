@@ -290,11 +290,13 @@ const pendingUploads = () => ipcRenderer.invoke("pendingUploads");
 const setPendingUploads = (pendingUploads: PendingUploads) =>
     ipcRenderer.invoke("setPendingUploads", pendingUploads);
 
-const markUploadedFiles = (paths: PendingUploads["filePaths"]) =>
-    ipcRenderer.invoke("markUploadedFiles", paths);
+const markUploadedFile = (path: string, associatedPath: string | undefined) =>
+    ipcRenderer.invoke("markUploadedFile", path, associatedPath);
 
-const markUploadedZipItems = (items: PendingUploads["zipItems"]) =>
-    ipcRenderer.invoke("markUploadedZipItems", items);
+const markUploadedZipItem = (
+    item: ZipItem,
+    associatedItem: ZipItem | undefined,
+) => ipcRenderer.invoke("markUploadedZipItem", item, associatedItem);
 
 const clearPendingUploads = () => ipcRenderer.invoke("clearPendingUploads");
 
@@ -411,7 +413,7 @@ contextBridge.exposeInMainWorld("electron", {
     pathOrZipItemSize,
     pendingUploads,
     setPendingUploads,
-    markUploadedFiles,
-    markUploadedZipItems,
+    markUploadedFile,
+    markUploadedZipItem,
     clearPendingUploads,
 });

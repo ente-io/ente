@@ -56,8 +56,8 @@ import {
 import {
     clearPendingUploads,
     listZipItems,
-    markUploadedFiles,
-    markUploadedZipItems,
+    markUploadedFile,
+    markUploadedZipItem,
     pathOrZipItemSize,
     pendingUploads,
     setPendingUploads,
@@ -211,13 +211,15 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle(
-        "markUploadedFiles",
-        (_, paths: PendingUploads["filePaths"]) => markUploadedFiles(paths),
+        "markUploadedFile",
+        (_, path: string, associatedPath: string | undefined) =>
+            markUploadedFile(path, associatedPath),
     );
 
     ipcMain.handle(
-        "markUploadedZipItems",
-        (_, items: PendingUploads["zipItems"]) => markUploadedZipItems(items),
+        "markUploadedZipItem",
+        (_, item: ZipItem, associatedItem: ZipItem | undefined) =>
+            markUploadedZipItem(item, associatedItem),
     );
 
     ipcMain.handle("clearPendingUploads", () => clearPendingUploads());
