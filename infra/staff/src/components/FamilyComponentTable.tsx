@@ -41,7 +41,7 @@ const FamilyTableComponent: React.FC = () => {
                 }
                 const userData = (await response.json()) as UserData; // Typecast to UserData interface
                 const members: FamilyMember[] =
-                    userData.details?.familyData?.members || [];
+                    userData.details?.familyData.members ?? [];
                 setFamilyMembers(members);
             } catch (error) {
                 console.error("Error fetching family data:", error);
