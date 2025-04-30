@@ -19,6 +19,7 @@ COPY --from=builder /etc/ente/museum .
 COPY configurations configurations
 COPY migrations migrations
 COPY mail-templates mail-templates
+COPY templates templates
 
 ARG GIT_COMMIT
 ENV GIT_COMMIT=$GIT_COMMIT
