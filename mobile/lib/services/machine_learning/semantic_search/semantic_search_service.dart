@@ -128,18 +128,7 @@ class SemanticSearchService {
     String query, {
     double? similarityThreshold,
   }) async {
-    bool showThreshold = false;
-    // if the query starts with 0.xxx, the split the query to get score threshold and actual query
-    if (query.startsWith(RegExp(r"0\.\d+"))) {
-      final parts = query.split(" ");
-      if (parts.length > 1) {
-        similarityThreshold = double.parse(parts[0]);
-        query = parts.sublist(1).join(" ");
-        showThreshold = true;
-      }
-    }
     final textEmbedding = await _getTextEmbedding(query);
-
     final similarityResults = await _getSimilarities(
       {query: textEmbedding},
       minimumSimilarityMap: {
@@ -170,24 +159,16 @@ class SemanticSearchService {
     for (final result in queryResults) {
       final file = filesMap[result.id];
       if (file != null && !ignoredCollections.contains(file.collectionID)) {
-        if (showThreshold) {
-          file.debugCaption =
-              "${fileIDToScoreMap[result.id]?.toStringAsFixed(3)}";
-        }
         results.add(file);
       }
-
       if (file == null) {
         deletedEntries.add(result.id);
       }
     }
-
     _logger.info(results.length.toString() + " results");
-
     if (deletedEntries.isNotEmpty) {
       unawaited(mlDataDB.deleteClipEmbeddings(deletedEntries));
     }
-
     return results;
   }
 
