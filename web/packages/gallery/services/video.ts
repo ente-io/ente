@@ -1,8 +1,10 @@
+import { isDesktop } from "ente-base/app";
+import { assertionFailed } from "ente-base/assert";
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
+import { ensureElectron } from "ente-base/electron";
 import { type PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
-import type { Electron } from "ente-base/types/ipc";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
@@ -22,9 +24,9 @@ import {
     putVideoData,
 } from "./file-data";
 import {
-    toDesktopUploadItem,
-    type DesktopUploadItem,
-    type UploadItem,
+    fileSystemUploadItemIfUnchanged,
+    type ProcessableUploadItem,
+    type TimestampedFileSystemUploadItem,
 } from "./upload";
 
 interface VideoProcessingQueueItem {
@@ -34,13 +36,14 @@ interface VideoProcessingQueueItem {
      */
     file: EnteFile;
     /**
-     * The {@link DesktopUploadItem} if available for the newly uploaded
-     * {@link file}.
+     * The {@link TimestampedFileSystemUploadItem} when available for the newly
+     * uploaded {@link file}.
      *
-     * If present, this serves as an optimization allowing us to directly read
-     * the file off the user's filesystem.
+     * It will be present when this queue item was enqueued during a upload from
+     * the current client. If present, this serves as an optimization allowing
+     * us to directly read the file off the user's file system.
      */
-    uploadItem: DesktopUploadItem | undefined;
+    timestampedUploadItem: TimestampedFileSystemUploadItem | undefined;
 }
 
 /**
@@ -314,63 +317,60 @@ const blobToDataURL = (blob: Blob) =>
  * client, allowing us to create its streamable variant without needing to
  * redownload the video.
  *
- * Note that this is an optimization. Even if we don't process the video at this
- * time (e.g. if the video processor can't keep up with the uploads), we will
- * eventually process it later as part of a backfill.
+ * It only does the processing if we're running in the context of the desktop
+ * app as the video processing is resource intensive. In particular, processing
+ * large videos with the Wasm ffmpeg implementation can cause the app to crash,
+ * on mobile devices (see https://github.com/ffmpegwasm/ffmpeg.wasm/issues/851).
+ * In contrast, the desktop app can us the efficient native FFmpeg integration.
+ *
+ * Note that this function is an optimization. Even if we don't process the
+ * video at this time (e.g. if the video processor can't keep up with the
+ * uploads), we will eventually process it later as part of a backfill.
  *
  * @param file The {@link EnteFile} that got uploaded (video or otherwise).
  *
- * @param uploadItem The item that was uploaded. This can be used to get at the
- * contents of the file that got uploaded.
+ * @param processableUploadItem The item that was uploaded. This can be used to
+ * read the contents of the file that got uploaded directly from disk instead of
+ * needing to download it again.
  */
 export const processVideoNewUpload = (
     file: EnteFile,
-    uploadItem: UploadItem,
+    processableUploadItem: ProcessableUploadItem,
 ) => {
     // TODO(HLS):
     if (!isVideoProcessingEnabled()) return;
+    if (!isDesktop) return;
     if (file.metadata.fileType !== FileType.video) return;
-
-    const electron = globalThis.electron;
-    if (!electron) {
-        // Processing very large videos with the current ffmpeg Wasm
-        // implementation can cause the app to crash, esp. on mobile devices
-        // (e.g. https://github.com/ffmpegwasm/ffmpeg.wasm/issues/851).
-        //
-        // So the video processing only happpens in the desktop app, which uses
-        // the much more efficient native FFmpeg integration.
-        return;
-    }
-
-    if (_state.videoProcessingQueue.length > 50) {
-        // Drop new requests if the queue can't keep up to avoid the app running
-        // out of memory by keeping hold of too many (potentially huge) video
-        // blobs. These items will later get processed as part of a backfill.
-        log.info("Will process new video upload later (backlog too big)");
+    if (processableUploadItem instanceof File) {
+        // While the types don't guarantee it, we really shouldn't be getting
+        // here. The only time a processableUploadItem can be File when we're
+        // running in the desktop app is when an edited image copy is being
+        // saved. But we've already checked above that the file which was
+        // uploaded was a video.
+        assertionFailed();
         return;
     }
 
     // Enqueue the item.
     _state.videoProcessingQueue.push({
         file,
-        uploadItem: toDesktopUploadItem(electron, uploadItem),
+        timestampedUploadItem: processableUploadItem,
     });
 
     // Tickle the processor if it isn't already running.
-    _state.queueProcessor ??= processQueue(electron);
+    _state.queueProcessor ??= processQueue();
 };
 
 export const isVideoProcessingEnabled = () =>
     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
 
-const processQueue = async (electron: Electron) => {
-    while (_state.videoProcessingQueue.length) {
+const processQueue = async () => {
+    while (true) {
+        const item = _state.videoProcessingQueue.shift();
+        if (!item) break;
         try {
-            await processQueueItem(
-                _state.videoProcessingQueue.shift()!,
-                electron,
-            );
+            await processQueueItem(item);
         } catch (e) {
             log.error("Video processing failed", e);
             // Ignore this unprocessable item. Currently this function only runs
@@ -403,11 +403,20 @@ const processQueue = async (electron: Electron) => {
  *
  * 3. Both the generated video and the HLS playlist are then uploaded, E2EE.
  */
-const processQueueItem = async (
-    { file, uploadItem }: VideoProcessingQueueItem,
-    electron: Electron,
-) => {
-    log.debug(() => ["gen-hls", { file, uploadItem }]);
+const processQueueItem = async ({
+    file,
+    timestampedUploadItem,
+}: VideoProcessingQueueItem) => {
+    const electron = ensureElectron();
+
+    log.debug(() => ["gen-hls", { file, timestampedUploadItem }]);
+
+    const uploadItem = timestampedUploadItem
+        ? await fileSystemUploadItemIfUnchanged(
+              timestampedUploadItem,
+              electron.fs.statMtime,
+          )
+        : undefined;
 
     const sourceVideo = uploadItem ?? (await downloadManager.fileStream(file));
 

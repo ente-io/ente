@@ -14,6 +14,7 @@ import {
 import type { UploadItem } from "ente-gallery/services/upload";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    type LivePhotoAssets,
     type UploadResult,
 } from "ente-gallery/services/upload";
 import {
@@ -42,7 +43,6 @@ import { addToCollection } from "ente-new/photos/services/collection";
 import { CustomError, handleUploadError } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
-import { type LivePhotoAssets } from "services/upload/uploadManager";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {

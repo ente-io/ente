@@ -299,7 +299,7 @@ export const ffmpegGenerateHLSPlaylistAndSegments = async (
     // Generate a "key info":
     //
     // - the first line specifies the key URI that is written into the playlist.
-    // - the second line specifies the path to the local filesystem file from
+    // - the second line specifies the path to the local file system file from
     //   where ffmpeg should read the key.
     const keyInfo = [keyURI, keyPath].join("\n");
 
