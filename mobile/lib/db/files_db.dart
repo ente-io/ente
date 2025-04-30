@@ -857,6 +857,7 @@ class FilesDB with SqlDbBase {
     return convertToFiles(results);
   }
 
+  // todo:rewrite (upload related)
   Future<Set<String>> getExistingLocalFileIDs(int ownerID) async {
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
@@ -872,6 +873,7 @@ class FilesDB with SqlDbBase {
     return result;
   }
 
+  // todo:rewrite (upload related)
   Future<Set<String>> getLocalIDsMarkedForOrAlreadyUploaded(int ownerID) async {
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
@@ -888,6 +890,7 @@ class FilesDB with SqlDbBase {
     return result;
   }
 
+// todo:rewrite (upload related)
   Future<Set<String>> getLocalFileIDsForCollection(int collectionID) async {
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
@@ -902,6 +905,7 @@ class FilesDB with SqlDbBase {
     return result;
   }
 
+  // todo:rewrite (upload related)
   // Sets the collectionID for the files with given LocalIDs if the
   // corresponding file entries are not already mapped to some other collection
   Future<void> setCollectionIDForUnMappedLocalFiles(
@@ -920,6 +924,7 @@ class FilesDB with SqlDbBase {
     );
   }
 
+  // todo:rewrite (upload related)
   Future<void> markFilesForReUpload(
     int ownerID,
     String localID,
@@ -956,6 +961,7 @@ class FilesDB with SqlDbBase {
     );
   }
 
+  // todo:rewrite cleanup (upload related)
   /*
     This method should only return localIDs which are not uploaded yet
     and can be mapped to incoming remote entry
@@ -1000,6 +1006,7 @@ class FilesDB with SqlDbBase {
     return convertToFiles(rows);
   }
 
+  // todo:rewrite (copy related)
   Future<Map<String, EnteFile>>
       getUserOwnedFilesWithSameHashForGivenListOfFiles(
     List<EnteFile> files,
@@ -1023,6 +1030,7 @@ class FilesDB with SqlDbBase {
     return Map.fromIterable(matchedFiles, key: (e) => e.hash);
   }
 
+// todo:rewrite (upload related)
   Future<List<EnteFile>> getUploadedFilesWithHashes(
     FileHashData hashData,
     FileType fileType,
@@ -1058,6 +1066,7 @@ class FilesDB with SqlDbBase {
     );
   }
 
+  // todo:rewrite (upload related)
   Future<void> updateUploadedFileAcrossCollections(EnteFile file) async {
     final db = await instance.sqliteAsyncDB;
     final parameterSet = _getParameterSetForFile(file, omitCollectionId: true)
@@ -1073,6 +1082,7 @@ class FilesDB with SqlDbBase {
     );
   }
 
+  // todo:rewrite (upload related)
   Future<void> updateLocalIDForUploaded(int uploadedID, String localID) async {
     final db = await instance.sqliteAsyncDB;
     await db.execute(
@@ -1082,6 +1092,7 @@ class FilesDB with SqlDbBase {
     );
   }
 
+  // todo:rewrite (upload related)
   Future<void> deleteByGeneratedID(int genID) async {
     final db = await instance.sqliteAsyncDB;
 
@@ -1167,24 +1178,6 @@ class FilesDB with SqlDbBase {
     }
     final results = await db.getAll(query);
     return convertToFiles(results);
-  }
-
-  Future<int> deleteFilesFromCollection(
-    int collectionID,
-    List<int> uploadedFileIDs,
-  ) async {
-    final db = await instance.sqliteAsyncDB;
-    return db.writeTransaction((tx) async {
-      await tx.execute(
-        '''
-      DELETE FROM $filesTable
-      WHERE $columnCollectionID = ? AND $columnUploadedFileID IN (${uploadedFileIDs.join(', ')});
-    ''',
-        [collectionID],
-      );
-      final res = await tx.get('SELECT changes()');
-      return res['changes()'] as int;
-    });
   }
 
   Future<int> archivedFilesCount(
