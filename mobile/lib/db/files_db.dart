@@ -1422,23 +1422,6 @@ class FilesDB with SqlDbBase {
     return files;
   }
 
-  // For a given userID, return unique uploadedFileId for the given userID
-  Future<List<int>> getUploadIDsWithMissingSize(int userId) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT DISTINCT $columnUploadedFileID FROM $filesTable
-      WHERE $columnOwnerID = ? AND $columnFileSize IS NULL
-    ''',
-      [userId],
-    );
-    final result = <int>[];
-    for (final row in rows) {
-      result.add(row[columnUploadedFileID] as int);
-    }
-    return result;
-  }
-
   Future<List<String>> getLocalFilesBackedUpWithoutLocation(int userId) async {
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
@@ -1456,34 +1439,6 @@ class FilesDB with SqlDbBase {
       result.add(row[columnLocalID] as String);
     }
     return result;
-  }
-
-  // updateSizeForUploadIDs takes a map of upploadedFileID and fileSize and
-  // update the fileSize for the given uploadedFileID
-  Future<void> updateSizeForUploadIDs(
-    Map<int, int> uploadedFileIDToSize,
-  ) async {
-    if (uploadedFileIDToSize.isEmpty) {
-      return;
-    }
-    final db = await instance.sqliteAsyncDB;
-    final parameterSets = <List<Object?>>[];
-
-    for (final uploadedFileID in uploadedFileIDToSize.keys) {
-      parameterSets.add([
-        uploadedFileIDToSize[uploadedFileID],
-        uploadedFileID,
-      ]);
-    }
-
-    await db.executeBatch(
-      '''
-      UPDATE $filesTable
-      SET $columnFileSize = ?
-      WHERE $columnUploadedFileID = ?;
-    ''',
-      parameterSets,
-    );
   }
 
   Future<List<EnteFile>> getAllFilesAfterDate({

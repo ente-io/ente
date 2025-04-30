@@ -7,12 +7,14 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
 import "package:photos/db/device_files_db.dart";
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/remote/table/files_table.dart";
 import 'package:photos/extensions/list.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/backup_status.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/file_magic_service.dart';
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
@@ -53,7 +55,7 @@ class FilesService {
   Future<bool> hasMigratedSizes() async {
     try {
       final List<int> uploadIDsWithMissingSize =
-          await _filesDB.getUploadIDsWithMissingSize(_config.getUserID()!);
+          await remoteDB.fileIDsWithMissingSize(_config.getUserID()!);
       if (uploadIDsWithMissingSize.isEmpty) {
         return Future.value(true);
       }
@@ -69,7 +71,9 @@ class FilesService {
     final batchedFiles = uploadIDsWithMissingSize.chunks(1000);
     for (final batch in batchedFiles) {
       final Map<int, int> uploadIdToSize = await getFilesSizeFromInfo(batch);
-      await _filesDB.updateSizeForUploadIDs(uploadIdToSize);
+      if (uploadIdToSize.isNotEmpty) {
+        await remoteDB.updateSize(uploadIdToSize);
+      }
     }
   }
 
@@ -132,7 +136,7 @@ class FilesService {
     BuildContext context,
   ) async {
     final List<EnteFile> uploadedFiles =
-        files.where((element) => element.uploadedFileID != null).toList();
+        files.where((element) => element.uploadedFileqID != null).toList();
 
     final List<EnteFile> remoteFilesToUpdate = [];
     final Map<int, Map<String, dynamic>> fileIDToUpdateMetadata = {};
