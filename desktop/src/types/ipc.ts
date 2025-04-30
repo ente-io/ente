@@ -32,3 +32,5 @@ export interface PendingUploads {
     filePaths: string[];
     zipItems: ZipItem[];
 }
+
+export type FFmpegCommand = string[] | { default: string[]; hdr: string[] };

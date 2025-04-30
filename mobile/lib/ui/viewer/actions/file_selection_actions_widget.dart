@@ -176,7 +176,7 @@ class _FileSelectionActionsWidgetState
         SelectionActionButton(
           icon: Icons.remove_circle_outline,
           labelText: S.of(context).notPersonLabel(widget.person!.data.name),
-          onTap: anyUploadedFiles ? _onNotpersonClicked : null,
+          onTap: _onNotpersonClicked,
         ),
       );
       if (ownedFilesCount == 1) {
@@ -195,7 +195,7 @@ class _FileSelectionActionsWidgetState
         SelectionActionButton(
           labelText: S.of(context).notThisPerson,
           icon: Icons.remove_circle_outline,
-          onTap: anyUploadedFiles ? _onRemoveFromClusterClicked : null,
+          onTap: _onRemoveFromClusterClicked,
         ),
       );
     }

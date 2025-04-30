@@ -359,7 +359,7 @@ export interface Electron {
      * (specified as {@link outputPathPlaceholder} in {@link command}).
      */
     ffmpegExec: (
-        command: string[],
+        command: FFmpegCommand,
         dataOrPathOrZipItem: Uint8Array | string | ZipItem,
         outputFileExtension: string,
     ) => Promise<Uint8Array>;
@@ -740,3 +740,15 @@ export interface PendingUploads {
      */
     zipItems: ZipItem[];
 }
+
+/**
+ * A command that we can ask FFmpeg to run for us.
+ *
+ * [Note: Alternative FFmpeg command for HDR videos]
+ *
+ * Usually, this is a single command (specified as an array of strings
+ * containing the "words" of the command). However, we can also provide two
+ * alternative commands - one to run when the input is (heuristically) detected
+ * as a HDR video, and one otherwise.
+ */
+export type FFmpegCommand = string[] | { default: string[]; hdr: string[] };

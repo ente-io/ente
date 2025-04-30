@@ -21,7 +21,11 @@ import {
     getFilePreviewDataUploadURL,
     putVideoData,
 } from "./file-data";
-import type { UploadItem } from "./upload";
+import {
+    toDesktopUploadItem,
+    type DesktopUploadItem,
+    type UploadItem,
+} from "./upload";
 
 interface VideoProcessingQueueItem {
     /**
@@ -30,12 +34,13 @@ interface VideoProcessingQueueItem {
      */
     file: EnteFile;
     /**
-     * The {@link UploadItem} if available for the newly uploaded {@link file}.
+     * The {@link DesktopUploadItem} if available for the newly uploaded
+     * {@link file}.
      *
      * If present, this serves as an optimization allowing us to directly read
      * the file off the user's filesystem.
      */
-    uploadItem: UploadItem | undefined;
+    uploadItem: DesktopUploadItem | undefined;
 }
 
 /**
@@ -325,13 +330,15 @@ export const processVideoNewUpload = (
     // TODO(HLS):
     if (!isVideoProcessingEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
+
+    const electron = globalThis.electron;
     if (!electron) {
         // Processing very large videos with the current ffmpeg Wasm
         // implementation can cause the app to crash, esp. on mobile devices
         // (e.g. https://github.com/ffmpegwasm/ffmpeg.wasm/issues/851).
         //
         // So the video processing only happpens in the desktop app, which uses
-        // the much more efficient native ffmpeg integration.
+        // the much more efficient native FFmpeg integration.
         return;
     }
 
@@ -344,7 +351,10 @@ export const processVideoNewUpload = (
     }
 
     // Enqueue the item.
-    _state.videoProcessingQueue.push({ file, uploadItem });
+    _state.videoProcessingQueue.push({
+        file,
+        uploadItem: toDesktopUploadItem(electron, uploadItem),
+    });
 
     // Tickle the processor if it isn't already running.
     _state.queueProcessor ??= processQueue(electron);
@@ -420,12 +430,18 @@ const processQueueItem = async (
 
     log.info(`Generate HLS for ${fileLogID(file)} | start`);
 
-    const { playlistToken, dimensions, videoSize } = await initiateGenerateHLS(
+    const res = await initiateGenerateHLS(
         electron,
         sourceVideo!,
         objectUploadURL,
     );
 
+    if (!res) {
+        log.info(`Generate HLS for ${fileLogID(file)} | not-required`);
+        return;
+    }
+
+    const { playlistToken, dimensions, videoSize } = res;
     try {
         const playlist = await readVideoStream(electron, playlistToken).then(
             (res) => res.text(),
