@@ -373,9 +373,11 @@ export const isVideoProcessingEnabled = () =>
     settingsSnapshot().isInternalUser;
 
 const processQueue = async () => {
-    while (_state.videoProcessingQueue.length) {
+    while (true) {
+        const item = _state.videoProcessingQueue.shift();
+        if (!item) break;
         try {
-            await processQueueItem(_state.videoProcessingQueue.shift()!);
+            await processQueueItem(item);
         } catch (e) {
             log.error("Video processing failed", e);
             // Ignore this unprocessable item. Currently this function only runs
