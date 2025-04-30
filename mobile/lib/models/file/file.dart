@@ -461,6 +461,8 @@ class EnteFile {
     PubMagicMetadata? pubMagicMetadata,
   }) {
     return EnteFile()
+      ..asset = asset
+      ..remoteAsset = remoteAsset
       ..generatedID = generatedID ?? this.generatedID
       ..uploadedFileID = uploadedFileID ?? this.uploadedFileID
       ..ownerID = ownerID ?? this.ownerID

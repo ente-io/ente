@@ -61,12 +61,9 @@ extension CollectionFileRead on RemoteDB {
     bool sortInAsc = false,
   }) async {
     if (fileID != null) {
-      final row = await sqliteDB.getOptional(
-        "SELECT * FROM collection_files WHERE collection_id = ? AND file_id = ?",
-        [collectionID, fileID],
-      );
-      if (row != null) {
-        return CollectionFileEntry.fromMap(row);
+      final entry = await getCollectionFileEntry(collectionID, fileID);
+      if (entry != null) {
+        return entry;
       }
     }
     final sortedRow = await sqliteDB.getOptional(
@@ -77,6 +74,20 @@ extension CollectionFileRead on RemoteDB {
       return CollectionFileEntry.fromMap(sortedRow);
     }
 
+    return null;
+  }
+
+  Future<CollectionFileEntry?> getCollectionFileEntry(
+    int collectionID,
+    int fileID,
+  ) async {
+    final row = await sqliteDB.getOptional(
+      "SELECT * FROM collection_files WHERE collection_id = ? AND file_id = ?",
+      [collectionID, fileID],
+    );
+    if (row != null) {
+      return CollectionFileEntry.fromMap(row);
+    }
     return null;
   }
 }

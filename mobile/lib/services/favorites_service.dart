@@ -6,12 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/remote/read/collection_files.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import "package:photos/events/favorites_service_init_complete_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -21,7 +23,6 @@ class FavoritesService {
 
   late CollectionsService _collectionsService;
   late CollectionActions _collectionActions;
-  late FilesDB _filesDB;
   int? _cachedFavoritesCollectionID;
   final Set<int> _cachedFavUploadedIDs = {};
   final Map<String, int> _cachedFavFileHases = {};
@@ -34,7 +35,6 @@ class FavoritesService {
     _config = Configuration.instance;
     _collectionsService = CollectionsService.instance;
     _collectionActions = CollectionActions(_collectionsService);
-    _filesDB = FilesDB.instance;
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       if (event.collectionID != null &&
@@ -110,10 +110,11 @@ class FavoritesService {
     if (file.ownerID != _config.getUserID() && file.hash != null) {
       return _cachedFavFileHases.containsKey(file.hash!);
     }
-    return _filesDB.doesFileExistInCollection(
+    final entry = await remoteDB.getCollectionFileEntry(
       file.uploadedFileID!,
       collection.id,
     );
+    return entry != null;
   }
 
   void _updateFavoriteFilesCache(
@@ -199,18 +200,18 @@ class FavoritesService {
       // move file from the fav collection to the .
       if (file.ownerID != _config.getUserID() &&
           _cachedFavFileHases.containsKey(file.hash!)) {
-        final EnteFile? favFile = await FilesDB.instance.getUploadedFile(
-          _cachedFavFileHases[file.hash!]!,
+        final EnteFile? favFile = await remoteCache.getCollectionFile(
           favCollection!.id,
+          _cachedFavFileHases[file.hash!]!,
         );
         if (favFile != null) {
           file = favFile;
         }
       }
       if (file.collectionID != favCollection!.id) {
-        final EnteFile? favFile = await FilesDB.instance.getUploadedFile(
-          file.uploadedFileID!,
+        final EnteFile? favFile = await remoteCache.getCollectionFile(
           favCollection.id,
+          file.uploadedFileID!,
         );
         if (favFile != null) {
           file = favFile;

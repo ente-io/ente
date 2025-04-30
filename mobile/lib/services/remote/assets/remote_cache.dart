@@ -64,4 +64,17 @@ class RemoteCache {
     }
     return EnteFile.fromRemoteAsset(asset, cf);
   }
+
+  Future<EnteFile?> getCollectionFile(int collectionID, int fileID) async {
+    final cf = await remoteDB.getCollectionFileEntry(collectionID, fileID);
+    final _ = isLoaded ?? await _load();
+    if (cf == null) {
+      return null;
+    }
+    final asset = remoteAssets[cf.fileID];
+    if (asset == null) {
+      return null;
+    }
+    return EnteFile.fromRemoteAsset(asset, cf);
+  }
 }

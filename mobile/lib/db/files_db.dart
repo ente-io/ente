@@ -544,21 +544,6 @@ class FilesDB with SqlDbBase {
     return convertToFiles(results)[0];
   }
 
-  Future<EnteFile?> getUploadedFile(int uploadedID, int collectionID) async {
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnUploadedFileID = ? AND $columnCollectionID = ?',
-      [
-        uploadedID,
-        collectionID,
-      ],
-    );
-    if (results.isEmpty) {
-      return null;
-    }
-    return convertToFiles(results)[0];
-  }
-
   Future<EnteFile?> getAnyUploadedFile(int uploadedID) async {
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
@@ -1352,19 +1337,6 @@ class FilesDB with SqlDbBase {
       AND ($columnLatitude IS NULL OR $columnLongitude IS NULL OR $columnLongitude = 0.0 or $columnLongitude = 0.0);
     ''',
     );
-  }
-
-  Future<bool> doesFileExistInCollection(
-    int uploadedFileID,
-    int collectionID,
-  ) async {
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnUploadedFileID = ? AND '
-      '$columnCollectionID = ? LIMIT 1',
-      [uploadedFileID, collectionID],
-    );
-    return rows.isNotEmpty;
   }
 
   Future<Map<int, EnteFile>> getFileIDToFileFromIDs(List<int> ids) async {
