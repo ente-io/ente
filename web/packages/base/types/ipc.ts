@@ -278,6 +278,12 @@ export interface Electron {
         isDir: (dirPath: string) => Promise<boolean>;
 
         /**
+         * Return the last modified time (integral epoch milliseconds) of the
+         * file system entry at {@link path}.
+         */
+        statMtime: (path: string) => Promise<number>;
+
+        /**
          * Return the paths of all the files under the given folder.
          *
          * This function walks the directory tree starting at {@link folderPath}

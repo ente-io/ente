@@ -142,6 +142,7 @@ export const markUploadedFile = (
     const existing = uploadStatusStore.get("filePaths") ?? [];
     const updated = existing.filter((p) => p != path && p != associatedPath);
     uploadStatusStore.set("filePaths", updated);
+    // See: [Note: Integral last modified time]
     return fs.stat(path).then((st) => st.mtime.getTime());
 };
 

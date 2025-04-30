@@ -1,6 +1,6 @@
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
-import type { ZipItem } from "ente-base/types/ipc";
+import type { Electron, ZipItem } from "ente-base/types/ipc";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
@@ -214,6 +214,57 @@ export const markUploadedAndObtainProcessableItem = async (
         } else {
             return p;
         }
+    }
+};
+
+/**
+ * Convert an {@link TimestampedFileSystemUploadItem} item back into a
+ * {@link FileSystemUploadItem} if the underlying file hasn't changed.
+ *
+ * While this functionality is not directly related to upload, this function is
+ * kept here since it is in some sense the inverse of
+ * {@link markUploadedAndObtainProcessableItem}.
+ *
+ * @param electron The {@link Electron} instance to use for IPC.
+ *
+ * @param item A {@link TimestampedFileSystemUploadItem}
+ *
+ * @returns If the last modified time of the file system file pointed to by the
+ * given {@link item} is the same as what is recorded within
+ * the structure, then return then wrapped {@link FileSystemUploadItem},
+ * otherwise return `undefined`.
+ *
+ * In case of any errors, also return `undefined`. This is because errors are
+ * expected if the underlying file system file was, e.g. renamed or removed
+ * between the time the file was uploaded and we got around to processing it.
+ */
+export const fileSystemUploadItemIfUnchanged = async (
+    electron: Electron,
+    { fsUploadItem, lastModifiedMs }: TimestampedFileSystemUploadItem,
+): Promise<FileSystemUploadItem | undefined> => {
+    let path: string;
+    if (typeof fsUploadItem == "string") {
+        path = fsUploadItem;
+    } else if (Array.isArray(fsUploadItem)) {
+        // The last modified time we recorded was of the zip file that contains
+        // the entry.
+        path = fsUploadItem[0];
+    } else {
+        path = fsUploadItem.path;
+    }
+
+    try {
+        const mtimeMs = await electron.fs.statMtime(path);
+        if (mtimeMs != lastModifiedMs) {
+            log.info(
+                `Not using upload item for path '${path}' since modified times have changed`,
+            );
+            return undefined;
+        }
+        return fsUploadItem;
+    } catch (e) {
+        log.warn(`Could not determine modified time for path '${path}'`, e);
+        return undefined;
     }
 };
 

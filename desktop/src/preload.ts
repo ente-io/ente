@@ -184,6 +184,8 @@ const fsWriteFileViaBackup = (path: string, contents: string) =>
 
 const fsIsDir = (dirPath: string) => ipcRenderer.invoke("fsIsDir", dirPath);
 
+const fsStatMtime = (path: string) => ipcRenderer.invoke("fsStatMtime", path);
+
 // - Conversion
 
 const convertToJPEG = (imageData: Uint8Array) =>
@@ -379,6 +381,7 @@ contextBridge.exposeInMainWorld("electron", {
         writeFile: fsWriteFile,
         writeFileViaBackup: fsWriteFileViaBackup,
         isDir: fsIsDir,
+        statMtime: fsStatMtime,
         findFiles: fsFindFiles,
     },
 

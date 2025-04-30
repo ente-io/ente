@@ -42,6 +42,7 @@ import {
     fsRm,
     fsRmdir,
     fsWriteFile,
+    fsStatMtime,
     fsWriteFileViaBackup,
 } from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
@@ -163,6 +164,8 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
+
+    ipcMain.handle("fsStatMtime", (_, path: string) => fsStatMtime(path));
 
     ipcMain.handle("fsFindFiles", (_, folderPath: string) =>
         fsFindFiles(folderPath),
