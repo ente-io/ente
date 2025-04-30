@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/remote/read/collection_files.dart";
+import "package:photos/db/remote/table/collection_files.dart";
 import "package:photos/events/pause_video_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';

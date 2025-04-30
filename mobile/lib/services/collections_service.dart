@@ -18,7 +18,7 @@ import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/remote/db.dart";
-import "package:photos/db/remote/read/collection_files.dart";
+import "package:photos/db/remote/table/collection_files.dart";
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';

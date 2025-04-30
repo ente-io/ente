@@ -1,4 +1,4 @@
-import "package:photos/db/remote/read/collection_files.dart";
+import "package:photos/db/remote/table/collection_files.dart";
 import "package:photos/db/remote/schema.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";

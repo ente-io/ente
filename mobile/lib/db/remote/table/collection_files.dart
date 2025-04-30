@@ -2,7 +2,7 @@ import "package:photos/db/remote/db.dart";
 import "package:photos/db/remote/schema.dart";
 import "package:photos/models/file/remote/file_entry.dart";
 
-extension CollectionFileRead on RemoteDB {
+extension CollectionFiles on RemoteDB {
   Future<int> getCollectionFileCount(int collectionID) async {
     final row = await sqliteDB.get(
       "SELECT COUNT(*) as count FROM collection_files WHERE collection_id = ?",

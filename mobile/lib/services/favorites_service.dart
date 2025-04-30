@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
-import "package:photos/db/remote/read/collection_files.dart";
+import "package:photos/db/remote/table/collection_files.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import "package:photos/events/favorites_service_init_complete_event.dart";
 import 'package:photos/events/files_updated_event.dart';
