@@ -314,6 +314,9 @@ const blobToDataURL = (blob: Blob) =>
  * client, allowing us to create its streamable variant without needing to
  * redownload the video.
  *
+ * It only does the processing if we're running in the context of the desktop
+ * app as the video processing is resource intensive.
+ *
  * Note that this is an optimization. Even if we don't process the video at this
  * time (e.g. if the video processor can't keep up with the uploads), we will
  * eventually process it later as part of a backfill.

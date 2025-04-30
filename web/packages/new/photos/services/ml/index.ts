@@ -10,7 +10,10 @@ import log from "ente-base/log";
 import { masterKeyFromSession } from "ente-base/session";
 import type { Electron } from "ente-base/types/ipc";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import type { UploadItem } from "ente-gallery/services/upload";
+import {
+    toDesktopUploadItem,
+    type UploadItem,
+} from "ente-gallery/services/upload";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { throttled } from "ente-utils/promise";
@@ -424,7 +427,8 @@ const workerDidUnawaitedIndex = () => void debounceUpdateClustersAndPeople();
 /**
  * Run indexing on a file which was uploaded from this client.
  *
- * Indexing only happens if ML is enabled.
+ * Indexing only happens if ML is enabled and we're running in the desktop app
+ * as it is resource intensive.
  *
  * This function is called by the uploader when it uploads a new file from this
  * client, giving us the opportunity to index it live. This is only an
@@ -440,9 +444,14 @@ const workerDidUnawaitedIndex = () => void debounceUpdateClustersAndPeople();
  */
 export const indexNewUpload = (file: EnteFile, uploadItem: UploadItem) => {
     if (!isMLEnabled()) return;
+
+    const electron = globalThis.electron;
+    if (!electron) return;
+
+    const desktopUploadItem = toDesktopUploadItem(electron, uploadItem);
     if (file.metadata.fileType !== FileType.image) return;
-    log.debug(() => ["ml/liveq", { file, uploadItem }]);
-    void worker().then((w) => w.onUpload(file, uploadItem));
+    log.debug(() => ["ml/liveq", { file, uploadItem: desktopUploadItem }]);
+    void worker().then((w) => w.onUpload(file, desktopUploadItem));
 };
 
 export type MLStatus =

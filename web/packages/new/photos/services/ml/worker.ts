@@ -6,7 +6,7 @@ import log from "ente-base/log";
 import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
 import type { ElectronMLWorker } from "ente-base/types/ipc";
 import { isNetworkDownloadError } from "ente-gallery/services/download";
-import type { UploadItem } from "ente-gallery/services/upload";
+import type { DesktopUploadItem } from "ente-gallery/services/upload";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { wait } from "ente-utils/promise";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
@@ -66,8 +66,13 @@ const idleDurationMax = 16 * 60; /* 16 minutes */
 interface IndexableItem {
     /** The {@link EnteFile} to (potentially) index. */
     file: EnteFile;
-    /** If the file was uploaded from the current client, then its contents. */
-    uploadItem: UploadItem | undefined;
+    /**
+     * If the file was uploaded from the current client, then its contents.
+     *
+     * Since indexing only happens in the desktop app, this is the more specific
+     * type {@link DesktopUploadItem}.
+     */
+    uploadItem: DesktopUploadItem | undefined;
     /** The existing ML data on remote corresponding to this file. */
     remoteMLData: RemoteMLData | undefined;
 }
@@ -177,7 +182,7 @@ export class MLWorker {
      * representation of the file's contents with us and won't need to download
      * the file from remote.
      */
-    onUpload(file: EnteFile, uploadItem: UploadItem) {
+    onUpload(file: EnteFile, uploadItem: DesktopUploadItem) {
         // Add the recently uploaded file to the live indexing queue.
         //
         // Limit the queue to some maximum so that we don't keep growing

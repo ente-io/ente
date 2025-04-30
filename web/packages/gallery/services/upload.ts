@@ -76,6 +76,10 @@ export interface FileAndPath {
 /**
  * The of cases of {@link UploadItem} that apply when we're running in the
  * context of our desktop app.
+ *
+ * If we know that we're running in the context of the desktop app then
+ * {@link toDesktopUploadItem} can be used to convert from an
+ * {@link UploadItem}.
  */
 export type DesktopUploadItem = Exclude<UploadItem, File>;
 

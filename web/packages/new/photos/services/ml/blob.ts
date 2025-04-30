@@ -2,7 +2,7 @@ import { basename } from "ente-base/file-name";
 import type { ElectronMLWorker } from "ente-base/types/ipc";
 import { renderableImageBlob } from "ente-gallery/services/convert";
 import { downloadManager } from "ente-gallery/services/download";
-import type { UploadItem } from "ente-gallery/services/upload";
+import type { DesktopUploadItem } from "ente-gallery/services/upload";
 import { readStream } from "ente-gallery/utils/native-stream";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
@@ -68,8 +68,8 @@ export const createImageBitmapAndData = async (
  * @param file The {@link EnteFile} to index.
  *
  * @param uploadItem If we're called during the upload process, then this will
- * be set to the {@link UploadItem} that was uploaded. This way, we can directly
- * use the on-disk file instead of needing to download the original from remote.
+ * be set to the {@link DesktopUploadItem} that was uploaded so that we can
+ * directly use the on-disk file instead of needing to download the original.
  *
  * @param electron The {@link ElectronMLWorker} instance that stands as a
  * witness that we're actually running in our desktop app (and thus can safely
@@ -77,7 +77,7 @@ export const createImageBitmapAndData = async (
  */
 export const fetchRenderableBlob = async (
     file: EnteFile,
-    uploadItem: UploadItem | undefined,
+    uploadItem: DesktopUploadItem | undefined,
     electron: ElectronMLWorker,
 ): Promise<Blob> =>
     uploadItem
@@ -86,7 +86,7 @@ export const fetchRenderableBlob = async (
 
 const fetchRenderableUploadItemBlob = async (
     file: EnteFile,
-    uploadItem: UploadItem,
+    uploadItem: DesktopUploadItem,
     electron: ElectronMLWorker,
 ) => {
     const fileType = file.metadata.fileType;
@@ -104,14 +104,15 @@ const fetchRenderableUploadItemBlob = async (
  *
  * See: [Note: Reading a UploadItem]
  *
- * @param uploadItem An {@link UploadItem} which we are trying to index. The
- * code calling us guarantees that this function will not be called for videos.
+ * @param uploadItem An {@link DesktopUploadItem} which we are trying to index.
+ * The code calling us guarantees that this function will not be called for
+ * videos.
  *
  * @returns a web {@link File} that can be used to access the upload item's
  * contents.
  */
 const readNonVideoUploadItem = async (
-    uploadItem: UploadItem,
+    uploadItem: DesktopUploadItem,
     electron: ElectronMLWorker,
 ): Promise<File> => {
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
@@ -126,11 +127,7 @@ const readNonVideoUploadItem = async (
             lastModified: lastModifiedMs,
         });
     } else {
-        if (uploadItem instanceof File) {
-            return uploadItem;
-        } else {
-            return uploadItem.file;
-        }
+        return uploadItem.file;
     }
 };
 

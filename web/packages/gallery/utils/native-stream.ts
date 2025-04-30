@@ -170,7 +170,7 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
  *
  * This is a variant of {@link writeStream} tailored for the HLS generation. It
  * is similar to {@link initiateConvertToMP4}, but also supports streaming
- * {@link UploadItem}s and {@link ReadableStream}s.
+ * {@link DesktopUploadItem}s and {@link ReadableStream}s.
  *
  * @param _ An {@link Electron} instance, witness to the fact that we're running
  * in the context of the desktop app. It is otherwise not used.
@@ -178,8 +178,8 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
  * @param video The video to convert.
  *
  * - If we're called during the upload process, then this will be set to the
- *   {@link UploadItem} that was uploaded. This way, we can directly use the
- *   on-disk file instead of needing to download the original from remote.
+ *   {@link DesktopUploadItem} that was uploaded. This way, we can directly use
+ *   the on-disk file instead of needing to download the original from remote.
  *
  * - Otherwise it should be a {@link ReadableStream} of the video contents.
  *
@@ -207,7 +207,7 @@ export const initiateGenerateHLS = async (
     if (video instanceof ReadableStream) {
         body = video;
     } else {
-        // video is an UploadItem
+        // video is a DesktopUploadItem
         body = null;
         if (typeof video == "string") {
             // Path to a regular file on the user's filesystem.
