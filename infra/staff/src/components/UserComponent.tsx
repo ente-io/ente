@@ -19,17 +19,7 @@ import Disable2FA from "./Disable2FA";
 import DisablePasskeys from "./DisablePasskeys";
 import ToggleEmailMFA from "./ToggleEmailMFA";
 import UpdateSubscription from "./UpdateSubscription";
-
-export interface UserData {
-    User: Record<string, string>;
-    Storage: Record<string, string>;
-    Subscription: Record<string, string>;
-    Security: Record<string, string>;
-}
-
-interface UserComponentProps {
-    userData: UserData | null;
-}
+import type { UserComponentProps } from "../types";
 
 const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     const [deleteAccountOpen, setDeleteAccountOpen] = React.useState(false);
@@ -44,10 +34,10 @@ const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     const [disablePasskeysOpen, setDisablePasskeysOpen] = React.useState(false);
 
     React.useEffect(() => {
-        setTwoFactorEnabled(userData?.Security["Two factor 2FA"] === "Enabled");
-        setEmail2FAEnabled(userData?.Security["Email MFA"] === "Enabled");
+        setTwoFactorEnabled(userData?.security["Two factor 2FA"] === "Enabled");
+        setEmail2FAEnabled(userData?.security["Email MFA"] === "Enabled");
         setCanDisableEmailMFA(
-            userData?.Security["Can Disable EmailMFA"] === "Yes",
+            userData?.security["Can Disable EmailMFA"] === "Yes",
         );
     }, [userData]);
 
