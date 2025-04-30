@@ -13,13 +13,13 @@ import TableContainer from "@mui/material/TableContainer";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
+import type { UserComponentProps } from "../types";
 import ChangeEmail from "./ChangeEmail";
 import DeleteAccount from "./DeleteAccont";
 import Disable2FA from "./Disable2FA";
 import DisablePasskeys from "./DisablePasskeys";
 import ToggleEmailMFA from "./ToggleEmailMFA";
 import UpdateSubscription from "./UpdateSubscription";
-import type { UserComponentProps } from "../types";
 
 const UserComponent: React.FC<UserComponentProps> = ({ userData }) => {
     const [deleteAccountOpen, setDeleteAccountOpen] = React.useState(false);

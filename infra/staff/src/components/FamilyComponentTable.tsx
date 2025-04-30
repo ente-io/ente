@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { getEmail, getToken } from "../App";
 import { apiOrigin } from "../services/support";
 import type { FamilyMember, UserData } from "../types";
-import { formatUsageToGB } from "../utils/strings";
+import { formatUsageToGB } from "../utils/";
 import CloseFamily from "./CloseFamily";
 
 const FamilyTableComponent: React.FC = () => {
