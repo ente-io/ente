@@ -112,6 +112,9 @@ const FamilyTableComponent: React.FC = () => {
                     <TableHead>
                         <TableRow>
                             <TableCell>
+                                <b>ID</b>
+                            </TableCell>
+                            <TableCell>
                                 <b>User</b>
                             </TableCell>
                             <TableCell>
@@ -121,13 +124,14 @@ const FamilyTableComponent: React.FC = () => {
                                 <b>Usage</b>
                             </TableCell>
                             <TableCell>
-                                <b>ID</b>
+                                <b>Quota</b>
                             </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {familyMembers.map((member) => (
                             <TableRow key={member.id}>
+                                <TableCell>{member.id}</TableCell>
                                 <TableCell>{member.email}</TableCell>
                                 <TableCell>
                                     <span
@@ -152,7 +156,9 @@ const FamilyTableComponent: React.FC = () => {
                                 <TableCell>
                                     {formatUsageToGB(member.usage)}
                                 </TableCell>
-                                <TableCell>{member.id}</TableCell>
+                                <TableCell>
+                                    {member.status !== 'SELF' ? formatUsageToGB(member.storageLimit) : ''}
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
