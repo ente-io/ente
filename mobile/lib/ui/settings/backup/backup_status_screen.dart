@@ -103,9 +103,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
       ...items.where(
         (element) => element.status != BackupItemStatus.uploaded,
       ),
-      ...items.where(
-        (element) => element.status == BackupItemStatus.uploaded,
-      ),
+      ...?result,
     ];
 
     return Scaffold(
