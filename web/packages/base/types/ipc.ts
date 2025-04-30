@@ -531,7 +531,7 @@ export interface Electron {
      * - Typically, this would be called at the start of an upload.
      *
      * - Thereafter, as each item gets uploaded one by one, we'd call
-     *   {@link markUploadedFiles} or {@link markUploadedZipItems}.
+     *   {@link markUploadedFile} or {@link markUploadedZipItem}.
      *
      * - Finally, once the upload completes (or gets cancelled), we'd call
      *   {@link clearPendingUploads} to complete the circle.
@@ -539,15 +539,41 @@ export interface Electron {
     setPendingUploads: (pendingUploads: PendingUploads) => Promise<void>;
 
     /**
-     * Mark the given files (given by their {@link paths}) as having been
+     * Mark the given files (specified by their disk paths) as having been
      * uploaded.
+     *
+     * @param {@link path} The path to the file system file which was uploaded.
+     *
+     * @param {@link associatedPath} The path file (if any) of the file
+     * associated with the file which was uploaded. This will be present only in
+     * the case of live photos, where this will be set to the path of the video
+     * component of the live photo on disk.
+     *
+     * @returns The last modified time (epoch milliseconds) of the file at
+     * {@link path}.
      */
-    markUploadedFiles: (paths: PendingUploads["filePaths"]) => Promise<void>;
+    markUploadedFile: (
+        path: string,
+        associatedPath?: string,
+    ) => Promise<number>;
 
     /**
      * Mark the given {@link ZipItem}s as having been uploaded.
+     *
+     * @param {@link item} The {@link ZipItem} which was uploaded.
+     *
+     * @param {@link associatedItem} An optional extra {@link ZipItem}
+     * associated with the {@link item} which was uploaded. This will be present
+     * only in case of live photos, where this'll be set to the {@link ZipItem}
+     * representing the video component of the live photo on disk.
+     *
+     * @returns The last modified time (epoch milliseconds) of the zip file
+     * containing {@link item}.
      */
-    markUploadedZipItems: (items: PendingUploads["zipItems"]) => Promise<void>;
+    markUploadedZipItem: (
+        item: ZipItem,
+        associatedItem?: ZipItem,
+    ) => Promise<number>;
 
     /**
      * Clear any pending uploads.

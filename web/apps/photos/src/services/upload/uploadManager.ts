@@ -814,16 +814,15 @@ const splitMetadataAndMediaItems = (
     );
 
 const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
-    // TODO: This can be done better
     if (item.isLivePhoto) {
         const [p0, p1] = [
             item.livePhotoAssets.image,
             item.livePhotoAssets.video,
         ];
         if (Array.isArray(p0) && Array.isArray(p1)) {
-            electron.markUploadedZipItems([p0, p1]);
+            return electron.markUploadedZipItem(p0, p1);
         } else if (typeof p0 == "string" && typeof p1 == "string") {
-            electron.markUploadedFiles([p0, p1]);
+            return electron.markUploadedFile(p0, p1);
         } else if (
             p0 &&
             typeof p0 == "object" &&

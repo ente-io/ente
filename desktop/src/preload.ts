@@ -290,13 +290,11 @@ const pendingUploads = () => ipcRenderer.invoke("pendingUploads");
 const setPendingUploads = (pendingUploads: PendingUploads) =>
     ipcRenderer.invoke("setPendingUploads", pendingUploads);
 
-const markUploadedFile = (path: string, associatedPath: string | undefined) =>
+const markUploadedFile = (path: string, associatedPath?: string) =>
     ipcRenderer.invoke("markUploadedFile", path, associatedPath);
 
-const markUploadedZipItem = (
-    item: ZipItem,
-    associatedItem: ZipItem | undefined,
-) => ipcRenderer.invoke("markUploadedZipItem", item, associatedItem);
+const markUploadedZipItem = (item: ZipItem, associatedItem?: ZipItem) =>
+    ipcRenderer.invoke("markUploadedZipItem", item, associatedItem);
 
 const clearPendingUploads = () => ipcRenderer.invoke("clearPendingUploads");
 
