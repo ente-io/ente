@@ -74,37 +74,59 @@ export interface FileAndPath {
 }
 
 /**
- * The of cases of {@link UploadItem} that apply when we're running in the
- * context of our desktop app.
+ * The cases of {@link UploadItem} that apply when we're running in the context
+ * of our desktop app.
  *
- * If we know that we're running in the context of the desktop app then
- * {@link toDesktopUploadItem} can be used to convert from an
- * {@link UploadItem}.
+ * See also {@link TimestampedDesktopUploadItem}.
  */
 export type DesktopUploadItem = Exclude<UploadItem, File>;
 
 /**
- * Assert that the given {@link UploadItem} is, in fact, an {@link DesktopUploadItem}.
+ * A {@link DesktopUploadItem} augmented with the last modified time of the
+ * corresponding file on disk.
+ *
+ * By keeping the last modified time, we can use it as a test of whether or not
+ * the file on disk was modified since it was uploaded. Such an ability is
+ * useful for tasks where there can be a arbitrary delay between when the file
+ * was uploaded and when the file gets processed.
+ *
+ * See {@link toTimestampedDesktopUploadItem} for converting a
+ * {@link UploadItem} into a {@link TimestampedDesktopUploadItem} when running
+ * in the context of the desktop app.
+ */
+export interface TimestampedDesktopUploadItem {
+    uploadItem: DesktopUploadItem;
+    lastModifiedTime: number;
+}
+
+/**
+ * Assert that the given {@link UploadItem} is, in fact, one of the cases that
+ * can happen when we're running in the context of the desktop app, and attach
+ * the last modified time of the corresponding file system file to it.
  *
  * @param electron A witness to the fact that we're running in the context of
- * the desktop app. The electron instance is not actually used by this function.
+ * the desktop app. We also use it to find the last modified time of the file.
  *
- * @param uploadItem The upload item we obtained from an arbitrary place in the app.
+ * @param uploadItem The upload item we obtained from an arbitrary place in the
+ * app.
  *
  * @returns The same {@link uploadItem}, but after excluding the cases that can
- * only happen when running in the web app.
+ * only happen when running in the web app, and with the last modified time of
+ * the file attached to it.
  */
-export const toDesktopUploadItem = (
+export const toTimestampedDesktopUploadItem = (
     electron: Electron,
     uploadItem: UploadItem,
-): DesktopUploadItem => {
+): TimestampedDesktopUploadItem => {
     if (uploadItem instanceof File) {
         log.info(`Invalid upload item (electron: ${!!electron})`, uploadItem);
         throw new Error(
             "Found a File upload item even though we're running in the desktop app",
         );
     }
-    return uploadItem;
+    // TODO(HLS):
+    const lastModifiedTime = 0;
+    return { uploadItem, lastModifiedTime };
 };
 
 /**

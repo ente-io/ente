@@ -6,7 +6,7 @@ import log from "ente-base/log";
 import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
 import type { ElectronMLWorker } from "ente-base/types/ipc";
 import { isNetworkDownloadError } from "ente-gallery/services/download";
-import type { DesktopUploadItem } from "ente-gallery/services/upload";
+import type { TimestampedDesktopUploadItem } from "ente-gallery/services/upload";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { wait } from "ente-utils/promise";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
@@ -64,16 +64,17 @@ const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
 
 interface IndexableItem {
-    /** The {@link EnteFile} to (potentially) index. */
+    /**
+     * The {@link EnteFile} to (potentially) index.
+     */
     file: EnteFile;
     /**
      * If the file was uploaded from the current client, then its contents.
-     *
-     * Since indexing only happens in the desktop app, this is the more specific
-     * type {@link DesktopUploadItem}.
      */
-    uploadItem: DesktopUploadItem | undefined;
-    /** The existing ML data on remote corresponding to this file. */
+    timestampedUploadItem: TimestampedDesktopUploadItem | undefined;
+    /**
+     * The existing ML data (if any) on remote corresponding to this file.
+     */
     remoteMLData: RemoteMLData | undefined;
 }
 
@@ -178,11 +179,13 @@ export class MLWorker {
     /**
      * Called when a file is uploaded from the current client.
      *
-     * This is a great opportunity to index since we already have the in-memory
-     * representation of the file's contents with us and won't need to download
-     * the file from remote.
+     * This is a great opportunity to index since we already have the file with
+     * us and won't need to download the file from remote.
      */
-    onUpload(file: EnteFile, uploadItem: DesktopUploadItem) {
+    onUpload(
+        file: EnteFile,
+        timestampedUploadItem: TimestampedDesktopUploadItem,
+    ) {
         // Add the recently uploaded file to the live indexing queue.
         //
         // Limit the queue to some maximum so that we don't keep growing
@@ -196,7 +199,11 @@ export class MLWorker {
         if (this.liveQ.length < 200) {
             // The file is just being uploaded, and so will not have any
             // pre-existing ML data on remote.
-            this.liveQ.push({ file, uploadItem, remoteMLData: undefined });
+            this.liveQ.push({
+                file,
+                timestampedUploadItem,
+                remoteMLData: undefined,
+            });
             this.wakeUp();
         } else {
             log.debug(() => "Ignoring upload item since liveQ is full");
@@ -312,7 +319,7 @@ export class MLWorker {
         // Return files after annotating them with their existing ML data.
         return Array.from(fileByID, ([id, file]) => ({
             file,
-            uploadItem: undefined,
+            timestampedUploadItem: undefined,
             remoteMLData: mlDataByID.get(id),
         }));
     }
@@ -499,7 +506,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  * then remote will return a 413 Request Entity Too Large).
  */
 const index = async (
-    { file, uploadItem, remoteMLData }: IndexableItem,
+    { file, timestampedUploadItem, remoteMLData }: IndexableItem,
     electron: ElectronMLWorker,
 ) => {
     const f = fileLogID(file);
@@ -549,7 +556,11 @@ const index = async (
 
     let renderableBlob: Blob;
     try {
-        renderableBlob = await fetchRenderableBlob(file, uploadItem, electron);
+        renderableBlob = await fetchRenderableBlob(
+            file,
+            timestampedUploadItem,
+            electron,
+        );
     } catch (e) {
         // Network errors are transient and shouldn't be marked.
         //

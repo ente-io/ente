@@ -11,6 +11,7 @@ import type { UploadItem } from "ente-gallery/services/upload";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     shouldDisableCFUploadProxy,
+    toTimestampedDesktopUploadItem,
     type UploadPhase,
     type UploadResult,
 } from "ente-gallery/services/upload";
@@ -647,8 +648,16 @@ class UploadManager {
                     (uploadResult == "uploaded" ||
                         uploadResult == "uploadedWithStaticThumbnail")
                 ) {
-                    indexNewUpload(decryptedFile, uploadItem);
-                    processVideoNewUpload(decryptedFile, uploadItem);
+                    if (electron) {
+                        // Run the various desktop app specific indexing /
+                        // processing steps on the uploaded file.
+                        const tsUploadItem = toTimestampedDesktopUploadItem(
+                            electron,
+                            uploadItem,
+                        );
+                        indexNewUpload(decryptedFile, tsUploadItem);
+                        processVideoNewUpload(decryptedFile, tsUploadItem);
+                    }
                 }
                 this.updateExistingFiles(decryptedFile);
             }

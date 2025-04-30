@@ -2,7 +2,10 @@ import { basename } from "ente-base/file-name";
 import type { ElectronMLWorker } from "ente-base/types/ipc";
 import { renderableImageBlob } from "ente-gallery/services/convert";
 import { downloadManager } from "ente-gallery/services/download";
-import type { DesktopUploadItem } from "ente-gallery/services/upload";
+import type {
+    DesktopUploadItem,
+    TimestampedDesktopUploadItem,
+} from "ente-gallery/services/upload";
 import { readStream } from "ente-gallery/utils/native-stream";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
@@ -77,16 +80,16 @@ export const createImageBitmapAndData = async (
  */
 export const fetchRenderableBlob = async (
     file: EnteFile,
-    uploadItem: DesktopUploadItem | undefined,
+    tsUploadItem: TimestampedDesktopUploadItem | undefined,
     electron: ElectronMLWorker,
 ): Promise<Blob> =>
-    uploadItem
-        ? await fetchRenderableUploadItemBlob(file, uploadItem, electron)
+    tsUploadItem
+        ? await fetchRenderableUploadItemBlob(file, tsUploadItem, electron)
         : await fetchRenderableEnteFileBlob(file);
 
 const fetchRenderableUploadItemBlob = async (
     file: EnteFile,
-    uploadItem: DesktopUploadItem,
+    tsUploadItem: TimestampedDesktopUploadItem,
     electron: ElectronMLWorker,
 ) => {
     const fileType = file.metadata.fileType;
@@ -94,6 +97,9 @@ const fetchRenderableUploadItemBlob = async (
         const thumbnailData = await downloadManager.thumbnailData(file);
         return new Blob([thumbnailData!]);
     } else {
+        // TODO(HLS):
+        const uploadItem = tsUploadItem.uploadItem;
+
         const blob = await readNonVideoUploadItem(uploadItem, electron);
         return renderableImageBlob(blob, file.metadata.title);
     }
