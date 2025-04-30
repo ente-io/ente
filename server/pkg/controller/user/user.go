@@ -322,6 +322,13 @@ func (c *UserController) HandleSelfAccountRecovery(ctx *gin.Context, token strin
 			Message: "Token expired",
 		}), "")
 	}
+	// check if account is already recovered
+	if user, userErr := c.UserRepo.Get(jwtToken.UserID); userErr == nil {
+		if strings.EqualFold(user.Email, jwtToken.Email) {
+			logrus.WithField("userID", jwtToken.UserID).Error("account is already recovered")
+			return nil
+		}
+	}
 	return c.HandleAccountRecovery(ctx, ente.RecoverAccountRequest{
 		UserID:  jwtToken.UserID,
 		EmailID: jwtToken.Email,
