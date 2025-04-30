@@ -173,8 +173,8 @@ export const markUploadedAndObtainProcessableItem = async (
     }
 
     const timestamped = async (
-        t: Promise<number>,
         item: FileSystemUploadItem,
+        t: Promise<number>,
     ): Promise<TimestampedFileSystemUploadItem> => ({
         fsUploadItem: item,
         lastModifiedMs: await t,
@@ -186,18 +186,16 @@ export const markUploadedAndObtainProcessableItem = async (
             item.livePhotoAssets!.video,
         ];
         if (Array.isArray(p0) && Array.isArray(p1)) {
-            return timestamped(electron.markUploadedZipItem(p0, p1), p0);
+            return timestamped(p0, electron.markUploadedZipItem(p0, p1));
         } else if (typeof p0 == "string" && typeof p1 == "string") {
-            return timestamped(electron.markUploadedFile(p0, p1), p0);
+            return timestamped(p0, electron.markUploadedFile(p0, p1));
         } else if (
-            p0 &&
             typeof p0 == "object" &&
             "path" in p0 &&
-            p1 &&
             typeof p1 == "object" &&
             "path" in p1
         ) {
-            return timestamped(electron.markUploadedFile(p0.path, p1.path), p0);
+            return timestamped(p0, electron.markUploadedFile(p0.path, p1.path));
         } else {
             throw new Error(
                 "Attempting to mark upload completion of unexpected desktop upload items",
@@ -206,11 +204,11 @@ export const markUploadedAndObtainProcessableItem = async (
     } else {
         const p = item.uploadItem!;
         if (Array.isArray(p)) {
-            return timestamped(electron.markUploadedZipItem(p), p);
+            return timestamped(p, electron.markUploadedZipItem(p));
         } else if (typeof p == "string") {
-            return timestamped(electron.markUploadedFile(p), p);
+            return timestamped(p, electron.markUploadedFile(p));
         } else if (typeof p == "object" && "path" in p) {
-            return timestamped(electron.markUploadedFile(p.path), p);
+            return timestamped(p, electron.markUploadedFile(p.path));
         } else {
             return p;
         }
