@@ -15,7 +15,6 @@ import "package:photos/services/machine_learning/face_thumbnail_generator.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/standalone/task_queue.dart";
 import "package:photos/utils/thumbnail_util.dart";
-// import "package:pool/pool.dart";
 
 void resetPool({required bool fullFile}) {
   if (fullFile) {
