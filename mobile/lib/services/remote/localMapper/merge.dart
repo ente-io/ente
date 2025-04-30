@@ -1,8 +1,15 @@
 import "package:photos/models/file/file.dart";
+import "package:photos/services/filter/db_filters.dart";
 
-List<EnteFile> merge({
+final homeGalleryFilters = DBFilterOptions(
+  dedupeUploadID: true,
+  ignoreSavedFiles: true,
+  onlyUploadedFiles: false,
+);
+Future<List<EnteFile>> merge({
   required List<EnteFile> localFiles,
   required List<EnteFile> remoteFiles,
+  DBFilterOptions? filterOptions,
 }) {
   final List<EnteFile> mergedFiles = [];
   int i = 0;
@@ -21,6 +28,8 @@ List<EnteFile> merge({
   // Add remaining elements (only one of these loops will actually run)
   mergedFiles.addAll(localFiles.sublist(i));
   mergedFiles.addAll(remoteFiles.sublist(j));
-
-  return mergedFiles;
+  if (filterOptions != null) {
+    return applyDBFilters(mergedFiles, filterOptions);
+  }
+  return Future.value(mergedFiles);
 }

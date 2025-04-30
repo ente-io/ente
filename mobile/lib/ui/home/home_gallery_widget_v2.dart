@@ -95,9 +95,10 @@ class _HomeGalleryWidgetV2State extends State<HomeGalleryWidgetV2> {
           ),
         );
 
-        final List<EnteFile> allFiles = merge(
+        final List<EnteFile> allFiles = await merge(
           localFiles: localFiles,
           remoteFiles: enteFiles,
+          filterOptions: homeGalleryFilters,
         );
         // merge
 
