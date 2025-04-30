@@ -1,3 +1,4 @@
+import "package:flutter/foundation.dart";
 import "package:photos/db/remote/db.dart";
 import "package:photos/db/remote/schema.dart";
 import "package:photos/extensions/stop_watch.dart";
@@ -103,6 +104,17 @@ extension CollectionFiles on RemoteDB {
       return CollectionFileEntry.fromMap(row.first);
     }
     return null;
+  }
+
+  Future<void> deleteFiles(List<int> fileIDs) async {
+    if (fileIDs.isEmpty) return;
+    final stopwatch = Stopwatch()..start();
+    await sqliteDB.execute(
+      "DELETE FROM collection_files WHERE file_id IN (${fileIDs.join(",")})",
+    );
+    debugPrint(
+      '$runtimeType deleteFiles complete in ${stopwatch.elapsed.inMilliseconds}ms for ${fileIDs.length}',
+    );
   }
 
   Future<Map<int, int>> getCollectionIDToMaxCreationTime() async {

@@ -825,6 +825,7 @@ class FilesDB with SqlDbBase {
     return files;
   }
 
+  // todo:rewrite (upload related)
   Future<List<int>> getUploadedFileIDsToBeUpdated(int ownerID) async {
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
@@ -841,6 +842,7 @@ class FilesDB with SqlDbBase {
     return uploadedFileIDs;
   }
 
+  // todo:rewrite (upload related)
   Future<List<EnteFile>> getFilesInAllCollection(
     int uploadedFileID,
     int userID,
@@ -1102,15 +1104,6 @@ class FilesDB with SqlDbBase {
     );
   }
 
-  Future<void> deleteMultipleUploadedFiles(List<int> uploadedFileIDs) async {
-    final db = await instance.sqliteAsyncDB;
-    final inParam = uploadedFileIDs.join(',');
-
-    await db.execute(
-      'DELETE FROM $filesTable WHERE $columnUploadedFileID IN ($inParam)',
-    );
-  }
-
   // todo: neeraj (rw, upload flow)
   Future<void> deleteMultipleByGeneratedIDs(List<int> generatedIDs) async {
     if (generatedIDs.isEmpty) {
@@ -1145,7 +1138,7 @@ class FilesDB with SqlDbBase {
     }
   }
 
-  Future<void> deleteLocalFiles(List<String> localIDs) async {
+  Future<void> markLocalIDAsNull(List<String> localIDs) async {
     final inParam = localIDs.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
     await db.execute(

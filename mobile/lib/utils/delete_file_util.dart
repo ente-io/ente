@@ -99,10 +99,7 @@ Future<void> deleteFilesFromEverywhere(
   }
   if (uploadedFilesToBeTrashed.isNotEmpty) {
     try {
-      final fileIDs =
-          uploadedFilesToBeTrashed.map((item) => item.fileID).toList();
       await trashSyncService.trashFilesOnServer(uploadedFilesToBeTrashed);
-      await FilesDB.instance.deleteMultipleUploadedFiles(fileIDs);
     } catch (e) {
       _logger.severe(e);
       await showGenericErrorDialog(context: context, error: e);
@@ -164,7 +161,6 @@ Future<void> deleteFilesFromRemoteOnly(
   }
   try {
     await trashSyncService.trashFilesOnServer(trashRequests);
-    await FilesDB.instance.deleteMultipleUploadedFiles(uploadedFileIDs);
   } catch (e, s) {
     _logger.severe("Failed to delete files from remote", e, s);
     await showGenericErrorDialog(context: context, error: e);
@@ -367,7 +363,7 @@ Future<bool> deleteLocalFiles(
 
     if (deletedIDs.isNotEmpty) {
       final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
-      await FilesDB.instance.deleteLocalFiles(deletedIDs);
+      await FilesDB.instance.markLocalIDAsNull(deletedIDs);
       _logger.info(deletedFiles.length.toString() + " files deleted locally");
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
@@ -445,7 +441,7 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
 
     if (deletedIDs.isNotEmpty) {
       final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
-      await FilesDB.instance.deleteLocalFiles(deletedIDs);
+      await FilesDB.instance.markLocalIDAsNull(deletedIDs);
       _logger.info(deletedFiles.length.toString() + " files deleted locally");
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
@@ -520,7 +516,7 @@ Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
 
     if (deletedIDs.isNotEmpty) {
       final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
-      await FilesDB.instance.deleteLocalFiles(deletedIDs);
+      await FilesDB.instance.markLocalIDAsNull(deletedIDs);
       _logger.info(deletedFiles.length.toString() + " files deleted locally");
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
