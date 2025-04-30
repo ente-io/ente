@@ -194,7 +194,7 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 	}{
 		{
 			getListofSubscribers: func() ([]ente.User, error) {
-				return c.UserRepo.GetUsersWithExceedingStorages(90)
+				return c.UserRepo.GetUsersWithExceedingStorage(90)
 			},
 			template: StorageLimitExceedingTemplate,
 			subject:  StorageLimitExceedingSubject,
@@ -202,7 +202,7 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 		},
 		{
 			getListofSubscribers: func() ([]ente.User, error) {
-				return c.UserRepo.GetUsersWithExceedingStorages(100)
+				return c.UserRepo.GetUsersWithExceedingStorage(100)
 			},
 			template: StorageLimitExceededTemplate,
 			subject:  StorageLimitExceededSubject,
@@ -210,15 +210,16 @@ func (c *EmailNotificationController) SendStorageAlerts() {
 		},
 	}
 	for _, alertGroup := range storageAlertGroups {
-		users, err := alertGroup.getListofSubscribers()
-		if err != nil {
-			log.WithError(err).Error("Failed to get list of users")
+		users, usersErr := alertGroup.getListofSubscribers()
+		if usersErr != nil {
+			log.WithError(usersErr).Error("Failed to get list of users")
 			continue
 		}
 		for _, u := range users {
 			lastNotificationTime, err := c.NotificationHistoryRepo.GetLastNotificationTime(u.ID, alertGroup.notifID)
 			logger := log.WithFields(log.Fields{
-				"user_id": u.ID,
+				"user_id":  u.ID,
+				"group_id": alertGroup.notifID,
 			})
 			if err != nil {
 				logger.Error("Could not fetch last notification time", err)

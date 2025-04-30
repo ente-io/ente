@@ -316,7 +316,7 @@ func (repo *UserRepository) GetPublicKey(userID int64) (string, error) {
 
 // GetUsersWithExceedingStorage returns list of users who have consumed 90% or 100% of their total storage quota
 // depending on the percentageThreshold (90% or 100%) and they are not part of any family plan
-func (repo *UserRepository) GetUsersWithExceedingStorages(percentageThreshold int64) ([]ente.User, error) {
+func (repo *UserRepository) GetUsersWithExceedingStorage(percentageThreshold int64) ([]ente.User, error) {
 	rows, err := repo.DB.Query(`
 		SELECT users.user_id, users.encrypted_email, users.email_decryption_nonce, users.email_hash, usage.storage_consumed, subscriptions.storage
 		FROM users 
