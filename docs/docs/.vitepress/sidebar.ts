@@ -269,15 +269,15 @@ export const sidebar = [
                         link: "/self-hosting/guides/admin",
                     },
                     {
-                        text: "Configure CLI for your instance",
+                        text: "Configuring CLI for your instance",
                         link: "/self-hosting/guides/selfhost-cli",
                     },
                     {
-                        text: "Hosting Ente from source",
+                        text: "Running Ente from source",
                         link: "/self-hosting/guides/from-source",
                     },
                     {
-                        text: "Hosting Ente without Docker",
+                        text: "Running Ente without Docker",
                         link: "/self-hosting/guides/standalone-ente",
                     },
                 ],

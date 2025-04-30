@@ -3,13 +3,13 @@ title: Uploads
 description: Fixing upload errors when trying to self host Ente
 ---
 
-# FAQ's regarding S3
+# Troubleshooting upload failures 
 
 Here are some errors our community members frequently encountered with the
 context and potential fixes.
 
 Fundamentally in most situations, the problem is because of minor mistakes or
-misconfiguration. Please make sure to reverse proxy museum and minIO API 
+misconfiguration. Please make sure to reverse proxy museum and MinIO API 
 endpoint to a domain and check your S3 credentials and whole configuration 
 file for any minor misconfigurations.
 
