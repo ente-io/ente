@@ -4,33 +4,33 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
-import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
-import "package:photos/ui/settings/pending_sync/pending_sync_info_screen.dart";
 import 'package:photos/utils/standalone/data.dart';
 import 'package:photos/utils/standalone/directory_content.dart';
 
-class PathStorageItem {
+class PathInfoStorageItem {
   final String path;
   final String title;
   final bool allowCacheClear;
+  final String match;
 
-  PathStorageItem.name(
+  PathInfoStorageItem.name(
     this.path,
-    this.title, {
+    this.title,
+    this.match, {
     this.allowCacheClear = false,
   });
 }
 
-class PathStorageViewer extends StatefulWidget {
-  final PathStorageItem item;
+class PathInfoStorageViewer extends StatefulWidget {
+  final PathInfoStorageItem item;
   final bool removeTopRadius;
   final bool removeBottomRadius;
   final bool enableDoubleTapClear;
 
-  const PathStorageViewer(
+  const PathInfoStorageViewer(
     this.item, {
     this.removeTopRadius = false,
     this.removeBottomRadius = false,
@@ -39,11 +39,11 @@ class PathStorageViewer extends StatefulWidget {
   });
 
   @override
-  State<PathStorageViewer> createState() => _PathStorageViewerState();
+  State<PathInfoStorageViewer> createState() => _PathInfoStorageViewerState();
 }
 
-class _PathStorageViewerState extends State<PathStorageViewer> {
-  final Logger _logger = Logger((_PathStorageViewerState).toString());
+class _PathInfoStorageViewerState extends State<PathInfoStorageViewer> {
+  final Logger _logger = Logger((_PathInfoStorageViewerState).toString());
 
   @override
   void initState() {
@@ -59,7 +59,10 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DirectoryStat>(
-      future: getDirectoryStat(Directory(widget.item.path)),
+      future: getDirectoryStat(
+        Directory(widget.item.path),
+        prefix: widget.item.match,
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return _buildMenuItemWidget(snapshot.data, null);
@@ -119,15 +122,6 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
         if (widget.item.allowCacheClear && widget.enableDoubleTapClear) {
           await deleteDirectoryContents(widget.item.path);
           _safeRefresh();
-        }
-      },
-      onLongPress: () async {
-        if (widget.item.title == S.of(context).pendingSync) {
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const PendingSyncInfoScreen(),
-            ),
-          );
         }
       },
     );
