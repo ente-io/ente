@@ -24,6 +24,7 @@ import {
     putVideoData,
 } from "./file-data";
 import {
+    fileSystemUploadItemIfUnchanged,
     type ProcessableUploadItem,
     type TimestampedFileSystemUploadItem,
 } from "./upload";
@@ -416,10 +417,14 @@ const processQueueItem = async ({
 }: VideoProcessingQueueItem) => {
     const electron = ensureElectron();
 
-    // TODO(HLS):
-    const uploadItem = timestampedUploadItem?.fsUploadItem;
+    log.debug(() => ["gen-hls", { file, timestampedUploadItem }]);
 
-    log.debug(() => ["gen-hls", { file, uploadItem }]);
+    const uploadItem = timestampedUploadItem
+        ? await fileSystemUploadItemIfUnchanged(
+              timestampedUploadItem,
+              electron.fs.statMtime,
+          )
+        : undefined;
 
     const sourceVideo = uploadItem ?? (await downloadManager.fileStream(file));
 
