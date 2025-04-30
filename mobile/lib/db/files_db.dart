@@ -516,6 +516,7 @@ class FilesDB with SqlDbBase {
     );
   }
 
+  // blocked upload queue
   Future<int> insertAndGetId(EnteFile file) async {
     _logger.info("Inserting $file");
     final db = await instance.sqliteAsyncDB;
@@ -532,23 +533,12 @@ class FilesDB with SqlDbBase {
     });
   }
 
+  //  upload queue
   Future<EnteFile?> getFile(int generatedID) async {
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
       'SELECT * FROM $filesTable WHERE $columnGeneratedID = ?',
       [generatedID],
-    );
-    if (results.isEmpty) {
-      return null;
-    }
-    return convertToFiles(results)[0];
-  }
-
-  Future<EnteFile?> getAnyUploadedFile(int uploadedID) async {
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnUploadedFileID = ?',
-      [uploadedID],
     );
     if (results.isEmpty) {
       return null;
@@ -1179,19 +1169,6 @@ class FilesDB with SqlDbBase {
     return convertToFiles(results);
   }
 
-  Future<void> deleteUnSyncedLocalFiles(List<String> localIDs) async {
-    final inParam = localIDs.map((id) => "'$id'").join(',');
-    final db = await instance.sqliteAsyncDB;
-    unawaited(
-      db.execute(
-        '''
-      DELETE FROM $filesTable
-      WHERE ($columnUploadedFileID is NULL OR $columnUploadedFileID = -1 ) AND $columnLocalID IN ($inParam)
-    ''',
-      ),
-    );
-  }
-
   Future<int> deleteFilesFromCollection(
     int collectionID,
     List<int> uploadedFileIDs,
@@ -1248,6 +1225,7 @@ class FilesDB with SqlDbBase {
     );
   }
 
+  // todo:rewrite (upload related)
   Future<List<EnteFile>> getPendingUploadForCollection(int collectionID) async {
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
@@ -1258,6 +1236,7 @@ class FilesDB with SqlDbBase {
     return convertToFiles(results);
   }
 
+  // todo:rewrite (upload related)
   Future<Set<String>> getLocalIDsPresentInEntries(
     List<EnteFile> existingFiles,
     int collectionID,
@@ -1299,6 +1278,7 @@ class FilesDB with SqlDbBase {
     return result;
   }
 
+  // todo:rewrite (upload related)
   Future<void> markForReUploadIfLocationMissing(List<String> localIDs) async {
     if (localIDs.isEmpty) {
       return;

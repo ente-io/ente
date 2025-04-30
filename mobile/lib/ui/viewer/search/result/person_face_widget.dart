@@ -7,6 +7,7 @@ import "package:photos/db/ml/db.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
@@ -137,7 +138,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
         });
         if (fileForFaceCrop.uploadedFileID != recentFileID) {
           fileForFaceCrop =
-              await FilesDB.instance.getAnyUploadedFile(recentFileID);
+              await remoteCache.getAnyCollectionFile(recentFileID);
           if (fileForFaceCrop == null) return null;
         }
       }
@@ -155,8 +156,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
         return null;
       }
       if (face.fileID != fileForFaceCrop.uploadedFileID!) {
-        fileForFaceCrop =
-            await FilesDB.instance.getAnyUploadedFile(face.fileID);
+        fileForFaceCrop = await remoteCache.getAnyCollectionFile(face.fileID);
         if (fileForFaceCrop == null) return null;
       }
       final cropMap = await getCachedFaceCrops(

@@ -10,6 +10,7 @@ import "package:photos/db/remote/table/collection_files.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import "package:photos/events/favorites_service_init_complete_event.dart";
 import 'package:photos/events/files_updated_event.dart';
+import "package:photos/log/devlog.dart";
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
@@ -85,7 +86,7 @@ class FavoritesService {
     if (file.collectionID != null &&
         _cachedFavoritesCollectionID != null &&
         file.collectionID == _cachedFavoritesCollectionID) {
-      debugPrint("File ${file.uploadedFileID} is part of favorite collection");
+      devLog("File ${file.uploadedFileID} is part of favorite collection");
       return true;
     }
     if (checkOnlyAlbum) {

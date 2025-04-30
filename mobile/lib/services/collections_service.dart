@@ -1768,13 +1768,15 @@ class CollectionsService {
         // Remove imported local files which are imported but not uploaded.
         // This handles the case where local file was trashed -> imported again
         // but not uploaded automatically as it was trashed.
+
         final localIDs = batch
             .where((e) => e.localID != null)
             .map((e) => e.localID!)
             .toSet()
             .toList();
         if (localIDs.isNotEmpty) {
-          await _filesDB.deleteUnSyncedLocalFiles(localIDs);
+          // todo:(rewrite) remove enteries from upload_mapping table
+          // if we decide to use it for book keeping
         }
         // Force reload home gallery to pull in the restored files
         Bus.instance.fire(ForceReloadHomeGalleryEvent("restoredFromTrash"));

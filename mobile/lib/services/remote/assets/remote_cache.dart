@@ -1,5 +1,5 @@
-import "package:photos/db/remote/table/collection_files.dart";
 import "package:photos/db/remote/schema.dart";
+import "package:photos/db/remote/table/collection_files.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/remote/asset.dart";
@@ -54,10 +54,10 @@ class RemoteCache {
       c.pubMagicMetadata.coverID,
       sortInAsc: c.pubMagicMetadata.asc ?? false,
     );
-    final _ = isLoaded ?? await _load();
     if (cf == null) {
       return null;
     }
+    final _ = isLoaded ?? await _load();
     final asset = remoteAssets[cf.fileID];
     if (asset == null) {
       return null;
@@ -67,10 +67,24 @@ class RemoteCache {
 
   Future<EnteFile?> getCollectionFile(int collectionID, int fileID) async {
     final cf = await remoteDB.getCollectionFileEntry(collectionID, fileID);
-    final _ = isLoaded ?? await _load();
     if (cf == null) {
       return null;
     }
+
+    final _ = isLoaded ?? await _load();
+    final asset = remoteAssets[cf.fileID];
+    if (asset == null) {
+      return null;
+    }
+    return EnteFile.fromRemoteAsset(asset, cf);
+  }
+
+  Future<EnteFile?> getAnyCollectionFile(int fileID) async {
+    final cf = await remoteDB.getAnyCollectionEntry(fileID);
+    if (cf == null) {
+      return null;
+    }
+    final _ = isLoaded ?? await _load();
     final asset = remoteAssets[cf.fileID];
     if (asset == null) {
       return null;

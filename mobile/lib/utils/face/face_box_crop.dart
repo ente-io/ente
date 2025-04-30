@@ -10,6 +10,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/face.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_thumbnail_generator.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/thumbnail_util.dart";
@@ -147,7 +148,8 @@ Future<Uint8List?> precomputeClusterFaceCrop(
   required bool useFullFile,
 }) async {
   try {
-    final w = (kDebugMode ? EnteWatch('precomputeClusterFaceCrop') : null)?..start();
+    final w = (kDebugMode ? EnteWatch('precomputeClusterFaceCrop') : null)
+      ?..start();
     final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
       clusterID: clusterID,
@@ -161,7 +163,7 @@ Future<Uint8List?> precomputeClusterFaceCrop(
     }
     EnteFile? fileForFaceCrop = file;
     if (face.fileID != file.uploadedFileID!) {
-      fileForFaceCrop = await FilesDB.instance.getAnyUploadedFile(face.fileID);
+      fileForFaceCrop = await remoteCache.getAnyCollectionFile(face.fileID);
       w?.log('getAnyUploadedFile');
     }
     if (fileForFaceCrop == null) {

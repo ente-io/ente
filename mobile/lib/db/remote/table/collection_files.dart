@@ -92,6 +92,19 @@ extension CollectionFiles on RemoteDB {
     return null;
   }
 
+  Future<CollectionFileEntry?> getAnyCollectionEntry(
+    int fileID,
+  ) async {
+    final row = await sqliteDB.getAll(
+      "SELECT * FROM collection_files WHERE file_id = ? limit 1",
+      [fileID],
+    );
+    if (row.isNotEmpty) {
+      return CollectionFileEntry.fromMap(row.first);
+    }
+    return null;
+  }
+
   Future<Map<int, int>> getCollectionIDToMaxCreationTime() async {
     final enteWatch = EnteWatch("getCollectionIDToMaxCreationTime")..start();
     final rows = await sqliteDB.getAll(
