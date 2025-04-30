@@ -7,7 +7,6 @@ class CollectionFileEntry {
   final Uint8List fileKeyNonce;
   final int updatedAt;
   final int createdAt;
-  final bool isDeleted;
 
   CollectionFileEntry({
     required this.collectionID,
@@ -16,7 +15,6 @@ class CollectionFileEntry {
     required this.fileKeyNonce,
     required this.updatedAt,
     required this.createdAt,
-    required this.isDeleted,
   });
 
   CollectionFileEntry.fromMap(Map<String, dynamic> map)
@@ -25,6 +23,5 @@ class CollectionFileEntry {
         fileKey = map["enc_key"] as Uint8List,
         fileKeyNonce = map["enc_key_nonce"] as Uint8List,
         updatedAt = map["updated_at"] as int,
-        createdAt = map["created_at"] as int,
-        isDeleted = (map["is_deleted"] as int) == 1;
+        createdAt = map["created_at"] as int;
 }

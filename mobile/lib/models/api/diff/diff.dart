@@ -113,8 +113,6 @@ class FileItem {
       magicMetadata?.toEncodedJson(),
       pubMagicMetadata?.toEncodedJson(),
       info?.toEncodedJson(),
-      matchLocalID,
-      'remote_data',
     ];
   }
 

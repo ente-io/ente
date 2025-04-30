@@ -1,6 +1,6 @@
 const collectionColumns =
-    'id, owner, enc_key, enc_key_nonce, name, type, local_path, '
-    'is_deleted, updation_time, sharees, public_urls, mmd_encoded_json, '
+    'id, owner, enc_key, enc_key_nonce, name, type, local_path, is_deleted, '
+    'updation_time, sharees, public_urls, mmd_encoded_json, '
     'mmd_ver, pub_mmd_encoded_json, pub_mmd_ver, shared_mmd_json, '
     'shared_mmd_ver';
 
@@ -72,7 +72,6 @@ class RemoteDBMigration {
       collection_id INTEGER NOT NULL,
       enc_key BLOB NOT NULL,
       enc_key_nonce BLOB NOT NULL,
-      is_deleted INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
       created_at INTEGER NOT NULL DEFAULT 0,
       PRIMARY KEY (file_id, collection_id)
@@ -119,7 +118,7 @@ class RemoteDBMigration {
     '''
     CREATE TABLE upload_mapping (
       file_id INTEGER PRIMARY KEY,
-      local_id TEXT DEFAULT NOT NULL,
+      local_id TEXT NOT NULL,
       -- icloud identifier if available
       local_clould_id TEXT,
       local_mapping_src TEXT DEFAULT NULL
