@@ -597,7 +597,7 @@ class UploadManager {
     ) {
         log.info(`Upload ${uploadableItem.fileName} | ${uploadResult}`);
         try {
-            const procesableUploadItem =
+            const processableUploadItem =
                 await markUploadedAndObtainProcessableItem(uploadableItem);
 
             let decryptedFile: EnteFile;
@@ -642,8 +642,8 @@ class UploadManager {
                     (uploadResult == "uploaded" ||
                         uploadResult == "uploadedWithStaticThumbnail")
                 ) {
-                    indexNewUpload(decryptedFile, procesableUploadItem);
-                    processVideoNewUpload(decryptedFile, procesableUploadItem);
+                    indexNewUpload(decryptedFile, processableUploadItem);
+                    processVideoNewUpload(decryptedFile, processableUploadItem);
                 }
                 this.updateExistingFiles(decryptedFile);
             }
