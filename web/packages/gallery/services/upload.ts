@@ -223,14 +223,14 @@ export const markUploadedAndObtainProcessableItem = async (
  * kept here since it is in some sense the inverse of
  * {@link markUploadedAndObtainProcessableItem}.
  *
- * @param item A {@link TimestampedFileSystemUploadItem}
+ * @param item A {@link TimestampedFileSystemUploadItem}.
  *
  * @param fsStatMtime A function that can be used to perform IPC and obtain the
  * last modified time from the node side.
  *
  * @returns If the last modified time of the file system file pointed to by the
  * given {@link item} is the same as what is recorded within the structure, then
- * return then wrapped {@link FileSystemUploadItem}, otherwise return
+ * return the wrapped {@link FileSystemUploadItem}, otherwise return
  * `undefined`.
  *
  * In case of any errors, also return `undefined`. This is because errors are

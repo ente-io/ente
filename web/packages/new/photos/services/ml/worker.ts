@@ -184,9 +184,6 @@ export class MLWorker {
      */
     onUpload(file: EnteFile, processableUploadItem: ProcessableUploadItem) {
         // Add the recently uploaded file to the live indexing queue.
-        //
-        // We can unconditionally process it since the file is just being
-        // uploaded, and so will not have any pre-existing ML data on remote.
         this.liveQ.push({
             file,
             processableUploadItem,

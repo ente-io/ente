@@ -41,8 +41,8 @@ import {
     fsRename,
     fsRm,
     fsRmdir,
-    fsWriteFile,
     fsStatMtime,
+    fsWriteFile,
     fsWriteFileViaBackup,
 } from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
