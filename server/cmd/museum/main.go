@@ -374,6 +374,8 @@ func main() {
 	p.ReqCntURLLabelMappingFn = urlSanitizer
 	server.Use(p.HandlerFunc())
 
+	server.LoadHTMLGlob("templates/*")
+
 	// note: the recover middleware must be in the last
 
 	server.Use(requestid.New(
