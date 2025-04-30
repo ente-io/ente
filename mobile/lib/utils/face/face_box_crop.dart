@@ -189,6 +189,19 @@ Future<Uint8List?> precomputeClusterFaceCrop(
   }
 }
 
+void checkStopTryingToGenerateFaceThumbnails(
+  EnteFile file, {
+  bool useFullFile = true,
+}) {
+  final taskId =
+      [file.uploadedFileID!, useFullFile ? "-full" : "-thumbnail"].join();
+  if (useFullFile) {
+    _queueFullFileFaceGenerations.removeTask(taskId);
+  } else {
+    _queueThumbnailFaceGenerations.removeTask(taskId);
+  }
+}
+
 Future<Map<String, Uint8List>?> _getFaceCropsUsingHeapPriorityQueue(
   EnteFile file,
   Map<String, FaceBox> faceBoxeMap, {
