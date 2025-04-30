@@ -185,26 +185,14 @@ export class MLWorker {
     onUpload(file: EnteFile, processableUploadItem: ProcessableUploadItem) {
         // Add the recently uploaded file to the live indexing queue.
         //
-        // Limit the queue to some maximum so that we don't keep growing
-        // indefinitely (and cause memory pressure) if the speed of uploads is
-        // exceeding the speed of indexing.
-        //
-        // In general, we can be sloppy with the items in the live queue (as
-        // long as we're not systematically ignoring it). This is because the
-        // live queue is just an optimization: if a file doesn't get indexed via
-        // the live queue, it'll later get indexed anyway when we backfill.
-        if (this.liveQ.length < 200) {
-            // The file is just being uploaded, and so will not have any
-            // pre-existing ML data on remote.
-            this.liveQ.push({
-                file,
-                processableUploadItem,
-                remoteMLData: undefined,
-            });
-            this.wakeUp();
-        } else {
-            log.debug(() => "Ignoring upload item since liveQ is full");
-        }
+        // We can unconditionally process it since the file is just being
+        // uploaded, and so will not have any pre-existing ML data on remote.
+        this.liveQ.push({
+            file,
+            processableUploadItem,
+            remoteMLData: undefined,
+        });
+        this.wakeUp();
     }
 
     /**

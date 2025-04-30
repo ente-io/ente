@@ -351,14 +351,6 @@ export const processVideoNewUpload = (
         return;
     }
 
-    if (_state.videoProcessingQueue.length > 50) {
-        // Drop new requests if the queue can't keep up to avoid the app running
-        // out of memory by keeping hold of too many (potentially huge) video
-        // blobs. These items will later get processed as part of a backfill.
-        log.info("Will process new video upload later (backlog too big)");
-        return;
-    }
-
     // Enqueue the item.
     _state.videoProcessingQueue.push({
         file,
