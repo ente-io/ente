@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/db/files_db.dart";
+import "package:photos/db/remote/table/collection_files.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/sync/remote_sync_service.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -120,8 +122,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
 
   Future<void> _deleteEmptyAlbums() async {
     final collections = CollectionsService.instance.getCollectionsForUI();
-    final idToFileTimeStamp =
-        await FilesDB.instance.getCollectionIDToMaxCreationTime();
+    final idToFileTimeStamp = await remoteDB.getCollectionIDToMaxCreationTime();
 
     // remove collections which are not empty or can't be deleted
     collections.removeWhere(

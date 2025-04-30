@@ -308,7 +308,7 @@ class CollectionsService {
 
   Future<Map<int, int>> getCollectionIDToNewestFileTime() {
     _collectionIDToNewestFileTime ??=
-        _filesDB.getCollectionIDToMaxCreationTime();
+        remoteDB.getCollectionIDToMaxCreationTime();
     return _collectionIDToNewestFileTime!;
   }
 

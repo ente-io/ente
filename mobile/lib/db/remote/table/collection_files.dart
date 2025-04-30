@@ -1,5 +1,6 @@
 import "package:photos/db/remote/db.dart";
 import "package:photos/db/remote/schema.dart";
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/remote/file_entry.dart";
 
 extension CollectionFiles on RemoteDB {
@@ -89,5 +90,21 @@ extension CollectionFiles on RemoteDB {
       return CollectionFileEntry.fromMap(row);
     }
     return null;
+  }
+
+  Future<Map<int, int>> getCollectionIDToMaxCreationTime() async {
+    final enteWatch = EnteWatch("getCollectionIDToMaxCreationTime")..start();
+    final rows = await sqliteDB.getAll(
+      '''SELECT collection_id, MAX(creation_time) as max_creation_time FROM collection_files join files on 
+      collection_files.file_id=files.id  GROUP BY collection_id''',
+    );
+    final Map<int, int> result = {};
+    for (var row in rows) {
+      final collectionId = row["collection_id"] as int;
+      final maxCreationTime = row["max_creation_time"] as int;
+      result[collectionId] = maxCreationTime;
+    }
+    enteWatch.log("query done");
+    return result;
   }
 }

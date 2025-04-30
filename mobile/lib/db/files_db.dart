@@ -1282,30 +1282,6 @@ class FilesDB with SqlDbBase {
     return result;
   }
 
-  // getCollectionLatestFileTime returns map of collectionID to the max
-  // creationTime of the files in the collection.
-  Future<Map<int, int>> getCollectionIDToMaxCreationTime() async {
-    final enteWatch = EnteWatch("getCollectionIDToMaxCreationTime")..start();
-    final db = await instance.sqliteAsyncDB;
-    final rows = await db.getAll(
-      '''
-      SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
-      FROM $filesTable
-      WHERE 
-      ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1
-       AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS 
-       NOT -1)
-      GROUP BY $columnCollectionID;
-    ''',
-    );
-    final result = <int, int>{};
-    for (final row in rows) {
-      result[row[columnCollectionID] as int] = row['max_creation_time'] as int;
-    }
-    enteWatch.log("query done");
-    return result;
-  }
-
   Future<Map<int, int>> getFileIDToCreationTime() async {
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
@@ -1404,22 +1380,6 @@ class FilesDB with SqlDbBase {
       result[eachFile.collectionID]!.add(eachFile);
     }
     return result;
-  }
-
-  List<EnteFile> convertToFilesForIsolate(Map args) {
-    final List<EnteFile> files = [];
-    for (final result in args["result"]) {
-      files.add(_getFileFromRow(result));
-    }
-    return files;
-  }
-
-  List<EnteFile> convertToFiles(List<Map<String, dynamic>> results) {
-    final List<EnteFile> files = [];
-    for (final result in results) {
-      files.add(_getFileFromRow(result));
-    }
-    return files;
   }
 
   Future<List<String>> getLocalFilesBackedUpWithoutLocation(int userId) async {
@@ -1560,6 +1520,22 @@ class FilesDB with SqlDbBase {
       "columns": columnNames.join(","),
       "placeholders": List.filled(columnNames.length, "?").join(","),
     };
+  }
+
+  List<EnteFile> convertToFilesForIsolate(Map args) {
+    final List<EnteFile> files = [];
+    for (final result in args["result"]) {
+      files.add(_getFileFromRow(result));
+    }
+    return files;
+  }
+
+  List<EnteFile> convertToFiles(List<Map<String, dynamic>> results) {
+    final List<EnteFile> files = [];
+    for (final result in results) {
+      files.add(_getFileFromRow(result));
+    }
+    return files;
   }
 
   List<Object?> _getParameterSetForFile(
