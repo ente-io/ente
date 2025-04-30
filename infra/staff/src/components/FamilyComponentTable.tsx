@@ -113,7 +113,7 @@ const FamilyTableComponent: React.FC = () => {
                     <TableBody>
                         {familyMembers.map((member) => (
                             <TableRow key={member.id}>
-                                    <TableCell>{member.id}</TableCell>
+                                <TableCell>{member.id}</TableCell>
                                 <TableCell>{member.email}</TableCell>
                                 <TableCell>
                                     <span
@@ -139,7 +139,9 @@ const FamilyTableComponent: React.FC = () => {
                                     {formatUsageToGB(member.usage)}
                                 </TableCell>
                                 <TableCell>
-                                    {member.status !== 'SELF' ? formatUsageToGB(member.usage) : ''}
+                                    {member.status !== "SELF"
+                                        ? formatUsageToGB(member.usage)
+                                        : ""}
                                 </TableCell>
                             </TableRow>
                         ))}
