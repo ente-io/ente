@@ -596,6 +596,12 @@ export interface Electron {
  */
 export interface ElectronMLWorker {
     /**
+     * Return the last modified time (epoch milliseconds) for the file at the
+     * given {@link path} on the user's file system.
+     */
+    fsStatMtime: (path: string) => Promise<number>;
+
+    /**
      * Return a CLIP embedding of the given image.
      *
      * See: [Note: Natural language search using CLIP]

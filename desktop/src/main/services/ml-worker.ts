@@ -18,6 +18,7 @@ import * as ort from "onnxruntime-node";
 import { messagePortMainEndpoint } from "../utils/comlink";
 import { wait } from "../utils/common";
 import { writeStream } from "../utils/stream";
+import { fsStatMtime } from "./fs";
 
 /**
  * We cannot do
@@ -63,6 +64,7 @@ process.parentPort.once("message", (e) => {
     // parent.
     expose(
         {
+            fsStatMtime,
             computeCLIPImageEmbedding,
             computeCLIPTextEmbeddingIfAvailable,
             detectFaces,
@@ -71,6 +73,12 @@ process.parentPort.once("message", (e) => {
         messagePortMainEndpoint(e.ports[0]!),
     );
 });
+
+// Duplicate of `fsStatMtime` from `fs.ts`.
+//
+// Since it is a trivial function, we duplicate its definition in the worker.
+const fsStatMtime = (path: string) =>
+    fs.stat(path).then((st) => st.mtime.getTime());
 
 /**
  * We cannot access Electron's {@link app} object within a utility process, so

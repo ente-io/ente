@@ -2,9 +2,10 @@ import { basename } from "ente-base/file-name";
 import type { ElectronMLWorker } from "ente-base/types/ipc";
 import { renderableImageBlob } from "ente-gallery/services/convert";
 import { downloadManager } from "ente-gallery/services/download";
-import type {
-    ProcessableUploadItem,
-    UploadItem,
+import {
+    fileSystemUploadItemIfUnchanged,
+    type ProcessableUploadItem,
+    type UploadItem,
 } from "ente-gallery/services/upload";
 import { readStream } from "ente-gallery/utils/native-stream";
 import type { EnteFile } from "ente-media/file";
@@ -74,18 +75,17 @@ export const createImageBitmapAndData = async (
  * be set to the {@link FilesystemUploadItem} that was uploaded so that we can
  * directly use the on-disk file instead of needing to download the original.
  *
- * @param electron The {@link ElectronMLWorker} instance that stands as a
- * witness that we're actually running in our desktop app (and thus can safely
- * call our Node.js layer for various functionality).
+ * @param electron The {@link ElectronMLWorker} instance that we can use to IPC
+ * with the Node.js layer.
  */
 export const fetchRenderableBlob = async (
     file: EnteFile,
     puItem: ProcessableUploadItem | undefined,
     electron: ElectronMLWorker,
 ): Promise<Blob> =>
-    puItem
+    (puItem
         ? await fetchRenderableUploadItemBlob(file, puItem, electron)
-        : await fetchRenderableEnteFileBlob(file);
+        : undefined) ?? (await fetchRenderableEnteFileBlob(file));
 
 const fetchRenderableUploadItemBlob = async (
     file: EnteFile,
@@ -98,7 +98,16 @@ const fetchRenderableUploadItemBlob = async (
         return new Blob([thumbnailData!]);
     } else {
         const uploadItem =
-            puItem instanceof File ? puItem : puItem.fsUploadItem;
+            puItem instanceof File
+                ? puItem
+                : await fileSystemUploadItemIfUnchanged(
+                      puItem,
+                      electron.fsStatMtime,
+                  );
+        if (!uploadItem) {
+            // The file on disk has changed. Fetch it from remote.
+            return undefined;
+        }
         const blob = await readNonVideoUploadItem(uploadItem, electron);
         return renderableImageBlob(blob, file.metadata.title);
     }

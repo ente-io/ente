@@ -1,6 +1,6 @@
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
-import type { Electron, ZipItem } from "ente-base/types/ipc";
+import type { ZipItem } from "ente-base/types/ipc";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
@@ -225,22 +225,23 @@ export const markUploadedAndObtainProcessableItem = async (
  * kept here since it is in some sense the inverse of
  * {@link markUploadedAndObtainProcessableItem}.
  *
- * @param electron The {@link Electron} instance to use for IPC.
- *
  * @param item A {@link TimestampedFileSystemUploadItem}
  *
+ * @param fsStatMtime A function that can be used to perform IPC and obtain the
+ * last modified time from the node side.
+ *
  * @returns If the last modified time of the file system file pointed to by the
- * given {@link item} is the same as what is recorded within
- * the structure, then return then wrapped {@link FileSystemUploadItem},
- * otherwise return `undefined`.
+ * given {@link item} is the same as what is recorded within the structure, then
+ * return then wrapped {@link FileSystemUploadItem}, otherwise return
+ * `undefined`.
  *
  * In case of any errors, also return `undefined`. This is because errors are
  * expected if the underlying file system file was, e.g. renamed or removed
  * between the time the file was uploaded and we got around to processing it.
  */
 export const fileSystemUploadItemIfUnchanged = async (
-    electron: Electron,
     { fsUploadItem, lastModifiedMs }: TimestampedFileSystemUploadItem,
+    fsStatMtime: (path: string) => Promise<number>,
 ): Promise<FileSystemUploadItem | undefined> => {
     let path: string;
     if (typeof fsUploadItem == "string") {
@@ -254,7 +255,7 @@ export const fileSystemUploadItemIfUnchanged = async (
     }
 
     try {
-        const mtimeMs = await electron.fs.statMtime(path);
+        const mtimeMs = await fsStatMtime(path);
         if (mtimeMs != lastModifiedMs) {
             log.info(
                 `Not using upload item for path '${path}' since modified times have changed`,
