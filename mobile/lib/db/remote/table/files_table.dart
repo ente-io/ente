@@ -23,7 +23,7 @@ extension FilesTable on RemoteDB {
     for (final id in idToSize.keys) {
       parameterSets.add([idToSize[id], id]);
     }
-    await sqliteDB.executeBatch(
+    return sqliteDB.executeBatch(
       "UPDATE files SET size = ? WHERE id = ?;",
       parameterSets,
     );
