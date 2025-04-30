@@ -32,8 +32,10 @@ export const resetUploadState = () => {
 /**
  * An item to upload is one of the following:
  *
- * 1. [web] A file drag-and-dropped or selected by the user when we are running
- *    in the web browser. These is the {@link File} case.
+ * 1. [web | desktop] A file drag-and-dropped or selected by the user when we
+ *    are running in a web browser. This is the {@link File} case. There is one
+ *    special case when this can also happen when running in the context of our
+ *    desktop app - when the user edits an existing image.
  *
  * 2. [desktop] A file drag-and-dropped or selected by the user when we are
  *    running in the context of our desktop app. In such cases, we also have the
@@ -54,9 +56,11 @@ export const resetUploadState = () => {
  *    containing the (path to zip file, and the name of an entry within that zip
  *    file). This is the {@link ZipItem} case.
  *
- * Only case 1 is possible when we're running in the web app.
+ * Case 1 is possible both when we're running in the web app and desktop app
+ * (that said, usually it only happens for the web app; it'll only happen in
+ * desktop in the special case when editing an image).
  *
- * Only case 2, 3 and 4 are possible when we're running in the desktop app.
+ * Case 2, 3 and 4 are only possible when we're running in the desktop app.
  *
  * Also see: [Note: Reading a UploadItem].
  */
