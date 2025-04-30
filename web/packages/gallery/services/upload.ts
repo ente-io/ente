@@ -162,7 +162,7 @@ export const markUploadedAndObtainProcessableItem = async (
     if (!electron) {
         const resultItem = item.isLivePhoto
             ? item.livePhotoAssets!.image
-            : item;
+            : item.uploadItem;
         if (resultItem instanceof File) {
             return resultItem;
         } else {
