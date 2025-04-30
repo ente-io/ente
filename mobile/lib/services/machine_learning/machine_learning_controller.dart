@@ -4,6 +4,7 @@ import "dart:io";
 import "package:battery_info/battery_info_plugin.dart";
 import "package:battery_info/model/android_battery_info.dart";
 import "package:battery_info/model/iso_battery_info.dart";
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/machine_learning_control_event.dart";
@@ -28,6 +29,13 @@ class MachineLearningController {
     _logger.info('MachineLearningController constructor');
     _startInteractionTimer(kDefaultInteractionTimeout);
     if (Platform.isIOS) {
+      if (kDebugMode) {
+        _logger.info(
+          "iOS battery info stream is not available in simulator, disabling in debug mode",
+        );
+        // if you need to test on physical device, uncomment this check
+        return;
+      }
       BatteryInfoPlugin()
           .iosBatteryInfoStream
           .listen((IosBatteryInfo? batteryInfo) {
@@ -41,7 +49,7 @@ class MachineLearningController {
         _onAndroidBatteryStateUpdate(batteryInfo);
       });
     }
-    _logger.info('init done');
+    _logger.info('init done ');
   }
 
   void onUserInteraction() {
