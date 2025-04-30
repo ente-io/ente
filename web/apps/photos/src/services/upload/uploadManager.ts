@@ -6,11 +6,11 @@ import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import { type ClusteredUploadItem, markUploaded } from "ente-gallery/services/upload-impl";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    markUploadedAndObtainProcessableItem,
     shouldDisableCFUploadProxy,
-    toTimestampedDesktopUploadItem,
+    type ClusteredUploadItem,
     type UploadPhase,
     type UploadResult,
 } from "ente-gallery/services/upload";
@@ -96,7 +96,6 @@ export type UploadItemWithCollection = UploadAsset & {
     localID: number;
     collectionID: number;
 };
-
 
 interface UploadCancelStatus {
     value: boolean;
@@ -598,8 +597,8 @@ class UploadManager {
     ) {
         log.info(`Upload ${uploadableItem.fileName} | ${uploadResult}`);
         try {
-            const electron = globalThis.electron;
-            if (electron) await markUploaded(electron, uploadableItem);
+            const procesableUploadItem =
+                await markUploadedAndObtainProcessableItem(uploadableItem);
 
             let decryptedFile: EnteFile;
             switch (uploadResult) {
@@ -643,16 +642,8 @@ class UploadManager {
                     (uploadResult == "uploaded" ||
                         uploadResult == "uploadedWithStaticThumbnail")
                 ) {
-                    if (electron) {
-                        // Run the various desktop app specific indexing /
-                        // processing steps on the uploaded file.
-                        const tsUploadItem = toTimestampedDesktopUploadItem(
-                            electron,
-                            uploadItem,
-                        );
-                        indexNewUpload(decryptedFile, tsUploadItem);
-                        processVideoNewUpload(decryptedFile, tsUploadItem);
-                    }
+                    indexNewUpload(decryptedFile, procesableUploadItem);
+                    processVideoNewUpload(decryptedFile, procesableUploadItem);
                 }
                 this.updateExistingFiles(decryptedFile);
             }
@@ -769,7 +760,6 @@ const makeUploadItemWithCollectionIDAndName = (
     externalParsedMetadata: f.externalParsedMetadata,
 });
 
-
 /**
  * The file that we hand off to the uploader. Essentially
  * {@link ClusteredUploadItem} with the {@link collection} attached to it.
@@ -794,7 +784,6 @@ const splitMetadataAndMediaItems = (
         },
         [[], []],
     );
-
 
 /**
  * Go through the given files, combining any sibling image + video assets into a

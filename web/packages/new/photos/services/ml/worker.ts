@@ -6,7 +6,7 @@ import log from "ente-base/log";
 import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
 import type { ElectronMLWorker } from "ente-base/types/ipc";
 import { isNetworkDownloadError } from "ente-gallery/services/download";
-import type { TimestampedDesktopUploadItem } from "ente-gallery/services/upload";
+import type { ProcessableUploadItem } from "ente-gallery/services/upload";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { wait } from "ente-utils/promise";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
@@ -71,7 +71,7 @@ interface IndexableItem {
     /**
      * If the file was uploaded from the current client, then its contents.
      */
-    timestampedUploadItem: TimestampedDesktopUploadItem | undefined;
+    processableUploadItem: ProcessableUploadItem | undefined;
     /**
      * The existing ML data (if any) on remote corresponding to this file.
      */
@@ -182,10 +182,7 @@ export class MLWorker {
      * This is a great opportunity to index since we already have the file with
      * us and won't need to download the file from remote.
      */
-    onUpload(
-        file: EnteFile,
-        timestampedUploadItem: TimestampedDesktopUploadItem,
-    ) {
+    onUpload(file: EnteFile, processableUploadItem: ProcessableUploadItem) {
         // Add the recently uploaded file to the live indexing queue.
         //
         // Limit the queue to some maximum so that we don't keep growing
@@ -201,7 +198,7 @@ export class MLWorker {
             // pre-existing ML data on remote.
             this.liveQ.push({
                 file,
-                timestampedUploadItem,
+                processableUploadItem,
                 remoteMLData: undefined,
             });
             this.wakeUp();
@@ -319,7 +316,7 @@ export class MLWorker {
         // Return files after annotating them with their existing ML data.
         return Array.from(fileByID, ([id, file]) => ({
             file,
-            timestampedUploadItem: undefined,
+            processableUploadItem: undefined,
             remoteMLData: mlDataByID.get(id),
         }));
     }
@@ -506,7 +503,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  * then remote will return a 413 Request Entity Too Large).
  */
 const index = async (
-    { file, timestampedUploadItem, remoteMLData }: IndexableItem,
+    { file, processableUploadItem, remoteMLData }: IndexableItem,
     electron: ElectronMLWorker,
 ) => {
     const f = fileLogID(file);
@@ -558,7 +555,7 @@ const index = async (
     try {
         renderableBlob = await fetchRenderableBlob(
             file,
-            timestampedUploadItem,
+            processableUploadItem,
             electron,
         );
     } catch (e) {

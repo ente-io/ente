@@ -10,7 +10,7 @@ import log from "ente-base/log";
 import { masterKeyFromSession } from "ente-base/session";
 import type { Electron } from "ente-base/types/ipc";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import { type TimestampedDesktopUploadItem } from "ente-gallery/services/upload";
+import { type ProcessableUploadItem } from "ente-gallery/services/upload";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { throttled } from "ente-utils/promise";
@@ -435,18 +435,19 @@ const workerDidUnawaitedIndex = () => void debounceUpdateClustersAndPeople();
  *
  * @param file The {@link EnteFile} that got uploaded.
  *
- * @param timestampedUploadItem The item that was uploaded. This can be used to
- * get at the contents of the file that got uploaded. In case of live photos,
- * this is the image part of the live photo that was uploaded.
+ * @param processableItem The item that was uploaded. This can be used to get at
+ * the contents of the file that got uploaded. In case of live photos, this is
+ * the image part of the live photo that was uploaded.
  */
 export const indexNewUpload = (
     file: EnteFile,
-    timestampedUploadItem: TimestampedDesktopUploadItem,
+    processableUploadItem: ProcessableUploadItem,
 ) => {
     if (!isMLEnabled()) return;
+    if (!isDesktop) return;
     if (file.metadata.fileType !== FileType.image) return;
-    log.debug(() => ["ml/liveq", { file, timestampedUploadItem }]);
-    void worker().then((w) => w.onUpload(file, timestampedUploadItem));
+    log.debug(() => ["ml/liveq", { file, processableUploadItem }]);
+    void worker().then((w) => w.onUpload(file, processableUploadItem));
 };
 
 export type MLStatus =

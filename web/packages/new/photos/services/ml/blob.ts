@@ -3,8 +3,8 @@ import type { ElectronMLWorker } from "ente-base/types/ipc";
 import { renderableImageBlob } from "ente-gallery/services/convert";
 import { downloadManager } from "ente-gallery/services/download";
 import type {
-    DesktopUploadItem,
-    TimestampedDesktopUploadItem,
+    ProcessableUploadItem,
+    UploadItem,
 } from "ente-gallery/services/upload";
 import { readStream } from "ente-gallery/utils/native-stream";
 import type { EnteFile } from "ente-media/file";
@@ -71,7 +71,7 @@ export const createImageBitmapAndData = async (
  * @param file The {@link EnteFile} to index.
  *
  * @param uploadItem If we're called during the upload process, then this will
- * be set to the {@link DesktopUploadItem} that was uploaded so that we can
+ * be set to the {@link FilesystemUploadItem} that was uploaded so that we can
  * directly use the on-disk file instead of needing to download the original.
  *
  * @param electron The {@link ElectronMLWorker} instance that stands as a
@@ -80,16 +80,16 @@ export const createImageBitmapAndData = async (
  */
 export const fetchRenderableBlob = async (
     file: EnteFile,
-    tsUploadItem: TimestampedDesktopUploadItem | undefined,
+    puItem: ProcessableUploadItem | undefined,
     electron: ElectronMLWorker,
 ): Promise<Blob> =>
-    tsUploadItem
-        ? await fetchRenderableUploadItemBlob(file, tsUploadItem, electron)
+    puItem
+        ? await fetchRenderableUploadItemBlob(file, puItem, electron)
         : await fetchRenderableEnteFileBlob(file);
 
 const fetchRenderableUploadItemBlob = async (
     file: EnteFile,
-    tsUploadItem: TimestampedDesktopUploadItem,
+    puItem: ProcessableUploadItem,
     electron: ElectronMLWorker,
 ) => {
     const fileType = file.metadata.fileType;
@@ -97,9 +97,8 @@ const fetchRenderableUploadItemBlob = async (
         const thumbnailData = await downloadManager.thumbnailData(file);
         return new Blob([thumbnailData!]);
     } else {
-        // TODO(HLS):
-        const uploadItem = tsUploadItem.uploadItem;
-
+        const uploadItem =
+            puItem instanceof File ? puItem : puItem.fsUploadItem;
         const blob = await readNonVideoUploadItem(uploadItem, electron);
         return renderableImageBlob(blob, file.metadata.title);
     }
@@ -110,15 +109,14 @@ const fetchRenderableUploadItemBlob = async (
  *
  * See: [Note: Reading a UploadItem]
  *
- * @param uploadItem An {@link DesktopUploadItem} which we are trying to index.
- * The code calling us guarantees that this function will not be called for
- * videos.
+ * @param uploadItem An {@link UploadItem} which we are trying to index. The
+ * code calling us guarantees that this function will not be called for videos.
  *
  * @returns a web {@link File} that can be used to access the upload item's
  * contents.
  */
 const readNonVideoUploadItem = async (
-    uploadItem: DesktopUploadItem,
+    uploadItem: UploadItem,
     electron: ElectronMLWorker,
 ): Promise<File> => {
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
@@ -133,7 +131,11 @@ const readNonVideoUploadItem = async (
             lastModified: lastModifiedMs,
         });
     } else {
-        return uploadItem.file;
+        if (uploadItem instanceof File) {
+            return uploadItem;
+        } else {
+            return uploadItem.file;
+        }
     }
 };
 

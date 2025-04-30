@@ -1,3 +1,5 @@
+import { isDesktop } from "ente-base/app";
+import { assertionFailed } from "ente-base/assert";
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
 import { ensureElectron } from "ente-base/electron";
@@ -21,7 +23,10 @@ import {
     getFilePreviewDataUploadURL,
     putVideoData,
 } from "./file-data";
-import { type TimestampedDesktopUploadItem } from "./upload";
+import {
+    type ProcessableUploadItem,
+    type TimestampedFileSystemUploadItem,
+} from "./upload";
 
 interface VideoProcessingQueueItem {
     /**
@@ -30,14 +35,14 @@ interface VideoProcessingQueueItem {
      */
     file: EnteFile;
     /**
-     * The {@link TimestampedDesktopUploadItem} when available for the newly
+     * The {@link TimestampedFileSystemUploadItem} when available for the newly
      * uploaded {@link file}.
      *
      * It will be present when this queue item was enqueued during a upload from
      * the current client. If present, this serves as an optimization allowing
-     * us to directly read the file off the user's filesystem.
+     * us to directly read the file off the user's file system.
      */
-    timestampedUploadItem: TimestampedDesktopUploadItem | undefined;
+    timestampedUploadItem: TimestampedFileSystemUploadItem | undefined;
 }
 
 /**
@@ -323,17 +328,27 @@ const blobToDataURL = (blob: Blob) =>
  *
  * @param file The {@link EnteFile} that got uploaded (video or otherwise).
  *
- * @param timestampedUploadItem The item that was uploaded. This can be used to
+ * @param processableUploadItem The item that was uploaded. This can be used to
  * read the contents of the file that got uploaded directly from disk instead of
  * needing to download it again.
  */
 export const processVideoNewUpload = (
     file: EnteFile,
-    timestampedUploadItem: TimestampedDesktopUploadItem,
+    processableUploadItem: ProcessableUploadItem,
 ) => {
     // TODO(HLS):
     if (!isVideoProcessingEnabled()) return;
+    if (!isDesktop) return;
     if (file.metadata.fileType !== FileType.video) return;
+    if (processableUploadItem instanceof File) {
+        // While the types don't guarantee it, we really shouldn't be getting
+        // here. The only time a processableUploadItem can be File when we're
+        // running in the desktop app is when an edited image copy is being
+        // saved. But we've already checked above that the file which was
+        // uploaded was a video.
+        assertionFailed();
+        return;
+    }
 
     if (_state.videoProcessingQueue.length > 50) {
         // Drop new requests if the queue can't keep up to avoid the app running
@@ -344,7 +359,10 @@ export const processVideoNewUpload = (
     }
 
     // Enqueue the item.
-    _state.videoProcessingQueue.push({ file, timestampedUploadItem });
+    _state.videoProcessingQueue.push({
+        file,
+        timestampedUploadItem: processableUploadItem,
+    });
 
     // Tickle the processor if it isn't already running.
     _state.queueProcessor ??= processQueue();
@@ -397,7 +415,7 @@ const processQueueItem = async ({
     const electron = ensureElectron();
 
     // TODO(HLS):
-    const uploadItem = timestampedUploadItem?.uploadItem;
+    const uploadItem = timestampedUploadItem?.fsUploadItem;
 
     log.debug(() => ["gen-hls", { file, uploadItem }]);
 

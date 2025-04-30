@@ -1,6 +1,6 @@
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
-import type { Electron, ZipItem } from "ente-base/types/ipc";
+import type { ZipItem } from "ente-base/types/ipc";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
@@ -79,14 +79,15 @@ export interface FileAndPath {
 
 /**
  * The cases of {@link UploadItem} that apply when we're running in the context
- * of our desktop app.
+ * of our desktop app, and the item that was uploaded has an associated file on
+ * the user's file system with a known path.
  *
- * See also {@link TimestampedDesktopUploadItem}.
+ * See also {@link TimestampedFileSystemUploadItem}.
  */
-export type DesktopUploadItem = Exclude<UploadItem, File>;
+export type FileSystemUploadItem = Exclude<UploadItem, File>;
 
 /**
- * A {@link DesktopUploadItem} augmented with the last modified time of the
+ * A {@link FileSystemUploadItem} augmented with the last modified time of the
  * corresponding file on disk.
  *
  * By keeping the last modified time, we can use it as a test of whether or not
@@ -95,42 +96,125 @@ export type DesktopUploadItem = Exclude<UploadItem, File>;
  * was uploaded and when the file gets processed.
  *
  * See {@link toTimestampedDesktopUploadItem} for converting a
- * {@link UploadItem} into a {@link TimestampedDesktopUploadItem} when running
- * in the context of the desktop app.
+ * {@link FileSystemUploadItem} into a {@link TimestampedFileSystemUploadItem}
+ * when running in the context of the desktop app.
  */
-export interface TimestampedDesktopUploadItem {
-    uploadItem: DesktopUploadItem;
-    lastModifiedTime: number;
+export interface TimestampedFileSystemUploadItem {
+    /**
+     * Information about the file system file which was uploaded to Ente.
+     */
+    fsUploadItem: FileSystemUploadItem;
+    /**
+     * The last modified time (epoch milliseconds) of the file system file.
+     */
+    lastModifiedMs: number;
+}
+
+export interface LivePhotoAssets {
+    image: UploadItem;
+    video: UploadItem;
 }
 
 /**
- * Assert that the given {@link UploadItem} is, in fact, one of the cases that
- * can happen when we're running in the context of the desktop app, and attach
- * the last modified time of the corresponding file system file to it.
+ * An upload item with both parts of a live photo clubbed together.
  *
- * @param electron A witness to the fact that we're running in the context of
- * the desktop app. We also use it to find the last modified time of the file.
- *
- * @param uploadItem The upload item we obtained from an arbitrary place in the
- * app.
- *
- * @returns The same {@link uploadItem}, but after excluding the cases that can
- * only happen when running in the web app, and with the last modified time of
- * the file attached to it.
+ * See: [Note: Intermediate file types during upload].
  */
-export const toTimestampedDesktopUploadItem = (
-    electron: Electron,
-    uploadItem: UploadItem,
-): TimestampedDesktopUploadItem => {
-    if (uploadItem instanceof File) {
-        log.info(`Invalid upload item (electron: ${!!electron})`, uploadItem);
-        throw new Error(
-            "Found a File upload item even though we're running in the desktop app",
-        );
+export interface ClusteredUploadItem {
+    localID: number;
+    collectionID: number;
+    fileName: string;
+    isLivePhoto: boolean;
+    uploadItem?: UploadItem;
+    // TODO: Tie this to the isLivePhoto flag using a discriminated union.
+    livePhotoAssets?: LivePhotoAssets;
+}
+
+/**
+ * Result of {@link markUploadedAndObtainPostProcessableItem}; see the
+ * documentation of that function for the meaning and cases of this type.
+ */
+export type ProcessableUploadItem = File | TimestampedFileSystemUploadItem;
+
+/**
+ * As the long name suggests, this function does a rather specific thing:
+ *
+ * - If we're running in the context of the web app, it will return the
+ *   {@link File} object that best represents the newly uploaded item. For
+ *   images and videos, this'll be the newly uploaded file itself. For live
+ *   photos, this will be the {@link File} object for the image component of the
+ *   live photo.
+ *
+ * - If we're running in the context of the desktop app, it will first mark the
+ *   item as having been uploaded in the persistent pending upload list that the
+ *   desktop app keeps (so that they can be resumed on restarts). After this,
+ *   it'll try to convert the item to a {@link TimestampedFileSystemUploadItem}
+ *   if possible, otherwise will return the web {@link File}. As with the web
+ *   case, in case of live photos the image component will be used in these
+ *   transformations.
+ *
+ * @param item An {@link ClusteredUploadItem} that was recently uploaded.
+ */
+export const markUploadedAndObtainProcessableItem = async (
+    item: ClusteredUploadItem,
+): Promise<ProcessableUploadItem> => {
+    const electron = globalThis.electron;
+    if (!electron) {
+        const resultItem = item.isLivePhoto
+            ? item.livePhotoAssets!.image
+            : item;
+        if (resultItem instanceof File) {
+            return resultItem;
+        } else {
+            throw new Error(
+                `Unexpected upload item of type "${typeof resultItem}"`,
+            );
+        }
     }
-    // TODO(HLS):
-    const lastModifiedTime = 0;
-    return { uploadItem, lastModifiedTime };
+
+    const timestamped = async (
+        t: Promise<number>,
+        item: FileSystemUploadItem,
+    ): Promise<TimestampedFileSystemUploadItem> => ({
+        fsUploadItem: item,
+        lastModifiedMs: await t,
+    });
+
+    if (item.isLivePhoto) {
+        const [p0, p1] = [
+            item.livePhotoAssets!.image,
+            item.livePhotoAssets!.video,
+        ];
+        if (Array.isArray(p0) && Array.isArray(p1)) {
+            return timestamped(electron.markUploadedZipItem(p0, p1), p0);
+        } else if (typeof p0 == "string" && typeof p1 == "string") {
+            return timestamped(electron.markUploadedFile(p0, p1), p0);
+        } else if (
+            p0 &&
+            typeof p0 == "object" &&
+            "path" in p0 &&
+            p1 &&
+            typeof p1 == "object" &&
+            "path" in p1
+        ) {
+            return timestamped(electron.markUploadedFile(p0.path, p1.path), p0);
+        } else {
+            throw new Error(
+                "Attempting to mark upload completion of unexpected desktop upload items",
+            );
+        }
+    } else {
+        const p = item.uploadItem!;
+        if (Array.isArray(p)) {
+            return timestamped(electron.markUploadedZipItem(p), p);
+        } else if (typeof p == "string") {
+            return timestamped(electron.markUploadedFile(p), p);
+        } else if (typeof p == "object" && "path" in p) {
+            return timestamped(electron.markUploadedFile(p.path), p);
+        } else {
+            return p;
+        }
+    }
 };
 
 /**
@@ -138,10 +222,10 @@ export const toTimestampedDesktopUploadItem = (
  * context of our desktop app, return a value that can be passed to
  * {@link Electron} functions over IPC.
  */
-export const toDataOrPathOrZipEntry = (desktopUploadItem: DesktopUploadItem) =>
-    typeof desktopUploadItem == "string" || Array.isArray(desktopUploadItem)
-        ? desktopUploadItem
-        : desktopUploadItem.path;
+export const toDataOrPathOrZipEntry = (fsUploadItem: FileSystemUploadItem) =>
+    typeof fsUploadItem == "string" || Array.isArray(fsUploadItem)
+        ? fsUploadItem
+        : fsUploadItem.path;
 
 export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 
