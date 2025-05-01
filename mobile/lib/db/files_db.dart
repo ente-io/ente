@@ -1684,6 +1684,9 @@ class FilesDB with SqlDbBase {
       AND $columnCreationTime > ?
       AND $columnUploadedFileID  != -1
       AND $columnOwnerID = $userID
+      AND $columnLocalID IS NOT NULL
+      AND ($columnFileSize IS NULL OR $columnFileSize <= 524288000)
+      AND ($columnDuration IS NULL OR $columnDuration <= 60)
       ORDER BY $columnCreationTime DESC
     ''',
       [getInt(fileType), beginDate.microsecondsSinceEpoch],
