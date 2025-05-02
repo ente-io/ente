@@ -163,14 +163,12 @@ class UploadService {
     }
 
     async uploadFile(uploadFile: UploadFile) {
-        if (this.publicAlbumsCredentials) {
-            return publicUploadHttpClient.uploadFile(
-                uploadFile,
-                this.publicAlbumsCredentials,
-            );
-        } else {
-            return UploadHttpClient.uploadFile(uploadFile);
-        }
+        return this.publicAlbumsCredentials
+            ? publicUploadHttpClient.uploadFile(
+                  uploadFile,
+                  this.publicAlbumsCredentials,
+              )
+            : UploadHttpClient.uploadFile(uploadFile);
     }
 
     private async refillUploadURLs() {
@@ -185,8 +183,8 @@ class UploadService {
     }
 
     private ensureUniqueUploadURLs() {
-        // TODO: Sanity check added on new implementation Nov 2024, remove after
-        // a while (tag: Migration).
+        // Sanity check added when this was a new implementation. Have kept it
+        // around, but it can be removed too.
         if (
             this.uploadURLs.length !=
             new Set(this.uploadURLs.map((u) => u.url)).size
@@ -211,17 +209,12 @@ class UploadService {
     }
 
     async fetchMultipartUploadURLs(count: number) {
-        if (this.publicAlbumsCredentials) {
-            // TODO: publicAlbumsCredentials
-            return await publicUploadHttpClient.fetchMultipartUploadURLs(
-                count,
-                this.publicAlbumsCredentials.accessToken,
-                // @ts-ignore
-                this.publicAlbumsCredentials.accessTokenJWT,
-            );
-        } else {
-            return await UploadHttpClient.fetchMultipartUploadURLs(count);
-        }
+        return this.publicAlbumsCredentials
+            ? publicUploadHttpClient.fetchMultipartUploadURLs(
+                  count,
+                  this.publicAlbumsCredentials,
+              )
+            : UploadHttpClient.fetchMultipartUploadURLs(count);
     }
 }
 
