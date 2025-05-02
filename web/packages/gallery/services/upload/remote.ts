@@ -1,7 +1,7 @@
 // TODO: Audit this file
-/* eslint-disable */
-// @ts-nocheck
-
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
     authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
@@ -14,7 +14,6 @@ import { apiURL, uploaderOrigin } from "ente-base/origins";
 import { type EnteFile } from "ente-media/file";
 import { CustomError, handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { z } from "zod";
 import type { MultipartUploadURLs, UploadFile } from "./upload-service";
 
@@ -39,16 +38,16 @@ const ObjectUploadURLResponse = z.object({ urls: ObjectUploadURL.array() });
 export class PhotosUploadHTTPClient {
     async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
         try {
-            const token = getToken();
-            if (!token) {
-                return;
-            }
             const url = await apiURL("/files");
             const response = await retryAsyncOperation(
                 () =>
-                    HTTPService.post(url, uploadFile, null, {
-                        "X-Auth-Token": token,
-                    }),
+                    HTTPService.post(
+                        url,
+                        uploadFile,
+                        // @ts-ignore
+                        null,
+                        authenticatedRequestHeaders(),
+                    ),
                 handleUploadError,
             );
             return response.data;
@@ -83,14 +82,10 @@ export class PhotosUploadHTTPClient {
         count: number,
     ): Promise<MultipartUploadURLs> {
         try {
-            const token = getToken();
-            if (!token) {
-                return;
-            }
             const response = await HTTPService.get(
                 await apiURL("/files/multipart-upload-urls"),
                 { count },
-                { "X-Auth-Token": token },
+                authenticatedRequestHeaders(),
             );
 
             return response.data.urls;
@@ -103,7 +98,7 @@ export class PhotosUploadHTTPClient {
     async putFile(
         fileUploadURL: ObjectUploadURL,
         file: Uint8Array,
-        progressTracker,
+        progressTracker: unknown,
     ): Promise<string> {
         try {
             await retryAsyncOperation(
@@ -111,6 +106,7 @@ export class PhotosUploadHTTPClient {
                     HTTPService.put(
                         fileUploadURL.url,
                         file,
+                        // @ts-ignore
                         null,
                         null,
                         progressTracker,
@@ -119,7 +115,12 @@ export class PhotosUploadHTTPClient {
             );
             return fileUploadURL.objectKey;
         } catch (e) {
-            if (e.message !== CustomError.UPLOAD_CANCELLED) {
+            if (
+                !(
+                    e instanceof Error &&
+                    e.message == CustomError.UPLOAD_CANCELLED
+                )
+            ) {
                 log.error("putFile to dataStore failed ", e);
             }
             throw e;
@@ -129,7 +130,7 @@ export class PhotosUploadHTTPClient {
     async putFileV2(
         fileUploadURL: ObjectUploadURL,
         file: Uint8Array,
-        progressTracker,
+        progressTracker: unknown,
     ): Promise<string> {
         try {
             const origin = await uploaderOrigin();
@@ -137,6 +138,7 @@ export class PhotosUploadHTTPClient {
                 HTTPService.put(
                     `${origin}/file-upload`,
                     file,
+                    // @ts-ignore
                     null,
                     { "UPLOAD-URL": fileUploadURL.url },
                     progressTracker,
@@ -144,7 +146,12 @@ export class PhotosUploadHTTPClient {
             );
             return fileUploadURL.objectKey;
         } catch (e) {
-            if (e.message !== CustomError.UPLOAD_CANCELLED) {
+            if (
+                !(
+                    e instanceof Error &&
+                    e.message == CustomError.UPLOAD_CANCELLED
+                )
+            ) {
                 log.error("putFile to dataStore failed ", e);
             }
             throw e;
@@ -154,17 +161,19 @@ export class PhotosUploadHTTPClient {
     async putFilePart(
         partUploadURL: string,
         filePart: Uint8Array,
-        progressTracker,
+        progressTracker: unknown,
     ) {
         try {
             const response = await retryAsyncOperation(async () => {
                 const resp = await HTTPService.put(
                     partUploadURL,
                     filePart,
+                    // @ts-ignore
                     null,
                     null,
                     progressTracker,
                 );
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 if (!resp?.headers?.etag) {
                     const err = Error(CustomError.ETAG_MISSING);
                     log.error("putFile in parts failed", err);
@@ -174,7 +183,12 @@ export class PhotosUploadHTTPClient {
             }, handleUploadError);
             return response.headers.etag as string;
         } catch (e) {
-            if (e.message !== CustomError.UPLOAD_CANCELLED) {
+            if (
+                !(
+                    e instanceof Error &&
+                    e.message == CustomError.UPLOAD_CANCELLED
+                )
+            ) {
                 log.error("put filePart failed", e);
             }
             throw e;
@@ -184,7 +198,7 @@ export class PhotosUploadHTTPClient {
     async putFilePartV2(
         partUploadURL: string,
         filePart: Uint8Array,
-        progressTracker,
+        progressTracker: unknown,
     ) {
         try {
             const origin = await uploaderOrigin();
@@ -192,10 +206,12 @@ export class PhotosUploadHTTPClient {
                 const resp = await HTTPService.put(
                     `${origin}/multipart-upload`,
                     filePart,
+                    // @ts-ignore
                     null,
                     { "UPLOAD-URL": partUploadURL },
                     progressTracker,
                 );
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 if (!resp?.data?.etag) {
                     const err = Error(CustomError.ETAG_MISSING);
                     log.error("putFile in parts failed", err);
@@ -205,16 +221,22 @@ export class PhotosUploadHTTPClient {
             });
             return response.data.etag as string;
         } catch (e) {
-            if (e.message !== CustomError.UPLOAD_CANCELLED) {
+            if (
+                !(
+                    e instanceof Error &&
+                    e.message == CustomError.UPLOAD_CANCELLED
+                )
+            ) {
                 log.error("put filePart failed", e);
             }
             throw e;
         }
     }
 
-    async completeMultipartUpload(completeURL: string, reqBody: any) {
+    async completeMultipartUpload(completeURL: string, reqBody: unknown) {
         try {
             await retryAsyncOperation(() =>
+                // @ts-ignore
                 HTTPService.post(completeURL, reqBody, null, {
                     "content-type": "text/xml",
                 }),
@@ -225,13 +247,14 @@ export class PhotosUploadHTTPClient {
         }
     }
 
-    async completeMultipartUploadV2(completeURL: string, reqBody: any) {
+    async completeMultipartUploadV2(completeURL: string, reqBody: unknown) {
         try {
             const origin = await uploaderOrigin();
             await retryAsyncOperation(() =>
                 HTTPService.post(
                     `${origin}/multipart-complete`,
                     reqBody,
+                    // @ts-ignore
                     null,
                     { "content-type": "text/xml", "UPLOAD-URL": completeURL },
                 ),
@@ -259,6 +282,7 @@ export class PublicAlbumsUploadHTTPClient {
                     HTTPService.post(
                         url,
                         uploadFile,
+                        // @ts-ignore
                         null,
                         authenticatedPublicAlbumsRequestHeaders(credentials),
                     ),
