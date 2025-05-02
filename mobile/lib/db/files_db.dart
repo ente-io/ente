@@ -1160,20 +1160,6 @@ class FilesDB with SqlDbBase {
     );
   }
 
-  Future<void> removeFromCollection(int collectionID, List<int> fileIDs) async {
-    final db = await instance.sqliteAsyncDB;
-    final inParam = fileIDs.join(',');
-    unawaited(
-      db.execute(
-        '''
-      DELETE FROM $filesTable
-      WHERE $columnCollectionID = ? AND $columnUploadedFileID IN ($inParam);
-      ''',
-        [collectionID],
-      ),
-    );
-  }
-
   // todo:rewrite (upload related)
   Future<List<EnteFile>> getPendingUploadForCollection(int collectionID) async {
     final db = await instance.sqliteAsyncDB;

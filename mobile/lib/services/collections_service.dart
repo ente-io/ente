@@ -1817,8 +1817,15 @@ class CollectionsService {
       );
     }
 
+    // insert new files in the toCollection which are not part of the toCollection
+    final existingUploadedIDs =
+        await remoteDB.getUploadedFileIDs(toCollectionID);
+    files.removeWhere(
+      (element) => existingUploadedIDs.contains(element.uploadedFileID),
+    );
+    await _filesDB.insertMultiple(files);
     // remove files from old collection
-    await _filesDB.removeFromCollection(
+    await remoteDB.deleteCollectionEnteries(
       fromCollectionID,
       files.map((e) => e.uploadedFileID!).toList(),
     );
@@ -1830,13 +1837,6 @@ class CollectionsService {
         type: EventType.deletedFromRemote,
       ),
     );
-    // insert new files in the toCollection which are not part of the toCollection
-    final existingUploadedIDs =
-        await remoteDB.getUploadedFileIDs(toCollectionID);
-    files.removeWhere(
-      (element) => existingUploadedIDs.contains(element.uploadedFileID),
-    );
-    await _filesDB.insertMultiple(files);
     Bus.instance.fire(
       CollectionUpdatedEvent(toCollectionID, files, "moveTo"),
     );
@@ -1893,7 +1893,7 @@ class CollectionsService {
         throw Exception("Failed to remove files from collection");
       }
 
-      await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
+      await remoteDB.deleteCollectionEnteries(collectionID, params["fileIDs"]);
       Bus.instance
           .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom"));
       Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom"));

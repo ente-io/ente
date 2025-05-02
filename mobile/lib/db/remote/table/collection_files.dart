@@ -117,6 +117,24 @@ extension CollectionFiles on RemoteDB {
     );
   }
 
+  Future<void> deleteCollectionsEnteries(List<int> cIDs) async {
+    if (cIDs.isEmpty) return;
+    await sqliteDB.execute(
+      "DELETE FROM collection_files WHERE collection_id IN (${cIDs.join(",")})",
+    );
+  }
+
+  Future<void> deleteCollectionEnteries(
+    int collectionID,
+    List<int> fileIDs,
+  ) async {
+    if (fileIDs.isEmpty) return;
+    await sqliteDB.execute(
+      "DELETE FROM collection_files WHERE collection_id = ? AND file_id IN (${fileIDs.join(",")})",
+      [collectionID],
+    );
+  }
+
   Future<Map<int, int>> getCollectionIDToMaxCreationTime() async {
     final enteWatch = EnteWatch("getCollectionIDToMaxCreationTime")..start();
     final rows = await sqliteDB.getAll(
