@@ -39,6 +39,7 @@ export class PhotosUploadHTTPClient {
     async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
         try {
             const url = await apiURL("/files");
+            const headers = await authenticatedRequestHeaders();
             const response = await retryAsyncOperation(
                 () =>
                     HTTPService.post(
@@ -46,7 +47,7 @@ export class PhotosUploadHTTPClient {
                         uploadFile,
                         // @ts-ignore
                         null,
-                        authenticatedRequestHeaders(),
+                        headers,
                     ),
                 handleUploadError,
             );
@@ -85,7 +86,7 @@ export class PhotosUploadHTTPClient {
             const response = await HTTPService.get(
                 await apiURL("/files/multipart-upload-urls"),
                 { count },
-                authenticatedRequestHeaders(),
+                await authenticatedRequestHeaders(),
             );
 
             return response.data.urls;
