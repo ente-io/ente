@@ -1,3 +1,7 @@
+// TODO: Audit this file
+/* eslint-disable */
+// @ts-nocheck
+
 import {
     authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
@@ -7,12 +11,12 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, uploaderOrigin } from "ente-base/origins";
-import { EnteFile } from "ente-media/file";
+import { type EnteFile } from "ente-media/file";
 import { CustomError, handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { z } from "zod";
-import { MultipartUploadURLs, UploadFile } from "./upload-service";
+import type { MultipartUploadURLs, UploadFile } from "./upload-service";
 
 /**
  * A pre-signed URL alongwith the associated object key.

@@ -73,7 +73,7 @@ import {
     savePublicCollectionPassword,
     syncPublicFiles,
 } from "services/publicCollectionService";
-import uploadManager from "services/upload/uploadManager";
+import { uploadManager } from "services/upload-manager";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributes,
