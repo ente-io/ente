@@ -542,7 +542,7 @@ interface UploadResponse {
  * {@link UploadManager} after it has assembled all the relevant bits we need to
  * go forth and upload.
  */
-export const uploader = async (
+export const upload = async (
     { collection, localID, fileName, ...uploadAsset }: UploadableUploadItem,
     uploaderName: string,
     existingFiles: EnteFile[],
@@ -670,7 +670,7 @@ export const uploader = async (
             uploadResult: metadata.hasStaticThumbnail
                 ? "uploadedWithStaticThumbnail"
                 : "uploaded",
-            uploadedFile: uploadedFile,
+            uploadedFile,
         };
     } catch (e) {
         // @ts-ignore
