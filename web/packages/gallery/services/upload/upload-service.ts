@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-/* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 // TODO: Audit this file
@@ -797,7 +796,7 @@ const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
     // smaller).
     let pending: Uint8Array | undefined;
     const transformer = new TransformStream<Uint8Array, Uint8Array>({
-        async transform(
+        transform(
             chunk: Uint8Array,
             controller: TransformStreamDefaultController,
         ) {
