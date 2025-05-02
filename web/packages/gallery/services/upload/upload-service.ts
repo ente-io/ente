@@ -1,8 +1,6 @@
+// TODO: Audit this file
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-// TODO: Audit this file
-/* eslint-disable @typescript-eslint/no-base-to-string */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
@@ -510,7 +508,9 @@ const uploadItemCreationDate = async (
     } else if (fileType == FileType.video) {
         parsedMetadata = await tryExtractVideoMetadata(uploadItem);
     } else {
-        throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
+        throw new Error(
+            `Unexpected file type ${fileType} for ${uploadItemFileName(uploadItem)}`,
+        );
     }
 
     return parsedMetadata?.creationDate?.timestamp;
@@ -1003,7 +1003,9 @@ const extractImageOrVideoMetadata = async (
     } else if (fileType == FileType.video) {
         parsedMetadata = await tryExtractVideoMetadata(uploadItem);
     } else {
-        throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
+        throw new Error(
+            `Unexpected file type ${fileType} for ${uploadItemFileName(uploadItem)}`,
+        );
     }
 
     // The `UploadAsset` itself might have metadata associated with a-priori, if
@@ -1106,7 +1108,8 @@ const tryExtractImageMetadata = async (
     try {
         return await extractExif(file);
     } catch (e) {
-        log.error(`Failed to extract image metadata for ${uploadItem}`, e);
+        const fileName = uploadItemFileName(uploadItem);
+        log.error(`Failed to extract image metadata for ${fileName}`, e);
         // @ts-ignore
         return undefined;
     }
@@ -1116,7 +1119,8 @@ const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
     try {
         return await extractVideoMetadata(uploadItem);
     } catch (e) {
-        log.error(`Failed to extract video metadata for ${uploadItem}`, e);
+        const fileName = uploadItemFileName(uploadItem);
+        log.error(`Failed to extract video metadata for ${fileName}`, e);
         return undefined;
     }
 };
@@ -1275,8 +1279,9 @@ const withThumbnail = async (
                 // directly for subsequent steps.
                 fileData = data;
             } else {
+                const fileName = uploadItemFileName(uploadItem);
                 log.warn(
-                    `Not using browser based thumbnail generation fallback for video at path ${uploadItem}`,
+                    `Not using browser based thumbnail generation fallback for video at path ${fileName}`,
                 );
             }
         }
