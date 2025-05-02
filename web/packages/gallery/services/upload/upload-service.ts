@@ -1,6 +1,6 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
@@ -500,7 +500,7 @@ const uploadItemCreationDate = async (
     parsedMetadataJSON: ParsedMetadataJSON | undefined,
 ) => {
     if (parsedMetadataJSON?.creationTime)
-        return parsedMetadataJSON?.creationTime;
+        return parsedMetadataJSON.creationTime;
 
     let parsedMetadata: ParsedMetadata | undefined;
     if (fileType == FileType.image) {
@@ -601,7 +601,7 @@ export const upload = async (
             areFilesSame(file.metadata, metadata),
         );
 
-        const anyMatch = matches?.length > 0 ? matches[0] : undefined;
+        const anyMatch = matches.length > 0 ? matches[0] : undefined;
 
         if (anyMatch) {
             const matchInSameCollection = matches.find(
@@ -1313,7 +1313,7 @@ const constructPublicMagicMetadata = async (
         publicMagicMetadataProps,
     );
 
-    if (Object.values(nonEmptyPublicMagicMetadataProps)?.length === 0) {
+    if (Object.values(nonEmptyPublicMagicMetadataProps).length === 0) {
         // @ts-ignore
         return null;
     }
@@ -1346,6 +1346,8 @@ const encryptFile = async (
     });
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
+    // Keep defensive check until the underlying type is audited.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (pubMagicMetadata) {
         const encryptedPubMagicMetadataData = await worker.encryptMetadataJSON({
             jsonValue: pubMagicMetadata.data,
