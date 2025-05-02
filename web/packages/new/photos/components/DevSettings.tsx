@@ -74,7 +74,7 @@ const Contents: React.FC<ContentsProps> = (props) => {
         [],
     );
 
-    // Even though this is async, this should be instantanous, we're just
+    // Even though this is async, this should be instantaneous, we're just
     // reading the value from the local IndexedDB.
     if (initialAPIOrigin === undefined) return <></>;
 

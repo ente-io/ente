@@ -14,12 +14,9 @@ PODS:
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
-  - ffmpeg-kit-ios-full-gpl (6.0)
-  - ffmpeg_kit_flutter_full_gpl (6.0.3):
-    - ffmpeg_kit_flutter_full_gpl/full-gpl (= 6.0.3)
-    - Flutter
-  - ffmpeg_kit_flutter_full_gpl/full-gpl (6.0.3):
-    - ffmpeg-kit-ios-full-gpl (= 6.0)
+  - ffmpeg_kit_custom (6.0.3)
+  - ffmpeg_kit_flutter (6.0.3):
+    - ffmpeg_kit_custom
     - Flutter
   - file_saver (0.0.1):
     - Flutter
@@ -193,11 +190,11 @@ PODS:
   - SDWebImageWebPCoder (0.14.6):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
-  - Sentry/HybridSDK (8.44.0)
-  - sentry_flutter (8.13.2):
+  - Sentry/HybridSDK (8.46.0)
+  - sentry_flutter (8.14.1):
     - Flutter
     - FlutterMacOS
-    - Sentry/HybridSDK (= 8.44.0)
+    - Sentry/HybridSDK (= 8.46.0)
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -252,7 +249,7 @@ DEPENDENCIES:
   - cupertino_http (from `.symlinks/plugins/cupertino_http/darwin`)
   - dart_ui_isolate (from `.symlinks/plugins/dart_ui_isolate/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
-  - ffmpeg_kit_flutter_full_gpl (from `.symlinks/plugins/ffmpeg_kit_flutter_full_gpl/ios`)
+  - ffmpeg_kit_flutter (from `.symlinks/plugins/ffmpeg_kit_flutter/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
@@ -304,8 +301,9 @@ DEPENDENCIES:
   - workmanager (from `.symlinks/plugins/workmanager/ios`)
 
 SPEC REPOS:
+  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios:
+    - ffmpeg_kit_custom
   trunk:
-    - ffmpeg-kit-ios-full-gpl
     - Firebase
     - FirebaseCore
     - FirebaseCoreInternal
@@ -340,8 +338,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/dart_ui_isolate/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
-  ffmpeg_kit_flutter_full_gpl:
-    :path: ".symlinks/plugins/ffmpeg_kit_flutter_full_gpl/ios"
+  ffmpeg_kit_flutter:
+    :path: ".symlinks/plugins/ffmpeg_kit_flutter/ios"
   file_saver:
     :path: ".symlinks/plugins/file_saver/ios"
   firebase_core:
@@ -449,8 +447,8 @@ SPEC CHECKSUMS:
   cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
   dart_ui_isolate: 46f6714abe6891313267153ef6f9748d8ecfcab1
   device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
-  ffmpeg-kit-ios-full-gpl: 80adc341962e55ef709e36baa8ed9a70cf4ea62b
-  ffmpeg_kit_flutter_full_gpl: ce18b888487c05c46ed252cd2e7956812f2e3bd1
+  ffmpeg_kit_custom: 682b4f2f1ff1f8abae5a92f6c3540f2441d5be99
+  ffmpeg_kit_flutter: 915b345acc97d4142e8a9a8549d177ff10f043f5
   file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
   Firebase: d80354ed7f6df5f9aca55e9eb47cc4b634735eaf
   firebase_core: 6cbed78b4f298ed103a9fd034e6dbc846320480f
@@ -503,8 +501,8 @@ SPEC CHECKSUMS:
   receive_sharing_intent: 222384f00ffe7e952bbfabaa9e3967cb87e5fe00
   SDWebImage: f84b0feeb08d2d11e6a9b843cb06d75ebf5b8868
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
-  Sentry: 0f9bc9adfc0b960e7f3bb5ec67e9a3d8193f3bdb
-  sentry_flutter: f4a0466dc8855998ffd59378ec33507c7dc32d7b
+  Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
+  sentry_flutter: 942017adbe00f963061cb11ec260414a990b7a42
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
@@ -519,6 +517,6 @@ SPEC CHECKSUMS:
   wakelock_plus: 04623e3f525556020ebd4034310f20fe7fda8b49
   workmanager: 01be2de7f184bd15de93a1812936a2b7f42ef07e
 
-PODFILE CHECKSUM: 20e086e6008977d43a3d40260f3f9bffcac748dd
+PODFILE CHECKSUM: a8ef88ad74ba499756207e7592c6071a96756d18
 
 COCOAPODS: 1.16.2

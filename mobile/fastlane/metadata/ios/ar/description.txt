@@ -1,33 +1,33 @@
-Ente is a simple app to automatically backup and organize your photos and videos.
+Ente هو تطبيق بسيط لإنشاء نسخ احتياطية وتنظيم صورك ومقاطع الفيديو الخاصة بك تلقائيًا.
 
-If you've been looking for a privacy-friendly alternative to preserve your memories, you've come to the right place. With Ente, they are stored end-to-end encrypted (e2ee). This means that only you can view them.
+إذا كنت تبحث عن بديل يحفظ الخصوصية للحفاظ على ذكرياتك، فأنت في المكان الصحيح. مع Ente، يتم تخزينهن بتشفير من طرف إلى طرف (e2ee). هذا يعني أنك وحدك من يستطيع رؤيتها.
 
-We have apps across all platforms, and your photos will seamlessly sync between all your devices in an end-to-end encrypted (e2ee) manner.
+لدينا تطبيقات عبر جميع المنصات، وستتم مزامنة صورك بسلاسة بين جميع أجهزتك بطريقة مشفرة من طرف إلى طرف (e2ee).
 
-Ente also makes it simple to share your albums with your loved ones. You can either share them directly with other Ente users, end-to-end encrypted; or with publicly viewable links.
+يجعل Ente أيضًا من السهل مشاركة ألبوماتك مع أحبائك. يمكنك إما مشاركتها مباشرة مع مستخدمي Ente الآخرين، بتشفير من طرف إلى طرف؛ أو باستخدام روابط قابلة للعرض بشكل عام.
 
-Your encrypted data is stored across multiple locations, including a fall-out shelter in Paris. We take posterity seriously and make it easy to ensure that your memories outlive you.
+يتم تخزين بياناتك المشفرة عبر مواقع متعددة، بما في ذلك ملجأ للطوارئ في باريس. نحن نأخذ مسألة البقاء على مر الزمن بجدية ونجعل من السهل ضمان أن ذكرياتك ستدوم بعدك.
 
-We are here to make the safest photos app ever, come join our journey!
+نحن هنا لنصنع أكثر تطبيقات الصور أمانًا على الإطلاق، انضم إلى رحلتنا!
 
-FEATURES
-- Original quality backups, because every pixel is important
-- Family plans, so you can share storage with your family
-- Shared folders, in case you want your partner to enjoy your "Camera" clicks
-- Album links, that can be protected with a password and set to expire
-- Ability to free up space, by removing files that have been safely backed up
-- Image editor, to add finishing touches
-- Favorite, hide and relive your memories, for they are precious
-- One-click import from all major storage providers
-- Dark theme, because your photos look good in it
-- 2FA, 3FA, biometric auth
-- and a LOT more!
+الميزات
+- نسخ احتياطية بالجودة الأصلية، لأن كل بكسل مهم
+- خطط عائلية، حتى تتمكن من مشاركة مساحة التخزين مع عائلتك
+- مجلدات مشتركة، في حال كنت ترغب في أن يستمتع شريكك بصور "الكاميرا" الخاصة بك
+- روابط الألبوم، التي يمكن حمايتها بكلمة مرور وتعيينها لتنتهي صلاحيتها
+- القدرة على تحرير المساحة، عن طريق إزالة الملفات التي تم نسخها احتياطيًا بأمان
+- محرر الصور، لإضافة اللمسات النهائية
+- إضافة إلى المفضلة، إخفاء، وإعادة إحياء ذكرياتك، فهي ثمينة
+- استيراد بنقرة واحدة من جميع مزودي التخزين الرئيسيين
+- الوضع الداكن، لأن صورك تظهر بشكلٍ أفضل فيه
+- مصادقة ثنائية (2FA)، مصادقة ثلاثية (3FA)، مصادقة بيومترية
+- وأكثر من ذلك بكثير!
 
-PRICING
-We don't offer forever free plans, because it is important to us that we remain sustainable and withstand the test of time. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
+التسعير
+نحن لا نقدم خططًا مجانية إلى الأبد، لأنه من المهم بالنسبة لنا أن نبقى مستدامين ونتجاوز اختبار الزمن. بدلاً من ذلك، نقدم خططًا بأسعار معقولة يمكنك مشاركتها بحرية مع عائلتك. يمكنك العثور على مزيد من المعلومات على ente.io.
 
-SUPPORT
-We take pride in offering human support. If you are our paid customer, you can reach out to team@ente.io and expect a response from our team within 24 hours.
+الدعم
+نحن نفخر بتقديم الدعم البشري. إذا كنت عميلاً مدفوعًا لدينا، يمكنك التواصل عبر team@ente.io وتوقع ردًا من فريقنا في غضون 24 ساعة.
 
-TERMS
+الشروط
 https://ente.io/terms

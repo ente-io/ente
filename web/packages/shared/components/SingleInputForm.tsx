@@ -143,7 +143,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                             input: {
                                 autoComplete:
                                     props.disableAutoComplete ||
-                                    props.fieldType === "password"
+                                    props.fieldType == "password"
                                         ? "off"
                                         : "on",
                                 endAdornment: props.fieldType ===

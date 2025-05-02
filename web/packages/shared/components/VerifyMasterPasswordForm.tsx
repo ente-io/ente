@@ -68,7 +68,7 @@ export default function VerifyMasterPasswordForm({
                 log.error("failed to derive key", e);
                 throw Error(CustomError.WEAK_DEVICE);
             }
-            if (!keyAttributes && typeof getKeyAttributes === "function") {
+            if (!keyAttributes && typeof getKeyAttributes == "function") {
                 keyAttributes = await getKeyAttributes(kek);
             }
             if (!keyAttributes) {

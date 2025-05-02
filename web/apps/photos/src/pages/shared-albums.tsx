@@ -129,7 +129,7 @@ export default function PublicCollectionGallery() {
                 setFilesDownloadProgressAttributesList((prev) => {
                     const attributes = prev?.find((attr) => attr.id === id);
                     const updatedAttributes =
-                        typeof value === "function"
+                        typeof value == "function"
                             ? value(attributes)
                             : { ...attributes, ...value };
                     const updatedAttributesList = attributes
@@ -181,7 +181,7 @@ export default function PublicCollectionGallery() {
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
-        if (currentURL.pathname !== "/") {
+        if (currentURL.pathname != "/") {
             router.replace(
                 {
                     pathname: "/shared-albums",
@@ -467,7 +467,7 @@ export default function PublicCollectionGallery() {
     } else if (!publicFiles || !credentials.current) {
         return (
             <Stack100vhCenter>
-                <Typography>{t("NOT_FOUND")}</Typography>
+                <Typography>{t("not_found")}</Typography>
             </Stack100vhCenter>
         );
     }

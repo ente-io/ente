@@ -66,6 +66,7 @@ import type { IpcRendererEvent } from "electron";
 import type {
     AppUpdate,
     CollectionMapping,
+    FFmpegCommand,
     FolderWatch,
     PendingUploads,
     ZipItem,
@@ -183,6 +184,8 @@ const fsWriteFileViaBackup = (path: string, contents: string) =>
 
 const fsIsDir = (dirPath: string) => ipcRenderer.invoke("fsIsDir", dirPath);
 
+const fsStatMtime = (path: string) => ipcRenderer.invoke("fsStatMtime", path);
+
 // - Conversion
 
 const convertToJPEG = (imageData: Uint8Array) =>
@@ -201,7 +204,7 @@ const generateImageThumbnail = (
     );
 
 const ffmpegExec = (
-    command: string[],
+    command: FFmpegCommand,
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
 ) =>
@@ -289,11 +292,11 @@ const pendingUploads = () => ipcRenderer.invoke("pendingUploads");
 const setPendingUploads = (pendingUploads: PendingUploads) =>
     ipcRenderer.invoke("setPendingUploads", pendingUploads);
 
-const markUploadedFiles = (paths: PendingUploads["filePaths"]) =>
-    ipcRenderer.invoke("markUploadedFiles", paths);
+const markUploadedFile = (path: string, associatedPath?: string) =>
+    ipcRenderer.invoke("markUploadedFile", path, associatedPath);
 
-const markUploadedZipItems = (items: PendingUploads["zipItems"]) =>
-    ipcRenderer.invoke("markUploadedZipItems", items);
+const markUploadedZipItem = (item: ZipItem, associatedItem?: ZipItem) =>
+    ipcRenderer.invoke("markUploadedZipItem", item, associatedItem);
 
 const clearPendingUploads = () => ipcRenderer.invoke("clearPendingUploads");
 
@@ -335,7 +338,7 @@ const clearPendingUploads = () => ipcRenderer.invoke("clearPendingUploads");
  * >
  * > https://www.electronjs.org/docs/latest/api/context-bridge#methods
  *
- * The copy itself is relatively fast, but the problem with transfering large
+ * The copy itself is relatively fast, but the problem with transferring large
  * amounts of data is potentially running out of memory during the copy.
  *
  * For an alternative, see [Note: IPC streams].
@@ -378,6 +381,7 @@ contextBridge.exposeInMainWorld("electron", {
         writeFile: fsWriteFile,
         writeFileViaBackup: fsWriteFileViaBackup,
         isDir: fsIsDir,
+        statMtime: fsStatMtime,
         findFiles: fsFindFiles,
     },
 
@@ -410,7 +414,7 @@ contextBridge.exposeInMainWorld("electron", {
     pathOrZipItemSize,
     pendingUploads,
     setPendingUploads,
-    markUploadedFiles,
-    markUploadedZipItems,
+    markUploadedFile,
+    markUploadedZipItem,
     clearPendingUploads,
 });

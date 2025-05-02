@@ -828,7 +828,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
-                disableDownload,
                 haveUser,
                 delegate: delegateRef.current!,
                 onClose: () => {
@@ -1151,6 +1150,10 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
             <Shortcut action={t("close")} shortcut={ut("Esc")} />
             <Shortcut
                 action={formattedListJoin([t("previous"), t("next")])}
+                shortcut={`${formattedListJoin([ut("←"), ut("→")])} ${ut("(Option/Alt)")}`}
+            />
+            <Shortcut
+                action={t("video_seek")}
                 shortcut={formattedListJoin([ut("←"), ut("→")])}
             />
             <Shortcut
@@ -1168,6 +1171,10 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
             <Shortcut
                 action={t("pan")}
                 shortcut={formattedListJoin([ut("W A S D"), t("drag")])}
+            />
+            <Shortcut
+                action={formattedListJoin([t("play"), t("pause")])}
+                shortcut={ut("Space")}
             />
             <Shortcut action={t("toggle_live")} shortcut={ut("Space")} />
             <Shortcut action={t("toggle_audio")} shortcut={ut("M")} />

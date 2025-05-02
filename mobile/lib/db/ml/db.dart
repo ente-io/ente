@@ -814,7 +814,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
   @override
   Future<double> getClusteredToIndexableFilesRatio() async {
-    final int indexableFiles = (await getIndexableFileIDs()).length;
+    final int indexableFiles = await getIndexableFileCount();
     final int clusteredFiles = await getClusteredOrFacelessFileCount();
 
     return clusteredFiles / indexableFiles;

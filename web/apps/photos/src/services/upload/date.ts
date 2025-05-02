@@ -1,3 +1,4 @@
+import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 
 /**
@@ -64,6 +65,35 @@ const parseEpochMicrosecondsFromFileName = (fileName: string) => {
         }
     }
 
+    if (!date) {
+        const [name] = nameAndExtension(fileName);
+
+        if (name.endsWith("_iOS")) {
+            // Parse (some) iOS filenames.
+            //
+            // As reported by a customer, iOS sometimes (unknown exactly when)
+            // does not retain the Exif date but instead puts it in the filename
+            // in a format like `20230427_145116000_iOS.jpg`, and that Apple
+            // Photos can parse it back from there.
+            //
+            // I couldn't find more official documentation from a quick look,
+            // but there do seem to be other people on the internet
+            // corraborating this:
+            //
+            // > iOS 11, (older versions do the same thing), when I take a photo
+            // > or video, the filename consists of the following:
+            // > 20170923_220934000_iOS ... file name is based on UTC/GMT time.
+            // >
+            // > https://discussions.apple.com/thread/8087977
+
+            const p = name.split("_");
+            if (p.length == 3) {
+                const dateString = `${p[0]}-${p[1]}`;
+                date = parseDateFromFusedDateString(dateString);
+            }
+        }
+    }
+
     // Generic pattern.
     if (!date) {
         date = parseDateFromDigitGroups(fileName);
@@ -109,7 +139,8 @@ interface DateComponents {
 }
 
 /**
- * Parse a date from a string of the form "YYYYMMDD-HHMMSS".
+ * Parse a date from a string of the form "YYYYMMDD-HHMMSS". Any extra
+ * characters at the end are ignored.
  */
 const parseDateFromFusedDateString = (s: string) =>
     validateAndGetDateFromComponents({

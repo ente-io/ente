@@ -6,7 +6,7 @@ import log from "ente-base/log";
 import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
 import type { ElectronMLWorker } from "ente-base/types/ipc";
 import { isNetworkDownloadError } from "ente-gallery/services/download";
-import type { UploadItem } from "ente-gallery/services/upload";
+import type { ProcessableUploadItem } from "ente-gallery/services/upload";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { wait } from "ente-utils/promise";
 import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
@@ -64,11 +64,17 @@ const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
 
 interface IndexableItem {
-    /** The {@link EnteFile} to (potentially) index. */
+    /**
+     * The {@link EnteFile} to (potentially) index.
+     */
     file: EnteFile;
-    /** If the file was uploaded from the current client, then its contents. */
-    uploadItem: UploadItem | undefined;
-    /** The existing ML data on remote corresponding to this file. */
+    /**
+     * If the file was uploaded from the current client, then its contents.
+     */
+    processableUploadItem: ProcessableUploadItem | undefined;
+    /**
+     * The existing ML data (if any) on remote corresponding to this file.
+     */
     remoteMLData: RemoteMLData | undefined;
 }
 
@@ -100,7 +106,7 @@ export class MLWorker {
     /** The last known state of the worker. */
     public state: WorkerState = "init";
     /** If the worker is currently clustering, then its last known progress. */
-    public clusteringProgess: ClusteringProgress | undefined;
+    public clusteringProgress: ClusteringProgress | undefined;
 
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
@@ -173,29 +179,17 @@ export class MLWorker {
     /**
      * Called when a file is uploaded from the current client.
      *
-     * This is a great opportunity to index since we already have the in-memory
-     * representation of the file's contents with us and won't need to download
-     * the file from remote.
+     * This is a great opportunity to index since we already have the file with
+     * us and won't need to download the file from remote.
      */
-    onUpload(file: EnteFile, uploadItem: UploadItem) {
+    onUpload(file: EnteFile, processableUploadItem: ProcessableUploadItem) {
         // Add the recently uploaded file to the live indexing queue.
-        //
-        // Limit the queue to some maximum so that we don't keep growing
-        // indefinitely (and cause memory pressure) if the speed of uploads is
-        // exceeding the speed of indexing.
-        //
-        // In general, we can be sloppy with the items in the live queue (as
-        // long as we're not systematically ignoring it). This is because the
-        // live queue is just an optimization: if a file doesn't get indexed via
-        // the live queue, it'll later get indexed anyway when we backfill.
-        if (this.liveQ.length < 200) {
-            // The file is just being uploaded, and so will not have any
-            // pre-existing ML data on remote.
-            this.liveQ.push({ file, uploadItem, remoteMLData: undefined });
-            this.wakeUp();
-        } else {
-            log.debug(() => "Ignoring upload item since liveQ is full");
-        }
+        this.liveQ.push({
+            file,
+            processableUploadItem,
+            remoteMLData: undefined,
+        });
+        this.wakeUp();
     }
 
     /**
@@ -307,7 +301,7 @@ export class MLWorker {
         // Return files after annotating them with their existing ML data.
         return Array.from(fileByID, ([id, file]) => ({
             file,
-            uploadItem: undefined,
+            processableUploadItem: undefined,
             remoteMLData: mlDataByID.get(id),
         }));
     }
@@ -335,7 +329,7 @@ export class MLWorker {
     }
 
     private updateClusteringProgress(progress: ClusteringProgress | undefined) {
-        this.clusteringProgess = progress;
+        this.clusteringProgress = progress;
         this.delegate?.workerDidUpdateStatus();
     }
 
@@ -494,7 +488,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  * then remote will return a 413 Request Entity Too Large).
  */
 const index = async (
-    { file, uploadItem, remoteMLData }: IndexableItem,
+    { file, processableUploadItem, remoteMLData }: IndexableItem,
     electron: ElectronMLWorker,
 ) => {
     const f = fileLogID(file);
@@ -544,7 +538,11 @@ const index = async (
 
     let renderableBlob: Blob;
     try {
-        renderableBlob = await fetchRenderableBlob(file, uploadItem, electron);
+        renderableBlob = await fetchRenderableBlob(
+            file,
+            processableUploadItem,
+            electron,
+        );
     } catch (e) {
         // Network errors are transient and shouldn't be marked.
         //

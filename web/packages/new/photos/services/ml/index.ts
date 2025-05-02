@@ -10,10 +10,11 @@ import log from "ente-base/log";
 import { masterKeyFromSession } from "ente-base/session";
 import type { Electron } from "ente-base/types/ipc";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import type { UploadItem } from "ente-gallery/services/upload";
+import { type ProcessableUploadItem } from "ente-gallery/services/upload";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { throttled } from "ente-utils/promise";
+import pDebounce from "p-debounce";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import {
@@ -385,8 +386,6 @@ export const mlSync = async () => {
     _state.isSyncing = false;
 };
 
-const workerDidUnawaitedIndex = () => void updateClustersAndPeople();
-
 const updateClustersAndPeople = async () => {
     const masterKey = await masterKeyFromSession();
 
@@ -401,9 +400,32 @@ const updateClustersAndPeople = async () => {
 };
 
 /**
+ * A debounced variant of {@link updateClustersAndPeople} suitable for use
+ * during potential in-progress uploads.
+ *
+ * The debounce uses a long interval (30 seconds) to avoid unnecessary reruns of
+ * the expensive clustering as individual files get uploaded. Usually we
+ * wouldn't get here as the live queue will keep getting refilled and the worker
+ * would keep ticking, but it is possible, depending on timing, for the queue to
+ * drain in the middle of uploads too.
+ *
+ * Ideally, we'd like to do the cluster update just once when the upload has
+ * completed, however currently we don't have access to {@link uploadManager}
+ * from here. So this gets us near that ideal, without adding too much impact or
+ * requiring us to be aware of the uploadManager status.
+ */
+const debounceUpdateClustersAndPeople = pDebounce(
+    updateClustersAndPeople,
+    30 * 1e3,
+);
+
+const workerDidUnawaitedIndex = () => void debounceUpdateClustersAndPeople();
+
+/**
  * Run indexing on a file which was uploaded from this client.
  *
- * Indexing only happens if ML is enabled.
+ * Indexing only happens if ML is enabled and we're running in the desktop app
+ * as it is resource intensive.
  *
  * This function is called by the uploader when it uploads a new file from this
  * client, giving us the opportunity to index it live. This is only an
@@ -413,15 +435,19 @@ const updateClustersAndPeople = async () => {
  *
  * @param file The {@link EnteFile} that got uploaded.
  *
- * @param uploadItem The item that was uploaded. This can be used to get at the
- * contents of the file that got uploaded. In case of live photos, this is the
- * image part of the live photo that was uploaded.
+ * @param processableItem The item that was uploaded. This can be used to get at
+ * the contents of the file that got uploaded. In case of live photos, this is
+ * the image part of the live photo that was uploaded.
  */
-export const indexNewUpload = (file: EnteFile, uploadItem: UploadItem) => {
+export const indexNewUpload = (
+    file: EnteFile,
+    processableUploadItem: ProcessableUploadItem,
+) => {
     if (!isMLEnabled()) return;
+    if (!isDesktop) return;
     if (file.metadata.fileType !== FileType.image) return;
-    log.debug(() => ["ml/liveq", { file, uploadItem }]);
-    void worker().then((w) => w.onUpload(file, uploadItem));
+    log.debug(() => ["ml/liveq", { file, processableUploadItem }]);
+    void worker().then((w) => w.onUpload(file, processableUploadItem));
 };
 
 export type MLStatus =
@@ -507,7 +533,7 @@ const getMLStatus = async (): Promise<MLStatus> => {
 
     // The worker has a clustering progress set iff it is clustering. This
     // overrides other behaviours.
-    const clusteringProgress = await w.clusteringProgess;
+    const clusteringProgress = await w.clusteringProgress;
     if (clusteringProgress) {
         return {
             phase: "clustering",
@@ -646,6 +672,7 @@ export const clipMatches = (
 export interface AnnotatedFaceID {
     faceID: string;
     personID: string;
+    personName: string | undefined;
 }
 
 /**
@@ -667,12 +694,18 @@ export const getAnnotatedFacesForFile = async (
         const person = personByFaceID.get(faceID);
         if (!person) continue;
         sortableFaces.push([
-            { faceID, personID: person.id },
+            { faceID, personID: person.id, personName: person.name },
             person.fileIDs.length,
         ]);
     }
 
-    sortableFaces.sort(([, a], [, b]) => b - a);
+    sortableFaces.sort((a, b) => {
+        // If only one has a person name, prefer it.
+        if (a[0].personName && !b[0].personName) return -1;
+        if (!a[0].personName && b[0].personName) return 1;
+        // Otherwise (both named or both unnamed) sort by their number of files.
+        return b[1] - a[1];
+    });
     return sortableFaces.map(([f]) => f);
 };
 

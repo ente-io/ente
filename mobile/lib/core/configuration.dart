@@ -33,7 +33,6 @@ import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
-import "package:photos/utils/wakelock_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:tuple/tuple.dart";
 import 'package:uuid/uuid.dart';
@@ -53,10 +52,6 @@ class Configuration {
   static const keyKey = "key";
   static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
   static const keyShouldBackupVideos = "should_backup_videos";
-
-  // keyShouldKeepDeviceAwake is used to determine whether the device screen
-  // should be kept on while the app is in foreground.
-  static const keyShouldKeepDeviceAwake = "should_keep_device_awake";
   static const keyShowSystemLockScreen = "should_show_lock_screen";
   static const keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
@@ -426,6 +421,13 @@ class Configuration {
     return _preferences.getString(endPointKey) ?? endpoint;
   }
 
+  // isEnteProduction checks if the current endpoint is the default production
+  // endpoint. This is used to determine if the app is in production mode or
+  // not. The default production endpoint is set in the environment variable
+  bool isEnteProduction() {
+    return getHttpEndpoint() == kDefaultProductionEndpoint;
+  }
+
   Future<void> setHttpEndpoint(String endpoint) async {
     await _preferences.setString(endPointKey, endpoint);
     Bus.instance.fire(EndpointUpdatedEvent());
@@ -576,16 +578,6 @@ class Configuration {
     } else {
       return true;
     }
-  }
-
-  bool shouldKeepDeviceAwake() {
-    final keepAwake = _preferences.get(keyShouldKeepDeviceAwake);
-    return keepAwake == null ? false : keepAwake as bool;
-  }
-
-  Future<void> setShouldKeepDeviceAwake(bool value) async {
-    await _preferences.setBool(keyShouldKeepDeviceAwake, value);
-    await EnteWakeLock.toggle(enable: value);
   }
 
   Future<void> setShouldBackupVideos(bool value) async {

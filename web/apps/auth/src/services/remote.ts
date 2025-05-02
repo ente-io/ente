@@ -32,7 +32,7 @@ export const getAuthCodes = async (masterKey: Uint8Array): Promise<Code[]> => {
         })
         .filter((f) => f !== undefined)
         .filter((f) => {
-            // Do not show trashed entries in the web inteface.
+            // Do not show trashed entries in the web interface.
             return !f.codeDisplay?.trashed;
         })
         .sort((a, b) => {

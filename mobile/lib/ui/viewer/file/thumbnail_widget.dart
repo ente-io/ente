@@ -1,4 +1,6 @@
 import "dart:async";
+import "dart:math";
+import "dart:typed_data";
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -21,6 +23,7 @@ import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import 'package:photos/utils/file_util.dart';
+import "package:photos/utils/standalone/task_queue.dart";
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -78,6 +81,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   ImageProvider? _imageProvider;
   int? optimizedImageHeight;
   int? optimizedImageWidth;
+  String? _localThumbnailQueueTaskId;
+  static const _maxLocalThumbnailRetries = 8;
 
   @override
   void initState() {
@@ -89,6 +94,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   void dispose() {
     super.dispose();
     Future.delayed(const Duration(milliseconds: 10), () {
+      if (!mounted && _localThumbnailQueueTaskId != null) {
+        if (widget.thumbnailSize == thumbnailLargeSize) {
+          largeLocalThumbnailQueue.removeTask(_localThumbnailQueueTaskId!);
+        } else if (widget.thumbnailSize == thumbnailSmallSize) {
+          smallLocalThumbnailQueue.removeTask(_localThumbnailQueueTaskId!);
+        }
+      }
       // Cancel request only if the widget has been unmounted
       if (!mounted && widget.file.isRemoteFile && !_hasLoadedThumbnail) {
         removePendingGetThumbnailRequestIfAny(widget.file);
@@ -103,6 +115,18 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       _reset();
     }
   }
+
+  static final smallLocalThumbnailQueue = TaskQueue<String>(
+    maxConcurrentTasks: 15,
+    taskTimeout: const Duration(minutes: 1),
+    maxQueueSize: 200,
+  );
+
+  static final largeLocalThumbnailQueue = TaskQueue<String>(
+    maxConcurrentTasks: 5,
+    taskTimeout: const Duration(minutes: 1),
+    maxQueueSize: 200,
+  );
 
   ///Assigned dimension will be the size of a grid item. The size will be
   ///assigned to the side which is smaller in dimension.
@@ -244,10 +268,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   Future _getThumbnailFromDisk() async {
-    return getThumbnailFromLocal(
-      widget.file,
-      size: widget.thumbnailSize,
-    ).then((thumbData) async {
+    return _loadWithRetry().then((thumbData) async {
       if (thumbData == null) {
         if (widget.file.isUploaded) {
           _logger.fine("Removing localID reference for " + widget.file.tag);
@@ -284,9 +305,78 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         thumbnailSmallSize,
       );
     }).catchError((e) {
-      _logger.warning("Could not load image: ", e);
+      _logger.warning("Could not load thumbnail from disk: ", e);
       _errorLoadingLocalThumbnail = true;
     });
+  }
+
+  Future<Uint8List?> _loadWithRetry() async {
+    int retryAttempts = 0;
+    while (retryAttempts <= _maxLocalThumbnailRetries) {
+      try {
+        return await _getLocalThumbnailUsingHeapPriorityQueue();
+      } catch (e) {
+        // only retry for specific exceptions
+        if (e is! TaskQueueTimeoutException &&
+            e is! TaskQueueOverflowException &&
+            e is! TaskQueueCancelledException) {
+          rethrow;
+        }
+        //Do not retry if the widget is not mounted
+        if (!mounted) {
+          return null;
+        }
+
+        retryAttempts++;
+        final backoff = Duration(
+          milliseconds: 100 * pow(2, retryAttempts).toInt(),
+        );
+        if (retryAttempts <= _maxLocalThumbnailRetries) {
+          _logger.warning(
+            "Error getting local thumbnail for ${widget.file.displayName}, retrying (attempt $retryAttempts) in ${backoff.inMilliseconds} ms",
+            e,
+          );
+          await Future.delayed(backoff); // Exponential backoff
+        } else {
+          rethrow;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  Future<Uint8List?> _getLocalThumbnailUsingHeapPriorityQueue() async {
+    final completer = Completer<Uint8List?>();
+
+    if (widget.thumbnailSize == thumbnailLargeSize) {
+      _localThumbnailQueueTaskId = [widget.file.localID!, "-large"].join();
+      await largeLocalThumbnailQueue.addTask(_localThumbnailQueueTaskId!,
+          () async {
+        final thumbnailBytes = await getThumbnailFromLocal(
+          widget.file,
+          size: widget.thumbnailSize,
+        );
+        completer.complete(thumbnailBytes);
+      });
+    } else if (widget.thumbnailSize == thumbnailSmallSize) {
+      _localThumbnailQueueTaskId = [widget.file.localID!, "-small"].join();
+      await smallLocalThumbnailQueue.addTask(_localThumbnailQueueTaskId!,
+          () async {
+        final thumbnailBytes = await getThumbnailFromLocal(
+          widget.file,
+          size: widget.thumbnailSize,
+        );
+        completer.complete(thumbnailBytes);
+      });
+    } else {
+      assert(false, "Invalid thumbnail size ${widget.thumbnailSize}");
+      _logger.severe(
+        "Invalid thumbnail size ${widget.thumbnailSize} for file ${widget.file.displayName}",
+      );
+    }
+
+    return completer.future;
   }
 
   void _loadNetworkImage() {

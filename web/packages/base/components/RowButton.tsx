@@ -134,7 +134,7 @@ interface RowButtonProps {
      * except we only support two cases for this row button component:
      *
      * - "primary" (default): A row button that uses "text.base" as the color of
-     *   the text (and an approprite background color, if needed, based on the
+     *   the text (and an appropriate background color, if needed, based on the
      *   value of the {@link variant}).
      *
      * - "critical": A row button that uses "critical.main" as the color of the
@@ -236,7 +236,7 @@ export const RowButton: React.FC<RowButtonProps> = ({
             <Stack direction="row" sx={{ py: "14px", gap: "10px" }}>
                 {startIcon && startIcon}
                 <Box sx={{ px: "2px" }}>
-                    {typeof label !== "string" ? (
+                    {typeof label != "string" ? (
                         label
                     ) : caption ? (
                         <Stack

@@ -1433,7 +1433,7 @@ const findCoverFiles = (
 
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         const coverID = collection.pubMagicMetadata?.data?.coverID;
-        if (typeof coverID === "number" && coverID > 0) {
+        if (typeof coverID == "number" && coverID > 0) {
             coverFile = collectionFiles.find(({ id }) => id === coverID);
         }
 

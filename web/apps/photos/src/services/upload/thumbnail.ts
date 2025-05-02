@@ -3,7 +3,7 @@ import { type Electron } from "ente-base/types/ipc";
 import * as ffmpeg from "ente-gallery/services/ffmpeg";
 import {
     toDataOrPathOrZipEntry,
-    type DesktopUploadItem,
+    type FileSystemUploadItem,
 } from "ente-gallery/services/upload";
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { isHEICExtension } from "ente-media/formats";
@@ -178,11 +178,10 @@ export const generateVideoThumbnailUsingCanvas = async (blob: Blob) => {
  * app, and this dependency is enforced by the need to pass the {@link electron}
  * object which we use to perform IPC with the Node.js side of our desktop app.
  *
- * @param dataOrPath Contents of an image or video file, or the path to the
- * image or video file on the user's local file system, whose thumbnail we want
- * to generate.
+ * @param fsUploadItem The image or video file on the user's file system whose
+ * thumbnail we want to generate.
  *
- * @param fileTypeInfo The type information for {@link dataOrPath}.
+ * @param fileTypeInfo The type information for {@link fsUploadItem}.
  *
  * @return The JPEG data of the generated thumbnail.
  *
@@ -190,16 +189,16 @@ export const generateVideoThumbnailUsingCanvas = async (blob: Blob) => {
  */
 export const generateThumbnailNative = async (
     electron: Electron,
-    desktopUploadItem: DesktopUploadItem,
+    fsUploadItem: FileSystemUploadItem,
     fileTypeInfo: FileTypeInfo,
 ): Promise<Uint8Array> =>
     fileTypeInfo.fileType === FileType.image
         ? await electron.generateImageThumbnail(
-              toDataOrPathOrZipEntry(desktopUploadItem),
+              toDataOrPathOrZipEntry(fsUploadItem),
               maxThumbnailDimension,
               maxThumbnailSize,
           )
-        : ffmpeg.generateVideoThumbnailNative(electron, desktopUploadItem);
+        : ffmpeg.generateVideoThumbnailNative(electron, fsUploadItem);
 
 /**
  * A fallback, black, thumbnail for use in cases where thumbnail generation

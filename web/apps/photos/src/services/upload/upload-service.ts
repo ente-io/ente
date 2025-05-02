@@ -14,6 +14,7 @@ import {
 import type { UploadItem } from "ente-gallery/services/upload";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    type LivePhotoAssets,
     type UploadResult,
 } from "ente-gallery/services/upload";
 import {
@@ -42,7 +43,6 @@ import { addToCollection } from "ente-new/photos/services/collection";
 import { CustomError, handleUploadError } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
-import { type LivePhotoAssets } from "services/upload/uploadManager";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
@@ -551,7 +551,7 @@ export const uploader = async (
     worker: CryptoWorker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
-    makeProgessTracker: MakeProgressTracker,
+    makeProgressTracker: MakeProgressTracker,
 ): Promise<UploadResponse> => {
     log.info(`Upload ${fileName} | start`);
     try {
@@ -655,7 +655,7 @@ export const uploader = async (
 
         const backupedFile = await uploadToBucket(
             encryptedFilePieces,
-            makeProgessTracker,
+            makeProgressTracker,
             isCFUploadProxyDisabled,
             abortIfCancelled,
         );
@@ -736,7 +736,7 @@ export const uploader = async (
  *    also have access to the full path of this file.
  *
  * 3. In addition, when running in the desktop app we have the ability to
- *    initate programmatic access absolute paths on the user's file system. For
+ *    initiate programmatic access absolute paths on the user's file system. For
  *    example, if the user asks us to watch certain folders on their disk for
  *    changes, we'll be able to pick up new images being added, and in such
  *    cases, the parameter here will be a path. Another example is when resuming
@@ -1389,7 +1389,7 @@ const encryptFileStream = async (
 
 const uploadToBucket = async (
     encryptedFilePieces: EncryptedFilePieces,
-    makeProgessTracker: MakeProgressTracker,
+    makeProgressTracker: MakeProgressTracker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
 ): Promise<BackupedFile> => {
@@ -1410,7 +1410,7 @@ const uploadToBucket = async (
                 await uploadStreamUsingMultipart(
                     localID,
                     encryptedData,
-                    makeProgessTracker,
+                    makeProgressTracker,
                     isCFUploadProxyDisabled,
                     abortIfCancelled,
                 ));
@@ -1421,7 +1421,7 @@ const uploadToBucket = async (
                     : await readEntireStream(encryptedData.stream);
             fileSize = data.length;
 
-            const progressTracker = makeProgessTracker(localID);
+            const progressTracker = makeProgressTracker(localID);
             const fileUploadURL = await uploadService.getUploadURL();
             if (!isCFUploadProxyDisabled) {
                 fileObjectKey = await UploadHttpClient.putFileV2(
@@ -1487,7 +1487,7 @@ interface PartEtag {
 async function uploadStreamUsingMultipart(
     fileLocalID: number,
     dataStream: EncryptedFileStream,
-    makeProgessTracker: MakeProgressTracker,
+    makeProgressTracker: MakeProgressTracker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
 ) {
@@ -1512,7 +1512,7 @@ async function uploadStreamUsingMultipart(
 
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
         fileSize += uploadChunk.length;
-        const progressTracker = makeProgessTracker(
+        const progressTracker = makeProgressTracker(
             fileLocalID,
             percentPerPart,
             index,

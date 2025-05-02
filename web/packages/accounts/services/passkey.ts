@@ -147,7 +147,7 @@ export const isPasskeyRecoveryEnabled = async () => {
             { "X-Auth-Token": token },
         );
 
-        if (typeof resp.data === "undefined") {
+        if (typeof resp.data == "undefined") {
             throw Error("request failed");
         }
 
@@ -173,7 +173,7 @@ const configurePasskeyRecovery = async (
             { "X-Auth-Token": token },
         );
 
-        if (typeof resp.data === "undefined") {
+        if (typeof resp.data == "undefined") {
             throw Error("request failed");
         }
     } catch (e) {
@@ -197,7 +197,7 @@ const getAccountsTokenAndURL = async () => {
         .object({
             // The origin that serves the accounts app.
             accountsUrl: z.string(),
-            // A token that can be used to autheticate with the accounts app.
+            // A token that can be used to authenticate with the accounts app.
             accountsToken: z.string(),
         })
         .parse(await res.json());

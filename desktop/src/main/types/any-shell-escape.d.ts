@@ -12,7 +12,7 @@
  *
  * yields (on POSIX shells):
  *
- *     curl -v -H 'Location;' -H 'User-Agent: FoorBar'"'"'s so-called "Browser"' 'http://www.daveeddy.com/?name=dave&age=24'
+ *     curl -v -H 'Location;' -H 'User-Agent: FooBar'"'"'s so-called "Browser"' 'http://www.daveeddy.com/?name=dave&age=24'
  *
  * or (on Windows):
  *

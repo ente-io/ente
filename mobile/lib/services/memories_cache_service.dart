@@ -22,6 +22,7 @@ import "package:photos/services/search_service.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
+import "package:synchronized/synchronized.dart";
 
 class MemoriesCacheService {
   static const _lastMemoriesCacheUpdateTimeKey = "lastMemoriesCacheUpdateTime";
@@ -39,7 +40,8 @@ class MemoriesCacheService {
 
   List<SmartMemory>? _cachedMemories;
   bool _shouldUpdate = false;
-  bool _isUpdateInProgress = false;
+
+  final _memoriesUpdateLock = Lock();
 
   MemoriesCacheService(this._prefs) {
     _logger.fine("MemoriesCacheService constructor");
@@ -88,7 +90,15 @@ class MemoriesCacheService {
     Bus.instance.fire(MemoriesSettingChanged());
   }
 
-  bool get enableSmartMemories => flagService.hasGrantedMLConsent;
+  bool get enableSmartMemories =>
+      flagService.hasGrantedMLConsent &&
+      localSettings.isMLLocalIndexingEnabled &&
+      localSettings.isSmartMemoriesEnabled;
+
+  bool get curatedMemoriesOption =>
+      showAnyMemories &&
+      flagService.hasGrantedMLConsent &&
+      localSettings.isMLLocalIndexingEnabled;
 
   void _checkIfTimeToUpdateCache() {
     if (!enableSmartMemories) {
@@ -152,74 +162,67 @@ class MemoriesCacheService {
       return;
     }
     _checkIfTimeToUpdateCache();
-    try {
-      if ((!_shouldUpdate && !forced) || _isUpdateInProgress) {
+
+    return _memoriesUpdateLock.synchronized(() async {
+      if ((!_shouldUpdate && !forced)) {
         _logger.info(
-          "No update needed (shouldUpdate: $_shouldUpdate, forced: $forced, isUpdateInProgress $_isUpdateInProgress)",
+          "No update needed (shouldUpdate: $_shouldUpdate, forced: $forced)",
         );
-        if (_isUpdateInProgress) {
-          int waitingTime = 0;
-          while (_isUpdateInProgress && waitingTime < 60) {
-            await Future.delayed(const Duration(seconds: 1));
-            waitingTime++;
-          }
-        }
-        return;
       }
       _logger.info(
-        "Updating memories cache (shouldUpdate: $_shouldUpdate, forced: $forced, isUpdateInProgress $_isUpdateInProgress)",
+        "Updating memories cache (shouldUpdate: $_shouldUpdate, forced: $forced)",
       );
-      _isUpdateInProgress = true;
-      final EnteWatch? w =
-          kDebugMode ? EnteWatch("MemoriesCacheService") : null;
-      w?.start();
-      final oldCache = await _readCacheFromDisk();
-      w?.log("gotten old cache");
-      final MemoriesCache newCache = _processOldCache(oldCache);
-      w?.log("processed old cache");
-      // calculate memories for this period and for the next period
-      final now = DateTime.now();
-      final next = now.add(kMemoriesUpdateFrequency);
-      final nowResult = await smartMemoriesService.calcMemories(now, newCache);
-      if (nowResult.isEmpty) {
-        _cachedMemories = [];
-        _isUpdateInProgress = false;
-        _logger.warning(
-          "No memories found for now, not updating cache and returning early",
+      try {
+        final EnteWatch? w =
+            kDebugMode ? EnteWatch("MemoriesCacheService") : null;
+        w?.start();
+        final oldCache = await _readCacheFromDisk();
+        w?.log("gotten old cache");
+        final MemoriesCache newCache = _processOldCache(oldCache);
+        w?.log("processed old cache");
+        // calculate memories for this period and for the next period
+        final now = DateTime.now();
+        final next = now.add(kMemoriesUpdateFrequency);
+        final nowResult =
+            await smartMemoriesService.calcMemories(now, newCache);
+        if (nowResult.isEmpty) {
+          _cachedMemories = [];
+          _logger.warning(
+            "No memories found for now, not updating cache and returning early",
+          );
+          return;
+        }
+        final nextResult =
+            await smartMemoriesService.calcMemories(next, newCache);
+        w?.log("calculated new memories");
+        for (final nowMemory in nowResult.memories) {
+          newCache.toShowMemories
+              .add(ToShowMemory.fromSmartMemory(nowMemory, now));
+        }
+        for (final nextMemory in nextResult.memories) {
+          newCache.toShowMemories
+              .add(ToShowMemory.fromSmartMemory(nextMemory, next));
+        }
+        newCache.baseLocations.addAll(nowResult.baseLocations);
+        w?.log("added memories to cache");
+        final file = File(await _getCachePath());
+        if (!file.existsSync()) {
+          file.createSync(recursive: true);
+        }
+        _cachedMemories = nowResult.memories
+            .where((memory) => memory.shouldShowNow())
+            .toList();
+        locationService.baseLocations = nowResult.baseLocations;
+        await file.writeAsBytes(
+          MemoriesCache.encodeToJsonString(newCache).codeUnits,
         );
-        return;
+        w?.log("cacheWritten");
+        await _cacheUpdated();
+        w?.logAndReset('_cacheUpdated method done');
+      } catch (e, s) {
+        _logger.info("Error updating memories cache", e, s);
       }
-      final nextResult =
-          await smartMemoriesService.calcMemories(next, newCache);
-      w?.log("calculated new memories");
-      for (final nowMemory in nowResult.memories) {
-        newCache.toShowMemories
-            .add(ToShowMemory.fromSmartMemory(nowMemory, now));
-      }
-      for (final nextMemory in nextResult.memories) {
-        newCache.toShowMemories
-            .add(ToShowMemory.fromSmartMemory(nextMemory, next));
-      }
-      newCache.baseLocations.addAll(nowResult.baseLocations);
-      w?.log("added memories to cache");
-      final file = File(await _getCachePath());
-      if (!file.existsSync()) {
-        file.createSync(recursive: true);
-      }
-      _cachedMemories =
-          nowResult.memories.where((memory) => memory.shouldShowNow()).toList();
-      locationService.baseLocations = nowResult.baseLocations;
-      await file.writeAsBytes(
-        MemoriesCache.encodeToJsonString(newCache).codeUnits,
-      );
-      w?.log("cacheWritten");
-      await _cacheUpdated();
-      w?.logAndReset('_cacheUpdated method done');
-    } catch (e, s) {
-      _logger.info("Error updating memories cache", e, s);
-    } finally {
-      _isUpdateInProgress = false;
-    }
+    });
   }
 
   /// WARNING: Use for testing only, TODO: lau: remove later
@@ -428,15 +431,27 @@ class MemoriesCacheService {
         allFileIdsToFile[file.uploadedFileID!] = file;
       }
     }
-    final jsonString = file.readAsStringSync();
-    return MemoriesCache.decodeFromJsonString(jsonString, allFileIdsToFile);
+    try {
+      final bytes = await file.readAsBytes();
+      final jsonString = String.fromCharCodes(bytes);
+      final cache =
+          MemoriesCache.decodeFromJsonString(jsonString, allFileIdsToFile);
+      _logger.info("Reading memories cache result from disk done");
+      return cache;
+    } catch (e, s) {
+      _logger.severe("Error reading or decoding cache file", e, s);
+      await file.delete();
+      return null;
+    }
   }
 
-  Future<void> clearMemoriesCache() async {
-    final file = File(await _getCachePath());
+  Future<void> clearMemoriesCache({bool fromDisk = true}) async {
+    if (fromDisk) {
+      final file = File(await _getCachePath());
       if (file.existsSync()) {
         await file.delete();
       }
+    }
     _cachedMemories = null;
   }
 }
