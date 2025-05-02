@@ -8,7 +8,7 @@ import {
 } from "ente-shared/components/Container";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
-import uploadManager from "services/upload/uploadManager";
+import { uploadManager } from "services/upload-manager";
 
 export default function GalleryEmptyState({ openUploader }) {
     return (

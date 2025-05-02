@@ -65,8 +65,8 @@ import type {
     UploadCounter,
     UploadFileNames,
     UploadItemWithCollection,
-} from "services/upload/uploadManager";
-import uploadManager from "services/upload/uploadManager";
+} from "services/upload-manager";
+import { uploadManager } from "services/upload-manager";
 import watcher from "services/watch";
 import { SetLoading } from "types/gallery";
 import { getOrCreateAlbum } from "utils/collection";

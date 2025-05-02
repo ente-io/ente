@@ -23,9 +23,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m55(passwordStrengthValue) =>
       "Надзейнасць пароля: ${passwordStrengthValue}";
 
-  static String m89(storageAmountInGB) => "${storageAmountInGB} Гб";
+  static String m90(storageAmountInGB) => "${storageAmountInGB} Гб";
 
-  static String m109(email) =>
+  static String m110(email) =>
       "Ліст адпраўлены на электронную пошту <green>${email}</green>";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -249,7 +249,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Немагчыма згенерыраваць ключы бяспекі на гэтай прыладзе.\n\nЗарэгіструйцеся з іншай прылады."),
         "status": MessageLookupByLibrary.simpleMessage("Стан"),
-        "storageInGB": m89,
+        "storageInGB": m90,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Надзейны"),
         "support": MessageLookupByLibrary.simpleMessage("Падтрымка"),
         "systemTheme": MessageLookupByLibrary.simpleMessage("Сістэма"),
@@ -288,7 +288,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("відэа"),
         "viewLargeFiles": MessageLookupByLibrary.simpleMessage("Вялікія файлы"),
         "viewer": MessageLookupByLibrary.simpleMessage("Праглядальнік"),
-        "weHaveSendEmailTo": m109,
+        "weHaveSendEmailTo": m110,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Ненадзейны"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("З вяртаннем!"),
         "yesDelete": MessageLookupByLibrary.simpleMessage("Так, выдаліць"),

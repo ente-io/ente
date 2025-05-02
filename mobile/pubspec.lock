@@ -2015,7 +2015,7 @@ packages:
     source: hosted
     version: "1.0.1"
   pool:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: pool
       sha256: "20fe868b6314b322ea036ba325e6fc0711a22948856475e2c2b6306e8ab39c2a"
