@@ -210,7 +210,7 @@ Future _configureWorkManager() async {
       iOSBackgroundAppRefresh,
       iOSBackgroundAppRefresh,
       frequency: const Duration(minutes: 15),
-      initialDelay: const Duration(minutes: 1),
+      initialDelay: const Duration(minutes: 10),
       constraints: workmanager.Constraints(
         networkType: workmanager.NetworkType.connected,
         requiresCharging: false,
