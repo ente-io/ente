@@ -290,7 +290,7 @@ func (c *UserController) NotifyAccountDeletion(userID int64, userEmail string, i
 	}
 	recoverToken, err2 := c.GetJWTTokenForClaim(&enteJWT.WebCommonJWTClaim{
 		UserID:     userID,
-		ExpiryTime: time.Microseconds(),
+		ExpiryTime: time.MicrosecondsAfterDays(7),
 		ClaimScope: enteJWT.RestoreAccount.Ptr(),
 		Email:      userEmail,
 	})
