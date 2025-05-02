@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
@@ -29,6 +30,7 @@ class BackupItemCard extends StatefulWidget {
 class _BackupItemCardState extends State<BackupItemCard> {
   String? folderName;
   bool showThumbnail = false;
+  final _logger = Logger("BackupItemCard");
 
   @override
   void initState() {
@@ -153,6 +155,10 @@ class _BackupItemCardState extends State<BackupItemCard> {
                           labelText: S.of(context).contactSupport,
                           buttonAction: ButtonAction.second,
                           onTap: () async {
+                            _logger.warning(
+                              "Backup failed for ${widget.item.file.displayName}",
+                              widget.item.error,
+                            );
                             await sendLogs(
                               context,
                               S.of(context).contactSupport,
