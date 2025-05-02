@@ -210,21 +210,14 @@ class CollectionsService {
     _cachedPublicAlbumKey.clear();
   }
 
-  Future<Map<int, int>> getCollectionIDsToBeSynced({
-    bool newSync = false,
-  }) async {
-    final idsToRemoveUpdateTimeMap = <int, int>{};
-    for (final collection in _collectionIDToCollections.values) {
-      if (!collection.isDeleted) {
-        idsToRemoveUpdateTimeMap[collection.id] = collection.updationTime;
-      }
-    }
+  Future<Map<int, int>> getCollectionIDsToBeSynced() async {
+    final idsToRemoveUpdateTimeMap =
+        await remoteDB.getCollectionIDToUpdationTime();
     final result = <int, int>{};
     for (final MapEntry<int, int> e in idsToRemoveUpdateTimeMap.entries) {
       final int cid = e.key;
       final int remoteUpdateTime = e.value;
-
-      if (remoteUpdateTime > getCollectionSyncTime(cid, syncV2: newSync)) {
+      if (remoteUpdateTime > getCollectionSyncTime(cid)) {
         result[cid] = remoteUpdateTime;
       }
     }
@@ -295,12 +288,7 @@ class CollectionsService {
         .toSet();
   }
 
-  int getCollectionSyncTime(int collectionID, {bool syncV2 = false}) {
-    if (syncV2) {
-      return _prefs
-              .getInt('${_collectionSyncTimeKeyPrefix}_v2 $collectionID') ??
-          0;
-    }
+  int getCollectionSyncTime(int collectionID) {
     return _prefs
             .getInt(_collectionSyncTimeKeyPrefix + collectionID.toString()) ??
         0;

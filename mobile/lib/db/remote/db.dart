@@ -44,6 +44,17 @@ class RemoteDB with SqlDbBase {
     return result;
   }
 
+  Future<Map<int, int>> getCollectionIDToUpdationTime() async {
+    final result = <int, int>{};
+    final cursor = await _sqliteDB.getAll(
+      "SELECT id, updation_time FROM collections where is_deleted = 0",
+    );
+    for (final row in cursor) {
+      result[row['id'] as int] = row['updation_time'] as int;
+    }
+    return result;
+  }
+
   Future<List<RemoteAsset>> getAllFiles() async {
     final result = <RemoteAsset>[];
     final cursor = await _sqliteDB.getAll("SELECT * FROM files");

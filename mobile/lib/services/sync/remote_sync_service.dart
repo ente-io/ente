@@ -228,28 +228,8 @@ class RemoteSyncService {
     await _collectionsService.sync();
     final idsToRemoteUpdationTimeMap =
         await _collectionsService.getCollectionIDsToBeSynced();
-    await _syncUpdatedCollections(idsToRemoteUpdationTimeMap);
     unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
     unawaited(_notifyNewFiles(idsToRemoteUpdationTimeMap.keys.toList()));
-  }
-
-  Future<void> _syncUpdatedCollections(
-    final Map<int, int> idsToRemoteUpdationTimeMap,
-  ) async {
-    for (final cid in idsToRemoteUpdationTimeMap.keys) {
-      await _syncCollectionFiles(
-        cid,
-        _collectionsService.getCollectionSyncTime(cid),
-      );
-      // update syncTime for the collection in sharedPrefs. Note: the
-      // syncTime can change on remote but we might not get a diff for the
-      // collection if there are not changes in the file, but the collection
-      // metadata (name, archive status, sharing etc) has changed.
-      final remoteUpdateTime = idsToRemoteUpdationTimeMap[cid];
-      await _collectionsService.setCollectionSyncTime(cid, remoteUpdateTime);
-    }
-    _logger.info("All updated collections synced");
-    Bus.instance.fire(DiffSyncCompleteEvent());
   }
 
   Future<void> _syncCollectionFiles(int collectionID, int sinceTime) async {

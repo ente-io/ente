@@ -46,7 +46,7 @@ class RemoteDiffService {
     for (final cid in idsToRemoteUpdationTimeMap.keys) {
       await _syncCollectionFiles(
         cid,
-        _collectionsService.getCollectionSyncTime(cid, syncV2: true),
+        _collectionsService.getCollectionSyncTime(cid),
       );
       // update syncTime for the collection in sharedPrefs. Note: the
       // syncTime can change on remote but we might not get a diff for the
