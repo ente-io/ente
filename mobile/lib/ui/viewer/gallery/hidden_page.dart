@@ -2,15 +2,15 @@ import "dart:async";
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/files_db.dart';
+import "package:photos/db/remote/schema.dart";
 import "package:photos/events/collection_updated_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/hidden_service.dart";
 import "package:photos/ui/collections/album/horizontal_list.dart";
@@ -89,13 +89,13 @@ class _HiddenPageState extends State<HiddenPage> {
     }
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return FilesDB.instance.getFilesInCollections(
-          [_defaultHiddenCollectionId!],
-          creationStartTime,
-          creationEndTime,
-          Configuration.instance.getUserID()!,
-          limit: limit,
-          asc: asc,
+        return remoteCache.getCollectionFilesResult(
+          FilterQueryParam(
+            collectionID: _defaultHiddenCollectionId!,
+            isAsc: asc ?? false,
+            createAtRange: (creationStartTime, creationEndTime),
+            limit: limit,
+          ),
         );
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
