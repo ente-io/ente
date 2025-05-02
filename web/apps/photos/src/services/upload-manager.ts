@@ -13,6 +13,7 @@ import {
     type ClusteredUploadItem,
     type UploadPhase,
     type UploadResult,
+    type UploadableUploadItem,
 } from "ente-gallery/services/upload";
 import {
     metadataJSONMapKeyForJSON,
@@ -762,16 +763,6 @@ const makeUploadItemWithCollectionIDAndName = (
     livePhotoAssets: f.livePhotoAssets,
     externalParsedMetadata: f.externalParsedMetadata,
 });
-
-/**
- * The file that we hand off to the uploader. Essentially
- * {@link ClusteredUploadItem} with the {@link collection} attached to it.
- *
- * See: [Note: Intermediate file types during upload].
- */
-export type UploadableUploadItem = ClusteredUploadItem & {
-    collection: Collection;
-};
 
 const splitMetadataAndMediaItems = (
     items: UploadItemWithCollectionIDAndName[],

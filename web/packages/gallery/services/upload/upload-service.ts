@@ -1,3 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable @typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+// TODO: Audit this file
+/* eslint-disable @typescript-eslint/no-base-to-string */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-inferrable-types */
 import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
 import type { BytesOrB64 } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
@@ -22,14 +30,14 @@ import {
     isFileTypeNotSupportedError,
 } from "ente-gallery/utils/detect-type";
 import { readStream } from "ente-gallery/utils/native-stream";
-import {
+import type {
+    EncryptedEnteFile,
     EncryptedMagicMetadata,
     EnteFile,
+    FilePublicMagicMetadata,
+    FilePublicMagicMetadataProps,
     MetadataFileAttributes,
     S3FileAttributes,
-    type EncryptedEnteFile,
-    type FilePublicMagicMetadata,
-    type FilePublicMagicMetadataProps,
 } from "ente-media/file";
 import {
     metadataHash,
@@ -44,6 +52,7 @@ import { CustomError, handleUploadError } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import * as convert from "xml-js";
+import type { UploadableUploadItem } from "../upload";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
     PhotosUploadHttpClient,
@@ -57,7 +66,6 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-import type { UploadableUploadItem } from "./upload-manager";
 
 const publicUploadHttpClient = new PublicUploadHttpClient();
 const UploadHttpClient = new PhotosUploadHttpClient();
@@ -161,6 +169,7 @@ class UploadService {
                 uploadFile,
                 // TODO: publicAlbumsCredentials
                 this.publicAlbumsCredentials.accessToken,
+                // @ts-ignore
                 this.publicAlbumsCredentials.accessTokenJWT,
             );
         } else {
@@ -211,6 +220,7 @@ class UploadService {
             return await publicUploadHttpClient.fetchMultipartUploadURLs(
                 count,
                 this.publicAlbumsCredentials.accessToken,
+                // @ts-ignore
                 this.publicAlbumsCredentials.accessTokenJWT,
             );
         } else {
@@ -674,6 +684,7 @@ export const uploader = async (
             uploadedFile: uploadedFile,
         };
     } catch (e) {
+        // @ts-ignore
         if (e.message == CustomError.UPLOAD_CANCELLED) {
             log.info(`Upload for ${fileName} cancelled`);
         } else {
@@ -774,6 +785,7 @@ const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
             size,
             lastModifiedMs: lm,
         } = await readStream(ensureElectron(), uploadItem);
+        // @ts-ignore
         underlyingStream = response.body;
         fileSize = size;
         lastModifiedMs = lm;
@@ -841,8 +853,10 @@ const readAssetDetails = async ({
     uploadItem,
 }: UploadAsset): Promise<ReadAssetDetailsResult> =>
     isLivePhoto
-        ? readLivePhotoDetails(livePhotoAssets)
-        : readImageOrVideoDetails(uploadItem);
+        ? // @ts-ignore
+          readLivePhotoDetails(livePhotoAssets)
+        : // @ts-ignore
+          readImageOrVideoDetails(uploadItem);
 
 const readLivePhotoDetails = async ({ image, video }: LivePhotoAssets) => {
     const img = await readImageOrVideoDetails(image);
@@ -874,8 +888,10 @@ const readImageOrVideoDetails = async (uploadItem: UploadItem) => {
     const { stream, fileSize, lastModifiedMs } =
         await readUploadItem(uploadItem);
 
+    // @ts-ignore
     const fileTypeInfo = await detectFileTypeInfoFromChunk(async () => {
         const reader = stream.getReader();
+        // @ts-ignore
         const chunk = (await reader.read())!.value;
         await reader.cancel();
         return chunk;
@@ -919,6 +935,7 @@ const extractAssetMetadata = async (
 ): Promise<ExtractAssetMetadataResult> =>
     isLivePhoto
         ? await extractLivePhotoMetadata(
+              // @ts-ignore
               livePhotoAssets,
               fileTypeInfo,
               lastModifiedMs,
@@ -927,6 +944,7 @@ const extractAssetMetadata = async (
               worker,
           )
         : await extractImageOrVideoMetadata(
+              // @ts-ignore
               uploadItem,
               externalParsedMetadata,
               fileTypeInfo,
@@ -946,6 +964,7 @@ const extractLivePhotoMetadata = async (
 ) => {
     const imageFileTypeInfo: FileTypeInfo = {
         fileType: FileType.image,
+        // @ts-ignore
         extension: fileTypeInfo.imageType,
     };
     const { metadata: imageMetadata, publicMagicMetadata } =
@@ -1030,7 +1049,9 @@ const extractImageOrVideoMetadata = async (
         creationTime = timestamp;
         publicMagicMetadata.dateTime = dateTime;
         if (offset) publicMagicMetadata.offsetTime = offset;
+        // @ts-ignore
     } else if (parsedMetadata.creationTime) {
+        // @ts-ignore
         creationTime = parsedMetadata.creationTime;
     } else {
         creationTime =
@@ -1098,6 +1119,7 @@ const tryExtractImageMetadata = async (
         return await extractExif(file);
     } catch (e) {
         log.error(`Failed to extract image metadata for ${uploadItem}`, e);
+        // @ts-ignore
         return undefined;
     }
 };
@@ -1147,8 +1169,10 @@ const readAsset = async (
     { isLivePhoto, uploadItem, livePhotoAssets }: UploadAsset,
 ): Promise<ThumbnailedFile> =>
     isLivePhoto
-        ? await readLivePhoto(livePhotoAssets, fileTypeInfo)
-        : await readImageOrVideo(uploadItem, fileTypeInfo);
+        ? // @ts-ignore
+          await readLivePhoto(livePhotoAssets, fileTypeInfo)
+        : // @ts-ignore
+          await readImageOrVideo(uploadItem, fileTypeInfo);
 
 const readLivePhoto = async (
     livePhotoAssets: LivePhotoAssets,
@@ -1160,6 +1184,7 @@ const readLivePhoto = async (
         hasStaticThumbnail,
     } = await withThumbnail(
         livePhotoAssets.image,
+        // @ts-ignore
         { extension: fileTypeInfo.imageType, fileType: FileType.image },
         await readUploadItem(livePhotoAssets.image),
     );
@@ -1296,6 +1321,7 @@ const constructPublicMagicMetadata = async (
     );
 
     if (Object.values(nonEmptyPublicMagicMetadataProps)?.length === 0) {
+        // @ts-ignore
         return null;
     }
     return await updateMagicMetadata(publicMagicMetadataProps);
@@ -1347,6 +1373,7 @@ const encryptFile = async (
             file: encryptedFiledata,
             thumbnail: encryptedThumbnail,
             metadata: encryptedMetadata,
+            // @ts-ignore
             pubMagicMetadata: encryptedPubMagicMetadata,
             localID: localID,
         },
@@ -1370,6 +1397,7 @@ const encryptFileStream = async (
         async pull(controller) {
             const { value } = await fileStreamReader.read();
             const encryptedFileChunk = await worker.encryptStreamChunk(
+                // @ts-ignore
                 value,
                 pushState,
                 ref.pullCount === chunkCount,
@@ -1396,6 +1424,7 @@ const uploadToBucket = async (
     const { localID, file, thumbnail, metadata, pubMagicMetadata } =
         encryptedFilePieces;
     try {
+        // @ts-ignore
         let fileObjectKey: string = null;
         let fileSize: number;
 
@@ -1425,12 +1454,14 @@ const uploadToBucket = async (
             const fileUploadURL = await uploadService.getUploadURL();
             if (!isCFUploadProxyDisabled) {
                 fileObjectKey = await UploadHttpClient.putFileV2(
+                    // @ts-ignore
                     fileUploadURL,
                     data,
                     progressTracker,
                 );
             } else {
                 fileObjectKey = await UploadHttpClient.putFile(
+                    // @ts-ignore
                     fileUploadURL,
                     data,
                     progressTracker,
@@ -1438,15 +1469,18 @@ const uploadToBucket = async (
             }
         }
         const thumbnailUploadURL = await uploadService.getUploadURL();
+        // @ts-ignore
         let thumbnailObjectKey: string = null;
         if (!isCFUploadProxyDisabled) {
             thumbnailObjectKey = await UploadHttpClient.putFileV2(
+                // @ts-ignore
                 thumbnailUploadURL,
                 thumbnail.encryptedData,
                 null,
             );
         } else {
             thumbnailObjectKey = await UploadHttpClient.putFile(
+                // @ts-ignore
                 thumbnailUploadURL,
                 thumbnail.encryptedData,
                 null,
@@ -1472,6 +1506,7 @@ const uploadToBucket = async (
         };
         return backupedFile;
     } catch (e) {
+        // @ts-ignore
         if (e.message !== CustomError.UPLOAD_CANCELLED) {
             log.error("Error when uploading to bucket", e);
         }

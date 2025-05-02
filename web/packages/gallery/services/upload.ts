@@ -1,6 +1,7 @@
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
 import type { ZipItem } from "ente-base/types/ipc";
+import type { Collection } from "ente-media/collection";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
@@ -129,6 +130,16 @@ export interface ClusteredUploadItem {
     // TODO: Tie this to the isLivePhoto flag using a discriminated union.
     livePhotoAssets?: LivePhotoAssets;
 }
+
+/**
+ * The file that we hand off to the uploader. Essentially
+ * {@link ClusteredUploadItem} with the {@link collection} attached to it.
+ *
+ * See: [Note: Intermediate file types during upload].
+ */
+export type UploadableUploadItem = ClusteredUploadItem & {
+    collection: Collection;
+};
 
 /**
  * Result of {@link markUploadedAndObtainPostProcessableItem}; see the
