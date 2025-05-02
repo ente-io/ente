@@ -19,13 +19,13 @@ import "package:photos/utils/thumbnail_util.dart";
 void resetPool({required bool fullFile}) {
   if (fullFile) {
     _queueFullFileFaceGenerations = TaskQueue<String>(
-      maxConcurrentTasks: 20,
+      maxConcurrentTasks: 5,
       taskTimeout: const Duration(minutes: 1),
       maxQueueSize: 50,
     );
   } else {
     _queueThumbnailFaceGenerations = TaskQueue<String>(
-      maxConcurrentTasks: 40,
+      maxConcurrentTasks: 5,
       taskTimeout: const Duration(minutes: 1),
       maxQueueSize: 100,
     );
@@ -38,12 +38,12 @@ const int _retryLimit = 3;
 final LRUMap<String, Uint8List?> _faceCropCache = LRUMap(1000);
 final LRUMap<String, Uint8List?> _faceCropThumbnailCache = LRUMap(1000);
 TaskQueue _queueFullFileFaceGenerations = TaskQueue<String>(
-  maxConcurrentTasks: 20,
+  maxConcurrentTasks: 5,
   taskTimeout: const Duration(minutes: 1),
   maxQueueSize: 50,
 );
 TaskQueue _queueThumbnailFaceGenerations = TaskQueue<String>(
-  maxConcurrentTasks: 40,
+  maxConcurrentTasks: 5,
   taskTimeout: const Duration(minutes: 1),
   maxQueueSize: 100,
 );
