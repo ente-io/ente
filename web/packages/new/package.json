@@ -5,7 +5,7 @@
     "dependencies": {
         "@mui/material": "^6.4.11",
         "@mui/system": "^6.4.11",
-        "@mui/x-date-pickers": "^7.29.1",
+        "@mui/x-date-pickers": "^7.29.2",
         "dayjs": "^1.11.13",
         "ente-base": "*",
         "ente-gallery": "*",
