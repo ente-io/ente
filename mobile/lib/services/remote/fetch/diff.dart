@@ -71,19 +71,22 @@ class RemoteDiffService {
         currentSinceTime,
         collectionKey,
       );
-      await remoteDB.deleteCollectionFilesDiff(diff.deletedItems);
-      await remoteDB.insertCollectionFilesDiff(diff.updatedItems);
+      if (diff.deletedItems.isNotEmpty) {
+        await remoteDB.deleteCollectionFilesDiff(diff.deletedItems);
+      }
+      if (diff.updatedItems.isNotEmpty) {
+        await remoteDB.deleteCollectionFilesDiff(diff.updatedItems);
+      }
       // todo:(rewrite) neeraj add logic to refresh home gallery when time or visibility changes
-      final int nextSyncFrom = max(diff.maxUpdatedAtTime, currentSinceTime);
-      await _collectionsService.setCollectionSyncTime(
-        collectionID,
-        nextSyncFrom,
-      );
+      if (diff.maxUpdatedAtTime > currentSinceTime) {
+        await _collectionsService.setCollectionSyncTime(
+          collectionID,
+          diff.maxUpdatedAtTime,
+        );
+        currentSinceTime = diff.maxUpdatedAtTime;
+      }
       _logger.fine("[Collection-$collectionID] synced $diff");
       hasMore = diff.hasMore;
-      if (hasMore) {
-        currentSinceTime = nextSyncFrom;
-      }
     }
   }
 }

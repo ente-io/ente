@@ -28,8 +28,11 @@ class CollectionFilesService {
           "sinceTime": sinceTime,
         },
       );
-      final String encodedKey = base64Encode(Uint8List.fromList(collectionKey));
       final List diff = response.data["diff"] as List;
+      if (diff.isEmpty) {
+        return DiffResult([], [], response.data["hasMore"] as bool, 0);
+      }
+      final String encodedKey = base64Encode(Uint8List.fromList(collectionKey));
       final startTime = DateTime.now();
       final DiffResult result =
           await Computer.shared().compute<Map<String, dynamic>, DiffResult>(

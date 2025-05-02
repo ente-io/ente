@@ -113,7 +113,6 @@ class RemoteDB with SqlDbBase {
   Future<void> deleteCollectionFilesDiff(
     List<CollectionFileItem> items,
   ) async {
-    if (items.isEmpty) return;
     final int collectionID = items.first.collectionID;
     final stopwatch = Stopwatch()..start();
     await Future.forEach(items.slices(_batchInsertMaxCount), (slice) async {
