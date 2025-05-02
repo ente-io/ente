@@ -1,6 +1,4 @@
 // TODO: Audit this file
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
 import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
@@ -879,8 +877,7 @@ const readImageOrVideoDetails = async (uploadItem: UploadItem) => {
     // @ts-ignore
     const fileTypeInfo = await detectFileTypeInfoFromChunk(async () => {
         const reader = stream.getReader();
-        // @ts-ignore
-        const chunk = (await reader.read())!.value;
+        const chunk = (await reader.read()).value;
         await reader.cancel();
         return chunk;
     }, uploadItemFileName(uploadItem));
