@@ -5197,6 +5197,16 @@ class S {
     );
   }
 
+  /// `Sorry, we could not backup this file right now, we will retry later.`
+  String get sorryBackupFailedDesc {
+    return Intl.message(
+      'Sorry, we could not backup this file right now, we will retry later.',
+      name: 'sorryBackupFailedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `We could not backup your data.\nWe will retry later.`
   String get couldNotBackUpTryLater {
     return Intl.message(
@@ -11793,6 +11803,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'el'),
       Locale.fromSubtags(languageCode: 'es'),
       Locale.fromSubtags(languageCode: 'et'),
+      Locale.fromSubtags(languageCode: 'eu'),
       Locale.fromSubtags(languageCode: 'fa'),
       Locale.fromSubtags(languageCode: 'fr'),
       Locale.fromSubtags(languageCode: 'gu'),
