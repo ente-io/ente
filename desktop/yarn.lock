@@ -67,9 +67,9 @@
   optionalDependencies:
     global-agent "^3.0.0"
 
-"@electron/node-gyp@git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2":
+"@electron/node-gyp@https://github.com/electron/node-gyp#06b29aafb7708acef8b3669835c8a7857ebc92d2":
   version "10.2.0-electron.1"
-  resolved "git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2"
+  resolved "https://github.com/electron/node-gyp#06b29aafb7708acef8b3669835c8a7857ebc92d2"
   dependencies:
     env-paths "^2.2.0"
     exponential-backoff "^3.1.1"
@@ -1175,10 +1175,10 @@ electron-builder@^26.0.14:
     simple-update-notifier "2.0.0"
     yargs "^17.6.2"
 
-electron-log@^5.3.4:
-  version "5.3.4"
-  resolved "https://registry.yarnpkg.com/electron-log/-/electron-log-5.3.4.tgz#4117d9762d06dbed8e3b878cc468a92ce415a9e0"
-  integrity sha512-QLj0EbsA5R5Yy4vjGlLe7m8hPNZ/Enp7c7a2WH7RUPr0hIOp0vDaC+6bJM0th6+uZKiZGGH5a2aKzvYp3eYwDQ==
+electron-log@^5.4.0:
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/electron-log/-/electron-log-5.4.0.tgz#3180bf5194b2e2efacb62ec1392f8150faf4de6b"
+  integrity sha512-AXI5OVppskrWxEAmCxuv8ovX+s2Br39CpCAgkGMNHQtjYT3IiVbSQTncEjFVGPgoH35ZygRm/mvUMBDWwhRxgg==
 
 electron-publish@26.0.13:
   version "26.0.13"
@@ -1216,10 +1216,10 @@ electron-updater@^6.6.3:
     semver "^7.6.3"
     tiny-typed-emitter "^2.1.0"
 
-electron@^35.2.1:
-  version "35.2.1"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-35.2.1.tgz#9aa91840e6f72c58cbccf7d17d52da0f479fc35c"
-  integrity sha512-LO4xXLpzkPPUVLvAbdHMlW7N9Z+Qqz+7QsmSWXluTIQMeJk+v7o36nUTZghyA2I1s//tlMvuaCtle6Qo2W0Ktg==
+electron@^36.1.0:
+  version "36.1.0"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-36.1.0.tgz#9919b77e61cd1400acc6dd24f9db8451fba5f8eb"
+  integrity sha512-gnp3BnbKdGsVc7cm1qlEaZc8pJsR08mIs8H/yTo8gHEtFkGGJbDTVZOYNAfbQlL0aXh+ozv+CnyiNeDNkT1Upg==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^22.7.7"
