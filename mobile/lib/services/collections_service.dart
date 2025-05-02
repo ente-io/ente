@@ -150,7 +150,7 @@ class CollectionsService {
     final Set<int> toDelete = {};
     for (final collection in fetchedCollections) {
       if (collection.isDeleted) {
-        await _filesDB.deleteCollection(collection.id);
+        await remoteDB.deleteCollectionFiles([collection.id]);
         await setCollectionSyncTime(collection.id, null);
         if (_collectionIDToCollections.containsKey(collection.id)) {
           shouldFireDeleteEvent = true;
@@ -667,7 +667,7 @@ class CollectionsService {
   }
 
   Future<void> _handleCollectionDeletion(Collection collection) async {
-    await _filesDB.deleteCollection(collection.id);
+    await remoteDB.deleteCollectionFiles([collection.id]);
     final deletedCollection = collection.copyWith(isDeleted: true);
     unawaited(_updateDB([deletedCollection]));
     _collectionIDToCollections[collection.id] = deletedCollection;
@@ -1825,7 +1825,7 @@ class CollectionsService {
     );
     await _filesDB.insertMultiple(files);
     // remove files from old collection
-    await remoteDB.deleteCollectionEnteries(
+    await remoteDB.deleteCFEnteries(
       fromCollectionID,
       files.map((e) => e.uploadedFileID!).toList(),
     );
@@ -1893,7 +1893,7 @@ class CollectionsService {
         throw Exception("Failed to remove files from collection");
       }
 
-      await remoteDB.deleteCollectionEnteries(collectionID, params["fileIDs"]);
+      await remoteDB.deleteCFEnteries(collectionID, params["fileIDs"]);
       Bus.instance
           .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom"));
       Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom"));

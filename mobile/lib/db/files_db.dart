@@ -1150,16 +1150,6 @@ class FilesDB with SqlDbBase {
     return count.first['COUNT'] as int;
   }
 
-  Future<void> deleteCollection(int collectionID) async {
-    final db = await instance.sqliteAsyncDB;
-    unawaited(
-      db.execute(
-        'DELETE FROM $filesTable WHERE $columnCollectionID = ?',
-        [collectionID],
-      ),
-    );
-  }
-
   // todo:rewrite (upload related)
   Future<List<EnteFile>> getPendingUploadForCollection(int collectionID) async {
     final db = await instance.sqliteAsyncDB;

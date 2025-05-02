@@ -117,14 +117,14 @@ extension CollectionFiles on RemoteDB {
     );
   }
 
-  Future<void> deleteCollectionsEnteries(List<int> cIDs) async {
+  Future<void> deleteCollectionFiles(List<int> cIDs) async {
     if (cIDs.isEmpty) return;
     await sqliteDB.execute(
       "DELETE FROM collection_files WHERE collection_id IN (${cIDs.join(",")})",
     );
   }
 
-  Future<void> deleteCollectionEnteries(
+  Future<void> deleteCFEnteries(
     int collectionID,
     List<int> fileIDs,
   ) async {
