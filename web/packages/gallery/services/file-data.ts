@@ -225,7 +225,7 @@ export const fetchFilePreviewData = async (
     return z.object({ url: z.string() }).parse(await res.json()).url;
 };
 
-const FilePrevieDataUploadURLResponse = z.object({
+const FilePreviewDataUploadURLResponse = z.object({
     /**
      * The objectID with which this uploaded data can be referred to post upload
      * (e.g. when invoking {@link putVideoData}).
@@ -252,7 +252,7 @@ export const getFilePreviewDataUploadURL = async (file: EnteFile) => {
         headers: await authenticatedRequestHeaders(),
     });
     ensureOk(res);
-    return FilePrevieDataUploadURLResponse.parse(await res.json());
+    return FilePreviewDataUploadURLResponse.parse(await res.json());
 };
 
 /**

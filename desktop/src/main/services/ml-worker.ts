@@ -18,6 +18,7 @@ import * as ort from "onnxruntime-node";
 import { messagePortMainEndpoint } from "../utils/comlink";
 import { wait } from "../utils/common";
 import { writeStream } from "../utils/stream";
+import { fsStatMtime } from "./fs";
 
 /**
  * We cannot do
@@ -63,6 +64,7 @@ process.parentPort.once("message", (e) => {
     // parent.
     expose(
         {
+            fsStatMtime,
             computeCLIPImageEmbedding,
             computeCLIPTextEmbeddingIfAvailable,
             detectFaces,

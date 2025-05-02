@@ -3,7 +3,7 @@ import log from "ente-base/log";
 import type { Electron } from "ente-base/types/ipc";
 import {
     toDataOrPathOrZipEntry,
-    type DesktopUploadItem,
+    type FileSystemUploadItem,
     type UploadItem,
 } from "ente-gallery/services/upload";
 import {
@@ -15,6 +15,7 @@ import {
     parseMetadataDate,
     type ParsedMetadata,
 } from "ente-media/file-metadata";
+import { settingsSnapshot } from "ente-new/photos/services/settings";
 import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,
@@ -37,7 +38,14 @@ import { ffmpegExecWeb } from "./web";
  */
 export const generateVideoThumbnailWeb = async (blob: Blob) =>
     _generateVideoThumbnail((seekTime: number) =>
-        ffmpegExecWeb(makeGenThumbnailCommand(seekTime), blob, "jpeg"),
+        ffmpegExecWeb(
+            // TODO(HLS): Enable for all
+            settingsSnapshot().isInternalUser
+                ? makeGenThumbnailCommand(seekTime)
+                : _makeGenThumbnailCommand(seekTime, false),
+            blob,
+            "jpeg",
+        ),
     );
 
 const _generateVideoThumbnail = async (
@@ -69,26 +77,49 @@ const _generateVideoThumbnail = async (
  */
 export const generateVideoThumbnailNative = async (
     electron: Electron,
-    desktopUploadItem: DesktopUploadItem,
+    fsUploadItem: FileSystemUploadItem,
 ) =>
     _generateVideoThumbnail((seekTime: number) =>
         electron.ffmpegExec(
             makeGenThumbnailCommand(seekTime),
-            toDataOrPathOrZipEntry(desktopUploadItem),
+            toDataOrPathOrZipEntry(fsUploadItem),
             "jpeg",
         ),
     );
 
-const makeGenThumbnailCommand = (seekTime: number) => [
+const makeGenThumbnailCommand = (seekTime: number) => ({
+    default: _makeGenThumbnailCommand(seekTime, false),
+    hdr: _makeGenThumbnailCommand(seekTime, true),
+});
+
+const _makeGenThumbnailCommand = (seekTime: number, forHDR: boolean) => [
     ffmpegPathPlaceholder,
     "-i",
     inputPathPlaceholder,
+    // Seek to seekTime in the video.
     "-ss",
     `00:00:0${seekTime}`,
+    // Take the first frame
     "-vframes",
     "1",
+    // Apply a filter to this frame
     "-vf",
-    "scale=-1:720",
+    [
+        // Scale it to a maximum height of 720 keeping aspect ratio, ensuring
+        // that the dimensions are even (subsequent filters require this).
+        "scale=-2:720",
+        forHDR
+            ? // Apply a tonemap to ensure that thumbnails of HDR videos do
+              // not look washed out. See: [Note: Tonemapping HDR to HD].
+              [
+                  "zscale=transfer=linear",
+                  "tonemap=tonemap=hable:desat=0",
+                  "zscale=primaries=709:transfer=709:matrix=709",
+              ]
+            : [],
+    ]
+        .flat()
+        .join(","),
     outputPathPlaceholder,
 ];
 

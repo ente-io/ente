@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import "package:photos/core/configuration.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 
 class DeveloperSettingsWidget extends StatelessWidget {
@@ -8,8 +7,8 @@ class DeveloperSettingsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kDefaultProductionEndpoint) {
+    if (!Configuration.instance.isEnteProduction()) {
+      final endpoint = Configuration.instance.getHttpEndpoint();
       final endpointURI = Uri.parse(endpoint);
       return Padding(
         padding: const EdgeInsets.only(bottom: 20),

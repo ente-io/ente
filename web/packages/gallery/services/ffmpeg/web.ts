@@ -1,7 +1,9 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { newID } from "ente-base/id";
 import log from "ente-base/log";
+import type { FFmpegCommand } from "ente-base/types/ipc";
 import { PromiseQueue } from "ente-utils/promise";
+import z from "zod";
 import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,
@@ -51,7 +53,7 @@ const createFFmpeg = async () => {
  * {@link command} on {@link blob}.
  */
 export const ffmpegExecWeb = async (
-    command: string[],
+    command: FFmpegCommand,
     blob: Blob,
     outputFileExtension: string,
 ): Promise<Uint8Array> => {
@@ -68,15 +70,13 @@ export const ffmpegExecWeb = async (
 
 const ffmpegExec = async (
     ffmpeg: FFmpeg,
-    command: string[],
+    command: FFmpegCommand,
     outputFileExtension: string,
     blob: Blob,
 ) => {
     const inputPath = newID("in_");
     const outputSuffix = outputFileExtension ? "." + outputFileExtension : "";
     const outputPath = newID("out_") + outputSuffix;
-
-    const cmd = substitutePlaceholders(command, inputPath, outputPath);
 
     const inputData = new Uint8Array(await blob.arrayBuffer());
 
@@ -88,6 +88,21 @@ const ffmpegExec = async (
         const startTime = Date.now();
 
         await ffmpeg.writeFile(inputPath, inputData);
+
+        let resolvedCommand: string[];
+        if (Array.isArray(command)) {
+            resolvedCommand = command;
+        } else {
+            const isHDR = await isHDRVideo(ffmpeg, inputPath);
+            log.debug(() => `[wasm] input file is ${isHDR ? "" : "not "}HDR`);
+            resolvedCommand = isHDR ? command.hdr : command.default;
+        }
+
+        const cmd = substitutePlaceholders(
+            resolvedCommand,
+            inputPath,
+            outputPath,
+        );
 
         status = await ffmpeg.exec(cmd);
         if (status !== 0) {
@@ -139,3 +154,98 @@ const substitutePlaceholders = (
             }
         })
         .filter((s) => s !== undefined);
+
+const isHDRVideoFFProbeOutput = z.object({
+    streams: z.array(z.object({ color_transfer: z.string().optional() })),
+});
+
+/**
+ * A variant of the {@link isHDRVideo} function in the desktop app source (see
+ * `ffmpeg.ts`), except here we have access to ffprobe and can use that instead
+ * of parsing the ffmpeg stderr.
+ *
+ * See: [Note: Alternative FFmpeg command for HDR videos]
+ *
+ * @param inputFilePath The path to a video file on the FFmpeg FS.
+ *
+ * @returns `true` if this file is likely a HDR video. Exceptions are treated as
+ * `false` to make this function safe to invoke without breaking the happy path.
+ */
+const isHDRVideo = async (ffmpeg: FFmpeg, inputFilePath: string) => {
+    try {
+        const jsonString = await ffprobeOutput(
+            ffmpeg,
+            [
+                ["-i", inputFilePath],
+                // Show information about streams.
+                "-show_streams",
+                // Select the first video stream. This is not necessarily
+                // correct in a multi stream file because the ffmpeg automatic
+                // mapping will use the highest resolution stream, but short of
+                // reinventing ffmpeg's resolution mechanism, it is a reasonable
+                // assumption for our current, heuristic, check.
+                ["-select_streams", "v:0"],
+                // Output JSON
+                ["-of", "json"],
+                ["-o", "output.json"],
+            ].flat(),
+            "output.json",
+        );
+
+        const output = isHDRVideoFFProbeOutput.parse(JSON.parse(jsonString));
+        switch (output.streams[0]?.color_transfer) {
+            case "smpte2084":
+            case "arib-std-b67":
+                return true;
+            default:
+                return false;
+        }
+    } catch (e) {
+        log.warn(`Could not detect HDR status of ${inputFilePath}`, e);
+        return false;
+    }
+};
+
+/**
+ * Return the textual output produced by verbatim invoking the given ffprobe
+ * {@link cmd} that is expected to writes to a file named {@link outputFilePath}
+ * in the FFmpeg FS.
+ *
+ * The file generated at {@link outputFilePath} is removed in all cases.
+ */
+const ffprobeOutput = async (
+    ffmpeg: FFmpeg,
+    cmd: string[],
+    outputPath: string,
+) => {
+    // Exit status of the ffmpeg.ffprobe invocation.
+    // `0` if no error, `!= 0` if timeout (1) or error.
+    let status: number | undefined;
+
+    try {
+        status = await ffmpeg.ffprobe(cmd);
+        // Currently, ffprobe incorrectly returns status -1 on success.
+        // https://github.com/ffmpegwasm/ffmpeg.wasm/issues/817
+        if (status !== 0 && status != -1) {
+            log.info(
+                `[wasm] ffprobe command failed with exit code ${status}: ${cmd.join(" ")}`,
+            );
+            throw new Error(`ffprobe command failed with exit code ${status}`);
+        }
+
+        const result = await ffmpeg.readFile(outputPath, "utf8");
+        if (typeof result != "string") throw new Error("Expected text data");
+
+        return result;
+    } finally {
+        try {
+            await ffmpeg.deleteFile(outputPath);
+        } catch (e) {
+            // Output file might not even exist if the command did not succeed,
+            // so only log on success.
+            if (status !== 0 && status != -1) {
+                log.error(`Failed to remove output ${outputPath}`, e);
+            }
+        }
+    }
+};

@@ -13,6 +13,7 @@ import type { BrowserWindow } from "electron";
 import { ipcMain } from "electron/main";
 import type {
     CollectionMapping,
+    FFmpegCommand,
     FolderWatch,
     PendingUploads,
     ZipItem,
@@ -40,6 +41,7 @@ import {
     fsRename,
     fsRm,
     fsRmdir,
+    fsStatMtime,
     fsWriteFile,
     fsWriteFileViaBackup,
 } from "./services/fs";
@@ -55,8 +57,8 @@ import {
 import {
     clearPendingUploads,
     listZipItems,
-    markUploadedFiles,
-    markUploadedZipItems,
+    markUploadedFile,
+    markUploadedZipItem,
     pathOrZipItemSize,
     pendingUploads,
     setPendingUploads,
@@ -163,6 +165,8 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
 
+    ipcMain.handle("fsStatMtime", (_, path: string) => fsStatMtime(path));
+
     ipcMain.handle("fsFindFiles", (_, folderPath: string) =>
         fsFindFiles(folderPath),
     );
@@ -187,7 +191,7 @@ export const attachIPCHandlers = () => {
         "ffmpegExec",
         (
             _,
-            command: string[],
+            command: FFmpegCommand,
             dataOrPathOrZipItem: Uint8Array | string | ZipItem,
             outputFileExtension: string,
         ) => ffmpegExec(command, dataOrPathOrZipItem, outputFileExtension),
@@ -210,13 +214,15 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle(
-        "markUploadedFiles",
-        (_, paths: PendingUploads["filePaths"]) => markUploadedFiles(paths),
+        "markUploadedFile",
+        (_, path: string, associatedPath: string | undefined) =>
+            markUploadedFile(path, associatedPath),
     );
 
     ipcMain.handle(
-        "markUploadedZipItems",
-        (_, items: PendingUploads["zipItems"]) => markUploadedZipItems(items),
+        "markUploadedZipItem",
+        (_, item: ZipItem, associatedItem: ZipItem | undefined) =>
+            markUploadedZipItem(item, associatedItem),
     );
 
     ipcMain.handle("clearPendingUploads", () => clearPendingUploads());
