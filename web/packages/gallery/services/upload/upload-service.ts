@@ -54,8 +54,8 @@ import {
 } from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
-    PhotosUploadHttpClient,
-    PublicUploadHttpClient,
+    PhotosUploadHTTPClient,
+    PublicAlbumsUploadHTTPClient,
     type ObjectUploadURL,
 } from "./remote";
 import type { ParsedMetadataJSON } from "./takeout";
@@ -66,8 +66,8 @@ import {
     generateThumbnailWeb,
 } from "./thumbnail";
 
-const publicUploadHttpClient = new PublicUploadHttpClient();
-const UploadHttpClient = new PhotosUploadHttpClient();
+const photosHTTPClient = new PhotosUploadHTTPClient();
+const publicAlbumsHTTPClient = new PublicAlbumsUploadHTTPClient();
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
@@ -164,11 +164,11 @@ class UploadService {
 
     async uploadFile(uploadFile: UploadFile) {
         return this.publicAlbumsCredentials
-            ? publicUploadHttpClient.uploadFile(
+            ? publicAlbumsHTTPClient.uploadFile(
                   uploadFile,
                   this.publicAlbumsCredentials,
               )
-            : UploadHttpClient.uploadFile(uploadFile);
+            : photosHTTPClient.uploadFile(uploadFile);
     }
 
     private async refillUploadURLs() {
@@ -196,12 +196,12 @@ class UploadService {
     private async _refillUploadURLs() {
         let urls: ObjectUploadURL[];
         if (this.publicAlbumsCredentials) {
-            urls = await publicUploadHttpClient.fetchUploadURLs(
+            urls = await publicAlbumsHTTPClient.fetchUploadURLs(
                 this.pendingUploadCount,
                 this.publicAlbumsCredentials,
             );
         } else {
-            urls = await UploadHttpClient.fetchUploadURLs(
+            urls = await photosHTTPClient.fetchUploadURLs(
                 this.pendingUploadCount,
             );
         }
@@ -210,11 +210,11 @@ class UploadService {
 
     async fetchMultipartUploadURLs(count: number) {
         return this.publicAlbumsCredentials
-            ? publicUploadHttpClient.fetchMultipartUploadURLs(
+            ? publicAlbumsHTTPClient.fetchMultipartUploadURLs(
                   count,
                   this.publicAlbumsCredentials,
               )
-            : UploadHttpClient.fetchMultipartUploadURLs(count);
+            : photosHTTPClient.fetchMultipartUploadURLs(count);
     }
 }
 
@@ -1442,14 +1442,14 @@ const uploadToBucket = async (
             const progressTracker = makeProgressTracker(localID);
             const fileUploadURL = await uploadService.getUploadURL();
             if (!isCFUploadProxyDisabled) {
-                fileObjectKey = await UploadHttpClient.putFileV2(
+                fileObjectKey = await photosHTTPClient.putFileV2(
                     // @ts-ignore
                     fileUploadURL,
                     data,
                     progressTracker,
                 );
             } else {
-                fileObjectKey = await UploadHttpClient.putFile(
+                fileObjectKey = await photosHTTPClient.putFile(
                     // @ts-ignore
                     fileUploadURL,
                     data,
@@ -1461,14 +1461,14 @@ const uploadToBucket = async (
         // @ts-ignore
         let thumbnailObjectKey: string = null;
         if (!isCFUploadProxyDisabled) {
-            thumbnailObjectKey = await UploadHttpClient.putFileV2(
+            thumbnailObjectKey = await photosHTTPClient.putFileV2(
                 // @ts-ignore
                 thumbnailUploadURL,
                 thumbnail.encryptedData,
                 null,
             );
         } else {
-            thumbnailObjectKey = await UploadHttpClient.putFile(
+            thumbnailObjectKey = await photosHTTPClient.putFile(
                 // @ts-ignore
                 thumbnailUploadURL,
                 thumbnail.encryptedData,
@@ -1543,13 +1543,13 @@ async function uploadStreamUsingMultipart(
         );
         let eTag = null;
         if (!isCFUploadProxyDisabled) {
-            eTag = await UploadHttpClient.putFilePartV2(
+            eTag = await photosHTTPClient.putFilePartV2(
                 fileUploadURL,
                 uploadChunk,
                 progressTracker,
             );
         } else {
-            eTag = await UploadHttpClient.putFilePart(
+            eTag = await photosHTTPClient.putFilePart(
                 fileUploadURL,
                 uploadChunk,
                 progressTracker,
@@ -1566,9 +1566,9 @@ async function uploadStreamUsingMultipart(
         { compact: true, ignoreComment: true, spaces: 4 },
     );
     if (!isCFUploadProxyDisabled) {
-        await UploadHttpClient.completeMultipartUploadV2(completeURL, cBody);
+        await photosHTTPClient.completeMultipartUploadV2(completeURL, cBody);
     } else {
-        await UploadHttpClient.completeMultipartUpload(completeURL, cBody);
+        await photosHTTPClient.completeMultipartUpload(completeURL, cBody);
     }
 
     return { objectKey: multipartUploadURLs.objectKey, fileSize };

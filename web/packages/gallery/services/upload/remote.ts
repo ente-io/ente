@@ -32,7 +32,11 @@ export type ObjectUploadURL = z.infer<typeof ObjectUploadURL>;
 
 const ObjectUploadURLResponse = z.object({ urls: ObjectUploadURL.array() });
 
-export class PhotosUploadHttpClient {
+/**
+ * Lowest layer for file upload related HTTP operations when we're running in
+ * the context of the photos app.
+ */
+export class PhotosUploadHTTPClient {
     async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
         try {
             const token = getToken();
@@ -244,7 +248,11 @@ export class PhotosUploadHttpClient {
     }
 }
 
-export class PublicUploadHttpClient {
+/**
+ * Lowest layer for file upload related HTTP operations when we're running in
+ * the context of the public albums app.
+ */
+export class PublicAlbumsUploadHTTPClient {
     async uploadFile(
         uploadFile: UploadFile,
         credentials: PublicAlbumsCredentials,
