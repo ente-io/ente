@@ -22,6 +22,7 @@ import 'package:photos/utils/standalone/date_time.dart';
 class EnteFile {
   AssetEntity? asset;
   RemoteAsset? remoteAsset;
+  CollectionFileEntry? fileEntry;
   int? generatedID;
   int? uploadedFileID;
   int? ownerID;
@@ -115,6 +116,7 @@ class EnteFile {
   ) {
     final EnteFile file = EnteFile();
     file.remoteAsset = asset;
+    file.fileEntry = collection;
     file.uploadedFileID = asset.id;
     file.ownerID = asset.ownerID;
     file.title = asset.title;
@@ -127,6 +129,7 @@ class EnteFile {
     file.metadataVersion = kCurrentMetadataVersion;
     file.duration = asset.durationInSec;
     file.fileSize = asset.fileSize;
+
     file.collectionID = collection.collectionID;
     file.encryptedKey = CryptoUtil.bin2base64(collection.fileKey);
     file.keyDecryptionNonce = CryptoUtil.bin2base64(collection.fileKeyNonce);
