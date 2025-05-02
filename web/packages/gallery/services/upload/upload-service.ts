@@ -670,8 +670,7 @@ export const upload = async (
             uploadedFile,
         };
     } catch (e) {
-        // @ts-ignore
-        if (e.message == CustomError.UPLOAD_CANCELLED) {
+        if (e instanceof Error && e.message == CustomError.UPLOAD_CANCELLED) {
             log.info(`Upload for ${fileName} cancelled`);
         } else {
             log.error(`Upload failed for ${fileName}`, e);
@@ -1036,9 +1035,7 @@ const extractImageOrVideoMetadata = async (
         creationTime = timestamp;
         publicMagicMetadata.dateTime = dateTime;
         if (offset) publicMagicMetadata.offsetTime = offset;
-        // @ts-ignore
-    } else if (parsedMetadata.creationTime) {
-        // @ts-ignore
+    } else if (parsedMetadata?.creationTime) {
         creationTime = parsedMetadata.creationTime;
     } else {
         creationTime =
@@ -1086,7 +1083,7 @@ const extractImageOrVideoMetadata = async (
 const tryExtractImageMetadata = async (
     uploadItem: UploadItem,
     lastModifiedMs: number | undefined,
-): Promise<ParsedMetadata> => {
+): Promise<ParsedMetadata | undefined> => {
     let file: File;
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
         // The library we use for extracting Exif from images, ExifReader,
@@ -1107,7 +1104,6 @@ const tryExtractImageMetadata = async (
     } catch (e) {
         const fileName = uploadItemFileName(uploadItem);
         log.error(`Failed to extract image metadata for ${fileName}`, e);
-        // @ts-ignore
         return undefined;
     }
 };
