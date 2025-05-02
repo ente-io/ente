@@ -116,7 +116,7 @@ import {
     removeFromFavorites,
 } from "services/collectionService";
 import exportService from "services/export";
-import uploadManager from "services/upload/uploadManager";
+import { uploadManager } from "services/upload-manager";
 import { isTokenValid } from "services/userService";
 import {
     GalleryContextType,

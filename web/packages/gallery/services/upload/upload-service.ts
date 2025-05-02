@@ -57,7 +57,7 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-import type { UploadableUploadItem } from "./uploadManager";
+import type { UploadableUploadItem } from "./upload-manager";
 
 const publicUploadHttpClient = new PublicUploadHttpClient();
 const UploadHttpClient = new PhotosUploadHttpClient();

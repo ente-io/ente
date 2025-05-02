@@ -14,7 +14,7 @@ import {
 import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import uploadManager from "services/upload/uploadManager";
+import { uploadManager } from "services/upload-manager";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { downloadSingleFile } from "utils/file";
 import {
