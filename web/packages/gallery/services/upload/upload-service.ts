@@ -4,7 +4,7 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/no-base-to-string */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-inferrable-types */
+
 import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
 import type { BytesOrB64 } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
@@ -118,7 +118,7 @@ const multipartChunksPerPart = 5;
 /** Upload files to cloud storage */
 class UploadService {
     private uploadURLs: ObjectUploadURL[] = [];
-    private pendingUploadCount: number = 0;
+    private pendingUploadCount = 0;
     private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     private activeUploadURLRefill: Promise<void> | undefined;
 
