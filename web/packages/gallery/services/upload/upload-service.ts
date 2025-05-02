@@ -19,12 +19,6 @@ import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
 } from "ente-gallery/services/magic-metadata";
-import type { UploadItem } from "ente-gallery/services/upload";
-import {
-    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
-    type LivePhotoAssets,
-    type UploadResult,
-} from "ente-gallery/services/upload";
 import {
     detectFileTypeInfoFromChunk,
     isFileTypeNotSupportedError,
@@ -52,7 +46,12 @@ import { CustomError, handleUploadError } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import * as convert from "xml-js";
-import type { UploadableUploadItem } from "../upload";
+import type { UploadableUploadItem, UploadItem } from ".";
+import {
+    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    type LivePhotoAssets,
+    type UploadResult,
+} from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
     PhotosUploadHttpClient,
