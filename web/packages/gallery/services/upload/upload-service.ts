@@ -143,7 +143,9 @@ class UploadService {
             await this.refillUploadURLs();
             this.ensureUniqueUploadURLs();
         }
-        return this.uploadURLs.pop();
+        const url = this.uploadURLs.pop();
+        if (!url) throw new Error("Failed to obtain upload URL");
+        return url;
     }
 
     private async preFetchUploadURLs() {
@@ -1169,6 +1171,7 @@ const readLivePhoto = async (
         hasStaticThumbnail,
     } = await withThumbnail(
         livePhotoAssets.image,
+        // TODO: Update underlying type
         // @ts-ignore
         { extension: fileTypeInfo.imageType, fileType: FileType.image },
         await readUploadItem(livePhotoAssets.image),
@@ -1442,14 +1445,12 @@ const uploadToBucket = async (
             const fileUploadURL = await uploadService.getUploadURL();
             if (!isCFUploadProxyDisabled) {
                 fileObjectKey = await photosHTTPClient.putFileV2(
-                    // @ts-ignore
                     fileUploadURL,
                     data,
                     progressTracker,
                 );
             } else {
                 fileObjectKey = await photosHTTPClient.putFile(
-                    // @ts-ignore
                     fileUploadURL,
                     data,
                     progressTracker,
@@ -1461,14 +1462,12 @@ const uploadToBucket = async (
         let thumbnailObjectKey: string = null;
         if (!isCFUploadProxyDisabled) {
             thumbnailObjectKey = await photosHTTPClient.putFileV2(
-                // @ts-ignore
                 thumbnailUploadURL,
                 thumbnail.encryptedData,
                 null,
             );
         } else {
             thumbnailObjectKey = await photosHTTPClient.putFile(
-                // @ts-ignore
                 thumbnailUploadURL,
                 thumbnail.encryptedData,
                 null,
