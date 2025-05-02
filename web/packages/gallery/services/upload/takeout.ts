@@ -1,7 +1,4 @@
 // TODO: Audit this file
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/dot-notation */
 /** @file Dealing with the JSON metadata sidecar files */
 
@@ -157,32 +154,33 @@ const uploadItemText = async (uploadItem: UploadItem) => {
 };
 
 const parseMetadataJSONText = (text: string) => {
-    const metadataJSON: object = JSON.parse(text);
-    if (!metadataJSON) {
-        return undefined;
-    }
+    const metadataJSON_ = JSON.parse(text) as unknown;
+    // Ignore non objects.
+    if (typeof metadataJSON_ != "object") return undefined;
+    // Ignore null.
+    if (!metadataJSON_) return undefined;
+
+    // At this point, `metadataJSON_` is an `object`, but TypeScript won't let
+    // me index it. The following is the simplest (but unsafe) way I could think
+    // of for convincing TypeScript to allow me to index `metadataJSON` with
+    // `string`s.
+    const metadataJSON = metadataJSON_ as Record<string, unknown>;
 
     const parsedMetadataJSON: ParsedMetadataJSON = {};
 
     parsedMetadataJSON.creationTime =
-        // @ts-ignore
         parseGTTimestamp(metadataJSON["photoTakenTime"]) ??
-        // @ts-ignore
         parseGTTimestamp(metadataJSON["creationTime"]);
 
     parsedMetadataJSON.modificationTime = parseGTTimestamp(
-        // @ts-ignore
         metadataJSON["modificationTime"],
     );
 
     parsedMetadataJSON.location =
-        // @ts-ignore
         parseGTLocation(metadataJSON["geoData"]) ??
-        // @ts-ignore
         parseGTLocation(metadataJSON["geoDataExif"]);
 
     parsedMetadataJSON.description = parseGTNonEmptyString(
-        // @ts-ignore
         metadataJSON["description"],
     );
 
