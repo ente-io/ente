@@ -1,11 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-/* eslint-disable @typescript-eslint/require-await */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 // TODO: Audit this file
-/* eslint-disable @typescript-eslint/no-base-to-string */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-inferrable-types */
+
 import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
 import type { BytesOrB64 } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
@@ -19,12 +14,6 @@ import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
 } from "ente-gallery/services/magic-metadata";
-import type { UploadItem } from "ente-gallery/services/upload";
-import {
-    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
-    type LivePhotoAssets,
-    type UploadResult,
-} from "ente-gallery/services/upload";
 import {
     detectFileTypeInfoFromChunk,
     isFileTypeNotSupportedError,
@@ -52,11 +41,16 @@ import { CustomError, handleUploadError } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import * as convert from "xml-js";
-import type { UploadableUploadItem } from "../upload";
+import type { UploadableUploadItem, UploadItem } from ".";
+import {
+    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    type LivePhotoAssets,
+    type UploadResult,
+} from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
-    PhotosUploadHttpClient,
-    PublicUploadHttpClient,
+    PhotosUploadHTTPClient,
+    PublicAlbumsUploadHTTPClient,
     type ObjectUploadURL,
 } from "./remote";
 import type { ParsedMetadataJSON } from "./takeout";
@@ -67,8 +61,8 @@ import {
     generateThumbnailWeb,
 } from "./thumbnail";
 
-const publicUploadHttpClient = new PublicUploadHttpClient();
-const UploadHttpClient = new PhotosUploadHttpClient();
+const photosHTTPClient = new PhotosUploadHTTPClient();
+const publicAlbumsHTTPClient = new PublicAlbumsUploadHTTPClient();
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
@@ -120,7 +114,7 @@ const multipartChunksPerPart = 5;
 /** Upload files to cloud storage */
 class UploadService {
     private uploadURLs: ObjectUploadURL[] = [];
-    private pendingUploadCount: number = 0;
+    private pendingUploadCount = 0;
     private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     private activeUploadURLRefill: Promise<void> | undefined;
 
@@ -149,7 +143,9 @@ class UploadService {
             await this.refillUploadURLs();
             this.ensureUniqueUploadURLs();
         }
-        return this.uploadURLs.pop();
+        const url = this.uploadURLs.pop();
+        if (!url) throw new Error("Failed to obtain upload URL");
+        return url;
     }
 
     private async preFetchUploadURLs() {
@@ -164,17 +160,12 @@ class UploadService {
     }
 
     async uploadFile(uploadFile: UploadFile) {
-        if (this.publicAlbumsCredentials) {
-            return publicUploadHttpClient.uploadFile(
-                uploadFile,
-                // TODO: publicAlbumsCredentials
-                this.publicAlbumsCredentials.accessToken,
-                // @ts-ignore
-                this.publicAlbumsCredentials.accessTokenJWT,
-            );
-        } else {
-            return UploadHttpClient.uploadFile(uploadFile);
-        }
+        return this.publicAlbumsCredentials
+            ? publicAlbumsHTTPClient.uploadFile(
+                  uploadFile,
+                  this.publicAlbumsCredentials,
+              )
+            : photosHTTPClient.uploadFile(uploadFile);
     }
 
     private async refillUploadURLs() {
@@ -189,8 +180,8 @@ class UploadService {
     }
 
     private ensureUniqueUploadURLs() {
-        // TODO: Sanity check added on new implementation Nov 2024, remove after
-        // a while (tag: Migration).
+        // Sanity check added when this was a new implementation. Have kept it
+        // around, but it can be removed too.
         if (
             this.uploadURLs.length !=
             new Set(this.uploadURLs.map((u) => u.url)).size
@@ -202,12 +193,12 @@ class UploadService {
     private async _refillUploadURLs() {
         let urls: ObjectUploadURL[];
         if (this.publicAlbumsCredentials) {
-            urls = await publicUploadHttpClient.fetchUploadURLs(
+            urls = await publicAlbumsHTTPClient.fetchUploadURLs(
                 this.pendingUploadCount,
                 this.publicAlbumsCredentials,
             );
         } else {
-            urls = await UploadHttpClient.fetchUploadURLs(
+            urls = await photosHTTPClient.fetchUploadURLs(
                 this.pendingUploadCount,
             );
         }
@@ -215,17 +206,12 @@ class UploadService {
     }
 
     async fetchMultipartUploadURLs(count: number) {
-        if (this.publicAlbumsCredentials) {
-            // TODO: publicAlbumsCredentials
-            return await publicUploadHttpClient.fetchMultipartUploadURLs(
-                count,
-                this.publicAlbumsCredentials.accessToken,
-                // @ts-ignore
-                this.publicAlbumsCredentials.accessTokenJWT,
-            );
-        } else {
-            return await UploadHttpClient.fetchMultipartUploadURLs(count);
-        }
+        return this.publicAlbumsCredentials
+            ? publicAlbumsHTTPClient.fetchMultipartUploadURLs(
+                  count,
+                  this.publicAlbumsCredentials,
+              )
+            : photosHTTPClient.fetchMultipartUploadURLs(count);
     }
 }
 
@@ -514,7 +500,7 @@ const uploadItemCreationDate = async (
     parsedMetadataJSON: ParsedMetadataJSON | undefined,
 ) => {
     if (parsedMetadataJSON?.creationTime)
-        return parsedMetadataJSON?.creationTime;
+        return parsedMetadataJSON.creationTime;
 
     let parsedMetadata: ParsedMetadata | undefined;
     if (fileType == FileType.image) {
@@ -522,7 +508,9 @@ const uploadItemCreationDate = async (
     } else if (fileType == FileType.video) {
         parsedMetadata = await tryExtractVideoMetadata(uploadItem);
     } else {
-        throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
+        throw new Error(
+            `Unexpected file type ${fileType} for ${uploadItemFileName(uploadItem)}`,
+        );
     }
 
     return parsedMetadata?.creationDate?.timestamp;
@@ -553,7 +541,7 @@ interface UploadResponse {
  * {@link UploadManager} after it has assembled all the relevant bits we need to
  * go forth and upload.
  */
-export const uploader = async (
+export const upload = async (
     { collection, localID, fileName, ...uploadAsset }: UploadableUploadItem,
     uploaderName: string,
     existingFiles: EnteFile[],
@@ -613,7 +601,7 @@ export const uploader = async (
             areFilesSame(file.metadata, metadata),
         );
 
-        const anyMatch = matches?.length > 0 ? matches[0] : undefined;
+        const anyMatch = matches.length > 0 ? matches[0] : undefined;
 
         if (anyMatch) {
             const matchInSameCollection = matches.find(
@@ -681,11 +669,10 @@ export const uploader = async (
             uploadResult: metadata.hasStaticThumbnail
                 ? "uploadedWithStaticThumbnail"
                 : "uploaded",
-            uploadedFile: uploadedFile,
+            uploadedFile,
         };
     } catch (e) {
-        // @ts-ignore
-        if (e.message == CustomError.UPLOAD_CANCELLED) {
+        if (e instanceof Error && e.message == CustomError.UPLOAD_CANCELLED) {
             log.info(`Upload for ${fileName} cancelled`);
         } else {
             log.error(`Upload failed for ${fileName}`, e);
@@ -785,8 +772,7 @@ const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
             size,
             lastModifiedMs: lm,
         } = await readStream(ensureElectron(), uploadItem);
-        // @ts-ignore
-        underlyingStream = response.body;
+        underlyingStream = response.body!;
         fileSize = size;
         lastModifiedMs = lm;
     } else {
@@ -808,7 +794,7 @@ const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
     // smaller).
     let pending: Uint8Array | undefined;
     const transformer = new TransformStream<Uint8Array, Uint8Array>({
-        async transform(
+        transform(
             chunk: Uint8Array,
             controller: TransformStreamDefaultController,
         ) {
@@ -891,8 +877,7 @@ const readImageOrVideoDetails = async (uploadItem: UploadItem) => {
     // @ts-ignore
     const fileTypeInfo = await detectFileTypeInfoFromChunk(async () => {
         const reader = stream.getReader();
-        // @ts-ignore
-        const chunk = (await reader.read())!.value;
+        const chunk = (await reader.read()).value;
         await reader.cancel();
         return chunk;
     }, uploadItemFileName(uploadItem));
@@ -1015,7 +1000,9 @@ const extractImageOrVideoMetadata = async (
     } else if (fileType == FileType.video) {
         parsedMetadata = await tryExtractVideoMetadata(uploadItem);
     } else {
-        throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
+        throw new Error(
+            `Unexpected file type ${fileType} for ${uploadItemFileName(uploadItem)}`,
+        );
     }
 
     // The `UploadAsset` itself might have metadata associated with a-priori, if
@@ -1049,9 +1036,7 @@ const extractImageOrVideoMetadata = async (
         creationTime = timestamp;
         publicMagicMetadata.dateTime = dateTime;
         if (offset) publicMagicMetadata.offsetTime = offset;
-        // @ts-ignore
-    } else if (parsedMetadata.creationTime) {
-        // @ts-ignore
+    } else if (parsedMetadata?.creationTime) {
         creationTime = parsedMetadata.creationTime;
     } else {
         creationTime =
@@ -1099,7 +1084,7 @@ const extractImageOrVideoMetadata = async (
 const tryExtractImageMetadata = async (
     uploadItem: UploadItem,
     lastModifiedMs: number | undefined,
-): Promise<ParsedMetadata> => {
+): Promise<ParsedMetadata | undefined> => {
     let file: File;
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
         // The library we use for extracting Exif from images, ExifReader,
@@ -1118,8 +1103,8 @@ const tryExtractImageMetadata = async (
     try {
         return await extractExif(file);
     } catch (e) {
-        log.error(`Failed to extract image metadata for ${uploadItem}`, e);
-        // @ts-ignore
+        const fileName = uploadItemFileName(uploadItem);
+        log.error(`Failed to extract image metadata for ${fileName}`, e);
         return undefined;
     }
 };
@@ -1128,7 +1113,8 @@ const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
     try {
         return await extractVideoMetadata(uploadItem);
     } catch (e) {
-        log.error(`Failed to extract video metadata for ${uploadItem}`, e);
+        const fileName = uploadItemFileName(uploadItem);
+        log.error(`Failed to extract video metadata for ${fileName}`, e);
         return undefined;
     }
 };
@@ -1184,6 +1170,7 @@ const readLivePhoto = async (
         hasStaticThumbnail,
     } = await withThumbnail(
         livePhotoAssets.image,
+        // TODO: Update underlying type
         // @ts-ignore
         { extension: fileTypeInfo.imageType, fileType: FileType.image },
         await readUploadItem(livePhotoAssets.image),
@@ -1287,8 +1274,9 @@ const withThumbnail = async (
                 // directly for subsequent steps.
                 fileData = data;
             } else {
+                const fileName = uploadItemFileName(uploadItem);
                 log.warn(
-                    `Not using browser based thumbnail generation fallback for video at path ${uploadItem}`,
+                    `Not using browser based thumbnail generation fallback for video at path ${fileName}`,
                 );
             }
         }
@@ -1320,7 +1308,7 @@ const constructPublicMagicMetadata = async (
         publicMagicMetadataProps,
     );
 
-    if (Object.values(nonEmptyPublicMagicMetadataProps)?.length === 0) {
+    if (Object.values(nonEmptyPublicMagicMetadataProps).length === 0) {
         // @ts-ignore
         return null;
     }
@@ -1353,6 +1341,8 @@ const encryptFile = async (
     });
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
+    // Keep defensive check until the underlying type is audited.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (pubMagicMetadata) {
         const encryptedPubMagicMetadataData = await worker.encryptMetadataJSON({
             jsonValue: pubMagicMetadata.data,
@@ -1424,8 +1414,7 @@ const uploadToBucket = async (
     const { localID, file, thumbnail, metadata, pubMagicMetadata } =
         encryptedFilePieces;
     try {
-        // @ts-ignore
-        let fileObjectKey: string = null;
+        let fileObjectKey: string;
         let fileSize: number;
 
         const encryptedData = file.encryptedData;
@@ -1453,15 +1442,13 @@ const uploadToBucket = async (
             const progressTracker = makeProgressTracker(localID);
             const fileUploadURL = await uploadService.getUploadURL();
             if (!isCFUploadProxyDisabled) {
-                fileObjectKey = await UploadHttpClient.putFileV2(
-                    // @ts-ignore
+                fileObjectKey = await photosHTTPClient.putFileV2(
                     fileUploadURL,
                     data,
                     progressTracker,
                 );
             } else {
-                fileObjectKey = await UploadHttpClient.putFile(
-                    // @ts-ignore
+                fileObjectKey = await photosHTTPClient.putFile(
                     fileUploadURL,
                     data,
                     progressTracker,
@@ -1469,18 +1456,15 @@ const uploadToBucket = async (
             }
         }
         const thumbnailUploadURL = await uploadService.getUploadURL();
-        // @ts-ignore
-        let thumbnailObjectKey: string = null;
+        let thumbnailObjectKey: string;
         if (!isCFUploadProxyDisabled) {
-            thumbnailObjectKey = await UploadHttpClient.putFileV2(
-                // @ts-ignore
+            thumbnailObjectKey = await photosHTTPClient.putFileV2(
                 thumbnailUploadURL,
                 thumbnail.encryptedData,
                 null,
             );
         } else {
-            thumbnailObjectKey = await UploadHttpClient.putFile(
-                // @ts-ignore
+            thumbnailObjectKey = await photosHTTPClient.putFile(
                 thumbnailUploadURL,
                 thumbnail.encryptedData,
                 null,
@@ -1506,8 +1490,9 @@ const uploadToBucket = async (
         };
         return backupedFile;
     } catch (e) {
-        // @ts-ignore
-        if (e.message !== CustomError.UPLOAD_CANCELLED) {
+        if (
+            !(e instanceof Error && e.message == CustomError.UPLOAD_CANCELLED)
+        ) {
             log.error("Error when uploading to bucket", e);
         }
         throw e;
@@ -1554,13 +1539,13 @@ async function uploadStreamUsingMultipart(
         );
         let eTag = null;
         if (!isCFUploadProxyDisabled) {
-            eTag = await UploadHttpClient.putFilePartV2(
+            eTag = await photosHTTPClient.putFilePartV2(
                 fileUploadURL,
                 uploadChunk,
                 progressTracker,
             );
         } else {
-            eTag = await UploadHttpClient.putFilePart(
+            eTag = await photosHTTPClient.putFilePart(
                 fileUploadURL,
                 uploadChunk,
                 progressTracker,
@@ -1577,9 +1562,9 @@ async function uploadStreamUsingMultipart(
         { compact: true, ignoreComment: true, spaces: 4 },
     );
     if (!isCFUploadProxyDisabled) {
-        await UploadHttpClient.completeMultipartUploadV2(completeURL, cBody);
+        await photosHTTPClient.completeMultipartUploadV2(completeURL, cBody);
     } else {
-        await UploadHttpClient.completeMultipartUpload(completeURL, cBody);
+        await photosHTTPClient.completeMultipartUpload(completeURL, cBody);
     }
 
     return { objectKey: multipartUploadURLs.objectKey, fileSize };
