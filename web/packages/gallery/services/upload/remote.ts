@@ -76,12 +76,7 @@ export class PhotosUploadHTTPClient {
             headers: await authenticatedRequestHeaders(),
         });
         ensureOk(res);
-        return (
-            // TODO: The as cast will not be needed when tsc strict mode is
-            // enabled for this code.
-            ObjectUploadURLResponse.parse(await res.json())
-                .urls as ObjectUploadURL[]
-        );
+        return ObjectUploadURLResponse.parse(await res.json()).urls;
     }
 
     async fetchMultipartUploadURLs(
@@ -290,12 +285,7 @@ export class PublicAlbumsUploadHTTPClient {
             headers: authenticatedPublicAlbumsRequestHeaders(credentials),
         });
         ensureOk(res);
-        return (
-            // TODO: The as cast will not be needed when tsc strict mode is
-            // enabled for this code.
-            ObjectUploadURLResponse.parse(await res.json())
-                .urls as ObjectUploadURL[]
-        );
+        return ObjectUploadURLResponse.parse(await res.json()).urls;
     }
 
     async fetchMultipartUploadURLs(
