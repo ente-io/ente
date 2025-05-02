@@ -1,3 +1,7 @@
+// TODO: Audit this file
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/dot-notation */
 /** @file Dealing with the JSON metadata sidecar files */
 
@@ -161,18 +165,24 @@ const parseMetadataJSONText = (text: string) => {
     const parsedMetadataJSON: ParsedMetadataJSON = {};
 
     parsedMetadataJSON.creationTime =
+        // @ts-ignore
         parseGTTimestamp(metadataJSON["photoTakenTime"]) ??
+        // @ts-ignore
         parseGTTimestamp(metadataJSON["creationTime"]);
 
     parsedMetadataJSON.modificationTime = parseGTTimestamp(
+        // @ts-ignore
         metadataJSON["modificationTime"],
     );
 
     parsedMetadataJSON.location =
+        // @ts-ignore
         parseGTLocation(metadataJSON["geoData"]) ??
+        // @ts-ignore
         parseGTLocation(metadataJSON["geoDataExif"]);
 
     parsedMetadataJSON.description = parseGTNonEmptyString(
+        // @ts-ignore
         metadataJSON["description"],
     );
 

@@ -1,3 +1,6 @@
+// TODO: Audit this file
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 
@@ -35,10 +38,12 @@ const parseEpochMicrosecondsFromFileName = (fileName: string) => {
     if (fileName.startsWith("IMG-") || fileName.startsWith("VID-")) {
         // WhatsApp media files
         // - e.g. "IMG-20171218-WA0028.jpg"
+        // @ts-ignore
         date = parseDateFromFusedDateString(fileName.split("-")[1]);
     } else if (fileName.startsWith("Screenshot_")) {
         // Screenshots on Android
         // - e.g. "Screenshot_20181227-152914.jpg"
+        // @ts-ignore
         date = parseDateFromFusedDateString(
             fileName.replaceAll("Screenshot_", ""),
         );
@@ -58,13 +63,16 @@ const parseEpochMicrosecondsFromFileName = (fileName: string) => {
         const p = fileName.split("-");
         if (p.length > 5) {
             const dateString = `${p[1]}${p[2]}${p[3]}-${p[4]}${p[5]}${p[6]}`;
+            // @ts-ignore
             date = parseDateFromFusedDateString(dateString);
         } else {
             const dateString = `${p[1]}${p[2]}${p[3]}-${p[4]}`;
+            // @ts-ignore
             date = parseDateFromFusedDateString(dateString);
         }
     }
 
+    // @ts-ignore
     if (!date) {
         const [name] = nameAndExtension(fileName);
 
@@ -89,13 +97,16 @@ const parseEpochMicrosecondsFromFileName = (fileName: string) => {
             const p = name.split("_");
             if (p.length == 3) {
                 const dateString = `${p[0]}-${p[1]}`;
+                // @ts-ignore
                 date = parseDateFromFusedDateString(dateString);
             }
         }
     }
 
     // Generic pattern.
+    // @ts-ignore
     if (!date) {
+        // @ts-ignore
         date = parseDateFromDigitGroups(fileName);
     }
 

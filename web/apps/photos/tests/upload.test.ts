@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/dot-notation */
+import {
+    parseDateFromDigitGroups,
+    tryParseEpochMicrosecondsFromFileName,
+} from "ente-gallery/services/upload/date";
+import {
+    matchTakeoutMetadata,
+    metadataJSONMapKeyForJSON,
+} from "ente-gallery/services/upload/takeout";
 import { FileType } from "ente-media/file-type";
 import { getLocalCollections } from "ente-new/photos/services/collections";
 import {
     getLocalFiles,
     groupFilesByCollectionID,
 } from "ente-new/photos/services/files";
-import {
-    parseDateFromDigitGroups,
-    tryParseEpochMicrosecondsFromFileName,
-} from "services/upload/date";
-import {
-    matchTakeoutMetadata,
-    metadataJSONMapKeyForJSON,
-} from "services/upload/takeout";
 import { getUserDetailsV2 } from "services/userService";
 
 const DATE_TIME_PARSING_TEST_FILE_NAMES = [
