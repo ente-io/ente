@@ -247,22 +247,18 @@ export class PhotosUploadHttpClient {
 export class PublicUploadHttpClient {
     async uploadFile(
         uploadFile: UploadFile,
-        token: string,
-        passwordToken: string,
+        credentials: PublicAlbumsCredentials,
     ): Promise<EnteFile> {
         try {
-            if (!token) {
-                throw Error(CustomError.TOKEN_MISSING);
-            }
             const url = await apiURL("/public-collection/file");
             const response = await retryAsyncOperation(
                 () =>
-                    HTTPService.post(url, uploadFile, null, {
-                        "X-Auth-Access-Token": token,
-                        ...(passwordToken && {
-                            "X-Auth-Access-Token-JWT": passwordToken,
-                        }),
-                    }),
+                    HTTPService.post(
+                        url,
+                        uploadFile,
+                        null,
+                        authenticatedPublicAlbumsRequestHeaders(credentials),
+                    ),
                 handleUploadError,
             );
             return response.data;
@@ -296,24 +292,14 @@ export class PublicUploadHttpClient {
 
     async fetchMultipartUploadURLs(
         count: number,
-        token: string,
-        passwordToken: string,
+        credentials: PublicAlbumsCredentials,
     ): Promise<MultipartUploadURLs> {
         try {
-            if (!token) {
-                throw Error(CustomError.TOKEN_MISSING);
-            }
             const response = await HTTPService.get(
                 await apiURL("/public-collection/multipart-upload-urls"),
                 { count },
-                {
-                    "X-Auth-Access-Token": token,
-                    ...(passwordToken && {
-                        "X-Auth-Access-Token-JWT": passwordToken,
-                    }),
-                },
+                authenticatedPublicAlbumsRequestHeaders(credentials),
             );
-
             return response.data.urls;
         } catch (e) {
             log.error("fetch public multipart-upload-url failed", e);

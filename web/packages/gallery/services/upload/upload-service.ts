@@ -166,10 +166,7 @@ class UploadService {
         if (this.publicAlbumsCredentials) {
             return publicUploadHttpClient.uploadFile(
                 uploadFile,
-                // TODO: publicAlbumsCredentials
-                this.publicAlbumsCredentials.accessToken,
-                // @ts-ignore
-                this.publicAlbumsCredentials.accessTokenJWT,
+                this.publicAlbumsCredentials,
             );
         } else {
             return UploadHttpClient.uploadFile(uploadFile);
