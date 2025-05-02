@@ -732,43 +732,6 @@ class FilesDB with SqlDbBase {
     return files;
   }
 
-  Future<FileLoadResult> getFilesInCollections(
-    List<int> collectionIDs,
-    int startTime,
-    int endTime,
-    int userID, {
-    int? limit,
-    bool? asc,
-  }) async {
-    if (collectionIDs.isEmpty) {
-      return FileLoadResult(<EnteFile>[], false);
-    }
-    final inParam = collectionIDs.map((id) => "'$id'").join(',');
-
-    final db = await instance.sqliteAsyncDB;
-    final order = (asc ?? false ? 'ASC' : 'DESC');
-    final String whereClause =
-        '$columnCollectionID  IN ($inParam) AND $columnCreationTime >= ? AND '
-        '$columnCreationTime <= ? AND $columnOwnerID = ?';
-    final List<Object> whereArgs = [startTime, endTime, userID];
-
-    String query = 'SELECT * FROM $filesTable WHERE $whereClause ORDER BY '
-        '$columnCreationTime $order, $columnModificationTime $order';
-    if (limit != null) {
-      query += ' LIMIT ?';
-      whereArgs.add(limit);
-    }
-    final results = await db.getAll(
-      query,
-      whereArgs,
-    );
-    final files = convertToFiles(results);
-    final dedupeResult =
-        await applyDBFilters(files, DBFilterOptions.dedupeOption);
-    _logger.info("Fetched " + dedupeResult.length.toString() + " files");
-    return FileLoadResult(files, files.length == limit);
-  }
-
   Future<List<EnteFile>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
     Set<int> ignoredCollectionIDs, {
