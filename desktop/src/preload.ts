@@ -184,6 +184,8 @@ const fsWriteFileViaBackup = (path: string, contents: string) =>
 
 const fsIsDir = (dirPath: string) => ipcRenderer.invoke("fsIsDir", dirPath);
 
+const fsStatMtime = (path: string) => ipcRenderer.invoke("fsStatMtime", path);
+
 // - Conversion
 
 const convertToJPEG = (imageData: Uint8Array) =>
@@ -290,11 +292,11 @@ const pendingUploads = () => ipcRenderer.invoke("pendingUploads");
 const setPendingUploads = (pendingUploads: PendingUploads) =>
     ipcRenderer.invoke("setPendingUploads", pendingUploads);
 
-const markUploadedFiles = (paths: PendingUploads["filePaths"]) =>
-    ipcRenderer.invoke("markUploadedFiles", paths);
+const markUploadedFile = (path: string, associatedPath?: string) =>
+    ipcRenderer.invoke("markUploadedFile", path, associatedPath);
 
-const markUploadedZipItems = (items: PendingUploads["zipItems"]) =>
-    ipcRenderer.invoke("markUploadedZipItems", items);
+const markUploadedZipItem = (item: ZipItem, associatedItem?: ZipItem) =>
+    ipcRenderer.invoke("markUploadedZipItem", item, associatedItem);
 
 const clearPendingUploads = () => ipcRenderer.invoke("clearPendingUploads");
 
@@ -379,6 +381,7 @@ contextBridge.exposeInMainWorld("electron", {
         writeFile: fsWriteFile,
         writeFileViaBackup: fsWriteFileViaBackup,
         isDir: fsIsDir,
+        statMtime: fsStatMtime,
         findFiles: fsFindFiles,
     },
 
@@ -411,7 +414,7 @@ contextBridge.exposeInMainWorld("electron", {
     pathOrZipItemSize,
     pendingUploads,
     setPendingUploads,
-    markUploadedFiles,
-    markUploadedZipItems,
+    markUploadedFile,
+    markUploadedZipItem,
     clearPendingUploads,
 });

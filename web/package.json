@@ -29,9 +29,9 @@
     },
     "devDependencies": {
         "concurrently": "^9.1.2",
-        "eslint": "^9.21.0",
+        "eslint": "^9.25.1",
         "prettier": "^3.5.3",
-        "typescript": "^5.8.2"
+        "typescript": "^5.8.3"
     },
     "packageManager": "yarn@1.22.22"
 }

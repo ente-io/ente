@@ -125,6 +125,7 @@ const handleRead = async (path: string) => {
         res.headers.set("Content-Length", `${fileSize}`);
 
         // Add the file's last modified time (as epoch milliseconds).
+        // See: [Note: Integral last modified time]
         const mtimeMs = stat.mtime.getTime();
         res.headers.set("X-Last-Modified-Ms", `${mtimeMs}`);
     }

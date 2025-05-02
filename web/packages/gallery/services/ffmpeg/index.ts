@@ -3,7 +3,7 @@ import log from "ente-base/log";
 import type { Electron } from "ente-base/types/ipc";
 import {
     toDataOrPathOrZipEntry,
-    type DesktopUploadItem,
+    type FileSystemUploadItem,
     type UploadItem,
 } from "ente-gallery/services/upload";
 import {
@@ -77,12 +77,12 @@ const _generateVideoThumbnail = async (
  */
 export const generateVideoThumbnailNative = async (
     electron: Electron,
-    desktopUploadItem: DesktopUploadItem,
+    fsUploadItem: FileSystemUploadItem,
 ) =>
     _generateVideoThumbnail((seekTime: number) =>
         electron.ffmpegExec(
             makeGenThumbnailCommand(seekTime),
-            toDataOrPathOrZipEntry(desktopUploadItem),
+            toDataOrPathOrZipEntry(fsUploadItem),
             "jpeg",
         ),
     );

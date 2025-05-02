@@ -10,7 +10,7 @@ import log from "ente-base/log";
 import { masterKeyFromSession } from "ente-base/session";
 import type { Electron } from "ente-base/types/ipc";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import type { UploadItem } from "ente-gallery/services/upload";
+import { type ProcessableUploadItem } from "ente-gallery/services/upload";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { throttled } from "ente-utils/promise";
@@ -424,7 +424,8 @@ const workerDidUnawaitedIndex = () => void debounceUpdateClustersAndPeople();
 /**
  * Run indexing on a file which was uploaded from this client.
  *
- * Indexing only happens if ML is enabled.
+ * Indexing only happens if ML is enabled and we're running in the desktop app
+ * as it is resource intensive.
  *
  * This function is called by the uploader when it uploads a new file from this
  * client, giving us the opportunity to index it live. This is only an
@@ -434,15 +435,19 @@ const workerDidUnawaitedIndex = () => void debounceUpdateClustersAndPeople();
  *
  * @param file The {@link EnteFile} that got uploaded.
  *
- * @param uploadItem The item that was uploaded. This can be used to get at the
- * contents of the file that got uploaded. In case of live photos, this is the
- * image part of the live photo that was uploaded.
+ * @param processableItem The item that was uploaded. This can be used to get at
+ * the contents of the file that got uploaded. In case of live photos, this is
+ * the image part of the live photo that was uploaded.
  */
-export const indexNewUpload = (file: EnteFile, uploadItem: UploadItem) => {
+export const indexNewUpload = (
+    file: EnteFile,
+    processableUploadItem: ProcessableUploadItem,
+) => {
     if (!isMLEnabled()) return;
+    if (!isDesktop) return;
     if (file.metadata.fileType !== FileType.image) return;
-    log.debug(() => ["ml/liveq", { file, uploadItem }]);
-    void worker().then((w) => w.onUpload(file, uploadItem));
+    log.debug(() => ["ml/liveq", { file, processableUploadItem }]);
+    void worker().then((w) => w.onUpload(file, processableUploadItem));
 };
 
 export type MLStatus =
