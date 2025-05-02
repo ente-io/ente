@@ -772,8 +772,7 @@ const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
             size,
             lastModifiedMs: lm,
         } = await readStream(ensureElectron(), uploadItem);
-        // @ts-ignore
-        underlyingStream = response.body;
+        underlyingStream = response.body!;
         fileSize = size;
         lastModifiedMs = lm;
     } else {
@@ -1415,8 +1414,7 @@ const uploadToBucket = async (
     const { localID, file, thumbnail, metadata, pubMagicMetadata } =
         encryptedFilePieces;
     try {
-        // @ts-ignore
-        let fileObjectKey: string = null;
+        let fileObjectKey: string;
         let fileSize: number;
 
         const encryptedData = file.encryptedData;
@@ -1458,8 +1456,7 @@ const uploadToBucket = async (
             }
         }
         const thumbnailUploadURL = await uploadService.getUploadURL();
-        // @ts-ignore
-        let thumbnailObjectKey: string = null;
+        let thumbnailObjectKey: string;
         if (!isCFUploadProxyDisabled) {
             thumbnailObjectKey = await photosHTTPClient.putFileV2(
                 thumbnailUploadURL,
@@ -1493,8 +1490,9 @@ const uploadToBucket = async (
         };
         return backupedFile;
     } catch (e) {
-        // @ts-ignore
-        if (e.message !== CustomError.UPLOAD_CANCELLED) {
+        if (
+            !(e instanceof Error && e.message == CustomError.UPLOAD_CANCELLED)
+        ) {
             log.error("Error when uploading to bucket", e);
         }
         throw e;
