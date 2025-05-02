@@ -1,5 +1,3 @@
-// TODO: Audit this file
-/* eslint-disable @typescript-eslint/prefer-promise-reject-errors */
 import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
 import * as ffmpeg from "ente-gallery/services/ffmpeg";
@@ -92,6 +90,7 @@ const generateImageThumbnailUsingCanvas = async (blob: Blob) => {
                     canvasCtx.drawImage(image, 0, 0, width, height);
                     resolve(undefined);
                 } catch (e: unknown) {
+                    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                     reject(e);
                 }
             };
@@ -163,6 +162,7 @@ export const generateVideoThumbnailUsingCanvas = async (blob: Blob) => {
                     canvasCtx.drawImage(video, 0, 0, width, height);
                     resolve(undefined);
                 } catch (e) {
+                    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                     reject(e);
                 }
             });
