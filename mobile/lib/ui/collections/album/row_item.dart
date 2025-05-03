@@ -4,6 +4,7 @@ import "package:photos/core/configuration.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -20,6 +21,9 @@ class AlbumRowItemWidget extends StatelessWidget {
   final bool showFileCount;
   final String tag;
   final bool? hasVerifiedLock;
+  final void Function(Collection)? onTapCallback;
+  final void Function(Collection)? onLongPressCallback;
+  final SelectedAlbums? selectedAlbums;
 
   const AlbumRowItemWidget(
     this.c,
@@ -28,6 +32,9 @@ class AlbumRowItemWidget extends StatelessWidget {
     this.showFileCount = true,
     this.tag = "",
     this.hasVerifiedLock,
+    this.onTapCallback,
+    this.onLongPressCallback,
+    this.selectedAlbums,
   });
 
   @override
@@ -44,6 +51,7 @@ class AlbumRowItemWidget extends StatelessWidget {
             color: c.publicURLs.first.isExpired ? warning500 : strokeBaseDark,
           )
         : null;
+
     return GestureDetector(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,20 +78,33 @@ class AlbumRowItemWidget extends StatelessWidget {
                                 CollectionsService.instance.getCoverCache(c);
                           }
                           if (thumbnail != null) {
+                            final bool isSelected =
+                                selectedAlbums?.isAlbumSelected(c) ?? false;
                             final String heroTag = tagPrefix + thumbnail.tag;
+                            final thumbnailWidget = ThumbnailWidget(
+                              thumbnail,
+                              shouldShowArchiveStatus: isOwner
+                                  ? c.isArchived()
+                                  : c.hasShareeArchived(),
+                              showFavForAlbumOnly: true,
+                              shouldShowSyncStatus: false,
+                              shouldShowPinIcon: isOwner && c.isPinned,
+                              key: Key(heroTag),
+                            );
                             return Hero(
                               tag: heroTag,
                               transitionOnUserGestures: true,
-                              child: ThumbnailWidget(
-                                thumbnail,
-                                shouldShowArchiveStatus: isOwner
-                                    ? c.isArchived()
-                                    : c.hasShareeArchived(),
-                                showFavForAlbumOnly: true,
-                                shouldShowSyncStatus: false,
-                                shouldShowPinIcon: isOwner && c.isPinned,
-                                key: Key(heroTag),
-                              ),
+                              child: isSelected
+                                  ? ColorFiltered(
+                                      colorFilter: ColorFilter.mode(
+                                        Colors.black.withOpacity(
+                                          0.4,
+                                        ),
+                                        BlendMode.darken,
+                                      ),
+                                      child: thumbnailWidget,
+                                    )
+                                  : thumbnailWidget,
                             );
                           } else {
                             return const NoThumbnailWidget();
@@ -103,6 +124,33 @@ class AlbumRowItemWidget extends StatelessWidget {
                             ),
                           ),
                         ),
+                      Positioned(
+                        top: 6,
+                        right: 6,
+                        child: Hero(
+                          tag: tagPrefix + "_album_selection",
+                          transitionOnUserGestures: true,
+                          child: ListenableBuilder(
+                            listenable: selectedAlbums ?? ValueNotifier(false),
+                            builder: (context, _) {
+                              final bool isSelected =
+                                  selectedAlbums?.isAlbumSelected(c) ?? false;
+                              return AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 200),
+                                switchInCurve: Curves.easeOut,
+                                switchOutCurve: Curves.easeIn,
+                                child: isSelected
+                                    ? const Icon(
+                                        Icons.check_circle_rounded,
+                                        color: Colors.white,
+                                        size: 22,
+                                      )
+                                    : null,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
                       if (!isOwner)
                         Align(
                           alignment: Alignment.bottomRight,
@@ -188,6 +236,10 @@ class AlbumRowItemWidget extends StatelessWidget {
         ],
       ),
       onTap: () async {
+        if (onTapCallback != null) {
+          onTapCallback!(c);
+          return;
+        }
         final thumbnail = await CollectionsService.instance.getCover(c);
         // ignore: unawaited_futures
         routeToPage(
@@ -198,6 +250,11 @@ class AlbumRowItemWidget extends StatelessWidget {
             hasVerifiedLock: hasVerifiedLock,
           ),
         );
+      },
+      onLongPress: () {
+        if (onLongPressCallback != null) {
+          onLongPressCallback!(c);
+        }
       },
     );
   }

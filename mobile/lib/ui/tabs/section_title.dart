@@ -45,25 +45,31 @@ class SectionOptions extends StatelessWidget {
   final Widget title;
   final Widget? trailingWidget;
   final EdgeInsetsGeometry? padding;
+  final VoidCallback? onTap;
 
   const SectionOptions(
     this.title, {
     this.trailingWidget,
     this.padding = const EdgeInsets.only(left: 12, right: 0),
     super.key,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     if (trailingWidget != null) {
-      return Container(
-        padding: padding,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(alignment: Alignment.centerLeft, child: title),
-            trailingWidget!,
-          ],
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          padding: padding,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Align(alignment: Alignment.centerLeft, child: title),
+              trailingWidget!,
+            ],
+          ),
         ),
       );
     } else {

@@ -1445,4 +1445,19 @@ class UserService {
 
     return emailIDs;
   }
+
+  Set<String> getEmailIDsOfFamilyMember() {
+    final emailIDs = <String>{};
+
+    final cachedUserDetails = getCachedUserDetails();
+    if (cachedUserDetails?.familyData?.members?.isNotEmpty ?? false) {
+      for (final member in cachedUserDetails!.familyData!.members!) {
+        if (member.email.isNotEmpty) {
+          emailIDs.add(member.email);
+        }
+      }
+    }
+
+    return emailIDs;
+  }
 }
