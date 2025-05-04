@@ -11,12 +11,14 @@ class FaceBox {
   final double y;
   final double width;
   final double height;
+  final double check;
 
   FaceBox({
     required this.x,
     required this.y,
     required this.width,
     required this.height,
+    required this.check,
   });
 
   factory FaceBox.fromJson(Map<String, dynamic> json) {
@@ -27,6 +29,7 @@ class FaceBox {
           parseIntOrDoubleAsDouble(json['yMin'])!,
       width: parseIntOrDoubleAsDouble(json['width'])!,
       height: parseIntOrDoubleAsDouble(json['height'])!,
+      check : parseIntOrDoubleAsObjetcAsCheckobject (json['objcheck'])!,
     );
   }
 
@@ -35,5 +38,6 @@ class FaceBox {
         'y': y,
         'width': width,
         'height': height,
+        'check' : objcheck,
       };
 }
