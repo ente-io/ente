@@ -1,4 +1,5 @@
 import "package:photos/models/ml/face/detection.dart";
+import "package:photos/models/ml/face/check_is.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/standalone/parse.dart";
@@ -10,11 +11,22 @@ class FaceWithoutEmbedding {
   final double score;
   final double blur;
 
+  // Is the image blurry based on Laplacian threshold?
   bool get isBlurry => blur < kLaplacianHardThreshold;
 
+  // Does the face have a high enough confidence score?
   bool get hasHighScore => score > kMinimumQualityFaceScore;
 
+  // Is the face both not blurry and has a high enough score?
   bool get isHighQuality => (!isBlurry) && hasHighScore;
+
+  // Recognition confidence level based on check value
+  FaceCheckStatus get checkStatus => detection.box.checkStatus;
+
+  // Shortcut booleans from checkStatus
+  bool get isCheckedRecognized => detection.box.isRecognized;
+  bool get isCheckedSuggestable => detection.box.isSuggestable;
+  bool get isCheckedRejected => detection.box.isRejected;
 
   FaceWithoutEmbedding(
     this.faceID,
@@ -32,13 +44,11 @@ class FaceWithoutEmbedding {
       fileID,
       parseIntOrDoubleAsDouble(json['score'])!,
       Detection.fromJson(json['detection'] as Map<String, dynamic>),
-      // high value means t
       parseIntOrDoubleAsDouble(json['blur']) ?? kLapacianDefault,
     );
   }
 
-  // Note: Keep the information in toJson minimum. Keep in sync with desktop.
-  // Derive fields like fileID from other values whenever possible
+  // Keep toJson output minimal and in sync with desktop logic
   Map<String, dynamic> toJson() => {
         'faceID': faceID,
         'detection': detection.toJson(),

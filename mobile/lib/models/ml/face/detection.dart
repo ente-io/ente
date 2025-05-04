@@ -2,7 +2,7 @@ import "dart:math" show min, max;
 
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/landmark.dart";
-import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
+import "package:photos/models/ml/face/check_is.dart"; // Check status enum & extension
 
 /// Stores the face detection data, notably the bounding box and landmarks.
 ///
@@ -21,13 +21,19 @@ class Detection {
 
   bool get isEmpty => box.width == 0 && box.height == 0 && landmarks.isEmpty;
 
-  // empty box
+  /// Face is fully recognized (high enough confidence)
+  bool get isRecognized => box.checkStatus == FaceCheckStatus.recognized;
+
+  /// Face is not confidently recognized, but close enough to suggest
+  bool get isSuggestion => box.checkStatus == FaceCheckStatus.suggest;
+
   Detection.empty()
       : box = FaceBox(
           x: 0,
           y: 0,
           width: 0,
           height: 0,
+          check: 0.0,
         ),
         landmarks = [];
 
@@ -40,16 +46,14 @@ class Detection {
     return Detection(
       box: FaceBox.fromJson(json['box'] as Map<String, dynamic>),
       landmarks: List<Landmark>.from(
-        json['landmarks']
-            .map((x) => Landmark.fromJson(x as Map<String, dynamic>)),
+        json['landmarks'].map((x) => Landmark.fromJson(x as Map<String, dynamic>)),
       ),
     );
   }
 
   FaceDirection getFaceDirection() {
-    if (isEmpty) {
-      return FaceDirection.straight;
-    }
+    if (isEmpty) return FaceDirection.straight;
+
     final leftEye = [landmarks[0].x, landmarks[0].y];
     final rightEye = [landmarks[1].x, landmarks[1].y];
     final nose = [landmarks[2].x, landmarks[2].y];
@@ -62,23 +66,18 @@ class Detection {
 
     final bool faceIsUpright =
         (max(leftEye[1], rightEye[1]) + 0.5 * eyeDistanceY < nose[1]) &&
-            (nose[1] + 0.5 * mouthDistanceY < min(leftMouth[1], rightMouth[1]));
+        (nose[1] + 0.5 * mouthDistanceY < min(leftMouth[1], rightMouth[1]));
 
-    final bool noseStickingOutLeft = (nose[0] < min(leftEye[0], rightEye[0])) &&
-        (nose[0] < min(leftMouth[0], rightMouth[0]));
+    final bool noseStickingOutLeft =
+        (nose[0] < min(leftEye[0], rightEye[0])) && (nose[0] < min(leftMouth[0], rightMouth[0]));
     final bool noseStickingOutRight =
-        (nose[0] > max(leftEye[0], rightEye[0])) &&
-            (nose[0] > max(leftMouth[0], rightMouth[0]));
+        (nose[0] > max(leftEye[0], rightEye[0])) && (nose[0] > max(leftMouth[0], rightMouth[0]));
 
-    final bool noseCloseToLeftEye =
-        (nose[0] - leftEye[0]).abs() < 0.2 * eyeDistanceX;
-    final bool noseCloseToRightEye =
-        (nose[0] - rightEye[0]).abs() < 0.2 * eyeDistanceX;
+    final bool noseCloseToLeftEye = (nose[0] - leftEye[0]).abs() < 0.2 * eyeDistanceX;
+    final bool noseCloseToRightEye = (nose[0] - rightEye[0]).abs() < 0.2 * eyeDistanceX;
 
-    // if (faceIsUpright && (noseStickingOutLeft || noseCloseToLeftEye)) {
     if (noseStickingOutLeft || (faceIsUpright && noseCloseToLeftEye)) {
       return FaceDirection.left;
-      // } else if (faceIsUpright && (noseStickingOutRight || noseCloseToRightEye)) {
     } else if (noseStickingOutRight || (faceIsUpright && noseCloseToRightEye)) {
       return FaceDirection.right;
     }
@@ -87,9 +86,8 @@ class Detection {
   }
 
   bool faceIsSideways() {
-    if (isEmpty) {
-      return false;
-    }
+    if (isEmpty) return false;
+
     final leftEye = [landmarks[0].x, landmarks[0].y];
     final rightEye = [landmarks[1].x, landmarks[1].y];
     final nose = [landmarks[2].x, landmarks[2].y];
@@ -102,14 +100,12 @@ class Detection {
 
     final bool faceIsUpright =
         (max(leftEye[1], rightEye[1]) + 0.5 * eyeDistanceY < nose[1]) &&
-            (nose[1] + 0.5 * mouthDistanceY < min(leftMouth[1], rightMouth[1]));
+        (nose[1] + 0.5 * mouthDistanceY < min(leftMouth[1], rightMouth[1]));
 
-    final bool noseStickingOutLeft =
-        (nose[0] < min(leftEye[0], rightEye[0]) - 0.5 * eyeDistanceX) &&
-            (nose[0] < min(leftMouth[0], rightMouth[0]));
-    final bool noseStickingOutRight =
-        (nose[0] > max(leftEye[0], rightEye[0]) + 0.5 * eyeDistanceX) &&
-            (nose[0] > max(leftMouth[0], rightMouth[0]));
+    final bool noseStickingOutLeft = (nose[0] < min(leftEye[0], rightEye[0]) - 0.5 * eyeDistanceX) &&
+        (nose[0] < min(leftMouth[0], rightMouth[0]));
+    final bool noseStickingOutRight = (nose[0] > max(leftEye[0], rightEye[0]) + 0.5 * eyeDistanceX) &&
+        (nose[0] > max(leftMouth[0], rightMouth[0]));
 
     return faceIsUpright && (noseStickingOutLeft || noseStickingOutRight);
   }

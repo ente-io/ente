@@ -1,4 +1,5 @@
 import "package:photos/models/ml/face/box.dart";
+import "package:photos/models/ml/face/check_is.dart";
 import "package:photos/models/ml/face/detection.dart";
 import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/models/ml/face/landmark.dart";
@@ -6,7 +7,7 @@ import 'package:photos/services/machine_learning/face_ml/face_filtering/face_fil
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/standalone/parse.dart";
 
-// FileInfo contains the image width and height of the image the face was detected in.
+// FileInfo holds the original image's width and height.
 class FileInfo {
   int? imageWidth;
   int? imageHeight;
@@ -23,18 +24,36 @@ class Face {
   final double score;
   final double blur;
 
-  ///#region Local DB fields
-  // This is not stored on the server, using it for local DB row
+  //#region Local DB fields
   FileInfo? fileInfo;
   final int fileID;
+  //#endregion
 
-  ///#endregion
-
+  // Is the image blurry based on Laplacian threshold?
   bool get isBlurry => blur < kLaplacianHardThreshold;
 
+  // Is the face score considered high quality?
   bool get hasHighScore => score > kMinimumQualityFaceScore;
 
+  // Is the face both not blurry and has high enough score?
   bool get isHighQuality => (!isBlurry) && hasHighScore;
+
+  // Is the face recognized (check >= 0.7)?
+  bool get isRecognized => detection.box.check >= 0.7;
+
+  // Is the face in the suggestion range (0.1 < check < 0.7)?
+  bool get isSuggestion => detection.box.check > 0.1 && detection.box.check < 0.7;
+
+  // Is the face uncertain (check <= 0.1)?
+  bool get isUncertain => detection.box.check <= 0.1;
+
+  // Evaluation of face recognition confidence (enum)
+  FaceCheckStatus get checkStatus => detection.box.checkStatus;
+
+  // Shortcut booleans from checkStatus
+  bool get isCheckedRecognized => detection.box.isRecognized;
+  bool get isCheckedSuggestable => detection.box.isSuggestable;
+  bool get isCheckedRejected => detection.box.isRejected;
 
   Face(
     this.faceID,
@@ -57,16 +76,13 @@ class Face {
         y: faceResult.detection.yMinBox,
         width: faceResult.detection.width,
         height: faceResult.detection.height,
+        check: faceResult.detection.check, // Important: take check here
       ),
       landmarks: faceResult.detection.allKeypoints
-          .map(
-            (keypoint) => Landmark(
-              x: keypoint[0],
-              y: keypoint[1],
-            ),
-          )
+          .map((keypoint) => Landmark(x: keypoint[0], y: keypoint[1]))
           .toList(),
     );
+
     return Face(
       faceResult.faceId,
       fileID,
@@ -101,13 +117,10 @@ class Face {
       parseAsDoubleList(json['embedding'] as List),
       parseIntOrDoubleAsDouble(json['score'])!,
       Detection.fromJson(json['detection'] as Map<String, dynamic>),
-      // high value means t
       parseIntOrDoubleAsDouble(json['blur']) ?? kLapacianDefault,
     );
   }
 
-  // Note: Keep the information in toJson minimum. Keep in sync with desktop.
-  // Derive fields like fileID from other values whenever possible
   Map<String, dynamic> toJson() => {
         'faceID': faceID,
         'embedding': embedding,
