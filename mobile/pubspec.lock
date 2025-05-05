@@ -643,7 +643,7 @@ packages:
     description:
       path: "flutter/flutter"
       ref: android-packaged
-      resolved-ref: "2ffa9fb3704508fdbfb4c1fdf49928d3f6a39109"
+      resolved-ref: "6d5d27a8c259eda6292f204a27fba53da70af20e"
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "6.0.3"
