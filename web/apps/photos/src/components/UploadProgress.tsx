@@ -39,7 +39,7 @@ import type {
     SegregatedFinishedUploads,
     UploadCounter,
     UploadFileNames,
-} from "services/upload/uploadManager";
+} from "services/upload-manager";
 
 interface UploadProgressProps {
     open: boolean;

@@ -290,7 +290,7 @@ func (c *UserController) NotifyAccountDeletion(userID int64, userEmail string, i
 	}
 	recoverToken, err2 := c.GetJWTTokenForClaim(&enteJWT.WebCommonJWTClaim{
 		UserID:     userID,
-		ExpiryTime: time.Microseconds(),
+		ExpiryTime: time.MicrosecondsAfterDays(7),
 		ClaimScope: enteJWT.RestoreAccount.Ptr(),
 		Email:      userEmail,
 	})
@@ -321,6 +321,13 @@ func (c *UserController) HandleSelfAccountRecovery(ctx *gin.Context, token strin
 		return stacktrace.Propagate(ente.NewBadRequestError(&ente.ApiErrorParams{
 			Message: "Token expired",
 		}), "")
+	}
+	// check if account is already recovered
+	if user, userErr := c.UserRepo.Get(jwtToken.UserID); userErr == nil {
+		if strings.EqualFold(user.Email, jwtToken.Email) {
+			logrus.WithField("userID", jwtToken.UserID).Error("account is already recovered")
+			return nil
+		}
 	}
 	return c.HandleAccountRecovery(ctx, ente.RecoverAccountRequest{
 		UserID:  jwtToken.UserID,

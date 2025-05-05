@@ -371,6 +371,21 @@
   "deleteFromBoth": "Eliminar de ambos",
   "newAlbum": "Nuevo álbum",
   "albums": "Álbumes",
+  "memoryCount": "{count, plural, =0{no hay recuerdos} one{{formattedCount} recuerdo} other{{formattedCount} recuerdos}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
+      }
+    }
+  },
   "selectedPhotos": "{count} seleccionados",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -777,6 +792,14 @@
   "share": "Compartir",
   "unhideToAlbum": "Hacer visible al álbum",
   "restoreToAlbum": "Restaurar al álbum",
+  "moveItem": "{count, plural,=1 {Mover objeto} other {Mover objetos}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, =1 {Añadir objeto} other {Añadir objetos}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Crear o seleccionar álbum",
   "selectAlbum": "Seleccionar álbum",
   "searchByAlbumNameHint": "Nombre del álbum",
@@ -874,6 +897,7 @@
   "authToViewYourMemories": "Por favor, autentícate para ver tus recuerdos",
   "unlock": "Desbloquear",
   "freeUpSpace": "Liberar espacio",
+  "freeUpSpaceSaving": "{count, plural, =1 {Se puede eliminar del dispositivo para liberar {formattedSize}} other {Se pueden eliminar del dispositivo para liberar {formattedSize}}}",
   "filesBackedUpInAlbum": "Se ha realizado la copia de seguridad de {count, plural, one {1 archivo} other {{formattedNumber} archivos}} de este álbum de forma segura",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -901,6 +925,18 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Aún puedes acceder {count, plural,=1 {a él} other {a ellos}} en Ente mientras tengas una suscripción activa",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
       }
     }
   },
@@ -1231,6 +1267,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Encuentra gente rápidamente por su nombre",
+  "addViewers": "{count, plural, =0 {Añadir espectador} =1{Añadir espectador} other {Añadir espectadores}}",
+  "addCollaborators": "{count, plural, =0 {Añadir colaborador} =1 {Añadir colaborador} other {Añadir colaboradores}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Mantén pulsado un correo electrónico para verificar el cifrado de extremo a extremo.",
   "developerSettingsWarning": "¿Estás seguro de que quieres modificar los ajustes de desarrollador?",
   "developerSettings": "Ajustes de desarrollador",
@@ -1362,6 +1400,16 @@
   "enableMachineLearningBanner": "Activar aprendizaje automático para búsqueda mágica y reconocimiento facial",
   "searchDiscoverEmptySection": "Las imágenes se mostrarán aquí cuando se complete el procesado y la sincronización",
   "searchPersonsEmptySection": "Las personas se mostrarán aquí cuando se complete el procesado y la sincronización",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 espectadores añadidos} =1 {1 espectador añadido} other {{count} espectadores añadidos}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 colaboradores añadidos} =1 {1 colaborador añadido} other {{count} colaboradores añadidos}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1437,6 +1485,15 @@
   },
   "currentlyRunning": "ejecutando",
   "ignored": "ignorado",
+  "photosCount": "{count, plural, =0 {0 fotos} =1 {1 foto} other {{count} fotos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "file": "Archivo",
   "searchSectionsLengthMismatch": "La longitud de las secciones no coincide: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1617,17 +1674,30 @@
   "selectTime": "Seleccionar hora",
   "selectDate": "Seleccionar fecha",
   "previous": "Anterior",
+  "selectOneDateAndTimeForAll": "Seleccione una fecha y hora para todas",
   "selectStartOfRange": "Seleccionar inicio del rango",
   "thisWillMakeTheDateAndTimeOfAllSelected": "Esto hará que la fecha y la hora de todas las fotos seleccionadas sean las mismas.",
+  "allWillShiftRangeBasedOnFirst": "Este es el primero en el grupo. Otras fotos seleccionadas cambiarán automáticamente basándose en esta nueva fecha",
   "newRange": "Nuevo rango",
   "selectOneDateAndTime": "Seleccionar fecha y hora",
   "moveSelectedPhotosToOneDate": "Mover las fotos seleccionadas a una fecha",
   "shiftDatesAndTime": "Cambiar fechas y hora",
+  "photosKeepRelativeTimeDifference": "Las fotos mantienen una diferencia de tiempo relativa",
+  "photocountPhotos": "{count, plural, =0 {No hay fotos} =1 {1 foto} other {{count} fotos}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "appIcon": "Ícono",
   "notThisPerson": "¿No es esta persona?",
   "selectedItemsWillBeRemovedFromThisPerson": "Los elementos seleccionados se eliminarán de esta persona, pero no se eliminarán de tu biblioteca.",
   "throughTheYears": "{dateFormat} a través de los años",
   "thisWeekThroughTheYears": "Esta semana a través de los años",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Esta semana, hace {count} año} other {Esta semana, hace {count} años}}",
   "youAndThem": "Tú y {name}",
   "admiringThem": "Admirando a {name}",
   "embracingThem": "Abrazando a {name}",
@@ -1639,6 +1709,9 @@
   "backgroundWithThem": "Preciosas vistas con {name}",
   "sportsWithThem": "Deportes con {name}",
   "roadtripWithThem": "Viaje en carretera con {name}",
+  "spotlightOnYourself": "Enfócate a ti mismo",
+  "spotlightOnThem": "Enfocar a {name}",
+  "personIsAge": "¡{name} tiene {age} años!",
   "personTurningAge": "{name} cumpliendo {age} pronto",
   "lastTimeWithThem": "Última vez con {name}",
   "tripToLocation": "Viaje a {location}",
@@ -1656,9 +1729,12 @@
   "cLIcon": "Nuevo ícono",
   "cLIconDesc": "Por fin, un nuevo icono de la aplicación, que creemos que representa mejor nuestro trabajo. También hemos añadido una opción para que puedas seguir utilizando el icono anterior.",
   "cLMemories": "Recuerdos",
+  "cLMemoriesDesc": "Redescubre tus momentos especiales: enfócate en tu gente favorita, tus viajes y vacaciones, tus mejores clics, y mucho más. Activa el aprendizaje de automático, etiquétate a ti mismo y etiqueta a tus amigos para la mejor experiencia.",
   "cLWidgets": "Widgets",
   "cLWidgetsDesc": "Ya están disponibles los widgets de pantalla de inicio con tus recuerdos. Podrás ver tus momentos especiales sin abrir la aplicación.",
   "cLFamilyPlan": "Límites de plan familiar",
   "cLFamilyPlanDesc": "Ahora puede establecer límites en cuanto al almacenamiento que los miembros de tu familia pueden utilizar.",
-  "cLBulkEditDesc": "Ahora puedes seleccionar múltiples fotos y editar la fecha/hora para todas ellas con una acción rápida. También es posible cambiar las fechas."
+  "cLBulkEdit": "Edición masiva de fechas",
+  "cLBulkEditDesc": "Ahora puedes seleccionar múltiples fotos y editar la fecha/hora para todas ellas con una acción rápida. También es posible cambiar las fechas.",
+  "curatedMemories": "Memorias revisadas"
 }

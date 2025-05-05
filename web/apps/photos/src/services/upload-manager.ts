@@ -13,7 +13,20 @@ import {
     type ClusteredUploadItem,
     type UploadPhase,
     type UploadResult,
+    type UploadableUploadItem,
 } from "ente-gallery/services/upload";
+import {
+    metadataJSONMapKeyForJSON,
+    tryParseTakeoutMetadataJSON,
+    type ParsedMetadataJSON,
+} from "ente-gallery/services/upload/takeout";
+import UploadService, {
+    areLivePhotoAssets,
+    upload,
+    uploadItemFileName,
+    type PotentialLivePhotoAsset,
+    type UploadAsset,
+} from "ente-gallery/services/upload/upload-service";
 import { processVideoNewUpload } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import {
@@ -34,18 +47,6 @@ import {
 } from "services/publicCollectionService";
 import watcher from "services/watch";
 import { getUserOwnedFiles } from "utils/file";
-import {
-    metadataJSONMapKeyForJSON,
-    tryParseTakeoutMetadataJSON,
-    type ParsedMetadataJSON,
-} from "./takeout";
-import UploadService, {
-    areLivePhotoAssets,
-    uploadItemFileName,
-    uploader,
-    type PotentialLivePhotoAsset,
-    type UploadAsset,
-} from "./upload-service";
 
 export type FileID = number;
 
@@ -556,7 +557,7 @@ class UploadManager {
             uiService.setFileProgress(localID, 0);
             await wait(0);
 
-            const { uploadResult, uploadedFile } = await uploader(
+            const { uploadResult, uploadedFile } = await upload(
                 uploadableItem,
                 this.uploaderName,
                 this.existingFiles,
@@ -705,7 +706,10 @@ class UploadManager {
     };
 }
 
-export default new UploadManager();
+/**
+ * Singleton instance of {@link UploadManager}.
+ */
+export const uploadManager = new UploadManager();
 
 /**
  * The data operated on by the intermediate stages of the upload.
@@ -731,7 +735,7 @@ export default new UploadManager();
  *
  * - On to the {@link ClusteredUploadItem} we attach the corresponding
  *   {@link collection}, giving us {@link UploadableUploadItem}. This is what
- *   gets queued and then passed to the {@link uploader}.
+ *   gets queued and then passed to the {@link upload}.
  */
 type UploadItemWithCollectionIDAndName = UploadAsset & {
     /** A unique ID for the duration of the upload */
@@ -759,16 +763,6 @@ const makeUploadItemWithCollectionIDAndName = (
     livePhotoAssets: f.livePhotoAssets,
     externalParsedMetadata: f.externalParsedMetadata,
 });
-
-/**
- * The file that we hand off to the uploader. Essentially
- * {@link ClusteredUploadItem} with the {@link collection} attached to it.
- *
- * See: [Note: Intermediate file types during upload].
- */
-export type UploadableUploadItem = ClusteredUploadItem & {
-    collection: Collection;
-};
 
 const splitMetadataAndMediaItems = (
     items: UploadItemWithCollectionIDAndName[],

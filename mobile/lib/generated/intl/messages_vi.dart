@@ -159,85 +159,85 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m73(endDate) => "Đăng ký sẽ được gia hạn vào ${endDate}";
 
-  static String m113(count) =>
+  static String m75(count) =>
       "${Intl.plural(count, one: '${count} kết quả được tìm thấy', other: '${count} kết quả được tìm thấy')}";
 
-  static String m75(snapshotLength, searchLength) =>
+  static String m76(snapshotLength, searchLength) =>
       "Độ dài các phần không khớp: ${snapshotLength} != ${searchLength}";
 
-  static String m76(count) => "${count} đã chọn";
+  static String m77(count) => "${count} đã chọn";
 
-  static String m77(count, yourCount) =>
+  static String m78(count, yourCount) =>
       "${count} đã chọn (${yourCount} của bạn)";
 
-  static String m79(verificationID) =>
+  static String m80(verificationID) =>
       "Đây là ID xác minh của tôi: ${verificationID} cho ente.io.";
 
-  static String m80(verificationID) =>
+  static String m81(verificationID) =>
       "Chào, bạn có thể xác nhận rằng đây là ID xác minh ente.io của bạn: ${verificationID}";
 
-  static String m81(referralCode, referralStorageInGB) =>
+  static String m82(referralCode, referralStorageInGB) =>
       "Mã giới thiệu Ente: ${referralCode} \n\nÁp dụng nó trong Cài đặt → Chung → Giới thiệu để nhận ${referralStorageInGB} GB miễn phí sau khi bạn đăng ký gói trả phí\n\nhttps://ente.io";
 
-  static String m82(numberOfPeople) =>
+  static String m83(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'Chia sẻ với những người cụ thể', one: 'Chia sẻ với 1 người', other: 'Chia sẻ với ${numberOfPeople} người')}";
 
-  static String m83(emailIDs) => "Chia sẻ với ${emailIDs}";
-
-  static String m84(fileType) =>
-      "Tệp ${fileType} này sẽ bị xóa khỏi thiết bị của bạn.";
+  static String m84(emailIDs) => "Chia sẻ với ${emailIDs}";
 
   static String m85(fileType) =>
+      "Tệp ${fileType} này sẽ bị xóa khỏi thiết bị của bạn.";
+
+  static String m86(fileType) =>
       "Tệp ${fileType} này có trong cả Ente và thiết bị của bạn.";
 
-  static String m86(fileType) => "Tệp ${fileType} này sẽ bị xóa khỏi Ente.";
+  static String m87(fileType) => "Tệp ${fileType} này sẽ bị xóa khỏi Ente.";
 
-  static String m89(storageAmountInGB) => "${storageAmountInGB} GB";
+  static String m90(storageAmountInGB) => "${storageAmountInGB} GB";
 
-  static String m90(
+  static String m91(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "${usedAmount} ${usedStorageUnit} trong tổng số ${totalAmount} ${totalStorageUnit} đã sử dụng";
 
-  static String m91(id) =>
+  static String m92(id) =>
       "ID ${id} của bạn đã được liên kết với một tài khoản Ente khác.\nNếu bạn muốn sử dụng ID ${id} này với tài khoản này, vui lòng liên hệ với bộ phận hỗ trợ của chúng tôi.";
 
-  static String m92(endDate) => "Đăng ký của bạn sẽ bị hủy vào ${endDate}";
+  static String m93(endDate) => "Đăng ký của bạn sẽ bị hủy vào ${endDate}";
 
-  static String m93(completed, total) =>
+  static String m94(completed, total) =>
       "${completed}/${total} kỷ niệm đã được lưu giữ";
 
-  static String m94(ignoreReason) =>
+  static String m95(ignoreReason) =>
       "Nhấn để tải lên, tải lên hiện tại bị bỏ qua do ${ignoreReason}";
 
-  static String m95(storageAmountInGB) =>
+  static String m96(storageAmountInGB) =>
       "Họ cũng nhận được ${storageAmountInGB} GB";
 
-  static String m96(email) => "Đây là ID xác minh của ${email}";
+  static String m97(email) => "Đây là ID xác minh của ${email}";
 
-  static String m99(count) =>
+  static String m100(count) =>
       "${Intl.plural(count, zero: 'Soon', one: '1 day', other: '${count} days')}";
 
-  static String m102(email) =>
+  static String m103(email) =>
       "Bạn đã được mời làm người liên hệ thừa kế bởi ${email}.";
 
-  static String m103(galleryType) =>
+  static String m104(galleryType) =>
       "Loại thư viện ${galleryType} không được hỗ trợ để đổi tên";
 
-  static String m104(ignoreReason) => "Tải lên bị bỏ qua do ${ignoreReason}";
+  static String m105(ignoreReason) => "Tải lên bị bỏ qua do ${ignoreReason}";
 
-  static String m105(count) => "Đang lưu giữ ${count} kỷ niệm...";
+  static String m106(count) => "Đang lưu giữ ${count} kỷ niệm...";
 
-  static String m106(endDate) => "Có hiệu lực đến ${endDate}";
+  static String m107(endDate) => "Có hiệu lực đến ${endDate}";
 
-  static String m107(email) => "Xác minh ${email}";
+  static String m108(email) => "Xác minh ${email}";
 
-  static String m109(email) =>
+  static String m110(email) =>
       "Chúng tôi đã gửi một email đến <green>${email}</green>";
 
-  static String m110(count) =>
+  static String m111(count) =>
       "${Intl.plural(count, one: '${count} năm trước', other: '${count} năm trước')}";
 
-  static String m112(storageSaved) =>
+  static String m113(storageSaved) =>
       "Bạn đã giải phóng thành công ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -1537,8 +1537,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Mời mọi người, và bạn sẽ thấy tất cả ảnh được chia sẻ bởi họ ở đây"),
         "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
             "Người sẽ được hiển thị ở đây sau khi hoàn tất xử lý và đồng bộ"),
-        "searchResultCount": m113,
-        "searchSectionsLengthMismatch": m75,
+        "searchResultCount": m75,
+        "searchSectionsLengthMismatch": m76,
         "security": MessageLookupByLibrary.simpleMessage("Bảo mật"),
         "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
             "Xem liên kết album công khai trong ứng dụng"),
@@ -1571,8 +1571,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
                 "Các mục đã chọn sẽ bị xóa khỏi tất cả các album và chuyển vào thùng rác."),
-        "selectedPhotos": m76,
-        "selectedPhotosWithYours": m77,
+        "selectedPhotos": m77,
+        "selectedPhotosWithYours": m78,
         "send": MessageLookupByLibrary.simpleMessage("Gửi"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Gửi email"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("Gửi lời mời"),
@@ -1603,16 +1603,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareAnAlbumNow": MessageLookupByLibrary.simpleMessage(
             "Chia sẻ một album ngay bây giờ"),
         "shareLink": MessageLookupByLibrary.simpleMessage("Chia sẻ liên kết"),
-        "shareMyVerificationID": m79,
+        "shareMyVerificationID": m80,
         "shareOnlyWithThePeopleYouWant": MessageLookupByLibrary.simpleMessage(
             "Chia sẻ chỉ với những người bạn muốn"),
-        "shareTextConfirmOthersVerificationID": m80,
+        "shareTextConfirmOthersVerificationID": m81,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Tải Ente để chúng ta có thể dễ dàng chia sẻ ảnh và video chất lượng gốc\n\nhttps://ente.io"),
-        "shareTextReferralCode": m81,
+        "shareTextReferralCode": m82,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Chia sẻ với người dùng không phải Ente"),
-        "shareWithPeopleSectionTitle": m82,
+        "shareWithPeopleSectionTitle": m83,
         "shareYourFirstAlbum": MessageLookupByLibrary.simpleMessage(
             "Chia sẻ album đầu tiên của bạn"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
@@ -1624,7 +1624,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ảnh chia sẻ mới"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
             "Nhận thông báo khi ai đó thêm ảnh vào album chia sẻ mà bạn tham gia"),
-        "sharedWith": m83,
+        "sharedWith": m84,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Chia sẻ với tôi"),
         "sharedWithYou":
             MessageLookupByLibrary.simpleMessage("Được chia sẻ với bạn"),
@@ -1640,11 +1640,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Đăng xuất các thiết bị khác"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Tôi đồng ý với <u-terms>các điều khoản dịch vụ</u-terms> và <u-policy>chính sách bảo mật</u-policy>"),
-        "singleFileDeleteFromDevice": m84,
+        "singleFileDeleteFromDevice": m85,
         "singleFileDeleteHighlight": MessageLookupByLibrary.simpleMessage(
             "Nó sẽ bị xóa khỏi tất cả các album."),
-        "singleFileInBothLocalAndRemote": m85,
-        "singleFileInRemoteOnly": m86,
+        "singleFileInBothLocalAndRemote": m86,
+        "singleFileInRemoteOnly": m87,
         "skip": MessageLookupByLibrary.simpleMessage("Bỏ qua"),
         "social": MessageLookupByLibrary.simpleMessage("Xã hội"),
         "someItemsAreInBothEnteAndYourDevice":
@@ -1691,13 +1691,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("Gia đình"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Bạn"),
-        "storageInGB": m89,
+        "storageInGB": m90,
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("Vượt quá giới hạn lưu trữ"),
-        "storageUsageInfo": m90,
+        "storageUsageInfo": m91,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Mạnh"),
-        "subAlreadyLinkedErrMessage": m91,
-        "subWillBeCancelledOn": m92,
+        "subAlreadyLinkedErrMessage": m92,
+        "subWillBeCancelledOn": m93,
         "subscribe": MessageLookupByLibrary.simpleMessage("Đăng ký"),
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
             "Bạn cần một đăng ký trả phí hoạt động để kích hoạt chia sẻ."),
@@ -1714,7 +1714,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Gợi ý tính năng"),
         "support": MessageLookupByLibrary.simpleMessage("Hỗ trợ"),
-        "syncProgress": m93,
+        "syncProgress": m94,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Đồng bộ hóa đã dừng"),
         "syncing": MessageLookupByLibrary.simpleMessage("Đang đồng bộ hóa..."),
@@ -1724,7 +1724,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Chạm để nhập mã"),
         "tapToUnlock": MessageLookupByLibrary.simpleMessage("Nhấn để mở khóa"),
         "tapToUpload": MessageLookupByLibrary.simpleMessage("Nhấn để tải lên"),
-        "tapToUploadIsIgnoredDue": m94,
+        "tapToUploadIsIgnoredDue": m95,
         "tempErrorContactSupportIfPersists": MessageLookupByLibrary.simpleMessage(
             "Có vẻ như đã xảy ra sự cố. Vui lòng thử lại sau một thời gian. Nếu lỗi vẫn tiếp diễn, vui lòng liên hệ với đội ngũ hỗ trợ."),
         "terminate": MessageLookupByLibrary.simpleMessage("Kết thúc"),
@@ -1748,7 +1748,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "theseItemsWillBeDeletedFromYourDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Các mục này sẽ bị xóa khỏi thiết bị của bạn."),
-        "theyAlsoGetXGb": m95,
+        "theyAlsoGetXGb": m96,
         "theyWillBeDeletedFromAllAlbums": MessageLookupByLibrary.simpleMessage(
             "Chúng sẽ bị xóa khỏi tất cả các album."),
         "thisActionCannotBeUndone": MessageLookupByLibrary.simpleMessage(
@@ -1764,7 +1764,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Email này đã được sử dụng"),
         "thisImageHasNoExifData": MessageLookupByLibrary.simpleMessage(
             "Hình ảnh này không có dữ liệu exif"),
-        "thisIsPersonVerificationId": m96,
+        "thisIsPersonVerificationId": m97,
         "thisIsYourVerificationId":
             MessageLookupByLibrary.simpleMessage("Đây là ID xác minh của bạn"),
         "thisWillLogYouOutOfTheFollowingDevice":
@@ -1788,11 +1788,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "total": MessageLookupByLibrary.simpleMessage("tổng"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Tổng kích thước"),
         "trash": MessageLookupByLibrary.simpleMessage("Thùng rác"),
-        "trashDaysLeft": m99,
+        "trashDaysLeft": m100,
         "trim": MessageLookupByLibrary.simpleMessage("Cắt"),
         "trustedContacts":
             MessageLookupByLibrary.simpleMessage("Liên hệ tin cậy"),
-        "trustedInviteBody": m102,
+        "trustedInviteBody": m103,
         "tryAgain": MessageLookupByLibrary.simpleMessage("Thử lại"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "Bật sao lưu để tự động tải lên các tệp được thêm vào thư mục thiết bị này lên Ente."),
@@ -1811,7 +1811,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Xác thực hai yếu tố đã được đặt lại thành công"),
         "twofactorSetup":
             MessageLookupByLibrary.simpleMessage("Cài đặt hai yếu tố"),
-        "typeOfGallerGallerytypeIsNotSupportedForRename": m103,
+        "typeOfGallerGallerytypeIsNotSupportedForRename": m104,
         "unarchive": MessageLookupByLibrary.simpleMessage("Khôi phục"),
         "unarchiveAlbum":
             MessageLookupByLibrary.simpleMessage("Khôi phục album"),
@@ -1835,10 +1835,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "updatingFolderSelection": MessageLookupByLibrary.simpleMessage(
             "Đang cập nhật lựa chọn thư mục..."),
         "upgrade": MessageLookupByLibrary.simpleMessage("Nâng cấp"),
-        "uploadIsIgnoredDueToIgnorereason": m104,
+        "uploadIsIgnoredDueToIgnorereason": m105,
         "uploadingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Đang tải tệp lên album..."),
-        "uploadingMultipleMemories": m105,
+        "uploadingMultipleMemories": m106,
         "uploadingSingleMemory":
             MessageLookupByLibrary.simpleMessage("Đang lưu giữ 1 kỷ niệm..."),
         "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(
@@ -1856,14 +1856,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sử dụng ảnh đã chọn"),
         "usedSpace":
             MessageLookupByLibrary.simpleMessage("Không gian đã sử dụng"),
-        "validTill": m106,
+        "validTill": m107,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Xác minh không thành công, vui lòng thử lại"),
         "verificationId": MessageLookupByLibrary.simpleMessage("ID xác minh"),
         "verify": MessageLookupByLibrary.simpleMessage("Xác minh"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Xác minh email"),
-        "verifyEmailID": m107,
+        "verifyEmailID": m108,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Xác minh"),
         "verifyPasskey":
             MessageLookupByLibrary.simpleMessage("Xác minh mã khóa"),
@@ -1901,7 +1901,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
             MessageLookupByLibrary.simpleMessage(
                 "Chúng tôi không hỗ trợ chỉnh sửa ảnh và album mà bạn chưa sở hữu"),
-        "weHaveSendEmailTo": m109,
+        "weHaveSendEmailTo": m110,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Yếu"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Chào mừng trở lại!"),
@@ -1910,7 +1910,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Liên hệ tin cậy có thể giúp khôi phục dữ liệu của bạn."),
         "yearShort": MessageLookupByLibrary.simpleMessage("năm"),
         "yearly": MessageLookupByLibrary.simpleMessage("Hàng năm"),
-        "yearsAgo": m110,
+        "yearsAgo": m111,
         "yes": MessageLookupByLibrary.simpleMessage("Có"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Có, hủy"),
         "yesConvertToViewer":
@@ -1942,7 +1942,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bạn không thể chia sẻ với chính mình"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "Bạn không có mục nào đã lưu trữ."),
-        "youHaveSuccessfullyFreedUp": m112,
+        "youHaveSuccessfullyFreedUp": m113,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Tài khoản của bạn đã bị xóa"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Bản đồ của bạn"),
