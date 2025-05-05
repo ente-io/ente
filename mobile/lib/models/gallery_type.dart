@@ -105,7 +105,6 @@ extension GalleyTypeExtension on GalleryType {
     switch (this) {
       case GalleryType.ownedCollection:
       case GalleryType.sharedCollection:
-      case GalleryType.sharedPublicCollection:
       case GalleryType.searchResults:
       case GalleryType.homepage:
       case GalleryType.favorite:
@@ -121,6 +120,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.magic:
         return true;
       case GalleryType.trash:
+      case GalleryType.sharedPublicCollection:
         return false;
     }
   }
