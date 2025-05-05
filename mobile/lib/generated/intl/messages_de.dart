@@ -1904,6 +1904,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Ein Fehler ist aufgetreten, bitte versuche es erneut"),
         "sorry": MessageLookupByLibrary.simpleMessage("Entschuldigung"),
+        "sorryBackupFailedDesc": MessageLookupByLibrary.simpleMessage(
+            "Leider konnten wir diese Datei momentan nicht sichern, wir werden es später erneut versuchen."),
         "sorryCouldNotAddToFavorites": MessageLookupByLibrary.simpleMessage(
             "Konnte leider nicht zu den Favoriten hinzugefügt werden!"),
         "sorryCouldNotRemoveFromFavorites":
