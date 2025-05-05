@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:io" show File;
+import "dart:math" show pow;
 
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
@@ -114,12 +115,16 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
     if (e is! TaskQueueTimeoutException &&
         e is! TaskQueueOverflowException &&
         e is! TaskQueueCancelledException) {
-      _logger.severe(
-        "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}",
-        e,
-        s,
-      );
       if (fetchAttempt <= _retryLimit) {
+        final backoff = Duration(
+          milliseconds: 100 * pow(2, fetchAttempt + 1).toInt(),
+        );
+        await Future.delayed(backoff);
+        _logger.warning(
+          "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}, retrying (attempt ${fetchAttempt + 1}) in ${backoff.inMilliseconds} ms",
+          e,
+          s,
+        );
         return getCachedFaceCrops(
           enteFile,
           faces,
@@ -127,6 +132,11 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
           useFullFile: useFullFile,
         );
       }
+      _logger.severe(
+        "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}",
+        e,
+        s,
+      );
     } else {
       _logger.info(
         "Stopped getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()} due to $e",
