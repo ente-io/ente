@@ -21,7 +21,7 @@ void resetPool({required bool fullFile}) {
     _queueFullFileFaceGenerations = TaskQueue<String>(
       maxConcurrentTasks: 5,
       taskTimeout: const Duration(minutes: 1),
-      maxQueueSize: 50,
+      maxQueueSize: 100,
     );
   } else {
     _queueThumbnailFaceGenerations = TaskQueue<String>(
@@ -40,7 +40,7 @@ final LRUMap<String, Uint8List?> _faceCropThumbnailCache = LRUMap(1000);
 TaskQueue _queueFullFileFaceGenerations = TaskQueue<String>(
   maxConcurrentTasks: 5,
   taskTimeout: const Duration(minutes: 1),
-  maxQueueSize: 50,
+  maxQueueSize: 100,
 );
 TaskQueue _queueThumbnailFaceGenerations = TaskQueue<String>(
   maxConcurrentTasks: 5,
