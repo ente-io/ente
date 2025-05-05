@@ -138,14 +138,10 @@ const DataTable: React.FC<DataTableProps> = ({
             minHeight: 300,
             display: "flex",
             flexDirection: "column",
-            marginBottom: "20px",
             height: "100%",
             width: "100%",
-            padding: "13px",
+            padding: "10px",
             overflowX: "hidden",
-            "&:not(:last-child)": {
-                marginBottom: "40px",
-            },
         }}
     >
         <Box
@@ -166,9 +162,9 @@ const DataTable: React.FC<DataTableProps> = ({
                     width: "100%",
                 }}
             >
-                {title}
+                {title.charAt(0).toUpperCase() + title.slice(1)}
             </Typography>
-            {title === "User" && (
+            {title === "user" && (
                 <IconButton
                     edge="start"
                     aria-label="delete"
@@ -177,7 +173,7 @@ const DataTable: React.FC<DataTableProps> = ({
                     <DeleteIcon style={{ color: "" }} />
                 </IconButton>
             )}
-            {title === "Subscription" && (
+            {title === "subscription" && (
                 <IconButton
                     edge="end"
                     aria-label="edit"
