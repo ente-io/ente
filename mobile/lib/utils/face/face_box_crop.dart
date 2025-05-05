@@ -16,22 +16,6 @@ import "package:photos/utils/file_util.dart";
 import "package:photos/utils/standalone/task_queue.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
-void resetPool({required bool fullFile}) {
-  if (fullFile) {
-    _queueFullFileFaceGenerations = TaskQueue<String>(
-      maxConcurrentTasks: 5,
-      taskTimeout: const Duration(minutes: 1),
-      maxQueueSize: 100,
-    );
-  } else {
-    _queueThumbnailFaceGenerations = TaskQueue<String>(
-      maxConcurrentTasks: 5,
-      taskTimeout: const Duration(minutes: 1),
-      maxQueueSize: 100,
-    );
-  }
-}
-
 final _logger = Logger("FaceCropUtils");
 
 const int _retryLimit = 3;
@@ -127,18 +111,25 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
     }
     return faceIdToCrop.isEmpty ? null : faceIdToCrop;
   } catch (e, s) {
-    _logger.severe(
-      "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}",
-      e,
-      s,
-    );
-    resetPool(fullFile: useFullFile);
-    if (fetchAttempt <= _retryLimit) {
-      return getCachedFaceCrops(
-        enteFile,
-        faces,
-        fetchAttempt: fetchAttempt + 1,
-        useFullFile: useFullFile,
+    if (e is! TaskQueueTimeoutException &&
+        e is! TaskQueueOverflowException &&
+        e is! TaskQueueCancelledException) {
+      _logger.severe(
+        "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}",
+        e,
+        s,
+      );
+      if (fetchAttempt <= _retryLimit) {
+        return getCachedFaceCrops(
+          enteFile,
+          faces,
+          fetchAttempt: fetchAttempt + 1,
+          useFullFile: useFullFile,
+        );
+      }
+    } else {
+      _logger.info(
+        "Stopped getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()} due to $e",
       );
     }
     return null;
