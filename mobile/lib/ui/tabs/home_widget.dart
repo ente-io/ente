@@ -448,8 +448,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
 
         if (value.isNotEmpty &&
-            (value[0].mimeType == "image/*" ||
-                value[0].mimeType == "video/*")) {
+            value[0].mimeType != null &&
+            (value[0].mimeType!.contains("image") ||
+                value[0].mimeType!.contains("video"))) {
           showDialog(
             context: context,
             builder: (BuildContext context) {
