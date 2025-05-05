@@ -263,6 +263,7 @@ func main() {
 		TrashRepository:       trashRepo,
 		UserRepo:              userRepo,
 		UsageCtrl:             usageController,
+		AccessCtrl:            accessCtrl,
 		CollectionRepo:        collectionRepo,
 		TaskLockingRepo:       taskLockingRepo,
 		DiscordController:     discordController,
