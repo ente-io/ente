@@ -315,9 +315,13 @@ export class FileViewerPhotoSwipe {
 
             const videoQuality = intendedVideoQualityForFileID(file.id);
 
-            const itemData = itemDataForFile(file, { videoQuality }, () =>
-                pswp.refreshSlideContent(index),
-            );
+            const itemData = itemDataForFile(file, { videoQuality }, () => {
+                // When we get updated item data,
+                // 1. Clear cached data.
+                _currentAnnotatedFile = undefined;
+                // 2. Request a refresh.
+                pswp.refreshSlideContent(index);
+            });
 
             if (itemData.fileType === FileType.video) {
                 const { videoPlaylistURL, videoURL } = itemData;
