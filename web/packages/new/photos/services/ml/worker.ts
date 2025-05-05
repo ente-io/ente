@@ -236,13 +236,15 @@ export class MLWorker {
         // If there is items remaining,
         if (items.length > 0) {
             // Index them.
-            const allSuccess = await indexNextBatch(
+            const indexedCount = await indexNextBatch(
                 items,
                 this.electron!,
                 this.delegate,
             );
-            if (allSuccess) {
-                // Everything is running smoothly. Reset the idle duration.
+            if (indexedCount > 0) {
+                // We made some progress, so there are no complete blockers
+                // (e.g. network being offline). Reset the idle duration and
+                // move on to the next batch (if any).
                 this.idleDuration = idleDurationStart;
                 // And tick again.
                 scheduleTick();
@@ -348,11 +350,7 @@ logUnhandledErrorsAndRejectionsInWorker();
 /**
  * Index the given batch of items.
  *
- * Returns `false` to indicate that either an error occurred, or that we cannot
- * currently process files since we don't have network connectivity.
- *
- * Which means that when it returns true, all is well and if there are more
- * things pending to process, we should chug along at full speed.
+ * @returns the count of items which were indexed.
  */
 const indexNextBatch = async (
     items: IndexableItem[],
@@ -364,7 +362,7 @@ const indexNextBatch = async (
     // were able to upload just a bit ago but don't have network now.
     if (!self.navigator.onLine) {
         log.info("Skipping ML indexing since we are not online");
-        return false;
+        return 0;
     }
 
     // Keep track if any of the items failed.
@@ -411,14 +409,16 @@ const indexNextBatch = async (
     // Clear any cached CLIP indexes, since now we might have new ones.
     clearCachedCLIPIndexes();
 
+    const indexedCount = items.length - failureCount;
+
     log.info(
         failureCount > 0
-            ? `Indexed ${items.length - failureCount} files (${failureCount} failed)`
+            ? `Indexed ${indexedCount} files (${failureCount} failed)`
             : `Indexed ${items.length} files`,
     );
 
-    // Return true if nothing failed.
-    return failureCount == 0;
+    // Return the count of indexed files.
+    return indexedCount;
 };
 
 /**
