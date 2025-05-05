@@ -467,7 +467,7 @@ const processQueueItem = async ({
 
         log.info(`Generate HLS for ${fileLogID(file)} | done`);
     } finally {
-        await Promise.all([videoStreamDone(electron, playlistToken)]);
+        await videoStreamDone(electron, playlistToken);
     }
 };
 
