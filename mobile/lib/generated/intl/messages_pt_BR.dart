@@ -172,7 +172,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m56(providerName) =>
       "Fale com o suporte ${providerName} se você foi cobrado";
 
-  static String m57(name, age) => "${name} está com ${age}!";
+  static String m57(name, age) => "${name} tem ${age} anos!";
 
   static String m58(name, age) => "${name} terá ${age} em breve";
 
@@ -209,7 +209,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "3. Ambos os dois ganham ${storageInGB} GB* grátis";
 
   static String m72(userEmail) =>
-      "${userEmail} será removido deste álbum compartilhado\n\nQuaisquer fotos adicionadas por eles também serão removidas do álbum";
+      "${userEmail} será removido do álbum compartilhado\n\nQualquer foto adicionada por ele será removida.";
 
   static String m73(endDate) => "Renovação de assinatura em ${endDate}";
 
@@ -445,7 +445,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Aplicar código"),
         "appstoreSubscription":
             MessageLookupByLibrary.simpleMessage("Assinatura da AppStore"),
-        "archive": MessageLookupByLibrary.simpleMessage("Arquivo"),
+        "archive": MessageLookupByLibrary.simpleMessage("Arquive"),
         "archiveAlbum": MessageLookupByLibrary.simpleMessage("Arquivar álbum"),
         "archiving": MessageLookupByLibrary.simpleMessage("Arquivando..."),
         "areYouSureThatYouWantToLeaveTheFamily":
@@ -558,7 +558,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Finalmente, um novo ícone para o ente que acreditamos que represente melhor nosso trabalho. Também, adicionamos um alterador de ícone para que você ainda consiga utilizar o ícone antigo."),
         "cLMemories": MessageLookupByLibrary.simpleMessage("Memórias"),
         "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "Redescubra seus momentos especiais - destaque pessoas importantes, suas viagens e celebrações, melhores visitas e muito mais. Ative a aprendizagem automática, mencione si mesmo e seus amigos para melhor experiência."),
+            "Relembre momentos especiais - destaque pessoas favoritas, suas viagens e feriados, melhores fotos, e muito mais. Ative o aprendizado automático, marque-se e nomeie seus amigos para melhorar a experiência."),
         "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgets"),
         "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
             "Widgets integrados com memórias já estão disponíveis. Eles apareceram com seus melhores momentos sem precisar abrir o ente."),
@@ -616,8 +616,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkingModels":
             MessageLookupByLibrary.simpleMessage("Verificando modelos..."),
         "city": MessageLookupByLibrary.simpleMessage("Na cidade"),
-        "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
-            "Reivindicar armazenamento grátis"),
+        "claimFreeStorage":
+            MessageLookupByLibrary.simpleMessage("Reivindique armaz. grátis"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Reivindique mais!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Reivindicado"),
         "claimedStorageSoFar": m14,
@@ -653,7 +653,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaborator": MessageLookupByLibrary.simpleMessage("Colaborador"),
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
-                "Os colaboradores podem adicionar fotos e vídeos ao álbum compartilhado."),
+                "Colaboradores podem adicionar fotos e vídeos ao álbum compartilhado."),
         "collaboratorsSuccessfullyAdded": m16,
         "collageLayout": MessageLookupByLibrary.simpleMessage("Layout"),
         "collageSaved":
@@ -749,7 +749,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "delete": MessageLookupByLibrary.simpleMessage("Excluir"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Excluir conta"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
-            "Lamentamos você ir. Compartilhe seu feedback para nos ajudar a melhorar."),
+            "Lamentamos você ir. Compartilhe seu feedback para ajudar-nos a melhorar."),
         "deleteAccountPermanentlyButton": MessageLookupByLibrary.simpleMessage(
             "Excluir conta permanentemente"),
         "deleteAlbum": MessageLookupByLibrary.simpleMessage("Excluir álbum"),
@@ -896,9 +896,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Esvaziar a lixeira?"),
         "enable": MessageLookupByLibrary.simpleMessage("Ativar"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
-            "Ente suporta aprendizagem de máquina para reconhecimento facial, busca mágica e outros recursos de busca avançados"),
+            "Ente fornece aprendizado automático no dispositivo para reconhecimento facial, busca mágica e outros recursos de busca avançados."),
         "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Ativar aprendizagem de máquina para busca mágica e reconhecimento facial"),
+            "Ativar o aprendizado automático para busca mágica e reconhecimento facial"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Ativar mapas"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Isso exibirá suas fotos em um mapa mundial.\n\nEste mapa é hospedado por Open Street Map, e as exatas localizações das fotos nunca serão compartilhadas.\n\nVocê pode desativar esta função a qualquer momento em Opções."),
@@ -920,7 +920,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "enteSubscriptionPitch": MessageLookupByLibrary.simpleMessage(
             "O Ente preserva suas memórias, então eles sempre estão disponíveis para você, mesmo se você perder o dispositivo."),
         "enteSubscriptionShareWithFamily": MessageLookupByLibrary.simpleMessage(
-            "Sua família também pode ser adicionada ao seu plano."),
+            "Sua família também poderá ser adicionada ao seu plano."),
         "enterAlbumName":
             MessageLookupByLibrary.simpleMessage("Inserir nome do álbum"),
         "enterCode": MessageLookupByLibrary.simpleMessage("Insira o código"),
@@ -1031,15 +1031,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "findThemQuickly":
             MessageLookupByLibrary.simpleMessage("Busque-os rapidamente"),
         "flip": MessageLookupByLibrary.simpleMessage("Inverter"),
-        "food": MessageLookupByLibrary.simpleMessage("Prazer em culinária"),
+        "food": MessageLookupByLibrary.simpleMessage("Amor por culinária"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("para suas memórias"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Esqueci a senha"),
         "foundFaces":
             MessageLookupByLibrary.simpleMessage("Rostos encontrados"),
-        "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
-            "Armazenamento grátis reivindicado"),
+        "freeStorageClaimed":
+            MessageLookupByLibrary.simpleMessage("Armaz. grátis reivindicado"),
         "freeStorageOnReferralSuccess": m35,
         "freeStorageUsable":
             MessageLookupByLibrary.simpleMessage("Armazenamento disponível"),
@@ -1205,7 +1205,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Nunca"),
         "linkPerson": MessageLookupByLibrary.simpleMessage("Vincular pessoa"),
         "linkPersonCaption": MessageLookupByLibrary.simpleMessage(
-            "para melhor experiência de compartilhamento"),
+            "para melhorar o compartilhamento"),
         "linkPersonToEmail": m46,
         "linkPersonToEmailConfirmation": m47,
         "livePhotos": MessageLookupByLibrary.simpleMessage("Fotos animadas"),
@@ -1276,7 +1276,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Perdeu o dispositivo?"),
         "machineLearning":
-            MessageLookupByLibrary.simpleMessage("Aprendizagem automática"),
+            MessageLookupByLibrary.simpleMessage("Aprendizado automático"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Busca mágica"),
         "magicSearchHint": MessageLookupByLibrary.simpleMessage(
             "A busca mágica permite buscar fotos pelo conteúdo, p. e.x. \'flor\', \'carro vermelho\', \'identidade\'"),
@@ -1304,17 +1304,17 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Juntar com o existente"),
         "mergedPhotos": MessageLookupByLibrary.simpleMessage("Fotos mescladas"),
         "mlConsent": MessageLookupByLibrary.simpleMessage(
-            "Ativar aprendizagem automática"),
-        "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
-            "Eu entendo, e desejo ativar a aprendizagem automática"),
+            "Ativar o aprendizado automático"),
+        "mlConsentConfirmation":
+            MessageLookupByLibrary.simpleMessage("Concordo e desejo ativá-lo"),
         "mlConsentDescription": MessageLookupByLibrary.simpleMessage(
-            "Se você ativar a aprendizagem automática, o Ente irá extrair informações como geometria de rosto dos arquivos, incluindo os compartilhados com você.\n\nIsso acontecerá no seu dispositivo, qualquer informação biométrica gerada será criptografada ponta a ponta."),
+            "Se ativar o aprendizado automático, Ente extrairá informações de geometria facial dos arquivos, incluindo aqueles compartilhados consigo.\n\nIsso acontecerá em seu dispositivo, e qualquer informação biométrica gerada será criptografada de ponta a ponta."),
         "mlConsentPrivacy": MessageLookupByLibrary.simpleMessage(
             "Clique aqui para mais detalhes sobre este recurso na política de privacidade"),
         "mlConsentTitle": MessageLookupByLibrary.simpleMessage(
-            "Ativar aprendizagem automática?"),
+            "Ativar aprendizado automático?"),
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
-            "Note que a aprendizagem automática resultará em uso de bateria e largura de banda maior até que todos os itens forem indexados. Considere-se usar o aplicativo para notebook para uma indexação mais rápida, todos os resultados serão sincronizados automaticamente."),
+            "Saiba que o aprendizado automático afetará a bateria do dispositivo negativamente até todos os itens serem indexados. Utilize a versão para computadores para melhor indexação, todos os resultados se auto-sincronizaram."),
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Celular, Web, Computador"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderado"),
@@ -1405,7 +1405,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("No dispositivo"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "No <branding>ente</branding>"),
-        "onTheRoad": MessageLookupByLibrary.simpleMessage("Na estrada de novo"),
+        "onTheRoad":
+            MessageLookupByLibrary.simpleMessage("Na estrada novamente"),
         "onlyFamilyAdminCanChangeCode": m53,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Apenas eles"),
         "oops": MessageLookupByLibrary.simpleMessage("Ops"),
@@ -1474,7 +1475,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "personIsAge": m57,
         "personName": MessageLookupByLibrary.simpleMessage("Nome da pessoa"),
         "personTurningAge": m58,
-        "pets": MessageLookupByLibrary.simpleMessage("Companhia de pelos"),
+        "pets": MessageLookupByLibrary.simpleMessage("Companhias peludas"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Descrições das fotos"),
         "photoGridSize":
@@ -1546,7 +1547,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "privateBackups":
             MessageLookupByLibrary.simpleMessage("Cópias privadas"),
         "privateSharing":
-            MessageLookupByLibrary.simpleMessage("Compartilhamento privado"),
+            MessageLookupByLibrary.simpleMessage("Compartilha privada"),
         "proceed": MessageLookupByLibrary.simpleMessage("Continuar"),
         "processed": MessageLookupByLibrary.simpleMessage("Processado"),
         "processing": MessageLookupByLibrary.simpleMessage("Processando"),
@@ -1889,6 +1890,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Algo deu errado. Tente outra vez"),
         "sorry": MessageLookupByLibrary.simpleMessage("Desculpe"),
+        "sorryBackupFailedDesc": MessageLookupByLibrary.simpleMessage(
+            "Desculpe, não podemos fazer cópia de segurança deste arquivo no momento, nós tentaremos mais tarde."),
         "sorryCouldNotAddToFavorites": MessageLookupByLibrary.simpleMessage(
             "Desculpe, não foi possível adicionar aos favoritos!"),
         "sorryCouldNotRemoveFromFavorites":
@@ -2192,7 +2195,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "youCannotDowngradeToThisPlan": MessageLookupByLibrary.simpleMessage(
             "Você não pode rebaixar para este plano"),
         "youCannotShareWithYourself": MessageLookupByLibrary.simpleMessage(
-            "Você não pode compartilhar consigo mesmo"),
+            "Não é possível compartilhar consigo mesmo"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "Você não tem nenhum item arquivado."),
         "youHaveSuccessfullyFreedUp": m113,
