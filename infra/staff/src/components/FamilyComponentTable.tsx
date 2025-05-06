@@ -140,7 +140,11 @@ const FamilyTableComponent: React.FC = () => {
                                 </TableCell>
                                 <TableCell>
                                     {member.status !== "SELF"
-                                        ? formatUsageToGB(member.storageLimit)
+                                        ? (member.storageLimit &&
+                                              formatUsageToGB(
+                                                  member.storageLimit,
+                                              )) ||
+                                          "NA"
                                         : ""}
                                 </TableCell>
                             </TableRow>
