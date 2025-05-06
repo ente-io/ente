@@ -59,7 +59,7 @@ const parseInitData = (data: unknown) => {
     ) {
         _userDataPath = data.userDataPath;
     } else {
-        log.errorString("Unparseable initialization data");
+        log.error("Unparseable initialization data");
     }
 };
 
@@ -127,7 +127,7 @@ const modelPathDownloadingIfNeeded = async (
     } else {
         const size = (await fs.stat(modelPath)).size;
         if (size !== expectedByteSize) {
-            log.errorString(
+            log.error(
                 `The size ${size} of model ${modelName} does not match the expected size, downloading again`,
             );
             await downloadModel(modelPath, modelName);

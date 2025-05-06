@@ -22,11 +22,10 @@
  * expected to handle these (sending them to the actual log).
  */
 export default {
-    /**
-     * Unlike the real {@link log.error}, this accepts only the first string
-     * argument, not the second optional error one.
-     */
-    errorString: (s: string) => mainProcess("log.errorString", s),
+    error: (s: string, e?: unknown) =>
+        mainProcess("log.errorString", messageWithError(s, e)),
+    warn: (s: string, e?: unknown) =>
+        mainProcess("log.warnString", messageWithError(s, e)),
     info: (...ms: unknown[]) => mainProcess("log.info", ms),
     /**
      * Unlike the real {@link log.debug}, this is (a) eagerly evaluated, and (b)
@@ -40,3 +39,21 @@ export default {
  */
 const mainProcess = (method: string, param: unknown) =>
     process.parentPort.postMessage({ method, p: param });
+
+// Duplicated verbatim from ./log.ts
+const messageWithError = (message: string, e?: unknown) => {
+    if (!e) return message;
+
+    let es: string;
+    if (e instanceof Error) {
+        // In practice, we expect ourselves to be called with Error objects, so
+        // this is the happy path so to say.
+        es = [`${e.name}: ${e.message}`, e.stack].filter((x) => x).join("\n");
+    } else {
+        // For the rest rare cases, use the default string serialization of e.
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        es = String(e);
+    }
+
+    return `${message}: ${es}`;
+};

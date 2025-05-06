@@ -103,20 +103,26 @@ export const processUtilityProcessLogMessage = (
         switch (m.method) {
             case "log.errorString":
                 if (typeof p == "string") {
-                    log.error(`${logTag} ${p}`);
+                    logError(`${logTag} ${p}`);
+                    return true;
+                }
+                break;
+            case "log.warnString":
+                if (typeof p == "string") {
+                    logWarn(`${logTag} ${p}`);
                     return true;
                 }
                 break;
             case "log.info":
                 if (Array.isArray(p)) {
                     // Need to cast from any[] to unknown[]
-                    log.info(logTag, ...(p as unknown[]));
+                    logInfo(logTag, ...(p as unknown[]));
                     return true;
                 }
                 break;
             case "log.debugString":
                 if (typeof p == "string") {
-                    log.debug(() => `${logTag} ${p}`);
+                    logDebug(() => `${logTag} ${p}`);
                     return true;
                 }
                 break;
