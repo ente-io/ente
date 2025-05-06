@@ -20,9 +20,12 @@ export const shuffled = <T>(xs: T[]): T[] =>
  * Functionally this is equivalent to `shuffled(items).slice(0, n)`, except it
  * tries to be a bit faster for long arrays when we need only a small sample
  * from it. In a few tests, this indeed makes a substantial difference.
+ *
+ * If {@link n} is less than the number of {@link items} then a random shuffle
+ * of the {@link items} is returned.
  */
 export const randomSample = <T>(items: T[], n: number) => {
-    if (items.length <= n) return items;
+    if (items.length <= n) return shuffled(items);
     if (n == 0) return [];
 
     if (n > items.length / 3) {
