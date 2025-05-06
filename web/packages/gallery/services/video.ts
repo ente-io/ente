@@ -365,6 +365,34 @@ export const isVideoProcessingEnabled = () =>
     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
 
+/*
+let resolveTick
+let tick = new Promise((r) => (resolveTick = r));
+
+const tickNow = () => {
+    console.log("tickNow");
+    resolveTick();
+    tick = new Promise((r) => (resolveTick = r));
+}
+
+const f = async () => {
+    const s = (new Date()).getTime();
+    const items = [1, 2, 3, 4, 5]
+    for (let i of items) {
+        console.log(i, (Date.now() - s) / 1e3)
+        const wait = new Promise((r) => setTimeout(r, i * 1e3));
+        await Promise.race([wait, tick]);
+    }
+    console.log("F", (Date.now() - s) / 1e3)
+}
+
+f()
+
+setTimeout(tickNow, 2500);
+setTimeout(tickNow, 5000);
+setTimeout(tickNow, 5500);
+*/
+
 const processQueue = async () => {
     while (true) {
         const item = _state.videoProcessingQueue.shift();
