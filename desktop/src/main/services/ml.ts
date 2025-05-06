@@ -9,7 +9,7 @@ import {
 } from "electron";
 import { app, utilityProcess } from "electron/main";
 import path from "node:path";
-import log from "../log";
+import log, { processUtilityProcessLogMessage } from "../log";
 
 /** The active ML worker (utility) process, if any. */
 let _child: UtilityProcess | undefined;
@@ -114,33 +114,9 @@ export const createMLWorker = (window: BrowserWindow) => {
  *    we use the `parentPort` in the utility process.
  */
 const handleMessagesFromUtilityProcess = (child: UtilityProcess) => {
-    const logTag = "[ml-worker]";
     child.on("message", (m: unknown) => {
-        if (m && typeof m == "object" && "method" in m && "p" in m) {
-            const p = m.p;
-            switch (m.method) {
-                case "log.errorString":
-                    if (typeof p == "string") {
-                        log.error(`${logTag} ${p}`);
-                        return;
-                    }
-                    break;
-                case "log.info":
-                    if (Array.isArray(p)) {
-                        // Need to cast from any[] to unknown[]
-                        log.info(logTag, ...(p as unknown[]));
-                        return;
-                    }
-                    break;
-                case "log.debugString":
-                    if (typeof p == "string") {
-                        log.debug(() => `${logTag} ${p}`);
-                        return;
-                    }
-                    break;
-                default:
-                    break;
-            }
+        if (processUtilityProcessLogMessage("[ml-worker]", m)) {
+            return;
         }
         log.info("Ignoring unknown message from ML worker", m);
     });

@@ -15,47 +15,13 @@ import { existsSync } from "fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import * as ort from "onnxruntime-node";
+import log from "../log-worker";
 import { messagePortMainEndpoint } from "../utils/comlink";
 import { wait } from "../utils/common";
 import { writeStream } from "../utils/stream";
 import { fsStatMtime } from "./fs";
 
-/**
- * We cannot do
- *
- *     import log from "../log";
- *
- * because that requires the Electron APIs that are not available to a utility
- * process (See: [Note: Using Electron APIs in UtilityProcess]). But even if
- * that were to work, logging will still be problematic since we'd try opening
- * the log file from two different Node.js processes (this one, and the main
- * one), and I didn't find any indication in the electron-log repository that
- * the log file's integrity would be maintained in such cases.
- *
- * So instead we create this proxy log object that uses `process.parentPort` to
- * transport the logs over to the main process.
- */
-const log = {
-    /**
-     * Unlike the real {@link log.error}, this accepts only the first string
-     * argument, not the second optional error one.
-     */
-    errorString: (s: string) => mainProcess("log.errorString", s),
-    info: (...ms: unknown[]) => mainProcess("log.info", ms),
-    /**
-     * Unlike the real {@link log.debug}, this is (a) eagerly evaluated, and (b)
-     * accepts only strings.
-     */
-    debugString: (s: string) => mainProcess("log.debugString", s),
-};
-
-/**
- * Send a message to the main process using a barebones RPC protocol.
- */
-const mainProcess = (method: string, param: unknown) =>
-    process.parentPort.postMessage({ method, p: param });
-
-log.debugString(`Started ML worker process`);
+log.debugString("Started ML worker process");
 
 process.parentPort.once("message", (e) => {
     // Initialize ourselves with the data we got from our parent.
