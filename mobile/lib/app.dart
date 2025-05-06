@@ -204,7 +204,7 @@ Future _configureWorkManager() async {
   try {
     await workmanager.Workmanager().initialize(
       callbackDispatcher,
-      isInDebugMode: kDebugMode,
+      isInDebugMode: true, // TODO: Remove when merged to production
     );
     await workmanager.Workmanager().registerPeriodicTask(
       iOSBackgroundAppRefresh,
