@@ -48,7 +48,7 @@ open ports:
 
 | Service     | Port     | Notes                   |
 | ----------- | -------- | ----------------------- |
-| museum      | `:8080`  | Ente's API server       |
+| museum      | `:8080`  | Ente's HTTP API server. You can [enable](#configuring-the-museum-for-https) HTTPS on `:443` manually. |
 | web         | `:3000`  | Ente Photos web app     |
 | postgres    |          | DB                      |
 | minio       | `:3200`  | S3                      |
@@ -119,6 +119,25 @@ persistent data is saved in volumes managed by Docker.
 > starting museum, one possibility is that you're recreating the `my-ente`
 > folder but still have leftover volumes (`my-ente_postgres-data` and
 > `my-ente_minio-data` from a previous attempt).
+
+### Configuring the museum for HTTPS
+
+The `compose.yaml` and `museum.yaml` require small changes to enable secure HTTPS for communication with museum API:
+- `compose.yaml`:
+   - change the port that the museum API listens on to `443`
+   - add the certificate files, i.e. `tls.cert` and `tls.key`, to `./credentials` folder
+- `museum.yaml`:
+   - set the `use-tls` to `true`
+
+> [!IMPORTANT]
+> Use copies or hardlinks for certificate files, not symlinks.
+
+> [!IMPORTANT]
+> You need to use the fullchain certificate file (`fullchain.cer`) if using Let's Encrypt.
+
+You then need to stop the cluster and start it up again, as instructed above. If you already
+connected any of the client apps to your instance, you will need to log out and [configure your your
+app(s)](#next-steps) to point to your ente instance using the fully-qualified URL over the 443 port.
 
 ### Caveat
 
