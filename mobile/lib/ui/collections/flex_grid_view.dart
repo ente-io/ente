@@ -43,6 +43,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   final bool enableSelectionMode;
   final bool shouldShowCreateAlbum;
   final SelectedAlbums? selectedAlbums;
+  final double scrollBottomSafeArea;
 
   const CollectionsFlexiGridViewWidget(
     this.collections, {
@@ -54,6 +55,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
     this.albumViewType = AlbumViewType.grid,
     this.shouldShowCreateAlbum = false,
     this.selectedAlbums,
+    this.scrollBottomSafeArea = 8,
   });
 
   @override
@@ -139,7 +141,12 @@ class _CollectionsFlexiGridViewWidgetState
 
     return SliverPadding(
       key: key,
-      padding: const EdgeInsets.all(8),
+      padding: EdgeInsets.only(
+        top: 8,
+        left: 8,
+        right: 8,
+        bottom: widget.scrollBottomSafeArea,
+      ),
       sliver: SliverGrid(
         delegate: SliverChildBuilderDelegate(
           (context, index) {
