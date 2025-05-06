@@ -53,13 +53,24 @@ interface VideoProcessingQueueItem {
  */
 class VideoState {
     /**
-     * Queue of videos waiting to be processed.
+     * Queue of recently uploaded items waiting to be processed.
      */
-    videoProcessingQueue: VideoProcessingQueueItem[] = [];
+    liveQueue: VideoProcessingQueueItem[] = [];
     /**
      * Active queue processor, if any.
      */
     queueProcessor: Promise<void> | undefined;
+    /**
+     * A promise that the main processing loop waits for in addition to the idle
+     * timeout. Can be resolved using {@link resolveTick}.
+     */
+    tick: Promise<void> | undefined;
+    /**
+     * A function that can be called to resolve {@link tick}.
+     *
+     * See: [Note: Exiting idle wait of processing loop].
+     */
+    resolveTick: (() => void) | undefined;
 }
 
 /**
@@ -352,12 +363,35 @@ export const processVideoNewUpload = (
     }
 
     // Enqueue the item.
-    _state.videoProcessingQueue.push({
+    _state.liveQueue.push({
         file,
         timestampedUploadItem: processableUploadItem,
     });
 
-    // Tickle the processor if it isn't already running.
+    // Interrupt any idle timeouts if any, go go.
+    tickNow();
+};
+
+/**
+ * If {@link processQueue} is not already running, start it.
+ *
+ * If there is an existing {@link resolveTick} so that if perchance
+ * {@link processQueue} was waiting on an idle timeout, it wakes up now.
+ *
+ * Also create a new {@link tick} and {@link resolveTick} pair for use by
+ * subsequent calls to {@link tickNow}
+ */
+const tickNow = () => {
+    // See: [Note: Exiting idle wait of processing loop] for what this function
+    // is trying to do.
+
+    // Resolve the existing tick (if any).
+    if (_state.resolveTick) _state.resolveTick();
+
+    // Create a new resolvable pair.
+    _state.tick = new Promise((r) => (_state.resolveTick = r));
+
+    // Start the processor if it isn't already running.
     _state.queueProcessor ??= processQueue();
 };
 
@@ -365,37 +399,45 @@ export const isVideoProcessingEnabled = () =>
     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
 
-/*
-let resolveTick
-let tick = new Promise((r) => (resolveTick = r));
-
-const tickNow = () => {
-    console.log("tickNow");
-    resolveTick();
-    tick = new Promise((r) => (resolveTick = r));
-}
-
-const f = async () => {
-    const s = (new Date()).getTime();
-    const items = [1, 2, 3, 4, 5]
-    for (let i of items) {
-        console.log(i, (Date.now() - s) / 1e3)
-        const wait = new Promise((r) => setTimeout(r, i * 1e3));
-        await Promise.race([wait, tick]);
-    }
-    console.log("F", (Date.now() - s) / 1e3)
-}
-
-f()
-
-setTimeout(tickNow, 2500);
-setTimeout(tickNow, 5000);
-setTimeout(tickNow, 5500);
-*/
-
+/**
+ * The video processing loop goes through videos one by one, preferring items in
+ * the liveQueue, otherwise working for a backlog item. If there are no items to
+ * process, it goes on an idle timeout. The {@link resolveTick} state property
+ * can be used to tickle it out of sleep.
+ *
+ * [Note: Exiting idle wait of processing loop]
+ *
+ * The following toy example illustrates the overall mechanism:
+ *
+ *     let resolveTick
+ *     let tick = new Promise((r) => (resolveTick = r));
+ *
+ *     const tickNow = () => {
+ *         resolveTick();
+ *         tick = new Promise((r) => (resolveTick = r));
+ *     }
+ *
+ *     const f = async () => {
+ *         for (let i of [1, 2, 3, 4, 5]) {
+ *             const wait = new Promise((r) => setTimeout(r, i * 1e3));
+ *             await Promise.race([wait, tick]);
+ *         }
+ *     }
+ *
+ *     f()
+ *
+ *     setTimeout(tickNow, 2500);
+ *     setTimeout(tickNow, 5000);
+ *     setTimeout(tickNow, 5500);
+ *
+ * The `Promise.race([wait, tick])` means that the loop will proceed to the next
+ * item either if the timeout expires, or if tick resolves. Thus the same
+ * function can handle both the internally determined processing of backfill
+ * batches, and the externally triggered processing of live uploads.
+ */
 const processQueue = async () => {
     while (true) {
-        const item = _state.videoProcessingQueue.shift();
+        const item = _state.liveQueue.shift();
         if (!item) break;
         try {
             await processQueueItem(item);
