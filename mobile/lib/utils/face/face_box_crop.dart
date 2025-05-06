@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:io" show File;
+import "dart:math" show pow;
 
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
@@ -16,22 +17,6 @@ import "package:photos/utils/file_util.dart";
 import "package:photos/utils/standalone/task_queue.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
-void resetPool({required bool fullFile}) {
-  if (fullFile) {
-    _queueFullFileFaceGenerations = TaskQueue<String>(
-      maxConcurrentTasks: 5,
-      taskTimeout: const Duration(minutes: 1),
-      maxQueueSize: 50,
-    );
-  } else {
-    _queueThumbnailFaceGenerations = TaskQueue<String>(
-      maxConcurrentTasks: 5,
-      taskTimeout: const Duration(minutes: 1),
-      maxQueueSize: 100,
-    );
-  }
-}
-
 final _logger = Logger("FaceCropUtils");
 
 const int _retryLimit = 3;
@@ -40,7 +25,7 @@ final LRUMap<String, Uint8List?> _faceCropThumbnailCache = LRUMap(1000);
 TaskQueue _queueFullFileFaceGenerations = TaskQueue<String>(
   maxConcurrentTasks: 5,
   taskTimeout: const Duration(minutes: 1),
-  maxQueueSize: 50,
+  maxQueueSize: 100,
 );
 TaskQueue _queueThumbnailFaceGenerations = TaskQueue<String>(
   maxConcurrentTasks: 5,
@@ -127,18 +112,34 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
     }
     return faceIdToCrop.isEmpty ? null : faceIdToCrop;
   } catch (e, s) {
-    _logger.severe(
-      "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}",
-      e,
-      s,
-    );
-    resetPool(fullFile: useFullFile);
-    if (fetchAttempt <= _retryLimit) {
-      return getCachedFaceCrops(
-        enteFile,
-        faces,
-        fetchAttempt: fetchAttempt + 1,
-        useFullFile: useFullFile,
+    if (e is! TaskQueueTimeoutException &&
+        e is! TaskQueueOverflowException &&
+        e is! TaskQueueCancelledException) {
+      if (fetchAttempt <= _retryLimit) {
+        final backoff = Duration(
+          milliseconds: 100 * pow(2, fetchAttempt + 1).toInt(),
+        );
+        await Future.delayed(backoff);
+        _logger.warning(
+          "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}, retrying (attempt ${fetchAttempt + 1}) in ${backoff.inMilliseconds} ms",
+          e,
+          s,
+        );
+        return getCachedFaceCrops(
+          enteFile,
+          faces,
+          fetchAttempt: fetchAttempt + 1,
+          useFullFile: useFullFile,
+        );
+      }
+      _logger.severe(
+        "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}",
+        e,
+        s,
+      );
+    } else {
+      _logger.info(
+        "Stopped getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()} due to $e",
       );
     }
     return null;

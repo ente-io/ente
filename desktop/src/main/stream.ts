@@ -332,14 +332,13 @@ const handleGenerateHLSWrite = async (
             return new Response(null, { status: 204 });
         }
 
-        const { playlistPath, videoPath } = result;
+        const { playlistPath, videoPath, videoSize, dimensions } = result;
         try {
-            await uploadVideoSegments(videoPath, objectUploadURL);
+            await uploadVideoSegments(videoPath, videoSize, objectUploadURL);
 
             const playlistToken = randomUUID();
             pendingVideoResults.set(playlistToken, playlistPath);
 
-            const { dimensions, videoSize } = result;
             return new Response(
                 JSON.stringify({ playlistToken, dimensions, videoSize }),
                 { status: 200 },
@@ -364,19 +363,32 @@ const handleGenerateHLSWrite = async (
  *
  * See: [Note: Upload HLS video segment from node side].
  *
+ * @param videoFilePath The path to the file on the user's file system to
+ * upload.
+ *
+ * @param videoSize The size in bytes of the file at {@link videoFilePath}.
+ *
+ * @param objectUploadURL A pre-signed URL to upload the file.
+ *
  * ---
  *
  * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOkOr4xx`
- * from `web/packages/base/http.ts` (we don't have the rest of the scaffolding
- * used by that function, which is why it is inlined bespoked).
+ * from `web/packages/base/http.ts`
  *
- * It handles the specific use case of uploading videos since generating the HLS
- * stream is a fairly expensive operation, so a retry to discount transient
- * network issues is called for. There are only 2 retries for a total of 3
- * attempts, and the retry gaps are more spaced out.
+ * - We don't have the rest of the scaffolding used by that function, which is
+ *   why it is intially inlined bespoked.
+ *
+ * - It handles the specific use case of uploading videos since generating the
+ *   HLS stream is a fairly expensive operation, so a retry to discount
+ *   transient network issues is called for. There are only 2 retries for a
+ *   total of 3 attempts, and the retry gaps are more spaced out.
+ *
+ * - Later it was discovered that net.fetch is much slower than node's native
+ *   fetch, so this implementation has further diverged.
  */
 export const uploadVideoSegments = async (
     videoFilePath: string,
+    videoSize: number,
     objectUploadURL: string,
 ) => {
     const waitTimeBeforeNextTry = [5000, 20000];
@@ -387,8 +399,17 @@ export const uploadVideoSegments = async (
             const nodeStream = fs_.createReadStream(videoFilePath);
             const webStream = Readable.toWeb(nodeStream);
 
-            const res = await net.fetch(objectUploadURL, {
+            // net.fetch is 40-50x slower than the native fetch for this
+            // particular PUT request. This is easily reproducible (replace
+            // `fetch` with `net.fetch`, then even on localhost the PUT requests
+            // start taking a minute or so; with node's native fetch, it is
+            // second(s)).
+            const res = await fetch(objectUploadURL, {
                 method: "PUT",
+                // net.fetch apparently deduces and inserts a content-length,
+                // because when we use the node native fetch then we need to
+                // provide it explicitly.
+                headers: { "Content-Length": `${videoSize}` },
                 // The duplex option is required since we're passing a stream.
                 //
                 // @ts-expect-error TypeScript's libdom.d.ts does not include

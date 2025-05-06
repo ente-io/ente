@@ -22,8 +22,8 @@ import {
 } from "ente-gallery/services/upload/takeout";
 import UploadService, {
     areLivePhotoAssets,
+    upload,
     uploadItemFileName,
-    uploader,
     type PotentialLivePhotoAsset,
     type UploadAsset,
 } from "ente-gallery/services/upload/upload-service";
@@ -557,7 +557,7 @@ class UploadManager {
             uiService.setFileProgress(localID, 0);
             await wait(0);
 
-            const { uploadResult, uploadedFile } = await uploader(
+            const { uploadResult, uploadedFile } = await upload(
                 uploadableItem,
                 this.uploaderName,
                 this.existingFiles,
@@ -735,7 +735,7 @@ export const uploadManager = new UploadManager();
  *
  * - On to the {@link ClusteredUploadItem} we attach the corresponding
  *   {@link collection}, giving us {@link UploadableUploadItem}. This is what
- *   gets queued and then passed to the {@link uploader}.
+ *   gets queued and then passed to the {@link upload}.
  */
 type UploadItemWithCollectionIDAndName = UploadAsset & {
     /** A unique ID for the duration of the upload */

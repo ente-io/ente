@@ -62,8 +62,8 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
         expiryTime: "",
         userId: "",
         attributes: {
-            "customerID": "",
-            "stripeAccountCountry": ""
+            customerID: "",
+            stripeAccountCountry: "",
         },
     });
 
@@ -108,9 +108,13 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                     expiryTime: expiryTime,
                     userId: userDataResponse.subscription.userID || "",
                     attributes: {
-                        customerID: userDataResponse.subscription.attributes.customerID || "",
-                        stripeAccountCountry: userDataResponse.subscription.attributes.stripeAccountCountry || ""
-                    }
+                        customerID:
+                            userDataResponse.subscription.attributes
+                                .customerID || "",
+                        stripeAccountCountry:
+                            userDataResponse.subscription.attributes
+                                .stripeAccountCountry || "",
+                    },
                 });
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -174,8 +178,9 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                 transactionId: values.transactionId,
                 attributes: {
                     customerID: values.attributes.customerID,
-                    stripeAccountCountry: values.attributes.stripeAccountCountry
-                }
+                    stripeAccountCountry:
+                        values.attributes.stripeAccountCountry,
+                },
             };
 
             try {

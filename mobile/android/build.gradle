@@ -8,6 +8,10 @@ allprojects {
         google()
         jcenter()
         mavenCentral()
+        // mavenLocal() // for FDroid
+        maven {
+            url "${project(':ffmpeg_kit_flutter').projectDir}/libs"
+        }
     }
 }
 

@@ -716,6 +716,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable": MessageLookupByLibrary.simpleMessage(
             "Mise à jour critique disponible"),
         "crop": MessageLookupByLibrary.simpleMessage("Rogner"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Souvenirs conservés"),
         "currentUsageIs": MessageLookupByLibrary.simpleMessage(
             "L\'utilisation actuelle est de "),
         "currentlyRunning":
@@ -1880,7 +1882,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Dates et heure de décalage"),
         "showMemories":
-            MessageLookupByLibrary.simpleMessage("Montrer les souvenirs"),
+            MessageLookupByLibrary.simpleMessage("Afficher les souvenirs"),
         "showPerson":
             MessageLookupByLibrary.simpleMessage("Montrer la personne"),
         "signOutFromOtherDevices": MessageLookupByLibrary.simpleMessage(
