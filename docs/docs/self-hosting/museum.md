@@ -67,3 +67,7 @@ Similarly, you can use the default
 [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml)
 as a reference for building a functioning `museum.yaml` for many other
 functionalities like SMTP, Discord notifications, Hardcoded-OTTs, etc.
+
+## References
+
+- [Environment Variables and Ports](/self-hosting/faq/environment)
