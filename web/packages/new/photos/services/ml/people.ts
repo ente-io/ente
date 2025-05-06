@@ -1,7 +1,7 @@
 import { assertionFailed } from "ente-base/assert";
 import log from "ente-base/log";
 import type { EnteFile } from "ente-media/file";
-import { shuffled } from "ente-utils/array";
+import { randomSample } from "ente-utils/array";
 import { getLocalFiles } from "../files";
 import {
     savedCGroups,
@@ -583,32 +583,6 @@ export const _suggestionsAndChoicesForPerson = async (
     );
 
     return { choices, suggestions };
-};
-
-/**
- * Return a random sample of {@link n} elements from the given {@link items}.
- *
- * Functionally this is equivalent to `shuffled(items).slice(0, n)`, except it
- * tries to be a bit faster for long arrays when we need only a small sample
- * from it. In a few tests, this indeed makes a substantial difference.
- */
-const randomSample = <T>(items: T[], n: number) => {
-    if (items.length <= n) return items;
-    if (n == 0) return [];
-
-    if (n > items.length / 3) {
-        // Avoid using the random sampling without replacement method if a
-        // significant proportion of the original items are needed, otherwise we
-        // might run into long retry loop at the tail end (hitting the same
-        // indexes again an again).
-        return shuffled(items).slice(0, n);
-    }
-
-    const ix = new Set<number>();
-    while (ix.size < n) {
-        ix.add(Math.floor(Math.random() * items.length));
-    }
-    return [...ix].map((i) => items[i]!);
 };
 
 /**

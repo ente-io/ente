@@ -7,9 +7,15 @@ import { type PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
+import {
+    getAllLocalFiles,
+    uniqueFilesByID,
+} from "ente-new/photos/services/files";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
+import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
+import { wait } from "ente-utils/promise";
 import { z } from "zod";
 import {
     initiateGenerateHLS,
@@ -43,8 +49,11 @@ interface VideoProcessingQueueItem {
      * the current client. If present, this serves as an optimization allowing
      * us to directly read the file off the user's file system.
      */
-    timestampedUploadItem: TimestampedFileSystemUploadItem | undefined;
+    timestampedUploadItem?: TimestampedFileSystemUploadItem;
 }
+
+const idleWaitInitial = 10 * 1000; /* 10 sec */
+const idleWaitMax = idleWaitInitial * 2 ** 6; /* 640 sec */
 
 /**
  * Internal in-memory state shared by the functions in this module.
@@ -71,6 +80,13 @@ class VideoState {
      * See: [Note: Exiting idle wait of processing loop].
      */
     resolveTick: (() => void) | undefined;
+    /**
+     * The time to sleep if nothing is pending.
+     *
+     * Goes from {@link idleWaitInitial} to {@link idleWaitMax} in doublings.
+     * Reset back to {@link idleWaitInitial} in case of any activity.
+     */
+    idleWait = idleWaitInitial;
 }
 
 /**
@@ -349,8 +365,8 @@ export const processVideoNewUpload = (
     processableUploadItem: ProcessableUploadItem,
 ) => {
     // TODO(HLS):
-    if (!isVideoProcessingEnabled()) return;
     if (!isDesktop) return;
+    if (!isVideoProcessingEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
     if (processableUploadItem instanceof File) {
         // While the types don't guarantee it, we really shouldn't be getting
@@ -436,22 +452,81 @@ export const isVideoProcessingEnabled = () =>
  * batches, and the externally triggered processing of live uploads.
  */
 const processQueue = async () => {
-    while (true) {
-        const item = _state.liveQueue.shift();
-        if (!item) break;
-        try {
-            await processQueueItem(item);
-        } catch (e) {
-            log.error("Video processing failed", e);
-            // Ignore this unprocessable item. Currently this function only runs
-            // post upload, so this item will later get processed as part of the
-            // backfill.
-            //
-            // TODO(HLS): When processing the backfill itself, we'll need a way
-            // to mark this item as failed.
+    if (!(isDesktop && isVideoProcessingEnabled())) {
+        assertionFailed(); /* we shouldn't have come here */
+        return;
+    }
+
+    let bq: typeof _state.liveQueue | undefined;
+    while (isVideoProcessingEnabled()) {
+        log.debug(() => ["gen-hls-iter", []]);
+        const item =
+            _state.liveQueue.shift() ?? (bq ??= await backfillQueue()).shift();
+        if (item) {
+            try {
+                await processQueueItem(item);
+            } catch (e) {
+                log.error("Video processing failed", e);
+            } finally {
+                // TODO(HLS): This needs to be more granular in case of errors.
+                await markProcessedVideoFileID(item.file.id);
+            }
+            // Reset the idle wait on any activity.
+            _state.idleWait = idleWaitInitial;
+        } else {
+            // Replenish the backfill queue if possible.
+            bq = await backfillQueue();
+            if (!bq.length) {
+                // There are no more items in either the live queue or backlog.
+                // Go to sleep (for increasingly longer durations, capped at a
+                // maximum).
+                const idleWait = _state.idleWait;
+                _state.idleWait = Math.min(idleWait * 2, idleWaitMax);
+
+                // `tick` allows the sleep to be interrupted when there is
+                // potential activity.
+                if (!_state.tick) assertionFailed();
+                const tick = _state.tick!;
+
+                log.debug(() => ["gen-hls", { idleWait }]);
+                await Promise.race([tick, wait(idleWait)]);
+            }
         }
     }
+
     _state.queueProcessor = undefined;
+};
+
+/**
+ * Return the next batch of videos that need to be processed.
+ *
+ * If there is nothing pending, return an empty array.
+ */
+const backfillQueue = async (): Promise<VideoProcessingQueueItem[]> => {
+    const allCollectionFiles = await getAllLocalFiles();
+    const processedVideoFileIDs = await savedProcessedVideoFileIDs();
+    const videoFiles = uniqueFilesByID(
+        allCollectionFiles.filter((f) => f.metadata.fileType == FileType.video),
+    );
+    const pendingVideoFiles = videoFiles.filter(
+        (f) => !processedVideoFileIDs.has(f.id),
+    );
+    const batch = randomSample(pendingVideoFiles, 50);
+    return batch.map((file) => ({ file }));
+};
+
+// TODO(HLS): Store this in DB.
+const _processedVideoFileIDs: number[] = [];
+const savedProcessedVideoFileIDs = async () => {
+    // TODO(HLS): make async
+    await wait(0);
+    return new Set(_processedVideoFileIDs);
+};
+
+const markProcessedVideoFileID = async (fileID: number) => {
+    // TODO(HLS): make async
+    await wait(0);
+    _processedVideoFileIDs.push(fileID);
 };
 
 /**
