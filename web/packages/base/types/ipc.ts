@@ -373,11 +373,11 @@ export interface Electron {
     // - ML
 
     /**
-     * Create a new ML worker, terminating the older ones (if any).
+     * Create a new ML utility process, terminating the older ones (if any).
      *
      * This creates a new Node.js utility process, and sets things up so that we
      * can communicate directly with that utility process using a
-     * {@link MessagePort} that gets posted using "createMLWorker/port".
+     * {@link MessagePort} that gets posted using "createMLUtilityProcess/port".
      *
      * At the other end of that port will be an object that conforms to the
      * {@link ElectronMLWorker} interface.
@@ -385,9 +385,9 @@ export interface Electron {
      * For more details about the IPC flow, see: [Note: ML IPC].
      *
      * Note: For simplicity of implementation, we assume that there is at most
-     * one outstanding call to {@link createMLWorker}.
+     * one outstanding call to {@link createMLUtilityProcess}.
      */
-    createMLWorker: () => void;
+    createMLUtilityProcess: () => void;
 
     // - Watch
 
@@ -592,7 +592,8 @@ export interface Electron {
 
 /**
  * The shape of the object exposed by the Node.js ML worker process on the
- * message port that the web layer obtains by doing {@link createMLWorker}.
+ * message port that the web layer obtains by doing
+ * {@link createMLUtilityProcess}.
  */
 export interface ElectronMLWorker {
     /**

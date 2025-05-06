@@ -11,11 +11,11 @@ import { app, utilityProcess } from "electron/main";
 import path from "node:path";
 import log, { processUtilityProcessLogMessage } from "../log";
 
-/** The active ML worker (utility) process, if any. */
+/** The active ML utility process, if any. */
 let _child: UtilityProcess | undefined;
 
 /**
- * Create a new ML worker process, terminating the older ones (if any).
+ * Create a new ML utility process, terminating the older ones (if any).
  *
  * [Note: ML IPC]
  *
@@ -70,9 +70,9 @@ let _child: UtilityProcess | undefined;
  * The RPC protocol is handled using comlink on both ends. The port itself needs
  * to be relayed using `postMessage`.
  */
-export const createMLWorker = (window: BrowserWindow) => {
+export const createMLUtilityProcess = (window: BrowserWindow) => {
     if (_child) {
-        log.debug(() => "Terminating previous ML worker process");
+        log.debug(() => "Terminating previous ML utility process");
         _child.kill();
         _child = undefined;
     }
@@ -83,7 +83,9 @@ export const createMLWorker = (window: BrowserWindow) => {
     const userDataPath = app.getPath("userData");
     child.postMessage({ userDataPath }, [port1]);
 
-    window.webContents.postMessage("createMLWorker/port", undefined, [port2]);
+    window.webContents.postMessage("createMLUtilityProcess/port", undefined, [
+        port2,
+    ]);
 
     handleMessagesFromUtilityProcess(child);
 
@@ -118,6 +120,6 @@ const handleMessagesFromUtilityProcess = (child: UtilityProcess) => {
         if (processUtilityProcessLogMessage("[ml-worker]", m)) {
             return;
         }
-        log.info("Ignoring unknown message from ML worker", m);
+        log.info("Ignoring unknown message from ML utility process", m);
     });
 };

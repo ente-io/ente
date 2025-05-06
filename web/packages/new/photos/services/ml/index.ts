@@ -135,7 +135,7 @@ const createComlinkWorker = async () => {
     const delegate = { workerDidUpdateStatus, workerDidUnawaitedIndex };
 
     // Obtain a message port from the Electron layer.
-    const messagePort = await createMLWorker(electron);
+    const messagePort = await createMLUtilityProcess(electron);
 
     const cw = new ComlinkWorker<typeof MLWorker>(
         "ML",
@@ -168,19 +168,19 @@ export const terminateMLWorker = async () => {
 
 /**
  * Obtain a port from the Node.js layer that can be used to communicate with the
- * ML worker process.
+ * ML utility process.
  */
-const createMLWorker = (electron: Electron): Promise<MessagePort> => {
+const createMLUtilityProcess = (electron: Electron): Promise<MessagePort> => {
     // The main process will do its thing, and send back the port it created to
-    // us by sending an message on the "createMLWorker/port" channel via the
-    // postMessage API. This roundabout way is needed because MessagePorts
+    // us by sending an message on the "createMLUtilityProcess/port" channel via
+    // the postMessage API. This roundabout way is needed because MessagePorts
     // cannot be transferred via the usual send/invoke pattern.
 
     const port = new Promise<MessagePort>((resolve) => {
         const l = ({ source, data, ports }: MessageEvent) => {
             // The source check verifies that the message is coming from our own
             // preload script. The data is the message that was posted.
-            if (source == window && data == "createMLWorker/port") {
+            if (source == window && data == "createMLUtilityProcess/port") {
                 window.removeEventListener("message", l);
                 resolve(ports[0]!);
             }
@@ -188,7 +188,7 @@ const createMLWorker = (electron: Electron): Promise<MessagePort> => {
         window.addEventListener("message", l);
     });
 
-    electron.createMLWorker();
+    electron.createMLUtilityProcess();
 
     return port;
 };

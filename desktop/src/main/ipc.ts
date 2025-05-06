@@ -47,7 +47,7 @@ import {
 } from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
-import { createMLWorker } from "./services/ml";
+import { createMLUtilityProcess } from "./services/ml";
 import {
     lastShownChangelogVersion,
     masterKeyB64,
@@ -235,7 +235,9 @@ export const attachIPCHandlers = () => {
 export const attachMainWindowIPCHandlers = (mainWindow: BrowserWindow) => {
     // - ML
 
-    ipcMain.on("createMLWorker", () => createMLWorker(mainWindow));
+    ipcMain.on("createMLUtilityProcess", () =>
+        createMLUtilityProcess(mainWindow),
+    );
 };
 
 /**

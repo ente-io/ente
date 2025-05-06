@@ -217,16 +217,16 @@ const ffmpegExec = (
 
 // - ML
 
-const createMLWorker = () => {
+const createMLUtilityProcess = () => {
     const l = (event: IpcRendererEvent) => {
         void windowLoaded.then(() => {
             // "*"" is the origin to send to.
-            window.postMessage("createMLWorker/port", "*", event.ports);
-            ipcRenderer.off("createMLWorker/port", l);
+            window.postMessage("createMLUtilityProcess/port", "*", event.ports);
+            ipcRenderer.off("createMLUtilityProcess/port", l);
         });
     };
-    ipcRenderer.on("createMLWorker/port", l);
-    ipcRenderer.send("createMLWorker");
+    ipcRenderer.on("createMLUtilityProcess/port", l);
+    ipcRenderer.send("createMLUtilityProcess");
 };
 
 // - Watch
@@ -393,7 +393,7 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - ML
 
-    createMLWorker,
+    createMLUtilityProcess,
 
     // - Watch
 

@@ -21,7 +21,7 @@ import { wait } from "../utils/common";
 import { writeStream } from "../utils/stream";
 import { fsStatMtime } from "./fs";
 
-log.debugString("Started ML worker process");
+log.debugString("Started ML utility process");
 
 process.parentPort.once("message", (e) => {
     // Initialize ourselves with the data we got from our parent.
