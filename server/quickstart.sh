@@ -84,7 +84,7 @@ services:
       # Use copies or hardlinks, not symlinks. Needs fullchain certificate if using Let's Encrypt.  
       # Also see https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml
       # - ./credentials:/credentials:ro
-      # You can also map the certificates directly from another folder, e.g.:
+      # Alternatively, you can mount the certificates directly from another folder, e.g.:
       # - /root/.acme.sh/ente.your.host.com_ecc/ente.your.host.com.key:/credentials/tls.key:ro
       # - /root/.acme.sh/ente.your.host.com_ecc/fullchain.cer:/credentials/tls.cert:ro
 
@@ -158,6 +158,8 @@ printf " \033[1;32mN\033[0m   Created \033[1mcompose.yaml\033[0m\n"
 sleep 1
 
 cat <<EOF >museum.yaml
+# See https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml for reference
+
 key:
       encryption: $museum_key
       hash: $museum_hash
