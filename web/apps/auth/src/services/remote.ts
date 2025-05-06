@@ -1,8 +1,12 @@
-import { decryptBoxB64, decryptMetadataJSON_New } from "@/base/crypto";
-import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
-import log from "@/base/log";
-import { apiURL } from "@/base/origins";
-import { ensureString } from "@/utils/ensure";
+import { decryptBoxB64, decryptMetadataJSON_New } from "ente-base/crypto";
+import {
+    authenticatedRequestHeaders,
+    ensureOk,
+    HTTPError,
+} from "ente-base/http";
+import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
+import { ensureString } from "ente-utils/ensure";
 import { codeFromURIString, type Code } from "services/code";
 import { z } from "zod";
 
@@ -28,7 +32,7 @@ export const getAuthCodes = async (masterKey: Uint8Array): Promise<Code[]> => {
         })
         .filter((f) => f !== undefined)
         .filter((f) => {
-            // Do not show trashed entries in the web inteface.
+            // Do not show trashed entries in the web interface.
             return !f.codeDisplay?.trashed;
         })
         .sort((a, b) => {

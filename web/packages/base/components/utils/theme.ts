@@ -1,8 +1,8 @@
-import type { AppName } from "@/base/app";
 import type { Theme } from "@mui/material";
 import { createTheme } from "@mui/material";
 import type { Components } from "@mui/material/styles/components";
 import type { TypographyOptions } from "@mui/material/styles/createTypography";
+import type { AppName } from "ente-base/app";
 
 const getTheme = (appName: AppName): Theme => {
     const colors = getColors(appName);

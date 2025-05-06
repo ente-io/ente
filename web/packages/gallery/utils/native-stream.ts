@@ -6,7 +6,9 @@
  * See: [Note: IPC streams].
  */
 
-import type { Electron, ElectronMLWorker, ZipItem } from "@/base/types/ipc";
+import type { Electron, ElectronMLWorker, ZipItem } from "ente-base/types/ipc";
+import { z } from "zod";
+import type { FileSystemUploadItem } from "../services/upload";
 
 /**
  * Stream the given file or zip entry from the user's local file system.
@@ -118,46 +120,141 @@ export const writeStream = async (
 };
 
 /**
- * Variant of {@link writeStream} tailored for video conversion.
+ * Initate a conversion to MP4, streaming the video contents to the node side.
  *
- * @param blob The video to convert.
+ * This is a variant of {@link writeStream} tailored for the conversion to MP4.
  *
- * @returns a token that can then be passed to {@link readConvertToMP4Stream} to
- * read back the converted video. See: [Note: Convert to MP4].
+ * @param _ An {@link Electron} instance, witness to the fact that we're running
+ * in the context of the desktop app. It is otherwise not used.
+ *
+ * @param video A {@link Blob} containing the video to convert.
+ *
+ * @returns a token that can then be passed to {@link readVideoStream} to
+ * retrieve the converted MP4 file. This three step sequence (write/read/done)
+ * can then be ended by using {@link videoStreamDone}).
+ *
+ * See: [Note: Convert to MP4].
  */
-export const writeConvertToMP4Stream = async (_: Electron, blob: Blob) => {
-    const url = "stream://convert-to-mp4";
+export const initiateConvertToMP4 = async (
+    _: Electron,
+    video: Blob,
+): Promise<string> => {
+    const url = "stream://video?op=convert-to-mp4";
+    const res = await fetch(url, { method: "POST", body: video });
+    if (!res.ok)
+        throw new Error(`Failed to write stream to ${url}: HTTP ${res.status}`);
+    return res.text();
+};
 
-    const req = new Request(url, {
+const GenerateHLSResult = z.object({
+    /**
+     * A token that can be used to passed to {@link readVideoStream} to retrieve
+     * the generated HLS playlist.
+     */
+    playlistToken: z.string(),
+    /**
+     * The dimensions (width and height in pixels) of the generated video stream.
+     */
+    dimensions: z.object({ width: z.number(), height: z.number() }),
+    /**
+     * The size (in bytes) of the file containing the encrypted video segments.
+     */
+    videoSize: z.number(),
+});
+
+export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
+
+/**
+ * Initate the generation of a HLS stream, streaming the source video contents
+ * to the node side.
+ *
+ * This is a variant of {@link writeStream} tailored for the HLS generation. It
+ * is similar to {@link initiateConvertToMP4}, but also supports streaming
+ * {@link FileSystemUploadItem}s and {@link ReadableStream}s.
+ *
+ * @param _ An {@link Electron} instance, witness to the fact that we're running
+ * in the context of the desktop app. It is otherwise not used.
+ *
+ * @param video The video to convert.
+ *
+ * - If we're called during the upload process, then this will be set to the
+ *   {@link FileSystemUploadItem} that was uploaded. This way, we can directly use
+ *   the on-disk file instead of needing to download the original from remote.
+ *
+ * - Otherwise it should be a {@link ReadableStream} of the video contents.
+ *
+ * @param objectUploadURL A presigned URL where the video segments should be
+ * uploaded to.
+ *
+ * @returns a token that can be used to retrieve the generated HLS playlist, and
+ * metadata about the generated video (its byte size and dimensions). See {@link
+ * GenerateHLSResult}.
+ *
+ * In case the video is such that it doesn't require a separate stream to be
+ * generated (e.g. it is a small video using an already compatible codec), then
+ * this function will return `undefined`.
+ *
+ * See: [Note: Preview variant of videos].
+ */
+export const initiateGenerateHLS = async (
+    _: Electron,
+    video: FileSystemUploadItem | ReadableStream,
+    objectUploadURL: string,
+): Promise<GenerateHLSResult | undefined> => {
+    const params = new URLSearchParams({ op: "generate-hls", objectUploadURL });
+
+    let body: ReadableStream | null;
+    if (video instanceof ReadableStream) {
+        body = video;
+    } else {
+        // video is a DesktopUploadItem
+        body = null;
+        if (typeof video == "string") {
+            // Path to a regular file on the user's file system.
+            params.set("path", video);
+        } else if (Array.isArray(video)) {
+            // Path within a zip file on the user's file system.
+            const [zipPath, entryName] = video;
+            params.set("zipPath", zipPath);
+            params.set("entryName", entryName);
+        } else {
+            // A File with a path. Use the path.
+            params.set("path", video.path);
+        }
+    }
+
+    const url = `stream://video?${params.toString()}`;
+    const res = await fetch(url, {
         method: "POST",
-        body: blob,
+        // The duplex option is required when body is a stream.
+        //
         // @ts-expect-error TypeScript's libdom.d.ts does not include the
         // "duplex" parameter, e.g. see
         // https://github.com/node-fetch/node-fetch/issues/1769.
         duplex: "half",
+        body,
     });
-
-    const res = await fetch(req);
     if (!res.ok)
         throw new Error(`Failed to write stream to ${url}: HTTP ${res.status}`);
 
-    const token = res.text();
-    return token;
+    if (res.status == 204) return undefined;
+
+    return GenerateHLSResult.parse(await res.json());
 };
 
 /**
  * Variant of {@link readStream} tailored for video conversion.
  *
- * @param token A token obtained from {@link writeConvertToMP4Stream}.
+ * @param token A token obtained from {@link writeVideoStream}.
  *
- * @returns the contents of the converted video. See: [Note: Convert to MP4].
+ * @returns a Response that contains the contents of the processed video.
  */
-export const readConvertToMP4Stream = async (
+export const readVideoStream = async (
     _: Electron,
     token: string,
-): Promise<Blob> => {
+): Promise<Response> => {
     const params = new URLSearchParams({ token });
-    const url = new URL(`stream://convert-to-mp4?${params.toString()}`);
+    const url = new URL(`stream://video?${params.toString()}`);
 
     const req = new Request(url, { method: "GET" });
 
@@ -167,23 +264,22 @@ export const readConvertToMP4Stream = async (
             `Failed to read stream from ${url.href}: HTTP ${res.status}`,
         );
 
-    return res.blob();
+    return res;
 };
 
 /**
  * Sibling of {@link readConvertToMP4Stream} to let the native side know when we
- * are done reading the response, and they can dispose any temporary resources
- * it was using.
+ * are done reading the response, so it can dispose any temporary resources.
  *
- * @param token A token obtained from {@link writeConvertToMP4Stream}.
+ * @param token A token obtained from {@link writeVideoStream}.
  */
-export const readConvertToMP4Done = async (
+export const videoStreamDone = async (
     _: Electron,
     token: string,
 ): Promise<void> => {
     // The value for `done` is arbitrary, only its presence matters.
     const params = new URLSearchParams({ token, done: "1" });
-    const url = new URL(`stream://convert-to-mp4?${params.toString()}`);
+    const url = new URL(`stream://video?${params.toString()}`);
 
     const req = new Request(url, { method: "GET" });
     const res = await fetch(req);

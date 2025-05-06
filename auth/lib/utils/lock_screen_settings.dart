@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:io";
 import "dart:typed_data";
 
 import "package:ente_auth/core/configuration.dart";
@@ -49,6 +50,8 @@ class LockScreenSettings {
     /// Function to Check if the migration for lock screen changes has
     /// already been done by checking a stored boolean value.
     await runLockScreenChangesMigration();
+
+    await _clearLsDataInKeychainIfFreshInstall();
   }
 
   Future<void> setOfflineModeWarningStatus(bool value) async {
@@ -209,5 +212,18 @@ class LockScreenSettings {
 
   Future<bool> isPasswordSet() async {
     return await _secureStorage.containsKey(key: password);
+  }
+
+  // If the app was uninstalled (without logging out if it was used with
+  // backups), keychain items of the app persist in the keychain. To avoid using
+  // old keychain items, we delete them on reinstall.
+  Future<void> _clearLsDataInKeychainIfFreshInstall() async {
+    if ((Platform.isIOS || Platform.isMacOS) &&
+        !Configuration.instance.isLoggedIn() &&
+        !Configuration.instance.hasOptedForOfflineMode()) {
+      await _secureStorage.delete(key: password);
+      await _secureStorage.delete(key: pin);
+      await _secureStorage.delete(key: saltKey);
+    }
   }
 }

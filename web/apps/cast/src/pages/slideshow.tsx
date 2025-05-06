@@ -1,6 +1,6 @@
-import log from "@/base/log";
 import { Stack, styled, Typography } from "@mui/material";
 import { FilledCircleCheck } from "components/FilledCircleCheck";
+import log from "ente-base/log";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { readCastData } from "services/cast-data";

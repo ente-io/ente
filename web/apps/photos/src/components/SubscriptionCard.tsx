@@ -1,13 +1,3 @@
-import { Overlay } from "@/base/components/containers";
-import type { ButtonishProps } from "@/base/components/mui";
-import { bytesInGB, formattedStorageByteSize } from "@/gallery/utils/units";
-import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
-import type { UserDetails } from "@/new/photos/services/user-details";
-import {
-    familyMemberStorageLimit,
-    familyUsage,
-    isPartOfFamilyWithOtherMembers,
-} from "@/new/photos/services/user-details";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CircleIcon from "@mui/icons-material/Circle";
 import {
@@ -18,6 +8,16 @@ import {
     styled,
     useMediaQuery,
 } from "@mui/material";
+import { Overlay } from "ente-base/components/containers";
+import type { ButtonishProps } from "ente-base/components/mui";
+import { bytesInGB, formattedStorageByteSize } from "ente-gallery/utils/units";
+import { UnstyledButton } from "ente-new/photos/components/UnstyledButton";
+import type { UserDetails } from "ente-new/photos/services/user-details";
+import {
+    familyMemberStorageLimit,
+    familyUsage,
+    isPartOfFamilyWithOtherMembers,
+} from "ente-new/photos/services/user-details";
 import { t } from "i18next";
 import type React from "react";
 

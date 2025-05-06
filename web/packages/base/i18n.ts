@@ -1,6 +1,6 @@
-import { isDevBuild } from "@/base/env";
-import log from "@/base/log";
-import { includes } from "@/utils/type-guards";
+import { isDevBuild } from "ente-base/env";
+import log from "ente-base/log";
+import { includes } from "ente-utils/type-guards";
 import { getUserLocales } from "get-user-locale";
 import i18n from "i18next";
 import resourcesToBackend from "i18next-resources-to-backend";
@@ -34,6 +34,7 @@ export const supportedLocales = [
     "uk-UA" /* Ukrainian */,
     "vi-VN" /* Vietnamese */,
     "ja-JP" /* Japanese */,
+    "ar-SA" /* Arabic */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -49,7 +50,7 @@ const defaultLocale: SupportedLocale = "en-US";
  *
  * In addition to the base i18next package, we use two of its plugins:
  *
- * - i18next-http-backend, for loading the JSON files containin the translations
+ * - i18next-http-backend, for loading the JSON files containing the translations
  *   at runtime, and
  *
  * - react-i18next, which adds React specific APIs
@@ -195,6 +196,8 @@ const closestSupportedLocale = (
             return "vi-VN";
         } else if (ls.startsWith("ja")) {
             return "ja-JP";
+        } else if (ls.startsWith("ar")) {
+            return "ar-SA";
         }
     }
 

@@ -1,14 +1,14 @@
-import { EnteLogo } from "@/base/components/EnteLogo";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "@ente/shared/components/Container";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import FolderIcon from "@mui/icons-material/FolderOutlined";
 import { Button, Stack, Typography, styled } from "@mui/material";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import {
+    FlexWrapper,
+    VerticallyCentered,
+} from "ente-shared/components/Container";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
-import uploadManager from "services/upload/uploadManager";
+import { uploadManager } from "services/upload-manager";
 
 export default function GalleryEmptyState({ openUploader }) {
     return (

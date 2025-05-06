@@ -15,6 +15,7 @@ class LocalSettings {
   static const _kHasSeenMLEnablingBanner = "ls.has_seen_ml_enabling_banner";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
+  static const kCuratedMemoriesEnabled = "ls.curated_memories_enabled";
   static const kRateUsPromptThreshold = 2;
   static const shouldLoopVideoKey = "video.should_loop";
   static const onGuestViewKey = "on_guest_view";
@@ -80,8 +81,28 @@ class LocalSettings {
   bool get isMLLocalIndexingEnabled =>
       _prefs.getBool(_kisMLLocalIndexingEnabled) ?? enoughRamForLocalIndexing;
 
+  bool get isSmartMemoriesEnabled =>
+      _prefs.getBool(kCuratedMemoriesEnabled) ?? true;
+
+  Future<bool> setSmartMemories(bool value) async {
+    await _prefs.setBool(kCuratedMemoriesEnabled, value);
+    return value;
+  }
+
   bool get userEnabledMultiplePart =>
       _prefs.getBool(kEnableMultiplePart) ?? false;
+
+  Future<void> autoEnableMultiplePart(int rolloutPercentage) async {
+    if (_prefs.containsKey(kEnableMultiplePart)) {
+      return;
+    }
+    rolloutPercentage = rolloutPercentage.clamp(0, 100);
+    final randomValue = DateTime.now().millisecondsSinceEpoch % 100;
+    await _prefs.setBool(
+      kEnableMultiplePart,
+      randomValue < rolloutPercentage,
+    );
+  }
 
   Future<bool> setUserEnabledMultiplePart(bool value) async {
     await _prefs.setBool(kEnableMultiplePart, value);

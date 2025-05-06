@@ -133,6 +133,8 @@ class _FileSelectionActionsWidgetState
 
     final bool anyOwnedFiles =
         split.pendingUploads.isNotEmpty || split.ownedByCurrentUser.isNotEmpty;
+    final bool allOwnedFiles =
+        ownedAndPendingUploadFilesCount > 0 && split.ownedByOtherUsers.isEmpty;
 
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
     final showCollageOption = CollageCreatorPage.isValidCount(
@@ -175,7 +177,7 @@ class _FileSelectionActionsWidgetState
         SelectionActionButton(
           icon: Icons.remove_circle_outline,
           labelText: S.of(context).notPersonLabel(widget.person!.data.name),
-          onTap: anyUploadedFiles ? _onNotpersonClicked : null,
+          onTap: _onNotpersonClicked,
         ),
       );
       if (ownedFilesCount == 1) {
@@ -194,7 +196,7 @@ class _FileSelectionActionsWidgetState
         SelectionActionButton(
           labelText: S.of(context).notThisPerson,
           icon: Icons.remove_circle_outline,
-          onTap: anyUploadedFiles ? _onRemoveFromClusterClicked : null,
+          onTap: _onRemoveFromClusterClicked,
         ),
       );
     }
@@ -258,7 +260,7 @@ class _FileSelectionActionsWidgetState
           icon: Icons.delete_outline,
           labelText: S.of(context).delete,
           onTap: anyOwnedFiles ? _onDeleteClick : null,
-          shouldShow: ownedAndPendingUploadFilesCount > 0,
+          shouldShow: allOwnedFiles,
         ),
       );
     }

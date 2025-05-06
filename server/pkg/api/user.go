@@ -540,6 +540,24 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *UserHandler) SelfAccountRecovery(c *gin.Context) {
+	token := c.Query("token")
+	if token == "" {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("token missing"), "token is required"))
+		return
+	}
+	err := h.UserController.HandleSelfAccountRecovery(c, token)
+	if err != nil {
+		logrus.WithError(err).
+			WithFields(logrus.Fields{
+				"req_id": requestid.Get(c),
+			}).Warning("Failed to handle self account recovery")
+		c.HTML(http.StatusOK, "account_recovery_error.html", gin.H{})
+		return
+	}
+	c.HTML(http.StatusOK, "account_recovered.html", gin.H{})
+}
+
 // GetSRPAttributes returns the SRP attributes for a user
 func (h *UserHandler) GetSRPAttributes(c *gin.Context) {
 	var request ente.GetSRPAttributesRequest

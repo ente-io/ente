@@ -1,4 +1,4 @@
-import { getKVS } from "@/base/kv";
+import { getKVS } from "ente-base/kv";
 
 /**
  * Return the origin (scheme, host, port triple) that should be used for making

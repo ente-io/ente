@@ -314,8 +314,8 @@ class CollectionsService {
     return _coverCache[coverKey];
   }
 
-  Future<int> getFileCount(Collection c) async {
-    if (_countCache.containsKey(c.id)) {
+  Future<int> getFileCount(Collection c, {bool useCache = true}) async {
+    if (_countCache.containsKey(c.id) && useCache) {
       return _countCache[c.id]!;
     } else {
       final count = await _filesDB.collectionFileCount(c.id);
@@ -385,6 +385,16 @@ class CollectionsService {
               !c.isHidden() &&
               allowedRoles.contains(c.getRole(userID)),
         )
+        .toList();
+  }
+
+  List<int> getAllOwnedCollectionIDs() {
+    final int userID = _config.getUserID()!;
+    return _collectionIDToCollections.values
+        .where(
+          (c) => !c.isDeleted && c.isOwner(userID),
+        )
+        .map((e) => e.id)
         .toList();
   }
 

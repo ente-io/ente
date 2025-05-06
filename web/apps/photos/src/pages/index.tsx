@@ -1,19 +1,19 @@
-import { LoginContents } from "@/accounts/components/LoginContents";
-import { SignUpContents } from "@/accounts/components/SignUpContents";
-import { CenteredFill, CenteredRow } from "@/base/components/containers";
-import { EnteLogo } from "@/base/components/EnteLogo";
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { useBaseContext } from "@/base/context";
-import log from "@/base/log";
-import { albumsAppOrigin, customAPIHost } from "@/base/origins";
-import { DevSettings } from "@/new/photos/components/DevSettings";
-import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
-import localForage from "@ente/shared/storage/localForage";
-import { getData } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { getKey } from "@ente/shared/storage/sessionStorage";
 import { Box, Stack, Typography, styled } from "@mui/material";
+import { LoginContents } from "ente-accounts/components/LoginContents";
+import { SignUpContents } from "ente-accounts/components/SignUpContents";
+import { CenteredFill, CenteredRow } from "ente-base/components/containers";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
+import { albumsAppOrigin, customAPIHost } from "ente-base/origins";
+import { DevSettings } from "ente-new/photos/components/DevSettings";
+import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
+import localForage from "ente-shared/storage/localForage";
+import { getData } from "ente-shared/storage/localStorage";
+import { getToken } from "ente-shared/storage/localStorage/helpers";
+import { getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -90,7 +90,7 @@ const Page: React.FC = () => {
             log.error("Local storage is not accessible", e);
             showMiniDialog({
                 title: t("error"),
-                message: t("LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE"),
+                message: t("local_storage_not_accessible"),
                 nonClosable: true,
                 cancel: false,
             });

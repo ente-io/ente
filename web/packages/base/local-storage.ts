@@ -1,4 +1,4 @@
-import { nullToUndefined } from "@/utils/transform";
+import { nullToUndefined } from "ente-utils/transform";
 
 /**
  * Clear local storage on logout.

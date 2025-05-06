@@ -16,6 +16,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
+import "package:photos/services/wake_lock_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -161,6 +162,12 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     WidgetsBinding.instance.removeObserver(this);
     player.dispose();
     _captionUpdatedSubscription.cancel();
+    if (EnteWakeLockService.instance.shouldKeepAppAwakeAcrossSessions) {
+      EnteWakeLockService.instance.updateWakeLock(
+        enable: true,
+        wakeLockFor: WakeLockFor.handlingMediaKitEdgeCase,
+      );
+    }
     super.dispose();
   }
 

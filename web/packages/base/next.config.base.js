@@ -107,14 +107,14 @@ const nextConfig = {
     devIndicators: false,
     compiler: { emotion: true },
     // Use Next.js to transpile our internal packages before bundling them.
-    transpilePackages: ["@/base", "@/utils", "@/new"],
+    transpilePackages: ["ente-base", "ente-utils", "ente-new"],
 
     // Add environment variables to the JavaScript bundle. They will be
     // available as `process.env.varName` to our code.
     env: { gitSHA, appName, isDesktop, desktopAppVersion },
 
     // Ask Next to use a separate dist directory for the desktop during
-    // development. This allows us run dev servers simulataneously for both web
+    // development. This allows us run dev servers simultaneously for both web
     // and desktop code without them stepping on each others toes.
     ...(process.env.NODE_ENV != "production" && isDesktop
         ? { distDir: ".next-desktop" }

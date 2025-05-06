@@ -1,10 +1,10 @@
-import { LinkButton } from "@/base/components/LinkButton";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { formattedNumber } from "@/base/i18n";
-import { formattedDateTime } from "@/base/i18n-date";
-import { EnteFile } from "@/media/file";
-import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { DialogActions, DialogContent, Stack, Typography } from "@mui/material";
+import { LinkButton } from "ente-base/components/LinkButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { formattedNumber } from "ente-base/i18n";
+import { formattedDateTime } from "ente-base/i18n-date";
+import { EnteFile } from "ente-media/file";
+import { SpaceBetweenFlex } from "ente-shared/components/Container";
 import { t } from "i18next";
 import { useState } from "react";
 import ExportPendingList from "./ExportPendingList";

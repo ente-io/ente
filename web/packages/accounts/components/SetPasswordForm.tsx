@@ -1,7 +1,7 @@
-import { isWeakPassword } from "@/accounts/utils/password";
-import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
 import { Box, Input, TextField, Typography } from "@mui/material";
+import { isWeakPassword } from "ente-accounts/utils/password";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import ShowHidePassword from "ente-shared/components/Form/ShowHidePassword";
 import { Formik } from "formik";
 import { t } from "i18next";
 import React, { useState } from "react";

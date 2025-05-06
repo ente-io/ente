@@ -1,5 +1,6 @@
 import "dart:convert" show jsonEncode, jsonDecode;
 
+import "package:logging/logging.dart";
 import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
 import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
@@ -157,5 +158,14 @@ T getFileIdFromFaceId<T extends Object>(String faceId) {
 }
 
 int? tryGetFileIdFromFaceId(String faceId) {
-  return int.tryParse(faceId.substring(0, faceId.indexOf('_')));
+  try {
+    return int.tryParse(faceId.substring(0, faceId.indexOf('_')));
+  } catch (e, s) {
+    Logger("FaceID").severe(
+      "Error parsing faceId: $faceId",
+      e,
+      s,
+    );
+    return null;
+  }
 }

@@ -1,8 +1,11 @@
-import { assertionFailed } from "@/base/assert";
-import { newID } from "@/base/id";
-import { ensureLocalUser } from "@/base/local-user";
-import type { EnteFile } from "@/media/file";
-import { filePublicMagicMetadata, metadataHash } from "@/media/file-metadata";
+import { assertionFailed } from "ente-base/assert";
+import { newID } from "ente-base/id";
+import { ensureLocalUser } from "ente-base/local-user";
+import type { EnteFile } from "ente-media/file";
+import {
+    filePublicMagicMetadata,
+    metadataHash,
+} from "ente-media/file-metadata";
 import {
     addToCollection,
     createCollectionNameByID,

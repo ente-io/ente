@@ -1,7 +1,10 @@
-import { deriveKey } from "@/base/crypto";
-import { authenticatedPublicAlbumsRequestHeaders, ensureOk } from "@/base/http";
-import { apiURL } from "@/base/origins";
-import type { PublicURL } from "@/media/collection";
+import { deriveKey } from "ente-base/crypto";
+import {
+    authenticatedPublicAlbumsRequestHeaders,
+    ensureOk,
+} from "ente-base/http";
+import { apiURL } from "ente-base/origins";
+import type { PublicURL } from "ente-media/collection";
 import { z } from "zod";
 
 /**

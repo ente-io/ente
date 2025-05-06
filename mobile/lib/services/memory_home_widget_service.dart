@@ -145,7 +145,7 @@ class MemoryHomeWidgetService {
     final files = Map.fromEntries(
       memories.map((m) {
         return MapEntry(m.title, m.memories.map((e) => e.file).toList());
-      }).take(50),
+      }),
     );
 
     return files;
@@ -230,7 +230,16 @@ class MemoryHomeWidgetService {
             );
           }
           index++;
+
+          if (index >= 50) {
+            _logger.warning(">>> Max memory limit reached");
+            break;
+          }
         }
+      }
+
+      if (index >= 50) {
+        break;
       }
     }
 

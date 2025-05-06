@@ -1,7 +1,7 @@
-import type { SRPAttributes } from "@/accounts/services/srp-remote";
-import { sharedCryptoWorker } from "@/base/crypto";
-import log from "@/base/log";
 import { Input, type ButtonProps } from "@mui/material";
+import type { SRPAttributes } from "ente-accounts/services/srp-remote";
+import { sharedCryptoWorker } from "ente-base/crypto";
+import log from "ente-base/log";
 import { t } from "i18next";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -68,7 +68,7 @@ export default function VerifyMasterPasswordForm({
                 log.error("failed to derive key", e);
                 throw Error(CustomError.WEAK_DEVICE);
             }
-            if (!keyAttributes && typeof getKeyAttributes === "function") {
+            if (!keyAttributes && typeof getKeyAttributes == "function") {
                 keyAttributes = await getKeyAttributes(kek);
             }
             if (!keyAttributes) {

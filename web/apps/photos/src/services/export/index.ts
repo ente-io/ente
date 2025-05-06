@@ -1,27 +1,30 @@
-import { ensureElectron } from "@/base/electron";
-import { joinPath } from "@/base/file-name";
-import log from "@/base/log";
-import { downloadManager } from "@/gallery/services/download";
-import { writeStream } from "@/gallery/utils/native-stream";
-import type { Collection } from "@/media/collection";
-import { mergeMetadata, type EnteFile } from "@/media/file";
-import { fileLocation, type Metadata } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
+import { ensureElectron } from "ente-base/electron";
+import { joinPath } from "ente-base/file-name";
+import log from "ente-base/log";
+import { downloadManager } from "ente-gallery/services/download";
+import { writeStream } from "ente-gallery/utils/native-stream";
+import type { Collection } from "ente-media/collection";
+import { mergeMetadata, type EnteFile } from "ente-media/file";
+import { fileLocation, type Metadata } from "ente-media/file-metadata";
+import { FileType } from "ente-media/file-type";
+import { decodeLivePhoto } from "ente-media/live-photo";
 import {
     createCollectionNameByID,
     getCollectionUserFacingName,
-} from "@/new/photos/services/collection";
-import { getAllLocalCollections } from "@/new/photos/services/collections";
+} from "ente-new/photos/services/collection";
+import { getAllLocalCollections } from "ente-new/photos/services/collections";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
-} from "@/new/photos/services/export";
-import { getAllLocalFiles } from "@/new/photos/services/files";
-import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
-import { PromiseQueue } from "@/utils/promise";
-import { CustomError } from "@ente/shared/error";
-import { getData, setData } from "@ente/shared/storage/localStorage";
+} from "ente-new/photos/services/export";
+import { getAllLocalFiles } from "ente-new/photos/services/files";
+import {
+    safeDirectoryName,
+    safeFileName,
+} from "ente-new/photos/utils/native-fs";
+import { CustomError } from "ente-shared/error";
+import { getData, setData } from "ente-shared/storage/localStorage";
+import { PromiseQueue } from "ente-utils/promise";
 import i18n from "i18next";
 import { migrateExport, type ExportRecord } from "./migration";
 
@@ -1398,11 +1401,11 @@ const getGoogleLikeMetadataFile = (
     const result: Record<string, unknown> = {
         title: fileExportName,
         creationTime: {
-            timestamp: creationTime,
+            timestamp: `${creationTime}`,
             formatted: dateTimeFormatter.format(creationTime * 1000),
         },
         modificationTime: {
-            timestamp: modificationTime,
+            timestamp: `${modificationTime}`,
             formatted: dateTimeFormatter.format(modificationTime * 1000),
         },
     };

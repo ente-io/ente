@@ -1,8 +1,8 @@
-import { assertionFailed } from "@/base/assert";
-import { newNonSecureID } from "@/base/id-worker";
-import log from "@/base/log";
-import type { EnteFile } from "@/media/file";
-import { wait } from "@/utils/promise";
+import { assertionFailed } from "ente-base/assert";
+import { newNonSecureID } from "ente-base/id-worker";
+import log from "ente-base/log";
+import type { EnteFile } from "ente-media/file";
+import { wait } from "ente-utils/promise";
 import {
     pullUserEntities,
     savedCGroups,
@@ -53,7 +53,7 @@ export type ClusterFace = Omit<Face, "embedding"> & {
  * clustering, with a bit of lookback (and a dollop of heuristics) to get the
  * clusters to merge across batches.
  *
- * The same logic is used for both the inital clustering and subsequent
+ * The same logic is used for both the initial clustering and subsequent
  * incremental updates, just that the incremental updates will be much faster
  * since most of the files will be skipped (as they already have a cluster
  * assigned to them).
