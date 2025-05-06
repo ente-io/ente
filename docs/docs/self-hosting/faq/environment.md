@@ -11,7 +11,7 @@ to which Web app and etc.
 
 Here's the list of important variables that the self hoster should know about:
 
-## Museum
+### Museum
 
 1. `NEXT_PUBLIC_ENTE_ENDPOINT`
 
@@ -22,7 +22,7 @@ apps to connect to your self hosted endpoint.
 All the apps (regardless of platform) by default connect to api.ente.io - which is 
 our production instance of Museum.
 
-## Web Apps
+### Web Apps
 
 > [!IMPORTANT]
 > Web apps don't need to be configured with the below endpoints. Web App Environment
@@ -39,7 +39,7 @@ the information and knowledge of all the other needful web apps like albums, cas
 This environment variable is used to configure and declare the endpoint for the Albums
 Web App.
 
-# Ports
+## Ports
 
 The below format is according to how ports are mapped in Docker. 
 Typically,`<host>:<container-port>`
