@@ -72,13 +72,21 @@ services:
   museum:
     image: ghcr.io/ente-io/server
     ports:
-      - 8080:8080 # API
+      - 8080:8080 # Museum API without HTTPS
+      # - 443:443 # Museum API with HTTPS. Also add certificates below and enable TLS in museum.yaml.
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
       - ./museum.yaml:/museum.yaml:ro
       - ./data:/data:ro
+      # For certificates, if using HTTPS.
+      # Use copies or hardlinks, not symlinks. Needs fullchain certificate if using Let's Encrypt.  
+      # Also see https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml
+      # - ./credentials:/credentials:ro
+      # You can also map the certificates directly from another folder, e.g.:
+      # - /root/.acme.sh/ente.your.host.com_ecc/ente.your.host.com.key:/credentials/tls.key:ro
+      # - /root/.acme.sh/ente.your.host.com_ecc/fullchain.cer:/credentials/tls.cert:ro
 
   # Resolve "localhost:3200" in the museum container to the minio container.
   socat:
@@ -157,6 +165,10 @@ key:
 jwt:
       secret: $museum_jwt_secret
 
+http:
+      # Change to true if using HTTPS for museum API.
+      # Requires providing certificates and changing the exposed API port in compose.yaml
+      use-tls: false 
 db:
       host: postgres
       port: 5432
