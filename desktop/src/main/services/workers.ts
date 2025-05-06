@@ -1,5 +1,6 @@
 /**
- * @file ML related functionality. This code runs in the main process.
+ * @file This main process code and interface for dealing with the various
+ * utility processes that we create.
  */
 
 import {
@@ -9,13 +10,14 @@ import {
 } from "electron";
 import { app, utilityProcess } from "electron/main";
 import path from "node:path";
-import log from "../log";
+import type { UtilityProcessType } from "../../types/ipc";
+import log, { processUtilityProcessLogMessage } from "../log";
 
-/** The active ML worker (utility) process, if any. */
+/** The active ML utility process, if any. */
 let _child: UtilityProcess | undefined;
 
 /**
- * Create a new ML worker process, terminating the older ones (if any).
+ * Create a new ML utility process, terminating the older ones (if any).
  *
  * [Note: ML IPC]
  *
@@ -36,7 +38,7 @@ let _child: UtilityProcess | undefined;
  * does not forward events to the renderer, causing the UI to jitter.
  *
  * The solution for this is to spawn an Electron UtilityProcess, which we can
- * think of a regular Node.js child process.  This frees up the Node.js main
+ * think of a regular Node.js child process. This frees up the Node.js main
  * process, and would remove the jitter.
  * https://www.electronjs.org/docs/latest/tutorial/process-model
  *
@@ -70,9 +72,21 @@ let _child: UtilityProcess | undefined;
  * The RPC protocol is handled using comlink on both ends. The port itself needs
  * to be relayed using `postMessage`.
  */
-export const createMLWorker = (window: BrowserWindow) => {
+export const triggerCreateUtilityProcess = (
+    type: UtilityProcessType,
+    window: BrowserWindow,
+) => {
+    switch (type) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        case "ml":
+            triggerCreateMLUtilityProcess(window);
+            break;
+    }
+};
+
+export const triggerCreateMLUtilityProcess = (window: BrowserWindow) => {
     if (_child) {
-        log.debug(() => "Terminating previous ML worker process");
+        log.debug(() => "Terminating previous ML utility process");
         _child.kill();
         _child = undefined;
     }
@@ -83,7 +97,7 @@ export const createMLWorker = (window: BrowserWindow) => {
     const userDataPath = app.getPath("userData");
     child.postMessage({ userDataPath }, [port1]);
 
-    window.webContents.postMessage("createMLWorker/port", undefined, [port2]);
+    window.webContents.postMessage("utilityProcessPort/ml", undefined, [port2]);
 
     handleMessagesFromUtilityProcess(child);
 
@@ -114,34 +128,10 @@ export const createMLWorker = (window: BrowserWindow) => {
  *    we use the `parentPort` in the utility process.
  */
 const handleMessagesFromUtilityProcess = (child: UtilityProcess) => {
-    const logTag = "[ml-worker]";
     child.on("message", (m: unknown) => {
-        if (m && typeof m == "object" && "method" in m && "p" in m) {
-            const p = m.p;
-            switch (m.method) {
-                case "log.errorString":
-                    if (typeof p == "string") {
-                        log.error(`${logTag} ${p}`);
-                        return;
-                    }
-                    break;
-                case "log.info":
-                    if (Array.isArray(p)) {
-                        // Need to cast from any[] to unknown[]
-                        log.info(logTag, ...(p as unknown[]));
-                        return;
-                    }
-                    break;
-                case "log.debugString":
-                    if (typeof p == "string") {
-                        log.debug(() => `${logTag} ${p}`);
-                        return;
-                    }
-                    break;
-                default:
-                    break;
-            }
+        if (processUtilityProcessLogMessage("[ml-worker]", m)) {
+            return;
         }
-        log.info("Ignoring unknown message from ML worker", m);
+        log.info("Ignoring unknown message from ML utility process", m);
     });
 };

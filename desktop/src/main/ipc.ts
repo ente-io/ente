@@ -16,6 +16,7 @@ import type {
     FFmpegCommand,
     FolderWatch,
     PendingUploads,
+    UtilityProcessType,
     ZipItem,
 } from "../types/ipc";
 import { logToDisk } from "./log";
@@ -47,7 +48,6 @@ import {
 } from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
-import { createMLWorker } from "./services/ml";
 import {
     lastShownChangelogVersion,
     masterKeyB64,
@@ -70,6 +70,7 @@ import {
     watchUpdateIgnoredFiles,
     watchUpdateSyncedFiles,
 } from "./services/watch";
+import { triggerCreateUtilityProcess } from "./services/workers";
 
 /**
  * Listen for IPC events sent/invoked by the renderer process, and route them to
@@ -233,9 +234,11 @@ export const attachIPCHandlers = () => {
  * the main window to do their thing.
  */
 export const attachMainWindowIPCHandlers = (mainWindow: BrowserWindow) => {
-    // - ML
+    // - Utility processes
 
-    ipcMain.on("createMLWorker", () => createMLWorker(mainWindow));
+    ipcMain.on("triggerCreateUtilityProcess", (_, type: UtilityProcessType) =>
+        triggerCreateUtilityProcess(type, mainWindow),
+    );
 };
 
 /**
