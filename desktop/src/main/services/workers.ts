@@ -1,5 +1,6 @@
 /**
- * @file ML related functionality. This code runs in the main process.
+ * @file This main process code and interface for dealing with the various
+ * utility processes that we create.
  */
 
 import {
@@ -9,6 +10,7 @@ import {
 } from "electron";
 import { app, utilityProcess } from "electron/main";
 import path from "node:path";
+import type { UtilityProcessType } from "../../types/ipc";
 import log, { processUtilityProcessLogMessage } from "../log";
 
 /** The active ML utility process, if any. */
@@ -36,7 +38,7 @@ let _child: UtilityProcess | undefined;
  * does not forward events to the renderer, causing the UI to jitter.
  *
  * The solution for this is to spawn an Electron UtilityProcess, which we can
- * think of a regular Node.js child process.  This frees up the Node.js main
+ * think of a regular Node.js child process. This frees up the Node.js main
  * process, and would remove the jitter.
  * https://www.electronjs.org/docs/latest/tutorial/process-model
  *
@@ -70,7 +72,19 @@ let _child: UtilityProcess | undefined;
  * The RPC protocol is handled using comlink on both ends. The port itself needs
  * to be relayed using `postMessage`.
  */
-export const createMLUtilityProcess = (window: BrowserWindow) => {
+export const triggerCreateUtilityProcess = (
+    type: UtilityProcessType,
+    window: BrowserWindow,
+) => {
+    switch (type) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        case "ml":
+            triggerCreateMLUtilityProcess(window);
+            break;
+    }
+};
+
+export const triggerCreateMLUtilityProcess = (window: BrowserWindow) => {
     if (_child) {
         log.debug(() => "Terminating previous ML utility process");
         _child.kill();
@@ -83,9 +97,7 @@ export const createMLUtilityProcess = (window: BrowserWindow) => {
     const userDataPath = app.getPath("userData");
     child.postMessage({ userDataPath }, [port1]);
 
-    window.webContents.postMessage("createMLUtilityProcess/port", undefined, [
-        port2,
-    ]);
+    window.webContents.postMessage("utilityProcessPort/ml", undefined, [port2]);
 
     handleMessagesFromUtilityProcess(child);
 
