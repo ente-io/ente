@@ -201,9 +201,9 @@ Future _configureWorkManager() async {
   }
   _logger.warning("Configuring Work Manager for background tasks");
   const iOSBackgroundAppRefresh = "io.ente.frame.iOSBackgroundAppRefresh";
-  const androidBackgroundAppRefresh = "io.ente.frame.iOSBackgroundAppRefresh";
+  const androidPeriodicTask = "io.ente.frame.androidPeriodicTask";
   final backgrounTaskIdentifier =
-      Platform.isIOS ? iOSBackgroundAppRefresh : androidBackgroundAppRefresh;
+      Platform.isIOS ? iOSBackgroundAppRefresh : androidPeriodicTask;
   try {
     await workmanager.Workmanager().initialize(
       callbackDispatcher,
