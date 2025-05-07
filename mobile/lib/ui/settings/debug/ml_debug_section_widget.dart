@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:math" show Random;
 import "dart:typed_data" show Float32List;
 
 import "package:flutter/foundation.dart" show kDebugMode;
@@ -78,20 +79,32 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Do some usearch",
+            title: "Do some basic usearch",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              final allImageEmbeddings = await mlDataDB.getAllClipVectors();
-              final tenVectors = allImageEmbeddings.sublist(0, 10);
-              final tenEmbeddings = tenVectors
-                  .map((e) => Float32List.fromList(e.vector.toList()))
-                  .toList();
-              final tenKeys =
-                  Uint64List.fromList(tenVectors.map((e) => e.fileID).toList());
+              // randomly generate some vectors and keys
+              final random = Random();
+              final tenEmbeddings = List.generate(
+                10,
+                (index) {
+                  final randomList = List<double>.generate(
+                    192,
+                    (_) => random.nextDouble(), // Values between 0 and 1
+                  );
+                  final randomVector = Vector.fromList(randomList).normalize();
+                  return Float32List.fromList(randomVector.toList());
+                },
+              );
+              final tenKeys = Uint64List.fromList(
+                List.generate(
+                  tenEmbeddings.length,
+                  (index) => BigInt.from(index + 1),
+                ),
+              );
               final embedDimensions = BigInt.from(tenEmbeddings.first.length);
               final indexPath = (await getApplicationSupportDirectory()).path +
                   "/ml/test/vector_db_index.usearch";
