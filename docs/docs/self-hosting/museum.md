@@ -56,8 +56,7 @@ apps:
 ```
 
 >[!IMPORTANT]
->By default your Ente instance will redirect all the URL's to our publicly
->hosted instances of the apps. 
+>By default, all the values redirect to our publicly hosted production services. 
 >For example, if `public-albums` is not configured your shared album will 
 >use the `albums.ente.io` URL.
 

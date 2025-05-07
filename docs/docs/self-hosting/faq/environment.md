@@ -3,11 +3,8 @@ title: "Environment Variables and Ports"
 description: "Information about all the Environment Variables needed to run Ente"
 ---
 
-# Environment Variables and Ports
-
-The self hosted instance relies on few endpoints in Museum as well as on the Web
-App. Additionally, this document also covers information about what ports are mapped
-to which Web app and etc. 
+# Environment variables and ports
+A self-hosted Ente instance requires specific endpoints in both Museum (the server) and web apps. This document outlines the essential environment variables and port mappings of the web apps.
 
 Here's the list of important variables that the self hoster should know about:
 
@@ -25,14 +22,13 @@ our production instance of Museum.
 ### Web Apps
 
 > [!IMPORTANT]
-> Web apps don't need to be configured with the below endpoints. Web App Environment
+> Web apps don't need to be configured with the below endpoints. Web app environment
 > variables are being documented here just so that the users know everything in detail.
 > Checkout [Configuring your Server](/self-hosting/museum) to configure endpoints for
 > particular app.
 
-In Ente, all the web apps are separated into different NextJS Apps. Hence, all of them
-are configured via Environment Variables. The photos app is the Ente Photos which has
-the information and knowledge of all the other needful web apps like albums, cast and etc.
+In Ente, all the web apps are separate NextJS applications. Therefore, they are all configured via environment variables. The photos app (Ente Photos) has information about and connects to other web apps like albums, cast, etc.
+
 
 1. `NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT`
 

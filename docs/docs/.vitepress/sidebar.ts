@@ -340,7 +340,7 @@ export const sidebar = [
                         link: "/self-hosting/faq/backup",
                     },
                     {
-                        text: "Environment Variables",
+                        text: "Environment variables",
                         link: "/self-hosting/faq/environment",
                     },
                 ],
