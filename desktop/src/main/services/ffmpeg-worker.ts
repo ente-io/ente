@@ -24,17 +24,41 @@ const ffmpegPathPlaceholder = "FFMPEG";
 const inputPathPlaceholder = "INPUT";
 const outputPathPlaceholder = "OUTPUT";
 
+/**
+ * The interface of the object exposed by `ffmpeg-worker.ts` on the message port
+ * pair that the main process creates to communicate with it.
+ *
+ * @see {@link ffmpegUtilityProcessPort}.
+ */
+export interface FFmpegUtilityProcess {
+    ffmpegExec: (
+        command: FFmpegCommand,
+        dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+        outputFileExtension: string,
+    ) => Promise<Uint8Array>;
+
+    ffmpegConvertToMP4: (
+        inputFilePath: string,
+        outputFilePath: string,
+    ) => Promise<void>;
+
+    ffmpegGenerateHLSPlaylistAndSegments: (
+        inputFilePath: string,
+        outputPathPrefix: string,
+    ) => Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined>;
+}
+
 log.debugString("Started ffmpeg utility process");
 
 process.parentPort.once("message", (e) => {
-    // Expose an instance of `ElectronFFmpegWorker & ElectronFFmpegWorkerNode`
-    // on the port we got from our parent.
+    // Expose an instance of `FFmpegUtilityProcess` on the port we got from our
+    // parent.
     expose(
         {
             ffmpegExec,
             ffmpegConvertToMP4,
             ffmpegGenerateHLSPlaylistAndSegments,
-        },
+        } satisfies FFmpegUtilityProcess,
         messagePortMainEndpoint(e.ports[0]!),
     );
 });

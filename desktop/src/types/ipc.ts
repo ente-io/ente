@@ -5,7 +5,7 @@
  * See [Note: types.ts <-> preload.ts <-> ipc.ts]
  */
 
-export type UtilityProcessType = "ml" | "ffmpeg";
+export type UtilityProcessType = "ml";
 
 export interface AppUpdate {
     autoUpdatable: boolean;

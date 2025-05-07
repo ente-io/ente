@@ -8,26 +8,28 @@ import {
     type BrowserWindow,
     type UtilityProcess,
 } from "electron";
-import { app, utilityProcess } from "electron/main";
+import { app, utilityProcess, type MessagePortMain } from "electron/main";
 import path from "node:path";
 import type { UtilityProcessType } from "../../types/ipc";
 import log, { processUtilityProcessLogMessage } from "../log";
-import type { FFmpegGenerateHLSPlaylistAndSegmentsResult } from "./ffmpeg-worker";
 
 /** The active ML utility process, if any. */
-let _childML: UtilityProcess | undefined;
+let _utilityProcessML: UtilityProcess | undefined;
 
-/** The active ffmpeg utility process, if any. */
-let _childFFmpeg: UtilityProcess | undefined;
+/**
+ * A {@link MessagePort} that can be used to communicate with
+ * the active ffmpeg utility process (if any).
+ */
+let _utilityProcessFFmpegPort: MessagePortMain | undefined;
 
 /**
  * Create a new utility process of the given {@link type}, terminating the older
  * ones (if any).
  *
- * The following note explains the reasoning why utility processes were used for
- * the first workload (ML) that was handled this way. Similar reasoning applies
- * to subsequent workloads (ffmpeg) that have been offloaded to utility
- * processes to avoid stutter in the UI.
+ * Currently the only type is "ml". The following note explains the reasoning
+ * why utility processes were used for the first workload (ML) that was handled
+ * this way. Similar reasoning applies to subsequent workloads (ffmpeg) that
+ * have been offloaded to utility processes to avoid stutter in the UI.
  *
  * [Note: ML IPC]
  *
@@ -85,22 +87,13 @@ let _childFFmpeg: UtilityProcess | undefined;
 export const triggerCreateUtilityProcess = (
     type: UtilityProcessType,
     window: BrowserWindow,
-) => {
-    switch (type) {
-        case "ml":
-            triggerCreateMLUtilityProcess(window);
-            break;
-        case "ffmpeg":
-            triggerCreateFFmpegUtilityProcess(window);
-            break;
-    }
-};
+) => triggerCreateMLUtilityProcess(window);
 
 export const triggerCreateMLUtilityProcess = (window: BrowserWindow) => {
-    if (_childML) {
+    if (_utilityProcessML) {
         log.debug(() => "Terminating previous ML utility process");
-        _childML.kill();
-        _childML = undefined;
+        _utilityProcessML.kill();
+        _utilityProcessML = undefined;
     }
 
     const { port1, port2 } = new MessageChannelMain();
@@ -113,7 +106,7 @@ export const triggerCreateMLUtilityProcess = (window: BrowserWindow) => {
 
     handleMessagesFromMLUtilityProcess(child);
 
-    _childML = child;
+    _utilityProcessML = child;
 };
 
 /**
@@ -148,27 +141,45 @@ const handleMessagesFromMLUtilityProcess = (child: UtilityProcess) => {
     });
 };
 
-export const triggerCreateFFmpegUtilityProcess = (window: BrowserWindow) => {
-    if (_childFFmpeg) {
-        log.debug(() => "Terminating previous ffmpeg utility process");
-        _childFFmpeg.kill();
-        _childFFmpeg = undefined;
-    }
+/**
+ * A port that can be used to communicate with the ffmpeg utility process. If
+ * there is no ffmpeg utility process, a new one is created on demand.
+ *
+ * See [Note: ML IPC] for a general outline of why utility processes are needed
+ * (tl;dr; to avoid stutter on the UI).
+ *
+ * In the case of ffmpeg, the IPC flow is a bit different: the utility process
+ * is not exposed to the web layer, and is internal to the node layer. The
+ * reason for this difference is that we need to create temporary files etc, and
+ * doing it a utility process requires access to the `app` module which are not
+ * accessible (See: [Note: Using Electron APIs in UtilityProcess]).
+ *
+ * There could've been possible reasonable workarounds, but the architecture
+ * we've adopted of three layers:
+ *
+ *     Renderer (web) <-> Node.js main <-> Node.js ffmpeg utility process
+ *
+ * The temporary file creation etc is handled in the Node.js main process, and
+ * paths to the files are forwarded to the ffmpeg utility process to act on.
+ *
+ * @returns a port that can be used to communiate with the utility process. The
+ * utility process is expected to expose an object that conforms to the
+ * {@link ElectronFFmpegWorkerNode} interface on this port.
+ */
+export const ffmpegUtilityProcessPort = () => {
+    if (_utilityProcessFFmpegPort) return _utilityProcessFFmpegPort;
 
     const { port1, port2 } = new MessageChannelMain();
 
     const child = utilityProcess.fork(path.join(__dirname, "ffmpeg-worker.js"));
-    // TODO
-    const userDataPath = app.getPath("userData");
-    child.postMessage({ userDataPath }, [port1]);
-
-    window.webContents.postMessage("utilityProcessPort/ffmpeg", undefined, [
-        port2,
-    ]);
+    // Send a handle to the port
+    child.postMessage({}, [port1]);
 
     handleMessagesFromFFmpegUtilityProcess(child);
 
-    _childFFmpeg = child;
+    _utilityProcessFFmpegPort = port2;
+
+    return _utilityProcessFFmpegPort;
 };
 
 const handleMessagesFromFFmpegUtilityProcess = (child: UtilityProcess) => {
@@ -178,37 +189,4 @@ const handleMessagesFromFFmpegUtilityProcess = (child: UtilityProcess) => {
         }
         log.info("Ignoring unknown message from ffmpeg utility process", m);
     });
-};
-
-/**
- * The port exposed by _childFFmpeg (i.e., by the utility process running
- * `ffmpeg-worker.ts`) provides an interface that conforms to
- * {@link ElectronFFmpegWorker} (meant for use by the web layer), and in
- * addition provides other "private" function meant for use by (the node layer).
- *
- * This interface lists the functions exposed for use by the node layer.
- */
-export interface ElectronFFmpegWorkerNode {
-    ffmpegConvertToMP4: (
-        inputFilePath: string,
-        outputFilePath: string,
-    ) => Promise<void>;
-
-    ffmpegGenerateHLSPlaylistAndSegments: (
-        inputFilePath: string,
-        outputPathPrefix: string,
-    ) => Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined>;
-}
-
-/**
- * Return a handle to the already running ffmpeg utility process.
- *
- * This assumes that the web layer has already initiated the utility process by
- * invoking `triggerCreateUtilityProcess("ffmpeg")`, otherwise this function
- * will throw.
- */
-export const electronFFmpegWorkerNodeIfRunning = () => {
-    const child = _childFFmpeg;
-    if (!child) throw new Error("ffmpeg utility process has not been started");
-    return child as unknown as ElectronFFmpegWorkerNode;
 };

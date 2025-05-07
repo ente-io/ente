@@ -334,6 +334,44 @@ export interface Electron {
         maxSize: number,
     ) => Promise<Uint8Array>;
 
+    // - FFmpeg
+
+    /**
+     * Execute a FFmpeg {@link command} on the given
+     * {@link dataOrPathOrZipItem}.
+     *
+     * This executes the command using a FFmpeg executable we bundle with our
+     * desktop app. We also have a Wasm FFmpeg implementation that we use when
+     * running on the web, which has a sibling function with the same
+     * parameters. See [Note:FFmpeg in Electron].
+     *
+     * @param command An array of strings, each representing one positional
+     * parameter in the command to execute. Placeholders for the input, output
+     * and ffmpeg's own path are replaced before executing the command
+     * (respectively {@link inputPathPlaceholder},
+     * {@link outputPathPlaceholder}, {@link ffmpegPathPlaceholder}).
+     *
+     * @param dataOrPathOrZipItem The bytes of the input file, or the path to
+     * the input file on the user's local disk, or the path to a zip file on the
+     * user's disk and the name of an entry in it. In all three cases, the data
+     * gets serialized to a temporary file, and then that path gets substituted
+     * in the FFmpeg {@link command} in lieu of {@link inputPathPlaceholder}.
+     *
+     * @param outputFileExtension The extension (without the dot, e.g. "jpeg")
+     * to use for the output file that we ask FFmpeg to create in
+     * {@param command}. While this file will eventually get deleted, and we'll
+     * just return its contents, for some FFmpeg command the extension matters
+     * (e.g. conversion to a JPEG fails if the extension is arbitrary).
+     *
+     * @returns The contents of the output file produced by the ffmpeg command
+     * (specified as {@link outputPathPlaceholder} in {@link command}).
+     */
+    ffmpegExec: (
+        command: FFmpegCommand,
+        dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+        outputFileExtension: string,
+    ) => Promise<Uint8Array>;
+
     // - Utility process
 
     /**
@@ -348,8 +386,6 @@ export interface Electron {
      * The code running in the utility process is determined by the specific
      * value of {@link type}. Thus, att the other end of that port will be an
      * object that conforms to:
-     *
-     * - {@link ElectronFFmpegWorker} interface, when type is "ffmpeg".
      *
      * - {@link ElectronMLWorker} interface, when type is "ml".
      *
@@ -562,50 +598,7 @@ export interface Electron {
     clearPendingUploads: () => Promise<void>;
 }
 
-export type UtilityProcessType = "ffmpeg" | "ml";
-
-/**
- * The shape of the object exposed by the Node.js utility process listening on
- * the other side message port that the web layer obtains by doing
- * {@link triggerCreateUtilityProcess} with type "ffmpeg".
- */
-export interface ElectronFFmpegWorker {
-    /**
-     * Execute a FFmpeg {@link command} on the given
-     * {@link dataOrPathOrZipItem}.
-     *
-     * This executes the command using a FFmpeg executable we bundle with our
-     * desktop app. We also have a Wasm FFmpeg implementation that we use when
-     * running on the web, which has a sibling function with the same
-     * parameters. See [Note:FFmpeg in Electron].
-     *
-     * @param command An array of strings, each representing one positional
-     * parameter in the command to execute. Placeholders for the input, output
-     * and ffmpeg's own path are replaced before executing the command
-     * (respectively {@link inputPathPlaceholder},
-     * {@link outputPathPlaceholder}, {@link ffmpegPathPlaceholder}).
-     *
-     * @param dataOrPathOrZipItem The bytes of the input file, or the path to
-     * the input file on the user's local disk, or the path to a zip file on the
-     * user's disk and the name of an entry in it. In all three cases, the data
-     * gets serialized to a temporary file, and then that path gets substituted
-     * in the FFmpeg {@link command} in lieu of {@link inputPathPlaceholder}.
-     *
-     * @param outputFileExtension The extension (without the dot, e.g. "jpeg")
-     * to use for the output file that we ask FFmpeg to create in
-     * {@param command}. While this file will eventually get deleted, and we'll
-     * just return its contents, for some FFmpeg command the extension matters
-     * (e.g. conversion to a JPEG fails if the extension is arbitrary).
-     *
-     * @returns The contents of the output file produced by the ffmpeg command
-     * (specified as {@link outputPathPlaceholder} in {@link command}).
-     */
-    ffmpegExec: (
-        command: FFmpegCommand,
-        dataOrPathOrZipItem: Uint8Array | string | ZipItem,
-        outputFileExtension: string,
-    ) => Promise<Uint8Array>;
-}
+export type UtilityProcessType = "ml";
 
 /**
  * The shape of the object exposed by the Node.js utility process listening on
