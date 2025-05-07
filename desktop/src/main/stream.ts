@@ -231,11 +231,12 @@ export const clearPendingVideoResults = () => pendingVideoResults.clear();
  * See also: [Note: IPC streams]
  */
 const handleConvertToMP4Write = async (request: Request) => {
+    const worker = await ffmpegUtilityProcess();
+
     const inputTempFilePath = await makeTempFilePath();
     await writeStream(inputTempFilePath, request.body!);
 
     const outputTempFilePath = await makeTempFilePath("mp4");
-    const worker = ffmpegUtilityProcess();
     try {
         await worker.ffmpegConvertToMP4(inputTempFilePath, outputTempFilePath);
     } catch (e) {
@@ -309,7 +310,7 @@ const handleGenerateHLSWrite = async (
         }
     }
 
-    const worker = ffmpegUtilityProcess();
+    const worker = await ffmpegUtilityProcess();
 
     const {
         path: inputFilePath,

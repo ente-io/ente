@@ -56,7 +56,14 @@ process.parentPort.once("message", (e) => {
         } satisfies FFmpegUtilityProcess,
         messagePortMainEndpoint(e.ports[0]!),
     );
+    mainProcess("ack", undefined);
 });
+
+/**
+ * Send a message to the main process using a barebones RPC protocol.
+ */
+const mainProcess = (method: string, param: unknown) =>
+    process.parentPort.postMessage({ method, p: param });
 
 /**
  * Run a FFmpeg command

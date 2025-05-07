@@ -17,10 +17,10 @@ import log, { processUtilityProcessLogMessage } from "../log";
 let _utilityProcessML: UtilityProcess | undefined;
 
 /**
- * A {@link MessagePort} that can be used to communicate with
- * the active ffmpeg utility process (if any).
+ * A promise to a {@link MessagePort} that can be used to communicate with the
+ * active ffmpeg utility process (if any).
  */
-let _utilityProcessFFmpegPort: MessagePortMain | undefined;
+let _utilityProcessFFmpegPort: Promise<MessagePortMain> | undefined;
 
 /**
  * Create a new utility process of the given {@link type}, terminating the older
@@ -175,18 +175,25 @@ export const ffmpegUtilityProcessPort = () => {
     // Send a handle to the port
     child.postMessage({}, [port1]);
 
-    handleMessagesFromFFmpegUtilityProcess(child);
-
-    _utilityProcessFFmpegPort = port2;
-
-    return _utilityProcessFFmpegPort;
-};
-
-const handleMessagesFromFFmpegUtilityProcess = (child: UtilityProcess) => {
     child.on("message", (m: unknown) => {
+        if (m && typeof m == "object" && "method" in m) {
+            switch (m.method) {
+                case "ack":
+                    resolvePortPromise!(port2);
+                    return;
+            }
+        }
+
         if (processUtilityProcessLogMessage("[ffmpeg-worker]", m)) {
             return;
         }
+
         log.info("Ignoring unknown message from ffmpeg utility process", m);
     });
+
+    let resolvePortPromise: ((port: MessagePortMain) => void) | undefined;
+    _utilityProcessFFmpegPort = new Promise((r) => (resolvePortPromise = r));
+
+    // Resolve with the other end of the port we sent to the utility process.
+    return _utilityProcessFFmpegPort;
 };

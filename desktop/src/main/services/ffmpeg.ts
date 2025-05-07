@@ -17,7 +17,7 @@ import { ffmpegUtilityProcessPort } from "./workers";
  * Return a handle to the ffmpeg utility process, starting it if needed.
  */
 export const ffmpegUtilityProcess = () => {
-    return ffmpegUtilityProcessPort() as unknown as FFmpegUtilityProcess;
+    return ffmpegUtilityProcessPort() as unknown as Promise<FFmpegUtilityProcess>;
 };
 
 export const ffmpegExec = async (
@@ -25,6 +25,8 @@ export const ffmpegExec = async (
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
 ): Promise<Uint8Array> => {
+    const worker = await ffmpegUtilityProcess();
+
     const {
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
@@ -35,11 +37,7 @@ export const ffmpegExec = async (
     try {
         await writeToTemporaryInputFile();
 
-        await ffmpegUtilityProcess().ffmpegExec(
-            command,
-            inputFilePath,
-            outputFilePath,
-        );
+        await worker.ffmpegExec(command, inputFilePath, outputFilePath);
 
         return await fs.readFile(outputFilePath);
     } finally {
