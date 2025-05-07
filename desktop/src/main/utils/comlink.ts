@@ -19,7 +19,14 @@ export const messagePortMainEndpoint = (mp: MessagePortMain): Endpoint => {
     const listeners = new WeakMap<NL, EL>();
     return {
         postMessage: (message, transfer) => {
-            mp.postMessage(message, transfer as unknown as MessagePortMain[]);
+            if (transfer) {
+                mp.postMessage(
+                    message,
+                    transfer as unknown as MessagePortMain[],
+                );
+            } else {
+                mp.postMessage(message);
+            }
         },
         addEventListener: (_, eh) => {
             const l: EL = (data) =>
