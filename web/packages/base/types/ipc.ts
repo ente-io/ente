@@ -334,8 +334,6 @@ export interface Electron {
         maxSize: number,
     ) => Promise<Uint8Array>;
 
-    // - FFmpeg
-
     /**
      * Execute a FFmpeg {@link command} on the given
      * {@link dataOrPathOrZipItem}.

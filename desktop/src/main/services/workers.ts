@@ -31,7 +31,8 @@ let _utilityProcessFFmpegEndpoint: Promise<Endpoint> | undefined;
  * Currently the only type is "ml". The following note explains the reasoning
  * why utility processes were used for the first workload (ML) that was handled
  * this way. Similar reasoning applies to subsequent workloads (ffmpeg) that
- * have been offloaded to utility processes to avoid stutter in the UI.
+ * have been offloaded to utility processes in a slightly different manner to
+ * avoid stutter in the UI.
  *
  * [Note: ML IPC]
  *
@@ -167,22 +168,28 @@ const handleMessagesFromMLUtilityProcess = (child: UtilityProcess) => {
  *
  * @returns an endpoint that can be used to communicate with the utility
  * process. The utility process is expected to expose an object that conforms to
- * the {@link ElectronFFmpegWorkerNode} interface on this port.
+ * the {@link ElectronFFmpegWorkerNode} interface on this endpoint.
  */
-export const ffmpegUtilityProcessEndpoint = () => {
-    if (_utilityProcessFFmpegEndpoint) return _utilityProcessFFmpegEndpoint;
+export const ffmpegUtilityProcessEndpoint = () =>
+    (_utilityProcessFFmpegEndpoint ??= createFFmpegUtilityProcessEndpoint());
+
+const createFFmpegUtilityProcessEndpoint = () => {
+    // Promise.withResolvers is currently in the node available to us.
+    let resolve: ((endpoint: Endpoint) => void) | undefined;
+    const promise = new Promise<Endpoint>((r) => (resolve = r));
 
     const { port1, port2 } = new MessageChannelMain();
 
     const child = utilityProcess.fork(path.join(__dirname, "ffmpeg-worker.js"));
-    // Send a handle to the port (one end of the message channel).
+    // Send a handle to the port (one end of the message channel) to the utility
+    // process. The utility process will reply with an "ack" when it get it.
     child.postMessage({}, [port1]);
 
     child.on("message", (m: unknown) => {
         if (m && typeof m == "object" && "method" in m) {
             switch (m.method) {
                 case "ack":
-                    resolveEndpoint!(messagePortMainEndpoint(port2));
+                    resolve!(messagePortMainEndpoint(port2));
                     return;
             }
         }
@@ -194,9 +201,7 @@ export const ffmpegUtilityProcessEndpoint = () => {
         log.info("Ignoring unknown message from ffmpeg utility process", m);
     });
 
-    let resolveEndpoint: ((port: Endpoint) => void) | undefined;
-    _utilityProcessFFmpegEndpoint = new Promise((r) => (resolveEndpoint = r));
-
-    // Resolve with the other end of the message channel.
-    return _utilityProcessFFmpegEndpoint;
+    // Resolve with the other end of the message channel (once we get an "ack"
+    // from the utility process).
+    return promise;
 };

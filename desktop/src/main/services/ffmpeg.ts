@@ -22,6 +22,11 @@ export const ffmpegUtilityProcess = () =>
         wrap<FFmpegUtilityProcess>(port),
     );
 
+/**
+ * Implement the IPC "ffmpegExec" contract, writing the input and output to
+ * temporary files as needed, and then forward to the {@link ffmpegExec} running
+ * in the utility process.
+ */
 export const ffmpegExec = async (
     command: FFmpegCommand,
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,

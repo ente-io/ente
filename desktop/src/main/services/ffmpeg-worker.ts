@@ -23,7 +23,7 @@ const outputPathPlaceholder = "OUTPUT";
  * The interface of the object exposed by `ffmpeg-worker.ts` on the message port
  * pair that the main process creates to communicate with it.
  *
- * @see {@link ffmpegUtilityProcessPort}.
+ * @see {@link ffmpegUtilityProcessEndpoint}.
  */
 export interface FFmpegUtilityProcess {
     ffmpegExec: (
