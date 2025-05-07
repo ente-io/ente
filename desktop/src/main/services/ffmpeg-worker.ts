@@ -1,9 +1,17 @@
+/**
+ * @file ffmpeg invocations. This code runs in a utility process.
+ */
+
+// See [Note: Using Electron APIs in UtilityProcess] about what we can and
+// cannot import.
+import { expose } from "comlink";
 import pathToFfmpeg from "ffmpeg-static";
 import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import path, { basename } from "node:path";
 import type { FFmpegCommand, ZipItem } from "../../types/ipc";
-import log from "../log";
+import log from "../log-worker";
+import { messagePortMainEndpoint } from "../utils/comlink";
 import { execAsync } from "../utils/electron";
 import {
     deleteTempFileIgnoringErrors,
@@ -15,6 +23,21 @@ import {
 const ffmpegPathPlaceholder = "FFMPEG";
 const inputPathPlaceholder = "INPUT";
 const outputPathPlaceholder = "OUTPUT";
+
+log.debugString("Started ffmpeg utility process");
+
+process.parentPort.once("message", (e) => {
+    // Expose an instance of `ElectronFFmpegWorker & ElectronFFmpegWorkerNode`
+    // on the port we got from our parent.
+    expose(
+        {
+            ffmpegExec,
+            ffmpegConvertToMP4,
+            ffmpegGenerateHLSPlaylistAndSegments,
+        },
+        messagePortMainEndpoint(e.ports[0]!),
+    );
+});
 
 /**
  * Run a FFmpeg command
@@ -43,7 +66,7 @@ const outputPathPlaceholder = "OUTPUT";
  *
  * But I'm not sure if our code is supposed to be able to use it, and how.
  */
-export const ffmpegExec = async (
+const ffmpegExec = async (
     command: FFmpegCommand,
     dataOrPathOrZipItem: Uint8Array | string | ZipItem,
     outputFileExtension: string,
@@ -63,7 +86,9 @@ export const ffmpegExec = async (
             resolvedCommand = command;
         } else {
             const isHDR = await isHDRVideo(inputFilePath);
-            log.debug(() => [basename(inputFilePath), { isHDR }]);
+            log.debugString(
+                `${basename(inputFilePath)} ${JSON.stringify({ isHDR })}`,
+            );
             resolvedCommand = isHDR ? command.hdr : command.default;
         }
 
@@ -123,7 +148,7 @@ const ffmpegBinaryPath = () => {
  * @param outputFilePath The path to a file on the user's local file system where
  * we should write the converted MP4 video.
  */
-export const ffmpegConvertToMP4 = async (
+const ffmpegConvertToMP4 = async (
     inputFilePath: string,
     outputFilePath: string,
 ): Promise<void> => {
@@ -179,14 +204,16 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  * If the video is such that it doesn't require stream generation, then this
  * function returns `undefined`.
  */
-export const ffmpegGenerateHLSPlaylistAndSegments = async (
+const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined> => {
     const { isH264, isBT709, bitrate } =
         await detectVideoCharacteristics(inputFilePath);
 
-    log.debug(() => [basename(inputFilePath), { isH264, isBT709, bitrate }]);
+    log.debugString(
+        `${basename(inputFilePath)} ${JSON.stringify({ isH264, isBT709, bitrate })}`,
+    );
 
     // If the video is smaller than 10 MB, and already H.264 (the codec we are
     // going to use for the conversion), then a streaming variant is not much

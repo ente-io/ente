@@ -6,7 +6,12 @@
  * See: [Note: IPC streams].
  */
 
-import type { Electron, ElectronMLWorker, ZipItem } from "ente-base/types/ipc";
+import type {
+    Electron,
+    ElectronFFmpegWorker,
+    ElectronMLWorker,
+    ZipItem,
+} from "ente-base/types/ipc";
 import { z } from "zod";
 import type { FileSystemUploadItem } from "../services/upload";
 
@@ -124,8 +129,9 @@ export const writeStream = async (
  *
  * This is a variant of {@link writeStream} tailored for the conversion to MP4.
  *
- * @param _ An {@link Electron} instance, witness to the fact that we're running
- * in the context of the desktop app. It is otherwise not used.
+ * @param _ An {@link ElectronFFmpegWorker} instance, witness to the fact that
+ * we're running in the context of the desktop app, and that an ffmpeg utility
+ * process has been initialized. It is otherwise not used.
  *
  * @param video A {@link Blob} containing the video to convert.
  *
@@ -136,7 +142,7 @@ export const writeStream = async (
  * See: [Note: Convert to MP4].
  */
 export const initiateConvertToMP4 = async (
-    _: Electron,
+    _: ElectronFFmpegWorker,
     video: Blob,
 ): Promise<string> => {
     const url = "stream://video?op=convert-to-mp4";
@@ -172,14 +178,16 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
  * is similar to {@link initiateConvertToMP4}, but also supports streaming
  * {@link FileSystemUploadItem}s and {@link ReadableStream}s.
  *
- * @param _ An {@link Electron} instance, witness to the fact that we're running
- * in the context of the desktop app. It is otherwise not used.
+ * @param _ An {@link ElectronFFmpegWorker} instance, witness to the fact that
+ * we're running in the context of the desktop app, and that an ffmpeg utility
+ * process has been initialized. It is otherwise not used.
  *
  * @param video The video to convert.
  *
  * - If we're called during the upload process, then this will be set to the
- *   {@link FileSystemUploadItem} that was uploaded. This way, we can directly use
- *   the on-disk file instead of needing to download the original from remote.
+ *   {@link FileSystemUploadItem} that was uploaded. This way, we can directly
+ *   use the on-disk file instead of needing to download the original from
+ *   remote.
  *
  * - Otherwise it should be a {@link ReadableStream} of the video contents.
  *
@@ -197,7 +205,7 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
  * See: [Note: Preview variant of videos].
  */
 export const initiateGenerateHLS = async (
-    _: Electron,
+    _: ElectronFFmpegWorker,
     video: FileSystemUploadItem | ReadableStream,
     objectUploadURL: string,
 ): Promise<GenerateHLSResult | undefined> => {

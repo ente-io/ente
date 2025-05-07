@@ -8,11 +8,8 @@ import fs from "node:fs/promises";
 import { Readable, Writable } from "node:stream";
 import { pathToFileURL } from "node:url";
 import log from "./log";
-import {
-    ffmpegConvertToMP4,
-    ffmpegGenerateHLSPlaylistAndSegments,
-    type FFmpegGenerateHLSPlaylistAndSegmentsResult,
-} from "./services/ffmpeg";
+import { type FFmpegGenerateHLSPlaylistAndSegmentsResult } from "./services/ffmpeg-worker";
+import { electronFFmpegWorkerNodeIfRunning } from "./services/workers";
 import { markClosableZip, openZip } from "./services/zip";
 import { wait } from "./utils/common";
 import { writeStream } from "./utils/stream";
@@ -238,8 +235,9 @@ const handleConvertToMP4Write = async (request: Request) => {
     await writeStream(inputTempFilePath, request.body!);
 
     const outputTempFilePath = await makeTempFilePath("mp4");
+    const worker = electronFFmpegWorkerNodeIfRunning();
     try {
-        await ffmpegConvertToMP4(inputTempFilePath, outputTempFilePath);
+        await worker.ffmpegConvertToMP4(inputTempFilePath, outputTempFilePath);
     } catch (e) {
         log.error("Conversion to MP4 failed", e);
         await deleteTempFileIgnoringErrors(outputTempFilePath);
@@ -311,6 +309,8 @@ const handleGenerateHLSWrite = async (
         }
     }
 
+    const worker = electronFFmpegWorkerNodeIfRunning();
+
     const {
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
@@ -322,7 +322,7 @@ const handleGenerateHLSWrite = async (
     try {
         await writeToTemporaryInputFile();
 
-        result = await ffmpegGenerateHLSPlaylistAndSegments(
+        result = await worker.ffmpegGenerateHLSPlaylistAndSegments(
             inputFilePath,
             outputFilePathPrefix,
         );

@@ -30,7 +30,7 @@ let _electronFFmpegWorker: Promise<ElectronFFmpegWorker> | undefined;
  * Handle to the on-demand lazily created utility process in the Node.js layer
  * that exposes an {@link ElectronFFmpegWorker} interface.
  */
-const electronFFmpegWorker = () =>
+export const getElectronFFmpegWorker = () =>
     (_electronFFmpegWorker ??= createElectronFFmpegWorker());
 
 const createElectronFFmpegWorker = () =>
@@ -94,7 +94,7 @@ const _generateVideoThumbnail = async (
 export const generateVideoThumbnailNative = async (
     fsUploadItem: FileSystemUploadItem,
 ) =>
-    electronFFmpegWorker().then((electronFW) =>
+    getElectronFFmpegWorker().then((electronFW) =>
         _generateVideoThumbnail((seekTime: number) =>
             electronFW.ffmpegExec(
                 makeGenThumbnailCommand(seekTime),
@@ -162,7 +162,7 @@ export const extractVideoMetadata = async (
         uploadItem instanceof File
             ? await ffmpegExecWeb(command, uploadItem, "txt")
             : await (
-                  await electronFFmpegWorker()
+                  await getElectronFFmpegWorker()
               ).ffmpegExec(command, toDataOrPathOrZipEntry(uploadItem), "txt"),
     );
 };
@@ -312,7 +312,8 @@ export const convertToMP4 = async (blob: Blob): Promise<Blob | Uint8Array> => {
 };
 
 const convertToMP4Native = async (electron: Electron, blob: Blob) => {
-    const token = await initiateConvertToMP4(electron, blob);
+    const electronFFmpegWorker = await getElectronFFmpegWorker();
+    const token = await initiateConvertToMP4(electronFFmpegWorker, blob);
     const mp4Blob = await readVideoStream(electron, token).then((res) =>
         res.blob(),
     );

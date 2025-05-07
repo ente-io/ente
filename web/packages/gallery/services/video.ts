@@ -23,6 +23,7 @@ import {
     videoStreamDone,
 } from "../utils/native-stream";
 import { downloadManager } from "./download";
+import { getElectronFFmpegWorker } from "./ffmpeg";
 import {
     fetchFileData,
     fetchFilePreviewData,
@@ -553,6 +554,7 @@ const processQueueItem = async ({
     timestampedUploadItem,
 }: VideoProcessingQueueItem) => {
     const electron = ensureElectron();
+    const electronFFmpegWorker = await getElectronFFmpegWorker();
 
     log.debug(() => ["gen-hls", { file, timestampedUploadItem }]);
 
@@ -585,7 +587,7 @@ const processQueueItem = async ({
     log.info(`Generate HLS for ${fileLogID(file)} | start`);
 
     const res = await initiateGenerateHLS(
-        electron,
+        electronFFmpegWorker,
         sourceVideo!,
         objectUploadURL,
     );

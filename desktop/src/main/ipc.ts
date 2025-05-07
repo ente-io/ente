@@ -13,7 +13,6 @@ import type { BrowserWindow } from "electron";
 import { ipcMain } from "electron/main";
 import type {
     CollectionMapping,
-    FFmpegCommand,
     FolderWatch,
     PendingUploads,
     UtilityProcessType,
@@ -32,7 +31,6 @@ import {
     openLogDirectory,
     selectDirectory,
 } from "./services/dir";
-import { ffmpegExec } from "./services/ffmpeg";
 import {
     fsExists,
     fsFindFiles,
@@ -186,16 +184,6 @@ export const attachIPCHandlers = () => {
             maxDimension: number,
             maxSize: number,
         ) => generateImageThumbnail(dataOrPathOrZipItem, maxDimension, maxSize),
-    );
-
-    ipcMain.handle(
-        "ffmpegExec",
-        (
-            _,
-            command: FFmpegCommand,
-            dataOrPathOrZipItem: Uint8Array | string | ZipItem,
-            outputFileExtension: string,
-        ) => ffmpegExec(command, dataOrPathOrZipItem, outputFileExtension),
     );
 
     // - Upload
