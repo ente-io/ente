@@ -74,4 +74,4 @@ functionalities like SMTP, Discord notifications, Hardcoded-OTTs, etc.
 
 ## References
 
-- [Environment Variables and Ports](/self-hosting/faq/environment)
+- [Environment variables and ports](/self-hosting/faq/environment)
