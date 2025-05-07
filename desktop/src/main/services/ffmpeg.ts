@@ -3,6 +3,7 @@
  * process.
  */
 
+import { wrap } from "comlink";
 import fs from "node:fs/promises";
 import type { FFmpegCommand, ZipItem } from "../../types/ipc";
 import {
@@ -11,14 +12,15 @@ import {
     makeTempFilePath,
 } from "../utils/temp";
 import type { FFmpegUtilityProcess } from "./ffmpeg-worker";
-import { ffmpegUtilityProcessPort } from "./workers";
+import { ffmpegUtilityProcessEndpoint } from "./workers";
 
 /**
  * Return a handle to the ffmpeg utility process, starting it if needed.
  */
-export const ffmpegUtilityProcess = () => {
-    return ffmpegUtilityProcessPort() as unknown as Promise<FFmpegUtilityProcess>;
-};
+export const ffmpegUtilityProcess = () =>
+    ffmpegUtilityProcessEndpoint().then((port) =>
+        wrap<FFmpegUtilityProcess>(port),
+    );
 
 export const ffmpegExec = async (
     command: FFmpegCommand,

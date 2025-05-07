@@ -3,24 +3,26 @@
  * utility processes that we create.
  */
 
+import type { Endpoint } from "comlink";
 import {
     MessageChannelMain,
     type BrowserWindow,
     type UtilityProcess,
 } from "electron";
-import { app, utilityProcess, type MessagePortMain } from "electron/main";
+import { app, utilityProcess } from "electron/main";
 import path from "node:path";
 import type { UtilityProcessType } from "../../types/ipc";
 import log, { processUtilityProcessLogMessage } from "../log";
+import { messagePortMainEndpoint } from "../utils/comlink";
 
 /** The active ML utility process, if any. */
 let _utilityProcessML: UtilityProcess | undefined;
 
 /**
- * A promise to a {@link MessagePort} that can be used to communicate with the
- * active ffmpeg utility process (if any).
+ * A promise to a comlink {@link Endpoint} that can be used to communicate with
+ * the active ffmpeg utility process (if any).
  */
-let _utilityProcessFFmpegPort: Promise<MessagePortMain> | undefined;
+let _utilityProcessFFmpegEndpoint: Promise<Endpoint> | undefined;
 
 /**
  * Create a new utility process of the given {@link type}, terminating the older
@@ -142,8 +144,9 @@ const handleMessagesFromMLUtilityProcess = (child: UtilityProcess) => {
 };
 
 /**
- * A port that can be used to communicate with the ffmpeg utility process. If
- * there is no ffmpeg utility process, a new one is created on demand.
+ * A comlink endpoint that can be used to communicate with the ffmpeg utility
+ * process. If there is no ffmpeg utility process, a new one is created on
+ * demand.
  *
  * See [Note: ML IPC] for a general outline of why utility processes are needed
  * (tl;dr; to avoid stutter on the UI).
@@ -162,24 +165,24 @@ const handleMessagesFromMLUtilityProcess = (child: UtilityProcess) => {
  * The temporary file creation etc is handled in the Node.js main process, and
  * paths to the files are forwarded to the ffmpeg utility process to act on.
  *
- * @returns a port that can be used to communiate with the utility process. The
- * utility process is expected to expose an object that conforms to the
- * {@link ElectronFFmpegWorkerNode} interface on this port.
+ * @returns an endpoint that can be used to communicate with the utility
+ * process. The utility process is expected to expose an object that conforms to
+ * the {@link ElectronFFmpegWorkerNode} interface on this port.
  */
-export const ffmpegUtilityProcessPort = () => {
-    if (_utilityProcessFFmpegPort) return _utilityProcessFFmpegPort;
+export const ffmpegUtilityProcessEndpoint = () => {
+    if (_utilityProcessFFmpegEndpoint) return _utilityProcessFFmpegEndpoint;
 
     const { port1, port2 } = new MessageChannelMain();
 
     const child = utilityProcess.fork(path.join(__dirname, "ffmpeg-worker.js"));
-    // Send a handle to the port
+    // Send a handle to the port (one end of the message channel).
     child.postMessage({}, [port1]);
 
     child.on("message", (m: unknown) => {
         if (m && typeof m == "object" && "method" in m) {
             switch (m.method) {
                 case "ack":
-                    resolvePortPromise!(port2);
+                    resolveEndpoint!(messagePortMainEndpoint(port2));
                     return;
             }
         }
@@ -191,9 +194,9 @@ export const ffmpegUtilityProcessPort = () => {
         log.info("Ignoring unknown message from ffmpeg utility process", m);
     });
 
-    let resolvePortPromise: ((port: MessagePortMain) => void) | undefined;
-    _utilityProcessFFmpegPort = new Promise((r) => (resolvePortPromise = r));
+    let resolveEndpoint: ((port: Endpoint) => void) | undefined;
+    _utilityProcessFFmpegEndpoint = new Promise((r) => (resolveEndpoint = r));
 
-    // Resolve with the other end of the port we sent to the utility process.
-    return _utilityProcessFFmpegPort;
+    // Resolve with the other end of the message channel.
+    return _utilityProcessFFmpegEndpoint;
 };
