@@ -9,15 +9,10 @@ import pathToFfmpeg from "ffmpeg-static";
 import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import path, { basename } from "node:path";
-import type { FFmpegCommand, ZipItem } from "../../types/ipc";
+import type { FFmpegCommand } from "../../types/ipc";
 import log from "../log-worker";
 import { messagePortMainEndpoint } from "../utils/comlink";
 import { execAsyncWorker } from "../utils/exec-worker";
-import {
-    deleteTempFileIgnoringErrors,
-    makeFileForDataOrStreamOrPathOrZipItem,
-    makeTempFilePath,
-} from "../utils/temp";
 
 /* Ditto in the web app's code (used by the Wasm FFmpeg invocation). */
 const ffmpegPathPlaceholder = "FFMPEG";
@@ -33,9 +28,9 @@ const outputPathPlaceholder = "OUTPUT";
 export interface FFmpegUtilityProcess {
     ffmpegExec: (
         command: FFmpegCommand,
-        dataOrPathOrZipItem: Uint8Array | string | ZipItem,
-        outputFileExtension: string,
-    ) => Promise<Uint8Array>;
+        inputFilePath: string,
+        outputFilePath: string,
+    ) => Promise<void>;
 
     ffmpegConvertToMP4: (
         inputFilePath: string,
@@ -92,44 +87,27 @@ process.parentPort.once("message", (e) => {
  */
 const ffmpegExec = async (
     command: FFmpegCommand,
-    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
-    outputFileExtension: string,
-): Promise<Uint8Array> => {
-    const {
-        path: inputFilePath,
-        isFileTemporary: isInputFileTemporary,
-        writeToTemporaryFile: writeToTemporaryInputFile,
-    } = await makeFileForDataOrStreamOrPathOrZipItem(dataOrPathOrZipItem);
-
-    const outputFilePath = await makeTempFilePath(outputFileExtension);
-    try {
-        await writeToTemporaryInputFile();
-
-        let resolvedCommand: string[];
-        if (Array.isArray(command)) {
-            resolvedCommand = command;
-        } else {
-            const isHDR = await isHDRVideo(inputFilePath);
-            log.debugString(
-                `${basename(inputFilePath)} ${JSON.stringify({ isHDR })}`,
-            );
-            resolvedCommand = isHDR ? command.hdr : command.default;
-        }
-
-        const cmd = substitutePlaceholders(
-            resolvedCommand,
-            inputFilePath,
-            outputFilePath,
+    inputFilePath: string,
+    outputFilePath: string,
+): Promise<void> => {
+    let resolvedCommand: string[];
+    if (Array.isArray(command)) {
+        resolvedCommand = command;
+    } else {
+        const isHDR = await isHDRVideo(inputFilePath);
+        log.debugString(
+            `${basename(inputFilePath)} ${JSON.stringify({ isHDR })}`,
         );
-
-        await execAsyncWorker(cmd);
-
-        return await fs.readFile(outputFilePath);
-    } finally {
-        if (isInputFileTemporary)
-            await deleteTempFileIgnoringErrors(inputFilePath);
-        await deleteTempFileIgnoringErrors(outputFilePath);
+        resolvedCommand = isHDR ? command.hdr : command.default;
     }
+
+    const cmd = substitutePlaceholders(
+        resolvedCommand,
+        inputFilePath,
+        outputFilePath,
+    );
+
+    await execAsyncWorker(cmd);
 };
 
 const substitutePlaceholders = (
@@ -494,20 +472,35 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
     } catch (e) {
         log.error("HLS generation failed", e);
         await Promise.all([
-            deleteTempFileIgnoringErrors(playlistPath),
-            deleteTempFileIgnoringErrors(videoPath),
+            deletePathIgnoringErrors(playlistPath),
+            deletePathIgnoringErrors(videoPath),
         ]);
         throw e;
     } finally {
         await Promise.all([
-            deleteTempFileIgnoringErrors(keyInfoPath),
-            deleteTempFileIgnoringErrors(keyPath),
+            deletePathIgnoringErrors(keyInfoPath),
+            deletePathIgnoringErrors(keyPath),
             // ffmpeg writes a /path/output.ts.tmp, clear it out too.
-            deleteTempFileIgnoringErrors(videoPath + ".tmp"),
+            deletePathIgnoringErrors(videoPath + ".tmp"),
         ]);
     }
 
     return { playlistPath, videoPath, dimensions, videoSize };
+};
+
+/**
+ * A variant of {@link deletePathIgnoringErrors} (which we can't directly use in
+ * the utility process). It unconditionally removes the item at the provided
+ * path; in particular, this will not raise any errors if there is no item at
+ * the given path (as may be expected to happen when we run during catch
+ * handlers).
+ */
+const deletePathIgnoringErrors = async (tempFilePath: string) => {
+    try {
+        await fs.rm(tempFilePath, { force: true });
+    } catch (e) {
+        log.error(`Could not delete item at path ${tempFilePath}`, e);
+    }
 };
 
 /**

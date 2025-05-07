@@ -8,8 +8,8 @@ import fs from "node:fs/promises";
 import { Readable, Writable } from "node:stream";
 import { pathToFileURL } from "node:url";
 import log from "./log";
+import { ffmpegUtilityProcess } from "./services/ffmpeg";
 import { type FFmpegGenerateHLSPlaylistAndSegmentsResult } from "./services/ffmpeg-worker";
-import { electronFFmpegWorkerNodeIfRunning } from "./services/workers";
 import { markClosableZip, openZip } from "./services/zip";
 import { wait } from "./utils/common";
 import { writeStream } from "./utils/stream";
@@ -235,7 +235,7 @@ const handleConvertToMP4Write = async (request: Request) => {
     await writeStream(inputTempFilePath, request.body!);
 
     const outputTempFilePath = await makeTempFilePath("mp4");
-    const worker = electronFFmpegWorkerNodeIfRunning();
+    const worker = ffmpegUtilityProcess();
     try {
         await worker.ffmpegConvertToMP4(inputTempFilePath, outputTempFilePath);
     } catch (e) {
@@ -309,7 +309,7 @@ const handleGenerateHLSWrite = async (
         }
     }
 
-    const worker = electronFFmpegWorkerNodeIfRunning();
+    const worker = ffmpegUtilityProcess();
 
     const {
         path: inputFilePath,
