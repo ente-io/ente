@@ -12,7 +12,7 @@ import path, { basename } from "node:path";
 import type { FFmpegCommand, ZipItem } from "../../types/ipc";
 import log from "../log-worker";
 import { messagePortMainEndpoint } from "../utils/comlink";
-import { execAsync } from "../utils/electron";
+import { execAsyncWorker } from "../utils/exec-worker";
 import {
     deleteTempFileIgnoringErrors,
     makeFileForDataOrStreamOrPathOrZipItem,
@@ -98,7 +98,7 @@ const ffmpegExec = async (
             outputFilePath,
         );
 
-        await execAsync(cmd);
+        await execAsyncWorker(cmd);
 
         return await fs.readFile(outputFilePath);
     } finally {
@@ -163,7 +163,7 @@ const ffmpegConvertToMP4 = async (
 
     const cmd = substitutePlaceholders(command, inputFilePath, outputFilePath);
 
-    await execAsync(cmd);
+    await execAsyncWorker(cmd);
 };
 
 export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
@@ -458,7 +458,7 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
         // Run the ffmpeg command to generate the HLS playlist and segments.
         //
         // Note: Depending on the size of the input file, this may take long!
-        const { stderr: conversionStderr } = await execAsync(command);
+        const { stderr: conversionStderr } = await execAsyncWorker(command);
 
         // Determine the dimensions of the generated video from the stderr
         // output produced by ffmpeg during the conversion.
@@ -699,7 +699,7 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
 
     const cmd = substitutePlaceholders(command, inputFilePath, /* NA */ "");
 
-    const { stderr } = await execAsync(cmd);
+    const { stderr } = await execAsyncWorker(cmd);
 
     return stderr;
 };
