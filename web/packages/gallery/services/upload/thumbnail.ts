@@ -200,7 +200,7 @@ export const generateThumbnailNative = async (
               maxThumbnailDimension,
               maxThumbnailSize,
           )
-        : ffmpeg.generateVideoThumbnailNative(electron, fsUploadItem);
+        : ffmpeg.generateVideoThumbnailNative(fsUploadItem);
 
 /**
  * A fallback, black, thumbnail for use in cases where thumbnail generation

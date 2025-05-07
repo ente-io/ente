@@ -1,6 +1,6 @@
 import { ensureElectron } from "ente-base/electron";
 import log from "ente-base/log";
-import type { Electron } from "ente-base/types/ipc";
+import type { Electron, ElectronFFmpegWorker } from "ente-base/types/ipc";
 import {
     toDataOrPathOrZipEntry,
     type FileSystemUploadItem,
@@ -16,12 +16,28 @@ import {
     type ParsedMetadata,
 } from "ente-media/file-metadata";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
+import { createUtilityProcess } from "../../utils/native-worker";
 import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,
     outputPathPlaceholder,
 } from "./constants";
 import { ffmpegExecWeb } from "./web";
+
+let _electronFFmpegWorker: Promise<ElectronFFmpegWorker> | undefined;
+
+/**
+ * Handle to the on-demand lazily created utility process in the Node.js layer
+ * that exposes an {@link ElectronFFmpegWorker} interface.
+ */
+const electronFFmpegWorker = () =>
+    (_electronFFmpegWorker ??= createElectronFFmpegWorker());
+
+const createElectronFFmpegWorker = () =>
+    createUtilityProcess(
+        ensureElectron(),
+        "ffmpeg",
+    ) as unknown as Promise<ElectronFFmpegWorker>;
 
 /**
  * Generate a thumbnail for the given video using a Wasm FFmpeg running in a web
@@ -76,14 +92,15 @@ const _generateVideoThumbnail = async (
  * See also {@link generateVideoThumbnailNative}.
  */
 export const generateVideoThumbnailNative = async (
-    electron: Electron,
     fsUploadItem: FileSystemUploadItem,
 ) =>
-    _generateVideoThumbnail((seekTime: number) =>
-        electron.ffmpegExec(
-            makeGenThumbnailCommand(seekTime),
-            toDataOrPathOrZipEntry(fsUploadItem),
-            "jpeg",
+    electronFFmpegWorker().then((electronFW) =>
+        _generateVideoThumbnail((seekTime: number) =>
+            electronFW.ffmpegExec(
+                makeGenThumbnailCommand(seekTime),
+                toDataOrPathOrZipEntry(fsUploadItem),
+                "jpeg",
+            ),
         ),
     );
 
@@ -144,11 +161,9 @@ export const extractVideoMetadata = async (
     return parseFFmpegExtractedMetadata(
         uploadItem instanceof File
             ? await ffmpegExecWeb(command, uploadItem, "txt")
-            : await ensureElectron().ffmpegExec(
-                  command,
-                  toDataOrPathOrZipEntry(uploadItem),
-                  "txt",
-              ),
+            : await (
+                  await electronFFmpegWorker()
+              ).ffmpegExec(command, toDataOrPathOrZipEntry(uploadItem), "txt"),
     );
 };
 
