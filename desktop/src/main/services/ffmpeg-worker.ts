@@ -9,7 +9,7 @@ import pathToFfmpeg from "ffmpeg-static";
 import { randomBytes } from "node:crypto";
 import fs_ from "node:fs";
 import fs from "node:fs/promises";
-import path, { basename } from "node:path";
+import path from "node:path";
 import { Readable } from "node:stream";
 import type { FFmpegCommand } from "../../types/ipc";
 import log from "../log-worker";
@@ -106,9 +106,6 @@ const ffmpegExec = async (
         resolvedCommand = command;
     } else {
         const isHDR = await isHDRVideo(inputFilePath);
-        log.debugString(
-            `${basename(inputFilePath)} ${JSON.stringify({ isHDR })}`,
-        );
         resolvedCommand = isHDR ? command.hdr : command.default;
     }
 
@@ -224,9 +221,7 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
     const { isH264, isBT709, bitrate } =
         await detectVideoCharacteristics(inputFilePath);
 
-    log.debugString(
-        `${basename(inputFilePath)} ${JSON.stringify({ isH264, isBT709, bitrate })}`,
-    );
+    log.debugString(JSON.stringify({ isH264, isBT709, bitrate }));
 
     // If the video is smaller than 10 MB, and already H.264 (the codec we are
     // going to use for the conversion), then a streaming variant is not much
