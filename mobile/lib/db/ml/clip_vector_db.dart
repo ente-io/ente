@@ -42,41 +42,42 @@ class ClipVectorDB {
     return vectorDB;
   }
 
-  Future<void> bulkInsertEmbeddings({
-    required Uint64List keys,
-    required List<Float32List> embeddings,
-  }) async {
-    final db = await _vectorDB;
-    try {
-      await db.bulkAddVectors(keys: keys, vectors: embeddings);
-    } catch (e, s) {
-      _logger.severe("Error bulk inserting embeddings", e, s);
-      rethrow;
-    }
-  }
-
-  Future<void> insertEmbeddings({
-    required BigInt key,
+  Future<void> insertEmbedding({
+    required int fileID,
     required List<double> embedding,
   }) async {
     final db = await _vectorDB;
     try {
-      await db.addVector(key: key, vector: embedding);
+      await db.addVector(key: BigInt.from(fileID), vector: embedding);
     } catch (e, s) {
       _logger.severe("Error inserting embedding", e, s);
       rethrow;
     }
   }
 
-  Future<List<EmbeddingVector>> getVectors(List<int> fileIds) async {
+  Future<void> bulkInsertEmbeddings({
+    required List<int> fileIDs,
+    required List<Float32List> embeddings,
+  }) async {
+    final db = await _vectorDB;
+    final bigKeys = Uint64List.fromList(fileIDs);
+    try {
+      await db.bulkAddVectors(keys: bigKeys, vectors: embeddings);
+    } catch (e, s) {
+      _logger.severe("Error bulk inserting embeddings", e, s);
+      rethrow;
+    }
+  }
+
+  Future<List<EmbeddingVector>> getEmbeddings(List<int> fileIDs) async {
     final db = await _vectorDB;
     try {
-      final keys = Uint64List.fromList(fileIds);
+      final keys = Uint64List.fromList(fileIDs);
       final vectors = await db.bulkGetVectors(keys: keys);
       return List.generate(
         vectors.length,
         (index) => EmbeddingVector(
-          fileID: fileIds[index],
+          fileID: fileIDs[index],
           embedding: vectors[index],
         ),
       );
@@ -86,13 +87,14 @@ class ClipVectorDB {
     }
   }
 
-  Future<void> deleteEmbeddings(List<int> keys) async {
+  Future<void> deleteEmbeddings(List<int> fileIDs) async {
     final db = await _vectorDB;
     try {
       final deletedCount =
-          await db.bulkRemoveVectors(keys: Uint64List.fromList(keys));
-      _logger
-          .info("Deleted $deletedCount embeddings, from ${keys.length} keys");
+          await db.bulkRemoveVectors(keys: Uint64List.fromList(fileIDs));
+      _logger.info(
+        "Deleted $deletedCount embeddings, from ${fileIDs.length} keys",
+      );
     } catch (e, s) {
       _logger.severe("Error bulk deleting specific embeddings", e, s);
       rethrow;
