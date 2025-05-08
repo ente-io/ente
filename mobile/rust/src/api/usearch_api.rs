@@ -114,6 +114,18 @@ impl VectorDB {
         removed_count
     }
 
+    pub fn bulk_remove_vectors(&self, keys: Vec<u64>) -> usize {
+        let mut removed_count = 0;
+        for key in keys {
+            removed_count += self
+                .index
+                .remove(key)
+                .expect("Failed to (bulk) remove vector");
+        }
+        self.save_index();
+        removed_count
+    }
+
     pub fn reset_index(&self) {
         self.index.reset().expect("Failed to reset index");
         self.save_index();
