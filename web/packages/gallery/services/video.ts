@@ -459,9 +459,23 @@ const processQueue = async () => {
 
     let bq: typeof _state.liveQueue | undefined;
     while (isVideoProcessingEnabled()) {
-        log.debug(() => ["gen-hls-iter", []]);
-        const item =
-            _state.liveQueue.shift() ?? (bq ??= await backfillQueue()).shift();
+        let item = _state.liveQueue.shift();
+        if (!item) {
+            if (!bq) /* initialize */ bq = await backfillQueue();
+            switch (bq.length) {
+                case 0:
+                    /* no more items to backfill */
+                    break;
+                case 1 /* last item. take it, and refill queue */:
+                    item = bq.pop();
+                    bq = await backfillQueue();
+                    break;
+                default:
+                    /* more than one item. take it */
+                    item = bq.pop();
+                    break;
+            }
+        }
         if (item) {
             try {
                 await processQueueItem(item);
@@ -474,23 +488,19 @@ const processQueue = async () => {
             // Reset the idle wait on any activity.
             _state.idleWait = idleWaitInitial;
         } else {
-            // Replenish the backfill queue if possible.
-            bq = await backfillQueue();
-            if (!bq.length) {
-                // There are no more items in either the live queue or backlog.
-                // Go to sleep (for increasingly longer durations, capped at a
-                // maximum).
-                const idleWait = _state.idleWait;
-                _state.idleWait = Math.min(idleWait * 2, idleWaitMax);
+            // There are no more items in either the live queue or backlog.
+            // Go to sleep (for increasingly longer durations, capped at a
+            // maximum).
+            const idleWait = _state.idleWait;
+            _state.idleWait = Math.min(idleWait * 2, idleWaitMax);
 
-                // `tick` allows the sleep to be interrupted when there is
-                // potential activity.
-                if (!_state.tick) assertionFailed();
-                const tick = _state.tick!;
+            // `tick` allows the sleep to be interrupted when there is
+            // potential activity.
+            if (!_state.tick) assertionFailed();
+            const tick = _state.tick!;
 
-                log.debug(() => ["gen-hls", { idleWait }]);
-                await Promise.race([tick, wait(idleWait)]);
-            }
+            log.debug(() => ["gen-hls", { idleWait }]);
+            await Promise.race([tick, wait(idleWait)]);
         }
     }
 
