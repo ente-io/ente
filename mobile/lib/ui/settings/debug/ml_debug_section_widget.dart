@@ -9,6 +9,7 @@ import "package:logging/logging.dart";
 import "package:ml_linalg/linalg.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
@@ -131,6 +132,111 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               await rustVectorDB.deleteIndex();
             } catch (e, s) {
               logger.warning('Rust bridge failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Fill ClipVectorDB",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final allClip = await MLDataDB.instance.getAllClipVectors();
+
+              final clipVectorDB = ClipVectorDB.instance;
+              await clipVectorDB.deleteAllEmbeddings();
+              final stats = await clipVectorDB.getIndexStats();
+              logger.info("ClipVectorDB stats: size: ${stats.$1}, "
+                  "capacity: ${stats.$2}, dimensions: ${stats.$3}");
+              showShortToast(
+                  context,
+                  "ClipVectorDB stats: size: ${stats.$1}, "
+                  "capacity: ${stats.$2}, dimensions: ${stats.$3}");
+
+              final fileIDs = allClip.map((e) => e.fileID).toList();
+              final embeddings = allClip
+                  .map((e) => Float32List.fromList(e.vector.toList()))
+                  .toList();
+              final now = DateTime.now();
+              await clipVectorDB.bulkInsertEmbeddings(
+                fileIDs: fileIDs,
+                embeddings: embeddings,
+              );
+              final duration = DateTime.now().difference(now);
+              logger.info(
+                "ClipVectorDB bulk insert took ${duration.inMilliseconds} ms for ${fileIDs.length} embeddings",
+              );
+              final statsAfter = await clipVectorDB.getIndexStats();
+              logger.info("ClipVectorDB stats after: size: ${statsAfter.$1}, "
+                  "capacity: ${statsAfter.$2}, dimensions: ${statsAfter.$3}");
+              showShortToast(
+                  context,
+                  "ClipVectorDB stats after: size: ${statsAfter.$1}, "
+                  "capacity: ${statsAfter.$2}, dimensions: ${statsAfter.$3}");
+            } catch (e, s) {
+              logger.warning('ClipVectorDB migration failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Show ClipVectorDB stats",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final clipVectorDB = ClipVectorDB.instance;
+              final stats = await clipVectorDB.getIndexStats();
+              logger.info("ClipVectorDB stats: size: ${stats.$1}, "
+                  "capacity: ${stats.$2}, dimensions: ${stats.$3}");
+              showShortToast(
+                  context,
+                  "ClipVectorDB stats: size: ${stats.$1}, "
+                  "capacity: ${stats.$2}, dimensions: ${stats.$3}");
+            } catch (e, s) {
+              logger.warning('ClipVectorDB stats failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Empty ClipVectorDB",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final clipVectorDB = ClipVectorDB.instance;
+              final stats = await clipVectorDB.getIndexStats();
+              logger.info("ClipVectorDB stats: size: ${stats.$1}, "
+                  "capacity: ${stats.$2}, dimensions: ${stats.$3}");
+              showShortToast(
+                  context,
+                  "ClipVectorDB stats: size: ${stats.$1}, "
+                  "capacity: ${stats.$2}, dimensions: ${stats.$3}");
+
+              await clipVectorDB.deleteAllEmbeddings();
+              final statsAfter = await clipVectorDB.getIndexStats();
+              logger.info("ClipVectorDB stats after: size: ${statsAfter.$1}, "
+                  "capacity: ${statsAfter.$2}, dimensions: ${statsAfter.$3}");
+              showShortToast(
+                  context,
+                  "ClipVectorDB stats after: size: ${statsAfter.$1}, "
+                  "capacity: ${statsAfter.$2}, dimensions: ${statsAfter.$3}");
+            } catch (e, s) {
+              logger.warning('ClipVectorDB cleanup failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
