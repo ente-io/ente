@@ -1420,14 +1420,13 @@ export class FileViewerPhotoSwipe {
         };
 
         if (this.pswp.currIndex >= newFileCount) {
-            // If the last slide was removed, go back to the beginning (the code
+            // If the last slide was removed, take one step back first (the code
             // that calls us ensures that we don't get called if there are no
             // more slides left).
-            this.pswp.goTo(0);
-            refreshSlideAndNextNeighbour(0);
-        } else {
-            refreshSlideAndNextNeighbour(this.pswp.currIndex);
+            this.pswp.prev();
         }
+
+        refreshSlideAndNextNeighbour(this.pswp.currIndex);
     }
 
     /**
