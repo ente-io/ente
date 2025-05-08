@@ -108,6 +108,15 @@ impl VectorDB {
         vector
     }
 
+    pub fn bulk_get_vectors(&self, keys: Vec<u64>) -> Vec<Vec<f32>> {
+        let mut vectors = Vec::new();
+        for key in keys {
+            let vector = self.get_vector(key);
+            vectors.push(vector);
+        }
+        vectors
+    }
+
     pub fn remove_vector(&self, key: u64) -> usize {
         let removed_count = self.index.remove(key).expect("Failed to remove vector");
         self.save_index();
