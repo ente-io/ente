@@ -39,9 +39,6 @@ class NetworkClient {
       ),
     );
 
-    _dio.httpClientAdapter = NativeAdapter();
-    _enteDio.httpClientAdapter = NativeAdapter();
-
     _setupInterceptors(endpoint);
 
     Bus.instance.on<EndpointUpdatedEvent>().listen((event) {
