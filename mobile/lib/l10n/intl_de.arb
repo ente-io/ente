@@ -721,6 +721,7 @@
     "type": "text"
   },
   "backupFailed": "Sicherung fehlgeschlagen",
+  "sorryBackupFailedDesc": "Leider konnten wir diese Datei momentan nicht sichern, wir werden es später erneut versuchen.",
   "couldNotBackUpTryLater": "Deine Daten konnten nicht gesichert werden.\nWir versuchen es später erneut.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente kann Dateien nur verschlüsseln und sichern, wenn du den Zugriff darauf gewährst",
   "pleaseGrantPermissions": "Bitte erteile die nötigen Berechtigungen",

@@ -397,6 +397,16 @@ class CollectionsService {
         .toList();
   }
 
+  List<int> getAllOwnedCollectionIDs() {
+    final int userID = _config.getUserID()!;
+    return _collectionIDToCollections.values
+        .where(
+          (c) => !c.isDeleted && c.isOwner(userID),
+        )
+        .map((e) => e.id)
+        .toList();
+  }
+
   SharedCollections getSharedCollections() {
     final List<Collection> outgoing = [];
     final List<Collection> incoming = [];

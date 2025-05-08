@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller/access"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -44,6 +45,7 @@ type FileController struct {
 	CollectionRepo        *repo.CollectionRepository
 	TaskLockingRepo       *repo.TaskLockRepository
 	QueueRepo             *repo.QueueRepository
+	AccessCtrl            access.Controller
 	S3Config              *s3config.S3Config
 	ObjectCleanupCtrl     *ObjectCleanupController
 	LockController        *lock.LockController
@@ -317,8 +319,10 @@ func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count 
 
 // GetFileURL verifies permissions and returns a presigned url to the requested file
 func (c *FileController) GetFileURL(ctx *gin.Context, userID int64, fileID int64) (string, error) {
-	err := c.verifyFileAccess(userID, fileID)
-	if err != nil {
+	if err := c.AccessCtrl.CanAccessFile(ctx, &access.CanAccessFileParams{
+		ActorUserID: userID,
+		FileIDs:     []int64{fileID},
+	}); err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
 	url, err := c.getSignedURLForType(ctx, fileID, ente.FILE)
@@ -333,8 +337,10 @@ func (c *FileController) GetFileURL(ctx *gin.Context, userID int64, fileID int64
 
 // GetThumbnailURL verifies permissions and returns a presigned url to the requested thumbnail
 func (c *FileController) GetThumbnailURL(ctx *gin.Context, userID int64, fileID int64) (string, error) {
-	err := c.verifyFileAccess(userID, fileID)
-	if err != nil {
+	if err := c.AccessCtrl.CanAccessFile(ctx, &access.CanAccessFileParams{
+		ActorUserID: userID,
+		FileIDs:     []int64{fileID},
+	}); err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
 	url, err := c.getSignedURLForType(ctx, fileID, ente.THUMBNAIL)
@@ -959,34 +965,6 @@ func (c *FileController) deleteObjectVersionFromHotStorage(objectKey string, ver
 	})
 	if err != nil {
 		return stacktrace.Propagate(err, "")
-	}
-	return nil
-}
-
-func (c *FileController) verifyFileAccess(actorUserID int64, fileID int64) error {
-	fileOwnerID, err := c.FileRepo.GetOwnerID(fileID)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-
-	if fileOwnerID != actorUserID {
-		cIDs, err := c.CollectionRepo.GetCollectionIDsSharedWithUser(actorUserID)
-		if err != nil {
-			return stacktrace.Propagate(err, "")
-		}
-		cwIDS, err := c.CollectionRepo.GetCollectionIDsSharedWithUser(fileOwnerID)
-		if err != nil {
-			return stacktrace.Propagate(err, "")
-		}
-		cIDs = append(cIDs, cwIDS...)
-
-		accessible, err := c.CollectionRepo.DoesFileExistInCollections(fileID, cIDs)
-		if err != nil {
-			return stacktrace.Propagate(err, "")
-		}
-		if !accessible {
-			return stacktrace.Propagate(ente.ErrPermissionDenied, "")
-		}
 	}
 	return nil
 }

@@ -26,6 +26,16 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m13(user) =>
       "${user}-(e)k ezin izango du argazki gehiago gehitu album honetan \n\nBaina haiek gehitutako argazkiak kendu ahal izango dituzte";
 
+  static String m14(isFamilyMember, storageAmountInGb) =>
+      "${Intl.select(isFamilyMember, {
+            'true': 'Zure familiak ${storageAmountInGb} GB eskatu du dagoeneko',
+            'false': 'Zuk ${storageAmountInGb} GB eskatu duzu dagoeneko',
+            'other': 'Zuk ${storageAmountInGb} GB eskatu duzu dagoeneko!',
+          })}";
+
+  static String m23(albumName) =>
+      "Honen bidez ${albumName} eskuratzeko esteka publikoa ezabatuko da.";
+
   static String m24(supportEmail) =>
       "Mesedez, bidali e-maila ${supportEmail}-era zure erregistratutako e-mail helbidetik";
 
@@ -38,11 +48,25 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m45(expiryTime) =>
       "Esteka epe honetan iraungiko da: ${expiryTime}";
 
+  static String m48(count, formattedCount) =>
+      "${Intl.plural(count, zero: 'oroitzapenik ez', one: 'oroitzapen ${formattedCount}', other: '${formattedCount} oroitzapen')}";
+
   static String m53(familyAdminEmail) =>
       "Mesedez, jarri harremanetan ${familyAdminEmail}-(r)ekin zure kodea aldatzeko.";
 
   static String m55(passwordStrengthValue) =>
       "Pasahitzaren indarra: ${passwordStrengthValue}";
+
+  static String m71(storageInGB) =>
+      "3. Bai zuk bai haiek ${storageInGB} GB* dohainik izango duzue";
+
+  static String m72(userEmail) =>
+      "${userEmail} partekatutako album honetatik ezabatuko da \n\nHaiek gehitutako argazki guztiak ere ezabatuak izango dira albumetik";
+
+  static String m77(count) => "${count} hautatuta";
+
+  static String m78(count, yourCount) =>
+      "${count} hautatuta (${yourCount} zureak)";
 
   static String m80(verificationID) =>
       "Hau da nire Egiaztatze IDa: ${verificationID} ente.io-rako.";
@@ -50,8 +74,18 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m81(verificationID) =>
       "Ei, baieztatu ahal duzu hau dela zure ente.io Egiaztatze IDa?: ${verificationID}";
 
+  static String m82(referralCode, referralStorageInGB) =>
+      "Sartu erreferentzia kodea: ${referralCode}\n\nAplikatu hemen: Ezarpenak → Orokorra→ Erreferentziak, ${referralStorageInGB} GB dohainik izateko ordainpeko plan batean \n\nhttps://ente.io";
+
   static String m83(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'Partekatu pertsona zehatz batzuekin', one: 'Partekatu pertsona batekin', other: 'Partekatu ${numberOfPeople} pertsonarekin')}";
+
+  static String m85(fileType) => "${fileType} hau zure gailutik ezabatuko da.";
+
+  static String m86(fileType) =>
+      "${fileType} hau Ente-n eta zure gailuan dago.";
+
+  static String m87(fileType) => "${fileType} hau Ente-tik ezabatuko da.";
 
   static String m90(storageAmountInGB) => "${storageAmountInGB} GB";
 
@@ -79,6 +113,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "addMore": MessageLookupByLibrary.simpleMessage("Gehitu gehiago"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Gehitu ikuslea"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Honela gehituta:"),
+        "addingToFavorites":
+            MessageLookupByLibrary.simpleMessage("Gogokoetan gehitzen..."),
+        "advancedSettings": MessageLookupByLibrary.simpleMessage("Aurreratuak"),
         "after1Day": MessageLookupByLibrary.simpleMessage("Egun bat barru"),
         "after1Hour": MessageLookupByLibrary.simpleMessage("Ordubete barru"),
         "after1Month":
@@ -89,6 +126,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "albumParticipantsCount": m8,
         "albumUpdated":
             MessageLookupByLibrary.simpleMessage("Albuma eguneratuta"),
+        "albums": MessageLookupByLibrary.simpleMessage("Albumak"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Utzi esteka duen jendeari ere album partekatuan argazkiak gehitzen."),
         "allowAddingPhotos":
@@ -98,12 +136,37 @@ class MessageLookup extends MessageLookupByLibrary {
         "apply": MessageLookupByLibrary.simpleMessage("Aplikatu"),
         "applyCodeTitle":
             MessageLookupByLibrary.simpleMessage("Aplikatu kodea"),
+        "archive": MessageLookupByLibrary.simpleMessage("Artxiboa"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Zein da zure kontua ezabatzeko arrazoi nagusia?"),
+        "authToChangeEmailVerificationSetting":
+            MessageLookupByLibrary.simpleMessage(
+                "Mesedez, autentifikatu emailaren egiaztatzea aldatzeko"),
+        "authToChangeLockscreenSetting": MessageLookupByLibrary.simpleMessage(
+            "Mesedez, autentifikatu pantaila blokeatzeko ezarpenak aldatzeko"),
+        "authToChangeYourEmail": MessageLookupByLibrary.simpleMessage(
+            "Mesedez, autentifikatu zure emaila aldatzeko"),
+        "authToChangeYourPassword": MessageLookupByLibrary.simpleMessage(
+            "Mesedez, autentifikatu zure pasahitza aldatzeko"),
+        "authToConfigureTwofactorAuthentication":
+            MessageLookupByLibrary.simpleMessage(
+                "Mesedez, autentifikatu faktore biko autentifikazioa konfiguratzeko"),
+        "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
+            "Mesedez, autentifikatu kontu ezabaketa hasteko"),
+        "authToViewTrashedFiles": MessageLookupByLibrary.simpleMessage(
+            "Mesedez, autentifikatu paperontzira botatako zure fitxategiak ikusteko"),
+        "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
+            "Mesedez, autentifikatu indarrean dauden zure saioak ikusteko"),
+        "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
+            "Mesedez, autentifikatu zure ezkutatutako fitxategiak ikusteko"),
+        "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
+            "Mesedez, autentifikatu zure berreskuratze giltza ikusteko"),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
             "Sentitzen dugu, album hau ezin da aplikazioan ireki."),
         "canNotOpenTitle":
             MessageLookupByLibrary.simpleMessage("Ezin dut album hau ireki"),
+        "canOnlyRemoveFilesOwnedByYou": MessageLookupByLibrary.simpleMessage(
+            "Zure fitxategiak baino ezin duzu ezabatu"),
         "cancel": MessageLookupByLibrary.simpleMessage("Utzi"),
         "cannotAddMorePhotosAfterBecomingViewer": m13,
         "change": MessageLookupByLibrary.simpleMessage("Aldatu"),
@@ -116,14 +179,19 @@ class MessageLookup extends MessageLookupByLibrary {
             "Aldatu zure erreferentzia kodea"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Mesedez, aztertu zure inbox (eta spam) karpetak egiaztatzea osotzeko"),
+        "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
+            "Eskatu debaldeko biltegiratzea"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Eskatu gehiago!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Eskatuta"),
+        "claimedStorageSoFar": m14,
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Kodea aplikatuta"),
         "codeChangeLimitReached": MessageLookupByLibrary.simpleMessage(
             "Sentitzen dugu, zure kode aldaketa muga gainditu duzu."),
         "codeCopiedToClipboard":
             MessageLookupByLibrary.simpleMessage("Kodea arbelean kopiatuta"),
+        "codeUsedByYou":
+            MessageLookupByLibrary.simpleMessage("Zuk erabilitako kodea"),
         "collabLinkSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Sortu esteka bat beste pertsona batzuei zure album partekatuan arriskuak gehitu eta ikusten uzteko, naiz eta Ente aplikazio edo kontua ez izan. Oso egokia gertakizun bateko argazkiak biltzeko."),
         "collaborativeLink":
@@ -135,6 +203,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotos":
             MessageLookupByLibrary.simpleMessage("Bildu argazkiak"),
         "confirm": MessageLookupByLibrary.simpleMessage("Baieztatu"),
+        "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
+            "Seguru zaude faktore biko autentifikazioa deuseztatu nahi duzula?"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Baieztatu Kontu Ezabaketa"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
@@ -153,10 +223,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Kopiatu eta itsatsi kode hau zure autentifikazio aplikaziora"),
         "createAccount": MessageLookupByLibrary.simpleMessage("Sortu kontua"),
+        "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
+            "Luze klikatu argazkiak hautatzeko eta klikatu + albuma sortzeko"),
         "createNewAccount":
             MessageLookupByLibrary.simpleMessage("Sortu kontu berria"),
         "createPublicLink":
             MessageLookupByLibrary.simpleMessage("Sortu esteka publikoa"),
+        "creatingLink":
+            MessageLookupByLibrary.simpleMessage("Esteka sortzen..."),
         "custom": MessageLookupByLibrary.simpleMessage("Aukeran"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Deszifratzen..."),
         "deleteAccount":
@@ -165,8 +239,19 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sentitzen dugu zu joateaz. Mesedez, utziguzu zure feedbacka hobetzen laguntzeko."),
         "deleteAccountPermanentlyButton":
             MessageLookupByLibrary.simpleMessage("Ezabatu Kontua Betiko"),
+        "deleteAlbum": MessageLookupByLibrary.simpleMessage("Ezabatu albuma"),
+        "deleteAlbumDialog": MessageLookupByLibrary.simpleMessage(
+            "Ezabatu nahi dituzu album honetan dauden argazkiak (eta bideoak) parte diren beste album <bold>guztietatik</bold> ere?"),
         "deleteEmailRequest": MessageLookupByLibrary.simpleMessage(
             "Mesedez, bidali e-mail bat <warning>account-deletion@ente.io</warning> helbidea zure erregistatutako helbidetik."),
+        "deleteFromBoth":
+            MessageLookupByLibrary.simpleMessage("Ezabatu bietatik"),
+        "deleteFromDevice":
+            MessageLookupByLibrary.simpleMessage("Ezabatu gailutik"),
+        "deleteFromEnte":
+            MessageLookupByLibrary.simpleMessage("Ezabatu Ente-tik"),
+        "deletePhotos":
+            MessageLookupByLibrary.simpleMessage("Ezabatu argazkiak"),
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "Behar dudan ezaugarre nagusiren bat falta zaio"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
@@ -177,14 +262,42 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nire arrazoia ez dago zerrendan"),
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "Zure eskaera 72 ordutan prozesatua izango da."),
+        "deleteSharedAlbum": MessageLookupByLibrary.simpleMessage(
+            "Partekatutako albuma ezabatu?"),
+        "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
+            "Albuma guztiontzat ezabatuko da \n\nAlbum honetan dauden beste pertsonek partekatutako argazkiak ezin izango dituzu eskuratu"),
         "details": MessageLookupByLibrary.simpleMessage("Detaileak"),
         "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
             "Ikusleek pantaila-irudiak atera ahal dituzte, edo kanpoko tresnen bidez zure argazkien kopiak gorde"),
         "disableDownloadWarningTitle":
             MessageLookupByLibrary.simpleMessage("Mesedez, ohartu"),
+        "disableLinkMessage": m23,
+        "discover": MessageLookupByLibrary.simpleMessage("Aurkitu"),
+        "discover_babies": MessageLookupByLibrary.simpleMessage("Umeak"),
+        "discover_celebrations":
+            MessageLookupByLibrary.simpleMessage("Ospakizunak"),
+        "discover_food": MessageLookupByLibrary.simpleMessage("Janaria"),
+        "discover_greenery": MessageLookupByLibrary.simpleMessage("Hostoa"),
+        "discover_hills": MessageLookupByLibrary.simpleMessage("Muinoak"),
+        "discover_identity": MessageLookupByLibrary.simpleMessage("Nortasuna"),
+        "discover_memes": MessageLookupByLibrary.simpleMessage("Memeak"),
+        "discover_notes": MessageLookupByLibrary.simpleMessage("Oharrak"),
+        "discover_pets": MessageLookupByLibrary.simpleMessage("Etxe-animaliak"),
+        "discover_receipts":
+            MessageLookupByLibrary.simpleMessage("Ordainagiriak"),
+        "discover_screenshots":
+            MessageLookupByLibrary.simpleMessage("Pantaila argazkiak"),
+        "discover_selfies": MessageLookupByLibrary.simpleMessage("Selfiak"),
+        "discover_sunset":
+            MessageLookupByLibrary.simpleMessage("Eguzki-sartzea"),
+        "discover_visiting_cards":
+            MessageLookupByLibrary.simpleMessage("Bisita txartelak"),
+        "discover_wallpapers":
+            MessageLookupByLibrary.simpleMessage("Horma-paperak"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("Egin hau geroago"),
         "done": MessageLookupByLibrary.simpleMessage("Eginda"),
         "dropSupportEmail": m24,
+        "eligible": MessageLookupByLibrary.simpleMessage("aukerakoak"),
         "email": MessageLookupByLibrary.simpleMessage("E-maila"),
         "emailAlreadyRegistered": MessageLookupByLibrary.simpleMessage(
             "Helbide hau badago erregistratuta lehendik."),
@@ -223,16 +336,30 @@ class MessageLookup extends MessageLookupByLibrary {
             "Esteka hau iraungi da. Mesedez, aukeratu beste epemuga bat edo deuseztatu estekaren epemuga."),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Akatsa kodea aplikatzean"),
+        "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(
+            "Ezin dugu zure erreferentziaren detailerik lortu. Mesedez, saiatu berriro geroago."),
+        "failedToLoadAlbums":
+            MessageLookupByLibrary.simpleMessage("Errorea albumak kargatzen"),
+        "faq": MessageLookupByLibrary.simpleMessage("FAQ"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedbacka"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Ahaztu pasahitza"),
+        "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
+            "Debaldeko biltegiratzea eskatuta"),
         "freeStorageOnReferralSuccess": m35,
+        "freeStorageUsable": MessageLookupByLibrary.simpleMessage(
+            "Debaldeko biltegiratzea erabilgarri"),
         "generatingEncryptionKeys":
             MessageLookupByLibrary.simpleMessage("Zifratze giltzak sortzen..."),
+        "help": MessageLookupByLibrary.simpleMessage("Laguntza"),
+        "hidden": MessageLookupByLibrary.simpleMessage("Ezkutatuta"),
         "howItWorks":
             MessageLookupByLibrary.simpleMessage("Nola funtzionatzen duen"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
             "Mesedez, eska iezaiozu ezarpenen landutako bere e-mail helbidean luze klikatzeko, eta egiaztatu gailu bietako IDak bat direla."),
+        "iOSLockOut": MessageLookupByLibrary.simpleMessage(
+            "Autentifikazio biometrikoa deuseztatuta dago. Mesedez, blokeatu eta desblokeatu zure pantaila indarrean jartzeko."),
+        "importing": MessageLookupByLibrary.simpleMessage("Inportatzen...."),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Pasahitz okerra"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
@@ -246,6 +373,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "invalidKey": MessageLookupByLibrary.simpleMessage("Kode okerra"),
         "invalidRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Sartu duzun berreskuratze kodea ez da zuzena. Mesedez, ziurtatu 24 hitz duela, eta egiaztatu hitz bakoitzaren idazkera. \n\nBerreskuratze kode zaharren bat sartu baduzu, ziurtatu 64 karaktere duela, eta egiaztatu horietako bakoitza."),
+        "inviteToEnte":
+            MessageLookupByLibrary.simpleMessage("Gonbidatu Ente-ra"),
+        "inviteYourFriends":
+            MessageLookupByLibrary.simpleMessage("Gonbidatu zure lagunak"),
+        "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
+            "Hautatutako elementuak album honetatik kenduko dira"),
+        "keepPhotos": MessageLookupByLibrary.simpleMessage("Gorde Argazkiak"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Mesedez, lagun gaitzazu informazio honekin"),
         "linkDeviceLimit": MessageLookupByLibrary.simpleMessage("Gailu muga"),
@@ -262,11 +396,31 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sartzeko klikatuz, <u-terms>zerbitzu baldintzak</u-terms> eta <u-policy>pribatutasun politikak</u-policy> onartzen ditut"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Gailua galdu duzu?"),
+        "machineLearning":
+            MessageLookupByLibrary.simpleMessage("Ikasketa automatikoa"),
+        "magicSearch": MessageLookupByLibrary.simpleMessage("Bilaketa magikoa"),
         "manage": MessageLookupByLibrary.simpleMessage("Kudeatu"),
+        "manageDeviceStorage":
+            MessageLookupByLibrary.simpleMessage("Kudeatu gailuaren katxea"),
+        "manageDeviceStorageDesc": MessageLookupByLibrary.simpleMessage(
+            "Berrikusi eta garbitu katxe lokalaren biltegiratzea."),
         "manageLink": MessageLookupByLibrary.simpleMessage("Kudeatu esteka"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Kudeatu"),
+        "memoryCount": m48,
+        "mlConsent": MessageLookupByLibrary.simpleMessage(
+            "Aktibatu ikasketa automatikoa"),
+        "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
+            "Ulertzen dut, eta ikasketa automatikoa aktibatu nahi dut"),
+        "mlConsentDescription": MessageLookupByLibrary.simpleMessage(
+            "Ikasketa automatikoa aktibatuz gero, Ente-k fitxategietatik informazioa aterako du (ad. argazkien geometria), zurekin partekatutako argazkietatik ere.\n\nHau zure gailuan gertatuko da, eta sortutako informazio biometrikoa puntutik puntura zifratuta egongo da."),
+        "mlConsentPrivacy": MessageLookupByLibrary.simpleMessage(
+            "Mesedez, klikatu hemen gure pribatutasun politikan ezaugarri honi buruz detaile gehiago izateko"),
+        "mlConsentTitle": MessageLookupByLibrary.simpleMessage(
+            "Ikasketa automatikoa aktibatuko?"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Ertaina"),
+        "movedToTrash": MessageLookupByLibrary.simpleMessage("Zarama mugituta"),
         "never": MessageLookupByLibrary.simpleMessage("Inoiz ez"),
+        "newAlbum": MessageLookupByLibrary.simpleMessage("Album berria"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Bat ere ez"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Berreskuratze giltzarik ez?"),
@@ -275,6 +429,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("Ondo"),
         "onlyFamilyAdminCanChangeCode": m53,
         "oops": MessageLookupByLibrary.simpleMessage("Ai!"),
+        "oopsSomethingWentWrong": MessageLookupByLibrary.simpleMessage(
+            "Oops, zerbait txarto joan da"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Edo aukeratu lehengo bat"),
         "password": MessageLookupByLibrary.simpleMessage("Pasahitza"),
@@ -285,6 +441,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordStrength": m55,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Ezin dugu zure pasahitza gorde, beraz, ahazten baduzu, <underline>ezin dugu zure data deszifratu</underline>"),
+        "peopleUsingYourCode": MessageLookupByLibrary.simpleMessage(
+            "Jendea zure kodea erabiltzen"),
+        "photoGridSize":
+            MessageLookupByLibrary.simpleMessage("Argazki sarearen tamaina"),
+        "photoSmallCase": MessageLookupByLibrary.simpleMessage("argazkia"),
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("Saiatu berriro, mesedez"),
         "pleaseWait":
@@ -317,10 +478,30 @@ class MessageLookup extends MessageLookupByLibrary {
             "Gailu hau ez da zure pasahitza egiaztatzeko bezain indartsua, baina gailu guztietan funtzionatzen duen modu batean birsortu ahal dugu. \n\nMesedez sartu zure berreskuratze giltza erabiliz eta birsortu zure pasahitza (aurreko berbera erabili ahal duzu nahi izanez gero)."),
         "recreatePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Berrezarri pasahitza"),
+        "referralStep1": MessageLookupByLibrary.simpleMessage(
+            "1. Eman kode hau zure lagunei"),
+        "referralStep2": MessageLookupByLibrary.simpleMessage(
+            "2. Haiek ordainpeko plan batean sinatu behar dute"),
+        "referralStep3": m71,
+        "referralsAreCurrentlyPaused": MessageLookupByLibrary.simpleMessage(
+            "Erreferentziak momentuz geldituta daude"),
         "remove": MessageLookupByLibrary.simpleMessage("Kendu"),
+        "removeFromAlbum":
+            MessageLookupByLibrary.simpleMessage("Kendu albumetik"),
+        "removeFromAlbumTitle":
+            MessageLookupByLibrary.simpleMessage("Albumetik kendu?"),
         "removeLink": MessageLookupByLibrary.simpleMessage("Ezabatu esteka"),
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Kendu parte hartzailea"),
+        "removeParticipantBody": m72,
+        "removePublicLink":
+            MessageLookupByLibrary.simpleMessage("Ezabatu esteka publikoa"),
+        "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
+            "Kentzen ari zaren elementu batzuk beste pertsona batzuek gehitu zituzten, beraz ezin izango dituzu eskuratu"),
+        "removeWithQuestionMark":
+            MessageLookupByLibrary.simpleMessage("Ezabatuko?"),
+        "removingFromFavorites":
+            MessageLookupByLibrary.simpleMessage("Gogokoetatik kentzen..."),
         "resendEmail":
             MessageLookupByLibrary.simpleMessage("Birbidali e-maila"),
         "resetPasswordTitle":
@@ -335,6 +516,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Eskaneatu barra kode hau zure autentifikazio aplikazioaz"),
         "selectReason":
             MessageLookupByLibrary.simpleMessage("Aukeratu arrazoia"),
+        "selectedPhotos": m77,
+        "selectedPhotosWithYours": m78,
         "sendEmail": MessageLookupByLibrary.simpleMessage("Bidali mezua"),
         "sendInvite":
             MessageLookupByLibrary.simpleMessage("Bidali gonbidapena"),
@@ -350,13 +533,20 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareTextConfirmOthersVerificationID": m81,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Jaitsi Ente argazkiak eta bideoak jatorrizko kalitatean errez partekatu ahal izateko \n\nhttps://ente.io"),
+        "shareTextReferralCode": m82,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Partekatu Ente erabiltzen ez dutenekin"),
         "shareWithPeopleSectionTitle": m83,
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Sortu partekatutako eta parte hartzeko albumak beste Ente erabiltzaileekin, debaldeko planak dituztenak barne."),
+        "sharing": MessageLookupByLibrary.simpleMessage("Partekatzen..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "<u-terms>Zerbitzu baldintzak</u-terms> eta <u-policy>pribatutasun politikak</u-policy> onartzen ditut"),
+        "singleFileDeleteFromDevice": m85,
+        "singleFileDeleteHighlight": MessageLookupByLibrary.simpleMessage(
+            "Album guztietatik ezabatuko da."),
+        "singleFileInBothLocalAndRemote": m86,
+        "singleFileInRemoteOnly": m87,
         "someoneSharingAlbumsWithYouShouldSeeTheSameId":
             MessageLookupByLibrary.simpleMessage(
                 "Zurekin albumak partekatzen dituen norbaitek ID berbera ikusi beharko luke bere gailuan."),
@@ -366,11 +556,19 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Zerbait ez da ondo joan, mesedez, saiatu berriro"),
         "sorry": MessageLookupByLibrary.simpleMessage("Barkatu"),
+        "sorryCouldNotAddToFavorites": MessageLookupByLibrary.simpleMessage(
+            "Sentitzen dut, ezin izan dugu zure gogokoetan gehitu!"),
+        "sorryCouldNotRemoveFromFavorites":
+            MessageLookupByLibrary.simpleMessage(
+                "Sentitzen dugu, ezin izan dugu zure gogokoetatik kendu!"),
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Tamalez, ezin dugu giltza segururik sortu gailu honetan. \n\nMesedez, eman izena beste gailu batetik."),
         "storageInGB": m90,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Gogorra"),
+        "subscribe": MessageLookupByLibrary.simpleMessage("Harpidetu"),
+        "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
+            "Ordainpeko harpidetza behar duzu partekatzea aktibatzeko."),
         "tapToCopy": MessageLookupByLibrary.simpleMessage("jo kopiatzeko"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("Klikatu kodea sartzeko"),
@@ -394,7 +592,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Hau egiteak gailu honetatik aterako zaitu!"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
             "Zure pasahitza berrezartzeko, mesedez egiaztatu zure e-maila lehenengoz."),
+        "total": MessageLookupByLibrary.simpleMessage("osotara"),
+        "trash": MessageLookupByLibrary.simpleMessage("Zarama"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Saiatu berriro"),
+        "twofactorAuthenticationHasBeenDisabled":
+            MessageLookupByLibrary.simpleMessage(
+                "Faktore biko autentifikazioa deuseztatua izan da"),
         "twofactorAuthenticationPageTitle":
             MessageLookupByLibrary.simpleMessage(
                 "Faktore biko autentifikatzea"),
@@ -402,6 +605,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Faktore biko ezarpena"),
         "unavailableReferralCode": MessageLookupByLibrary.simpleMessage(
             "Sentitzen dugu, kode hau ezin da erabili."),
+        "uncategorized":
+            MessageLookupByLibrary.simpleMessage("Kategori gabekoa"),
+        "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
+            "Biltegiratze erabilgarria zure oraingo planaren arabera mugatuta dago. Soberan eskatutako biltegiratzea automatikoki erabili ahal izango duzu zure plan gaurkotzen duzunean."),
         "useRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Erabili berreskuratze giltza"),
         "verificationId":
@@ -414,6 +621,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Egiaztatu pasahitza"),
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Berreskuratze giltza egiaztatuz..."),
+        "videoSmallCase": MessageLookupByLibrary.simpleMessage("bideoa"),
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Ikusi berreskuratze kodea"),
         "viewer": MessageLookupByLibrary.simpleMessage("Ikuslea"),
@@ -423,7 +631,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ongi etorri berriro!"),
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("Bai, egin ikusle"),
+        "yesDelete": MessageLookupByLibrary.simpleMessage("Bai, ezabatu"),
+        "yesRemove": MessageLookupByLibrary.simpleMessage("Bai, ezabatu"),
         "you": MessageLookupByLibrary.simpleMessage("Zu"),
+        "youCanAtMaxDoubleYourStorage": MessageLookupByLibrary.simpleMessage(
+            "* Gehienez zure biltegiratzea bikoiztu ahal duzu"),
+        "youCannotShareWithYourself": MessageLookupByLibrary.simpleMessage(
+            "Ezin duzu zeure buruarekin partekatu"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Zure kontua ezabatua izan da")
       };

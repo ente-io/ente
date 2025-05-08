@@ -721,6 +721,7 @@
     "type": "text"
   },
   "backupFailed": "Backup failed",
+  "sorryBackupFailedDesc": "Sorry, we could not backup this file right now, we will retry later.",
   "couldNotBackUpTryLater": "We could not backup your data.\nWe will retry later.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente can encrypt and preserve files only if you grant access to them",
   "pleaseGrantPermissions": "Please grant permissions",
@@ -1029,7 +1030,7 @@
   "didYouKnow": "Did you know?",
   "loadingMessage": "Loading your photos...",
   "loadMessage1": "You can share your subscription with your family",
-  "loadMessage2": "We have preserved over 30 million memories so far",
+  "loadMessage2": "We have preserved over 200 million memories so far",
   "loadMessage3": "We keep 3 copies of your data, one in an underground fallout shelter",
   "loadMessage4": "All our apps are open source",
   "loadMessage5": "Our source code and cryptography have been externally audited",

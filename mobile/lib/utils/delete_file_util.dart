@@ -197,6 +197,7 @@ Future<void> deleteFilesOnDeviceOnly(
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
+  final List<String?> localOnlyIDs = [];
   bool hasLocalOnlyFiles = false;
   for (final file in files) {
     if (file.localID != null) {
@@ -211,6 +212,7 @@ Future<void> deleteFilesOnDeviceOnly(
     }
     if (file.uploadedFileID == null) {
       hasLocalOnlyFiles = true;
+      localOnlyIDs.add(file.localID);
     }
   }
   if (hasLocalOnlyFiles && Platform.isAndroid) {
@@ -233,8 +235,12 @@ Future<void> deleteFilesOnDeviceOnly(
     if (deletedIDs.contains(file.localID) ||
         alreadyDeletedIDs.contains(file.localID)) {
       deletedFiles.add(file);
-      file.localID = null;
-      await FilesDB.instance.update(file);
+      if (hasLocalOnlyFiles && localOnlyIDs.contains(file.localID)) {
+        await FilesDB.instance.deleteLocalFile(file);
+      } else {
+        file.localID = null;
+        await FilesDB.instance.update(file);
+      }
     }
   }
   if (deletedFiles.isNotEmpty || alreadyDeletedIDs.isNotEmpty) {

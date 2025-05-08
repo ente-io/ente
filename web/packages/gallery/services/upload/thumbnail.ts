@@ -90,6 +90,7 @@ const generateImageThumbnailUsingCanvas = async (blob: Blob) => {
                     canvasCtx.drawImage(image, 0, 0, width, height);
                     resolve(undefined);
                 } catch (e: unknown) {
+                    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                     reject(e);
                 }
             };
@@ -161,6 +162,7 @@ export const generateVideoThumbnailUsingCanvas = async (blob: Blob) => {
                     canvasCtx.drawImage(video, 0, 0, width, height);
                     resolve(undefined);
                 } catch (e) {
+                    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                     reject(e);
                 }
             });

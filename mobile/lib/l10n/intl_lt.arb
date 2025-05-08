@@ -780,10 +780,7 @@
   "hide": "Slėpti",
   "share": "Bendrinti",
   "restoreToAlbum": "Atkurti į albumą",
-  "moveItem": "{count, plural, one {Perkelti elementą} few {Perkelti elementus} many {Perkelti elemento} =1 {Perkelti elementą} other {Perkelti elementų}}",
-  "@moveItem": {
-    "description": "Page title while moving one or more items to an album"
-  },
+
   "addItem": "{count, plural, one {Pridėti elementą} few {Pridėti elementus} many {Pridėti elemento} =1 {Pridėti elementą} other {Pridėti elementų}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"

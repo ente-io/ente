@@ -19,9 +19,10 @@ import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/ignored_file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/service_locator.dart";
-import 'package:photos/services/ignored_files_service.dart';
+import "package:photos/services/collections_service.dart";
+import "package:photos/services/ignored_files_service.dart";
 import "package:photos/utils/file_key.dart";
-import 'package:shared_preferences/shared_preferences.dart';
+import "package:shared_preferences/shared_preferences.dart";
 
 class TrashSyncService {
   final _logger = Logger("TrashSyncService");
@@ -110,10 +111,36 @@ class TrashSyncService {
   Future<void> trashFilesOnServer(List<TrashRequest> trashRequestItems) async {
     final includedFileIDs = <int>{};
     final uniqueItems = <TrashRequest>[];
+    final ownedCollectionIDs =
+        CollectionsService.instance.getAllOwnedCollectionIDs();
     for (final item in trashRequestItems) {
       if (!includedFileIDs.contains(item.fileID)) {
-        uniqueItems.add(item);
-        includedFileIDs.add(item.fileID);
+        // Check if the collectionID in the request is owned by the user
+        if (ownedCollectionIDs.contains(item.collectionID)) {
+          uniqueItems.add(item);
+          includedFileIDs.add(item.fileID);
+        } else {
+          // If not owned, use a different owned collectionID
+          final bool foundAnotherOwnedCollection = false;
+          // todo: rewrite neeraj
+          // final fileCollectionIDs =
+          //     await FilesDB.instance.getAllCollectionIDsOfFile(item.fileID);
+
+          // for (final collectionID in fileCollectionIDs) {
+          //   if (ownedCollectionIDs.contains(collectionID)) {
+          //     final newItem = TrashRequest(item.fileID, collectionID);
+          //     uniqueItems.add(newItem);
+          //     includedFileIDs.add(item.fileID);
+          //     foundAnotherOwnedCollection = true;
+          //     break;
+          //   }
+          // }
+          if (!foundAnotherOwnedCollection) {
+            _logger.severe(
+              "File ${item.fileID} is not owned by the user and has no other owned collection",
+            );
+          }
+        }
       }
     }
     final requestData = <String, dynamic>{};

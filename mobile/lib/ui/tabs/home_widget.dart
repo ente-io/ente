@@ -441,15 +441,18 @@ class _HomeWidgetState extends State<HomeWidget> {
     _intentDataStreamSubscription =
         ReceiveSharingIntent.instance.getMediaStream().listen(
       (List<SharedMediaFile> value) {
-        if (value.isNotEmpty && value[0].path.contains("albums.ente.io")) {
+        if (value.isEmpty) {
+          return;
+        }
+        if (value[0].path.contains("albums.ente.io")) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri);
           return;
         }
 
-        if (value.isNotEmpty &&
-            (value[0].mimeType == "image/*" ||
-                value[0].mimeType == "video/*")) {
+        if (value[0].mimeType != null &&
+            (value[0].mimeType!.contains("image") ||
+                value[0].mimeType!.contains("video"))) {
           showDialog(
             context: context,
             builder: (BuildContext context) {

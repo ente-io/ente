@@ -168,6 +168,7 @@ class MemoriesCacheService {
         _logger.info(
           "No update needed (shouldUpdate: $_shouldUpdate, forced: $forced)",
         );
+        return;
       }
       _logger.info(
         "Updating memories cache (shouldUpdate: $_shouldUpdate, forced: $forced)",
