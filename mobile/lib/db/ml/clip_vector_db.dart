@@ -111,6 +111,21 @@ class ClipVectorDB {
     }
   }
 
+  Future<(int, int, int)> getIndexStats() async {
+    final db = await _vectorDB;
+    try {
+      final stats = await db.getIndexStats();
+      return (
+        stats.$1.toInt(),
+        stats.$2.toInt(),
+        stats.$3.toInt(),
+      );
+    } catch (e, s) {
+      _logger.severe("Error getting index stats", e, s);
+      rethrow;
+    }
+  }
+
   Future<(Uint64List, Float32List)> searchClosestVectors(
     List<double> query,
     int count,
