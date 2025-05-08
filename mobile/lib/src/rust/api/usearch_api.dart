@@ -24,6 +24,8 @@ abstract class VectorDb implements RustOpaqueInterface {
   Future<(List<Uint64List>, List<Float32List>)> bulkSearchVectors(
       {required List<Float32List> queries, required BigInt count});
 
+  Future<bool> containsVector({required BigInt key});
+
   Future<void> deleteIndex();
 
   Future<(BigInt, BigInt, BigInt, BigInt, BigInt)> getIndexStats();

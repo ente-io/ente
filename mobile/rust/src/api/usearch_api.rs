@@ -100,6 +100,10 @@ impl VectorDB {
         (keys, distances)
     }
 
+    pub fn contains_vector(&self, key: u64) -> bool {
+        self.index.contains(key)
+    }
+
     pub fn get_vector(&self, key: u64) -> Vec<f32> {
         let mut vector: Vec<f32> = vec![0.0; self.index.dimensions()];
         self.index
