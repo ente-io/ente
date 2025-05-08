@@ -60,8 +60,8 @@ class CollectionFilesService {
     final List diff = args['diff'] as List;
     final hasMore = args['hasMore'] as bool;
     int latestUpdatedAtTime = 0;
-    final deletedFiles = <CollectionFileItem>[];
-    final updatedFiles = <CollectionFileItem>[];
+    final deletedFiles = <DiffFileItem>[];
+    final updatedFiles = <DiffFileItem>[];
     final int defaultCreatedAt = DateTime.now().millisecondsSinceEpoch;
 
     for (final item in diff) {
@@ -72,7 +72,7 @@ class CollectionFilesService {
       final bool isCollectionItemDeleted = item["isDeleted"];
       latestUpdatedAtTime = max(latestUpdatedAtTime, collectionUpdationTime);
       if (isCollectionItemDeleted) {
-        final deletedItem = CollectionFileItem(
+        final deletedItem = DiffFileItem(
           collectionID: collectionID,
           updatedAt: collectionUpdationTime,
           isDeleted: true,
@@ -135,7 +135,7 @@ class CollectionFilesService {
       final String thumbnailDecryptionHeader =
           item["thumbnail"]["decryptionHeader"];
       final Info? info = Info.fromJson(item["info"]);
-      final CollectionFileItem file = CollectionFileItem(
+      final DiffFileItem file = DiffFileItem(
         collectionID: collectionID,
         updatedAt: collectionUpdationTime,
         encFileKey: encFileKey,
@@ -166,8 +166,8 @@ class CollectionFilesService {
 }
 
 class DiffResult {
-  final List<CollectionFileItem> updatedItems;
-  final List<CollectionFileItem> deletedItems;
+  final List<DiffFileItem> updatedItems;
+  final List<DiffFileItem> deletedItems;
   final bool hasMore;
   final int maxUpdatedAtTime;
   DiffResult(

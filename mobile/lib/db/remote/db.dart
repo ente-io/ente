@@ -81,13 +81,12 @@ class RemoteDB with SqlDbBase {
     );
   }
 
-  Future<void> insertCollectionFilesDiff(
-    List<CollectionFileItem> collections,
+  Future<void> insertFilesDiff(
+    List<DiffFileItem> items,
   ) async {
-    if (collections.isEmpty) return;
+    if (items.isEmpty) return;
     final stopwatch = Stopwatch()..start();
-    await Future.forEach(collections.slices(_batchInsertMaxCount),
-        (slice) async {
+    await Future.forEach(items.slices(_batchInsertMaxCount), (slice) async {
       final List<List<Object?>> collectionFileValues = [];
       final List<List<Object?>> fileValues = [];
       for (final item in slice) {
@@ -106,12 +105,12 @@ class RemoteDB with SqlDbBase {
       ]);
     });
     debugPrint(
-      '$runtimeType insertCollectionFilesDiff complete in ${stopwatch.elapsed.inMilliseconds}ms for ${collections.length}',
+      '$runtimeType insertCollectionFilesDiff complete in ${stopwatch.elapsed.inMilliseconds}ms for ${items.length}',
     );
   }
 
-  Future<void> deleteCollectionFilesDiff(
-    List<CollectionFileItem> items,
+  Future<void> deleteFilesDiff(
+    List<DiffFileItem> items,
   ) async {
     final int collectionID = items.first.collectionID;
     final stopwatch = Stopwatch()..start();

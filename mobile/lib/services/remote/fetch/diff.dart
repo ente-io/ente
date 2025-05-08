@@ -1,5 +1,3 @@
-import "dart:math";
-
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -72,10 +70,10 @@ class RemoteDiffService {
         collectionKey,
       );
       if (diff.deletedItems.isNotEmpty) {
-        await remoteDB.deleteCollectionFilesDiff(diff.deletedItems);
+        await remoteDB.deleteFilesDiff(diff.deletedItems);
       }
       if (diff.updatedItems.isNotEmpty) {
-        await remoteDB.deleteCollectionFilesDiff(diff.updatedItems);
+        await remoteDB.insertFilesDiff(diff.updatedItems);
       }
       // todo:(rewrite) neeraj add logic to refresh home gallery when time or visibility changes
       if (diff.maxUpdatedAtTime > currentSinceTime) {

@@ -166,7 +166,7 @@ class FileItem {
   int get fileSize => info?.fileSize ?? -1;
 }
 
-class CollectionFileItem {
+class DiffFileItem {
   final int collectionID;
   final bool isDeleted;
   final Uint8List? encFileKey;
@@ -175,7 +175,7 @@ class CollectionFileItem {
   final int? createdAt;
   final FileItem fileItem;
 
-  CollectionFileItem({
+  DiffFileItem({
     required this.collectionID,
     required this.isDeleted,
     required this.updatedAt,
