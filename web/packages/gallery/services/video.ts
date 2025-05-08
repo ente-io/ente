@@ -526,17 +526,42 @@ const backfillQueue = async (): Promise<VideoProcessingQueueItem[]> => {
 };
 
 // TODO(HLS): Store this in DB.
-const _processedVideoFileIDs: number[] = [];
+let _processedVideoFileIDs: number[] = [];
+
+/**
+ * Return a {@link Set} containing the ids of the files which do not need to be
+ * processed for generating their streaming variant. This data is retrieved from
+ * persistent storage (KV DB), where it is stored as an array.
+ */
 const savedProcessedVideoFileIDs = async () => {
     // TODO(HLS): make async
     await wait(0);
     return new Set(_processedVideoFileIDs);
 };
 
-const markProcessedVideoFileID = async (fileID: number) => {
+/**
+ * Add or replace the persisted set of ids of files which do not need to be
+ * processed for generating their streaming variant. The data is persisted (as
+ * an array) in KV DB, and can be retrieved by using
+ * {@link savedProcessedVideoFileIDs}.
+ */
+const saveProcessedVideoFileIDs = async (videoFileIDs: Set<number>) => {
     // TODO(HLS): make async
     await wait(0);
-    _processedVideoFileIDs.push(fileID);
+    _processedVideoFileIDs = Array.from(videoFileIDs);
+};
+
+/**
+ * Mark the provided file ID as not requiring further processing for generating
+ * its streaming variant.
+ *
+ * The mark is persisted locally in IndexedDB (KV DB), so will persist across
+ * app restarts (but not across logouts).
+ */
+const markProcessedVideoFileID = async (fileID: number) => {
+    const savedIDs = await savedProcessedVideoFileIDs();
+    savedIDs.add(fileID);
+    return saveProcessedVideoFileIDs(savedIDs);
 };
 
 /**
