@@ -1089,6 +1089,8 @@ class VectorDbImpl extends RustOpaque implements VectorDb {
       RustLib.instance.api.crateApiUsearchApiVectorDbBulkSearchVectors(
           that: this, queries: queries, count: count);
 
+  /// Check if a vector with the given key exists in the index.
+  /// `true` if the index contains the vector with the given key, `false` otherwise.
   Future<bool> containsVector({required BigInt key}) => RustLib.instance.api
       .crateApiUsearchApiVectorDbContainsVector(that: this, key: key);
 
