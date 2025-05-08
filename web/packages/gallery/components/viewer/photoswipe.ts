@@ -1390,17 +1390,43 @@ export class FileViewerPhotoSwipe {
 
     /**
      * Reload the current slide, asking the data source for its data afresh.
+     */
+    refreshCurrentSlideContent() {
+        this.pswp.refreshSlideContent(this.pswp.currIndex);
+    }
+
+    /**
+     * Reload the PhotoSwipe dialog (without recreating it) if the current slide
+     * that was being viewed is no longer part of the list of files that should
+     * be shown. This can happen when the user deleted the file, or if they
+     * marked it archived in a context (like "All") where archived files are not
+     * being shown.
      *
      * @param expectedFileCount The count of files that we expect to show after
-     * the refresh. If provided, this is used to (circle) go back to the first
-     * slide when the slide which we were at previously is not available anymore
-     * (e.g. when deleting the last file in a sequence).
+     * the refresh.
      */
-    refreshCurrentSlideContent(expectedFileCount?: number) {
-        if (expectedFileCount && this.pswp.currIndex >= expectedFileCount) {
+    refreshCurrentSlideContentAfterRemove(newFileCount: number) {
+        // Refresh the slide, and its subsequent neighbour.
+        //
+        // To see why, consider item at index 3 was removed. After refreshing,
+        // the contents of the item previously at index 4, and now at index 3,
+        // would be displayed. But the preloaded slide next to us (showing item
+        // at index 4) would already be displaying the same item, so that also
+        // needs to be refreshed to displaying the item previously at index 5
+        // (now at index 4).
+        const refreshSlideAndNextNeighbour = (i: number) => {
+            this.pswp.refreshSlideContent(i);
+            this.pswp.refreshSlideContent(i + 1 == newFileCount ? 0 : i + 1);
+        };
+
+        if (this.pswp.currIndex >= newFileCount) {
+            // If the last slide was removed, go back to the beginning (the code
+            // that calls us ensures that we don't get called if there are no
+            // more slides left).
             this.pswp.goTo(0);
+            refreshSlideAndNextNeighbour(0);
         } else {
-            this.pswp.refreshSlideContent(this.pswp.currIndex);
+            refreshSlideAndNextNeighbour(this.pswp.currIndex);
         }
     }
 
