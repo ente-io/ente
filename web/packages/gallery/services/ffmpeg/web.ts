@@ -94,7 +94,6 @@ const ffmpegExec = async (
             resolvedCommand = command;
         } else {
             const isHDR = await isHDRVideo(ffmpeg, inputPath);
-            log.debug(() => `[wasm] input file is ${isHDR ? "" : "not "}HDR`);
             resolvedCommand = isHDR ? command.hdr : command.default;
         }
 

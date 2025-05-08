@@ -178,8 +178,9 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
  * @param video The video to convert.
  *
  * - If we're called during the upload process, then this will be set to the
- *   {@link FileSystemUploadItem} that was uploaded. This way, we can directly use
- *   the on-disk file instead of needing to download the original from remote.
+ *   {@link FileSystemUploadItem} that was uploaded. This way, we can directly
+ *   use the on-disk file instead of needing to download the original from
+ *   remote.
  *
  * - Otherwise it should be a {@link ReadableStream} of the video contents.
  *
