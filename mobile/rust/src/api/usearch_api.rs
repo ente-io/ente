@@ -61,7 +61,11 @@ impl VectorDB {
     }
 
     pub fn add_vector(&self, key: u64, vector: &Vec<f32>) {
-        self.ensure_capacity(1);
+        if self.contains_vector(key) {
+            self.remove_vector(key);
+        } else {
+            self.ensure_capacity(1);
+        }
         self.index.add(key, vector).expect("Failed to add vector");
         self.save_index();
     }
@@ -69,6 +73,9 @@ impl VectorDB {
     pub fn bulk_add_vectors(&self, keys: Vec<u64>, vectors: &Vec<Vec<f32>>) {
         self.ensure_capacity(keys.len());
         for (key, vector) in keys.iter().zip(vectors.iter()) {
+            if self.contains_vector(*key) {
+                self.remove_vector(*key);
+            }
             self.index
                 .add(*key, vector)
                 .expect("Failed to (bulk) add vector");
