@@ -55,7 +55,11 @@ apps:
     family: family.myente.xyz
 ```
 
-By default, all the values redirect to our publicly hosted production services.
+>[!IMPORTANT]
+>By default, all the values redirect to our publicly hosted production services. 
+>For example, if `public-albums` is not configured your shared album will 
+>use the `albums.ente.io` URL.
+
 After you are done with filling the values, restart museum and the app will
 start utilizing those endpoints instead of Ente's production instances.
 
@@ -67,3 +71,7 @@ Similarly, you can use the default
 [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml)
 as a reference for building a functioning `museum.yaml` for many other
 functionalities like SMTP, Discord notifications, Hardcoded-OTTs, etc.
+
+## References
+
+- [Environment variables and ports](/self-hosting/faq/environment)
