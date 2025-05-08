@@ -35,7 +35,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   late StreamSubscription<SyncStatusUpdate> _subscription;
   late StreamSubscription<NotificationEvent> _notificationSubscription;
-  bool _isPasuedDueToNetwork = false;
+  bool _isPausedDueToNetwork = false;
   bool _showStatus = false;
   bool _showErrorBanner = false;
   bool _showMlBanner = !flagService.hasGrantedMLConsent &&
@@ -46,7 +46,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   void initState() {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
       _logger.info("Received event " + event.status.toString());
-      _isPasuedDueToNetwork = event.status == SyncStatus.paused;
+      _isPausedDueToNetwork = event.status == SyncStatus.paused;
       if (event.status == SyncStatus.error) {
         setState(() {
           _syncError = event.error;
@@ -102,7 +102,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   onTap: () {
                     routeToPage(
                       context,
-                      _isPasuedDueToNetwork
+                      _isPausedDueToNetwork
                           ? const BackupSettingsScreen()
                           : const BackupStatusScreen(),
                       forceCustomPageRoute: true,
