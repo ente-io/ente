@@ -26,9 +26,6 @@ unsupported file format and we will do our best to help you out.
 
 Yes, we currently do not support files larger than 4 GB.
 
-If this constraint is a concern for you, please write to
-[support@ente.io](mailto:support@ente.io) with your use case and we will do our
-best to help you.
 
 ## Does Ente support videos?
 
