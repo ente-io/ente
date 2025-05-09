@@ -150,6 +150,9 @@ impl VectorDB {
 
     pub fn reset_index(&self) {
         self.index.reset().expect("Failed to reset index");
+        self.index
+            .reserve(1000)
+            .expect("Failed to reserve space in index");
         self.save_index();
     }
 
