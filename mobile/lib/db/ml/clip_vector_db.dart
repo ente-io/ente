@@ -122,14 +122,16 @@ class ClipVectorDB {
     }
   }
 
-  Future<(int, int, int)> getIndexStats() async {
+  Future<VectorDbStats> getIndexStats() async {
     final db = await _vectorDB;
     try {
       final stats = await db.getIndexStats();
-      return (
-        stats.$1.toInt(),
-        stats.$2.toInt(),
-        stats.$3.toInt(),
+      return VectorDbStats(
+        size: stats.$1.toInt(),
+        capacity: stats.$2.toInt(),
+        dimensions: stats.$3.toInt(),
+        expansionAdd: stats.$4.toInt(),
+        expansionSearch: stats.$5.toInt(),
       );
     } catch (e, s) {
       _logger.severe("Error getting index stats", e, s);
@@ -163,5 +165,27 @@ class ClipVectorDB {
       _logger.severe("Error searching closest vector", e, s);
       rethrow;
     }
+  }
+}
+
+class VectorDbStats {
+  final int size;
+  final int capacity;
+  final int dimensions;
+
+  final int expansionAdd;
+  final int expansionSearch;
+
+  VectorDbStats({
+    required this.size,
+    required this.capacity,
+    required this.dimensions,
+    required this.expansionAdd,
+    required this.expansionSearch,
+  });
+
+  @override
+  String toString() {
+    return "VectorDbStats(size: $size, capacity: $capacity, dimensions: $dimensions, expansionAdd: $expansionAdd, expansionSearch: $expansionSearch)";
   }
 }

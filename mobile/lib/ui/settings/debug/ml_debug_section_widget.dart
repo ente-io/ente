@@ -155,12 +155,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               await clipVectorDB.deleteAllEmbeddings();
               logger.info("Clean vector DB");
               final stats = await clipVectorDB.getIndexStats();
-              logger.info("ClipVectorDB stats: size: ${stats.$1}, "
-                  "capacity: ${stats.$2}, dimensions: ${stats.$3}");
-              showShortToast(
-                  context,
-                  "ClipVectorDB stats: size: ${stats.$1}, "
-                  "capacity: ${stats.$2}, dimensions: ${stats.$3}");
+              logger.info(stats.toString());
+              showShortToast(context, stats.toString());
 
               final fileIDs = allClipSmall.map((e) => e.fileID).toList();
               final embeddings = allClipSmall
@@ -179,12 +175,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                 "ClipVectorDB bulk insert took ${duration.inMilliseconds} ms for ${fileIDs.length} embeddings",
               );
               final statsAfter = await clipVectorDB.getIndexStats();
-              logger.info("ClipVectorDB stats after: size: ${statsAfter.$1}, "
-                  "capacity: ${statsAfter.$2}, dimensions: ${statsAfter.$3}");
-              showShortToast(
-                  context,
-                  "ClipVectorDB stats after: size: ${statsAfter.$1}, "
-                  "capacity: ${statsAfter.$2}, dimensions: ${statsAfter.$3}");
+              logger.info(statsAfter.toString());
+              showShortToast(context, statsAfter.toString());
             } catch (e, s) {
               logger.warning('ClipVectorDB migration failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
@@ -201,7 +193,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await MLDataDB.instance.migrateFillClipVectorDB();
+              await MLDataDB.instance.checkMigrateFillClipVectorDB();
               showShortToast(context, "Migration done!");
             } catch (e, s) {
               logger.warning('ClipVectorDB migration failed ', e, s);
@@ -221,12 +213,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             try {
               final clipVectorDB = ClipVectorDB.instance;
               final stats = await clipVectorDB.getIndexStats();
-              logger.info("ClipVectorDB stats: size: ${stats.$1}, "
-                  "capacity: ${stats.$2}, dimensions: ${stats.$3}");
-              showShortToast(
-                  context,
-                  "ClipVectorDB stats: size: ${stats.$1}, "
-                  "capacity: ${stats.$2}, dimensions: ${stats.$3}");
+              logger.info(stats.toString());
+              showShortToast(context, stats.toString());
             } catch (e, s) {
               logger.warning('ClipVectorDB stats failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
