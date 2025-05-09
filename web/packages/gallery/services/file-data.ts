@@ -136,14 +136,18 @@ const RemoteFDStatus = z.object({
     updatedAt: z.number(),
 });
 
-export interface UpdatedFileDataFileIDsResult {
+/**
+ * A paginated part of the result set sent by remote during
+ * {@link syncUpdatedFileDataFileIDs}.
+ */
+export interface UpdatedFileDataFileIDsPage {
     /**
      * The IDs of files for which a file data entry has been created or updated.
      */
     fileIDs: Set<number>;
     /**
-     * The largest (last/latest) updatedAt (epoch microseconds) from amongst all
-     * of these files.
+     * The latest updatedAt (epoch microseconds) time obtained from remote in
+     * this batch this sync from amongst all of these files.
      */
     lastUpdatedAt: number;
 }
@@ -152,12 +156,20 @@ export interface UpdatedFileDataFileIDsResult {
  * Fetch the IDs of files for which new file data entries of the given
  * {@link type} have been created or updated since the given {@link sinceTime}.
  *
+ * The interaction with remote is paginated, with the {@link onPage} callback
+ * being called as each page of new data is received.
+ *
  * @param type The {@link FileDataType} for which we want to check for creation
  * or updates.
  *
  * @param lastUpdatedAt Epoch microseconds. This is used to ask remote to
- * provide us only entries  whose {@link updatedAt} is more than the given
- * value. Set this to zero to start from the beginning.
+ * provide us only entries whose {@link updatedAt} is more than the given value.
+ * Set this to zero to start from the beginning.
+ *
+ * @param onPage A callback invoked for each page of results received from
+ * remote. It is passed both the fileIDs received in the batch under
+ * consideration, and the largest of the updated time for all entries
+ * (irrespective of {@link type}) in that batch.
  *
  * ----
  *
@@ -168,29 +180,36 @@ export interface UpdatedFileDataFileIDsResult {
  * cases where existing playlists or ML indexes get deleted (unless the
  * underlying file is deleted). See: [Note: Caching HLS playlist data].
  */
-export const fetchUpdatedFileDataFileIDs = async (
+export const syncUpdatedFileDataFileIDs = async (
     type: FileDataType,
     lastUpdatedAt: number,
-): Promise<UpdatedFileDataFileIDsResult> => {
-    const params = new URLSearchParams({
-        lastUpdatedAt: lastUpdatedAt.toString(),
-    });
+    onPage: (page: UpdatedFileDataFileIDsPage) => Promise<void>,
+): Promise<void> => {
     const url = await apiURL("/files/data/status-diff");
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
-    ensureOk(res);
-    const diff = z
-        .object({ diff: z.array(RemoteFDStatus) })
-        .parse(await res.json()).diff;
-    const fileIDs = new Set<number>();
-    for (const fd of diff) {
-        if (fd.type != type) continue;
-        if (fd.isDeleted) continue;
-        fileIDs.add(fd.fileID);
-        lastUpdatedAt = Math.max(lastUpdatedAt, fd.updatedAt);
+    while (true) {
+        const params = new URLSearchParams({
+            lastUpdatedAt: lastUpdatedAt.toString(),
+        });
+        const res = await fetch(`${url}?${params.toString()}`, {
+            headers: await authenticatedRequestHeaders(),
+        });
+        ensureOk(res);
+        const diff = z
+            .object({ diff: z.array(RemoteFDStatus) })
+            .parse(await res.json()).diff;
+        if (diff.length) {
+            const fileIDs = new Set<number>();
+            for (const fd of diff) {
+                lastUpdatedAt = Math.max(lastUpdatedAt, fd.updatedAt);
+                if (fd.type == type && !fd.isDeleted) {
+                    fileIDs.add(fd.fileID);
+                }
+            }
+            await onPage({ fileIDs, lastUpdatedAt });
+        } else {
+            break;
+        }
     }
-    return { fileIDs, lastUpdatedAt };
 };
 
 /**
