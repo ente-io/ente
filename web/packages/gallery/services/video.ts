@@ -28,6 +28,7 @@ import {
     fetchFilePreviewData,
     getFilePreviewDataUploadURL,
     putVideoData,
+    syncUpdatedFileDataFileIDs,
 } from "./file-data";
 import {
     fileSystemUploadItemIfUnchanged,
@@ -340,6 +341,95 @@ const blobToDataURL = (blob: Blob) =>
         reader.readAsDataURL(blob);
     });
 
+// TODO(HLS): Store this in DB.
+let _processedVideoFileIDs: number[] = [];
+let _videoPreviewFileIDSyncLastUpdatedAt: number | undefined;
+
+/**
+ * Return a {@link Set} containing the ids of the files which do not need to be
+ * processed for generating their streaming variant. This data is retrieved from
+ * persistent storage (KV DB), where it is stored as an array.
+ */
+const savedProcessedVideoFileIDs = async () => {
+    // TODO(HLS): make async
+    await wait(0);
+    return new Set(_processedVideoFileIDs);
+};
+
+/**
+ * Add or replace the persisted set of ids of files which do not need to be
+ * processed for generating their streaming variant. The data is persisted (as
+ * an array) in KV DB, and can be retrieved by using
+ * {@link savedProcessedVideoFileIDs}.
+ */
+const saveProcessedVideoFileIDs = async (videoFileIDs: Set<number>) => {
+    // TODO(HLS): make async
+    await wait(0);
+    _processedVideoFileIDs = Array.from(videoFileIDs);
+};
+
+/**
+ * Mark the provided file ID as not requiring further processing for generating
+ * its streaming variant.
+ *
+ * The mark is persisted locally in IndexedDB (KV DB), so will persist across
+ * app restarts (but not across logouts).
+ */
+const markProcessedVideoFileID = async (fileID: number) => {
+    const savedIDs = await savedProcessedVideoFileIDs();
+    savedIDs.add(fileID);
+    return saveProcessedVideoFileIDs(savedIDs);
+};
+
+/**
+ * Mark multiple file IDs as processed. Plural variant of
+ * {@link markProcessedVideoFileID}.
+ */
+const markProcessedVideoFileIDs = async (fileIDs: Set<number>) => {
+    const savedIDs = await savedProcessedVideoFileIDs();
+    return saveProcessedVideoFileIDs(savedIDs.union(fileIDs));
+};
+
+/**
+ * Return the persisted time when we last synced processed file IDs with remote.
+ *
+ * The returned value is an epoch millisecond value suitable to be passed to
+ * {@link syncUpdatedFileDataFileIDs}.
+ */
+const savedSyncLastUpdatedAt = async () => {
+    // TODO(HLS): make async
+    await wait(0);
+    return _videoPreviewFileIDSyncLastUpdatedAt;
+};
+
+/**
+ * Update the persisted timestamp used for syncing processed file IDs with
+ * remote.
+ *
+ * Use {@link savedSyncLastUpdatedAt} to get the persisted value back.
+ */
+const saveSyncLastUpdatedAt = async (lastUpdatedAt: number) => {
+    // TODO(HLS): make async
+    await wait(0);
+    _videoPreviewFileIDSyncLastUpdatedAt = lastUpdatedAt;
+};
+
+/**
+ * Fetch IDs of files from remote that have been processed by other clients
+ * since the last time we checked.
+ */
+export const syncProcessedFileIDs = async () =>
+    syncUpdatedFileDataFileIDs(
+        "vid_preview",
+        (await savedSyncLastUpdatedAt()) ?? 0,
+        async ({ fileIDs, lastUpdatedAt }) => {
+            await Promise.all([
+                markProcessedVideoFileIDs(fileIDs),
+                saveSyncLastUpdatedAt(lastUpdatedAt),
+            ]);
+        },
+    );
+
 /**
  * Create a streamable HLS playlist for a video uploaded from this client.
  *
@@ -526,45 +616,6 @@ const backfillQueue = async (): Promise<VideoProcessingQueueItem[]> => {
     );
     const batch = randomSample(pendingVideoFiles, 50);
     return batch.map((file) => ({ file }));
-};
-
-// TODO(HLS): Store this in DB.
-let _processedVideoFileIDs: number[] = [];
-
-/**
- * Return a {@link Set} containing the ids of the files which do not need to be
- * processed for generating their streaming variant. This data is retrieved from
- * persistent storage (KV DB), where it is stored as an array.
- */
-const savedProcessedVideoFileIDs = async () => {
-    // TODO(HLS): make async
-    await wait(0);
-    return new Set(_processedVideoFileIDs);
-};
-
-/**
- * Add or replace the persisted set of ids of files which do not need to be
- * processed for generating their streaming variant. The data is persisted (as
- * an array) in KV DB, and can be retrieved by using
- * {@link savedProcessedVideoFileIDs}.
- */
-const saveProcessedVideoFileIDs = async (videoFileIDs: Set<number>) => {
-    // TODO(HLS): make async
-    await wait(0);
-    _processedVideoFileIDs = Array.from(videoFileIDs);
-};
-
-/**
- * Mark the provided file ID as not requiring further processing for generating
- * its streaming variant.
- *
- * The mark is persisted locally in IndexedDB (KV DB), so will persist across
- * app restarts (but not across logouts).
- */
-const markProcessedVideoFileID = async (fileID: number) => {
-    const savedIDs = await savedProcessedVideoFileIDs();
-    savedIDs.add(fileID);
-    return saveProcessedVideoFileIDs(savedIDs);
 };
 
 /**
