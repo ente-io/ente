@@ -304,6 +304,8 @@ func fSrpAttributes(email string, hashKey []byte) (*ente.GetSRPAttributesRespons
 	if emailHash[16]%2 == 0 {
 		memLimit = 268435456
 		opsLimit = 16
+	}
+	if emailHash[16]%5 == 0 {
 		emailVerificationEnabled = true
 	}
 	return &ente.GetSRPAttributesResponse{
