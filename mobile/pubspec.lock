@@ -642,8 +642,8 @@ packages:
     dependency: "direct main"
     description:
       path: "flutter/flutter"
-      ref: flurrify
-      resolved-ref: f0f49e4238c1d59fdce06c51f94431831c191c82
+      ref: android-packaged
+      resolved-ref: "6d5d27a8c259eda6292f204a27fba53da70af20e"
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "6.0.3"
@@ -2039,7 +2039,7 @@ packages:
     source: hosted
     version: "1.0.1"
   pool:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: pool
       sha256: "20fe868b6314b322ea036ba325e6fc0711a22948856475e2c2b6306e8ab39c2a"

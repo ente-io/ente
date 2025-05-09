@@ -81,22 +81,22 @@ export type LocalCLIPIndex = CLIPIndex & {
 };
 
 /**
- * Compute the CLIP embedding of a given file.
+ * Compute the CLIP embedding of a given {@link image}.
  *
- * This function is the entry point to the CLIP indexing pipeline. The file goes
- * through various stages:
+ * This function is the third and fourth stage of the CLIP indexing pipeline.
+ * The file goes through various stages:
  *
- * 1. Downloading the original if needed.
- * 2. Convert (if needed) and pre-process.
- * 3. Compute embeddings using ONNX/CLIP.
+ * 1. Download the original (if needed).
+ * 2. Convert (if needed) to obtain an image bitmap.
+ * 3. Preprocess the image bitmap.
+ * 4. Compute embeddings of this preprocessed image using ONNX/CLIP.
  *
  * Once all of it is done, it CLIP embedding (wrapped as a {@link CLIPIndex} so
  * that it can be saved locally and also uploaded to the user's remote storage
  * for use on their other devices).
  *
- * @param uploadItem If we're called during the upload process, then this will
- * be set to the {@link UploadItem} that was uploaded. This way, we can directly
- * use the on-disk file instead of needing to download the original from remote.
+ * @param image The image bitmap (and its associated data) of the image file
+ * whose CLIP embedding we're computing.
  *
  * @param electron The {@link ElectronMLWorker} instance that allows us to call
  * our Node.js layer to run the ONNX inference.

@@ -1,21 +1,26 @@
+import { isDesktop } from "ente-base/app";
+import { assertionFailed } from "ente-base/assert";
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
-import {
-    retryEnsuringHTTPOkOr4xx,
-    type PublicAlbumsCredentials,
-} from "ente-base/http";
+import { ensureElectron } from "ente-base/electron";
+import { type PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
-import type { Electron } from "ente-base/types/ipc";
-import type { EnteFile } from "ente-media/file";
+import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
+import {
+    getAllLocalFiles,
+    uniqueFilesByID,
+} from "ente-new/photos/services/files";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
+import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
+import { wait } from "ente-utils/promise";
 import { z } from "zod";
 import {
+    initiateGenerateHLS,
     readVideoStream,
     videoStreamDone,
-    writeVideoStream,
 } from "../utils/native-stream";
 import { downloadManager } from "./download";
 import {
@@ -24,7 +29,11 @@ import {
     getFilePreviewDataUploadURL,
     putVideoData,
 } from "./file-data";
-import type { UploadItem } from "./upload";
+import {
+    fileSystemUploadItemIfUnchanged,
+    type ProcessableUploadItem,
+    type TimestampedFileSystemUploadItem,
+} from "./upload";
 
 interface VideoProcessingQueueItem {
     /**
@@ -33,10 +42,18 @@ interface VideoProcessingQueueItem {
      */
     file: EnteFile;
     /**
-     * The contents of the {@link file} as the newly uploaded {@link UploadItem}.
+     * The {@link TimestampedFileSystemUploadItem} when available for the newly
+     * uploaded {@link file}.
+     *
+     * It will be present when this queue item was enqueued during a upload from
+     * the current client. If present, this serves as an optimization allowing
+     * us to directly read the file off the user's file system.
      */
-    uploadItem: UploadItem;
+    timestampedUploadItem?: TimestampedFileSystemUploadItem;
 }
+
+const idleWaitInitial = 10 * 1000; /* 10 sec */
+const idleWaitMax = idleWaitInitial * 2 ** 6; /* 640 sec */
 
 /**
  * Internal in-memory state shared by the functions in this module.
@@ -45,13 +62,31 @@ interface VideoProcessingQueueItem {
  */
 class VideoState {
     /**
-     * Queue of videos waiting to be processed.
+     * Queue of recently uploaded items waiting to be processed.
      */
-    videoProcessingQueue: VideoProcessingQueueItem[] = [];
+    liveQueue: VideoProcessingQueueItem[] = [];
     /**
      * Active queue processor, if any.
      */
     queueProcessor: Promise<void> | undefined;
+    /**
+     * A promise that the main processing loop waits for in addition to the idle
+     * timeout. Can be resolved using {@link resolveTick}.
+     */
+    tick: Promise<void> | undefined;
+    /**
+     * A function that can be called to resolve {@link tick}.
+     *
+     * See: [Note: Exiting idle wait of processing loop].
+     */
+    resolveTick: (() => void) | undefined;
+    /**
+     * The time to sleep if nothing is pending.
+     *
+     * Goes from {@link idleWaitInitial} to {@link idleWaitMax} in doublings.
+     * Reset back to {@link idleWaitInitial} in case of any activity.
+     */
+    idleWait = idleWaitInitial;
 }
 
 /**
@@ -309,69 +344,189 @@ const blobToDataURL = (blob: Blob) =>
  * client, allowing us to create its streamable variant without needing to
  * redownload the video.
  *
- * Note that this is an optimization. Even if we don't process the video at this
- * time (e.g. if the video processor can't keep up with the uploads), we will
- * eventually process it later as part of a backfill.
+ * It only does the processing if we're running in the context of the desktop
+ * app as the video processing is resource intensive. In particular, processing
+ * large videos with the Wasm ffmpeg implementation can cause the app to crash,
+ * on mobile devices (see https://github.com/ffmpegwasm/ffmpeg.wasm/issues/851).
+ * In contrast, the desktop app can us the efficient native FFmpeg integration.
+ *
+ * Note that this function is an optimization. Even if we don't process the
+ * video at this time (e.g. if the video processor can't keep up with the
+ * uploads), we will eventually process it later as part of a backfill.
  *
  * @param file The {@link EnteFile} that got uploaded (video or otherwise).
  *
- * @param uploadItem The item that was uploaded. This can be used to get at the
- * contents of the file that got uploaded.
+ * @param processableUploadItem The item that was uploaded. This can be used to
+ * read the contents of the file that got uploaded directly from disk instead of
+ * needing to download it again.
  */
 export const processVideoNewUpload = (
     file: EnteFile,
-    uploadItem: UploadItem,
+    processableUploadItem: ProcessableUploadItem,
 ) => {
     // TODO(HLS):
+    if (!isDesktop) return;
     if (!isVideoProcessingEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
-    if (!electron) {
-        // Processing very large videos with the current ffmpeg Wasm
-        // implementation can cause the app to crash, esp. on mobile devices
-        // (e.g. https://github.com/ffmpegwasm/ffmpeg.wasm/issues/851).
-        //
-        // So the video processing only happpens in the desktop app, which uses
-        // the much more efficient native ffmpeg integration.
-        return;
-    }
-
-    if (_state.videoProcessingQueue.length > 50) {
-        // Drop new requests if the queue can't keep up to avoid the app running
-        // out of memory by keeping hold of too many (potentially huge) video
-        // blobs. These items will later get processed as part of a backfill.
-        log.info("Will process new video upload later (backlog too big)");
+    if (processableUploadItem instanceof File) {
+        // While the types don't guarantee it, we really shouldn't be getting
+        // here. The only time a processableUploadItem can be File when we're
+        // running in the desktop app is when an edited image copy is being
+        // saved. But we've already checked above that the file which was
+        // uploaded was a video.
+        assertionFailed();
         return;
     }
 
     // Enqueue the item.
-    _state.videoProcessingQueue.push({ file, uploadItem });
+    _state.liveQueue.push({
+        file,
+        timestampedUploadItem: processableUploadItem,
+    });
 
-    // Tickle the processor if it isn't already running.
-    _state.queueProcessor ??= processQueue(electron);
+    // Interrupt any idle timeouts if any, go go.
+    tickNow();
+};
+
+/**
+ * If {@link processQueue} is not already running, start it.
+ *
+ * If there is an existing {@link resolveTick} so that if perchance
+ * {@link processQueue} was waiting on an idle timeout, it wakes up now.
+ *
+ * Also create a new {@link tick} and {@link resolveTick} pair for use by
+ * subsequent calls to {@link tickNow}
+ */
+const tickNow = () => {
+    // See: [Note: Exiting idle wait of processing loop] for what this function
+    // is trying to do.
+
+    // Resolve the existing tick (if any).
+    if (_state.resolveTick) _state.resolveTick();
+
+    // Create a new resolvable pair.
+    _state.tick = new Promise((r) => (_state.resolveTick = r));
+
+    // Start the processor if it isn't already running.
+    _state.queueProcessor ??= processQueue();
 };
 
 export const isVideoProcessingEnabled = () =>
     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
 
-const processQueue = async (electron: Electron) => {
-    while (_state.videoProcessingQueue.length) {
-        try {
-            await processQueueItem(
-                _state.videoProcessingQueue.shift()!,
-                electron,
-            );
-        } catch (e) {
-            log.error("Video processing failed", e);
-            // Ignore this unprocessable item. Currently this function only runs
-            // post upload, so this item will later get processed as part of the
-            // backfill.
-            //
-            // TODO(HLS): When processing the backfill itself, we'll need a way
-            // to mark this item as failed.
+/**
+ * The video processing loop goes through videos one by one, preferring items in
+ * the liveQueue, otherwise working for a backlog item. If there are no items to
+ * process, it goes on an idle timeout. The {@link resolveTick} state property
+ * can be used to tickle it out of sleep.
+ *
+ * [Note: Exiting idle wait of processing loop]
+ *
+ * The following toy example illustrates the overall mechanism:
+ *
+ *     let resolveTick
+ *     let tick = new Promise((r) => (resolveTick = r));
+ *
+ *     const tickNow = () => {
+ *         resolveTick();
+ *         tick = new Promise((r) => (resolveTick = r));
+ *     }
+ *
+ *     const f = async () => {
+ *         for (let i of [1, 2, 3, 4, 5]) {
+ *             const wait = new Promise((r) => setTimeout(r, i * 1e3));
+ *             await Promise.race([wait, tick]);
+ *         }
+ *     }
+ *
+ *     f()
+ *
+ *     setTimeout(tickNow, 2500);
+ *     setTimeout(tickNow, 5000);
+ *     setTimeout(tickNow, 5500);
+ *
+ * The `Promise.race([wait, tick])` means that the loop will proceed to the next
+ * item either if the timeout expires, or if tick resolves. Thus the same
+ * function can handle both the internally determined processing of backfill
+ * batches, and the externally triggered processing of live uploads.
+ */
+const processQueue = async () => {
+    if (!(isDesktop && isVideoProcessingEnabled())) {
+        assertionFailed(); /* we shouldn't have come here */
+        return;
+    }
+
+    let bq: typeof _state.liveQueue | undefined;
+    while (isVideoProcessingEnabled()) {
+        log.debug(() => ["gen-hls-iter", []]);
+        const item =
+            _state.liveQueue.shift() ?? (bq ??= await backfillQueue()).shift();
+        if (item) {
+            try {
+                await processQueueItem(item);
+            } catch (e) {
+                log.error("Video processing failed", e);
+            } finally {
+                // TODO(HLS): This needs to be more granular in case of errors.
+                await markProcessedVideoFileID(item.file.id);
+            }
+            // Reset the idle wait on any activity.
+            _state.idleWait = idleWaitInitial;
+        } else {
+            // Replenish the backfill queue if possible.
+            bq = await backfillQueue();
+            if (!bq.length) {
+                // There are no more items in either the live queue or backlog.
+                // Go to sleep (for increasingly longer durations, capped at a
+                // maximum).
+                const idleWait = _state.idleWait;
+                _state.idleWait = Math.min(idleWait * 2, idleWaitMax);
+
+                // `tick` allows the sleep to be interrupted when there is
+                // potential activity.
+                if (!_state.tick) assertionFailed();
+                const tick = _state.tick!;
+
+                log.debug(() => ["gen-hls", { idleWait }]);
+                await Promise.race([tick, wait(idleWait)]);
+            }
         }
     }
+
     _state.queueProcessor = undefined;
+};
+
+/**
+ * Return the next batch of videos that need to be processed.
+ *
+ * If there is nothing pending, return an empty array.
+ */
+const backfillQueue = async (): Promise<VideoProcessingQueueItem[]> => {
+    const allCollectionFiles = await getAllLocalFiles();
+    const processedVideoFileIDs = await savedProcessedVideoFileIDs();
+    const videoFiles = uniqueFilesByID(
+        allCollectionFiles.filter((f) => f.metadata.fileType == FileType.video),
+    );
+    const pendingVideoFiles = videoFiles.filter(
+        (f) => !processedVideoFileIDs.has(f.id),
+    );
+    const batch = randomSample(pendingVideoFiles, 50);
+    return batch.map((file) => ({ file }));
+};
+
+// TODO(HLS): Store this in DB.
+const _processedVideoFileIDs: number[] = [];
+const savedProcessedVideoFileIDs = async () => {
+    // TODO(HLS): make async
+    await wait(0);
+    return new Set(_processedVideoFileIDs);
+};
+
+const markProcessedVideoFileID = async (fileID: number) => {
+    // TODO(HLS): make async
+    await wait(0);
+    _processedVideoFileIDs.push(fileID);
 };
 
 /**
@@ -393,110 +548,71 @@ const processQueue = async (electron: Electron) => {
  *
  * 3. Both the generated video and the HLS playlist are then uploaded, E2EE.
  */
-const processQueueItem = async (
-    { file, uploadItem }: VideoProcessingQueueItem,
-    electron: Electron,
-) => {
-    log.debug(() => ["gen-hls", { file, uploadItem }]);
+const processQueueItem = async ({
+    file,
+    timestampedUploadItem,
+}: VideoProcessingQueueItem) => {
+    const electron = ensureElectron();
 
-    const fileBlob = await fetchOriginalVideoBlob(file, uploadItem);
+    log.debug(() => ["gen-hls", { file, timestampedUploadItem }]);
 
-    // TODO(HLS):
-    const tokens = await writeVideoStream(electron, "generate-hls", fileBlob!);
-    const [playlistToken, videoToken] = [tokens[0]!, tokens[1]!];
+    const uploadItem = timestampedUploadItem
+        ? await fileSystemUploadItemIfUnchanged(
+              timestampedUploadItem,
+              electron.fs.statMtime,
+          )
+        : undefined;
 
+    const sourceVideo = uploadItem ?? (await downloadManager.fileStream(file));
+
+    // [Note: Upload HLS video segment from node side]
+    //
+    // The generated video can be huge (multi-GB), too large to read it into
+    // memory as an arrayBuffer.
+    //
+    // One option was to chain the video stream response (from the node side)
+    // directly into a fetch request to `objectUploadURL`, however that requires
+    // HTTP/2 (our servers support it, but self hosters' might not). Also that
+    // approach won't work with retries on transient failures unless we
+    // duplicate the stream beforehand, which invalidates the point of
+    // streaming.
+    //
+    // So instead we provide the presigned upload URL to the node side so that
+    // it can directly upload the generated video segments.
+    const { objectID, url: objectUploadURL } =
+        await getFilePreviewDataUploadURL(file);
+
+    log.info(`Generate HLS for ${fileLogID(file)} | start`);
+
+    const res = await initiateGenerateHLS(
+        electron,
+        sourceVideo!,
+        objectUploadURL,
+    );
+
+    if (!res) {
+        log.info(`Generate HLS for ${fileLogID(file)} | not-required`);
+        return;
+    }
+
+    const { playlistToken, dimensions, videoSize } = res;
     try {
-        const playlistBlob = await readVideoStream(
-            electron,
-            playlistToken,
-        ).then((res) => res.blob());
-
-        const { objectID, url: objectUploadURL } =
-            await getFilePreviewDataUploadURL(file);
-
-        // TOOD(HLS): Move this to the node side.
-        const videoBlob = await readVideoStream(electron, videoToken).then(
-            (res) => res.blob(),
-        );
-
-        const objectSize = videoBlob.size;
-
-        // Video conversion is non-trivial effort, and the video segment file
-        // we're uploading is potentially very large, so add retries to avoid
-        // the need to redo everything in case of transient errors.
-        await retryEnsuringHTTPOkOr4xx(() =>
-            fetch(objectUploadURL, { method: "PUT", body: videoBlob }),
+        const playlist = await readVideoStream(electron, playlistToken).then(
+            (res) => res.text(),
         );
 
         const playlistData = await encodePlaylistJSON({
             type: "hls_video",
-            playlist: await playlistBlob.text(),
-            // TODO(HLS): Critical, fix this before any use.
-            width: 1280,
-            // TODO(HLS): Critical, fix this before any use.
-            height: 720,
-            size: objectSize,
+            playlist,
+            ...dimensions,
+            size: videoSize,
         });
 
-        await putVideoData(file, playlistData, objectID, objectSize);
+        await putVideoData(file, playlistData, objectID, videoSize);
+
+        log.info(`Generate HLS for ${fileLogID(file)} | done`);
     } finally {
-        await Promise.all([
-            videoStreamDone(electron, playlistToken),
-            videoStreamDone(electron, videoToken),
-        ]);
-    }
-};
-
-/**
- * Return a blob containing the contents of the given video file.
- *
- * The blob is either constructed using the given {@link uploadItem} if present,
- * otherwise it is downloaded from remote.
- *
- * @param file An {@link EnteFile} of type {@link FileType.video}.
- *
- * @param uploadItem If we're called during the upload process, then this will
- * be set to the {@link UploadItem} that was uploaded. This way, we can directly
- * use the on-disk file instead of needing to download the original from remote.
- */
-const fetchOriginalVideoBlob = async (
-    file: EnteFile,
-    uploadItem: UploadItem | undefined,
-): Promise<Blob | ReadableStream | null> =>
-    uploadItem
-        ? fetchOriginalVideoUploadItemBlob(file, uploadItem)
-        : await downloadManager.fileStream(file);
-
-const fetchOriginalVideoUploadItemBlob = (
-    _: EnteFile,
-    uploadItem: UploadItem,
-) => {
-    // TODO(HLS): Commented below is the implementation that the eventual
-    // desktop only conversion would need to handle - the conversion logic would
-    // need to move to the desktop side to allow it to handle large videos.
-    //
-    // Meanwhile during development, we assume we're on the happy web-only cases
-    // (dragging and dropping a file). All this code is behind a development
-    // feature flag, so it is not going to impact end users.
-
-    if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
-        throw new Error("Not implemented");
-        // const { response, lastModifiedMs } = await readStream(
-        //     ensureElectron(),
-        //     uploadItem,
-        // );
-        // const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
-        // // This function will not be called for videos, and for images
-        // // it is reasonable to read the entire stream into memory here.
-        // return new File([await response.arrayBuffer()], basename(path), {
-        //     lastModified: lastModifiedMs,
-        // });
-    } else {
-        if (uploadItem instanceof File) {
-            return uploadItem;
-        } else {
-            return uploadItem.file;
-        }
+        await videoStreamDone(electron, playlistToken);
     }
 };
 

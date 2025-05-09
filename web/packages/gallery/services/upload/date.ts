@@ -24,10 +24,10 @@ export const tryParseEpochMicrosecondsFromFileName = (
 };
 
 // Not sure why we have a try catch, but until there is a chance to validate
-// that it doesn't indeed throw, move out the actual logic into this separate
-// and more readable function.
+// that it doesn't indeed throw, keep this actual logic into this separate and
+// more readable function.
 const parseEpochMicrosecondsFromFileName = (fileName: string) => {
-    let date: Date;
+    let date: Date | undefined;
 
     fileName = fileName.trim();
 
@@ -35,13 +35,16 @@ const parseEpochMicrosecondsFromFileName = (fileName: string) => {
     if (fileName.startsWith("IMG-") || fileName.startsWith("VID-")) {
         // WhatsApp media files
         // - e.g. "IMG-20171218-WA0028.jpg"
-        date = parseDateFromFusedDateString(fileName.split("-")[1]);
+        const p = fileName.split("-");
+        const dateString = p[1];
+        if (dateString) {
+            date = parseDateFromFusedDateString(dateString);
+        }
     } else if (fileName.startsWith("Screenshot_")) {
         // Screenshots on Android
         // - e.g. "Screenshot_20181227-152914.jpg"
-        date = parseDateFromFusedDateString(
-            fileName.replaceAll("Screenshot_", ""),
-        );
+        const dateString = fileName.replace("Screenshot_", "");
+        date = parseDateFromFusedDateString(dateString);
     } else if (fileName.startsWith("signal-")) {
         // Signal images
         //
@@ -59,8 +62,8 @@ const parseEpochMicrosecondsFromFileName = (fileName: string) => {
         if (p.length > 5) {
             const dateString = `${p[1]}${p[2]}${p[3]}-${p[4]}${p[5]}${p[6]}`;
             date = parseDateFromFusedDateString(dateString);
-        } else {
-            const dateString = `${p[1]}${p[2]}${p[3]}-${p[4]}`;
+        } else if (p.length > 1) {
+            const dateString = `${p[1]}${p[2] ?? ""}${p[3] ?? ""}-${p[4] ?? ""}`;
             date = parseDateFromFusedDateString(dateString);
         }
     }
@@ -119,8 +122,6 @@ const parseEpochMicrosecondsFromFileName = (fileName: string) => {
         return unixTime;
     }
 };
-
-const currentYear = new Date().getFullYear();
 
 /**
  * An intermediate data structure we use for the functions in this file. It
@@ -195,7 +196,10 @@ const validateAndGetDateFromComponents = (components: DateComponents) => {
     if (!isDatePartValid(date, components)) {
         return undefined;
     }
-    if (date.getFullYear() < 1990 || date.getFullYear() > currentYear + 1) {
+    if (
+        date.getFullYear() < 1990 ||
+        date.getFullYear() > new Date().getFullYear() + 1
+    ) {
         return undefined;
     }
     return date;

@@ -5,6 +5,7 @@ import path from "node:path";
 import type { ZipItem } from "../../types/ipc";
 import log from "../log";
 import { markClosableZip, openZip } from "../services/zip";
+import { writeStream } from "./stream";
 
 /**
  * Our very own directory within the system temp directory. Go crazy, but
@@ -79,7 +80,7 @@ export const deleteTempFileIgnoringErrors = async (tempFilePath: string) => {
     }
 };
 
-/** The result of {@link makeFileForDataOrPathOrZipItem}. */
+/** The result of {@link makeFileForDataOrStreamOrPathOrZipItem}. */
 interface FileForDataOrPathOrZipItem {
     /**
      * The path to the file (possibly temporary).
@@ -104,14 +105,14 @@ interface FileForDataOrPathOrZipItem {
 /**
  * Return the path to a file, a boolean indicating if this is a temporary path
  * that needs to be deleted after processing, and a function to write the given
- * {@link dataOrPathOrZipItem} into that temporary file if needed.
+ * {@link item} into that temporary file if needed.
  *
- * @param dataOrPathOrZipItem The contents of the file, or the path to an
- * existing file, or a (path to a zip file, name of an entry within that zip
- * file) tuple.
+ * @param item The contents of the file (bytes), or a {@link ReadableStream}
+ * with the contents of the file, or the path to an existing file, or a (path to
+ * a zip file, name of an entry within that zip file) tuple.
  */
-export const makeFileForDataOrPathOrZipItem = async (
-    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+export const makeFileForDataOrStreamOrPathOrZipItem = async (
+    item: Uint8Array | ReadableStream | string | ZipItem,
 ): Promise<FileForDataOrPathOrZipItem> => {
     let path: string;
     let isFileTemporary: boolean;
@@ -119,18 +120,19 @@ export const makeFileForDataOrPathOrZipItem = async (
         /* no-op */
     };
 
-    if (typeof dataOrPathOrZipItem == "string") {
-        path = dataOrPathOrZipItem;
+    if (typeof item == "string") {
+        path = item;
         isFileTemporary = false;
     } else {
         path = await makeTempFilePath();
         isFileTemporary = true;
-        if (dataOrPathOrZipItem instanceof Uint8Array) {
-            writeToTemporaryFile = () =>
-                fs.writeFile(path, dataOrPathOrZipItem);
+        if (item instanceof Uint8Array) {
+            writeToTemporaryFile = () => fs.writeFile(path, item);
+        } else if (item instanceof ReadableStream) {
+            writeToTemporaryFile = () => writeStream(path, item);
         } else {
             writeToTemporaryFile = async () => {
-                const [zipPath, entryName] = dataOrPathOrZipItem;
+                const [zipPath, entryName] = item;
                 const zip = openZip(zipPath);
                 try {
                     await zip.extract(entryName, path);

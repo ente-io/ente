@@ -22,6 +22,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m0(title) => "${title} (Me)";
 
+  static String m2(count) =>
+      "${Intl.plural(count, one: 'Legg til element', other: 'Legg til elementene')}";
+
   static String m3(storageAmount, endDate) =>
       "Tillegget på ${storageAmount} er gyldig til ${endDate}";
 
@@ -136,6 +139,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m47(personName, email) =>
       "Dette knytter ${personName} til ${email}";
 
+  static String m48(count, formattedCount) =>
+      "${Intl.plural(count, zero: 'ingen minner', one: '${formattedCount} minne', other: '${formattedCount} minner')}";
+
+  static String m49(count) =>
+      "${Intl.plural(count, one: 'Flytt elementet', other: 'Flytt elementene')}";
+
   static String m50(albumName) => "Flyttet til ${albumName}";
 
   static String m51(personName) => "Ingen forslag for ${personName}";
@@ -194,101 +203,101 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m74(name) => "Biltur med ${name}";
 
-  static String m113(count) =>
+  static String m75(count) =>
       "${Intl.plural(count, one: '${count} resultat funnet', other: '${count} resultater funnet')}";
 
-  static String m75(snapshotLength, searchLength) =>
+  static String m76(snapshotLength, searchLength) =>
       "Uoverensstemmelse i seksjonslengde: ${snapshotLength} != ${searchLength}";
 
-  static String m76(count) => "${count} valgt";
+  static String m77(count) => "${count} valgt";
 
-  static String m77(count, yourCount) => "${count} valgt (${yourCount} dine)";
+  static String m78(count, yourCount) => "${count} valgt (${yourCount} dine)";
 
-  static String m78(name) => "Selfier med ${name}";
-
-  static String m79(verificationID) =>
-      "Her er min verifiserings-ID: ${verificationID} for ente.io.";
+  static String m79(name) => "Selfier med ${name}";
 
   static String m80(verificationID) =>
+      "Her er min verifiserings-ID: ${verificationID} for ente.io.";
+
+  static String m81(verificationID) =>
       "Hei, kan du bekrefte at dette er din ente.io verifiserings-ID: ${verificationID}";
 
-  static String m81(referralCode, referralStorageInGB) =>
+  static String m82(referralCode, referralStorageInGB) =>
       "Gi vervekode: ${referralCode} \n\nBruk den i Innstillinger → General → Verving for å få ${referralStorageInGB} GB gratis etter at du har registrert deg for en betalt plan\n\nhttps://ente.io";
 
-  static String m82(numberOfPeople) =>
+  static String m83(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'Del med bestemte personer', one: 'Delt med 1 person', other: 'Delt med ${numberOfPeople} personer')}";
 
-  static String m83(emailIDs) => "Delt med ${emailIDs}";
-
-  static String m84(fileType) =>
-      "Denne ${fileType} vil bli slettet fra enheten din.";
+  static String m84(emailIDs) => "Delt med ${emailIDs}";
 
   static String m85(fileType) =>
+      "Denne ${fileType} vil bli slettet fra enheten din.";
+
+  static String m86(fileType) =>
       "Denne ${fileType} er både i Ente og på enheten din.";
 
-  static String m86(fileType) => "Denne ${fileType} vil bli slettet fra Ente.";
+  static String m87(fileType) => "Denne ${fileType} vil bli slettet fra Ente.";
 
-  static String m87(name) => "Sport med ${name}";
+  static String m88(name) => "Sport med ${name}";
 
-  static String m88(name) => "Fremhev ${name}";
+  static String m89(name) => "Fremhev ${name}";
 
-  static String m89(storageAmountInGB) => "${storageAmountInGB} GB";
+  static String m90(storageAmountInGB) => "${storageAmountInGB} GB";
 
-  static String m90(
+  static String m91(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "${usedAmount} ${usedStorageUnit} av ${totalAmount} ${totalStorageUnit} brukt";
 
-  static String m91(id) =>
+  static String m92(id) =>
       "Din ${id} er allerede koblet til en annen Ente-konto.\nHvis du ønsker å bruke din ${id} med denne kontoen, vennligst kontakt vår brukerstøtte\'\'";
 
-  static String m92(endDate) =>
+  static String m93(endDate) =>
       "Abonnementet ditt blir avsluttet den ${endDate}";
 
-  static String m93(completed, total) => "${completed}/${total} minner bevart";
+  static String m94(completed, total) => "${completed}/${total} minner bevart";
 
-  static String m94(ignoreReason) =>
+  static String m95(ignoreReason) =>
       "Trykk for å laste opp, opplasting er ignorert nå på grunn av ${ignoreReason}";
 
-  static String m95(storageAmountInGB) => "De får også ${storageAmountInGB} GB";
+  static String m96(storageAmountInGB) => "De får også ${storageAmountInGB} GB";
 
-  static String m96(email) => "Dette er ${email} sin verifiserings-ID";
+  static String m97(email) => "Dette er ${email} sin verifiserings-ID";
 
-  static String m97(count) =>
+  static String m98(count) =>
       "${Intl.plural(count, one: 'Denne uka, ${count} år siden', other: 'Denne uka, ${count} år siden')}";
 
-  static String m98(dateFormat) => "${dateFormat} gjennom årene";
+  static String m99(dateFormat) => "${dateFormat} gjennom årene";
 
-  static String m99(count) =>
+  static String m100(count) =>
       "${Intl.plural(count, zero: 'Snart', one: '1 dag', other: '${count} dager')}";
 
-  static String m100(year) => "Reise i ${year}";
+  static String m101(year) => "Reise i ${year}";
 
-  static String m101(location) => "Reise til ${location}";
+  static String m102(location) => "Reise til ${location}";
 
-  static String m102(email) =>
+  static String m103(email) =>
       "Du er invitert til å være en betrodd kontakt av ${email}.";
 
-  static String m103(galleryType) =>
+  static String m104(galleryType) =>
       "Galleritype ${galleryType} støttes ikke for nytt navn";
 
-  static String m104(ignoreReason) =>
+  static String m105(ignoreReason) =>
       "Opplastingen ble ignorert på grunn av ${ignoreReason}";
 
-  static String m105(count) => "Bevarer ${count} minner...";
+  static String m106(count) => "Bevarer ${count} minner...";
 
-  static String m106(endDate) => "Gyldig til ${endDate}";
+  static String m107(endDate) => "Gyldig til ${endDate}";
 
-  static String m107(email) => "Verifiser ${email}";
+  static String m108(email) => "Verifiser ${email}";
 
-  static String m109(email) =>
+  static String m110(email) =>
       "Vi har sendt en e-post til <green>${email}</green>";
 
-  static String m110(count) =>
+  static String m111(count) =>
       "${Intl.plural(count, one: '${count} år siden', other: '${count} år siden')}";
 
-  static String m111(name) => "Du og ${name}";
+  static String m112(name) => "Du og ${name}";
 
-  static String m112(storageSaved) => "Du har frigjort ${storageSaved}!";
+  static String m113(storageSaved) => "Du har frigjort ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -315,6 +324,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addFiles": MessageLookupByLibrary.simpleMessage("Legg til filer"),
         "addFromDevice":
             MessageLookupByLibrary.simpleMessage("Legg til fra enhet"),
+        "addItem": m2,
         "addLocation": MessageLookupByLibrary.simpleMessage("Legg til sted"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Legg til"),
         "addMore": MessageLookupByLibrary.simpleMessage("Legg til flere"),
@@ -1248,6 +1258,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "me": MessageLookupByLibrary.simpleMessage("Meg"),
+        "memoryCount": m48,
         "merchandise": MessageLookupByLibrary.simpleMessage("Varer"),
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Slå sammen med eksisterende"),
@@ -1279,6 +1290,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mostRecent": MessageLookupByLibrary.simpleMessage("Nyeste"),
         "mostRelevant": MessageLookupByLibrary.simpleMessage("Mest relevant"),
         "mountains": MessageLookupByLibrary.simpleMessage("Over åsene"),
+        "moveItem": m49,
         "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
             "Flytt valgte bilder til en dato"),
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("Flytt til album"),
@@ -1692,8 +1704,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Inviter folk, og du vil se alle bilder som deles av dem her"),
         "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
             "Folk vil vises her når behandling og synkronisering er fullført"),
-        "searchResultCount": m113,
-        "searchSectionsLengthMismatch": m75,
+        "searchResultCount": m75,
+        "searchSectionsLengthMismatch": m76,
         "security": MessageLookupByLibrary.simpleMessage("Sikkerhet"),
         "seePublicAlbumLinksInApp": MessageLookupByLibrary.simpleMessage(
             "Se offentlige albumlenker i appen"),
@@ -1741,9 +1753,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeRemovedFromThisPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Valgte elementer fjernes fra denne personen, men blir ikke slettet fra biblioteket ditt."),
-        "selectedPhotos": m76,
-        "selectedPhotosWithYours": m77,
-        "selfiesWithThem": m78,
+        "selectedPhotos": m77,
+        "selectedPhotosWithYours": m78,
+        "selfiesWithThem": m79,
         "send": MessageLookupByLibrary.simpleMessage("Send"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send e-post"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("Send invitasjon"),
@@ -1773,16 +1785,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareAnAlbumNow":
             MessageLookupByLibrary.simpleMessage("Del et album nå"),
         "shareLink": MessageLookupByLibrary.simpleMessage("Del link"),
-        "shareMyVerificationID": m79,
+        "shareMyVerificationID": m80,
         "shareOnlyWithThePeopleYouWant":
             MessageLookupByLibrary.simpleMessage("Del bare med de du vil"),
-        "shareTextConfirmOthersVerificationID": m80,
+        "shareTextConfirmOthersVerificationID": m81,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Last ned Ente slik at vi lett kan dele bilder og videoer av original kvalitet\n\nhttps://ente.io"),
-        "shareTextReferralCode": m81,
+        "shareTextReferralCode": m82,
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Del med brukere som ikke har Ente"),
-        "shareWithPeopleSectionTitle": m82,
+        "shareWithPeopleSectionTitle": m83,
         "shareYourFirstAlbum":
             MessageLookupByLibrary.simpleMessage("Del ditt første album"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
@@ -1793,7 +1805,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nye delte bilder"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
             "Motta varsler når noen legger til et bilde i et delt album som du er en del av"),
-        "sharedWith": m83,
+        "sharedWith": m84,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Delt med meg"),
         "sharedWithYou": MessageLookupByLibrary.simpleMessage("Delt med deg"),
         "sharing": MessageLookupByLibrary.simpleMessage("Deler..."),
@@ -1809,11 +1821,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Logg ut andre enheter"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Jeg godtar <u-terms>bruksvilkårene</u-terms> og <u-policy>personvernreglene</u-policy>"),
-        "singleFileDeleteFromDevice": m84,
+        "singleFileDeleteFromDevice": m85,
         "singleFileDeleteHighlight": MessageLookupByLibrary.simpleMessage(
             "Den vil bli slettet fra alle album."),
-        "singleFileInBothLocalAndRemote": m85,
-        "singleFileInRemoteOnly": m86,
+        "singleFileInBothLocalAndRemote": m86,
+        "singleFileInRemoteOnly": m87,
         "skip": MessageLookupByLibrary.simpleMessage("Hopp over"),
         "social": MessageLookupByLibrary.simpleMessage("Sosial"),
         "someItemsAreInBothEnteAndYourDevice":
@@ -1847,8 +1859,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("Nyeste først"),
         "sortOldestFirst": MessageLookupByLibrary.simpleMessage("Eldste først"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Suksess"),
-        "sportsWithThem": m87,
-        "spotlightOnThem": m88,
+        "sportsWithThem": m88,
+        "spotlightOnThem": m89,
         "spotlightOnYourself":
             MessageLookupByLibrary.simpleMessage("Fremhev deg selv"),
         "startAccountRecoveryTitle":
@@ -1863,15 +1875,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "storage": MessageLookupByLibrary.simpleMessage("Lagring"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("Familie"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Deg"),
-        "storageInGB": m89,
+        "storageInGB": m90,
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("Lagringsplassen er full"),
-        "storageUsageInfo": m90,
+        "storageUsageInfo": m91,
         "streamDetails":
             MessageLookupByLibrary.simpleMessage("Strømmedetaljer"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("Sterkt"),
-        "subAlreadyLinkedErrMessage": m91,
-        "subWillBeCancelledOn": m92,
+        "subAlreadyLinkedErrMessage": m92,
+        "subWillBeCancelledOn": m93,
         "subscribe": MessageLookupByLibrary.simpleMessage("Abonner"),
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
             "Du trenger et aktivt betalt abonnement for å aktivere deling."),
@@ -1889,7 +1901,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Foreslå funksjoner"),
         "sunrise": MessageLookupByLibrary.simpleMessage("På horisonten"),
         "support": MessageLookupByLibrary.simpleMessage("Brukerstøtte"),
-        "syncProgress": m93,
+        "syncProgress": m94,
         "syncStopped":
             MessageLookupByLibrary.simpleMessage("Synkronisering stoppet"),
         "syncing": MessageLookupByLibrary.simpleMessage("Synkroniserer..."),
@@ -1902,7 +1914,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Trykk for å låse opp"),
         "tapToUpload":
             MessageLookupByLibrary.simpleMessage("Trykk for å laste opp"),
-        "tapToUploadIsIgnoredDue": m94,
+        "tapToUploadIsIgnoredDue": m95,
         "tempErrorContactSupportIfPersists": MessageLookupByLibrary.simpleMessage(
             "Det ser ut som noe gikk galt. Prøv på nytt etter en stund. Hvis feilen vedvarer, kontakt kundestøtte."),
         "terminate": MessageLookupByLibrary.simpleMessage("Avslutte"),
@@ -1925,7 +1937,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "theseItemsWillBeDeletedFromYourDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Disse elementene vil bli slettet fra enheten din."),
-        "theyAlsoGetXGb": m95,
+        "theyAlsoGetXGb": m96,
         "theyWillBeDeletedFromAllAlbums": MessageLookupByLibrary.simpleMessage(
             "De vil bli slettet fra alle album."),
         "thisActionCannotBeUndone": MessageLookupByLibrary.simpleMessage(
@@ -1943,12 +1955,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Dette bildet har ingen exif-data"),
         "thisIsMeExclamation":
             MessageLookupByLibrary.simpleMessage("Dette er meg!"),
-        "thisIsPersonVerificationId": m96,
+        "thisIsPersonVerificationId": m97,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "Dette er din bekreftelses-ID"),
         "thisWeekThroughTheYears":
             MessageLookupByLibrary.simpleMessage("Denne uka gjennom årene"),
-        "thisWeekXYearsAgo": m97,
+        "thisWeekXYearsAgo": m98,
         "thisWillLogYouOutOfTheFollowingDevice":
             MessageLookupByLibrary.simpleMessage(
                 "Dette vil logge deg ut av følgende enhet:"),
@@ -1960,7 +1972,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
             MessageLookupByLibrary.simpleMessage(
                 "Dette fjerner de offentlige lenkene av alle valgte hurtiglenker."),
-        "throughTheYears": m98,
+        "throughTheYears": m99,
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(
                 "For å aktivere applås, vennligst angi passord eller skjermlås i systeminnstillingene."),
@@ -1974,13 +1986,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "total": MessageLookupByLibrary.simpleMessage("totalt"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Total størrelse"),
         "trash": MessageLookupByLibrary.simpleMessage("Papirkurv"),
-        "trashDaysLeft": m99,
+        "trashDaysLeft": m100,
         "trim": MessageLookupByLibrary.simpleMessage("Beskjær"),
-        "tripInYear": m100,
-        "tripToLocation": m101,
+        "tripInYear": m101,
+        "tripToLocation": m102,
         "trustedContacts":
             MessageLookupByLibrary.simpleMessage("Betrodde kontakter"),
-        "trustedInviteBody": m102,
+        "trustedInviteBody": m103,
         "tryAgain": MessageLookupByLibrary.simpleMessage("Prøv igjen"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "Slå på sikkerhetskopi for å automatisk laste opp filer lagt til denne enhetsmappen i Ente."),
@@ -1998,7 +2010,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Tofaktorautentisering ble tilbakestilt"),
         "twofactorSetup":
             MessageLookupByLibrary.simpleMessage("Oppsett av to-faktor"),
-        "typeOfGallerGallerytypeIsNotSupportedForRename": m103,
+        "typeOfGallerGallerytypeIsNotSupportedForRename": m104,
         "unarchive": MessageLookupByLibrary.simpleMessage("Opphev arkivering"),
         "unarchiveAlbum":
             MessageLookupByLibrary.simpleMessage("Gjenopprett album"),
@@ -2022,10 +2034,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "updatingFolderSelection":
             MessageLookupByLibrary.simpleMessage("Oppdaterer mappevalg..."),
         "upgrade": MessageLookupByLibrary.simpleMessage("Oppgrader"),
-        "uploadIsIgnoredDueToIgnorereason": m104,
+        "uploadIsIgnoredDueToIgnorereason": m105,
         "uploadingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Laster opp filer til albumet..."),
-        "uploadingMultipleMemories": m105,
+        "uploadingMultipleMemories": m106,
         "uploadingSingleMemory":
             MessageLookupByLibrary.simpleMessage("Bevarer 1 minne..."),
         "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(
@@ -2045,7 +2057,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Bruk valgt bilde"),
         "usedSpace":
             MessageLookupByLibrary.simpleMessage("Benyttet lagringsplass"),
-        "validTill": m106,
+        "validTill": m107,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Bekreftelse mislyktes, vennligst prøv igjen"),
@@ -2054,7 +2066,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("Bekreft"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("Bekreft e-postadresse"),
-        "verifyEmailID": m107,
+        "verifyEmailID": m108,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Bekreft"),
         "verifyPasskey":
             MessageLookupByLibrary.simpleMessage("Bekreft tilgangsnøkkel"),
@@ -2093,7 +2105,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
             MessageLookupByLibrary.simpleMessage(
                 "Vi støtter ikke redigering av bilder og album som du ikke eier ennå"),
-        "weHaveSendEmailTo": m109,
+        "weHaveSendEmailTo": m110,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Svakt"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Velkommen tilbake!"),
@@ -2102,7 +2114,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Betrodd kontakt kan hjelpe til med å gjenopprette dine data."),
         "yearShort": MessageLookupByLibrary.simpleMessage("år"),
         "yearly": MessageLookupByLibrary.simpleMessage("Årlig"),
-        "yearsAgo": m110,
+        "yearsAgo": m111,
         "yes": MessageLookupByLibrary.simpleMessage("Ja"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Ja, avslutt"),
         "yesConvertToViewer":
@@ -2116,7 +2128,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesResetPerson":
             MessageLookupByLibrary.simpleMessage("Ja, tilbakestill person"),
         "you": MessageLookupByLibrary.simpleMessage("Deg"),
-        "youAndThem": m111,
+        "youAndThem": m112,
         "youAreOnAFamilyPlan": MessageLookupByLibrary.simpleMessage(
             "Du har et familieabonnement!"),
         "youAreOnTheLatestVersion": MessageLookupByLibrary.simpleMessage(
@@ -2135,7 +2147,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Du kan ikke dele med deg selv"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "Du har ingen arkiverte elementer."),
-        "youHaveSuccessfullyFreedUp": m112,
+        "youHaveSuccessfullyFreedUp": m113,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Brukeren din har blitt slettet"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Ditt kart"),

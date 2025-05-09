@@ -6,7 +6,7 @@ import { type ZipItem } from "../../types/ipc";
 import { execAsync, isDev } from "../utils/electron";
 import {
     deleteTempFileIgnoringErrors,
-    makeFileForDataOrPathOrZipItem,
+    makeFileForDataOrStreamOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils/temp";
 
@@ -69,7 +69,7 @@ export const generateImageThumbnail = async (
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
         writeToTemporaryFile: writeToTemporaryInputFile,
-    } = await makeFileForDataOrPathOrZipItem(dataOrPathOrZipItem);
+    } = await makeFileForDataOrStreamOrPathOrZipItem(dataOrPathOrZipItem);
 
     const outputFilePath = await makeTempFilePath("jpeg");
 

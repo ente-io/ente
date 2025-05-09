@@ -278,6 +278,12 @@ export interface Electron {
         isDir: (dirPath: string) => Promise<boolean>;
 
         /**
+         * Return the last modified time (integral epoch milliseconds) of the
+         * file system entry at {@link path}.
+         */
+        statMtime: (path: string) => Promise<number>;
+
+        /**
          * Return the paths of all the files under the given folder.
          *
          * This function walks the directory tree starting at {@link folderPath}
@@ -359,7 +365,7 @@ export interface Electron {
      * (specified as {@link outputPathPlaceholder} in {@link command}).
      */
     ffmpegExec: (
-        command: string[],
+        command: FFmpegCommand,
         dataOrPathOrZipItem: Uint8Array | string | ZipItem,
         outputFileExtension: string,
     ) => Promise<Uint8Array>;
@@ -367,21 +373,27 @@ export interface Electron {
     // - ML
 
     /**
-     * Create a new ML worker, terminating the older ones (if any).
+     * Trigger the creation of a new utility process of the given {@link type},
+     * terminating the older ones (if any).
      *
      * This creates a new Node.js utility process, and sets things up so that we
      * can communicate directly with that utility process using a
-     * {@link MessagePort} that gets posted using "createMLWorker/port".
+     * {@link MessagePort} that gets posted on the "utilityProcessPort/<type>"
+     * channel.
      *
-     * At the other end of that port will be an object that conforms to the
-     * {@link ElectronMLWorker} interface.
+     * The code running in the utility process is determined by the specific
+     * value of {@link type}. Thus, att the other end of that port will be an
+     * object that conforms to:
+     *
+     * - {@link ElectronMLWorker} interface, when type is "ml".
      *
      * For more details about the IPC flow, see: [Note: ML IPC].
      *
      * Note: For simplicity of implementation, we assume that there is at most
-     * one outstanding call to {@link createMLWorker}.
+     * one outstanding call to {@link triggerCreateUtilityProcess} for a given
+     * {@link type}.
      */
-    createMLWorker: () => void;
+    triggerCreateUtilityProcess: (type: UtilityProcessType) => void;
 
     // - Watch
 
@@ -531,7 +543,7 @@ export interface Electron {
      * - Typically, this would be called at the start of an upload.
      *
      * - Thereafter, as each item gets uploaded one by one, we'd call
-     *   {@link markUploadedFiles} or {@link markUploadedZipItems}.
+     *   {@link markUploadedFile} or {@link markUploadedZipItem}.
      *
      * - Finally, once the upload completes (or gets cancelled), we'd call
      *   {@link clearPendingUploads} to complete the circle.
@@ -539,15 +551,41 @@ export interface Electron {
     setPendingUploads: (pendingUploads: PendingUploads) => Promise<void>;
 
     /**
-     * Mark the given files (given by their {@link paths}) as having been
+     * Mark the given files (specified by their disk paths) as having been
      * uploaded.
+     *
+     * @param {@link path} The path to the file system file which was uploaded.
+     *
+     * @param {@link associatedPath} The path file (if any) of the file
+     * associated with the file which was uploaded. This will be present only in
+     * the case of live photos, where this will be set to the path of the video
+     * component of the live photo on disk.
+     *
+     * @returns The last modified time (epoch milliseconds) of the file at
+     * {@link path}.
      */
-    markUploadedFiles: (paths: PendingUploads["filePaths"]) => Promise<void>;
+    markUploadedFile: (
+        path: string,
+        associatedPath?: string,
+    ) => Promise<number>;
 
     /**
      * Mark the given {@link ZipItem}s as having been uploaded.
+     *
+     * @param {@link item} The {@link ZipItem} which was uploaded.
+     *
+     * @param {@link associatedItem} An optional extra {@link ZipItem}
+     * associated with the {@link item} which was uploaded. This will be present
+     * only in case of live photos, where this'll be set to the {@link ZipItem}
+     * representing the video component of the live photo on disk.
+     *
+     * @returns The last modified time (epoch milliseconds) of the zip file
+     * containing {@link item}.
      */
-    markUploadedZipItems: (items: PendingUploads["zipItems"]) => Promise<void>;
+    markUploadedZipItem: (
+        item: ZipItem,
+        associatedItem?: ZipItem,
+    ) => Promise<number>;
 
     /**
      * Clear any pending uploads.
@@ -558,11 +596,20 @@ export interface Electron {
     clearPendingUploads: () => Promise<void>;
 }
 
+export type UtilityProcessType = "ml";
+
 /**
- * The shape of the object exposed by the Node.js ML worker process on the
- * message port that the web layer obtains by doing {@link createMLWorker}.
+ * The shape of the object exposed by the Node.js utility process listening on
+ * the other side message port that the web layer obtains by doing
+ * {@link triggerCreateUtilityProcess} with type "ml".
  */
 export interface ElectronMLWorker {
+    /**
+     * Return the last modified time (epoch milliseconds) for the file at the
+     * given {@link path} on the user's file system.
+     */
+    fsStatMtime: (path: string) => Promise<number>;
+
     /**
      * Return a CLIP embedding of the given image.
      *
@@ -740,3 +787,15 @@ export interface PendingUploads {
      */
     zipItems: ZipItem[];
 }
+
+/**
+ * A command that we can ask FFmpeg to run for us.
+ *
+ * [Note: Alternative FFmpeg command for HDR videos]
+ *
+ * Usually, this is a single command (specified as an array of strings
+ * containing the "words" of the command). However, we can also provide two
+ * alternative commands - one to run when the input is (heuristically) detected
+ * as a HDR video, and one otherwise.
+ */
+export type FFmpegCommand = string[] | { default: string[]; hdr: string[] };

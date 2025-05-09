@@ -242,7 +242,7 @@ class PreviewVideoStore {
           '-vf "format=yuv420p10le,zscale=transfer=linear,tonemap=tonemap=hable:desat=0:peak=10,zscale=transfer=bt709:matrix=bt709:primaries=bt709,format=yuv420p" '
           '-color_primaries bt709 -color_trc bt709 -colorspace bt709 '
           '-c:v libx264 -crf 23 -preset medium '
-          '-c:a copy '
+          '-c:a aac -b:a 128k '
           '-f hls -hls_time 2 -hls_flags single_file '
           '-hls_list_size 0 -hls_key_info_file ${keyinfo.path} '
           '$prefix/output.m3u8',
@@ -355,6 +355,8 @@ class PreviewVideoStore {
           collectionID: enteFile.collectionID ?? 0,
         );
         _removeFromLocks(enteFile).ignore();
+        Directory(prefix).delete(recursive: true).ignore();
+
         Bus.instance.fire(PreviewUpdatedEvent(_items));
       }
     } finally {
@@ -657,7 +659,7 @@ class PreviewVideoStore {
     final fileSize = enteFile.fileSize;
     FFProbeProps? props;
     File? file;
-    bool result = false;
+    bool skipFile = false;
 
     try {
       final isFileUnder10MB = fileSize != null && fileSize <= 10 * 1024 * 1024;
@@ -669,13 +671,42 @@ class PreviewVideoStore {
               .firstWhereOrNull((e) => e["type"] == "video");
 
           final codec = videoData["codec_name"]?.toString().toLowerCase();
-          result = codec?.contains("h264") ?? false;
+          skipFile = codec?.contains("h264") ?? false;
+
+          if (skipFile) {
+            _logger.info(
+              "[init] Ignoring file ${enteFile.displayName} for preview due to codec",
+            );
+            return (props, skipFile, file);
+          }
         }
+      }
+
+      int? size = enteFile.fileSize;
+      int? duration = enteFile.duration;
+
+      if (size == null) {
+        file = await getFile(enteFile, isOrigin: true);
+        size = file?.lengthSync();
+      }
+
+      if (duration == null) {
+        file ??= await getFile(enteFile, isOrigin: true);
+        props = await getVideoPropsAsync(file!);
+        duration = props?.duration?.inSeconds;
+      }
+
+      if ((size == null || duration == null) ||
+          (size >= 500 * 1024 * 1024 || duration > 60)) {
+        skipFile = true;
+        _logger.info(
+          "[init] Ignoring file ${enteFile.displayName} for preview due to size: $size and duration: $duration",
+        );
       }
     } catch (e, sT) {
       _logger.warning("Failed to check props", e, sT);
     }
-    return (props, result, file);
+    return (props, skipFile, file);
   }
 
   // generate stream for all files after cutoff date
@@ -721,6 +752,7 @@ class PreviewVideoStore {
     var n = allFiles.length, i = 0;
     while (i < n) {
       final enteFile = allFiles[i];
+
       // elimination case for <=10 MB with H.264
       final (_, result, _) = await _checkFileForPreviewCreation(enteFile);
       final isFailure =
@@ -736,6 +768,9 @@ class PreviewVideoStore {
         );
       }
       if (result || isFailure) {
+        _logger.info(
+          "[init] Ignoring file ${enteFile.displayName} for preview",
+        );
         allFiles.removeAt(i);
         n--;
         continue;

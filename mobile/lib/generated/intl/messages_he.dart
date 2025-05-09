@@ -83,41 +83,41 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m72(userEmail) =>
       "${userEmail} יוסר מהאלבום המשותף הזה\n\nגם תמונות שנוספו על ידיהם יוסרו מהאלבום";
 
-  static String m76(count) => "${count} נבחרו";
+  static String m77(count) => "${count} נבחרו";
 
-  static String m77(count, yourCount) => "${count} נבחרו (${yourCount} שלך)";
-
-  static String m79(verificationID) =>
-      "הנה מזהה האימות שלי: ${verificationID} עבור ente.io.";
+  static String m78(count, yourCount) => "${count} נבחרו (${yourCount} שלך)";
 
   static String m80(verificationID) =>
+      "הנה מזהה האימות שלי: ${verificationID} עבור ente.io.";
+
+  static String m81(verificationID) =>
       "היי, תוכל לוודא שזה מזהה האימות שלך של ente.io: ${verificationID}";
 
-  static String m82(numberOfPeople) =>
+  static String m83(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'שתף עם אנשים ספציפיים', one: 'שותף עם איש 1', two: 'שותף עם 2 אנשים', other: 'שותף עם ${numberOfPeople} אנשים')}";
 
-  static String m83(emailIDs) => "הושתף ע\"י ${emailIDs}";
+  static String m84(emailIDs) => "הושתף ע\"י ${emailIDs}";
 
-  static String m84(fileType) => "${fileType} יימחק מהמכשיר שלך.";
+  static String m85(fileType) => "${fileType} יימחק מהמכשיר שלך.";
 
-  static String m89(storageAmountInGB) => "${storageAmountInGB} GB";
+  static String m90(storageAmountInGB) => "${storageAmountInGB} GB";
 
-  static String m92(endDate) => "המנוי שלך יבוטל ב-${endDate}";
+  static String m93(endDate) => "המנוי שלך יבוטל ב-${endDate}";
 
-  static String m93(completed, total) => "${completed}/${total} זכרונות נשמרו";
+  static String m94(completed, total) => "${completed}/${total} זכרונות נשמרו";
 
-  static String m95(storageAmountInGB) => "הם גם יקבלו ${storageAmountInGB} GB";
+  static String m96(storageAmountInGB) => "הם גם יקבלו ${storageAmountInGB} GB";
 
-  static String m96(email) => "זה מזהה האימות של ${email}";
+  static String m97(email) => "זה מזהה האימות של ${email}";
 
-  static String m107(email) => "אמת ${email}";
+  static String m108(email) => "אמת ${email}";
 
-  static String m109(email) => "שלחנו דוא\"ל ל<green>${email}</green>";
+  static String m110(email) => "שלחנו דוא\"ל ל<green>${email}</green>";
 
-  static String m110(count) =>
+  static String m111(count) =>
       "${Intl.plural(count, one: 'לפני ${count} שנה', two: 'לפני ${count} שנים', many: 'לפני ${count} שנים', other: 'לפני ${count} שנים')}";
 
-  static String m112(storageSaved) => "הצלחת לפנות ${storageSaved}!";
+  static String m113(storageSaved) => "הצלחת לפנות ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -738,8 +738,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedFoldersWillBeEncryptedAndBackedUp":
             MessageLookupByLibrary.simpleMessage(
                 "התיקיות שנבחרו יוצפנו ויגובו"),
-        "selectedPhotos": m76,
-        "selectedPhotosWithYours": m77,
+        "selectedPhotos": m77,
+        "selectedPhotosWithYours": m78,
         "send": MessageLookupByLibrary.simpleMessage("שלח"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("שלח דוא\"ל"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("שלח הזמנה"),
@@ -758,15 +758,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareAnAlbumNow":
             MessageLookupByLibrary.simpleMessage("שתף אלבום עכשיו"),
         "shareLink": MessageLookupByLibrary.simpleMessage("שתף קישור"),
-        "shareMyVerificationID": m79,
+        "shareMyVerificationID": m80,
         "shareOnlyWithThePeopleYouWant":
             MessageLookupByLibrary.simpleMessage("שתף רק אם אנשים שאתה בוחר"),
-        "shareTextConfirmOthersVerificationID": m80,
+        "shareTextConfirmOthersVerificationID": m81,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "הורד את ente על מנת שנוכל לשתף תמונות וסרטונים באיכות המקור באופן קל\n\nhttps://ente.io"),
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "שתף עם משתמשים שהם לא של ente"),
-        "shareWithPeopleSectionTitle": m82,
+        "shareWithPeopleSectionTitle": m83,
         "shareYourFirstAlbum":
             MessageLookupByLibrary.simpleMessage("שתף את האלבום הראשון שלך"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
@@ -777,13 +777,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedPhotoNotificationsExplanation":
             MessageLookupByLibrary.simpleMessage(
                 "קבל התראות כשמישהו מוסיף תמונה לאלבום משותף שאתה חלק ממנו"),
-        "sharedWith": m83,
+        "sharedWith": m84,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("שותף איתי"),
         "sharing": MessageLookupByLibrary.simpleMessage("משתף..."),
         "showMemories": MessageLookupByLibrary.simpleMessage("הצג זכרונות"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "אני מסכים ל<u-terms>תנאי שירות</u-terms> ול<u-policy>מדיניות הפרטיות</u-policy>"),
-        "singleFileDeleteFromDevice": m84,
+        "singleFileDeleteFromDevice": m85,
         "singleFileDeleteHighlight":
             MessageLookupByLibrary.simpleMessage("זה יימחק מכל האלבומים."),
         "skip": MessageLookupByLibrary.simpleMessage("דלג"),
@@ -812,18 +812,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "storage": MessageLookupByLibrary.simpleMessage("אחסון"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("משפחה"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("אתה"),
-        "storageInGB": m89,
+        "storageInGB": m90,
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("גבול מקום האחסון נחרג"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("חזקה"),
-        "subWillBeCancelledOn": m92,
+        "subWillBeCancelledOn": m93,
         "subscribe": MessageLookupByLibrary.simpleMessage("הרשם"),
         "subscription": MessageLookupByLibrary.simpleMessage("מנוי"),
         "success": MessageLookupByLibrary.simpleMessage("הצלחה"),
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("הציעו מאפיינים"),
         "support": MessageLookupByLibrary.simpleMessage("תמיכה"),
-        "syncProgress": m93,
+        "syncProgress": m94,
         "syncing": MessageLookupByLibrary.simpleMessage("מסנכרן..."),
         "systemTheme": MessageLookupByLibrary.simpleMessage("מערכת"),
         "tapToCopy": MessageLookupByLibrary.simpleMessage("הקש כדי להעתיק"),
@@ -839,12 +839,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "theDownloadCouldNotBeCompleted":
             MessageLookupByLibrary.simpleMessage("לא ניתן להשלים את ההורדה"),
         "theme": MessageLookupByLibrary.simpleMessage("ערכת נושא"),
-        "theyAlsoGetXGb": m95,
+        "theyAlsoGetXGb": m96,
         "thisCanBeUsedToRecoverYourAccountIfYou":
             MessageLookupByLibrary.simpleMessage(
                 "זה יכול לשמש לשחזור החשבון שלך במקרה ותאבד את הגורם השני"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("מכשיר זה"),
-        "thisIsPersonVerificationId": m96,
+        "thisIsPersonVerificationId": m97,
         "thisIsYourVerificationId":
             MessageLookupByLibrary.simpleMessage("זה מזהה האימות שלך"),
         "thisWillLogYouOutOfTheFollowingDevice":
@@ -888,7 +888,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verificationId": MessageLookupByLibrary.simpleMessage("מזהה אימות"),
         "verify": MessageLookupByLibrary.simpleMessage("אמת"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("אימות דוא\"ל"),
-        "verifyEmailID": m107,
+        "verifyEmailID": m108,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("אמת"),
         "verifyPassword": MessageLookupByLibrary.simpleMessage("אמת סיסמא"),
         "verifyingRecoveryKey":
@@ -905,11 +905,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "אנא בקר ב-web.ente.io על מנת לנהל את המנוי שלך"),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("הקוד שלנו פתוח!"),
-        "weHaveSendEmailTo": m109,
+        "weHaveSendEmailTo": m110,
         "weakStrength": MessageLookupByLibrary.simpleMessage("חלשה"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("ברוך שובך!"),
         "yearly": MessageLookupByLibrary.simpleMessage("שנתי"),
-        "yearsAgo": m110,
+        "yearsAgo": m111,
         "yes": MessageLookupByLibrary.simpleMessage("כן"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("כן, בטל"),
         "yesConvertToViewer":
@@ -932,7 +932,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "אתה לא יכול לשנמך לתוכנית הזו"),
         "youCannotShareWithYourself":
             MessageLookupByLibrary.simpleMessage("אתה לא יכול לשתף עם עצמך"),
-        "youHaveSuccessfullyFreedUp": m112,
+        "youHaveSuccessfullyFreedUp": m113,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("החשבון שלך נמחק"),
         "yourPlanWasSuccessfullyDowngraded":

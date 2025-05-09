@@ -460,7 +460,7 @@
       }
     }
   },
-  "showMemories": "Montrer les souvenirs",
+  "showMemories": "Afficher les souvenirs",
   "yearsAgo": "{count, plural, one{il y a {count} an} other{il y a {count} ans}}",
   "backupSettings": "Paramètres de la sauvegarde",
   "backupStatus": "État de la sauvegarde",
@@ -1678,5 +1678,6 @@
   "cLFamilyPlan": "Limites pour le forfait Famille",
   "cLFamilyPlanDesc": "Vous pouvez maintenant fixer des limites sur la quantité de stockage que les membres de votre famille peuvent utiliser.",
   "cLBulkEdit": "Dates de modification multiples",
-  "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes celles-ci, en une seule action rapide. Les dates de décalage sont également prises en charge."
+  "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes celles-ci, en une seule action rapide. Les dates de décalage sont également prises en charge.",
+  "curatedMemories": "Souvenirs conservés"
 }

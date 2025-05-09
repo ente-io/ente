@@ -499,6 +499,7 @@
   "duplicateCodes": "Doppelte Codes",
   "noDuplicates": "✨ Keine Duplikate",
   "youveNoDuplicateCodesThatCanBeCleared": "Du hast keine doppelten Codes, die bereinigt werden können",
+  "deduplicateCodes": "Codes deduplizieren",
   "deselectAll": "Alle abwählen",
   "selectAll": "Alles auswählen",
   "deleteDuplicates": "Duplikate löschen",

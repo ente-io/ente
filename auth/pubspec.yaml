@@ -1,7 +1,7 @@
 
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.3.5+436
+version: 4.3.6+437
 publish_to: none
 
 environment:
@@ -84,8 +84,8 @@ dependencies:
   protobuf: ^3.0.0
   qr_code_scanner: ^1.0.1
   qr_flutter: ^4.1.0 
-  sentry: ^8.7.0
-  sentry_flutter: ^8.7.0
+  sentry: ^8.14.2
+  sentry_flutter: ^8.14.2
   share_plus: ^10.0.2
   shared_preferences: ^2.0.5
   sqflite:
@@ -107,12 +107,6 @@ dependencies:
   window_manager: ^0.4.2
   xdg_directories: ^1.0.4
 
-dependency_overrides:
-  flutter_secure_storage_linux:
-    git:
-      url: https://github.com/mogol/flutter_secure_storage.git
-      ref: develop
-      path: flutter_secure_storage_linux
 dev_dependencies:
   build_runner: ^2.1.11
   flutter_test:
