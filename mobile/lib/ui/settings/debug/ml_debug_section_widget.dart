@@ -147,9 +147,13 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           onTap: () async {
             try {
               final allClip = await MLDataDB.instance.getAllClipVectors();
+              final allClipSmall = allClip.sublist(0, 15000);
+              showShortToast(context, "Got all embeddings");
+              logger.info("Got all embeddings");
 
               final clipVectorDB = ClipVectorDB.instance;
               await clipVectorDB.deleteAllEmbeddings();
+              logger.info("Clean vector DB");
               final stats = await clipVectorDB.getIndexStats();
               logger.info("ClipVectorDB stats: size: ${stats.$1}, "
                   "capacity: ${stats.$2}, dimensions: ${stats.$3}");
@@ -158,10 +162,13 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   "ClipVectorDB stats: size: ${stats.$1}, "
                   "capacity: ${stats.$2}, dimensions: ${stats.$3}");
 
-              final fileIDs = allClip.map((e) => e.fileID).toList();
-              final embeddings = allClip
+              final fileIDs = allClipSmall.map((e) => e.fileID).toList();
+              final embeddings = allClipSmall
                   .map((e) => Float32List.fromList(e.vector.toList()))
                   .toList();
+              showShortToast(context, "Reshaped embeddings data");
+              logger.info("Reshaped embeddings data");
+
               final now = DateTime.now();
               await clipVectorDB.bulkInsertEmbeddings(
                 fileIDs: fileIDs,
@@ -178,6 +185,24 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   context,
                   "ClipVectorDB stats after: size: ${statsAfter.$1}, "
                   "capacity: ${statsAfter.$2}, dimensions: ${statsAfter.$3}");
+            } catch (e, s) {
+              logger.warning('ClipVectorDB migration failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Migrate to ClipVectorDB",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await MLDataDB.instance.migrateFillClipVectorDB();
+              showShortToast(context, "Migration done!");
             } catch (e, s) {
               logger.warning('ClipVectorDB migration failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
