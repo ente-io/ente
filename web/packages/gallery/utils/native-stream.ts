@@ -248,7 +248,8 @@ export const initiateGenerateHLS = async (
  *
  * @param token A token obtained from {@link writeVideoStream}.
  *
- * @returns a Response that contains the contents of the processed video.
+ * @returns a Response that contains the data associated with the provided
+ * token.
  */
 export const readVideoStream = async (
     _: Electron,

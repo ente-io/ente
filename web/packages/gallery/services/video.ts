@@ -3,7 +3,7 @@ import { assertionFailed } from "ente-base/assert";
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
 import { ensureElectron } from "ente-base/electron";
-import { type PublicAlbumsCredentials } from "ente-base/http";
+import { isHTTP4xxError, type PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
@@ -523,7 +523,7 @@ export const videoProcessingSyncIfNeeded = async () => {
     await syncProcessedFileIDs();
     _state.haveSyncedOnce = true;
 
-    tickNow(); /* if not already */
+    tickNow(); /* if not already ticking */
 };
 
 /**
@@ -709,13 +709,13 @@ const processQueue = async () => {
  */
 const backfillQueue = async (): Promise<VideoProcessingQueueItem[]> => {
     const allCollectionFiles = await getAllLocalFiles();
-    const processedVideoFileIDs = await savedProcessedVideoFileIDs();
+    const doneIDs = (await savedProcessedVideoFileIDs()).union(
+        await savedFailedVideoFileIDs(),
+    );
     const videoFiles = uniqueFilesByID(
         allCollectionFiles.filter((f) => f.metadata.fileType == FileType.video),
     );
-    const pendingVideoFiles = videoFiles.filter(
-        (f) => !processedVideoFileIDs.has(f.id),
-    );
+    const pendingVideoFiles = videoFiles.filter((f) => !doneIDs.has(f.id));
     const batch = randomSample(pendingVideoFiles, 50);
     return batch.map((file) => ({ file }));
 };
@@ -787,6 +787,7 @@ const processQueueItem = async ({
 
     log.info(`Generate HLS for ${fileLogID(file)} | start`);
 
+    // TODO(HLS): Inside this needs to be more granular in case of errors.
     const res = await initiateGenerateHLS(
         electron,
         sourceVideo!,
@@ -811,7 +812,12 @@ const processQueueItem = async ({
             size: videoSize,
         });
 
-        await putVideoData(file, playlistData, objectID, videoSize);
+        try {
+            await putVideoData(file, playlistData, objectID, videoSize);
+        } catch (e) {
+            if (isHTTP4xxError(e)) await markFailedVideoFileID(file.id);
+            throw e;
+        }
 
         log.info(`Generate HLS for ${fileLogID(file)} | done`);
     } finally {
