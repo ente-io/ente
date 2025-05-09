@@ -11,7 +11,6 @@ import type { KeyAttributes, User } from "../user/types";
 
 export interface VerifyMasterPasswordFormProps {
     user: User | undefined;
-    keyAttributes: KeyAttributes | undefined;
     callback: (
         key: string,
         kek: string,
@@ -19,16 +18,26 @@ export interface VerifyMasterPasswordFormProps {
         passphrase?: string,
     ) => void;
     buttonText: string;
-    submitButtonProps?: ButtonProps;
+    keyAttributes: KeyAttributes | undefined;
     /**
      * A callback invoked when the form wants to get {@link KeyAttributes}.
+     *
+     * It is only provided during the login flow, where we do not have
+     * {@link keyAttributes} already available for the user. In case the form is
+     * used for reauthenticating the user after they've already logged in, then
+     * this function will not be provided.
      *
      * This function can throw an `CustomError.TWO_FACTOR_ENABLED` to signal to
      * the form that some other form of second factor is enabled and the user
      * has been redirected to a two factor verification page.
+     *
+     * This function can throw an `CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT`
+     * to signal that either that the password is incorrect, or no account with
+     * the provided email exists.
      */
     getKeyAttributes?: (kek: string) => Promise<KeyAttributes | undefined>;
     srpAttributes?: SRPAttributes;
+    submitButtonProps?: ButtonProps;
 }
 
 export default function VerifyMasterPasswordForm({
@@ -98,6 +107,9 @@ export default function VerifyMasterPasswordForm({
                         break;
                     case CustomError.INCORRECT_PASSWORD:
                         setFieldError(t("incorrect_password"));
+                        break;
+                    case CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT:
+                        setFieldError(t("incorrect_password_or_no_account"));
                         break;
                     default:
                         setFieldError(t("generic_error"));
