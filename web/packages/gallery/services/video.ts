@@ -351,43 +351,79 @@ const blobToDataURL = (blob: Blob) =>
     });
 
 // TODO(HLS): Store this in DB.
-let _processedVideoFileIDs: number[] = [];
-let _videoPreviewFileIDSyncLastUpdatedAt: number | undefined;
+let _videoPreviewProcessedFileIDs: number[] = [];
+let _videoPreviewFailedFileIDs: number[] = [];
+let _videoPreviewSyncLastUpdatedAt: number | undefined;
 
 /**
- * Return a {@link Set} containing the ids of the files which do not need to be
- * processed for generating their streaming variant. This data is retrieved from
- * persistent storage (KV DB), where it is stored as an array.
+ * Return the (persistent) {@link Set} containing the ids of the files which
+ * have already been processed for generating their streaming variant.
+ *
+ * {@link savedProcessedVideoFileIDs} and its sibling
+ * {@link savedFailedVideoFileIDs} are mutually exclusive - that is, a file ID
+ * will be present in only one of them at max. We maintain that invariant in the
+ * higher level `mark*` functions when updating either of these persisted sets.
+ *
+ * The data is retrieved from persistent storage (KV DB), where it is stored as
+ * an array.
  */
 const savedProcessedVideoFileIDs = async () => {
     // TODO(HLS): make async
     await wait(0);
-    return new Set(_processedVideoFileIDs);
+    return new Set(_videoPreviewProcessedFileIDs);
 };
 
 /**
- * Add or replace the persisted set of ids of files which do not need to be
- * processed for generating their streaming variant. The data is persisted (as
- * an array) in KV DB, and can be retrieved by using
- * {@link savedProcessedVideoFileIDs}.
+ * Return the (persistent) {@link Set} containing the ids of the files for which
+ * an attempt to generate a streaming variant failed locally.
+ *
+ * @see also {@link savedProcessedVideoFileIDs}.
+ */
+const savedFailedVideoFileIDs = async () => {
+    // TODO(HLS): make async
+    await wait(0);
+    return new Set(_videoPreviewFailedFileIDs);
+};
+
+/**
+ * Update the persisted set of IDs of files which have already been processed
+ * and have a video preview generated (either on this client, or elsewhere).
+ *
+ * @see also {@link savedProcessedVideoFileIDs}.
  */
 const saveProcessedVideoFileIDs = async (videoFileIDs: Set<number>) => {
     // TODO(HLS): make async
     await wait(0);
-    _processedVideoFileIDs = Array.from(videoFileIDs);
+    _videoPreviewProcessedFileIDs = Array.from(videoFileIDs);
 };
 
 /**
- * Mark the provided file ID as not requiring further processing for generating
- * its streaming variant.
+ * Update the persisted set of IDs of files for which attempt to generate a
+ * video preview failed on this client.
+ *
+ * @see also {@link savedProcessedVideoFileIDs}.
+ */
+const saveFailedVideoFileIDs = async (videoFileIDs: Set<number>) => {
+    // TODO(HLS): make async
+    await wait(0);
+    _videoPreviewFailedFileIDs = Array.from(videoFileIDs);
+};
+
+/**
+ * Mark the provided file ID as having been processed to generate a video
+ * preview.
  *
  * The mark is persisted locally in IndexedDB (KV DB), so will persist across
  * app restarts (but not across logouts).
+ *
+ * @see also {@link savedProcessedVideoFileIDs}.
  */
 const markProcessedVideoFileID = async (fileID: number) => {
     const savedIDs = await savedProcessedVideoFileIDs();
+    const failedIDs = await savedFailedVideoFileIDs();
     savedIDs.add(fileID);
-    return saveProcessedVideoFileIDs(savedIDs);
+    if (failedIDs.delete(fileID)) await saveFailedVideoFileIDs(failedIDs);
+    await saveProcessedVideoFileIDs(savedIDs);
 };
 
 /**
@@ -396,7 +432,31 @@ const markProcessedVideoFileID = async (fileID: number) => {
  */
 const markProcessedVideoFileIDs = async (fileIDs: Set<number>) => {
     const savedIDs = await savedProcessedVideoFileIDs();
-    return saveProcessedVideoFileIDs(savedIDs.union(fileIDs));
+    const failedIDs = await savedFailedVideoFileIDs();
+    await Promise.all([
+        saveProcessedVideoFileIDs(savedIDs.union(fileIDs)),
+        saveFailedVideoFileIDs(failedIDs.difference(fileIDs)),
+    ]);
+};
+
+/**
+ * Mark the provided file ID as having failed in a non-transient manner when we
+ * tried processing it to generate a video preview on this client.
+ *
+ * Similar to [Note: Transient and permanent indexing failures], we attempt to
+ * separate failures into two categories - transients, which leave no mark no
+ * the DB so that the file eventually gets retried; and permanent, where we keep
+ * a persistent record of failure so that this client does not go into a loop
+ * reattempting preview generation for the specific unprocessable (to the best
+ * of the current client's ability) item.
+ *
+ * The mark is local only, and will be reset on logout, or if another client
+ * with a different able is able to process it.
+ */
+const markFailedVideoFileID = async (fileID: number) => {
+    const failedIDs = await savedFailedVideoFileIDs();
+    failedIDs.add(fileID);
+    await saveFailedVideoFileIDs(failedIDs);
 };
 
 /**
@@ -408,7 +468,7 @@ const markProcessedVideoFileIDs = async (fileIDs: Set<number>) => {
 const savedSyncLastUpdatedAt = async () => {
     // TODO(HLS): make async
     await wait(0);
-    return _videoPreviewFileIDSyncLastUpdatedAt;
+    return _videoPreviewSyncLastUpdatedAt;
 };
 
 /**
@@ -420,7 +480,7 @@ const savedSyncLastUpdatedAt = async () => {
 const saveSyncLastUpdatedAt = async (lastUpdatedAt: number) => {
     // TODO(HLS): make async
     await wait(0);
-    _videoPreviewFileIDSyncLastUpdatedAt = lastUpdatedAt;
+    _videoPreviewSyncLastUpdatedAt = lastUpdatedAt;
 };
 
 /**
@@ -615,11 +675,10 @@ const processQueue = async () => {
         if (item) {
             try {
                 await processQueueItem(item);
-            } catch (e) {
-                log.error("Video processing failed", e);
-            } finally {
-                // TODO(HLS): This needs to be more granular in case of errors.
                 await markProcessedVideoFileID(item.file.id);
+            } catch (e) {
+                // This will get retried again at some point later.
+                log.error(`Failed to process video ${fileLogID(item.file)}`, e);
             }
             // Reset the idle wait on any activity.
             _state.idleWait = idleWaitInitial;
