@@ -53,7 +53,7 @@ impl VectorDB {
     fn ensure_capacity(&self, margin: usize) {
         let current_size = self.index.size();
         let capacity = self.index.capacity();
-        if current_size + margin >= capacity {
+        if current_size + margin + 1000 >= capacity {
             self.index
                 .reserve(current_size + margin)
                 .expect("Failed to reserve space in index");
