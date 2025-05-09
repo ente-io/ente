@@ -31,8 +31,9 @@ export interface VerifyMasterPasswordFormProps {
      * the form that some other form of second factor is enabled and the user
      * has been redirected to a two factor verification page.
      *
-     * This function can throw an `CustomError.INCORRECT_PASSWORD` to signal
-     * that either that the password is incorrect, or no such account exists.
+     * This function can throw an `CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT`
+     * to signal that either that the password is incorrect, or no account with
+     * the provided email exists.
      */
     getKeyAttributes?: (kek: string) => Promise<KeyAttributes | undefined>;
     srpAttributes?: SRPAttributes;
@@ -105,16 +106,10 @@ export default function VerifyMasterPasswordForm({
                         setFieldError(t("weak_device_hint"));
                         break;
                     case CustomError.INCORRECT_PASSWORD:
-                        if (getKeyAttributes) {
-                            // During login flow, the API contract allows for a
-                            // SRP verification 401 both because of incorrect
-                            // credentials or a non existent account.
-                            setFieldError(t("incorrect_password_or_no_account"));
-                        } else {
-                            // During in-app reauthentication, the reason is
-                            // unambiguous.
-                            setFieldError(t("incorrect_password"));
-                        }
+                        setFieldError(t("incorrect_password"));
+                        break;
+                    case CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT:
+                        setFieldError(t("incorrect_password_or_no_account"));
                         break;
                     default:
                         setFieldError(t("generic_error"));

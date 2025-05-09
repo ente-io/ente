@@ -36,6 +36,7 @@ export const CustomError = {
     NOT_FOUND: "not found ",
     WEAK_DEVICE: "password decryption failed on the device",
     INCORRECT_PASSWORD: "incorrect password",
+    INCORRECT_PASSWORD_OR_NO_ACCOUNT: "incorrect password or no such account",
     UPLOAD_CANCELLED: "upload cancelled",
     UPDATE_EXPORTED_RECORD_FAILED: "update file exported record failed",
     EXPORT_STOPPED: "export stopped",
