@@ -370,7 +370,7 @@ export interface Electron {
         outputFileExtension: string,
     ) => Promise<Uint8Array>;
 
-    // - ML
+    // - Utility process
 
     /**
      * Trigger the creation of a new utility process of the given {@link type},

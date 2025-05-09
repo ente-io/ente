@@ -571,6 +571,10 @@ func (h *UserHandler) GetSRPAttributes(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	logrus.WithFields(logrus.Fields{
+		"email":       request.Email,
+		"srp_user_id": response.SRPUserID,
+	}).Info("Sending SRP attributes")
 	c.JSON(http.StatusOK, gin.H{"attributes": response})
 }
 
