@@ -122,6 +122,78 @@ export const fetchFileData = async (
 };
 
 /**
+ * An entry in the response to the `/files/data/status-diff`. The actual
+ * structure has more fields, there are just the fields we are interested in.
+ */
+const RemoteFDStatus = z.object({
+    fileID: z.number(),
+    /** Expected to be one of {@link FileDataType} */
+    type: z.string(),
+    isDeleted: z.boolean(),
+    /**
+     * The epoch microseconds when this file data entry was added or updated.
+     */
+    updatedAt: z.number(),
+});
+
+export interface UpdatedFileDataFileIDsResult {
+    /**
+     * The IDs of files for which a file data entry has been created or updated.
+     */
+    fileIDs: Set<number>;
+    /**
+     * The largest (last/latest) updatedAt (epoch microseconds) from amongst all
+     * of these files.
+     */
+    lastUpdatedAt: number;
+}
+
+/**
+ * Fetch the IDs of files for which new file data entries of the given
+ * {@link type} have been created or updated since the given {@link sinceTime}.
+ *
+ * @param type The {@link FileDataType} for which we want to check for creation
+ * or updates.
+ *
+ * @param lastUpdatedAt Epoch microseconds. This is used to ask remote to
+ * provide us only entries  whose {@link updatedAt} is more than the given
+ * value. Set this to zero to start from the beginning.
+ *
+ * ----
+ *
+ * Implementation notes:
+ *
+ * Unlike other "diff" APIs, the diff API used here won't return tombstone
+ * entries for deleted files. This is not a problem because there are no current
+ * cases where existing playlists or ML indexes get deleted (unless the
+ * underlying file is deleted). See: [Note: Caching HLS playlist data].
+ */
+export const fetchUpdatedFileDataFileIDs = async (
+    type: FileDataType,
+    lastUpdatedAt: number,
+): Promise<UpdatedFileDataFileIDsResult> => {
+    const params = new URLSearchParams({
+        lastUpdatedAt: lastUpdatedAt.toString(),
+    });
+    const url = await apiURL("/files/data/status-diff");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    const diff = z
+        .object({ diff: z.array(RemoteFDStatus) })
+        .parse(await res.json()).diff;
+    const fileIDs = new Set<number>();
+    for (const fd of diff) {
+        if (fd.type != type) continue;
+        if (fd.isDeleted) continue;
+        fileIDs.add(fd.fileID);
+        lastUpdatedAt = Math.max(lastUpdatedAt, fd.updatedAt);
+    }
+    return { fileIDs, lastUpdatedAt };
+};
+
+/**
  * Upload file data associated with the given file to remote.
  *
  * This function will save or update the given data as the latest file data of

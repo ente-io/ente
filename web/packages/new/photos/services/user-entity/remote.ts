@@ -139,7 +139,7 @@ export const userEntityDiff = async (
         sinceTime: sinceTime.toString(),
         limit: defaultDiffLimit.toString(),
     });
-    const url = await apiURL(`/user-entity/entity/diff`);
+    const url = await apiURL("/user-entity/entity/diff");
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: await authenticatedRequestHeaders(),
     });

@@ -139,11 +139,14 @@ export interface HLSPlaylistData {
  *
  * - If a file has a corresponding HLS playlist, then currently there is no
  *   scenario (apart from file deletion, where the playlist also gets deleted)
- *   where the playlist is updated or deleted after being created. There is a
- *   limit to the validity of the presigned chunk URLs within the playlist we
- *   create which we do handle (`createHLSPlaylistItemDataValidity`), but the
- *   original playlist itself does not change. In particular, a positive result
- *   ("this file has a playlist") can be cached indefinitely.
+ *   where the playlist is deleted after being created. There is a limit to the
+ *   validity of the presigned chunk URLs within the playlist we create (which
+ *   we do handle, see `createHLSPlaylistItemDataValidity`), but the original
+ *   playlist itself does not change. Updates are technically possible, but
+ *   apart from a misbehaving client, are not expected (and should be no-ops in
+ *   the rare cases they happen, since effectively same playlist should get
+ *   regenerated again). All in all, this means that a positive result ("this
+ *   file has a playlist") can be cached indefinitely.
  *
  * - If a file does not have a HLS playlist, and it is eligible for being
  *   streamed (e.g. it is not too small where the streaming overhead is not
