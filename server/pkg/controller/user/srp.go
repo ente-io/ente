@@ -324,8 +324,7 @@ func fCreateSession(srpUserID string, srpA string) (*ente.CreateSRPSessionRespon
 	if len(srpABytes) != 512 {
 		return nil, ente.NewBadRequestWithMessage("Invalid length for srpA")
 	}
-	// wait for 50ms
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(20 * time.Millisecond)
 	// generate 512 bytes of random data
 	srpBBytes := make([]byte, 512)
 	_, err := rand.Read(srpBBytes)
