@@ -22,7 +22,7 @@ import {
     readVideoStream,
     videoStreamDone,
 } from "../utils/native-stream";
-import { downloadManager } from "./download";
+import { downloadManager, isNetworkDownloadError } from "./download";
 import {
     fetchFileData,
     fetchFilePreviewData,
@@ -32,6 +32,7 @@ import {
 } from "./file-data";
 import {
     fileSystemUploadItemIfUnchanged,
+    type FileSystemUploadItem,
     type ProcessableUploadItem,
     type TimestampedFileSystemUploadItem,
 } from "./upload";
@@ -766,7 +767,17 @@ const processQueueItem = async ({
           )
         : undefined;
 
-    const sourceVideo = uploadItem ?? (await downloadManager.fileStream(file));
+    let sourceVideo: FileSystemUploadItem | ReadableStream | undefined =
+        uploadItem;
+    if (!sourceVideo) {
+        try {
+            sourceVideo = (await downloadManager.fileStream(file))!;
+        } catch (e) {
+            if (!isNetworkDownloadError(e))
+                await markFailedVideoFileID(file.id);
+            throw e;
+        }
+    }
 
     // [Note: Upload HLS video segment from node side]
     //
@@ -790,7 +801,7 @@ const processQueueItem = async ({
     // TODO(HLS): Inside this needs to be more granular in case of errors.
     const res = await initiateGenerateHLS(
         electron,
-        sourceVideo!,
+        sourceVideo,
         objectUploadURL,
     );
 
