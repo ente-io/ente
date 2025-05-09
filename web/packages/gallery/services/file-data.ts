@@ -185,19 +185,17 @@ export const syncUpdatedFileDataFileIDs = async (
     lastUpdatedAt: number,
     onPage: (page: UpdatedFileDataFileIDsPage) => Promise<void>,
 ): Promise<void> => {
-    const url = await apiURL("/files/data/status-diff");
     while (true) {
-        const params = new URLSearchParams({
-            lastUpdatedAt: lastUpdatedAt.toString(),
-        });
-        const res = await fetch(`${url}?${params.toString()}`, {
+        const res = await fetch(await apiURL("/files/data/status-diff"), {
+            method: "POST",
             headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ lastUpdatedAt }),
         });
         ensureOk(res);
         const diff = z
-            .object({ diff: z.array(RemoteFDStatus) })
+            .object({ diff: RemoteFDStatus.array().nullish() })
             .parse(await res.json()).diff;
-        if (diff.length) {
+        if (diff?.length) {
             const fileIDs = new Set<number>();
             for (const fd of diff) {
                 lastUpdatedAt = Math.max(lastUpdatedAt, fd.updatedAt);
