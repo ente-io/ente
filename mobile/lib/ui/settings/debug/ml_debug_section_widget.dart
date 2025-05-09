@@ -211,7 +211,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Empty ClipVectorDB",
+            title: "Delete/Empty ClipVectorDB",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -219,22 +219,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           onTap: () async {
             try {
               final clipVectorDB = ClipVectorDB.instance;
-              final stats = await clipVectorDB.getIndexStats();
-              logger.info("ClipVectorDB stats: size: ${stats.$1}, "
-                  "capacity: ${stats.$2}, dimensions: ${stats.$3}");
-              showShortToast(
-                  context,
-                  "ClipVectorDB stats: size: ${stats.$1}, "
-                  "capacity: ${stats.$2}, dimensions: ${stats.$3}");
-
-              await clipVectorDB.deleteAllEmbeddings();
-              final statsAfter = await clipVectorDB.getIndexStats();
-              logger.info("ClipVectorDB stats after: size: ${statsAfter.$1}, "
-                  "capacity: ${statsAfter.$2}, dimensions: ${statsAfter.$3}");
-              showShortToast(
-                  context,
-                  "ClipVectorDB stats after: size: ${statsAfter.$1}, "
-                  "capacity: ${statsAfter.$2}, dimensions: ${statsAfter.$3}");
+              await clipVectorDB.deleteIndex();
             } catch (e, s) {
               logger.warning('ClipVectorDB cleanup failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);

@@ -111,6 +111,17 @@ class ClipVectorDB {
     }
   }
 
+  Future<void> deleteIndex() async {
+    final db = await _vectorDB;
+    try {
+      await db.deleteIndex();
+      _vectorDbFuture = null;
+    } catch (e, s) {
+      _logger.severe("Error deleting index", e, s);
+      rethrow;
+    }
+  }
+
   Future<(int, int, int)> getIndexStats() async {
     final db = await _vectorDB;
     try {
