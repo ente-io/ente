@@ -29,17 +29,15 @@ const filesColumns =
 
 final String filesUpdateColumns = filesColumns
     .split(', ')
-    .where(
-      (column) => (column != 'id' ||
-          column != 'local_id' ||
-          column != 'local_mapping_src'),
-    ) // Exclude primary key from update
+    .where((column) => (column != 'id'))
     .map((column) => '$column = excluded.$column') // Use excluded virtual table
     .join(', ');
 
 const trashedFilesColumns =
     'id, owner_id, file_header, thumb_header, metadata, priv_metadata, pub_metadata, info, trash_data';
 
+const uploadLocalMappingColumns =
+    'file_id, local_id, local_clould_id, local_mapping_src';
 String collectionValuePlaceHolder =
     collectionColumns.split(',').map((_) => '?').join(',');
 

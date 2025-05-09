@@ -1,5 +1,6 @@
 import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/file/remote/asset.dart";
+import "package:photos/models/file/remote/rl_mapping.dart";
 
 RemoteAsset fromRow(Map<String, dynamic> row) {
   final metadata = Metadata.fromEncodedJson(row['metadata']);
@@ -15,5 +16,15 @@ RemoteAsset fromRow(Map<String, dynamic> row) {
     privateMetadata: privateMetadata,
     publicMetadata: publicMetadata,
     info: info,
+  );
+}
+
+RLMapping rowToUploadLocalMapping(Map<String, Object?> row) {
+  return RLMapping(
+    remoteUploadID: row['file_id'] as int,
+    localID: row['local_id'] as String,
+    localCloudID: row['local_clould_id'] as String?,
+    mappingType:
+        MappingTypeExtension.fromName(row['local_mapping_src'] as String),
   );
 }
