@@ -88,6 +88,15 @@ class VideoState {
      * Reset back to {@link idleWaitInitial} in case of any activity.
      */
     idleWait = idleWaitInitial;
+    /**
+     * `true` if we have synced at least once with remote.
+     *
+     * We use this to gate the processing of the backfill queue to avoid
+     * unnecessarily picking up files that have already been indexed elsewhere
+     * (we'll still check before processing them, but still that's unnecessary
+     * work this flag can save us).
+     */
+    haveSyncedOnce = false;
 }
 
 /**
@@ -451,7 +460,10 @@ export const videoProcessingSyncIfNeeded = async () => {
     if (!isDesktop) return;
     if (!isVideoProcessingEnabled()) return;
 
-    await wait(0);
+    await syncProcessedFileIDs();
+    _state.haveSyncedOnce = true;
+
+    tickNow(); /* if not already */
 };
 
 /**
@@ -578,19 +590,26 @@ const processQueue = async () => {
     while (isVideoProcessingEnabled()) {
         let item = _state.liveQueue.shift();
         if (!item) {
-            if (!bq) /* initialize */ bq = await backfillQueue();
-            switch (bq.length) {
-                case 0:
-                    /* no more items to backfill */
-                    break;
-                case 1 /* last item. take it, and refill queue */:
-                    item = bq.pop();
-                    bq = await backfillQueue();
-                    break;
-                default:
-                    /* more than one item. take it */
-                    item = bq.pop();
-                    break;
+            if (!bq && _state.haveSyncedOnce) {
+                /* initialize */
+                bq = await backfillQueue();
+            }
+            if (bq) {
+                switch (bq.length) {
+                    case 0:
+                        /* no more items to backfill */
+                        break;
+                    case 1 /* last item. take it, and refill queue */:
+                        item = bq.pop();
+                        bq = await backfillQueue();
+                        break;
+                    default:
+                        /* more than one item. take it */
+                        item = bq.pop();
+                        break;
+                }
+            } else {
+                log.info("Not backfilling since we haven't synced yet");
             }
         }
         if (item) {
@@ -668,6 +687,18 @@ const processQueueItem = async ({
     const electron = ensureElectron();
 
     log.debug(() => ["gen-hls", { file, timestampedUploadItem }]);
+
+    const playlistFileData = await fetchFileData("vid_preview", file.id);
+    if (playlistFileData) {
+        // Since video processing for even an individual item can take
+        // substantial time, it is possible that an item might've gotten
+        // processed on a different client in the interval between us enqueuing
+        // it and us getting here.
+        //
+        // Bail out early to avoid unnecessary duplicate work.
+        log.info(`Generate HLS for ${fileLogID(file)} | already-processed`);
+        return;
+    }
 
     const uploadItem = timestampedUploadItem
         ? await fileSystemUploadItemIfUnchanged(
