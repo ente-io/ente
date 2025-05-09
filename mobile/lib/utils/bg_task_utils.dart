@@ -62,14 +62,14 @@ class BgTaskUtils {
         backgrounTaskIdentifier,
         backgrounTaskIdentifier,
         frequency: const Duration(minutes: 15),
-        initialDelay: const Duration(minutes: 10),
+        // initialDelay: const Duration(minutes: 10),
         constraints: workmanager.Constraints(
           networkType: workmanager.NetworkType.connected,
           requiresCharging: false,
           requiresStorageNotLow: false,
           requiresDeviceIdle: false,
         ),
-        existingWorkPolicy: workmanager.ExistingWorkPolicy.keep,
+        existingWorkPolicy: workmanager.ExistingWorkPolicy.append,
         backoffPolicy: workmanager.BackoffPolicy.linear,
         backoffPolicyDelay: const Duration(minutes: 15),
       );
