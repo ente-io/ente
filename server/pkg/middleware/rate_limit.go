@@ -147,6 +147,8 @@ func (r *RateLimitMiddleware) APIRateLimitForUserMiddleware(urlSanitizer func(_ 
 func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limiter.Limiter {
 	if reqPath == "/users/ott" ||
 		reqPath == "/users/verify-email" ||
+		reqPath == "/user/change-email" ||
+		reqPath == "/users/public-key" ||
 		reqPath == "/public-collection/verify-password" ||
 		reqPath == "/family/accept-invite" ||
 		reqPath == "/users/srp/attributes" ||
