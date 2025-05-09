@@ -418,7 +418,7 @@ const saveSyncLastUpdatedAt = async (lastUpdatedAt: number) => {
  * Fetch IDs of files from remote that have been processed by other clients
  * since the last time we checked.
  */
-export const syncProcessedFileIDs = async () =>
+const syncProcessedFileIDs = async () =>
     syncUpdatedFileDataFileIDs(
         "vid_preview",
         (await savedSyncLastUpdatedAt()) ?? 0,
@@ -429,6 +429,30 @@ export const syncProcessedFileIDs = async () =>
             ]);
         },
     );
+
+/**
+ * If video processing is enabled, trigger a sync with remote and any subsequent
+ * backfill queue processing for pending videos.
+ *
+ * This function is expected to be called during a regular sync that the app
+ * makes with remote (See: [Note: Remote sync]). It is a no-op if video
+ * processing is not enabled or eligible on this device. Otherwise it syncs the
+ * list of already processed file IDs with remote.
+ *
+ * At this point it also triggers a backfill (if needed), but doesn't wait for
+ * it to complete (which might take a time for big libraries).
+ *
+ * Calling it when a backfill has already been triggered by a previous sync is
+ * also a no-op. However, a backfill does not start until at least one sync of
+ * file IDs has been completed with remote, to avoid picking up work on file IDs
+ * that have already been processed elsewhere.
+ */
+export const videoProcessingSyncIfNeeded = async () => {
+    if (!isDesktop) return;
+    if (!isVideoProcessingEnabled()) return;
+
+    await wait(0);
+};
 
 /**
  * Create a streamable HLS playlist for a video uploaded from this client.
@@ -457,7 +481,6 @@ export const processVideoNewUpload = (
     file: EnteFile,
     processableUploadItem: ProcessableUploadItem,
 ) => {
-    // TODO(HLS):
     if (!isDesktop) return;
     if (!isVideoProcessingEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
@@ -505,6 +528,7 @@ const tickNow = () => {
 };
 
 export const isVideoProcessingEnabled = () =>
+    // TODO(HLS):
     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
 
