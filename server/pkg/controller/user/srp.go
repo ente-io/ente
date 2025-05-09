@@ -101,7 +101,6 @@ func (c *UserController) GetSRPAttributes(context *gin.Context, email string) (*
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return fSrpAttributes(email, c.HashingKey)
-			//return nil, stacktrace.Propagate(ente.ErrNotFound, "user does not exist")
 		} else {
 			return nil, stacktrace.Propagate(err, "failed to get user")
 		}
@@ -119,8 +118,7 @@ func (c *UserController) CreateSrpSession(context *gin.Context, req ente.CreateS
 		if errors.Is(err, sql.ErrNoRows) {
 			return fCreateSession(req.SRPUserID.String(), req.SRPA)
 		}
-		return nil, stacktrace.Propagate(ente.ErrInvalidPassword, "failed to get srp auth entity")
-		//return nil, stacktrace.Propagate(err, "failed to get srp auth entity")
+		return nil, stacktrace.Propagate(err, "failed to get srp auth entity")
 	}
 	isEmailMFAEnabled, err := c.UserAuthRepo.IsEmailMFAEnabled(context, srpAuthEntity.UserID)
 	if err != nil {
