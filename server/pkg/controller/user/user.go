@@ -59,6 +59,7 @@ type UserController struct {
 	UserCache              *cache2.UserCache
 	UserCacheController    *usercache.Controller
 	SRPLimiter             *limiter.Limiter
+	OTTLimiter             *limiter.Limiter
 }
 
 const (
@@ -125,6 +126,7 @@ func NewUserController(
 	userCacheController *usercache.Controller,
 ) *UserController {
 	srpLimiter := util.NewRateLimiter("100-H")
+	ottLimiter := util.NewRateLimiter("100-H")
 	return &UserController{
 		UserRepo:               userRepo,
 		UsageRepo:              usageRepo,
@@ -151,6 +153,7 @@ func NewUserController(
 		UserCache:              userCache,
 		UserCacheController:    userCacheController,
 		SRPLimiter:             srpLimiter,
+		OTTLimiter:             ottLimiter,
 	}
 }
 
