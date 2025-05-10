@@ -43,7 +43,7 @@
       "title": "Anycoin Direct",
       "slug": "anycoindirect"
     },
-     {
+    {
       "title": "Aruba",
       "slug": "aruba",
       "hex": "ef8a33"
@@ -131,6 +131,10 @@
       "altNames": [
         "Binance US"
       ]
+    },
+    {
+      "title": "Bitazza",
+      "slug": "bitazza"
     },
     {
       "title": "Bitkub",
@@ -877,7 +881,7 @@
         "欧易"
       ]
     },
-     {
+    {
       "title": "OnShape",
       "slug": "onshape",
       "hex": "7abb5e"
@@ -1001,7 +1005,7 @@
       "title": "RealMe",
       "slug": "realme"
     },
-     {
+    {
       "title": "RealVNC",
       "slug": "realvnc",
       "hex": "488aec"
