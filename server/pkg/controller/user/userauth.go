@@ -83,27 +83,9 @@ func hardcodedOTTForEmail(hardCodedOTT HardCodedOTT, email string) string {
 
 // SendEmailOTT generates and sends an OTT to the provided email address
 func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpose string) error {
-	if purpose == ente.ChangeEmailOTTPurpose {
-		if err := c.isEmailAlreadyUsed(email); err != nil {
-			return err
-		}
+	if err := c.validateSendOTT(email, purpose); err != nil {
+		return err
 	}
-
-	isSignUpComplete, err := c.isSignUpComplete(email)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	if purpose == ente.SignUpOTTPurpose && isSignUpComplete {
-		return stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
-	}
-	if purpose == ente.SignUpOTTPurpose && viper.GetBool("internal.disable-registration") && !isSignUpComplete {
-		return stacktrace.Propagate(ente.ErrPermissionDenied, "registration is disabled")
-	}
-
-	if purpose == ente.LoginOTTPurpose && !isSignUpComplete {
-		return stacktrace.Propagate(ente.ErrUserNotRegistered, "user has not completed sign up process")
-	}
-
 	ott, err := random.GenerateSixDigitOtp()
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -156,6 +138,28 @@ func (c *UserController) isEmailAlreadyUsed(email string) error {
 	if !errors.Is(err, sql.ErrNoRows) {
 		// unknown error, rethrow
 		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
+func (c *UserController) validateSendOTT(email string, purpose string) error {
+	if purpose == ente.ChangeEmailOTTPurpose {
+		if err := c.isEmailAlreadyUsed(email); err != nil {
+			return err
+		}
+	}
+	isSignUpComplete, err := c.isSignUpComplete(email)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if purpose == ente.SignUpOTTPurpose && viper.GetBool("internal.disable-registration") && !isSignUpComplete {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "registration is disabled")
+	}
+	if purpose == ente.SignUpOTTPurpose && isSignUpComplete {
+		return stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
+	}
+	if purpose == ente.LoginOTTPurpose && !isSignUpComplete {
+		return stacktrace.Propagate(ente.ErrUserNotRegistered, "user has not completed sign up process")
 	}
 	return nil
 }
