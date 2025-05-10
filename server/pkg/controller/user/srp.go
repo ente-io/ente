@@ -99,11 +99,16 @@ func (c *UserController) UpdateSrpAndKeyAttributes(context *gin.Context,
 func (c *UserController) GetSRPAttributes(context *gin.Context, email string) (*ente.GetSRPAttributesResponse, error) {
 	userID, err := c.UserRepo.GetUserIDWithEmail(email)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return fSrpAttributes(email, c.HashingKey)
-		} else {
-			return nil, stacktrace.Propagate(err, "failed to get user")
+		if !errors.Is(err, sql.ErrNoRows) {
+			return nil, stacktrace.Propagate(err, "failed to get user id")
 		}
+		if limit, limitErr := c.SRPLimiter.Get(context, "get_srp"); limitErr == nil {
+			if limit.Reached {
+				c.DiscordController.NotifyPotentialAbuse("swallowing missing srp errors")
+				return fSrpAttributes(email, c.HashingKey)
+			}
+		}
+		return nil, stacktrace.Propagate(err, "failed to get user")
 	}
 	srpAttributes, err := c.UserAuthRepo.GetSRPAttributes(userID)
 	if err != nil {
