@@ -7,7 +7,9 @@ import (
 	enteJWT "github.com/ente-io/museum/ente/jwt"
 	"github.com/ente-io/museum/pkg/controller/collections"
 	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
+	util "github.com/ente-io/museum/pkg/utils"
 	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ulule/limiter/v3"
 	"strings"
 
 	cache2 "github.com/ente-io/museum/ente/cache"
@@ -56,6 +58,7 @@ type UserController struct {
 	HardCodedOTT           HardCodedOTT
 	UserCache              *cache2.UserCache
 	UserCacheController    *usercache.Controller
+	SRPLimiter             *limiter.Limiter
 }
 
 const (
@@ -121,6 +124,7 @@ func NewUserController(
 	userCache *cache2.UserCache,
 	userCacheController *usercache.Controller,
 ) *UserController {
+	srpLimiter := util.NewRateLimiter("100-H")
 	return &UserController{
 		UserRepo:               userRepo,
 		UsageRepo:              usageRepo,
@@ -146,6 +150,7 @@ func NewUserController(
 		HardCodedOTT:           ReadHardCodedOTTFromConfig(),
 		UserCache:              userCache,
 		UserCacheController:    userCacheController,
+		SRPLimiter:             srpLimiter,
 	}
 }
 
