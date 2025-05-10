@@ -104,7 +104,7 @@ func (c *UserController) GetSRPAttributes(context *gin.Context, email string) (*
 		}
 		if limit, limitErr := c.SRPLimiter.Get(context, "get_srp"); limitErr == nil {
 			if limit.Reached {
-				c.DiscordController.NotifyPotentialAbuse("hitting srp limit")
+				c.DiscordController.NotifyPotentialAbuse("swallowing missing srp errors")
 				return fSrpAttributes(email, c.HashingKey)
 			}
 		}
