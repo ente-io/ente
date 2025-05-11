@@ -16,6 +16,7 @@ import 'package:photos/ui/account/verify_recovery_page.dart';
 import 'package:photos/ui/components/home_header_widget.dart';
 import 'package:photos/ui/components/notification_widget.dart';
 import 'package:photos/ui/home/header_error_widget.dart';
+import "package:photos/ui/settings/backup/backup_settings_screen.dart";
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
 import "package:photos/ui/settings/ml/enable_ml_consent.dart";
 import 'package:photos/utils/navigation_util.dart';
@@ -34,7 +35,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   late StreamSubscription<SyncStatusUpdate> _subscription;
   late StreamSubscription<NotificationEvent> _notificationSubscription;
-
+  bool _isPausedDueToNetwork = false;
   bool _showStatus = false;
   bool _showErrorBanner = false;
   bool _showMlBanner = !flagService.hasGrantedMLConsent &&
@@ -45,6 +46,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   void initState() {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
       _logger.info("Received event " + event.status.toString());
+      _isPausedDueToNetwork = event.status == SyncStatus.paused;
       if (event.status == SyncStatus.error) {
         setState(() {
           _syncError = event.error;
@@ -100,7 +102,9 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   onTap: () {
                     routeToPage(
                       context,
-                      const BackupStatusScreen(),
+                      _isPausedDueToNetwork
+                          ? const BackupSettingsScreen()
+                          : const BackupStatusScreen(),
                       forceCustomPageRoute: true,
                     ).ignore();
                   },

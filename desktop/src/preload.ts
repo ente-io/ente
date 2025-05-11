@@ -69,6 +69,7 @@ import type {
     FFmpegCommand,
     FolderWatch,
     PendingUploads,
+    UtilityProcessType,
     ZipItem,
 } from "./types/ipc";
 
@@ -215,18 +216,19 @@ const ffmpegExec = (
         outputFileExtension,
     );
 
-// - ML
+// - Utility processes
 
-const createMLWorker = () => {
+const triggerCreateUtilityProcess = (type: UtilityProcessType) => {
+    const portEvent = `utilityProcessPort/${type}`;
     const l = (event: IpcRendererEvent) => {
         void windowLoaded.then(() => {
             // "*"" is the origin to send to.
-            window.postMessage("createMLWorker/port", "*", event.ports);
-            ipcRenderer.off("createMLWorker/port", l);
+            window.postMessage(portEvent, "*", event.ports);
+            ipcRenderer.off(portEvent, l);
         });
     };
-    ipcRenderer.on("createMLWorker/port", l);
-    ipcRenderer.send("createMLWorker");
+    ipcRenderer.on(portEvent, l);
+    ipcRenderer.send("triggerCreateUtilityProcess", type);
 };
 
 // - Watch
@@ -393,7 +395,7 @@ contextBridge.exposeInMainWorld("electron", {
 
     // - ML
 
-    createMLWorker,
+    triggerCreateUtilityProcess,
 
     // - Watch
 

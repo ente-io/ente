@@ -339,6 +339,10 @@ export const sidebar = [
                         text: "Backups",
                         link: "/self-hosting/faq/backup",
                     },
+                    {
+                        text: "Environment variables",
+                        link: "/self-hosting/faq/environment",
+                    },
                 ],
             },
         ],

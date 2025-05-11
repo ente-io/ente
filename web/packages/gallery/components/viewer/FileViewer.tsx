@@ -781,30 +781,32 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     // Modify the active annotated file if we found a file with
                     // the same ID in the (possibly) updated files array.
                     //
-                    // Note the omission of the PhotoSwipe refresh: we don't
-                    // refresh the PhotoSwipe dialog itself since that would
-                    // cause the user to lose their pan / zoom etc.
-                    //
                     // This is not correct in its full generality, but it works
-                    // fine in the specific cases we would need to handle:
+                    // fine in the specific cases we would need to handle (and
+                    // we want to avoid refreshing the entire UI unnecessarily
+                    // lest the user lose their zoom/pan etc):
                     //
-                    // - In case of delete, we'll not get to this code branch.
+                    // - In case of delete or toggling archived that caused the
+                    //   file is no longer part of the list that is shown, we'll
+                    //   not get to this code branch.
                     //
-                    // - In case of toggling archive, just updating the file
-                    //   attribute is enough, the UI state is derived from it;
-                    //   none of the other attributes of the annotated file
-                    //   currently depend on the archive status change.
+                    // - In case of toggling archive otherwise, just updating
+                    //   the file attribute is enough, the UI state is derived
+                    //   from it; none of the other attributes of the annotated
+                    //   file currently depend on the archive status change.
                     af = { ...af, file: updatedFile };
                 } else {
-                    // Refreshing the current slide after the current file has
-                    // gone will show the subsequent slide (since that would've
-                    // now moved down to the current index).
+                    // The file we were displaying is no longer part of the list
+                    // of files that should be displayed. Refresh the slides,
+                    // adjusting the indexes as necessary.
                     //
-                    // However, we might've been the last slide, in which case
-                    // we need to go back one slide first. To determine this,
-                    // also pass the expected count of files to our PhotoSwipe
-                    // wrapper.
-                    psRef.current?.refreshCurrentSlideContent(files.length);
+                    // A special case is when we might've been the last slide,
+                    // in which case we need to go back one slide first. To
+                    // determine this, also pass the expected count of files to
+                    // our PhotoSwipe wrapper.
+                    psRef.current?.refreshCurrentSlideContentAfterRemove(
+                        files.length,
+                    );
                 }
             } else {
                 // If there are no more files left, close the viewer.

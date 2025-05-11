@@ -22,6 +22,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m0(title) => "${title} (Me)";
 
+  static String m2(count) =>
+      "${Intl.plural(count, one: 'Legg til element', other: 'Legg til elementene')}";
+
   static String m3(storageAmount, endDate) =>
       "Tillegget på ${storageAmount} er gyldig til ${endDate}";
 
@@ -135,6 +138,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m47(personName, email) =>
       "Dette knytter ${personName} til ${email}";
+
+  static String m48(count, formattedCount) =>
+      "${Intl.plural(count, zero: 'ingen minner', one: '${formattedCount} minne', other: '${formattedCount} minner')}";
+
+  static String m49(count) =>
+      "${Intl.plural(count, one: 'Flytt elementet', other: 'Flytt elementene')}";
 
   static String m50(albumName) => "Flyttet til ${albumName}";
 
@@ -315,6 +324,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addFiles": MessageLookupByLibrary.simpleMessage("Legg til filer"),
         "addFromDevice":
             MessageLookupByLibrary.simpleMessage("Legg til fra enhet"),
+        "addItem": m2,
         "addLocation": MessageLookupByLibrary.simpleMessage("Legg til sted"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Legg til"),
         "addMore": MessageLookupByLibrary.simpleMessage("Legg til flere"),
@@ -1248,6 +1258,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "me": MessageLookupByLibrary.simpleMessage("Meg"),
+        "memoryCount": m48,
         "merchandise": MessageLookupByLibrary.simpleMessage("Varer"),
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Slå sammen med eksisterende"),
@@ -1279,6 +1290,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mostRecent": MessageLookupByLibrary.simpleMessage("Nyeste"),
         "mostRelevant": MessageLookupByLibrary.simpleMessage("Mest relevant"),
         "mountains": MessageLookupByLibrary.simpleMessage("Over åsene"),
+        "moveItem": m49,
         "moveSelectedPhotosToOneDate": MessageLookupByLibrary.simpleMessage(
             "Flytt valgte bilder til en dato"),
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("Flytt til album"),

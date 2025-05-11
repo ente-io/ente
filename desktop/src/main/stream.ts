@@ -3,18 +3,13 @@
  */
 import { net, protocol } from "electron/main";
 import { randomUUID } from "node:crypto";
-import fs_ from "node:fs";
 import fs from "node:fs/promises";
-import { Readable, Writable } from "node:stream";
+import { Writable } from "node:stream";
 import { pathToFileURL } from "node:url";
 import log from "./log";
-import {
-    ffmpegConvertToMP4,
-    ffmpegGenerateHLSPlaylistAndSegments,
-    type FFmpegGenerateHLSPlaylistAndSegmentsResult,
-} from "./services/ffmpeg";
+import { ffmpegUtilityProcess } from "./services/ffmpeg";
+import { type FFmpegGenerateHLSPlaylistAndSegmentsResult } from "./services/ffmpeg-worker";
 import { markClosableZip, openZip } from "./services/zip";
-import { wait } from "./utils/common";
 import { writeStream } from "./utils/stream";
 import {
     deleteTempFile,
@@ -234,12 +229,14 @@ export const clearPendingVideoResults = () => pendingVideoResults.clear();
  * See also: [Note: IPC streams]
  */
 const handleConvertToMP4Write = async (request: Request) => {
+    const worker = await ffmpegUtilityProcess();
+
     const inputTempFilePath = await makeTempFilePath();
     await writeStream(inputTempFilePath, request.body!);
 
     const outputTempFilePath = await makeTempFilePath("mp4");
     try {
-        await ffmpegConvertToMP4(inputTempFilePath, outputTempFilePath);
+        await worker.ffmpegConvertToMP4(inputTempFilePath, outputTempFilePath);
     } catch (e) {
         log.error("Conversion to MP4 failed", e);
         await deleteTempFileIgnoringErrors(outputTempFilePath);
@@ -311,6 +308,8 @@ const handleGenerateHLSWrite = async (
         }
     }
 
+    const worker = await ffmpegUtilityProcess();
+
     const {
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
@@ -322,9 +321,10 @@ const handleGenerateHLSWrite = async (
     try {
         await writeToTemporaryInputFile();
 
-        result = await ffmpegGenerateHLSPlaylistAndSegments(
+        result = await worker.ffmpegGenerateHLSPlaylistAndSegments(
             inputFilePath,
             outputFilePathPrefix,
+            objectUploadURL,
         );
 
         if (!result) {
@@ -332,94 +332,17 @@ const handleGenerateHLSWrite = async (
             return new Response(null, { status: 204 });
         }
 
-        const { playlistPath, videoPath } = result;
-        try {
-            await uploadVideoSegments(videoPath, objectUploadURL);
+        const { playlistPath, videoSize, dimensions } = result;
 
-            const playlistToken = randomUUID();
-            pendingVideoResults.set(playlistToken, playlistPath);
+        const playlistToken = randomUUID();
+        pendingVideoResults.set(playlistToken, playlistPath);
 
-            const { dimensions, videoSize } = result;
-            return new Response(
-                JSON.stringify({ playlistToken, dimensions, videoSize }),
-                { status: 200 },
-            );
-        } catch (e) {
-            await deleteTempFileIgnoringErrors(playlistPath);
-            throw e;
-        } finally {
-            await deleteTempFileIgnoringErrors(videoPath);
-        }
+        return new Response(
+            JSON.stringify({ playlistToken, videoSize, dimensions }),
+            { status: 200 },
+        );
     } finally {
         if (isInputFileTemporary)
             await deleteTempFileIgnoringErrors(inputFilePath);
-    }
-};
-
-/**
- * Upload the file at the given {@link videoFilePath} to the provided presigned
- * {@link objectUploadURL} using a HTTP PUT request.
- *
- * In case on non-HTTP-4xx errors, retry up to 3 times with exponential backoff.
- *
- * See: [Note: Upload HLS video segment from node side].
- *
- * ---
- *
- * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOkOr4xx`
- * from `web/packages/base/http.ts` (we don't have the rest of the scaffolding
- * used by that function, which is why it is inlined bespoked).
- *
- * It handles the specific use case of uploading videos since generating the HLS
- * stream is a fairly expensive operation, so a retry to discount transient
- * network issues is called for. There are only 2 retries for a total of 3
- * attempts, and the retry gaps are more spaced out.
- */
-export const uploadVideoSegments = async (
-    videoFilePath: string,
-    objectUploadURL: string,
-) => {
-    const waitTimeBeforeNextTry = [5000, 20000];
-
-    while (true) {
-        let abort = false;
-        try {
-            const nodeStream = fs_.createReadStream(videoFilePath);
-            const webStream = Readable.toWeb(nodeStream);
-
-            const res = await net.fetch(objectUploadURL, {
-                method: "PUT",
-                // The duplex option is required since we're passing a stream.
-                //
-                // @ts-expect-error TypeScript's libdom.d.ts does not include
-                // the "duplex" parameter, e.g. see
-                // https://github.com/node-fetch/node-fetch/issues/1769.
-                duplex: "half",
-                body: webStream,
-            });
-
-            if (res.ok) {
-                // Success.
-                return;
-            }
-            if (res.status >= 400 && res.status < 500) {
-                // HTTP 4xx.
-                abort = true;
-            }
-            throw new Error(
-                `Failed to upload generated HLS video: HTTP ${res.status} ${res.statusText}`,
-            );
-        } catch (e) {
-            if (abort) {
-                throw e;
-            }
-            const t = waitTimeBeforeNextTry.shift();
-            if (!t) {
-                throw e;
-            } else {
-                log.warn("Will retry potentially transient request failure", e);
-            }
-            await wait(t);
-        }
     }
 };

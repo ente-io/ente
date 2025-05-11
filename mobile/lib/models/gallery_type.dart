@@ -312,6 +312,7 @@ extension GalleryAppBarExtn on GalleryType {
   bool isSharable() {
     if (this == GalleryType.ownedCollection ||
         this == GalleryType.quickLink ||
+        this == GalleryType.favorite ||
         this == GalleryType.hiddenOwnedCollection ||
         this == GalleryType.sharedCollection) {
       return true;

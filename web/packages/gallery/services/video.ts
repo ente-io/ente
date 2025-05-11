@@ -3,28 +3,36 @@ import { assertionFailed } from "ente-base/assert";
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
 import { ensureElectron } from "ente-base/electron";
-import { type PublicAlbumsCredentials } from "ente-base/http";
+import { isHTTP4xxError, type PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
+import {
+    getAllLocalFiles,
+    uniqueFilesByID,
+} from "ente-new/photos/services/files";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
+import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
+import { wait } from "ente-utils/promise";
 import { z } from "zod";
 import {
     initiateGenerateHLS,
     readVideoStream,
     videoStreamDone,
 } from "../utils/native-stream";
-import { downloadManager } from "./download";
+import { downloadManager, isNetworkDownloadError } from "./download";
 import {
     fetchFileData,
     fetchFilePreviewData,
     getFilePreviewDataUploadURL,
     putVideoData,
+    syncUpdatedFileDataFileIDs,
 } from "./file-data";
 import {
     fileSystemUploadItemIfUnchanged,
+    type FileSystemUploadItem,
     type ProcessableUploadItem,
     type TimestampedFileSystemUploadItem,
 } from "./upload";
@@ -43,8 +51,11 @@ interface VideoProcessingQueueItem {
      * the current client. If present, this serves as an optimization allowing
      * us to directly read the file off the user's file system.
      */
-    timestampedUploadItem: TimestampedFileSystemUploadItem | undefined;
+    timestampedUploadItem?: TimestampedFileSystemUploadItem;
 }
+
+const idleWaitInitial = 10 * 1000; /* 10 sec */
+const idleWaitMax = idleWaitInitial * 2 ** 6; /* 640 sec */
 
 /**
  * Internal in-memory state shared by the functions in this module.
@@ -53,13 +64,40 @@ interface VideoProcessingQueueItem {
  */
 class VideoState {
     /**
-     * Queue of videos waiting to be processed.
+     * Queue of recently uploaded items waiting to be processed.
      */
-    videoProcessingQueue: VideoProcessingQueueItem[] = [];
+    liveQueue: VideoProcessingQueueItem[] = [];
     /**
      * Active queue processor, if any.
      */
     queueProcessor: Promise<void> | undefined;
+    /**
+     * A promise that the main processing loop waits for in addition to the idle
+     * timeout. Can be resolved using {@link resolveTick}.
+     */
+    tick: Promise<void> | undefined;
+    /**
+     * A function that can be called to resolve {@link tick}.
+     *
+     * See: [Note: Exiting idle wait of processing loop].
+     */
+    resolveTick: (() => void) | undefined;
+    /**
+     * The time to sleep if nothing is pending.
+     *
+     * Goes from {@link idleWaitInitial} to {@link idleWaitMax} in doublings.
+     * Reset back to {@link idleWaitInitial} in case of any activity.
+     */
+    idleWait = idleWaitInitial;
+    /**
+     * `true` if we have synced at least once with remote.
+     *
+     * We use this to gate the processing of the backfill queue to avoid
+     * unnecessarily picking up files that have already been indexed elsewhere
+     * (we'll still check before processing them, but still that's unnecessary
+     * work this flag can save us).
+     */
+    haveSyncedOnce = false;
 }
 
 /**
@@ -112,11 +150,14 @@ export interface HLSPlaylistData {
  *
  * - If a file has a corresponding HLS playlist, then currently there is no
  *   scenario (apart from file deletion, where the playlist also gets deleted)
- *   where the playlist is updated or deleted after being created. There is a
- *   limit to the validity of the presigned chunk URLs within the playlist we
- *   create which we do handle (`createHLSPlaylistItemDataValidity`), but the
- *   original playlist itself does not change. In particular, a positive result
- *   ("this file has a playlist") can be cached indefinitely.
+ *   where the playlist is deleted after being created. There is a limit to the
+ *   validity of the presigned chunk URLs within the playlist we create (which
+ *   we do handle, see `createHLSPlaylistItemDataValidity`), but the original
+ *   playlist itself does not change. Updates are technically possible, but
+ *   apart from a misbehaving client, are not expected (and should be no-ops in
+ *   the rare cases they happen, since effectively same playlist should get
+ *   regenerated again). All in all, this means that a positive result ("this
+ *   file has a playlist") can be cached indefinitely.
  *
  * - If a file does not have a HLS playlist, and it is eligible for being
  *   streamed (e.g. it is not too small where the streaming overhead is not
@@ -310,6 +351,182 @@ const blobToDataURL = (blob: Blob) =>
         reader.readAsDataURL(blob);
     });
 
+// TODO(HLS): Store this in DB.
+let _videoPreviewProcessedFileIDs: number[] = [];
+let _videoPreviewFailedFileIDs: number[] = [];
+let _videoPreviewSyncLastUpdatedAt: number | undefined;
+
+/**
+ * Return the (persistent) {@link Set} containing the ids of the files which
+ * have already been processed for generating their streaming variant.
+ *
+ * {@link savedProcessedVideoFileIDs} and its sibling
+ * {@link savedFailedVideoFileIDs} are mutually exclusive - that is, a file ID
+ * will be present in only one of them at max. We maintain that invariant in the
+ * higher level `mark*` functions when updating either of these persisted sets.
+ *
+ * The data is retrieved from persistent storage (KV DB), where it is stored as
+ * an array.
+ */
+const savedProcessedVideoFileIDs = async () => {
+    // TODO(HLS): make async
+    await wait(0);
+    return new Set(_videoPreviewProcessedFileIDs);
+};
+
+/**
+ * Return the (persistent) {@link Set} containing the ids of the files for which
+ * an attempt to generate a streaming variant failed locally.
+ *
+ * @see also {@link savedProcessedVideoFileIDs}.
+ */
+const savedFailedVideoFileIDs = async () => {
+    // TODO(HLS): make async
+    await wait(0);
+    return new Set(_videoPreviewFailedFileIDs);
+};
+
+/**
+ * Update the persisted set of IDs of files which have already been processed
+ * and have a video preview generated (either on this client, or elsewhere).
+ *
+ * @see also {@link savedProcessedVideoFileIDs}.
+ */
+const saveProcessedVideoFileIDs = async (videoFileIDs: Set<number>) => {
+    // TODO(HLS): make async
+    await wait(0);
+    _videoPreviewProcessedFileIDs = Array.from(videoFileIDs);
+};
+
+/**
+ * Update the persisted set of IDs of files for which attempt to generate a
+ * video preview failed on this client.
+ *
+ * @see also {@link savedProcessedVideoFileIDs}.
+ */
+const saveFailedVideoFileIDs = async (videoFileIDs: Set<number>) => {
+    // TODO(HLS): make async
+    await wait(0);
+    _videoPreviewFailedFileIDs = Array.from(videoFileIDs);
+};
+
+/**
+ * Mark the provided file ID as having been processed to generate a video
+ * preview.
+ *
+ * The mark is persisted locally in IndexedDB (KV DB), so will persist across
+ * app restarts (but not across logouts).
+ *
+ * @see also {@link savedProcessedVideoFileIDs}.
+ */
+const markProcessedVideoFileID = async (fileID: number) => {
+    const savedIDs = await savedProcessedVideoFileIDs();
+    const failedIDs = await savedFailedVideoFileIDs();
+    savedIDs.add(fileID);
+    if (failedIDs.delete(fileID)) await saveFailedVideoFileIDs(failedIDs);
+    await saveProcessedVideoFileIDs(savedIDs);
+};
+
+/**
+ * Mark multiple file IDs as processed. Plural variant of
+ * {@link markProcessedVideoFileID}.
+ */
+const markProcessedVideoFileIDs = async (fileIDs: Set<number>) => {
+    const savedIDs = await savedProcessedVideoFileIDs();
+    const failedIDs = await savedFailedVideoFileIDs();
+    await Promise.all([
+        saveProcessedVideoFileIDs(savedIDs.union(fileIDs)),
+        saveFailedVideoFileIDs(failedIDs.difference(fileIDs)),
+    ]);
+};
+
+/**
+ * Mark the provided file ID as having failed in a non-transient manner when we
+ * tried processing it to generate a video preview on this client.
+ *
+ * Similar to [Note: Transient and permanent indexing failures], we attempt to
+ * separate failures into two categories - transients, which leave no mark no
+ * the DB so that the file eventually gets retried; and permanent, where we keep
+ * a persistent record of failure so that this client does not go into a loop
+ * reattempting preview generation for the specific unprocessable (to the best
+ * of the current client's ability) item.
+ *
+ * The mark is local only, and will be reset on logout, or if another client
+ * with a different able is able to process it.
+ */
+const markFailedVideoFileID = async (fileID: number) => {
+    const failedIDs = await savedFailedVideoFileIDs();
+    failedIDs.add(fileID);
+    await saveFailedVideoFileIDs(failedIDs);
+};
+
+/**
+ * Return the persisted time when we last synced processed file IDs with remote.
+ *
+ * The returned value is an epoch millisecond value suitable to be passed to
+ * {@link syncUpdatedFileDataFileIDs}.
+ */
+const savedSyncLastUpdatedAt = async () => {
+    // TODO(HLS): make async
+    await wait(0);
+    return _videoPreviewSyncLastUpdatedAt;
+};
+
+/**
+ * Update the persisted timestamp used for syncing processed file IDs with
+ * remote.
+ *
+ * Use {@link savedSyncLastUpdatedAt} to get the persisted value back.
+ */
+const saveSyncLastUpdatedAt = async (lastUpdatedAt: number) => {
+    // TODO(HLS): make async
+    await wait(0);
+    _videoPreviewSyncLastUpdatedAt = lastUpdatedAt;
+};
+
+/**
+ * Fetch IDs of files from remote that have been processed by other clients
+ * since the last time we checked.
+ */
+const syncProcessedFileIDs = async () =>
+    syncUpdatedFileDataFileIDs(
+        "vid_preview",
+        (await savedSyncLastUpdatedAt()) ?? 0,
+        async ({ fileIDs, lastUpdatedAt }) => {
+            await Promise.all([
+                markProcessedVideoFileIDs(fileIDs),
+                saveSyncLastUpdatedAt(lastUpdatedAt),
+            ]);
+        },
+    );
+
+/**
+ * If video processing is enabled, trigger a sync with remote and any subsequent
+ * backfill queue processing for pending videos.
+ *
+ * This function is expected to be called during a regular sync that the app
+ * makes with remote (See: [Note: Remote sync]). It is a no-op if video
+ * processing is not enabled or eligible on this device. Otherwise it syncs the
+ * list of already processed file IDs with remote.
+ *
+ * At this point it also triggers a backfill (if needed), but doesn't wait for
+ * it to complete (which might take a time for big libraries).
+ *
+ * Calling it when a backfill has already been triggered by a previous sync is
+ * also a no-op. However, a backfill does not start until at least one sync of
+ * file IDs has been completed with remote, to avoid picking up work on file IDs
+ * that have already been processed elsewhere.
+ */
+export const videoProcessingSyncIfNeeded = async () => {
+    if (!isDesktop) return;
+    if (!isVideoProcessingEnabled()) return;
+
+    await syncProcessedFileIDs();
+    _state.haveSyncedOnce = true;
+
+    tickNow(); /* if not already ticking */
+};
+
 /**
  * Create a streamable HLS playlist for a video uploaded from this client.
  *
@@ -337,9 +554,8 @@ export const processVideoNewUpload = (
     file: EnteFile,
     processableUploadItem: ProcessableUploadItem,
 ) => {
-    // TODO(HLS):
-    if (!isVideoProcessingEnabled()) return;
     if (!isDesktop) return;
+    if (!isVideoProcessingEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
     if (processableUploadItem instanceof File) {
         // While the types don't guarantee it, we really shouldn't be getting
@@ -352,36 +568,157 @@ export const processVideoNewUpload = (
     }
 
     // Enqueue the item.
-    _state.videoProcessingQueue.push({
+    _state.liveQueue.push({
         file,
         timestampedUploadItem: processableUploadItem,
     });
 
-    // Tickle the processor if it isn't already running.
+    // Interrupt any idle timeouts if any, go go.
+    tickNow();
+};
+
+/**
+ * If {@link processQueue} is not already running, start it.
+ *
+ * If there is an existing {@link resolveTick} so that if perchance
+ * {@link processQueue} was waiting on an idle timeout, it wakes up now.
+ *
+ * Also create a new {@link tick} and {@link resolveTick} pair for use by
+ * subsequent calls to {@link tickNow}
+ */
+const tickNow = () => {
+    // See: [Note: Exiting idle wait of processing loop] for what this function
+    // is trying to do.
+
+    // Resolve the existing tick (if any).
+    if (_state.resolveTick) _state.resolveTick();
+
+    // Create a new resolvable pair.
+    _state.tick = new Promise((r) => (_state.resolveTick = r));
+
+    // Start the processor if it isn't already running.
     _state.queueProcessor ??= processQueue();
 };
 
 export const isVideoProcessingEnabled = () =>
+    // TODO(HLS):
     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
 
+/**
+ * The video processing loop goes through videos one by one, preferring items in
+ * the liveQueue, otherwise working for a backlog item. If there are no items to
+ * process, it goes on an idle timeout. The {@link resolveTick} state property
+ * can be used to tickle it out of sleep.
+ *
+ * [Note: Exiting idle wait of processing loop]
+ *
+ * The following toy example illustrates the overall mechanism:
+ *
+ *     let resolveTick
+ *     let tick = new Promise((r) => (resolveTick = r));
+ *
+ *     const tickNow = () => {
+ *         resolveTick();
+ *         tick = new Promise((r) => (resolveTick = r));
+ *     }
+ *
+ *     const f = async () => {
+ *         for (let i of [1, 2, 3, 4, 5]) {
+ *             const wait = new Promise((r) => setTimeout(r, i * 1e3));
+ *             await Promise.race([wait, tick]);
+ *         }
+ *     }
+ *
+ *     f()
+ *
+ *     setTimeout(tickNow, 2500);
+ *     setTimeout(tickNow, 5000);
+ *     setTimeout(tickNow, 5500);
+ *
+ * The `Promise.race([wait, tick])` means that the loop will proceed to the next
+ * item either if the timeout expires, or if tick resolves. Thus the same
+ * function can handle both the internally determined processing of backfill
+ * batches, and the externally triggered processing of live uploads.
+ */
 const processQueue = async () => {
-    while (true) {
-        const item = _state.videoProcessingQueue.shift();
-        if (!item) break;
-        try {
-            await processQueueItem(item);
-        } catch (e) {
-            log.error("Video processing failed", e);
-            // Ignore this unprocessable item. Currently this function only runs
-            // post upload, so this item will later get processed as part of the
-            // backfill.
-            //
-            // TODO(HLS): When processing the backfill itself, we'll need a way
-            // to mark this item as failed.
+    if (!(isDesktop && isVideoProcessingEnabled())) {
+        assertionFailed(); /* we shouldn't have come here */
+        return;
+    }
+
+    let bq: typeof _state.liveQueue | undefined;
+    while (isVideoProcessingEnabled()) {
+        let item = _state.liveQueue.shift();
+        if (!item) {
+            if (!bq && _state.haveSyncedOnce) {
+                /* initialize */
+                bq = await backfillQueue();
+            }
+            if (bq) {
+                switch (bq.length) {
+                    case 0:
+                        /* no more items to backfill */
+                        break;
+                    case 1 /* last item. take it, and refill queue */:
+                        item = bq.pop();
+                        bq = await backfillQueue();
+                        break;
+                    default:
+                        /* more than one item. take it */
+                        item = bq.pop();
+                        break;
+                }
+            } else {
+                log.info("Not backfilling since we haven't synced yet");
+            }
+        }
+        if (item) {
+            try {
+                await processQueueItem(item);
+                await markProcessedVideoFileID(item.file.id);
+            } catch (e) {
+                // This will get retried again at some point later.
+                log.error(`Failed to process video ${fileLogID(item.file)}`, e);
+            }
+            // Reset the idle wait on any activity.
+            _state.idleWait = idleWaitInitial;
+        } else {
+            // There are no more items in either the live queue or backlog.
+            // Go to sleep (for increasingly longer durations, capped at a
+            // maximum).
+            const idleWait = _state.idleWait;
+            _state.idleWait = Math.min(idleWait * 2, idleWaitMax);
+
+            // `tick` allows the sleep to be interrupted when there is
+            // potential activity.
+            if (!_state.tick) assertionFailed();
+            const tick = _state.tick!;
+
+            log.debug(() => ["gen-hls", { idleWait }]);
+            await Promise.race([tick, wait(idleWait)]);
         }
     }
+
     _state.queueProcessor = undefined;
+};
+
+/**
+ * Return the next batch of videos that need to be processed.
+ *
+ * If there is nothing pending, return an empty array.
+ */
+const backfillQueue = async (): Promise<VideoProcessingQueueItem[]> => {
+    const allCollectionFiles = await getAllLocalFiles();
+    const doneIDs = (await savedProcessedVideoFileIDs()).union(
+        await savedFailedVideoFileIDs(),
+    );
+    const videoFiles = uniqueFilesByID(
+        allCollectionFiles.filter((f) => f.metadata.fileType == FileType.video),
+    );
+    const pendingVideoFiles = videoFiles.filter((f) => !doneIDs.has(f.id));
+    const batch = randomSample(pendingVideoFiles, 50);
+    return batch.map((file) => ({ file }));
 };
 
 /**
@@ -411,6 +748,18 @@ const processQueueItem = async ({
 
     log.debug(() => ["gen-hls", { file, timestampedUploadItem }]);
 
+    const playlistFileData = await fetchFileData("vid_preview", file.id);
+    if (playlistFileData) {
+        // Since video processing for even an individual item can take
+        // substantial time, it is possible that an item might've gotten
+        // processed on a different client in the interval between us enqueuing
+        // it and us getting here.
+        //
+        // Bail out early to avoid unnecessary duplicate work.
+        log.info(`Generate HLS for ${fileLogID(file)} | already-processed`);
+        return;
+    }
+
     const uploadItem = timestampedUploadItem
         ? await fileSystemUploadItemIfUnchanged(
               timestampedUploadItem,
@@ -418,7 +767,17 @@ const processQueueItem = async ({
           )
         : undefined;
 
-    const sourceVideo = uploadItem ?? (await downloadManager.fileStream(file));
+    let sourceVideo: FileSystemUploadItem | ReadableStream | undefined =
+        uploadItem;
+    if (!sourceVideo) {
+        try {
+            sourceVideo = (await downloadManager.fileStream(file))!;
+        } catch (e) {
+            if (!isNetworkDownloadError(e))
+                await markFailedVideoFileID(file.id);
+            throw e;
+        }
+    }
 
     // [Note: Upload HLS video segment from node side]
     //
@@ -439,9 +798,10 @@ const processQueueItem = async ({
 
     log.info(`Generate HLS for ${fileLogID(file)} | start`);
 
+    // TODO(HLS): Inside this needs to be more granular in case of errors.
     const res = await initiateGenerateHLS(
         electron,
-        sourceVideo!,
+        sourceVideo,
         objectUploadURL,
     );
 
@@ -463,11 +823,16 @@ const processQueueItem = async ({
             size: videoSize,
         });
 
-        await putVideoData(file, playlistData, objectID, videoSize);
+        try {
+            await putVideoData(file, playlistData, objectID, videoSize);
+        } catch (e) {
+            if (isHTTP4xxError(e)) await markFailedVideoFileID(file.id);
+            throw e;
+        }
 
         log.info(`Generate HLS for ${fileLogID(file)} | done`);
     } finally {
-        await Promise.all([videoStreamDone(electron, playlistToken)]);
+        await videoStreamDone(electron, playlistToken);
     }
 };
 
