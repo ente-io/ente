@@ -1305,11 +1305,20 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) VALUES (?, ?, ?)',
         _getRowFromEmbedding(embeddings.first),
       );
+      await ClipVectorDB.instance.insertEmbedding(
+        fileID: embeddings.first.fileID,
+        embedding: embeddings.first.embedding,
+      );
     } else {
       final inputs = embeddings.map((e) => _getRowFromEmbedding(e)).toList();
       await db.executeBatch(
         'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) values(?, ?, ?)',
         inputs,
+      );
+      await ClipVectorDB.instance.bulkInsertEmbeddings(
+        fileIDs: embeddings.map((e) => e.fileID).toList(),
+        embeddings:
+            embeddings.map((e) => Float32List.fromList(e.embedding)).toList(),
       );
     }
     Bus.instance.fire(EmbeddingUpdatedEvent());
@@ -1321,6 +1330,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(
       'DELETE FROM $clipTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})',
     );
+    await ClipVectorDB.instance.deleteEmbeddings(fileIDs);
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
@@ -1328,6 +1338,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   Future<void> deleteClipIndexes() async {
     final db = await instance.asyncDB;
     await db.execute('DELETE FROM $clipTable');
+    await ClipVectorDB.instance.deleteAllEmbeddings();
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
