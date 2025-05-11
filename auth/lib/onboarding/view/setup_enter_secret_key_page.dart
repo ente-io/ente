@@ -293,10 +293,6 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  widget.code == null
-                      ? advanceOptionWidget()
-                      : const SizedBox.shrink(),
-                  const SizedBox(height: 12),
                   Wrap(
                     spacing: 12,
                     alignment: WrapAlignment.start,
@@ -343,6 +339,10 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  widget.code == null
+                      ? advanceOptionWidget()
+                      : const SizedBox.shrink(),
                   const SizedBox(height: 40),
                   SizedBox(
                     width: 400,
