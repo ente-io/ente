@@ -525,6 +525,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   }
 
   Widget advanceOptionWidget() {
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.only(top: 16.0),
       child: Column(
@@ -537,9 +538,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Advanced',
-                ),
+                Text(l10n.advanced),
                 ValueListenableBuilder<bool>(
                   valueListenable: showAdvancedOptions,
                   builder: (context, isExpanded, child) {
@@ -583,7 +582,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  const FieldLabel("Algorithm", width: 60),
+                                  FieldLabel(l10n.algorithm, width: 60),
                                   AlgorithmSelectorWidget(
                                     currentAlgorithm: _algorithm,
                                     onSelected: (newAlgorithm) async {
@@ -597,7 +596,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  const FieldLabel("Type", width: 60),
+                                  FieldLabel(l10n.type, width: 60),
                                   ToptSelectorWidget(
                                     currentTopt: _type,
                                     onSelected: (newTopt) async {
@@ -610,7 +609,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                               ),
                               Row(
                                 children: [
-                                  const FieldLabel("Period", width: 60),
+                                  FieldLabel(l10n.period, width: 60),
                                   Expanded(
                                     child: TextFormField(
                                       keyboardType: TextInputType.number,
@@ -639,7 +638,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                               ),
                               Row(
                                 children: [
-                                  const FieldLabel("Digits", width: 60),
+                                  FieldLabel(l10n.digits, width: 60),
                                   Expanded(
                                     child: TextFormField(
                                       keyboardType: TextInputType.number,
