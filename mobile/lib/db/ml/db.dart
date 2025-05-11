@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:io" show File;
 import "dart:math";
 
 import "package:collection/collection.dart";
@@ -9,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/common/base.dart";
 import "package:photos/db/ml/base.dart";
+import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db_model_mappers.dart";
 import 'package:photos/db/ml/schema.dart';
 import "package:photos/events/embedding_updated_event.dart";
@@ -81,6 +83,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       "MLDataDB Migration took ${stopwatch.elapsedMilliseconds} ms",
     );
     stopwatch.stop();
+    unawaited(checkMigrateFillClipVectorDB());
 
     return asyncDBConnection;
   }
@@ -1181,6 +1184,92 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       embeddings.add(embedding);
     }
     return embeddings;
+  }
+
+  Future<void> checkMigrateFillClipVectorDB({bool force = false}) async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    _logger.info("Checking if ClipVectorDB migration is needed");
+
+    // Check if vector DB migration has run
+    final documentsDirectory = await getApplicationDocumentsDirectory();
+    final migrationFlagFile =
+        File(join(documentsDirectory.path, 'clip_vector_migration_done'));
+    if (await migrationFlagFile.exists() && !force) {
+      _logger.info("ClipVectorDB migration not needed, already done");
+      return;
+    }
+
+    // Get total count first to track progress
+    final db = await instance.asyncDB;
+    final countResult =
+        await db.getAll('SELECT COUNT($fileIDColumn) as total FROM $clipTable');
+    final totalCount = countResult.first['total'] as int;
+    if (totalCount == 0) {
+      _logger.info("No clip embeddings to migrate");
+      await migrationFlagFile.create();
+      return;
+    }
+
+    final clipVectorDB = ClipVectorDB.instance;
+    await clipVectorDB.deleteAllEmbeddings();
+
+    _logger
+        .info("Starting migration of $totalCount clip embeddings to vector DB");
+    const batchSize = 5000;
+    int offset = 0;
+    int processedCount = 0;
+    int weirdCount = 0;
+    final stopwatch = Stopwatch()..start();
+    try {
+      while (true) {
+        final List<Map<String, dynamic>> results = await db.getAll('''
+        SELECT $fileIDColumn, $embeddingColumn 
+        FROM $clipTable
+        ORDER BY $fileIDColumn DESC
+        LIMIT $batchSize OFFSET $offset
+      ''');
+        if (results.isEmpty) {
+          break;
+        }
+        final List<int> fileIDs = [];
+        final List<Float32List> embeddings = [];
+        for (final result in results) {
+          final embedding =
+              Float32List.view((result[embeddingColumn] as Uint8List).buffer);
+          if (embedding.length == 512) {
+            fileIDs.add(result[fileIDColumn] as int);
+            embeddings.add(Float32List.view(result[embeddingColumn].buffer));
+          } else {
+            weirdCount++;
+          }
+        }
+
+        await ClipVectorDB.instance
+            .bulkInsertEmbeddings(fileIDs: fileIDs, embeddings: embeddings);
+        processedCount += fileIDs.length;
+        offset += batchSize;
+        _logger.info(
+          "migrated $processedCount/$totalCount embeddings to ClipVectorDB",
+        );
+        if (processedCount >= totalCount) {
+          break;
+        }
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+      _logger.info(
+        "migrated all $totalCount embeddings to ClipVectorDB in ${stopwatch.elapsed.inMilliseconds} ms, with $weirdCount weird embeddings not migrated",
+      );
+      await migrationFlagFile.create();
+    } catch (e) {
+      _logger.severe(
+        "Error migrating ClipVectorDB after ${stopwatch.elapsed.inMilliseconds} ms, clearing out DB again",
+        e,
+      );
+      await clipVectorDB.deleteAllEmbeddings();
+      rethrow;
+    } finally {
+      stopwatch.stop();
+    }
   }
 
   // Get indexed FileIDs
