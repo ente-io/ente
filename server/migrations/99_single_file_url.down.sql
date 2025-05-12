@@ -9,6 +9,7 @@ DROP INDEX IF EXISTS unique_report_public_collection_id_ip_ua;
 DROP INDEX IF EXISTS unique_report_public_file_id_ip_ua;
 
 ALTER TABLE public_abuse_report DROP CONSTRAINT IF EXISTS fk_public_abuse_report_file_token_id;
+ALTER TABLE public_abuse_report DROP CONSTRAINT IF EXISTS unique_report_public_file_id_ip_ua;
 
 ALTER TABLE public_abuse_report DROP COLUMN IF EXISTS file_share_id;
 

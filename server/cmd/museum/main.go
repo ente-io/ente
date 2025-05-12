@@ -6,6 +6,7 @@ import (
 	b64 "encoding/base64"
 	"fmt"
 	"github.com/ente-io/museum/pkg/controller/collections"
+	"github.com/ente-io/museum/pkg/repo/public"
 	"net/http"
 	"os"
 	"os/signal"
@@ -176,7 +177,7 @@ func main() {
 	fileDataRepo := &fileDataRepo.Repository{DB: db, ObjectCleanupRepo: objectCleanupRepo}
 	familyRepo := &repo.FamilyRepository{DB: db}
 	trashRepo := &repo.TrashRepository{DB: db, ObjectRepo: objectRepo, FileRepo: fileRepo, QueueRepo: queueRepo}
-	publicCollectionRepo := repo.NewPublicCollectionRepository(db, viper.GetString("apps.public-albums"))
+	publicCollectionRepo := public.NewPublicCollectionRepository(db, viper.GetString("apps.public-albums"))
 	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, PublicCollectionRepo: publicCollectionRepo,
 		TrashRepo: trashRepo, SecretEncryptionKey: secretEncryptionKeyBytes, QueueRepo: queueRepo, LatencyLogger: latencyLogger}
 	pushRepo := &repo.PushTokenRepository{DB: db}
@@ -898,7 +899,7 @@ func setupAndStartBackgroundJobs(
 	objectCleanupController.StartClearingOrphanObjects()
 }
 
-func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionRepo *repo.PublicCollectionRepository,
+func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionRepo *public.PublicCollectionRepository,
 	twoFactorRepo *repo.TwoFactorRepository, passkeysRepo *passkey.Repository, fileController *controller.FileController,
 	taskRepo *repo.TaskLockRepository, emailNotificationCtrl *email.EmailNotificationController,
 	trashController *controller.TrashController, pushController *controller.PushController,

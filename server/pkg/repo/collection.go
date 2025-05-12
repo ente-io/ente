@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/ente-io/museum/pkg/repo/public"
 	"strconv"
 	t "time"
 
@@ -24,7 +25,7 @@ import (
 type CollectionRepository struct {
 	DB                   *sql.DB
 	FileRepo             *FileRepository
-	PublicCollectionRepo *PublicCollectionRepository
+	PublicCollectionRepo *public.PublicCollectionRepository
 	TrashRepo            *TrashRepository
 	SecretEncryptionKey  []byte
 	QueueRepo            *QueueRepository

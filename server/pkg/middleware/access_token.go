@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"github.com/ente-io/museum/pkg/repo/public"
 	"net/http"
 
 	"github.com/ente-io/museum/ente"
@@ -26,7 +27,7 @@ var whitelistedCollectionShareIDs = []int64{111}
 
 // AccessTokenMiddleware intercepts and authenticates incoming requests
 type AccessTokenMiddleware struct {
-	PublicCollectionRepo *repo.PublicCollectionRepository
+	PublicCollectionRepo *public.PublicCollectionRepository
 	PublicCollectionCtrl *controller.PublicCollectionController
 	CollectionRepo       *repo.CollectionRepository
 	Cache                *cache.Cache

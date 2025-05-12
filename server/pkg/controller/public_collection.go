@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/repo/public"
 
 	"github.com/ente-io/museum/ente"
 	enteJWT "github.com/ente-io/museum/ente/jwt"
@@ -53,7 +54,7 @@ const (
 type PublicCollectionController struct {
 	FileController        *FileController
 	EmailNotificationCtrl *emailCtrl.EmailNotificationController
-	PublicCollectionRepo  *repo.PublicCollectionRepository
+	PublicCollectionRepo  *public.PublicCollectionRepository
 	CollectionRepo        *repo.CollectionRepository
 	UserRepo              *repo.UserRepository
 	JwtSecret             []byte
