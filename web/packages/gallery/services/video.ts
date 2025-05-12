@@ -8,6 +8,7 @@ import {
     retryAsyncOperation,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
+import { getKV, getKVN, setKV } from "ente-base/kv";
 import { ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { fileLogID, type EnteFile } from "ente-media/file";
@@ -357,11 +358,6 @@ const blobToDataURL = (blob: Blob) =>
         reader.readAsDataURL(blob);
     });
 
-// TODO(HLS): Store this in DB.
-let _videoPreviewProcessedFileIDs: number[] = [];
-let _videoPreviewFailedFileIDs: number[] = [];
-let _videoPreviewSyncLastUpdatedAt: number | undefined;
-
 /**
  * Return the (persistent) {@link Set} containing the ids of the files which
  * have already been processed for generating their streaming variant.
@@ -374,11 +370,18 @@ let _videoPreviewSyncLastUpdatedAt: number | undefined;
  * The data is retrieved from persistent storage (KV DB), where it is stored as
  * an array.
  */
-const savedProcessedVideoFileIDs = async () => {
-    // TODO(HLS): make async
-    await wait(0);
-    return new Set(_videoPreviewProcessedFileIDs);
-};
+const savedProcessedVideoFileIDs = () =>
+    // [Note: Avoiding zod parsing overhead for DB arrays]
+    //
+    // Validating that the value we read from the DB is indeed the same as the
+    // type we expect can be done using zod, but for potentially very large
+    // arrays, this has an overhead that is perhaps not justified when dealing
+    // with DB entries we ourselves wrote.
+    //
+    // As an optimization, we skip the runtime check here and cast. This might
+    // not be the most optimal choice in the future, so (a) use it sparingly,
+    // and (b) mark all such cases with the title of this note.
+    getKV("videoPreviewProcessedFileIDs").then((v) => new Set(v as number[]));
 
 /**
  * Return the (persistent) {@link Set} containing the ids of the files for which
@@ -386,11 +389,9 @@ const savedProcessedVideoFileIDs = async () => {
  *
  * @see also {@link savedProcessedVideoFileIDs}.
  */
-const savedFailedVideoFileIDs = async () => {
-    // TODO(HLS): make async
-    await wait(0);
-    return new Set(_videoPreviewFailedFileIDs);
-};
+const savedFailedVideoFileIDs = () =>
+    // See: [Note: Avoiding zod parsing overhead for DB arrays]
+    getKV("videoPreviewFailedFileIDs").then((v) => new Set(v as number[]));
 
 /**
  * Update the persisted set of IDs of files which have already been processed
@@ -398,11 +399,8 @@ const savedFailedVideoFileIDs = async () => {
  *
  * @see also {@link savedProcessedVideoFileIDs}.
  */
-const saveProcessedVideoFileIDs = async (videoFileIDs: Set<number>) => {
-    // TODO(HLS): make async
-    await wait(0);
-    _videoPreviewProcessedFileIDs = Array.from(videoFileIDs);
-};
+const saveProcessedVideoFileIDs = (videoFileIDs: Set<number>) =>
+    setKV("videoPreviewProcessedFileIDs", Array.from(videoFileIDs));
 
 /**
  * Update the persisted set of IDs of files for which attempt to generate a
@@ -410,11 +408,8 @@ const saveProcessedVideoFileIDs = async (videoFileIDs: Set<number>) => {
  *
  * @see also {@link savedProcessedVideoFileIDs}.
  */
-const saveFailedVideoFileIDs = async (videoFileIDs: Set<number>) => {
-    // TODO(HLS): make async
-    await wait(0);
-    _videoPreviewFailedFileIDs = Array.from(videoFileIDs);
-};
+const saveFailedVideoFileIDs = (videoFileIDs: Set<number>) =>
+    setKV("videoPreviewFailedFileIDs", Array.from(videoFileIDs));
 
 /**
  * Mark the provided file ID as having been processed to generate a video
@@ -472,11 +467,7 @@ const markFailedVideoFileID = async (fileID: number) => {
  * The returned value is an epoch millisecond value suitable to be passed to
  * {@link syncUpdatedFileDataFileIDs}.
  */
-const savedSyncLastUpdatedAt = async () => {
-    // TODO(HLS): make async
-    await wait(0);
-    return _videoPreviewSyncLastUpdatedAt;
-};
+const savedSyncLastUpdatedAt = () => getKVN("videoPreviewSyncLastUpdatedAt");
 
 /**
  * Update the persisted timestamp used for syncing processed file IDs with
@@ -484,11 +475,8 @@ const savedSyncLastUpdatedAt = async () => {
  *
  * Use {@link savedSyncLastUpdatedAt} to get the persisted value back.
  */
-const saveSyncLastUpdatedAt = async (lastUpdatedAt: number) => {
-    // TODO(HLS): make async
-    await wait(0);
-    _videoPreviewSyncLastUpdatedAt = lastUpdatedAt;
-};
+const saveSyncLastUpdatedAt = (lastUpdatedAt: number) =>
+    setKV("videoPreviewSyncLastUpdatedAt", lastUpdatedAt);
 
 /**
  * Fetch IDs of files from remote that have been processed by other clients
