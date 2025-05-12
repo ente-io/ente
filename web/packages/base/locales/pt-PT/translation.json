@@ -32,6 +32,7 @@
     "set_password": "Definir palavra-passe",
     "sign_in": "Entrar",
     "incorrect_password": "Palavra-passe incorreta",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Introduza uma palavra-passe para encriptar os seus dados",
     "pick_password_caution": "Não guardamos a sua palavra-passe, por isso, se se esquecer dela, não poderemos ajudá-lo a recuperar os seus dados sem uma chave de recuperação.",
     "key_generation_in_progress": "Gerar chaves de criptografia...",

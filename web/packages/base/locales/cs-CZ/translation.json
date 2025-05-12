@@ -32,6 +32,7 @@
     "set_password": "Nastavit heslo",
     "sign_in": "Přihlásit se",
     "incorrect_password": "Nesprávné heslo",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Zadejte heslo, kterým můžeme zašifrovat Vaše data",
     "pick_password_caution": "Vaše heslo neukládáme, takže pokud ho zapomenete, <strong>nebudeme moci pomoci </strong>obnovit vaše data bez obnovovacího klíče.",
     "key_generation_in_progress": "Generování šifrovacích klíčů...",

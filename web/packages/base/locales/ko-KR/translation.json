@@ -32,6 +32,7 @@
     "set_password": "비밀번호 설정",
     "sign_in": "로그인",
     "incorrect_password": "잘못된 비밀번호입니다",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "데이터 암호화를 위한 새로운 암호 입력",
     "pick_password_caution": "우리는 귀하의 비밀번호를 저장하지 않습니다. 만약 비밀번호를 잊어버린 경우 복구 키가 없다면 <strong>데이터 복구를 도와드릴 수 없습니다</strong>.",
     "key_generation_in_progress": "암호화 키 생성 중...",

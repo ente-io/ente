@@ -32,6 +32,7 @@
     "set_password": "Nustatyti slaptažodį",
     "sign_in": "Prisijungti",
     "incorrect_password": "Neteisingas slaptažodis.",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Įveskite slaptažodį, kurį galime naudoti jūsų duomenims šifruoti.",
     "pick_password_caution": "Jūsų slaptažodžio nesaugome, todėl jei jį pamiršite, be atkūrimo rakto <strong>negalėsime padėti </strong>atkurti duomenų.",
     "key_generation_in_progress": "Generuojami šifravimo raktai...",

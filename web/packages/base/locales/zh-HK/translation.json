@@ -32,6 +32,7 @@
     "set_password": "設定密碼",
     "sign_in": "登入",
     "incorrect_password": "密碼錯誤",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "",
     "pick_password_caution": "",
     "key_generation_in_progress": "",
