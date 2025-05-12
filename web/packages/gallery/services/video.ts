@@ -15,6 +15,7 @@ import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import {
     getAllLocalFiles,
+    getLocalTrashFileIDs,
     uniqueFilesByID,
 } from "ente-new/photos/services/files";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
@@ -711,15 +712,21 @@ const backfillQueue = async (
     userID: number,
 ): Promise<VideoProcessingQueueItem[]> => {
     const allCollectionFiles = await getAllLocalFiles();
+    const localTrashFileIDs = await getLocalTrashFileIDs();
+    const videoFiles = uniqueFilesByID(
+        allCollectionFiles.filter(
+            (f) =>
+                f.ownerID == userID &&
+                f.metadata.fileType == FileType.video &&
+                !localTrashFileIDs.has(f.id),
+        ),
+    );
+
     const doneIDs = (await savedProcessedVideoFileIDs()).union(
         await savedFailedVideoFileIDs(),
     );
-    const videoFiles = uniqueFilesByID(
-        allCollectionFiles.filter(
-            (f) => f.ownerID == userID && f.metadata.fileType == FileType.video,
-        ),
-    );
     const pendingVideoFiles = videoFiles.filter((f) => !doneIDs.has(f.id));
+
     const batch = randomSample(pendingVideoFiles, 50);
     return batch.map((file) => ({ file }));
 };
