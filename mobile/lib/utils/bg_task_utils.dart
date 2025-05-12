@@ -16,9 +16,9 @@ void callbackDispatcher() {
       await runBackgroundTask(taskName);
       return true;
     } catch (e) {
-      BgTaskUtils.$.info('[WorkManager] task error: $e');
+      BgTaskUtils.$.info('Task error: $e');
       await BgTaskUtils.killBGTask(taskName);
-      return false;
+      return Future.error(e.toString());
     }
   });
 }
@@ -73,9 +73,9 @@ class BgTaskUtils {
         backoffPolicy: workmanager.BackoffPolicy.linear,
         backoffPolicyDelay: const Duration(minutes: 15),
       );
+      $.info("WorkManager configured");
     } catch (e) {
       $.warning("Failed to configure WorkManager: $e");
     }
-    $.info("WorkManager configured");
   }
 }
