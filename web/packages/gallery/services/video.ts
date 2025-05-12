@@ -3,7 +3,11 @@ import { assertionFailed } from "ente-base/assert";
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
 import { ensureElectron } from "ente-base/electron";
-import { isHTTP4xxError, type PublicAlbumsCredentials } from "ente-base/http";
+import {
+    isHTTP4xxError,
+    retryAsyncOperation,
+    type PublicAlbumsCredentials,
+} from "ente-base/http";
 import log from "ente-base/log";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
@@ -824,7 +828,9 @@ const processQueueItem = async ({
         });
 
         try {
-            await putVideoData(file, playlistData, objectID, videoSize);
+            await retryAsyncOperation(() =>
+                putVideoData(file, playlistData, objectID, videoSize),
+            );
         } catch (e) {
             if (isHTTP4xxError(e)) await markFailedVideoFileID(file.id);
             throw e;
