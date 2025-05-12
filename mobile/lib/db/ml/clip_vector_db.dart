@@ -131,8 +131,10 @@ class ClipVectorDB {
         size: stats.$1.toInt(),
         capacity: stats.$2.toInt(),
         dimensions: stats.$3.toInt(),
-        expansionAdd: stats.$4.toInt(),
-        expansionSearch: stats.$5.toInt(),
+        fileSize: stats.$4.toInt(),
+        memoryUsage: stats.$5.toInt(),
+        expansionAdd: stats.$6.toInt(),
+        expansionSearch: stats.$7.toInt(),
       );
     } catch (e, s) {
       _logger.severe("Error getting index stats", e, s);
@@ -210,6 +212,10 @@ class VectorDbStats {
   final int capacity;
   final int dimensions;
 
+  // in bytes
+  final int fileSize;
+  final int memoryUsage;
+
   final int expansionAdd;
   final int expansionSearch;
 
@@ -217,12 +223,14 @@ class VectorDbStats {
     required this.size,
     required this.capacity,
     required this.dimensions,
+    required this.fileSize,
+    required this.memoryUsage,
     required this.expansionAdd,
     required this.expansionSearch,
   });
 
   @override
   String toString() {
-    return "VectorDbStats(size: $size, capacity: $capacity, dimensions: $dimensions, expansionAdd: $expansionAdd, expansionSearch: $expansionSearch)";
+    return "VectorDbStats(size: $size, capacity: $capacity, dimensions: $dimensions, file size (bytes): $fileSize, memory usage (bytes): $memoryUsage, expansionAdd: $expansionAdd, expansionSearch: $expansionSearch)";
   }
 }

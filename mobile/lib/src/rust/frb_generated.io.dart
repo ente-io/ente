@@ -79,8 +79,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ) dco_decode_record_list_prim_u_64_strict_list_prim_f_32_strict(dynamic raw);
 
   @protected
-  (BigInt, BigInt, BigInt, BigInt, BigInt)
-      dco_decode_record_usize_usize_usize_usize_usize(dynamic raw);
+  (BigInt, BigInt, BigInt, BigInt, BigInt, BigInt, BigInt)
+      dco_decode_record_usize_usize_usize_usize_usize_usize_usize(dynamic raw);
 
   @protected
   BigInt dco_decode_u_64(dynamic raw);
@@ -149,8 +149,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
           SseDeserializer deserializer);
 
   @protected
-  (BigInt, BigInt, BigInt, BigInt, BigInt)
-      sse_decode_record_usize_usize_usize_usize_usize(
+  (BigInt, BigInt, BigInt, BigInt, BigInt, BigInt, BigInt)
+      sse_decode_record_usize_usize_usize_usize_usize_usize_usize(
           SseDeserializer deserializer);
 
   @protected
@@ -225,8 +225,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       (Uint64List, Float32List) self, SseSerializer serializer);
 
   @protected
-  void sse_encode_record_usize_usize_usize_usize_usize(
-      (BigInt, BigInt, BigInt, BigInt, BigInt) self, SseSerializer serializer);
+  void sse_encode_record_usize_usize_usize_usize_usize_usize_usize(
+      (BigInt, BigInt, BigInt, BigInt, BigInt, BigInt, BigInt) self,
+      SseSerializer serializer);
 
   @protected
   void sse_encode_u_64(BigInt self, SseSerializer serializer);

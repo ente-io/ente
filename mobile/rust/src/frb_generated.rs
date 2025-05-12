@@ -904,7 +904,7 @@ impl SseDecode for (Vec<u64>, Vec<f32>) {
     }
 }
 
-impl SseDecode for (usize, usize, usize, usize, usize) {
+impl SseDecode for (usize, usize, usize, usize, usize, usize, usize) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_field0 = <usize>::sse_decode(deserializer);
@@ -912,7 +912,11 @@ impl SseDecode for (usize, usize, usize, usize, usize) {
         let mut var_field2 = <usize>::sse_decode(deserializer);
         let mut var_field3 = <usize>::sse_decode(deserializer);
         let mut var_field4 = <usize>::sse_decode(deserializer);
-        return (var_field0, var_field1, var_field2, var_field3, var_field4);
+        let mut var_field5 = <usize>::sse_decode(deserializer);
+        let mut var_field6 = <usize>::sse_decode(deserializer);
+        return (
+            var_field0, var_field1, var_field2, var_field3, var_field4, var_field5, var_field6,
+        );
     }
 }
 
@@ -1171,7 +1175,7 @@ impl SseEncode for (Vec<u64>, Vec<f32>) {
     }
 }
 
-impl SseEncode for (usize, usize, usize, usize, usize) {
+impl SseEncode for (usize, usize, usize, usize, usize, usize, usize) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <usize>::sse_encode(self.0, serializer);
@@ -1179,6 +1183,8 @@ impl SseEncode for (usize, usize, usize, usize, usize) {
         <usize>::sse_encode(self.2, serializer);
         <usize>::sse_encode(self.3, serializer);
         <usize>::sse_encode(self.4, serializer);
+        <usize>::sse_encode(self.5, serializer);
+        <usize>::sse_encode(self.6, serializer);
     }
 }
 

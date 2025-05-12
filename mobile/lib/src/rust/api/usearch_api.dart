@@ -30,7 +30,8 @@ abstract class VectorDb implements RustOpaqueInterface {
 
   Future<void> deleteIndex();
 
-  Future<(BigInt, BigInt, BigInt, BigInt, BigInt)> getIndexStats();
+  Future<(BigInt, BigInt, BigInt, BigInt, BigInt, BigInt, BigInt)>
+      getIndexStats();
 
   Future<Float32List> getVector({required BigInt key});
 

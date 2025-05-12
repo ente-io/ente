@@ -164,13 +164,25 @@ impl VectorDB {
         }
     }
 
-    pub fn get_index_stats(&self) -> (usize, usize, usize, usize, usize) {
+    pub fn get_index_stats(&self) -> (usize, usize, usize, usize, usize, usize, usize) {
         let size = self.index.size();
         let capacity = self.index.capacity();
         let dimensions = self.index.dimensions();
+
+        let file_size = self.index.serialized_length();
+        let memory_usage = self.index.memory_usage();
+
         let expansion_add = self.index.expansion_add();
         let expansion_search = self.index.expansion_search();
 
-        (size, capacity, dimensions, expansion_add, expansion_search)
+        (
+            size,
+            capacity,
+            dimensions,
+            file_size,
+            memory_usage,
+            expansion_add,
+            expansion_search,
+        )
     }
 }

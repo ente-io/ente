@@ -110,7 +110,7 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiUsearchApiVectorDbDeleteIndex({required VectorDb that});
 
-  Future<(BigInt, BigInt, BigInt, BigInt, BigInt)>
+  Future<(BigInt, BigInt, BigInt, BigInt, BigInt, BigInt, BigInt)>
       crateApiUsearchApiVectorDbGetIndexStats({required VectorDb that});
 
   Future<Float32List> crateApiUsearchApiVectorDbGetVector(
@@ -356,7 +356,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<(BigInt, BigInt, BigInt, BigInt, BigInt)>
+  Future<(BigInt, BigInt, BigInt, BigInt, BigInt, BigInt, BigInt)>
       crateApiUsearchApiVectorDbGetIndexStats({required VectorDb that}) {
     return handler.executeNormal(NormalTask(
       callFfi: (port_) {
@@ -367,7 +367,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             funcId: 8, port: port_);
       },
       codec: SseCodec(
-        decodeSuccessData: sse_decode_record_usize_usize_usize_usize_usize,
+        decodeSuccessData:
+            sse_decode_record_usize_usize_usize_usize_usize_usize_usize,
         decodeErrorData: null,
       ),
       constMeta: kCrateApiUsearchApiVectorDbGetIndexStatsConstMeta,
@@ -691,12 +692,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  (BigInt, BigInt, BigInt, BigInt, BigInt)
-      dco_decode_record_usize_usize_usize_usize_usize(dynamic raw) {
+  (BigInt, BigInt, BigInt, BigInt, BigInt, BigInt, BigInt)
+      dco_decode_record_usize_usize_usize_usize_usize_usize_usize(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 5) {
-      throw Exception('Expected 5 elements, got ${arr.length}');
+    if (arr.length != 7) {
+      throw Exception('Expected 7 elements, got ${arr.length}');
     }
     return (
       dco_decode_usize(arr[0]),
@@ -704,6 +705,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       dco_decode_usize(arr[2]),
       dco_decode_usize(arr[3]),
       dco_decode_usize(arr[4]),
+      dco_decode_usize(arr[5]),
+      dco_decode_usize(arr[6]),
     );
   }
 
@@ -852,8 +855,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  (BigInt, BigInt, BigInt, BigInt, BigInt)
-      sse_decode_record_usize_usize_usize_usize_usize(
+  (BigInt, BigInt, BigInt, BigInt, BigInt, BigInt, BigInt)
+      sse_decode_record_usize_usize_usize_usize_usize_usize_usize(
           SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     final var_field0 = sse_decode_usize(deserializer);
@@ -861,7 +864,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     final var_field2 = sse_decode_usize(deserializer);
     final var_field3 = sse_decode_usize(deserializer);
     final var_field4 = sse_decode_usize(deserializer);
-    return (var_field0, var_field1, var_field2, var_field3, var_field4);
+    final var_field5 = sse_decode_usize(deserializer);
+    final var_field6 = sse_decode_usize(deserializer);
+    return (
+      var_field0,
+      var_field1,
+      var_field2,
+      var_field3,
+      var_field4,
+      var_field5,
+      var_field6
+    );
   }
 
   @protected
@@ -1008,14 +1021,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_record_usize_usize_usize_usize_usize(
-      (BigInt, BigInt, BigInt, BigInt, BigInt) self, SseSerializer serializer) {
+  void sse_encode_record_usize_usize_usize_usize_usize_usize_usize(
+      (BigInt, BigInt, BigInt, BigInt, BigInt, BigInt, BigInt) self,
+      SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(self.$1, serializer);
     sse_encode_usize(self.$2, serializer);
     sse_encode_usize(self.$3, serializer);
     sse_encode_usize(self.$4, serializer);
     sse_encode_usize(self.$5, serializer);
+    sse_encode_usize(self.$6, serializer);
+    sse_encode_usize(self.$7, serializer);
   }
 
   @protected
@@ -1099,10 +1115,11 @@ class VectorDbImpl extends RustOpaque implements VectorDb {
         that: this,
       );
 
-  Future<(BigInt, BigInt, BigInt, BigInt, BigInt)> getIndexStats() =>
-      RustLib.instance.api.crateApiUsearchApiVectorDbGetIndexStats(
-        that: this,
-      );
+  Future<(BigInt, BigInt, BigInt, BigInt, BigInt, BigInt, BigInt)>
+      getIndexStats() =>
+          RustLib.instance.api.crateApiUsearchApiVectorDbGetIndexStats(
+            that: this,
+          );
 
   Future<Float32List> getVector({required BigInt key}) => RustLib.instance.api
       .crateApiUsearchApiVectorDbGetVector(that: this, key: key);
