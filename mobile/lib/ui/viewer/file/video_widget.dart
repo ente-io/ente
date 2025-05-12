@@ -69,8 +69,7 @@ class _VideoWidgetState extends State<VideoWidget> {
     final isPreviewAvailable = FileDataService.instance.previewIds
             ?.containsKey(widget.file.uploadedFileID) ??
         false;
-    if (!PreviewVideoStore.instance.isVideoStreamingEnabled ||
-        !isPreviewAvailable) {
+    if (!isPreviewAvailable) {
       return;
     }
     widget.playbackCallback?.call(false);
