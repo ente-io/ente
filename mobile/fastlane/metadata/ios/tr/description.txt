@@ -14,7 +14,7 @@ Ente, albümlerinizi sevdiklerinizle paylaşmanızı da kolaylaştırıyor. Bunl
 - Orijinal kalitede yedekler, çünkü her piksel önemlidir
 - Aile planları, böylece depolama alanını ailenizle paylaşabilirsiniz
 - Partnerinizin "Kamera" tıklamalarınızın keyfini çıkarmasını istemeniz durumunda paylaşılan klasörler
-- Parola ile korunabilen ve süresi dolacak şekilde ayarlanabilen albüm bağlantıları
+- Albüm bağlantıları, parolayla korunabilir ve son kullanma tarihi ayarlanabilir
 - Güvenli bir şekilde yedeklenmiş dosyaları kaldırarak alan boşaltma yeteneği
 - Son rötuşları eklemek için görüntü düzenleyici
 - Favori, sakla ve anılarını yeniden yaşa, çünkü onlar değerlidir
@@ -26,7 +26,7 @@ Ente, albümlerinizi sevdiklerinizle paylaşmanızı da kolaylaştırıyor. Bunl
 FİYATLANDIRMA
 Sonsuza kadar ücretsiz planlar sunmuyoruz, çünkü sürdürülebilir kalmamız ve zamanın testine dayanmamız bizim için önemli. Bunun yerine, ailenizle özgürce paylaşabileceğiniz uygun fiyatlı planlar sunuyoruz. Daha fazla bilgiyi ente.io adresinde bulabilirsiniz.
 
-🙋DESTEK
+DESTEK
 İnsan desteği sunmaktan gurur duyuyoruz. Ücretli müşterimiz iseniz team@ente.io adresine ulaşabilir ve ekibimizden 24 saat içinde yanıt bekleyebilirsiniz.
 
 ŞARTLAR
