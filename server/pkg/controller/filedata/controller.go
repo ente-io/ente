@@ -2,7 +2,6 @@ package filedata
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -139,12 +138,12 @@ func (c *Controller) GetFileData(ctx *gin.Context, actorUser int64, req fileData
 	}
 	doRows, err := c.Repo.GetFilesData(ctx, req.Type, []int64{req.FileID})
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) && req.PreferNoContent {
-			return nil, nil
-		}
 		return nil, stacktrace.Propagate(err, "")
 	}
 	if len(doRows) == 0 || doRows[0].IsDeleted {
+		if req.PreferNoContent {
+			return nil, nil
+		}
 		return nil, stacktrace.Propagate(&ente.ErrNotFoundError, "")
 	}
 	ctxLogger := log.WithFields(log.Fields{
