@@ -53,7 +53,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final _logger = Logger("main");
 
-bool _isProcessRunning = false;
 const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
 const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
 const kHeartBeatFrequency = Duration(seconds: 1);
@@ -122,17 +121,40 @@ Future<void> _homeWidgetSync() async {
 }
 
 Future<void> runBackgroundTask(String taskId, {String mode = 'normal'}) async {
-  if (_isProcessRunning) {
-    _logger.info("Background task triggered when process was already running");
-    await _sync('bgTaskActiveProcess');
-  } else {
-    _runWithLogs(
-      () async {
-        _logger.info("Starting background task in $mode mode");
-        _runInBackground(taskId).ignore();
-      },
-      prefix: "[bg]",
-    ).ignore();
+  if (Platform.isIOS) {
+    _scheduleSuicide(kBGTaskTimeout, taskId); // To prevent OS from punishing us
+  }
+  try {
+    if (await _isRunningInForeground()) {
+      _logger
+          .info("Background task triggered when process was already running");
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      await Configuration.instance.init();
+      await NetworkClient.instance.init(packageInfo);
+      ServiceLocator.instance
+          .init(prefs, NetworkClient.instance.enteDio, packageInfo);
+      await CollectionsService.instance.init(prefs);
+      await FileUploader.instance.init(prefs, true);
+      LocalFileUpdateService.instance.init(prefs);
+      AppLifecycleService.instance.init(prefs);
+
+      await LocalSyncService.instance.init(prefs);
+      RemoteSyncService.instance.init(prefs);
+      await SyncService.instance.init(prefs);
+
+      await _sync('bgTaskActiveProcess');
+    } else {
+      await _runWithLogs(
+        () async {
+          _logger.info("Starting background task in $mode mode");
+          await _runInBackground(taskId);
+        },
+        prefix: "[bg]",
+      );
+    }
+  } catch (e, s) {
+    _logger.severe("Error in background task", e, s);
   }
 }
 
@@ -140,10 +162,8 @@ Future<void> _runInBackground(String taskId) async {
   if (await _isRunningInForeground()) {
     _logger.info("FG task running, skipping BG taskID: $taskId");
     return;
-  } else {
-    _logger.info("FG task is not running");
   }
-  _logger.info("[BackgroundFetch] Event received: $taskId");
+  _logger.info("[WorkManager] Event received: $taskId");
   _scheduleBGTaskKill(taskId);
 
   await _init(true, via: 'runViaBackgroundTask');
@@ -173,7 +193,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       }
     });
     if (!isBackground) _heartBeatOnInit(0);
-    _isProcessRunning = true;
     _logger.info("Initializing...  inBG =$isBackground via: $via $tlog");
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
@@ -379,7 +398,7 @@ Future<bool> _isRunningInForeground() async {
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final bool isRunningInFG = await _isRunningInForeground(); // hb
   final bool isInForeground = AppLifecycleService.instance.isForeground;
-  if (_isProcessRunning) {
+  if (await _isRunningInForeground()) {
     _logger.info(
       "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground",
     );
@@ -409,4 +428,13 @@ Future<void> _logFGHeartBeatInfo(SharedPreferences prefs) async {
       ? 'never'
       : DateTime.fromMicrosecondsSinceEpoch(lastFGTaskHeartBeatTime).toString();
   _logger.info('isAlreadyRunningFG: $isRunningInFG, last Beat: $lastRun');
+}
+
+void _scheduleSuicide(Duration duration, [String? taskID]) {
+  final taskIDVal = taskID ?? 'no taskID';
+  _logger.warning("Schedule seppuku taskID: $taskIDVal");
+  Future.delayed(duration, () {
+    _logger.warning("TLE, committing seppuku for taskID: $taskIDVal");
+    BgTaskUtils.killBGTask(taskID);
+  });
 }
