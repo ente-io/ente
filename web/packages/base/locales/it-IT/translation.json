@@ -32,6 +32,7 @@
     "set_password": "Imposta una password",
     "sign_in": "Accedi",
     "incorrect_password": "Password sbagliata",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Inserisci una password per crittografare i tuoi dati",
     "pick_password_caution": "Non memorizziamo la tua password, quindi se la dimentichi, <strong>non saremo in grado di aiutarti </strong>a recuperare i tuoi dati senza una chiave di recupero.",
     "key_generation_in_progress": "Generazione delle chiavi di crittografia...",
