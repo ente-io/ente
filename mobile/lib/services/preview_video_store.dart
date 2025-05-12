@@ -105,7 +105,7 @@ class PreviewVideoStore {
     return DateTime.fromMillisecondsSinceEpoch(milliseconds);
   }
 
-  Future<bool> isSharedFilePreviewAvilable(EnteFile file) async {
+  Future<bool> isSharedFileStreamble(EnteFile file) async {
     try {
       await getPreviewUrl(file);
       return true;
