@@ -106,7 +106,6 @@ class _VideoWidgetState extends State<VideoWidget> {
   @override
   Widget build(BuildContext context) {
     final isPreviewVideoPlayable = isPreviewLoadable &&
-        PreviewVideoStore.instance.isVideoStreamingEnabled &&
         widget.file.isUploaded &&
         (FileDataService.instance.previewIds
                 ?.containsKey(widget.file.uploadedFileID!) ??
