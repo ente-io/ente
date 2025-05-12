@@ -60,6 +60,7 @@ export interface FamilyMember {
     email: string;
     status: string;
     usage: number;
+    storageLimit: number;
 }
 
 // Types related to passkeys

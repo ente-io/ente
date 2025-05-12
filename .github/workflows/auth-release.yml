@@ -117,7 +117,9 @@ jobs:
                   mv dist/**/*-*-linux.deb artifacts/ente-${{ github.ref_name }}-x86_64.deb
 
             - name: Generate checksums
-              run: sha256sum artifacts/ente-* >> artifacts/sha256sum-rpm-appimage
+              run: |
+                sha256sum artifacts/ente-auth-*.apk >> artifacts/sha256sum-apk
+                sha256sum artifacts/ente-auth-*.deb artifacts/ente-auth-*.rpm artifacts/ente-auth-*.AppImage >> artifacts/sha256sum-linux
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1

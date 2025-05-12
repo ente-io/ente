@@ -15,7 +15,6 @@ import {
     parseMetadataDate,
     type ParsedMetadata,
 } from "ente-media/file-metadata";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,
@@ -38,14 +37,7 @@ import { ffmpegExecWeb } from "./web";
  */
 export const generateVideoThumbnailWeb = async (blob: Blob) =>
     _generateVideoThumbnail((seekTime: number) =>
-        ffmpegExecWeb(
-            // TODO(HLS): Enable for all
-            settingsSnapshot().isInternalUser
-                ? makeGenThumbnailCommand(seekTime)
-                : _makeGenThumbnailCommand(seekTime, false),
-            blob,
-            "jpeg",
-        ),
+        ffmpegExecWeb(makeGenThumbnailCommand(seekTime), blob, "jpeg"),
     );
 
 const _generateVideoThumbnail = async (

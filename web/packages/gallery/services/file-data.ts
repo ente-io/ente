@@ -122,6 +122,95 @@ export const fetchFileData = async (
 };
 
 /**
+ * An entry in the response to the `/files/data/status-diff`. The actual
+ * structure has more fields, there are just the fields we are interested in.
+ */
+const RemoteFDStatus = z.object({
+    fileID: z.number(),
+    /** Expected to be one of {@link FileDataType} */
+    type: z.string(),
+    isDeleted: z.boolean(),
+    /**
+     * The epoch microseconds when this file data entry was added or updated.
+     */
+    updatedAt: z.number(),
+});
+
+/**
+ * A paginated part of the result set sent by remote during
+ * {@link syncUpdatedFileDataFileIDs}.
+ */
+export interface UpdatedFileDataFileIDsPage {
+    /**
+     * The IDs of files for which a file data entry has been created or updated.
+     */
+    fileIDs: Set<number>;
+    /**
+     * The latest updatedAt (epoch microseconds) time obtained from remote in
+     * this batch this sync from amongst all of these files.
+     */
+    lastUpdatedAt: number;
+}
+
+/**
+ * Fetch the IDs of files for which new file data entries of the given
+ * {@link type} have been created or updated since the given {@link sinceTime}.
+ *
+ * The interaction with remote is paginated, with the {@link onPage} callback
+ * being called as each page of new data is received.
+ *
+ * @param type The {@link FileDataType} for which we want to check for creation
+ * or updates.
+ *
+ * @param lastUpdatedAt Epoch microseconds. This is used to ask remote to
+ * provide us only entries whose {@link updatedAt} is more than the given value.
+ * Set this to zero to start from the beginning.
+ *
+ * @param onPage A callback invoked for each page of results received from
+ * remote. It is passed both the fileIDs received in the batch under
+ * consideration, and the largest of the updated time for all entries
+ * (irrespective of {@link type}) in that batch.
+ *
+ * ----
+ *
+ * Implementation notes:
+ *
+ * Unlike other "diff" APIs, the diff API used here won't return tombstone
+ * entries for deleted files. This is not a problem because there are no current
+ * cases where existing playlists or ML indexes get deleted (unless the
+ * underlying file is deleted). See: [Note: Caching HLS playlist data].
+ */
+export const syncUpdatedFileDataFileIDs = async (
+    type: FileDataType,
+    lastUpdatedAt: number,
+    onPage: (page: UpdatedFileDataFileIDsPage) => Promise<void>,
+): Promise<void> => {
+    while (true) {
+        const res = await fetch(await apiURL("/files/data/status-diff"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ lastUpdatedAt }),
+        });
+        ensureOk(res);
+        const diff = z
+            .object({ diff: RemoteFDStatus.array().nullish() })
+            .parse(await res.json()).diff;
+        if (diff?.length) {
+            const fileIDs = new Set<number>();
+            for (const fd of diff) {
+                lastUpdatedAt = Math.max(lastUpdatedAt, fd.updatedAt);
+                if (fd.type == type && !fd.isDeleted) {
+                    fileIDs.add(fd.fileID);
+                }
+            }
+            await onPage({ fileIDs, lastUpdatedAt });
+        } else {
+            break;
+        }
+    }
+};
+
+/**
  * Upload file data associated with the given file to remote.
  *
  * This function will save or update the given data as the latest file data of

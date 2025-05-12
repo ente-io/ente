@@ -32,6 +32,7 @@
     "set_password": "Ustaw hasło",
     "sign_in": "Zaloguj się",
     "incorrect_password": "Nieprawidłowe hasło",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Wprowadź hasło, którego możemy użyć do zaszyfrowania Twoich danych",
     "pick_password_caution": "Nie przechowujemy Twojego hasła, więc jeśli je zapomnisz, <strong>nie będziemy w stanie Ci pomóc </strong>odzyskać Twoich danych bez klucza odzyskiwania.",
     "key_generation_in_progress": "Generowanie kluczy szyfrujących...",

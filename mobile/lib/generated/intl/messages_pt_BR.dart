@@ -1212,7 +1212,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Você pode compartilhar sua assinatura com seus familiares"),
         "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "Nós preservamos mais de 30 milhões de memórias até então"),
+            "Preservamos mais de 200 milhões de memórias até então"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "Mantemos 3 cópias dos seus dados, uma em um abrigo subterrâneo"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(

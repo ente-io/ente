@@ -1006,8 +1006,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkPersonToEmailConfirmation": m47,
         "livePhotos": MessageLookupByLibrary.simpleMessage("实况照片"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage("您可以与家庭分享您的订阅"),
-        "loadMessage2":
-            MessageLookupByLibrary.simpleMessage("到目前为止，我们已经保存了超过3 000万个回忆"),
         "loadMessage3":
             MessageLookupByLibrary.simpleMessage("我们保存你的3个数据副本，其中一个在地下安全屋中"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage("我们所有的应用程序都是开源的"),

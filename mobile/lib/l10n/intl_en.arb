@@ -1030,7 +1030,7 @@
   "didYouKnow": "Did you know?",
   "loadingMessage": "Loading your photos...",
   "loadMessage1": "You can share your subscription with your family",
-  "loadMessage2": "We have preserved over 30 million memories so far",
+  "loadMessage2": "We have preserved over 200 million memories so far",
   "loadMessage3": "We keep 3 copies of your data, one in an underground fallout shelter",
   "loadMessage4": "All our apps are open source",
   "loadMessage5": "Our source code and cryptography have been externally audited",
@@ -1660,7 +1660,7 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Video streaming",
+  "videoStreaming": "Generate streamable video",
   "processingVideos": "Processing videos",
   "streamDetails": "Stream details",
   "processing": "Processing",

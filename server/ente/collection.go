@@ -38,7 +38,7 @@ func (c *Collection) AllowSharing() bool {
 	if c == nil {
 		return false
 	}
-	if c.Type == "favorites" || c.Type == "uncategorized" {
+	if c.Type == "uncategorized" {
 		return false
 	}
 	return true

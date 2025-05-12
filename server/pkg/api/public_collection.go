@@ -79,6 +79,10 @@ func (h *PublicCollectionHandler) GetFileData(c *gin.Context) {
 		handler.Error(c, err)
 		return
 	}
+	if resp == nil {
+		c.Status(http.StatusNoContent)
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"data": resp,
 	})

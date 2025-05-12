@@ -1179,7 +1179,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "You can share your subscription with your family"),
         "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "We have preserved over 30 million memories so far"),
+            "We have preserved over 200 million memories so far"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "We keep 3 copies of your data, one in an underground fallout shelter"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(
@@ -2055,7 +2055,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoInfo": MessageLookupByLibrary.simpleMessage("Video Info"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
         "videoStreaming":
-            MessageLookupByLibrary.simpleMessage("Video streaming"),
+            MessageLookupByLibrary.simpleMessage("Generate streamable video"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("View active sessions"),
