@@ -386,6 +386,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "albumTitle": MessageLookupByLibrary.simpleMessage("Album title"),
         "albumUpdated": MessageLookupByLibrary.simpleMessage("Album updated"),
         "albums": MessageLookupByLibrary.simpleMessage("Albums"),
+        "albumsWidgetDesc": MessageLookupByLibrary.simpleMessage(
+            "Select the albums you wish to see on your homescreen."),
         "allClear": MessageLookupByLibrary.simpleMessage("✨ All clear"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("All memories preserved"),
@@ -1259,6 +1261,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "me": MessageLookupByLibrary.simpleMessage("Me"),
+        "memories": MessageLookupByLibrary.simpleMessage("Memories"),
+        "memoriesWidgetDesc": MessageLookupByLibrary.simpleMessage(
+            "Select the kind of memories you wish to see on your homescreen."),
         "memoryCount": m48,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
         "mergeWithExisting":
@@ -1407,6 +1412,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>"),
+        "pastYearsMemories":
+            MessageLookupByLibrary.simpleMessage("Past years\' memories"),
         "paymentDetails":
             MessageLookupByLibrary.simpleMessage("Payment details"),
         "paymentFailed": MessageLookupByLibrary.simpleMessage("Payment failed"),
@@ -1418,6 +1425,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "people": MessageLookupByLibrary.simpleMessage("People"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
+        "peopleWidgetDesc": MessageLookupByLibrary.simpleMessage(
+            "Select the people you wish to see on your homescreen."),
         "permDeleteWarning": MessageLookupByLibrary.simpleMessage(
             "All items in trash will be permanently deleted\n\nThis action cannot be undone"),
         "permanentlyDelete":
@@ -1813,6 +1822,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "singleFileInBothLocalAndRemote": m86,
         "singleFileInRemoteOnly": m87,
         "skip": MessageLookupByLibrary.simpleMessage("Skip"),
+        "smartMemories": MessageLookupByLibrary.simpleMessage("Smart memories"),
         "social": MessageLookupByLibrary.simpleMessage("Social"),
         "someItemsAreInBothEnteAndYourDevice":
             MessageLookupByLibrary.simpleMessage(
@@ -2089,6 +2099,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsNew": MessageLookupByLibrary.simpleMessage("What\'s new"),
         "whyAddTrustContact": MessageLookupByLibrary.simpleMessage(
             "Trusted contact can help in recovering your data."),
+        "widgets": MessageLookupByLibrary.simpleMessage("Widgets"),
         "yearShort": MessageLookupByLibrary.simpleMessage("yr"),
         "yearly": MessageLookupByLibrary.simpleMessage("Yearly"),
         "yearsAgo": m111,

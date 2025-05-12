@@ -11785,6 +11785,76 @@ class S {
       args: [],
     );
   }
+
+  /// `Widgets`
+  String get widgets {
+    return Intl.message(
+      'Widgets',
+      name: 'widgets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Memories`
+  String get memories {
+    return Intl.message(
+      'Memories',
+      name: 'memories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select the people you wish to see on your homescreen.`
+  String get peopleWidgetDesc {
+    return Intl.message(
+      'Select the people you wish to see on your homescreen.',
+      name: 'peopleWidgetDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select the albums you wish to see on your homescreen.`
+  String get albumsWidgetDesc {
+    return Intl.message(
+      'Select the albums you wish to see on your homescreen.',
+      name: 'albumsWidgetDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select the kind of memories you wish to see on your homescreen.`
+  String get memoriesWidgetDesc {
+    return Intl.message(
+      'Select the kind of memories you wish to see on your homescreen.',
+      name: 'memoriesWidgetDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart memories`
+  String get smartMemories {
+    return Intl.message(
+      'Smart memories',
+      name: 'smartMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Past years' memories`
+  String get pastYearsMemories {
+    return Intl.message(
+      'Past years\' memories',
+      name: 'pastYearsMemories',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
