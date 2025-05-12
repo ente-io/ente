@@ -5,6 +5,7 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
+import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/data/holidays.dart';
@@ -1413,11 +1414,30 @@ class SearchService {
     int? limit,
   ) async {
     try {
+      final int ownerID = Configuration.instance.getUserID()!;
       final searchResults = <GenericSearchResult>[];
       final allFiles = await getAllFilesForSearch();
       final peopleToSharedFiles = <User, List<EnteFile>>{};
+      final peopleToSharedAlbums = <String, List<Collection>>{};
       final existingEmails = <String>{};
       final familyEmails = UserService.instance.getEmailIDsOfFamilyMember();
+      final List<Collection> collections = _collectionService
+          .getCollectionsForUI(includedShared: true, includeCollab: true);
+
+      for (Collection collection in collections) {
+        if (collection.isHidden() ||
+            collection.isArchived() ||
+            collection.isOwner(ownerID)) {
+          continue;
+        }
+        if (collection.owner.id != ownerID) {
+          if (peopleToSharedAlbums.containsKey(collection.owner.email)) {
+            peopleToSharedAlbums[collection.owner.email]!.add(collection);
+          } else {
+            peopleToSharedAlbums[collection.owner.email] = [collection];
+          }
+        }
+      }
 
       int peopleCount = 0;
       for (EnteFile file in allFiles) {
@@ -1487,7 +1507,7 @@ class SearchService {
         final name = user.displayName != null && user.displayName!.isNotEmpty
             ? user.displayName!
             : user.email;
-
+        final collections = peopleToSharedAlbums[user.email] ?? [];
         searchResults.add(
           GenericSearchResult(
             ResultType.shared,
@@ -1502,6 +1522,7 @@ class SearchService {
               kPersonParamID: user.linkedPersonID,
               kContactEmail: user.email,
             },
+            collections: collections,
           ),
         );
       }

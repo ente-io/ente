@@ -1,3 +1,4 @@
+import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/models/search/search_types.dart";
@@ -14,6 +15,8 @@ abstract class SearchResult {
   }
 
   List<EnteFile> resultFiles();
+
+  List<Collection> resultCollections();
 
   HierarchicalSearchFilter getHierarchicalSearchFilter();
 }
