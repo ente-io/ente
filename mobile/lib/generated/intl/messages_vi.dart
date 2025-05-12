@@ -1057,8 +1057,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "livePhotos": MessageLookupByLibrary.simpleMessage("Ảnh trực tiếp"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Bạn có thể chia sẻ đăng ký của mình với gia đình"),
-        "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "Chúng tôi đã bảo tồn hơn 30 triệu kỷ niệm cho đến nay"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "Chúng tôi giữ 3 bản sao dữ liệu của bạn, một trong nơi trú ẩn dưới lòng đất"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(

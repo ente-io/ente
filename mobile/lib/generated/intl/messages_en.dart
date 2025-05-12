@@ -2055,7 +2055,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoInfo": MessageLookupByLibrary.simpleMessage("Video Info"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
         "videoStreaming":
-            MessageLookupByLibrary.simpleMessage("Video streaming"),
+            MessageLookupByLibrary.simpleMessage("Generate streamable video"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("View active sessions"),

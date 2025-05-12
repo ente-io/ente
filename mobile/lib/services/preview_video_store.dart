@@ -105,6 +105,15 @@ class PreviewVideoStore {
     return DateTime.fromMillisecondsSinceEpoch(milliseconds);
   }
 
+  Future<bool> isSharedFileStreamble(EnteFile file) async {
+    try {
+      await getPreviewUrl(file);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> chunkAndUploadVideo(
     BuildContext? ctx,
     EnteFile enteFile, [
