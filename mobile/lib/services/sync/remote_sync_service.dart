@@ -91,6 +91,11 @@ class RemoteSyncService {
   }
 
   Future<void> sync({bool silently = false}) async {
+    // TODO(prateekmedia): Remove this to enable foregroung uploads
+    if (AppLifecycleService.instance.isForeground) {
+      _logger.info("Skipping remote sync since app is in foreground");
+      return;
+    }
     if (!_config.hasConfiguredAccount()) {
       _logger.info("Skipping remote sync since account is not configured");
       return;
@@ -127,9 +132,11 @@ class RemoteSyncService {
         await syncDeviceCollectionFilesForUpload();
       }
 
-      FileDataService.instance.syncFDStatus().then((_) {
-        PreviewVideoStore.instance.queueFiles();
-      }).ignore();
+      if (AppLifecycleService.instance.isForeground) {
+        FileDataService.instance.syncFDStatus().then((_) {
+          PreviewVideoStore.instance.queueFiles();
+        }).ignore();
+      }
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (filesToBeUploaded.isNotEmpty) {
@@ -150,7 +157,7 @@ class RemoteSyncService {
           // Skipping a resync to ensure that files that were ignored in this
           // session are not processed now
           // ignore: unawaited_futures
-          sync();
+          await sync();
         } else {
           _logger.info("Fire backup completed event");
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedBackup));
