@@ -137,9 +137,21 @@ export const fetchFileData = async (
  * structure has more fields, there are just the fields we are interested in.
  */
 const RemoteFDStatus = z.object({
+    /**
+     * The ID of the file whose file data we're querying.
+     */
     fileID: z.number(),
-    /** Expected to be one of {@link FileDataType} */
+    /**
+     * Expected to be one of {@link FileDataType}
+     */
     type: z.string(),
+    /**
+     * `true` if the file data has been deleted.
+     *
+     * This can be true in the in-progress partial deletion case, which the file
+     * data deletion has been processed but the file deletion has not yet been
+     * processed.
+     */
     isDeleted: z.boolean(),
     /**
      * The epoch microseconds when this file data entry was added or updated.
