@@ -26,15 +26,13 @@ import ItemList from "components/ItemList";
 import { FilledIconButton } from "ente-base/components/mui";
 import { useBaseContext } from "ente-base/context";
 import { formattedListJoin } from "ente-base/i18n";
-import {
-    type UploadPhase,
-    type UploadResult,
-} from "ente-gallery/services/upload";
+import { type UploadPhase } from "ente-gallery/services/upload";
 import { SpaceBetweenFlex } from "ente-shared/components/Container";
 import { t } from "i18next";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import type {
+    FinishedUploadResult,
     InProgressUpload,
     SegregatedFinishedUploads,
     UploadCounter,
@@ -251,7 +249,6 @@ const uploadedFileCount = (
     let c = 0;
     c += finishedUploads.get("uploaded")?.length ?? 0;
     c += finishedUploads.get("uploadedWithStaticThumbnail")?.length ?? 0;
-    c += finishedUploads.get("addedSymlink")?.length ?? 0;
 
     return c;
 };
@@ -474,7 +471,7 @@ const NotUploadSectionHeader = styled("div")(
 );
 
 interface ResultSectionProps {
-    uploadResult: UploadResult;
+    uploadResult: FinishedUploadResult;
     sectionTitle: string;
     sectionInfo?: React.ReactNode;
 }
