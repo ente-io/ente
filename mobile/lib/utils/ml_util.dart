@@ -255,7 +255,7 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
   if (batchToYield.isNotEmpty) {
     _logger.info("queueing indexing for  ${batchToYield.length}");
     yield batchToYield;
-}
+  }
 }
 
 // Returns a list of faces from the given remote fileML. null if the version is less than the current version

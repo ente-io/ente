@@ -103,6 +103,7 @@ Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {
     await session.getReturnCode();
     final mediaInfo = await completer.future;
     if (kDebugMode) {
+      log("uncomment below line to see ffprobe logs");
       // logs.forEach((key, value) {
       //   log("log for session $key: $value", name: "FFprobeKit");
       // });
