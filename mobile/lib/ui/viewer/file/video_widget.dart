@@ -79,9 +79,9 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   Future<void> _checkForPreview() async {
     if (!widget.file.isOwner && flagService.internalUser) {
-      final bool isStreambale =
+      final bool isStremable =
           await PreviewVideoStore.instance.isSharedFileStreamble(widget.file);
-      if (!isStreambale && mounted) {
+      if (!isStremable && mounted) {
         isPreviewLoadable = false;
         setState(() {});
       }
