@@ -100,7 +100,13 @@ export const fetchFileData = async (
     fileID: number,
     publicAlbumsCredentials?: PublicAlbumsCredentials,
 ): Promise<RemoteFileData | undefined> => {
-    const params = new URLSearchParams({ type, fileID: fileID.toString() });
+    const params = new URLSearchParams({
+        type,
+        fileID: fileID.toString(),
+        // Ask museum to respond with 204 instead of 404 if no playlist exists
+        // for the given file.
+        preferNoContent: "true",
+    });
 
     let res: Response;
     if (publicAlbumsCredentials) {
@@ -116,6 +122,11 @@ export const fetchFileData = async (
         });
     }
 
+    if (res.status == 204) return undefined;
+    // We're passing `preferNoContent` so the expected response is 204, but this
+    // might be a self hoster running an older museum that does not recognize
+    // that flag, so retain the old behavior. This fallback can be removed in a
+    // few months (tag: Migration, note added May 2025).
     if (res.status == 404) return undefined;
     ensureOk(res);
     return z.object({ data: RemoteFileData }).parse(await res.json()).data;
