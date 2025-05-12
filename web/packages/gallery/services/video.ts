@@ -25,6 +25,7 @@ import {
     initiateGenerateHLS,
     readVideoStream,
     videoStreamDone,
+    type GenerateHLSResult,
 } from "../utils/native-stream";
 import { downloadManager, isNetworkDownloadError } from "./download";
 import {
@@ -802,12 +803,24 @@ const processQueueItem = async ({
 
     log.info(`Generate HLS for ${fileLogID(file)} | start`);
 
-    // TODO(HLS): Inside this needs to be more granular in case of errors.
-    const res = await initiateGenerateHLS(
-        electron,
-        sourceVideo,
-        objectUploadURL,
-    );
+    let res: GenerateHLSResult | undefined;
+    try {
+        res = await initiateGenerateHLS(electron, sourceVideo, objectUploadURL);
+    } catch (e) {
+        // Failures during stream generation on the native side are expected to
+        // happen in two cases:
+        //
+        // 1. There is something specific to this video that doesn't work with
+        //    the current HLS generation pipeline (the ffmpeg invocation).
+        //
+        // 2. The upload of the generated video fails.
+        //
+        // The native side code already retries failures for case 2 (except HTTP
+        // 4xx errors). Thus, usually we should come here only for case 1, and
+        // retrying the same video again will not work either.
+        await markFailedVideoFileID(file.id);
+        throw e;
+    }
 
     if (!res) {
         log.info(`Generate HLS for ${fileLogID(file)} | not-required`);
