@@ -45,5 +45,5 @@ Typically,`<host>:<container-port>`
 1. `8080:8080`: Museum (Ente's server)
 2. `3000:3000`: Ente Photos web app
 3. `3001:3001`: Ente Accounts web app
-4. `3003:3003`: [EEnte Auth](https://ente.io/auth/)
+4. `3003:3003`: [Ente Auth web app](https://ente.io/auth/)
 5. `3004:3004`: [Ente Cast web app](http://ente.io/cast)

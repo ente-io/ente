@@ -32,6 +32,7 @@
     "set_password": "Passwort setzen",
     "sign_in": "Einloggen",
     "incorrect_password": "Falsches Passwort",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Bitte gib ein Passwort ein, mit dem wir deine Daten verschlüsseln können",
     "pick_password_caution": "Wir speichern dein Passwort nicht. Wenn du es vergisst, <strong>können wir dir nicht helfen</strong>, deine Daten ohne einen Wiederherstellungsschlüssel wiederherzustellen.",
     "key_generation_in_progress": "Generierung von Verschlüsselungsschlüsseln...",

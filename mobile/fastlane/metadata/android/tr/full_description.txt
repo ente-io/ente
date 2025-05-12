@@ -15,7 +15,7 @@ ente ayrıca, ente'de olmasalar bile albümlerinizi sevdiklerinizle paylaşmanı
 - Aile planları, böylece depolama alanını ailenizle paylaşabilirsiniz
 - Seyahatten sonra fotoğrafları bir araya toplayabilmeniz için ortak albümler
 - Partnerinizin "Kamera" tıklamalarınızın keyfini çıkarmasını istemeniz durumunda paylaşılan klasörler
-- Parola ile korunabilen ve süresi dolacak şekilde ayarlanabilen albüm bağlantıları
+- Albüm bağlantıları, parolayla korunabilir
 - Güvenli bir şekilde yedeklenmiş dosyaları kaldırarak alan boşaltma yeteneği
 - İnsan desteği, çünkü sen buna değersin
 - Açıklamalar, böylece anılarınıza başlık yazabilir ve onları kolayca bulabilirsiniz
@@ -27,10 +27,10 @@ ente ayrıca, ente'de olmasalar bile albümlerinizi sevdiklerinizle paylaşmanı
 - ve çok daha fazlası!
 
 İZİNLER
-bir fotoğraf depolama sağlayıcısının amacına hizmet etmek için belirli izinlere yönelik taleplerde bulunulabilir; bu izinler burada incelenebilir: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
+ente, burada gözden geçirilebilecek bir fotoğraf depolama sağlayıcısının amacına hizmet etmek için belirli izinler ister: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
 
 FİYATLANDIRMA
 Sonsuza kadar ücretsiz planlar sunmuyoruz, çünkü sürdürülebilir kalmamız ve zamanın testine dayanmamız bizim için önemli. Bunun yerine, ailenizle özgürce paylaşabileceğiniz uygun fiyatlı planlar sunuyoruz. Daha fazla bilgiyi ente.io adresinde bulabilirsiniz.
 
-🙋DESTEK
+DESTEK
 İnsan desteği sunmaktan gurur duyuyoruz. Ücretli müşterimiz iseniz team@ente.io adresine ulaşabilir ve ekibimizden 24 saat içinde yanıt bekleyebilirsiniz.

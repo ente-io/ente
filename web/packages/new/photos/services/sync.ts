@@ -1,4 +1,5 @@
 import { resetFileViewerDataSourceOnClose } from "ente-gallery/components/viewer/data-source";
+import { videoProcessingSyncIfNeeded } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { isHiddenCollection } from "ente-new/photos/services/collection";
@@ -57,7 +58,7 @@ export const preCollectionAndFilesSync = async () => {
  * See: [Note: Remote sync]
  */
 export const postCollectionAndFilesSync = async () => {
-    await Promise.all([searchDataSync()]);
+    await Promise.all([searchDataSync(), videoProcessingSyncIfNeeded()]);
     // ML sync might take a very long time for initial indexing, so don't wait
     // for it to finish.
     void mlSync();

@@ -14,7 +14,7 @@ Ente, albümlerinizi sevdiklerinizle paylaşmanızı da kolaylaştırıyor. Bunl
 - Orijinal kalitede yedekler, çünkü her piksel önemlidir
 - Aile planları, böylece depolama alanını ailenizle paylaşabilirsiniz
 - Partnerinizin "Kamera" tıklamalarınızın keyfini çıkarmasını istemeniz durumunda paylaşılan klasörler
-- Parola ile korunabilen ve süresi dolacak şekilde ayarlanabilen albüm bağlantıları
+- Albüm bağlantıları, parolayla korunabilir ve son kullanma tarihi ayarlanabilir
 - Güvenli bir şekilde yedeklenmiş dosyaları kaldırarak alan boşaltma yeteneği
 - Son rötuşları eklemek için görüntü düzenleyici
 - Favori, sakla ve anılarını yeniden yaşa, çünkü onlar değerlidir

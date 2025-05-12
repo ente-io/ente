@@ -88,6 +88,8 @@
   "useRecoveryKey": "Použít obnovovací klíč",
   "incorrectPasswordTitle": "Nesprávné heslo",
   "welcomeBack": "Vítejte zpět!",
+  "emailAlreadyRegistered": "E-mail je již registrován.",
+  "emailNotRegistered": "E-mail není registrován.",
   "madeWithLoveAtPrefix": "vyrobeno s ❤️ v ",
   "supportDevs": "Předplaťte si <bold-green>ente</bold-green>, abyste nás podpořili",
   "supportDiscount": "Použijte kód \"AUTH\" pro získání 10% slevy na první rok",
@@ -495,9 +497,18 @@
   "appLockOfflineModeWarning": "Zvolili jste si pokračování bez zálohování. Pokud zapomenete heslo do aplikace, přístup k datům bude uzamčen.",
   "duplicateCodes": "Duplikovat kódy",
   "noDuplicates": "✨ Žádné duplikáty",
+  "youveNoDuplicateCodesThatCanBeCleared": "Nemáte žádné duplicitní kódy k odstranění",
   "deduplicateCodes": "Deduplikovat kódy",
   "deselectAll": "Zrušit výběr všech položek",
   "selectAll": "Vybrat vše",
   "deleteDuplicates": "Odstranit duplikáty",
-  "plainHTML": "Prosté HTML"
+  "plainHTML": "Prosté HTML",
+  "tellUsWhatYouThink": "Sdělte nám svůj názor",
+  "dropReviewiOS": "Zanechat recenzi na App Store",
+  "dropReviewAndroid": "Zanechat recenzi na Play Store",
+  "supportEnte": "Podpořte <bold-green>ente</bold-green>",
+  "giveUsAStarOnGithub": "Dejte nám hvězdu na Githubu",
+  "free5GB": "5GB zdarma na <bold-green>ente</bold-green> Fotky",
+  "freeStorageOffer": "10% sleva na <bold-green>ente</bold-green> fotky",
+  "freeStorageOfferDescription": "Použijte kód \"AUTH\" pro získání 10% slevy na první rok"
 }
