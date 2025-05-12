@@ -158,7 +158,8 @@ export interface UpdatedFileDataFileIDsPage {
     fileIDs: Set<number>;
     /**
      * The latest updatedAt (epoch microseconds) time obtained from remote in
-     * this batch this sync from amongst all of these files.
+     * this batch of sync (from amongst all of the files in the batch, not just
+     * those that were filtered to be part of {@link fileIDs}).
      */
     lastUpdatedAt: number;
 }
