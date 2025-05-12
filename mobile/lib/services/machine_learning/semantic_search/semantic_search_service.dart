@@ -8,6 +8,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
@@ -265,9 +266,12 @@ class SemanticSearchService {
     required Map<String, double> minimumSimilarityMap,
   }) async {
     final startTime = DateTime.now();
-    await _cacheClipVectors();
-    final Map<String, List<QueryResult>> queryResults = await MLComputer
-        .instance
+    // TODO: lau: remove this when we feel confident about vector DB
+    // await _cacheClipVectors();
+    // final Map<String, List<QueryResult>> queryResults = await MLComputer
+    //     .instance
+    //     .computeBulkSimilarities(textQueryToEmbeddingMap, minimumSimilarityMap);
+    final queryResults = await ClipVectorDB.instance
         .computeBulkSimilarities(textQueryToEmbeddingMap, minimumSimilarityMap);
     final endTime = DateTime.now();
     _logger.info(

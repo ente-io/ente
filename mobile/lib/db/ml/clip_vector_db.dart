@@ -5,6 +5,7 @@ import "package:logging/logging.dart";
 import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/models/ml/vector.dart";
+import "package:photos/services/machine_learning/semantic_search/query_result.dart";
 import "package:photos/src/rust/api/usearch_api.dart";
 
 class ClipVectorDB {
@@ -163,6 +164,42 @@ class ClipVectorDB {
       return (result.$1[0], result.$2[0]);
     } catch (e, s) {
       _logger.severe("Error searching closest vector", e, s);
+      rethrow;
+    }
+  }
+
+  Future<Map<String, List<QueryResult>>> computeBulkSimilarities(
+    Map<String, List<double>> textQueryToEmbeddingMap,
+    Map<String, double> minimumSimilarityMap,
+  ) async {
+    try {
+      final queryToResults = <String, List<QueryResult>>{};
+      for (final MapEntry<String, List<double>> entry
+          in textQueryToEmbeddingMap.entries) {
+        final query = entry.key;
+        final minimumSimilarity = minimumSimilarityMap[query]!;
+        final textEmbedding = entry.value;
+        final (potentialFileIDs, distances) =
+            await searchClosestVectors(textEmbedding, 1000);
+        final queryResults = <QueryResult>[];
+        for (var i = 0; i < potentialFileIDs.length; i++) {
+          final similarity = 1 - distances[i];
+          if (similarity >= minimumSimilarity) {
+            queryResults
+                .add(QueryResult(potentialFileIDs[i].toInt(), similarity));
+          } else {
+            break;
+          }
+        }
+        queryToResults[query] = queryResults;
+      }
+      return queryToResults;
+    } catch (e, s) {
+      _logger.severe(
+        "Could not bulk find embeddings similarities using vector DB",
+        e,
+        s,
+      );
       rethrow;
     }
   }
