@@ -39,6 +39,8 @@ class ClipVectorDB {
       filePath: databaseDirectory,
       dimensions: _embeddingDimension,
     );
+    final stats = await getIndexStats(vectorDB);
+    _logger.info("VectorDB connection opened with stats: ${stats.toString()}");
 
     return vectorDB;
   }
@@ -123,8 +125,8 @@ class ClipVectorDB {
     }
   }
 
-  Future<VectorDbStats> getIndexStats() async {
-    final db = await _vectorDB;
+  Future<VectorDbStats> getIndexStats([VectorDb? db]) async {
+    db ??= await _vectorDB;
     try {
       final stats = await db.getIndexStats();
       return VectorDbStats(
@@ -231,6 +233,6 @@ class VectorDbStats {
 
   @override
   String toString() {
-    return "VectorDbStats(size: $size, capacity: $capacity, dimensions: $dimensions, file size (bytes): $fileSize, memory usage (bytes): $memoryUsage, expansionAdd: $expansionAdd, expansionSearch: $expansionSearch)";
+    return "VectorDbStats(size: $size, capacity: $capacity, dimensions: $dimensions, file size on disk (bytes): $fileSize, memory usage (bytes): $memoryUsage, expansionAdd: $expansionAdd, expansionSearch: $expansionSearch)";
   }
 }
