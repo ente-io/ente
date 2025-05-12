@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -77,13 +78,15 @@ class MemoriesWidgetSettings extends StatelessWidget {
                           captionedTextWidget: CaptionedTextWidget(
                             title: S.of(context).pastYearsMemories,
                           ),
+                          leadingIconWidget: SvgPicture.asset(
+                            "assets/icons/past-year-memory-icon.svg",
+                          ),
                           menuItemColor: colorScheme.fillFaint,
                           trailingWidget: ToggleSwitchWidget(
                             value: () => true,
                             onChanged: () async {},
                           ),
                           singleBorderRadius: 8,
-                          alignCaptionedTextToLeft: true,
                           isGestureDetectorDisabled: true,
                         ),
                         const SizedBox(height: 4),
@@ -91,13 +94,15 @@ class MemoriesWidgetSettings extends StatelessWidget {
                           captionedTextWidget: CaptionedTextWidget(
                             title: S.of(context).smartMemories,
                           ),
+                          leadingIconWidget: SvgPicture.asset(
+                            "assets/icons/smart-memory-icon.svg",
+                          ),
                           menuItemColor: colorScheme.fillFaint,
                           trailingWidget: ToggleSwitchWidget(
                             value: () => true,
                             onChanged: () async {},
                           ),
                           singleBorderRadius: 8,
-                          alignCaptionedTextToLeft: true,
                           isGestureDetectorDisabled: true,
                         ),
                       ],
