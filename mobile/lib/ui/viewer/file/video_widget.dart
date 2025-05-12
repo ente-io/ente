@@ -16,7 +16,6 @@ import "package:photos/services/preview_video_store.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
-import "package:photos/ui/settings/backup/backup_status_screen.dart";
 import "package:photos/ui/viewer/file/video_widget_media_kit_new.dart";
 import "package:photos/ui/viewer/file/video_widget_native.dart";
 import "package:photos/utils/standalone/data.dart";
@@ -80,11 +79,12 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   Future<void> _checkForPreview() async {
     if (!widget.file.isOwner && flagService.internalUser) {
-      final bool isStreambale = await PreviewVideoStore.instance
-          .isSharedFileStreamble(widget.file);
-    if (!isStreambale && mounted) {
-      isPreviewLoadable = false;
-      setState(() {});
+      final bool isStreambale =
+          await PreviewVideoStore.instance.isSharedFileStreamble(widget.file);
+      if (!isStreambale && mounted) {
+        isPreviewLoadable = false;
+        setState(() {});
+      }
     }
     if (!isPreviewLoadable) {
       return;
