@@ -8,6 +8,7 @@ import {
     retryAsyncOperation,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
+import { ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
@@ -652,13 +653,15 @@ const processQueue = async () => {
         return;
     }
 
+    const userID = ensureLocalUser().id;
+
     let bq: typeof _state.liveQueue | undefined;
     while (isVideoProcessingEnabled()) {
         let item = _state.liveQueue.shift();
         if (!item) {
             if (!bq && _state.haveSyncedOnce) {
                 /* initialize */
-                bq = await backfillQueue();
+                bq = await backfillQueue(userID);
             }
             if (bq) {
                 switch (bq.length) {
@@ -667,7 +670,7 @@ const processQueue = async () => {
                         break;
                     case 1 /* last item. take it, and refill queue */:
                         item = bq.pop();
-                        bq = await backfillQueue();
+                        bq = await backfillQueue(userID);
                         break;
                     default:
                         /* more than one item. take it */
@@ -712,14 +715,21 @@ const processQueue = async () => {
  * Return the next batch of videos that need to be processed.
  *
  * If there is nothing pending, return an empty array.
+ *
+ * @param userID The ID of the currently logged in user. This is used to filter
+ * the files to only include those that are owned by the user.
  */
-const backfillQueue = async (): Promise<VideoProcessingQueueItem[]> => {
+const backfillQueue = async (
+    userID: number,
+): Promise<VideoProcessingQueueItem[]> => {
     const allCollectionFiles = await getAllLocalFiles();
     const doneIDs = (await savedProcessedVideoFileIDs()).union(
         await savedFailedVideoFileIDs(),
     );
     const videoFiles = uniqueFilesByID(
-        allCollectionFiles.filter((f) => f.metadata.fileType == FileType.video),
+        allCollectionFiles.filter(
+            (f) => f.ownerID == userID && f.metadata.fileType == FileType.video,
+        ),
     );
     const pendingVideoFiles = videoFiles.filter((f) => !doneIDs.has(f.id));
     const batch = randomSample(pendingVideoFiles, 50);
