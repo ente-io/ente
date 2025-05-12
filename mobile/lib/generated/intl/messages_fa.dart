@@ -241,8 +241,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "لطفا با این اطلاعات به ما کمک کنید"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("روشن"),
-        "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "ما تا کنون بیش از ۳۰ میلیون خاطره را حفظ کرده‌ایم"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("قفل"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("ورود"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("در حال خروج..."),

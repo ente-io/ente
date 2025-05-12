@@ -11081,10 +11081,10 @@ class S {
     );
   }
 
-  /// `Video streaming`
+  /// `Generate streamable video`
   String get videoStreaming {
     return Intl.message(
-      'Video streaming',
+      'Generate streamable video',
       name: 'videoStreaming',
       desc: '',
       args: [],
