@@ -9,7 +9,7 @@ import { isNetworkDownloadError } from "ente-gallery/services/download";
 import type { ProcessableUploadItem } from "ente-gallery/services/upload";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { wait } from "ente-utils/promise";
-import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
+import { getAllLocalFiles, getLocalTrashFileIDs } from "../files";
 import {
     createImageBitmapAndData,
     fetchRenderableBlob,
@@ -438,11 +438,9 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
     const localFiles = await getAllLocalFiles();
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
 
-    const localTrashFileIDs = (await getLocalTrashedFiles()).map((f) => f.id);
-
     await updateAssumingLocalFiles(
         Array.from(localFileByID.keys()),
-        localTrashFileIDs,
+        await getLocalTrashFileIDs(),
     );
 
     const fileIDsToIndex = await getIndexableFileIDs(count);

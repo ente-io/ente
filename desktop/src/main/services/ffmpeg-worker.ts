@@ -798,8 +798,8 @@ const uploadVideoSegments = async (
                 // Success.
                 return;
             }
-            if (res.status >= 400 && res.status < 500) {
-                // HTTP 4xx.
+            if (res.status >= 400 && res.status < 500 && res.status != 429) {
+                // HTTP 4xx, except potentially transient 429 rate limits.
                 abort = true;
             }
             throw new Error(
