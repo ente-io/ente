@@ -34,7 +34,7 @@ Future<void> showAlreadyLinkedEmailDialog(
   await showChoiceActionSheet(
     context,
     title: 'Email already assigned',
-    body: 'This email is already assigned to ${person?.data.name}.',
+    body: 'This email is already assigned to ${person.data.name}.',
     firstButtonLabel: S.of(context).editPerson,
     firstButtonOnTap: () async {
       await routeToPage(
