@@ -34,17 +34,21 @@ Locale? autoDetectedLocale;
 
 Locale localResolutionCallBack(deviceLocales, supportedLocales) {
   _onDeviceLocales = deviceLocales;
-  debugPrint("onDeviceLocales: ${_onDeviceLocales.toString()}");
+  Locale? firstLangeuageMatch;
   for (Locale deviceLocale in deviceLocales) {
     for (Locale supportedLocale in appSupportedLocales) {
       if (supportedLocale == deviceLocale) {
         autoDetectedLocale = supportedLocale;
         return supportedLocale;
-      } else if (supportedLocale.languageCode == deviceLocale.languageCode) {
-        autoDetectedLocale = supportedLocale;
-        return supportedLocale;
+      }
+      if (firstLangeuageMatch == null &&
+          supportedLocale.languageCode == deviceLocale.languageCode) {
+        firstLangeuageMatch = deviceLocale;
       }
     }
+  }
+  if (firstLangeuageMatch != null) {
+    autoDetectedLocale = firstLangeuageMatch;
   }
   return autoDetectedLocale ?? const Locale('en');
 }
