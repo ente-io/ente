@@ -199,7 +199,12 @@ class _CollectionsFlexiGridViewWidgetState
 
     return SliverPadding(
       key: key,
-      padding: const EdgeInsets.all(8),
+      padding: EdgeInsets.only(
+        top: 8,
+        left: 8,
+        right: 8,
+        bottom: widget.scrollBottomSafeArea,
+      ),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
           (context, index) {

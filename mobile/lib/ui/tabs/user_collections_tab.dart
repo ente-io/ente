@@ -174,7 +174,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                         appTitle: SectionTitle(
                           titleWithBrand: getOnEnteSection(context),
                         ),
-                        initialScrollOffset: _scrollController.offset,
                       ),
                     ),
                   );
