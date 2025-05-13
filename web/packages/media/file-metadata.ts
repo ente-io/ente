@@ -274,6 +274,33 @@ export interface PublicMagicMetadata {
      */
     caption?: string;
     uploaderName?: string;
+    /**
+     * An arbitrary integer set to indicate that this file should be skipped for
+     * the purpose of HLS generation.
+     *
+     * Current semantics:
+     *
+     * - if 1, skip this file
+     * - otherwise attempt processing
+     *
+     * [Note: Marking files which do not need video processing]
+     *
+     * Some video files do not require generation of a HLS stream. The current
+     * logic is H.264 files less than 10 MB, but this might change in future
+     * clients.
+     *
+     * For such skipped files, there thus won't be a HLS playlist generated.
+     * However, we still need a way to indicate to other clients that this file
+     * has already been looked at.
+     *
+     * To that end, we add a flag to the public magic metadata for the file. To
+     * allow future flexibility, this flag is an integer "streaming version".
+     * Currently it is set to 1 by a client who recognizes that this file does
+     * not need processing, and other clients can ignore this file if they find
+     * sv == 1. In the future, there might be other values for sv (e.g. if the
+     * skip logic changes).
+     */
+    sv?: number;
 }
 
 /**
