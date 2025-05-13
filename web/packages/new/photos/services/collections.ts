@@ -343,9 +343,29 @@ export async function cleanTrashCollections(fileTrash: Trash) {
 async function getLastTrashSyncTime() {
     return (await localForage.getItem<number>(TRASH_TIME)) ?? 0;
 }
+
+/**
+ * Update our locally saved data about the files and collections in trash by
+ * syncing with remote.
+ *
+ * The sync uses a diff-based mechanism that syncs forward from the last sync
+ * time (also persisted).
+ *
+ * @param onUpdateTrashFiles A callback invoked when the locally persisted trash
+ * items are updated. This can be used for the UI to also update its state. This
+ * callback can be invoked multiple times during the sync (once for each batch
+ * that gets processed).
+ *
+ * @param onPruneDeletedFiles A callback invoked when files that were previously
+ * in trash have now been permanently deleted. This can be used by other
+ * subsystems to prune data referring to files that now have been deleted
+ * permanently.  This callback can be invoked multiple times during the sync
+ * (once for each batch that gets processed).
+ */
 export async function syncTrash(
     collections: Collection[],
-    setTrashedFiles: ((fs: EnteFile[]) => void) | undefined,
+    onUpdateTrashFiles: (files: EnteFile[]) => void,
+    onPruneDeletedFiles: (files: EnteFile[]) => void,
 ): Promise<void> {
     const trash = await getLocalTrash();
     collections = [...collections, ...(await getLocalDeletedCollections())];
@@ -360,16 +380,18 @@ export async function syncTrash(
     const updatedTrash = await updateTrash(
         collectionMap,
         lastSyncTime,
-        setTrashedFiles,
+        onUpdateTrashFiles,
+        onPruneDeletedFiles,
         trash,
     );
     await cleanTrashCollections(updatedTrash);
 }
 
-export const updateTrash = async (
+const updateTrash = async (
     collections: Map<number, Collection>,
     sinceTime: number,
-    setTrashedFiles: ((fs: EnteFile[]) => void) | undefined,
+    onUpdateTrashFiles: (files: EnteFile[]) => void,
+    onPruneDeletedFiles: (files: EnteFile[]) => void,
     currentTrash: Trash,
 ): Promise<Trash> => {
     try {
@@ -415,7 +437,7 @@ export const updateTrash = async (
                 time = resp.data.diff.slice(-1)[0].updatedAt;
             }
 
-            setTrashedFiles?.(getTrashedFiles(updatedTrash));
+            onUpdateTrashFiles(getTrashedFiles(updatedTrash));
             await localForage.setItem(TRASH, updatedTrash);
             await localForage.setItem(TRASH_TIME, time);
         } while (resp.data.hasMore);
