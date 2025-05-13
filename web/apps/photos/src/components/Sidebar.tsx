@@ -832,7 +832,7 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                                         /* TODO(HLS): */ pt("Streamable videos")
                                     }
                                     checked={isHLSGenerationEnabled}
-                                    onClick={toggleHLSGeneration}
+                                    onClick={() => void toggleHLSGeneration()}
                                 />
                             </RowButtonGroup>
                         </Stack>

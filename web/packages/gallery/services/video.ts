@@ -8,7 +8,7 @@ import {
     retryAsyncOperation,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
-import { getKV, getKVN, setKV } from "ente-base/kv";
+import { getKV, getKVB, getKVN, setKV } from "ente-base/kv";
 import { ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { fileLogID, type EnteFile } from "ente-media/file";
@@ -181,11 +181,11 @@ const setHLSGenerationStatusSnapshot = (snapshot: HLSGenerationStatus) => {
 };
 
 /**
- * Return `true` if this client is capable of generating HLS streams for the
+ * Return `true` if this client is capable of generating HLS streams for
  * uploaded videos.
  *
- * This function implementation is written expecting to be called many times
- * (e.g. during UI rendering).
+ * This function implementation is fast and can be called many times (e.g.
+ * during UI rendering).
  */
 export const isHLSGenerationSupported = () =>
     // Keep this check fast, we get called many times.
@@ -194,15 +194,48 @@ export const isHLSGenerationSupported = () =>
     process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
 
+// TODO(HLS): Only the isDesktop flag is needed eventually.
+export const isHLSGenerationSupportedTemp = () =>
+    isDesktop &&
+    // TODO(HLS):
+    process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING;
+
+/**
+ * Initialize the video processing subsystem if the user has enabled HLS
+ * generation in settings.
+ */
+export const initVideoProcessing = async () => {
+    let enabled = false;
+    if (await savedGenerateHLS()) enabled = true;
+
+    _state.isHLSGenerationEnabled = enabled;
+
+    // Update snapshot to reflect the enabled setting. The estimated count will
+    // get filled in when we tick.
+    setHLSGenerationStatusSnapshot({ enabled });
+};
+
+/**
+ * Return the persisted user preference for HLS generation.
+ */
+const savedGenerateHLS = () => getKVB("generateHLS");
+
+/**
+ * Update the persisted user preference for HLS generation.
+ *
+ * Use {@link savedGenerateHLS} to get the persisted value back.
+ */
+const saveGenerateHLS = (enabled: boolean) => setKV("generateHLS", enabled);
+
 /**
  * Enable or disable (toggle) the HLS generation on this client.
  *
  * When HLS generation is enabled, this client will process videos to generate a
  * streamable variant of them.
  *
- * It can only be enabled when
+ * Precondition: {@link isHLSGenerationSupported} must be `true`.
  */
-export const toggleHLSGeneration = () => {
+export const toggleHLSGeneration = async () => {
     if (!isHLSGenerationSupported()) {
         assertionFailed();
         return;
@@ -210,8 +243,13 @@ export const toggleHLSGeneration = () => {
 
     const enabled = !_state.isHLSGenerationEnabled;
 
-    // Right now we only set the enabled setting. The estimated count status
-    // will get filled in when we tick.
+    // Update disk.
+    await saveGenerateHLS(enabled);
+    // Update in memory.
+    _state.isHLSGenerationEnabled = enabled;
+
+    // Update snapshot. Right now we only set the enabled setting. The estimated
+    // count will get filled in when we tick.
     setHLSGenerationStatusSnapshot({ enabled });
 
     // Wake up the processor if needed.
