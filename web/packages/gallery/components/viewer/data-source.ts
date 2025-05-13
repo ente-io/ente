@@ -471,7 +471,7 @@ const enqueueUpdates = async (
             );
         } else {
             // 2. if the file is not eligible ("skip"), we can cache it.
-            // 3. Otherwise we shouldn't cache it indefinitely.
+            // 3. Otherwise it's transient and shouldn't be cached indefinitely.
             update({ ...videoURLD, isTransient: hlsPlaylistData != "skip" });
         }
     };

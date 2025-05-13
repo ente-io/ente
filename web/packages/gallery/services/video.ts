@@ -178,9 +178,8 @@ export const hlsGenerationStatusSubscribe = (
  * A return value of `undefined` indicates that the HLS generation subsystem has
  * not been initialized yet.
  */
-export const hlsGenerationStatusSnapshot = ():
-    | HLSGenerationStatus
-    | undefined => _state.hlsGenerationStatusSnapshot;
+export const hlsGenerationStatusSnapshot = () =>
+    _state.hlsGenerationStatusSnapshot;
 
 const setHLSGenerationStatusSnapshot = (snapshot: HLSGenerationStatus) => {
     _state.hlsGenerationStatusSnapshot = snapshot;
