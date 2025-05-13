@@ -59,10 +59,6 @@ class _ContactResultPageState extends State<ContactResultPage> {
     super.initState();
     files = widget.searchResult.resultFiles();
     collections = widget.searchResult.resultCollections();
-    debugPrint("ContactResultPage: ${collections.length}");
-    for (final c in collections) {
-      debugPrint("ContactResultPage: ${c.displayName} ${c.owner.email}");
-    }
     _searchResultName = widget.searchResult.name();
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
