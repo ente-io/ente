@@ -227,6 +227,8 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
     // going to use for the conversion), then a streaming variant is not much
     // use. Skip such cases.
     //
+    // See also: [Note: Marking files which do not need video processing]
+    //
     // ---
     //
     // [Note: HEVC/H.265 issues]

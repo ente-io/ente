@@ -12,6 +12,10 @@ import { getKV, getKVN, setKV } from "ente-base/kv";
 import { ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { fileLogID, type EnteFile } from "ente-media/file";
+import {
+    filePublicMagicMetadata,
+    updateRemotePublicMagicMetadata,
+} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
     getAllLocalFiles,
@@ -732,9 +736,14 @@ const backfillQueue = async (
     const videoFiles = uniqueFilesByID(
         allCollectionFiles.filter(
             (f) =>
+                // Only files the user owns.
                 f.ownerID == userID &&
+                // Only videos.
                 f.metadata.fileType == FileType.video &&
-                !localTrashFileIDs.has(f.id),
+                // Not in trash.
+                !localTrashFileIDs.has(f.id) &&
+                // See: [Note: Marking files which do not need video processing]
+                filePublicMagicMetadata(f)?.sv != 1,
         ),
     );
 
@@ -845,6 +854,8 @@ const processQueueItem = async ({
 
     if (!res) {
         log.info(`Generate HLS for ${fileLogID(file)} | not-required`);
+        // See: [Note: Marking files which do not need video processing]
+        await updateRemotePublicMagicMetadata(file, { sv: 1 });
         return;
     }
 
