@@ -496,6 +496,33 @@ const syncProcessedFileIDs = async () =>
     );
 
 /**
+ * Remove any saved entries for file IDs which were previously in trash but now
+ * have been permanently deleted.
+ *
+ * This is called when processing the trash diff. It gives us a hook to clear
+ * these IDs from our video processing related local state.
+ *
+ * See: [Note: Pruning stale status-diff entries]
+ *
+ * It is a no-op when we're running in the context of the web app (since it
+ * doesn't currently process videos, so doesn't need to keep any local state for
+ * that purpose).
+ */
+export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
+    deletedFileIDs: Set<number>,
+) => {
+    if (!isDesktop) return;
+
+    const existing = await savedProcessedVideoFileIDs();
+    if (existing.size > 0) {
+        const updated = existing.difference(deletedFileIDs);
+        if (updated.size != existing.size) {
+            await saveProcessedVideoFileIDs(updated);
+        }
+    }
+};
+
+/**
  * If video processing is enabled, trigger a sync with remote and any subsequent
  * backfill queue processing for pending videos.
  *
