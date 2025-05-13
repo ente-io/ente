@@ -675,27 +675,16 @@ const processQueue = async () => {
     while (isVideoProcessingEnabled()) {
         let item = _state.liveQueue.shift();
         if (!item) {
-            if (!bq && _state.haveSyncedOnce) {
-                /* initialize */
-                bq = await backfillQueue(userID);
-            }
-            if (bq) {
-                switch (bq.length) {
-                    case 0:
-                        /* no more items to backfill */
-                        break;
-                    case 1 /* last item. take it, and refill queue */:
-                        item = bq.pop();
-                        bq = await backfillQueue(userID);
-                        break;
-                    default:
-                        /* more than one item. take it */
-                        item = bq.pop();
-                        break;
+            // Initialize or refill queue.
+            if (!bq?.length) {
+                if (_state.haveSyncedOnce) {
+                    bq = await backfillQueue(userID);
+                } else {
+                    log.info("Not attempting backfill until first sync");
                 }
-            } else {
-                log.info("Not backfilling since we haven't synced yet");
             }
+            // Take item if queue is not empty.
+            if (bq?.length) item = bq.pop();
         }
         if (item) {
             try {
