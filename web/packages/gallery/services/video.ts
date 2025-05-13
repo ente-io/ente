@@ -175,6 +175,10 @@ export const hlsGenerationStatusSubscribe = (
  *
  * See also {@link hlsGenerationStatusSubscribe}.
  *
+ * This function can be safely called even if {@link isHLSGenerationSupported}
+ * is `false` (in such cases, it will always return `undefined`). This is so
+ * that it can be unconditionally called as part of a React hook.
+ *
  * A return value of `undefined` indicates that the HLS generation subsystem has
  * not been initialized yet.
  */

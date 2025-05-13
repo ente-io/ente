@@ -17,6 +17,10 @@ import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { pt } from "ente-base/i18n";
+import {
+    hlsGenerationStatusSnapshot,
+    isHLSGenerationSupported,
+} from "ente-gallery/services/video";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
 import { isMLSupported, mlStatusSnapshot } from "ente-new/photos/services/ml";
 import { searchOptionsForString } from "ente-new/photos/services/search";
@@ -383,11 +387,26 @@ const shouldShowEmptyState = (inputValue: string) => {
     // Don't show empty state if the user has entered search input.
     if (inputValue) return false;
 
-    // Don't show empty state if there is no ML related information.
-    if (!isMLSupported) return false;
+    // Don't show empty state if there is no ML related information AND we're
+    // not processing videos.
 
-    const status = mlStatusSnapshot();
-    if (!status || status.phase == "disabled") return false;
+    if (!isMLSupported && !isHLSGenerationSupported()) {
+        // Neither of ML or HLS generation is supported on current client. This
+        // is the code path for web.
+        return false;
+    }
+
+    const mlStatus = mlStatusSnapshot();
+    const vpStatus = hlsGenerationStatusSnapshot();
+    if (
+        (!mlStatus || mlStatus.phase == "disabled") &&
+        (!vpStatus?.enabled || vpStatus.status != "processing")
+    ) {
+        // ML is either not supported or currently disabled AND video processing
+        // is either not supported or currently not happening. Don't show the
+        // empty state.
+        return false;
+    }
 
     // Show it otherwise.
     return true;
@@ -429,9 +448,9 @@ const EmptyState: React.FC<
             break;
     }
 
-    // If we're neither video processing, nor ML is enabled, then don't show the
+    // If ML is disabled and we're not video processing, then don't show the
     // empty state content.
-    if (!label && (!mlStatus || mlStatus.phase == "disabled")) {
+    if ((!mlStatus || mlStatus.phase == "disabled") && !label) {
         return <></>;
     }
 
