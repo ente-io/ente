@@ -697,10 +697,17 @@ export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
  */
 export const videoProcessingSyncIfNeeded = async () => {
     if (!isHLSGenerationSupported()) return;
+
+    // The `haveSyncedOnce` flag tracks whether or not a sync has happened for
+    // the app, and is not specific to video processing. We always set it even
+    // if HLS generation is currently disabled so that we can immediately start
+    // processing the backfill if it gets video processing gets enabled during
+    // the app's session, without waiting for the next sync to happen.
+    _state.haveSyncedOnce = true;
+
     if (!isHLSGenerationEnabled()) return;
 
     await syncProcessedFileIDs();
-    _state.haveSyncedOnce = true;
 
     tickNow(); /* if not already ticking */
 };
