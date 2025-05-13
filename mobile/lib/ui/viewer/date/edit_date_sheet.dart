@@ -264,7 +264,7 @@ class DateAndTimeWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final locale = Localizations.localeOf(context);
-    final String date = DateFormat.yMMMd(locale.languageCode).format(dateTime);
+    final String date = DateFormat.yMMMd(locale.toString()).format(dateTime);
     final String time = DateFormat(
       MediaQuery.of(context).alwaysUse24HourFormat ? 'HH:mm' : 'h:mm a',
     ).format(dateTime);
@@ -628,7 +628,7 @@ class PhotoDateHeaderWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "${DateFormat.yMEd(locale.languageCode).format(startDate)} · ${DateFormat(
+                        "${DateFormat.yMEd(locale.toString()).format(startDate)} · ${DateFormat(
                           MediaQuery.of(context).alwaysUse24HourFormat
                               ? 'HH:mm'
                               : 'h:mm a',
@@ -648,7 +648,7 @@ class PhotoDateHeaderWidget extends StatelessWidget {
 }
 
 String _formatDate(DateTime date, Locale locale, BuildContext context) {
-  return "${DateFormat.yMEd(locale.languageCode).format(date)}\n${DateFormat(
+  return "${DateFormat.yMEd(locale.toString()).format(date)}\n${DateFormat(
     MediaQuery.of(context).alwaysUse24HourFormat ? 'HH:mm' : 'h:mm a',
   ).format(date)}";
 }
