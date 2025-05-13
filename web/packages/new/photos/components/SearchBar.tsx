@@ -473,7 +473,11 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
         >
             <Box>
                 <Typography
-                    sx={{ fontWeight: "medium", wordBreak: "break-word" }}
+                    sx={{
+                        color: "text.base",
+                        fontWeight: "medium",
+                        wordBreak: "break-word",
+                    }}
                 >
                     {option.suggestion.label}
                 </Typography>
