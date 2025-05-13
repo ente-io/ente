@@ -191,18 +191,25 @@ export interface UpdatedFileDataFileIDsPage {
  * Set this to zero to start from the beginning.
  *
  * @param onPage A callback invoked for each page of results received from
- * remote. It is passed both the fileIDs received in the batch under
- * consideration, and the largest of the updated time for all entries
- * (irrespective of {@link type}) in that batch.
+ * remote. It is passed the fileIDs received in the batch under consideration,
+ * and the largest of the updated time for all entries (irrespective of
+ * {@link type}) in that batch.
  *
  * ----
  *
- * Implementation notes:
+ * [Note: Pruning stale status-diff entries]
  *
  * Unlike other "diff" APIs, the diff API used here won't return tombstone
  * entries for deleted files. This is not a problem because there are no current
  * cases where existing playlists or ML indexes get deleted (unless the
  * underlying file is deleted). See: [Note: Caching HLS playlist data].
+ *
+ * Note that the "/files/data/status-diff" includes entries for files that are
+ * in trash. This means that, while not a practical problem (because it's just
+ * numeric ids), the number of fileIDs we store locally can grow unbounded as
+ * files move to trash and then get deleted. So to prune them, we also add a
+ * hook to the /trash/v2/diff processing, and prune any locally saved file IDs
+ * which have been deleted from trash.
  */
 export const syncUpdatedFileDataFileIDs = async (
     type: FileDataType,
@@ -223,6 +230,9 @@ export const syncUpdatedFileDataFileIDs = async (
             const fileIDs = new Set<number>();
             for (const fd of diff) {
                 lastUpdatedAt = Math.max(lastUpdatedAt, fd.updatedAt);
+                // While we could prune isDeleted entries here, we can also rely
+                // on the the pruning that happens when the trash gets synced.
+                // See: [Note: Pruning stale status-diff entries]
                 if (fd.type == type && !fd.isDeleted) {
                     fileIDs.add(fd.fileID);
                 }
