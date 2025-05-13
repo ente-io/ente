@@ -164,6 +164,7 @@ func (c *Controller) GetFileData(ctx *gin.Context, actorUser int64, req fileData
 		Type:             doRows[0].Type,
 		EncryptedData:    s3MetaObject.EncryptedData,
 		DecryptionHeader: s3MetaObject.DecryptionHeader,
+		UpdatedAt:        doRows[0].UpdatedAt,
 	}, nil
 }
 
@@ -208,6 +209,7 @@ func (c *Controller) GetFilesData(ctx *gin.Context, req fileData.GetFilesData) (
 				Type:             obj.dbEntry.Type,
 				EncryptedData:    obj.s3MetaObject.EncryptedData,
 				DecryptionHeader: obj.s3MetaObject.DecryptionHeader,
+				UpdatedAt:        obj.dbEntry.UpdatedAt,
 			})
 		}
 	}

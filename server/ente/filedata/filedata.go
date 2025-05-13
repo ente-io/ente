@@ -26,6 +26,7 @@ type Entity struct {
 	Type             ente.ObjectType `json:"type"`
 	EncryptedData    string          `json:"encryptedData"`
 	DecryptionHeader string          `json:"decryptionHeader"`
+	UpdatedAt        int64           `json:"updatedAt"`
 }
 
 type FDDiffRequest struct {
