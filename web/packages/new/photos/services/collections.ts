@@ -379,23 +379,23 @@ export async function syncTrash(
 
     const updatedTrash = await updateTrash(
         collectionMap,
+        trash,
         lastSyncTime,
         onUpdateTrashFiles,
         onPruneDeletedFiles,
-        trash,
     );
     await cleanTrashCollections(updatedTrash);
 }
 
 const updateTrash = async (
     collections: Map<number, Collection>,
+    currentTrash: Trash,
     sinceTime: number,
     onUpdateTrashFiles: (files: EnteFile[]) => void,
     onPruneDeletedFiles: (files: EnteFile[]) => void,
-    currentTrash: Trash,
 ): Promise<Trash> => {
+    let updatedTrash: Trash = [...currentTrash];
     try {
-        let updatedTrash: Trash = [...currentTrash];
         let time = sinceTime;
 
         let resp;
@@ -441,11 +441,10 @@ const updateTrash = async (
             await localForage.setItem(TRASH, updatedTrash);
             await localForage.setItem(TRASH_TIME, time);
         } while (resp.data.hasMore);
-        return updatedTrash;
     } catch (e) {
         log.error("Get trash files failed", e);
     }
-    return currentTrash;
+    return updatedTrash;
 };
 
 export const emptyTrash = async () => {
