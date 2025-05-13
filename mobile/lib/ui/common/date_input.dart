@@ -122,7 +122,6 @@ class _DatePickerFieldState extends State<DatePickerField> {
 
   Future<void> _showDatePicker() async {
     final Locale locale = await getFormatLocale();
-    debugPrint("DatePicker: $locale");
     final DateTime? picked = await showDatePicker(
       context: context,
       locale: locale,
