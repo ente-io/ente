@@ -95,6 +95,9 @@ func (c *Controller) InsertOrUpdateMetadata(ctx *gin.Context, req *fileData.PutF
 	if req.Type != ente.MlData {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("unsupported object type "+string(req.Type)), "")
 	}
+	if versionErr := c._validateLastUpdatedAt(ctx, req.LastUpdatedAt, req.FileID, req.Type); versionErr != nil {
+		return stacktrace.Propagate(versionErr, "")
+	}
 
 	bucketID := c.S3Config.GetBucketID(req.Type)
 	objectKey := fileData.ObjectMetadataKey(req.FileID, fileOwnerID, req.Type, nil)
@@ -313,6 +316,30 @@ func (c *Controller) _checkMetadataReadOrWritePerm(ctx *gin.Context, userID int6
 		FileIDs:     fileIDs,
 	}); err != nil {
 		return stacktrace.Propagate(err, "User does not own some file(s)")
+	}
+	return nil
+}
+
+func (c *Controller) _validateLastUpdatedAt(ctx *gin.Context, lastUpdatedAt *int64, fileID int64, oType ente.ObjectType) error {
+	if lastUpdatedAt == nil {
+		return nil
+	}
+	doRows, err := c.Repo.GetFilesData(ctx, oType, []int64{fileID})
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get data")
+	}
+	if len(doRows) == 0 {
+		if *lastUpdatedAt == 0 {
+			return nil
+		}
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("invalid version"), "no data found for fileID %d", fileID)
+	}
+	if doRows[0].IsDeleted {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("data deleted"), "fileID %d is deleted", fileID)
+	}
+	dbUpdatedAt := doRows[0].UpdatedAt
+	if dbUpdatedAt != *lastUpdatedAt {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("invalid version"), "last updated at mismatch for fileID %d, dbUpdatedAt %d, lastUpdatedAt %d", fileID, dbUpdatedAt, *lastUpdatedAt)
 	}
 	return nil
 }
