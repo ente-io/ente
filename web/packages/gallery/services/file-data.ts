@@ -7,6 +7,7 @@ import {
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 
 /**
@@ -43,6 +44,29 @@ const RemoteFileData = z.object({
      * crypto layer.
      */
     decryptionHeader: z.string(),
+    /**
+     * The epoch microseconds when this file data entry was last upserted.
+     *
+     * [Note: PUT "mldata" version check]
+     *
+     * When PUT-ting mldata onto remote, the client is expected to pass the
+     * updated at of the existing {@link RemoteFileData} which it is updating
+     * (this field), or 0 if the client is creating a new entity.
+     *
+     * This allows remote to detect and reject cases where the client is trying
+     * to overwrite a version it hasn't yet pulled.
+     *
+     * About the optionality of this field: Newer museums are expected to always
+     * provide the {@link updatedAt} in the response, but for ease of self
+     * hosters we don't take a hard dependency on the latest museum and instead
+     * allow this field to be optional. When it is not present, effectively
+     * we'll pass 0 as {@link lastUpdatedAt} in the "mldata" PUT API call, but
+     * since it's an old museum it'll anyway ignore it.
+     *
+     * > This note was added May 2025, and the optionality can be removed in a
+     * > few months when museums should've updated (tag: Migration).
+     */
+    updatedAt: z.number().nullish().transform(nullToUndefined),
 });
 
 type RemoteFileData = z.infer<typeof RemoteFileData>;
@@ -257,11 +281,15 @@ export const syncUpdatedFileDataFileIDs = async (
  *
  * @param data The binary data to upload. The exact contents of the data are
  * {@link type} specific.
+ *
+ * @param lastUpdatedAt The {@link updatedAt} of the {@link RemoteFileData}
+ * which we are updating, or 0 to indicate a new entity.
  */
 export const putFileData = async (
     file: EnteFile,
     type: FileDataType,
     data: Uint8Array,
+    lastUpdatedAt: number,
 ) => {
     const { encryptedData, decryptionHeader } = await encryptBlobB64(
         data,
@@ -276,6 +304,7 @@ export const putFileData = async (
             type,
             encryptedData,
             decryptionHeader,
+            lastUpdatedAt,
         }),
     });
     ensureOk(res);

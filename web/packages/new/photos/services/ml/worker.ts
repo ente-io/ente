@@ -614,7 +614,8 @@ const index = async (
         log.debug(() => ["Uploading ML data", rawMLData]);
 
         try {
-            await putMLData(file, rawMLData);
+            const lastUpdatedAt = remoteMLData?.updatedAt ?? 0;
+            await putMLData(file, rawMLData, lastUpdatedAt);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
             if (isHTTP4xxError(e)) await markIndexingFailed(fileID);
