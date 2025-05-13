@@ -31,6 +31,7 @@ import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/services/filedata/filedata_service.dart";
+import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -529,16 +530,23 @@ class PreviewVideoStore {
     _logger.info("Getting playlist for $file");
     int? width, height, size;
     try {
-      final objectKey =
-          FileDataService.instance.previewIds?[file.uploadedFileID!]?.objectId;
-      final FileInfo? playlistCache = (objectKey == null)
-          ? null
-          : await cacheManager.getFileFromCache(_getCacheKey(objectKey));
-      final detailsCache = (objectKey == null)
-          ? null
-          : await cacheManager.getFileFromCache(
-              _getDetailsCacheKey(objectKey),
-            );
+      late final String objectKey;
+      final PreviewInfo? previewInfo =
+          FileDataService.instance.previewIds?[file.uploadedFileID!];
+      (String, String)? previewURLResult;
+      if (previewInfo == null) {
+        previewURLResult = await _getPreviewUrl(file);
+        _logger.info("parrsed objectID: ${previewURLResult.$2}");
+        objectKey = previewURLResult.$2;
+      } else {
+        objectKey = previewInfo.objectId;
+      }
+
+      final FileInfo? playlistCache =
+          await cacheManager.getFileFromCache(_getCacheKey(objectKey));
+      final detailsCache = await cacheManager.getFileFromCache(
+        _getDetailsCacheKey(objectKey),
+      );
       String finalPlaylist;
       if (playlistCache != null) {
         finalPlaylist = playlistCache.file.readAsStringSync();
@@ -565,62 +573,57 @@ class PreviewVideoStore {
           header: header,
         );
         finalPlaylist = playlistData["playlist"];
-
         width = playlistData["width"];
         height = playlistData["height"];
         size = playlistData["size"];
-
-        if (objectKey != null) {
-          unawaited(
-            cacheManager.putFile(
-              _getCacheKey(objectKey),
-              Uint8List.fromList(
-                (playlistData["playlist"] as String).codeUnits,
-              ),
+        unawaited(
+          cacheManager.putFile(
+            _getCacheKey(objectKey),
+            Uint8List.fromList(
+              (playlistData["playlist"] as String).codeUnits,
             ),
-          );
-          final details = {
-            "width": width,
-            "height": height,
-            "size": size,
-          };
-          unawaited(
-            cacheManager.putFile(
-              _getDetailsCacheKey(objectKey),
-              Uint8List.fromList(
-                json.encode(details).codeUnits,
-              ),
+          ),
+        );
+        unawaited(
+          cacheManager.putFile(
+            _getDetailsCacheKey(objectKey),
+            Uint8List.fromList(
+              json.encode({
+                "width": width,
+                "height": height,
+                "size": size,
+              }).codeUnits,
             ),
-          );
-        }
+          ),
+        );
       }
-
-      final videoFile = objectKey == null
-          ? null
-          : (await videoCacheManager
-                  .getFileFromCache(_getVideoPreviewKey(objectKey)))
-              ?.file;
+      final videoFile = (await videoCacheManager
+              .getFileFromCache(_getVideoPreviewKey(objectKey)))
+          ?.file;
       if (videoFile == null) {
-        final previewURL = await _getPreviewUrl(file);
-        if (objectKey != null) {
-          unawaited(
-            _downloadAndCacheVideo(
-              previewURL,
-              _getVideoPreviewKey(objectKey),
-            ),
-          );
-        }
+        previewURLResult = previewURLResult ?? await _getPreviewUrl(file);
+        unawaited(
+          videoCacheManager.downloadFile(
+            previewURLResult.$1,
+            key: _getVideoPreviewKey(objectKey),
+          ),
+        );
         finalPlaylist =
-            finalPlaylist.replaceAll('\noutput.ts', '\n$previewURL');
+            finalPlaylist.replaceAll('\noutput.ts', '\n${previewURLResult.$1}');
       } else {
         finalPlaylist =
             finalPlaylist.replaceAll('\noutput.ts', '\n${videoFile.path}');
       }
-
       final tempDir = await getTemporaryDirectory();
       final playlistFile = File("${tempDir.path}/${file.uploadedFileID}.m3u8");
       await playlistFile.writeAsString(finalPlaylist);
-      _logger.info("Writing playlist to ${playlistFile.path}");
+      final String log = (StringBuffer()
+            ..write("[CACHE-STATUS] ")
+            ..write("Video: ${videoFile != null ? '✓' : '✗'} | ")
+            ..write("Details: ${detailsCache != null ? '✓' : '✗'} | ")
+            ..write("Playlist: ${playlistCache != null ? '✓' : '✗'}"))
+          .toString();
+      _logger.info("Mapped playlist to ${playlistFile.path}, $log");
       final data = PlaylistData(
         preview: playlistFile,
         width: width,
@@ -633,12 +636,7 @@ class PreviewVideoStore {
     }
   }
 
-  Future _downloadAndCacheVideo(String url, String key) async {
-    final file = await videoCacheManager.downloadFile(url, key: key);
-    return file;
-  }
-
-  Future<String> _getPreviewUrl(EnteFile file) async {
+  Future<(String, String)> _getPreviewUrl(EnteFile file) async {
     try {
       final response = await _dio.get(
         "/files/data/preview",
@@ -648,7 +646,13 @@ class PreviewVideoStore {
               file.fileType == FileType.video ? "vid_preview" : "img_preview",
         },
       );
-      return response.data["url"];
+
+      final url = (response.data["url"] as String);
+      final uri = Uri.parse(url);
+      final segments = uri.pathSegments;
+      if (segments.isEmpty) throw Exception("Invalid URL");
+      final String objectID = segments.last;
+      return (url, objectID);
     } catch (e) {
       _logger.warning("Failed to get preview url", e);
       rethrow;
