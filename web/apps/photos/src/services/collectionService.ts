@@ -627,9 +627,7 @@ export const sortCollectionSummaries = (
                     return (b.updationTime ?? 0) - (a.updationTime ?? 0);
             }
         })
-        // TODO:
-        // eslint-disable-next-line no-constant-binary-expression
-        .sort((a, b) => b.order ?? 0 - a.order ?? 0)
+        .sort((a, b) => (b.order ?? 0) - (a.order ?? 0))
         .sort(
             (a, b) =>
                 CollectionSummaryOrder.get(a.type) -
