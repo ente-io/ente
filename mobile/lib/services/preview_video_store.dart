@@ -107,7 +107,7 @@ class PreviewVideoStore {
 
   Future<bool> isSharedFileStreamble(EnteFile file) async {
     try {
-      await getPreviewUrl(file);
+      await _getPreviewUrl(file);
       return true;
     } catch (_) {
       return false;
@@ -135,7 +135,7 @@ class PreviewVideoStore {
       try {
         // check if playlist already exist
         await getPlaylist(enteFile);
-        final _ = await getPreviewUrl(enteFile);
+        final _ = await _getPreviewUrl(enteFile);
 
         if (ctx != null && ctx.mounted) {
           showShortToast(ctx, 'Video preview already exists');
@@ -601,14 +601,7 @@ class PreviewVideoStore {
                   .getFileFromCache(_getVideoPreviewKey(objectKey)))
               ?.file;
       if (videoFile == null) {
-        final response2 = await _dio.get(
-          "/files/data/preview",
-          queryParameters: {
-            "fileID": file.uploadedFileID,
-            "type": "vid_preview",
-          },
-        );
-        final previewURL = response2.data["url"];
+        final previewURL = await _getPreviewUrl(file);
         if (objectKey != null) {
           unawaited(
             _downloadAndCacheVideo(
@@ -645,7 +638,7 @@ class PreviewVideoStore {
     return file;
   }
 
-  Future<String> getPreviewUrl(EnteFile file) async {
+  Future<String> _getPreviewUrl(EnteFile file) async {
     try {
       final response = await _dio.get(
         "/files/data/preview",
