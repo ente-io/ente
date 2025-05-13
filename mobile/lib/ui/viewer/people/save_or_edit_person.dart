@@ -628,10 +628,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       _logger.severe(
         "Failed to addNewPerson, email is already assigned to a person",
       );
-      await showGenericErrorDialog(
-        context: context,
-        error: "Email already assigned",
-      );
+      await showAlreadyLinkedEmailDialog(context, email);
       return null;
     }
 
