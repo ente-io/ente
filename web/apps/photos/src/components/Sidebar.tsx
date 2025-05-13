@@ -61,6 +61,10 @@ import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { customAPIHost } from "ente-base/origins";
 import { downloadString } from "ente-base/utils/web";
+import {
+    isHLSGenerationSupported,
+    toggleHLSGeneration,
+} from "ente-gallery/services/video";
 import { DeleteAccount } from "ente-new/photos/components/DeleteAccount";
 import { DropdownInput } from "ente-new/photos/components/DropdownInput";
 import { MLSettings } from "ente-new/photos/components/sidebar/MLSettings";
@@ -71,6 +75,7 @@ import {
 } from "ente-new/photos/components/utils/dialog";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
+    useHLSGenerationStatusSnapshot,
     useSettingsSnapshot,
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
@@ -769,6 +774,9 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     const { show: showMLSettings, props: mlSettingsVisibilityProps } =
         useModalVisibility();
 
+    const hlsGenStatusSnapshot = useHLSGenerationStatusSnapshot();
+    const isHLSGenerationEnabled = !!hlsGenStatusSnapshot?.enabled;
+
     useEffect(() => {
         if (open) void syncSettings();
     }, [open]);
@@ -798,6 +806,18 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                                 onClick={showMLSettings}
                             />
                         </RowButtonGroup>
+                    )}
+                    {isHLSGenerationSupported() && (
+                        // TODO(HLS): Visual look
+                        <Stack sx={{ px: "16px", py: "20px" }}>
+                            <RowButtonGroup>
+                                <RowSwitch
+                                    label={t("enabled")}
+                                    checked={isHLSGenerationEnabled}
+                                    onClick={toggleHLSGeneration}
+                                />
+                            </RowButtonGroup>
+                        </Stack>
                     )}
                     <RowButton
                         endIcon={<ChevronRightIcon />}

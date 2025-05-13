@@ -49,6 +49,10 @@ import {
     type TimestampedFileSystemUploadItem,
 } from "./upload";
 
+export type HLSGenerationStatus =
+    | { enabled: false }
+    | { enabled: true; estimatedPendingCount?: number };
+
 interface VideoProcessingQueueItem {
     /**
      * The {@link EnteFile} (guaranteed to be of {@link FileType.video}) whose
@@ -75,6 +79,20 @@ const idleWaitMax = idleWaitInitial * 2 ** 6; /* 640 sec */
  * This entire object will be reset on logout.
  */
 class VideoState {
+    /**
+     * `true` if the generation of HLS streams has been enabled on this client.
+     */
+    isHLSGenerationEnabled = false;
+    /**
+     * Subscriptions to {@link HLSGenerationStatus} updates attached using
+     * {@link hlsGenerationStatusSubscribe}.
+     */
+    hlsGenerationStatusListeners: (() => void)[] = [];
+    /**
+     * Snapshot of the {@link HLSGenerationStatus} returned by the
+     * {@link hlsGenerationStatusSnapshot} function.
+     */
+    hlsGenerationStatusSnapshot: HLSGenerationStatus | undefined;
     /**
      * Queue of recently uploaded items waiting to be processed.
      */
@@ -127,6 +145,77 @@ export const resetVideoState = () => {
     // Note: We rely on [Note: Full reload on logout] to abort any in-flight
     // requests.
     _state = new VideoState();
+};
+
+/**
+ * A function that can be used to subscribe to updates in the HLS generation
+ * settings and status.
+ *
+ * See: [Note: Snapshots and useSyncExternalStore].
+ */
+export const hlsGenerationStatusSubscribe = (
+    onChange: () => void,
+): (() => void) => {
+    _state.hlsGenerationStatusListeners.push(onChange);
+    return () => {
+        _state.hlsGenerationStatusListeners =
+            _state.hlsGenerationStatusListeners.filter((l) => l != onChange);
+    };
+};
+
+/**
+ * Return the last know, cached {@link HLSGenerationStatus}.
+ *
+ * See also {@link hlsGenerationStatusSubscribe}.
+ *
+ * A return value of `undefined` indicates that the HLS generation subsystem has
+ * not been initialized yet.
+ */
+export const hlsGenerationStatusSnapshot = ():
+    | HLSGenerationStatus
+    | undefined => _state.hlsGenerationStatusSnapshot;
+
+const setHLSGenerationStatusSnapshot = (snapshot: HLSGenerationStatus) => {
+    _state.hlsGenerationStatusSnapshot = snapshot;
+    _state.hlsGenerationStatusListeners.forEach((l) => l());
+};
+
+/**
+ * Return `true` if this client is capable of generating HLS streams for the
+ * uploaded videos.
+ *
+ * This function implementation is written expecting to be called many times
+ * (e.g. during UI rendering).
+ */
+export const isHLSGenerationSupported = () =>
+    // Keep this check fast, we get called many times.
+    isDesktop &&
+    // TODO(HLS):
+    process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
+    settingsSnapshot().isInternalUser;
+
+/**
+ * Enable or disable (toggle) the HLS generation on this client.
+ *
+ * When HLS generation is enabled, this client will process videos to generate a
+ * streamable variant of them.
+ *
+ * It can only be enabled when
+ */
+export const toggleHLSGeneration = () => {
+    if (!isHLSGenerationSupported()) {
+        assertionFailed();
+        return;
+    }
+
+    const enabled = !_state.isHLSGenerationEnabled;
+
+    // Right now we only set the enabled setting. The estimated count status
+    // will get filled in when we tick.
+    setHLSGenerationStatusSnapshot({ enabled });
+
+    // Wake up the processor if needed.
+    if (enabled) tickNow();
 };
 
 export interface HLSPlaylistData {
@@ -515,7 +604,7 @@ const syncProcessedFileIDs = async () =>
 export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
     deletedFileIDs: Set<number>,
 ) => {
-    if (!isDesktop) return;
+    if (!isHLSGenerationSupported()) return;
 
     const existing = await savedProcessedVideoFileIDs();
     if (existing.size > 0) {
@@ -544,7 +633,7 @@ export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
  * that have already been processed elsewhere.
  */
 export const videoProcessingSyncIfNeeded = async () => {
-    if (!isDesktop) return;
+    if (!isHLSGenerationSupported()) return;
     if (!isVideoProcessingEnabled()) return;
 
     await syncProcessedFileIDs();
@@ -580,7 +669,7 @@ export const processVideoNewUpload = (
     file: EnteFile,
     processableUploadItem: ProcessableUploadItem,
 ) => {
-    if (!isDesktop) return;
+    if (!isHLSGenerationSupported()) return;
     if (!isVideoProcessingEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
     if (processableUploadItem instanceof File) {
@@ -668,7 +757,7 @@ export const isVideoProcessingEnabled = () =>
  * batches, and the externally triggered processing of live uploads.
  */
 const processQueue = async () => {
-    if (!(isDesktop && isVideoProcessingEnabled())) {
+    if (!isHLSGenerationSupported() || !isVideoProcessingEnabled()) {
         assertionFailed(); /* we shouldn't have come here */
         return;
     }
