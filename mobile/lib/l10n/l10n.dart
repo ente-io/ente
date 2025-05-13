@@ -29,21 +29,46 @@ const List<Locale> appSupportedLocales = <Locale>[
   Locale("zh", "CN"),
 ];
 
+List<Locale> _onDeviceLocales = [];
 Locale? autoDetectedLocale;
 
-Locale localResolutionCallBack(locales, supportedLocales) {
-  for (Locale locale in locales) {
+Locale localResolutionCallBack(deviceLocales, supportedLocales) {
+  _onDeviceLocales = deviceLocales;
+  debugPrint("onDeviceLocales: ${_onDeviceLocales.toString()}");
+  for (Locale deviceLocale in deviceLocales) {
     for (Locale supportedLocale in appSupportedLocales) {
-      if (supportedLocale == locale) {
+      if (supportedLocale == deviceLocale) {
         autoDetectedLocale = supportedLocale;
         return supportedLocale;
-      } else if (supportedLocale.languageCode == locale.languageCode) {
+      } else if (supportedLocale.languageCode == deviceLocale.languageCode) {
         autoDetectedLocale = supportedLocale;
         return supportedLocale;
       }
     }
   }
-  return const Locale('en');
+  return autoDetectedLocale ?? const Locale('en');
+}
+
+// This is used to get locale that should be used for various formatting
+// operations like date, time, number etc. For common languages like english, different
+// locale might have different formats. For example, en_US and en_GB have different
+// formats for date and time. Use this method to find the best locale for formatting
+// operations. This is not used for displaying text in the app.
+Future<Locale> getFormatLocale() async {
+  final Locale locale = (await getLocale())!;
+  Locale? firstLanguageMatch;
+  // see if exact matche is present in the device locales
+  for (Locale deviceLocale in _onDeviceLocales) {
+    if (deviceLocale.languageCode == locale.languageCode &&
+        deviceLocale.countryCode == locale.countryCode) {
+      return deviceLocale;
+    }
+    if (firstLanguageMatch == null &&
+        deviceLocale.languageCode == locale.languageCode) {
+      firstLanguageMatch = deviceLocale;
+    }
+  }
+  return firstLanguageMatch ?? locale;
 }
 
 Future<Locale?> getLocale({
