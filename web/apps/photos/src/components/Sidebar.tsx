@@ -7,6 +7,7 @@ import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
+import ScienceIcon from "@mui/icons-material/Science";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
     Box,
@@ -33,6 +34,7 @@ import {
     RowButtonDivider,
     RowButtonGroup,
     RowButtonGroupHint,
+    RowButtonGroupTitle,
     RowSwitch,
 } from "ente-base/components/RowButton";
 import { SpacedRow } from "ente-base/components/containers";
@@ -52,6 +54,7 @@ import {
 import { useBaseContext } from "ente-base/context";
 import {
     getLocaleInUse,
+    pt,
     setLocaleInUse,
     supportedLocales,
     ut,
@@ -807,18 +810,6 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                             />
                         </RowButtonGroup>
                     )}
-                    {isHLSGenerationSupported() && (
-                        // TODO(HLS): Visual look
-                        <Stack sx={{ px: "16px", py: "20px" }}>
-                            <RowButtonGroup>
-                                <RowSwitch
-                                    label={t("enabled")}
-                                    checked={isHLSGenerationEnabled}
-                                    onClick={toggleHLSGeneration}
-                                />
-                            </RowButtonGroup>
-                        </Stack>
-                    )}
                     <RowButton
                         endIcon={<ChevronRightIcon />}
                         label={t("map")}
@@ -829,6 +820,23 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         label={t("advanced")}
                         onClick={showAdvancedSettings}
                     />
+                    {isHLSGenerationSupported() && (
+                        // TODO(HLS): Visual look
+                        <Stack>
+                            <RowButtonGroupTitle icon={<ScienceIcon />}>
+                                {t("labs")}
+                            </RowButtonGroupTitle>
+                            <RowButtonGroup>
+                                <RowSwitch
+                                    label={
+                                        /* TODO(HLS): */ pt("Streamable videos")
+                                    }
+                                    checked={isHLSGenerationEnabled}
+                                    onClick={toggleHLSGeneration}
+                                />
+                            </RowButtonGroup>
+                        </Stack>
+                    )}
                 </Stack>
             </Stack>
             <MapSettings
