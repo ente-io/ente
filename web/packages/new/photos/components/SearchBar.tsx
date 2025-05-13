@@ -13,10 +13,10 @@ import {
     useTheme,
     type Theme,
 } from "@mui/material";
-import { assertionFailed } from "ente-base/assert";
 import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { pt } from "ente-base/i18n";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
 import { isMLSupported, mlStatusSnapshot } from "ente-new/photos/services/ml";
 import { searchOptionsForString } from "ente-new/photos/services/search";
@@ -38,6 +38,7 @@ import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
 import {
+    useHLSGenerationStatusSnapshot,
     useMLStatusSnapshot,
     usePeopleStateSnapshot,
 } from "./utils/use-snapshot";
@@ -401,15 +402,19 @@ const EmptyState: React.FC<
 > = ({ onSelectPeople, onSelectPerson }) => {
     const mlStatus = useMLStatusSnapshot();
     const people = usePeopleStateSnapshot()?.visiblePeople;
-
-    if (!mlStatus || mlStatus.phase == "disabled") {
-        // The preflight check should've prevented us from coming here.
-        assertionFailed();
-        return <></>;
-    }
+    const vpStatus = useHLSGenerationStatusSnapshot();
 
     let label: string | undefined;
-    switch (mlStatus.phase) {
+    switch (mlStatus?.phase) {
+        case undefined:
+        case "disabled":
+        case "done":
+            // If ML is not running, see if video processing is.
+            if (vpStatus?.enabled && vpStatus.status == "processing") {
+                // TODO(HLS):
+                label = pt("Processing videos...");
+            }
+            break;
         case "scheduled":
             label = t("indexing_scheduled");
             break;
@@ -422,6 +427,12 @@ const EmptyState: React.FC<
         case "clustering":
             label = t("indexing_people");
             break;
+    }
+
+    // If we're neither video processing, nor ML is enabled, then don't show the
+    // empty state content.
+    if (!label && (!mlStatus || mlStatus.phase == "disabled")) {
+        return <></>;
     }
 
     return (
