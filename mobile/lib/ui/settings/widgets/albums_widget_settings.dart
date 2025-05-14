@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection/collection.dart";
+import "package:photos/services/collections_service.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/collections/flex_grid_view.dart";
+import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 
@@ -12,6 +18,23 @@ class AlbumsWidgetSettings extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          8 + MediaQuery.viewPaddingOf(context).bottom,
+        ),
+        child: ButtonWidget(
+          buttonType: ButtonType.primary,
+          buttonSize: ButtonSize.large,
+          labelText: S.of(context).save,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            // await _generateAlbumUrl();
+          },
+        ),
+      ),
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
@@ -33,7 +56,7 @@ class AlbumsWidgetSettings extends StatelessWidget {
               ),
             ],
           ),
-          if (1 == 1)
+          if (1 != 1)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -59,24 +82,26 @@ class AlbumsWidgetSettings extends StatelessWidget {
               ),
             )
           else
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 32.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Show a grid here with lots of data and a save button",
-                        ),
-                      ],
-                    ),
+            FutureBuilder<List<Collection>>(
+              future:
+                  CollectionsService.instance.getCollectionForOnEnteSection(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return CollectionsFlexiGridViewWidget(
+                    snapshot.data!,
+                    displayLimitCount: 1000000,
+                    shrinkWrap: true,
+                    shouldShowCreateAlbum: true,
+                    enableSelectionMode: true,
                   );
-                },
-                childCount: 1,
-              ),
+                } else if (snapshot.hasError) {
+                  return SliverToBoxAdapter(
+                    child: Text(snapshot.error.toString()),
+                  );
+                } else {
+                  return const SliverToBoxAdapter(child: EnteLoadingWidget());
+                }
+              },
             ),
         ],
       ),
