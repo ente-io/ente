@@ -116,18 +116,17 @@ const _makeGenThumbnailCommand = (seekTime: number, forHDR: boolean) => [
 ];
 
 /**
- * Extract metadata from the given video
+ * Extract metadata from the given video.
  *
- * When we're running in the context of our desktop app _and_ we're passed a
- * file path , this uses the native FFmpeg bundled with our desktop app.
- * Otherwise it uses a Wasm build of FFmpeg running in a web worker.
+ * When we're running in the context of our desktop app _and_ we're passed an
+ * upload item that resolves to a path of the user's file system, this uses the
+ * native FFmpeg bundled with our desktop app. Otherwise it uses a Wasm build of
+ * FFmpeg running in a web worker.
  *
- * This function is called during upload, when we need to extract the metadata
- * of videos that the user is uploading.
+ * This function is called during upload, when we need to extract the
+ * "ffmetadata" of videos that the user is uploading.
  *
- * @param uploadItem A {@link File}, or the absolute path to a file on the
- * user's local file system. A path can only be provided when we're running in
- * the context of our desktop app.
+ * @param uploadItem The video item being uploaded.
  */
 export const extractVideoMetadata = async (
     uploadItem: UploadItem,
@@ -259,6 +258,26 @@ const parseFFMetadataDate = (s: string | undefined) => {
 
     return d;
 };
+
+/**
+ * Extract the duration (in seconds) from the given video
+ *
+ * This is a sibling of {@link extractVideoMetadata}, except it tries to
+ * determine the duration of the video. The duration is not part of the
+ * "ffmetadata", and is instead a property of the video itself.
+ *
+ * @param uploadItem The video item being uploaded.
+ *
+ * @return the duration of the video in seconds (a floating point number).
+ */
+export const determineVideoDuration = async (
+    uploadItem: UploadItem,
+): Promise<number> =>
+    uploadItem instanceof File
+        ? await determineVideoDurationWeb(uploadItem)
+        : await ensureElectron().ffmpegDetermineVideoDuration(
+              toDataOrPathOrZipEntry(uploadItem),
+          );
 
 /**
  * Convert a video from a format that is not supported in the browser to MP4.
