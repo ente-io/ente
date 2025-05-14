@@ -768,6 +768,44 @@ export const fileLocation = (file: EnteFile): Location | undefined => {
 };
 
 /**
+ * Return the duration of the video as a formatted "HH:mm:ss" string (when
+ * present) for the given {@link EnteFile}.
+ *
+ * Only files with type `FileType.video` are expected to have a duration.
+ *
+ * @returns The duration of the video as a string of the form "HH:mm:ss". The
+ * underlying duration present in the file's metadata is guaranteed to be
+ * integral, so there will never be a subsecond component.
+ *
+ * - If the hour component is all zeroes, it will be omitted.
+ *
+ * - Leading zeros in the minutes component will be trimmed off if an hour
+ *   component is not present. If minutes is all zeros, then "0" will be used.
+ *
+ * - For example, an underlying duration of 595 seconds will result in a
+ *   formatted string of the form "9:55". While an underlying duration of 9
+ *   seconds will be returned as a string "0:09".
+ *
+ * - A zero duration will be treated as undefined.
+ */
+export const fileDurationString = (file: EnteFile): string | undefined => {
+    const d = file.metadata.duration;
+    if (!d) return undefined;
+
+    const s = d % 60;
+    const m = Math.floor(d / 60) % 60;
+    const h = Math.floor(d / 3600);
+
+    const ss = s > 9 ? `${s}` : `0${s}`;
+    if (h) {
+        const mm = m > 9 ? `${m}` : `0${m}`;
+        return `${h}:${mm}:${ss}`;
+    } else {
+        return `${m}:${ss}`;
+    }
+};
+
+/**
  * Return the caption, aka "description", (if any) attached to the given
  * {@link EnteFile}.
  */
