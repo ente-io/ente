@@ -1,7 +1,6 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
-import { isDesktop } from "ente-base/app";
 import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
 import type { BytesOrB64 } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
@@ -1053,10 +1052,10 @@ const extractImageOrVideoMetadata = async (
     if (
         fileType == FileType.video &&
         // TODO(HLS):
-        !isDesktop &&
         settingsSnapshot().isInternalUser
     ) {
         duration = await tryDetermineVideoDuration(uploadItem);
+        // TODO(HLS):
         log.debug(() => ["extracted duration", duration]);
     }
 

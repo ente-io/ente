@@ -2,7 +2,7 @@ import { ensureElectron } from "ente-base/electron";
 import log from "ente-base/log";
 import type { Electron } from "ente-base/types/ipc";
 import {
-    toDataOrPathOrZipEntry,
+    toPathOrZipEntry,
     type FileSystemUploadItem,
     type UploadItem,
 } from "ente-gallery/services/upload";
@@ -74,7 +74,7 @@ export const generateVideoThumbnailNative = async (
     _generateVideoThumbnail((seekTime: number) =>
         electron.ffmpegExec(
             makeGenThumbnailCommand(seekTime),
-            toDataOrPathOrZipEntry(fsUploadItem),
+            toPathOrZipEntry(fsUploadItem),
             "jpeg",
         ),
     );
@@ -137,7 +137,7 @@ export const extractVideoMetadata = async (
             ? await ffmpegExecWeb(command, uploadItem, "txt")
             : await ensureElectron().ffmpegExec(
                   command,
-                  toDataOrPathOrZipEntry(uploadItem),
+                  toPathOrZipEntry(uploadItem),
                   "txt",
               ),
     );
@@ -274,10 +274,10 @@ export const determineVideoDuration = async (
     uploadItem: UploadItem,
 ): Promise<number> =>
     uploadItem instanceof File
-        ? await determineVideoDurationWeb(uploadItem)
-        : 0; /*, await ensureElectron().ffmpegDetermineVideoDuration(
-              toDataOrPathOrZipEntry(uploadItem),
-          ));*/
+        ? determineVideoDurationWeb(uploadItem)
+        : ensureElectron().ffmpegDetermineVideoDuration(
+              toPathOrZipEntry(uploadItem),
+          );
 
 /**
  * Convert a video from a format that is not supported in the browser to MP4.

@@ -2,7 +2,7 @@ import log from "ente-base/log";
 import { type Electron } from "ente-base/types/ipc";
 import * as ffmpeg from "ente-gallery/services/ffmpeg";
 import {
-    toDataOrPathOrZipEntry,
+    toPathOrZipEntry,
     type FileSystemUploadItem,
 } from "ente-gallery/services/upload";
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
@@ -196,7 +196,7 @@ export const generateThumbnailNative = async (
 ): Promise<Uint8Array> =>
     fileTypeInfo.fileType === FileType.image
         ? await electron.generateImageThumbnail(
-              toDataOrPathOrZipEntry(fsUploadItem),
+              toPathOrZipEntry(fsUploadItem),
               maxThumbnailDimension,
               maxThumbnailSize,
           )
