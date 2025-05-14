@@ -141,9 +141,11 @@ export interface Metadata {
      */
     videoHash?: string;
     /**
-     * The duration (in seconds) of the video.
+     * The duration (in integral seconds) of the video.
      *
-     * Only present for videos (`fileType == FileType.video`).
+     * Only present for videos (`fileType == FileType.video`). For compatibility
+     * with other clients, this must be a integer number of seconds, without any
+     * sub-second fraction.
      */
     duration?: number;
     hasStaticThumbnail?: boolean;

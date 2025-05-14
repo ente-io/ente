@@ -1078,7 +1078,7 @@ const extractImageOrVideoMetadata = async (
     };
 
     if (duration) {
-        metadata.duration = ensureNumber(duration);
+        metadata.duration = ensureInteger(Math.ceil(duration));
     }
 
     const location = parsedMetadataJSON?.location ?? parsedMetadata?.location;
