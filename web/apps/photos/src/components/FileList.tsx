@@ -9,6 +9,7 @@ import { isSameDay } from "ente-base/date";
 import { formattedDateRelative } from "ente-base/i18n-date";
 import { downloadManager } from "ente-gallery/services/download";
 import { EnteFile, enteFileDeletionDate } from "ente-media/file";
+import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
     GAP_BTW_TILES,
@@ -1198,15 +1199,13 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             ) : (
                 <LoadingThumbnail />
             )}
-            {file.metadata.fileType === FileType.livePhoto ? (
+            {file.metadata.fileType == FileType.livePhoto ? (
                 <FileTypeIndicatorOverlay>
-                    <AlbumOutlinedIcon />
+                    <AlbumOutlinedIcon fontSize="small" />
                 </FileTypeIndicatorOverlay>
             ) : (
-                file.metadata.fileType === FileType.video && (
-                    <FileTypeIndicatorOverlay>
-                        <PlayCircleOutlineOutlinedIcon />
-                    </FileTypeIndicatorOverlay>
+                file.metadata.fileType == FileType.video && (
+                    <VideoDurationOverlay duration={fileDurationString(file)} />
                 )
             )}
             {selected && <SelectedOverlay />}
@@ -1399,4 +1398,20 @@ const SelectedOverlay = styled(Overlay)(
     border: 2px solid ${theme.vars.palette.accent.main};
     border-radius: 4px;
 `,
+);
+
+interface VideoDurationOverlayProps {
+    duration: string | undefined;
+}
+
+const VideoDurationOverlay: React.FC<VideoDurationOverlayProps> = ({
+    duration,
+}) => (
+    <FileTypeIndicatorOverlay>
+        {duration ? (
+            <Typography variant="mini">{duration}</Typography>
+        ) : (
+            <PlayCircleOutlineOutlinedIcon fontSize="small" />
+        )}
+    </FileTypeIndicatorOverlay>
 );
