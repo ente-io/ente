@@ -45,6 +45,8 @@ export interface FFmpegUtilityProcess {
         outputPathPrefix: string,
         outputUploadURL: string,
     ) => Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined>;
+
+    ffmpegDetermineVideoDuration: (inputFilePath: string) => Promise<number>;
 }
 
 log.debugString("Started ffmpeg utility process");
@@ -57,6 +59,7 @@ process.parentPort.once("message", (e) => {
             ffmpegExec,
             ffmpegConvertToMP4,
             ffmpegGenerateHLSPlaylistAndSegments,
+            ffmpegDetermineVideoDuration,
         } satisfies FFmpegUtilityProcess,
         messagePortMainEndpoint(e.ports[0]!),
     );
@@ -548,6 +551,7 @@ interface VideoCharacteristics {
     isBT709: boolean;
     bitrate: number | undefined;
 }
+
 /**
  * Heuristically determine information about the video at the given
  * {@link inputFilePath}:
@@ -820,4 +824,55 @@ const uploadVideoSegments = async (
             await wait(t);
         }
     }
+};
+
+/**
+ * A regex that matches the first line of the form
+ *
+ *   Duration: 00:00:03.13, start: 0.000000, bitrate: 16088 kb/s
+ *
+ * The part after Duration: and until the first non-digit or colon is the first
+ * capture group.
+ */
+const videoDurationLineRegex = /\s\sDuration: ([0-9:]+)/;
+
+/**
+ * Determine the duration of the video at the given {@link inputFilePath}.
+ *
+ * While the detection works for all known cases, it is still heuristic because
+ * it uses ffmpeg output instead of ffprobe (which we don't have access to).
+ * See: [Note: Parsing CLI output might break on ffmpeg updates].
+ */
+export const ffmpegDetermineVideoDuration = async (inputFilePath: string) => {
+    const videoInfo = await pseudoFFProbeVideo(inputFilePath);
+    const videoDurationMatch = videoDurationLineRegex.exec(videoInfo)?.at(1);
+
+    const fail = () => {
+        throw new Error(`Cannot parse video duration '${videoDurationMatch}'`);
+    };
+
+    const nums = (videoDurationMatch ?? "")
+        .split(":")
+        .map((s) => parseInt(s, 10) || 0);
+    let [h, m, s] = [0, 0, 0];
+    switch (nums.length) {
+        case 1:
+            s = nums[0]!;
+            break;
+        case 2:
+            m = nums[0]!;
+            s = nums[1]!;
+            break;
+        case 3:
+            h = nums[0]!;
+            m = nums[1]!;
+            s = nums[2]!;
+            break;
+        default:
+            fail();
+    }
+
+    const duration = h * 3600 + m * 60 + s;
+    if (!duration) fail();
+    return duration;
 };

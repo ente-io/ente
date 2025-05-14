@@ -71,6 +71,7 @@ export const withInputFile = async <T>(
  */
 export const ffmpegDetermineVideoDuration = async (
     pathOrZipItem: string | ZipItem,
-): Promise<number> => {
-    throw new Error("todo");
-};
+): Promise<number> =>
+    withInputFile(pathOrZipItem, async (worker, inputFilePath) =>
+        worker.ffmpegDetermineVideoDuration(inputFilePath),
+    );
