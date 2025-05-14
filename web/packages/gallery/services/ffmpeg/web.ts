@@ -154,7 +154,7 @@ const withInputMount = async <T>(
     ffmpeg: FFmpeg,
     blob: Blob,
     f: (inputPath: string) => Promise<T>,
-) => {
+): Promise<T> => {
     const mountDir = "/mount";
     const inputFileName = newID("in_");
     const inputPath = joinPath(mountDir, inputFileName);

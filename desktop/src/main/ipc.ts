@@ -32,7 +32,7 @@ import {
     openLogDirectory,
     selectDirectory,
 } from "./services/dir";
-import { ffmpegExec } from "./services/ffmpeg";
+import { ffmpegDetermineVideoDuration, ffmpegExec } from "./services/ffmpeg";
 import {
     fsExists,
     fsFindFiles,
@@ -196,6 +196,12 @@ export const attachIPCHandlers = () => {
             pathOrZipItem: string | ZipItem,
             outputFileExtension: string,
         ) => ffmpegExec(command, pathOrZipItem, outputFileExtension),
+    );
+
+    ipcMain.handle(
+        "ffmpegDetermineVideoDuration",
+        (_, pathOrZipItem: string | ZipItem) =>
+            ffmpegDetermineVideoDuration(pathOrZipItem),
     );
 
     // - Upload

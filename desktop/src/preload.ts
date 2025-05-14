@@ -216,6 +216,9 @@ const ffmpegExec = (
         outputFileExtension,
     );
 
+const ffmpegDetermineVideoDuration = (pathOrZipItem: string | ZipItem) =>
+    ipcRenderer.invoke("ffmpegDetermineVideoDuration", pathOrZipItem);
+
 // - Utility processes
 
 const triggerCreateUtilityProcess = (type: UtilityProcessType) => {
@@ -392,6 +395,7 @@ contextBridge.exposeInMainWorld("electron", {
     convertToJPEG,
     generateImageThumbnail,
     ffmpegExec,
+    ffmpegDetermineVideoDuration,
 
     // - ML
 
