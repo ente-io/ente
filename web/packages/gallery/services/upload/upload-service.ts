@@ -1,6 +1,7 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 
+import { isDesktop } from "ente-base/app";
 import { streamEncryptionChunkSize } from "ente-base/crypto/libsodium";
 import type { BytesOrB64 } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
@@ -9,7 +10,10 @@ import { basename, nameAndExtension } from "ente-base/file-name";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { extractExif } from "ente-gallery/services/exif";
-import { extractVideoMetadata } from "ente-gallery/services/ffmpeg";
+import {
+    determineVideoDuration,
+    extractVideoMetadata,
+} from "ente-gallery/services/ffmpeg";
 import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
@@ -37,6 +41,7 @@ import {
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
 import { addToCollection } from "ente-new/photos/services/collection";
+import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { CustomError, handleUploadError } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
@@ -1043,6 +1048,18 @@ const extractImageOrVideoMetadata = async (
             tryParseEpochMicrosecondsFromFileName(fileName) ?? modificationTime;
     }
 
+    // Video duration
+    let duration: number | undefined;
+    // TODO(HLS):
+    if (
+        !isDesktop &&
+        fileType == FileType.video &&
+        settingsSnapshot().isInternalUser
+    ) {
+        duration = await tryDetermineVideoDuration(uploadItem);
+        log.debug(() => ["extracted duration", duration]);
+    }
+
     // To avoid introducing malformed data into the metadata fields (which the
     // other clients might not expect and handle), we have extra "ensure" checks
     // here that act as a safety valve if somehow the TypeScript type is lying.
@@ -1115,6 +1132,16 @@ const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
     } catch (e) {
         const fileName = uploadItemFileName(uploadItem);
         log.error(`Failed to extract video metadata for ${fileName}`, e);
+        return undefined;
+    }
+};
+
+const tryDetermineVideoDuration = async (uploadItem: UploadItem) => {
+    try {
+        return await determineVideoDuration(uploadItem);
+    } catch (e) {
+        const fileName = uploadItemFileName(uploadItem);
+        log.error(`Failed to extract video duration for ${fileName}`, e);
         return undefined;
     }
 };
