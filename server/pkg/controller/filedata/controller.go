@@ -20,6 +20,7 @@ import (
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 	"sync"
 	gTime "time"
 )
@@ -330,18 +331,23 @@ func (c *Controller) _validateLastUpdatedAt(ctx *gin.Context, lastUpdatedAt *int
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to get data")
 	}
+	var invalidVersionErr = &ente.ApiError{
+		HttpStatusCode: http.StatusBadRequest,
+		Code:           "INVALID_VERSION",
+		Message:        "",
+	}
 	if len(doRows) == 0 {
 		if *lastUpdatedAt == 0 {
 			return nil
 		}
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage("invalid version"), "no data found for fileID %d", fileID)
+		return stacktrace.Propagate(invalidVersionErr, "no data found for fileID %d", fileID)
 	}
 	if doRows[0].IsDeleted {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage("data deleted"), "fileID %d is deleted", fileID)
 	}
 	dbUpdatedAt := doRows[0].UpdatedAt
 	if dbUpdatedAt != *lastUpdatedAt {
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage("invalid version"), "last updated at mismatch for fileID %d, dbUpdatedAt %d, lastUpdatedAt %d", fileID, dbUpdatedAt, *lastUpdatedAt)
+		return stacktrace.Propagate(invalidVersionErr, "last updated at mismatch for fileID %d, dbUpdatedAt %d, lastUpdatedAt %d", fileID, dbUpdatedAt, *lastUpdatedAt)
 	}
 	return nil
 }
