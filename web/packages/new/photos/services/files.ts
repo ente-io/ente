@@ -242,6 +242,13 @@ export function getTrashedFiles(trash: Trash): EnteFile[] {
     );
 }
 
+/**
+ * Return the IDs of all the files that are part of the trash as per our local
+ * database.
+ */
+export const getLocalTrashFileIDs = () =>
+    getLocalTrash().then((trash) => new Set(trash.map((f) => f.file.id)));
+
 const sortTrashFiles = (files: EnteFile[]) => {
     return files.sort((a, b) => {
         if (a.deleteBy === b.deleteBy) {

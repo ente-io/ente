@@ -3,12 +3,19 @@ import { assertionFailed } from "ente-base/assert";
 import { decryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
 import { ensureElectron } from "ente-base/electron";
-import { isHTTP4xxError, type PublicAlbumsCredentials } from "ente-base/http";
+import {
+    isHTTP4xxError,
+    retryAsyncOperation,
+    type PublicAlbumsCredentials,
+} from "ente-base/http";
+import { getKV, getKVN, setKV } from "ente-base/kv";
+import { ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import {
     getAllLocalFiles,
+    getLocalTrashFileIDs,
     uniqueFilesByID,
 } from "ente-new/photos/services/files";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
@@ -21,6 +28,7 @@ import {
     initiateGenerateHLS,
     readVideoStream,
     videoStreamDone,
+    type GenerateHLSResult,
 } from "../utils/native-stream";
 import { downloadManager, isNetworkDownloadError } from "./download";
 import {
@@ -351,11 +359,6 @@ const blobToDataURL = (blob: Blob) =>
         reader.readAsDataURL(blob);
     });
 
-// TODO(HLS): Store this in DB.
-let _videoPreviewProcessedFileIDs: number[] = [];
-let _videoPreviewFailedFileIDs: number[] = [];
-let _videoPreviewSyncLastUpdatedAt: number | undefined;
-
 /**
  * Return the (persistent) {@link Set} containing the ids of the files which
  * have already been processed for generating their streaming variant.
@@ -368,11 +371,18 @@ let _videoPreviewSyncLastUpdatedAt: number | undefined;
  * The data is retrieved from persistent storage (KV DB), where it is stored as
  * an array.
  */
-const savedProcessedVideoFileIDs = async () => {
-    // TODO(HLS): make async
-    await wait(0);
-    return new Set(_videoPreviewProcessedFileIDs);
-};
+const savedProcessedVideoFileIDs = () =>
+    // [Note: Avoiding zod parsing overhead for DB arrays]
+    //
+    // Validating that the value we read from the DB is indeed the same as the
+    // type we expect can be done using zod, but for potentially very large
+    // arrays, this has an overhead that is perhaps not justified when dealing
+    // with DB entries we ourselves wrote.
+    //
+    // As an optimization, we skip the runtime check here and cast. This might
+    // not be the most optimal choice in the future, so (a) use it sparingly,
+    // and (b) mark all such cases with the title of this note.
+    getKV("videoPreviewProcessedFileIDs").then((v) => new Set(v as number[]));
 
 /**
  * Return the (persistent) {@link Set} containing the ids of the files for which
@@ -380,11 +390,9 @@ const savedProcessedVideoFileIDs = async () => {
  *
  * @see also {@link savedProcessedVideoFileIDs}.
  */
-const savedFailedVideoFileIDs = async () => {
-    // TODO(HLS): make async
-    await wait(0);
-    return new Set(_videoPreviewFailedFileIDs);
-};
+const savedFailedVideoFileIDs = () =>
+    // See: [Note: Avoiding zod parsing overhead for DB arrays]
+    getKV("videoPreviewFailedFileIDs").then((v) => new Set(v as number[]));
 
 /**
  * Update the persisted set of IDs of files which have already been processed
@@ -392,11 +400,8 @@ const savedFailedVideoFileIDs = async () => {
  *
  * @see also {@link savedProcessedVideoFileIDs}.
  */
-const saveProcessedVideoFileIDs = async (videoFileIDs: Set<number>) => {
-    // TODO(HLS): make async
-    await wait(0);
-    _videoPreviewProcessedFileIDs = Array.from(videoFileIDs);
-};
+const saveProcessedVideoFileIDs = (videoFileIDs: Set<number>) =>
+    setKV("videoPreviewProcessedFileIDs", Array.from(videoFileIDs));
 
 /**
  * Update the persisted set of IDs of files for which attempt to generate a
@@ -404,11 +409,8 @@ const saveProcessedVideoFileIDs = async (videoFileIDs: Set<number>) => {
  *
  * @see also {@link savedProcessedVideoFileIDs}.
  */
-const saveFailedVideoFileIDs = async (videoFileIDs: Set<number>) => {
-    // TODO(HLS): make async
-    await wait(0);
-    _videoPreviewFailedFileIDs = Array.from(videoFileIDs);
-};
+const saveFailedVideoFileIDs = (videoFileIDs: Set<number>) =>
+    setKV("videoPreviewFailedFileIDs", Array.from(videoFileIDs));
 
 /**
  * Mark the provided file ID as having been processed to generate a video
@@ -466,11 +468,7 @@ const markFailedVideoFileID = async (fileID: number) => {
  * The returned value is an epoch millisecond value suitable to be passed to
  * {@link syncUpdatedFileDataFileIDs}.
  */
-const savedSyncLastUpdatedAt = async () => {
-    // TODO(HLS): make async
-    await wait(0);
-    return _videoPreviewSyncLastUpdatedAt;
-};
+const savedSyncLastUpdatedAt = () => getKVN("videoPreviewSyncLastUpdatedAt");
 
 /**
  * Update the persisted timestamp used for syncing processed file IDs with
@@ -478,11 +476,8 @@ const savedSyncLastUpdatedAt = async () => {
  *
  * Use {@link savedSyncLastUpdatedAt} to get the persisted value back.
  */
-const saveSyncLastUpdatedAt = async (lastUpdatedAt: number) => {
-    // TODO(HLS): make async
-    await wait(0);
-    _videoPreviewSyncLastUpdatedAt = lastUpdatedAt;
-};
+const saveSyncLastUpdatedAt = (lastUpdatedAt: number) =>
+    setKV("videoPreviewSyncLastUpdatedAt", lastUpdatedAt);
 
 /**
  * Fetch IDs of files from remote that have been processed by other clients
@@ -499,6 +494,33 @@ const syncProcessedFileIDs = async () =>
             ]);
         },
     );
+
+/**
+ * Remove any saved entries for file IDs which were previously in trash but now
+ * have been permanently deleted.
+ *
+ * This is called when processing the trash diff. It gives us a hook to clear
+ * these IDs from our video processing related local state.
+ *
+ * See: [Note: Pruning stale status-diff entries]
+ *
+ * It is a no-op when we're running in the context of the web app (since it
+ * doesn't currently process videos, so doesn't need to keep any local state for
+ * that purpose).
+ */
+export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
+    deletedFileIDs: Set<number>,
+) => {
+    if (!isDesktop) return;
+
+    const existing = await savedProcessedVideoFileIDs();
+    if (existing.size > 0) {
+        const updated = existing.difference(deletedFileIDs);
+        if (updated.size != existing.size) {
+            await saveProcessedVideoFileIDs(updated);
+        }
+    }
+};
 
 /**
  * If video processing is enabled, trigger a sync with remote and any subsequent
@@ -647,13 +669,15 @@ const processQueue = async () => {
         return;
     }
 
+    const userID = ensureLocalUser().id;
+
     let bq: typeof _state.liveQueue | undefined;
     while (isVideoProcessingEnabled()) {
         let item = _state.liveQueue.shift();
         if (!item) {
             if (!bq && _state.haveSyncedOnce) {
                 /* initialize */
-                bq = await backfillQueue();
+                bq = await backfillQueue(userID);
             }
             if (bq) {
                 switch (bq.length) {
@@ -662,7 +686,7 @@ const processQueue = async () => {
                         break;
                     case 1 /* last item. take it, and refill queue */:
                         item = bq.pop();
-                        bq = await backfillQueue();
+                        bq = await backfillQueue(userID);
                         break;
                     default:
                         /* more than one item. take it */
@@ -707,16 +731,29 @@ const processQueue = async () => {
  * Return the next batch of videos that need to be processed.
  *
  * If there is nothing pending, return an empty array.
+ *
+ * @param userID The ID of the currently logged in user. This is used to filter
+ * the files to only include those that are owned by the user.
  */
-const backfillQueue = async (): Promise<VideoProcessingQueueItem[]> => {
+const backfillQueue = async (
+    userID: number,
+): Promise<VideoProcessingQueueItem[]> => {
     const allCollectionFiles = await getAllLocalFiles();
+    const localTrashFileIDs = await getLocalTrashFileIDs();
+    const videoFiles = uniqueFilesByID(
+        allCollectionFiles.filter(
+            (f) =>
+                f.ownerID == userID &&
+                f.metadata.fileType == FileType.video &&
+                !localTrashFileIDs.has(f.id),
+        ),
+    );
+
     const doneIDs = (await savedProcessedVideoFileIDs()).union(
         await savedFailedVideoFileIDs(),
     );
-    const videoFiles = uniqueFilesByID(
-        allCollectionFiles.filter((f) => f.metadata.fileType == FileType.video),
-    );
     const pendingVideoFiles = videoFiles.filter((f) => !doneIDs.has(f.id));
+
     const batch = randomSample(pendingVideoFiles, 50);
     return batch.map((file) => ({ file }));
 };
@@ -798,12 +835,24 @@ const processQueueItem = async ({
 
     log.info(`Generate HLS for ${fileLogID(file)} | start`);
 
-    // TODO(HLS): Inside this needs to be more granular in case of errors.
-    const res = await initiateGenerateHLS(
-        electron,
-        sourceVideo,
-        objectUploadURL,
-    );
+    let res: GenerateHLSResult | undefined;
+    try {
+        res = await initiateGenerateHLS(electron, sourceVideo, objectUploadURL);
+    } catch (e) {
+        // Failures during stream generation on the native side are expected to
+        // happen in two cases:
+        //
+        // 1. There is something specific to this video that doesn't work with
+        //    the current HLS generation pipeline (the ffmpeg invocation).
+        //
+        // 2. The upload of the generated video fails.
+        //
+        // The native side code already retries failures for case 2 (except HTTP
+        // 4xx errors). Thus, usually we should come here only for case 1, and
+        // retrying the same video again will not work either.
+        await markFailedVideoFileID(file.id);
+        throw e;
+    }
 
     if (!res) {
         log.info(`Generate HLS for ${fileLogID(file)} | not-required`);
@@ -824,7 +873,9 @@ const processQueueItem = async ({
         });
 
         try {
-            await putVideoData(file, playlistData, objectID, videoSize);
+            await retryAsyncOperation(() =>
+                putVideoData(file, playlistData, objectID, videoSize),
+            );
         } catch (e) {
             if (isHTTP4xxError(e)) await markFailedVideoFileID(file.id);
             throw e;

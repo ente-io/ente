@@ -100,7 +100,13 @@ export const fetchFileData = async (
     fileID: number,
     publicAlbumsCredentials?: PublicAlbumsCredentials,
 ): Promise<RemoteFileData | undefined> => {
-    const params = new URLSearchParams({ type, fileID: fileID.toString() });
+    const params = new URLSearchParams({
+        type,
+        fileID: fileID.toString(),
+        // Ask museum to respond with 204 instead of 404 if no playlist exists
+        // for the given file.
+        preferNoContent: "true",
+    });
 
     let res: Response;
     if (publicAlbumsCredentials) {
@@ -116,6 +122,11 @@ export const fetchFileData = async (
         });
     }
 
+    if (res.status == 204) return undefined;
+    // We're passing `preferNoContent` so the expected response is 204, but this
+    // might be a self hoster running an older museum that does not recognize
+    // that flag, so retain the old behavior. This fallback can be removed in a
+    // few months (tag: Migration, note added May 2025).
     if (res.status == 404) return undefined;
     ensureOk(res);
     return z.object({ data: RemoteFileData }).parse(await res.json()).data;
@@ -126,9 +137,21 @@ export const fetchFileData = async (
  * structure has more fields, there are just the fields we are interested in.
  */
 const RemoteFDStatus = z.object({
+    /**
+     * The ID of the file whose file data we're querying.
+     */
     fileID: z.number(),
-    /** Expected to be one of {@link FileDataType} */
+    /**
+     * Expected to be one of {@link FileDataType}
+     */
     type: z.string(),
+    /**
+     * `true` if the file data has been deleted.
+     *
+     * This can be true in the in-progress partial deletion case, which the file
+     * data deletion has been processed but the file deletion has not yet been
+     * processed.
+     */
     isDeleted: z.boolean(),
     /**
      * The epoch microseconds when this file data entry was added or updated.
@@ -147,7 +170,8 @@ export interface UpdatedFileDataFileIDsPage {
     fileIDs: Set<number>;
     /**
      * The latest updatedAt (epoch microseconds) time obtained from remote in
-     * this batch this sync from amongst all of these files.
+     * this batch of sync (from amongst all of the files in the batch, not just
+     * those that were filtered to be part of {@link fileIDs}).
      */
     lastUpdatedAt: number;
 }
@@ -167,18 +191,25 @@ export interface UpdatedFileDataFileIDsPage {
  * Set this to zero to start from the beginning.
  *
  * @param onPage A callback invoked for each page of results received from
- * remote. It is passed both the fileIDs received in the batch under
- * consideration, and the largest of the updated time for all entries
- * (irrespective of {@link type}) in that batch.
+ * remote. It is passed the fileIDs received in the batch under consideration,
+ * and the largest of the updated time for all entries (irrespective of
+ * {@link type}) in that batch.
  *
  * ----
  *
- * Implementation notes:
+ * [Note: Pruning stale status-diff entries]
  *
  * Unlike other "diff" APIs, the diff API used here won't return tombstone
  * entries for deleted files. This is not a problem because there are no current
  * cases where existing playlists or ML indexes get deleted (unless the
  * underlying file is deleted). See: [Note: Caching HLS playlist data].
+ *
+ * Note that the "/files/data/status-diff" includes entries for files that are
+ * in trash. This means that, while not a practical problem (because it's just
+ * numeric ids), the number of fileIDs we store locally can grow unbounded as
+ * files move to trash and then get deleted. So to prune them, we also add a
+ * hook to the /trash/v2/diff processing, and prune any locally saved file IDs
+ * which have been deleted from trash.
  */
 export const syncUpdatedFileDataFileIDs = async (
     type: FileDataType,
@@ -199,6 +230,9 @@ export const syncUpdatedFileDataFileIDs = async (
             const fileIDs = new Set<number>();
             for (const fd of diff) {
                 lastUpdatedAt = Math.max(lastUpdatedAt, fd.updatedAt);
+                // While we could prune isDeleted entries here, we can also rely
+                // on the the pruning that happens when the trash gets synced.
+                // See: [Note: Pruning stale status-diff entries]
                 if (fd.type == type && !fd.isDeleted) {
                     fileIDs.add(fd.fileID);
                 }

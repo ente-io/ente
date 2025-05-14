@@ -182,7 +182,7 @@ const isHDRVideo = async (ffmpeg: FFmpeg, inputFilePath: string) => {
                 // correct in a multi stream file because the ffmpeg automatic
                 // mapping will use the highest resolution stream, but short of
                 // reinventing ffmpeg's resolution mechanism, it is a reasonable
-                // assumption for our current, heuristic, check.
+                // assumption for our current heuristic check.
                 ["-select_streams", "v:0"],
                 // Output JSON
                 ["-of", "json"],
