@@ -56,6 +56,8 @@ import { type RemoteFaceIndex } from "./face";
 export interface RemoteMLData {
     raw: RawRemoteMLData;
     parsed: ParsedRemoteMLData | undefined;
+    // See: [Note: PUT "mldata" version check]
+    updatedAt: number | undefined;
 }
 
 export type RawRemoteMLData = Record<string, unknown>;
@@ -159,7 +161,7 @@ export const fetchMLData = async (
 
     const result = new Map<number, RemoteMLData>();
     for (const remoteFileData of remoteFileDatas) {
-        const { fileID } = remoteFileData;
+        const { fileID, updatedAt } = remoteFileData;
         const file = filesByID.get(fileID);
         if (!file) {
             log.warn(`Ignoring ML data for unknown file id ${fileID}`);
@@ -173,7 +175,10 @@ export const fetchMLData = async (
             // @ts-ignore
             const decryptedBytes = await decryptBlob(remoteFileData, file.key);
             const jsonString = await gunzip(decryptedBytes);
-            result.set(fileID, remoteMLDataFromJSONString(jsonString));
+            result.set(
+                fileID,
+                remoteMLDataFromJSONString(jsonString, updatedAt),
+            );
         } catch (e) {
             // This shouldn't happen. Best guess is that some client has
             // uploaded a corrupted ML index. Ignore it so that it gets
@@ -185,7 +190,10 @@ export const fetchMLData = async (
     return result;
 };
 
-const remoteMLDataFromJSONString = (jsonString: string) => {
+const remoteMLDataFromJSONString = (
+    jsonString: string,
+    updatedAt: number | undefined,
+) => {
     const raw = RawRemoteMLData.parse(JSON.parse(jsonString));
     const parseResult = ParsedRemoteMLData.safeParse(raw);
     // TODO: [Note: strict mode migration]
@@ -199,7 +207,7 @@ const remoteMLDataFromJSONString = (jsonString: string) => {
     const parsed = parseResult.success
         ? (parseResult.data as ParsedRemoteMLData)
         : undefined;
-    return { raw, parsed };
+    return { raw, parsed, updatedAt };
 };
 
 /**
@@ -214,5 +222,14 @@ const remoteMLDataFromJSONString = (jsonString: string) => {
  *
  * See: [Note: Preserve unknown ML data fields].
  */
-export const putMLData = async (file: EnteFile, mlData: RawRemoteMLData) =>
-    putFileData(file, "mldata", await gzip(JSON.stringify(mlData)));
+export const putMLData = async (
+    file: EnteFile,
+    mlData: RawRemoteMLData,
+    lastUpdatedAt: number,
+) =>
+    putFileData(
+        file,
+        "mldata",
+        await gzip(JSON.stringify(mlData)),
+        lastUpdatedAt,
+    );
