@@ -216,8 +216,9 @@ const IsHDRVideoFFProbeOutput = z.object({
  * `false` to make this function safe to invoke without breaking the happy path.
  */
 const isHDRVideo = async (ffmpeg: FFmpeg, inputFilePath: string) => {
+    let jsonString: string | undefined;
     try {
-        const jsonString = await ffprobeOutput(
+        jsonString = await ffprobeOutput(
             ffmpeg,
             [
                 ["-i", inputFilePath],
@@ -245,7 +246,8 @@ const isHDRVideo = async (ffmpeg: FFmpeg, inputFilePath: string) => {
                 return false;
         }
     } catch (e) {
-        log.warn(`Could not detect HDR status of ${inputFilePath}`, e);
+        log.warn("Could not detect HDR status", e);
+        if (jsonString) log.debug(() => ["ffprobe-output", jsonString]);
         return false;
     }
 };
@@ -315,13 +317,21 @@ const ffprobeExecVideoDuration = async (ffmpeg: FFmpeg, blob: Blob) =>
             "output.json",
         );
 
-        const output = IsHDRVideoFFProbeOutput.parse(JSON.parse(jsonString));
-        switch (output.streams[0]?.color_transfer) {
-            case "smpte2084":
-            case "arib-std-b67":
-                // TODO: Implement me
-                return 1;
-            default:
-                return 0;
+        try {
+            const output = IsHDRVideoFFProbeOutput.parse(
+                JSON.parse(jsonString),
+            );
+            switch (output.streams[0]?.color_transfer) {
+                case "smpte2084":
+                case "arib-std-b67":
+                    // TODO: Implement me
+                    return 1;
+                default:
+                    return 0;
+            }
+        } catch (e) {
+            log.warn("Could not determine video duration", e);
+            log.debug(() => ["ffprobe-output", jsonString]);
+            throw e;
         }
     });
