@@ -89,9 +89,9 @@ class AlbumsWidgetSettings extends StatelessWidget {
                 if (snapshot.hasData) {
                   return CollectionsFlexiGridViewWidget(
                     snapshot.data!,
-                    displayLimitCount: 1000000,
+                    displayLimitCount: snapshot.data!.length,
                     shrinkWrap: true,
-                    shouldShowCreateAlbum: true,
+                    shouldShowCreateAlbum: false,
                     enableSelectionMode: true,
                   );
                 } else if (snapshot.hasError) {
