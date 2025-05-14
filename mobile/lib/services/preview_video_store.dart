@@ -108,6 +108,11 @@ class PreviewVideoStore {
 
   Future<bool> isSharedFileStreamble(EnteFile file) async {
     try {
+      if (FileDataService.instance.previewIds
+              ?.containsKey(file.uploadedFileID) ??
+          false) {
+        return true;
+      }
       await _getPreviewUrl(file);
       return true;
     } catch (_) {
@@ -533,8 +538,10 @@ class PreviewVideoStore {
       late final String objectKey;
       final PreviewInfo? previewInfo =
           FileDataService.instance.previewIds?[file.uploadedFileID!];
+      bool shouldAppendPreview = false;
       (String, String)? previewURLResult;
       if (previewInfo == null) {
+        shouldAppendPreview = true;
         previewURLResult = await _getPreviewUrl(file);
         _logger.info("parrsed objectID: ${previewURLResult.$2}");
         objectKey = previewURLResult.$2;
@@ -630,6 +637,13 @@ class PreviewVideoStore {
         height: height,
         size: size,
       );
+      if (shouldAppendPreview) {
+        FileDataService.instance.appendPreview(
+          file.uploadedFileID!,
+          objectKey,
+          size!,
+        );
+      }
       return data;
     } catch (_) {
       rethrow;
