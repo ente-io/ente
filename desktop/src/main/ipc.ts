@@ -182,10 +182,10 @@ export const attachIPCHandlers = () => {
         "generateImageThumbnail",
         (
             _,
-            dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+            pathOrZipItem: string | ZipItem,
             maxDimension: number,
             maxSize: number,
-        ) => generateImageThumbnail(dataOrPathOrZipItem, maxDimension, maxSize),
+        ) => generateImageThumbnail(pathOrZipItem, maxDimension, maxSize),
     );
 
     ipcMain.handle(
@@ -193,9 +193,9 @@ export const attachIPCHandlers = () => {
         (
             _,
             command: FFmpegCommand,
-            dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+            pathOrZipItem: string | ZipItem,
             outputFileExtension: string,
-        ) => ffmpegExec(command, dataOrPathOrZipItem, outputFileExtension),
+        ) => ffmpegExec(command, pathOrZipItem, outputFileExtension),
     );
 
     // - Upload

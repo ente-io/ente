@@ -8,7 +8,7 @@ import fs from "node:fs/promises";
 import type { FFmpegCommand, ZipItem } from "../../types/ipc";
 import {
     deleteTempFileIgnoringErrors,
-    makeFileForDataOrStreamOrPathOrZipItem,
+    makeFileForStreamOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils/temp";
 import type { FFmpegUtilityProcess } from "./ffmpeg-worker";
@@ -29,7 +29,7 @@ export const ffmpegUtilityProcess = () =>
  */
 export const ffmpegExec = async (
     command: FFmpegCommand,
-    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+    pathOrZipItem: string | ZipItem,
     outputFileExtension: string,
 ): Promise<Uint8Array> => {
     const worker = await ffmpegUtilityProcess();
@@ -38,7 +38,7 @@ export const ffmpegExec = async (
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
         writeToTemporaryFile: writeToTemporaryInputFile,
-    } = await makeFileForDataOrStreamOrPathOrZipItem(dataOrPathOrZipItem);
+    } = await makeFileForStreamOrPathOrZipItem(pathOrZipItem);
 
     const outputFilePath = await makeTempFilePath(outputFileExtension);
     try {

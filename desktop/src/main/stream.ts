@@ -14,7 +14,7 @@ import { writeStream } from "./utils/stream";
 import {
     deleteTempFile,
     deleteTempFileIgnoringErrors,
-    makeFileForDataOrStreamOrPathOrZipItem,
+    makeFileForStreamOrPathOrZipItem,
     makeTempFilePath,
 } from "./utils/temp";
 
@@ -292,7 +292,7 @@ const handleGenerateHLSWrite = async (
     const objectUploadURL = params.get("objectUploadURL");
     if (!objectUploadURL) throw new Error("Missing objectUploadURL");
 
-    let inputItem: Parameters<typeof makeFileForDataOrStreamOrPathOrZipItem>[0];
+    let inputItem: Parameters<typeof makeFileForStreamOrPathOrZipItem>[0];
     const path = params.get("path");
     if (path) {
         inputItem = path;
@@ -314,7 +314,7 @@ const handleGenerateHLSWrite = async (
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
         writeToTemporaryFile: writeToTemporaryInputFile,
-    } = await makeFileForDataOrStreamOrPathOrZipItem(inputItem);
+    } = await makeFileForStreamOrPathOrZipItem(inputItem);
 
     const outputFilePathPrefix = await makeTempFilePath();
     let result: FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined;
