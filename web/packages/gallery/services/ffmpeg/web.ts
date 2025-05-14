@@ -199,7 +199,7 @@ const substitutePlaceholders = (
         })
         .filter((s) => s !== undefined);
 
-const IsHDRVideoFFProbeOutput = z.object({
+const FFProbeOutputIsHDR = z.object({
     streams: z.array(z.object({ color_transfer: z.string().optional() })),
 });
 
@@ -237,7 +237,7 @@ const isHDRVideo = async (ffmpeg: FFmpeg, inputFilePath: string) => {
             "output.json",
         );
 
-        const output = IsHDRVideoFFProbeOutput.parse(JSON.parse(jsonString));
+        const output = FFProbeOutputIsHDR.parse(JSON.parse(jsonString));
         switch (output.streams[0]?.color_transfer) {
             case "smpte2084":
             case "arib-std-b67":
@@ -296,29 +296,44 @@ const ffprobeOutput = async (
     }
 };
 
+const FFProbeOutputDuration = z.object({
+    format: z.object({ duration: z.string() }),
+});
+
 const ffprobeExecVideoDuration = async (ffmpeg: FFmpeg, blob: Blob) =>
     withInputMount(ffmpeg, blob, async (inputPath) => {
         // Determine the video duration from the container, bypassing the issues
         // with stream selection.
         //
-        //    ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 input.mp4
+        //    ffprobe -v error -show_entries format=duration -of
+        //    default=noprint_wrappers=1:nokey=1 input.mp4
         //
         // Source:
         // https://trac.ffmpeg.org/wiki/FFprobeTips#Formatcontainerduration
         //
         // Reference: https://ffmpeg.org/ffprobe.html
+        //
+        // Since we cannot grab the stdout easily, the command has been modified
+        // to output to a file instead. However, in doing the command seems to
+        // have become flaky - for certain videos, it outputs extra lines and
+        // not just the duration. So we also switch to the JSON output for more
+        // robust behaviour, and parse the duration from it.
 
-        const durationString = await ffprobeOutput(
+        const jsonString = await ffprobeOutput(
             ffmpeg,
             [
                 ["-i", inputPath],
                 ["-v", "error"],
                 ["-show_entries", "format=duration"],
-                ["-of", "default=noprint_wrappers=1:nokey=1"],
-                ["-o", "output.txt"],
+                ["-of", "json"],
+                ["-o", "output.json"],
             ].flat(),
-            "output.txt",
+            "output.json",
         );
+
+        const durationString = FFProbeOutputDuration.parse(
+            JSON.parse(jsonString),
+        ).format.duration;
 
         const duration = parseFloat(durationString);
         if (isNaN(duration)) {
