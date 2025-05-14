@@ -20,7 +20,7 @@ import {
     inputPathPlaceholder,
     outputPathPlaceholder,
 } from "./constants";
-import { ffmpegExecWeb } from "./web";
+import { determineVideoDurationWeb, ffmpegExecWeb } from "./web";
 
 /**
  * Generate a thumbnail for the given video using a Wasm FFmpeg running in a web
