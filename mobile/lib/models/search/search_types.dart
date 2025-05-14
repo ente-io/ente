@@ -97,19 +97,14 @@ extension SectionTypeExtensions on SectionType {
   bool get isCTAVisible {
     switch (this) {
       case SectionType.face:
-        return false;
       case SectionType.magic:
-        return false;
       case SectionType.moment:
-        return false;
-      case SectionType.location:
-        return true;
-      case SectionType.contacts:
-        return true;
-      case SectionType.album:
-        return true;
       case SectionType.fileTypesAndExtension:
         return false;
+      case SectionType.location:
+      case SectionType.contacts:
+      case SectionType.album:
+        return true;
     }
   }
 
@@ -122,19 +117,14 @@ extension SectionTypeExtensions on SectionType {
   bool get isEmptyCTAVisible {
     switch (this) {
       case SectionType.face:
-        return false;
       case SectionType.magic:
-        return false;
       case SectionType.moment:
-        return false;
-      case SectionType.location:
-        return true;
-      case SectionType.contacts:
-        return true;
-      case SectionType.album:
-        return true;
       case SectionType.fileTypesAndExtension:
         return false;
+      case SectionType.location:
+      case SectionType.contacts:
+      case SectionType.album:
+        return true;
     }
   }
 

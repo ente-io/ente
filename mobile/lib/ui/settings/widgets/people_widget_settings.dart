@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
 
 class PeopleWidgetSettings extends StatelessWidget {
   const PeopleWidgetSettings({super.key});
@@ -12,6 +15,23 @@ class PeopleWidgetSettings extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          8,
+          16,
+          8 + MediaQuery.viewPaddingOf(context).bottom,
+        ),
+        child: ButtonWidget(
+          buttonType: ButtonType.primary,
+          buttonSize: ButtonSize.large,
+          labelText: S.of(context).save,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            // await _generateAlbumUrl();
+          },
+        ),
+      ),
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
@@ -33,7 +53,7 @@ class PeopleWidgetSettings extends StatelessWidget {
               ),
             ],
           ),
-          if (1 == 1)
+          if (1 != 1)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -59,24 +79,8 @@ class PeopleWidgetSettings extends StatelessWidget {
               ),
             )
           else
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 32.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Show a grid here with lots of data and a save button",
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                childCount: 1,
-              ),
+            const SliverToBoxAdapter(
+              child: PeopleSectionAllWidget(),
             ),
         ],
       ),
