@@ -164,7 +164,7 @@ const substitutePlaceholders = (
         })
         .filter((s) => s !== undefined);
 
-const isHDRVideoFFProbeOutput = z.object({
+const IsHDRVideoFFProbeOutput = z.object({
     streams: z.array(z.object({ color_transfer: z.string().optional() })),
 });
 
@@ -201,7 +201,7 @@ const isHDRVideo = async (ffmpeg: FFmpeg, inputFilePath: string) => {
             "output.json",
         );
 
-        const output = isHDRVideoFFProbeOutput.parse(JSON.parse(jsonString));
+        const output = IsHDRVideoFFProbeOutput.parse(JSON.parse(jsonString));
         switch (output.streams[0]?.color_transfer) {
             case "smpte2084":
             case "arib-std-b67":
