@@ -535,7 +535,7 @@ class PreviewVideoStore {
     _logger.info("Getting playlist for $file");
     int? width, height, size;
     try {
-      late final String objectKey;
+      late final String objectID;
       final PreviewInfo? previewInfo =
           FileDataService.instance.previewIds?[file.uploadedFileID!];
       bool shouldAppendPreview = false;
@@ -544,15 +544,15 @@ class PreviewVideoStore {
         shouldAppendPreview = true;
         previewURLResult = await _getPreviewUrl(file);
         _logger.info("parrsed objectID: ${previewURLResult.$2}");
-        objectKey = previewURLResult.$2;
+        objectID = previewURLResult.$2;
       } else {
-        objectKey = previewInfo.objectId;
+        objectID = previewInfo.objectId;
       }
 
       final FileInfo? playlistCache =
-          await cacheManager.getFileFromCache(_getCacheKey(objectKey));
+          await cacheManager.getFileFromCache(_getCacheKey(objectID));
       final detailsCache = await cacheManager.getFileFromCache(
-        _getDetailsCacheKey(objectKey),
+        _getDetailsCacheKey(objectID),
       );
       String finalPlaylist;
       if (playlistCache != null) {
@@ -585,7 +585,7 @@ class PreviewVideoStore {
         size = playlistData["size"];
         unawaited(
           cacheManager.putFile(
-            _getCacheKey(objectKey),
+            _getCacheKey(objectID),
             Uint8List.fromList(
               (playlistData["playlist"] as String).codeUnits,
             ),
@@ -593,7 +593,7 @@ class PreviewVideoStore {
         );
         unawaited(
           cacheManager.putFile(
-            _getDetailsCacheKey(objectKey),
+            _getDetailsCacheKey(objectID),
             Uint8List.fromList(
               json.encode({
                 "width": width,
@@ -605,14 +605,14 @@ class PreviewVideoStore {
         );
       }
       final videoFile = (await videoCacheManager
-              .getFileFromCache(_getVideoPreviewKey(objectKey)))
+              .getFileFromCache(_getVideoPreviewKey(objectID)))
           ?.file;
       if (videoFile == null) {
         previewURLResult = previewURLResult ?? await _getPreviewUrl(file);
         unawaited(
           videoCacheManager.downloadFile(
             previewURLResult.$1,
-            key: _getVideoPreviewKey(objectKey),
+            key: _getVideoPreviewKey(objectID),
           ),
         );
         finalPlaylist =
@@ -640,7 +640,7 @@ class PreviewVideoStore {
       if (shouldAppendPreview) {
         FileDataService.instance.appendPreview(
           file.uploadedFileID!,
-          objectKey,
+          objectID,
           size!,
         );
       }
