@@ -832,9 +832,9 @@ const uploadVideoSegments = async (
  *   Duration: 00:00:03.13, start: 0.000000, bitrate: 16088 kb/s
  *
  * The part after Duration: and until the first non-digit or colon is the first
- * capture group.
+ * capture group, while after the dot is an optional second capture group.
  */
-const videoDurationLineRegex = /\s\sDuration: ([0-9:]+)/;
+const videoDurationLineRegex = /\s\sDuration: ([0-9:]+)(.[0-9]+)?/;
 
 /**
  * Determine the duration of the video at the given {@link inputFilePath}.
@@ -845,34 +845,39 @@ const videoDurationLineRegex = /\s\sDuration: ([0-9:]+)/;
  */
 export const ffmpegDetermineVideoDuration = async (inputFilePath: string) => {
     const videoInfo = await pseudoFFProbeVideo(inputFilePath);
-    const videoDurationMatch = videoDurationLineRegex.exec(videoInfo)?.at(1);
+    const matches = videoDurationLineRegex.exec(videoInfo);
 
     const fail = () => {
-        throw new Error(`Cannot parse video duration '${videoDurationMatch}'`);
+        throw new Error(`Cannot parse video duration '${matches?.at(0)}'`);
     };
 
-    const nums = (videoDurationMatch ?? "")
+    // The HH:mm:ss.
+    const ints = (matches?.at(1) ?? "")
         .split(":")
         .map((s) => parseInt(s, 10) || 0);
     let [h, m, s] = [0, 0, 0];
-    switch (nums.length) {
+    switch (ints.length) {
         case 1:
-            s = nums[0]!;
+            s = ints[0]!;
             break;
         case 2:
-            m = nums[0]!;
-            s = nums[1]!;
+            m = ints[0]!;
+            s = ints[1]!;
             break;
         case 3:
-            h = nums[0]!;
-            m = nums[1]!;
-            s = nums[2]!;
+            h = ints[0]!;
+            m = ints[1]!;
+            s = ints[2]!;
             break;
         default:
             fail();
     }
 
-    const duration = h * 3600 + m * 60 + s;
+    // Optional subseconds.
+    const ss = parseFloat(`0${matches?.at(2) ?? ""}`);
+
+    // Follow the same round up behaviour that the web side uses.
+    const duration = Math.ceil(h * 3600 + m * 60 + s + ss);
     if (!duration) fail();
     return duration;
 };
