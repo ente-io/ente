@@ -57,6 +57,12 @@ class _CollectionListPageState extends State<CollectionListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final displayLimitCount = (collections?.length ?? 0);
+    final bool enableSelectionMode =
+        widget.sectionType == UISectionType.homeCollections ||
+            widget.sectionType == UISectionType.outgoingCollections ||
+            widget.sectionType == UISectionType.incomingCollections;
+
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
@@ -75,8 +81,10 @@ class _CollectionListPageState extends State<CollectionListPage> {
             ),
             CollectionsFlexiGridViewWidget(
               collections,
-              displayLimitCount: collections?.length ?? 0,
+              displayLimitCount: displayLimitCount,
               tag: widget.tag,
+              enableSelectionMode: enableSelectionMode,
+              scrollBottomSafeArea: 140,
             ),
           ],
         ),

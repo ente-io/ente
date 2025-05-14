@@ -63,8 +63,9 @@ func (g *GetFilesData) Validate() error {
 }
 
 type GetFileData struct {
-	FileID int64           `form:"fileID" binding:"required"`
-	Type   ente.ObjectType `form:"type" binding:"required"`
+	FileID          int64           `form:"fileID" binding:"required"`
+	Type            ente.ObjectType `form:"type" binding:"required"`
+	PreferNoContent bool            `form:"preferNoContent"`
 }
 
 func (g *GetFileData) Validate() error {
