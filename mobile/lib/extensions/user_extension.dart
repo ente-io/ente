@@ -12,4 +12,7 @@ extension UserExtension on User {
   String? get linkedPersonID =>
       PersonService.instance.emailToPartialPersonDataMapCache[email]
           ?[PersonService.kPersonIDKey];
+
+  String get nameOrEmail =>
+      displayName ?? email.substring(0, email.indexOf("@"));
 }

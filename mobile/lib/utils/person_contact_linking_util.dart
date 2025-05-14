@@ -11,3 +11,4 @@ Future<bool> checkIfEmailAlreadyAssignedToAPerson(
   }
   return false;
 }
+
