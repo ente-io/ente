@@ -298,40 +298,33 @@ const ffprobeOutput = async (
 
 const ffprobeExecVideoDuration = async (ffmpeg: FFmpeg, blob: Blob) =>
     withInputMount(ffmpeg, blob, async (inputPath) => {
-        const jsonString = await ffprobeOutput(
+        // Determine the video duration from the container, bypassing the issues
+        // with stream selection.
+        //
+        //    ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 input.mp4
+        //
+        // Source:
+        // https://trac.ffmpeg.org/wiki/FFprobeTips#Formatcontainerduration
+        //
+        // Reference: https://ffmpeg.org/ffprobe.html
+
+        const durationString = await ffprobeOutput(
             ffmpeg,
             [
                 ["-i", inputPath],
-                // Show information about streams.
-                "-show_streams",
-                // Select the first video stream. This is not necessarily
-                // correct in a multi stream file because the ffmpeg automatic
-                // mapping will use the highest resolution stream, but short of
-                // reinventing ffmpeg's resolution mechanism, it is a reasonable
-                // assumption for our current heuristic check.
-                ["-select_streams", "v:0"],
-                // Output JSON
-                ["-of", "json"],
-                ["-o", "output.json"],
+                ["-v", "error"],
+                ["-show_entries", "format=duration"],
+                ["-of", "default=noprint_wrappers=1:nokey=1"],
+                ["-o", "output.txt"],
             ].flat(),
-            "output.json",
+            "output.txt",
         );
 
-        try {
-            const output = IsHDRVideoFFProbeOutput.parse(
-                JSON.parse(jsonString),
-            );
-            switch (output.streams[0]?.color_transfer) {
-                case "smpte2084":
-                case "arib-std-b67":
-                    // TODO: Implement me
-                    return 1;
-                default:
-                    return 0;
-            }
-        } catch (e) {
-            log.warn("Could not determine video duration", e);
-            log.debug(() => ["ffprobe-output", jsonString]);
-            throw e;
+        const duration = parseFloat(durationString);
+        if (isNaN(duration)) {
+            const msg = "Could not parse video duration";
+            log.warn(msg, durationString);
+            throw new Error(msg);
         }
+        return duration;
     });

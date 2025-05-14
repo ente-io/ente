@@ -275,9 +275,9 @@ export const determineVideoDuration = async (
 ): Promise<number> =>
     uploadItem instanceof File
         ? await determineVideoDurationWeb(uploadItem)
-        : await ensureElectron().ffmpegDetermineVideoDuration(
+        : 0; /*, await ensureElectron().ffmpegDetermineVideoDuration(
               toDataOrPathOrZipEntry(uploadItem),
-          );
+          ));*/
 
 /**
  * Convert a video from a format that is not supported in the browser to MP4.
