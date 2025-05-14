@@ -1050,10 +1050,10 @@ const extractImageOrVideoMetadata = async (
 
     // Video duration
     let duration: number | undefined;
-    // TODO(HLS):
     if (
-        !isDesktop &&
         fileType == FileType.video &&
+        // TODO(HLS):
+        !isDesktop &&
         settingsSnapshot().isInternalUser
     ) {
         duration = await tryDetermineVideoDuration(uploadItem);
@@ -1076,6 +1076,10 @@ const extractImageOrVideoMetadata = async (
         modificationTime: ensureInteger(modificationTime),
         hash,
     };
+
+    if (duration) {
+        metadata.duration = ensureNumber(duration);
+    }
 
     const location = parsedMetadataJSON?.location ?? parsedMetadata?.location;
     if (location) {

@@ -140,6 +140,12 @@ export interface Metadata {
      * older clients.
      */
     videoHash?: string;
+    /**
+     * The duration (in seconds) of the video.
+     *
+     * Only present for videos (`fileType == FileType.video`).
+     */
+    duration?: number;
     hasStaticThumbnail?: boolean;
     localID?: number;
     version?: number;
