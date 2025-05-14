@@ -80,6 +80,7 @@ class MemoriesWidgetSettings extends StatelessWidget {
                           ),
                           leadingIconWidget: SvgPicture.asset(
                             "assets/icons/past-year-memory-icon.svg",
+                            color: colorScheme.textBase,
                           ),
                           menuItemColor: colorScheme.fillFaint,
                           trailingWidget: ToggleSwitchWidget(
@@ -96,6 +97,7 @@ class MemoriesWidgetSettings extends StatelessWidget {
                           ),
                           leadingIconWidget: SvgPicture.asset(
                             "assets/icons/smart-memory-icon.svg",
+                            color: colorScheme.textBase,
                           ),
                           menuItemColor: colorScheme.fillFaint,
                           trailingWidget: ToggleSwitchWidget(

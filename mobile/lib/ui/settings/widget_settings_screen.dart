@@ -76,6 +76,7 @@ class WidgetSettingsScreen extends StatelessWidget {
                               ),
                               leadingIconWidget: SvgPicture.asset(
                                 "assets/icons/people-widget-icon.svg",
+                                color: colorScheme.textBase,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               singleBorderRadius: 8,
@@ -89,6 +90,7 @@ class WidgetSettingsScreen extends StatelessWidget {
                               ),
                               leadingIconWidget: SvgPicture.asset(
                                 "assets/icons/albums-widget-icon.svg",
+                                color: colorScheme.textBase,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               singleBorderRadius: 8,
@@ -102,6 +104,7 @@ class WidgetSettingsScreen extends StatelessWidget {
                               ),
                               leadingIconWidget: SvgPicture.asset(
                                 "assets/icons/memories-widget-icon.svg",
+                                color: colorScheme.textBase,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               singleBorderRadius: 8,
