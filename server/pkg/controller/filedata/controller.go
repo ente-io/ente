@@ -3,6 +3,7 @@ package filedata
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -332,7 +333,7 @@ func (c *Controller) _validateLastUpdatedAt(ctx *gin.Context, lastUpdatedAt *int
 		return stacktrace.Propagate(err, "failed to get data")
 	}
 	var invalidVersionErr = &ente.ApiError{
-		HttpStatusCode: http.StatusBadRequest,
+		HttpStatusCode: http.StatusConflict,
 		Code:           "INVALID_VERSION",
 		Message:        "",
 	}
@@ -340,14 +341,17 @@ func (c *Controller) _validateLastUpdatedAt(ctx *gin.Context, lastUpdatedAt *int
 		if *lastUpdatedAt == 0 {
 			return nil
 		}
-		return stacktrace.Propagate(invalidVersionErr, "no data found for fileID %d", fileID)
+		invalidVersionErr.Message = "non zero version empty data"
+		return invalidVersionErr
 	}
 	if doRows[0].IsDeleted {
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage("data deleted"), "fileID %d is deleted", fileID)
+		invalidVersionErr.Message = "data deleted"
+		return invalidVersionErr
 	}
 	dbUpdatedAt := doRows[0].UpdatedAt
 	if dbUpdatedAt != *lastUpdatedAt {
-		return stacktrace.Propagate(invalidVersionErr, "last updated at mismatch for fileID %d, dbUpdatedAt %d, lastUpdatedAt %d", fileID, dbUpdatedAt, *lastUpdatedAt)
+		invalidVersionErr.Message = fmt.Sprintf("version mismatch expected %d, found %d", dbUpdatedAt, *lastUpdatedAt)
+		return invalidVersionErr
 	}
 	return nil
 }
