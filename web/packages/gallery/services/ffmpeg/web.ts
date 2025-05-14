@@ -1,4 +1,5 @@
-import { FFmpeg } from "@ffmpeg/ffmpeg";
+import { FFFSType, FFmpeg } from "@ffmpeg/ffmpeg";
+import { joinPath } from "ente-base/file-name";
 import { newID } from "ente-base/id";
 import log from "ente-base/log";
 import type { FFmpegCommand } from "ente-base/types/ipc";
@@ -74,11 +75,14 @@ const ffmpegExec = async (
     outputFileExtension: string,
     blob: Blob,
 ) => {
-    const inputPath = newID("in_");
+    const mountDir = "/mount";
+    const inputFileName = newID("in_");
+    const inputPath = joinPath(mountDir, inputFileName);
+
     const outputSuffix = outputFileExtension ? "." + outputFileExtension : "";
     const outputPath = newID("out_") + outputSuffix;
 
-    const inputData = new Uint8Array(await blob.arrayBuffer());
+    const inputFile = new File([blob], inputFileName);
 
     // Exit status of the ffmpeg.exec invocation.
     // `0` if no error, `!= 0` if timeout (1) or error.
@@ -87,7 +91,8 @@ const ffmpegExec = async (
     try {
         const startTime = Date.now();
 
-        await ffmpeg.writeFile(inputPath, inputData);
+        await ffmpeg.createDir(mountDir);
+        await ffmpeg.mount(FFFSType.WORKERFS, { files: [inputFile] }, mountDir);
 
         let resolvedCommand: string[];
         if (Array.isArray(command)) {
@@ -119,9 +124,14 @@ const ffmpegExec = async (
         return result;
     } finally {
         try {
-            await ffmpeg.deleteFile(inputPath);
+            await ffmpeg.unmount(mountDir);
         } catch (e) {
-            log.error(`Failed to remove input ${inputPath}`, e);
+            log.error(`Failed to remove mount ${mountDir}`, e);
+        }
+        try {
+            await ffmpeg.deleteDir(mountDir);
+        } catch (e) {
+            log.error(`Failed to delete mount directory ${mountDir}`, e);
         }
         try {
             await ffmpeg.deleteFile(outputPath);
