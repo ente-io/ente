@@ -255,8 +255,8 @@ export const syncUpdatedFileDataFileIDs = async (
             for (const fd of diff) {
                 lastUpdatedAt = Math.max(lastUpdatedAt, fd.updatedAt);
                 // While we could prune isDeleted entries here, we can also rely
-                // on the the pruning that happens when the trash gets synced.
-                // See: [Note: Pruning stale status-diff entries]
+                // on the pruning that happens when the trash gets synced. See:
+                // [Note: Pruning stale status-diff entries]
                 if (fd.type == type && !fd.isDeleted) {
                     fileIDs.add(fd.fileID);
                 }
