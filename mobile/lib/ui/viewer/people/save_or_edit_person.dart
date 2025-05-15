@@ -682,7 +682,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
           _email!.isNotEmpty &&
           _email != person!.data.email &&
           await checkIfEmailAlreadyAssignedToAPerson(_email!)) {
-        throw Exception("Email already assigned to a person");
+        await showAlreadyLinkedEmailDialog(context, _email!);
+        return null;
       }
       final String name = _inputName.trim();
       final String? birthDate = _selectedDate;
