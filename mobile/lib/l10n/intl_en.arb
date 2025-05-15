@@ -1281,6 +1281,8 @@
   "createCollaborativeLink": "Create collaborative link",
   "search": "Search",
   "enterPersonName": "Enter person name",
+  "editEmailAlreadyLinked": "This email is already linked to {name}.",
+  "viewPersonToUnlink": "View {name} to unlink",
   "enterName": "Enter name",
   "savePerson": "Save person",
   "editPerson": "Edit person",
