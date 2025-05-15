@@ -97,6 +97,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m26(count, formattedSize) =>
       "${count} files, ${formattedSize} each";
 
+  static String m114(name) => "This email is already linked to ${name}.";
+
   static String m27(newEmail) => "Email changed to ${newEmail}";
 
   static String m28(email) => "${email} does not have an Ente account.";
@@ -303,6 +305,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m107(endDate) => "Valid till ${endDate}";
 
   static String m108(email) => "Verify ${email}";
+
+  static String m115(name) => "View ${name} to unlink";
 
   static String m109(count) =>
       "${Intl.plural(count, zero: 'Added 0 viewers', one: 'Added 1 viewer', other: 'Added ${count} viewers')}";
@@ -848,6 +852,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m25,
         "duplicateItemsGroup": m26,
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+        "editEmailAlreadyLinked": m114,
         "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Edit location"),
@@ -2067,6 +2072,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewLargeFilesDesc": MessageLookupByLibrary.simpleMessage(
             "View files that are consuming the most amount of storage."),
         "viewLogs": MessageLookupByLibrary.simpleMessage("View logs"),
+        "viewPersonToUnlink": m115,
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("View recovery key"),
         "viewer": MessageLookupByLibrary.simpleMessage("Viewer"),
