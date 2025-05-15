@@ -10,9 +10,31 @@
  * is a needed for fast refresh to work.
  */
 
+import log from "ente-base/log";
 import type { Collection } from "ente-media/collection";
 import type { FamilyData } from "ente-new/photos/services/user-details";
+import { getRecoveryKey } from "ente-shared/crypto/helpers";
 import type { User } from "ente-shared/user/types";
+
+/**
+ * Ensure that the keys in local storage are not malformed by verifying that the
+ * recoveryKey can be decrypted with the masterKey.
+ *
+ * This is not meant to be bullet proof, but more like an extra sanity check.
+ *
+ * @returns `true` if the sanity check passed, otherwise `false`. Since failure
+ * is not expected, the caller should {@link logout} on `false` to avoid
+ * continuing with an unexpected local state.
+ */
+export const validateKey = async () => {
+    try {
+        await getRecoveryKey();
+        return true;
+    } catch (e) {
+        log.warn("Failed to validate key" /*, caller will logout */, e);
+        return false;
+    }
+};
 
 export const constructUserIDToEmailMap = (
     user: User,

@@ -60,6 +60,7 @@ import {
 import {
     constructUserIDToEmailMap,
     createShareeSuggestionEmails,
+    validateKey,
 } from "ente-new/photos/components/gallery/helpers";
 import {
     useGalleryReducer,
@@ -97,7 +98,6 @@ import {
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { FlexWrapper } from "ente-shared/components/Container";
-import { getRecoveryKey } from "ente-shared/crypto/helpers";
 import { CustomError } from "ente-shared/error";
 import { getData } from "ente-shared/storage/localStorage";
 import {
@@ -290,19 +290,6 @@ const Page: React.FC = () => {
 
     const router = useRouter();
 
-    // Ensure that the keys in local storage are not malformed by verifying that
-    // the recoveryKey can be decrypted with the masterKey.
-    // Note: This is not bullet-proof.
-    const validateKey = async () => {
-        try {
-            await getRecoveryKey();
-            return true;
-        } catch {
-            logout();
-            return false;
-        }
-    };
-
     useEffect(() => {
         const key = getKey("encryptionKey");
         const token = getToken();
@@ -314,8 +301,8 @@ const Page: React.FC = () => {
         preloadImage("/images/subscription-card-background");
         const electron = globalThis.electron;
         const main = async () => {
-            const valid = await validateKey();
-            if (!valid) {
+            if (!(await validateKey())) {
+                logout();
                 return;
             }
             initSettings();
