@@ -12,7 +12,7 @@ import {
     configureSRP,
     generateKeyAndSRPAttributes,
 } from "ente-accounts/services/srp";
-import { putAttributes } from "ente-accounts/services/user";
+import { putUserKeyAttributes } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
@@ -70,7 +70,7 @@ const Page: React.FC = () => {
             const { keyAttributes, masterKey, srpSetupAttributes } =
                 await generateKeyAndSRPAttributes(passphrase);
 
-            await putAttributes(keyAttributes);
+            await putUserKeyAttributes(keyAttributes);
             await configureSRP(srpSetupAttributes);
             await generateAndSaveIntermediateKeyAttributes(
                 passphrase,

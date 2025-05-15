@@ -23,7 +23,7 @@ import type {
 } from "ente-accounts/services/srp-remote";
 import { getSRPAttributes } from "ente-accounts/services/srp-remote";
 import {
-    putAttributes,
+    putUserKeyAttributes,
     sendOTT,
     verifyEmail,
 } from "ente-accounts/services/user";
@@ -141,7 +141,7 @@ const Page: React.FC = () => {
                         "originalKeyAttributes",
                     );
                     if (originalKeyAttributes) {
-                        await putAttributes(originalKeyAttributes);
+                        await putUserKeyAttributes(originalKeyAttributes);
                     }
                     if (getData("srpSetupAttributes")) {
                         const srpSetupAttributes: SRPSetupAttributes =

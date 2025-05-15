@@ -8,7 +8,7 @@ import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import type { SRPAttributes } from "./srp-remote";
 import { getSRPAttributes } from "./srp-remote";
-import { putAttributes, RemoteKeyAttributes } from "./user";
+import { putUserKeyAttributes, RemoteKeyAttributes } from "./user";
 
 type SessionValidity =
     | { status: "invalid" }
@@ -155,7 +155,7 @@ export const isSessionInvalid = async (): Promise<boolean> => {
         if (!hasSetKeys) {
             const originalKeyAttributes = getData("originalKeyAttributes");
             if (originalKeyAttributes)
-                await putAttributes(originalKeyAttributes);
+                await putUserKeyAttributes(originalKeyAttributes);
         }
     } catch (e) {
         log.warn("Failed to check session validity", e);

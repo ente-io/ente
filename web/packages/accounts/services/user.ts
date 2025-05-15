@@ -198,7 +198,7 @@ export type TwoFactorAuthorizationResponse = z.infer<
 /**
  * Update or set the user's {@link KeyAttributes} on remote.
  */
-export const putAttributes = async (keyAttributes: KeyAttributes) =>
+export const putUserKeyAttributes = async (keyAttributes: KeyAttributes) =>
     ensureOk(
         await fetch(await apiURL("/users/attributes"), {
             method: "PUT",
