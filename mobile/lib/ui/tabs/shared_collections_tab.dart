@@ -7,6 +7,7 @@ import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/events/tab_changed_event.dart";
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection_items.dart';
@@ -48,6 +49,16 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     leading: true,
   );
   static const heroTagPrefix = "outgoing_collection";
+  late StreamSubscription<TabChangedEvent> _tabChangeEvent;
+
+  // This can be used to defer loading of widgets in this tab until the tab is
+  // selected for a certain amount of time. This will not turn true until the
+  // user has been in the tab for 500ms. This is to prevent loading widgets when
+  // the user is just switching tabs quickly.
+  final _canLoadDeferredWidgets = ValueNotifier<bool>(false);
+  final _debouncerForDeferringLoad = Debouncer(
+    const Duration(milliseconds: 500),
+  );
 
   @override
   void initState() {
@@ -72,6 +83,27 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
+    });
+
+    _tabChangeEvent = Bus.instance.on<TabChangedEvent>().listen((event) {
+      if (event.selectedIndex == 2) {
+        _debouncerForDeferringLoad.run(() async {
+          _logger.info("Loading deferred widgets in shared collections tab");
+          if (mounted) {
+            _canLoadDeferredWidgets.value = true;
+            await _tabChangeEvent.cancel();
+            Future.delayed(
+              Duration.zero,
+              () => _debouncerForDeferringLoad.cancelDebounceTimer(),
+            );
+          }
+        });
+      } else {
+        _debouncerForDeferringLoad.cancelDebounceTimer();
+        if (mounted) {
+          _canLoadDeferredWidgets.value = false;
+        }
+      }
     });
   }
 
@@ -309,24 +341,31 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                   )
                 : const SizedBox.shrink(),
             const SizedBox(height: 2),
-            FutureBuilder(
-              future: SearchService.instance
-                  .getAllContactsSearchResults(kSearchSectionLimit),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return ContactsSection(
-                    snapshot.data as List<GenericSearchResult>,
-                  );
-                } else if (snapshot.hasError) {
-                  _logger.severe(
-                    "failed to load contacts section",
-                    snapshot.error,
-                    snapshot.stackTrace,
-                  );
-                  return const EnteLoadingWidget();
-                } else {
-                  return const EnteLoadingWidget();
-                }
+            ValueListenableBuilder(
+              valueListenable: _canLoadDeferredWidgets,
+              builder: (context, value, _) {
+                return value
+                    ? FutureBuilder(
+                        future: SearchService.instance
+                            .getAllContactsSearchResults(kSearchSectionLimit),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return ContactsSection(
+                              snapshot.data as List<GenericSearchResult>,
+                            );
+                          } else if (snapshot.hasError) {
+                            _logger.severe(
+                              "failed to load contacts section",
+                              snapshot.error,
+                              snapshot.stackTrace,
+                            );
+                            return const EnteLoadingWidget();
+                          } else {
+                            return const EnteLoadingWidget();
+                          }
+                        },
+                      )
+                    : const EnteLoadingWidget();
               },
             ),
             const SizedBox(height: 4),
@@ -344,6 +383,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     _collectionUpdatesSubscription.cancel();
     _loggedOutEvent.cancel();
     _debouncer.cancelDebounceTimer();
+    _debouncerForDeferringLoad.cancelDebounceTimer();
+    _tabChangeEvent.cancel();
+    _canLoadDeferredWidgets.dispose();
     super.dispose();
   }
 
