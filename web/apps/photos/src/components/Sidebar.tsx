@@ -7,6 +7,7 @@ import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
+import ScienceIcon from "@mui/icons-material/Science";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
     Box,
@@ -33,6 +34,7 @@ import {
     RowButtonDivider,
     RowButtonGroup,
     RowButtonGroupHint,
+    RowButtonGroupTitle,
     RowSwitch,
 } from "ente-base/components/RowButton";
 import { SpacedRow } from "ente-base/components/containers";
@@ -52,6 +54,7 @@ import {
 import { useBaseContext } from "ente-base/context";
 import {
     getLocaleInUse,
+    pt,
     setLocaleInUse,
     supportedLocales,
     ut,
@@ -61,6 +64,10 @@ import log from "ente-base/log";
 import { savedLogs } from "ente-base/log-web";
 import { customAPIHost } from "ente-base/origins";
 import { downloadString } from "ente-base/utils/web";
+import {
+    isHLSGenerationSupported,
+    toggleHLSGeneration,
+} from "ente-gallery/services/video";
 import { DeleteAccount } from "ente-new/photos/components/DeleteAccount";
 import { DropdownInput } from "ente-new/photos/components/DropdownInput";
 import { MLSettings } from "ente-new/photos/components/sidebar/MLSettings";
@@ -71,6 +78,7 @@ import {
 } from "ente-new/photos/components/utils/dialog";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
+    useHLSGenerationStatusSnapshot,
     useSettingsSnapshot,
     useUserDetailsSnapshot,
 } from "ente-new/photos/components/utils/use-snapshot";
@@ -769,6 +777,9 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     const { show: showMLSettings, props: mlSettingsVisibilityProps } =
         useModalVisibility();
 
+    const hlsGenStatusSnapshot = useHLSGenerationStatusSnapshot();
+    const isHLSGenerationEnabled = !!hlsGenStatusSnapshot?.enabled;
+
     useEffect(() => {
         if (open) void syncSettings();
     }, [open]);
@@ -809,6 +820,22 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         label={t("advanced")}
                         onClick={showAdvancedSettings}
                     />
+                    {isHLSGenerationSupported() && (
+                        <Stack>
+                            <RowButtonGroupTitle icon={<ScienceIcon />}>
+                                {t("labs")}
+                            </RowButtonGroupTitle>
+                            <RowButtonGroup>
+                                <RowSwitch
+                                    label={
+                                        /* TODO(HLS): */ pt("Streamable videos")
+                                    }
+                                    checked={isHLSGenerationEnabled}
+                                    onClick={() => void toggleHLSGeneration()}
+                                />
+                            </RowButtonGroup>
+                        </Stack>
+                    )}
                 </Stack>
             </Stack>
             <MapSettings
@@ -899,6 +926,8 @@ const localeName = (locale: SupportedLocale) => {
             return "日本語";
         case "ar-SA":
             return "اَلْعَرَبِيَّةُ";
+        case "tr-TR":
+            return "Türkçe";
     }
 };
 

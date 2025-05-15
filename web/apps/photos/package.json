@@ -26,9 +26,9 @@
         "xml-js": "^1.6.11"
     },
     "devDependencies": {
-        "@types/node": "^22.14.0",
-        "@types/react": "^19.1.0",
-        "@types/react-dom": "^19.1.1",
+        "@types/node": "^22.15.18",
+        "@types/react": "^19.1.4",
+        "@types/react-dom": "^19.1.5",
         "@types/react-window": "^1.8.8",
         "ente-build-config": "*"
     }

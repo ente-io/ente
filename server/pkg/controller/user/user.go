@@ -7,7 +7,9 @@ import (
 	enteJWT "github.com/ente-io/museum/ente/jwt"
 	"github.com/ente-io/museum/pkg/controller/collections"
 	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
+	util "github.com/ente-io/museum/pkg/utils"
 	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ulule/limiter/v3"
 	"strings"
 
 	cache2 "github.com/ente-io/museum/ente/cache"
@@ -56,6 +58,8 @@ type UserController struct {
 	HardCodedOTT           HardCodedOTT
 	UserCache              *cache2.UserCache
 	UserCacheController    *usercache.Controller
+	SRPLimiter             *limiter.Limiter
+	OTTLimiter             *limiter.Limiter
 }
 
 const (
@@ -121,6 +125,8 @@ func NewUserController(
 	userCache *cache2.UserCache,
 	userCacheController *usercache.Controller,
 ) *UserController {
+	srpLimiter := util.NewRateLimiter("100-H")
+	ottLimiter := util.NewRateLimiter("100-H")
 	return &UserController{
 		UserRepo:               userRepo,
 		UsageRepo:              usageRepo,
@@ -146,6 +152,8 @@ func NewUserController(
 		HardCodedOTT:           ReadHardCodedOTTFromConfig(),
 		UserCache:              userCache,
 		UserCacheController:    userCacheController,
+		SRPLimiter:             srpLimiter,
+		OTTLimiter:             ottLimiter,
 	}
 }
 
@@ -290,7 +298,7 @@ func (c *UserController) NotifyAccountDeletion(userID int64, userEmail string, i
 	}
 	recoverToken, err2 := c.GetJWTTokenForClaim(&enteJWT.WebCommonJWTClaim{
 		UserID:     userID,
-		ExpiryTime: time.Microseconds(),
+		ExpiryTime: time.MicrosecondsAfterDays(7),
 		ClaimScope: enteJWT.RestoreAccount.Ptr(),
 		Email:      userEmail,
 	})
@@ -321,6 +329,13 @@ func (c *UserController) HandleSelfAccountRecovery(ctx *gin.Context, token strin
 		return stacktrace.Propagate(ente.NewBadRequestError(&ente.ApiErrorParams{
 			Message: "Token expired",
 		}), "")
+	}
+	// check if account is already recovered
+	if user, userErr := c.UserRepo.Get(jwtToken.UserID); userErr == nil {
+		if strings.EqualFold(user.Email, jwtToken.Email) {
+			logrus.WithField("userID", jwtToken.UserID).Error("account is already recovered")
+			return nil
+		}
 	}
 	return c.HandleAccountRecovery(ctx, ente.RecoverAccountRequest{
 		UserID:  jwtToken.UserID,

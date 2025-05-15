@@ -263,6 +263,7 @@ func main() {
 		TrashRepository:       trashRepo,
 		UserRepo:              userRepo,
 		UsageCtrl:             usageController,
+		AccessCtrl:            accessCtrl,
 		CollectionRepo:        collectionRepo,
 		TaskLockingRepo:       taskLockingRepo,
 		DiscordController:     discordController,
@@ -374,6 +375,7 @@ func main() {
 	p.ReqCntURLLabelMappingFn = urlSanitizer
 	server.Use(p.HandlerFunc())
 
+	server.LoadHTMLGlob("web-templates/*")
 	// note: the recover middleware must be in the last
 
 	server.Use(requestid.New(

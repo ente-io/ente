@@ -5,15 +5,28 @@ import { type CryptoWorker } from "ente-base/crypto/worker";
 import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
-import type { Electron } from "ente-base/types/ipc";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import type { UploadItem } from "ente-gallery/services/upload";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    markUploadedAndObtainProcessableItem,
     shouldDisableCFUploadProxy,
+    type ClusteredUploadItem,
     type UploadPhase,
     type UploadResult,
+    type UploadableUploadItem,
 } from "ente-gallery/services/upload";
+import {
+    metadataJSONMapKeyForJSON,
+    tryParseTakeoutMetadataJSON,
+    type ParsedMetadataJSON,
+} from "ente-gallery/services/upload/takeout";
+import UploadService, {
+    areLivePhotoAssets,
+    upload,
+    uploadItemFileName,
+    type PotentialLivePhotoAsset,
+    type UploadAsset,
+} from "ente-gallery/services/upload/upload-service";
 import { processVideoNewUpload } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import {
@@ -34,18 +47,6 @@ import {
 } from "services/publicCollectionService";
 import watcher from "services/watch";
 import { getUserOwnedFiles } from "utils/file";
-import {
-    metadataJSONMapKeyForJSON,
-    tryParseTakeoutMetadataJSON,
-    type ParsedMetadataJSON,
-} from "./takeout";
-import UploadService, {
-    areLivePhotoAssets,
-    uploadItemFileName,
-    uploader,
-    type PotentialLivePhotoAsset,
-    type UploadAsset,
-} from "./upload-service";
 
 export type FileID = number;
 
@@ -63,16 +64,23 @@ export interface InProgressUpload {
     progress: PercentageUploaded;
 }
 
+/**
+ * A variant of {@link UploadResult} used when segregating finished uploads in
+ * the UI. "addedSymlink" is treated as "uploaded", everything else remains as
+ * it were.
+ */
+export type FinishedUploadResult = Exclude<UploadResult, "addedSymlink">;
+
 export interface FinishedUpload {
     localFileID: FileID;
-    result: UploadResult;
+    result: FinishedUploadResult;
 }
 
 export type InProgressUploads = Map<FileID, PercentageUploaded>;
 
-export type FinishedUploads = Map<FileID, UploadResult>;
+export type FinishedUploads = Map<FileID, FinishedUploadResult>;
 
-export type SegregatedFinishedUploads = Map<UploadResult, FileID[]>;
+export type SegregatedFinishedUploads = Map<FinishedUploadResult, FileID[]>;
 
 export interface ProgressUpdater {
     setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
@@ -96,11 +104,6 @@ export type UploadItemWithCollection = UploadAsset & {
     localID: number;
     collectionID: number;
 };
-
-export interface LivePhotoAssets {
-    image: UploadItem;
-    video: UploadItem;
-}
 
 interface UploadCancelStatus {
     value: boolean;
@@ -162,7 +165,7 @@ class UIService {
         this.setTotalFileCount(count);
         this.filesUploadedCount = 0;
         this.inProgressUploads = new Map<number, number>();
-        this.finishedUploads = new Map<number, UploadResult>();
+        this.finishedUploads = new Map<number, FinishedUploadResult>();
         this.updateProgressBarUI();
     }
 
@@ -206,7 +209,7 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    moveFileToResultList(key: number, uploadResult: UploadResult) {
+    moveFileToResultList(key: number, uploadResult: FinishedUploadResult) {
         this.finishedUploads.set(key, uploadResult);
         this.inProgressUploads.delete(key);
         this.updateProgressBarUI();
@@ -561,7 +564,7 @@ class UploadManager {
             uiService.setFileProgress(localID, 0);
             await wait(0);
 
-            const { uploadResult, uploadedFile } = await uploader(
+            const { uploadResult, uploadedFile } = await upload(
                 uploadableItem,
                 this.uploaderName,
                 this.existingFiles,
@@ -599,11 +602,13 @@ class UploadManager {
         uploadableItem: UploadableUploadItem,
         uploadResult: UploadResult,
         uploadedFile: EncryptedEnteFile | EnteFile | undefined,
-    ) {
+    ): Promise<FinishedUploadResult> {
         log.info(`Upload ${uploadableItem.fileName} | ${uploadResult}`);
+        const finishedUploadResult =
+            uploadResult == "addedSymlink" ? "uploaded" : uploadResult;
         try {
-            const electron = globalThis.electron;
-            if (electron) await markUploaded(electron, uploadableItem);
+            const processableUploadItem =
+                await markUploadedAndObtainProcessableItem(uploadableItem);
 
             let decryptedFile: EnteFile;
             switch (uploadResult) {
@@ -612,11 +617,8 @@ class UploadManager {
                     this.failedItems.push(uploadableItem);
                     break;
                 case "alreadyUploaded":
-                    decryptedFile = uploadedFile as EnteFile;
-                    break;
                 case "addedSymlink":
                     decryptedFile = uploadedFile as EnteFile;
-                    uploadResult = "uploaded";
                     break;
                 case "uploaded":
                 case "uploadedWithStaticThumbnail":
@@ -647,8 +649,8 @@ class UploadManager {
                     (uploadResult == "uploaded" ||
                         uploadResult == "uploadedWithStaticThumbnail")
                 ) {
-                    indexNewUpload(decryptedFile, uploadItem);
-                    processVideoNewUpload(decryptedFile, uploadItem);
+                    indexNewUpload(decryptedFile, processableUploadItem);
+                    processVideoNewUpload(decryptedFile, processableUploadItem);
                 }
                 this.updateExistingFiles(decryptedFile);
             }
@@ -657,7 +659,7 @@ class UploadManager {
                 uploadableItem,
                 uploadedFile as EncryptedEnteFile,
             );
-            return uploadResult;
+            return finishedUploadResult;
         } catch (e) {
             log.error("Post file upload action failed", e);
             return "failed";
@@ -710,7 +712,10 @@ class UploadManager {
     };
 }
 
-export default new UploadManager();
+/**
+ * Singleton instance of {@link UploadManager}.
+ */
+export const uploadManager = new UploadManager();
 
 /**
  * The data operated on by the intermediate stages of the upload.
@@ -736,7 +741,7 @@ export default new UploadManager();
  *
  * - On to the {@link ClusteredUploadItem} we attach the corresponding
  *   {@link collection}, giving us {@link UploadableUploadItem}. This is what
- *   gets queued and then passed to the {@link uploader}.
+ *   gets queued and then passed to the {@link upload}.
  */
 type UploadItemWithCollectionIDAndName = UploadAsset & {
     /** A unique ID for the duration of the upload */
@@ -765,30 +770,6 @@ const makeUploadItemWithCollectionIDAndName = (
     externalParsedMetadata: f.externalParsedMetadata,
 });
 
-/**
- * An upload item with both parts of a live photo clubbed together.
- *
- * See: [Note: Intermediate file types during upload].
- */
-interface ClusteredUploadItem {
-    localID: number;
-    collectionID: number;
-    fileName: string;
-    isLivePhoto: boolean;
-    uploadItem?: UploadItem;
-    livePhotoAssets?: LivePhotoAssets;
-}
-
-/**
- * The file that we hand off to the uploader. Essentially
- * {@link ClusteredUploadItem} with the {@link collection} attached to it.
- *
- * See: [Note: Intermediate file types during upload].
- */
-export type UploadableUploadItem = ClusteredUploadItem & {
-    collection: Collection;
-};
-
 const splitMetadataAndMediaItems = (
     items: UploadItemWithCollectionIDAndName[],
 ): [
@@ -803,54 +784,6 @@ const splitMetadataAndMediaItems = (
         },
         [[], []],
     );
-
-const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
-    // TODO: This can be done better
-    if (item.isLivePhoto) {
-        const [p0, p1] = [
-            item.livePhotoAssets.image,
-            item.livePhotoAssets.video,
-        ];
-        if (Array.isArray(p0) && Array.isArray(p1)) {
-            electron.markUploadedZipItems([p0, p1]);
-        } else if (typeof p0 == "string" && typeof p1 == "string") {
-            electron.markUploadedFiles([p0, p1]);
-        } else if (
-            p0 &&
-            typeof p0 == "object" &&
-            "path" in p0 &&
-            p1 &&
-            typeof p1 == "object" &&
-            "path" in p1
-        ) {
-            electron.markUploadedFiles([p0.path, p1.path]);
-        } else {
-            throw new Error(
-                "Attempting to mark upload completion of unexpected desktop upload items",
-            );
-        }
-    } else {
-        const p = item.uploadItem!;
-        if (Array.isArray(p)) {
-            electron.markUploadedZipItems([p]);
-        } else if (typeof p == "string") {
-            electron.markUploadedFiles([p]);
-        } else if (p && typeof p == "object" && "path" in p) {
-            electron.markUploadedFiles([p.path]);
-        } else {
-            // We can come here when the user saves an image they've edited, in
-            // which case `item` will be a web File object which won't have a
-            // path. Such a la carte uploads don't mark the file as pending
-            // anyways, so there isn't anything to do also.
-            //
-            // Keeping a log here, though really the upper layers of the code
-            // need to be reworked so that we don't even get here in such cases.
-            log.info(
-                "Ignoring attempt to mark upload completion of (likely edited) item",
-            );
-        }
-    }
-};
 
 /**
  * Go through the given files, combining any sibling image + video assets into a

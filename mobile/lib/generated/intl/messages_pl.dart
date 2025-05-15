@@ -1077,8 +1077,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zdjęcia Live Photo"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Możesz udostępnić swoją subskrypcję swojej rodzinie"),
-        "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "Do tej pory zachowaliśmy ponad 30 milionów wspomnień"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "Przechowujemy 3 kopie Twoich danych, jedną w podziemnym schronie"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(

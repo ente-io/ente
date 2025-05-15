@@ -388,9 +388,20 @@ class CollectionsService {
         .toList();
   }
 
+  List<int> getAllOwnedCollectionIDs() {
+    final int userID = _config.getUserID()!;
+    return _collectionIDToCollections.values
+        .where(
+          (c) => !c.isDeleted && c.isOwner(userID),
+        )
+        .map((e) => e.id)
+        .toList();
+  }
+
   Future<SharedCollections> getSharedCollections() async {
     final AlbumSortKey sortKey = localSettings.albumSortKey();
     final AlbumSortDirection sortDirection = localSettings.albumSortDirection();
+
     final List<Collection> outgoing = [];
     final List<Collection> incoming = [];
     final List<Collection> quickLinks = [];

@@ -716,6 +716,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable": MessageLookupByLibrary.simpleMessage(
             "Mise à jour critique disponible"),
         "crop": MessageLookupByLibrary.simpleMessage("Rogner"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Souvenirs conservés"),
         "currentUsageIs": MessageLookupByLibrary.simpleMessage(
             "L\'utilisation actuelle est de "),
         "currentlyRunning":
@@ -1209,8 +1211,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "livePhotos": MessageLookupByLibrary.simpleMessage("Photos en direct"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Vous pouvez partager votre abonnement avec votre famille"),
-        "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "Nous avons conservé plus de 30 millions de souvenirs jusqu\'à présent"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "Nous conservons 3 copies de vos données, l\'une dans un abri anti-atomique"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(
@@ -1880,7 +1880,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Dates et heure de décalage"),
         "showMemories":
-            MessageLookupByLibrary.simpleMessage("Montrer les souvenirs"),
+            MessageLookupByLibrary.simpleMessage("Afficher les souvenirs"),
         "showPerson":
             MessageLookupByLibrary.simpleMessage("Montrer la personne"),
         "signOutFromOtherDevices": MessageLookupByLibrary.simpleMessage(

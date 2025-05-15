@@ -349,32 +349,27 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   Future<Uint8List?> _getLocalThumbnailUsingHeapPriorityQueue() async {
     final completer = Completer<Uint8List?>();
 
+    late TaskQueue<String> relevantTaskQueue;
     if (widget.thumbnailSize == thumbnailLargeSize) {
+      relevantTaskQueue = largeLocalThumbnailQueue;
       _localThumbnailQueueTaskId = [widget.file.localID!, "-large"].join();
-      await largeLocalThumbnailQueue.addTask(_localThumbnailQueueTaskId!,
-          () async {
-        final thumbnailBytes = await getThumbnailFromLocal(
-          widget.file,
-          size: widget.thumbnailSize,
-        );
-        completer.complete(thumbnailBytes);
-      });
     } else if (widget.thumbnailSize == thumbnailSmallSize) {
+      relevantTaskQueue = smallLocalThumbnailQueue;
       _localThumbnailQueueTaskId = [widget.file.localID!, "-small"].join();
-      await smallLocalThumbnailQueue.addTask(_localThumbnailQueueTaskId!,
-          () async {
-        final thumbnailBytes = await getThumbnailFromLocal(
-          widget.file,
-          size: widget.thumbnailSize,
-        );
-        completer.complete(thumbnailBytes);
-      });
     } else {
       assert(false, "Invalid thumbnail size ${widget.thumbnailSize}");
       _logger.severe(
         "Invalid thumbnail size ${widget.thumbnailSize} for file ${widget.file.displayName}",
       );
     }
+
+    await relevantTaskQueue.addTask(_localThumbnailQueueTaskId!, () async {
+      final thumbnailBytes = await getThumbnailFromLocal(
+        widget.file,
+        size: widget.thumbnailSize,
+      );
+      completer.complete(thumbnailBytes);
+    });
 
     return completer.future;
   }

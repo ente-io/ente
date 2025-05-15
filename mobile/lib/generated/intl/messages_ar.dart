@@ -1183,8 +1183,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "livePhotos": MessageLookupByLibrary.simpleMessage("الصور الحية"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "يمكنك مشاركة اشتراكك مع عائلتك."),
-        "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "لقد حفظنا أكثر من 30 مليون ذكرى حتى الآن."),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "نحتفظ بـ 3 نسخ من بياناتك، إحداها في ملجأ للطوارئ تحت الأرض."),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(

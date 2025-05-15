@@ -8,9 +8,9 @@ import { blobCache } from "ente-base/blob-cache";
 import { ensureElectron } from "ente-base/electron";
 import log from "ente-base/log";
 import { masterKeyFromSession } from "ente-base/session";
-import type { Electron } from "ente-base/types/ipc";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
-import type { UploadItem } from "ente-gallery/services/upload";
+import { type ProcessableUploadItem } from "ente-gallery/services/upload";
+import { createUtilityProcess } from "ente-gallery/utils/native-worker";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { throttled } from "ente-utils/promise";
@@ -135,7 +135,7 @@ const createComlinkWorker = async () => {
     const delegate = { workerDidUpdateStatus, workerDidUnawaitedIndex };
 
     // Obtain a message port from the Electron layer.
-    const messagePort = await createMLWorker(electron);
+    const messagePort = await createUtilityProcess(electron, "ml");
 
     const cw = new ComlinkWorker<typeof MLWorker>(
         "ML",
@@ -164,33 +164,6 @@ export const terminateMLWorker = async () => {
         await _state.comlinkWorker.then((cw) => cw.terminate());
         _state.comlinkWorker = undefined;
     }
-};
-
-/**
- * Obtain a port from the Node.js layer that can be used to communicate with the
- * ML worker process.
- */
-const createMLWorker = (electron: Electron): Promise<MessagePort> => {
-    // The main process will do its thing, and send back the port it created to
-    // us by sending an message on the "createMLWorker/port" channel via the
-    // postMessage API. This roundabout way is needed because MessagePorts
-    // cannot be transferred via the usual send/invoke pattern.
-
-    const port = new Promise<MessagePort>((resolve) => {
-        const l = ({ source, data, ports }: MessageEvent) => {
-            // The source check verifies that the message is coming from our own
-            // preload script. The data is the message that was posted.
-            if (source == window && data == "createMLWorker/port") {
-                window.removeEventListener("message", l);
-                resolve(ports[0]!);
-            }
-        };
-        window.addEventListener("message", l);
-    });
-
-    electron.createMLWorker();
-
-    return port;
 };
 
 /**
@@ -424,7 +397,8 @@ const workerDidUnawaitedIndex = () => void debounceUpdateClustersAndPeople();
 /**
  * Run indexing on a file which was uploaded from this client.
  *
- * Indexing only happens if ML is enabled.
+ * Indexing only happens if ML is enabled and we're running in the desktop app
+ * as it is resource intensive.
  *
  * This function is called by the uploader when it uploads a new file from this
  * client, giving us the opportunity to index it live. This is only an
@@ -434,15 +408,19 @@ const workerDidUnawaitedIndex = () => void debounceUpdateClustersAndPeople();
  *
  * @param file The {@link EnteFile} that got uploaded.
  *
- * @param uploadItem The item that was uploaded. This can be used to get at the
- * contents of the file that got uploaded. In case of live photos, this is the
- * image part of the live photo that was uploaded.
+ * @param processableItem The item that was uploaded. This can be used to get at
+ * the contents of the file that got uploaded. In case of live photos, this is
+ * the image part of the live photo that was uploaded.
  */
-export const indexNewUpload = (file: EnteFile, uploadItem: UploadItem) => {
+export const indexNewUpload = (
+    file: EnteFile,
+    processableUploadItem: ProcessableUploadItem,
+) => {
     if (!isMLEnabled()) return;
+    if (!isDesktop) return;
     if (file.metadata.fileType !== FileType.image) return;
-    log.debug(() => ["ml/liveq", { file, uploadItem }]);
-    void worker().then((w) => w.onUpload(file, uploadItem));
+    log.debug(() => ["ml/liveq", { file, processableUploadItem }]);
+    void worker().then((w) => w.onUpload(file, processableUploadItem));
 };
 
 export type MLStatus =
@@ -493,10 +471,16 @@ export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
  *
  * See also {@link mlStatusSubscribe}.
  *
+ * This function can be safely called even if {@link isMLSupported} is `false`
+ * (in such cases, it will always return `undefined`). This is so that it can be
+ * unconditionally called as part of a React hook.
+ *
  * A return value of `undefined` indicates that we're still performing the
  * asynchronous tasks that are needed to get the status.
  */
 export const mlStatusSnapshot = (): MLStatus | undefined => {
+    if (!isMLSupported) return undefined;
+
     const result = _state.mlStatusSnapshot;
     // We don't have it yet, trigger an update.
     if (!result) triggerStatusUpdate();

@@ -1,6 +1,7 @@
 import { isDesktop } from "ente-base/app";
 import log from "ente-base/log";
 import { workerBridge } from "ente-base/worker/worker-bridge";
+import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
@@ -175,11 +176,20 @@ const testHEICDataURL =
  * A special case if for FileType.livePhoto on Linux in the desktop app, where
  * the conversion always happens to workaround the audio only playback in that
  * specific scenario.
+ *
+ * @param file The {@link EnteFile} with which this video is associated.
+ *
+ * @param videoFileName The name of the video.
+ *
+ * @param videoBlob The contents of the video.
+ *
+ * @returns An object URL that can be used to playback the provided
+ * {@link videoBlob}.
  */
 export const playableVideoURL = async (
-    fileName: string,
+    file: EnteFile,
+    videoFileName: string,
     videoBlob: Blob,
-    opts?: { fileType?: FileType },
 ): Promise<string> => {
     const videoObjectURL = URL.createObjectURL(videoBlob);
     const isPlayable = await isPlaybackPossible(videoObjectURL);
@@ -207,7 +217,7 @@ export const playableVideoURL = async (
         // conversion is fast in the desktop app.
         if (
             isDesktop &&
-            opts?.fileType == FileType.livePhoto &&
+            file.metadata.fileType == FileType.livePhoto &&
             // eslint-disable-next-line @typescript-eslint/no-deprecated
             navigator.platform.startsWith("Linux")
         ) {
@@ -228,13 +238,13 @@ export const playableVideoURL = async (
 
     if (shouldConvert) {
         try {
-            log.info(`Converting ${fileName} to mp4`);
+            log.info(`Converting ${videoFileName} to mp4`);
             const convertedBlob = await convertToMP4(videoBlob);
             return URL.createObjectURL(
                 new Blob([convertedBlob], { type: "video/mp4" }),
             );
         } catch (e) {
-            log.error(`Video conversion failed for ${fileName}`, e);
+            log.error(`Video conversion failed for ${videoFileName}`, e);
         }
     }
 

@@ -1025,8 +1025,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "livePhotos": MessageLookupByLibrary.simpleMessage("ライブフォト"),
         "loadMessage1":
             MessageLookupByLibrary.simpleMessage("サブスクリプションを家族と共有できます"),
-        "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "私たちはこれまでに3000万以上の思い出を保存してきました"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "私たちはあなたのデータのコピーを3つ保管しています。1つは地下のシェルターにあります。"),
         "loadMessage4":

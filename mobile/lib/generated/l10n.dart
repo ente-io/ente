@@ -5197,6 +5197,16 @@ class S {
     );
   }
 
+  /// `Sorry, we could not backup this file right now, we will retry later.`
+  String get sorryBackupFailedDesc {
+    return Intl.message(
+      'Sorry, we could not backup this file right now, we will retry later.',
+      name: 'sorryBackupFailedDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `We could not backup your data.\nWe will retry later.`
   String get couldNotBackUpTryLater {
     return Intl.message(
@@ -7270,10 +7280,10 @@ class S {
     );
   }
 
-  /// `We have preserved over 30 million memories so far`
+  /// `We have preserved over 200 million memories so far`
   String get loadMessage2 {
     return Intl.message(
-      'We have preserved over 30 million memories so far',
+      'We have preserved over 200 million memories so far',
       name: 'loadMessage2',
       desc: '',
       args: [],
@@ -11071,10 +11081,10 @@ class S {
     );
   }
 
-  /// `Video streaming`
+  /// `Generate streamable video`
   String get videoStreaming {
     return Intl.message(
-      'Video streaming',
+      'Generate streamable video',
       name: 'videoStreaming',
       desc: '',
       args: [],

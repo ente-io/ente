@@ -1,4 +1,6 @@
+import "dart:async";
 import "dart:io" show File;
+import "dart:math" show pow;
 
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
@@ -12,28 +14,24 @@ import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/services/machine_learning/face_thumbnail_generator.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/standalone/task_queue.dart";
 import "package:photos/utils/thumbnail_util.dart";
-import "package:pool/pool.dart";
-
-void resetPool({required bool fullFile}) {
-  if (fullFile) {
-    _poolFullFileFaceGenerations =
-        Pool(20, timeout: const Duration(seconds: 15));
-  } else {
-    _poolThumbnailFaceGenerations =
-        Pool(100, timeout: const Duration(seconds: 15));
-  }
-}
 
 final _logger = Logger("FaceCropUtils");
 
 const int _retryLimit = 3;
 final LRUMap<String, Uint8List?> _faceCropCache = LRUMap(1000);
 final LRUMap<String, Uint8List?> _faceCropThumbnailCache = LRUMap(1000);
-Pool _poolFullFileFaceGenerations =
-    Pool(20, timeout: const Duration(seconds: 15));
-Pool _poolThumbnailFaceGenerations =
-    Pool(100, timeout: const Duration(seconds: 15));
+TaskQueue _queueFullFileFaceGenerations = TaskQueue<String>(
+  maxConcurrentTasks: 5,
+  taskTimeout: const Duration(minutes: 1),
+  maxQueueSize: 100,
+);
+TaskQueue _queueThumbnailFaceGenerations = TaskQueue<String>(
+  maxConcurrentTasks: 5,
+  taskTimeout: const Duration(minutes: 1),
+  maxQueueSize: 100,
+);
 
 Future<Uint8List?> checkGetCachedCropForFaceID(String faceID) async {
   final Uint8List? cachedCover = _faceCropCache.get(faceID);
@@ -91,19 +89,10 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
       }
     }
 
-    late final Pool relevantResourcePool;
-    if (useFullFile) {
-      relevantResourcePool = _poolFullFileFaceGenerations;
-    } else {
-      relevantResourcePool = _poolThumbnailFaceGenerations;
-    }
-
-    final result = await relevantResourcePool.withResource(
-      () async => await _getFaceCrops(
-        enteFile,
-        facesWithoutCrops,
-        useFullFile: useFullFile,
-      ),
+    final result = await _getFaceCropsUsingHeapPriorityQueue(
+      enteFile,
+      facesWithoutCrops,
+      useFullFile: useFullFile,
     );
     if (result == null) {
       return (faceIdToCrop.isEmpty) ? null : faceIdToCrop;
@@ -123,18 +112,34 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
     }
     return faceIdToCrop.isEmpty ? null : faceIdToCrop;
   } catch (e, s) {
-    _logger.severe(
-      "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}",
-      e,
-      s,
-    );
-    resetPool(fullFile: useFullFile);
-    if (fetchAttempt <= _retryLimit) {
-      return getCachedFaceCrops(
-        enteFile,
-        faces,
-        fetchAttempt: fetchAttempt + 1,
-        useFullFile: useFullFile,
+    if (e is! TaskQueueTimeoutException &&
+        e is! TaskQueueOverflowException &&
+        e is! TaskQueueCancelledException) {
+      if (fetchAttempt <= _retryLimit) {
+        final backoff = Duration(
+          milliseconds: 100 * pow(2, fetchAttempt + 1).toInt(),
+        );
+        await Future.delayed(backoff);
+        _logger.warning(
+          "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}, retrying (attempt ${fetchAttempt + 1}) in ${backoff.inMilliseconds} ms",
+          e,
+          s,
+        );
+        return getCachedFaceCrops(
+          enteFile,
+          faces,
+          fetchAttempt: fetchAttempt + 1,
+          useFullFile: useFullFile,
+        );
+      }
+      _logger.severe(
+        "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}",
+        e,
+        s,
+      );
+    } else {
+      _logger.info(
+        "Stopped getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()} due to $e",
       );
     }
     return null;
@@ -147,7 +152,8 @@ Future<Uint8List?> precomputeClusterFaceCrop(
   required bool useFullFile,
 }) async {
   try {
-    final w = (kDebugMode ? EnteWatch('precomputeClusterFaceCrop') : null)?..start();
+    final w = (kDebugMode ? EnteWatch('precomputeClusterFaceCrop') : null)
+      ?..start();
     final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
       clusterID: clusterID,
@@ -182,6 +188,48 @@ Future<Uint8List?> precomputeClusterFaceCrop(
     );
     return null;
   }
+}
+
+void checkStopTryingToGenerateFaceThumbnails(
+  EnteFile file, {
+  bool useFullFile = true,
+}) {
+  final taskId =
+      [file.uploadedFileID!, useFullFile ? "-full" : "-thumbnail"].join();
+  if (useFullFile) {
+    _queueFullFileFaceGenerations.removeTask(taskId);
+  } else {
+    _queueThumbnailFaceGenerations.removeTask(taskId);
+  }
+}
+
+Future<Map<String, Uint8List>?> _getFaceCropsUsingHeapPriorityQueue(
+  EnteFile file,
+  Map<String, FaceBox> faceBoxeMap, {
+  bool useFullFile = true,
+}) async {
+  final completer = Completer<Map<String, Uint8List>?>();
+
+  late final TaskQueue relevantTaskQueue;
+  late final String taskId;
+  if (useFullFile) {
+    relevantTaskQueue = _queueFullFileFaceGenerations;
+    taskId = [file.uploadedFileID!, "-full"].join();
+  } else {
+    relevantTaskQueue = _queueThumbnailFaceGenerations;
+    taskId = [file.uploadedFileID!, "-thumbnail"].join();
+  }
+
+  await relevantTaskQueue.addTask(taskId, () async {
+    final faceCrops = await _getFaceCrops(
+      file,
+      faceBoxeMap,
+      useFullFile: useFullFile,
+    );
+    completer.complete(faceCrops);
+  });
+
+  return completer.future;
 }
 
 Future<Map<String, Uint8List>?> _getFaceCrops(

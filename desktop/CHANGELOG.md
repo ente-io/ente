@@ -2,6 +2,7 @@
 
 ## v1.7.13 (Unreleased)
 
+- Support Turkish translations.
 - .
 
 ## v1.7.12

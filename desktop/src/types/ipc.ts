@@ -5,6 +5,8 @@
  * See [Note: types.ts <-> preload.ts <-> ipc.ts]
  */
 
+export type UtilityProcessType = "ml";
+
 export interface AppUpdate {
     autoUpdatable: boolean;
     version: string;
@@ -32,3 +34,5 @@ export interface PendingUploads {
     filePaths: string[];
     zipItems: ZipItem[];
 }
+
+export type FFmpegCommand = string[] | { default: string[]; hdr: string[] };

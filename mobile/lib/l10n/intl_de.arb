@@ -721,6 +721,7 @@
     "type": "text"
   },
   "backupFailed": "Sicherung fehlgeschlagen",
+  "sorryBackupFailedDesc": "Leider konnten wir diese Datei momentan nicht sichern, wir werden es später erneut versuchen.",
   "couldNotBackUpTryLater": "Deine Daten konnten nicht gesichert werden.\nWir versuchen es später erneut.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente kann Dateien nur verschlüsseln und sichern, wenn du den Zugriff darauf gewährst",
   "pleaseGrantPermissions": "Bitte erteile die nötigen Berechtigungen",
@@ -1029,7 +1030,7 @@
   "didYouKnow": "Schon gewusst?",
   "loadingMessage": "Fotos werden geladen...",
   "loadMessage1": "Du kannst dein Abonnement mit deiner Familie teilen",
-  "loadMessage2": "Wir haben bereits mehr als 30 Millionen Erinnerungsstücke gesichert",
+  "loadMessage2": "Wir haben bereits über 200 Millionen Erinnerungen bewahrt",
   "loadMessage3": "Wir behalten 3 Kopien Ihrer Daten, eine in einem unterirdischen Schutzbunker",
   "loadMessage4": "Alle unsere Apps sind Open-Source",
   "loadMessage5": "Unser Quellcode und unsere Kryptografie wurden extern geprüft",

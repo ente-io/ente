@@ -20,10 +20,8 @@ import {
     groupFilesByCollectionID,
 } from "ente-new/photos/services/files";
 import { ensureString } from "ente-utils/ensure";
-import uploadManager, {
-    type UploadItemWithCollection,
-} from "services/upload/uploadManager";
 import { removeFromCollection } from "./collectionService";
+import { type UploadItemWithCollection, uploadManager } from "./upload-manager";
 
 /**
  * Watch for file system folders and automatically update the corresponding Ente

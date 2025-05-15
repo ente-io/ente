@@ -717,6 +717,7 @@
     "description": "Button text for raising a support tickets in case of unhandled errors during backup",
     "type": "text"
   },
+  "sorryBackupFailedDesc": "Atsiprašome, šiuo metu negalėjome sukurti atsarginės šio failo kopijos. Bandysime pakartoti vėliau.",
   "couldNotBackUpTryLater": "Nepavyko sukurti atsarginės duomenų kopijos.\nBandysime pakartotinai vėliau.",
   "pleaseGrantPermissions": "Suteikite leidimus.",
   "grantPermission": "Suteikti leidimą",
@@ -924,7 +925,7 @@
   "exportLogs": "Eksportuoti žurnalus",
   "didYouKnow": "Ar žinojote?",
   "loadMessage1": "Galite bendrinti savo prenumeratą su šeima.",
-  "loadMessage2": "Iki šiol išsaugojome daugiau kaip 30 milijonų prisiminimų.",
+  "loadMessage2": "Iki šiol išsaugojome daugiau nei 200 milijonų prisiminimų.",
   "loadMessage3": "Laikome 3 jūsų duomenų kopijas, vieną iš jų – požeminėje priešgaisrinėje slėptuvėje.",
   "loadMessage4": "Visos mūsų programos yra atvirojo kodo.",
   "loadMessage5": "Mūsų šaltinio kodas ir kriptografija buvo išoriškai audituoti.",

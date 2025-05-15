@@ -10,6 +10,8 @@
  *
  * This function is a promisified `setTimeout`. It returns a promise that
  * resolves after {@link ms} milliseconds.
+ *
+ * Duplicated from `web/packages/utils/promise.ts`.
  */
 export const wait = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms));

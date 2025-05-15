@@ -2,13 +2,16 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/ente-io/museum/ente"
 	fileData "github.com/ente-io/museum/ente/filedata"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
+	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
-	"net/http"
+	"github.com/sirupsen/logrus"
 )
 
 func (h *FileHandler) PutFileData(ctx *gin.Context) {
@@ -37,7 +40,8 @@ func (h *FileHandler) PutFileData(ctx *gin.Context) {
 func (h *FileHandler) PutVideoData(ctx *gin.Context) {
 	var req fileData.VidPreviewRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handler.Error(ctx, ente.NewBadRequestWithMessage(err.Error()))
+		logrus.WithField("req_id", requestid.Get(ctx)).WithError(err).Warn("Request binding failed")
+		handler.Error(ctx, ente.NewBadRequestWithMessage("invalid request body"))
 		return
 	}
 	if err := req.Validate(); err != nil {
@@ -103,6 +107,10 @@ func (h *FileHandler) GetFileData(ctx *gin.Context) {
 	resp, err := h.FileDataCtrl.GetFileData(ctx, actorUser, req)
 	if err != nil {
 		handler.Error(ctx, err)
+		return
+	}
+	if resp == nil {
+		ctx.Status(http.StatusNoContent)
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{

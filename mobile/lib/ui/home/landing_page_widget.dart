@@ -310,7 +310,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   void _autoEnableResumableUpload() {
-    localSettings.autoEnableMultiplePart(20).ignore();
+    localSettings.autoEnableMultiplePart(50).ignore();
   }
 }
 
