@@ -38,28 +38,28 @@ const List<Locale> appSupportedLocales = <Locale>[
 ];
 
 Locale? autoDetectedLocale;
-Locale localResolutionCallBack(locales, supportedLocales) {
-  Locale? languageCodeMatch;
-  final Map<String, Locale> languageCodeToLocale = {
-    for (Locale supportedLocale in appSupportedLocales)
-      supportedLocale.languageCode: supportedLocale,
-  };
-
-  for (Locale locale in locales) {
+// This function takes device locales and supported locales as input
+// and returns the best matching locale.
+// The device locales are sorted by priority, so the first one is the most preferred.
+Locale localResolutionCallBack(onDeviceLocales, supportedLocales) {
+  final Set<String> languageSupport = {};
+  for (Locale supportedLocale in appSupportedLocales) {
+    languageSupport.add(supportedLocale.languageCode);
+  }
+  for (Locale locale in onDeviceLocales) {
+    // check if exact local is supported, if yes, return it
     if (appSupportedLocales.contains(locale)) {
       autoDetectedLocale = locale;
       return locale;
     }
-
-    if (languageCodeMatch == null &&
-        languageCodeToLocale.containsKey(locale.languageCode)) {
-      languageCodeMatch = languageCodeToLocale[locale.languageCode];
-      autoDetectedLocale = languageCodeMatch;
+    // check if language code is supported, if yes, return it
+    if (languageSupport.contains(locale.languageCode)) {
+      autoDetectedLocale = locale;
+      return locale;
     }
   }
-
   // Return the first language code match or default to 'en'
-  return languageCodeMatch ?? const Locale('en');
+  return autoDetectedLocale ?? const Locale('en');
 }
 
 Future<Locale?> getLocale({
