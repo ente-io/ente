@@ -73,7 +73,16 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
       // Remove faces with low scores
       if (!kDebugMode) {
+        final beforeLength = faces.length;
+        final lowScores = faces
+            .where((face) => (face.score < kMinimumFaceShowScore))
+            .toList();
         faces.removeWhere((face) => (face.score < kMinimumFaceShowScore));
+        if (faces.length != beforeLength) {
+          _logger.warning(
+            'File ${file.uploadedFileID} has ${beforeLength - faces.length} faces with low scores ($lowScores) that are not shown in the UI',
+          );
+        }
       } else {
         faces.removeWhere((face) => (face.score < 0.5));
       }
@@ -139,6 +148,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
       final faceCrops = getCachedFaceCrops(file, faces);
       final List<String> faceIDs = [];
+      final List<double> faceScores = [];
       for (final Face face in faces) {
         final String? clusterID = faceIdsToClusterIds[face.faceID];
         final PersonEntity? person = clusterIDToPerson[clusterID] != null
@@ -147,6 +157,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         final highlight =
             (clusterID == lastViewedClusterID) && (person == null);
         faceIDs.add(face.faceID);
+        faceScores.add(face.score);
         faceWidgets.add(
           FaceWidget(
             file,
@@ -160,7 +171,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         );
       }
 
-      _logger.info('File ${file.uploadedFileID} has FaceIDs: $faceIDs');
+      _logger.info(
+        'File ${file.uploadedFileID} has FaceIDs: $faceIDs with scores: $faceScores',
+      );
 
       return faceWidgets;
     } catch (e, s) {
