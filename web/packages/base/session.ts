@@ -5,15 +5,19 @@ import { toB64 } from "./crypto/libsodium";
 /**
  * Remove all data stored in session storage (data tied to the browser tab).
  *
- * See `docs/storage.md` for more details about session storage.
+ * See `docs/storage.md` for more details about session storage. Currently, only
+ * the following entries are stored in session storage:
+ *
+ * - "encryptionKey"
+ * - "keyEncryptionKey" (transient)
  */
 export const clearSessionStorage = () => sessionStorage.clear();
 
-// TODO: Same as B64EncryptionResult. Revisit.
 /**
- * Schema of "encryptionKey" JSON string stored in session storage.
+ * Schema of JSON string value for the "encryptionKey" and "keyEncryptionKey"
+ * keys strings stored in session storage.
  */
-const EncryptionKeyAttributes = z.object({
+const SessionKeyData = z.object({
     encryptedData: z.string(),
     key: z.string(),
     nonce: z.string(),
@@ -74,7 +78,7 @@ export const masterKeyFromSessionIfLoggedIn = async () => {
     const value = sessionStorage.getItem("encryptionKey");
     if (!value) return undefined;
 
-    const { encryptedData, key, nonce } = EncryptionKeyAttributes.parse(
+    const { encryptedData, key, nonce } = SessionKeyData.parse(
         JSON.parse(value),
     );
     return decryptBox({ encryptedData, nonce }, key);
@@ -85,3 +89,32 @@ export const masterKeyFromSessionIfLoggedIn = async () => {
  * base64 string.
  */
 export const masterKeyB64FromSession = () => masterKeyFromSession().then(toB64);
+
+/**
+ * Return the decrypted user's key encryption key ("kek") from session storage
+ * if present, otherwise return `undefined`.
+ *
+ * [Note: Stashing kek in session store]
+ *
+ * During login, if the user has set a second factor (passkey or TOTP), then we
+ * need to redirect them to the accounts app or TOTP page to verify the second
+ * factor. This second factor verification happens after password verification,
+ * but simply storing the decrypted kek in-memory wouldn't work because the
+ * second factor redirect can happen to a separate accounts app altogether.
+ *
+ * So instead, we stash the encrypted kek in session store (using
+ * {@link stashKeyEncryptionKeyInSessionStore}), and after redirect, retrieve
+ * it (after clearing it) using {@link unstashKeyEncryptionKeyFromSession}.
+ */
+export const unstashKeyEncryptionKeyFromSession = async () => {
+    // TODO: Same value as the deprecated getKey("keyEncryptionKey")
+    const value = sessionStorage.getItem("keyEncryptionKey");
+    if (!value) return undefined;
+
+    sessionStorage.removeItem("keyEncryptionKey");
+
+    const { encryptedData, key, nonce } = SessionKeyData.parse(
+        JSON.parse(value),
+    );
+    return decryptBox({ encryptedData, nonce }, key);
+};

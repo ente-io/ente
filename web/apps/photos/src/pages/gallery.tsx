@@ -32,7 +32,10 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
-import { clearSessionStorage, haveCredentialsInSession } from "ente-base/session";
+import {
+    clearSessionStorage,
+    haveCredentialsInSession,
+} from "ente-base/session";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
@@ -556,7 +559,6 @@ const Page: React.FC = () => {
         async (force = false, silent = false) => {
             if (!navigator.onLine) return;
             if (!haveCredentialsInSession()) {
-                // TODO: clear shouldn't be required once we remove kek from ss.
                 clearSessionStorage();
                 router.push("/credentials");
                 return;
