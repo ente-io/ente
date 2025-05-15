@@ -1,9 +1,9 @@
 import "package:collection/collection.dart";
 import "package:flutter/widgets.dart";
-import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/ui/viewer/people/save_or_edit_person.dart";
+import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -33,16 +33,15 @@ Future<void> showAlreadyLinkedEmailDialog(
 
   await showChoiceActionSheet(
     context,
-    title: 'Email already assigned',
-    body: 'This email is already assigned to ${person.data.name}.',
-    firstButtonLabel: S.of(context).editPerson,
+    title: context.l10n.error,
+    body: context.l10n.editEmailAlreadyLinked(person.data.name),
+    firstButtonLabel: context.l10n.viewPersonToUnlink(person.data.name),
     firstButtonOnTap: () async {
       await routeToPage(
         context,
-        SaveOrEditPerson(
-          person.data.assigned.firstOrNull?.id,
+        PeoplePage(
           person: person,
-          isEditing: true,
+          searchResult: null,
         ),
       );
     },
