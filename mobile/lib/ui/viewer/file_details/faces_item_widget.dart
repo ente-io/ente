@@ -6,6 +6,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
@@ -72,7 +73,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
       // Remove faces with low scores
       if (!kDebugMode) {
-        faces.removeWhere((face) => (face.score < 0.75));
+        faces.removeWhere((face) => (face.score < kMinimumFaceShowScore));
       } else {
         faces.removeWhere((face) => (face.score < 0.5));
       }
