@@ -83,7 +83,7 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
     // deployments).
     const { keyAttributes } = SessionValidityResponse.parse(await res.json());
     if (keyAttributes) {
-        const remoteKeyAttributes = keyAttributes satisfies KeyAttributes;
+        const remoteKeyAttributes = keyAttributes;
 
         // We should have these values locally if we reach here.
         const email = ensureLocalUser().email;
@@ -108,7 +108,10 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
                 // changed.
                 return {
                     status: "validButPasswordChanged",
-                    updatedKeyAttributes: remoteKeyAttributes,
+                    // TODO:
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    updatedKeyAttributes: remoteKeyAttributes as KeyAttributes,
                     updatedSRPAttributes: remoteSRPAttributes,
                 };
             }
