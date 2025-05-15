@@ -606,7 +606,7 @@ const detectVideoCharacteristics = async (inputFilePath: string) => {
     const brs = videoBitrateRegex.exec(videoStreamLine)?.at(0);
     if (brs) {
         const br = parseInt(brs, 10);
-        if (br) res.bitrate = br;
+        if (br) res.bitrate = br * 1000;
     }
 
     return res;
