@@ -54,7 +54,6 @@ import {
 import { useBaseContext } from "ente-base/context";
 import {
     getLocaleInUse,
-    pt,
     setLocaleInUse,
     supportedLocales,
     ut,
@@ -827,9 +826,7 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                             </RowButtonGroupTitle>
                             <RowButtonGroup>
                                 <RowSwitch
-                                    label={
-                                        /* TODO(HLS): */ pt("Streamable videos")
-                                    }
+                                    label={t("streamable_videos")}
                                     checked={isHLSGenerationEnabled}
                                     onClick={() => void toggleHLSGeneration()}
                                 />

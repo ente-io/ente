@@ -65,7 +65,7 @@ export const setLSUser = async (user: object) => {
 export const migrateKVToken = async (user: unknown) => {
     // Throw an error if the data is in local storage but not in IndexedDB. This
     // is a pre-cursor to inlining this code.
-    // TODO(REL): Remove this sanity check after a few days.
+    // TODO: Remove this sanity check eventually when this code is revisited.
     const oldLSUser = getData("user");
     const wasMissing =
         oldLSUser &&

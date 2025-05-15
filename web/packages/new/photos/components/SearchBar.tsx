@@ -16,7 +16,6 @@ import {
 import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
-import { pt } from "ente-base/i18n";
 import {
     hlsGenerationStatusSnapshot,
     isHLSGenerationSupported,
@@ -430,8 +429,7 @@ const EmptyState: React.FC<
         case "done":
             // If ML is not running, see if video processing is.
             if (vpStatus?.enabled && vpStatus.status == "processing") {
-                // TODO(HLS):
-                label = pt("Processing videos...");
+                label = t("processing_videos_status");
             }
             break;
         case "scheduled":
