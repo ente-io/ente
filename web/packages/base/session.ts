@@ -9,6 +9,36 @@ import { toB64 } from "./crypto/libsodium";
  */
 export const clearSessionStorage = () => sessionStorage.clear();
 
+// TODO: Same as B64EncryptionResult. Revisit.
+/**
+ * Schema of "encryptionKey" JSON string stored in session storage.
+ */
+const EncryptionKeyAttributes = z.object({
+    encryptedData: z.string(),
+    key: z.string(),
+    nonce: z.string(),
+});
+
+/**
+ * Save the user's encrypted master key in the session storage.
+ *
+ * @param keyB64 The user's master key as a base64 encoded string.
+ */
+// TODO(RE):
+// export const saveMasterKeyInSessionStore = async (
+//     keyB64: string,
+//     fromDesktop?: boolean,
+// ) => {
+//     const cryptoWorker = await sharedCryptoWorker();
+//     const sessionKeyAttributes =
+//         await cryptoWorker.generateKeyAndEncryptToB64(key);
+//     setKey(keyType, sessionKeyAttributes);
+//     const electron = globalThis.electron;
+//     if (electron && !fromDesktop) {
+//         electron.saveMasterKeyB64(key);
+//     }
+// };
+
 /**
  * Return the user's decrypted master key from session storage.
  *
@@ -55,10 +85,3 @@ export const masterKeyFromSessionIfLoggedIn = async () => {
  * base64 string.
  */
 export const masterKeyB64FromSession = () => masterKeyFromSession().then(toB64);
-
-// TODO: Same as B64EncryptionResult. Revisit.
-const EncryptionKeyAttributes = z.object({
-    encryptedData: z.string(),
-    key: z.string(),
-    nonce: z.string(),
-});
