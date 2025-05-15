@@ -135,6 +135,17 @@ import {
 } from "utils/collection";
 import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
 
+/**
+ * Options to customize the behaviour of the sync with remote that gets
+ * triggered on various actions within the gallery and its descendants.
+ */
+interface SyncWithRemoteOpts {
+    /** Force a sync to happen (default: no) */
+    force?: boolean;
+    /** Perform the sync without showing a global loading bar (default: no) */
+    silent?: boolean;
+}
+
 const defaultGalleryContext: GalleryContextType = {
     setActiveCollectionID: () => null,
     syncWithRemote: () => null,
@@ -191,13 +202,11 @@ const Page: React.FC = () => {
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
 
-    const syncInProgress = useRef(false);
-    const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
-        undefined,
-    );
-    const resync = useRef<{ force: boolean; silent: boolean } | undefined>(
-        undefined,
-    );
+    /**`true` if a sync is currently in progress. */
+    const isSyncing = useRef(false);
+    /** Set to the {@link SyncWithRemoteOpts} of the last sync that was enqueued
+        while one was already in progress. */
+    const resyncOpts = useRef<SyncWithRemoteOpts | undefined>(undefined);
 
     const [userIDToEmailMap, setUserIDToEmailMap] =
         useState<Map<number, string>>(null);
@@ -300,6 +309,8 @@ const Page: React.FC = () => {
         preloadImage("/images/subscription-card-background");
 
         const electron = globalThis.electron;
+        let syncIntervalID: ReturnType<typeof setInterval> | undefined;
+
         void (async () => {
             if (!(await validateKey())) {
                 logout();
@@ -326,21 +337,23 @@ const Page: React.FC = () => {
                 hiddenFiles: await getLocalFiles("hidden"),
                 trashedFiles: await getLocalTrashedFiles(),
             });
-            await syncWithRemote(true);
+            await syncWithRemote({ force: true });
             setIsFirstLoad(false);
             setJustSignedUp(false);
-            syncInterval.current = setInterval(
-                () => syncWithRemote(false, true),
+            syncIntervalID = setInterval(
+                () => syncWithRemote({ silent: true }),
                 5 * 60 * 1000 /* 5 minutes */,
             );
             if (electron) {
-                electron.onMainWindowFocus(() => syncWithRemote(false, true));
+                electron.onMainWindowFocus(() =>
+                    syncWithRemote({ silent: true }),
+                );
                 if (await shouldShowWhatsNew(electron)) showWhatsNew();
             }
         })();
 
         return () => {
-            clearInterval(syncInterval.current);
+            clearInterval(syncIntervalID);
             if (electron) electron.onMainWindowFocus(undefined);
         };
     }, []);
@@ -513,7 +526,7 @@ const Page: React.FC = () => {
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
 
-    const handleFileAndCollectionSyncWithRemote = useCallback(async () => {
+    const fileAndCollectionSyncWithRemote = useCallback(async () => {
         const didUpdateFiles = await syncCollectionAndFiles({
             onSetCollections: (
                 collections,
@@ -542,8 +555,11 @@ const Page: React.FC = () => {
         }
     }, []);
 
-    const handleSyncWithRemote = useCallback(
-        async (force = false, silent = false) => {
+    const syncWithRemote = useCallback(
+        async (opts?: SyncWithRemoteOpts) => {
+            const { force, silent } = opts ?? {};
+
+            // Pre-flight checks.
             if (!navigator.onLine) return;
             if (await isSessionInvalid()) {
                 showSessionExpiredDialog();
@@ -554,16 +570,24 @@ const Page: React.FC = () => {
                 router.push("/credentials");
                 return;
             }
-            if (syncInProgress.current && !force) {
-                resync.current = { force, silent };
-                return;
+
+            // Start or enqueue.
+            let isForced = false;
+            if (isSyncing.current) {
+                if (force) {
+                    isForced = true;
+                } else {
+                    resyncOpts.current = { force, silent };
+                    return;
+                }
             }
-            const isForced = syncInProgress.current && force;
-            syncInProgress.current = true;
+
+            // The sync
+            isSyncing.current = true;
             try {
                 if (!silent) showLoadingBar();
                 await preCollectionAndFilesSync();
-                await handleFileAndCollectionSyncWithRemote();
+                await fileAndCollectionSyncWithRemote();
                 // syncWithRemote is called with the force flag set to true before
                 // doing an upload. So it is possible, say when resuming a pending
                 // upload, that we get two syncWithRemotes happening in parallel.
@@ -578,11 +602,12 @@ const Page: React.FC = () => {
                 dispatch({ type: "clearUnsyncedState" });
                 if (!silent) hideLoadingBar();
             }
-            syncInProgress.current = false;
-            if (resync.current) {
-                const { force, silent } = resync.current;
-                setTimeout(() => handleSyncWithRemote(force, silent), 0);
-                resync.current = undefined;
+            isSyncing.current = false;
+
+            const nextOpts = resyncOpts.current;
+            if (nextOpts) {
+                resyncOpts.current = undefined;
+                setTimeout(() => syncWithRemote(nextOpts), 0);
             }
         },
         [
@@ -590,12 +615,9 @@ const Page: React.FC = () => {
             hideLoadingBar,
             router,
             showSessionExpiredDialog,
-            handleFileAndCollectionSyncWithRemote,
+            fileAndCollectionSyncWithRemote,
         ],
     );
-
-    // Alias for existing code.
-    const syncWithRemote = handleSyncWithRemote;
 
     const setupSelectAllKeyBoardShortcutHandler = () => {
         const handleKeyUp = (e: KeyboardEvent) => {
@@ -670,7 +692,7 @@ const Page: React.FC = () => {
                     );
                 }
                 clearSelection();
-                await syncWithRemote(false, true);
+                await syncWithRemote({ silent: true });
             } catch (e) {
                 onGenericError(e);
             } finally {
@@ -706,7 +728,7 @@ const Page: React.FC = () => {
                 );
             }
             clearSelection();
-            await syncWithRemote(false, true);
+            await syncWithRemote({ silent: true });
         } catch (e) {
             onGenericError(e);
         } finally {
@@ -879,7 +901,8 @@ const Page: React.FC = () => {
             value={{
                 ...defaultGalleryContext,
                 setActiveCollectionID: handleSetActiveCollectionID,
-                syncWithRemote,
+                syncWithRemote: (force, silent) =>
+                    syncWithRemote({ force, silent }),
                 setBlockingLoad,
                 photoListHeader,
                 userIDToEmailMap,
@@ -1029,7 +1052,9 @@ const Page: React.FC = () => {
 
                 <Upload
                     activeCollection={activeCollection}
-                    syncWithRemote={syncWithRemote}
+                    syncWithRemote={(force, silent) =>
+                        syncWithRemote({ force, silent })
+                    }
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
                         false,
@@ -1113,7 +1138,7 @@ const Page: React.FC = () => {
                         }
                         onMarkTempDeleted={handleMarkTempDeleted}
                         onSetOpenFileViewer={setIsFileViewerOpen}
-                        onSyncWithRemote={handleSyncWithRemote}
+                        onSyncWithRemote={syncWithRemote}
                         onVisualFeedback={handleVisualFeedback}
                         onSelectCollection={handleSelectCollection}
                         onSelectPerson={handleSelectPerson}
