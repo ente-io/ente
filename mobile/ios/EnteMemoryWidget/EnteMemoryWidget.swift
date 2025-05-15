@@ -13,7 +13,7 @@ import WidgetKit
 private let widgetGroupId = "group.io.ente.frame.EnteMemoryWidget"
 
 struct Provider: TimelineProvider {
-    let X = 15
+    let minutes = 15
     let data = UserDefaults(suiteName: widgetGroupId)
 
     func placeholder(in _: Context) -> FileEntry {
@@ -47,7 +47,7 @@ struct Provider: TimelineProvider {
             for offset in 0..<count! {
                 let randomInt = Int.random(in: 0..<totalMemories!)
                 let entryDate = Calendar.current.date(
-                    byAdding: .minute, value: X * offset, to: currentDate
+                    byAdding: .minute, value: minutes * offset, to: currentDate
                 )!
                 let imageData =
                     data?.string(forKey: "memory_widget_" + String(randomInt))
@@ -229,8 +229,8 @@ struct EnteMemoryWidget: Widget {
                     .background()
             }
         }
-        .configurationDisplayName("Your memories")
-        .description("See special moments from the past.")
+        .configurationDisplayName("Memories")
+        .description("See special moments from the past")
         .contentMarginsDisabled()
     }
 }
