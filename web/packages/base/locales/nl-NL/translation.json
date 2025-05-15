@@ -675,5 +675,7 @@
     "theme": "Thema",
     "system": "Systeem",
     "light": "Licht",
-    "dark": "Donker"
+    "dark": "Donker",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }

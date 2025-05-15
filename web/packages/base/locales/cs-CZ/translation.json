@@ -675,5 +675,7 @@
     "theme": "Téma",
     "system": "Systém",
     "light": "Světlý",
-    "dark": "Tmavý"
+    "dark": "Tmavý",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }
