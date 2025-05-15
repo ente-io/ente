@@ -31,6 +31,7 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
+import { clearSessionStorage } from "ente-base/session";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "ente-shared/components/SingleInputForm";
@@ -41,7 +42,6 @@ import {
     getLocalReferralSource,
     setIsFirstLogin,
 } from "ente-shared/storage/localStorage/helpers";
-import { clearKeys } from "ente-shared/storage/sessionStorage";
 import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -153,7 +153,7 @@ const Page: React.FC = () => {
                 setIsFirstLogin(true);
                 const redirectURL = unstashRedirect();
                 if (keyAttributes?.encryptedKey) {
-                    clearKeys();
+                    clearSessionStorage();
                     void router.push(redirectURL ?? "/credentials");
                 } else {
                     void router.push(redirectURL ?? "/generate");

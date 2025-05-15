@@ -32,6 +32,7 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
+import { clearSessionStorage, haveCredentialsInSession } from "ente-base/session";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
@@ -103,7 +104,7 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from "ente-shared/storage/localStorage/helpers";
-import { clearKeys, getKey } from "ente-shared/storage/sessionStorage";
+import { getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
@@ -554,6 +555,12 @@ const Page: React.FC = () => {
     const handleSyncWithRemote = useCallback(
         async (force = false, silent = false) => {
             if (!navigator.onLine) return;
+            if (!haveCredentialsInSession()) {
+                // TODO: clear shouldn't be required once we remove kek from ss.
+                clearSessionStorage();
+                router.push("/credentials");
+                return;
+            }
             if (syncInProgress.current && !force) {
                 resync.current = { force, silent };
                 return;
@@ -584,10 +591,6 @@ const Page: React.FC = () => {
                 switch (e.message) {
                     case CustomError.SESSION_EXPIRED:
                         showSessionExpiredDialog();
-                        break;
-                    case CustomError.KEY_MISSING:
-                        clearKeys();
-                        router.push("/credentials");
                         break;
                     default:
                         log.error("syncWithRemote failed", e);

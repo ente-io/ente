@@ -3,6 +3,13 @@ import { decryptBox } from "./crypto";
 import { toB64 } from "./crypto/libsodium";
 
 /**
+ * Remove all data stored in session storage (data tied to the browser tab).
+ *
+ * See `docs/storage.md` for more details about session storage.
+ */
+export const clearSessionStorage = () => sessionStorage.clear();
+
+/**
  * Return the user's decrypted master key from session storage.
  *
  * Precondition: The user should be logged in.
