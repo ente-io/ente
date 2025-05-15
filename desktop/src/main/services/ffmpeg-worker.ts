@@ -45,6 +45,8 @@ export interface FFmpegUtilityProcess {
         outputPathPrefix: string,
         outputUploadURL: string,
     ) => Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined>;
+
+    ffmpegDetermineVideoDuration: (inputFilePath: string) => Promise<number>;
 }
 
 log.debugString("Started ffmpeg utility process");
@@ -57,6 +59,7 @@ process.parentPort.once("message", (e) => {
             ffmpegExec,
             ffmpegConvertToMP4,
             ffmpegGenerateHLSPlaylistAndSegments,
+            ffmpegDetermineVideoDuration,
         } satisfies FFmpegUtilityProcess,
         messagePortMainEndpoint(e.ports[0]!),
     );
@@ -226,6 +229,8 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
     // If the video is smaller than 10 MB, and already H.264 (the codec we are
     // going to use for the conversion), then a streaming variant is not much
     // use. Skip such cases.
+    //
+    // See also: [Note: Marking files which do not need video processing]
     //
     // ---
     //
@@ -546,6 +551,7 @@ interface VideoCharacteristics {
     isBT709: boolean;
     bitrate: number | undefined;
 }
+
 /**
  * Heuristically determine information about the video at the given
  * {@link inputFilePath}:
@@ -818,4 +824,60 @@ const uploadVideoSegments = async (
             await wait(t);
         }
     }
+};
+
+/**
+ * A regex that matches the first line of the form
+ *
+ *   Duration: 00:00:03.13, start: 0.000000, bitrate: 16088 kb/s
+ *
+ * The part after Duration: and until the first non-digit or colon is the first
+ * capture group, while after the dot is an optional second capture group.
+ */
+const videoDurationLineRegex = /\s\sDuration: ([0-9:]+)(.[0-9]+)?/;
+
+/**
+ * Determine the duration of the video at the given {@link inputFilePath}.
+ *
+ * While the detection works for all known cases, it is still heuristic because
+ * it uses ffmpeg output instead of ffprobe (which we don't have access to).
+ * See: [Note: Parsing CLI output might break on ffmpeg updates].
+ */
+export const ffmpegDetermineVideoDuration = async (inputFilePath: string) => {
+    const videoInfo = await pseudoFFProbeVideo(inputFilePath);
+    const matches = videoDurationLineRegex.exec(videoInfo);
+
+    const fail = () => {
+        throw new Error(`Cannot parse video duration '${matches?.at(0)}'`);
+    };
+
+    // The HH:mm:ss.
+    const ints = (matches?.at(1) ?? "")
+        .split(":")
+        .map((s) => parseInt(s, 10) || 0);
+    let [h, m, s] = [0, 0, 0];
+    switch (ints.length) {
+        case 1:
+            s = ints[0]!;
+            break;
+        case 2:
+            m = ints[0]!;
+            s = ints[1]!;
+            break;
+        case 3:
+            h = ints[0]!;
+            m = ints[1]!;
+            s = ints[2]!;
+            break;
+        default:
+            fail();
+    }
+
+    // Optional subseconds.
+    const ss = parseFloat(`0${matches?.at(2) ?? ""}`);
+
+    // Follow the same round up behaviour that the web side uses.
+    const duration = Math.ceil(h * 3600 + m * 60 + s + ss);
+    if (!duration) fail();
+    return duration;
 };

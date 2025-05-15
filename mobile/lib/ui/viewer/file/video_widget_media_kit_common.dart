@@ -7,7 +7,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/ui/viewer/file/preview_status_widget.dart";
+import "package:photos/ui/viewer/file/video_stream_change.dart";
 import "package:photos/utils/standalone/date_time.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 
@@ -132,7 +132,7 @@ class _VideoWidgetState extends State<VideoWidget> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              PreviewStatusWidget(
+                              VideoStreamChangeWidget(
                                 showControls: value,
                                 file: widget.file,
                                 isPreviewPlayer: widget.isPreviewPlayer,

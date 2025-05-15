@@ -193,28 +193,31 @@ const convertToJPEG = (imageData: Uint8Array) =>
     ipcRenderer.invoke("convertToJPEG", imageData);
 
 const generateImageThumbnail = (
-    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+    pathOrZipItem: string | ZipItem,
     maxDimension: number,
     maxSize: number,
 ) =>
     ipcRenderer.invoke(
         "generateImageThumbnail",
-        dataOrPathOrZipItem,
+        pathOrZipItem,
         maxDimension,
         maxSize,
     );
 
 const ffmpegExec = (
     command: FFmpegCommand,
-    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+    pathOrZipItem: string | ZipItem,
     outputFileExtension: string,
 ) =>
     ipcRenderer.invoke(
         "ffmpegExec",
         command,
-        dataOrPathOrZipItem,
+        pathOrZipItem,
         outputFileExtension,
     );
+
+const ffmpegDetermineVideoDuration = (pathOrZipItem: string | ZipItem) =>
+    ipcRenderer.invoke("ffmpegDetermineVideoDuration", pathOrZipItem);
 
 // - Utility processes
 
@@ -392,6 +395,7 @@ contextBridge.exposeInMainWorld("electron", {
     convertToJPEG,
     generateImageThumbnail,
     ffmpegExec,
+    ffmpegDetermineVideoDuration,
 
     // - ML
 

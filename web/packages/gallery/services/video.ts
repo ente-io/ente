@@ -8,10 +8,14 @@ import {
     retryAsyncOperation,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
-import { getKV, getKVN, setKV } from "ente-base/kv";
+import { getKV, getKVB, getKVN, setKV } from "ente-base/kv";
 import { ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { fileLogID, type EnteFile } from "ente-media/file";
+import {
+    filePublicMagicMetadata,
+    updateRemotePublicMagicMetadata,
+} from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import {
     getAllLocalFiles,
@@ -45,6 +49,12 @@ import {
     type TimestampedFileSystemUploadItem,
 } from "./upload";
 
+export type HLSGenerationEnabledStatus = "processing" | "idle";
+
+export type HLSGenerationStatus =
+    | { enabled: false }
+    | { enabled: true; status?: HLSGenerationEnabledStatus };
+
 interface VideoProcessingQueueItem {
     /**
      * The {@link EnteFile} (guaranteed to be of {@link FileType.video}) whose
@@ -71,6 +81,25 @@ const idleWaitMax = idleWaitInitial * 2 ** 6; /* 640 sec */
  * This entire object will be reset on logout.
  */
 class VideoState {
+    /**
+     * `true` if the generation of HLS streams has been enabled on this client.
+     */
+    isHLSGenerationEnabled = false;
+    /**
+     * Subscriptions to {@link HLSGenerationStatus} updates attached using
+     * {@link hlsGenerationStatusSubscribe}.
+     */
+    hlsGenerationStatusListeners: (() => void)[] = [];
+    /**
+     * Snapshot of the {@link HLSGenerationStatus} returned by the
+     * {@link hlsGenerationStatusSnapshot} function.
+     */
+    hlsGenerationStatusSnapshot: HLSGenerationStatus | undefined;
+    /**
+     * Value of the {@link status} field in the last
+     * {@link hlsGenerationStatusSnapshot}.
+     */
+    lastEnabledStatus: HLSGenerationEnabledStatus | undefined;
     /**
      * Queue of recently uploaded items waiting to be processed.
      */
@@ -125,6 +154,132 @@ export const resetVideoState = () => {
     _state = new VideoState();
 };
 
+/**
+ * A function that can be used to subscribe to updates in the HLS generation
+ * settings and status.
+ *
+ * See: [Note: Snapshots and useSyncExternalStore].
+ */
+export const hlsGenerationStatusSubscribe = (
+    onChange: () => void,
+): (() => void) => {
+    _state.hlsGenerationStatusListeners.push(onChange);
+    return () => {
+        _state.hlsGenerationStatusListeners =
+            _state.hlsGenerationStatusListeners.filter((l) => l != onChange);
+    };
+};
+
+/**
+ * Return the last know, cached {@link HLSGenerationStatus}.
+ *
+ * See also {@link hlsGenerationStatusSubscribe}.
+ *
+ * This function can be safely called even if {@link isHLSGenerationSupported}
+ * is `false` (in such cases, it will always return `undefined`). This is so
+ * that it can be unconditionally called as part of a React hook.
+ *
+ * A return value of `undefined` indicates that the HLS generation subsystem has
+ * not been initialized yet.
+ */
+export const hlsGenerationStatusSnapshot = () =>
+    _state.hlsGenerationStatusSnapshot;
+
+const setHLSGenerationStatusSnapshot = (snapshot: HLSGenerationStatus) => {
+    _state.hlsGenerationStatusSnapshot = snapshot;
+    _state.hlsGenerationStatusListeners.forEach((l) => l());
+};
+
+/**
+ * A variant of {@link setHLSGenerationStatusSnapshot} that only triggers an
+ * update of the snapshot if the enabled state is different from the last known
+ * enabled state.
+ */
+const updateSnapshotIfNeeded = (
+    status: HLSGenerationEnabledStatus | undefined,
+) => {
+    const enabled = _state.isHLSGenerationEnabled;
+    if (enabled && status != _state.lastEnabledStatus) {
+        _state.lastEnabledStatus = status;
+        setHLSGenerationStatusSnapshot({ enabled, status });
+    }
+};
+
+/**
+ * Return `true` if this client is capable of generating HLS streams for
+ * uploaded videos.
+ *
+ * This function implementation is fast and can be called many times (e.g.
+ * during UI rendering).
+ */
+export const isHLSGenerationSupported = () =>
+    // Keep this check fast, we get called many times.
+    isDesktop &&
+    // TODO(HLS):
+    settingsSnapshot().isInternalUser;
+
+// TODO(HLS): Only the isDesktop flag is needed eventually.
+export const isHLSGenerationSupportedTemp = () => isDesktop;
+
+/**
+ * Initialize the video processing subsystem if the user has enabled HLS
+ * generation in settings.
+ */
+export const initVideoProcessing = async () => {
+    let enabled = false;
+    if (await savedGenerateHLS()) enabled = true;
+
+    _state.isHLSGenerationEnabled = enabled;
+
+    // Update snapshot to reflect the enabled setting. The status will get
+    // filled in when we tick.
+    setHLSGenerationStatusSnapshot({ enabled });
+};
+
+/**
+ * Return the persisted user preference for HLS generation.
+ */
+const savedGenerateHLS = () => getKVB("generateHLS");
+
+/**
+ * Update the persisted user preference for HLS generation.
+ *
+ * Use {@link savedGenerateHLS} to get the persisted value back.
+ */
+const saveGenerateHLS = (enabled: boolean) => setKV("generateHLS", enabled);
+
+/**
+ * Enable or disable (toggle) the HLS generation on this client.
+ *
+ * When HLS generation is enabled, this client will process videos to generate a
+ * streamable variant of them.
+ *
+ * Precondition: {@link isHLSGenerationSupported} must be `true`.
+ */
+export const toggleHLSGeneration = async () => {
+    if (!isHLSGenerationSupported()) {
+        assertionFailed();
+        return;
+    }
+
+    const enabled = !_state.isHLSGenerationEnabled;
+
+    // Clear transient fields.
+    _state.lastEnabledStatus = undefined;
+
+    // Update disk.
+    await saveGenerateHLS(enabled);
+    // Update in memory.
+    _state.isHLSGenerationEnabled = enabled;
+
+    // Update snapshot. Right now we only set the enabled setting. The status
+    // will get filled in when we tick.
+    setHLSGenerationStatusSnapshot({ enabled });
+
+    // Wake up the processor if needed.
+    if (enabled) tickNow();
+};
+
 export interface HLSPlaylistData {
     /** A data URL to a HLS playlist that streams the video. */
     playlistURL: string;
@@ -133,6 +288,11 @@ export interface HLSPlaylistData {
     /** The height of the video (px). */
     height: number;
 }
+
+/**
+ * See: [Note: Caching HLS playlist data] for the semantics of "skip".
+ */
+export type HLSPlaylistDataForFile = HLSPlaylistData | "skip" | undefined;
 
 /**
  * Return a HLS playlist that can be used to stream playback of then given video
@@ -167,33 +327,34 @@ export interface HLSPlaylistData {
  *   regenerated again). All in all, this means that a positive result ("this
  *   file has a playlist") can be cached indefinitely.
  *
- * - If a file does not have a HLS playlist, and it is eligible for being
- *   streamed (e.g. it is not too small where the streaming overhead is not
- *   required), then a client (this one, or a different one) can process it at
- *   any arbitrary time. So the negative result ("this file does not have a
+ * - If a file does not have a HLS playlist, it might be because it is not
+ *   eligible for being streamed (e.g. it is already small and in a compatible
+ *   codec). See [Note: Marking files which do not need video processing] for
+ *   more details of this case. In particular, we can cache this state in memory
+ *   indefinitely too, since there isn't a current case where either this
+ *   eligibility can change, or the client gain the ability to handle them
+ *   without restarting.
+ *
+ * - Finally, if a file does not have an HLS playlist but and it is eligible for
+ *   being streamed, then a client (this one, or a different one) can process it
+ *   at any arbitrary time. So the negative result ("this file does not have a
  *   playlist") cannot be cached.
  *
- * So while we can easily cache the first case ("this file has a playlist"), we
- * need to deal with the second case ("this file does not have a playlist") a
- * bit more intricately:
- *
- * - If running in the context of a logged in user (e.g. photos app), we can use
- *   the "/files/data/status-diff" API to be notified of any modifications to
- *   the second case for the user's own files. This status-diff happens during
- *   the regular "sync", and we can use that as a cue to selectively prune cache
- *   entries for the second case (but can otherwise indefinitely cache it).
- *
- * - If the file is a shared file, the status-diff will not return it. And if
- *   we're not running in the context of a logged in user (e.g. the public
- *   albums app), then there is no status-diff to do. For these two scenarios,
- *   we thus mark the cached values as "transient" and always recheck for a
- *   playlist when opening the slide.
+ * So while we can easily cache the first case ("this file has a playlist") and
+ * second case ("this file doesn't need a streaming variant"), we need to deal
+ * with the third case ("this file does not have a playlist") by marking the
+ * cached values as "transient" and always recheck for a playlist when opening
+ * the slide.
  */
 export const hlsPlaylistDataForFile = async (
     file: EnteFile,
     publicAlbumsCredentials?: PublicAlbumsCredentials,
-): Promise<HLSPlaylistData | undefined> => {
+): Promise<HLSPlaylistDataForFile> => {
     ensurePrecondition(file.metadata.fileType == FileType.video);
+
+    if (filePublicMagicMetadata(file)?.sv == 1) {
+        return "skip";
+    }
 
     const playlistFileData = await fetchFileData(
         "vid_preview",
@@ -511,7 +672,7 @@ const syncProcessedFileIDs = async () =>
 export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
     deletedFileIDs: Set<number>,
 ) => {
-    if (!isDesktop) return;
+    if (!isHLSGenerationSupported()) return;
 
     const existing = await savedProcessedVideoFileIDs();
     if (existing.size > 0) {
@@ -540,11 +701,18 @@ export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
  * that have already been processed elsewhere.
  */
 export const videoProcessingSyncIfNeeded = async () => {
-    if (!isDesktop) return;
-    if (!isVideoProcessingEnabled()) return;
+    if (!isHLSGenerationSupported()) return;
+
+    // The `haveSyncedOnce` flag tracks whether or not a sync has happened for
+    // the app, and is not specific to video processing. We always set it even
+    // if HLS generation is currently disabled so that we can immediately start
+    // processing the backfill if it gets video processing gets enabled during
+    // the app's session, without waiting for the next sync to happen.
+    _state.haveSyncedOnce = true;
+
+    if (!isHLSGenerationEnabled()) return;
 
     await syncProcessedFileIDs();
-    _state.haveSyncedOnce = true;
 
     tickNow(); /* if not already ticking */
 };
@@ -576,8 +744,8 @@ export const processVideoNewUpload = (
     file: EnteFile,
     processableUploadItem: ProcessableUploadItem,
 ) => {
-    if (!isDesktop) return;
-    if (!isVideoProcessingEnabled()) return;
+    if (!isHLSGenerationSupported()) return;
+    if (!isHLSGenerationEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
     if (processableUploadItem instanceof File) {
         // While the types don't guarantee it, we really shouldn't be getting
@@ -622,10 +790,7 @@ const tickNow = () => {
     _state.queueProcessor ??= processQueue();
 };
 
-export const isVideoProcessingEnabled = () =>
-    // TODO(HLS):
-    process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
-    settingsSnapshot().isInternalUser;
+export const isHLSGenerationEnabled = () => _state.isHLSGenerationEnabled;
 
 /**
  * The video processing loop goes through videos one by one, preferring items in
@@ -664,7 +829,7 @@ export const isVideoProcessingEnabled = () =>
  * batches, and the externally triggered processing of live uploads.
  */
 const processQueue = async () => {
-    if (!(isDesktop && isVideoProcessingEnabled())) {
+    if (!isHLSGenerationSupported() || !isHLSGenerationEnabled()) {
         assertionFailed(); /* we shouldn't have come here */
         return;
     }
@@ -672,32 +837,23 @@ const processQueue = async () => {
     const userID = ensureLocalUser().id;
 
     let bq: typeof _state.liveQueue | undefined;
-    while (isVideoProcessingEnabled()) {
+    while (isHLSGenerationEnabled()) {
         let item = _state.liveQueue.shift();
         if (!item) {
-            if (!bq && _state.haveSyncedOnce) {
-                /* initialize */
-                bq = await backfillQueue(userID);
-            }
-            if (bq) {
-                switch (bq.length) {
-                    case 0:
-                        /* no more items to backfill */
-                        break;
-                    case 1 /* last item. take it, and refill queue */:
-                        item = bq.pop();
-                        bq = await backfillQueue(userID);
-                        break;
-                    default:
-                        /* more than one item. take it */
-                        item = bq.pop();
-                        break;
+            // Initialize or refill queue.
+            if (!bq?.length) {
+                if (_state.haveSyncedOnce) {
+                    bq = await backfillQueue(userID);
+                } else {
+                    log.info("Not attempting backfill until first sync");
                 }
-            } else {
-                log.info("Not backfilling since we haven't synced yet");
             }
+            // Take item if queue is not empty.
+            if (bq?.length) item = bq.pop();
         }
         if (item) {
+            updateSnapshotIfNeeded("processing");
+
             try {
                 await processQueueItem(item);
                 await markProcessedVideoFileID(item.file.id);
@@ -711,6 +867,8 @@ const processQueue = async () => {
             // There are no more items in either the live queue or backlog.
             // Go to sleep (for increasingly longer durations, capped at a
             // maximum).
+            updateSnapshotIfNeeded("idle");
+
             const idleWait = _state.idleWait;
             _state.idleWait = Math.min(idleWait * 2, idleWaitMax);
 
@@ -723,6 +881,8 @@ const processQueue = async () => {
             await Promise.race([tick, wait(idleWait)]);
         }
     }
+
+    updateSnapshotIfNeeded(undefined);
 
     _state.queueProcessor = undefined;
 };
@@ -743,9 +903,14 @@ const backfillQueue = async (
     const videoFiles = uniqueFilesByID(
         allCollectionFiles.filter(
             (f) =>
+                // Only files the user owns.
                 f.ownerID == userID &&
+                // Only videos.
                 f.metadata.fileType == FileType.video &&
-                !localTrashFileIDs.has(f.id),
+                // Not in trash.
+                !localTrashFileIDs.has(f.id) &&
+                // See: [Note: Marking files which do not need video processing]
+                filePublicMagicMetadata(f)?.sv != 1,
         ),
     );
 
@@ -856,6 +1021,8 @@ const processQueueItem = async ({
 
     if (!res) {
         log.info(`Generate HLS for ${fileLogID(file)} | not-required`);
+        // See: [Note: Marking files which do not need video processing]
+        await updateRemotePublicMagicMetadata(file, { sv: 1 });
         return;
     }
 

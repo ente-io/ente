@@ -908,13 +908,9 @@ class _EmailSectionState extends State<_EmailSection> {
                           "Error getting isMeAssigned",
                           snapshot.error,
                         );
-                        return const RepaintBoundary(
-                          child: EnteLoadingWidget(),
-                        );
+                        return const EnteLoadingWidget();
                       } else {
-                        return const RepaintBoundary(
-                          child: EnteLoadingWidget(),
-                        );
+                        return const EnteLoadingWidget();
                       }
                     },
                   ),
