@@ -12,6 +12,8 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/models/search/search_constants.dart";
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/ente_theme.dart";
@@ -58,7 +60,8 @@ class _ContactResultPageState extends State<ContactResultPage> {
   void initState() {
     super.initState();
     files = widget.searchResult.resultFiles();
-    collections = widget.searchResult.resultCollections();
+    collections = (widget.searchResult as GenericSearchResult)
+        .params[kContactCollections];
     _searchResultName = widget.searchResult.name();
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {

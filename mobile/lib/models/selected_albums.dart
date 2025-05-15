@@ -19,12 +19,12 @@ class SelectedAlbums extends ChangeNotifier {
     notifyListeners();
   }
 
-  void selectAll(Set<Collection> albumsToSelect) {
+  void select(Set<Collection> albumsToSelect) {
     albums.addAll(albumsToSelect);
     notifyListeners();
   }
 
-  void unSelectAll(
+  void unSelect(
     Set<Collection> albumsToUnselect, {
     bool skipNotify = false,
   }) {

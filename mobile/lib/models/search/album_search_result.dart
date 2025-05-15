@@ -1,4 +1,3 @@
-import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/search/hierarchical/album_filter.dart";
@@ -29,11 +28,6 @@ class AlbumSearchResult extends SearchResult {
   @override
   List<EnteFile> resultFiles() {
     // for album search result, we should open the album page directly
-    throw UnimplementedError();
-  }
-
-  @override
-  List<Collection> resultCollections() {
     throw UnimplementedError();
   }
 

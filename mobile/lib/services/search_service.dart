@@ -1430,12 +1430,11 @@ class SearchService {
             collection.isOwner(ownerID)) {
           continue;
         }
-        if (collection.owner.id != ownerID) {
-          if (peopleToSharedAlbums.containsKey(collection.owner.email)) {
-            peopleToSharedAlbums[collection.owner.email]!.add(collection);
-          } else {
-            peopleToSharedAlbums[collection.owner.email] = [collection];
-          }
+
+        if (peopleToSharedAlbums.containsKey(collection.owner.email)) {
+          peopleToSharedAlbums[collection.owner.email]!.add(collection);
+        } else {
+          peopleToSharedAlbums[collection.owner.email] = [collection];
         }
       }
 
@@ -1521,8 +1520,8 @@ class SearchService {
             params: {
               kPersonParamID: user.linkedPersonID,
               kContactEmail: user.email,
+              kContactCollections: collections,
             },
-            collections: collections,
           ),
         );
       }
