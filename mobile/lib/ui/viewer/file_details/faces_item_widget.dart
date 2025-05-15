@@ -52,23 +52,13 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     late final mlDataDB = MLDataDB.instance;
     try {
       if (file.uploadedFileID == null) {
-        return [
-          ChipButtonWidget(
-            S.of(context).fileNotUploadedYet,
-            noChips: true,
-          ),
-        ];
+        return [const NoFaceChipButtonWidget(NoFacesReason.fileNotUploaded)];
       }
 
       final List<Face>? faces =
           await mlDataDB.getFacesForGivenFileID(file.uploadedFileID!);
       if (faces == null) {
-        return [
-          ChipButtonWidget(
-            S.of(context).imageNotAnalyzed,
-            noChips: true,
-          ),
-        ];
+        return [const NoFaceChipButtonWidget(NoFacesReason.fileNotAnalyzed)];
       }
 
       // Remove faces with low scores
@@ -88,12 +78,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       }
 
       if (faces.isEmpty) {
-        return [
-          ChipButtonWidget(
-            S.of(context).noFacesFound,
-            noChips: true,
-          ),
-        ];
+        return [const NoFaceChipButtonWidget(NoFacesReason.noFacesFound)];
       }
 
       final faceIdsToClusterIds = await mlDataDB
@@ -180,5 +165,45 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       _logger.severe('failed to get face widgets in file info', e, s);
       return <FaceWidget>[];
     }
+  }
+}
+
+enum NoFacesReason {
+  fileNotUploaded,
+  fileNotAnalyzed,
+  noFacesFound,
+}
+
+String getNoFaceReasonText(
+  BuildContext context,
+  NoFacesReason reason,
+) {
+  switch (reason) {
+    case NoFacesReason.fileNotUploaded:
+      return S.of(context).fileNotUploadedYet;
+    case NoFacesReason.fileNotAnalyzed:
+      return S.of(context).imageNotAnalyzed;
+    case NoFacesReason.noFacesFound:
+      return S.of(context).noFacesFound;
+  }
+}
+
+class NoFaceChipButtonWidget extends StatelessWidget {
+  final NoFacesReason reason;
+
+  const NoFaceChipButtonWidget(
+    this.reason, {
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 5),
+      child: ChipButtonWidget(
+        getNoFaceReasonText(context, reason),
+        noChips: true,
+      ),
+    );
   }
 }
