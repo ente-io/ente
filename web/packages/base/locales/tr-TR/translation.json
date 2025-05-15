@@ -675,5 +675,7 @@
     "theme": "Tema",
     "system": "Sistem",
     "light": "Aydınlık",
-    "dark": "Karanlık"
+    "dark": "Karanlık",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }
