@@ -1055,8 +1055,6 @@ const extractImageOrVideoMetadata = async (
         settingsSnapshot().isInternalUser
     ) {
         duration = await tryDetermineVideoDuration(uploadItem);
-        // TODO(HLS):
-        log.debug(() => ["extracted duration", duration]);
     }
 
     // To avoid introducing malformed data into the metadata fields (which the

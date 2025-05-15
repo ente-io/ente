@@ -216,14 +216,10 @@ export const isHLSGenerationSupported = () =>
     // Keep this check fast, we get called many times.
     isDesktop &&
     // TODO(HLS):
-    process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
     settingsSnapshot().isInternalUser;
 
 // TODO(HLS): Only the isDesktop flag is needed eventually.
-export const isHLSGenerationSupportedTemp = () =>
-    isDesktop &&
-    // TODO(HLS):
-    process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING;
+export const isHLSGenerationSupportedTemp = () => isDesktop;
 
 /**
  * Initialize the video processing subsystem if the user has enabled HLS
