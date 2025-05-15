@@ -35,6 +35,7 @@ import log from "ente-base/log";
 import {
     clearSessionStorage,
     haveCredentialsInSession,
+    masterKeyFromSessionIfLoggedIn,
 } from "ente-base/session";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type Collection } from "ente-media/collection";
@@ -291,16 +292,16 @@ const Page: React.FC = () => {
     const router = useRouter();
 
     useEffect(() => {
-        const key = getKey("encryptionKey");
         const token = getToken();
-        if (!key || !token) {
+        if (!haveCredentialsInSession() || !token) {
             stashRedirect("/gallery");
             router.push("/");
             return;
         }
         preloadImage("/images/subscription-card-background");
+
         const electron = globalThis.electron;
-        const main = async () => {
+        void (async () => {
             if (!(await validateKey())) {
                 logout();
                 return;
@@ -337,8 +338,8 @@ const Page: React.FC = () => {
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
                 if (await shouldShowWhatsNew(electron)) showWhatsNew();
             }
-        };
-        main();
+        })();
+
         return () => {
             clearInterval(syncInterval.current);
             if (electron) electron.onMainWindowFocus(undefined);
@@ -545,7 +546,7 @@ const Page: React.FC = () => {
     const handleSyncWithRemote = useCallback(
         async (force = false, silent = false) => {
             if (!navigator.onLine) return;
-            if (!haveCredentialsInSession()) {
+            if (!(await masterKeyFromSessionIfLoggedIn())) {
                 clearSessionStorage();
                 router.push("/credentials");
                 return;
