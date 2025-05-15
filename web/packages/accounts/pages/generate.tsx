@@ -35,7 +35,6 @@ import { useEffect, useState } from "react";
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
-    const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
     const [openRecoveryKey, setOpenRecoveryKey] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -59,7 +58,6 @@ const Page: React.FC = () => {
         } else if (keyAttributes?.encryptedKey) {
             void router.push("/credentials");
         } else {
-            setToken(user.token);
             setLoading(false);
         }
     }, [router]);
@@ -72,8 +70,7 @@ const Page: React.FC = () => {
             const { keyAttributes, masterKey, srpSetupAttributes } =
                 await generateKeyAndSRPAttributes(passphrase);
 
-            // TODO: Refactor the code to not require this ensure
-            await putAttributes(token!, keyAttributes);
+            await putAttributes(keyAttributes);
             await configureSRP(srpSetupAttributes);
             await generateAndSaveIntermediateKeyAttributes(
                 passphrase,

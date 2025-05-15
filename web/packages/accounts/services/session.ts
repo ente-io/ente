@@ -1,9 +1,5 @@
 import { authenticatedRequestHeaders, HTTPError } from "ente-base/http";
-import {
-    ensureAuthToken,
-    ensureLocalUser,
-    getAuthToken,
-} from "ente-base/local-user";
+import { ensureLocalUser, getAuthToken } from "ente-base/local-user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { getData } from "ente-shared/storage/localStorage";
@@ -12,7 +8,7 @@ import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import type { SRPAttributes } from "./srp-remote";
 import { getSRPAttributes } from "./srp-remote";
-import { putAttributes } from "./user";
+import { putAttributes, RemoteKeyAttributes } from "./user";
 
 type SessionValidity =
     | { status: "invalid" }
@@ -25,12 +21,7 @@ type SessionValidity =
 
 const SessionValidityResponse = z.object({
     hasSetKeys: z.boolean(),
-    // TODO: Update me when we have a zod type for KeyAttributes.
-    keyAttributes: z
-        .object({})
-        .passthrough()
-        .nullish()
-        .transform(nullToUndefined),
+    keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
 });
 
 /**
@@ -92,11 +83,7 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
     // deployments).
     const { keyAttributes } = SessionValidityResponse.parse(await res.json());
     if (keyAttributes) {
-        // Assume it is a `KeyAttributes`.
-        //
-        // Enhancement: Convert this to a zod validation.
-        // TODO: Update me when we have a zod type for KeyAttributes.
-        const remoteKeyAttributes = keyAttributes as KeyAttributes;
+        const remoteKeyAttributes = keyAttributes satisfies KeyAttributes;
 
         // We should have these values locally if we reach here.
         const email = ensureLocalUser().email;
@@ -149,8 +136,9 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
  * ends in logging the user out, and we don't want to log the user out on on
  * e.g. transient network issues.
  */
-export const isAuthTokenInvalid = async (): Promise<boolean> => {
-    if (!(await getAuthToken())) {
+export const isSessionInvalid = async (): Promise<boolean> => {
+    const token = await getAuthToken();
+    if (!token) {
         return true; /* No saved token, session is invalid */
     }
 
@@ -165,10 +153,9 @@ export const isAuthTokenInvalid = async (): Promise<boolean> => {
 
         const { hasSetKeys } = SessionValidityResponse.parse(await res.json());
         if (!hasSetKeys) {
-            await putAttributes(
-                await ensureAuthToken(),
-                getData("originalKeyAttributes"),
-            );
+            const originalKeyAttributes = getData("originalKeyAttributes");
+            if (originalKeyAttributes)
+                await putAttributes(originalKeyAttributes);
         }
     } catch (e) {
         log.warn("Failed to check session validity", e);

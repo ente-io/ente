@@ -137,11 +137,11 @@ const Page: React.FC = () => {
                     setData("keyAttributes", keyAttributes);
                     setData("originalKeyAttributes", keyAttributes);
                 } else {
-                    if (getData("originalKeyAttributes")) {
-                        await putAttributes(
-                            token!,
-                            getData("originalKeyAttributes"),
-                        );
+                    const originalKeyAttributes = getData(
+                        "originalKeyAttributes",
+                    );
+                    if (originalKeyAttributes) {
+                        await putAttributes(originalKeyAttributes);
                     }
                     if (getData("srpSetupAttributes")) {
                         const srpSetupAttributes: SRPSetupAttributes =

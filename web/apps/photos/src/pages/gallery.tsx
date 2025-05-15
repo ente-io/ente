@@ -21,7 +21,7 @@ import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import { stashRedirect } from "ente-accounts/services/redirect";
-import { checkSessionValidity } from "ente-accounts/services/session";
+import { isSessionInvalid } from "ente-accounts/services/session";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { CenteredRow } from "ente-base/components/containers";
@@ -32,7 +32,6 @@ import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { getAuthToken } from "ente-base/local-user";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
@@ -101,7 +100,6 @@ import {
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { FlexWrapper } from "ente-shared/components/Container";
-import { CustomError } from "ente-shared/error";
 import { getData } from "ente-shared/storage/localStorage";
 import {
     getToken,
@@ -124,7 +122,6 @@ import {
 } from "services/collectionService";
 import exportService from "services/export";
 import { uploadManager } from "services/upload-manager";
-import { isTokenValid } from "services/userService";
 import {
     GalleryContextType,
     SelectedState,
@@ -548,16 +545,7 @@ const Page: React.FC = () => {
     const handleSyncWithRemote = useCallback(
         async (force = false, silent = false) => {
             if (!navigator.onLine) return;
-            if (
-                !(await getAuthToken()) ||
-                !(await checkSessionValidity()
-                    .then(({ status }) => status != "invalid")
-                    .catch(() => true))
-            ) {
-                // If we don't have an auth token, or if remote says that the
-                // auth token is invalid, then show the session expired dialog.
-                // Ignore other errors since we don't want to log the user out
-                // on e.g. transient network issues.
+            if (await isSessionInvalid()) {
                 showSessionExpiredDialog();
                 return;
             }
@@ -573,15 +561,7 @@ const Page: React.FC = () => {
             const isForced = syncInProgress.current && force;
             syncInProgress.current = true;
             try {
-                const token = getToken();
-                if (!token) {
-                    return;
-                }
-                const tokenValid = await isTokenValid(token);
-                if (!tokenValid) {
-                    throw new Error(CustomError.SESSION_EXPIRED);
-                }
-                !silent && showLoadingBar();
+                if (!silent) showLoadingBar();
                 await preCollectionAndFilesSync();
                 await handleFileAndCollectionSyncWithRemote();
                 // syncWithRemote is called with the force flag set to true before
@@ -593,16 +573,10 @@ const Page: React.FC = () => {
                     await postCollectionAndFilesSync();
                 }
             } catch (e) {
-                switch (e.message) {
-                    case CustomError.SESSION_EXPIRED:
-                        showSessionExpiredDialog();
-                        break;
-                    default:
-                        log.error("syncWithRemote failed", e);
-                }
+                log.error("syncWithRemote failed", e);
             } finally {
                 dispatch({ type: "clearUnsyncedState" });
-                !silent && hideLoadingBar();
+                if (!silent) hideLoadingBar();
             }
             syncInProgress.current = false;
             if (resync.current) {
