@@ -13,6 +13,7 @@ class AlbumSelectionOverlayBar extends StatefulWidget {
   final List<Collection> collections;
   final Color? backgroundColor;
   final UISectionType sectionType;
+  final bool showSelectAllButton;
 
   const AlbumSelectionOverlayBar(
     this.selectedAlbums,
@@ -21,6 +22,7 @@ class AlbumSelectionOverlayBar extends StatefulWidget {
     super.key,
     this.onClose,
     this.backgroundColor,
+    this.showSelectAllButton = false,
   });
 
   @override
@@ -60,14 +62,15 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: SelectAllAlbumsButton(
-                  widget.selectedAlbums,
-                  widget.collections,
-                  backgroundColor: widget.backgroundColor,
+              if (widget.showSelectAllButton)
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: SelectAllAlbumsButton(
+                    widget.selectedAlbums,
+                    widget.collections,
+                    backgroundColor: widget.backgroundColor,
+                  ),
                 ),
-              ),
               const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(boxShadow: shadowFloatFaintLight),
@@ -123,7 +126,7 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
           if (_allSelected) {
             widget.selectedAlbums.clearAll();
           } else {
-            widget.selectedAlbums.selectAll(
+            widget.selectedAlbums.select(
               widget.collections.toSet(),
             );
           }

@@ -221,7 +221,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             ),
             SliverToBoxAdapter(
               child:
-                  SizedBox(height: 64 + MediaQuery.of(context).padding.bottom),
+                  SizedBox(height: 64 + MediaQuery.paddingOf(context).bottom),
             ),
           ],
         ),
@@ -229,6 +229,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
           widget.selectedAlbums!,
           UISectionType.homeCollections,
           collections,
+          showSelectAllButton: false,
         ),
       ],
     );

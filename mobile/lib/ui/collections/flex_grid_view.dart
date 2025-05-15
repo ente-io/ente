@@ -26,8 +26,8 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   Width changes dynamically with screen width such that we can fit 2 in one row.
   Keep the width integral (center the albums to distribute excess pixels)
    */
-  static const maxThumbnailWidth = 170.0;
-  static const fixedGapBetweenAlbum = 2.0;
+  static const maxThumbnailWidth = 224.0;
+  static const fixedGapBetweenAlbum = 4.0;
   static const minGapForHorizontalPadding = 8.0;
   static const collectionItemsToPreload = 20;
 
@@ -115,7 +115,7 @@ class _CollectionsFlexiGridViewWidgetState
   }
 
   Widget _buildGridView(BuildContext context, Key key) {
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
     final int albumsCountInOneRow =
         max(screenWidth ~/ CollectionsFlexiGridViewWidget.maxThumbnailWidth, 3);
     final double gapBetweenAlbums = (albumsCountInOneRow - 1) *

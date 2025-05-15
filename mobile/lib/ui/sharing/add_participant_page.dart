@@ -85,7 +85,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       appBar: AppBar(
         title: Text(
           widget.isMultipleCollections
-              ? "Add participants"
+              ? S.of(context).addParticipants
               : widget.isAddingViewer
                   ? S.of(context).addViewer
                   : S.of(context).addCollaborator,

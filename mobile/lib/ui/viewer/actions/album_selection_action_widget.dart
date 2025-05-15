@@ -56,7 +56,7 @@ class _AlbumSelectionActionWidgetState
   @override
   Widget build(BuildContext context) {
     if (widget.selectedAlbums.albums.isEmpty) {
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
     final List<SelectionActionButton> items = [];
     final hasPinnedAlbum =
@@ -166,9 +166,6 @@ class _AlbumSelectionActionWidgetState
         collections: widget.selectedAlbums.albums.toList(),
       ),
     );
-    if (hasFavorites) {
-      _showFavToast();
-    }
     widget.selectedAlbums.clearAll();
   }
 
@@ -176,6 +173,7 @@ class _AlbumSelectionActionWidgetState
     int count = 0;
     final List<Collection> nonEmptyCollection = [];
 
+    final List errors = [];
     for (final collection in widget.selectedAlbums.albums) {
       count = await FilesDB.instance.collectionFileCount(collection.id);
       final bool isEmptyCollection = count == 0;
@@ -184,13 +182,19 @@ class _AlbumSelectionActionWidgetState
           await CollectionsService.instance.trashEmptyCollection(collection);
         } catch (e, s) {
           _logger.warning("failed to trash collection", e, s);
-          await showGenericErrorDialog(context: context, error: e);
+          errors.add(e);
         }
       } else if (collection.type == CollectionType.favorites) {
         continue;
       } else {
         nonEmptyCollection.add(collection);
       }
+    }
+    if (errors.isNotEmpty) {
+      await showGenericErrorDialog(
+        context: context,
+        error: errors.first,
+      );
     }
 
     if (nonEmptyCollection.isNotEmpty) {
@@ -366,7 +370,7 @@ class _AlbumSelectionActionWidgetState
   void _showFavToast() {
     showShortToast(
       context,
-      "The Favorites album cannot be modified",
+      S.of(context).actionNotSupportedOnFavouritesAlbum,
     );
   }
 }

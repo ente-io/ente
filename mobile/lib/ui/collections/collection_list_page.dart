@@ -125,6 +125,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
               _selectedAlbum,
               widget.sectionType,
               collections!,
+              showSelectAllButton: true,
             ),
           ],
         ),
@@ -217,7 +218,6 @@ class _CollectionListPageState extends State<CollectionListPage> {
                         : AlbumSortDirection.ascending;
                 await localSettings.setAlbumSortDirection(albumSortDirection!);
                 await refreshCollections();
-                setState(() {});
                 Bus.instance.fire(AlbumSortOrderChangeEvent());
               }
             },

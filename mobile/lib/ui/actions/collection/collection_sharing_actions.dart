@@ -391,8 +391,7 @@ class CollectionActions {
         ),
       ],
       bodyWidget: StyledText(
-        text:
-            "Also delete the photos (and videos) present in these ${collections.length} albums from <bold>all</bold> other albums they are part of?",
+        text: S.of(bContext).deleteMultipleAlbumDialog(collections.length),
         style: textTheme.body.copyWith(color: textMutedDark),
         tags: {
           'bold': StyledTextTag(

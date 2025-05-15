@@ -24,7 +24,7 @@ class AlbumBottomActionBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
-    final widthOfScreen = MediaQuery.of(context).size.width;
+    final widthOfScreen = MediaQuery.sizeOf(context).width;
     final colorScheme = getEnteColorScheme(context);
     final double leftRightPadding = widthOfScreen > restrictedMaxWidth
         ? (widthOfScreen - restrictedMaxWidth) / 2
