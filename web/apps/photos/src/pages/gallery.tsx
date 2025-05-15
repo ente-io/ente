@@ -21,6 +21,7 @@ import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import { stashRedirect } from "ente-accounts/services/redirect";
+import { checkSessionValidity } from "ente-accounts/services/session";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { CenteredRow } from "ente-base/components/containers";
@@ -31,6 +32,7 @@ import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
+import { getAuthToken } from "ente-base/local-user";
 import log from "ente-base/log";
 import {
     clearSessionStorage,
@@ -546,6 +548,19 @@ const Page: React.FC = () => {
     const handleSyncWithRemote = useCallback(
         async (force = false, silent = false) => {
             if (!navigator.onLine) return;
+            if (
+                !(await getAuthToken()) ||
+                !(await checkSessionValidity()
+                    .then(({ status }) => status != "invalid")
+                    .catch(() => true))
+            ) {
+                // If we don't have an auth token, or if remote says that the
+                // auth token is invalid, then show the session expired dialog.
+                // Ignore other errors since we don't want to log the user out
+                // on e.g. transient network issues.
+                showSessionExpiredDialog();
+                return;
+            }
             if (!(await masterKeyFromSessionIfLoggedIn())) {
                 clearSessionStorage();
                 router.push("/credentials");
