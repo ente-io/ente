@@ -10,8 +10,8 @@ class FillerMemory extends SmartMemory {
     this.yearsAgo,
     int firstDateToShow,
     int lastDateToShow, {
-    int? firstCreationTime,
-    int? lastCreationTime,
+    super.firstCreationTime,
+    super.lastCreationTime,
   }) : super(
           memories,
           MemoryType.filler,
