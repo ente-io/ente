@@ -11,7 +11,9 @@
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>
+		<string>group.io.ente.frame.EnteAlbumWidget</string>
 		<string>group.io.ente.frame.EnteMemoryWidget</string>
+		<string>group.io.ente.frame.EntePeopleWidget</string>
 	</array>
 </dict>
 </plist>
