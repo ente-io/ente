@@ -897,7 +897,7 @@
   "authToViewYourMemories": "Nustatykite tapatybę, kad peržiūrėtumėte savo prisiminimus",
   "unlock": "Atrakinti",
   "freeUpSpace": "Atlaisvinti vietos",
-  "freeUpSpaceSaving": "{count, plural, one {Tai galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}} few {Juos galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}} many {Jos galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}} =1 {Jį galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}} other {Jų galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {Jį galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}} other {Jų galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {{formattedNumber} failas šiame albume saugiai sukurta atsarginė kopija} few {{formattedNumber} failai šiame albume saugiai sukurtos atsarginės kopijos} many {{formattedNumber} failo šiame albume saugiai sukurtos atsargines kopijos} other {{formattedNumber} failų šiame albume saugiai sukurta atsarginė kopija}}.",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",

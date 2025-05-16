@@ -1484,7 +1484,7 @@
   },
   "currentlyRunning": "выполняется",
   "ignored": "игнорируется",
-  "photosCount": "{count, plural, =0 {0 фотографий} =1 {1 фотография} one {{count} фотография}  other {{count} фотографий}}",
+  "photosCount": "{count, plural, =0 {0 фотографий} =1 {1 фотография}  other {{count} фотографий}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1658,7 +1658,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Создать потоковое видео",
   "processingVideos": "Обработка видео",
   "streamDetails": "Информация о потоке",
   "processing": "Обработка",
@@ -1696,7 +1695,7 @@
   "selectedItemsWillBeRemovedFromThisPerson": "Выбранные элементы будут отвязаны от этого человека, но не удалены из вашей библиотеки.",
   "throughTheYears": "{dateFormat} сквозь годы",
   "thisWeekThroughTheYears": "Эта неделя сквозь годы",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Эта неделя, {count} год назад} one{Эта неделя, {count} год назад}  other {Эта неделя, {count} лет назад}}",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Эта неделя, {count} год назад} other {Эта неделя, {count} лет назад}}",
   "youAndThem": "Вы и {name}",
   "admiringThem": "Любуясь {name}",
   "embracingThem": "Обнимая {name}",
