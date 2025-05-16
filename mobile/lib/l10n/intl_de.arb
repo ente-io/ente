@@ -1281,6 +1281,8 @@
   "createCollaborativeLink": "Gemeinschaftlichen Link erstellen",
   "search": "Suche",
   "enterPersonName": "Namen der Person eingeben",
+  "editEmailAlreadyLinked": "Diese E-Mail ist bereits verknüpft mit {name}.",
+  "viewPersonToUnlink": "{name} zum Entfernen des Links anzeigen",
   "enterName": "Name eingeben",
   "savePerson": "Person speichern",
   "editPerson": "Person bearbeiten",
