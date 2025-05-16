@@ -20,22 +20,16 @@ import 'package:photos/ui/sharing/user_avator_widget.dart';
 import "package:photos/ui/sharing/verify_identity_dialog.dart";
 
 class AddParticipantPage extends StatefulWidget {
-  final Collection? collection;
   final bool isAddingViewer;
-  final List<Collection>? collections;
+  final List<Collection> collections;
 
   const AddParticipantPage(
-    this.collection,
+    this.collections,
     this.isAddingViewer, {
     super.key,
-    this.collections,
-  }) : assert(
-          collection != null || (collections != null),
-          'Either collection or non-empty collections must be provided',
-        );
+  });
 
-  bool get isMultipleCollections =>
-      collections != null && collections!.isNotEmpty;
+  bool get isToMultipleCollections => collections.length > 1;
 
   @override
   State<StatefulWidget> createState() => _AddParticipantPage();
@@ -84,7 +78,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         title: Text(
-          widget.isMultipleCollections
+          widget.isToMultipleCollections
               ? S.of(context).addParticipants
               : widget.isAddingViewer
                   ? S.of(context).addViewer
@@ -230,7 +224,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 8),
-                  widget.isMultipleCollections
+                  widget.isToMultipleCollections
                       ? _multipleActionButton()
                       : _singleActionButton(),
                   const SizedBox(height: 12),
@@ -253,7 +247,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       isDisabled: _selectedEmails.isEmpty,
       onTap: () async {
         final results = <bool>[];
-        final collections = getAllCollections();
+        final collections = widget.collections;
 
         for (String email in _selectedEmails) {
           for (Collection collection in collections) {
@@ -297,7 +291,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
             final results = <bool>[];
-            final collections = getAllCollections();
+            final collections = widget.collections;
 
             for (String email in _selectedEmails) {
               bool result = false;
@@ -331,7 +325,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
             final results = <bool>[];
-            final collections = getAllCollections();
+            final collections = widget.collections;
 
             for (String email in _selectedEmails) {
               bool result = false;
@@ -454,18 +448,12 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     );
   }
 
-  List<Collection> getAllCollections() {
-    if (widget.collections != null && widget.collections!.isNotEmpty) {
-      return widget.collections!;
-    } else if (widget.collection != null) {
-      return [widget.collection!];
-    }
-    return [];
-  }
-
   List<User> _getSuggestedUser() {
     final Set<String> existingEmails = {};
-    final collections = getAllCollections();
+    final collections = widget.collections;
+    if (collections.isEmpty) {
+      return [];
+    }
 
     for (final Collection collection in collections) {
       for (final User u in collection.sharees) {

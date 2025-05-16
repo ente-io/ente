@@ -161,9 +161,8 @@ class _AlbumSelectionActionWidgetState
     await routeToPage(
       context,
       AddParticipantPage(
-        widget.selectedAlbums.albums.toList().first,
+        widget.selectedAlbums.albums.toList(),
         false,
-        collections: widget.selectedAlbums.albums.toList(),
       ),
     );
     widget.selectedAlbums.clearAll();
