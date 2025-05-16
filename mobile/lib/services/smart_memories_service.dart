@@ -77,6 +77,11 @@ class SmartMemoriesService {
       final (allFiles, allFileIdsToFile) = await _getFilesAndMapForMemories();
       _logger.finest("All files length: ${allFiles.length} $t");
 
+      final collectionIDsToExclude = await getCollectionIDsToExclude();
+      _logger.finest(
+        'collectionIDsToExclude length: ${collectionIDsToExclude.length} $t',
+      );
+
       final seenTimes = await _memoriesDB.getSeenTimes();
       _logger.finest('seenTimes has ${seenTimes.length} entries $t');
 
@@ -129,6 +134,7 @@ class SmartMemoriesService {
         param: <String, dynamic>{
           "allFiles": allFiles,
           "allFileIdsToFile": allFileIdsToFile,
+          "collectionIDsToExclude": collectionIDsToExclude,
           "now": now,
           "oldCache": oldCache,
           "debugSurfaceAll": debugSurfaceAll,
@@ -196,6 +202,7 @@ class SmartMemoriesService {
       // Arguments: direct data
       final Set<EnteFile> allFiles = args["allFiles"];
       final Map<int, EnteFile> allFileIdsToFile = args["allFileIdsToFile"];
+      final Set<int> collectionIDsToExclude = args["collectionIDsToExclude"];
       final DateTime now = args["now"];
       final MemoriesCache oldCache = args["oldCache"];
       final bool debugSurfaceAll = args["debugSurfaceAll"] ?? false;
@@ -231,6 +238,17 @@ class SmartMemoriesService {
       dev.log("All files length at start: ${allFiles.length} $t");
 
       final List<SmartMemory> memories = [];
+
+      // On this day memories
+      final onThisDayMemories = await _getOnThisDayResults(
+        allFiles,
+        now,
+        seenTimes: seenTimes,
+        collectionIDsToExclude: collectionIDsToExclude,
+      );
+      _deductUsedMemories(allFiles, onThisDayMemories);
+      memories.addAll(onThisDayMemories);
+      dev.log("All files length after on this day: ${allFiles.length} $t");
 
       // People memories
       final peopleMemories = await _getPeopleResults(
@@ -1563,7 +1581,6 @@ class SmartMemoriesService {
       'viber',
       'wechat',
       'line',
-      'snapchat',
       'meme',
       'internet',
       'saved images',
@@ -1589,7 +1606,7 @@ class SmartMemoriesService {
     Iterable<EnteFile> allFiles,
     DateTime currentTime, {
     required Map<int, int> seenTimes,
-    required Set<int> excludedCollectionIds,
+    required Set<int> collectionIDsToExclude,
   }) async {
     final List<OnThisDayMemory> memoryResults = [];
     if (allFiles.isEmpty) return [];
@@ -1611,7 +1628,7 @@ class SmartMemoriesService {
 
     // Find all the relevant memories
     for (final file in allFiles) {
-      if (excludedCollectionIds.contains(file.collectionID)) continue;
+      if (collectionIDsToExclude.contains(file.collectionID)) continue;
       if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) {
         continue;
       }
