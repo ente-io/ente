@@ -1566,6 +1566,7 @@ class SmartMemoriesService {
     final timeTillYearEnd = DateTime(currentYear + 1).difference(startPoint);
     final bool almostYearEnd = timeTillYearEnd < diffThreshold;
 
+    // Find all the relevant memories
     for (final file in allFiles) {
       if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) {
         continue;
@@ -1590,6 +1591,8 @@ class SmartMemoriesService {
         }
       }
     }
+
+    // Per day, filter the memories to find the best ones
     for (var day = 0; day < daysToCompute; day++) {
       final memories = daysToMemories[day];
       if (memories == null) continue;
@@ -1603,11 +1606,59 @@ class SmartMemoriesService {
       final bool hasThreeInAtLeastThreeYears =
           yearCounts.values.where((count) => count >= 3).length >= 3;
       if (!hasThreeInAtLeastThreeYears) continue;
-      memories.sort(
+
+      final filteredMemories = <Memory>[];
+      if (memories.length > 20) {
+        // Group memories by year
+        final Map<int, List<Memory>> memoriesByYear = {};
+        for (final memory in memories) {
+          final creationTime =
+              DateTime.fromMicrosecondsSinceEpoch(memory.file.creationTime!);
+          final year = creationTime.year;
+          memoriesByYear.putIfAbsent(year, () => []).add(memory);
+        }
+        for (final year in memoriesByYear.keys) {
+          memoriesByYear[year]!.shuffle(Random());
+        }
+
+        // Get all years, randonly select 20 years if there are more than 20
+        List<int> years = memoriesByYear.keys.toList()..sort();
+        if (years.length > 20) {
+          years.shuffle(Random());
+          years = years.take(20).toList()..sort();
+        }
+
+        // First round to take one memory from each year
+        for (final year in years) {
+          if (filteredMemories.length >= 20) break;
+          final yearMemories = memoriesByYear[year]!;
+          if (yearMemories.isNotEmpty) {
+            filteredMemories.add(yearMemories.removeAt(0));
+          }
+        }
+
+        // Second round to fill up to 20 memories
+        while (filteredMemories.length < 20) {
+          bool addedAny = false;
+          for (final year in years) {
+            if (filteredMemories.length >= 20) break;
+            final yearMemories = memoriesByYear[year]!;
+            if (yearMemories.isNotEmpty) {
+              filteredMemories.add(yearMemories.removeAt(0));
+              addedAny = true;
+            }
+          }
+          if (!addedAny) break;
+        }
+      } else {
+        filteredMemories.addAll(memories);
+      }
+
+      filteredMemories.sort(
         (a, b) => a.file.creationTime!.compareTo(b.file.creationTime!),
       );
       final onThisDayMemory = OnThisDayMemory(
-        memories,
+        filteredMemories,
         startPoint.add(Duration(days: day)).microsecondsSinceEpoch,
         startPoint.add(Duration(days: day + 1)).microsecondsSinceEpoch,
       );
