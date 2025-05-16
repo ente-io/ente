@@ -32,13 +32,13 @@ class EntePeopleWidgetProvider : HomeWidgetProvider() {
                         val views =
                                 RemoteViews(context.packageName, R.layout.people_widget_layout)
                                         .apply {
-                                                val totalMemories =
-                                                        widgetData.getInt("totalMemories", 0)
+                                                val totalPeople =
+                                                        widgetData.getInt("totalPeople", 0)
                                                 var randomNumber = -1
                                                 var imagePath: String? = null
-                                                if (totalMemories > 0) {
+                                                if (totalPeople > 0) {
                                                         randomNumber =
-                                                                (0 until totalMemories!!).random()
+                                                                (0 until totalPeople!!).random()
                                                         imagePath =
                                                                 widgetData.getString(
                                                                         "people_widget_" +

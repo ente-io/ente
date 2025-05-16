@@ -32,13 +32,13 @@ class EnteAlbumsWidgetProvider : HomeWidgetProvider() {
                         val views =
                                 RemoteViews(context.packageName, R.layout.albums_widget_layout)
                                         .apply {
-                                                val totalMemories =
-                                                        widgetData.getInt("totalMemories", 0)
+                                                val totalAlbums =
+                                                        widgetData.getInt("totalAlbums", 0)
                                                 var randomNumber = -1
                                                 var imagePath: String? = null
-                                                if (totalMemories > 0) {
+                                                if (totalAlbums > 0) {
                                                         randomNumber =
-                                                                (0 until totalMemories!!).random()
+                                                                (0 until totalAlbums!!).random()
                                                         imagePath =
                                                                 widgetData.getString(
                                                                         "albums_widget_" +

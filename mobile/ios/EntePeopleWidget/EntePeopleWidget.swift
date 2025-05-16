@@ -39,13 +39,13 @@ struct Provider: TimelineProvider {
             direction: .backward
         )!
 
-        var totalMemories =
-            data?.integer(forKey: "totalMemories")
+        var totalPeople =
+            data?.integer(forKey: "totalPeople")
 
-        if totalMemories != nil && totalMemories! > 0 {
-            let count = totalMemories! > 5 ? 5 : totalMemories
+        if totalPeople != nil && totalPeople! > 0 {
+            let count = totalPeople! > 5 ? 5 : totalPeople
             for offset in 0..<count! {
-                let randomInt = Int.random(in: 0..<totalMemories!)
+                let randomInt = Int.random(in: 0..<totalPeople!)
                 let entryDate = Calendar.current.date(
                     byAdding: .minute, value: minutes * offset, to: currentDate
                 )!
@@ -189,7 +189,7 @@ struct EntePeopleWidgetEntryView: View {
                             .aspectRatio(contentMode: .fit)
                             .padding(8)
 
-                        Text("See People you wish to appear here")
+                        Text("Go to Settings->General to customise the widget")
                             .font(.custom("Inter", size: 14, relativeTo: .caption))
                             .foregroundStyle(.white)  // Tint-aware color
                             .multilineTextAlignment(.center)

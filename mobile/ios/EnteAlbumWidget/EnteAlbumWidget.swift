@@ -39,13 +39,13 @@ struct Provider: TimelineProvider {
             direction: .backward
         )!
 
-        var totalMemories =
-            data?.integer(forKey: "totalMemories")
+        var totalAlbums =
+            data?.integer(forKey: "totalAlbums")
 
-        if totalMemories != nil && totalMemories! > 0 {
-            let count = totalMemories! > 5 ? 5 : totalMemories
+        if totalAlbums != nil && totalAlbums! > 0 {
+            let count = totalAlbums! > 5 ? 5 : totalAlbums
             for offset in 0..<count! {
-                let randomInt = Int.random(in: 0..<totalMemories!)
+                let randomInt = Int.random(in: 0..<totalAlbums!)
                 let entryDate = Calendar.current.date(
                     byAdding: .minute, value: minutes * offset, to: currentDate
                 )!
@@ -189,7 +189,7 @@ struct EnteAlbumWidgetEntryView: View {
                             .aspectRatio(contentMode: .fit)
                             .padding(8)
 
-                        Text("Your albums will appear here")
+                        Text("Go to Settings->General to customise the widget")
                             .font(.custom("Inter", size: 14, relativeTo: .caption))
                             .foregroundStyle(.white)  // Tint-aware color
                             .multilineTextAlignment(.center)
