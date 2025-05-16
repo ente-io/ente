@@ -181,7 +181,7 @@ class EnteMemoryWidgetProvider : HomeWidgetProvider() {
                                                                 ContextCompat.getDrawable(
                                                                         context,
                                                                         R.drawable
-                                                                                .ic_home_widget_default
+                                                                                .ic_memories_widget
                                                                 )
                                                         val bitmap =
                                                                 (drawable as BitmapDrawable).bitmap

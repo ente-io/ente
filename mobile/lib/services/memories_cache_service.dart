@@ -345,6 +345,26 @@ class MemoriesCacheService {
     return;
   }
 
+  Future<List<SmartMemory>> getMemoriesForWidget({
+    required bool pastYears,
+    required bool smart,
+  }) async {
+    if (!pastYears && !smart) {
+      return [];
+    }
+    final allMemories = await getMemories();
+    if (pastYears && smart) {
+      return allMemories;
+    }
+    final filteredMemories = <SmartMemory>[];
+    for (final memory in allMemories) {
+      if (!pastYears && memory.type == MemoryType.filler) continue;
+      if (!smart && memory.type != MemoryType.filler) continue;
+      filteredMemories.add(memory);
+    }
+    return filteredMemories;
+  }
+
   Future<List<SmartMemory>> getMemories() async {
     if (!showAnyMemories) {
       _logger.info('Showing memories is disabled in settings, showing none');
