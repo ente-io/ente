@@ -19,6 +19,6 @@ class OnThisDayMemory extends SmartMemory {
 
   @override
   String createTitle(S s, String languageCode) {
-    return S.of(context).onThisDay;
+    return s.onThisDay;
   }
 }
