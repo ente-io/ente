@@ -57,7 +57,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     leading: true,
   );
 
-  static const int _kOnEnteItemLimitCount = 10;
+  static const int _kOnEnteItemLimitCount = 12;
   @override
   void initState() {
     super.initState();
@@ -164,6 +164,8 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 collections,
                 displayLimitCount: _kOnEnteItemLimitCount,
                 shrinkWrap: true,
+                shouldShowCreateAlbum: true,
+                enableSelectionMode: true,
               )
             : const SliverToBoxAdapter(child: EmptyState()),
         collections.length > _kOnEnteItemLimitCount
