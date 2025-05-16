@@ -1735,5 +1735,6 @@
   "cLFamilyPlanDesc": "Ahora puede establecer límites en cuanto al almacenamiento que los miembros de tu familia pueden utilizar.",
   "cLBulkEdit": "Edición masiva de fechas",
   "cLBulkEditDesc": "Ahora puedes seleccionar múltiples fotos y editar la fecha/hora para todas ellas con una acción rápida. También es posible cambiar las fechas.",
-  "curatedMemories": "Memorias revisadas"
+  "curatedMemories": "Memorias revisadas",
+  "onThisDay": "On this day"
 }
