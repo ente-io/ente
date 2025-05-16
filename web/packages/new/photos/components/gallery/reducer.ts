@@ -543,6 +543,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 hiddenFileIDs,
                 archivedFileIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
+                    action.user,
                     normalCollections,
                     normalFiles,
                     state.unsyncedFavoriteUpdates,
@@ -617,6 +618,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     deriveDefaultHiddenCollectionIDs(hiddenCollections),
                 archivedFileIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
+                    state.user!,
                     normalCollections,
                     state.normalFiles,
                     state.unsyncedFavoriteUpdates,
@@ -669,6 +671,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 archivedCollectionIDs,
                 archivedFileIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
+                    state.user!,
                     normalCollections,
                     state.normalFiles,
                     state.unsyncedFavoriteUpdates,
@@ -892,6 +895,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             return {
                 ...state,
                 favoriteFileIDs: deriveFavoriteFileIDs(
+                    state.user!,
                     state.normalCollections,
                     state.normalFiles,
                     unsyncedFavoriteUpdates,
@@ -941,6 +945,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             const unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"] =
                 new Map();
             const favoriteFileIDs = deriveFavoriteFileIDs(
+                state.user!,
                 state.normalCollections,
                 state.normalFiles,
                 unsyncedFavoriteUpdates,
@@ -1211,13 +1216,14 @@ const deriveArchivedFileIDs = (
  * Compute favorite file IDs from their dependencies.
  */
 const deriveFavoriteFileIDs = (
+    user: User,
     collections: Collection[],
     files: EnteFile[],
     unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"],
 ) => {
     let favoriteFileIDs = new Set<number>();
     for (const collection of collections) {
-        if (collection.type == "favorites") {
+        if (collection.type == "favorites" && collection.owner.id == user.id) {
             favoriteFileIDs = new Set(
                 files
                     .filter((file) => file.collectionID === collection.id)
@@ -1640,6 +1646,7 @@ const stateForUpdatedNormalFiles = (
         normalFiles,
     ),
     favoriteFileIDs: deriveFavoriteFileIDs(
+        state.user!,
         state.normalCollections,
         normalFiles,
         state.unsyncedFavoriteUpdates,
