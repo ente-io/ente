@@ -1561,6 +1561,7 @@ class SmartMemoriesService {
     final diffThreshold = Duration(days: daysToCompute);
 
     final Map<int, List<Memory>> daysToMemories = {};
+    final Map<int, List<int>> daysToYears = {};
 
     final timeTillYearEnd = DateTime(currentYear + 1).difference(startPoint);
     final bool almostYearEnd = timeTillYearEnd < diffThreshold;
@@ -1573,26 +1574,35 @@ class SmartMemoriesService {
       final fileTimeInYear = fileDate.copyWith(year: currentYear);
       final diff = fileTimeInYear.difference(startPoint);
       if (!diff.isNegative && diff < diffThreshold) {
-        final yearsAgo = currentYear - fileDate.year;
         daysToMemories
             .putIfAbsent(diff.inDays, () => [])
             .add(Memory.fromFile(file, seenTimes));
+        daysToYears.putIfAbsent(diff.inDays, () => []).add(fileDate.year);
       } else if (almostYearEnd) {
         final altDiff = fileDate.copyWith(year: currentYear + 1).difference(
               currentTime,
             );
         if (!altDiff.isNegative && altDiff < diffThreshold) {
-          final yearsAgo = currentYear - fileDate.year + 1;
           daysToMemories
               .putIfAbsent(altDiff.inDays, () => [])
               .add(Memory.fromFile(file, seenTimes));
+          daysToYears.putIfAbsent(altDiff.inDays, () => []).add(fileDate.year);
         }
       }
     }
     for (var day = 0; day < daysToCompute; day++) {
       final memories = daysToMemories[day];
       if (memories == null) continue;
-      if (memories.length < 10) continue;
+      if (memories.length < 5) continue;
+      final years = daysToYears[day]!;
+      if (years.toSet().length < 3) continue;
+      final yearCounts = <int, int>{};
+      for (final year in years) {
+        yearCounts[year] = (yearCounts[year] ?? 0) + 1;
+      }
+      final bool hasThreeInAtLeastThreeYears =
+          yearCounts.values.where((count) => count >= 3).length >= 3;
+      if (!hasThreeInAtLeastThreeYears) continue;
       memories.sort(
         (a, b) => a.file.creationTime!.compareTo(b.file.creationTime!),
       );
