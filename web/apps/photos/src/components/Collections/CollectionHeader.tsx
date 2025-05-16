@@ -344,7 +344,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                             onClick={onCollectionShare}
                             startIcon={<PeopleIcon />}
                         >
-                            {/*TODO(RE):*/ pt("Share favorites")}
+                            {/*TODO(FAV):*/ pt("Share favorites")}
                         </OverflowMenuOption>
                     </>
                 ) : collectionSummaryType == "uncategorized" ? (
@@ -513,7 +513,7 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
                     collectionSummaryType == "sharedOnlyViaLink"
                   ? t("modify_sharing")
                   : collectionSummaryType == "favorites"
-                    ? /*TODO(RE):*/ pt("Share favorites")
+                    ? /*TODO(FAV):*/ pt("Share favorites")
                     : t("share_album")
         }
     >

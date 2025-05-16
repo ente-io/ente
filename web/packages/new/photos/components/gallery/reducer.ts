@@ -1223,6 +1223,7 @@ const deriveFavoriteFileIDs = (
 ) => {
     let favoriteFileIDs = new Set<number>();
     for (const collection of collections) {
+        // See: [Note: User and shared favorites]
         if (collection.type == "favorites" && collection.owner.id == user.id) {
             favoriteFileIDs = new Set(
                 files
@@ -1367,6 +1368,19 @@ const createCollectionSummaries = (
         } else if (isPinnedCollection(collection)) {
             type = "pinned";
         } else {
+            // [Note: User and shared favorites]
+            //
+            // "favorites" can be both the user's own favorites, or favorites of
+            // other users shared with them. However, all of the latter will get
+            // typed as "incomingShareViewer" or "incomingShareCollaborator" in
+            // the first case above. So if a collection summary has type
+            // "favorites", it is guaranteed to be the user's own favorites.
+            //
+            // However, the type of the _collection_ itself is not changed, so
+            // whenever we're checking the type of the collection (not of the
+            // collection summary) and we specifically want to target the user's
+            // own favorites, we also need to check the collection owner's ID is
+            // the same as the logged in user's ID.
             type = collection.type;
         }
 
@@ -1404,6 +1418,19 @@ const createCollectionSummaries = (
             name = t("section_uncategorized");
         } else if (type == "favorites") {
             name = t("favorites");
+        } else if (collection.type == "favorites") {
+            // See: [Note: User and shared favorites] above.
+            //
+            // Use the first letter of the email of the user who shared this
+            // particular favorite as a prefix to disambiguate this collection
+            // from the user's own favorites.
+            // TODO(FAV): localize
+            const initial = collection.owner.email.at(0)?.toUpperCase();
+            if (initial) {
+                name = `${initial}'s {t("favorites")}`;
+            } else {
+                name = `Shared {t("favorites")}`;
+            }
         } else {
             name = collection.name;
         }
