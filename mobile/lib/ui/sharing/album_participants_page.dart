@@ -55,7 +55,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
     await routeToPage(
       context,
       AddParticipantPage(
-        widget.collection as List<Collection>,
+        [widget.collection],
         addingViewer
             ? [ActionTypesToShow.addViewer]
             : [ActionTypesToShow.addCollaborator],

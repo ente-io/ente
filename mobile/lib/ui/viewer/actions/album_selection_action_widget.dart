@@ -201,10 +201,8 @@ class _AlbumSelectionActionWidgetState
         context,
         nonEmptyCollection,
       );
-      if (result == true) {
-        Navigator.of(context).pop();
-      } else {
-        debugPrint("No pop");
+      if (result == false) {
+        debugPrint("Failed to delete collection");
       }
     }
     if (hasFavorites) {
@@ -327,9 +325,6 @@ class _AlbumSelectionActionWidgetState
           labelText: S.of(context).leaveAlbum,
           onTap: () async {
             for (final collection in widget.selectedAlbums.albums) {
-              if (collection.type == CollectionType.favorites) {
-                continue;
-              }
               await CollectionsService.instance.leaveAlbum(collection);
             }
             widget.selectedAlbums.clearAll();
