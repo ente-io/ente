@@ -118,6 +118,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                           child: Align(
                             alignment: Alignment.topLeft,
                             child: AlbumSharesIcons(
+                              padding: const EdgeInsets.only(left: 4, top: 4),
                               sharees: c.getSharees(),
                               type: AvatarType.mini,
                               trailingWidget: linkIcon,
@@ -125,8 +126,8 @@ class AlbumRowItemWidget extends StatelessWidget {
                           ),
                         ),
                       Positioned(
-                        top: 6,
-                        right: 6,
+                        top: 5,
+                        right: 5,
                         child: Hero(
                           tag: tagPrefix + "_album_selection",
                           transitionOnUserGestures: true,
@@ -158,10 +159,8 @@ class AlbumRowItemWidget extends StatelessWidget {
                             tag: tagPrefix + "_owner_other",
                             transitionOnUserGestures: true,
                             child: Padding(
-                              padding: const EdgeInsets.only(
-                                right: 8.0,
-                                bottom: 8.0,
-                              ),
+                              padding:
+                                  const EdgeInsets.only(right: 4, bottom: 4),
                               child: UserAvatarWidget(
                                 c.owner,
                                 thumbnailView: true,
