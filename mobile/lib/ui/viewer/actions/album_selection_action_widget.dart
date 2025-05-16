@@ -202,8 +202,7 @@ class _AlbumSelectionActionWidgetState
         nonEmptyCollection,
       );
       if (result == false) {
-        // Navigator.of(context).pop();
-        debugPrint("No pop");
+        debugPrint("Failed to delete collection");
       }
     }
     if (hasFavorites) {
