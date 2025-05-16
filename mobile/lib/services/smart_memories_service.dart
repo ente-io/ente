@@ -31,6 +31,7 @@ import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/language_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -1543,10 +1544,52 @@ class SmartMemoriesService {
     return memoryResults;
   }
 
+  Future<Set<int>> getCollectionIDsToExclude() async {
+    final collections = CollectionsService.instance.getCollectionsForUI();
+
+    // Names of collections to exclude
+    const excludedNames = {
+      'screenshot',
+      'whatsapp',
+      'telegram',
+      'download',
+      'facebook',
+      'instagram',
+      'messenger',
+      'twitter',
+      'reddit',
+      'discord',
+      'signal',
+      'viber',
+      'wechat',
+      'line',
+      'snapchat',
+      'meme',
+      'internet',
+      'saved images',
+      'document',
+    };
+
+    final excludedCollectionIDs = <int>{};
+    collectionLoop:
+    for (final collection in collections) {
+      final collectionName = collection.displayName.toLowerCase();
+      for (final excludedName in excludedNames) {
+        if (collectionName.contains(excludedName)) {
+          excludedCollectionIDs.add(collection.id);
+          continue collectionLoop;
+        }
+      }
+    }
+
+    return excludedCollectionIDs;
+  }
+
   static Future<List<OnThisDayMemory>> _getOnThisDayResults(
     Iterable<EnteFile> allFiles,
     DateTime currentTime, {
     required Map<int, int> seenTimes,
+    required Set<int> excludedCollectionIds,
   }) async {
     final List<OnThisDayMemory> memoryResults = [];
     if (allFiles.isEmpty) return [];
@@ -1568,6 +1611,7 @@ class SmartMemoriesService {
 
     // Find all the relevant memories
     for (final file in allFiles) {
+      if (excludedCollectionIds.contains(file.collectionID)) continue;
       if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) {
         continue;
       }
