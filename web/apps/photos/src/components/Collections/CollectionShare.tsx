@@ -778,7 +778,6 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                 type="submit"
                                 color="accent"
                                 fullWidth
-                                buttonText={props.buttonText}
                                 loading={loading}
                                 sx={{ mt: 2, mb: 4 }}
                                 {...restSubmitButtonProps}
