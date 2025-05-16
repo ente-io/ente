@@ -6,6 +6,7 @@ import Avatar from "components/pages/gallery/Avatar";
 import { assertionFailed } from "ente-base/assert";
 import { Overlay } from "ente-base/components/containers";
 import { isSameDay } from "ente-base/date";
+import { isDevBuild } from "ente-base/env";
 import { formattedDateRelative } from "ente-base/i18n-date";
 import { downloadManager } from "ente-gallery/services/download";
 import { EnteFile, enteFileDeletionDate } from "ente-media/file";
@@ -28,14 +29,7 @@ import { FlexWrapper } from "ente-shared/components/Container";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
-import React, {
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import {
     VariableSizeList as List,
@@ -206,18 +200,6 @@ export const FileList: React.FC<FileListProps> = ({
         listRef.current?.resetAfterIndex(0);
     };
 
-    const fullSpanListItem = useCallback(
-        (listItem: TimeStampListItem) => ({
-            ...listItem,
-            item: (
-                <ListItemContainer span={columns}>
-                    {listItem.item}
-                </ListItemContainer>
-            ),
-        }),
-        [columns],
-    );
-
     useEffect(() => {
         const main = () => {
             if (refreshInProgress.current) {
@@ -228,7 +210,7 @@ export const FileList: React.FC<FileListProps> = ({
             let timeStampList: TimeStampListItem[] = [];
 
             if (header) {
-                timeStampList.push(fullSpanListItem(header));
+                timeStampList.push(asFullSpanListItem(header));
             } else if (galleryContext.photoListHeader) {
                 timeStampList.push(
                     getPhotoListHeader(galleryContext.photoListHeader),
@@ -254,7 +236,7 @@ export const FileList: React.FC<FileListProps> = ({
             }
             timeStampList.push(getVacuumItem(timeStampList));
             if (footer) {
-                timeStampList.push(fullSpanListItem(footer));
+                timeStampList.push(asFullSpanListItem(footer));
             } else if (publicCollectionGalleryContext.credentials) {
                 if (publicCollectionGalleryContext.photoListFooter) {
                     timeStampList.push(
@@ -292,8 +274,10 @@ export const FileList: React.FC<FileListProps> = ({
             if (hasHeader) {
                 return timeStampList;
             }
+            // TODO(RE): Remove after audit.
+            if (isDevBuild) throw new Error("Unexpected header change");
             if (header) {
-                return [fullSpanListItem(header), ...timeStampList];
+                return [asFullSpanListItem(header), ...timeStampList];
             } else if (galleryContext.photoListHeader) {
                 return [
                     getPhotoListHeader(galleryContext.photoListHeader),
@@ -322,13 +306,16 @@ export const FileList: React.FC<FileListProps> = ({
                 timeStampList.length > 0 &&
                 timeStampList[timeStampList.length - 1]?.tag ==
                     "publicAlbumsFooter";
+
             if (hasFooter) {
                 return timeStampList;
             }
+            // TODO(RE): Remove after audit.
+            if (isDevBuild) throw new Error("Unexpected footer change");
             if (footer) {
                 return [
                     ...timeStampList,
-                    fullSpanListItem(footer),
+                    asFullSpanListItem(footer),
                     getAlbumsFooter(),
                 ];
             } else if (publicCollectionGalleryContext.credentials) {
@@ -1026,6 +1013,15 @@ const ListContainer = styled(Box, {
 const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
     grid-column: span ${(props) => props.span};
 `;
+
+const FullSpanListItemContainer = styled(FlexWrapper)`
+    grid-column: 1 / -1;
+`;
+
+const asFullSpanListItem = ({ item, ...rest }: TimeStampListItem) => ({
+    ...rest,
+    item: <FullSpanListItemContainer>{item}</FullSpanListItemContainer>,
+});
 
 const DateContainer = styled(ListItemContainer)(
     ({ theme }) => `
