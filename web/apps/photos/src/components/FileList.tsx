@@ -28,7 +28,14 @@ import { FlexWrapper } from "ente-shared/components/Container";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { Trans } from "react-i18next";
 import {
     VariableSizeList as List,
@@ -125,6 +132,16 @@ export interface FileListProps {
      */
     favoriteFileIDs?: Set<number>;
     /**
+     * An optional {@link TimeStampListItem} shown before all the items in the
+     * list. It is not sticky, and scrolls along with the content of the list.
+     */
+    header?: TimeStampListItem;
+    /**
+     * An optional {@link TimeStampListItem} shown after all the items in the
+     * list. It is not sticky, and scrolls along with the content of the list.
+     */
+    footer?: TimeStampListItem;
+    /**
      * Called when the user activates the thumbnail at the given {@link index}.
      *
      * This corresponding file would be at the corresponding index of
@@ -149,6 +166,8 @@ export const FileList: React.FC<FileListProps> = ({
     activeCollectionID,
     activePersonID,
     favoriteFileIDs,
+    header,
+    footer,
     onItemClick,
 }) => {
     const galleryContext = useContext(GalleryContext);
@@ -187,6 +206,18 @@ export const FileList: React.FC<FileListProps> = ({
         listRef.current?.resetAfterIndex(0);
     };
 
+    const fullSpanListItem = useCallback(
+        (listItem: TimeStampListItem) => ({
+            ...listItem,
+            item: (
+                <ListItemContainer span={columns}>
+                    {listItem.item}
+                </ListItemContainer>
+            ),
+        }),
+        [columns],
+    );
+
     useEffect(() => {
         const main = () => {
             if (refreshInProgress.current) {
@@ -196,7 +227,9 @@ export const FileList: React.FC<FileListProps> = ({
             refreshInProgress.current = true;
             let timeStampList: TimeStampListItem[] = [];
 
-            if (galleryContext.photoListHeader) {
+            if (header) {
+                timeStampList.push(fullSpanListItem(header));
+            } else if (galleryContext.photoListHeader) {
                 timeStampList.push(
                     getPhotoListHeader(galleryContext.photoListHeader),
                 );
@@ -220,7 +253,9 @@ export const FileList: React.FC<FileListProps> = ({
                 timeStampList.push(getEmptyListItem());
             }
             timeStampList.push(getVacuumItem(timeStampList));
-            if (publicCollectionGalleryContext.credentials) {
+            if (footer) {
+                timeStampList.push(fullSpanListItem(footer));
+            } else if (publicCollectionGalleryContext.credentials) {
                 if (publicCollectionGalleryContext.photoListFooter) {
                     timeStampList.push(
                         getPhotoListFooter(
@@ -257,7 +292,9 @@ export const FileList: React.FC<FileListProps> = ({
             if (hasHeader) {
                 return timeStampList;
             }
-            if (galleryContext.photoListHeader) {
+            if (header) {
+                return [fullSpanListItem(header), ...timeStampList];
+            } else if (galleryContext.photoListHeader) {
                 return [
                     getPhotoListHeader(galleryContext.photoListHeader),
                     ...timeStampList,
@@ -288,7 +325,13 @@ export const FileList: React.FC<FileListProps> = ({
             if (hasFooter) {
                 return timeStampList;
             }
-            if (publicCollectionGalleryContext.credentials) {
+            if (footer) {
+                return [
+                    ...timeStampList,
+                    fullSpanListItem(footer),
+                    getAlbumsFooter(),
+                ];
+            } else if (publicCollectionGalleryContext.credentials) {
                 if (publicCollectionGalleryContext.photoListFooter) {
                     return [
                         ...timeStampList,
