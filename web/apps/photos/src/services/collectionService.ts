@@ -37,6 +37,7 @@ import {
     groupFilesByCollectionID,
     sortFiles,
 } from "ente-new/photos/services/files";
+import { getPublicKey } from "ente-new/photos/services/user";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getData } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
@@ -48,7 +49,6 @@ import {
     isQuickLinkCollection,
     isValidMoveTarget,
 } from "utils/collection";
-import { getPublicKey } from "./userService";
 
 const UNCATEGORIZED_COLLECTION_NAME = "Uncategorized";
 export const HIDDEN_COLLECTION_NAME = ".hidden";

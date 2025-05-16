@@ -4,17 +4,6 @@ import type { UserDetails } from "ente-new/photos/services/user-details";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 
-export const getPublicKey = async (email: string) => {
-    const token = getToken();
-
-    const resp = await HTTPService.get(
-        await apiURL("/users/public-key"),
-        { email },
-        { "X-Auth-Token": token },
-    );
-    return resp.data.publicKey;
-};
-
 export const getUserDetailsV2 = async (): Promise<UserDetails> => {
     try {
         const token = getToken();
