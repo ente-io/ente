@@ -259,7 +259,7 @@ export const syncUserDetails = async () => {
 };
 
 /**
- * Fetch user details from remote.
+ * Fetch the user details for the currently logged in user from remote.
  */
 export const getUserDetailsV2 = async () => {
     const res = await fetch(await apiURL("/users/details/v2"), {

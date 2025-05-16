@@ -13,7 +13,7 @@ import {
     getLocalFiles,
     groupFilesByCollectionID,
 } from "ente-new/photos/services/files";
-import { getUserDetailsV2 } from "services/userService";
+import { getUserDetailsV2 } from "ente-new/photos/services/user-details";
 
 const DATE_TIME_PARSING_TEST_FILE_NAMES = [
     {
