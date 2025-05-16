@@ -5,7 +5,6 @@ import "package:native_video_player/native_video_player.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/seekbar_triggered_event.dart";
 import "package:photos/theme/colors.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 
 class SeekBar extends StatefulWidget {
@@ -64,7 +63,6 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     return AnimatedBuilder(
       animation: _animationController,
       builder: (_, __) {
