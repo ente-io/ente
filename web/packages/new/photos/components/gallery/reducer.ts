@@ -1444,9 +1444,11 @@ const createCollectionSummaries = (
             // TODO(FAV): localize
             const initial = collection.owner.email.at(0)?.toUpperCase();
             if (initial) {
-                name = `${initial}'s ${t("favorites")}`;
+                // TODO(FAV):
+                // name = `${initial}'s ${t("favorites")}`;
+                name = `${initial}'s favorites`;
             } else {
-                name = `Shared ${t("favorites")}`;
+                name = "Shared favorites";
             }
         } else {
             name = collection.name;
