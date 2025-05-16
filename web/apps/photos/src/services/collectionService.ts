@@ -1,4 +1,5 @@
 import { encryptMetadataJSON, sharedCryptoWorker } from "ente-base/crypto";
+import { ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { UpdateMagicMetadataRequest } from "ente-gallery/services/file";
@@ -600,10 +601,15 @@ export const updateShareableURL = async (
     }
 };
 
+/**
+ * Return the user's own favorites collection, if any.
+ */
 export const getFavCollection = async () => {
     const collections = await getLocalCollections();
+    const userID = ensureLocalUser().id;
     for (const collection of collections) {
-        if (collection.type == "favorites") {
+        // See: [Note: User and shared favorites]
+        if (collection.type == "favorites" && collection.owner.id == userID) {
             return collection;
         }
     }

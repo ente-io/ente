@@ -50,6 +50,9 @@ export const findDefaultHiddenCollectionIDs = (collections: Collection[]) =>
             .map((collection) => collection.id),
     );
 
+/**
+ * Return true if this is a collection that the user doesn't own.
+ */
 export const isIncomingShare = (collection: Collection, user: User) =>
     collection.owner.id !== user.id;
 
