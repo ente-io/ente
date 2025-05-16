@@ -7,6 +7,7 @@ enum MemoryType {
   clip,
   time,
   filler,
+  onThisDay,
 }
 
 MemoryType memoryTypeFromString(String type) {
@@ -21,6 +22,8 @@ MemoryType memoryTypeFromString(String type) {
       return MemoryType.filler;
     case "clip":
       return MemoryType.clip;
+    case "onThisDay":
+      return MemoryType.onThisDay;
     default:
       throw ArgumentError("Invalid memory type: $type");
   }

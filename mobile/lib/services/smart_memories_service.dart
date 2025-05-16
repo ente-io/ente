@@ -21,6 +21,7 @@ import "package:photos/models/memories/clip_memory.dart";
 import "package:photos/models/memories/filler_memory.dart";
 import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
+import "package:photos/models/memories/on_this_day_memory.dart";
 import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
@@ -1538,6 +1539,69 @@ class SmartMemoriesService {
         windowEnd,
       );
       memoryResults.add(fillerMemory);
+    }
+    return memoryResults;
+  }
+
+  static Future<List<OnThisDayMemory>> _getOnThisDayResults(
+    Iterable<EnteFile> allFiles,
+    DateTime currentTime, {
+    required Map<int, int> seenTimes,
+  }) async {
+    final List<OnThisDayMemory> memoryResults = [];
+    if (allFiles.isEmpty) return [];
+
+    final daysToCompute = kMemoriesUpdateFrequency.inDays + 1;
+    final currentYear = currentTime.year;
+    final currentMonth = currentTime.month;
+    final currentDay = currentTime.day;
+    final startPoint = DateTime(currentYear, currentMonth, currentDay);
+    final cutOffTime = startPoint
+        .subtract(const Duration(days: 363) - kMemoriesUpdateFrequency);
+    final diffThreshold = Duration(days: daysToCompute);
+
+    final Map<int, List<Memory>> daysToMemories = {};
+
+    final timeTillYearEnd = DateTime(currentYear + 1).difference(startPoint);
+    final bool almostYearEnd = timeTillYearEnd < diffThreshold;
+
+    for (final file in allFiles) {
+      if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) {
+        continue;
+      }
+      final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+      final fileTimeInYear = fileDate.copyWith(year: currentYear);
+      final diff = fileTimeInYear.difference(startPoint);
+      if (!diff.isNegative && diff < diffThreshold) {
+        final yearsAgo = currentYear - fileDate.year;
+        daysToMemories
+            .putIfAbsent(diff.inDays, () => [])
+            .add(Memory.fromFile(file, seenTimes));
+      } else if (almostYearEnd) {
+        final altDiff = fileDate.copyWith(year: currentYear + 1).difference(
+              currentTime,
+            );
+        if (!altDiff.isNegative && altDiff < diffThreshold) {
+          final yearsAgo = currentYear - fileDate.year + 1;
+          daysToMemories
+              .putIfAbsent(altDiff.inDays, () => [])
+              .add(Memory.fromFile(file, seenTimes));
+        }
+      }
+    }
+    for (var day = 0; day < daysToCompute; day++) {
+      final memories = daysToMemories[day];
+      if (memories == null) continue;
+      if (memories.length < 10) continue;
+      memories.sort(
+        (a, b) => a.file.creationTime!.compareTo(b.file.creationTime!),
+      );
+      final onThisDayMemory = OnThisDayMemory(
+        memories,
+        startPoint.add(Duration(days: day)).microsecondsSinceEpoch,
+        startPoint.add(Duration(days: day + 1)).microsecondsSinceEpoch,
+      );
+      memoryResults.add(onThisDayMemory);
     }
     return memoryResults;
   }
