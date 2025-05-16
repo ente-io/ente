@@ -34,22 +34,23 @@ Locale? autoDetectedLocale;
 
 Locale localResolutionCallBack(deviceLocales, supportedLocales) {
   _onDeviceLocales = deviceLocales;
-  Locale? firstLangeuageMatch;
-  for (Locale deviceLocale in deviceLocales) {
-    for (Locale supportedLocale in appSupportedLocales) {
-      if (supportedLocale == deviceLocale) {
-        autoDetectedLocale = supportedLocale;
-        return supportedLocale;
-      }
-      if (firstLangeuageMatch == null &&
-          supportedLocale.languageCode == deviceLocale.languageCode) {
-        firstLangeuageMatch = deviceLocale;
-      }
+  final Set<String> languageSupport = {};
+  for (Locale supportedLocale in appSupportedLocales) {
+    languageSupport.add(supportedLocale.languageCode);
+  }
+  for (Locale locale in deviceLocales) {
+    // check if exact local is supported, if yes, return it
+    if (appSupportedLocales.contains(locale)) {
+      autoDetectedLocale = locale;
+      return locale;
+    }
+    // check if language code is supported, if yes, return it
+    if (languageSupport.contains(locale.languageCode)) {
+      autoDetectedLocale = locale;
+      return locale;
     }
   }
-  if (firstLangeuageMatch != null) {
-    autoDetectedLocale = firstLangeuageMatch;
-  }
+  // Return the first language code match or default to 'en'
   return autoDetectedLocale ?? const Locale('en');
 }
 
