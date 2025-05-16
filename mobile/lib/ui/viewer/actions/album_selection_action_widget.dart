@@ -162,7 +162,7 @@ class _AlbumSelectionActionWidgetState
       context,
       AddParticipantPage(
         widget.selectedAlbums.albums.toList(),
-        false,
+        const [ActionTypesToShow.addViewer, ActionTypesToShow.addCollaborator],
       ),
     );
     widget.selectedAlbums.clearAll();
