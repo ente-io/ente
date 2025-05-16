@@ -201,9 +201,8 @@ class _AlbumSelectionActionWidgetState
         context,
         nonEmptyCollection,
       );
-      if (result == true) {
-        Navigator.of(context).pop();
-      } else {
+      if (result == false) {
+        // Navigator.of(context).pop();
         debugPrint("No pop");
       }
     }
