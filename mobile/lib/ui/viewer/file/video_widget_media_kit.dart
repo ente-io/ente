@@ -124,7 +124,6 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     return Hero(
       tag: widget.tagPrefix! + widget.file.tag,
       child: MaterialVideoControlsTheme(
