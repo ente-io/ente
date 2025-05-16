@@ -333,6 +333,90 @@ class CollectionActions {
     }
   }
 
+  Future<bool> deleteMultipleCollectionSheet(
+    BuildContext bContext,
+    List<Collection> collections,
+  ) async {
+    final textTheme = getEnteTextTheme(bContext);
+    final actionResult = await showActionSheet(
+      context: bContext,
+      buttons: [
+        ButtonWidget(
+          labelText: S.of(bContext).keepPhotos,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.first,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+          onTap: () async {
+            for (final collection in collections) {
+              try {
+                await trashCollectionKeepingPhotos(collection, bContext);
+              } catch (e, s) {
+                logger.severe(
+                  "Failed to keep photos & delete collection",
+                  e,
+                  s,
+                );
+                rethrow;
+              }
+            }
+          },
+        ),
+        ButtonWidget(
+          labelText: S.of(bContext).deletePhotos,
+          buttonType: ButtonType.critical,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.second,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+          onTap: () async {
+            for (final collection in collections) {
+              try {
+                await collectionsService.trashNonEmptyCollection(collection);
+              } catch (e) {
+                logger.severe("Failed to delete collection", e);
+                rethrow;
+              }
+            }
+          },
+        ),
+        ButtonWidget(
+          labelText: S.of(bContext).cancel,
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.third,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        ),
+      ],
+      bodyWidget: StyledText(
+        text: S.of(bContext).deleteMultipleAlbumDialog(collections.length),
+        style: textTheme.body.copyWith(color: textMutedDark),
+        tags: {
+          'bold': StyledTextTag(
+            style: textTheme.body.copyWith(color: textBaseDark),
+          ),
+        },
+      ),
+      actionSheetType: ActionSheetType.defaultActionSheet,
+    );
+    if (actionResult?.action != null &&
+        actionResult!.action == ButtonAction.error) {
+      await showGenericErrorDialog(
+        context: bContext,
+        error: actionResult.exception,
+      );
+      return false;
+    }
+    if ((actionResult?.action != null) &&
+        (actionResult!.action == ButtonAction.first ||
+            actionResult.action == ButtonAction.second)) {
+      return true;
+    }
+    return false;
+  }
+
   // deleteCollectionSheet returns true if the album is successfully deleted
   Future<bool> deleteCollectionSheet(
     BuildContext bContext,

@@ -11101,10 +11101,10 @@ class S {
     );
   }
 
-  /// `Generate streamable video`
+  /// `Streamable videos`
   String get videoStreaming {
     return Intl.message(
-      'Generate streamable video',
+      'Streamable videos',
       name: 'videoStreaming',
       desc: '',
       args: [],
@@ -11801,6 +11801,46 @@ class S {
     return Intl.message(
       'Curated memories',
       name: 'curatedMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Also delete the photos (and videos) present in these {count} albums from <bold>all</bold> other albums they are part of?`
+  String deleteMultipleAlbumDialog(Object count) {
+    return Intl.message(
+      'Also delete the photos (and videos) present in these $count albums from <bold>all</bold> other albums they are part of?',
+      name: 'deleteMultipleAlbumDialog',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Add participants`
+  String get addParticipants {
+    return Intl.message(
+      'Add participants',
+      name: 'addParticipants',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} selected`
+  String selectedAlbums(Object count) {
+    return Intl.message(
+      '$count selected',
+      name: 'selectedAlbums',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Action not supported on Favourites album`
+  String get actionNotSupportedOnFavouritesAlbum {
+    return Intl.message(
+      'Action not supported on Favourites album',
+      name: 'actionNotSupportedOnFavouritesAlbum',
       desc: '',
       args: [],
     );

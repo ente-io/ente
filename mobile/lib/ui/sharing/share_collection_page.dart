@@ -92,7 +92,10 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           // ignore: unawaited_futures
           routeToPage(
             context,
-            AddParticipantPage(widget.collection, true),
+            AddParticipantPage(
+              [widget.collection],
+              const [ActionTypesToShow.addViewer],
+            ),
           ).then(
             (value) => {
               if (mounted) {setState(() => {})},
@@ -118,8 +121,13 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         isTopBorderRadiusRemoved: true,
         onTap: () async {
           // ignore: unawaited_futures
-          routeToPage(context, AddParticipantPage(widget.collection, false))
-              .then(
+          routeToPage(
+            context,
+            AddParticipantPage(
+              [widget.collection],
+              const [ActionTypesToShow.addCollaborator],
+            ),
+          ).then(
             (value) => {
               if (mounted) {setState(() => {})},
             },

@@ -54,7 +54,12 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   Future<void> _navigateToAddUser(bool addingViewer) async {
     await routeToPage(
       context,
-      AddParticipantPage(widget.collection, addingViewer),
+      AddParticipantPage(
+        [widget.collection],
+        addingViewer
+            ? [ActionTypesToShow.addViewer]
+            : [ActionTypesToShow.addCollaborator],
+      ),
     );
     if (mounted) {
       setState(() => {});
