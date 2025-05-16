@@ -325,9 +325,6 @@ class _AlbumSelectionActionWidgetState
           labelText: S.of(context).leaveAlbum,
           onTap: () async {
             for (final collection in widget.selectedAlbums.albums) {
-              if (collection.type == CollectionType.favorites) {
-                continue;
-              }
               await CollectionsService.instance.leaveAlbum(collection);
             }
             widget.selectedAlbums.clearAll();
