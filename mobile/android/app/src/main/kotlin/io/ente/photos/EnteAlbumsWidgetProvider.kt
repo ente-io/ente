@@ -180,8 +180,7 @@ class EnteAlbumsWidgetProvider : HomeWidgetProvider() {
                                                         val drawable =
                                                                 ContextCompat.getDrawable(
                                                                         context,
-                                                                        R.drawable
-                                                                                .ic_home_widget_default
+                                                                        R.drawable.ic_albums_widget
                                                                 )
                                                         val bitmap =
                                                                 (drawable as BitmapDrawable).bitmap
