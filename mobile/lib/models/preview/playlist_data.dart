@@ -7,12 +7,14 @@ class PlaylistData {
   int? width;
   int? height;
   int? size;
+  int? durationInSeconds;
 
   PlaylistData({
     required this.preview,
     this.width,
     this.height,
     this.size,
+    this.durationInSeconds,
   });
 
   PlaylistData copyWith({
@@ -20,12 +22,14 @@ class PlaylistData {
     int? width,
     int? height,
     int? size,
+    int? durationInSeconds,
   }) {
     return PlaylistData(
       preview: preview ?? this.preview,
       width: width ?? this.width,
       height: height ?? this.height,
       size: size ?? this.size,
+      durationInSeconds: durationInSeconds ?? this.durationInSeconds,
     );
   }
 
@@ -35,6 +39,7 @@ class PlaylistData {
       'width': width,
       'height': height,
       'size': size,
+      'durationInSeconds': durationInSeconds,
     };
   }
 
@@ -42,7 +47,7 @@ class PlaylistData {
 
   @override
   String toString() {
-    return 'PlaylistData(preview: $preview, width: $width, height: $height, size: $size)';
+    return 'PlaylistData(preview: $preview, width: $width, height: $height, size: $size, durationInSeconds: $durationInSeconds)';
   }
 
   @override

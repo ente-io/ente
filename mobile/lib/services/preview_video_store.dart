@@ -636,6 +636,7 @@ class PreviewVideoStore {
         width: width,
         height: height,
         size: size,
+        durationInSeconds: parseDurationFromHLS(finalPlaylist),
       );
       if (shouldAppendPreview) {
         FileDataService.instance.appendPreview(
@@ -648,6 +649,17 @@ class PreviewVideoStore {
     } catch (_) {
       rethrow;
     }
+  }
+
+  int? parseDurationFromHLS(String playlist) {
+    final lines = playlist.split("\n");
+    for (final line in lines) {
+      if (line.startsWith("#EXT-X-TARGETDURATION")) {
+        final duration = line.split(":").last.trim();
+        return int.tryParse(duration);
+      }
+    }
+    return null;
   }
 
   Future<(String, String)> _getPreviewUrl(EnteFile file) async {
