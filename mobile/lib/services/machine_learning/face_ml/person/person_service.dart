@@ -38,6 +38,8 @@ class PersonService {
     return _instance!;
   }
 
+  static bool get isInitialized => _instance != null;
+
   late Logger logger = Logger("PersonService");
 
   static Future<void> init(

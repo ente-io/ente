@@ -13,6 +13,11 @@ extension UserExtension on User {
       PersonService.instance.emailToPartialPersonDataMapCache[email]
           ?[PersonService.kPersonIDKey];
 
-  String get nameOrEmail =>
-      displayName ?? email.substring(0, email.indexOf("@"));
+  String get nameOrEmail {
+    if (PersonService.isInitialized) {
+      return displayName ?? email.substring(0, email.indexOf("@"));
+    } else {
+      return email.substring(0, email.indexOf("@"));
+    }
+  }
 }
