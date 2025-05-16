@@ -142,7 +142,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
           seekBarBufferColor: Colors.transparent,
           seekBarThumbColor: backgroundElevatedLight,
           seekBarColor: fillMutedDark,
-          seekBarPositionColor: colorScheme.primary300,
+          seekBarPositionColor: backgroundElevatedLight,
           seekBarContainerHeight: 56,
           seekBarAlignment: Alignment.center,
 
