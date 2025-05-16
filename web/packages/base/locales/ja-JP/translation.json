@@ -675,5 +675,7 @@
     "theme": "テーマ",
     "system": "システム",
     "light": "ライト",
-    "dark": "ダーク"
+    "dark": "ダーク",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }

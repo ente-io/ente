@@ -675,5 +675,7 @@
     "theme": "Tema",
     "system": "Sistema",
     "light": "Claro",
-    "dark": "Oscuro"
+    "dark": "Oscuro",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }

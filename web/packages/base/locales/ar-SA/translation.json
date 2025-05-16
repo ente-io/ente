@@ -675,5 +675,7 @@
     "theme": "المظهر",
     "system": "النظام",
     "light": "فاتح",
-    "dark": "داكن"
+    "dark": "داكن",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }

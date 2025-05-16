@@ -21,6 +21,7 @@ import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import { stashRedirect } from "ente-accounts/services/redirect";
+import { isSessionInvalid } from "ente-accounts/services/session";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { CenteredRow } from "ente-base/components/containers";
@@ -32,6 +33,11 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
+import {
+    clearSessionStorage,
+    haveCredentialsInSession,
+    masterKeyFromSessionIfLoggedIn,
+} from "ente-base/session";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
@@ -56,6 +62,7 @@ import {
 import {
     constructUserIDToEmailMap,
     createShareeSuggestionEmails,
+    validateKey,
 } from "ente-new/photos/components/gallery/helpers";
 import {
     useGalleryReducer,
@@ -93,8 +100,6 @@ import {
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { FlexWrapper } from "ente-shared/components/Container";
-import { getRecoveryKey } from "ente-shared/crypto/helpers";
-import { CustomError } from "ente-shared/error";
 import { getData } from "ente-shared/storage/localStorage";
 import {
     getToken,
@@ -103,7 +108,7 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from "ente-shared/storage/localStorage/helpers";
-import { clearKeys, getKey } from "ente-shared/storage/sessionStorage";
+import { getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
@@ -117,7 +122,6 @@ import {
 } from "services/collectionService";
 import exportService from "services/export";
 import { uploadManager } from "services/upload-manager";
-import { isTokenValid } from "services/userService";
 import {
     GalleryContextType,
     SelectedState,
@@ -130,6 +134,17 @@ import {
     type CollectionOp,
 } from "utils/collection";
 import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
+
+/**
+ * Options to customize the behaviour of the sync with remote that gets
+ * triggered on various actions within the gallery and its descendants.
+ */
+interface SyncWithRemoteOpts {
+    /** Force a sync to happen (default: no) */
+    force?: boolean;
+    /** Perform the sync without showing a global loading bar (default: no) */
+    silent?: boolean;
+}
 
 const defaultGalleryContext: GalleryContextType = {
     setActiveCollectionID: () => null,
@@ -187,13 +202,11 @@ const Page: React.FC = () => {
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
 
-    const syncInProgress = useRef(false);
-    const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
-        undefined,
-    );
-    const resync = useRef<{ force: boolean; silent: boolean } | undefined>(
-        undefined,
-    );
+    /**`true` if a sync is currently in progress. */
+    const isSyncing = useRef(false);
+    /** Set to the {@link SyncWithRemoteOpts} of the last sync that was enqueued
+        while one was already in progress. */
+    const resyncOpts = useRef<SyncWithRemoteOpts | undefined>(undefined);
 
     const [userIDToEmailMap, setUserIDToEmailMap] =
         useState<Map<number, string>>(null);
@@ -286,32 +299,21 @@ const Page: React.FC = () => {
 
     const router = useRouter();
 
-    // Ensure that the keys in local storage are not malformed by verifying that
-    // the recoveryKey can be decrypted with the masterKey.
-    // Note: This is not bullet-proof.
-    const validateKey = async () => {
-        try {
-            await getRecoveryKey();
-            return true;
-        } catch {
-            logout();
-            return false;
-        }
-    };
-
     useEffect(() => {
-        const key = getKey("encryptionKey");
         const token = getToken();
-        if (!key || !token) {
+        if (!haveCredentialsInSession() || !token) {
             stashRedirect("/gallery");
             router.push("/");
             return;
         }
         preloadImage("/images/subscription-card-background");
+
         const electron = globalThis.electron;
-        const main = async () => {
-            const valid = await validateKey();
-            if (!valid) {
+        let syncIntervalID: ReturnType<typeof setInterval> | undefined;
+
+        void (async () => {
+            if (!(await validateKey())) {
+                logout();
                 return;
             }
             initSettings();
@@ -335,21 +337,23 @@ const Page: React.FC = () => {
                 hiddenFiles: await getLocalFiles("hidden"),
                 trashedFiles: await getLocalTrashedFiles(),
             });
-            await syncWithRemote(true);
+            await syncWithRemote({ force: true });
             setIsFirstLoad(false);
             setJustSignedUp(false);
-            syncInterval.current = setInterval(
-                () => syncWithRemote(false, true),
+            syncIntervalID = setInterval(
+                () => syncWithRemote({ silent: true }),
                 5 * 60 * 1000 /* 5 minutes */,
             );
             if (electron) {
-                electron.onMainWindowFocus(() => syncWithRemote(false, true));
+                electron.onMainWindowFocus(() =>
+                    syncWithRemote({ silent: true }),
+                );
                 if (await shouldShowWhatsNew(electron)) showWhatsNew();
             }
-        };
-        main();
+        })();
+
         return () => {
-            clearInterval(syncInterval.current);
+            clearInterval(syncIntervalID);
             if (electron) electron.onMainWindowFocus(undefined);
         };
     }, []);
@@ -522,7 +526,7 @@ const Page: React.FC = () => {
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
 
-    const handleFileAndCollectionSyncWithRemote = useCallback(async () => {
+    const fileAndCollectionSyncWithRemote = useCallback(async () => {
         const didUpdateFiles = await syncCollectionAndFiles({
             onSetCollections: (
                 collections,
@@ -551,27 +555,39 @@ const Page: React.FC = () => {
         }
     }, []);
 
-    const handleSyncWithRemote = useCallback(
-        async (force = false, silent = false) => {
+    const syncWithRemote = useCallback(
+        async (opts?: SyncWithRemoteOpts) => {
+            const { force, silent } = opts ?? {};
+
+            // Pre-flight checks.
             if (!navigator.onLine) return;
-            if (syncInProgress.current && !force) {
-                resync.current = { force, silent };
+            if (await isSessionInvalid()) {
+                showSessionExpiredDialog();
                 return;
             }
-            const isForced = syncInProgress.current && force;
-            syncInProgress.current = true;
-            try {
-                const token = getToken();
-                if (!token) {
+            if (!(await masterKeyFromSessionIfLoggedIn())) {
+                clearSessionStorage();
+                router.push("/credentials");
+                return;
+            }
+
+            // Start or enqueue.
+            let isForced = false;
+            if (isSyncing.current) {
+                if (force) {
+                    isForced = true;
+                } else {
+                    resyncOpts.current = { force, silent };
                     return;
                 }
-                const tokenValid = await isTokenValid(token);
-                if (!tokenValid) {
-                    throw new Error(CustomError.SESSION_EXPIRED);
-                }
-                !silent && showLoadingBar();
+            }
+
+            // The sync
+            isSyncing.current = true;
+            try {
+                if (!silent) showLoadingBar();
                 await preCollectionAndFilesSync();
-                await handleFileAndCollectionSyncWithRemote();
+                await fileAndCollectionSyncWithRemote();
                 // syncWithRemote is called with the force flag set to true before
                 // doing an upload. So it is possible, say when resuming a pending
                 // upload, that we get two syncWithRemotes happening in parallel.
@@ -581,26 +597,17 @@ const Page: React.FC = () => {
                     await postCollectionAndFilesSync();
                 }
             } catch (e) {
-                switch (e.message) {
-                    case CustomError.SESSION_EXPIRED:
-                        showSessionExpiredDialog();
-                        break;
-                    case CustomError.KEY_MISSING:
-                        clearKeys();
-                        router.push("/credentials");
-                        break;
-                    default:
-                        log.error("syncWithRemote failed", e);
-                }
+                log.error("syncWithRemote failed", e);
             } finally {
                 dispatch({ type: "clearUnsyncedState" });
-                !silent && hideLoadingBar();
+                if (!silent) hideLoadingBar();
             }
-            syncInProgress.current = false;
-            if (resync.current) {
-                const { force, silent } = resync.current;
-                setTimeout(() => handleSyncWithRemote(force, silent), 0);
-                resync.current = undefined;
+            isSyncing.current = false;
+
+            const nextOpts = resyncOpts.current;
+            if (nextOpts) {
+                resyncOpts.current = undefined;
+                setTimeout(() => syncWithRemote(nextOpts), 0);
             }
         },
         [
@@ -608,12 +615,9 @@ const Page: React.FC = () => {
             hideLoadingBar,
             router,
             showSessionExpiredDialog,
-            handleFileAndCollectionSyncWithRemote,
+            fileAndCollectionSyncWithRemote,
         ],
     );
-
-    // Alias for existing code.
-    const syncWithRemote = handleSyncWithRemote;
 
     const setupSelectAllKeyBoardShortcutHandler = () => {
         const handleKeyUp = (e: KeyboardEvent) => {
@@ -688,7 +692,7 @@ const Page: React.FC = () => {
                     );
                 }
                 clearSelection();
-                await syncWithRemote(false, true);
+                await syncWithRemote({ silent: true });
             } catch (e) {
                 onGenericError(e);
             } finally {
@@ -724,7 +728,7 @@ const Page: React.FC = () => {
                 );
             }
             clearSelection();
-            await syncWithRemote(false, true);
+            await syncWithRemote({ silent: true });
         } catch (e) {
             onGenericError(e);
         } finally {
@@ -897,7 +901,8 @@ const Page: React.FC = () => {
             value={{
                 ...defaultGalleryContext,
                 setActiveCollectionID: handleSetActiveCollectionID,
-                syncWithRemote,
+                syncWithRemote: (force, silent) =>
+                    syncWithRemote({ force, silent }),
                 setBlockingLoad,
                 photoListHeader,
                 userIDToEmailMap,
@@ -1047,7 +1052,9 @@ const Page: React.FC = () => {
 
                 <Upload
                     activeCollection={activeCollection}
-                    syncWithRemote={syncWithRemote}
+                    syncWithRemote={(force, silent) =>
+                        syncWithRemote({ force, silent })
+                    }
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
                         false,
@@ -1131,7 +1138,7 @@ const Page: React.FC = () => {
                         }
                         onMarkTempDeleted={handleMarkTempDeleted}
                         onSetOpenFileViewer={setIsFileViewerOpen}
-                        onSyncWithRemote={handleSyncWithRemote}
+                        onSyncWithRemote={syncWithRemote}
                         onVisualFeedback={handleVisualFeedback}
                         onSelectCollection={handleSelectCollection}
                         onSelectPerson={handleSelectPerson}

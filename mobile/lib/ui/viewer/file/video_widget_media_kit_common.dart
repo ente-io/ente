@@ -420,13 +420,12 @@ class _SeekBarState extends State<SeekBar> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     return SliderTheme(
       data: SliderTheme.of(context).copyWith(
         trackHeight: 1.0,
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
         overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),
-        activeTrackColor: colorScheme.primary300,
+        activeTrackColor: backgroundElevatedLight,
         inactiveTrackColor: fillMutedDark,
         thumbColor: backgroundElevatedLight,
         overlayColor: fillMutedDark,

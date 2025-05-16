@@ -1281,6 +1281,8 @@
   "createCollaborativeLink": "Gemeinschaftlichen Link erstellen",
   "search": "Suche",
   "enterPersonName": "Namen der Person eingeben",
+  "editEmailAlreadyLinked": "Diese E-Mail ist bereits verknüpft mit {name}.",
+  "viewPersonToUnlink": "{name} zum Entfernen des Links anzeigen",
   "enterName": "Name eingeben",
   "savePerson": "Person speichern",
   "editPerson": "Person bearbeiten",
@@ -1411,7 +1413,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {}=0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1660,7 +1662,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Video-Streaming",
   "processingVideos": "Verarbeite Videos",
   "streamDetails": "Stream-Details",
   "processing": "In Bearbeitung",

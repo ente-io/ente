@@ -646,9 +646,14 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
     if (widget.playlistData != null && widget.selectedPreview) {
       aspectRatio = widget.playlistData!.width! / widget.playlistData!.height!;
-      if (widget.file.duration != null &&
-          (duration == "0:00" || duration == null)) {
-        duration = secondsToDuration(widget.file.duration!);
+      if (duration == "0:00" || duration == null) {
+        if ((widget.file.duration ?? 0) > 0) {
+          duration = secondsToDuration(widget.file.duration!);
+        } else if (widget.playlistData!.durationInSeconds != null) {
+          duration = secondsToDuration(
+            widget.playlistData!.durationInSeconds!,
+          );
+        }
       }
       _logger.info("Getting aspect ratio from preview video");
       return;

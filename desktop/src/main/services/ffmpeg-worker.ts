@@ -193,8 +193,8 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  *
  *     H.264, <= 10 MB              - Skip
  *     H.264, <= 4000 kb/s bitrate  - Don't re-encode video stream
- *     BT.709, <= 2000 kb/s bitrate - Don't apply the scale+fps filter
- *     !BT.709                      - Apply tonemap (zscale+tonemap+zscale)
+ *     !HDR, <= 2000 kb/s bitrate   - Don't apply the scale+fps filter
+ *     HDR                          - Apply tonemap (zscale+tonemap+zscale)
  *
  * Example invocation:
  *
@@ -221,10 +221,10 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
     outputPathPrefix: string,
     outputUploadURL: string,
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined> => {
-    const { isH264, isBT709, bitrate } =
+    const { isH264, isHDR, bitrate } =
         await detectVideoCharacteristics(inputFilePath);
 
-    log.debugString(JSON.stringify({ isH264, isBT709, bitrate }));
+    log.debugString(JSON.stringify({ isH264, isHDR, bitrate }));
 
     // If the video is smaller than 10 MB, and already H.264 (the codec we are
     // going to use for the conversion), then a streaming variant is not much
@@ -279,8 +279,10 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
     // - BT.709 ("High-Definition" or HD)
     // - BT.2020 ("Ultra-High-Definition" or UHD, aka HDR^).
     //
-    // ^ HDR ("High-Dynamic-Range") is an addendum to BT.2020, but for our
-    //   purpose here we can treat it as as alias.
+    // ^ HDR ("High-Dynamic-Range") is an addendum to BT.2020, but for the
+    //   discussion here we can treat it as as alias. In particular, not all
+    //   BT.2020 videos are HDR, the check we use instead looks for particular
+    //   color transfers (see the `isHDRVideo` function below).
     //
     // BT.709 is the most common amongst these for older files out stored on
     // computers, and they conform mostly to the standard (one notable exception
@@ -297,15 +299,14 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
     // that uses the tonemap filter.
     //
     // However applying this tonemap to videos that are already HD leads to a
-    // brightness drop. So we conditionally apply this filter chain only if the
-    // colorspace is not already BT.709.
+    // brightness drop. So we conditionally apply this filter chain only if we
+    // can heuristically detect that the video is HDR.
     //
-    // See also: [Note: Alternative FFmpeg command for HDR videos], although
-    // that uses a allow-list based check (while here we use deny-list).
+    // See also: [Note: Alternative FFmpeg command for HDR videos].
     //
     // Reference:
     // - https://trac.ffmpeg.org/wiki/colorspace
-    const tonemap = !isBT709;
+    const tonemap = isHDR;
 
     // We want the generated playlist to refer to the chunks as "output.ts".
     //
@@ -389,10 +390,9 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
                                 "fps=30",
                             ]
                           : [],
-                      // Convert the colorspace if the video is not in the HD
-                      // color space (bt709). Before conversion, tone map colors
-                      // so that they work the same across the change in the
-                      // dyamic range.
+                      // Convert the colorspace if the video is HDR. Before
+                      // conversion, tone map colors so that they work the same
+                      // across the change in the dyamic range.
                       //
                       // 1. The tonemap filter only works linear light, so we
                       //    first use zscale with transfer=linear to linearize
@@ -548,7 +548,7 @@ const videoDimensionsRegex = / ([1-9]\d*)x([1-9]\d*)/;
 
 interface VideoCharacteristics {
     isH264: boolean;
-    isBT709: boolean;
+    isHDR: boolean;
     bitrate: number | undefined;
 }
 
@@ -557,7 +557,7 @@ interface VideoCharacteristics {
  * {@link inputFilePath}:
  *
  * - If is encoded using H.264 codec.
- * - If it uses the BT.709 colorspace.
+ * - If it is HDR.
  * - Its bitrate.
  *
  * The defaults are tailored for the cases in which these conditions are used,
@@ -592,13 +592,18 @@ const detectVideoCharacteristics = async (inputFilePath: string) => {
     // codec conversion to happen, even if it is unnecessary.
     const res: VideoCharacteristics = {
         isH264: false,
-        isBT709: false,
+        isHDR: false,
         bitrate: undefined,
     };
     if (!videoStreamLine) return res;
 
     res.isH264 = videoStreamLine.startsWith("h264 ");
-    res.isBT709 = videoStreamLine.includes("bt709");
+
+    // Same check as `isHDRVideo`.
+    res.isHDR =
+        videoStreamLine.includes("smpte2084") ||
+        videoStreamLine.includes("arib-std-b67");
+
     // The regex matches "\d kb/s", but there can be other units for the
     // bitrate. However, (a) "kb/s" is the most common for videos out in the
     // wild, and (b) even if we guess wrong it we'll just do "-v:c x264" instead
@@ -606,7 +611,7 @@ const detectVideoCharacteristics = async (inputFilePath: string) => {
     const brs = videoBitrateRegex.exec(videoStreamLine)?.at(0);
     if (brs) {
         const br = parseInt(brs, 10);
-        if (br) res.bitrate = br;
+        if (br) res.bitrate = br * 1000;
     }
 
     return res;
@@ -663,22 +668,21 @@ const detectVideoDimensions = (conversionStderr: string) => {
  * Heuristically detect if the file at given path is a HDR video.
  *
  * This is similar to {@link detectVideoCharacteristics}, and see that
- * function's documentation for all the caveats. However, this function uses an
- * allow-list instead, and considers any file with color transfer "smpte2084" or
- * "arib-std-b67" to be HDR. While this is in some sense a more exact check, it
- * comes with different caveats:
+ * function's documentation for all the caveats. Specifically, this function
+ * uses an allow-list, and considers any file with color transfer "smpte2084" or
+ * "arib-std-b67" to be HDR. Caveats:
  *
- * - These particular constants are not guaranteed to be correct; these are just
- *   what I saw on the internet as being used / recommended for detecting HDR.
+ * 1. These particular constants are not guaranteed to be correct; these are
+ *    from various internet posts as being used / recommended for detecting HDR.
  *
- * - Since we don't have ffprobe, we're not checking the color space value
- *   itself but a substring of the stream line in the ffmpeg stderr output.
+ * 2. Since we don't have ffprobe, we're not checking the color space value
+ *    itself but a substring of the stream line in the ffmpeg stderr output.
  *
- * In particular, we use this more exact check for places where we have less
- * leeway. e.g. when generating thumbnails, if we apply the tonemapping to any
- * non-BT.709 file (as the HLS stream generation does), we start getting the
- * "code 3074: no path between colorspaces" error during the JPEG conversion
- * (this is not a problem in the H.264 conversion).
+ * This check should generally not have false positives (unless something else
+ * in the log line triggers #2), but it can have false negative. This is the
+ * lesser of the two evils since if we apply the tonemapping to any non-BT.709
+ * file, we start getting the "code 3074: no path between colorspaces" error
+ * during the JPEG or H.264 conversion.
  *
  * - See: [Note: Alternative FFmpeg command for HDR videos]
  * - See: [Note: Tonemapping HDR to HD]

@@ -1384,7 +1384,7 @@
   "enableMachineLearningBanner": "Aktiver maskinlæring for magisk søk og ansiktsgjenkjenning",
   "searchDiscoverEmptySection": "Bilder vil vises her når behandlingen og synkronisering er fullført",
   "searchPersonsEmptySection": "Folk vil vises her når behandling og synkronisering er fullført",
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {}=0 {La til 0 samarbeidspartner} =1 {La til 1 samarbeidspartner} other {Lagt til {count} samarbeidspartnere}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {La til 0 samarbeidspartner} =1 {La til 1 samarbeidspartner} other {Lagt til {count} samarbeidspartnere}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1624,7 +1624,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Videostrømming",
   "processingVideos": "Behandler videoer",
   "streamDetails": "Strømmedetaljer",
   "processing": "Behandler",
