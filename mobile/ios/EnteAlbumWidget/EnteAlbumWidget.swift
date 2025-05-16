@@ -207,7 +207,7 @@ struct EnteAlbumWidgetEntryView: View {
             .widgetURL(
                 URL(
                     string:
-                        "albumswidget://message?generatedId=\(entry.generatedId != nil ? String(entry.generatedId!) : "nan")&homeWidget"
+                        "albumwidget://message?generatedId=\(entry.generatedId != nil ? String(entry.generatedId!) : "nan")&homeWidget"
                 )
             )
         }

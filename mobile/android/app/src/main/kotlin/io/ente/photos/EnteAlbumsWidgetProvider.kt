@@ -68,7 +68,7 @@ class EnteAlbumsWidgetProvider : HomeWidgetProvider() {
 
                                                         val deepLinkUri =
                                                                 Uri.parse(
-                                                                        "albumswidget://message?generatedId=${generatedId}&homeWidget"
+                                                                        "albumwidget://message?generatedId=${generatedId}&homeWidget"
                                                                 )
 
                                                         val pendingIntent =
