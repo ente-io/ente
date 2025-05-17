@@ -49,10 +49,10 @@ For example,
 
 ```yaml
 apps:
-    public-albums: albums.myente.xyz
-    cast: cast.myente.xyz
-    accounts: accounts.myente.xyz
-    family: family.myente.xyz
+    public-albums: https://albums.myente.xyz
+    cast: https://cast.myente.xyz
+    accounts: https://accounts.myente.xyz
+    family: https://family.myente.xyz
 ```
 
 >[!IMPORTANT]
