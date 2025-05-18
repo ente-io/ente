@@ -63,7 +63,7 @@ class SmartMemoriesService {
   SmartMemoriesService();
 
   // One general method to get all memories, which calls on internal methods for each separate memory type
-  Future<MemoriesResult> calcMemories(
+  Future<MemoriesResult> calcSmartMemories(
     DateTime now,
     MemoriesCache oldCache, {
     bool debugSurfaceAll = false,
@@ -328,7 +328,7 @@ class SmartMemoriesService {
     }
   }
 
-  Future<List<FillerMemory>> calcFillerResults() async {
+  Future<List<FillerMemory>> calcSimpleMemories() async {
     final now = DateTime.now();
     final (allFiles, _) = await _getFilesAndMapForMemories();
     final seenTimes = await _memoriesDB.getSeenTimes();

@@ -185,7 +185,7 @@ class MemoriesCacheService {
         final now = DateTime.now();
         final next = now.add(kMemoriesUpdateFrequency);
         final nowResult =
-            await smartMemoriesService.calcMemories(now, newCache);
+            await smartMemoriesService.calcSmartMemories(now, newCache);
         if (nowResult.isEmpty) {
           _cachedMemories = [];
           _logger.warning(
@@ -194,7 +194,7 @@ class MemoriesCacheService {
           return;
         }
         final nextResult =
-            await smartMemoriesService.calcMemories(next, newCache);
+            await smartMemoriesService.calcSmartMemories(next, newCache);
         w?.log("calculated new memories");
         for (final nowMemory in nowResult.memories) {
           newCache.toShowMemories
@@ -339,7 +339,7 @@ class MemoriesCacheService {
 
   Future<void> _calculateRegularFillers() async {
     if (_cachedMemories == null) {
-      _cachedMemories = await smartMemoriesService.calcFillerResults();
+      _cachedMemories = await smartMemoriesService.calcSimpleMemories();
       Bus.instance.fire(MemoriesChangedEvent());
     }
     return;

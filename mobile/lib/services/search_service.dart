@@ -1272,7 +1272,7 @@ class SearchService {
 
       final cache = await memoriesCacheService.debugCacheForTesting();
       final memoriesResult = await smartMemoriesService
-          .calcMemories(calcTime, cache, debugSurfaceAll: true);
+          .calcSmartMemories(calcTime, cache, debugSurfaceAll: true);
       locationService.baseLocations = memoriesResult.baseLocations;
       memories = memoriesResult.memories;
     }
