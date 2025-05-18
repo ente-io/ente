@@ -346,20 +346,30 @@ class MemoriesCacheService {
   }
 
   Future<List<SmartMemory>> getMemoriesForWidget({
+    required bool onThisDay,
     required bool pastYears,
     required bool smart,
   }) async {
-    if (!pastYears && !smart) {
+    if (!onThisDay && !pastYears && !smart) {
+      _logger.info(
+        'No memories requested, returning empty list',
+      );
       return [];
     }
     final allMemories = await getMemories();
-    if (pastYears && smart) {
+    if (onThisDay && pastYears && smart) {
       return allMemories;
     }
     final filteredMemories = <SmartMemory>[];
     for (final memory in allMemories) {
-      if (!pastYears && memory.type == MemoryType.filler) continue;
-      if (!smart && memory.type != MemoryType.filler) continue;
+      if (!memory.shouldShowNow()) continue;
+      if (memory.type == MemoryType.onThisDay) {
+        if (!onThisDay) continue;
+      } else if (memory.type == MemoryType.filler) {
+        if (!pastYears) continue;
+      } else {
+        if (!smart) continue;
+      }
       filteredMemories.add(memory);
     }
     return filteredMemories;
