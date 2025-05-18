@@ -328,22 +328,41 @@ class SmartMemoriesService {
     }
   }
 
-  Future<List<FillerMemory>> calcSimpleMemories() async {
+  Future<List<SmartMemory>> calcSimpleMemories() async {
     final now = DateTime.now();
     final (allFiles, _) = await _getFilesAndMapForMemories();
     final seenTimes = await _memoriesDB.getSeenTimes();
+    final collectionIDsToExclude = await getCollectionIDsToExclude();
+
+    final List<SmartMemory> memories = [];
+
+    // On this day memories
+    final onThisDayMemories = await _getOnThisDayResults(
+      allFiles,
+      now,
+      seenTimes: seenTimes,
+      collectionIDsToExclude: collectionIDsToExclude,
+    );
+    if (onThisDayMemories.isNotEmpty &&
+        onThisDayMemories.first.shouldShowNow()) {
+      memories.add(onThisDayMemories.first);
+      _deductUsedMemories(allFiles, [onThisDayMemories.first]);
+    }
+
+    // Filler memories
     final fillerMemories =
         await _getFillerResults(allFiles, now, seenTimes: seenTimes);
+    memories.addAll(fillerMemories);
 
     final local = await getLocale();
     final languageCode = local?.languageCode ?? "en";
     final s = await LanguageService.s;
 
     _logger.finest('get locale and S');
-    for (final memory in fillerMemories) {
+    for (final memory in memories) {
       memory.title = memory.createTitle(s, languageCode);
     }
-    return fillerMemories;
+    return memories;
   }
 
   static void _deductUsedMemories(
