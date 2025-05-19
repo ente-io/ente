@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:collection";
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -276,5 +275,4 @@ Future<void> _saveLivePhotoOnDroid(
     "remoteDownload",
   );
   await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
-}
 }

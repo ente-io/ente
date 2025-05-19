@@ -173,7 +173,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
       };
 
       encryptedThumbnail = (await NetworkClient.instance.getDio().get(
-                file.pubPreviewUrl,
+                file.pubThumbUrl,
                 options: Options(
                   headers: headers,
                   responseType: ResponseType.bytes,

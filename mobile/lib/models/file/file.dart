@@ -243,9 +243,6 @@ class EnteFile {
   }
 
   String get downloadUrl {
-    if (localFileServer.isNotEmpty) {
-      return "$localFileServer/$uploadedFileID";
-    }
     final endpoint = Configuration.instance.getHttpEndpoint();
     if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
       return endpoint + "/files/download/" + uploadedFileID.toString();
@@ -255,9 +252,6 @@ class EnteFile {
   }
 
   String get publicDownloadUrl {
-    if (localFileServer.isNotEmpty) {
-      return "$localFileServer/$uploadedFileID";
-    }
     final endpoint = Configuration.instance.getHttpEndpoint();
     if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
       return endpoint +
@@ -269,10 +263,16 @@ class EnteFile {
     }
   }
 
-  String get pubPreviewUrl {
-    if (localFileServer.isNotEmpty) {
-      return "$localFileServer/thumb/$uploadedFileID";
+  String get thumbnailUrl {
+    final endpoint = Configuration.instance.getHttpEndpoint();
+    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
+      return endpoint + "/files/preview/" + uploadedFileID.toString();
+    } else {
+      return "https://thumbnails.ente.io/?fileID=" + uploadedFileID.toString();
     }
+  }
+
+  String get pubThumbUrl {
     final endpoint = Configuration.instance.getHttpEndpoint();
     if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
       return endpoint +
@@ -289,18 +289,6 @@ class EnteFile {
   }
 
   String? debugCaption;
-
-  String get thumbnailUrl {
-    if (localFileServer.isNotEmpty) {
-      return "$localFileServer/thumb/$uploadedFileID";
-    }
-    final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
-      return endpoint + "/files/preview/" + uploadedFileID.toString();
-    } else {
-      return "https://thumbnails.ente.io/?fileID=" + uploadedFileID.toString();
-    }
-  }
 
   String get displayName {
     if (pubMagicMetadata != null && pubMagicMetadata!.editedName != null) {
