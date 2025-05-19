@@ -1442,7 +1442,7 @@ const createCollectionSummaries = (
             // particular favorite as a prefix to disambiguate this collection
             // from the user's own favorites.
             // TODO(FAV): localize
-            const initial = collection.owner.email.at(0)?.toUpperCase();
+            const initial = collection.owner.email?.at(0)?.toUpperCase();
             if (initial) {
                 // TODO(FAV):
                 // name = `${initial}'s ${t("favorites")}`;

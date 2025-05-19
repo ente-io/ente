@@ -86,12 +86,21 @@ export interface CollectionUser {
     id: number;
     /**
      * The email of the user.
+     *
+     * - The email is present for the {@link owner} only for shared collections.
+     * - The email is present for all {@link sharees}.
+     * - Remote uses a blank string to indicate absent values.
      */
-    email: string;
+    email?: string;
     /**
      * The association / privilege level of the user with the collection.
+     *
+     * - The role is not present blank for the {@link owner}.
+     * - The role is present, and one of "VIEWER" and "COLLABORATOR" for the
+     *   {@link sharees}.
+     * - Remote uses a blank string to indicate absent values.
      */
-    role: CollectionUserRole;
+    role?: CollectionUserRole;
 }
 
 export interface EncryptedCollection {
