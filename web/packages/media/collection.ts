@@ -79,8 +79,18 @@ export type CollectionUserRole =
  * or as someone with whom the collection has been shared with.
  */
 export interface CollectionUser {
+    /**
+     * The ID of the underlying {@link User} that this {@link CollectionUser}
+     * stands for.
+     */
     id: number;
+    /**
+     * The email of the user.
+     */
     email: string;
+    /**
+     * The association / privilege level of the user with the collection.
+     */
     role: CollectionUserRole;
 }
 
