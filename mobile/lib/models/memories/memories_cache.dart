@@ -150,7 +150,7 @@ class ToShowMemory {
       memory.type,
       memory.firstDateToShow,
       memory.lastDateToShow,
-      memory.id!,
+      memory.id,
       calcTime.microsecondsSinceEpoch,
       personID: personID,
       peopleMemoryType: peopleMemoryType,
