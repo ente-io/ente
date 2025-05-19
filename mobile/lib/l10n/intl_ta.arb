@@ -2,6 +2,8 @@
   "@@locale ": "en",
   "enterYourEmailAddress": "உங்கள் மின்னஞ்சல் முகவரியை உள்ளிடவும்",
   "accountWelcomeBack": "மீண்டும் வருக!",
+  "emailAlreadyRegistered": "மின்னஞ்சல் முன்பே பதிவுசெய்யப்பட்டுள்ளது.",
+  "emailNotRegistered": "மின்னஞ்சல் பதிவு செய்யப்படவில்லை.",
   "email": "மின்னஞ்சல்",
   "cancel": "ரத்து செய்",
   "verify": "சரிபார்க்கவும்",
@@ -15,6 +17,8 @@
   "confirmDeletePrompt": "ஆம், எல்லா செயலிகளிலும் இந்தக் கணக்கையும் அதன் தரவையும் நிரந்தரமாக நீக்க விரும்புகிறேன்.",
   "confirmAccountDeletion": "கணக்கு நீக்குதலை உறுதிப்படுத்தவும்",
   "deleteAccountPermanentlyButton": "கணக்கை நிரந்தரமாக நீக்கவும்",
+  "yourAccountHasBeenDeleted": "உங்கள் கணக்கு நீக்கப்பட்டது",
+  "selectReason": "காரணத்தைத் தேர்ந்தெடுக்கவும்",
   "deleteReason1": "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை",
   "onThisDay": "On this day"
 }

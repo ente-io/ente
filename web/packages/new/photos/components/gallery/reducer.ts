@@ -543,6 +543,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 hiddenFileIDs,
                 archivedFileIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
+                    action.user,
                     normalCollections,
                     normalFiles,
                     state.unsyncedFavoriteUpdates,
@@ -617,6 +618,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     deriveDefaultHiddenCollectionIDs(hiddenCollections),
                 archivedFileIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
+                    state.user!,
                     normalCollections,
                     state.normalFiles,
                     state.unsyncedFavoriteUpdates,
@@ -669,6 +671,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 archivedCollectionIDs,
                 archivedFileIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
+                    state.user!,
                     normalCollections,
                     state.normalFiles,
                     state.unsyncedFavoriteUpdates,
@@ -892,6 +895,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             return {
                 ...state,
                 favoriteFileIDs: deriveFavoriteFileIDs(
+                    state.user!,
                     state.normalCollections,
                     state.normalFiles,
                     unsyncedFavoriteUpdates,
@@ -941,6 +945,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             const unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"] =
                 new Map();
             const favoriteFileIDs = deriveFavoriteFileIDs(
+                state.user!,
                 state.normalCollections,
                 state.normalFiles,
                 unsyncedFavoriteUpdates,
@@ -1211,13 +1216,15 @@ const deriveArchivedFileIDs = (
  * Compute favorite file IDs from their dependencies.
  */
 const deriveFavoriteFileIDs = (
+    user: User,
     collections: Collection[],
     files: EnteFile[],
     unsyncedFavoriteUpdates: GalleryState["unsyncedFavoriteUpdates"],
 ) => {
     let favoriteFileIDs = new Set<number>();
     for (const collection of collections) {
-        if (collection.type == "favorites") {
+        // See: [Note: User and shared favorites]
+        if (collection.type == "favorites" && collection.owner.id == user.id) {
             favoriteFileIDs = new Set(
                 files
                     .filter((file) => file.collectionID === collection.id)
@@ -1350,6 +1357,26 @@ const createCollectionSummaries = (
             } else {
                 type = "incomingShareViewer";
             }
+        } else if (collection.type == "favorites") {
+            // [Note: User and shared favorites]
+            //
+            // "favorites" can be both the user's own favorites, or favorites of
+            // other users shared with them. However, all of the latter will get
+            // typed as "incomingShareViewer" or "incomingShareCollaborator" in
+            // the first case above. So if a collection summary has type
+            // "favorites", it is guaranteed to be the user's own favorites.
+            //
+            // However, notice that the type of the _collection_ itself is not
+            // changed, so whenever we're checking the type of the collection
+            // (not of the collection summary) and we specifically want to
+            // target the user's own favorites, we also need to check the
+            // collection owner's ID is the same as the logged in user's ID.
+            //
+            // This case needs to be above the other cases since the primary
+            // classification of this collection summary is that it is the
+            // user's "favorites", everything else is secondary and can be part
+            // of the `attributes` computed below.
+            type = collection.type;
         } else if (isOutgoingShare(collection, user)) {
             type = "outgoingShare";
         } else if (isSharedOnlyViaLink(collection)) {
@@ -1389,15 +1416,40 @@ const createCollectionSummaries = (
         if (isPinnedCollection(collection)) {
             attributes.push("pinned");
         }
-        // TODO: Verify type before removing the null check.
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (collection.type) attributes.push(collection.type);
+        switch (collection.type) {
+            case "favorites":
+                // We don't want to treat other folks' favorites specially like
+                // the user's own favorites (giving it a special icon etc).
+                if (collection.owner.id == user.id)
+                    attributes.push(collection.type);
+                break;
+            default:
+                // TODO: Verify type before removing the null check.
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                if (collection.type) attributes.push(collection.type);
+                break;
+        }
 
         let name: string;
         if (type == "uncategorized") {
             name = t("section_uncategorized");
         } else if (type == "favorites") {
             name = t("favorites");
+        } else if (collection.type == "favorites") {
+            // See: [Note: User and shared favorites] above.
+            //
+            // Use the first letter of the email of the user who shared this
+            // particular favorite as a prefix to disambiguate this collection
+            // from the user's own favorites.
+            // TODO(FAV): localize
+            const initial = collection.owner.email.at(0)?.toUpperCase();
+            if (initial) {
+                // TODO(FAV):
+                // name = `${initial}'s ${t("favorites")}`;
+                name = `${initial}'s favorites`;
+            } else {
+                name = "Shared favorites";
+            }
         } else {
             name = collection.name;
         }
@@ -1640,6 +1692,7 @@ const stateForUpdatedNormalFiles = (
         normalFiles,
     ),
     favoriteFileIDs: deriveFavoriteFileIDs(
+        state.user!,
         state.normalCollections,
         normalFiles,
         state.unsyncedFavoriteUpdates,

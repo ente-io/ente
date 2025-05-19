@@ -83,13 +83,14 @@ func (c *Client) VerifySRPSession(
 	return &res, nil
 }
 
-func (c *Client) SendEmailOTP(
+func (c *Client) SendLoginOTP(
 	ctx context.Context,
 	email string,
 ) error {
 	var res AuthorizationResponse
 	payload := map[string]interface{}{
-		"email": email,
+		"email":   email,
+		"purpose": "login",
 	}
 	r, err := c.restClient.R().
 		SetContext(ctx).
