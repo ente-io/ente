@@ -244,7 +244,7 @@ class EnteFile {
 
   String get downloadUrl {
     final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
+    if (disableWorker) {
       return endpoint + "/files/download/" + uploadedFileID.toString();
     } else {
       return "https://files.ente.io/?fileID=" + uploadedFileID.toString();
@@ -253,34 +253,34 @@ class EnteFile {
 
   String get publicDownloadUrl {
     final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
-      return endpoint +
-          "/public-collection/files/download/" +
-          uploadedFileID.toString();
+    if (disableWorker) {
+      return endpoint + "/public-collection/files/download/${uploadedFileID!}";
     } else {
-      return "https://public-albums.ente.io/download/?fileID=" +
-          uploadedFileID.toString();
+      return "https://public-albums.ente.io/download/?fileID=$uploadedFileID";
     }
   }
 
   String get thumbnailUrl {
     final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
-      return endpoint + "/files/preview/" + uploadedFileID.toString();
+    if (disableWorker) {
+      return endpoint + "/files/preview/$uploadedFileID";
     } else {
-      return "https://thumbnails.ente.io/?fileID=" + uploadedFileID.toString();
+      return "https://thumbnails.ente.io/?fileID=$uploadedFileID";
     }
+  }
+
+  bool get disableWorker {
+    final endpoint = Configuration.instance.getHttpEndpoint();
+    return endpoint != kDefaultProductionEndpoint ||
+        flagService.disableCFWorker;
   }
 
   String get pubThumbUrl {
     final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kDefaultProductionEndpoint || flagService.disableCFWorker) {
-      return endpoint +
-          "/public-collection/files/preview/" +
-          uploadedFileID.toString();
+    if (disableWorker) {
+      return endpoint + "/public-collection/files/preview/$uploadedFileID";
     } else {
-      return "https://public-albums.ente.io/preview/?fileID=" +
-          uploadedFileID.toString();
+      return "https://public-albums.ente.io/preview/?fileID=$uploadedFileID";
     }
   }
 
