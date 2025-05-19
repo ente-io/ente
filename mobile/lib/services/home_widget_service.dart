@@ -8,7 +8,9 @@ import "package:path_provider/path_provider.dart";
 import "package:path_provider_foundation/path_provider_foundation.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/services/album_home_widget_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
+import "package:photos/services/people_home_widget_service.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -24,6 +26,8 @@ class HomeWidgetService {
   init(SharedPreferences prefs) {
     setAppGroupID(iOSGroupID);
     MemoryHomeWidgetService.instance.init(prefs);
+    PeopleHomeWidgetService.instance.init(prefs);
+    AlbumHomeWidgetService.instance.init(prefs);
   }
 
   void setAppGroupID(String id) {
@@ -32,6 +36,8 @@ class HomeWidgetService {
 
   Future<void> initHomeWidget() async {
     await MemoryHomeWidgetService.instance.initMemoryHW(null);
+    await PeopleHomeWidgetService.instance.initPeopleHW(null);
+    await AlbumHomeWidgetService.instance.initAlbumsHW(null);
   }
 
   Future<bool?> updateWidget({
@@ -154,6 +160,20 @@ class HomeWidgetService {
         generatedId,
         context,
       );
+    } else if (uri.scheme == "peoplewidget") {
+      _logger.info("onLaunchFromWidget: redirecting to people widget");
+      await PeopleHomeWidgetService.instance.onLaunchFromWidget(
+        generatedId,
+        context,
+      );
+    } else if (uri.scheme == "albumwidget") {
+      _logger.info("onLaunchFromWidget: redirecting to album widget");
+      await AlbumHomeWidgetService.instance.onLaunchFromWidget(
+        generatedId,
+        context,
+      );
+    } else {
+      _logger.warning("onLaunchFromWidget: unknown scheme");
     }
   }
 }
