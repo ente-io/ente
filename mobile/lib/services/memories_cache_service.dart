@@ -313,6 +313,7 @@ class MemoriesCacheService {
             memory.title,
             memory.firstTimeToShow,
             memory.lastTimeToShow,
+            id: memory.id,
           );
           if (smartMemory.memories.isNotEmpty) {
             memories.add(smartMemory);

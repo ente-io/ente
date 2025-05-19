@@ -1,4 +1,5 @@
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/base/id.dart";
 import "package:photos/models/memories/memory.dart";
 
 enum MemoryType {
@@ -35,6 +36,7 @@ class SmartMemory {
   String title;
   int firstDateToShow;
   int lastDateToShow;
+  late final String id;
 
   int? firstCreationTime;
   int? lastCreationTime;
@@ -45,9 +47,12 @@ class SmartMemory {
     this.title,
     this.firstDateToShow,
     this.lastDateToShow, {
+    String? id,
     this.firstCreationTime,
     this.lastCreationTime,
-  });
+  }) {
+    this.id = id ?? newID(type.name);
+  }
 
   bool get notForShow => firstDateToShow == 0 && lastDateToShow == 0;
 
