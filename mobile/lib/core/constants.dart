@@ -101,9 +101,6 @@ const blackThumbnailBase64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB'
     'AKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAo'
     'AKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgAoAKACgD/9k=';
 
-const localFileServer =
-    String.fromEnvironment("localFileServer", defaultValue: "");
-
 const uploadTempFilePrefix = "upload_file_";
 final tempDirCleanUpInterval = kDebugMode
     ? const Duration(seconds: 30).inMicroseconds
