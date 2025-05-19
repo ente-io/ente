@@ -17,6 +17,7 @@ export default {
 } satisfies ExportedHandler;
 
 const handlePOST = async (request: Request) => {
+    // {job="worker"} |= `[csp-report]` | json log="logs[0]" | keep log
     console.log("[csp-report]", await request.text());
     return new Response(null, { status: 200 });
 };
