@@ -137,7 +137,8 @@ class _ContactResultPageState extends State<ContactResultPage> {
                 },
               ),
             ),
-          if (collections.isNotEmpty) _buildAlbumSection(collections),
+          if (collections.isNotEmpty)
+            _AlbumsSection(context: context, collections: collections),
         ],
       ),
     );
@@ -191,8 +192,19 @@ class _ContactResultPageState extends State<ContactResultPage> {
       ),
     );
   }
+}
 
-  Widget _buildAlbumSection(List<Collection> collections) {
+class _AlbumsSection extends StatelessWidget {
+  const _AlbumsSection({
+    required this.context,
+    required this.collections,
+  });
+
+  final BuildContext context;
+  final List<Collection> collections;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24, top: 8),
       child: Column(
