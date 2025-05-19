@@ -49,7 +49,11 @@ import { ItemVisibility } from "ente-media/file-metadata";
  */
 export type CollectionType = "album" | "folder" | "favorites" | "uncategorized";
 
-export type CollectionRole = "VIEWER" | "OWNER" | "COLLABORATOR" | "UNKNOWN";
+export type CollectionUserRole =
+    | "VIEWER"
+    | "OWNER"
+    | "COLLABORATOR"
+    | "UNKNOWN";
 
 /**
  * Information about the user associated with a collection, either as an owner,
@@ -58,7 +62,7 @@ export type CollectionRole = "VIEWER" | "OWNER" | "COLLABORATOR" | "UNKNOWN";
 export interface CollectionUser {
     id: number;
     email: string;
-    role: CollectionRole;
+    role: CollectionUserRole;
 }
 
 export interface EncryptedCollection {
