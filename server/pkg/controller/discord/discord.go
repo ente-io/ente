@@ -2,6 +2,7 @@ package discord
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -19,6 +20,8 @@ type DiscordController struct {
 	HostName    string
 	Environment string
 	UserRepo    *repo.UserRepository
+	lastSent    map[string]time.Time
+	mu          sync.Mutex
 }
 
 func NewDiscordController(userRepo *repo.UserRepository, hostName string, environment string) *DiscordController {
@@ -28,6 +31,7 @@ func NewDiscordController(userRepo *repo.UserRepository, hostName string, enviro
 		HostName:    hostName,
 		Environment: environment,
 		UserRepo:    userRepo,
+		lastSent:    make(map[string]time.Time),
 	}
 }
 
@@ -106,6 +110,14 @@ func (c *DiscordController) NotifyAccountDelete(userID int64, paymentProvider st
 }
 
 func (c *DiscordController) NotifyPotentialAbuse(message string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	now := time.Now()
+	if lastTime, exists := c.lastSent[message]; exists && now.Sub(lastTime) < time.Minute {
+		log.Infof("Skipping duplicate abuse notification: %s", message)
+		return
+	}
+	c.lastSent[message] = now
 	c.Notify(fmt.Sprintf("%s: %s", c.HostName, message))
 }
 

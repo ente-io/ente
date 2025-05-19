@@ -32,6 +32,7 @@
     "set_password": "Установить пароль",
     "sign_in": "Зарегистрироваться",
     "incorrect_password": "Неверный пароль",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Пожалуйста, введите пароль, который мы можем использовать для шифрования ваших данных",
     "pick_password_caution": "Мы не храним ваш пароль, поэтому, если вы его забудете, <strong>мы ничем не сможем вам помочь</strong>для восстановления ваших данных без пароля.",
     "key_generation_in_progress": "Генерируем ключи шифрования...",
@@ -674,5 +675,7 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }

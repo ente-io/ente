@@ -1219,7 +1219,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Du kannst dein Abonnement mit deiner Familie teilen"),
         "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "Wir haben bereits mehr als 30 Millionen Erinnerungsstücke gesichert"),
+            "Wir haben bereits über 200 Millionen Erinnerungen bewahrt"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "Wir behalten 3 Kopien Ihrer Daten, eine in einem unterirdischen Schutzbunker"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(

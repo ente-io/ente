@@ -32,6 +32,7 @@
     "set_password": "Definir contraseña",
     "sign_in": "Ingresar",
     "incorrect_password": "Contraseña incorrecta",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Introducir una contraseña que podamos usar para cifrar sus datos",
     "pick_password_caution": "No guardamos su contraseña, así que si la olvida, <strong>no podremos ayudarte </strong>a recuperar tus datos sin una clave de recuperación.",
     "key_generation_in_progress": "Generando claves de encriptación...",
@@ -674,5 +675,7 @@
     "theme": "Tema",
     "system": "Sistema",
     "light": "Claro",
-    "dark": "Oscuro"
+    "dark": "Oscuro",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }

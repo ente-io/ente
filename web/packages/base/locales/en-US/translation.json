@@ -32,6 +32,7 @@
     "set_password": "Set password",
     "sign_in": "Sign in",
     "incorrect_password": "Incorrect password",
+    "incorrect_password_or_no_account": "Incorrect password or email not registered",
     "pick_password_hint": "Please enter a password that we can use to encrypt your data",
     "pick_password_caution": "We don't store your password, so if you forget it, <strong>we will not be able to help you </strong>recover your data without a recovery key.",
     "key_generation_in_progress": "Generating encryption keys...",
@@ -674,5 +675,7 @@
     "theme": "Theme",
     "system": "System",
     "light": "Light",
-    "dark": "Dark"
+    "dark": "Dark",
+    "streamable_videos": "Streamable videos",
+    "processing_videos_status": "Processing videos..."
 }

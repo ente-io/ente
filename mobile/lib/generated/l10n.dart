@@ -9096,6 +9096,26 @@ class S {
     );
   }
 
+  /// `This email is already linked to {name}.`
+  String editEmailAlreadyLinked(Object name) {
+    return Intl.message(
+      'This email is already linked to $name.',
+      name: 'editEmailAlreadyLinked',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `View {name} to unlink`
+  String viewPersonToUnlink(Object name) {
+    return Intl.message(
+      'View $name to unlink',
+      name: 'viewPersonToUnlink',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `Enter name`
   String get enterName {
     return Intl.message(
@@ -11081,10 +11101,10 @@ class S {
     );
   }
 
-  /// `Video streaming`
+  /// `Generate streamable video`
   String get videoStreaming {
     return Intl.message(
-      'Video streaming',
+      'Generate streamable video',
       name: 'videoStreaming',
       desc: '',
       args: [],

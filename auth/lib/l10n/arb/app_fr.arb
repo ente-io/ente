@@ -513,5 +513,6 @@
   "free5GB": "5 Go gratuits sur <bold-green>Ente</bold-green> Photos",
   "loginWithAuthAccount": "Connectez-vous avec votre compte Auth",
   "freeStorageOffer": "10% de réduction sur <bold-green>Ente</bold-green> Photos",
-  "freeStorageOfferDescription": "Utilisez le code coupon \"AUTH\" pour obtenir 10% de réduction la première année"
+  "freeStorageOfferDescription": "Utilisez le code coupon \"AUTH\" pour obtenir 10% de réduction la première année",
+  "period": "Période"
 }

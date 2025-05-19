@@ -347,6 +347,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Data cache"),
         "calculating": MessageLookupByLibrary.simpleMessage("Menghitung..."),
+        "canNotOpenTitle": MessageLookupByLibrary.simpleMessage(
+            "Tidak dapat membuka album ini"),
         "canOnlyRemoveFilesOwnedByYou": MessageLookupByLibrary.simpleMessage(
             "Hanya dapat menghapus berkas yang dimiliki oleh mu"),
         "cancel": MessageLookupByLibrary.simpleMessage("Batal"),
@@ -404,6 +406,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Kolaborator bisa menambahkan foto dan video ke album bersama ini."),
+        "collageLayout": MessageLookupByLibrary.simpleMessage("Tata letak"),
         "collectEventPhotos":
             MessageLookupByLibrary.simpleMessage("Kumpulkan foto acara"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Kumpulkan foto"),
@@ -672,6 +675,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "familyPlans": MessageLookupByLibrary.simpleMessage("Paket keluarga"),
         "faq": MessageLookupByLibrary.simpleMessage("Tanya Jawab Umum"),
         "faqs": MessageLookupByLibrary.simpleMessage("Tanya Jawab Umum"),
+        "favorite": MessageLookupByLibrary.simpleMessage("Favorit"),
         "feedback": MessageLookupByLibrary.simpleMessage("Masukan"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
             "Gagal menyimpan file ke galeri"),
@@ -807,8 +811,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tidak pernah"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Kamu bisa membagikan langgananmu dengan keluarga"),
-        "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "Kami telah memelihara lebih dari 30 juta kenangan saat ini"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "Kami menyimpan 3 salinan dari data kamu, salah satunya di tempat pengungsian bawah tanah"),
         "loadMessage7": MessageLookupByLibrary.simpleMessage(
@@ -877,6 +879,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Sedang"),
         "moments": MessageLookupByLibrary.simpleMessage("Momen"),
         "monthly": MessageLookupByLibrary.simpleMessage("Bulanan"),
+        "moveToAlbum":
+            MessageLookupByLibrary.simpleMessage("Pindahkan ke album"),
         "moveToHiddenAlbum": MessageLookupByLibrary.simpleMessage(
             "Pindahkan ke album tersembunyi"),
         "movedSuccessfullyTo": m50,

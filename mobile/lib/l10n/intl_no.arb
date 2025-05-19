@@ -1016,7 +1016,6 @@
   "didYouKnow": "Visste du at?",
   "loadingMessage": "Laster bildene dine...",
   "loadMessage1": "Du kan dele abonnementet med familien din",
-  "loadMessage2": "Vi har bevart over 30 millioner minner så langt",
   "loadMessage3": "Vi beholder 3 kopier av dine data, en i en underjordisk bunker",
   "loadMessage4": "Alle våre apper har åpen kildekode",
   "loadMessage5": "Vår kildekode og kryptografi har blitt revidert eksternt",
@@ -1615,7 +1614,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Videostrømming",
   "processingVideos": "Behandler videoer",
   "streamDetails": "Strømmedetaljer",
   "processing": "Behandler",

@@ -208,16 +208,15 @@ function SharingDetails({ collection, type }) {
                     </RowButtonGroupTitle>
                     <RowButtonGroup>
                         {viewers.map((item, index) => (
-                            <>
+                            <React.Fragment key={item}>
                                 <RowLabel
-                                    key={item}
                                     label={isMe(item) ? t("you") : item}
                                     startIcon={<Avatar email={item} />}
                                 />
                                 {index !== viewers.length - 1 && (
                                     <RowButtonDivider />
                                 )}
-                            </>
+                            </React.Fragment>
                         ))}
                     </RowButtonGroup>
                 </Stack>
@@ -778,7 +777,6 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                 type="submit"
                                 color="accent"
                                 fullWidth
-                                buttonText={props.buttonText}
                                 loading={loading}
                                 sx={{ mt: 2, mb: 4 }}
                                 {...restSubmitButtonProps}

@@ -1052,8 +1052,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "livePhotos": MessageLookupByLibrary.simpleMessage("Живі фото"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Ви можете поділитися своєю передплатою з родиною"),
-        "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "На цей час ми зберегли понад 30 мільйонів спогадів"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "Ми зберігаємо 3 копії ваших даних, одну в підземному бункері"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(

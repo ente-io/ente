@@ -167,7 +167,7 @@ func (c *ClICtrl) verifyPassKey(ctx context.Context, authResp *api.Authorization
 }
 
 func (c *ClICtrl) validateEmail(ctx context.Context, email string) (*api.AuthorizationResponse, error) {
-	err := c.Client.SendEmailOTP(ctx, email)
+	err := c.Client.SendLoginOTP(ctx, email)
 	if err != nil {
 		return nil, err
 	}

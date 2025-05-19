@@ -1069,7 +1069,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Galite bendrinti savo prenumeratą su šeima."),
         "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "Iki šiol išsaugojome daugiau kaip 30 milijonų prisiminimų."),
+            "Iki šiol išsaugojome daugiau nei 200 milijonų prisiminimų."),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "Laikome 3 jūsų duomenų kopijas, vieną iš jų – požeminėje priešgaisrinėje slėptuvėje."),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(
@@ -1653,6 +1653,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Kažkas nutiko ne taip. Bandykite dar kartą."),
         "sorry": MessageLookupByLibrary.simpleMessage("Atsiprašome"),
+        "sorryBackupFailedDesc": MessageLookupByLibrary.simpleMessage(
+            "Atsiprašome, šiuo metu negalėjome sukurti atsarginės šio failo kopijos. Bandysime pakartoti vėliau."),
         "sorryCouldNotAddToFavorites": MessageLookupByLibrary.simpleMessage(
             "Atsiprašome, nepavyko pridėti prie mėgstamų."),
         "sorryCouldNotRemoveFromFavorites":

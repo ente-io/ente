@@ -2,6 +2,8 @@ import "dart:convert";
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
+import "package:photos/core/configuration.dart";
+import "package:photos/extensions/user_extension.dart";
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/collection/collection_old.dart";
@@ -46,9 +48,15 @@ class Collection {
 
   set sharedMagicMetadata(ShareeMagicMetadata? val) => _sharedMmd = val;
 
-// ignore: deprecated_member_use_from_same_package
-  String get displayName =>
-      name ?? (isDeleted == true ? 'Delete album' : "Unnamed Album");
+  // ignore: deprecated_member_use_from_same_package
+  String get displayName {
+    if (!isDeleted &&
+        type == CollectionType.favorites &&
+        !isOwner(Configuration.instance.getUserID() ?? -1)) {
+      return '${owner.nameOrEmail}\'s favorites';
+    }
+    return name ?? "Unnamed Album";
+  }
 
   void setName(String newName) {
     // ignore: deprecated_member_use_from_same_package

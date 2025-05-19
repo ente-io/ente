@@ -993,7 +993,6 @@
   "didYouKnow": "Wist u dat?",
   "loadingMessage": "Uw foto's laden...",
   "loadMessage1": "U kunt uw abonnement met uw familie delen",
-  "loadMessage2": "We hebben tot nu toe meer dan tien miljoen herinneringen bewaard",
   "loadMessage3": "We bewaren 3 kopieën van uw bestanden, één in een ondergrondse kernbunker",
   "loadMessage4": "Al onze apps zijn open source",
   "loadMessage5": "Onze broncode en cryptografie zijn extern gecontroleerd en geverifieerd",
@@ -1602,7 +1601,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Video streamen",
   "processingVideos": "Video's verwerken",
   "streamDetails": "Stream details",
   "processing": "Verwerken",

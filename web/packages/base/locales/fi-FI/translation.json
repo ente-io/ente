@@ -32,6 +32,7 @@
     "set_password": "Aseta salasana",
     "sign_in": "Kirjaudu sisään",
     "incorrect_password": "Väärä salasana",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Anna salasana, jota voimme käyttää salaamaan tietosi",
     "pick_password_caution": "Emme säilytä salasanaasi, joten jos unohdat sen, <strong>emme voi auttaa sinua </strong>palauttamaan tietojasi ilman palautusavainta.",
     "key_generation_in_progress": "Luodaan salausavaimia...",
@@ -674,5 +675,7 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }

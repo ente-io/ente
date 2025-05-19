@@ -711,6 +711,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "criticalUpdateAvailable": MessageLookupByLibrary.simpleMessage(
             "Доступно критическое обновление"),
         "crop": MessageLookupByLibrary.simpleMessage("Обрезать"),
+        "curatedMemories":
+            MessageLookupByLibrary.simpleMessage("Отобранные воспоминания"),
         "currentUsageIs": MessageLookupByLibrary.simpleMessage(
             "Текущее использование составляет "),
         "currentlyRunning": MessageLookupByLibrary.simpleMessage("выполняется"),
@@ -1191,8 +1193,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "livePhotos": MessageLookupByLibrary.simpleMessage("Живые фото"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Вы можете поделиться подпиской с вашей семьёй"),
-        "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "Мы сохранили уже более 30 миллионов воспоминаний"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "Мы храним 3 копии ваших данных, одну из них — в бункере"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(
@@ -1757,7 +1757,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Выберите папки для резервного копирования"),
         "selectItemsToAdd": MessageLookupByLibrary.simpleMessage(
             "Выберите элементы для добавления"),
-        "selectLanguage": MessageLookupByLibrary.simpleMessage("Выбрать язык"),
+        "selectLanguage": MessageLookupByLibrary.simpleMessage("Выберите язык"),
         "selectMailApp": MessageLookupByLibrary.simpleMessage(
             "Выберите почтовое приложение"),
         "selectMorePhotos":
@@ -1809,7 +1809,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "setCover": MessageLookupByLibrary.simpleMessage("Установить обложку"),
         "setLabel": MessageLookupByLibrary.simpleMessage("Установить"),
         "setNewPassword":
-            MessageLookupByLibrary.simpleMessage("Установить новый пароль"),
+            MessageLookupByLibrary.simpleMessage("Установите новый пароль"),
         "setNewPin":
             MessageLookupByLibrary.simpleMessage("Установите новый PIN-код"),
         "setPasswordTitle":
@@ -1854,7 +1854,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Сместить даты и время"),
         "showMemories":
-            MessageLookupByLibrary.simpleMessage("Показать воспоминания"),
+            MessageLookupByLibrary.simpleMessage("Показывать воспоминания"),
         "showPerson": MessageLookupByLibrary.simpleMessage("Показать человека"),
         "signOutFromOtherDevices":
             MessageLookupByLibrary.simpleMessage("Выйти с других устройств"),
@@ -2041,7 +2041,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "twitter": MessageLookupByLibrary.simpleMessage("Twitter"),
         "twoMonthsFreeOnYearlyPlans": MessageLookupByLibrary.simpleMessage(
             "2 месяца в подарок на годовом тарифе"),
-        "twofactor": MessageLookupByLibrary.simpleMessage("Двухфакторная"),
+        "twofactor": MessageLookupByLibrary.simpleMessage(
+            "Двухфакторная аутентификация"),
         "twofactorAuthenticationHasBeenDisabled":
             MessageLookupByLibrary.simpleMessage(
                 "Двухфакторная аутентификация отключена"),

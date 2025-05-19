@@ -13,8 +13,8 @@ import (
 	"github.com/ente-io/stacktrace"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/google/uuid"
-	"github.com/spf13/viper"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/byteMarshaller"

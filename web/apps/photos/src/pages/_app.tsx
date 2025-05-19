@@ -46,6 +46,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 
+import {
+    initVideoProcessing,
+    isHLSGenerationSupportedTemp,
+} from "ente-gallery/services/video";
 import "photoswipe/dist/photoswipe.css";
 import "styles/global.css";
 import "styles/photoswipe.css";
@@ -108,6 +112,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         };
 
         if (isMLSupported) initML();
+        if (isHLSGenerationSupportedTemp()) void initVideoProcessing();
 
         electron.onOpenEnteURL(handleOpenEnteURL);
         electron.onAppUpdateAvailable(showUpdateDialog);

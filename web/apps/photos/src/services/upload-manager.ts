@@ -64,16 +64,23 @@ export interface InProgressUpload {
     progress: PercentageUploaded;
 }
 
+/**
+ * A variant of {@link UploadResult} used when segregating finished uploads in
+ * the UI. "addedSymlink" is treated as "uploaded", everything else remains as
+ * it were.
+ */
+export type FinishedUploadResult = Exclude<UploadResult, "addedSymlink">;
+
 export interface FinishedUpload {
     localFileID: FileID;
-    result: UploadResult;
+    result: FinishedUploadResult;
 }
 
 export type InProgressUploads = Map<FileID, PercentageUploaded>;
 
-export type FinishedUploads = Map<FileID, UploadResult>;
+export type FinishedUploads = Map<FileID, FinishedUploadResult>;
 
-export type SegregatedFinishedUploads = Map<UploadResult, FileID[]>;
+export type SegregatedFinishedUploads = Map<FinishedUploadResult, FileID[]>;
 
 export interface ProgressUpdater {
     setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
@@ -158,7 +165,7 @@ class UIService {
         this.setTotalFileCount(count);
         this.filesUploadedCount = 0;
         this.inProgressUploads = new Map<number, number>();
-        this.finishedUploads = new Map<number, UploadResult>();
+        this.finishedUploads = new Map<number, FinishedUploadResult>();
         this.updateProgressBarUI();
     }
 
@@ -202,7 +209,7 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    moveFileToResultList(key: number, uploadResult: UploadResult) {
+    moveFileToResultList(key: number, uploadResult: FinishedUploadResult) {
         this.finishedUploads.set(key, uploadResult);
         this.inProgressUploads.delete(key);
         this.updateProgressBarUI();
@@ -595,8 +602,10 @@ class UploadManager {
         uploadableItem: UploadableUploadItem,
         uploadResult: UploadResult,
         uploadedFile: EncryptedEnteFile | EnteFile | undefined,
-    ) {
+    ): Promise<FinishedUploadResult> {
         log.info(`Upload ${uploadableItem.fileName} | ${uploadResult}`);
+        const finishedUploadResult =
+            uploadResult == "addedSymlink" ? "uploaded" : uploadResult;
         try {
             const processableUploadItem =
                 await markUploadedAndObtainProcessableItem(uploadableItem);
@@ -608,11 +617,8 @@ class UploadManager {
                     this.failedItems.push(uploadableItem);
                     break;
                 case "alreadyUploaded":
-                    decryptedFile = uploadedFile as EnteFile;
-                    break;
                 case "addedSymlink":
                     decryptedFile = uploadedFile as EnteFile;
-                    uploadResult = "uploaded";
                     break;
                 case "uploaded":
                 case "uploadedWithStaticThumbnail":
@@ -653,7 +659,7 @@ class UploadManager {
                 uploadableItem,
                 uploadedFile as EncryptedEnteFile,
             );
-            return uploadResult;
+            return finishedUploadResult;
         } catch (e) {
             log.error("Post file upload action failed", e);
             return "failed";

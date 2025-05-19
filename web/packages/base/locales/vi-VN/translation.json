@@ -32,6 +32,7 @@
     "set_password": "Đặt mật khẩu",
     "sign_in": "Đăng nhập",
     "incorrect_password": "Mật khẩu không chính xác",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Vui lòng nhập mật khẩu mà chúng tôi có thể sử dụng để mã hóa dữ liệu của bạn",
     "pick_password_caution": "Chúng tôi không lưu trữ mật khẩu của bạn, vì vậy nếu bạn quên, <strong>chúng tôi sẽ không thể giúp bạn</strong> khôi phục dữ liệu mà không có khóa khôi phục.",
     "key_generation_in_progress": "Đang tạo khóa mã hóa...",
@@ -674,5 +675,7 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }
