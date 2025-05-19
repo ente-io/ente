@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import "package:photos/ui/settings/ml/enable_ml_consent.dart";
 import "package:photos/ui/settings/widgets/albums_widget_settings.dart";
 import "package:photos/ui/settings/widgets/memories_widget_settings.dart";
 import "package:photos/ui/settings/widgets/people_widget_settings.dart";
@@ -16,6 +18,15 @@ class WidgetSettingsScreen extends StatelessWidget {
   const WidgetSettingsScreen({super.key});
 
   void onPeopleTapped(BuildContext context) {
+    final bool isMLEnabled = !flagService.hasGrantedMLConsent;
+    if (isMLEnabled) {
+      routeToPage(
+        context,
+        const EnableMachineLearningConsent(),
+        forceCustomPageRoute: true,
+      );
+      return;
+    }
     routeToPage(
       context,
       const PeopleWidgetSettings(),

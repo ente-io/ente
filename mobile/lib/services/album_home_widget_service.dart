@@ -13,6 +13,10 @@ class AlbumHomeWidgetService {
 
   AlbumHomeWidgetService._privateConstructor();
 
+  static const _selectedAlbumsHWKey = "selectedAlbumsHW";
+  static const _androidClass = "EnteAlbumsWidgetProvider";
+  static const _iOSClass = "EnteAlbumsWidget";
+
   static final AlbumHomeWidgetService instance =
       AlbumHomeWidgetService._privateConstructor();
 
@@ -33,8 +37,35 @@ class AlbumHomeWidgetService {
     await updateAlbumsChanged(false);
   }
 
+  List<String>? getSelectedAlbums() {
+    final selectedAlbums = _prefs.getStringList(_selectedAlbumsHWKey);
+
+    return selectedAlbums;
+  }
+
+  Future<void> setSelectedAlbums(
+    List<String> selectedAlbums,
+  ) async {
+    await _prefs.setStringList(_selectedAlbumsHWKey, selectedAlbums);
+  }
+
+  Future<int> countHomeWidgets() async {
+    final installedWidgets =
+        await HomeWidgetService.instance.getInstalledWidgets();
+
+    final albumWidgets = installedWidgets
+        .where(
+          (element) =>
+              element.androidClassName == _androidClass ||
+              element.iOSKind == _iOSClass,
+        )
+        .toList();
+
+    return albumWidgets.length;
+  }
+
   Future<void> _albumsSync() async {
-    final homeWidgetCount = await HomeWidgetService.instance.countHomeWidgets();
+    final homeWidgetCount = await countHomeWidgets();
     if (homeWidgetCount == 0) {
       _logger.warning("no home widget active");
       return;
@@ -159,8 +190,8 @@ class AlbumHomeWidgetService {
 
   Future<void> _updateWidget({String? text}) async {
     await HomeWidgetService.instance.updateWidget(
-      androidClass: "EnteAlbumsWidgetProvider",
-      iOSClass: "EnteAlbumsWidget",
+      androidClass: _androidClass,
+      iOSClass: _iOSClass,
     );
     if (flagService.internalUser) {
       await Fluttertoast.showToast(

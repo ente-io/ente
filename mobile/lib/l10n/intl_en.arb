@@ -1750,5 +1750,6 @@
   "deleteMultipleAlbumDialog": "Also delete the photos (and videos) present in these {count} albums from <bold>all</bold> other albums they are part of?",
   "addParticipants": "Add participants",
   "selectedAlbums": "{count} selected",
-  "actionNotSupportedOnFavouritesAlbum": "Action not supported on Favourites album"
+  "actionNotSupportedOnFavouritesAlbum": "Action not supported on Favourites album",
+  "onThisDayMemories": "On this day memories"
 }

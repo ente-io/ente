@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
+import "package:photos/services/memory_home_widget_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
@@ -9,13 +11,85 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
 
-class MemoriesWidgetSettings extends StatelessWidget {
+class MemoriesWidgetSettings extends StatefulWidget {
   const MemoriesWidgetSettings({super.key});
+
+  @override
+  State<MemoriesWidgetSettings> createState() => _MemoriesWidgetSettingsState();
+}
+
+class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
+  bool hasInstalledAny = false;
+
+  bool? isYearlyMemoriesEnabled = true;
+  bool? isSmartMemoriesEnabled = false;
+  bool? isOnThisDayMemoriesEnabled = false;
+
+  late final bool isMLEnabled;
+
+  @override
+  void initState() {
+    super.initState();
+
+    initVariables();
+    checkIfAnyWidgetInstalled();
+  }
+
+  Future<void> checkIfAnyWidgetInstalled() async {
+    final count = await MemoryHomeWidgetService.instance.countHomeWidgets();
+    setState(() {
+      hasInstalledAny = count > 0;
+    });
+  }
+
+  Future<void> initVariables() async {
+    isMLEnabled = flagService.hasGrantedMLConsent;
+    isYearlyMemoriesEnabled =
+        await MemoryHomeWidgetService.instance.getSelectedLastYearMemories();
+    isSmartMemoriesEnabled =
+        await MemoryHomeWidgetService.instance.getSelectedMLMemories();
+    isOnThisDayMemoriesEnabled =
+        await MemoryHomeWidgetService.instance.getSelectedOnThisDayMemories();
+
+    if (isYearlyMemoriesEnabled == null ||
+        isSmartMemoriesEnabled == null ||
+        isOnThisDayMemoriesEnabled == null) {
+      if (isMLEnabled) {
+        enableMLMemories();
+      } else {
+        enableNonMLMemories();
+      }
+    }
+
+    setState(() {});
+  }
+
+  void enableMLMemories() {
+    isYearlyMemoriesEnabled = false;
+    isSmartMemoriesEnabled = true;
+    isOnThisDayMemoriesEnabled = true;
+  }
+
+  void enableNonMLMemories() {
+    isYearlyMemoriesEnabled = true;
+    isSmartMemoriesEnabled = false;
+    isOnThisDayMemoriesEnabled = false;
+  }
+
+  Future<void> updateVariables() async {
+    await MemoryHomeWidgetService.instance
+        .setSelectedLastYearMemories(isYearlyMemoriesEnabled!);
+    await MemoryHomeWidgetService.instance
+        .setSelectedMLMemories(isSmartMemoriesEnabled!);
+    await MemoryHomeWidgetService.instance
+        .setSelectedOnThisDayMemories(isOnThisDayMemoriesEnabled!);
+  }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -38,7 +112,7 @@ class MemoriesWidgetSettings extends StatelessWidget {
               ),
             ],
           ),
-          if (1 != 1)
+          if (!hasInstalledAny)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -84,29 +158,66 @@ class MemoriesWidgetSettings extends StatelessWidget {
                           ),
                           menuItemColor: colorScheme.fillFaint,
                           trailingWidget: ToggleSwitchWidget(
-                            value: () => true,
-                            onChanged: () async {},
+                            value: () => isYearlyMemoriesEnabled ?? true,
+                            onChanged: () async {
+                              setState(() {
+                                isYearlyMemoriesEnabled =
+                                    !isYearlyMemoriesEnabled!;
+                              });
+                              await updateVariables();
+                            },
                           ),
                           singleBorderRadius: 8,
                           isGestureDetectorDisabled: true,
                         ),
-                        const SizedBox(height: 4),
-                        MenuItemWidget(
-                          captionedTextWidget: CaptionedTextWidget(
-                            title: S.of(context).smartMemories,
+                        if (isMLEnabled) ...[
+                          const SizedBox(height: 4),
+                          MenuItemWidget(
+                            captionedTextWidget: CaptionedTextWidget(
+                              title: S.of(context).smartMemories,
+                            ),
+                            leadingIconWidget: SvgPicture.asset(
+                              "assets/icons/smart-memory-icon.svg",
+                              color: colorScheme.textBase,
+                            ),
+                            menuItemColor: colorScheme.fillFaint,
+                            trailingWidget: ToggleSwitchWidget(
+                              value: () => isSmartMemoriesEnabled!,
+                              onChanged: () async {
+                                setState(() {
+                                  isSmartMemoriesEnabled =
+                                      !isSmartMemoriesEnabled!;
+                                });
+                                await updateVariables();
+                              },
+                            ),
+                            singleBorderRadius: 8,
+                            isGestureDetectorDisabled: true,
                           ),
-                          leadingIconWidget: SvgPicture.asset(
-                            "assets/icons/smart-memory-icon.svg",
-                            color: colorScheme.textBase,
+                          const SizedBox(height: 4),
+                          MenuItemWidget(
+                            captionedTextWidget: CaptionedTextWidget(
+                              title: S.of(context).onThisDayMemories,
+                            ),
+                            leadingIconWidget: SvgPicture.asset(
+                              "assets/icons/memories-widget-icon.svg",
+                              color: colorScheme.textBase,
+                            ),
+                            menuItemColor: colorScheme.fillFaint,
+                            trailingWidget: ToggleSwitchWidget(
+                              value: () => isOnThisDayMemoriesEnabled!,
+                              onChanged: () async {
+                                setState(() {
+                                  isOnThisDayMemoriesEnabled =
+                                      !isOnThisDayMemoriesEnabled!;
+                                });
+                                await updateVariables();
+                              },
+                            ),
+                            singleBorderRadius: 8,
+                            isGestureDetectorDisabled: true,
                           ),
-                          menuItemColor: colorScheme.fillFaint,
-                          trailingWidget: ToggleSwitchWidget(
-                            value: () => true,
-                            onChanged: () async {},
-                          ),
-                          singleBorderRadius: 8,
-                          isGestureDetectorDisabled: true,
-                        ),
+                        ],
                       ],
                     ),
                   );

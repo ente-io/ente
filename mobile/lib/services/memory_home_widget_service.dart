@@ -13,6 +13,12 @@ class MemoryHomeWidgetService {
 
   MemoryHomeWidgetService._privateConstructor();
 
+  static const _selectedLastYearMemoriesKey = "selectedLastYearMemoriesHW";
+  static const _selectedMLMemoriesKey = "selectedMLMemoriesHW";
+  static const _selectedOnThisDayMemoriesKey = "selectedOnThisDayMemoriesHW";
+  static const _androidClass = "EnteMemoryWidgetProvider";
+  static const _iOSClass = "EnteMemoryWidget";
+
   static final MemoryHomeWidgetService instance =
       MemoryHomeWidgetService._privateConstructor();
 
@@ -33,8 +39,50 @@ class MemoryHomeWidgetService {
     await updateMemoryChanged(false);
   }
 
+  Future<bool?> getSelectedLastYearMemories() async {
+    final selectedMemories = _prefs.getBool(_selectedLastYearMemoriesKey);
+    return selectedMemories;
+  }
+
+  Future<void> setSelectedLastYearMemories(bool selectedMemories) async {
+    await _prefs.setBool(_selectedLastYearMemoriesKey, selectedMemories);
+  }
+
+  Future<bool?> getSelectedMLMemories() async {
+    final selectedMemories = _prefs.getBool(_selectedMLMemoriesKey);
+    return selectedMemories;
+  }
+
+  Future<void> setSelectedMLMemories(bool selectedMemories) async {
+    await _prefs.setBool(_selectedMLMemoriesKey, selectedMemories);
+  }
+
+  Future<bool?> getSelectedOnThisDayMemories() async {
+    final selectedMemories = _prefs.getBool(_selectedOnThisDayMemoriesKey);
+    return selectedMemories;
+  }
+
+  Future<void> setSelectedOnThisDayMemories(bool selectedMemories) async {
+    await _prefs.setBool(_selectedOnThisDayMemoriesKey, selectedMemories);
+  }
+
+  Future<int> countHomeWidgets() async {
+    final installedWidgets =
+        await HomeWidgetService.instance.getInstalledWidgets();
+
+    final memoryWidgets = installedWidgets
+        .where(
+          (element) =>
+              element.androidClassName == _androidClass ||
+              element.iOSKind == _iOSClass,
+        )
+        .toList();
+
+    return memoryWidgets.length;
+  }
+
   Future<void> _memorySync() async {
-    final homeWidgetCount = await HomeWidgetService.instance.countHomeWidgets();
+    final homeWidgetCount = await countHomeWidgets();
     if (homeWidgetCount == 0) {
       _logger.warning("no home widget active");
       return;
@@ -153,8 +201,8 @@ class MemoryHomeWidgetService {
 
   Future<void> _updateWidget({String? text}) async {
     await HomeWidgetService.instance.updateWidget(
-      androidClass: "EnteMemoryWidgetProvider",
-      iOSClass: "EnteMemoryWidget",
+      androidClass: _androidClass,
+      iOSClass: _iOSClass,
     );
     if (flagService.internalUser) {
       await Fluttertoast.showToast(

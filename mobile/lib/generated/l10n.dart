@@ -11915,6 +11915,16 @@ class S {
       args: [],
     );
   }
+
+  /// `On this day memories`
+  String get onThisDayMemories {
+    return Intl.message(
+      'On this day memories',
+      name: 'onThisDayMemories',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

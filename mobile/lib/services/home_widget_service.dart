@@ -3,6 +3,7 @@ import "dart:io";
 
 import "package:flutter/material.dart";
 import 'package:home_widget/home_widget.dart' as hw;
+import "package:home_widget/home_widget.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:path_provider_foundation/path_provider_foundation.dart";
@@ -75,7 +76,11 @@ class HomeWidgetService {
   }
 
   Future<int> countHomeWidgets() async {
-    return (await hw.HomeWidget.getInstalledWidgets()).length;
+    return (await getInstalledWidgets()).length;
+  }
+
+  Future<List<HomeWidgetInfo>> getInstalledWidgets() async {
+    return await hw.HomeWidget.getInstalledWidgets();
   }
 
   Future<bool> _captureFile(

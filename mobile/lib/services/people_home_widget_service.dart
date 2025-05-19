@@ -13,6 +13,10 @@ class PeopleHomeWidgetService {
 
   PeopleHomeWidgetService._privateConstructor();
 
+  static const _selectedPeopleHWKey = "selectedPeopleHW";
+  static const _androidClass = "EntePeopleWidgetProvider";
+  static const _iOSClass = "EntePeopleWidget";
+
   static final PeopleHomeWidgetService instance =
       PeopleHomeWidgetService._privateConstructor();
 
@@ -33,8 +37,35 @@ class PeopleHomeWidgetService {
     await updatePeopleChanged(false);
   }
 
+  List<String>? getSelectedPeople() {
+    final selectedAlbums = _prefs.getStringList(_selectedPeopleHWKey);
+
+    return selectedAlbums;
+  }
+
+  Future<void> setSelectedPeople(
+    List<String> selectedAlbums,
+  ) async {
+    await _prefs.setStringList(_selectedPeopleHWKey, selectedAlbums);
+  }
+
+  Future<int> countHomeWidgets() async {
+    final installedWidgets =
+        await HomeWidgetService.instance.getInstalledWidgets();
+
+    final peopleWidgets = installedWidgets
+        .where(
+          (element) =>
+              element.androidClassName == _androidClass ||
+              element.iOSKind == _iOSClass,
+        )
+        .toList();
+
+    return peopleWidgets.length;
+  }
+
   Future<void> _peopleSync() async {
-    final homeWidgetCount = await HomeWidgetService.instance.countHomeWidgets();
+    final homeWidgetCount = await countHomeWidgets();
     if (homeWidgetCount == 0) {
       _logger.warning("no home widget active");
       return;
@@ -156,8 +187,8 @@ class PeopleHomeWidgetService {
 
   Future<void> _updateWidget({String? text}) async {
     await HomeWidgetService.instance.updateWidget(
-      androidClass: "EntePeopleWidgetProvider",
-      iOSClass: "EntePeopleWidget",
+      androidClass: _androidClass,
+      iOSClass: _iOSClass,
     );
     if (flagService.internalUser) {
       await Fluttertoast.showToast(
