@@ -294,6 +294,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Ingen gendannelsesnøgle?"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Ups, noget gik galt"),

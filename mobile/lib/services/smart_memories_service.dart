@@ -21,6 +21,7 @@ import "package:photos/models/memories/clip_memory.dart";
 import "package:photos/models/memories/filler_memory.dart";
 import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
+import "package:photos/models/memories/on_this_day_memory.dart";
 import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
@@ -30,6 +31,7 @@ import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/language_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -61,7 +63,7 @@ class SmartMemoriesService {
   SmartMemoriesService();
 
   // One general method to get all memories, which calls on internal methods for each separate memory type
-  Future<MemoriesResult> calcMemories(
+  Future<MemoriesResult> calcSmartMemories(
     DateTime now,
     MemoriesCache oldCache, {
     bool debugSurfaceAll = false,
@@ -74,6 +76,11 @@ class SmartMemoriesService {
 
       final (allFiles, allFileIdsToFile) = await _getFilesAndMapForMemories();
       _logger.finest("All files length: ${allFiles.length} $t");
+
+      final collectionIDsToExclude = await getCollectionIDsToExclude();
+      _logger.finest(
+        'collectionIDsToExclude length: ${collectionIDsToExclude.length} $t',
+      );
 
       final seenTimes = await _memoriesDB.getSeenTimes();
       _logger.finest('seenTimes has ${seenTimes.length} entries $t');
@@ -127,6 +134,7 @@ class SmartMemoriesService {
         param: <String, dynamic>{
           "allFiles": allFiles,
           "allFileIdsToFile": allFileIdsToFile,
+          "collectionIDsToExclude": collectionIDsToExclude,
           "now": now,
           "oldCache": oldCache,
           "debugSurfaceAll": debugSurfaceAll,
@@ -194,6 +202,7 @@ class SmartMemoriesService {
       // Arguments: direct data
       final Set<EnteFile> allFiles = args["allFiles"];
       final Map<int, EnteFile> allFileIdsToFile = args["allFileIdsToFile"];
+      final Set<int> collectionIDsToExclude = args["collectionIDsToExclude"];
       final DateTime now = args["now"];
       final MemoriesCache oldCache = args["oldCache"];
       final bool debugSurfaceAll = args["debugSurfaceAll"] ?? false;
@@ -229,6 +238,17 @@ class SmartMemoriesService {
       dev.log("All files length at start: ${allFiles.length} $t");
 
       final List<SmartMemory> memories = [];
+
+      // On this day memories
+      final onThisDayMemories = await _getOnThisDayResults(
+        allFiles,
+        now,
+        seenTimes: seenTimes,
+        collectionIDsToExclude: collectionIDsToExclude,
+      );
+      _deductUsedMemories(allFiles, onThisDayMemories);
+      memories.addAll(onThisDayMemories);
+      dev.log("All files length after on this day: ${allFiles.length} $t");
 
       // People memories
       final peopleMemories = await _getPeopleResults(
@@ -308,22 +328,41 @@ class SmartMemoriesService {
     }
   }
 
-  Future<List<FillerMemory>> calcFillerResults() async {
+  Future<List<SmartMemory>> calcSimpleMemories() async {
     final now = DateTime.now();
     final (allFiles, _) = await _getFilesAndMapForMemories();
     final seenTimes = await _memoriesDB.getSeenTimes();
+    final collectionIDsToExclude = await getCollectionIDsToExclude();
+
+    final List<SmartMemory> memories = [];
+
+    // On this day memories
+    final onThisDayMemories = await _getOnThisDayResults(
+      allFiles,
+      now,
+      seenTimes: seenTimes,
+      collectionIDsToExclude: collectionIDsToExclude,
+    );
+    if (onThisDayMemories.isNotEmpty &&
+        onThisDayMemories.first.shouldShowNow()) {
+      memories.add(onThisDayMemories.first);
+      _deductUsedMemories(allFiles, [onThisDayMemories.first]);
+    }
+
+    // Filler memories
     final fillerMemories =
         await _getFillerResults(allFiles, now, seenTimes: seenTimes);
+    memories.addAll(fillerMemories);
 
     final local = await getLocale();
     final languageCode = local?.languageCode ?? "en";
     final s = await LanguageService.s;
 
     _logger.finest('get locale and S');
-    for (final memory in fillerMemories) {
+    for (final memory in memories) {
       memory.title = memory.createTitle(s, languageCode);
     }
-    return fillerMemories;
+    return memories;
   }
 
   static void _deductUsedMemories(
@@ -1538,6 +1577,172 @@ class SmartMemoriesService {
         windowEnd,
       );
       memoryResults.add(fillerMemory);
+    }
+    return memoryResults;
+  }
+
+  Future<Set<int>> getCollectionIDsToExclude() async {
+    final collections = CollectionsService.instance.getCollectionsForUI();
+
+    // Names of collections to exclude
+    const excludedNames = {
+      'screenshot',
+      'whatsapp',
+      'telegram',
+      'download',
+      'facebook',
+      'instagram',
+      'messenger',
+      'twitter',
+      'reddit',
+      'discord',
+      'signal',
+      'viber',
+      'wechat',
+      'line',
+      'meme',
+      'internet',
+      'saved images',
+      'document',
+    };
+
+    final excludedCollectionIDs = <int>{};
+    collectionLoop:
+    for (final collection in collections) {
+      final collectionName = collection.displayName.toLowerCase();
+      for (final excludedName in excludedNames) {
+        if (collectionName.contains(excludedName)) {
+          excludedCollectionIDs.add(collection.id);
+          continue collectionLoop;
+        }
+      }
+    }
+
+    return excludedCollectionIDs;
+  }
+
+  static Future<List<OnThisDayMemory>> _getOnThisDayResults(
+    Iterable<EnteFile> allFiles,
+    DateTime currentTime, {
+    required Map<int, int> seenTimes,
+    required Set<int> collectionIDsToExclude,
+  }) async {
+    final List<OnThisDayMemory> memoryResults = [];
+    if (allFiles.isEmpty) return [];
+
+    final daysToCompute = kMemoriesUpdateFrequency.inDays + 1;
+    final currentYear = currentTime.year;
+    final currentMonth = currentTime.month;
+    final currentDay = currentTime.day;
+    final startPoint = DateTime(currentYear, currentMonth, currentDay);
+    final cutOffTime = startPoint
+        .subtract(const Duration(days: 363) - kMemoriesUpdateFrequency);
+    final diffThreshold = Duration(days: daysToCompute);
+
+    final Map<int, List<Memory>> daysToMemories = {};
+    final Map<int, List<int>> daysToYears = {};
+
+    final timeTillYearEnd = DateTime(currentYear + 1).difference(startPoint);
+    final bool almostYearEnd = timeTillYearEnd < diffThreshold;
+
+    // Find all the relevant memories
+    for (final file in allFiles) {
+      if (collectionIDsToExclude.contains(file.collectionID)) continue;
+      if (file.creationTime! > cutOffTime.microsecondsSinceEpoch) {
+        continue;
+      }
+      final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
+      final fileTimeInYear = fileDate.copyWith(year: currentYear);
+      final diff = fileTimeInYear.difference(startPoint);
+      if (!diff.isNegative && diff < diffThreshold) {
+        daysToMemories
+            .putIfAbsent(diff.inDays, () => [])
+            .add(Memory.fromFile(file, seenTimes));
+        daysToYears.putIfAbsent(diff.inDays, () => []).add(fileDate.year);
+      } else if (almostYearEnd) {
+        final altDiff = fileDate.copyWith(year: currentYear + 1).difference(
+              currentTime,
+            );
+        if (!altDiff.isNegative && altDiff < diffThreshold) {
+          daysToMemories
+              .putIfAbsent(altDiff.inDays, () => [])
+              .add(Memory.fromFile(file, seenTimes));
+          daysToYears.putIfAbsent(altDiff.inDays, () => []).add(fileDate.year);
+        }
+      }
+    }
+
+    // Per day, filter the memories to find the best ones
+    for (var day = 0; day < daysToCompute; day++) {
+      final memories = daysToMemories[day];
+      if (memories == null) continue;
+      if (memories.length < 5) continue;
+      final years = daysToYears[day]!;
+      if (years.toSet().length < 3) continue;
+      final yearCounts = <int, int>{};
+      for (final year in years) {
+        yearCounts[year] = (yearCounts[year] ?? 0) + 1;
+      }
+      final bool hasThreeInAtLeastThreeYears =
+          yearCounts.values.where((count) => count >= 3).length >= 3;
+      if (!hasThreeInAtLeastThreeYears) continue;
+
+      final filteredMemories = <Memory>[];
+      if (memories.length > 20) {
+        // Group memories by year
+        final Map<int, List<Memory>> memoriesByYear = {};
+        for (final memory in memories) {
+          final creationTime =
+              DateTime.fromMicrosecondsSinceEpoch(memory.file.creationTime!);
+          final year = creationTime.year;
+          memoriesByYear.putIfAbsent(year, () => []).add(memory);
+        }
+        for (final year in memoriesByYear.keys) {
+          memoriesByYear[year]!.shuffle(Random());
+        }
+
+        // Get all years, randonly select 20 years if there are more than 20
+        List<int> years = memoriesByYear.keys.toList()..sort();
+        if (years.length > 20) {
+          years.shuffle(Random());
+          years = years.take(20).toList()..sort();
+        }
+
+        // First round to take one memory from each year
+        for (final year in years) {
+          if (filteredMemories.length >= 20) break;
+          final yearMemories = memoriesByYear[year]!;
+          if (yearMemories.isNotEmpty) {
+            filteredMemories.add(yearMemories.removeAt(0));
+          }
+        }
+
+        // Second round to fill up to 20 memories
+        while (filteredMemories.length < 20) {
+          bool addedAny = false;
+          for (final year in years) {
+            if (filteredMemories.length >= 20) break;
+            final yearMemories = memoriesByYear[year]!;
+            if (yearMemories.isNotEmpty) {
+              filteredMemories.add(yearMemories.removeAt(0));
+              addedAny = true;
+            }
+          }
+          if (!addedAny) break;
+        }
+      } else {
+        filteredMemories.addAll(memories);
+      }
+
+      filteredMemories.sort(
+        (a, b) => a.file.creationTime!.compareTo(b.file.creationTime!),
+      );
+      final onThisDayMemory = OnThisDayMemory(
+        filteredMemories,
+        startPoint.add(Duration(days: day)).microsecondsSinceEpoch,
+        startPoint.add(Duration(days: day + 1)).microsecondsSinceEpoch,
+      );
+      memoryResults.add(onThisDayMemory);
     }
     return memoryResults;
   }

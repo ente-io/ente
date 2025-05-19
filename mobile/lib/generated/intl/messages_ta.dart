@@ -48,6 +48,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("தவறான மின்னஞ்சல் முகவரி"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "இந்த தகவலுடன் தயவுசெய்து எங்களுக்கு உதவுங்கள்"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
         "verify": MessageLookupByLibrary.simpleMessage("சரிபார்க்கவும்")
       };
 }

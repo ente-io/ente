@@ -16,8 +16,8 @@ class TimeMemory extends SmartMemory {
     this.day,
     this.month,
     this.yearsAgo,
-    int? firstCreationTime,
-    int? lastCreationTime,
+    super.firstCreationTime,
+    super.lastCreationTime,
   }) : super(
           memories,
           MemoryType.time,

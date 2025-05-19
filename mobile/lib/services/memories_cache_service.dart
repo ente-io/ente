@@ -185,7 +185,7 @@ class MemoriesCacheService {
         final now = DateTime.now();
         final next = now.add(kMemoriesUpdateFrequency);
         final nowResult =
-            await smartMemoriesService.calcMemories(now, newCache);
+            await smartMemoriesService.calcSmartMemories(now, newCache);
         if (nowResult.isEmpty) {
           _cachedMemories = [];
           _logger.warning(
@@ -194,7 +194,7 @@ class MemoriesCacheService {
           return;
         }
         final nextResult =
-            await smartMemoriesService.calcMemories(next, newCache);
+            await smartMemoriesService.calcSmartMemories(next, newCache);
         w?.log("calculated new memories");
         for (final nowMemory in nowResult.memories) {
           newCache.toShowMemories
@@ -339,27 +339,37 @@ class MemoriesCacheService {
 
   Future<void> _calculateRegularFillers() async {
     if (_cachedMemories == null) {
-      _cachedMemories = await smartMemoriesService.calcFillerResults();
+      _cachedMemories = await smartMemoriesService.calcSimpleMemories();
       Bus.instance.fire(MemoriesChangedEvent());
     }
     return;
   }
 
   Future<List<SmartMemory>> getMemoriesForWidget({
+    required bool onThisDay,
     required bool pastYears,
     required bool smart,
   }) async {
-    if (!pastYears && !smart) {
+    if (!onThisDay && !pastYears && !smart) {
+      _logger.info(
+        'No memories requested, returning empty list',
+      );
       return [];
     }
     final allMemories = await getMemories();
-    if (pastYears && smart) {
+    if (onThisDay && pastYears && smart) {
       return allMemories;
     }
     final filteredMemories = <SmartMemory>[];
     for (final memory in allMemories) {
-      if (!pastYears && memory.type == MemoryType.filler) continue;
-      if (!smart && memory.type != MemoryType.filler) continue;
+      if (!memory.shouldShowNow()) continue;
+      if (memory.type == MemoryType.onThisDay) {
+        if (!onThisDay) continue;
+      } else if (memory.type == MemoryType.filler) {
+        if (!pastYears) continue;
+      } else {
+        if (!smart) continue;
+      }
       filteredMemories.add(memory);
     }
     return filteredMemories;

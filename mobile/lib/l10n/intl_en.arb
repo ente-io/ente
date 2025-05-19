@@ -1751,5 +1751,6 @@
   "addParticipants": "Add participants",
   "selectedAlbums": "{count} selected",
   "actionNotSupportedOnFavouritesAlbum": "Action not supported on Favourites album",
-  "onThisDayMemories": "On this day memories"
+  "onThisDayMemories": "On this day memories",
+  "onThisDay": "On this day"
 }
