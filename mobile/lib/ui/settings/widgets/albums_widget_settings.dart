@@ -52,8 +52,8 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
 
     if (selectedAlbums != null) {
       for (final collectionID in selectedAlbums) {
-        final collection = CollectionsService.instance
-            .getCollectionByID(int.parse(collectionID));
+        final collection =
+            CollectionsService.instance.getCollectionByID(collectionID);
 
         if (collection != null) {
           albums.add(collection);
