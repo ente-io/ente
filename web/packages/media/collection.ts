@@ -49,10 +49,24 @@ import { ItemVisibility } from "ente-media/file-metadata";
  */
 export type CollectionType = "album" | "folder" | "favorites" | "uncategorized";
 
+/**
+ * The privilege level of a participant associated with a collection.
+ *
+ * - "VIEWER" - Has read-only access to files in the collection.
+ *
+ * - "COLLABORATOR" - Can additionally add files from the collection, and remove
+ *   files that they added from the collection.
+ *
+ * - "OWNER" - The owner of the collection. Can remove any file, including those
+ *   added by other users, from the collection.
+ *
+ * It is guaranteed that a there will be exactly one participant of type OWNER,
+ * and their user ID will be the same as the collection `owner.id`.
+ */
 export type CollectionUserRole =
     | "VIEWER"
-    | "OWNER"
     | "COLLABORATOR"
+    | "OWNER"
     | "UNKNOWN";
 
 /**
