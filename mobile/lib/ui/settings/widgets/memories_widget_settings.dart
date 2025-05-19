@@ -67,13 +67,13 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
   void enableMLMemories() {
     isYearlyMemoriesEnabled = false;
     isSmartMemoriesEnabled = true;
-    isOnThisDayMemoriesEnabled = true;
+    isOnThisDayMemoriesEnabled = false;
   }
 
   void enableNonMLMemories() {
     isYearlyMemoriesEnabled = true;
     isSmartMemoriesEnabled = false;
-    isOnThisDayMemoriesEnabled = false;
+    isOnThisDayMemoriesEnabled = true;
   }
 
   Future<void> updateVariables() async {
@@ -170,6 +170,29 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                           singleBorderRadius: 8,
                           isGestureDetectorDisabled: true,
                         ),
+                        const SizedBox(height: 4),
+                        MenuItemWidget(
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: S.of(context).onThisDayMemories,
+                          ),
+                          leadingIconWidget: SvgPicture.asset(
+                            "assets/icons/memories-widget-icon.svg",
+                            color: colorScheme.textBase,
+                          ),
+                          menuItemColor: colorScheme.fillFaint,
+                          trailingWidget: ToggleSwitchWidget(
+                            value: () => isOnThisDayMemoriesEnabled!,
+                            onChanged: () async {
+                              setState(() {
+                                isOnThisDayMemoriesEnabled =
+                                    !isOnThisDayMemoriesEnabled!;
+                              });
+                              await updateVariables();
+                            },
+                          ),
+                          singleBorderRadius: 8,
+                          isGestureDetectorDisabled: true,
+                        ),
                         if (isMLEnabled) ...[
                           const SizedBox(height: 4),
                           MenuItemWidget(
@@ -187,29 +210,6 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                                 setState(() {
                                   isSmartMemoriesEnabled =
                                       !isSmartMemoriesEnabled!;
-                                });
-                                await updateVariables();
-                              },
-                            ),
-                            singleBorderRadius: 8,
-                            isGestureDetectorDisabled: true,
-                          ),
-                          const SizedBox(height: 4),
-                          MenuItemWidget(
-                            captionedTextWidget: CaptionedTextWidget(
-                              title: S.of(context).onThisDayMemories,
-                            ),
-                            leadingIconWidget: SvgPicture.asset(
-                              "assets/icons/memories-widget-icon.svg",
-                              color: colorScheme.textBase,
-                            ),
-                            menuItemColor: colorScheme.fillFaint,
-                            trailingWidget: ToggleSwitchWidget(
-                              value: () => isOnThisDayMemoriesEnabled!,
-                              onChanged: () async {
-                                setState(() {
-                                  isOnThisDayMemoriesEnabled =
-                                      !isOnThisDayMemoriesEnabled!;
                                 });
                                 await updateVariables();
                               },
