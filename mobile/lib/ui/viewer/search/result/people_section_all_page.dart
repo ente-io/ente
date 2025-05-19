@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/search/search_result.dart";
+import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/models/selected_people.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
@@ -28,27 +29,36 @@ class PeopleSectionAllPage extends StatelessWidget {
 }
 
 class PeopleSectionAllWidget extends StatefulWidget {
-  const PeopleSectionAllWidget({super.key});
+  const PeopleSectionAllWidget({
+    super.key,
+    this.selectedPeople,
+  });
+
+  final SelectedPeople? selectedPeople;
 
   @override
   State<PeopleSectionAllWidget> createState() => _PeopleSectionAllWidgetState();
 }
 
 class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
-  late Future<List<SearchResult>> sectionData;
+  late Future<List<GenericSearchResult>> sectionData;
   final streamSubscriptions = <StreamSubscription>[];
 
   @override
   void initState() {
     super.initState();
-    sectionData = SectionType.face.getData(context);
+    sectionData = SectionType.face.getData(context).then(
+          (value) => List.from(value),
+        );
 
     final streamsToListenTo = SectionType.face.viewAllUpdateEvents();
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
           setState(() {
-            sectionData = SectionType.face.getData(context);
+            sectionData = SectionType.face.getData(context).then(
+                  (value) => List.from(value),
+                );
           });
         }),
       );
@@ -71,7 +81,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     const horizontalEdgePadding = 20.0;
     const gridPadding = 16.0;
 
-    return FutureBuilder<List<SearchResult>>(
+    return FutureBuilder<List<GenericSearchResult>>(
       future: sectionData,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -110,6 +120,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
               return PersonSearchExample(
                 searchResult: results[index],
                 size: itemSize,
+                selectedPeople: widget.selectedPeople,
               )
                   .animate(delay: Duration(milliseconds: index * 13))
                   .fadeIn(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/selected_people.dart";
 import "package:photos/services/people_home_widget_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -18,11 +19,24 @@ class PeopleWidgetSettings extends StatefulWidget {
 
 class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
   bool hasInstalledAny = false;
+  final _selectedPeople = SelectedPeople();
+
+  Set<String> people = <String>{};
 
   @override
   void initState() {
     super.initState();
+    _selectedPeople.addListener(_selectedPeopleListener);
+    getSelections();
     checkIfAnyWidgetInstalled();
+  }
+
+  Future<void> getSelections() async {
+    final selectedPeople = PeopleHomeWidgetService.instance.getSelectedPeople();
+
+    if (selectedPeople != null) {
+      _selectedPeople.select(selectedPeople.toSet());
+    }
   }
 
   Future<void> checkIfAnyWidgetInstalled() async {
@@ -30,6 +44,17 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
     setState(() {
       hasInstalledAny = count > 0;
     });
+  }
+
+  void _selectedPeopleListener() {
+    people = _selectedPeople.personIds;
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _selectedPeople.removeListener(_selectedPeopleListener);
+    super.dispose();
   }
 
   @override
@@ -49,9 +74,15 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                 buttonSize: ButtonSize.large,
                 labelText: S.of(context).save,
                 shouldSurfaceExecutionStates: false,
-                onTap: () async {
-                  // await _generateAlbumUrl();
-                },
+                isDisabled: people.isEmpty,
+                onTap: people.isEmpty
+                    ? null
+                    : () async {
+                        await PeopleHomeWidgetService.instance
+                            .setSelectedPeople(people.toList());
+                        // TODO: update/sync widget
+                        Navigator.pop(context);
+                      },
               ),
             )
           : null,
@@ -102,8 +133,10 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
               ),
             )
           else
-            const SliverToBoxAdapter(
-              child: PeopleSectionAllWidget(),
+            SliverToBoxAdapter(
+              child: PeopleSectionAllWidget(
+                selectedPeople: _selectedPeople,
+              ),
             ),
         ],
       ),
