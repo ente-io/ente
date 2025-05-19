@@ -185,7 +185,17 @@ class MemoryHomeWidgetService {
   }
 
   Future<Map<String, Iterable<EnteFile>>> _getMemories() async {
-    final memories = await memoriesCacheService.getMemories();
+    final lastYearValue = await getSelectedLastYearMemories();
+    final mlValue = await getSelectedMLMemories();
+    final onThisDayValue = await getSelectedOnThisDayMemories();
+    final isMLEnabled = flagService.hasGrantedMLConsent;
+
+    final memories = await memoriesCacheService.getMemoriesForWidget(
+      onThisDay: onThisDayValue ?? !isMLEnabled,
+      pastYears: lastYearValue ?? !isMLEnabled,
+      smart: mlValue ?? isMLEnabled,
+    );
+
     if (memories.isEmpty) {
       return {};
     }
