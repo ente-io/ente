@@ -582,9 +582,9 @@ const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
 );
 
 const showDownloadQuickOption = (type: CollectionSummaryType) =>
+    type == "album" ||
     type == "folder" ||
     type == "favorites" ||
-    type == "album" ||
     type == "uncategorized" ||
     type == "hiddenItems" ||
     type == "incomingShareViewer" ||
@@ -620,10 +620,10 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
 );
 
 const showShareQuickOption = (type: CollectionSummaryType) =>
+    type == "album" ||
     type == "folder" ||
     (type == "favorites" &&
         /* TODO(FAV): */ settingsSnapshot().isInternalUser) ||
-    type == "album" ||
     type == "outgoingShare" ||
     type == "sharedOnlyViaLink" ||
     type == "archived" ||

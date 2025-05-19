@@ -6,14 +6,101 @@ import { ItemVisibility } from "ente-media/file-metadata";
 
 // TODO: Audit this file
 
-export type CollectionType = "folder" | "favorites" | "album" | "uncategorized";
+/**
+ * The type of a collection.
+ *
+ * - "album" - A regular "Ente Album" that the user sees in their library.
+ *
+ * - "folder" - An Ente Album that is also associated with an OS album on the
+ *   user's mobile device.
+ *
+ *   A collection of type "folder" is created by the mobile app if there is an
+ *   associated on-device album for the new Ente album being created.
+ *
+ *   This separation between "album" and "folder" allows different mobile
+ *   clients to push to the same Folder ("Camera", "Screenshots"), not allowing
+ *   for duplicate folders with the same name, while still allowing users to
+ *   create different albums with the same name.
+ *
+ *   The web/desktop app does not create collections of type "folder", and
+ *   otherwise treats them as aliases for "album".
+ *
+ * - "favorites" - A special collection consisting of the items that the user
+ *   has marked as their favorites.
+ *
+ *   The user can have at most one collection of type "favorites" (enforced at
+ *   remote). This collection is created on demand by the client where the user
+ *   first marks an item as a favorite. The user can choose to share their
+ *   "favorites" with other users, so it is possible for there to be multiple
+ *   collections of type "favorites" present in our local database, however only
+ *   one of those will belong to the logged in user (cf `owner.id`).
+ *
+ * - "uncategorized" - A special collection consisting of items that do not
+ *   belong to any other collection.
+ *
+ *   In the remote schema, each item ({@link EnteFile}) is always associated
+ *   with a collection. The same item may belong to multiple collections (See:
+ *   [Note: Collection File]), but it must belong to at least one collection.
+ *
+ *   In some scenarios, e.g. when deleting the last collection to which a file
+ *   belongs, the file would thus get orphaned and violate the schema
+ *   invariants. So in such cases, the client which is performing the
+ *   corresponding operation moves the file to the user's special
+ *   "uncategorized" collection, creating it if needed.
+ *
+ *   Similar to "favorites", the user can have only one "uncategorized"
+ *   collection. However, unlike "favorites", the "uncategorized" collection
+ *   cannot be shared.
+ */
+export type CollectionType = "album" | "folder" | "favorites" | "uncategorized";
 
-export type CollectionRole = "VIEWER" | "OWNER" | "COLLABORATOR" | "UNKNOWN";
+/**
+ * The privilege level of a participant associated with a collection.
+ *
+ * - "VIEWER" - Has read-only access to files in the collection.
+ *
+ * - "COLLABORATOR" - Can additionally add files from the collection, and remove
+ *   files that they added from the collection (i.e., files they "own").
+ *
+ * - "OWNER" - The owner of the collection. Can remove any file, including those
+ *   added by other users, from the collection.
+ *
+ * It is guaranteed that a there will be exactly one participant of type OWNER,
+ * and their user ID will be the same as the collection `owner.id`.
+ */
+export type CollectionUserRole =
+    | "VIEWER"
+    | "COLLABORATOR"
+    | "OWNER"
+    | "UNKNOWN";
 
+/**
+ * Information about the user associated with a collection, either as an owner,
+ * or as someone with whom the collection has been shared with.
+ */
 export interface CollectionUser {
+    /**
+     * The ID of the underlying {@link User} that this {@link CollectionUser}
+     * stands for.
+     */
     id: number;
-    email: string;
-    role: CollectionRole;
+    /**
+     * The email of the user.
+     *
+     * - The email is present for the {@link owner} only for shared collections.
+     * - The email is present for all {@link sharees}.
+     * - Remote uses a blank string to indicate absent values.
+     */
+    email?: string;
+    /**
+     * The association / privilege level of the user with the collection.
+     *
+     * - The role is not present blank for the {@link owner}.
+     * - The role is present, and one of "VIEWER" and "COLLABORATOR" for the
+     *   {@link sharees}.
+     * - Remote uses a blank string to indicate absent values.
+     */
+    role?: CollectionUserRole;
 }
 
 export interface EncryptedCollection {
@@ -25,6 +112,13 @@ export interface EncryptedCollection {
      * all collections on an Ente instance (i.e., it is not scoped to a user).
      */
     id: number;
+    /**
+     * Information about the user who owns the collection.
+     *
+     * Each collection is owned by exactly one user. The owner may optionally
+     * choose to share it with additional users, granting them varying level of
+     * privileges.
+     */
     owner: CollectionUser;
     // collection name was unencrypted in the past, so we need to keep it as optional
     name?: string;
