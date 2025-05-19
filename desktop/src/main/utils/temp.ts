@@ -80,8 +80,8 @@ export const deleteTempFileIgnoringErrors = async (tempFilePath: string) => {
     }
 };
 
-/** The result of {@link makeFileForDataOrStreamOrPathOrZipItem}. */
-interface FileForDataOrPathOrZipItem {
+/** The result of {@link makeFileForStreamOrPathOrZipItem}. */
+interface FileForStreamOrPathOrZipItem {
     /**
      * The path to the file (possibly temporary).
      */
@@ -107,13 +107,13 @@ interface FileForDataOrPathOrZipItem {
  * that needs to be deleted after processing, and a function to write the given
  * {@link item} into that temporary file if needed.
  *
- * @param item The contents of the file (bytes), or a {@link ReadableStream}
- * with the contents of the file, or the path to an existing file, or a (path to
- * a zip file, name of an entry within that zip file) tuple.
+ * @param item A {@link ReadableStream} with the contents of the file, or the
+ * path to an existing file, or a (path to a zip file, name of an entry within
+ * that zip file) tuple.
  */
-export const makeFileForDataOrStreamOrPathOrZipItem = async (
-    item: Uint8Array | ReadableStream | string | ZipItem,
-): Promise<FileForDataOrPathOrZipItem> => {
+export const makeFileForStreamOrPathOrZipItem = async (
+    item: ReadableStream | string | ZipItem,
+): Promise<FileForStreamOrPathOrZipItem> => {
     let path: string;
     let isFileTemporary: boolean;
     let writeToTemporaryFile = async () => {
@@ -126,9 +126,7 @@ export const makeFileForDataOrStreamOrPathOrZipItem = async (
     } else {
         path = await makeTempFilePath();
         isFileTemporary = true;
-        if (item instanceof Uint8Array) {
-            writeToTemporaryFile = () => fs.writeFile(path, item);
-        } else if (item instanceof ReadableStream) {
+        if (item instanceof ReadableStream) {
             writeToTemporaryFile = () => writeStream(path, item);
         } else {
             writeToTemporaryFile = async () => {

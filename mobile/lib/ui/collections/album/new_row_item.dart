@@ -36,7 +36,7 @@ class NewAlbumRowItemWidget extends StatelessWidget {
             alwaysShowSuccessState: false,
             initialValue: "",
             textCapitalization: TextCapitalization.words,
-            popnavAfterSubmission: false,
+            popnavAfterSubmission: true,
             onSubmit: (String text) async {
               if (text.trim() == "") {
                 return;
@@ -50,7 +50,6 @@ class NewAlbumRowItemWidget extends StatelessWidget {
                   context,
                   CollectionPage(CollectionWithThumbnail(c, null)),
                 );
-                Navigator.of(context).pop();
               } catch (e, s) {
                 Logger("CreateNewAlbumRowItemWidget")
                     .severe("Failed to rename album", e, s);

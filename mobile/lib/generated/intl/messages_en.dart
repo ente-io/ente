@@ -82,6 +82,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m21(count) =>
       "${Intl.plural(count, one: 'Delete ${count} item', other: 'Delete ${count} items')}";
 
+  static String m116(count) =>
+      "Also delete the photos (and videos) present in these ${count} albums from <bold>all</bold> other albums they are part of?";
+
   static String m22(currentlyDeleting, totalCount) =>
       "Deleting ${currentlyDeleting} / ${totalCount}";
 
@@ -96,6 +99,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m26(count, formattedSize) =>
       "${count} files, ${formattedSize} each";
+
+  static String m114(name) => "This email is already linked to ${name}.";
 
   static String m27(newEmail) => "Email changed to ${newEmail}";
 
@@ -221,6 +226,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m76(snapshotLength, searchLength) =>
       "Sections length mismatch: ${snapshotLength} != ${searchLength}";
 
+  static String m117(count) => "${count} selected";
+
   static String m77(count) => "${count} selected";
 
   static String m78(count, yourCount) =>
@@ -304,6 +311,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m108(email) => "Verify ${email}";
 
+  static String m115(name) => "View ${name} to unlink";
+
   static String m109(count) =>
       "${Intl.plural(count, zero: 'Added 0 viewers', one: 'Added 1 viewer', other: 'Added ${count} viewers')}";
 
@@ -332,6 +341,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Welcome back!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>."),
+        "actionNotSupportedOnFavouritesAlbum":
+            MessageLookupByLibrary.simpleMessage(
+                "Action not supported on Favourites album"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Active sessions"),
         "add": MessageLookupByLibrary.simpleMessage("Add"),
@@ -356,6 +368,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Details of add-ons"),
         "addOnValidTill": m3,
         "addOns": MessageLookupByLibrary.simpleMessage("Add-ons"),
+        "addParticipants":
+            MessageLookupByLibrary.simpleMessage("Add participants"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Add photos"),
         "addSelected": MessageLookupByLibrary.simpleMessage("Add selected"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("Add to album"),
@@ -764,6 +778,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteItemCount": m21,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Delete location"),
+        "deleteMultipleAlbumDialog": m116,
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Delete photos"),
         "deleteProgress": m22,
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
@@ -850,6 +865,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m25,
         "duplicateItemsGroup": m26,
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+        "editEmailAlreadyLinked": m114,
         "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Edit location"),
@@ -1737,6 +1753,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Select your face"),
         "selectYourPlan":
             MessageLookupByLibrary.simpleMessage("Select your plan"),
+        "selectedAlbums": m117,
         "selectedFilesAreNotOnEnte": MessageLookupByLibrary.simpleMessage(
             "Selected files are not on Ente"),
         "selectedFoldersWillBeEncryptedAndBackedUp":
@@ -2065,7 +2082,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoInfo": MessageLookupByLibrary.simpleMessage("Video Info"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
         "videoStreaming":
-            MessageLookupByLibrary.simpleMessage("Generate streamable video"),
+            MessageLookupByLibrary.simpleMessage("Streamable videos"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("View active sessions"),
@@ -2077,6 +2094,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewLargeFilesDesc": MessageLookupByLibrary.simpleMessage(
             "View files that are consuming the most amount of storage."),
         "viewLogs": MessageLookupByLibrary.simpleMessage("View logs"),
+        "viewPersonToUnlink": m115,
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("View recovery key"),
         "viewer": MessageLookupByLibrary.simpleMessage("Viewer"),

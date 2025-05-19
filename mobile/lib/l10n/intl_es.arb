@@ -1658,7 +1658,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Transmisión de vídeo",
   "processingVideos": "Procesando vídeos",
   "streamDetails": "Detalles de la transmisión",
   "processing": "Procesando",

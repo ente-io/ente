@@ -8,7 +8,7 @@ import fs from "node:fs/promises";
 import type { FFmpegCommand, ZipItem } from "../../types/ipc";
 import {
     deleteTempFileIgnoringErrors,
-    makeFileForDataOrStreamOrPathOrZipItem,
+    makeFileForStreamOrPathOrZipItem,
     makeTempFilePath,
 } from "../utils/temp";
 import type { FFmpegUtilityProcess } from "./ffmpeg-worker";
@@ -29,27 +29,49 @@ export const ffmpegUtilityProcess = () =>
  */
 export const ffmpegExec = async (
     command: FFmpegCommand,
-    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+    pathOrZipItem: string | ZipItem,
     outputFileExtension: string,
-): Promise<Uint8Array> => {
+): Promise<Uint8Array> =>
+    withInputFile(pathOrZipItem, async (worker, inputFilePath) => {
+        const outputFilePath = await makeTempFilePath(outputFileExtension);
+        try {
+            await worker.ffmpegExec(command, inputFilePath, outputFilePath);
+            return await fs.readFile(outputFilePath);
+        } finally {
+            await deleteTempFileIgnoringErrors(outputFilePath);
+        }
+    });
+
+export const withInputFile = async <T>(
+    pathOrZipItem: string | ZipItem,
+    f: (worker: FFmpegUtilityProcess, inputFilePath: string) => Promise<T>,
+): Promise<T> => {
     const worker = await ffmpegUtilityProcess();
 
     const {
         path: inputFilePath,
         isFileTemporary: isInputFileTemporary,
         writeToTemporaryFile: writeToTemporaryInputFile,
-    } = await makeFileForDataOrStreamOrPathOrZipItem(dataOrPathOrZipItem);
+    } = await makeFileForStreamOrPathOrZipItem(pathOrZipItem);
 
-    const outputFilePath = await makeTempFilePath(outputFileExtension);
     try {
         await writeToTemporaryInputFile();
 
-        await worker.ffmpegExec(command, inputFilePath, outputFilePath);
-
-        return await fs.readFile(outputFilePath);
+        return await f(worker, inputFilePath);
     } finally {
         if (isInputFileTemporary)
             await deleteTempFileIgnoringErrors(inputFilePath);
-        await deleteTempFileIgnoringErrors(outputFilePath);
     }
 };
+
+/**
+ * Implement the IPC "ffmpegDetermineVideoDuration" contract, writing the input
+ * to temporary files as needed, and then forward to the
+ * {@link ffmpegDetermineVideoDuration} running in the utility process.
+ */
+export const ffmpegDetermineVideoDuration = async (
+    pathOrZipItem: string | ZipItem,
+): Promise<number> =>
+    withInputFile(pathOrZipItem, async (worker, inputFilePath) =>
+        worker.ffmpegDetermineVideoDuration(inputFilePath),
+    );

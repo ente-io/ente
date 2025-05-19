@@ -9096,6 +9096,26 @@ class S {
     );
   }
 
+  /// `This email is already linked to {name}.`
+  String editEmailAlreadyLinked(Object name) {
+    return Intl.message(
+      'This email is already linked to $name.',
+      name: 'editEmailAlreadyLinked',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `View {name} to unlink`
+  String viewPersonToUnlink(Object name) {
+    return Intl.message(
+      'View $name to unlink',
+      name: 'viewPersonToUnlink',
+      desc: '',
+      args: [name],
+    );
+  }
+
   /// `Enter name`
   String get enterName {
     return Intl.message(
@@ -11081,10 +11101,10 @@ class S {
     );
   }
 
-  /// `Generate streamable video`
+  /// `Streamable videos`
   String get videoStreaming {
     return Intl.message(
-      'Generate streamable video',
+      'Streamable videos',
       name: 'videoStreaming',
       desc: '',
       args: [],
@@ -11851,6 +11871,46 @@ class S {
     return Intl.message(
       'Past years\' memories',
       name: 'pastYearsMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Also delete the photos (and videos) present in these {count} albums from <bold>all</bold> other albums they are part of?`
+  String deleteMultipleAlbumDialog(Object count) {
+    return Intl.message(
+      'Also delete the photos (and videos) present in these $count albums from <bold>all</bold> other albums they are part of?',
+      name: 'deleteMultipleAlbumDialog',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Add participants`
+  String get addParticipants {
+    return Intl.message(
+      'Add participants',
+      name: 'addParticipants',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} selected`
+  String selectedAlbums(Object count) {
+    return Intl.message(
+      '$count selected',
+      name: 'selectedAlbums',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Action not supported on Favourites album`
+  String get actionNotSupportedOnFavouritesAlbum {
+    return Intl.message(
+      'Action not supported on Favourites album',
+      name: 'actionNotSupportedOnFavouritesAlbum',
       desc: '',
       args: [],
     );

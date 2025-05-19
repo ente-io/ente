@@ -1,7 +1,7 @@
 import { expose, wrap } from "comlink";
 import { clientPackageName } from "ente-base/app";
 import { assertionFailed } from "ente-base/assert";
-import { isHTTP4xxError } from "ente-base/http";
+import { isHTTP4xxError, isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
 import type { ElectronMLWorker } from "ente-base/types/ipc";
@@ -614,10 +614,18 @@ const index = async (
         log.debug(() => ["Uploading ML data", rawMLData]);
 
         try {
-            await putMLData(file, rawMLData);
+            const lastUpdatedAt = remoteMLData?.updatedAt ?? 0;
+            await putMLData(file, rawMLData, lastUpdatedAt);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
-            if (isHTTP4xxError(e)) await markIndexingFailed(fileID);
+            if (isHTTP4xxError(e)) {
+                // 409 Conflict indicates that we tried overwriting existing
+                // mldata. Don't mark it as a failure, the file has already been
+                // processed.
+                if (!isHTTPErrorWithStatus(e, 409)) {
+                    await markIndexingFailed(fileID);
+                }
+            }
             throw e;
         }
 

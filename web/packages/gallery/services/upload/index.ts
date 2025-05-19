@@ -283,7 +283,7 @@ export const fileSystemUploadItemIfUnchanged = async (
  * context of our desktop app, return a value that can be passed to
  * {@link Electron} functions over IPC.
  */
-export const toDataOrPathOrZipEntry = (fsUploadItem: FileSystemUploadItem) =>
+export const toPathOrZipEntry = (fsUploadItem: FileSystemUploadItem) =>
     typeof fsUploadItem == "string" || Array.isArray(fsUploadItem)
         ? fsUploadItem
         : fsUploadItem.path;

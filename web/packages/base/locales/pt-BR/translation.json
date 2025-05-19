@@ -32,7 +32,7 @@
     "set_password": "Definir senha",
     "sign_in": "Entrar",
     "incorrect_password": "Senha incorreta",
-    "incorrect_password_or_no_account": "",
+    "incorrect_password_or_no_account": "Senha incorreta ou e-mail não registrado",
     "pick_password_hint": "Insira uma senha que podemos usar para criptografar seus dados",
     "pick_password_caution": "Não armazenamos sua senha, portanto, caso se esqueça, <strong>não poderemos ajudar você</strong>a recuperar seus dados sem uma chave de recuperação.",
     "key_generation_in_progress": "Gerando chaves de criptografia...",
@@ -675,5 +675,7 @@
     "theme": "Tema",
     "system": "Automático",
     "light": "Claro",
-    "dark": "Escuro"
+    "dark": "Escuro",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }

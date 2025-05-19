@@ -992,6 +992,7 @@
   "didYouKnow": "Lo sapevi che?",
   "loadingMessage": "Caricando le tue foto...",
   "loadMessage1": "Puoi condividere il tuo abbonamento con la tua famiglia",
+  "loadMessage2": "Finora abbiamo conservato oltre 200 milioni di ricordi",
   "loadMessage3": "Teniamo 3 copie dei tuoi dati, uno in un rifugio sotterraneo antiatomico",
   "loadMessage4": "Tutte le nostre app sono open source",
   "loadMessage5": "Il nostro codice sorgente e la crittografia hanno ricevuto audit esterni",
@@ -1497,6 +1498,15 @@
   "useDifferentPlayerInfo": "Hai problemi a riprodurre questo video? Premi a lungo qui per provare un altro lettore.",
   "hideSharedItemsFromHomeGallery": "Nascondi gli elementi condivisi dalla galleria principale",
   "gallery": "Galleria",
+  "emailDoesNotHaveEnteAccount": "{email} non ha un account Ente.",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "accountOwnerPersonAppbarTitle": "{title} (Io)",
   "@accountOwnerPersonAppbarTitle": {
     "description": "Title of appbar for account owner person",
@@ -1537,5 +1547,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "processingVideos": "Elaborando video"
+  "processingVideos": "Elaborando video",
+  "joinAlbumConfirmationDialogBody": "Unirsi a un album renderà visibile la tua email ai suoi partecipanti."
 }

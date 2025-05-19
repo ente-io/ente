@@ -675,5 +675,7 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }

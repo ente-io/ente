@@ -61,10 +61,9 @@ class _VideoWidgetState extends State<VideoWidget> {
       isPreviewLoadable = FileDataService.instance.previewIds
               ?.containsKey(widget.file.uploadedFileID) ??
           false;
-      if (!widget.file.isOwner && flagService.internalUser) {
-        // todo: neeraj assume shared files are previewable, fetch the preview data
-        // and mark as not previewable if not available. Add backend support for
-        // fetching preview status to cache this information proactively
+      if (!widget.file.isOwner) {
+        // For shared video, we need to on-demand check if the file is streamable
+        // and if not, we need to set isPreviewLoadable to false
         isPreviewLoadable = true;
       }
       _checkForPreview();
@@ -78,7 +77,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   Future<void> _checkForPreview() async {
-    if (!widget.file.isOwner && flagService.internalUser) {
+    if (!widget.file.isOwner) {
       final bool isStreamable =
           await PreviewVideoStore.instance.isSharedFileStreamble(widget.file);
       if (!isStreamable && mounted) {

@@ -4,7 +4,7 @@ import { downloadManager } from "ente-gallery/services/download";
 import { extractRawExif, parseExif } from "ente-gallery/services/exif";
 import {
     hlsPlaylistDataForFile,
-    type HLSPlaylistData,
+    type HLSPlaylistDataForFile,
 } from "ente-gallery/services/video";
 import type { EnteFile } from "ente-media/file";
 import { fileCaption, filePublicMagicMetadata } from "ente-media/file-metadata";
@@ -452,10 +452,14 @@ const enqueueUpdates = async (
 
     const updateVideo = (
         videoURL: string | undefined,
-        hlsPlaylistData: HLSPlaylistData | undefined,
+        hlsPlaylistData: HLSPlaylistDataForFile,
     ) => {
         const videoURLD = videoURL ? { videoURL } : {};
-        if (hlsPlaylistData) {
+        // See: [Note: Caching HLS playlist data]
+        //
+        // In brief, there are three cases:
+        if (typeof hlsPlaylistData == "object") {
+            // 1. If we have a playlist, we can cache it
             const {
                 playlistURL: videoPlaylistURL,
                 width,
@@ -466,18 +470,9 @@ const enqueueUpdates = async (
                 createHLSPlaylistItemDataValidity(),
             );
         } else {
-            // See: [Note: Caching HLS playlist data]
-            //
-            // TODO(HLS): As an optimization, we can handle the logged in vs
-            // public albums case separately once we have the status-diff state,
-            // we don't need to mark status-diff case as transient.
-            //
-            // Note that setting the transient flag is not too expensive, since
-            // the underlying videoURL is still cached by the download manager.
-            // So effectively, under normal circumstance, it just adds one API
-            // call (to recheck if an HLS playlist now exists for the given
-            // file).
-            update({ ...videoURLD, isTransient: true });
+            // 2. if the file is not eligible ("skip"), we can cache it.
+            // 3. Otherwise it's transient and shouldn't be cached indefinitely.
+            update({ ...videoURLD, isTransient: hlsPlaylistData != "skip" });
         }
     };
 
@@ -526,7 +521,7 @@ const enqueueUpdates = async (
     }
 
     try {
-        let hlsPlaylistData: HLSPlaylistData | undefined;
+        let hlsPlaylistData: HLSPlaylistDataForFile;
         if (file.metadata.fileType == FileType.video) {
             hlsPlaylistData = await hlsPlaylistDataForFile(
                 file,
@@ -534,7 +529,10 @@ const enqueueUpdates = async (
             );
             // We have a HLS playlist, and the user didn't request the original.
             // Early return so that we don't initiate a fetch for the original.
-            if (hlsPlaylistData && opts?.videoQuality != "original") {
+            if (
+                typeof hlsPlaylistData == "object" &&
+                opts?.videoQuality != "original"
+            ) {
                 updateVideo(undefined, hlsPlaylistData);
                 return;
             }

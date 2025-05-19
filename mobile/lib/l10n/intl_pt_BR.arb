@@ -1281,6 +1281,8 @@
   "createCollaborativeLink": "Criar link colaborativo",
   "search": "Buscar",
   "enterPersonName": "Inserir nome da pessoa",
+  "editEmailAlreadyLinked": "Este e-mail já está vinculado a {name}.",
+  "viewPersonToUnlink": "Visualizar {name} para desvincular",
   "enterName": "Inserir nome",
   "savePerson": "Salvar pessoa",
   "editPerson": "Editar pessoa",
@@ -1660,7 +1662,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Transmissão de vídeo",
   "processingVideos": "Processando vídeos",
   "streamDetails": "Detalhes da transmissão",
   "processing": "Processando",
