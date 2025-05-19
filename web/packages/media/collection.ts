@@ -17,6 +17,11 @@ import { ItemVisibility } from "ente-media/file-metadata";
  *   A collection of type "folder" is created by the mobile app if there is an
  *   associated on-device album for the new Ente album being created.
  *
+ *   This separation between "album" and "folder" allows different mobile
+ *   clients to push to the same Folder ("Camera", "Screenshots"), not allowing
+ *   for duplicate folders with the same name, while still allowing users to
+ *   create different albums with the same name.
+ *
  *   The web/desktop app does not create collections of type "folder", and
  *   otherwise treats them as aliases for "album".
  *
@@ -55,7 +60,7 @@ export type CollectionType = "album" | "folder" | "favorites" | "uncategorized";
  * - "VIEWER" - Has read-only access to files in the collection.
  *
  * - "COLLABORATOR" - Can additionally add files from the collection, and remove
- *   files that they added from the collection.
+ *   files that they added from the collection (i.e., files they "own").
  *
  * - "OWNER" - The owner of the collection. Can remove any file, including those
  *   added by other users, from the collection.
