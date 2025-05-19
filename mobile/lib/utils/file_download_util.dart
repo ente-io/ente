@@ -15,6 +15,7 @@ import "package:photos/events/local_photos_updated_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ignored_file.dart";
+import "package:photos/module/download/file_url.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
@@ -47,7 +48,7 @@ Future<File?> downloadAndDecryptPublicFile(
       if (authJWTToken != null) "X-Auth-Access-Token-JWT": authJWTToken,
     };
     final response = (await NetworkClient.instance.getDio().download(
-      file.publicDownloadUrl,
+      FileUrl.getUrl(file.uploadedFileID!, FileUrlType.publicDownload),
       encryptedFilePath,
       options: Options(
         headers: headers,
