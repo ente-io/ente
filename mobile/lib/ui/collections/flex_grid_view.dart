@@ -22,15 +22,15 @@ import "package:photos/utils/navigation_util.dart";
 
 class CollectionsFlexiGridViewWidget extends StatefulWidget {
   /*
-  Aspect ratio 1:1 Max width 224 Fixed gap 8
-  Width changes dynamically with screen width such that we can fit 2 in one row.
+  Aspect ratio 1:1 Max width 224 Fixed gap 4
+  Width changes dynamically with screen width such that we can fit 3 in one row.
   Keep the width integral (center the albums to distribute excess pixels)
    */
   static const maxThumbnailWidth = 224.0;
   static const fixedGapBetweenAlbum = 4.0;
   static const minGapForHorizontalPadding = 8.0;
   static const collectionItemsToPreload = 20;
-
+  static const silverHorizontalPadding = 16.0;
   final List<Collection>? collections;
   // At max how many albums to display
   final int displayLimitCount;
@@ -130,9 +130,11 @@ class _CollectionsFlexiGridViewWidgetState
                             .minGapForHorizontalPadding)) %
                 albumsCountInOneRow;
 
-    final double sideOfThumbnail =
-        (screenWidth - gapOnSizeOfAlbums - gapBetweenAlbums) /
-            albumsCountInOneRow;
+    final double sideOfThumbnail = (screenWidth -
+            gapOnSizeOfAlbums -
+            gapBetweenAlbums -
+            CollectionsFlexiGridViewWidget.silverHorizontalPadding) /
+        albumsCountInOneRow;
 
     final int totalCollections = widget.collections!.length;
     final bool showCreateAlbum = widget.shouldShowCreateAlbum;
@@ -163,7 +165,6 @@ class _CollectionsFlexiGridViewWidgetState
               sideOfThumbnail,
               tag: widget.tag,
               selectedAlbums: widget.selectedAlbums,
-              showFileCount: false,
               onTapCallback: (c) {
                 isAnyAlbumSelected
                     ? _toggleAlbumSelection(c)
@@ -184,7 +185,7 @@ class _CollectionsFlexiGridViewWidgetState
           crossAxisCount: albumsCountInOneRow,
           mainAxisSpacing: 2,
           crossAxisSpacing: gapBetweenAlbums,
-          childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 46),
+          childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 56),
         ),
       ),
     );
