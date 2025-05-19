@@ -1,8 +1,11 @@
 import "package:flutter/material.dart";
 import "package:fluttertoast/fluttertoast.dart";
 import "package:logging/logging.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
+import "package:photos/services/favorites_service.dart";
 import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -37,10 +40,10 @@ class AlbumHomeWidgetService {
     await updateAlbumsChanged(false);
   }
 
-  List<String>? getSelectedAlbums() {
+  List<int>? getSelectedAlbums() {
     final selectedAlbums = _prefs.getStringList(_selectedAlbumsHWKey);
 
-    return selectedAlbums;
+    return selectedAlbums?.map((e) => int.tryParse(e) ?? 0).toList();
   }
 
   Future<void> setSelectedAlbums(
@@ -82,12 +85,20 @@ class AlbumHomeWidgetService {
       return true;
     }
 
-    // TODO: Check if any selected album doesn't exist
-    // final areAlbumShown = albumsCacheService.showAnyAlbum;
-    // if (!areAlbumShown) {
-    //   _logger.warning("albums not enabled");
-    //   return true;
-    // }
+    final selectedAlbums = getSelectedAlbums();
+    final albums = [];
+    for (final selectedAlbum in selectedAlbums ?? []) {
+      final collection =
+          CollectionsService.instance.getCollectionByID(selectedAlbum);
+      if (collection != null) {
+        albums.add(collection);
+      }
+    }
+
+    if ((selectedAlbums?.isNotEmpty ?? false) && albums.isEmpty) {
+      _logger.warning("selected albums not found");
+      return true;
+    }
 
     return false;
   }
@@ -170,22 +181,34 @@ class AlbumHomeWidgetService {
   }
 
   Future<Map<String, Iterable<EnteFile>>> _getAlbum() async {
-    // TODO: Get Albums from the selected album and map them into title: files format
+    var selectedAlbums = getSelectedAlbums();
+    if (selectedAlbums == null || selectedAlbums.isEmpty) {
+      final favoriteId =
+          await FavoritesService.instance.getFavoriteCollectionID();
+      if (favoriteId != null) {
+        selectedAlbums = [favoriteId];
+      }
+    }
 
-    // final albums = await albumsCacheService.getAlbum();
-    // if (albums.isEmpty) {
-    //   return {};
-    // }
+    final albums = <String, List<EnteFile>>{};
+    for (final selectedAlbum in selectedAlbums ?? []) {
+      final collection =
+          CollectionsService.instance.getCollectionByID(selectedAlbum);
+      if (collection != null) {
+        final files =
+            await FilesDB.instance.getAllFilesCollection(collection.id);
+        albums.addAll({
+          collection.decryptedName ?? "Album": files,
+        });
+      }
+    }
 
-    // final files = Map.fromEntries(
-    //   albums.map((m) {
-    //     return MapEntry(m.title, m.albums.map((e) => e.file).toList());
-    //   }),
-    // );
+    if (albums.isEmpty) {
+      _logger.warning("No albums found");
+      return {};
+    }
 
-    // return files;
-
-    return {};
+    return albums;
   }
 
   Future<void> _updateWidget({String? text}) async {
