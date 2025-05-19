@@ -97,6 +97,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m26(count, formattedSize) =>
       "${count} arquivos, ${formattedSize} cada";
 
+  static String m114(name) => "Este e-mail já está vinculado a ${name}.";
+
   static String m27(newEmail) => "E-mail alterado para ${newEmail}";
 
   static String m28(email) => "${email} não possui uma conta Ente.";
@@ -302,6 +304,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m107(endDate) => "Válido até ${endDate}";
 
   static String m108(email) => "Verificar ${email}";
+
+  static String m115(name) => "Visualizar ${name} para desvincular";
 
   static String m109(count) =>
       "${Intl.plural(count, zero: 'Adicionado 0 vizualizadores', one: 'Adicionado 1 visualizador', other: 'Adicionado ${count} visualizadores')}";
@@ -865,6 +869,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m25,
         "duplicateItemsGroup": m26,
         "edit": MessageLookupByLibrary.simpleMessage("Editar"),
+        "editEmailAlreadyLinked": m114,
         "editLocation":
             MessageLookupByLibrary.simpleMessage("Editar localização"),
         "editLocationTagTitle":
@@ -2124,8 +2129,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoInfo":
             MessageLookupByLibrary.simpleMessage("Informações do vídeo"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("vídeo"),
-        "videoStreaming":
-            MessageLookupByLibrary.simpleMessage("Transmissão de vídeo"),
         "videos": MessageLookupByLibrary.simpleMessage("Vídeos"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("Ver sessões ativas"),
@@ -2139,6 +2142,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewLargeFilesDesc": MessageLookupByLibrary.simpleMessage(
             "Ver arquivos que consumem a maior parte do armazenamento."),
         "viewLogs": MessageLookupByLibrary.simpleMessage("Ver registros"),
+        "viewPersonToUnlink": m115,
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Ver chave de recuperação"),
         "viewer": MessageLookupByLibrary.simpleMessage("Visualizador"),

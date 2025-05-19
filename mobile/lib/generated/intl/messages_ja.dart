@@ -1793,7 +1793,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("リカバリキーを確認中..."),
         "videoInfo": MessageLookupByLibrary.simpleMessage("ビデオ情報"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("ビデオ"),
-        "videoStreaming": MessageLookupByLibrary.simpleMessage("動画ストリーミング"),
         "videos": MessageLookupByLibrary.simpleMessage("ビデオ"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("アクティブなセッションを表示"),

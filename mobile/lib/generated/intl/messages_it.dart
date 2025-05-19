@@ -87,6 +87,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m27(newEmail) => "Email cambiata in ${newEmail}";
 
+  static String m28(email) => "${email} non ha un account Ente.";
+
   static String m29(email) =>
       "${email} non ha un account Ente.\n\nInvia un invito per condividere foto.";
 
@@ -775,6 +777,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "emailAlreadyRegistered":
             MessageLookupByLibrary.simpleMessage("Email già registrata."),
         "emailChangedTo": m27,
+        "emailDoesNotHaveEnteAccount": m28,
         "emailNoEnteAccount": m29,
         "emailNotRegistered":
             MessageLookupByLibrary.simpleMessage("Email non registrata."),
@@ -1032,6 +1035,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Gli elementi mostrano il numero di giorni rimanenti prima della cancellazione permanente"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Gli elementi selezionati saranno rimossi da questo album"),
+        "joinAlbumConfirmationDialogBody": MessageLookupByLibrary.simpleMessage(
+            "Unirsi a un album renderà visibile la tua email ai suoi partecipanti."),
         "joinDiscord":
             MessageLookupByLibrary.simpleMessage("Unisciti a Discord"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Mantieni foto"),
@@ -1079,6 +1084,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "livePhotos": MessageLookupByLibrary.simpleMessage("Live Photo"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Puoi condividere il tuo abbonamento con la tua famiglia"),
+        "loadMessage2": MessageLookupByLibrary.simpleMessage(
+            "Finora abbiamo conservato oltre 200 milioni di ricordi"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "Teniamo 3 copie dei tuoi dati, uno in un rifugio sotterraneo antiatomico"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(

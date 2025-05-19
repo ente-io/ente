@@ -23,16 +23,20 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(title) => "${title} (Aš)";
 
   static String m1(count) =>
-      "${Intl.plural(count, zero: 'Pridėti bendradarbių', one: 'Pridėti bendradarbį', few: 'Pridėti bendradarbius', many: 'Pridėti bendradarbio', other: 'Pridėti bendradarbių')}";
+      "${Intl.plural(count, zero: 'Pridėti bendradarbių', one: 'Pridėti bendradarbį', other: 'Pridėti bendradarbių')}";
 
   static String m2(count) =>
-      "${Intl.plural(count, one: 'Pridėti elementą', few: 'Pridėti elementus', many: 'Pridėti elemento', other: 'Pridėti elementų')}";
+      "${Intl.plural(count, one: 'Pridėti elementą', other: 'Pridėti elementų')}";
 
   static String m3(storageAmount, endDate) =>
       "Jūsų ${storageAmount} priedas galioja iki ${endDate}";
 
   static String m4(count) =>
-      "${Intl.plural(count, zero: 'Pridėti žiūrėtojų', one: 'Pridėti žiūrėtoją', few: 'Pridėti žiūrėtojus', many: 'Pridėti žiūrėtojo', other: 'Pridėti žiūrėtojų')}";
+      "${Intl.plural(count, zero: 'Pridėti žiūrėtojų', one: 'Pridėti žiūrėtoją', other: 'Pridėti žiūrėtojų')}";
+
+  static String m5(emailOrName) => "Įtraukė ${emailOrName}";
+
+  static String m6(albumName) => "Sėkmingai įtraukta į „${albumName}“";
 
   static String m7(name) => "Žavisi ${name}";
 
@@ -56,6 +60,9 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': 'Jūs gavote ${storageAmountInGb} GB iki šiol.',
           })}";
 
+  static String m15(albumName) =>
+      "Bendradarbiavimo nuoroda sukurta albumui „${albumName}“";
+
   static String m16(count) =>
       "${Intl.plural(count, zero: 'Pridėta 0 bendradarbių', one: 'Pridėtas 1 bendradarbis', other: 'Pridėta ${count} bendradarbių')}";
 
@@ -71,7 +78,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m20(endpoint) => "Prijungta prie ${endpoint}";
 
   static String m21(count) =>
-      "${Intl.plural(count, one: 'Ištrinti ${count} elementą', few: 'Ištrinti ${count} elementus', many: 'Ištrinti ${count} elemento', other: 'Ištrinti ${count} elementų')}";
+      "${Intl.plural(count, one: 'Ištrinti ${count} elementą', other: 'Ištrinti ${count} elementų')}";
 
   static String m22(currentlyDeleting, totalCount) =>
       "Ištrinama ${currentlyDeleting} / ${totalCount}";
@@ -83,7 +90,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Iš savo registruoto el. pašto adreso atsiųskite el. laišką adresu ${supportEmail}";
 
   static String m25(count, storageSaved) =>
-      "Išvalėte ${Intl.plural(count, one: '${count} dubliuojantį failą', few: '${count} dubliuojančius failus', many: '${count} dubliuojančio failo', other: '${count} dubliuojančių failų')}, išsaugodami (${storageSaved}).";
+      "Išvalėte ${Intl.plural(count, one: '${count} dubliuojantį failą', other: '${count} dubliuojančių failų')}, išsaugodami (${storageSaved})";
 
   static String m26(count, formattedSize) =>
       "${count} failai (-ų), kiekvienas ${formattedSize}";
@@ -97,6 +104,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m31(text) => "Rastos papildomos nuotraukos, skirtos ${text}";
 
+  static String m34(count, formattedNumber) =>
+      "${Intl.plural(count, one: '${formattedNumber} failas šiame albume saugiai sukurta atsarginė kopija', few: '${formattedNumber} failai šiame albume saugiai sukurtos atsarginės kopijos', many: '${formattedNumber} failo šiame albume saugiai sukurtos atsargines kopijos', other: '${formattedNumber} failų šiame albume saugiai sukurta atsarginė kopija')}.";
+
   static String m35(storageAmountInGB) =>
       "${storageAmountInGB} GB kiekvieną kartą, kai kas nors užsiregistruoja mokamam planui ir pritaiko jūsų kodą.";
 
@@ -104,15 +114,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "Nemokamas bandomasis laikotarpis galioja iki ${endDate}";
 
   static String m37(count) =>
-      "Vis dar galite pasiekti ${Intl.plural(count, one: 'jį', few: 'juos', many: 'juos', other: 'jų')} platformoje „Ente“, kol turite aktyvų prenumeratą.";
+      "Vis dar galite pasiekti ${Intl.plural(count, one: 'jį', other: 'jų')} platformoje „Ente“, kol turite aktyvų prenumeratą.";
 
   static String m38(sizeInMBorGB) => "Atlaisvinti ${sizeInMBorGB}";
+
+  static String m39(count, formattedSize) =>
+      "${Intl.plural(count, one: 'Jį galima ištrinti iš įrenginio, kad atlaisvintų ${formattedSize}', other: 'Jų galima ištrinti iš įrenginio, kad atlaisvintų ${formattedSize}')}";
 
   static String m40(currentlyProcessing, totalCount) =>
       "Apdorojama ${currentlyProcessing} / ${totalCount}";
 
   static String m42(count) =>
-      "${Intl.plural(count, one: '${count} elementas', few: '${count} elementai', many: '${count} elemento', other: '${count} elementų')}";
+      "${Intl.plural(count, one: '${count} elementas', other: '${count} elementų')}";
 
   static String m44(email) => "${email} pakvietė jus būti patikimu kontaktu";
 
@@ -122,10 +135,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Tai susies ${personName} su ${email}.";
 
   static String m48(count, formattedCount) =>
-      "${Intl.plural(count, zero: 'nėra prisiminimų', one: '${formattedCount} prisiminimas', few: '${formattedCount} prisiminimai', many: '${formattedCount} prisiminimo', other: '${formattedCount} prisiminimų')}";
+      "${Intl.plural(count, zero: 'nėra prisiminimų', one: '${formattedCount} prisiminimas', other: '${formattedCount} prisiminimų')}";
 
   static String m49(count) =>
-      "${Intl.plural(count, one: 'Perkelti elementą', few: 'Perkelti elementus', many: 'Perkelti elemento', other: 'Perkelti elementų')}";
+      "${Intl.plural(count, one: 'Perkelti elementą', other: 'Perkelti elementų')}";
+
+  static String m50(albumName) => "Sėkmingai perkelta į „${albumName}“";
 
   static String m51(personName) => "Nėra pasiūlymų asmeniui ${personName}.";
 
@@ -141,10 +156,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Kreipkitės į ${providerName} palaikymo komandą, jei jums buvo nuskaičiuota.";
 
   static String m59(count) =>
-      "${Intl.plural(count, zero: 'Nėra nuotraukų', one: '1 nuotrauka', few: '${count} nuotraukos', many: '${count} nuotraukos', other: '${count} nuotraukų')}";
-
-  static String m60(count) =>
-      "${Intl.plural(count, zero: '0 nuotraukų', one: '1 nuotrauka', few: '${count} nuotraukos', many: '${count} nuotraukos', other: '${count} nuotraukų')}";
+      "${Intl.plural(count, zero: 'Nėra nuotraukų', one: '1 nuotrauka', other: '${count} nuotraukų')}";
 
   static String m61(endDate) =>
       "Nemokama bandomoji versija galioja iki ${endDate}.\nVėliau galėsite pasirinkti mokamą planą.";
@@ -174,7 +186,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m73(endDate) => "Prenumerata pratęsiama ${endDate}";
 
   static String m75(count) =>
-      "${Intl.plural(count, one: 'Rastas ${count} rezultatas', few: 'Rasti ${count} rezultatai', many: 'Rasta ${count} rezultato', other: 'Rasta ${count} rezultatų')}";
+      "${Intl.plural(count, one: 'Rastas ${count} rezultatas', other: 'Rasta ${count} rezultatų')}";
 
   static String m76(snapshotLength, searchLength) =>
       "Sekcijų ilgio neatitikimas: ${snapshotLength} != ${searchLength}";
@@ -195,6 +207,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m83(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'Bendrinti su konkrečiais asmenimis', one: 'Bendrinta su 1 asmeniu', other: 'Bendrinta su ${numberOfPeople} asmenimis')}";
+
+  static String m84(emailIDs) => "Bendrinta su ${emailIDs}";
 
   static String m85(fileType) =>
       "Šis ${fileType} bus ištrintas iš jūsų įrenginio.";
@@ -223,7 +237,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m97(email) => "Tai – ${email} patvirtinimo ID";
 
   static String m98(count) =>
-      "${Intl.plural(count, one: 'Šią savaitę, prieš ${count} metus', few: 'Šią savaitę, prieš ${count} metus', many: 'Šią savaitę, prieš ${count} metų', other: 'Šią savaitę, prieš ${count} metų')}";
+      "${Intl.plural(count, one: 'Šią savaitę, prieš ${count} metus', other: 'Šią savaitę, prieš ${count} metų')}";
 
   static String m99(dateFormat) => "${dateFormat} per metus";
 
@@ -243,18 +257,17 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m105(ignoreReason) =>
       "Įkėlimas ignoruojamas dėl ${ignoreReason}.";
 
+  static String m106(count) => "Išsaugomi ${count} prisiminimai...";
+
   static String m107(endDate) => "Galioja iki ${endDate}";
 
   static String m108(email) => "Patvirtinti ${email}";
-
-  static String m109(count) =>
-      "${Intl.plural(count, zero: 'Pridėta 0 žiūrėtojų', one: 'Pridėtas 1 žiūrėtojas', few: 'Pridėti ${count} žiūrėtojai', many: 'Pridėta ${count} žiūrėtojo', other: 'Pridėta ${count} žiūrėtojų')}";
 
   static String m110(email) =>
       "Išsiuntėme laišką adresu <green>${email}</green>";
 
   static String m111(count) =>
-      "${Intl.plural(count, one: 'prieš ${count} metus', few: 'prieš ${count} metus', many: 'prieš ${count} metų', other: 'prieš ${count} metų')}";
+      "${Intl.plural(count, one: 'prieš ${count} metus', other: 'prieš ${count} metų')}";
 
   static String m112(name) => "Jūs ir ${name}";
 
@@ -306,6 +319,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addViewer": MessageLookupByLibrary.simpleMessage("Pridėti žiūrėtoją"),
         "addViewers": m4,
         "addedAs": MessageLookupByLibrary.simpleMessage("Pridėta kaip"),
+        "addedBy": m5,
+        "addedSuccessfullyTo": m6,
         "addingToFavorites":
             MessageLookupByLibrary.simpleMessage("Pridedama prie mėgstamų..."),
         "admiringThem": m7,
@@ -398,6 +413,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Jūsų prenumerata buvo atšaukta. Ar norėtumėte pasidalyti priežastimi?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Kokia yra pagrindinė priežastis, dėl kurios ištrinate savo paskyrą?"),
+        "askYourLovedOnesToShare": MessageLookupByLibrary.simpleMessage(
+            "Paprašykite savo artimuosius bendrinti"),
         "atAFalloutShelter":
             MessageLookupByLibrary.simpleMessage("priešgaisrinėje slėptuvėje"),
         "authToChangeEmailVerificationSetting":
@@ -424,6 +441,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nustatykite tapatybę, kad peržiūrėtumėte savo aktyvius seansus"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
             "Nustatykite tapatybę, kad peržiūrėtumėte paslėptus failus"),
+        "authToViewYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Nustatykite tapatybę, kad peržiūrėtumėte savo prisiminimus"),
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Nustatykite tapatybę, kad peržiūrėtumėte savo atkūrimo raktą"),
         "authenticating":
@@ -451,6 +470,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "backgroundWithThem": m11,
         "backup":
             MessageLookupByLibrary.simpleMessage("Kurti atsarginę kopiją"),
+        "backupFailed":
+            MessageLookupByLibrary.simpleMessage("Atsarginė kopija nepavyko"),
         "backupFile": MessageLookupByLibrary.simpleMessage(
             "Kurti atsarginę failo kopiją"),
         "backupOverMobileData": MessageLookupByLibrary.simpleMessage(
@@ -487,10 +508,17 @@ class MessageLookup extends MessageLookupByLibrary {
             "Dabar galima naudoti su prisiminimais integruotus pagrindinio ekrano valdiklius. Jie parodys jūsų ypatingas akimirkas neatvėrus programos."),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Podėliuoti duomenis"),
+        "calculating": MessageLookupByLibrary.simpleMessage("Skaičiuojama..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
             "Atsiprašome, šio albumo negalima atverti programoje."),
         "canNotOpenTitle":
             MessageLookupByLibrary.simpleMessage("Negalima atverti šio albumo"),
+        "canNotUploadToAlbumsOwnedByOthers":
+            MessageLookupByLibrary.simpleMessage(
+                "Negalima įkelti į kitiems priklausančius albumus"),
+        "canOnlyCreateLinkForFilesOwnedByYou":
+            MessageLookupByLibrary.simpleMessage(
+                "Galima sukurti nuorodą tik jums priklausantiems failams"),
         "canOnlyRemoveFilesOwnedByYou": MessageLookupByLibrary.simpleMessage(
             "Galima pašalinti tik jums priklausančius failus"),
         "cancel": MessageLookupByLibrary.simpleMessage("Atšaukti"),
@@ -548,6 +576,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Spustelėkite ant perpildymo meniu"),
         "close": MessageLookupByLibrary.simpleMessage("Uždaryti"),
+        "clubByCaptureTime": MessageLookupByLibrary.simpleMessage(
+            "Grupuoti pagal užfiksavimo laiką"),
+        "clubByFileName": MessageLookupByLibrary.simpleMessage(
+            "Grupuoti pagal failo pavadinimą"),
         "clusteringProgress":
             MessageLookupByLibrary.simpleMessage("Sankaupos vykdymas"),
         "codeAppliedPageTitle":
@@ -562,11 +594,15 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sukurkite nuorodą, kad asmenys galėtų pridėti ir peržiūrėti nuotraukas bendrinamame albume, nereikalaujant „Ente“ programos ar paskyros. Puikiai tinka įvykių nuotraukoms rinkti."),
         "collaborativeLink":
             MessageLookupByLibrary.simpleMessage("Bendradarbiavimo nuoroda"),
+        "collaborativeLinkCreatedFor": m15,
         "collaborator": MessageLookupByLibrary.simpleMessage("Bendradarbis"),
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Bendradarbiai gali pridėti nuotraukų ir vaizdo įrašų į bendrintą albumą."),
         "collaboratorsSuccessfullyAdded": m16,
+        "collageLayout": MessageLookupByLibrary.simpleMessage("Išdėstymas"),
+        "collageSaved": MessageLookupByLibrary.simpleMessage(
+            "Koliažas išsaugotas į galeriją"),
         "collect": MessageLookupByLibrary.simpleMessage("Rinkti"),
         "collectEventPhotos":
             MessageLookupByLibrary.simpleMessage("Rinkti įvykių nuotraukas"),
@@ -602,6 +638,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "continueLabel": MessageLookupByLibrary.simpleMessage("Tęsti"),
         "continueOnFreeTrial": MessageLookupByLibrary.simpleMessage(
             "Tęsti nemokame bandomajame laikotarpyje"),
+        "convertToAlbum":
+            MessageLookupByLibrary.simpleMessage("Konvertuoti į albumą"),
         "copyEmailAddress":
             MessageLookupByLibrary.simpleMessage("Kopijuoti el. pašto adresą"),
         "copyLink": MessageLookupByLibrary.simpleMessage("Kopijuoti nuorodą"),
@@ -614,6 +652,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nepavyko atlaisvinti vietos."),
         "couldNotUpdateSubscription": MessageLookupByLibrary.simpleMessage(
             "Nepavyko atnaujinti prenumeratos"),
+        "count": MessageLookupByLibrary.simpleMessage("Skaičių"),
         "create": MessageLookupByLibrary.simpleMessage("Kurti"),
         "createAccount": MessageLookupByLibrary.simpleMessage("Kurti paskyrą"),
         "createAlbumActionHint": MessageLookupByLibrary.simpleMessage(
@@ -646,6 +685,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "declineTrustInvite":
             MessageLookupByLibrary.simpleMessage("Atmesti kvietimą"),
         "decrypting": MessageLookupByLibrary.simpleMessage("Iššifruojama..."),
+        "decryptingVideo": MessageLookupByLibrary.simpleMessage(
+            "Iššifruojamas vaizdo įrašas..."),
         "deduplicateFiles":
             MessageLookupByLibrary.simpleMessage("Atdubliuoti failus"),
         "delete": MessageLookupByLibrary.simpleMessage("Ištrinti"),
@@ -705,6 +746,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "developerSettingsWarning": MessageLookupByLibrary.simpleMessage(
             "Ar tikrai norite modifikuoti kūrėjo nustatymus?"),
         "deviceCodeHint": MessageLookupByLibrary.simpleMessage("Įveskite kodą"),
+        "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
+            "Į šį įrenginio albumą įtraukti failai bus automatiškai įkelti į „Ente“."),
         "deviceLock":
             MessageLookupByLibrary.simpleMessage("Įrenginio užraktas"),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
@@ -807,6 +850,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Galutinis taškas sėkmingai atnaujintas"),
         "endtoendEncryptedByDefault": MessageLookupByLibrary.simpleMessage(
             "Pagal numatytąjį užšifruota visapusiškai"),
+        "enteCanEncryptAndPreserveFilesOnlyIfYouGrant":
+            MessageLookupByLibrary.simpleMessage(
+                "„Ente“ gali užšifruoti ir išsaugoti failus tik tada, jei suteikiate prieigą prie jų."),
         "entePhotosPerm": MessageLookupByLibrary.simpleMessage(
             "„Ente“ <i>reikia leidimo</i> išsaugoti jūsų nuotraukas"),
         "enteSubscriptionPitch": MessageLookupByLibrary.simpleMessage(
@@ -904,6 +950,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "fileSavedToGallery": MessageLookupByLibrary.simpleMessage(
             "Failas išsaugotas į galeriją"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("Failų tipai"),
+        "filesBackedUpInAlbum": m34,
         "filesSavedToGallery":
             MessageLookupByLibrary.simpleMessage("Failai išsaugoti į galeriją"),
         "findPeopleByName": MessageLookupByLibrary.simpleMessage(
@@ -932,6 +979,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sutaupykite vietos savo įrenginyje išvalydami failus, kurių atsarginės kopijos jau buvo sukurtos."),
         "freeUpSpace":
             MessageLookupByLibrary.simpleMessage("Atlaisvinti vietos"),
+        "freeUpSpaceSaving": m39,
         "gallery": MessageLookupByLibrary.simpleMessage("Galerija"),
         "galleryMemoryLimitInfo": MessageLookupByLibrary.simpleMessage(
             "Galerijoje rodoma iki 1000 prisiminimų"),
@@ -943,6 +991,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Eiti į nustatymus"),
         "googlePlayId":
             MessageLookupByLibrary.simpleMessage("„Google Play“ ID"),
+        "grantFullAccessPrompt": MessageLookupByLibrary.simpleMessage(
+            "Leiskite prieigą prie visų nuotraukų nustatymų programoje."),
         "grantPermission":
             MessageLookupByLibrary.simpleMessage("Suteikti leidimą"),
         "greenery": MessageLookupByLibrary.simpleMessage("Žaliasis gyvenimas"),
@@ -974,6 +1024,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("Gerai"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignoruoti"),
         "ignored": MessageLookupByLibrary.simpleMessage("ignoruota"),
+        "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
+            "Kai kurie šio albumo failai ignoruojami, nes anksčiau buvo ištrinti iš „Ente“."),
         "imageNotAnalyzed":
             MessageLookupByLibrary.simpleMessage("Vaizdas neanalizuotas."),
         "immediately": MessageLookupByLibrary.simpleMessage("Iš karto"),
@@ -1008,6 +1060,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Netinkamas raktas."),
         "invalidRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Įvestas atkūrimo raktas yra netinkamas. Įsitikinkite, kad jame yra 24 žodžiai, ir patikrinkite kiekvieno iš jų rašybą.\n\nJei įvedėte senesnį atkūrimo kodą, įsitikinkite, kad jis yra 64 simbolių ilgio, ir patikrinkite kiekvieną iš jų."),
+        "invite": MessageLookupByLibrary.simpleMessage("Kviesti"),
         "inviteToEnte":
             MessageLookupByLibrary.simpleMessage("Kviesti į „Ente“"),
         "inviteYourFriends":
@@ -1059,6 +1112,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "light": MessageLookupByLibrary.simpleMessage("Šviesi"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("Šviesi"),
         "link": MessageLookupByLibrary.simpleMessage("Susieti"),
+        "linkCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
+            "Nuoroda nukopijuota į iškarpinę"),
         "linkDeviceLimit":
             MessageLookupByLibrary.simpleMessage("Įrenginių riba"),
         "linkEmail": MessageLookupByLibrary.simpleMessage("Susieti el. paštą"),
@@ -1093,6 +1148,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "web.ente.io turi sklandų įkėlėją"),
         "loadMessage9": MessageLookupByLibrary.simpleMessage(
             "Naudojame „Xchacha20Poly1305“, kad saugiai užšifruotume jūsų duomenis."),
+        "loadingExifData":
+            MessageLookupByLibrary.simpleMessage("Įkeliami EXIF duomenys..."),
         "loadingGallery":
             MessageLookupByLibrary.simpleMessage("Įkeliama galerija..."),
         "loadingModel":
@@ -1129,6 +1186,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "longPressAnEmailToVerifyEndToEndEncryption":
             MessageLookupByLibrary.simpleMessage(
                 "Ilgai paspauskite el. paštą, kad patvirtintumėte visapusį šifravimą."),
+        "longpressOnAnItemToViewInFullscreen":
+            MessageLookupByLibrary.simpleMessage(
+                "Ilgai paspauskite elementą, kad peržiūrėtumėte per visą ekraną"),
         "loopVideoOff": MessageLookupByLibrary.simpleMessage(
             "Išjungtas vaizdo įrašo ciklas"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage(
@@ -1192,8 +1252,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Perkelti pasirinktas nuotraukas į vieną datą"),
         "moveToAlbum":
             MessageLookupByLibrary.simpleMessage("Perkelti į albumą"),
+        "movedSuccessfullyTo": m50,
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Perkelta į šiukšlinę"),
+        "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
+            "Perkeliami failai į albumą..."),
         "name": MessageLookupByLibrary.simpleMessage("Pavadinimą"),
         "nameTheAlbum":
             MessageLookupByLibrary.simpleMessage("Pavadinkite albumą"),
@@ -1222,6 +1285,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nėra „Ente“ paskyros!"),
         "noExifData": MessageLookupByLibrary.simpleMessage("Nėra EXIF duomenų"),
         "noFacesFound": MessageLookupByLibrary.simpleMessage("Nerasta veidų."),
+        "noHiddenPhotosOrVideos": MessageLookupByLibrary.simpleMessage(
+            "Nėra paslėptų nuotraukų arba vaizdo įrašų"),
         "noImagesWithLocation":
             MessageLookupByLibrary.simpleMessage("Nėra vaizdų su vietove"),
         "noInternetConnection":
@@ -1263,6 +1328,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "openAlbumInBrowserTitle": MessageLookupByLibrary.simpleMessage(
             "Naudokite interneto programą, kad pridėtumėte nuotraukų į šį albumą."),
         "openFile": MessageLookupByLibrary.simpleMessage("Atverti failą"),
+        "openSettings":
+            MessageLookupByLibrary.simpleMessage("Atverti nustatymus"),
         "openTheItem":
             MessageLookupByLibrary.simpleMessage("• Atverkite elementą."),
         "optionalAsShortAsYouLike": MessageLookupByLibrary.simpleMessage(
@@ -1320,7 +1387,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "photosAddedByYouWillBeRemovedFromTheAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Jūsų pridėtos nuotraukos bus pašalintos iš albumo"),
-        "photosCount": m60,
         "photosKeepRelativeTimeDifference":
             MessageLookupByLibrary.simpleMessage(
                 "Nuotraukos išlaiko santykinį laiko skirtumą"),
@@ -1353,6 +1419,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseVerifyTheCodeYouHaveEntered":
             MessageLookupByLibrary.simpleMessage("Patvirtinkite įvestą kodą."),
         "pleaseWait": MessageLookupByLibrary.simpleMessage("Palaukite..."),
+        "pleaseWaitDeletingAlbum": MessageLookupByLibrary.simpleMessage(
+            "Palaukite. Ištrinamas albumas"),
         "pleaseWaitForSometimeBeforeRetrying":
             MessageLookupByLibrary.simpleMessage(
                 "Palaukite kurį laiką prieš bandydami pakartotinai"),
@@ -1380,6 +1448,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "processingImport": m65,
         "processingVideos":
             MessageLookupByLibrary.simpleMessage("Apdorojami vaizdo įrašai"),
+        "publicLinkCreated":
+            MessageLookupByLibrary.simpleMessage("Vieša nuoroda sukurta"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Įjungta viešoji nuoroda"),
         "queued": MessageLookupByLibrary.simpleMessage("Įtraukta eilėje"),
@@ -1479,6 +1549,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "removingFromFavorites":
             MessageLookupByLibrary.simpleMessage("Pašalinama iš mėgstamų..."),
         "rename": MessageLookupByLibrary.simpleMessage("Pervadinti"),
+        "renameAlbum":
+            MessageLookupByLibrary.simpleMessage("Pervadinti albumą"),
         "renameFile": MessageLookupByLibrary.simpleMessage("Pervadinti failą"),
         "renewSubscription":
             MessageLookupByLibrary.simpleMessage("Pratęsti prenumeratą"),
@@ -1489,6 +1561,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pranešti apie riktą"),
         "resendEmail":
             MessageLookupByLibrary.simpleMessage("Iš naujo siųsti el. laišką"),
+        "resetIgnoredFiles":
+            MessageLookupByLibrary.simpleMessage("Atkurti ignoruojamus failus"),
         "resetPasswordTitle": MessageLookupByLibrary.simpleMessage(
             "Nustatyti slaptažodį iš naujo"),
         "resetToDefault": MessageLookupByLibrary.simpleMessage(
@@ -1551,6 +1625,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pasirinkite vietovę"),
         "selectALocationFirst": MessageLookupByLibrary.simpleMessage(
             "Pirmiausia pasirinkite vietovę"),
+        "selectAlbum":
+            MessageLookupByLibrary.simpleMessage("Pasirinkti albumą"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Pasirinkti viską"),
         "selectAllShort": MessageLookupByLibrary.simpleMessage("Viskas"),
         "selectCoverPhoto": MessageLookupByLibrary.simpleMessage(
@@ -1562,6 +1638,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pasirinkite kalbą"),
         "selectMailApp":
             MessageLookupByLibrary.simpleMessage("Pasirinkti pašto programą"),
+        "selectMorePhotos": MessageLookupByLibrary.simpleMessage(
+            "Pasirinkti daugiau nuotraukų"),
         "selectOneDateAndTime": MessageLookupByLibrary.simpleMessage(
             "Pasirinkti vieną datą ir laiką"),
         "selectOneDateAndTimeForAll": MessageLookupByLibrary.simpleMessage(
@@ -1623,14 +1701,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "Bendrinkite su ne „Ente“ naudotojais."),
         "shareWithPeopleSectionTitle": m83,
+        "shareYourFirstAlbum": MessageLookupByLibrary.simpleMessage(
+            "Bendrinkite savo pirmąjį albumą"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Sukurkite bendrinamus ir bendradarbiaujamus albumus su kitais „Ente“ naudotojais, įskaitant naudotojus nemokamuose planuose."),
+        "sharedByMe": MessageLookupByLibrary.simpleMessage("Bendrinta manimi"),
         "sharedByYou":
             MessageLookupByLibrary.simpleMessage("Bendrinta iš jūsų"),
         "sharedPhotoNotifications": MessageLookupByLibrary.simpleMessage(
             "Naujos bendrintos nuotraukos"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
             "Gaukite pranešimus, kai kas nors prideda nuotrauką į bendrinamą albumą, kuriame dalyvaujate."),
+        "sharedWith": m84,
         "sharedWithMe":
             MessageLookupByLibrary.simpleMessage("Bendrinta su manimi"),
         "sharedWithYou":
@@ -1747,6 +1829,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Įvestas atkūrimo raktas yra neteisingas."),
         "theme": MessageLookupByLibrary.simpleMessage("Tema"),
         "theyAlsoGetXGb": m96,
+        "thisAlbumAlreadyHDACollaborativeLink":
+            MessageLookupByLibrary.simpleMessage(
+                "Šis albumas jau turi bendradarbiavimo nuorodą."),
         "thisCanBeUsedToRecoverYourAccountIfYou":
             MessageLookupByLibrary.simpleMessage(
                 "Tai gali būti naudojama paskyrai atkurti, jei prarandate dvigubo tapatybės nustatymą"),
@@ -1786,6 +1871,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "tooManyIncorrectAttempts": MessageLookupByLibrary.simpleMessage(
             "Per daug neteisingų bandymų."),
         "total": MessageLookupByLibrary.simpleMessage("iš viso"),
+        "totalSize": MessageLookupByLibrary.simpleMessage("Bendrą dydį"),
         "trash": MessageLookupByLibrary.simpleMessage("Šiukšlinė"),
         "trashDaysLeft": m100,
         "trim": MessageLookupByLibrary.simpleMessage("Trumpinti"),
@@ -1795,6 +1881,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Patikimi kontaktai"),
         "trustedInviteBody": m103,
         "tryAgain": MessageLookupByLibrary.simpleMessage("Bandyti dar kartą"),
+        "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
+            "Įjunkite atsarginės kopijos kūrimą, kad automatiškai įkeltumėte į šį įrenginio aplanką įtrauktus failus į „Ente“."),
         "twitter": MessageLookupByLibrary.simpleMessage("„Twitter“"),
         "twoMonthsFreeOnYearlyPlans": MessageLookupByLibrary.simpleMessage(
             "2 mėnesiai nemokamai metiniuose planuose"),
@@ -1819,6 +1907,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "uncategorized":
             MessageLookupByLibrary.simpleMessage("Nekategorizuoti"),
         "unhide": MessageLookupByLibrary.simpleMessage("Rodyti"),
+        "unhideToAlbum":
+            MessageLookupByLibrary.simpleMessage("Rodyti į albumą"),
+        "unhidingFilesToAlbum":
+            MessageLookupByLibrary.simpleMessage("Rodomi failai į albumą"),
         "unlock": MessageLookupByLibrary.simpleMessage("Atrakinti"),
         "unpinAlbum": MessageLookupByLibrary.simpleMessage("Atsegti albumą"),
         "unselectAll": MessageLookupByLibrary.simpleMessage("Nesirinkti visų"),
@@ -1829,6 +1921,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Atnaujinamas aplankų pasirinkimas..."),
         "upgrade": MessageLookupByLibrary.simpleMessage("Keisti planą"),
         "uploadIsIgnoredDueToIgnorereason": m105,
+        "uploadingFilesToAlbum":
+            MessageLookupByLibrary.simpleMessage("Įkeliami failai į albumą..."),
+        "uploadingMultipleMemories": m106,
+        "uploadingSingleMemory":
+            MessageLookupByLibrary.simpleMessage("Išsaugomas prisiminimas..."),
         "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(
             "Iki 50% nuolaida, gruodžio 4 d."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
@@ -1863,8 +1960,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoInfo":
             MessageLookupByLibrary.simpleMessage("Vaizdo įrašo informacija"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("vaizdo įrašas"),
-        "videoStreaming": MessageLookupByLibrary.simpleMessage(
-            "Vaizdo įrašų srautinis perdavimas"),
         "videos": MessageLookupByLibrary.simpleMessage("Vaizdo įrašai"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("Peržiūrėti aktyvius seansus"),
@@ -1880,7 +1975,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Peržiūrėti atkūrimo raktą"),
         "viewer": MessageLookupByLibrary.simpleMessage("Žiūrėtojas"),
-        "viewersSuccessfullyAdded": m109,
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Aplankykite web.ente.io, kad tvarkytumėte savo prenumeratą"),
         "waitingForVerification":
@@ -1920,6 +2014,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Esate naujausioje versijoje"),
         "youCanAtMaxDoubleYourStorage": MessageLookupByLibrary.simpleMessage(
             "* Galite daugiausiai padvigubinti savo saugyklą."),
+        "youCanManageYourLinksInTheShareTab":
+            MessageLookupByLibrary.simpleMessage(
+                "Nuorodas galite valdyti bendrinimo kortelėje."),
+        "youCanTrySearchingForADifferentQuery":
+            MessageLookupByLibrary.simpleMessage(
+                "Galite pabandyti ieškoti pagal kitą užklausą."),
         "youCannotDowngradeToThisPlan": MessageLookupByLibrary.simpleMessage(
             "Negalite pakeisti į šį planą"),
         "youCannotShareWithYourself": MessageLookupByLibrary.simpleMessage(
@@ -1949,6 +2049,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Jūsų patvirtinimo kodas nebegaliojantis."),
         "youveNoDuplicateFilesThatCanBeCleared":
             MessageLookupByLibrary.simpleMessage(
-                "Neturite dubliuotų failų, kuriuos būtų galima išvalyti.")
+                "Neturite dubliuotų failų, kuriuos būtų galima išvalyti."),
+        "youveNoFilesInThisAlbumThatCanBeDeleted":
+            MessageLookupByLibrary.simpleMessage(
+                "Neturite šiame albume failų, kuriuos būtų galima ištrinti.")
       };
 }

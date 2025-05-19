@@ -2097,8 +2097,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Herstelsleutel verifiëren..."),
         "videoInfo": MessageLookupByLibrary.simpleMessage("Video-info"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
-        "videoStreaming":
-            MessageLookupByLibrary.simpleMessage("Video streamen"),
         "videos": MessageLookupByLibrary.simpleMessage("Video\'s"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("Actieve sessies bekijken"),

@@ -137,6 +137,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m47(personName, email) =>
       "Cela va associer ${personName} à ${email}";
 
+  static String m48(count, formattedCount) =>
+      "${Intl.plural(count, zero: 'aucun souvenir', one: '${formattedCount} souvenir', other: '${formattedCount} souvenirs')}";
+
   static String m50(albumName) => "Déplacé avec succès vers ${albumName}";
 
   static String m51(personName) => "Aucune suggestion pour ${personName}";
@@ -281,6 +284,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m107(endDate) => "Valable jusqu\'au ${endDate}";
 
   static String m108(email) => "Vérifier ${email}";
+
+  static String m115(name) => "Voir ${name} pour délier";
 
   static String m110(email) =>
       "Nous avons envoyé un email à <green>${email}</green>";
@@ -1296,6 +1301,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "me": MessageLookupByLibrary.simpleMessage("Moi"),
+        "memoryCount": m48,
         "merchandise": MessageLookupByLibrary.simpleMessage("Boutique"),
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Fusionner avec existant"),
@@ -2155,8 +2161,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Vérification de la clé de récupération..."),
         "videoInfo": MessageLookupByLibrary.simpleMessage("Informations vidéo"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("vidéo"),
-        "videoStreaming":
-            MessageLookupByLibrary.simpleMessage("Streaming vidéo"),
         "videos": MessageLookupByLibrary.simpleMessage("Vidéos"),
         "viewActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Afficher les connexions actives"),
@@ -2171,6 +2175,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Affichez les fichiers qui consomment le plus de stockage."),
         "viewLogs":
             MessageLookupByLibrary.simpleMessage("Afficher les journaux"),
+        "viewPersonToUnlink": m115,
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Voir la clé de récupération"),
         "viewer": MessageLookupByLibrary.simpleMessage("Observateur"),

@@ -1727,7 +1727,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("正在验证恢复密钥..."),
         "videoInfo": MessageLookupByLibrary.simpleMessage("视频详情"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("视频"),
-        "videoStreaming": MessageLookupByLibrary.simpleMessage("影音流"),
         "videos": MessageLookupByLibrary.simpleMessage("视频"),
         "viewActiveSessions": MessageLookupByLibrary.simpleMessage("查看活动会话"),
         "viewAddOnButton": MessageLookupByLibrary.simpleMessage("查看附加组件"),

@@ -2075,8 +2075,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Verifiserer gjenopprettingsnøkkel..."),
         "videoInfo": MessageLookupByLibrary.simpleMessage("Videoinformasjon"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
-        "videoStreaming":
-            MessageLookupByLibrary.simpleMessage("Videostrømming"),
         "videos": MessageLookupByLibrary.simpleMessage("Videoer"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("Vis aktive økter"),

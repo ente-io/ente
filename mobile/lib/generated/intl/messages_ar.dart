@@ -2067,7 +2067,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "جارٍ التحقق من مفتاح الاسترداد..."),
         "videoInfo": MessageLookupByLibrary.simpleMessage("معلومات الفيديو"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("فيديو"),
-        "videoStreaming": MessageLookupByLibrary.simpleMessage("بث الفيديو"),
         "videos": MessageLookupByLibrary.simpleMessage("مقاطع الفيديو"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("عرض الجلسات النشطة"),

@@ -2119,7 +2119,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Kurtarma kodu doğrulanıyor..."),
         "videoInfo": MessageLookupByLibrary.simpleMessage("Video Bilgileri"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
-        "videoStreaming": MessageLookupByLibrary.simpleMessage("Video akışı"),
         "videos": MessageLookupByLibrary.simpleMessage("Videolar"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("Aktif oturumları görüntüle"),

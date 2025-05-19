@@ -41,7 +41,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m7(name) => "Любуясь ${name}";
 
   static String m8(count) =>
-      "${Intl.plural(count, zero: 'Нет участников', one: '${count} участник', few: '${count} участника', other: '${count} участников')}";
+      "${Intl.plural(count, zero: 'Нет участников', one: '${count} участник', other: '${count} участников')}";
 
   static String m9(versionValue) => "Версия: ${versionValue}";
 
@@ -67,7 +67,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m15(albumName) => "Совместная ссылка создана для ${albumName}";
 
   static String m16(count) =>
-      "${Intl.plural(count, zero: 'Добавлено 0 соавторов', one: 'Добавлен 1 соавтор', few: 'Добавлено ${count} соавтора', other: 'Добавлено ${count} соавторов')}";
+      "${Intl.plural(count, zero: 'Добавлено 0 соавторов', one: 'Добавлен 1 соавтор', other: 'Добавлено ${count} соавторов')}";
 
   static String m17(email, numOfDays) =>
       "Вы собираетесь добавить ${email} в качестве доверенного контакта. Доверенный контакт сможет восстановить ваш аккаунт, если вы будете отсутствовать ${numOfDays} дней.";
@@ -81,7 +81,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m20(endpoint) => "Подключено к ${endpoint}";
 
   static String m21(count) =>
-      "${Intl.plural(count, one: 'Удалить ${count} элемент', few: 'Удалить ${count} элемента', other: 'Удалить ${count} элементов')}";
+      "${Intl.plural(count, one: 'Удалить ${count} элемент', other: 'Удалить ${count} элементов')}";
 
   static String m22(currentlyDeleting, totalCount) =>
       "Удаление ${currentlyDeleting} / ${totalCount}";
@@ -93,7 +93,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Пожалуйста, отправьте письмо на ${supportEmail} с вашего зарегистрированного адреса электронной почты";
 
   static String m25(count, storageSaved) =>
-      "Вы удалили ${Intl.plural(count, one: '${count} дубликат', few: '${count} дубликата', other: '${count} дубликатов')}, освободив (${storageSaved}!)";
+      "Вы удалили ${Intl.plural(count, one: '${count} дубликат', other: '${count} дубликатов')}, освободив (${storageSaved}!)";
 
   static String m26(count, formattedSize) =>
       "${count} файлов, по ${formattedSize} каждый";
@@ -112,10 +112,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m32(name) => "Пир с ${name}";
 
   static String m33(count, formattedNumber) =>
-      "${Intl.plural(count, one: '${formattedNumber} файл на этом устройстве был успешно сохранён', few: '${formattedNumber} файла на этом устройстве были успешно сохранены', other: '${formattedNumber} файлов на этом устройстве были успешно сохранены')}";
+      "${Intl.plural(count, one: '${formattedNumber} файл на этом устройстве был успешно сохранён', other: '${formattedNumber} файлов на этом устройстве были успешно сохранены')}";
 
   static String m34(count, formattedNumber) =>
-      "${Intl.plural(count, one: '${formattedNumber} файл в этом альбоме был успешно сохранён', few: '${formattedNumber} файла в этом альбоме были успешно сохранены', other: '${formattedNumber} файлов в этом альбоме были успешно сохранены')}";
+      "${Intl.plural(count, one: '${formattedNumber} файл в этом альбоме был успешно сохранён', other: '${formattedNumber} файлов в этом альбоме были успешно сохранены')}";
 
   static String m35(storageAmountInGB) =>
       "${storageAmountInGB} ГБ каждый раз, когда кто-то подписывается на платный тариф и применяет ваш код";
@@ -137,7 +137,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m41(name) => "Поход с ${name}";
 
   static String m42(count) =>
-      "${Intl.plural(count, one: '${count} элемент', few: '${count} элемента', other: '${count} элементов')}";
+      "${Intl.plural(count, one: '${count} элемент', other: '${count} элементов')}";
 
   static String m43(name) => "В последний раз с ${name}";
 
@@ -151,7 +151,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m47(personName, email) => "Это свяжет ${personName} с ${email}";
 
   static String m48(count, formattedCount) =>
-      "${Intl.plural(count, zero: 'нет воспоминаний', one: '${formattedCount} воспоминание', few: '${formattedCount} воспоминания', other: '${formattedCount} воспоминаний')}";
+      "${Intl.plural(count, zero: 'нет воспоминаний', one: '${formattedCount} воспоминание', other: '${formattedCount} воспоминаний')}";
 
   static String m49(count) =>
       "${Intl.plural(count, one: 'Переместить элемент', other: 'Переместить элементы')}";
@@ -181,7 +181,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, zero: 'Нет фото', one: '1 фото', other: '${count} фото')}";
 
   static String m60(count) =>
-      "${Intl.plural(count, zero: '0 фотографий', one: '1 фотография', few: '${count} фотографии', other: '${count} фотографий')}";
+      "${Intl.plural(count, zero: '0 фотографий', one: '1 фотография', other: '${count} фотографий')}";
 
   static String m61(endDate) =>
       "Бесплатный пробный период действителен до ${endDate}.\nПосле этого вы можете выбрать платный тариф.";
@@ -217,7 +217,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m74(name) => "Путешествие с ${name}";
 
   static String m75(count) =>
-      "${Intl.plural(count, one: '${count} результат найден', few: '${count} результата найдено', other: '${count} результатов найдено')}";
+      "${Intl.plural(count, one: '${count} результат найден', other: '${count} результатов найдено')}";
 
   static String m76(snapshotLength, searchLength) =>
       "Несоответствие длины разделов: ${snapshotLength} != ${searchLength}";
@@ -278,12 +278,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m97(email) => "Это идентификатор подтверждения ${email}";
 
   static String m98(count) =>
-      "${Intl.plural(count, one: 'Эта неделя, ${count} год назад', few: 'Эта неделя, ${count} года назад', other: 'Эта неделя, ${count} лет назад')}";
+      "${Intl.plural(count, one: 'Эта неделя, ${count} год назад', other: 'Эта неделя, ${count} лет назад')}";
 
   static String m99(dateFormat) => "${dateFormat} сквозь годы";
 
   static String m100(count) =>
-      "${Intl.plural(count, zero: 'Скоро', one: '1 день', few: '${count} дня', other: '${count} дней')}";
+      "${Intl.plural(count, zero: 'Скоро', one: '1 день', other: '${count} дней')}";
 
   static String m101(year) => "Поездка в ${year}";
 
@@ -2143,8 +2143,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Проверка ключа восстановления..."),
         "videoInfo": MessageLookupByLibrary.simpleMessage("Информация о видео"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("видео"),
-        "videoStreaming":
-            MessageLookupByLibrary.simpleMessage("Потоковое видео"),
         "videos": MessageLookupByLibrary.simpleMessage("Видео"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("Просмотр активных сессий"),

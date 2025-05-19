@@ -51,9 +51,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m15(albumName) =>
       "Створено спільне посилання для «${albumName}»";
 
-  static String m16(count) =>
-      "${Intl.plural(count, zero: 'Додано 0 співавторів', one: 'Додано 1 співавтор', few: 'Додано ${count} співаторів', many: 'Додано ${count} співаторів', other: 'Додано ${count} співавторів')}";
-
   static String m17(email, numOfDays) =>
       "Ви збираєтеся додати ${email} як довірений контакт. Вони зможуть відновити ваш обліковий запис, якщо ви будете відсутні протягом ${numOfDays} днів.";
 
@@ -66,7 +63,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m20(endpoint) => "Під\'єднано до ${endpoint}";
 
   static String m21(count) =>
-      "${Intl.plural(count, one: 'Видалено ${count} елемент', few: 'Видалено ${count} елементи', many: 'Видалено ${count} елементів', other: 'Видалено ${count} елементів')}";
+      "${Intl.plural(count, one: 'Видалено ${count} елемент', other: 'Видалено ${count} елементів')}";
 
   static String m22(currentlyDeleting, totalCount) =>
       "Видалення ${currentlyDeleting} / ${totalCount}";
@@ -94,7 +91,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, one: 'Для 1 файлу', other: 'Для ${formattedNumber} файлів')} на цьому пристрої було створено резервну копію";
 
   static String m34(count, formattedNumber) =>
-      "${Intl.plural(count, one: 'Для 1 файлу', few: 'Для ${formattedNumber} файлів', many: 'Для ${formattedNumber} файлів', other: 'Для ${formattedNumber} файлів')} у цьому альбомі було створено резервну копію";
+      "${Intl.plural(count, one: 'Для 1 файлу', other: 'Для ${formattedNumber} файлів')} у цьому альбомі було створено резервну копію";
 
   static String m35(storageAmountInGB) =>
       "${storageAmountInGB} ГБ щоразу, коли хтось оформлює передплату і застосовує ваш код";
@@ -230,7 +227,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m110(email) => "Ми надіслали листа на <green>${email}</green>";
 
   static String m111(count) =>
-      "${Intl.plural(count, one: '${count} рік тому', few: '${count} роки тому', many: '${count} років тому', other: '${count} років тому')}";
+      "${Intl.plural(count, one: '${count} рік тому', other: '${count} років тому')}";
 
   static String m113(storageSaved) => "Ви успішно звільнили ${storageSaved}!";
 
@@ -541,7 +538,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Співавтори можуть додавати фотографії та відео до спільного альбому."),
-        "collaboratorsSuccessfullyAdded": m16,
         "collageLayout": MessageLookupByLibrary.simpleMessage("Макет"),
         "collageSaved":
             MessageLookupByLibrary.simpleMessage("Колаж збережено до галереї"),
