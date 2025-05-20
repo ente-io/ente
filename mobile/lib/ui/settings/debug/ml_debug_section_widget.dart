@@ -328,7 +328,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async =>
-              await MemoryHomeWidgetService.instance.initMemoryHW(true),
+              await MemoryHomeWidgetService.instance.initMemoryHomeWidget(true),
         ),
         sectionOptionSpacing,
         MenuItemWidget(
@@ -338,8 +338,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () async =>
-              await MemoryHomeWidgetService.instance.initMemoryHW(false),
+          onTap: () async => await MemoryHomeWidgetService.instance
+              .initMemoryHomeWidget(false),
         ),
         sectionOptionSpacing,
         MenuItemWidget(

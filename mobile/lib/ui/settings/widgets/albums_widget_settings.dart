@@ -47,7 +47,8 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
   }
 
   Future<void> selectExisting() async {
-    final selectedAlbums = AlbumHomeWidgetService.instance.getSelectedAlbums();
+    final selectedAlbums =
+        AlbumHomeWidgetService.instance.getSelectedAlbumIds();
     final albums = <Collection>{};
 
     if (selectedAlbums != null) {

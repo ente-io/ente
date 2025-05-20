@@ -1,70 +1,144 @@
-import "package:flutter/material.dart";
-import "package:fluttertoast/fluttertoast.dart";
-import "package:logging/logging.dart";
-import "package:photos/models/file/file.dart";
-import "package:photos/models/memories/smart_memory.dart";
-import "package:photos/service_locator.dart";
-import "package:photos/services/home_widget_service.dart";
-import "package:photos/services/sync/local_sync_service.dart";
-import "package:shared_preferences/shared_preferences.dart";
-import "package:synchronized/synchronized.dart";
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:logging/logging.dart';
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/memories/smart_memory.dart';
+import 'package:photos/service_locator.dart';
+import 'package:photos/services/home_widget_service.dart';
+import 'package:photos/services/sync/local_sync_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:synchronized/synchronized.dart';
 
 class MemoryHomeWidgetService {
-  final Logger _logger = Logger((MemoryHomeWidgetService).toString());
+  // Constants
+  static const String SELECTED_LAST_YEAR_MEMORIES_KEY =
+      "selectedLastYearMemoriesHW";
+  static const String SELECTED_ML_MEMORIES_KEY = "selectedMLMemoriesHW";
+  static const String SELECTED_ON_THIS_DAY_MEMORIES_KEY =
+      "selectedOnThisDayMemoriesHW";
+  static const String ANDROID_CLASS_NAME = "EnteMemoryWidgetProvider";
+  static const String IOS_CLASS_NAME = "EnteMemoryWidget";
+  static const String MEMORY_CHANGED_KEY = "memoryChanged.widget";
+  static const String TOTAL_MEMORIES_KEY = "totalMemories";
+  static const int MAX_MEMORIES_LIMIT = 50;
 
-  MemoryHomeWidgetService._privateConstructor();
-
-  static const _selectedLastYearMemoriesKey = "selectedLastYearMemoriesHW";
-  static const _selectedMLMemoriesKey = "selectedMLMemoriesHW";
-  static const _selectedOnThisDayMemoriesKey = "selectedOnThisDayMemoriesHW";
-  static const _androidClass = "EnteMemoryWidgetProvider";
-  static const _iOSClass = "EnteMemoryWidget";
-
+  // Singleton pattern
   static final MemoryHomeWidgetService instance =
       MemoryHomeWidgetService._privateConstructor();
+  MemoryHomeWidgetService._privateConstructor();
 
+  // Properties
+  final Logger _logger = Logger((MemoryHomeWidgetService).toString());
   late final SharedPreferences _prefs;
-
   final _memoryForceRefreshLock = Lock();
   bool _hasSyncedMemory = false;
 
-  static const memoryChangedKey = "memoryChanged.widget";
-  static const totalMemories = "totalMemories";
-
-  init(SharedPreferences prefs) {
+  // Initialization
+  void init(SharedPreferences prefs) {
     _prefs = prefs;
   }
 
-  Future<void> _forceMemoryUpdate() async {
-    await _lockAndLoadMemories();
-    await updateMemoryChanged(false);
-  }
-
+  // Preference getters and setters
   Future<bool?> getSelectedLastYearMemories() async {
-    final selectedMemories = _prefs.getBool(_selectedLastYearMemoriesKey);
-    return selectedMemories;
+    return _prefs.getBool(SELECTED_LAST_YEAR_MEMORIES_KEY);
   }
 
   Future<void> setSelectedLastYearMemories(bool selectedMemories) async {
-    await _prefs.setBool(_selectedLastYearMemoriesKey, selectedMemories);
+    await _prefs.setBool(SELECTED_LAST_YEAR_MEMORIES_KEY, selectedMemories);
   }
 
   Future<bool?> getSelectedMLMemories() async {
-    final selectedMemories = _prefs.getBool(_selectedMLMemoriesKey);
-    return selectedMemories;
+    return _prefs.getBool(SELECTED_ML_MEMORIES_KEY);
   }
 
   Future<void> setSelectedMLMemories(bool selectedMemories) async {
-    await _prefs.setBool(_selectedMLMemoriesKey, selectedMemories);
+    await _prefs.setBool(SELECTED_ML_MEMORIES_KEY, selectedMemories);
   }
 
   Future<bool?> getSelectedOnThisDayMemories() async {
-    final selectedMemories = _prefs.getBool(_selectedOnThisDayMemoriesKey);
-    return selectedMemories;
+    return _prefs.getBool(SELECTED_ON_THIS_DAY_MEMORIES_KEY);
   }
 
   Future<void> setSelectedOnThisDayMemories(bool selectedMemories) async {
-    await _prefs.setBool(_selectedOnThisDayMemoriesKey, selectedMemories);
+    await _prefs.setBool(SELECTED_ON_THIS_DAY_MEMORIES_KEY, selectedMemories);
+  }
+
+  // Public methods
+  Future<void> initMemoryHomeWidget(bool? forceFetchNewMemories) async {
+    if (await _hasAnyBlockers()) {
+      await clearWidget();
+      return;
+    }
+
+    await _memoryForceRefreshLock.synchronized(() async {
+      if (await _hasAnyBlockers()) {
+        return;
+      }
+
+      final isWidgetEmpty = await _isWidgetEmpty();
+      forceFetchNewMemories ??= await _shouldForceFetchMemories(isWidgetEmpty);
+
+      _logger.warning(
+        "Initializing memory widget: forceFetch: $forceFetchNewMemories, isEmpty: $isWidgetEmpty",
+      );
+
+      if (forceFetchNewMemories!) {
+        await _forceMemoryUpdate();
+      } else if (!isWidgetEmpty) {
+        await _syncExistingMemories();
+      }
+    });
+  }
+
+  Future<void> clearWidget() async {
+    final isWidgetEmpty = await _isWidgetEmpty();
+    if (isWidgetEmpty) {
+      _logger.info("Widget already empty, nothing to clear");
+      return;
+    }
+
+    _logger.info("Clearing MemoryHomeWidget");
+    await _setTotalMemories(null);
+    _hasSyncedMemory = false;
+    await _refreshWidget(message: "MemoryHomeWidget cleared & updated");
+  }
+
+  Future<void> updateMemoryChanged(bool value) async {
+    _logger.info("Updating memory changed flag to $value");
+    await _prefs.setBool(MEMORY_CHANGED_KEY, value);
+  }
+
+  Future<void> checkPendingMemorySync({bool addDelay = true}) async {
+    if (addDelay) {
+      await Future.delayed(const Duration(seconds: 5));
+    }
+
+    final isWidgetEmpty = await _isWidgetEmpty();
+    final shouldForceFetch = await _shouldForceFetchMemories(isWidgetEmpty);
+
+    if (_hasSyncedMemory && !shouldForceFetch) {
+      _logger.info("Memories already synced, no action needed");
+      return;
+    }
+
+    await initMemoryHomeWidget(shouldForceFetch);
+  }
+
+  Future<void> memoryChanged() async {
+    await updateMemoryChanged(true);
+
+    final cachedMemories = await _getMemoriesForWidget();
+    final currentTotal = cachedMemories.length;
+    final existingTotal = await _getTotalMemories() ?? 0;
+
+    if (existingTotal == currentTotal && existingTotal == 0) {
+      await updateMemoryChanged(false);
+      _logger.info("Memories empty, no update needed");
+      return;
+    }
+
+    _logger.info("Memories changed, updating widget");
+    await initMemoryHomeWidget(true);
   }
 
   Future<int> countHomeWidgets() async {
@@ -73,115 +147,75 @@ class MemoryHomeWidgetService {
 
     final memoryWidgets = installedWidgets
         .where(
-          (element) =>
-              element.androidClassName == _androidClass ||
-              element.iOSKind == _iOSClass,
+          (widget) =>
+              widget.androidClassName == ANDROID_CLASS_NAME ||
+              widget.iOSKind == IOS_CLASS_NAME,
         )
         .toList();
 
     return memoryWidgets.length;
   }
 
-  Future<void> _memorySync() async {
-    final homeWidgetCount = await countHomeWidgets();
-    if (homeWidgetCount == 0) {
-      _logger.warning("no home widget active");
-      return;
-    }
+  Future<void> onLaunchFromWidget(int generatedId, BuildContext context) async {
+    _hasSyncedMemory = true;
+    await _syncExistingMemories();
 
-    await _updateWidget(text: "refreshing from same set");
+    await memoriesCacheService.goToMemoryFromGeneratedFileID(
+      context,
+      generatedId,
+    );
   }
 
-  Future<bool> hasAnyBlockers() async {
+  // Private methods
+  Future<bool> _hasAnyBlockers() async {
+    // Check if first import is completed
     final hasCompletedFirstImport =
         LocalSyncService.instance.hasCompletedFirstImport();
     if (!hasCompletedFirstImport) {
-      _logger.warning("first import not completed");
+      _logger.warning("First import not completed");
       return true;
     }
 
+    // Check if memories are enabled
     final areMemoriesShown = memoriesCacheService.showAnyMemories;
     if (!areMemoriesShown) {
-      _logger.warning("memories not enabled");
+      _logger.warning("Memories not enabled");
       return true;
     }
 
     return false;
   }
 
-  Future<void> initMemoryHW(bool? forceFetchNewMemories) async {
-    final result = await hasAnyBlockers();
-    if (result) {
-      await clearWidget();
+  Future<void> _forceMemoryUpdate() async {
+    await _loadAndRenderMemories();
+    await updateMemoryChanged(false);
+  }
+
+  Future<void> _syncExistingMemories() async {
+    final homeWidgetCount = await countHomeWidgets();
+    if (homeWidgetCount == 0) {
+      _logger.warning("No active home widgets found");
       return;
     }
 
-    await _memoryForceRefreshLock.synchronized(() async {
-      final result = await hasAnyBlockers();
-      if (result) {
-        return;
-      }
-      final isTotalEmpty = await _checkIfTotalEmpty();
-      forceFetchNewMemories ??= await getForceFetchCondition(isTotalEmpty);
-
-      _logger.warning(
-        "init memory hw: forceFetch: $forceFetchNewMemories, isTotalEmpty: $isTotalEmpty",
-      );
-
-      if (forceFetchNewMemories!) {
-        await _forceMemoryUpdate();
-      } else if (!isTotalEmpty) {
-        await _memorySync();
-      }
-    });
+    await _refreshWidget(message: "Refreshing from existing memory set");
   }
 
-  Future<void> clearWidget() async {
-    final isTotalEmpty = await _checkIfTotalEmpty();
-    if (isTotalEmpty) {
-      _logger.info(">>> Nothing to clear");
-      return;
-    }
-
-    _logger.info("Clearing MemoryHomeWidget");
-
-    await _setTotal(null);
-    _hasSyncedMemory = false;
-
-    await _updateWidget(text: "MemoryHomeWidget cleared & updated");
-  }
-
-  Future<void> updateMemoryChanged(bool value) async {
-    _logger.info("Updating memory changed to $value");
-    await _prefs.setBool(memoryChangedKey, value);
-  }
-
-  Future<bool> _checkIfTotalEmpty() async {
-    final total = await _getTotal();
+  Future<bool> _isWidgetEmpty() async {
+    final total = await _getTotalMemories();
     return total == 0 || total == null;
   }
 
-  Future<bool> getForceFetchCondition(bool isTotalEmpty) async {
-    final memoryChanged = _prefs.getBool(memoryChangedKey) ?? true;
-    if (memoryChanged == true) return true;
-
-    final cachedMemories = await _getMemoriesForWidget();
-
-    final forceFetchNewMemories = isTotalEmpty && cachedMemories.isNotEmpty;
-    return forceFetchNewMemories;
-  }
-
-  Future<void> checkPendingMemorySync({bool addDelay = true}) async {
-    if (addDelay) await Future.delayed(const Duration(seconds: 5), () {});
-
-    final isTotalEmpty = await _checkIfTotalEmpty();
-    final forceFetchNewMemories = await getForceFetchCondition(isTotalEmpty);
-
-    if (_hasSyncedMemory && !forceFetchNewMemories) {
-      _logger.info(">>> Memory already synced");
-      return;
+  Future<bool> _shouldForceFetchMemories(bool isWidgetEmpty) async {
+    // Check if memory changed flag is set
+    final memoryChanged = _prefs.getBool(MEMORY_CHANGED_KEY) ?? true;
+    if (memoryChanged == true) {
+      return true;
     }
-    await MemoryHomeWidgetService.instance.initMemoryHW(null);
+
+    // Check if we should force fetch new memories
+    final cachedMemories = await _getMemoriesForWidget();
+    return isWidgetEmpty && cachedMemories.isNotEmpty;
   }
 
   Future<List<SmartMemory>> _getMemoriesForWidget() async {
@@ -199,30 +233,38 @@ class MemoryHomeWidgetService {
     return memories;
   }
 
-  Future<Map<String, Iterable<EnteFile>>> _getMemories() async {
+  Future<Map<String, Iterable<EnteFile>>> _getMemoriesWithFiles() async {
     final memories = await _getMemoriesForWidget();
 
     if (memories.isEmpty) {
       return {};
     }
 
-    final files = Map.fromEntries(
-      memories.map((m) {
-        return MapEntry(m.title, m.memories.map((e) => e.file).toList());
-      }),
+    return Map.fromEntries(
+      memories.map(
+        (memory) =>
+            MapEntry(memory.title, memory.memories.map((m) => m.file).toList()),
+      ),
     );
-
-    return files;
   }
 
-  Future<void> _updateWidget({String? text}) async {
+  Future<int?> _getTotalMemories() async {
+    return HomeWidgetService.instance.getData<int>(TOTAL_MEMORIES_KEY);
+  }
+
+  Future<void> _setTotalMemories(int? total) async {
+    await HomeWidgetService.instance.setData(TOTAL_MEMORIES_KEY, total);
+  }
+
+  Future<void> _refreshWidget({String? message}) async {
     await HomeWidgetService.instance.updateWidget(
-      androidClass: _androidClass,
-      iOSClass: _iOSClass,
+      androidClass: ANDROID_CLASS_NAME,
+      iOSClass: IOS_CLASS_NAME,
     );
+
     if (flagService.internalUser) {
       await Fluttertoast.showToast(
-        msg: "[i] ${text ?? "MemoryHomeWidget updated"}",
+        msg: "[i][mem] ${message ?? "MemoryHomeWidget updated"}",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -231,99 +273,74 @@ class MemoryHomeWidgetService {
         fontSize: 16.0,
       );
     }
-    _logger.info(">>> Home Widget updated, type: ${text ?? "normal"}");
+
+    _logger.info("Home Widget updated: ${message ?? "standard update"}");
   }
 
-  Future<void> memoryChanged() async {
-    await updateMemoryChanged(true);
-    final cachedMemories = await _getMemoriesForWidget();
-    final currentTotal = cachedMemories.length;
+  Future<void> _loadAndRenderMemories() async {
+    final memoriesWithFiles = await _getMemoriesWithFiles();
 
-    final int total = await _getTotal() ?? 0;
-
-    if (total == currentTotal && total == 0) {
-      await updateMemoryChanged(false);
-      _logger.info(">>> Memories empty, doing nothing");
-      return;
-    }
-
-    _logger.info(">>> Memories changed, updating widget");
-    await initMemoryHW(true);
-  }
-
-  Future<int?> _getTotal() async {
-    return HomeWidgetService.instance.getData<int>(totalMemories);
-  }
-
-  Future<void> _setTotal(int? total) async =>
-      await HomeWidgetService.instance.setData(totalMemories, total);
-
-  Future<void> _lockAndLoadMemories() async {
-    final files = await _getMemories();
-
-    if (files.isEmpty) {
-      _logger.warning("No files found, clearing everything");
+    if (memoriesWithFiles.isEmpty) {
+      _logger.warning("No memories found, clearing widget");
       await clearWidget();
       return;
     }
 
-    final total = await _getTotal();
-    _logger.info(">>> Total memories before: $total");
+    final currentTotal = await _getTotalMemories();
+    _logger.info("Current total memories in widget: $currentTotal");
 
-    int index = 0;
+    int renderedCount = 0;
 
-    for (final i in files.entries) {
-      for (final file in i.value) {
-        final value = await HomeWidgetService.instance
-            .renderFile(file, "memory_widget_$index", i.key, null)
-            .catchError(
-          (e, sT) {
-            _logger.severe("Error rendering widget", e, sT);
-            return null;
-          },
-        );
+    for (final entry in memoriesWithFiles.entries) {
+      final memoryTitle = entry.key;
+      final memoryFiles = entry.value;
 
-        if (value != null) {
-          final result = await hasAnyBlockers();
-          if (result) {
+      for (final file in memoryFiles) {
+        final renderResult = await HomeWidgetService.instance
+            .renderFile(file, "memory_widget_$renderedCount", memoryTitle, null)
+            .catchError((e, stackTrace) {
+          _logger.severe("Error rendering widget", e, stackTrace);
+          return null;
+        });
+
+        if (renderResult != null) {
+          // Check for blockers again before continuing
+          if (await _hasAnyBlockers()) {
             return;
           }
-          if (index == 1) {
-            await _updateWidget(
-              text: "First memory fetched. updating widget",
+
+          await _setTotalMemories(renderedCount);
+
+          // Show update toast after first item is rendered
+          if (renderedCount == 1) {
+            await _refreshWidget(
+              message: "First memory fetched, updating widget",
             );
           }
-          index++;
-          await _setTotal(index);
 
-          if (index >= 50) {
-            _logger.warning(">>> Max memory limit reached");
+          renderedCount++;
+
+          // Limit the number of memories to avoid performance issues
+          if (renderedCount >= MAX_MEMORIES_LIMIT) {
+            _logger.warning(
+              "Maximum memories limit ($MAX_MEMORIES_LIMIT) reached",
+            );
             break;
           }
         }
       }
 
-      if (index >= 50) {
+      if (renderedCount >= MAX_MEMORIES_LIMIT) {
         break;
       }
     }
 
-    if (index == 0) {
+    if (renderedCount == 0) {
       return;
     }
 
-    await _updateWidget(
-      text: ">>> Switching to next memory set, total: $index",
-    );
-  }
-
-  Future<void> onLaunchFromWidget(int generatedId, BuildContext context) async {
-    _hasSyncedMemory = true;
-    await _memorySync();
-
-    await memoriesCacheService.goToMemoryFromGeneratedFileID(
-      context,
-      generatedId,
+    await _refreshWidget(
+      message: "Switched to next memory set, total: $renderedCount",
     );
   }
 }
