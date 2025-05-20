@@ -26,10 +26,14 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   Width changes dynamically with screen width such that we can fit 3 in one row.
   Keep the width integral (center the albums to distribute excess pixels)
    */
+  /// [horizontalPadding] Accounts for SliverPadding edges plus additional
+  /// adjustment to ensure album thumbnails appear as perfect squares.
+  /// Increasing this value makes thumbnails narrower.
+
   static const maxThumbnailWidth = 224.0;
   static const fixedGapBetweenAlbum = 4.0;
   static const collectionItemsToPreload = 20;
-  static const silverHorizontalPadding = 16.0;
+  static const horizontalPadding = 24.0;
   final List<Collection>? collections;
   // At max how many albums to display
   final int displayLimitCount;
@@ -122,7 +126,7 @@ class _CollectionsFlexiGridViewWidgetState
 
     final double sideOfThumbnail = (screenWidth -
             gapBetweenAlbums -
-            CollectionsFlexiGridViewWidget.silverHorizontalPadding) /
+            CollectionsFlexiGridViewWidget.horizontalPadding) /
         albumsCountInOneRow;
 
     final int totalCollections = widget.collections!.length;
@@ -134,8 +138,8 @@ class _CollectionsFlexiGridViewWidgetState
       key: key,
       padding: EdgeInsets.only(
         top: 8,
-        left: CollectionsFlexiGridViewWidget.silverHorizontalPadding / 2,
-        right: CollectionsFlexiGridViewWidget.silverHorizontalPadding / 2,
+        left: 8,
+        right: 8,
         bottom: widget.scrollBottomSafeArea,
       ),
       sliver: SliverGrid(
@@ -192,8 +196,8 @@ class _CollectionsFlexiGridViewWidgetState
       key: key,
       padding: EdgeInsets.only(
         top: 8,
-        left: CollectionsFlexiGridViewWidget.silverHorizontalPadding / 2,
-        right: CollectionsFlexiGridViewWidget.silverHorizontalPadding / 2,
+        left: 8,
+        right: 8,
         bottom: widget.scrollBottomSafeArea,
       ),
       sliver: SliverList(
