@@ -193,12 +193,12 @@ class AlbumHomeWidgetService {
 
     // First navigate to the collection page
     final thumbnail = await CollectionsService.instance.getCover(collection);
-    await routeToPage(
+    routeToPage(
       context,
       CollectionPage(
         CollectionWithThumbnail(collection, thumbnail),
       ),
-    );
+    ).ignore();
 
     // Then open the specific file
     final file = await FilesDB.instance.getFile(fileId);
