@@ -169,7 +169,6 @@ dependencies:
     git:
       url: https://github.com/eddyuan/privacy_screen.git
       ref: 855418e
-  protobuf: ^3.1.0
   receive_sharing_intent: # pub.dev is behind
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
@@ -190,6 +189,7 @@ dependencies:
   syncfusion_flutter_sliders: ^25.2.5
   synchronized: ^3.3.0+3
   system_info_plus: ^0.0.6
+  timezone: ^0.9.4
   tuple: ^2.0.0
   ua_client_hints: ^1.4.0
   url_launcher: ^6.3.0
@@ -234,6 +234,7 @@ dependency_overrides:
     git:
       url: https://github.com/media-kit/media-kit
       path: media_kit_video
+  protobuf: ^3.1.0
   video_player: # remove this dep as soon as we move to one player for all
     git:
       url: https://github.com/ente-io/packages.git
