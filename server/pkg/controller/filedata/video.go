@@ -29,8 +29,7 @@ func (c *Controller) InsertVideoPreview(ctx *gin.Context, req *filedata.VidPrevi
 	if sizeErr := c.verifySize(bucketID, fileObjectKey, req.ObjectSize); sizeErr != nil {
 		return stacktrace.Propagate(sizeErr, "failed to validate size")
 	}
-	// Start a goroutine to handle the upload and insert operations
-	//go func() {
+
 	obj := filedata.S3FileMetadata{
 		Version:          *req.Version,
 		EncryptedData:    req.Playlist,
@@ -59,9 +58,9 @@ func (c *Controller) InsertVideoPreview(ctx *gin.Context, req *filedata.VidPrevi
 	dbInsertErr := c.Repo.InsertOrUpdatePreviewData(context.Background(), row, fileObjectKey)
 	if dbInsertErr != nil {
 		logger.WithError(dbInsertErr).Error("insert or update failed")
-		return nil
+		return stacktrace.Propagate(dbInsertErr, "failed to insert or update preview data")
 	}
-	//}()
+
 	return nil
 
 }
