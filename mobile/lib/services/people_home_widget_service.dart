@@ -11,7 +11,7 @@ import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/machine_learning/face_ml/person/person_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
-import 'package:photos/ui/viewer/file/file_widget.dart';
+import "package:photos/ui/viewer/file/detail_page.dart";
 import 'package:photos/utils/navigation_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
@@ -163,10 +163,14 @@ class PeopleHomeWidgetService {
 
     await routeToPage(
       context,
-      FileWidget(
-        file,
-        tagPrefix: "peoplewidget",
+      DetailPage(
+        DetailPageConfiguration(
+          List.unmodifiable([file]),
+          0,
+          "peoplewidget",
+        ),
       ),
+      forceCustomPageRoute: true,
     );
   }
 
@@ -205,8 +209,6 @@ class PeopleHomeWidgetService {
       _logger.warning("Error looking up people: $e");
       return true;
     }
-
-    // TODO: If peopleIds are null then check if SearchFilter contains at least one
 
     return false;
   }

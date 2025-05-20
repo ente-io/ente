@@ -13,7 +13,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
-import 'package:photos/ui/viewer/file/file_widget.dart';
+import "package:photos/ui/viewer/file/detail_page.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -209,10 +209,14 @@ class AlbumHomeWidgetService {
 
     await routeToPage(
       context,
-      FileWidget(
-        file,
-        tagPrefix: "albumwidget",
+      DetailPage(
+        DetailPageConfiguration(
+          List.unmodifiable([file]),
+          0,
+          "albumwidget",
+        ),
       ),
+      forceCustomPageRoute: true,
     );
   }
 
