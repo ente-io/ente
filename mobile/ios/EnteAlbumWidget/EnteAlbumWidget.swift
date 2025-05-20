@@ -10,7 +10,7 @@ import SwiftUI
 import UIKit
 import WidgetKit
 
-private let widgetGroupId = "group.io.ente.frame.EnteAlbumWidget"
+private let widgetGroupId = "group.io.ente.frame.EnteMemoryWidget"
 
 struct Provider: TimelineProvider {
     let minutes = 15

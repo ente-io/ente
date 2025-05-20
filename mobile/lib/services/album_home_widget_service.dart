@@ -4,7 +4,6 @@ import "package:crypto/crypto.dart";
 import "package:flutter/material.dart";
 import "package:fluttertoast/fluttertoast.dart";
 import "package:logging/logging.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
@@ -124,7 +123,6 @@ class AlbumHomeWidgetService {
     }
 
     await _albumsForceRefreshLock.synchronized(() async {
-      HomeWidgetService.instance.setAppGroupID(iOSGroupIDAlbum);
       final result = await hasAnyBlockers();
       if (result) {
         return;
@@ -165,7 +163,6 @@ class AlbumHomeWidgetService {
   }
 
   Future<bool> _checkIfTotalEmpty() async {
-    HomeWidgetService.instance.setAppGroupID(iOSGroupIDAlbum);
     final total = await _getTotal();
     return total == 0 || total == null;
   }
@@ -191,8 +188,8 @@ class AlbumHomeWidgetService {
     return true;
   }
 
-  Future<void> checkPendingAlbumsSync() async {
-    await Future.delayed(const Duration(seconds: 5), () {});
+  Future<void> checkPendingAlbumsSync({bool addDelay = true}) async {
+    if (addDelay) await Future.delayed(const Duration(seconds: 5), () {});
 
     final isTotalEmpty = await _checkIfTotalEmpty();
     final forceFetchNewAlbum = await getForceFetchCondition(isTotalEmpty);
@@ -204,10 +201,10 @@ class AlbumHomeWidgetService {
     await initAlbumsHW(forceFetchNewAlbum);
   }
 
-  Future<Map<String, Iterable<EnteFile>>> _getAlbum() async {
+  Future<Map<int, (String, Iterable<EnteFile>)>> _getAlbum() async {
     final selectedAlbums = await getSelectedAlbumsIDs();
 
-    final albums = <String, List<EnteFile>>{};
+    final albums = <int, (String, List<EnteFile>)>{};
     for (final selectedAlbum in selectedAlbums) {
       final collection =
           CollectionsService.instance.getCollectionByID(selectedAlbum);
@@ -215,7 +212,7 @@ class AlbumHomeWidgetService {
         final files =
             await FilesDB.instance.getAllFilesCollection(collection.id);
         albums.addAll({
-          collection.decryptedName ?? "Album": files,
+          collection.id: (collection.decryptedName ?? "Album", files),
         });
       }
     }
@@ -306,12 +303,11 @@ class AlbumHomeWidgetService {
   }
 
   Future<int?> _getTotal() async {
-    return HomeWidgetService.instance
-        .getData<int>(totalAlbums, iOSGroupIDAlbum);
+    return HomeWidgetService.instance.getData<int>(totalAlbums);
   }
 
-  Future<void> _setTotal(int? total) async => await HomeWidgetService.instance
-      .setData(totalAlbums, total, iOSGroupIDAlbum);
+  Future<void> _setTotal(int? total) async =>
+      await HomeWidgetService.instance.setData(totalAlbums, total);
 
   Future<void> _lockAndLoadAlbum() async {
     final files = await _getAlbum();
@@ -328,9 +324,14 @@ class AlbumHomeWidgetService {
     int index = 0;
 
     for (final i in files.entries) {
-      for (final file in i.value) {
+      for (final file in i.value.$2) {
         final value = await HomeWidgetService.instance
-            .renderFile(file, "albums_widget_$index", i.key, iOSGroupIDAlbum)
+            .renderFile(
+          file,
+          "albums_widget_$index",
+          i.value.$1,
+          i.key.toString(),
+        )
             .catchError(
           (e, sT) {
             _logger.severe("Error rendering widget", e, sT);

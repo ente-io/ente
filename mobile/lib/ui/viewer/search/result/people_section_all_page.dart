@@ -32,9 +32,11 @@ class PeopleSectionAllWidget extends StatefulWidget {
   const PeopleSectionAllWidget({
     super.key,
     this.selectedPeople,
+    this.namedOnly = false,
   });
 
   final SelectedPeople? selectedPeople;
+  final bool namedOnly;
 
   @override
   State<PeopleSectionAllWidget> createState() => _PeopleSectionAllWidgetState();

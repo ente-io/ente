@@ -80,7 +80,8 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                     : () async {
                         await PeopleHomeWidgetService.instance
                             .setSelectedPeople(people.toList());
-                        // TODO: update/sync widget
+                        await PeopleHomeWidgetService.instance
+                            .checkPendingPeopleSync(addDelay: false);
                         Navigator.pop(context);
                       },
               ),
@@ -136,6 +137,7 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
             SliverToBoxAdapter(
               child: PeopleSectionAllWidget(
                 selectedPeople: _selectedPeople,
+                namedOnly: true,
               ),
             ),
         ],

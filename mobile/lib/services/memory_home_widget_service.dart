@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 import "package:fluttertoast/fluttertoast.dart";
 import "package:logging/logging.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/service_locator.dart";
@@ -163,7 +162,7 @@ class MemoryHomeWidgetService {
   }
 
   Future<bool> getForceFetchCondition(bool isTotalEmpty) async {
-    final memoryChanged = _prefs.getBool(memoryChangedKey);
+    final memoryChanged = _prefs.getBool(memoryChangedKey) ?? true;
     if (memoryChanged == true) return true;
 
     final cachedMemories = await _getMemoriesForWidget();
@@ -172,8 +171,8 @@ class MemoryHomeWidgetService {
     return forceFetchNewMemories;
   }
 
-  Future<void> checkPendingMemorySync() async {
-    await Future.delayed(const Duration(seconds: 5), () {});
+  Future<void> checkPendingMemorySync({bool addDelay = true}) async {
+    if (addDelay) await Future.delayed(const Duration(seconds: 5), () {});
 
     final isTotalEmpty = await _checkIfTotalEmpty();
     final forceFetchNewMemories = await getForceFetchCondition(isTotalEmpty);
@@ -182,7 +181,7 @@ class MemoryHomeWidgetService {
       _logger.info(">>> Memory already synced");
       return;
     }
-    await HomeWidgetService.instance.initHomeWidget();
+    await MemoryHomeWidgetService.instance.initMemoryHW(null);
   }
 
   Future<List<SmartMemory>> _getMemoriesForWidget() async {
@@ -236,28 +235,28 @@ class MemoryHomeWidgetService {
   }
 
   Future<void> memoryChanged() async {
-    final cachedMemories = await memoriesCacheService.getCachedMemories();
-    final currentTotal = cachedMemories?.length ?? 0;
+    await updateMemoryChanged(true);
+    final cachedMemories = await _getMemoriesForWidget();
+    final currentTotal = cachedMemories.length;
 
     final int total = await _getTotal() ?? 0;
 
     if (total == currentTotal && total == 0) {
-      _logger.info(">>> Memories not changed, doing nothing");
+      await updateMemoryChanged(false);
+      _logger.info(">>> Memories empty, doing nothing");
       return;
     }
 
     _logger.info(">>> Memories changed, updating widget");
-    await updateMemoryChanged(true);
     await initMemoryHW(true);
   }
 
   Future<int?> _getTotal() async {
-    return HomeWidgetService.instance
-        .getData<int>(totalMemories, iOSGroupIDMemory);
+    return HomeWidgetService.instance.getData<int>(totalMemories);
   }
 
-  Future<void> _setTotal(int? total) async => await HomeWidgetService.instance
-      .setData(totalMemories, total, iOSGroupIDMemory);
+  Future<void> _setTotal(int? total) async =>
+      await HomeWidgetService.instance.setData(totalMemories, total);
 
   Future<void> _lockAndLoadMemories() async {
     final files = await _getMemories();
@@ -276,12 +275,7 @@ class MemoryHomeWidgetService {
     for (final i in files.entries) {
       for (final file in i.value) {
         final value = await HomeWidgetService.instance
-            .renderFile(
-          file,
-          "memory_widget_$index",
-          i.key,
-          iOSGroupIDMemory,
-        )
+            .renderFile(file, "memory_widget_$index", i.key, null)
             .catchError(
           (e, sT) {
             _logger.severe("Error rendering widget", e, sT);

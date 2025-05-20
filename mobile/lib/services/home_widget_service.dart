@@ -15,7 +15,6 @@ import "package:photos/services/people_home_widget_service.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
-import "package:synchronized/synchronized.dart";
 
 class HomeWidgetService {
   final Logger _logger = Logger((HomeWidgetService).toString());
@@ -24,9 +23,9 @@ class HomeWidgetService {
 
   static final HomeWidgetService instance =
       HomeWidgetService._privateConstructor();
-  final _groupIDLock = Lock();
 
   init(SharedPreferences prefs) {
+    setAppGroupID(iOSGroupIDMemory);
     MemoryHomeWidgetService.instance.init(prefs);
     PeopleHomeWidgetService.instance.init(prefs);
     AlbumHomeWidgetService.instance.init(prefs);
@@ -54,29 +53,23 @@ class HomeWidgetService {
     );
   }
 
-  Future<T?> getData<T>(String key, String iOSGroupID) async {
-    return await _groupIDLock.synchronized(() {
-      setAppGroupID(iOSGroupID);
-      return hw.HomeWidget.getWidgetData<T>(key);
-    });
+  Future<T?> getData<T>(String key) async {
+    return hw.HomeWidget.getWidgetData<T>(key);
   }
 
-  Future<bool?> setData<T>(String key, T? data, String iOSGroupID) async {
-    return await _groupIDLock.synchronized(() {
-      setAppGroupID(iOSGroupID);
-      return hw.HomeWidget.saveWidgetData<T>(key, data);
-    });
+  Future<bool?> setData<T>(String key, T? data) async {
+    return hw.HomeWidget.saveWidgetData<T>(key, data);
   }
 
   Future<Size?> renderFile(
     EnteFile randomFile,
     String key,
     String title,
-    String iOSGroupID,
+    String? mainKey,
   ) async {
     const size = 512.0;
 
-    final result = await _captureFile(randomFile, key, title, iOSGroupID);
+    final result = await _captureFile(randomFile, key, title, mainKey);
     if (!result) {
       _logger.warning("can't capture file ${randomFile.displayName}");
       return null;
@@ -97,7 +90,7 @@ class HomeWidgetService {
     EnteFile ogFile,
     String key,
     String title,
-    String iOSGroupID,
+    String? mainKey,
   ) async {
     try {
       final thumbnail = await getThumbnail(ogFile);
@@ -108,7 +101,7 @@ class HomeWidgetService {
       if (Platform.isIOS) {
         final PathProviderFoundation provider = PathProviderFoundation();
         directory = await provider.getContainerPath(
-          appGroupIdentifier: iOSGroupID,
+          appGroupIdentifier: iOSGroupIDMemory,
         );
       } else {
         directory = (await getApplicationSupportDirectory()).path;
@@ -121,7 +114,7 @@ class HomeWidgetService {
       }
       await file.writeAsBytes(thumbnail!);
 
-      await setData(key, path, iOSGroupID);
+      await setData(key, path);
 
       final subText = await SmartMemoriesService.getDateFormattedLocale(
         creationTime: ogFile.creationTime!,
@@ -131,6 +124,7 @@ class HomeWidgetService {
         "title": title,
         "subText": subText,
         "generatedId": ogFile.generatedID!,
+        if (mainKey != null) "mainKey": mainKey,
       };
       if (Platform.isIOS) {
         await hw.HomeWidget.saveWidgetData<Map<String, dynamic>>(
@@ -151,11 +145,9 @@ class HomeWidgetService {
   }
 
   Future<void> clearWidget(bool autoLogout) async {
-    setAppGroupID(iOSGroupIDMemory);
+    if (autoLogout) setAppGroupID(iOSGroupIDMemory);
     await MemoryHomeWidgetService.instance.clearWidget();
-    setAppGroupID(iOSGroupIDAlbum);
     await AlbumHomeWidgetService.instance.clearWidget();
-    setAppGroupID(iOSGroupIDPeople);
     await PeopleHomeWidgetService.instance.clearWidget();
   }
 
@@ -186,10 +178,9 @@ class HomeWidgetService {
       );
     } else if (uri.scheme == "albumwidget") {
       _logger.info("onLaunchFromWidget: redirecting to album widget");
-      final collectionID =
-          int.tryParse(uri.queryParameters["collectionID"] ?? "");
+      final collectionID = int.tryParse(uri.queryParameters["mainKey"] ?? "");
       if (collectionID == null) {
-        _logger.warning("onLaunchFromWidget: collectionID is null");
+        _logger.warning("onLaunchFromWidget: mainKey is null");
         return;
       }
       await AlbumHomeWidgetService.instance.onLaunchFromWidget(

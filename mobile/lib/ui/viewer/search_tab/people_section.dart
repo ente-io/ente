@@ -204,7 +204,7 @@ class PersonSearchExample extends StatelessWidget {
 
   void toggleSelection() {
     selectedPeople?.toggleSelection(
-      (searchResult.hierarchicalSearchFilter as FaceFilter).clusterId!,
+      (searchResult.hierarchicalSearchFilter as FaceFilter).personId!,
     );
   }
 
@@ -218,10 +218,10 @@ class PersonSearchExample extends StatelessWidget {
     return ListenableBuilder(
       listenable: selectedPeople ?? ValueNotifier(false),
       builder: (context, _) {
-        final bool isSelected = selectedPeople?.isPersonSelected(
-              (searchResult.hierarchicalSearchFilter as FaceFilter).clusterId!,
-            ) ??
-            false;
+        final filter = (searchResult.hierarchicalSearchFilter as FaceFilter);
+        final id = filter.personId ?? filter.clusterId ?? "";
+        final bool isSelected = selectedPeople?.isPersonSelected(id) ?? false;
+
         return GestureDetector(
           onTap: isSelected
               ? toggleSelection
