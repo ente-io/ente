@@ -18,6 +18,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/wake_lock_service.dart";
 import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
@@ -196,11 +197,40 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
                 onStreamChange: widget.onStreamChange,
                 isPreviewPlayer: widget.selectedPreview,
               )
-            : const Center(
-                child: EnteLoadingWidget(
-                  size: 32,
-                  color: fillBaseDark,
-                  padding: 0,
+            : Center(
+                child: ValueListenableBuilder(
+                  valueListenable: _progressNotifier,
+                  builder: (BuildContext context, double? progress, _) {
+                    return progress == null || progress == 1
+                        ? const EnteLoadingWidget(
+                            size: 32,
+                            color: fillBaseDark,
+                            padding: 0,
+                          )
+                        : Stack(
+                            children: [
+                              CircularProgressIndicator(
+                                backgroundColor: Colors.transparent,
+                                value: progress,
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color.fromRGBO(45, 194, 98, 1.0),
+                                ),
+                                strokeWidth: 2,
+                                strokeCap: StrokeCap.round,
+                              ),
+                              if (flagService.internalUser)
+                                Center(
+                                  child: Text(
+                                    "${(progress * 100).toStringAsFixed(0)}%",
+                                    style:
+                                        getEnteTextTheme(context).tiny.copyWith(
+                                              color: textBaseDark,
+                                            ),
+                                  ),
+                                ),
+                            ],
+                          );
+                  },
                 ),
               ),
       ),

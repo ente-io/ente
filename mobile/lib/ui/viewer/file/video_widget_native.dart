@@ -598,14 +598,27 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                         color: fillBaseDark,
                         padding: 0,
                       )
-                    : CircularProgressIndicator(
-                        backgroundColor: Colors.transparent,
-                        value: progress,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color.fromRGBO(45, 194, 98, 1.0),
-                        ),
-                        strokeWidth: 2,
-                        strokeCap: StrokeCap.round,
+                    : Stack(
+                        children: [
+                          CircularProgressIndicator(
+                            backgroundColor: Colors.transparent,
+                            value: progress,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              Color.fromRGBO(45, 194, 98, 1.0),
+                            ),
+                            strokeWidth: 2,
+                            strokeCap: StrokeCap.round,
+                          ),
+                          if (flagService.internalUser)
+                            Center(
+                              child: Text(
+                                "${(progress * 100).toStringAsFixed(0)}%",
+                                style: getEnteTextTheme(context).tiny.copyWith(
+                                      color: textBaseDark,
+                                    ),
+                              ),
+                            ),
+                        ],
                       );
               },
             ),
