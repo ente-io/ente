@@ -71,7 +71,9 @@ const kSearchSectionLimit = 9;
 
 const maxPickAssetLimit = 50;
 
-const iOSGroupID = "group.io.ente.frame.EnteMemoryWidget";
+const iOSGroupIDMemory = "group.io.ente.frame.EnteMemoryWidget";
+const iOSGroupIDAlbum = "group.io.ente.frame.EntePeopleWidget";
+const iOSGroupIDPeople = "group.io.ente.frame.EnteAlbumWidget";
 
 const blackThumbnailBase64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB'
     'AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQ'

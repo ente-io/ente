@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
 import "package:fluttertoast/fluttertoast.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
@@ -164,10 +166,9 @@ class MemoryHomeWidgetService {
     final memoryChanged = _prefs.getBool(memoryChangedKey);
     if (memoryChanged == true) return true;
 
-    final cachedMemories = await memoriesCacheService.getCachedMemories();
+    final cachedMemories = await _getMemoriesForWidget();
 
-    final forceFetchNewMemories =
-        isTotalEmpty && (cachedMemories?.isNotEmpty ?? false);
+    final forceFetchNewMemories = isTotalEmpty && cachedMemories.isNotEmpty;
     return forceFetchNewMemories;
   }
 
@@ -184,7 +185,7 @@ class MemoryHomeWidgetService {
     await HomeWidgetService.instance.initHomeWidget();
   }
 
-  Future<Map<String, Iterable<EnteFile>>> _getMemories() async {
+  Future<List<SmartMemory>> _getMemoriesForWidget() async {
     final lastYearValue = await getSelectedLastYearMemories();
     final mlValue = await getSelectedMLMemories();
     final onThisDayValue = await getSelectedOnThisDayMemories();
@@ -195,6 +196,12 @@ class MemoryHomeWidgetService {
       pastYears: lastYearValue ?? !isMLEnabled,
       smart: mlValue ?? isMLEnabled,
     );
+
+    return memories;
+  }
+
+  Future<Map<String, Iterable<EnteFile>>> _getMemories() async {
+    final memories = await _getMemoriesForWidget();
 
     if (memories.isEmpty) {
       return {};
@@ -245,11 +252,12 @@ class MemoryHomeWidgetService {
   }
 
   Future<int?> _getTotal() async {
-    return HomeWidgetService.instance.getData<int>(totalMemories);
+    return HomeWidgetService.instance
+        .getData<int>(totalMemories, iOSGroupIDMemory);
   }
 
-  Future<void> _setTotal(int? total) async =>
-      await HomeWidgetService.instance.setData(totalMemories, total);
+  Future<void> _setTotal(int? total) async => await HomeWidgetService.instance
+      .setData(totalMemories, total, iOSGroupIDMemory);
 
   Future<void> _lockAndLoadMemories() async {
     final files = await _getMemories();
@@ -268,7 +276,12 @@ class MemoryHomeWidgetService {
     for (final i in files.entries) {
       for (final file in i.value) {
         final value = await HomeWidgetService.instance
-            .renderFile(file, "memory_widget_$index", i.key)
+            .renderFile(
+          file,
+          "memory_widget_$index",
+          i.key,
+          iOSGroupIDMemory,
+        )
             .catchError(
           (e, sT) {
             _logger.severe("Error rendering widget", e, sT);
@@ -281,13 +294,13 @@ class MemoryHomeWidgetService {
           if (result) {
             return;
           }
-          await _setTotal(index);
           if (index == 1) {
             await _updateWidget(
               text: "First memory fetched. updating widget",
             );
           }
           index++;
+          await _setTotal(index);
 
           if (index >= 50) {
             _logger.warning(">>> Max memory limit reached");

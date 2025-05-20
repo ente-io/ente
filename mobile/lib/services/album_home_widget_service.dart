@@ -1,13 +1,22 @@
+import "dart:convert";
+
+import "package:crypto/crypto.dart";
 import "package:flutter/material.dart";
 import "package:fluttertoast/fluttertoast.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/models/collection/collection.dart";
+import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/favorites_service.dart";
 import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/sync/local_sync_service.dart";
+import "package:photos/ui/viewer/file/file_widget.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:synchronized/synchronized.dart";
 
@@ -17,8 +26,9 @@ class AlbumHomeWidgetService {
   AlbumHomeWidgetService._privateConstructor();
 
   static const _selectedAlbumsHWKey = "selectedAlbumsHW";
+  static const _albumsLastHashKey = "albumsLastHash";
   static const _androidClass = "EnteAlbumsWidgetProvider";
-  static const _iOSClass = "EnteAlbumsWidget";
+  static const _iOSClass = "EnteAlbumWidget";
 
   static final AlbumHomeWidgetService instance =
       AlbumHomeWidgetService._privateConstructor();
@@ -38,6 +48,16 @@ class AlbumHomeWidgetService {
   Future<void> _forceAlbumsUpdate() async {
     await _lockAndLoadAlbum();
     await updateAlbumsChanged(false);
+  }
+
+  String? getAlbumsLastHash() {
+    final albumsLastHash = _prefs.getString(_albumsLastHashKey);
+
+    return albumsLastHash;
+  }
+
+  Future<void> setAlbumsLastHash(String hash) async {
+    await _prefs.setString(_albumsLastHashKey, hash);
   }
 
   List<int>? getSelectedAlbums() {
@@ -86,14 +106,7 @@ class AlbumHomeWidgetService {
     }
 
     final selectedAlbums = getSelectedAlbums();
-    final albums = [];
-    for (final selectedAlbum in selectedAlbums ?? []) {
-      final collection =
-          CollectionsService.instance.getCollectionByID(selectedAlbum);
-      if (collection != null) {
-        albums.add(collection);
-      }
-    }
+    final albums = getAlbums(selectedAlbums ?? []);
 
     if ((selectedAlbums?.isNotEmpty ?? false) && albums.isEmpty) {
       _logger.warning("selected albums not found");
@@ -111,6 +124,7 @@ class AlbumHomeWidgetService {
     }
 
     await _albumsForceRefreshLock.synchronized(() async {
+      HomeWidgetService.instance.setAppGroupID(iOSGroupIDAlbum);
       final result = await hasAnyBlockers();
       if (result) {
         return;
@@ -151,6 +165,7 @@ class AlbumHomeWidgetService {
   }
 
   Future<bool> _checkIfTotalEmpty() async {
+    HomeWidgetService.instance.setAppGroupID(iOSGroupIDAlbum);
     final total = await _getTotal();
     return total == 0 || total == null;
   }
@@ -159,12 +174,21 @@ class AlbumHomeWidgetService {
     final albumsChanged = _prefs.getBool(albumsChangedKey);
     if (albumsChanged == true) return true;
 
-    // TODO: Get Album data i.e. List of Ente Files
-    final cachedAlbum = []; // await albumsCacheService.getCachedAlbum();
+    final selectedAlbums = await getSelectedAlbumsIDs();
+    if (selectedAlbums.isEmpty) {
+      _logger.warning("No selected albums");
+      return false;
+    }
 
-    final forceFetchNewAlbum =
-        isTotalEmpty && (cachedAlbum.isNotEmpty ?? false);
-    return forceFetchNewAlbum;
+    final hash = getHash(selectedAlbums);
+    final lastHash = getAlbumsLastHash();
+
+    if (hash == lastHash) {
+      _logger.warning("No changes detected");
+      return false;
+    }
+
+    return true;
   }
 
   Future<void> checkPendingAlbumsSync() async {
@@ -177,21 +201,14 @@ class AlbumHomeWidgetService {
       _logger.info(">>> Albums already synced");
       return;
     }
-    await HomeWidgetService.instance.initHomeWidget();
+    await initAlbumsHW(forceFetchNewAlbum);
   }
 
   Future<Map<String, Iterable<EnteFile>>> _getAlbum() async {
-    var selectedAlbums = getSelectedAlbums();
-    if (selectedAlbums == null || selectedAlbums.isEmpty) {
-      final favoriteId =
-          await FavoritesService.instance.getFavoriteCollectionID();
-      if (favoriteId != null) {
-        selectedAlbums = [favoriteId];
-      }
-    }
+    final selectedAlbums = await getSelectedAlbumsIDs();
 
     final albums = <String, List<EnteFile>>{};
-    for (final selectedAlbum in selectedAlbums ?? []) {
+    for (final selectedAlbum in selectedAlbums) {
       final collection =
           CollectionsService.instance.getCollectionByID(selectedAlbum);
       if (collection != null) {
@@ -218,7 +235,7 @@ class AlbumHomeWidgetService {
     );
     if (flagService.internalUser) {
       await Fluttertoast.showToast(
-        msg: "[i] ${text ?? "AlbumsHomeWidget updated"}",
+        msg: "[i][al] ${text ?? "AlbumsHomeWidget updated"}",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -230,15 +247,56 @@ class AlbumHomeWidgetService {
     _logger.info(">>> Home Widget updated, type: ${text ?? "normal"}");
   }
 
+  String getHash(List<int> selectedAlbums) {
+    final albums = <Collection>{};
+    String currentDates = "";
+    for (final selectedAlbum in selectedAlbums) {
+      final collection =
+          CollectionsService.instance.getCollectionByID(selectedAlbum);
+      if (collection != null) {
+        albums.add(collection);
+        currentDates += "${collection.updationTime.toString()}_";
+      }
+    }
+
+    final hash =
+        md5.convert(utf8.encode(currentDates)).toString().substring(0, 10);
+    return hash;
+  }
+
+  List<Collection> getAlbums(List<int> selectedAlbums) {
+    final albums = <Collection>[];
+    for (final selectedAlbum in selectedAlbums) {
+      final collection =
+          CollectionsService.instance.getCollectionByID(selectedAlbum);
+      if (collection != null) {
+        albums.add(collection);
+      }
+    }
+
+    return albums;
+  }
+
+  Future<List<int>> getSelectedAlbumsIDs() async {
+    final selectedAlbums = getSelectedAlbums();
+    if (selectedAlbums == null || selectedAlbums.isEmpty) {
+      final favoriteId =
+          await FavoritesService.instance.getFavoriteCollectionID();
+      if (favoriteId != null) {
+        return [favoriteId];
+      }
+    }
+    return selectedAlbums ?? [];
+  }
+
   Future<void> albumsChanged() async {
-    // TODO: Get Albums and checks if size is changed
-    final cachedAlbum = []; // await albumsCacheService.getCachedAlbum();
-    final currentTotal = cachedAlbum.length ?? 0;
+    final lastHash = getAlbumsLastHash();
 
-    final int total = await _getTotal() ?? 0;
+    final selectedAlbums = await getSelectedAlbumsIDs();
+    final hash = getHash(selectedAlbums);
 
-    if (total == currentTotal && total == 0) {
-      _logger.info(">>> Album not changed, doing nothing");
+    if (selectedAlbums.isEmpty || hash == lastHash) {
+      _logger.info(">>> No changes detected");
       return;
     }
 
@@ -248,11 +306,12 @@ class AlbumHomeWidgetService {
   }
 
   Future<int?> _getTotal() async {
-    return HomeWidgetService.instance.getData<int>(totalAlbums);
+    return HomeWidgetService.instance
+        .getData<int>(totalAlbums, iOSGroupIDAlbum);
   }
 
-  Future<void> _setTotal(int? total) async =>
-      await HomeWidgetService.instance.setData(totalAlbums, total);
+  Future<void> _setTotal(int? total) async => await HomeWidgetService.instance
+      .setData(totalAlbums, total, iOSGroupIDAlbum);
 
   Future<void> _lockAndLoadAlbum() async {
     final files = await _getAlbum();
@@ -271,7 +330,7 @@ class AlbumHomeWidgetService {
     for (final i in files.entries) {
       for (final file in i.value) {
         final value = await HomeWidgetService.instance
-            .renderFile(file, "albums_widget_$index", i.key)
+            .renderFile(file, "albums_widget_$index", i.key, iOSGroupIDAlbum)
             .catchError(
           (e, sT) {
             _logger.severe("Error rendering widget", e, sT);
@@ -284,13 +343,13 @@ class AlbumHomeWidgetService {
           if (result) {
             return;
           }
-          await _setTotal(index);
           if (index == 1) {
             await _updateWidget(
               text: "First albums fetched. updating widget",
             );
           }
           index++;
+          await _setTotal(index);
 
           if (index >= 50) {
             _logger.warning(">>> Max albums limit reached");
@@ -304,6 +363,11 @@ class AlbumHomeWidgetService {
       }
     }
 
+    final selectedAlbums = await getSelectedAlbumsIDs();
+
+    final hash = getHash(selectedAlbums);
+    await setAlbumsLastHash(hash);
+
     if (index == 0) {
       return;
     }
@@ -313,10 +377,39 @@ class AlbumHomeWidgetService {
     );
   }
 
-  Future<void> onLaunchFromWidget(int generatedId, BuildContext context) async {
+  Future<void> onLaunchFromWidget(
+    int generatedId,
+    int collectionID,
+    BuildContext context,
+  ) async {
     _hasSyncedAlbums = true;
     await _albumsSync();
 
-    // TODO: Open albums page for this album
+    final c = CollectionsService.instance.getCollectionByID(collectionID);
+    if (c == null) {
+      _logger.warning("onLaunchFromWidget: collection is null");
+      return;
+    }
+
+    final thumbnail = await CollectionsService.instance.getCover(c);
+    await routeToPage(
+      context,
+      CollectionPage(
+        CollectionWithThumbnail(c, thumbnail),
+      ),
+    );
+    final file = await FilesDB.instance.getFile(generatedId);
+    if (file == null) {
+      _logger.warning("onLaunchFromWidget: file is null");
+      return;
+    }
+    // open generated id file preview
+    await routeToPage(
+      context,
+      FileWidget(
+        file,
+        tagPrefix: "albumwidget",
+      ),
+    );
   }
 }

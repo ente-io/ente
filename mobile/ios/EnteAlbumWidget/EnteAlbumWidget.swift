@@ -50,9 +50,9 @@ struct Provider: TimelineProvider {
                     byAdding: .minute, value: minutes * offset, to: currentDate
                 )!
                 let imageData =
-                    data?.string(forKey: "album_widget_" + String(randomInt))
+                    data?.string(forKey: "albums_widget_" + String(randomInt))
                 let dictionary = data?.dictionary(
-                    forKey: "album_widget_" + String(randomInt) + "_data")
+                    forKey: "albums_widget_" + String(randomInt) + "_data")
                 let generatedId = dictionary?["generatedId"] as? Int
                 let subTitle = dictionary?["subText"] as? String
                 let title = dictionary?["title"] as? String
@@ -177,9 +177,9 @@ struct EnteAlbumWidgetEntryView: View {
                                 alignment: .bottomLeading
                             )
                     }
-                } else if let data = Data(
+                } else if let imgData = Data(
                     base64Encoded: defaultBase64Image),
-                    let uiImage = UIImage(data: data)
+                    let uiImage = UIImage(data: imgData)
                 {
                     VStack(spacing: 8) {
                         Spacer()

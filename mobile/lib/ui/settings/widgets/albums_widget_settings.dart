@@ -104,9 +104,9 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                             _albums.map((e) => e.id.toString()).toList();
                         await AlbumHomeWidgetService.instance
                             .setSelectedAlbums(albums);
-                        // TODO: Run sync
-                        // await AlbumHomeWidgetService.instance.updateWidget();
                         Navigator.pop(context);
+                        await AlbumHomeWidgetService.instance
+                            .checkPendingAlbumsSync();
                       }
                     : null,
                 isDisabled: _albums.isEmpty,

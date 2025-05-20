@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:fluttertoast/fluttertoast.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/home_widget_service.dart";
@@ -170,7 +171,7 @@ class PeopleHomeWidgetService {
   }
 
   Future<Map<String, Iterable<EnteFile>>> _getPeople() async {
-    // TODO: Get People data i.e. List of Ente Files
+    final peopleIds = getSelectedPeople();
     final people = []; // await peopleCacheService.getPeople();
     if (people.isEmpty) {
       return {};
@@ -222,11 +223,12 @@ class PeopleHomeWidgetService {
   }
 
   Future<int?> _getTotal() async {
-    return HomeWidgetService.instance.getData<int>(totalPeople);
+    return HomeWidgetService.instance
+        .getData<int>(totalPeople, iOSGroupIDPeople);
   }
 
-  Future<void> _setTotal(int? total) async =>
-      await HomeWidgetService.instance.setData(totalPeople, total);
+  Future<void> _setTotal(int? total) async => await HomeWidgetService.instance
+      .setData(totalPeople, total, iOSGroupIDPeople);
 
   Future<void> _lockAndLoadPeople() async {
     final files = await _getPeople();
@@ -245,7 +247,12 @@ class PeopleHomeWidgetService {
     for (final i in files.entries) {
       for (final file in i.value) {
         final value = await HomeWidgetService.instance
-            .renderFile(file, "people_widget_$index", i.key)
+            .renderFile(
+          file,
+          "people_widget_$index",
+          i.key,
+          iOSGroupIDPeople,
+        )
             .catchError(
           (e, sT) {
             _logger.severe("Error rendering widget", e, sT);
