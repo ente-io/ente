@@ -239,8 +239,10 @@ class HomeWidgetService {
 
       case PEOPLE_WIDGET_SCHEME:
         _logger.info("Launching app from people widget");
+        final personId = uri.queryParameters[MAIN_KEY_PARAM] ?? "";
         await PeopleHomeWidgetService.instance.onLaunchFromWidget(
           generatedId,
+          personId,
           context,
         );
         break;

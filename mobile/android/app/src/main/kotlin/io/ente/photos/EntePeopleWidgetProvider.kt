@@ -19,7 +19,12 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 @Serializable
-data class PeopleFileData(val title: String?, val subText: String?, val generatedId: Int?)
+data class PeopleFileData(
+        val title: String?,
+        val subText: String?,
+        val generatedId: Int?,
+        val mainKey: String?
+)
 
 class EntePeopleWidgetProvider : HomeWidgetProvider() {
         override fun onUpdate(
@@ -65,10 +70,11 @@ class EntePeopleWidgetProvider : HomeWidgetProvider() {
                                                         val title = decoded?.title
                                                         val subText = decoded?.subText
                                                         val generatedId = decoded?.generatedId
+                                                        val mainKey = decoded?.mainKey
 
                                                         val deepLinkUri =
                                                                 Uri.parse(
-                                                                        "peoplewidget://message?generatedId=${generatedId}&homeWidget"
+                                                                        "peoplewidget://message?generatedId=${generatedId}&mainKey=${mainKey}&homeWidget"
                                                                 )
 
                                                         val pendingIntent =

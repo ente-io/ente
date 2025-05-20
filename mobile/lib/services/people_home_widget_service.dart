@@ -144,7 +144,11 @@ class PeopleHomeWidgetService {
     await initHomeWidget(true);
   }
 
-  Future<void> onLaunchFromWidget(int fileId, BuildContext context) async {
+  Future<void> onLaunchFromWidget(
+    int fileId,
+    String personId,
+    BuildContext context,
+  ) async {
     _hasSyncedPeople = true;
     await _syncExistingPeople();
 

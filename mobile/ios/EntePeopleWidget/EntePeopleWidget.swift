@@ -19,14 +19,14 @@ struct Provider: TimelineProvider {
     func placeholder(in _: Context) -> FileEntry {
         FileEntry(
             date: Date(), index: nil, imageData: nil, title: "Title", subTitle: "Sub Title",
-            generatedId: nil)
+            generatedId: nil, mainKey: nil)
     }
 
     func getSnapshot(in _: Context, completion: @escaping (FileEntry) -> Void) {
         let entry = FileEntry(
             date: Date(), index: -2, imageData: nil, title: "Jane Fonda",
             subTitle: "Sep 23, 2021",
-            generatedId: nil)
+            generatedId: nil, mainKey: nil)
         completion(entry)
     }
 
@@ -56,15 +56,17 @@ struct Provider: TimelineProvider {
                 let generatedId = dictionary?["generatedId"] as? Int
                 let subTitle = dictionary?["subText"] as? String
                 let title = dictionary?["title"] as? String
+                let mainKey = dictionary?["mainKey"] as? String
 
                 let entry = FileEntry(
                     date: entryDate, index: randomInt, imageData: imageData, title: title,
-                    subTitle: subTitle, generatedId: generatedId)
+                    subTitle: subTitle, generatedId: generatedId, mainKey: mainKey)
                 entries.append(entry)
             }
         } else {
             let entry = FileEntry(
-                date: Date(), index: -1, imageData: nil, title: nil, subTitle: nil, generatedId: nil
+                date: Date(), index: -1, imageData: nil, title: nil, subTitle: nil,
+                generatedId: nil, mainKey: nil
             )
             entries.append(entry)
         }
@@ -85,6 +87,7 @@ struct FileEntry: TimelineEntry {
     let title: String?
     let subTitle: String?
     var generatedId: Int?
+    var mainKey: String?
 }
 
 struct EntePeopleWidgetEntryView: View {
@@ -207,7 +210,7 @@ struct EntePeopleWidgetEntryView: View {
             .widgetURL(
                 URL(
                     string:
-                        "peoplewidget://message?generatedId=\(entry.generatedId != nil ? String(entry.generatedId!) : "nan")&homeWidget"
+                        "peoplewidget://message?generatedId=\(entry.generatedId != nil ? String(entry.generatedId!) : "nan")&mainKey=\(entry.mainKey != nil ? entry.mainKey! : "nan")&homeWidget"
                 )
             )
         }
@@ -238,9 +241,11 @@ struct EntePeopleWidget: Widget {
     EntePeopleWidget()
 } timeline: {
     FileEntry(
-        date: .now, index: -2, imageData: nil, title: nil, subTitle: nil, generatedId: nil)
+        date: .now, index: -2, imageData: nil, title: nil, subTitle: nil, generatedId: nil,
+        mainKey: nil)
     FileEntry(
-        date: .now, index: -2, imageData: nil, title: nil, subTitle: nil, generatedId: nil)
+        date: .now, index: -2, imageData: nil, title: nil, subTitle: nil, generatedId: nil,
+        mainKey: nil)
 }
 
 extension View {

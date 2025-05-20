@@ -19,7 +19,12 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 @Serializable
-data class AlbumsFileData(val title: String?, val subText: String?, val generatedId: Int?)
+data class AlbumsFileData(
+        val title: String?,
+        val subText: String?,
+        val generatedId: Int?,
+        val mainKey: String?
+)
 
 class EnteAlbumsWidgetProvider : HomeWidgetProvider() {
         override fun onUpdate(
@@ -65,10 +70,11 @@ class EnteAlbumsWidgetProvider : HomeWidgetProvider() {
                                                         val title = decoded?.title
                                                         val subText = decoded?.subText
                                                         val generatedId = decoded?.generatedId
+                                                        val mainKey = decoded?.mainKey
 
                                                         val deepLinkUri =
                                                                 Uri.parse(
-                                                                        "albumwidget://message?generatedId=${generatedId}&homeWidget"
+                                                                        "albumwidget://message?generatedId=${generatedId}&mainKey=${mainKey}&homeWidget"
                                                                 )
 
                                                         val pendingIntent =
