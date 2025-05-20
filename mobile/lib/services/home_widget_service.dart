@@ -105,7 +105,7 @@ class HomeWidgetService {
     final relevantWidgets = installedWidgets
         .where(
           (widget) =>
-              widget.androidClassName == "io.ente.photos.$androidClass" ||
+              (widget.androidClassName?.contains(androidClass) ?? false) ||
               widget.iOSKind == iOSClass,
         )
         .toList();
