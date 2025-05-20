@@ -3,51 +3,9 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import "package:photos/module/download/file_url.dart";
+import "package:photos/module/download/task.dart";
 import 'package:sqflite/sqflite.dart';
-
-class DownloadTask {
-  final int id;
-  final String url;
-  final String filename;
-  int bytesDownloaded;
-  int totalBytes;
-  String status; // 'pending', 'downloading', 'paused', 'completed', 'error'
-  String error;
-
-  DownloadTask({
-    required this.id,
-    required this.url,
-    required this.filename,
-    this.bytesDownloaded = 0,
-    this.totalBytes = 0,
-    this.status = 'pending',
-    this.error = '',
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'url': url,
-      'filename': filename,
-      'bytesDownloaded': bytesDownloaded,
-      'totalBytes': totalBytes,
-      'status': status,
-      'error': error,
-    };
-  }
-
-  factory DownloadTask.fromMap(Map<String, dynamic> map) {
-    return DownloadTask(
-      id: map['id'],
-      url: map['url'],
-      filename: map['filename'],
-      bytesDownloaded: map['bytesDownloaded'],
-      totalBytes: map['totalBytes'],
-      status: map['status'],
-      error: map['error'],
-    );
-  }
-}
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -147,10 +105,11 @@ class DownloadManager {
   }
 
   // Create a new download task
-  Future<DownloadTask> createDownload(String url, String filename) async {
+  Future<DownloadTask> createDownload(int id, String filename, int size) async {
     final task = DownloadTask(
       id: DateTime.now().millisecondsSinceEpoch,
-      url: url,
+      url: FileUrl.getUrl(id, FileUrlType.download),
+      totalBytes: size,
       filename: filename,
       status: 'pending',
     );
@@ -190,29 +149,6 @@ class DownloadManager {
         options.headers!['Range'] = 'bytes=${task.bytesDownloaded}-';
       }
 
-      // Make HEAD request first to get content length if we don't have it
-      if (task.totalBytes == 0) {
-        try {
-          final headResponse = await _dio.head(
-            task.url,
-            options: Options(
-              followRedirects: true,
-              validateStatus: (status) => status != null && status < 500,
-            ),
-          );
-
-          final contentLength = headResponse.headers.value('content-length');
-          if (contentLength != null) {
-            task.totalBytes = int.parse(contentLength);
-            await _dbHelper.updateDownload(task);
-            _updateProgress(task);
-          }
-        } catch (e) {
-          // Failed to get size, will try to get it from GET request
-          print('Failed to get content length via HEAD: $e');
-        }
-      }
-
       // Make actual download request
       final response = await _dio.get(
         task.url,
@@ -227,34 +163,6 @@ class DownloadManager {
       final statusCode = response.statusCode ?? 0;
 
       if (statusCode == 200 || statusCode == 206) {
-        // Get total file size from headers if not already known
-        if (task.totalBytes == 0) {
-          final contentLength = response.headers.value('content-length');
-          if (contentLength != null) {
-            task.totalBytes = int.parse(contentLength);
-
-            // If it's a partial response, add what we've already downloaded
-            if (statusCode == 206) {
-              // Parse content range header to get total size
-              final contentRange = response.headers.value('content-range');
-              if (contentRange != null && contentRange.contains('/')) {
-                final totalString = contentRange.split('/').last;
-                if (totalString != '*') {
-                  task.totalBytes = int.parse(totalString);
-                } else {
-                  // If server sends '*', we add what we already have
-                  task.totalBytes += task.bytesDownloaded;
-                }
-              } else {
-                task.totalBytes += task.bytesDownloaded;
-              }
-            }
-
-            await _dbHelper.updateDownload(task);
-            _updateProgress(task);
-          }
-        }
-
         // Open the file in append mode if resuming, otherwise create new
         IOSink fileSink;
         if (task.bytesDownloaded > 0 && statusCode == 206) {
