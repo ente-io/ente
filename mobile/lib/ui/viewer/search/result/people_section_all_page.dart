@@ -50,22 +50,39 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   @override
   void initState() {
     super.initState();
-    sectionData = SectionType.face.getData(context).then(
-          (value) => List.from(value),
-        );
+    sectionData = getResults();
 
     final streamsToListenTo = SectionType.face.viewAllUpdateEvents();
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
           setState(() {
-            sectionData = SectionType.face.getData(context).then(
-                  (value) => List.from(value),
-                );
+            sectionData = getResults();
           });
         }),
       );
     }
+  }
+
+  Future<List<GenericSearchResult>> getResults() async {
+    final results =
+        List<GenericSearchResult>.from(await SectionType.face.getData(context));
+
+    if (widget.namedOnly) {
+      results.removeWhere(
+        (element) =>
+            (element.hierarchicalSearchFilter as FaceFilter).personId == null,
+      );
+      if (widget.selectedPeople?.personIds.isEmpty ?? false) {
+        widget.selectedPeople!.select(
+          results
+              .take(2)
+              .map((e) => (e.hierarchicalSearchFilter as FaceFilter).personId!)
+              .toSet(),
+        );
+      }
+    }
+    return results;
   }
 
   @override
@@ -95,14 +112,6 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
           return Center(child: Text(S.of(context).noResultsFound + '.'));
         } else {
           final results = snapshot.data!;
-          if (widget.namedOnly) {
-            results.removeWhere(
-              (element) =>
-                  (element.hierarchicalSearchFilter as FaceFilter).personId ==
-                  null,
-            );
-          }
-
           final screenWidth = MediaQuery.of(context).size.width;
           final crossAxisCount = (screenWidth / 100).floor();
 

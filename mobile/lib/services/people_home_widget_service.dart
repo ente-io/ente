@@ -3,6 +3,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
+import "package:photos/models/search/search_types.dart";
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/machine_learning/face_ml/person/person_service.dart';
@@ -189,9 +192,9 @@ class PeopleHomeWidgetService {
     }
 
     // Check if selected people exist
-    final peopleIds = getSelectedPeople();
+    final peopleIds = await _getEffectiveSelectedPeopleIds();
     try {
-      for (final id in peopleIds ?? []) {
+      for (final id in peopleIds) {
         final person = await PersonService.instance.getPerson(id);
         if (person == null) {
           _logger.warning("Person not found for id: $id");
@@ -228,11 +231,37 @@ class PeopleHomeWidgetService {
     return peopleChanged ?? true;
   }
 
+  Future<List<String>> _getEffectiveSelectedPeopleIds() async {
+    var peopleIds = getSelectedPeople();
+
+    if (peopleIds == null || peopleIds.isEmpty) {
+      // Search Filter with face and pick top two faces
+      final searchFilter = await SectionType.face.getData(null).then(
+            (value) => List<GenericSearchResult>.from(value).where(
+              (element) =>
+                  (element.hierarchicalSearchFilter as FaceFilter).personId !=
+                  null,
+            ),
+          );
+
+      if (searchFilter.isNotEmpty) {
+        peopleIds = searchFilter
+            .take(2)
+            .map((e) => (e.hierarchicalSearchFilter as FaceFilter).personId!)
+            .toList();
+      } else {
+        _logger.warning("No selected people found");
+      }
+    }
+
+    return peopleIds ?? [];
+  }
+
   Future<Map<String, (String, Iterable<EnteFile>)>> _getPeople() async {
-    final peopleIds = getSelectedPeople();
+    final peopleIds = await _getEffectiveSelectedPeopleIds();
     final Map<String, (String, Iterable<EnteFile>)> peopleFiles = {};
 
-    for (final id in peopleIds ?? []) {
+    for (final id in peopleIds) {
       final person = await PersonService.instance.getPerson(id);
       if (person == null) {
         _logger.warning("Person not found for id: $id");
