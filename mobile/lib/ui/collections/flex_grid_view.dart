@@ -28,7 +28,6 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
    */
   static const maxThumbnailWidth = 224.0;
   static const fixedGapBetweenAlbum = 4.0;
-  static const minGapForHorizontalPadding = 8.0;
   static const collectionItemsToPreload = 20;
   static const silverHorizontalPadding = 16.0;
   final List<Collection>? collections;
@@ -120,18 +119,8 @@ class _CollectionsFlexiGridViewWidgetState
         max(screenWidth ~/ CollectionsFlexiGridViewWidget.maxThumbnailWidth, 3);
     final double gapBetweenAlbums = (albumsCountInOneRow - 1) *
         CollectionsFlexiGridViewWidget.fixedGapBetweenAlbum;
-    // gapOnSizeOfAlbums will be
-    final double gapOnSizeOfAlbums =
-        CollectionsFlexiGridViewWidget.minGapForHorizontalPadding +
-            (screenWidth -
-                    gapBetweenAlbums -
-                    (2 *
-                        CollectionsFlexiGridViewWidget
-                            .minGapForHorizontalPadding)) %
-                albumsCountInOneRow;
 
     final double sideOfThumbnail = (screenWidth -
-            gapOnSizeOfAlbums -
             gapBetweenAlbums -
             CollectionsFlexiGridViewWidget.silverHorizontalPadding) /
         albumsCountInOneRow;
@@ -145,8 +134,8 @@ class _CollectionsFlexiGridViewWidgetState
       key: key,
       padding: EdgeInsets.only(
         top: 8,
-        left: 8,
-        right: 8,
+        left: CollectionsFlexiGridViewWidget.silverHorizontalPadding / 2,
+        right: CollectionsFlexiGridViewWidget.silverHorizontalPadding / 2,
         bottom: widget.scrollBottomSafeArea,
       ),
       sliver: SliverGrid(
@@ -184,8 +173,9 @@ class _CollectionsFlexiGridViewWidgetState
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInOneRow,
           mainAxisSpacing: 2,
-          crossAxisSpacing: gapBetweenAlbums,
-          childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 56),
+          crossAxisSpacing:
+              CollectionsFlexiGridViewWidget.fixedGapBetweenAlbum * 2,
+          childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 46),
         ),
       ),
     );
@@ -202,8 +192,8 @@ class _CollectionsFlexiGridViewWidgetState
       key: key,
       padding: EdgeInsets.only(
         top: 8,
-        left: 8,
-        right: 8,
+        left: CollectionsFlexiGridViewWidget.silverHorizontalPadding / 2,
+        right: CollectionsFlexiGridViewWidget.silverHorizontalPadding / 2,
         bottom: widget.scrollBottomSafeArea,
       ),
       sliver: SliverList(
