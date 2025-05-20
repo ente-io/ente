@@ -565,10 +565,10 @@ const deletePathIgnoringErrors = async (tempFilePath: string) => {
  *
  *     Stream #0:1[0x2](und): Video: h264 (Constrained Baseline) (avc1 / 0x31637661), yuv420p(progressive), 480x270 [SAR 1:1 DAR 16:9], 539 kb/s, 29.97 fps, 29.97 tbr, 30k tbn (default)
  */
-const videoStreamLineRegex = /Stream #.+: Video:(.+)$/;
+const videoStreamLineRegex = /Stream #.+: Video:(.+)\r?\n/;
 
 /** {@link videoStreamLineRegex}, but global. */
-const videoStreamLinesRegex = /Stream #.+: Video:(.+)$/g;
+const videoStreamLinesRegex = /Stream #.+: Video:(.+)\r?\n/g;
 
 /**
  * A regex that matches "<digits> kb/s" preceded by a space. See
