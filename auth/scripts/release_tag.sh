@@ -1,5 +1,3 @@
-#!/bin/sh
-
 #!/bin/bash
 
 # Function to display usage
@@ -20,6 +18,9 @@ cd "$(dirname "$0")/.."
 # Get the tag from the command line argument
 TAG=$1
 
+# Define the appdata file path - use absolute path to avoid directory navigation issues
+PROJECT_ROOT=$(pwd)
+APPDATA_FILE="${PROJECT_ROOT}/linux/packaging/enteauth.appdata.xml"
 
 # Get the version from the pubspec.yaml file and cut everything after the +
 VERSION=$(grep "^version:" pubspec.yaml | awk '{ print $2 }' | cut -d '+' -f 1)
@@ -39,7 +40,33 @@ if [[ $TAG != *$VERSION ]]; then
     exit 1
 fi
 
-## If all checks pass, create the tag
+# Extract version number from the tag (remove prefix)
+TAG_VERSION=${TAG#$PREFIX}
+
+# Check if this version is already in the releases section of the appdata.xml file
+if ! grep -q "<release version=\"$TAG_VERSION\"" "$APPDATA_FILE"; then
+    echo "Adding release entry for version $TAG_VERSION to appdata.xml"
+    
+    # Get today's date in YYYY-MM-DD format
+    TODAY=$(date +%Y-%m-%d)
+    
+    # Create the new release entry with proper formatting
+    NEW_RELEASE="\n        <release version=\"$TAG_VERSION\" date=\"$TODAY\" />"
+    
+    # Use a more reliable approach with awk instead of sed for cross-platform compatibility
+    echo "Creating temporary file with updated content..."
+    awk '/<releases>/{print $0; print "        <release version=\"'"$TAG_VERSION"'\" date=\"'"$TODAY"'\" />"; next}1' "$APPDATA_FILE" > "${APPDATA_FILE}.tmp"
+    mv "${APPDATA_FILE}.tmp" "$APPDATA_FILE"
+    
+    echo "Added release entry for version $TAG_VERSION with date $TODAY"
+    
+    # Stage and commit the updated appdata.xml file
+    git add "$APPDATA_FILE"
+    git commit -m "Add release $TAG_VERSION to appdata.xml"
+    echo "Committed appdata.xml changes for version $TAG_VERSION"
+fi
+
+# If all checks pass, create the tag
 git tag $TAG
 echo "Tag $TAG created."
 
