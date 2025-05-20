@@ -80,9 +80,8 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                     : () async {
                         await PeopleHomeWidgetService.instance
                             .setSelectedPeople(people.toList());
-                        await PeopleHomeWidgetService.instance
-                            .checkPendingPeopleSync(addDelay: false);
                         Navigator.pop(context);
+                        await PeopleHomeWidgetService.instance.peopleChanged();
                       },
               ),
             )

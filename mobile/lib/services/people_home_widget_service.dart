@@ -135,6 +135,23 @@ class PeopleHomeWidgetService {
     await HomeWidgetService.instance.initHomeWidget();
   }
 
+  Future<void> peopleChanged() async {
+    await updatePeopleChanged(true);
+
+    final cachedMemories = await _getPeople();
+    final currentTotal = cachedMemories.length;
+    final existingTotal = await _getTotalPeople() ?? 0;
+
+    if (existingTotal == currentTotal && existingTotal == 0) {
+      await updatePeopleChanged(false);
+      _logger.info("People empty, no update needed");
+      return;
+    }
+
+    _logger.info("People changed, updating widget");
+    await initHomeWidget(true);
+  }
+
   Future<void> onLaunchFromWidget(int fileId, BuildContext context) async {
     _hasSyncedPeople = true;
     await _syncExistingPeople();
@@ -228,10 +245,12 @@ class PeopleHomeWidgetService {
 
       final clusterFiles =
           await SearchService.instance.getClusterFilesForPersonID(id);
-      peopleFiles[id] = (
-        person.data.name,
-        clusterFiles.entries.expand((e) => e.value).toList()
-      );
+      final files = clusterFiles.entries.expand((e) => e.value).toList();
+      if (files.isEmpty) {
+        _logger.warning("No files found for person: ${person.data.name}");
+        continue;
+      }
+      peopleFiles[id] = (person.data.name, files);
     }
 
     return peopleFiles;
@@ -280,6 +299,9 @@ class PeopleHomeWidgetService {
 
     int renderedCount = 0;
 
+    final bool isWidgetPresent = await countHomeWidgets() > 0;
+    final limit = isWidgetPresent ? MAX_PEOPLE_LIMIT : 5;
+
     for (final entry in peopleWithFiles.entries) {
       final personId = entry.key;
       final personName = entry.value.$1;
@@ -316,14 +338,14 @@ class PeopleHomeWidgetService {
           renderedCount++;
 
           // Limit the number of people to avoid performance issues
-          if (renderedCount >= MAX_PEOPLE_LIMIT) {
-            _logger.warning("Maximum people limit ($MAX_PEOPLE_LIMIT) reached");
+          if (renderedCount >= limit) {
+            _logger.warning("Maximum people limit ($limit) reached");
             break;
           }
         }
       }
 
-      if (renderedCount >= MAX_PEOPLE_LIMIT) {
+      if (renderedCount >= limit) {
         break;
       }
     }

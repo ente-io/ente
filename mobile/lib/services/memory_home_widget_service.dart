@@ -291,6 +291,9 @@ class MemoryHomeWidgetService {
 
     int renderedCount = 0;
 
+    final bool isWidgetPresent = await countHomeWidgets() > 0;
+    final limit = isWidgetPresent ? MAX_MEMORIES_LIMIT : 5;
+
     for (final entry in memoriesWithFiles.entries) {
       final memoryTitle = entry.key;
       final memoryFiles = entry.value;
@@ -321,16 +324,16 @@ class MemoryHomeWidgetService {
           renderedCount++;
 
           // Limit the number of memories to avoid performance issues
-          if (renderedCount >= MAX_MEMORIES_LIMIT) {
+          if (renderedCount >= limit) {
             _logger.warning(
-              "Maximum memories limit ($MAX_MEMORIES_LIMIT) reached",
+              "Maximum memories limit ($limit) reached",
             );
             break;
           }
         }
       }
 
-      if (renderedCount >= MAX_MEMORIES_LIMIT) {
+      if (renderedCount >= limit) {
         break;
       }
     }

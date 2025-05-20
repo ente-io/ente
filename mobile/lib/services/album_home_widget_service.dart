@@ -371,6 +371,9 @@ class AlbumHomeWidgetService {
 
     int renderedCount = 0;
 
+    final bool isWidgetPresent = await countHomeWidgets() > 0;
+    final limit = isWidgetPresent ? MAX_ALBUMS_LIMIT : 5;
+
     for (final entry in albumsWithFiles.entries) {
       final albumId = entry.key;
       final albumName = entry.value.$1;
@@ -407,14 +410,14 @@ class AlbumHomeWidgetService {
           renderedCount++;
 
           // Limit the number of albums to avoid performance issues
-          if (renderedCount >= MAX_ALBUMS_LIMIT) {
-            _logger.warning("Maximum albums limit ($MAX_ALBUMS_LIMIT) reached");
+          if (renderedCount >= limit) {
+            _logger.warning("Maximum albums limit ($limit) reached");
             break;
           }
         }
       }
 
-      if (renderedCount >= MAX_ALBUMS_LIMIT) {
+      if (renderedCount >= limit) {
         break;
       }
     }

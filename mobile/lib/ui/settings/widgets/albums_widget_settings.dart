@@ -106,8 +106,7 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                         await AlbumHomeWidgetService.instance
                             .setSelectedAlbums(albums);
                         Navigator.pop(context);
-                        await AlbumHomeWidgetService.instance
-                            .checkPendingAlbumsSync();
+                        await AlbumHomeWidgetService.instance.albumsChanged();
                       }
                     : null,
                 isDisabled: _albums.isEmpty,

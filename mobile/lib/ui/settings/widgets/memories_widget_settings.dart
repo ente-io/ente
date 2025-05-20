@@ -83,8 +83,7 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
         .setSelectedMLMemories(isSmartMemoriesEnabled!);
     await MemoryHomeWidgetService.instance
         .setSelectedOnThisDayMemories(isOnThisDayMemoriesEnabled!);
-    await MemoryHomeWidgetService.instance
-        .checkPendingMemorySync(addDelay: true);
+    await MemoryHomeWidgetService.instance.memoryChanged();
   }
 
   @override
