@@ -5,6 +5,7 @@ import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/models/selected_people.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -94,6 +95,14 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
           return Center(child: Text(S.of(context).noResultsFound + '.'));
         } else {
           final results = snapshot.data!;
+          if (widget.namedOnly) {
+            results.removeWhere(
+              (element) =>
+                  (element.hierarchicalSearchFilter as FaceFilter).personId ==
+                  null,
+            );
+          }
+
           final screenWidth = MediaQuery.of(context).size.width;
           final crossAxisCount = (screenWidth / 100).floor();
 
