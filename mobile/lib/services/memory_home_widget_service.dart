@@ -142,18 +142,10 @@ class MemoryHomeWidgetService {
   }
 
   Future<int> countHomeWidgets() async {
-    final installedWidgets =
-        await HomeWidgetService.instance.getInstalledWidgets();
-
-    final memoryWidgets = installedWidgets
-        .where(
-          (widget) =>
-              widget.androidClassName == ANDROID_CLASS_NAME ||
-              widget.iOSKind == IOS_CLASS_NAME,
-        )
-        .toList();
-
-    return memoryWidgets.length;
+    return await HomeWidgetService.instance.countHomeWidgets(
+      ANDROID_CLASS_NAME,
+      IOS_CLASS_NAME,
+    );
   }
 
   Future<void> onLaunchFromWidget(int generatedId, BuildContext context) async {

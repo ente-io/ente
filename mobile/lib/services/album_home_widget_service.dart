@@ -90,18 +90,10 @@ class AlbumHomeWidgetService {
   }
 
   Future<int> countHomeWidgets() async {
-    final installedWidgets =
-        await HomeWidgetService.instance.getInstalledWidgets();
-
-    final albumWidgets = installedWidgets
-        .where(
-          (widget) =>
-              widget.androidClassName == ANDROID_CLASS_NAME ||
-              widget.iOSKind == IOS_CLASS_NAME,
-        )
-        .toList();
-
-    return albumWidgets.length;
+    return await HomeWidgetService.instance.countHomeWidgets(
+      ANDROID_CLASS_NAME,
+      IOS_CLASS_NAME,
+    );
   }
 
   Future<void> clearWidget() async {

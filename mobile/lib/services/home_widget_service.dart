@@ -97,8 +97,20 @@ class HomeWidgetService {
     return const Size(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
   }
 
-  Future<int> countHomeWidgets() async {
-    return (await getInstalledWidgets()).length;
+  Future<int> countHomeWidgets(
+    String androidClass,
+    String iOSClass,
+  ) async {
+    final installedWidgets = await getInstalledWidgets();
+    final relevantWidgets = installedWidgets
+        .where(
+          (widget) =>
+              widget.androidClassName == "io.ente.photos.$androidClass" ||
+              widget.iOSKind == iOSClass,
+        )
+        .toList();
+
+    return relevantWidgets.length;
   }
 
   Future<List<HomeWidgetInfo>> getInstalledWidgets() async {

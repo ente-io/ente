@@ -62,18 +62,10 @@ class PeopleHomeWidgetService {
   }
 
   Future<int> countHomeWidgets() async {
-    final installedWidgets =
-        await HomeWidgetService.instance.getInstalledWidgets();
-
-    final peopleWidgets = installedWidgets
-        .where(
-          (widget) =>
-              widget.androidClassName == ANDROID_CLASS_NAME ||
-              widget.iOSKind == IOS_CLASS_NAME,
-        )
-        .toList();
-
-    return peopleWidgets.length;
+    return await HomeWidgetService.instance.countHomeWidgets(
+      ANDROID_CLASS_NAME,
+      IOS_CLASS_NAME,
+    );
   }
 
   Future<void> initHomeWidget(bool? forceFetchNewPeople) async {
