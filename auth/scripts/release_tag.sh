@@ -50,9 +50,6 @@ if ! grep -q "<release version=\"$TAG_VERSION\"" "$APPDATA_FILE"; then
     # Get today's date in YYYY-MM-DD format
     TODAY=$(date +%Y-%m-%d)
     
-    # Create the new release entry with proper formatting
-    NEW_RELEASE="\n        <release version=\"$TAG_VERSION\" date=\"$TODAY\" />"
-    
     # Use a more reliable approach with awk instead of sed for cross-platform compatibility
     echo "Creating temporary file with updated content..."
     awk '/<releases>/{print $0; print "        <release version=\"'"$TAG_VERSION"'\" date=\"'"$TODAY"'\" />"; next}1' "$APPDATA_FILE" > "${APPDATA_FILE}.tmp"
