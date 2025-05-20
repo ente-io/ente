@@ -4,6 +4,7 @@
 
 // See [Note: Using Electron APIs in UtilityProcess] about what we can and
 // cannot import.
+import shellescape from "any-shell-escape";
 import { expose } from "comlink";
 import pathToFfmpeg from "ffmpeg-static";
 import { randomBytes } from "node:crypto";
@@ -324,6 +325,20 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
     const playlistPath = path.join(outputPathPrefix, "output.m3u8");
     const videoPath = path.join(outputPathPrefix, "output.ts");
 
+    // A file into which we'll redirect ffmpeg's stderr.
+    //
+    // [Note: ERR_CHILD_PROCESS_STDIO_MAXBUFFER]
+    //
+    // For very large videos, the stderr output of ffmpeg may cause the stdio
+    // max buffer size limits to be exceeded, raising the following error:
+    //
+    //     RangeError [ERR_CHILD_PROCESS_STDIO_MAXBUFFER]: stderr maxBuffer length exceeded
+    //
+    // So instead of capturing the stderr normally, we redirect it to a
+    // temporary file, and then read it from there to extract the video
+    // dimensions.
+    const stderrPath = path.join(outputPathPrefix, "stderr.txt");
+
     // Generate a cryptographically secure random key (16 bytes).
     const keyBytes = randomBytes(16);
     const keyB64 = keyBytes.toString("base64");
@@ -458,7 +473,7 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
         playlistPath,
     ].flat();
 
-    let dimensions: ReturnType<typeof detectVideoDimensions>;
+    let dimensions: { width: number; height: number };
     let videoSize: number;
 
     try {
@@ -468,14 +483,17 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
             fs.writeFile(keyInfoPath, keyInfo, { encoding: "utf8" }),
         ]);
 
+        // Tack on the redirection after constructing the command.
+        const commandWithRedirection = `${shellescape(command)} 2>${stderrPath}`;
+
         // Run the ffmpeg command to generate the HLS playlist and segments.
         //
         // Note: Depending on the size of the input file, this may take long!
-        const { stderr: conversionStderr } = await execAsyncWorker(command);
+        await execAsyncWorker(commandWithRedirection);
 
         // Determine the dimensions of the generated video from the stderr
         // output produced by ffmpeg during the conversion.
-        dimensions = detectVideoDimensions(conversionStderr);
+        dimensions = await detectVideoDimensions(stderrPath);
 
         // Find the size of the generated video segments by reading the size of
         // the generated .ts file.
@@ -488,6 +506,7 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
         throw e;
     } finally {
         await Promise.all([
+            deletePathIgnoringErrors(stderrPath),
             deletePathIgnoringErrors(keyInfoPath),
             deletePathIgnoringErrors(keyPath),
             deletePathIgnoringErrors(videoPath),
@@ -628,7 +647,12 @@ const detectVideoCharacteristics = async (inputFilePath: string) => {
  *
  * See: [Note: Parsing CLI output might break on ffmpeg updates].
  */
-const detectVideoDimensions = (conversionStderr: string) => {
+const detectVideoDimensions = async (stderrPath: string) => {
+    // Instead of reading the stderr directly off the child_process.exec, we
+    // wrote it to a file to avoid hitting the max stdio buffer limits. Read it
+    // from there.
+    const conversionStderr = await fs.readFile(stderrPath, "utf-8");
+
     // There is a nicer way to do it - by running `pseudoFFProbeVideo` on the
     // generated playlist. However, that playlist includes a data URL that
     // specifies the encryption info, and ffmpeg refuses to read that unless we
