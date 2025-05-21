@@ -6,6 +6,7 @@ import {
     authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
     ensureOk,
+    publicRequestHeaders,
     retryAsyncOperation,
     retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
@@ -327,7 +328,7 @@ export const _completeMultipartUpload = async (
     retryEnsuringHTTPOk(() =>
         fetch(completionURL, {
             method: "POST",
-            headers: { "Content-Type": "text/xml" },
+            headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
             body: reqBody,
         }),
     );

@@ -18,7 +18,8 @@ export const authenticatedRequestHeaders = async () => ({
 
 /**
  * Return headers that should be passed alongwith (almost) all unauthenticated
- * `fetch` calls that we make to our API servers.
+ * `fetch` calls that we make to our remotes like our API servers (museum), or
+ * to presigned URLs that are handled by the S3 storage buckets themselves.
  *
  * - The client package name.
  */
