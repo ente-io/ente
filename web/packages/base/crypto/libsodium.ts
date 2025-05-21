@@ -632,6 +632,22 @@ export async function decryptToUTF8(
     return sodium.to_string(decrypted);
 }
 
+/**
+ * Initialize and return new state that can be used to hash the chunks of data
+ * in a streaming manner.
+ *
+ * [Note: Chunked hashing]
+ *
+ * 1. Obtain a hash state using {@link chunkHashInit}.
+ *
+ * 2. Pass the hash state and the data chunk to {@link chunkHashUpdate}.
+ *
+ * 3. Finalize the hash state and obtain the hash using {@link chunkHashFinal}.
+ *
+ * @returns An opaque object representing the hash state. This can be passed
+ * (along with the data to hash) to {@link chunkHashUpdate}, and the final hash
+ * obtained using {@link chunkHashFinal}.
+ */
 export async function initChunkHashing() {
     await sodium.ready;
     const hashState = sodium.crypto_generichash_init(
@@ -641,6 +657,15 @@ export async function initChunkHashing() {
     return hashState;
 }
 
+/**
+ * Update the hash state to incorporate the contents of the provided data chunk.
+ *
+ * See: [Note: Chunked hashing]
+ *
+ * @param hashState A hash state obtained using {@link chunkHashInit}.
+ *
+ * @param chunk The data (bytes) to hash.
+ */
 export async function hashFileChunk(
     hashState: sodium.StateAddress,
     chunk: Uint8Array,
@@ -649,6 +674,14 @@ export async function hashFileChunk(
     sodium.crypto_generichash_update(hashState, chunk);
 }
 
+/**
+ * Finalize a hash state and return the hash it represents (as a base64 string).
+ *
+ * @param hashState A hash state obtained using {@link chunkHashInit} and fed
+ * chunks using {@link chunkHashUpdate}.
+ *
+ * @returns The hash of all the chunks (as a base64 string).
+ */
 export async function completeChunkHashing(hashState: sodium.StateAddress) {
     await sodium.ready;
     const hash = sodium.crypto_generichash_final(
