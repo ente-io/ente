@@ -271,21 +271,7 @@ export const putFilePart = async (
         fetch(partUploadURL, {
             method: "PUT",
             headers: publicRequestHeaders(),
-            // @ts-expect-error See: [Note: duplex param required for stream body]
-            duplex: "half",
-            // Pipe the part data via a transform stream so that we can report progress.
-            body: new Response(partData).body!.pipeThrough(
-                new TransformStream({
-                    start() {
-                        console.log("start");
-                    },
-                    transform(chunk, controller) {
-                        console.log("chunk", chunk);
-                        onProgress(chunk.length /* dummy value for now */);
-                        controller.enqueue(chunk);
-                    },
-                }),
-            ),
+            body: partData,
         }),
     );
     return nullToUndefined(res.headers.get("etag"));
