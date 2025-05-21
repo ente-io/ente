@@ -854,7 +854,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (payload != null) {
       debugPrint('notification payload: $payload');
       if (payload.toLowerCase().contains("onthisday")) {
-        await memoriesCacheService.goToMemoryFromMemoryID(
+        // ignore: unawaited_futures
+        memoriesCacheService.goToMemoryFromMemoryID(
           context,
           payload,
         );
