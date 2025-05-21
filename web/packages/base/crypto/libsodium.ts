@@ -633,6 +633,12 @@ export async function decryptToUTF8(
 }
 
 /**
+ * An opaque object meant to be threaded through {@link chunkHashInit},
+ * {@link chunkHashUpdate} and {@link chunkHashFinal}.
+ */
+export type ChunkHashState = sodium.StateAddress;
+
+/**
  * Initialize and return new state that can be used to hash the chunks of data
  * in a streaming manner.
  *
@@ -648,14 +654,13 @@ export async function decryptToUTF8(
  * (along with the data to hash) to {@link chunkHashUpdate}, and the final hash
  * obtained using {@link chunkHashFinal}.
  */
-export async function initChunkHashing() {
+export const chunkHashInit = async (): Promise<ChunkHashState> => {
     await sodium.ready;
-    const hashState = sodium.crypto_generichash_init(
+    return sodium.crypto_generichash_init(
         null,
         sodium.crypto_generichash_BYTES_MAX,
     );
-    return hashState;
-}
+};
 
 /**
  * Update the hash state to incorporate the contents of the provided data chunk.
@@ -666,31 +671,32 @@ export async function initChunkHashing() {
  *
  * @param chunk The data (bytes) to hash.
  */
-export async function hashFileChunk(
-    hashState: sodium.StateAddress,
+export const chunkHashUpdate = async (
+    hashState: ChunkHashState,
     chunk: Uint8Array,
-) {
+) => {
     await sodium.ready;
     sodium.crypto_generichash_update(hashState, chunk);
-}
+};
 
 /**
  * Finalize a hash state and return the hash it represents (as a base64 string).
+ *
+ * See: [Note: Chunked hashing]
  *
  * @param hashState A hash state obtained using {@link chunkHashInit} and fed
  * chunks using {@link chunkHashUpdate}.
  *
  * @returns The hash of all the chunks (as a base64 string).
  */
-export async function completeChunkHashing(hashState: sodium.StateAddress) {
+export const chunkHashFinal = async (hashState: ChunkHashState) => {
     await sodium.ready;
     const hash = sodium.crypto_generichash_final(
         hashState,
         sodium.crypto_generichash_BYTES_MAX,
     );
-    const hashString = toB64(hash);
-    return hashString;
-}
+    return toB64(hash);
+};
 
 /**
  * Generate a new public/private keypair for use with public-key encryption
