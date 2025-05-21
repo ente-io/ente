@@ -275,7 +275,7 @@ export class PhotosUploadHTTPClient {
  *
  * See: [Note: Multipart uploads].
  */
-interface MultipartCompletedPart {
+export interface MultipartCompletedPart {
     /**
      * The part number (1-indexed).
      *
@@ -292,7 +292,7 @@ interface MultipartCompletedPart {
      * This is the Entity tag (retrieved as the "ETag" response header) returned
      * by remote when the part was uploaded.
      */
-    etag: string;
+    eTag: string;
 }
 
 /**
@@ -349,8 +349,11 @@ export const createMultipartUploadRequestBody = (
     // No extra quotes need to be added, the etag values we get from remote
     // already quoted, we just need to pass them verbatim.
 
-    const result = "";
-    return result;
+    const resultParts = parts.map(
+        (part) =>
+            `<Part><PartNumber>${part.partNumber}</PartNumber><ETag>${part.eTag}</ETag></Part>`,
+    );
+    return `<CompleteMultipartUpload>${resultParts.join("\n")}</CompleteMultipartUpload>`;
 };
 
 /**

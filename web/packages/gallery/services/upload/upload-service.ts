@@ -54,8 +54,10 @@ import {
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
     _completeMultipartUpload,
+    createMultipartUploadRequestBody,
     PhotosUploadHTTPClient,
     PublicAlbumsUploadHTTPClient,
+    type MultipartCompletedPart,
     type ObjectUploadURL,
 } from "./remote";
 import type { ParsedMetadataJSON } from "./takeout";
@@ -1565,6 +1567,7 @@ async function uploadStreamUsingMultipart(
     const percentPerPart =
         RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
     const partEtags: PartEtag[] = [];
+    const completedParts: MultipartCompletedPart[] = [];
     let fileSize = 0;
     for (const [
         index,
@@ -1594,6 +1597,7 @@ async function uploadStreamUsingMultipart(
             );
         }
         partEtags.push({ PartNumber: index + 1, ETag: eTag });
+        completedParts.push({ partNumber: index + 1, eTag });
     }
     const { done } = await streamReader.read();
     if (!done) throw new Error("More chunks than expected");
@@ -1603,11 +1607,18 @@ async function uploadStreamUsingMultipart(
         { CompleteMultipartUpload: { Part: partEtags } },
         { compact: true, ignoreComment: true, spaces: 4 },
     );
+    if (process.env.NEXT_PUBLIC_ENTE_WIP_MP) {
+        console.log(cBody);
+        console.log(createMultipartUploadRequestBody(completedParts));
+    }
     if (!isCFUploadProxyDisabled) {
         await photosHTTPClient.completeMultipartUploadV2(completeURL, cBody);
     } else {
         if (process.env.NEXT_PUBLIC_ENTE_WIP_MP) {
-            await _completeMultipartUpload(completeURL, cBody);
+            await _completeMultipartUpload(
+                completeURL,
+                createMultipartUploadRequestBody(completedParts),
+            );
         } else {
             await photosHTTPClient.completeMultipartUpload(completeURL, cBody);
         }
