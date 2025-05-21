@@ -44,7 +44,6 @@ import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { CustomError, handleUploadError } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
-import * as convert from "xml-js";
 import type { UploadableUploadItem, UploadItem } from ".";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
@@ -54,7 +53,7 @@ import {
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
     completeMultipartUpload,
-    createMultipartUploadRequestBody,
+    completeMultipartUploadViaWorker,
     PhotosUploadHTTPClient,
     PublicAlbumsUploadHTTPClient,
     type MultipartCompletedPart,
@@ -1543,11 +1542,6 @@ const uploadToBucket = async (
     }
 };
 
-interface PartEtag {
-    PartNumber: number;
-    ETag: string;
-}
-
 async function uploadStreamUsingMultipart(
     fileLocalID: number,
     dataStream: EncryptedFileStream,
@@ -1566,7 +1560,6 @@ async function uploadStreamUsingMultipart(
     const streamReader = stream.getReader();
     const percentPerPart =
         RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
-    const partEtags: PartEtag[] = [];
     const completedParts: MultipartCompletedPart[] = [];
     let fileSize = 0;
     for (const [
@@ -1596,21 +1589,16 @@ async function uploadStreamUsingMultipart(
                 progressTracker,
             );
         }
-        partEtags.push({ PartNumber: index + 1, ETag: eTag });
         completedParts.push({ partNumber: index + 1, eTag });
     }
     const { done } = await streamReader.read();
     if (!done) throw new Error("More chunks than expected");
 
-    const completeURL = multipartUploadURLs.completeURL;
-    const cBody = convert.js2xml(
-        { CompleteMultipartUpload: { Part: partEtags } },
-        { compact: true, ignoreComment: true, spaces: 4 },
-    );
+    const completionURL = multipartUploadURLs.completeURL;
     if (!isCFUploadProxyDisabled) {
-        await photosHTTPClient.completeMultipartUploadV2(completeURL, cBody);
+        await completeMultipartUploadViaWorker(completionURL, completedParts);
     } else {
-        await completeMultipartUpload(completeURL, completedParts);
+        await completeMultipartUpload(completionURL, completedParts);
     }
 
     return { objectKey: multipartUploadURLs.objectKey, fileSize };

@@ -20,12 +20,18 @@ import { z } from "zod";
 import type { MultipartUploadURLs, UploadFile } from "./upload-service";
 
 /**
- * A pre-signed URL alongwith the associated object key.
+ * A pre-signed URL alongwith the associated object key that is later used to
+ * refer to file contents (the "object") that were uploaded to this URL.
  */
 const ObjectUploadURL = z.object({
-    /** A pre-signed URL that can be used to upload data to S3. */
+    /**
+     * A pre-signed URL that can be used to upload data to an S3-compatible
+     * remote.
+     */
     objectKey: z.string(),
-    /** The objectKey with which remote will refer to this object. */
+    /**
+     * The objectKey with which remote (museum) will refer to this object.
+     */
     url: z.string(),
 });
 
@@ -235,24 +241,6 @@ export class PhotosUploadHTTPClient {
             throw e;
         }
     }
-
-    async completeMultipartUploadV2(completeURL: string, reqBody: unknown) {
-        try {
-            const origin = await uploaderOrigin();
-            await retryAsyncOperation(() =>
-                HTTPService.post(
-                    `${origin}/multipart-complete`,
-                    reqBody,
-                    // @ts-ignore
-                    null,
-                    { "content-type": "text/xml", "UPLOAD-URL": completeURL },
-                ),
-            );
-        } catch (e) {
-            log.error("put file in parts failed", e);
-            throw e;
-        }
-    }
 }
 
 /**
@@ -280,11 +268,12 @@ export interface MultipartCompletedPart {
 
 /**
  * Construct an XML string of the format expected as the request body for
- * {@link _completeMultipartUpload} or {@link _completeMultipartUploadViaProxy}.
+ * {@link _completeMultipartUpload} or
+ * {@link _completeMultipartUploadViaWorker}.
  *
  * @param parts Information about the parts that were uploaded.
  */
-export const createMultipartUploadRequestBody = (
+const createMultipartUploadRequestBody = (
     parts: MultipartCompletedPart[],
 ): string => {
     // To avoid introducing a dependency on a XML library, we construct the
@@ -388,8 +377,9 @@ export const createMultipartUploadRequestBody = (
  * 3. Once all the parts have been uploaded, send a consolidated report of all
  *    the uploaded parts (the step 2's) to remote via another presigned
  *    "completion URL" that we also got in step 1. Like step 2, there are 2
- *    variants of this - one where we directly tell the remote (S3), and one
- *    where we report via a worker.
+ *    variants of this - one where we directly tell the remote (S3)
+ *    ({@link completeMultipartUpload}), and one where we report via a worker
+ *    ({@link completeMultipartUploadViaWorker}).
  */
 export const completeMultipartUpload = (
     completionURL: string,
@@ -406,7 +396,7 @@ export const completeMultipartUpload = (
 /**
  * Variant of {@link completeMultipartUpload} that uses the CF worker.
  */
-export const completeMultipartUploadViaProxy = async (
+export const completeMultipartUploadViaWorker = async (
     completionURL: string,
     completedParts: MultipartCompletedPart[],
 ) => {
