@@ -1607,17 +1607,10 @@ async function uploadStreamUsingMultipart(
         { CompleteMultipartUpload: { Part: partEtags } },
         { compact: true, ignoreComment: true, spaces: 4 },
     );
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_MP) {
-        console.log(cBody);
-        console.log(createMultipartUploadRequestBody(completedParts));
-    }
     if (!isCFUploadProxyDisabled) {
         await photosHTTPClient.completeMultipartUploadV2(completeURL, cBody);
     } else {
-        await completeMultipartUpload(
-            completeURL,
-            createMultipartUploadRequestBody(completedParts),
-        );
+        await completeMultipartUpload(completeURL, completedParts);
     }
 
     return { objectKey: multipartUploadURLs.objectKey, fileSize };

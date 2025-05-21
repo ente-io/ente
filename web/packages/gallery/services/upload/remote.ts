@@ -267,9 +267,6 @@ export interface MultipartCompletedPart {
      *
      * The part number indicates the sequential ordering where this part belongs
      * in the overall file's data.
-     *
-     * The part number must start at 1 and the part numbers that get passed to
-     * {@link createMultipartUploadRequestBody} must be consecutive.
      */
     partNumber: number;
     /**
@@ -349,8 +346,8 @@ export const createMultipartUploadRequestBody = (
  * @param completionURL A presigned URL to which the final status of the
  * uploaded parts should be reported to.
  *
- * @param reqBody A XML string containing information about the parts which were
- * uploaded.
+ * @param completedParts Information about all the parts of the file that have
+ * been uploaded. The part numbers must start at 1 and must be consecutive.
  *
  * [Note: Multipart uploads]
  *
@@ -395,6 +392,21 @@ export const createMultipartUploadRequestBody = (
  *    where we report via a worker.
  */
 export const completeMultipartUpload = async (
+    completionURL: string,
+    completedParts: MultipartCompletedPart[],
+) =>
+    retryEnsuringHTTPOk(() =>
+        fetch(completionURL, {
+            method: "POST",
+            headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
+            body: createMultipartUploadRequestBody(completedParts),
+        }),
+    );
+
+/**
+ * Variant of {@link completeMultipartUpload} that uses the CF worker.
+ */
+export const completeMultipartUploadViaProxy = async (
     completionURL: string,
     reqBody: string,
 ) =>
