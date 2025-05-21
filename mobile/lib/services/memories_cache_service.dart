@@ -275,7 +275,7 @@ class MemoriesCacheService {
         id: memory.id.hashCode,
         channelID: "onThisDay",
         channelName: "On this day",
-        payload: "onThisDay_${memory.id}",
+        payload: memory.id,
         dateTime: scheduleTime,
       );
       scheduledDates.add(scheduleTime);

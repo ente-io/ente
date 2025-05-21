@@ -854,11 +854,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (payload != null) {
       debugPrint('notification payload: $payload');
       if (payload.toLowerCase().contains("onthisday")) {
-        final String memoryID = payload.substring(payload.indexOf("_") + 1);
-        // ignore: unawaited_futures
         await memoriesCacheService.goToMemoryFromMemoryID(
           context,
-          memoryID,
+          payload,
         );
       } else {
         final collectionID = Uri.parse(payload).queryParameters["collectionID"];
