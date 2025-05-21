@@ -12,6 +12,7 @@ import 'package:photos/services/machine_learning/face_ml/person/person_service.d
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
+import "package:photos/ui/viewer/people/people_page.dart";
 import 'package:photos/utils/navigation_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:synchronized/synchronized.dart';
@@ -160,6 +161,22 @@ class PeopleHomeWidgetService {
       _logger.warning("Cannot launch widget: file with ID $fileId not found");
       return;
     }
+
+    final person = await PersonService.instance.getPerson(personId);
+    if (person == null) {
+      _logger
+          .warning("Cannot launch widget: person with ID $personId not found");
+      return;
+    }
+
+    routeToPage(
+      context,
+      PeoplePage(
+        person: person,
+        searchResult: null,
+      ),
+      forceCustomPageRoute: true,
+    ).ignore();
 
     await routeToPage(
       context,
