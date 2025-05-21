@@ -1,6 +1,7 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Enter your email address",
+  "enterYourNewEmailAddress": "Enter your new email address",
   "accountWelcomeBack": "Welcome back!",
   "emailAlreadyRegistered": "Email already registered.",
   "emailNotRegistered": "Email not registered.",
@@ -1739,5 +1740,9 @@
   "cLFamilyPlanDesc": "You can now set limits on how much storage your family members can use.",
   "cLBulkEdit": "Bulk Edit dates",
   "cLBulkEditDesc": "You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.",
-  "curatedMemories": "Curated memories"
+  "curatedMemories": "Curated memories",
+  "deleteMultipleAlbumDialog": "Also delete the photos (and videos) present in these {count} albums from <bold>all</bold> other albums they are part of?",
+  "addParticipants": "Add participants",
+  "selectedAlbums": "{count} selected",
+  "actionNotSupportedOnFavouritesAlbum": "Action not supported on Favourites album"
 }

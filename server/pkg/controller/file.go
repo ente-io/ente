@@ -59,7 +59,7 @@ type FileController struct {
 const StorageOverflowAboveSubscriptionLimit = int64(1024 * 1024 * 50)
 
 // MaxFileSize is the maximum file size a user can upload
-const MaxFileSize = int64(1024 * 1024 * 1024 * 5)
+const MaxFileSize = int64(1024 * 1024 * 1024 * 10)
 
 // MaxUploadURLsLimit indicates the max number of upload urls which can be request in one go
 const MaxUploadURLsLimit = 50

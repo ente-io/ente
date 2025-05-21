@@ -133,11 +133,12 @@ class SearchableItemWidget extends StatelessWidget {
                 ],
               ),
             ),
-            const Flexible(
+            Flexible(
               flex: 1,
               child: IconButtonWidget(
                 icon: Icons.chevron_right_outlined,
                 iconButtonType: IconButtonType.secondary,
+                iconColor: colorScheme.blurStrokePressed,
               ),
             ),
           ],
