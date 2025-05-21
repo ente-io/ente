@@ -270,23 +270,27 @@ export class PhotosUploadHTTPClient {
 }
 
 /**
- * Information about an individual part of a multipart upload.
+ * Information about an individual part of a multipart upload that has been
+ * uploaded to the remote (S3 or proxy).
  *
  * See: [Note: Multipart uploads].
  */
-interface MultipartUploadPartInfo {
+interface MultipartCompletedPart {
     /**
      * The part number (1-indexed).
      *
-     * The part number indicates the sequential ordering (starting from 1) where
-     * this part belongs in the overall file's data.
+     * The part number indicates the sequential ordering where this part belongs
+     * in the overall file's data.
+     *
+     * The part number must start at 1 and the part numbers that get passed to
+     * {@link createMultipartUploadRequestBody} must be consecutive.
      */
     partNumber: number;
     /**
      * The part "ETag".
      *
-     * This is the value of the "ETag" header in the remote response we received
-     * when the part was uploaded.
+     * This is the Entity tag (retrieved as the "ETag" response header) returned
+     * by remote when the part was uploaded.
      */
     etag: string;
 }
@@ -298,10 +302,53 @@ interface MultipartUploadPartInfo {
  * @param parts Information about the parts that were uploaded.
  */
 export const createMultipartUploadRequestBody = (
-    parts: MultipartUploadPartInfo[],
+    parts: MultipartCompletedPart[],
 ): string => {
     // To avoid introducing a dependency on a XML library, we construct the
     // requisite XML by hand.
+    //
+    // Example:
+    //
+    //     <CompleteMultipartUpload>
+    //         <Part>
+    //             <PartNumber>1</PartNumber>
+    //             <ETag>"1b3e6cdb1270c0b664076f109a7137c1"</ETag>
+    //         </Part>
+    //         <Part>
+    //             <PartNumber>2</PartNumber>
+    //             <ETag>"6049d6384a9e65694c833a3aca6584fd"</ETag>
+    //         </Part>
+    //         <Part>
+    //             <PartNumber>3</PartNumber>
+    //             <ETag>"331747eae8068f03b844e6f28cc0ed23"</ETag>
+    //         </Part>
+    //     </CompleteMultipartUpload>
+    //
+    //
+    // Spec:
+    // https://docs.aws.amazon.com/AmazonS3/latest/API/API_CompleteMultipartUpload.html
+    //
+    //     <CompleteMultipartUpload>
+    //        <Part>
+    //           <PartNumber>integer</PartNumber>
+    //           <ETag>string</ETag>
+    //        </Part>
+    //        ...
+    //     </CompleteMultipartUpload>
+    //
+    // Note that in the example given on the spec page, the etag strings are quoted:
+    //
+    //     <CompleteMultipartUpload>
+    //        <Part>
+    //           <PartNumber>1</PartNumber>
+    //           <ETag>"a54357aff0632cce46d942af68356b38"</ETag>
+    //        </Part>
+    //        ...
+    //     </CompleteMultipartUpload>
+    //
+    // No extra quotes need to be added, the etag values we get from remote
+    // already quoted, we just need to pass them verbatim.
+
     const result = "";
     return result;
 };
