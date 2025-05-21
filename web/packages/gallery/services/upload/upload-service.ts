@@ -44,7 +44,6 @@ import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { CustomError, handleUploadError } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
-import * as convert from "xml-js";
 import type { UploadableUploadItem, UploadItem } from ".";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
@@ -53,8 +52,11 @@ import {
 } from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
+    completeMultipartUpload,
+    completeMultipartUploadViaWorker,
     PhotosUploadHTTPClient,
     PublicAlbumsUploadHTTPClient,
+    type MultipartCompletedPart,
     type ObjectUploadURL,
 } from "./remote";
 import type { ParsedMetadataJSON } from "./takeout";
@@ -1540,11 +1542,6 @@ const uploadToBucket = async (
     }
 };
 
-interface PartEtag {
-    PartNumber: number;
-    ETag: string;
-}
-
 async function uploadStreamUsingMultipart(
     fileLocalID: number,
     dataStream: EncryptedFileStream,
@@ -1563,7 +1560,7 @@ async function uploadStreamUsingMultipart(
     const streamReader = stream.getReader();
     const percentPerPart =
         RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
-    const partEtags: PartEtag[] = [];
+    const completedParts: MultipartCompletedPart[] = [];
     let fileSize = 0;
     for (const [
         index,
@@ -1571,8 +1568,8 @@ async function uploadStreamUsingMultipart(
     ] of multipartUploadURLs.partURLs.entries()) {
         abortIfCancelled();
 
-        const uploadChunk = await combineChunksToFormUploadPart(streamReader);
-        fileSize += uploadChunk.length;
+        const uploadPart = await nextMultipartUploadPart(streamReader);
+        fileSize += uploadPart.length;
         const progressTracker = makeProgressTracker(
             fileLocalID,
             percentPerPart,
@@ -1582,45 +1579,44 @@ async function uploadStreamUsingMultipart(
         if (!isCFUploadProxyDisabled) {
             eTag = await photosHTTPClient.putFilePartV2(
                 fileUploadURL,
-                uploadChunk,
+                uploadPart,
                 progressTracker,
             );
         } else {
             eTag = await photosHTTPClient.putFilePart(
                 fileUploadURL,
-                uploadChunk,
+                uploadPart,
                 progressTracker,
             );
         }
-        partEtags.push({ PartNumber: index + 1, ETag: eTag });
+        completedParts.push({ partNumber: index + 1, eTag });
     }
     const { done } = await streamReader.read();
     if (!done) throw new Error("More chunks than expected");
 
-    const completeURL = multipartUploadURLs.completeURL;
-    const cBody = convert.js2xml(
-        { CompleteMultipartUpload: { Part: partEtags } },
-        { compact: true, ignoreComment: true, spaces: 4 },
-    );
+    const completionURL = multipartUploadURLs.completeURL;
     if (!isCFUploadProxyDisabled) {
-        await photosHTTPClient.completeMultipartUploadV2(completeURL, cBody);
+        await completeMultipartUploadViaWorker(completionURL, completedParts);
     } else {
-        await photosHTTPClient.completeMultipartUpload(completeURL, cBody);
+        await completeMultipartUpload(completionURL, completedParts);
     }
 
     return { objectKey: multipartUploadURLs.objectKey, fileSize };
 }
 
-async function combineChunksToFormUploadPart(
+/**
+ * Construct byte arrays, up to 20 MB each, containing the contents of (up to)
+ * the next 5 {@link streamEncryptionChunkSize} chunks read from the given
+ * {@link streamReader}.
+ */
+const nextMultipartUploadPart = async (
     streamReader: ReadableStreamDefaultReader<Uint8Array>,
-) {
-    const combinedChunks = [];
+) => {
+    const chunks = [];
     for (let i = 0; i < multipartChunksPerPart; i++) {
         const { done, value: chunk } = await streamReader.read();
-        if (done) {
-            break;
-        }
-        combinedChunks.push(chunk);
+        if (done) break;
+        chunks.push(chunk);
     }
-    return mergeUint8Arrays(combinedChunks);
-}
+    return mergeUint8Arrays(chunks);
+};
