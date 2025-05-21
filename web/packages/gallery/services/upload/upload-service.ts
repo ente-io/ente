@@ -1572,8 +1572,8 @@ async function uploadStreamUsingMultipart(
     ] of multipartUploadURLs.partURLs.entries()) {
         abortIfCancelled();
 
-        const uploadChunk = await combineChunksToFormUploadPart(streamReader);
-        fileSize += uploadChunk.length;
+        const uploadPart = await nextMultipartUploadPart(streamReader);
+        fileSize += uploadPart.length;
         const progressTracker = makeProgressTracker(
             fileLocalID,
             percentPerPart,
@@ -1583,13 +1583,13 @@ async function uploadStreamUsingMultipart(
         if (!isCFUploadProxyDisabled) {
             eTag = await photosHTTPClient.putFilePartV2(
                 fileUploadURL,
-                uploadChunk,
+                uploadPart,
                 progressTracker,
             );
         } else {
             eTag = await photosHTTPClient.putFilePart(
                 fileUploadURL,
-                uploadChunk,
+                uploadPart,
                 progressTracker,
             );
         }
@@ -1616,16 +1616,19 @@ async function uploadStreamUsingMultipart(
     return { objectKey: multipartUploadURLs.objectKey, fileSize };
 }
 
-async function combineChunksToFormUploadPart(
+/**
+ * Construct byte arrays, up to 20 MB each, containing the contents of (up to)
+ * the next 5 {@link streamEncryptionChunkSize} chunks read from the given
+ * {@link streamReader}.
+ */
+const nextMultipartUploadPart = async (
     streamReader: ReadableStreamDefaultReader<Uint8Array>,
-) {
-    const combinedChunks = [];
+) => {
+    const chunks = [];
     for (let i = 0; i < multipartChunksPerPart; i++) {
         const { done, value: chunk } = await streamReader.read();
-        if (done) {
-            break;
-        }
-        combinedChunks.push(chunk);
+        if (done) break;
+        chunks.push(chunk);
     }
-    return mergeUint8Arrays(combinedChunks);
-}
+    return mergeUint8Arrays(chunks);
+};
