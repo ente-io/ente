@@ -6,7 +6,12 @@ import type { BytesOrB64 } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
 import { ensureElectron } from "ente-base/electron";
 import { basename, nameAndExtension } from "ente-base/file-name";
-import type { PublicAlbumsCredentials } from "ente-base/http";
+import {
+    ensureOk,
+    retryAsyncOperation,
+    type HTTPRequestRetrier,
+    type PublicAlbumsCredentials,
+} from "ente-base/http";
 import log from "ente-base/log";
 import { extractExif } from "ente-gallery/services/exif";
 import {
@@ -1543,6 +1548,41 @@ const uploadToBucket = async (
     }
 };
 
+/**
+ * A factory method that returns a function which will act like variant of
+ * {@link retryEnsuringHTTPOk} and also understands the cancellation mechanism
+ * used by the upload subsystem.
+ *
+ * @param abortIfCancelled A function that aborts the operation by throwing a
+ * error with the message set to {@link CustomError.UPLOAD_CANCELLED} if the
+ * user has cancelled the upload.
+ *
+ * @return A function of type {@link HTTPRequestRetrier} that can be used to
+ * retry requests. This function will retry requests (obtained afresh each time
+ * by calling the provided {@link request} function) in the same manner as
+ * {@link retryEnsuringHTTPOk}. Additionally, it will call
+ * {@link abortIfCancelled} before each attempt, and also bypass the retries
+ * when the abort happens on such cancellations.
+ */
+const createAbortableRetryEnsuringHTTPOk =
+    (abortIfCancelled: () => void): HTTPRequestRetrier =>
+    (request: () => Promise<Response>) =>
+        retryAsyncOperation(
+            async () => {
+                abortIfCancelled();
+                const r = await request();
+                ensureOk(r);
+                return r;
+            },
+            (e) => {
+                if (
+                    e instanceof Error &&
+                    e.message == CustomError.UPLOAD_CANCELLED
+                )
+                    throw e;
+            },
+        );
+
 async function uploadStreamUsingMultipart(
     fileLocalID: number,
     dataStream: EncryptedFileStream,
@@ -1550,6 +1590,9 @@ async function uploadStreamUsingMultipart(
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
 ) {
+    const abortableRetryEnsuringHTTPOk =
+        createAbortableRetryEnsuringHTTPOk(abortIfCancelled);
+
     const uploadPartCount = Math.ceil(
         dataStream.chunkCount / multipartChunksPerPart,
     );
@@ -1604,9 +1647,13 @@ async function uploadStreamUsingMultipart(
 
     const completionURL = multipartUploadURLs.completeURL;
     if (!isCFUploadProxyDisabled) {
-        await completeMultipartUploadViaWorker(completionURL, completedParts);
+        await abortableRetryEnsuringHTTPOk(() =>
+            completeMultipartUploadViaWorker(completionURL, completedParts),
+        );
     } else {
-        await completeMultipartUpload(completionURL, completedParts);
+        await abortableRetryEnsuringHTTPOk(() =>
+            completeMultipartUpload(completionURL, completedParts),
+        );
     }
 
     return { objectKey: multipartUploadURLs.objectKey, fileSize };

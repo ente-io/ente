@@ -202,6 +202,10 @@ export const retryAsyncOperation = async <T>(
     }
 };
 
+export type HTTPRequestRetrier = (
+    request: () => Promise<Response>,
+) => Promise<Response>;
+
 /**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
  *
@@ -209,7 +213,9 @@ export const retryAsyncOperation = async <T>(
  * matched by {@link ensureOk}) is also counted as an error when considering if
  * a request should be retried.
  */
-export const retryEnsuringHTTPOk = (request: () => Promise<Response>) =>
+export const retryEnsuringHTTPOk: HTTPRequestRetrier = (
+    request: () => Promise<Response>,
+) =>
     retryAsyncOperation(async () => {
         const r = await request();
         ensureOk(r);
@@ -223,7 +229,9 @@ export const retryEnsuringHTTPOk = (request: () => Promise<Response>) =>
  * This is similar to {@link retryEnsuringHTTPOk}, except it stops retrying if
  * remote responds with a 4xx HTTP status.
  */
-export const retryEnsuringHTTPOkOr4xx = (request: () => Promise<Response>) =>
+export const retryEnsuringHTTPOkOr4xx: HTTPRequestRetrier = (
+    request: () => Promise<Response>,
+) =>
     retryAsyncOperation(
         async () => {
             const r = await request();

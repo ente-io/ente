@@ -21,38 +21,6 @@ import { z } from "zod";
 import type { MultipartUploadURLs, UploadFile } from "./upload-service";
 
 /**
- * A variant of {@link retryEnsuringHTTPOk} that understands the cancellation
- * mechanism used by the upload subsystem.
- *
- * @param abortIfCancelled A function that aborts the operation by throwing a
- * error with the message set to {@link CustomError.UPLOAD_CANCELLED} if the
- * user has cancelled the upload.
- *
- * @param request A function that returns a new promise for a request that we
- * want to retry.
- *
- * This function will retry requests (obtained afresh each time by calling
- * {@link request}) in the same manner as {@link retryEnsuringHTTPOk}.
- * Additionally, it will call {@link abortIfCancelled} before each attempt, and
- * also bypass the retries when the abort happens on such cancellations.
- */
-export const retryEnsuringHTTPOkUnlessCanclelled = (
-    abortIfCancelled: () => void,
-    request: () => Promise<Response>,
-) =>
-    retryAsyncOperation(
-        async () => {
-            const r = await request();
-            ensureOk(r);
-            return r;
-        },
-        (e) => {
-            if (e instanceof Error && e.message == CustomError.UPLOAD_CANCELLED)
-                throw e;
-        },
-    );
-
-/**
  * A pre-signed URL alongwith the associated object key that is later used to
  * refer to file contents (the "object") that were uploaded to this URL.
  */
@@ -452,13 +420,11 @@ export const completeMultipartUpload = (
     completionURL: string,
     completedParts: MultipartCompletedPart[],
 ) =>
-    retryEnsuringHTTPOk(() =>
-        fetch(completionURL, {
-            method: "POST",
-            headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
-            body: createMultipartUploadRequestBody(completedParts),
-        }),
-    );
+    fetch(completionURL, {
+        method: "POST",
+        headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
+        body: createMultipartUploadRequestBody(completedParts),
+    });
 
 /**
  * Variant of {@link completeMultipartUpload} that uses the CF worker.
@@ -466,20 +432,16 @@ export const completeMultipartUpload = (
 export const completeMultipartUploadViaWorker = async (
     completionURL: string,
     completedParts: MultipartCompletedPart[],
-) => {
-    const origin = await uploaderOrigin();
-    return retryEnsuringHTTPOk(() =>
-        fetch(`${origin}/multipart-complete`, {
-            method: "POST",
-            headers: {
-                ...publicRequestHeaders(),
-                "Content-Type": "text/xml",
-                "UPLOAD-URL": completionURL,
-            },
-            body: createMultipartUploadRequestBody(completedParts),
-        }),
-    );
-};
+) =>
+    fetch(`${await uploaderOrigin()}/multipart-complete`, {
+        method: "POST",
+        headers: {
+            ...publicRequestHeaders(),
+            "Content-Type": "text/xml",
+            "UPLOAD-URL": completionURL,
+        },
+        body: createMultipartUploadRequestBody(completedParts),
+    });
 
 /**
  * Lowest layer for file upload related HTTP operations when we're running in
