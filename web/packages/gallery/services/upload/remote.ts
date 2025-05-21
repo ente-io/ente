@@ -236,20 +236,6 @@ export class PhotosUploadHTTPClient {
         }
     }
 
-    async completeMultipartUpload(completeURL: string, reqBody: unknown) {
-        try {
-            await retryAsyncOperation(() =>
-                // @ts-ignore
-                HTTPService.post(completeURL, reqBody, null, {
-                    "content-type": "text/xml",
-                }),
-            );
-        } catch (e) {
-            log.error("put file in parts failed", e);
-            throw e;
-        }
-    }
-
     async completeMultipartUploadV2(completeURL: string, reqBody: unknown) {
         try {
             const origin = await uploaderOrigin();
@@ -408,7 +394,7 @@ export const createMultipartUploadRequestBody = (
  *    variants of this - one where we directly tell the remote (S3), and one
  *    where we report via a worker.
  */
-export const _completeMultipartUpload = async (
+export const completeMultipartUpload = async (
     completionURL: string,
     reqBody: string,
 ) =>

@@ -53,7 +53,7 @@ import {
 } from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
-    _completeMultipartUpload,
+    completeMultipartUpload,
     createMultipartUploadRequestBody,
     PhotosUploadHTTPClient,
     PublicAlbumsUploadHTTPClient,
@@ -1614,14 +1614,10 @@ async function uploadStreamUsingMultipart(
     if (!isCFUploadProxyDisabled) {
         await photosHTTPClient.completeMultipartUploadV2(completeURL, cBody);
     } else {
-        if (process.env.NEXT_PUBLIC_ENTE_WIP_MP) {
-            await _completeMultipartUpload(
-                completeURL,
-                createMultipartUploadRequestBody(completedParts),
-            );
-        } else {
-            await photosHTTPClient.completeMultipartUpload(completeURL, cBody);
-        }
+        await completeMultipartUpload(
+            completeURL,
+            createMultipartUploadRequestBody(completedParts),
+        );
     }
 
     return { objectKey: multipartUploadURLs.objectKey, fileSize };
