@@ -56,6 +56,7 @@ import {
     completeMultipartUploadViaWorker,
     PhotosUploadHTTPClient,
     PublicAlbumsUploadHTTPClient,
+    putFilePart,
     type MultipartCompletedPart,
     type ObjectUploadURL,
 } from "./remote";
@@ -1564,12 +1565,12 @@ async function uploadStreamUsingMultipart(
     let fileSize = 0;
     for (const [
         index,
-        fileUploadURL,
+        partUploadURL,
     ] of multipartUploadURLs.partURLs.entries()) {
         abortIfCancelled();
 
-        const uploadPart = await nextMultipartUploadPart(streamReader);
-        fileSize += uploadPart.length;
+        const partData = await nextMultipartUploadPart(streamReader);
+        fileSize += partData.length;
         const progressTracker = makeProgressTracker(
             fileLocalID,
             percentPerPart,
@@ -1578,16 +1579,23 @@ async function uploadStreamUsingMultipart(
         let eTag = null;
         if (!isCFUploadProxyDisabled) {
             eTag = await photosHTTPClient.putFilePartV2(
-                fileUploadURL,
-                uploadPart,
+                partUploadURL,
+                partData,
                 progressTracker,
             );
         } else {
-            eTag = await photosHTTPClient.putFilePart(
-                fileUploadURL,
-                uploadPart,
-                progressTracker,
-            );
+            if (process.env.NEXT_PUBLIC_ENTE_WIP_MP) {
+                eTag = await putFilePart(partUploadURL, partData, (...args) => {
+                    console.log("test progress", args);
+                });
+                if (!eTag) throw new Error(CustomError.ETAG_MISSING);
+            } else {
+                eTag = await photosHTTPClient.putFilePart(
+                    partUploadURL,
+                    partData,
+                    progressTracker,
+                );
+            }
         }
         completedParts.push({ partNumber: index + 1, eTag });
     }

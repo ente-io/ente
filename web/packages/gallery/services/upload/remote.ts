@@ -16,6 +16,7 @@ import { apiURL, uploaderOrigin } from "ente-base/origins";
 import { type EnteFile } from "ente-media/file";
 import { CustomError, handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import type { MultipartUploadURLs, UploadFile } from "./upload-service";
 
@@ -244,6 +245,39 @@ export class PhotosUploadHTTPClient {
 }
 
 /**
+ * Upload a part of a multipart upload using a pre-signed URL.
+ *
+ * See: [Note: Multipart uploads].
+ *
+ * @param partUploadURL A pre-signed URL that can be used to upload data to the
+ * remote S3-compatible storage.
+ *
+ * @param partData The part bytes to upload.
+ *
+ * @param onProgress A function to call to indicate upload progress.
+ *
+ * @returns the value of the "ETag" header in the remote response, or
+ * `undefined` if the ETag was not present in the response (this is not expected
+ * from remote in case of a successful response, but it can happen in case the
+ * user has some misconfigured browser extension which is blocking the ETag
+ * header from being parsed).
+ */
+export const putFilePart = async (
+    partUploadURL: string,
+    partData: Uint8Array,
+    onProgress: (bytesUploaded: number) => void,
+) => {
+    const res = await retryEnsuringHTTPOk(() =>
+        fetch(partUploadURL, {
+            method: "PUT",
+            headers: publicRequestHeaders(),
+            body: partData,
+        }),
+    );
+    return nullToUndefined(res.headers.get("etag"));
+};
+
+/**
  * Information about an individual part of a multipart upload that has been
  * uploaded to the remote (S3 or proxy).
  *
@@ -371,8 +405,9 @@ const createMultipartUploadRequestBody = (
  *
  * 2. Break the file to be uploaded into parts, and upload each part using a PUT
  *    request to one of the presigned URLs we got in step 1. There are two
- *    variants of this - one where we directly upload to the remote (S3), and
- *    one where we go via a worker.
+ *    variants of this - one where we directly upload to the remote (S3)
+ *    ({@link putFilePart}), and one where we go via a worker
+ *    ({@link putFilePartViaWorker}).
  *
  * 3. Once all the parts have been uploaded, send a consolidated report of all
  *    the uploaded parts (the step 2's) to remote via another presigned
