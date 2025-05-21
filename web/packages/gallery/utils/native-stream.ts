@@ -105,11 +105,16 @@ export const writeStream = async (
     const req = new Request(url, {
         // GET can't have a body
         method: "POST",
-        body: stream,
-        // @ts-expect-error TypeScript's libdom.d.ts does not include the
-        // "duplex" parameter, e.g. see
+        // [Note: duplex param required for stream body]
+        //
+        // The duplex parameter needs to be set to 'half' when streaming
+        // requests. However, TypeScript's libdom.d.ts does not include the
+        // "duplex" parameter, so we need to silence the tsc error. e.g. see
         // https://github.com/node-fetch/node-fetch/issues/1769.
+        //
+        // @ts-expect-error See: [Note: duplex param required for stream body]
         duplex: "half",
+        body: stream,
     });
 
     const res = await fetch(req);
@@ -227,11 +232,7 @@ export const initiateGenerateHLS = async (
     const url = `stream://video?${params.toString()}`;
     const res = await fetch(url, {
         method: "POST",
-        // The duplex option is required when body is a stream.
-        //
-        // @ts-expect-error TypeScript's libdom.d.ts does not include the
-        // "duplex" parameter, e.g. see
-        // https://github.com/node-fetch/node-fetch/issues/1769.
+        // @ts-expect-error See: [Note: duplex param required for stream body]
         duplex: "half",
         body,
     });
