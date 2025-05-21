@@ -1147,20 +1147,33 @@ const tryDetermineVideoDuration = async (uploadItem: UploadItem) => {
     }
 };
 
+/**
+ * Compute the hash of an item we're attempting to upload.
+ *
+ * The hash is retained in the file metadata, and is also used to detect
+ * duplicates during upload.
+ *
+ * This process can take a noticable amount of time. As an extreme case, for a
+ * 10 GB upload item, this can take a 2-3 minutes.
+ *
+ * @param uploadItem The {@link UploadItem} we're attempting to upload.
+ *
+ * @param worker A {@link CryptoWorker} to use for computing the hash.
+ */
 const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
     const { stream, chunkCount } = await readUploadItem(uploadItem);
-    const hashState = await worker.initChunkHashing();
+    const hashState = await worker.chunkHashInit();
 
     const streamReader = stream.getReader();
     for (let i = 0; i < chunkCount; i++) {
         const { done, value: chunk } = await streamReader.read();
         if (done) throw new Error("Less chunks than expected");
-        await worker.hashFileChunk(hashState, Uint8Array.from(chunk));
+        await worker.chunkHashUpdate(hashState, Uint8Array.from(chunk));
     }
 
     const { done } = await streamReader.read();
     if (!done) throw new Error("More chunks than expected");
-    return await worker.completeChunkHashing(hashState);
+    return await worker.chunkHashFinal(hashState);
 };
 
 /**
