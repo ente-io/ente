@@ -268,6 +268,63 @@ export class PhotosUploadHTTPClient {
 }
 
 /**
+ * Complete a multipart upload by reporting information about all the uploaded
+ * parts to the provided {@link completionURL}.
+ *
+ * @param completionURL The URL to which the final status of the uploaded parts
+ * should be reported to.
+ *
+ * @param reqBody Information about the parts which were uploaded.
+ *
+ * [Note: Multipart uploads]
+ *
+ * Multipart uploads are a mechanism to upload large files onto an remote
+ * storage bucket by breaking it into smaller chunks / "parts", uploading each
+ * part separately, and then reporting the consolidated information of all the
+ * uploaded parts to a URL that marks the upload as complete on remote.
+ *
+ * This allows greater resilience since uploads of individual parts can be
+ * retried independently without failing the entire upload on transient network
+ * issues. This also helps self hosters, since often cloud providers have limits
+ * to the size of single requests that they'll allow through (e.g. the
+ * Cloudflare free plan currently has a 100 MB request size limit).
+ *
+ * The flow is implemented in two ways:
+ *
+ * a. The normal way, where each requests is made to a remote S3 bucket directly
+ *    using the presigned URL.
+ *
+ * b. Using workers, where the requests are proxied via a worker near to the
+ *    user's network to speed the requests up.
+ *
+ * See the documentation of {@link shouldDisableCFUploadProxy} for more details
+ * about the via-worker flow.
+ *
+ * In both cases, the overall flow is roughly like the following:
+ *
+ * 1. Obtain multiple presigned URLs from remote (museum). The specific API call
+ *    will be different (because of the different authentication mechanisms)
+ *    when we're running in the context of the photos app and when we're running
+ *    in the context of the public albums app.
+ *
+ * 2. Break the file to be uploaded into parts, and upload each part using a PUT
+ *    request to one of the presigned URLs we got in step 1. There are two
+ *    variants of this - one where we directly upload to the remote (S3), and
+ *    one where we go via a worker.
+ *
+ * 3. Once all the parts have been uploaded, send a consolidated report of all
+ *    the uploaded parts (the step 2's) to remote via another presigned
+ *    "completion URL" that we also got in step 1. Like step 2, there are 2
+ *    variants of this - one where we directly tell the remote (S3), and one
+ *    where we report via a worker.
+ *
+ */
+export const _completeMultipartUpload = async (completionURL: string) => {
+
+}
+
+
+/**
  * Lowest layer for file upload related HTTP operations when we're running in
  * the context of the public albums app.
  */
