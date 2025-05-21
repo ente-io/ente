@@ -166,8 +166,8 @@ class ToShowMemory {
       memoryTypeFromString(json['type']),
       json['firstTimeToShow'],
       json['lastTimeToShow'],
-      json['calculationTime'],
       json['id'] ?? newID(json['type'] as String),
+      json['calculationTime'],
       personID: json['personID'],
       peopleMemoryType: json['peopleMemoryType'] != null
           ? peopleMemoryTypeFromString(json['peopleMemoryType'])
