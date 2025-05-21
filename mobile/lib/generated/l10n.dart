@@ -60,6 +60,16 @@ class S {
     );
   }
 
+  /// `Enter your new email address`
+  String get enterYourNewEmailAddress {
+    return Intl.message(
+      'Enter your new email address',
+      name: 'enterYourNewEmailAddress',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Welcome back!`
   String get accountWelcomeBack {
     return Intl.message(
