@@ -1628,9 +1628,11 @@ async function uploadStreamUsingMultipart(
             );
         } else {
             if (process.env.NEXT_PUBLIC_ENTE_WIP_MP) {
-                eTag = await putFilePart(partUploadURL, partData, (...args) => {
-                    console.log("test progress", args);
-                });
+                eTag = await putFilePart(
+                    partUploadURL,
+                    partData,
+                    abortableRetryEnsuringHTTPOk,
+                );
                 if (!eTag) throw new Error(CustomError.ETAG_MISSING);
             } else {
                 eTag = await photosHTTPClient.putFilePart(

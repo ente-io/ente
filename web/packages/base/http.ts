@@ -202,6 +202,13 @@ export const retryAsyncOperation = async <T>(
     }
 };
 
+/**
+ * A function that wraps the request(s) in retries if needed.
+ *
+ * See {@link retryEnsuringHTTPOk} for the canonical example. This typedef is to
+ * allow us to talk about and pass functions that behave similar to
+ * {@link retryEnsuringHTTPOk}, but perhaps with other additional checks.
+ */
 export type HTTPRequestRetrier = (
     request: () => Promise<Response>,
 ) => Promise<Response>;

@@ -8,7 +8,7 @@ import {
     ensureOk,
     publicRequestHeaders,
     retryAsyncOperation,
-    retryEnsuringHTTPOk,
+    type HTTPRequestRetrier,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
@@ -254,7 +254,7 @@ export class PhotosUploadHTTPClient {
  *
  * @param partData The part bytes to upload.
  *
- * @param onProgress A function to call to indicate upload progress.
+ * @param retrier A function to wrap the request in retries if needed.
  *
  * @returns the value of the "ETag" header in the remote response, or
  * `undefined` if the ETag was not present in the response (this is not expected
@@ -265,9 +265,9 @@ export class PhotosUploadHTTPClient {
 export const putFilePart = async (
     partUploadURL: string,
     partData: Uint8Array,
-    onProgress: (bytesUploaded: number) => void,
+    retrier: HTTPRequestRetrier,
 ) => {
-    const res = await retryEnsuringHTTPOk(() =>
+    const res = await retrier(() =>
         fetch(partUploadURL, {
             method: "PUT",
             headers: publicRequestHeaders(),
