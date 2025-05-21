@@ -853,22 +853,31 @@ class _HomeWidgetState extends State<HomeWidget> {
     final String? payload = notificationResponse.payload;
     if (payload != null) {
       debugPrint('notification payload: $payload');
-      final collectionID = Uri.parse(payload).queryParameters["collectionID"];
-      if (collectionID != null) {
-        final collection = CollectionsService.instance
-            .getCollectionByID(int.parse(collectionID))!;
-        final thumbnail =
-            await CollectionsService.instance.getCover(collection);
+      if (payload.toLowerCase().contains("onthisday")) {
+        final String memoryID = payload.substring(payload.indexOf("_") + 1);
         // ignore: unawaited_futures
-        routeToPage(
+        await memoriesCacheService.goToMemoryFromMemoryID(
           context,
-          CollectionPage(
-            CollectionWithThumbnail(
-              collection,
-              thumbnail,
-            ),
-          ),
+          memoryID,
         );
+      } else {
+        final collectionID = Uri.parse(payload).queryParameters["collectionID"];
+        if (collectionID != null) {
+          final collection = CollectionsService.instance
+              .getCollectionByID(int.parse(collectionID))!;
+          final thumbnail =
+              await CollectionsService.instance.getCover(collection);
+          // ignore: unawaited_futures
+          routeToPage(
+            context,
+            CollectionPage(
+              CollectionWithThumbnail(
+                collection,
+                thumbnail,
+              ),
+            ),
+          );
+        }
       }
     }
   }

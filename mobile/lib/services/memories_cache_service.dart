@@ -444,6 +444,8 @@ class MemoriesCacheService {
           "No memories found in cache, force updating cache. Possible severe caching issue",
         );
         await updateCache(forced: true);
+      } else {
+        _logger.info("Found memories in cache");
       }
       if (_cachedMemories == null || _cachedMemories!.isEmpty) {
         _logger
@@ -494,6 +496,39 @@ class MemoriesCacheService {
         initialIndex: fileIdx,
         memories: allMemories[memoryIdx].memories,
         child: FullScreenMemory(allMemories[memoryIdx].title, fileIdx),
+      ),
+      forceCustomPageRoute: true,
+    );
+  }
+
+  Future<void> goToMemoryFromMemoryID(
+    BuildContext context,
+    String memoryID,
+  ) async {
+    final allMemories = await getMemories();
+    if (allMemories.isEmpty) return;
+    int memoryIdx = 0;
+    bool found = false;
+    memoryLoop:
+    for (final memory in _cachedMemories!) {
+      if (memory.id == memoryID) {
+        found = true;
+        break memoryLoop;
+      }
+      memoryIdx++;
+    }
+    if (!found) {
+      _logger.warning(
+        "Could not find memory with memoryID: $memoryID",
+      );
+      return;
+    }
+    await routeToPage(
+      context,
+      FullScreenMemoryDataUpdater(
+        initialIndex: 0,
+        memories: allMemories[memoryIdx].memories,
+        child: FullScreenMemory(allMemories[memoryIdx].title, 0),
       ),
       forceCustomPageRoute: true,
     );
