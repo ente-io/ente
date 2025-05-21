@@ -6,7 +6,9 @@ import {
     authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
     ensureOk,
+    publicRequestHeaders,
     retryAsyncOperation,
+    retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
@@ -18,12 +20,18 @@ import { z } from "zod";
 import type { MultipartUploadURLs, UploadFile } from "./upload-service";
 
 /**
- * A pre-signed URL alongwith the associated object key.
+ * A pre-signed URL alongwith the associated object key that is later used to
+ * refer to file contents (the "object") that were uploaded to this URL.
  */
 const ObjectUploadURL = z.object({
-    /** A pre-signed URL that can be used to upload data to S3. */
+    /**
+     * A pre-signed URL that can be used to upload data to an S3-compatible
+     * remote.
+     */
     objectKey: z.string(),
-    /** The objectKey with which remote will refer to this object. */
+    /**
+     * The objectKey with which remote (museum) will refer to this object.
+     */
     url: z.string(),
 });
 
@@ -233,39 +241,178 @@ export class PhotosUploadHTTPClient {
             throw e;
         }
     }
-
-    async completeMultipartUpload(completeURL: string, reqBody: unknown) {
-        try {
-            await retryAsyncOperation(() =>
-                // @ts-ignore
-                HTTPService.post(completeURL, reqBody, null, {
-                    "content-type": "text/xml",
-                }),
-            );
-        } catch (e) {
-            log.error("put file in parts failed", e);
-            throw e;
-        }
-    }
-
-    async completeMultipartUploadV2(completeURL: string, reqBody: unknown) {
-        try {
-            const origin = await uploaderOrigin();
-            await retryAsyncOperation(() =>
-                HTTPService.post(
-                    `${origin}/multipart-complete`,
-                    reqBody,
-                    // @ts-ignore
-                    null,
-                    { "content-type": "text/xml", "UPLOAD-URL": completeURL },
-                ),
-            );
-        } catch (e) {
-            log.error("put file in parts failed", e);
-            throw e;
-        }
-    }
 }
+
+/**
+ * Information about an individual part of a multipart upload that has been
+ * uploaded to the remote (S3 or proxy).
+ *
+ * See: [Note: Multipart uploads].
+ */
+export interface MultipartCompletedPart {
+    /**
+     * The part number (1-indexed).
+     *
+     * The part number indicates the sequential ordering where this part belongs
+     * in the overall file's data.
+     */
+    partNumber: number;
+    /**
+     * The part "ETag".
+     *
+     * This is the Entity tag (retrieved as the "ETag" response header) returned
+     * by remote when the part was uploaded.
+     */
+    eTag: string;
+}
+
+/**
+ * Construct an XML string of the format expected as the request body for
+ * {@link _completeMultipartUpload} or
+ * {@link _completeMultipartUploadViaWorker}.
+ *
+ * @param parts Information about the parts that were uploaded.
+ */
+const createMultipartUploadRequestBody = (
+    parts: MultipartCompletedPart[],
+): string => {
+    // To avoid introducing a dependency on a XML library, we construct the
+    // requisite XML by hand.
+    //
+    // Example:
+    //
+    //     <CompleteMultipartUpload>
+    //         <Part>
+    //             <PartNumber>1</PartNumber>
+    //             <ETag>"1b3e6cdb1270c0b664076f109a7137c1"</ETag>
+    //         </Part>
+    //         <Part>
+    //             <PartNumber>2</PartNumber>
+    //             <ETag>"6049d6384a9e65694c833a3aca6584fd"</ETag>
+    //         </Part>
+    //         <Part>
+    //             <PartNumber>3</PartNumber>
+    //             <ETag>"331747eae8068f03b844e6f28cc0ed23"</ETag>
+    //         </Part>
+    //     </CompleteMultipartUpload>
+    //
+    //
+    // Spec:
+    // https://docs.aws.amazon.com/AmazonS3/latest/API/API_CompleteMultipartUpload.html
+    //
+    //     <CompleteMultipartUpload>
+    //        <Part>
+    //           <PartNumber>integer</PartNumber>
+    //           <ETag>string</ETag>
+    //        </Part>
+    //        ...
+    //     </CompleteMultipartUpload>
+    //
+    // Note that in the example given on the spec page, the etag strings are quoted:
+    //
+    //     <CompleteMultipartUpload>
+    //        <Part>
+    //           <PartNumber>1</PartNumber>
+    //           <ETag>"a54357aff0632cce46d942af68356b38"</ETag>
+    //        </Part>
+    //        ...
+    //     </CompleteMultipartUpload>
+    //
+    // No extra quotes need to be added, the etag values we get from remote
+    // already quoted, we just need to pass them verbatim.
+
+    const resultParts = parts.map(
+        (part) =>
+            `<Part><PartNumber>${part.partNumber}</PartNumber><ETag>${part.eTag}</ETag></Part>`,
+    );
+    return `<CompleteMultipartUpload>\n${resultParts.join("\n")}\n</CompleteMultipartUpload>`;
+};
+
+/**
+ * Complete a multipart upload by reporting information about all the uploaded
+ * parts to the provided {@link completionURL}.
+ *
+ * @param completionURL A presigned URL to which the final status of the
+ * uploaded parts should be reported to.
+ *
+ * @param completedParts Information about all the parts of the file that have
+ * been uploaded. The part numbers must start at 1 and must be consecutive.
+ *
+ * [Note: Multipart uploads]
+ *
+ * Multipart uploads are a mechanism to upload large files onto an remote
+ * storage bucket by breaking it into smaller chunks / "parts", uploading each
+ * part separately, and then reporting the consolidated information of all the
+ * uploaded parts to a URL that marks the upload as complete on remote.
+ *
+ * This allows greater resilience since uploads of individual parts can be
+ * retried independently without failing the entire upload on transient network
+ * issues. This also helps self hosters, since often cloud providers have limits
+ * to the size of single requests that they'll allow through (e.g. the
+ * Cloudflare free plan currently has a 100 MB request size limit).
+ *
+ * The flow is implemented in two ways:
+ *
+ * a. The normal way, where each requests is made to a remote S3 bucket directly
+ *    using the presigned URL.
+ *
+ * b. Using workers, where the requests are proxied via a worker near to the
+ *    user's network to speed the requests up.
+ *
+ * See the documentation of {@link shouldDisableCFUploadProxy} for more details
+ * about the via-worker flow.
+ *
+ * In both cases, the overall flow is roughly like the following:
+ *
+ * 1. Obtain multiple presigned URLs from remote (museum). The specific API call
+ *    will be different (because of the different authentication mechanisms)
+ *    when we're running in the context of the photos app and when we're running
+ *    in the context of the public albums app.
+ *
+ * 2. Break the file to be uploaded into parts, and upload each part using a PUT
+ *    request to one of the presigned URLs we got in step 1. There are two
+ *    variants of this - one where we directly upload to the remote (S3), and
+ *    one where we go via a worker.
+ *
+ * 3. Once all the parts have been uploaded, send a consolidated report of all
+ *    the uploaded parts (the step 2's) to remote via another presigned
+ *    "completion URL" that we also got in step 1. Like step 2, there are 2
+ *    variants of this - one where we directly tell the remote (S3)
+ *    ({@link completeMultipartUpload}), and one where we report via a worker
+ *    ({@link completeMultipartUploadViaWorker}).
+ */
+export const completeMultipartUpload = (
+    completionURL: string,
+    completedParts: MultipartCompletedPart[],
+) =>
+    retryEnsuringHTTPOk(() =>
+        fetch(completionURL, {
+            method: "POST",
+            headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
+            body: createMultipartUploadRequestBody(completedParts),
+        }),
+    );
+
+/**
+ * Variant of {@link completeMultipartUpload} that uses the CF worker.
+ */
+export const completeMultipartUploadViaWorker = async (
+    completionURL: string,
+    completedParts: MultipartCompletedPart[],
+) => {
+    const origin = await uploaderOrigin();
+    return retryEnsuringHTTPOk(() =>
+        fetch(`${origin}/multipart-complete`, {
+            method: "POST",
+            headers: {
+                ...publicRequestHeaders(),
+                "Content-Type": "text/xml",
+                "UPLOAD-URL": completionURL,
+            },
+            body: createMultipartUploadRequestBody(completedParts),
+        }),
+    );
+};
 
 /**
  * Lowest layer for file upload related HTTP operations when we're running in

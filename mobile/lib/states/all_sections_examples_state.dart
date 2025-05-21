@@ -96,9 +96,16 @@ class _AllSectionsExamplesProviderState
         _logger.info("'_debounceTimer: reloading all sections in search tab");
         final allSectionsExamples = <Future<List<SearchResult>>>[];
         for (SectionType sectionType in SectionType.values) {
-          allSectionsExamples.add(
-            sectionType.getData(context, limit: kSearchSectionLimit),
-          );
+          // Contacts section have been moved to shared collections tab
+          // temporarily from search tab. So we can skip computing data here
+          // since 'allSectionsExamples' is for search tab sections only.
+          if (sectionType == SectionType.contacts) {
+            allSectionsExamples.add(Future.value([]));
+          } else {
+            allSectionsExamples.add(
+              sectionType.getData(context, limit: kSearchSectionLimit),
+            );
+          }
         }
         try {
           allSectionsExamplesFuture = Future.wait<List<SearchResult>>(

@@ -513,5 +513,10 @@
   "free5GB": "<bold-green>ente</bold-green> Photos 上 5GB 可用空间",
   "loginWithAuthAccount": "使用您的认证账户登录",
   "freeStorageOffer": "购买 <bold-green>ente</bold-green> Photos 可享受 10% 优惠",
-  "freeStorageOfferDescription": "使用优惠码“AUTH”可享受首年 10% 折扣"
+  "freeStorageOfferDescription": "使用优惠码“AUTH”可享受首年 10% 折扣",
+  "advanced": "高级",
+  "algorithm": "算法",
+  "type": "类型",
+  "period": "周期",
+  "digits": "数字"
 }

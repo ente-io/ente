@@ -675,5 +675,7 @@
     "theme": "主题",
     "system": "系统",
     "light": "浅色",
-    "dark": "深色"
+    "dark": "深色",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }

@@ -845,8 +845,8 @@ class FileUploader {
       if ((e is StorageLimitExceededError ||
           e is FileTooLargeForPlanError ||
           e is NoActiveSubscriptionError)) {
-        // file upload can be be retried in such cases without user intervention
-        uploadHardFailure = false;
+        // file upload can not be retried in such cases without user intervention
+        uploadHardFailure = true;
       }
       if (isMultipartUpload && isPutOrUpdateFileError(e)) {
         await UploadLocksDB.instance.deleteMultipartTrack(lockKey);

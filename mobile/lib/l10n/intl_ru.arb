@@ -220,7 +220,7 @@
   "after1Month": "Через 1 месяц",
   "after1Year": "Через 1 год",
   "manageParticipants": "Управлять",
-  "albumParticipantsCount": "{count, plural, =0 {Нет участников} =1 {{count} участник} one {{count} участник} few {{count} участника} other {{count} участников}}",
+  "albumParticipantsCount": "{count, plural, =0 {Нет участников} =1 {{count} участник} other {{count} участников}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -371,7 +371,7 @@
   "deleteFromBoth": "Удалить из обоих мест",
   "newAlbum": "Новый альбом",
   "albums": "Альбомы",
-  "memoryCount": "{count, plural, =0{нет воспоминаний} one{{formattedCount} воспоминание} few{{formattedCount} воспоминания} other{{formattedCount} воспоминаний}}",
+  "memoryCount": "{count, plural, =0{нет воспоминаний} one{{formattedCount} воспоминание}  other{{formattedCount} воспоминаний}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -458,8 +458,8 @@
   "selectAll": "Выбрать все",
   "skip": "Пропустить",
   "updatingFolderSelection": "Обновление выбора папок...",
-  "itemCount": "{count, plural, one{{count} элемент} few{{count} элемента} other{{count} элементов}}",
-  "deleteItemCount": "{count, plural, =1 {Удалить {count} элемент} one {Удалить {count} элемент} few {Удалить {count} элемента} other {Удалить {count} элементов}}",
+  "itemCount": "{count, plural, one{{count} элемент} other{{count} элементов}}",
+  "deleteItemCount": "{count, plural, =1 {Удалить {count} элемент} other {Удалить {count} элементов}}",
   "duplicateItemsGroup": "{count} файлов, по {formattedSize} каждый",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -542,7 +542,7 @@
   },
   "remindToEmptyEnteTrash": "Также очистите «Корзину», чтобы освободить место",
   "sparkleSuccess": "✨ Успех",
-  "duplicateFileCountWithStorageSaved": "Вы удалили {count, plural, one{{count} дубликат} few{{count} дубликата} other{{count} дубликатов}}, освободив ({storageSaved}!)",
+  "duplicateFileCountWithStorageSaved": "Вы удалили {count, plural, one{{count} дубликат} other{{count} дубликатов}}, освободив ({storageSaved}!)",
   "@duplicateFileCountWithStorageSaved": {
     "description": "The text to display when the user has successfully cleaned up duplicate files",
     "type": "text",
@@ -824,7 +824,7 @@
   "referFriendsAnd2xYourPlan": "Пригласите друзей и удвойте свой тариф",
   "shareAlbumHint": "Откройте альбом и нажмите кнопку «Поделиться» в правом верхнем углу, чтобы поделиться.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "На элементах отображается количество дней, оставшихся до их безвозвратного удаления",
-  "trashDaysLeft": "{count, plural, =0 {Скоро} =1 {1 день} one{{count} день} few{{count} дня} other {{count} дней}}",
+  "trashDaysLeft": "{count, plural, =0 {Скоро} =1 {1 день}  other {{count} дней}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -898,7 +898,7 @@
   "unlock": "Разблокировать",
   "freeUpSpace": "Освободить место",
   "freeUpSpaceSaving": "{count, plural, =1 {Его можно удалить с устройства, чтобы освободить {formattedSize}} other {Их можно удалить с устройства, чтобы освободить {formattedSize}}}",
-  "filesBackedUpInAlbum": "{count, plural, one {{formattedNumber} файл в этом альбоме был успешно сохранён} few{{formattedNumber} файла в этом альбоме были успешно сохранены} other {{formattedNumber} файлов в этом альбоме были успешно сохранены}}",
+  "filesBackedUpInAlbum": "{count, plural, one {{formattedNumber} файл в этом альбоме был успешно сохранён} other {{formattedNumber} файлов в этом альбоме были успешно сохранены}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
     "placeholders": {
@@ -913,7 +913,7 @@
       }
     }
   },
-  "filesBackedUpFromDevice": "{count, plural, one {{formattedNumber} файл на этом устройстве был успешно сохранён} few{{formattedNumber} файла на этом устройстве были успешно сохранены} other {{formattedNumber} файлов на этом устройстве были успешно сохранены}}",
+  "filesBackedUpFromDevice": "{count, plural, one {{formattedNumber} файл на этом устройстве был успешно сохранён}  other {{formattedNumber} файлов на этом устройстве были успешно сохранены}}",
   "@filesBackedUpFromDevice": {
     "description": "Text to tell user how many files have been backed up from this device",
     "placeholders": {
@@ -1214,7 +1214,7 @@
   "searchHint4": "Местоположение",
   "searchHint5": "Скоро: Лица и магический поиск ✨",
   "addYourPhotosNow": "Добавьте ваши фото",
-  "searchResultCount": "{count, plural, one{{count} результат найден} few{{count} результата найдено} other {{count} результатов найдено}}",
+  "searchResultCount": "{count, plural, one{{count} результат найден} other {{count} результатов найдено}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
@@ -1409,7 +1409,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 соавторов} =1 {Добавлен 1 соавтор} one{Добавлен {count} соавтор} few{Добавлено {count} соавтора} other {Добавлено {count} соавторов}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Добавлено 0 соавторов} =1 {Добавлен 1 соавтор} other {Добавлено {count} соавторов}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1484,7 +1484,7 @@
   },
   "currentlyRunning": "выполняется",
   "ignored": "игнорируется",
-  "photosCount": "{count, plural, =0 {0 фотографий} =1 {1 фотография} one {{count} фотография} few {{count} фотографии} other {{count} фотографий}}",
+  "photosCount": "{count, plural, =0 {0 фотографий} =1 {1 фотография}  other {{count} фотографий}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1658,7 +1658,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Потоковое видео",
   "processingVideos": "Обработка видео",
   "streamDetails": "Информация о потоке",
   "processing": "Обработка",
@@ -1696,7 +1695,7 @@
   "selectedItemsWillBeRemovedFromThisPerson": "Выбранные элементы будут отвязаны от этого человека, но не удалены из вашей библиотеки.",
   "throughTheYears": "{dateFormat} сквозь годы",
   "thisWeekThroughTheYears": "Эта неделя сквозь годы",
-  "thisWeekXYearsAgo": "{count, plural, =1 {Эта неделя, {count} год назад} one{Эта неделя, {count} год назад} few{Эта неделя, {count} года назад}  other {Эта неделя, {count} лет назад}}",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Эта неделя, {count} год назад} other {Эта неделя, {count} лет назад}}",
   "youAndThem": "Вы и {name}",
   "admiringThem": "Любуясь {name}",
   "embracingThem": "Обнимая {name}",

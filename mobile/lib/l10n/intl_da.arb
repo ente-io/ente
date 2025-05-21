@@ -207,7 +207,7 @@
   "after1Month": "Efter 1 måned",
   "after1Year": "Efter 1 år",
   "manageParticipants": "Administrer",
-  "albumParticipantsCount": "{count, plural, one {}=0 {Ingen Deltagere} =1 {1 Deltager} other {{count} Deltagere}}",
+  "albumParticipantsCount": "{count, plural, =0 {Ingen Deltagere} =1 {1 Deltager} other {{count} Deltagere}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {

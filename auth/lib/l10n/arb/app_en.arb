@@ -173,6 +173,7 @@
   "invalidQRCode": "Invalid QR code",
   "noRecoveryKeyTitle": "No recovery key?",
   "enterEmailHint": "Enter your email address",
+  "enterNewEmailHint": "Enter your new email address",
   "invalidEmailTitle": "Invalid email address",
   "invalidEmailMessage": "Please enter a valid email address.",
   "deleteAccount": "Delete account",

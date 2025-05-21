@@ -77,8 +77,8 @@
     "more": "",
     "mouse_scroll": "",
     "pan": "",
-    "pinch": "",
-    "drag": "",
+    "pinch": "Pizzica",
+    "drag": "Trascina",
     "tap_inside_image": "",
     "tap_outside_image": "",
     "shortcuts": "",
@@ -675,5 +675,7 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": ""
 }

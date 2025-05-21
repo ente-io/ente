@@ -513,5 +513,9 @@
   "free5GB": "5GB kostenlos auf <bold-green>ente</bold-green> Photos",
   "loginWithAuthAccount": "Mit Ihrem Auth Account anmelden",
   "freeStorageOffer": "10% Rabatt für <bold-green>ente</bold-green> Photos",
-  "freeStorageOfferDescription": "Verwende den Code \"AUTH\", um 10% im ersten Jahr zu sparen"
+  "freeStorageOfferDescription": "Verwende den Code \"AUTH\", um 10% im ersten Jahr zu sparen",
+  "advanced": "Erweitert",
+  "algorithm": "Algorithmus",
+  "type": "Typ",
+  "digits": "Ziffern"
 }

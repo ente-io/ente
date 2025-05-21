@@ -192,7 +192,9 @@
       "slug": "blue_sky"
     },
     {
-      "title": "bonify"
+      "title": "bonify",
+      "slug": "bonify",
+      "altNames": ["bonify.de"]
     },
     {
       "title": "Booking",
@@ -302,6 +304,10 @@
     {
       "title": "CSGORoll",
       "slug": "csgoroll"
+    },
+    {
+      "title": "Cryptee",
+      "slug": "cryptee"
     },
     {
       "title": "Cwallet",

@@ -636,6 +636,7 @@ class PreviewVideoStore {
         width: width,
         height: height,
         size: size,
+        durationInSeconds: parseDurationFromHLS(finalPlaylist),
       );
       if (shouldAppendPreview) {
         FileDataService.instance.appendPreview(
@@ -648,6 +649,25 @@ class PreviewVideoStore {
     } catch (_) {
       rethrow;
     }
+  }
+
+  int? parseDurationFromHLS(String playlist) {
+    final lines = playlist.split("\n");
+    double totalDuration = 0.0;
+    for (final line in lines) {
+      if (line.startsWith("#EXTINF:")) {
+        // Extract duration value (e.g., "#EXTINF:2.400000," → "2.400000")
+        final durationStr = line.substring(
+          8,
+          line.length - 1,
+        );
+        final duration = double.tryParse(durationStr);
+        if (duration != null) {
+          totalDuration += duration;
+        }
+      }
+    }
+    return totalDuration > 0 ? totalDuration.round() : null;
   }
 
   Future<(String, String)> _getPreviewUrl(EnteFile file) async {

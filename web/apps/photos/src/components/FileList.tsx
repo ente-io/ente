@@ -6,6 +6,7 @@ import Avatar from "components/pages/gallery/Avatar";
 import { assertionFailed } from "ente-base/assert";
 import { Overlay } from "ente-base/components/containers";
 import { isSameDay } from "ente-base/date";
+import { isDevBuild } from "ente-base/env";
 import { formattedDateRelative } from "ente-base/i18n-date";
 import { downloadManager } from "ente-gallery/services/download";
 import { EnteFile, enteFileDeletionDate } from "ente-media/file";
@@ -125,6 +126,16 @@ export interface FileListProps {
      */
     favoriteFileIDs?: Set<number>;
     /**
+     * An optional {@link TimeStampListItem} shown before all the items in the
+     * list. It is not sticky, and scrolls along with the content of the list.
+     */
+    header?: TimeStampListItem;
+    /**
+     * An optional {@link TimeStampListItem} shown after all the items in the
+     * list. It is not sticky, and scrolls along with the content of the list.
+     */
+    footer?: TimeStampListItem;
+    /**
      * Called when the user activates the thumbnail at the given {@link index}.
      *
      * This corresponding file would be at the corresponding index of
@@ -149,6 +160,8 @@ export const FileList: React.FC<FileListProps> = ({
     activeCollectionID,
     activePersonID,
     favoriteFileIDs,
+    header,
+    footer,
     onItemClick,
 }) => {
     const galleryContext = useContext(GalleryContext);
@@ -196,7 +209,9 @@ export const FileList: React.FC<FileListProps> = ({
             refreshInProgress.current = true;
             let timeStampList: TimeStampListItem[] = [];
 
-            if (galleryContext.photoListHeader) {
+            if (header) {
+                timeStampList.push(asFullSpanListItem(header));
+            } else if (galleryContext.photoListHeader) {
                 timeStampList.push(
                     getPhotoListHeader(galleryContext.photoListHeader),
                 );
@@ -220,7 +235,9 @@ export const FileList: React.FC<FileListProps> = ({
                 timeStampList.push(getEmptyListItem());
             }
             timeStampList.push(getVacuumItem(timeStampList));
-            if (publicCollectionGalleryContext.credentials) {
+            if (footer) {
+                timeStampList.push(asFullSpanListItem(footer));
+            } else if (publicCollectionGalleryContext.credentials) {
                 if (publicCollectionGalleryContext.photoListFooter) {
                     timeStampList.push(
                         getPhotoListFooter(
@@ -257,7 +274,11 @@ export const FileList: React.FC<FileListProps> = ({
             if (hasHeader) {
                 return timeStampList;
             }
-            if (galleryContext.photoListHeader) {
+            // TODO(RE): Remove after audit.
+            if (isDevBuild) throw new Error("Unexpected header change");
+            if (header) {
+                return [asFullSpanListItem(header), ...timeStampList];
+            } else if (galleryContext.photoListHeader) {
                 return [
                     getPhotoListHeader(galleryContext.photoListHeader),
                     ...timeStampList,
@@ -285,10 +306,27 @@ export const FileList: React.FC<FileListProps> = ({
                 timeStampList.length > 0 &&
                 timeStampList[timeStampList.length - 1]?.tag ==
                     "publicAlbumsFooter";
+
             if (hasFooter) {
                 return timeStampList;
             }
-            if (publicCollectionGalleryContext.credentials) {
+            // TODO(RE): Remove after audit.
+            if (
+                isDevBuild &&
+                (footer ||
+                    publicCollectionGalleryContext.credentials ||
+                    showAppDownloadBanner)
+            ) {
+                console.log({ timeStampList, footer, showAppDownloadBanner });
+                throw new Error("Unexpected footer change");
+            }
+            if (footer) {
+                return [
+                    ...timeStampList,
+                    asFullSpanListItem(footer),
+                    getAlbumsFooter(),
+                ];
+            } else if (publicCollectionGalleryContext.credentials) {
                 if (publicCollectionGalleryContext.photoListFooter) {
                     return [
                         ...timeStampList,
@@ -983,6 +1021,15 @@ const ListContainer = styled(Box, {
 const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
     grid-column: span ${(props) => props.span};
 `;
+
+const FullSpanListItemContainer = styled(FlexWrapper)`
+    grid-column: 1 / -1;
+`;
+
+const asFullSpanListItem = ({ item, ...rest }: TimeStampListItem) => ({
+    ...rest,
+    item: <FullSpanListItemContainer>{item}</FullSpanListItemContainer>,
+});
 
 const DateContainer = styled(ListItemContainer)(
     ({ theme }) => `

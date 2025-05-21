@@ -6,6 +6,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
@@ -51,39 +52,33 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     late final mlDataDB = MLDataDB.instance;
     try {
       if (file.uploadedFileID == null) {
-        return [
-          ChipButtonWidget(
-            S.of(context).fileNotUploadedYet,
-            noChips: true,
-          ),
-        ];
+        return [const NoFaceChipButtonWidget(NoFacesReason.fileNotUploaded)];
       }
 
       final List<Face>? faces =
           await mlDataDB.getFacesForGivenFileID(file.uploadedFileID!);
       if (faces == null) {
-        return [
-          ChipButtonWidget(
-            S.of(context).imageNotAnalyzed,
-            noChips: true,
-          ),
-        ];
+        return [const NoFaceChipButtonWidget(NoFacesReason.fileNotAnalyzed)];
       }
 
       // Remove faces with low scores
       if (!kDebugMode) {
-        faces.removeWhere((face) => (face.score < 0.75));
+        final beforeLength = faces.length;
+        final lowScores = faces
+            .where((face) => (face.score < kMinimumFaceShowScore))
+            .toList();
+        faces.removeWhere((face) => (face.score < kMinimumFaceShowScore));
+        if (faces.length != beforeLength) {
+          _logger.warning(
+            'File ${file.uploadedFileID} has ${beforeLength - faces.length} faces with low scores ($lowScores) that are not shown in the UI',
+          );
+        }
       } else {
         faces.removeWhere((face) => (face.score < 0.5));
       }
 
       if (faces.isEmpty) {
-        return [
-          ChipButtonWidget(
-            S.of(context).noFacesFound,
-            noChips: true,
-          ),
-        ];
+        return [const NoFaceChipButtonWidget(NoFacesReason.noFacesFound)];
       }
 
       final faceIdsToClusterIds = await mlDataDB
@@ -138,6 +133,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
       final faceCrops = getCachedFaceCrops(file, faces);
       final List<String> faceIDs = [];
+      final List<double> faceScores = [];
       for (final Face face in faces) {
         final String? clusterID = faceIdsToClusterIds[face.faceID];
         final PersonEntity? person = clusterIDToPerson[clusterID] != null
@@ -146,6 +142,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         final highlight =
             (clusterID == lastViewedClusterID) && (person == null);
         faceIDs.add(face.faceID);
+        faceScores.add(face.score);
         faceWidgets.add(
           FaceWidget(
             file,
@@ -159,12 +156,54 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         );
       }
 
-      _logger.info('File ${file.uploadedFileID} has FaceIDs: $faceIDs');
+      _logger.info(
+        'File ${file.uploadedFileID} has FaceIDs: $faceIDs with scores: $faceScores',
+      );
 
       return faceWidgets;
     } catch (e, s) {
       _logger.severe('failed to get face widgets in file info', e, s);
       return <FaceWidget>[];
     }
+  }
+}
+
+enum NoFacesReason {
+  fileNotUploaded,
+  fileNotAnalyzed,
+  noFacesFound,
+}
+
+String getNoFaceReasonText(
+  BuildContext context,
+  NoFacesReason reason,
+) {
+  switch (reason) {
+    case NoFacesReason.fileNotUploaded:
+      return S.of(context).fileNotUploadedYet;
+    case NoFacesReason.fileNotAnalyzed:
+      return S.of(context).imageNotAnalyzed;
+    case NoFacesReason.noFacesFound:
+      return S.of(context).noFacesFound;
+  }
+}
+
+class NoFaceChipButtonWidget extends StatelessWidget {
+  final NoFacesReason reason;
+
+  const NoFaceChipButtonWidget(
+    this.reason, {
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 5),
+      child: ChipButtonWidget(
+        getNoFaceReasonText(context, reason),
+        noChips: true,
+      ),
+    );
   }
 }

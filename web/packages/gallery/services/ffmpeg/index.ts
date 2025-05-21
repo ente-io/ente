@@ -184,8 +184,13 @@ const parseFFmpegExtractedMetadata = (ffmpegOutput: Uint8Array) => {
     // with comments and newlines.
     //
     // https://ffmpeg.org/ffmpeg-formats.html#Metadata-2
+    //
+    // On Windows, while I couldn't find it documented anywhere, the generated
+    // ffmetadata file uses Unix line separators ("\n"). But for the sake of
+    // extra (albeit possibly unnecessary) safety, handle both \r\n and \n
+    // separators in the split. See: [Note: ffmpeg newlines]
 
-    const lines = new TextDecoder().decode(ffmpegOutput).split("\n");
+    const lines = new TextDecoder().decode(ffmpegOutput).split(/\r?\n/);
     const isPair = (xs: string[]): xs is [string, string] => xs.length == 2;
     const kvPairs = lines.map((property) => property.split("=")).filter(isPair);
 

@@ -371,7 +371,7 @@
   "deleteFromBoth": "Ištrinti iš abiejų",
   "newAlbum": "Naujas albumas",
   "albums": "Albumai",
-  "memoryCount": "{count, plural, =0 {nėra prisiminimų} one {{formattedCount} prisiminimas} few {{formattedCount} prisiminimai} many {{formattedCount} prisiminimo} other {{formattedCount} prisiminimų}}",
+  "memoryCount": "{count, plural, =0 {nėra prisiminimų} one {{formattedCount} prisiminimas} other {{formattedCount} prisiminimų}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -458,8 +458,8 @@
   "selectAll": "Pasirinkti viską",
   "skip": "Praleisti",
   "updatingFolderSelection": "Atnaujinamas aplankų pasirinkimas...",
-  "itemCount": "{count, plural, one{{count} elementas} few {{count} elementai} many {{count} elemento} other{{count} elementų}}",
-  "deleteItemCount": "{count, plural, =1 {Ištrinti {count} elementą} few {Ištrinti {count} elementus} many {Ištrinti {count} elemento} other {Ištrinti {count} elementų}}",
+  "itemCount": "{count, plural, one{{count} elementas} other{{count} elementų}}",
+  "deleteItemCount": "{count, plural, =1 {Ištrinti {count} elementą} other {Ištrinti {count} elementų}}",
   "duplicateItemsGroup": "{count} failai (-ų), kiekvienas {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -476,7 +476,7 @@
     }
   },
   "showMemories": "Rodyti prisiminimus",
-  "yearsAgo": "{count, plural, one{prieš {count} metus} few {prieš {count} metus} many {prieš {count} metų} other{prieš {count} metų}}",
+  "yearsAgo": "{count, plural, one{prieš {count} metus} other{prieš {count} metų}}",
   "backupSettings": "Atsarginės kopijos nustatymai",
   "backupStatus": "Atsarginės kopijos būsena",
   "backupStatusDescription": "Čia bus rodomi elementai, kurių atsarginės kopijos buvo sukurtos.",
@@ -542,7 +542,7 @@
   },
   "remindToEmptyEnteTrash": "Taip pat ištuštinkite šiukšlinę, kad gautumėte laisvos vietos.",
   "sparkleSuccess": "✨ Sėkmė",
-  "duplicateFileCountWithStorageSaved": "Išvalėte {count, plural, one{{count} dubliuojantį failą} few {{count} dubliuojančius failus} many {{count} dubliuojančio failo} other{{count} dubliuojančių failų}}, išsaugodami ({storageSaved}).",
+  "duplicateFileCountWithStorageSaved": "Išvalėte {count, plural, one{{count} dubliuojantį failą} other{{count} dubliuojančių failų}}, išsaugodami ({storageSaved})",
   "@duplicateFileCountWithStorageSaved": {
     "description": "The text to display when the user has successfully cleaned up duplicate files",
     "type": "text",
@@ -693,8 +693,11 @@
   "startBackup": "Pradėti kurti atsarginę kopiją",
   "noPhotosAreBeingBackedUpRightNow": "Šiuo metu nekuriamos atsarginės nuotraukų kopijos",
   "preserveMore": "Išsaugoti daugiau",
+  "grantFullAccessPrompt": "Leiskite prieigą prie visų nuotraukų nustatymų programoje.",
   "allowPermTitle": "Leisti prieigą prie nuotraukų",
   "allowPermBody": "Iš nustatymų leiskite prieigą prie nuotraukų, kad „Ente“ galėtų rodyti ir kurti atsargines bibliotekos kopijas.",
+  "openSettings": "Atverti nustatymus",
+  "selectMorePhotos": "Pasirinkti daugiau nuotraukų",
   "existingUser": "Esamas naudotojas",
   "privateBackups": "Privačios atsarginės kopijos",
   "forYourMemories": "jūsų prisiminimams",
@@ -717,8 +720,10 @@
     "description": "Button text for raising a support tickets in case of unhandled errors during backup",
     "type": "text"
   },
+  "backupFailed": "Atsarginė kopija nepavyko",
   "sorryBackupFailedDesc": "Atsiprašome, šiuo metu negalėjome sukurti atsarginės šio failo kopijos. Bandysime pakartoti vėliau.",
   "couldNotBackUpTryLater": "Nepavyko sukurti atsarginės duomenų kopijos.\nBandysime pakartotinai vėliau.",
+  "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "„Ente“ gali užšifruoti ir išsaugoti failus tik tada, jei suteikiate prieigą prie jų.",
   "pleaseGrantPermissions": "Suteikite leidimus.",
   "grantPermission": "Suteikti leidimą",
   "privateSharing": "Privatus bendrinimas",
@@ -762,6 +767,10 @@
     }
   },
   "permanentlyDelete": "Ištrinti negrįžtamai",
+  "canOnlyCreateLinkForFilesOwnedByYou": "Galima sukurti nuorodą tik jums priklausantiems failams",
+  "publicLinkCreated": "Vieša nuoroda sukurta",
+  "youCanManageYourLinksInTheShareTab": "Nuorodas galite valdyti bendrinimo kortelėje.",
+  "linkCopiedToClipboard": "Nuoroda nukopijuota į iškarpinę",
   "restore": "Atkurti",
   "@restore": {
     "description": "Display text for an action which triggers a restore of item from trash",
@@ -775,26 +784,43 @@
   "shareLink": "Bendrinti nuorodą",
   "createCollage": "Kurti koliažą",
   "saveCollage": "Išsaugoti koliažą",
+  "collageSaved": "Koliažas išsaugotas į galeriją",
+  "collageLayout": "Išdėstymas",
   "addToEnte": "Pridėti į „Ente“",
   "addToAlbum": "Pridėti į albumą",
   "delete": "Ištrinti",
   "hide": "Slėpti",
   "share": "Bendrinti",
+  "unhideToAlbum": "Rodyti į albumą",
   "restoreToAlbum": "Atkurti į albumą",
-  "moveItem": "{count, plural, one {Perkelti elementą} few {Perkelti elementus} many {Perkelti elemento} =1 {Perkelti elementą} other {Perkelti elementų}}",
+  "moveItem": "{count, plural, =1 {Perkelti elementą} other {Perkelti elementų}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, one {Pridėti elementą} few {Pridėti elementus} many {Pridėti elemento} =1 {Pridėti elementą} other {Pridėti elementų}}",
+  "addItem": "{count, plural, =1 {Pridėti elementą} other {Pridėti elementų}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
   "createOrSelectAlbum": "Kurkite arba pasirinkite albumą",
+  "selectAlbum": "Pasirinkti albumą",
   "searchByAlbumNameHint": "Albumo pavadinimas",
   "albumTitle": "Albumo pavadinimas",
   "enterAlbumName": "Įveskite albumo pavadinimą",
   "restoringFiles": "Atkuriami failai...",
+  "movingFilesToAlbum": "Perkeliami failai į albumą...",
+  "unhidingFilesToAlbum": "Rodomi failai į albumą",
+  "canNotUploadToAlbumsOwnedByOthers": "Negalima įkelti į kitiems priklausančius albumus",
+  "uploadingFilesToAlbum": "Įkeliami failai į albumą...",
+  "addedSuccessfullyTo": "Sėkmingai įtraukta į „{albumName}“",
+  "movedSuccessfullyTo": "Sėkmingai perkelta į „{albumName}“",
+  "thisAlbumAlreadyHDACollaborativeLink": "Šis albumas jau turi bendradarbiavimo nuorodą.",
+  "collaborativeLinkCreatedFor": "Bendradarbiavimo nuoroda sukurta albumui „{albumName}“",
+  "askYourLovedOnesToShare": "Paprašykite savo artimuosius bendrinti",
+  "invite": "Kviesti",
+  "shareYourFirstAlbum": "Bendrinkite savo pirmąjį albumą",
+  "sharedWith": "Bendrinta su {emailIDs}",
   "sharedWithMe": "Bendrinta su manimi",
+  "sharedByMe": "Bendrinta manimi",
   "doubleYourStorage": "Padvigubinkite saugyklą",
   "referFriendsAnd2xYourPlan": "Rekomenduokite draugams ir 2 kartus padidinkite savo planą",
   "shareAlbumHint": "Atidarykite albumą ir palieskite bendrinimo mygtuką viršuje dešinėje, kad bendrintumėte.",
@@ -810,6 +836,8 @@
     }
   },
   "deleteAll": "Ištrinti viską",
+  "renameAlbum": "Pervadinti albumą",
+  "convertToAlbum": "Konvertuoti į albumą",
   "setCover": "Nustatyti viršelį",
   "@setCover": {
     "description": "Text to set cover photo for an album"
@@ -821,15 +849,26 @@
   "leaveSharedAlbum": "Palikti bendrinamą albumą?",
   "leaveAlbum": "Palikti albumą",
   "photosAddedByYouWillBeRemovedFromTheAlbum": "Jūsų pridėtos nuotraukos bus pašalintos iš albumo",
+  "youveNoFilesInThisAlbumThatCanBeDeleted": "Neturite šiame albume failų, kuriuos būtų galima ištrinti.",
   "youDontHaveAnyArchivedItems": "Neturite jokių archyvuotų elementų.",
+  "ignoredFolderUploadReason": "Kai kurie šio albumo failai ignoruojami, nes anksčiau buvo ištrinti iš „Ente“.",
+  "resetIgnoredFiles": "Atkurti ignoruojamus failus",
+  "deviceFilesAutoUploading": "Į šį įrenginio albumą įtraukti failai bus automatiškai įkelti į „Ente“.",
+  "turnOnBackupForAutoUpload": "Įjunkite atsarginės kopijos kūrimą, kad automatiškai įkeltumėte į šį įrenginio aplanką įtrauktus failus į „Ente“.",
+  "noHiddenPhotosOrVideos": "Nėra paslėptų nuotraukų arba vaizdo įrašų",
   "toHideAPhotoOrVideo": "Kad paslėptumėte nuotrauką ar vaizdo įrašą",
   "openTheItem": "• Atverkite elementą.",
   "clickOnTheOverflowMenu": "• Spustelėkite ant perpildymo meniu",
   "nothingToSeeHere": "Čia nėra nieko, ką pamatyti. 👀",
   "unarchiveAlbum": "Išarchyvuoti albumą",
   "archiveAlbum": "Archyvuoti albumą",
+  "calculating": "Skaičiuojama...",
+  "pleaseWaitDeletingAlbum": "Palaukite. Ištrinamas albumas",
   "searchByExamples": "• Albumų pavadinimai (pvz., „Fotoaparatas“)\n• Failų tipai (pvz., „Vaizdo įrašai“, „.gif“)\n• Metai ir mėnesiai (pvz., „2022“, „sausis“)\n• Šventės (pvz., „Kalėdos“)\n• Nuotraukų aprašymai (pvz., „#džiaugsmas“)",
+  "youCanTrySearchingForADifferentQuery": "Galite pabandyti ieškoti pagal kitą užklausą.",
   "noResultsFound": "Rezultatų nerasta.",
+  "addedBy": "Įtraukė {emailOrName}",
+  "loadingExifData": "Įkeliami EXIF duomenys...",
   "viewAllExifData": "Peržiūrėti visus EXIF duomenis",
   "noExifData": "Nėra EXIF duomenų",
   "thisImageHasNoExifData": "Šis vaizdas neturi Exif duomenų",
@@ -849,9 +888,35 @@
   "deduplicateFiles": "Atdubliuoti failus",
   "deselectAll": "Naikinti visų pasirinkimą",
   "reviewDeduplicateItems": "Peržiūrėkite ir ištrinkite elementus, kurie, jūsų manymu, yra dublikatai.",
+  "clubByCaptureTime": "Grupuoti pagal užfiksavimo laiką",
+  "clubByFileName": "Grupuoti pagal failo pavadinimą",
+  "count": "Skaičių",
+  "totalSize": "Bendrą dydį",
+  "longpressOnAnItemToViewInFullscreen": "Ilgai paspauskite elementą, kad peržiūrėtumėte per visą ekraną",
+  "decryptingVideo": "Iššifruojamas vaizdo įrašas...",
+  "authToViewYourMemories": "Nustatykite tapatybę, kad peržiūrėtumėte savo prisiminimus",
   "unlock": "Atrakinti",
   "freeUpSpace": "Atlaisvinti vietos",
-  "freeUpAccessPostDelete": "Vis dar galite pasiekti {count, plural, one {jį} few {juos} many {juos} =1 {jį} other {jų}} platformoje „Ente“, kol turite aktyvų prenumeratą.",
+  "freeUpSpaceSaving": "{count, plural, =1 {Jį galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}} other {Jų galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}}}",
+  "filesBackedUpInAlbum": "{count, plural, one {{formattedNumber} failas šiame albume saugiai sukurta atsarginė kopija} few {{formattedNumber} failai šiame albume saugiai sukurtos atsarginės kopijos} many {{formattedNumber} failo šiame albume saugiai sukurtos atsargines kopijos} other {{formattedNumber} failų šiame albume saugiai sukurta atsarginė kopija}}.",
+  "@filesBackedUpInAlbum": {
+    "description": "Text to tell user how many files have been backed up in the album",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Vis dar galite pasiekti {count, plural, =1 {jį} other {jų}} platformoje „Ente“, kol turite aktyvų prenumeratą.",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -881,6 +946,16 @@
   "encryptingBackup": "Šifruojama atsarginė kopija...",
   "syncStopped": "Sinchronizavimas sustabdytas",
   "syncProgress": "{completed} / {total} išsaugomi prisiminimai",
+  "uploadingMultipleMemories": "Išsaugomi {count} prisiminimai...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "uploadingSingleMemory": "Išsaugomas prisiminimas...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
     "placeholders": {
@@ -1053,7 +1128,7 @@
   "searchHint3": "Albumai, failų pavadinimai ir tipai",
   "searchHint4": "Vietovė",
   "searchHint5": "Jau netrukus: veidų ir magiškos paieškos ✨",
-  "searchResultCount": "{count, plural, one{Rastas {count} rezultatas} few {Rasti {count} rezultatai} many {Rasta {count} rezultato} other{Rasta {count} rezultatų}}",
+  "searchResultCount": "{count, plural, one{Rastas {count} rezultatas} other{Rasta {count} rezultatų}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {
@@ -1102,8 +1177,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Greitai suraskite žmones pagal vardą",
-  "addViewers": "{count, plural, one {Pridėti žiūrėtoją} few {Pridėti žiūrėtojus} many {Pridėti žiūrėtojo} =0 {Pridėti žiūrėtojų} =1 {Pridėti žiūrėtoją} other {Pridėti žiūrėtojų}}",
-  "addCollaborators": "{count, plural, one {Pridėti bendradarbį} few {Pridėti bendradarbius} many {Pridėti bendradarbio} =0 {Pridėti bendradarbių} =1 {Pridėti bendradarbį} other {Pridėti bendradarbių}}",
+  "addViewers": "{count, plural, =0 {Pridėti žiūrėtojų} =1 {Pridėti žiūrėtoją} other {Pridėti žiūrėtojų}}",
+  "addCollaborators": "{count, plural, =0 {Pridėti bendradarbių} =1 {Pridėti bendradarbį} other {Pridėti bendradarbių}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Ilgai paspauskite el. paštą, kad patvirtintumėte visapusį šifravimą.",
   "developerSettingsWarning": "Ar tikrai norite modifikuoti kūrėjo nustatymus?",
   "developerSettings": "Kūrėjo nustatymai",
@@ -1232,16 +1307,6 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
-  "viewersSuccessfullyAdded": "{count, plural, one {Pridėtas {count} žiūrėtojas} few {Pridėti {count} žiūrėtojai} many {Pridėta {count} žiūrėtojo} =0 {Pridėta 0 žiūrėtojų} =1 {Pridėtas 1 žiūrėtojas} other {Pridėta {count} žiūrėtojų}}",
-  "@viewersSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of viewers that were successfully added to an album."
-  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Pridėta 0 bendradarbių} =1 {Pridėtas 1 bendradarbis} other {Pridėta {count} bendradarbių}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1317,15 +1382,6 @@
   },
   "currentlyRunning": "šiuo metu vykdoma",
   "ignored": "ignoruota",
-  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
-  "@photosCount": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    }
-  },
   "file": "Failas",
   "searchSectionsLengthMismatch": "Sekcijų ilgio neatitikimas: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1475,7 +1531,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Vaizdo įrašų srautinis perdavimas",
   "processingVideos": "Apdorojami vaizdo įrašai",
   "streamDetails": "Srautinio perdavimo išsami informacija",
   "processing": "Apdorojama",
@@ -1499,7 +1554,7 @@
   "moveSelectedPhotosToOneDate": "Perkelti pasirinktas nuotraukas į vieną datą",
   "shiftDatesAndTime": "Pastumti datas ir laiką",
   "photosKeepRelativeTimeDifference": "Nuotraukos išlaiko santykinį laiko skirtumą",
-  "photocountPhotos": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {Nėra nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
+  "photocountPhotos": "{count, plural,  =0 {Nėra nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
   "@photocountPhotos": {
     "placeholders": {
       "count": {
@@ -1513,7 +1568,7 @@
   "selectedItemsWillBeRemovedFromThisPerson": "Pasirinkti elementai bus pašalinti iš šio asmens, bet nebus ištrinti iš jūsų bibliotekos.",
   "throughTheYears": "{dateFormat} per metus",
   "thisWeekThroughTheYears": "Ši savaitė per metus",
-  "thisWeekXYearsAgo": "{count, plural, one {Šią savaitę, prieš {count} metus} few {Šią savaitę, prieš {count} metus} many {Šią savaitę, prieš {count} metų}=1 {Šią savaitę, prieš {count} metus} other {Šią savaitę, prieš {count} metų}}",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Šią savaitę, prieš {count} metus} other {Šią savaitę, prieš {count} metų}}",
   "youAndThem": "Jūs ir {name}",
   "admiringThem": "Žavisi {name}",
   "backgroundWithThem": "Gražūs vaizdai su {name}",
