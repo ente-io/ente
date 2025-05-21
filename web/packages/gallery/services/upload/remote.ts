@@ -7,6 +7,7 @@ import {
     authenticatedRequestHeaders,
     ensureOk,
     retryAsyncOperation,
+    retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
@@ -271,10 +272,11 @@ export class PhotosUploadHTTPClient {
  * Complete a multipart upload by reporting information about all the uploaded
  * parts to the provided {@link completionURL}.
  *
- * @param completionURL The URL to which the final status of the uploaded parts
- * should be reported to.
+ * @param completionURL A presigned URL to which the final status of the
+ * uploaded parts should be reported to.
  *
- * @param reqBody Information about the parts which were uploaded.
+ * @param reqBody A XML string containing information about the parts which were
+ * uploaded.
  *
  * [Note: Multipart uploads]
  *
@@ -317,12 +319,18 @@ export class PhotosUploadHTTPClient {
  *    "completion URL" that we also got in step 1. Like step 2, there are 2
  *    variants of this - one where we directly tell the remote (S3), and one
  *    where we report via a worker.
- *
  */
-export const _completeMultipartUpload = async (completionURL: string) => {
-
-}
-
+export const _completeMultipartUpload = async (
+    completionURL: string,
+    reqBody: string,
+) =>
+    retryEnsuringHTTPOk(() =>
+        fetch(completionURL, {
+            method: "POST",
+            headers: { "Content-Type": "text/xml" },
+            body: reqBody,
+        }),
+    );
 
 /**
  * Lowest layer for file upload related HTTP operations when we're running in
