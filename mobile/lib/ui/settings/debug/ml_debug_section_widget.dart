@@ -70,55 +70,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Now notification",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            try {
-              await NotificationService.instance.showNotification(
-                "On this day",
-                "Look back on X memories 🌄",
-                channelID: "memoryID",
-                channelName: "onThisDay",
-                payload: "memoryID",
-              );
-            } catch (e, s) {
-              logger.warning('test notification failed ', e, s);
-              await showGenericErrorDialog(context: context, error: e);
-            }
-          },
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Soon notification",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            try {
-              await NotificationService.instance.scheduleNotification(
-                "On this day",
-                "Look back on X memories 🌄",
-                id: 1,
-                channelID: "memoryID",
-                channelName: "On this day",
-                payload: "memoryID",
-                dateTime: DateTime.now().add(const Duration(seconds: 5)),
-              );
-              showShortToast(context, 'Done');
-            } catch (e, s) {
-              logger.warning('soon exact notification failed ', e, s);
-              await showGenericErrorDialog(context: context, error: e);
-            }
-          },
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
             title: "Show pending notifications",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
@@ -144,7 +95,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await NotificationService.instance.clearAllScheduledNotifications();
+              await NotificationService.instance
+                  .clearAllScheduledNotifications();
               showShortToast(context, 'Done');
             } catch (e) {
               await showGenericErrorDialog(context: context, error: e);
