@@ -440,6 +440,9 @@ class MemoriesCacheService {
       }
       _cachedMemories = await _getMemoriesFromCache();
       if (_cachedMemories == null || _cachedMemories!.isEmpty) {
+        _logger.warning(
+          "No memories found in cache, force updating cache. Possible severe caching issue",
+        );
         await updateCache(forced: true);
       }
       if (_cachedMemories == null || _cachedMemories!.isEmpty) {
