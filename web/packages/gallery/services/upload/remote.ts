@@ -391,7 +391,7 @@ export const createMultipartUploadRequestBody = (
  *    variants of this - one where we directly tell the remote (S3), and one
  *    where we report via a worker.
  */
-export const completeMultipartUpload = async (
+export const completeMultipartUpload = (
     completionURL: string,
     completedParts: MultipartCompletedPart[],
 ) =>
@@ -408,15 +408,21 @@ export const completeMultipartUpload = async (
  */
 export const completeMultipartUploadViaProxy = async (
     completionURL: string,
-    reqBody: string,
-) =>
-    retryEnsuringHTTPOk(() =>
-        fetch(completionURL, {
+    completedParts: MultipartCompletedPart[],
+) => {
+    const origin = await uploaderOrigin();
+    return retryEnsuringHTTPOk(() =>
+        fetch(`${origin}/multipart-complete`, {
             method: "POST",
-            headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
-            body: reqBody,
+            headers: {
+                ...publicRequestHeaders(),
+                "Content-Type": "text/xml",
+                "UPLOAD-URL": completionURL,
+            },
+            body: createMultipartUploadRequestBody(completedParts),
         }),
     );
+};
 
 /**
  * Lowest layer for file upload related HTTP operations when we're running in
