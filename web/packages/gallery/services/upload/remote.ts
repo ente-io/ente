@@ -270,6 +270,43 @@ export class PhotosUploadHTTPClient {
 }
 
 /**
+ * Information about an individual part of a multipart upload.
+ *
+ * See: [Note: Multipart uploads].
+ */
+interface MultipartUploadPartInfo {
+    /**
+     * The part number (1-indexed).
+     *
+     * The part number indicates the sequential ordering (starting from 1) where
+     * this part belongs in the overall file's data.
+     */
+    partNumber: number;
+    /**
+     * The part "ETag".
+     *
+     * This is the value of the "ETag" header in the remote response we received
+     * when the part was uploaded.
+     */
+    etag: string;
+}
+
+/**
+ * Construct an XML string of the format expected as the request body for
+ * {@link _completeMultipartUpload} or {@link _completeMultipartUploadViaProxy}.
+ *
+ * @param parts Information about the parts that were uploaded.
+ */
+export const createMultipartUploadRequestBody = (
+    parts: MultipartUploadPartInfo[],
+): string => {
+    // To avoid introducing a dependency on a XML library, we construct the
+    // requisite XML by hand.
+    const result = "";
+    return result;
+};
+
+/**
  * Complete a multipart upload by reporting information about all the uploaded
  * parts to the provided {@link completionURL}.
  *
