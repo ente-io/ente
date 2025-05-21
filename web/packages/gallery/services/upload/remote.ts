@@ -325,7 +325,7 @@ const createMultipartUploadRequestBody = (
         (part) =>
             `<Part><PartNumber>${part.partNumber}</PartNumber><ETag>${part.eTag}</ETag></Part>`,
     );
-    return `<CompleteMultipartUpload>${resultParts.join("\n")}</CompleteMultipartUpload>`;
+    return `<CompleteMultipartUpload>\n${resultParts.join("\n")}\n</CompleteMultipartUpload>`;
 };
 
 /**
