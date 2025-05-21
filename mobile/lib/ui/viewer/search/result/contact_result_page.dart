@@ -5,13 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/models/search/search_constants.dart";
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/components/end_to_end_banner.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
@@ -46,6 +52,7 @@ class ContactResultPage extends StatefulWidget {
 class _ContactResultPageState extends State<ContactResultPage> {
   final _selectedFiles = SelectedFiles();
   late final List<EnteFile> files;
+  late final List<Collection> collections;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late String _searchResultName;
 
@@ -53,6 +60,8 @@ class _ContactResultPageState extends State<ContactResultPage> {
   void initState() {
     super.initState();
     files = widget.searchResult.resultFiles();
+    collections = (widget.searchResult as GenericSearchResult)
+        .params[kContactCollections];
     _searchResultName = widget.searchResult.name();
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
@@ -104,8 +113,10 @@ class _ContactResultPageState extends State<ContactResultPage> {
       initialFiles: widget.searchResult.resultFiles().isNotEmpty
           ? [widget.searchResult.resultFiles().first]
           : null,
-      header: EmailValidator.validate(_searchResultName)
-          ? Padding(
+      header: Column(
+        children: [
+          if (EmailValidator.validate(_searchResultName))
+            Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 8),
               child: EndToEndBanner(
                 title: context.l10n.linkPerson,
@@ -125,8 +136,11 @@ class _ContactResultPageState extends State<ContactResultPage> {
                   }
                 },
               ),
-            )
-          : null,
+            ),
+          if (collections.isNotEmpty)
+            _AlbumsSection(context: context, collections: collections),
+        ],
+      ),
     );
 
     return GalleryFilesState(
@@ -175,6 +189,55 @@ class _ContactResultPageState extends State<ContactResultPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _AlbumsSection extends StatelessWidget {
+  const _AlbumsSection({
+    required this.context,
+    required this.collections,
+  });
+
+  final BuildContext context;
+  final List<Collection> collections;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24, top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Text(
+              S.of(context).albums,
+              style: getEnteTextTheme(context).large,
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: SizedBox(
+              height: 147,
+              child: ListView.separated(
+                separatorBuilder: (context, index) => const SizedBox(width: 4),
+                scrollDirection: Axis.horizontal,
+                itemCount: collections.length,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                itemBuilder: (context, index) {
+                  final item = collections[index];
+                  return AlbumRowItemWidget(
+                    item,
+                    120,
+                    showFileCount: false,
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
