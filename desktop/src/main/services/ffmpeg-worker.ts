@@ -17,6 +17,7 @@ import log from "../log-worker";
 import { messagePortMainEndpoint } from "../utils/comlink";
 import { wait } from "../utils/common";
 import { execAsyncWorker } from "../utils/exec-worker";
+import { publicRequestHeaders } from "../utils/http";
 
 /* Ditto in the web app's code (used by the Wasm FFmpeg invocation). */
 const ffmpegPathPlaceholder = "FFMPEG";
@@ -861,7 +862,10 @@ const uploadVideoSegmentsSingle = (
             method: "PUT",
             // net.fetch deduces and inserts a content-length for us, when we
             // use the node native fetch then we need to provide it explicitly.
-            headers: { "Content-Length": `${videoSize}` },
+            headers: {
+                ...publicRequestHeaders(),
+                "Content-Length": `${videoSize}`,
+            },
             // See: [Note: duplex param required for stream body]
             // @ts-expect-error ^see note above
             duplex: "half",
@@ -927,7 +931,10 @@ const uploadVideoSegmentsMultipart = async (
         const res = await retryEnsuringHTTPOk(() =>
             fetch(partUploadURL, {
                 method: "PUT",
-                headers: { "Content-Length": `${size}` },
+                headers: {
+                    ...publicRequestHeaders(),
+                    "Content-Length": `${size}`,
+                },
                 // See: [Note: duplex param required for stream body]
                 // @ts-expect-error ^see note above
                 duplex: "half",
@@ -951,7 +958,7 @@ const uploadVideoSegmentsMultipart = async (
     return await retryEnsuringHTTPOk(() =>
         fetch(completionURL, {
             method: "POST",
-            headers: { "Content-Type": "text/xml" },
+            headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
             body: completionBody,
         }),
     );
