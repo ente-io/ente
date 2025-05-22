@@ -823,8 +823,6 @@ const uploadVideoSegments = async (
     videoSize: number,
     uploadURLs: string[],
 ) => {
-    const waitTimeBeforeNextTry = [5000, 20000];
-
     if (uploadURLs.length != 1) throw new Error("TODO(HLS): WIP");
     // This can be either a single pre-signed URL (for a normal upload), or a
     // list of part upload URLs and a completion URL (for multipart uploads).
@@ -832,51 +830,71 @@ const uploadVideoSegments = async (
     // See: [Note: Passing HLS multipart upload URLs over IPC]
     const objectUploadURL = uploadURLs[0]!;
 
+    const nodeStream = fs_.createReadStream(videoFilePath);
+    const webStream = Readable.toWeb(nodeStream);
+
+    // net.fetch is 40-50x slower than the native fetch for this particular PUT
+    // request. This is easily reproducible - replace `fetch` with `net.fetch`,
+    // then even on localhost the PUT requests start taking a minute or so,
+    // while they take second(s) with node's native fetch.
+    await retryEnsuringHTTPOk(() =>
+        fetch(objectUploadURL, {
+            method: "PUT",
+            // net.fetch apparently deduces and inserts a content-length,
+            // because when we use the node native fetch then we need to
+            // provide it explicitly.
+            headers: { "Content-Length": `${videoSize}` },
+            // See: [Note: duplex param required for stream body]
+            // @ts-expect-error ^see note above
+            duplex: "half",
+            body: webStream,
+        }),
+    );
+};
+
+/**
+ * Upload the given {@link stream} to the provided presigned
+ * {@link uploadURL} using a HTTP PUT request.
+ *
+ * In case on non-HTTP-4xx errors, retry up to 2 times with exponential backoff.
+ *
+ * ---
+ *
+ * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOk`
+ * from `web/packages/base/http.ts`
+ *
+ * - We don't have the rest of the scaffolding used by that function, which is
+ *   why it is intially inlined bespoked.
+ *
+ * - It handles the specific use case of uploading videos since generating the
+ *   HLS stream is a fairly expensive operation, so a retry to discount
+ *   transient network issues is called for. There are only 2 retries for a
+ *   total of 3 attempts, and the retry gaps are more spaced out.
+ *
+ * - Later it was discovered that net.fetch is much slower than node's native
+ *   fetch, so this implementation has further diverged.
+ *
+ * - This also moved to a utility process, where we also have a more restricted
+ *   ability to import electron API.
+ */
+const retryEnsuringHTTPOk = async (request: () => Promise<Response>) => {
+    const waitTimeBeforeNextTry = [5000, 20000];
+
     while (true) {
-        let abort = false;
         try {
-            const nodeStream = fs_.createReadStream(videoFilePath);
-            const webStream = Readable.toWeb(nodeStream);
-
-            // net.fetch is 40-50x slower than the native fetch for this
-            // particular PUT request. This is easily reproducible - replace
-            // `fetch` with `net.fetch`, then even on localhost the PUT requests
-            // start taking a minute or so, while they take second(s) with
-            // node's native fetch.
-            const res = await fetch(objectUploadURL, {
-                method: "PUT",
-                // net.fetch apparently deduces and inserts a content-length,
-                // because when we use the node native fetch then we need to
-                // provide it explicitly.
-                headers: { "Content-Length": `${videoSize}` },
-                // See: [Note: duplex param required for stream body]
-                // @ts-expect-error ^see note above
-                duplex: "half",
-                body: webStream,
-            });
-
-            if (res.ok) {
-                // Success.
-                return;
-            }
-            if (res.status >= 400 && res.status < 500 && res.status != 429) {
-                // HTTP 4xx, except potentially transient 429 rate limits.
-                abort = true;
-            }
+            const res = await request();
+            if (res.ok) /* Success. */ return;
             throw new Error(
-                `Failed to upload generated HLS video: HTTP ${res.status} ${res.statusText}`,
+                `Request failed: HTTP ${res.status} ${res.statusText}`,
             );
         } catch (e) {
-            if (abort) {
-                throw e;
-            }
             const t = waitTimeBeforeNextTry.shift();
             if (!t) {
                 throw e;
             } else {
                 log.warn("Will retry potentially transient request failure", e);
+                await wait(t);
             }
-            await wait(t);
         }
     }
 };
