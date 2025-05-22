@@ -1222,6 +1222,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final stopwatch = Stopwatch()..start();
     try {
       while (true) {
+        // Allow some time for any GC to finish
+        await Future.delayed(const Duration(milliseconds: 100));
+
         final List<Map<String, dynamic>> results = await db.getAll('''
         SELECT $fileIDColumn, $embeddingColumn 
         FROM $clipTable
@@ -1254,6 +1257,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         if (processedCount >= totalCount) {
           break;
         }
+        embeddings.clear();
+        fileIDs.clear();
+        results.clear();
+        // Allow some time for any GC to finish
         await Future.delayed(const Duration(milliseconds: 100));
       }
       _logger.info(
