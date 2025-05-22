@@ -893,7 +893,7 @@ const retryEnsuringHTTPOk = async (request: () => Promise<Response>) => {
     while (true) {
         try {
             const res = await request();
-            if (res.ok) /* Success. */ return;
+            if (res.ok) /* Success. */ return res;
             throw new Error(
                 `Request failed: HTTP ${res.status} ${res.statusText}`,
             );
@@ -915,20 +915,38 @@ const uploadVideoSegmentsMultipart = async (
     partUploadURLs: string[],
     completionURL: string,
 ) => {
-    /*
-    retryEnsuringHTTPOk(
-        fetch(objectUploadURL, {
-            method: "PUT",
-            // net.fetch deduces and inserts a content-length for us, when we
-            // use the node native fetch then we need to provide it explicitly.
-            headers: { "Content-Length": `${videoSize}` },
-            // See: [Note: duplex param required for stream body]
-            // @ts-expect-error ^see note above
-            duplex: "half",
-            body: Readable.toWeb(fs_.createReadStream(videoFilePath)),
+    const partSize = Math.floor(videoSize / partUploadURLs.length);
+    let partNumber = 0;
+    // See `createMultipartUploadRequestBody` in the web code for a more
+    // expansive and documented version of this XML body construction.
+    const completionXML = ["<CompleteMultipartUpload>"];
+    for (const partUploadURL of partUploadURLs) {
+        partNumber += 1;
+        const res = await retryEnsuringHTTPOk(() =>
+            fetch(partUploadURL, {
+                method: "PUT",
+                headers: { "Content-Length": `${videoSize}` },
+                // See: [Note: duplex param required for stream body]
+                // @ts-expect-error ^see note above
+                duplex: "half",
+                body: Readable.toWeb(fs_.createReadStream(videoFilePath)),
+            }),
+        );
+        const eTag = res.headers.get("etag");
+        if (!eTag) throw new Error("Response did not have an ETag");
+        completionXML.push(
+            `<Part><PartNumber>${partNumber}</PartNumber><ETag>${eTag}</ETag></Part>`,
+        );
+    }
+    completionXML.push("</CompleteMultipartUpload>");
+    const completionBody = completionXML.join("");
+    return await retryEnsuringHTTPOk(() =>
+        fetch(completionURL, {
+            method: "POST",
+            headers: { "Content-Type": "text/xml" },
+            body: completionBody,
         }),
     );
-    */
 };
 
 /**
