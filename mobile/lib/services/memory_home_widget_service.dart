@@ -1,3 +1,4 @@
+import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
@@ -18,6 +19,7 @@ class MemoryHomeWidgetService {
       "selectedOnThisDayMemoriesHW";
   static const String ANDROID_CLASS_NAME = "EnteMemoryWidgetProvider";
   static const String IOS_CLASS_NAME = "EnteMemoryWidget";
+  static const String MEMORY_STATUS_KEY = "memoryStatusKey.widget";
   static const String MEMORY_CHANGED_KEY = "memoryChanged.widget";
   static const String TOTAL_MEMORIES_KEY = "totalMemories";
   static const int MAX_MEMORIES_LIMIT = 50;
@@ -100,12 +102,24 @@ class MemoryHomeWidgetService {
     _logger.info("Clearing MemoryHomeWidget");
     await _setTotalMemories(null);
     _hasSyncedMemory = false;
+    await updateMemoriesStatus(WidgetStatus.syncedEmpty);
     await _refreshWidget(message: "MemoryHomeWidget cleared & updated");
   }
 
   Future<void> updateMemoryChanged(bool value) async {
     _logger.info("Updating memory changed flag to $value");
     await _prefs.setBool(MEMORY_CHANGED_KEY, value);
+  }
+
+  WidgetStatus getMemoriesStatus() {
+    return WidgetStatus.values.firstWhereOrNull(
+          (v) => v.index == (_prefs.getInt(MEMORY_STATUS_KEY) ?? 0),
+        ) ??
+        WidgetStatus.notSynced;
+  }
+
+  Future<void> updateMemoriesStatus(WidgetStatus value) async {
+    await _prefs.setInt(MEMORY_STATUS_KEY, value.index);
   }
 
   Future<void> checkPendingMemorySync({bool addDelay = true}) async {
@@ -205,9 +219,16 @@ class MemoryHomeWidgetService {
       return true;
     }
 
-    // Check if we should force fetch new memories
-    final cachedMemories = await _getMemoriesForWidget();
-    return isWidgetEmpty && cachedMemories.isNotEmpty;
+    final memoriesStatus = getMemoriesStatus();
+    switch (memoriesStatus) {
+      case WidgetStatus.notSynced:
+        return true;
+      case WidgetStatus.syncedPartially:
+        return await countHomeWidgets() > 0;
+      case WidgetStatus.syncedEmpty:
+      case WidgetStatus.syncedAll:
+        return false;
+    }
   }
 
   Future<List<SmartMemory>> _getMemoriesForWidget() async {
@@ -286,6 +307,8 @@ class MemoryHomeWidgetService {
     final bool isWidgetPresent = await countHomeWidgets() > 0;
     final limit = isWidgetPresent ? MAX_MEMORIES_LIMIT : 5;
 
+    await updateMemoriesStatus(WidgetStatus.notSynced);
+
     for (final entry in memoriesWithFiles.entries) {
       final memoryTitle = entry.key;
       final memoryFiles = entry.value;
@@ -311,6 +334,7 @@ class MemoryHomeWidgetService {
             await _refreshWidget(
               message: "First memory fetched, updating widget",
             );
+            await updateMemoriesStatus(WidgetStatus.syncedPartially);
           }
 
           renderedCount++;
@@ -332,6 +356,10 @@ class MemoryHomeWidgetService {
 
     if (renderedCount == 0) {
       return;
+    }
+
+    if (isWidgetPresent) {
+      await updateMemoriesStatus(WidgetStatus.syncedAll);
     }
 
     await _refreshWidget(

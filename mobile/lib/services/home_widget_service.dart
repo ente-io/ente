@@ -16,6 +16,13 @@ import 'package:photos/services/smart_memories_service.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum WidgetStatus {
+  notSynced,
+  syncedPartially,
+  syncedEmpty,
+  syncedAll,
+}
+
 /// Service to manage home screen widgets across the application
 /// Handles widget initialization, updates, and interaction with platform-specific widget APIs
 class HomeWidgetService {

@@ -1,3 +1,4 @@
+import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
@@ -22,6 +23,7 @@ class PeopleHomeWidgetService {
   static const String SELECTED_PEOPLE_KEY = "selectedPeopleHW";
   static const String ANDROID_CLASS_NAME = "EntePeopleWidgetProvider";
   static const String IOS_CLASS_NAME = "EntePeopleWidget";
+  static const String PEOPLE_STATUS_KEY = "peopleStatusKey.widget";
   static const String PEOPLE_CHANGED_KEY = "peopleChanged.widget";
   static const String TOTAL_PEOPLE_KEY = "totalPeople";
   static const int MAX_PEOPLE_LIMIT = 50;
@@ -107,7 +109,19 @@ class PeopleHomeWidgetService {
     _logger.info("Clearing PeopleHomeWidget");
     await _setTotalPeople(null);
     _hasSyncedPeople = false;
+    await updatePeopleStatus(WidgetStatus.syncedEmpty);
     await _refreshWidget(message: "PeopleHomeWidget cleared & updated");
+  }
+
+  WidgetStatus getPeopleStatus() {
+    return WidgetStatus.values.firstWhereOrNull(
+          (v) => v.index == (_prefs.getInt(PEOPLE_STATUS_KEY) ?? 0),
+        ) ??
+        WidgetStatus.notSynced;
+  }
+
+  Future<void> updatePeopleStatus(WidgetStatus value) async {
+    await _prefs.setInt(PEOPLE_STATUS_KEY, value.index);
   }
 
   Future<void> updatePeopleChanged(bool value) async {
@@ -253,7 +267,20 @@ class PeopleHomeWidgetService {
 
   Future<bool> _shouldForceFetchPeople(bool isPeopleEmpty) async {
     final peopleChanged = _prefs.getBool(PEOPLE_CHANGED_KEY);
-    return peopleChanged ?? true;
+    if (peopleChanged ?? true) {
+      return true;
+    }
+
+    final peopleStatus = getPeopleStatus();
+    switch (peopleStatus) {
+      case WidgetStatus.notSynced:
+        return true;
+      case WidgetStatus.syncedPartially:
+        return await countHomeWidgets() > 0;
+      case WidgetStatus.syncedEmpty:
+      case WidgetStatus.syncedAll:
+        return false;
+    }
   }
 
   Future<List<String>> _getEffectiveSelectedPeopleIds() async {
@@ -351,6 +378,7 @@ class PeopleHomeWidgetService {
 
     final bool isWidgetPresent = await countHomeWidgets() > 0;
     final limit = isWidgetPresent ? MAX_PEOPLE_LIMIT : 5;
+    await updatePeopleStatus(WidgetStatus.notSynced);
 
     for (final entry in peopleWithFiles.entries) {
       final personId = entry.key;
@@ -383,6 +411,7 @@ class PeopleHomeWidgetService {
             await _refreshWidget(
               message: "First person fetched, updating widget",
             );
+            await updatePeopleStatus(WidgetStatus.syncedPartially);
           }
 
           renderedCount++;
@@ -402,6 +431,10 @@ class PeopleHomeWidgetService {
 
     if (renderedCount == 0) {
       return;
+    }
+
+    if (isWidgetPresent) {
+      await updatePeopleStatus(WidgetStatus.syncedAll);
     }
 
     await _refreshWidget(
