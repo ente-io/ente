@@ -1,6 +1,5 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
     authenticatedPublicAlbumsRequestHeaders,
@@ -84,7 +83,7 @@ export const fetchPublicAlbumsUploadURLs = async (
  *
  * This is a list of pre-signed URLs (one for each part), a URL to indicate
  * completion, and an associated object key that is later used to refer to the
- * combined object that was uploaded to the part URLs.
+ * combined object from the parts there were uploaded to the part URLs.
  */
 const MultipartUploadURLs = z.object({
     /**
@@ -96,12 +95,11 @@ const MultipartUploadURLs = z.object({
      * A list of pre-signed URLs that can be used to upload the parts of the
      * entire file's data to an S3-compatible remote.
      */
-
     partURLs: z.string().array(),
     /**
-     * A pre-signed URL that can be used to complete the multipart upload by
-     * providing the list of parts that were uploaded (and their sequence) to
-     * the S3-compatible remote.
+     * A pre-signed URL that can be used to finalize the multipart upload into a
+     * single object on remote by providing the list of parts that were uploaded
+     * (and their sequence) to the S3-compatible remote.
      */
     completeURL: z.string(),
 });
@@ -111,12 +109,13 @@ export type MultipartUploadURLs = z.infer<typeof MultipartUploadURLs>;
 const MultipartUploadURLsResponse = z.object({ urls: MultipartUploadURLs });
 
 /**
- * Fetch a {@link MultipartUploadURLs} from remote that can be used to upload
- * large object by splitting then into {@link uploadPartCount} parts.
+ * Fetch a {@link MultipartUploadURLs} structure from remote that can be used to
+ * upload a large object by splitting it into {@link uploadPartCount} parts.
  *
  * See: [Note: Multipart uploads].
  *
- * @param uploadPartCount The number of parts in which we want to upload the file.
+ * @param uploadPartCount The number of parts in which we want to upload the
+ * object.
  *
  * @returns A structure ({@link MultipartUploadURLs}) containing pre-signed URLs
  * for uploading each part, a completion URL, and the final object key.
@@ -126,6 +125,22 @@ export const fetchMultipartUploadURLs = async (uploadPartCount: number) => {
     const url = await apiURL("/files/multipart-upload-urls");
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return MultipartUploadURLsResponse.parse(await res.json()).urls;
+};
+
+/**
+ * Sibling of {@link fetchMultipartUploadURLs} for public albums.
+ */
+export const fetchPublicAlbumsMultipartUploadURLs = async (
+    uploadPartCount: number,
+    credentials: PublicAlbumsCredentials,
+) => {
+    const params = new URLSearchParams({ count: uploadPartCount.toString() });
+    const url = await apiURL("/public-collection/multipart-upload-urls");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: authenticatedPublicAlbumsRequestHeaders(credentials),
     });
     ensureOk(res);
     return MultipartUploadURLsResponse.parse(await res.json()).urls;
@@ -450,23 +465,6 @@ export class PublicAlbumsUploadHTTPClient {
             return response.data;
         } catch (e) {
             log.error("upload public File Failed", e);
-            throw e;
-        }
-    }
-
-    async fetchMultipartUploadURLs(
-        count: number,
-        credentials: PublicAlbumsCredentials,
-    ): Promise<MultipartUploadURLs> {
-        try {
-            const response = await HTTPService.get(
-                await apiURL("/public-collection/multipart-upload-urls"),
-                { count },
-                authenticatedPublicAlbumsRequestHeaders(credentials),
-            );
-            return response.data.urls;
-        } catch (e) {
-            log.error("fetch public multipart-upload-url failed", e);
             throw e;
         }
     }

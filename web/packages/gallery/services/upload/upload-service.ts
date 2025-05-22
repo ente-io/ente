@@ -60,6 +60,7 @@ import {
     completeMultipartUpload,
     completeMultipartUploadViaWorker,
     fetchMultipartUploadURLs,
+    fetchPublicAlbumsMultipartUploadURLs,
     fetchPublicAlbumsUploadURLs,
     fetchUploadURLs,
     PhotosUploadHTTPClient,
@@ -221,13 +222,13 @@ class UploadService {
         urls.forEach((u) => this.uploadURLs.push(u));
     }
 
-    async fetchMultipartUploadURLs(count: number) {
+    async fetchMultipartUploadURLs(uploadPartCount: number) {
         return this.publicAlbumsCredentials
-            ? publicAlbumsHTTPClient.fetchMultipartUploadURLs(
-                  count,
+            ? fetchPublicAlbumsMultipartUploadURLs(
+                  uploadPartCount,
                   this.publicAlbumsCredentials,
               )
-            : fetchMultipartUploadURLs(count);
+            : fetchMultipartUploadURLs(uploadPartCount);
     }
 }
 
