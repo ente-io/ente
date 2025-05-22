@@ -14,7 +14,7 @@ import {
 import log from "ente-base/log";
 import { apiURL, uploaderOrigin } from "ente-base/origins";
 import { type EnteFile } from "ente-media/file";
-import { CustomError, handleUploadError } from "ente-shared/error";
+import { handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
@@ -104,70 +104,46 @@ export class PhotosUploadHTTPClient {
             throw e;
         }
     }
-
-    async putFile(
-        fileUploadURL: ObjectUploadURL,
-        file: Uint8Array,
-        progressTracker: unknown,
-    ): Promise<string> {
-        try {
-            await retryAsyncOperation(
-                () =>
-                    HTTPService.put(
-                        fileUploadURL.url,
-                        file,
-                        // @ts-ignore
-                        null,
-                        null,
-                        progressTracker,
-                    ),
-                handleUploadError,
-            );
-            return fileUploadURL.objectKey;
-        } catch (e) {
-            if (
-                !(
-                    e instanceof Error &&
-                    e.message == CustomError.UPLOAD_CANCELLED
-                )
-            ) {
-                log.error("putFile to dataStore failed ", e);
-            }
-            throw e;
-        }
-    }
-
-    async putFileV2(
-        fileUploadURL: ObjectUploadURL,
-        file: Uint8Array,
-        progressTracker: unknown,
-    ): Promise<string> {
-        try {
-            const origin = await uploaderOrigin();
-            await retryAsyncOperation(() =>
-                HTTPService.put(
-                    `${origin}/file-upload`,
-                    file,
-                    // @ts-ignore
-                    null,
-                    { "UPLOAD-URL": fileUploadURL.url },
-                    progressTracker,
-                ),
-            );
-            return fileUploadURL.objectKey;
-        } catch (e) {
-            if (
-                !(
-                    e instanceof Error &&
-                    e.message == CustomError.UPLOAD_CANCELLED
-                )
-            ) {
-                log.error("putFile to dataStore failed ", e);
-            }
-            throw e;
-        }
-    }
 }
+
+/**
+ * Upload a file using a pre-signed URL.
+ *
+ * @param fileUploadURL A pre-signed URL that can be used to upload data to the
+ * remote S3-compatible storage.
+ *
+ * @param fileData The data to upload.
+ *
+ * @param retrier A function to wrap the request in retries if needed.
+ */
+export const putFile = async (
+    fileUploadURL: string,
+    fileData: Uint8Array,
+    retrier: HTTPRequestRetrier,
+) =>
+    retrier(() =>
+        fetch(fileUploadURL, {
+            method: "PUT",
+            headers: publicRequestHeaders(),
+            body: fileData,
+        }),
+    );
+
+/**
+ * Variant of {@link putFile} that uses a CF worker.
+ */
+export const putFileViaWorker = async (
+    fileUploadURL: string,
+    fileData: Uint8Array,
+    retrier: HTTPRequestRetrier,
+) =>
+    retrier(async () =>
+        fetch(`${await uploaderOrigin()}/file-upload`, {
+            method: "PUT",
+            headers: { ...publicRequestHeaders(), "UPLOAD-URL": fileUploadURL },
+            body: fileData,
+        }),
+    );
 
 /**
  * Upload a part of a multipart upload using a pre-signed URL.
@@ -316,6 +292,8 @@ const createMultipartUploadRequestBody = (
  * @param completedParts Information about all the parts of the file that have
  * been uploaded. The part numbers must start at 1 and must be consecutive.
  *
+ * @param retrier A function to wrap the request in retries if needed.
+ *
  * [Note: Multipart uploads]
  *
  * Multipart uploads are a mechanism to upload large files onto an remote
@@ -363,12 +341,15 @@ const createMultipartUploadRequestBody = (
 export const completeMultipartUpload = (
     completionURL: string,
     completedParts: MultipartCompletedPart[],
+    retrier: HTTPRequestRetrier,
 ) =>
-    fetch(completionURL, {
-        method: "POST",
-        headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
-        body: createMultipartUploadRequestBody(completedParts),
-    });
+    retrier(() =>
+        fetch(completionURL, {
+            method: "POST",
+            headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
+            body: createMultipartUploadRequestBody(completedParts),
+        }),
+    );
 
 /**
  * Variant of {@link completeMultipartUpload} that uses a CF worker.
@@ -376,16 +357,19 @@ export const completeMultipartUpload = (
 export const completeMultipartUploadViaWorker = async (
     completionURL: string,
     completedParts: MultipartCompletedPart[],
+    retrier: HTTPRequestRetrier,
 ) =>
-    fetch(`${await uploaderOrigin()}/multipart-complete`, {
-        method: "POST",
-        headers: {
-            ...publicRequestHeaders(),
-            "Content-Type": "text/xml",
-            "UPLOAD-URL": completionURL,
-        },
-        body: createMultipartUploadRequestBody(completedParts),
-    });
+    retrier(async () =>
+        fetch(`${await uploaderOrigin()}/multipart-complete`, {
+            method: "POST",
+            headers: {
+                ...publicRequestHeaders(),
+                "Content-Type": "text/xml",
+                "UPLOAD-URL": completionURL,
+            },
+            body: createMultipartUploadRequestBody(completedParts),
+        }),
+    );
 
 /**
  * Lowest layer for file upload related HTTP operations when we're running in
