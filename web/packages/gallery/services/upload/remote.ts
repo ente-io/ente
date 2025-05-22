@@ -41,6 +41,44 @@ export type ObjectUploadURL = z.infer<typeof ObjectUploadURL>;
 const ObjectUploadURLResponse = z.object({ urls: ObjectUploadURL.array() });
 
 /**
+ * Fetch a fresh list of URLs from remote that can be used to upload files
+ * and thumbnails to.
+ *
+ * @param countHint An approximate number of files that we're expecting to
+ * upload.
+ *
+ * @returns A list of pre-signed object URLs that can be used to upload data
+ * to the S3 bucket.
+ */
+export const fetchUploadURLs = async (countHint: number) => {
+    const count = Math.min(50, countHint * 2).toString();
+    const params = new URLSearchParams({ count });
+    const url = await apiURL("/files/upload-urls");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return ObjectUploadURLResponse.parse(await res.json()).urls;
+};
+
+/**
+ * Sibling of {@link fetchUploadURLs} for public albums.
+ */
+export const fetchPublicAlbumsUploadURLs = async (
+    countHint: number,
+    credentials: PublicAlbumsCredentials,
+) => {
+    const count = Math.min(50, countHint * 2).toString();
+    const params = new URLSearchParams({ count });
+    const url = await apiURL("/public-collection/upload-urls");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+    });
+    ensureOk(res);
+    return ObjectUploadURLResponse.parse(await res.json()).urls;
+};
+
+/**
  * Lowest layer for file upload related HTTP operations when we're running in
  * the context of the photos app.
  */
@@ -65,27 +103,6 @@ export class PhotosUploadHTTPClient {
             log.error("upload Files Failed", e);
             throw e;
         }
-    }
-
-    /**
-     * Fetch a fresh list of URLs from remote that can be used to upload files
-     * and thumbnails to.
-     *
-     * @param countHint An approximate number of files that we're expecting to
-     * upload.
-     *
-     * @returns A list of pre-signed object URLs that can be used to upload data
-     * to the S3 bucket.
-     */
-    async fetchUploadURLs(countHint: number) {
-        const count = Math.min(50, countHint * 2).toString();
-        const params = new URLSearchParams({ count });
-        const url = await apiURL("/files/upload-urls");
-        const res = await fetch(`${url}?${params.toString()}`, {
-            headers: await authenticatedRequestHeaders(),
-        });
-        ensureOk(res);
-        return ObjectUploadURLResponse.parse(await res.json()).urls;
     }
 
     async fetchMultipartUploadURLs(
@@ -398,23 +415,6 @@ export class PublicAlbumsUploadHTTPClient {
             log.error("upload public File Failed", e);
             throw e;
         }
-    }
-
-    /**
-     * Sibling of {@link fetchUploadURLs} for public albums.
-     */
-    async fetchUploadURLs(
-        countHint: number,
-        credentials: PublicAlbumsCredentials,
-    ) {
-        const count = Math.min(50, countHint * 2).toString();
-        const params = new URLSearchParams({ count });
-        const url = await apiURL("/public-collection/upload-urls");
-        const res = await fetch(`${url}?${params.toString()}`, {
-            headers: authenticatedPublicAlbumsRequestHeaders(credentials),
-        });
-        ensureOk(res);
-        return ObjectUploadURLResponse.parse(await res.json()).urls;
     }
 
     async fetchMultipartUploadURLs(

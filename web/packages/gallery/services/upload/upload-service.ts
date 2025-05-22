@@ -59,6 +59,8 @@ import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
     completeMultipartUpload,
     completeMultipartUploadViaWorker,
+    fetchPublicAlbumsUploadURLs,
+    fetchUploadURLs,
     PhotosUploadHTTPClient,
     PublicAlbumsUploadHTTPClient,
     putFile,
@@ -208,14 +210,12 @@ class UploadService {
     private async _refillUploadURLs() {
         let urls: ObjectUploadURL[];
         if (this.publicAlbumsCredentials) {
-            urls = await publicAlbumsHTTPClient.fetchUploadURLs(
+            urls = await fetchPublicAlbumsUploadURLs(
                 this.pendingUploadCount,
                 this.publicAlbumsCredentials,
             );
         } else {
-            urls = await photosHTTPClient.fetchUploadURLs(
-                this.pendingUploadCount,
-            );
+            urls = await fetchUploadURLs(this.pendingUploadCount);
         }
         urls.forEach((u) => this.uploadURLs.push(u));
     }
