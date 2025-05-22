@@ -250,19 +250,14 @@ class UIService {
     }
 
     /**
-     * Update the upload progress shown in the UI for the file with the given
-     * {@link fileLocalID} after {@link partNumber} parts have been completed,
-     * each contributing {@link percentPerPart} to the total.
+     * Update the upload progress shown in the UI to {@link percentage} for the
+     * file with the given {@link fileLocalID}.
+     *
+     * @param percentage The upload completion percentage. It should be a value
+     * between 0 and 100 (inclusive).
      */
-    updateUploadProgress(
-        fileLocalID: number,
-        percentPerPart: number,
-        uploadedPartCount: number,
-    ) {
-        this.inProgressUploads.set(
-            fileLocalID,
-            Math.min(Math.round(percentPerPart * uploadedPartCount), 98),
-        );
+    updateUploadProgress(fileLocalID: number, percentage: number) {
+        this.inProgressUploads.set(fileLocalID, Math.round(percentage));
         this.updateProgressBarUI();
     }
 }

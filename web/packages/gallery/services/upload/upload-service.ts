@@ -54,11 +54,7 @@ import {
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import type { UploadableUploadItem, UploadItem } from ".";
-import {
-    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
-    type LivePhotoAssets,
-    type UploadResult,
-} from ".";
+import { type LivePhotoAssets, type UploadResult } from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
     completeMultipartUpload,
@@ -557,12 +553,14 @@ interface UploadContext {
     /**
      * A function that gets called update the progress shown in the UI for a
      * particular file as the parts of that file get uploaded.
+     *
+     * @param {fileLocalID} The local ID of the file whose progress we want to
+     * update.
+     *
+     * @param {percentage} The upload completion percentage, as a value between
+     * 0 and 100 (inclusive).
      */
-    updateUploadProgress: (
-        fileLocalID: number,
-        percentPerPart: number,
-        uploadedPartCount: number,
-    ) => void;
+    updateUploadProgress: (fileLocalID: number, percentage: number) => void;
 }
 
 interface UploadResponse {
@@ -1493,6 +1491,14 @@ const uploadToBucket = async (
 
     const requestRetrier = createAbortableRetryEnsuringHTTPOk(abortIfCancelled);
 
+    // The bulk of the network time during upload is taken in uploading the
+    // actual encrypted objects to remote S3, but after that there is another
+    // API request we need to make to "finalize" the file (on museum). This
+    // should be quick usually, but it's a different network route altogether
+    // and we can't know for sure how long it'll take. So keep aside a small
+    // approximate percentage for this last step.
+    const maxPercent = Math.floor(95 + 5 * Math.random());
+
     let fileObjectKey: string;
     let fileSize: number;
 
@@ -1509,6 +1515,7 @@ const uploadToBucket = async (
                 encryptedData,
                 uploadContext,
                 requestRetrier,
+                maxPercent,
             ));
     } else {
         const data =
@@ -1524,7 +1531,7 @@ const uploadToBucket = async (
         } else {
             await putFile(fileUploadURL.url, data, requestRetrier);
         }
-        updateUploadProgress(localID, RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(), 1);
+        updateUploadProgress(localID, maxPercent);
     }
 
     const thumbnailUploadURL = await uploadService.getUploadURL();
@@ -1601,6 +1608,7 @@ const uploadStreamUsingMultipart = async (
     dataStream: EncryptedFileStream,
     uploadContext: UploadContext,
     requestRetrier: HTTPRequestRetrier,
+    maxPercent: number,
 ) => {
     const { isCFUploadProxyDisabled, abortIfCancelled, updateUploadProgress } =
         uploadContext;
@@ -1615,8 +1623,7 @@ const uploadStreamUsingMultipart = async (
     const { stream } = dataStream;
 
     const streamReader = stream.getReader();
-    const percentPerPart =
-        RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
+    const percentPerPart = maxPercent / uploadPartCount;
 
     let fileSize = 0;
     const completedParts: MultipartCompletedPart[] = [];
@@ -1639,7 +1646,7 @@ const uploadStreamUsingMultipart = async (
             : await putFilePart(partUploadURL, partData, requestRetrier);
         if (!eTag) throw new Error(CustomErrorMessage.eTagMissing);
 
-        updateUploadProgress(fileLocalID, percentPerPart, partNumber);
+        updateUploadProgress(fileLocalID, percentPerPart * partNumber);
         completedParts.push({ partNumber, eTag });
     }
     const { done } = await streamReader.read();
