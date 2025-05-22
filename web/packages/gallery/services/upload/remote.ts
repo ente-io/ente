@@ -8,7 +8,7 @@ import {
     ensureOk,
     publicRequestHeaders,
     retryAsyncOperation,
-    retryEnsuringHTTPOk,
+    type HTTPRequestRetrier,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
@@ -16,6 +16,7 @@ import { apiURL, uploaderOrigin } from "ente-base/origins";
 import { type EnteFile } from "ente-media/file";
 import { CustomError, handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import type { MultipartUploadURLs, UploadFile } from "./upload-service";
 
@@ -166,82 +167,59 @@ export class PhotosUploadHTTPClient {
             throw e;
         }
     }
-
-    async putFilePart(
-        partUploadURL: string,
-        filePart: Uint8Array,
-        progressTracker: unknown,
-    ) {
-        try {
-            const response = await retryAsyncOperation(async () => {
-                const resp = await HTTPService.put(
-                    partUploadURL,
-                    filePart,
-                    // @ts-ignore
-                    null,
-                    null,
-                    progressTracker,
-                );
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                if (!resp?.headers?.etag) {
-                    const err = Error(CustomError.ETAG_MISSING);
-                    log.error("putFile in parts failed", err);
-                    throw err;
-                }
-                return resp;
-            }, handleUploadError);
-            return response.headers.etag as string;
-        } catch (e) {
-            if (
-                !(
-                    e instanceof Error &&
-                    e.message == CustomError.UPLOAD_CANCELLED
-                )
-            ) {
-                log.error("put filePart failed", e);
-            }
-            throw e;
-        }
-    }
-
-    async putFilePartV2(
-        partUploadURL: string,
-        filePart: Uint8Array,
-        progressTracker: unknown,
-    ) {
-        try {
-            const origin = await uploaderOrigin();
-            const response = await retryAsyncOperation(async () => {
-                const resp = await HTTPService.put(
-                    `${origin}/multipart-upload`,
-                    filePart,
-                    // @ts-ignore
-                    null,
-                    { "UPLOAD-URL": partUploadURL },
-                    progressTracker,
-                );
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                if (!resp?.data?.etag) {
-                    const err = Error(CustomError.ETAG_MISSING);
-                    log.error("putFile in parts failed", err);
-                    throw err;
-                }
-                return resp;
-            });
-            return response.data.etag as string;
-        } catch (e) {
-            if (
-                !(
-                    e instanceof Error &&
-                    e.message == CustomError.UPLOAD_CANCELLED
-                )
-            ) {
-                log.error("put filePart failed", e);
-            }
-            throw e;
-        }
-    }
 }
+
+/**
+ * Upload a part of a multipart upload using a pre-signed URL.
+ *
+ * See: [Note: Multipart uploads].
+ *
+ * @param partUploadURL A pre-signed URL that can be used to upload data to the
+ * remote S3-compatible storage.
+ *
+ * @param partData The part bytes to upload.
+ *
+ * @param retrier A function to wrap the request in retries if needed.
+ *
+ * @returns the value of the "ETag" header in the remote response, or
+ * `undefined` if the ETag was not present in the response (this is not expected
+ * from remote in case of a successful response, but it can happen in case the
+ * user has some misconfigured browser extension which is blocking the ETag
+ * header from being parsed).
+ */
+export const putFilePart = async (
+    partUploadURL: string,
+    partData: Uint8Array,
+    retrier: HTTPRequestRetrier,
+) => {
+    const res = await retrier(() =>
+        fetch(partUploadURL, {
+            method: "PUT",
+            headers: publicRequestHeaders(),
+            body: partData,
+        }),
+    );
+    return nullToUndefined(res.headers.get("etag"));
+};
+
+/**
+ * Variant of {@link putFilePart} that uses a CF worker.
+ */
+export const putFilePartViaWorker = async (
+    partUploadURL: string,
+    partData: Uint8Array,
+    retrier: HTTPRequestRetrier,
+) => {
+    const origin = await uploaderOrigin();
+    const res = await retrier(() =>
+        fetch(`${origin}/multipart-upload`, {
+            method: "PUT",
+            headers: { ...publicRequestHeaders(), "UPLOAD-URL": partUploadURL },
+            body: partData,
+        }),
+    );
+    return z.object({ etag: z.string() }).parse(await res.json()).etag;
+};
 
 /**
  * Information about an individual part of a multipart upload that has been
@@ -371,8 +349,9 @@ const createMultipartUploadRequestBody = (
  *
  * 2. Break the file to be uploaded into parts, and upload each part using a PUT
  *    request to one of the presigned URLs we got in step 1. There are two
- *    variants of this - one where we directly upload to the remote (S3), and
- *    one where we go via a worker.
+ *    variants of this - one where we directly upload to the remote (S3)
+ *    ({@link putFilePart}), and one where we go via a worker
+ *    ({@link putFilePartViaWorker}).
  *
  * 3. Once all the parts have been uploaded, send a consolidated report of all
  *    the uploaded parts (the step 2's) to remote via another presigned
@@ -385,34 +364,28 @@ export const completeMultipartUpload = (
     completionURL: string,
     completedParts: MultipartCompletedPart[],
 ) =>
-    retryEnsuringHTTPOk(() =>
-        fetch(completionURL, {
-            method: "POST",
-            headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
-            body: createMultipartUploadRequestBody(completedParts),
-        }),
-    );
+    fetch(completionURL, {
+        method: "POST",
+        headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
+        body: createMultipartUploadRequestBody(completedParts),
+    });
 
 /**
- * Variant of {@link completeMultipartUpload} that uses the CF worker.
+ * Variant of {@link completeMultipartUpload} that uses a CF worker.
  */
 export const completeMultipartUploadViaWorker = async (
     completionURL: string,
     completedParts: MultipartCompletedPart[],
-) => {
-    const origin = await uploaderOrigin();
-    return retryEnsuringHTTPOk(() =>
-        fetch(`${origin}/multipart-complete`, {
-            method: "POST",
-            headers: {
-                ...publicRequestHeaders(),
-                "Content-Type": "text/xml",
-                "UPLOAD-URL": completionURL,
-            },
-            body: createMultipartUploadRequestBody(completedParts),
-        }),
-    );
-};
+) =>
+    fetch(`${await uploaderOrigin()}/multipart-complete`, {
+        method: "POST",
+        headers: {
+            ...publicRequestHeaders(),
+            "Content-Type": "text/xml",
+            "UPLOAD-URL": completionURL,
+        },
+        body: createMultipartUploadRequestBody(completedParts),
+    });
 
 /**
  * Lowest layer for file upload related HTTP operations when we're running in
