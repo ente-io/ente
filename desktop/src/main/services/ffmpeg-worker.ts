@@ -823,13 +823,28 @@ const uploadVideoSegments = async (
     videoSize: number,
     uploadURLs: string[],
 ) => {
-    if (uploadURLs.length != 1) throw new Error("TODO(HLS): WIP");
     // This can be either a single pre-signed URL (for a normal upload), or a
     // list of part upload URLs and a completion URL (for multipart uploads).
     //
     // See: [Note: Passing HLS multipart upload URLs over IPC]
-    const objectUploadURL = uploadURLs[0]!;
-    return uploadVideoSegmentsSingle(videoFilePath, videoSize, objectUploadURL);
+    if (uploadURLs.length == 1) {
+        const objectUploadURL = uploadURLs[0]!;
+        return uploadVideoSegmentsSingle(
+            videoFilePath,
+            videoSize,
+            objectUploadURL,
+        );
+    } else {
+        const partURLs = [...uploadURLs];
+        const completionURL = partURLs.pop();
+        if (!partURLs.length || !completionURL) throw new Error("Invalid URLs");
+        return uploadVideoSegmentsMultipart(
+            videoFilePath,
+            videoSize,
+            partURLs,
+            completionURL,
+        );
+    }
 };
 
 const uploadVideoSegmentsSingle = (
@@ -855,13 +870,6 @@ const uploadVideoSegmentsSingle = (
     );
 
 /**
- * Upload the given {@link stream} to the provided presigned
- * {@link uploadURL} using a HTTP PUT request.
- *
- * In case on non-HTTP-4xx errors, retry up to 2 times with exponential backoff.
- *
- * ---
- *
  * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOk`
  * from `web/packages/base/http.ts`
  *
@@ -899,6 +907,28 @@ const retryEnsuringHTTPOk = async (request: () => Promise<Response>) => {
             }
         }
     }
+};
+
+const uploadVideoSegmentsMultipart = async (
+    videoFilePath: string,
+    videoSize: number,
+    partUploadURLs: string[],
+    completionURL: string,
+) => {
+    /*
+    retryEnsuringHTTPOk(
+        fetch(objectUploadURL, {
+            method: "PUT",
+            // net.fetch deduces and inserts a content-length for us, when we
+            // use the node native fetch then we need to provide it explicitly.
+            headers: { "Content-Length": `${videoSize}` },
+            // See: [Note: duplex param required for stream body]
+            // @ts-expect-error ^see note above
+            duplex: "half",
+            body: Readable.toWeb(fs_.createReadStream(videoFilePath)),
+        }),
+    );
+    */
 };
 
 /**
