@@ -178,12 +178,18 @@ class PeopleHomeWidgetService {
       forceCustomPageRoute: true,
     ).ignore();
 
+    final clusterFiles =
+        await SearchService.instance.getClusterFilesForPersonID(
+      personId,
+    );
+    final files = clusterFiles.entries.expand((e) => e.value).toList();
+
     await routeToPage(
       context,
       DetailPage(
         DetailPageConfiguration(
-          List.unmodifiable([file]),
-          0,
+          files,
+          files.indexOf(file),
           "peoplewidget",
         ),
       ),

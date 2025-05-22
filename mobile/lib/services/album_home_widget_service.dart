@@ -199,6 +199,8 @@ class AlbumHomeWidgetService {
         CollectionWithThumbnail(collection, thumbnail),
       ),
     ).ignore();
+    final getAllFilesCollection =
+        await FilesDB.instance.getAllFilesCollection(collection.id);
 
     // Then open the specific file
     final file = await FilesDB.instance.getFile(fileId);
@@ -211,8 +213,8 @@ class AlbumHomeWidgetService {
       context,
       DetailPage(
         DetailPageConfiguration(
-          List.unmodifiable([file]),
-          0,
+          getAllFilesCollection,
+          getAllFilesCollection.indexOf(file),
           "albumwidget",
         ),
       ),
