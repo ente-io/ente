@@ -11816,6 +11816,16 @@ class S {
     );
   }
 
+  /// `On this day`
+  String get onThisDay {
+    return Intl.message(
+      'On this day',
+      name: 'onThisDay',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Also delete the photos (and videos) present in these {count} albums from <bold>all</bold> other albums they are part of?`
   String deleteMultipleAlbumDialog(Object count) {
     return Intl.message(

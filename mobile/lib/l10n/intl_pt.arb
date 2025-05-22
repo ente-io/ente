@@ -1387,5 +1387,294 @@
         "example": "no network"
       }
     }
-  }
+  },
+  "tapToUploadIsIgnoredDue": "Toque para enviar, atualmente o envio é ignorado devido a {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Toque para enviar",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "Info",
+  "addFiles": "Adicionar arquivos",
+  "castAlbum": "Transferir álbum",
+  "imageNotAnalyzed": "Imagem não analisada",
+  "noFacesFound": "Nenhum rosto encontrado",
+  "fileNotUploadedYet": "Arquivo ainda não enviado",
+  "noSuggestionsForPerson": "Sem sugestões para {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "mês",
+  "yearShort": "ano",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "Atualmente executando",
+  "ignored": "ignorado",
+  "photosCount": "{count, plural, =0 {0 fotos} =1 {1 foto} other {{count} fotos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Arquivo",
+  "searchSectionsLengthMismatch": "Incompatibilidade de comprimento de seções: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Selecionar aplicativo de e-mail",
+  "selectAllShort": "Tudo",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "selectCoverPhoto": "Selecionar foto da capa",
+  "newLocation": "Nova localização",
+  "faceNotClusteredYet": "Rosto não agrupado ainda, volte aqui mais tarde",
+  "theLinkYouAreTryingToAccessHasExpired": "O link que você está tentando acessar já expirou.",
+  "openFile": "Abrir arquivo",
+  "backupFile": "Copiar arquivo com segurança",
+  "openAlbumInBrowser": "Abrir álbum no navegador",
+  "openAlbumInBrowserTitle": "Use o aplicativo da web para adicionar fotos a este álbum",
+  "allow": "Permitir",
+  "allowAppToOpenSharedAlbumLinks": "Permitir aplicativo abrir links de álbum compartilhado",
+  "seePublicAlbumLinksInApp": "Ver links de álbum compartilhado no aplicativo",
+  "emergencyContacts": "Contatos de emergência",
+  "acceptTrustInvite": "Aceitar convite",
+  "declineTrustInvite": "Recusar convite",
+  "removeYourselfAsTrustedContact": "Remover si mesmo dos contatos confiáveis",
+  "legacy": "Legado",
+  "legacyPageDesc": "O legado permite que contatos confiáveis acessem sua conta em sua ausência.",
+  "legacyPageDesc2": "Contatos confiáveis podem iniciar recuperação de conta. Se não cancelado dentro de 30 dias, redefina sua senha e acesse sua conta.",
+  "legacyAccounts": "Contas legadas",
+  "trustedContacts": "Contatos confiáveis",
+  "addTrustedContact": "Adicionar contato confiável",
+  "removeInvite": "Remover convite",
+  "recoveryWarning": "Um contato confiável está tentando acessar sua conta",
+  "rejectRecovery": "Rejeitar recuperação",
+  "recoveryInitiated": "A recuperação iniciou",
+  "recoveryInitiatedDesc": "Você poderá acessar a conta após {days} dias.  Uma notificação será enviada para {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Cancelar recuperação",
+  "recoveryAccount": "Recuperar conta",
+  "cancelAccountRecoveryBody": "Deseja mesmo cancelar a recuperação de conta?",
+  "startAccountRecoveryTitle": "Iniciar recuperação",
+  "whyAddTrustContact": "Um contato confiável pode ajudá-lo em recuperar seus dados.",
+  "recoveryReady": "Você pode recuperar a conta com e-mail {email} por definir uma nova senha.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} está tentando recuperar sua conta.",
+  "trustedInviteBody": "Você foi convidado para ser um contato legado por {email}.",
+  "warning": "Aviso",
+  "proceed": "Continuar",
+  "confirmAddingTrustedContact": "Você está prestes a adicionar {email} como contato confiável. Eles poderão recuperar sua conta se você estiver ausente por {numOfDays} dias.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} convidou você para ser um contato confiável",
+  "authToManageLegacy": "Autentique-se para gerenciar seus contatos confiáveis",
+  "useDifferentPlayerInfo": "Enfrentando problemas ao reproduzir este vídeo? Mantenha pressionado aqui ou tente outro reprodutor de vídeo",
+  "hideSharedItemsFromHomeGallery": "Ocultar itens compartilhados da galeria inicial",
+  "gallery": "Galeria",
+  "joinAlbum": "Unir-se ao álbum",
+  "joinAlbumSubtext": "para visualizar e adicionar suas fotos",
+  "joinAlbumSubtextViewer": "para adicionar isso aos álbuns compartilhados",
+  "join": "Unir-se",
+  "linkEmail": "Vincular e-mail",
+  "link": "Vincular",
+  "noEnteAccountExclamation": "Nenhuma conta Ente!",
+  "orPickFromYourContacts": "ou escolher dos seus contatos",
+  "emailDoesNotHaveEnteAccount": "{email} não possui uma conta Ente.",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (Eu)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignMe": "Reatribuir \"Eu\"",
+  "me": "Eu",
+  "linkEmailToContactBannerCaption": "para compartilhar rápido",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "Selecione a pessoa para vincular",
+  "linkPersonToEmail": "Vincular pessoa a {email}",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "linkPersonToEmailConfirmation": "Isso vinculará {personName} a {email}",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "Selecione seu rosto",
+  "reassigningLoading": "Reatribuindo...",
+  "reassignedToName": "Atribuído a {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "Salvar mudanças antes de sair?",
+  "dontSave": "Não salvar",
+  "thisIsMeExclamation": "Este é você!",
+  "linkPerson": "Vincular pessoa",
+  "linkPersonCaption": "para melhor experiência de compartilhamento",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "Transmissão de vídeo",
+  "processingVideos": "Processando vídeos",
+  "streamDetails": "Detalhes da transmissão",
+  "processing": "Processando",
+  "queued": "Na fila",
+  "ineligible": "Inelegível",
+  "failed": "Falhou",
+  "playStream": "Reproduzir transmissão",
+  "playOriginal": "Reproduzir original",
+  "joinAlbumConfirmationDialogBody": "Unir-se ao álbum fará que seu e-mail seja visível a todos do álbum.",
+  "pleaseWaitThisWillTakeAWhile": "Aguarde um pouco, isso talvez leve um tempo.",
+  "editTime": "Editar tempo",
+  "selectTime": "Selecionar tempo",
+  "selectDate": "Selecionar data",
+  "previous": "Anterior",
+  "selectOneDateAndTimeForAll": "Selecione uma data e hora para todos",
+  "selectStartOfRange": "Selecionar início de intervalo",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "Isso fará que a data e hora de todas as fotos selecionadas fiquem iguais.",
+  "allWillShiftRangeBasedOnFirst": "Este é o primeiro do grupo. As outras fotos selecionadas serão automaticamente alteradas para esta nova data",
+  "newRange": "Novo intervalo",
+  "selectOneDateAndTime": "Selecionar data e hora",
+  "moveSelectedPhotosToOneDate": "Mover fotos selecionadas para uma data",
+  "shiftDatesAndTime": "Alterar as datas e horas",
+  "photosKeepRelativeTimeDifference": "As fotos mantêm a diferença de tempo relativo",
+  "photocountPhotos": "{count, plural, =0 {Sem fotos} =1 {1 foto} other {{count} fotos}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "appIcon": "Ícone do aplicativo",
+  "notThisPerson": "Não é esta pessoa?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Os itens selecionados serão removidos desta pessoa, entretanto não serão excluídos da sua biblioteca.",
+  "throughTheYears": "{dateFormat} com o passar dos anos",
+  "thisWeekThroughTheYears": "Esta semana com o passar dos anos",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Esta semana, {count} ano atrás} other {Esta semana, {count} anos atrás}}",
+  "youAndThem": "Você e {name}",
+  "admiringThem": "Admirando {name}",
+  "embracingThem": "Abraçando {name}",
+  "partyWithThem": "Festejando com {name}",
+  "hikingWithThem": "Caminhando com {name}",
+  "feastingWithThem": "Tendo banquete com {name}",
+  "selfiesWithThem": "Tirando selfies com {name}",
+  "posingWithThem": "Fazendo pose com {name}",
+  "backgroundWithThem": "Vistas bonitas com {name}",
+  "sportsWithThem": "Jogando esportes com {name}",
+  "roadtripWithThem": "Viajando de carro com {name}",
+  "spotlightOnYourself": "Destacar si mesmo",
+  "spotlightOnThem": "Destacar {name}",
+  "personIsAge": "{name} está com {age}!",
+  "personTurningAge": "{name} terá {age} em breve",
+  "lastTimeWithThem": "Últimos momentos com {name}",
+  "tripToLocation": "Viajem à {location}",
+  "tripInYear": "Viajem em {year}",
+  "lastYearsTrip": "Viajem do ano passado",
+  "sunrise": "No horizonte",
+  "mountains": "Sob as montanhas",
+  "greenery": "A vegetação verde",
+  "beach": "Areia e o mar",
+  "city": "Na cidade",
+  "moon": "Na luz do luar",
+  "onTheRoad": "Na estrada de novo",
+  "food": "Prazer em culinária",
+  "pets": "Companhia de pelos",
+  "cLIcon": "Novo Ícone",
+  "cLIconDesc": "Finalmente, um novo ícone para o ente que acreditamos que represente melhor nosso trabalho. Também, adicionamos um alterador de ícone para que você ainda consiga utilizar o ícone antigo.",
+  "cLMemories": "Memórias",
+  "cLMemoriesDesc": "Redescubra seus momentos especiais - destaque pessoas importantes, suas viagens e celebrações, melhores visitas e muito mais. Ative a aprendizagem automática, mencione si mesmo e seus amigos para melhor experiência.",
+  "cLWidgets": "Widgets",
+  "cLWidgetsDesc": "Widgets integrados com memórias já estão disponíveis. Eles apareceram com seus melhores momentos sem precisar abrir o ente.",
+  "cLFamilyPlan": "Limites de planos familiares",
+  "cLFamilyPlanDesc": "Agora você pode definir um limite de quanto armazenamento os seus entes queridos podem usar.",
+  "cLBulkEdit": "Editar todas as datas",
+  "cLBulkEditDesc": "Agora você pode selecionar várias fotos, editar data e hora de todos com um só clique. Alternar datas também são suportados.",
+  "curatedMemories": "Curated memories",
+  "onThisDay": "On this day"
 }

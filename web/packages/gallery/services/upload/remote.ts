@@ -1,6 +1,5 @@
 // TODO: Audit this file
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
     authenticatedPublicAlbumsRequestHeaders,
@@ -8,16 +7,17 @@ import {
     ensureOk,
     publicRequestHeaders,
     retryAsyncOperation,
-    retryEnsuringHTTPOk,
+    type HTTPRequestRetrier,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, uploaderOrigin } from "ente-base/origins";
 import { type EnteFile } from "ente-media/file";
-import { CustomError, handleUploadError } from "ente-shared/error";
+import { handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
+import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
-import type { MultipartUploadURLs, UploadFile } from "./upload-service";
+import type { UploadFile } from "./upload-service";
 
 /**
  * A pre-signed URL alongwith the associated object key that is later used to
@@ -25,12 +25,13 @@ import type { MultipartUploadURLs, UploadFile } from "./upload-service";
  */
 const ObjectUploadURL = z.object({
     /**
-     * A pre-signed URL that can be used to upload data to an S3-compatible
-     * remote.
+     * The objectKey with which remote (both museum and the S3 bucket) will
+     * refer to this object once it has been uploaded.
      */
     objectKey: z.string(),
     /**
-     * The objectKey with which remote (museum) will refer to this object.
+     * A pre-signed URL that can be used to upload data to an S3-compatible
+     * remote.
      */
     url: z.string(),
 });
@@ -40,208 +41,201 @@ export type ObjectUploadURL = z.infer<typeof ObjectUploadURL>;
 const ObjectUploadURLResponse = z.object({ urls: ObjectUploadURL.array() });
 
 /**
- * Lowest layer for file upload related HTTP operations when we're running in
- * the context of the photos app.
+ * Fetch a fresh list of URLs from remote that can be used to upload objects.
+ *
+ * @param countHint An approximate number of objects that we're expecting to
+ * upload.
+ *
+ * @returns A list of pre-signed object URLs that can be used to upload data to
+ * the S3 bucket. Each URL also has an associated "object key" with which remote
+ * will refer to the uploaded object after it has been uploaded.
  */
-export class PhotosUploadHTTPClient {
-    async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
-        try {
-            const url = await apiURL("/files");
-            const headers = await authenticatedRequestHeaders();
-            const response = await retryAsyncOperation(
-                () =>
-                    HTTPService.post(
-                        url,
-                        uploadFile,
-                        // @ts-ignore
-                        null,
-                        headers,
-                    ),
-                handleUploadError,
-            );
-            return response.data;
-        } catch (e) {
-            log.error("upload Files Failed", e);
-            throw e;
-        }
-    }
+export const fetchUploadURLs = async (countHint: number) => {
+    const count = Math.min(50, countHint * 2).toString();
+    const params = new URLSearchParams({ count });
+    const url = await apiURL("/files/upload-urls");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return ObjectUploadURLResponse.parse(await res.json()).urls;
+};
 
+/**
+ * Sibling of {@link fetchUploadURLs} for public albums.
+ */
+export const fetchPublicAlbumsUploadURLs = async (
+    countHint: number,
+    credentials: PublicAlbumsCredentials,
+) => {
+    const count = Math.min(50, countHint * 2).toString();
+    const params = new URLSearchParams({ count });
+    const url = await apiURL("/public-collection/upload-urls");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+    });
+    ensureOk(res);
+    return ObjectUploadURLResponse.parse(await res.json()).urls;
+};
+
+/**
+ * A list of URLs to use for multipart uploads.
+ *
+ * This is a list of pre-signed URLs (one for each part), a URL to indicate
+ * completion, and an associated object key that is later used to refer to the
+ * combined object from the parts there were uploaded to the part URLs.
+ */
+const MultipartUploadURLs = z.object({
     /**
-     * Fetch a fresh list of URLs from remote that can be used to upload files
-     * and thumbnails to.
-     *
-     * @param countHint An approximate number of files that we're expecting to
-     * upload.
-     *
-     * @returns A list of pre-signed object URLs that can be used to upload data
-     * to the S3 bucket.
+     * The objectKey with which remote (museum and the S3 bucket) will refer to
+     * this object once it has been uploaded.
      */
-    async fetchUploadURLs(countHint: number) {
-        const count = Math.min(50, countHint * 2).toString();
-        const params = new URLSearchParams({ count });
-        const url = await apiURL("/files/upload-urls");
-        const res = await fetch(`${url}?${params.toString()}`, {
-            headers: await authenticatedRequestHeaders(),
-        });
-        ensureOk(res);
-        return ObjectUploadURLResponse.parse(await res.json()).urls;
-    }
+    objectKey: z.string(),
+    /**
+     * A list of pre-signed URLs that can be used to upload the parts of the
+     * entire file's data to an S3-compatible remote.
+     */
+    partURLs: z.string().array(),
+    /**
+     * A pre-signed URL that can be used to finalize the multipart upload into a
+     * single object on remote by providing the list of parts that were uploaded
+     * (and their sequence) to the S3-compatible remote.
+     */
+    completeURL: z.string(),
+});
 
-    async fetchMultipartUploadURLs(
-        count: number,
-    ): Promise<MultipartUploadURLs> {
-        try {
-            const response = await HTTPService.get(
-                await apiURL("/files/multipart-upload-urls"),
-                { count },
-                await authenticatedRequestHeaders(),
-            );
+export type MultipartUploadURLs = z.infer<typeof MultipartUploadURLs>;
 
-            return response.data.urls;
-        } catch (e) {
-            log.error("fetch multipart-upload-url failed", e);
-            throw e;
-        }
-    }
+const MultipartUploadURLsResponse = z.object({ urls: MultipartUploadURLs });
 
-    async putFile(
-        fileUploadURL: ObjectUploadURL,
-        file: Uint8Array,
-        progressTracker: unknown,
-    ): Promise<string> {
-        try {
-            await retryAsyncOperation(
-                () =>
-                    HTTPService.put(
-                        fileUploadURL.url,
-                        file,
-                        // @ts-ignore
-                        null,
-                        null,
-                        progressTracker,
-                    ),
-                handleUploadError,
-            );
-            return fileUploadURL.objectKey;
-        } catch (e) {
-            if (
-                !(
-                    e instanceof Error &&
-                    e.message == CustomError.UPLOAD_CANCELLED
-                )
-            ) {
-                log.error("putFile to dataStore failed ", e);
-            }
-            throw e;
-        }
-    }
+/**
+ * Fetch a {@link MultipartUploadURLs} structure from remote that can be used to
+ * upload a large object by splitting it into {@link uploadPartCount} parts.
+ *
+ * See: [Note: Multipart uploads].
+ *
+ * @param uploadPartCount The number of parts in which we want to upload the
+ * object.
+ *
+ * @returns A structure ({@link MultipartUploadURLs}) containing pre-signed URLs
+ * for uploading each part, a completion URL, and the final object key.
+ */
+export const fetchMultipartUploadURLs = async (uploadPartCount: number) => {
+    const params = new URLSearchParams({ count: uploadPartCount.toString() });
+    const url = await apiURL("/files/multipart-upload-urls");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return MultipartUploadURLsResponse.parse(await res.json()).urls;
+};
 
-    async putFileV2(
-        fileUploadURL: ObjectUploadURL,
-        file: Uint8Array,
-        progressTracker: unknown,
-    ): Promise<string> {
-        try {
-            const origin = await uploaderOrigin();
-            await retryAsyncOperation(() =>
-                HTTPService.put(
-                    `${origin}/file-upload`,
-                    file,
-                    // @ts-ignore
-                    null,
-                    { "UPLOAD-URL": fileUploadURL.url },
-                    progressTracker,
-                ),
-            );
-            return fileUploadURL.objectKey;
-        } catch (e) {
-            if (
-                !(
-                    e instanceof Error &&
-                    e.message == CustomError.UPLOAD_CANCELLED
-                )
-            ) {
-                log.error("putFile to dataStore failed ", e);
-            }
-            throw e;
-        }
-    }
+/**
+ * Sibling of {@link fetchMultipartUploadURLs} for public albums.
+ */
+export const fetchPublicAlbumsMultipartUploadURLs = async (
+    uploadPartCount: number,
+    credentials: PublicAlbumsCredentials,
+) => {
+    const params = new URLSearchParams({ count: uploadPartCount.toString() });
+    const url = await apiURL("/public-collection/multipart-upload-urls");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+    });
+    ensureOk(res);
+    return MultipartUploadURLsResponse.parse(await res.json()).urls;
+};
 
-    async putFilePart(
-        partUploadURL: string,
-        filePart: Uint8Array,
-        progressTracker: unknown,
-    ) {
-        try {
-            const response = await retryAsyncOperation(async () => {
-                const resp = await HTTPService.put(
-                    partUploadURL,
-                    filePart,
-                    // @ts-ignore
-                    null,
-                    null,
-                    progressTracker,
-                );
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                if (!resp?.headers?.etag) {
-                    const err = Error(CustomError.ETAG_MISSING);
-                    log.error("putFile in parts failed", err);
-                    throw err;
-                }
-                return resp;
-            }, handleUploadError);
-            return response.headers.etag as string;
-        } catch (e) {
-            if (
-                !(
-                    e instanceof Error &&
-                    e.message == CustomError.UPLOAD_CANCELLED
-                )
-            ) {
-                log.error("put filePart failed", e);
-            }
-            throw e;
-        }
-    }
+/**
+ * Upload a file using a pre-signed URL.
+ *
+ * @param fileUploadURL A pre-signed URL that can be used to upload data to the
+ * remote S3-compatible storage.
+ *
+ * @param fileData The data to upload.
+ *
+ * @param retrier A function to wrap the request in retries if needed.
+ */
+export const putFile = async (
+    fileUploadURL: string,
+    fileData: Uint8Array,
+    retrier: HTTPRequestRetrier,
+) =>
+    retrier(() =>
+        fetch(fileUploadURL, {
+            method: "PUT",
+            headers: publicRequestHeaders(),
+            body: fileData,
+        }),
+    );
 
-    async putFilePartV2(
-        partUploadURL: string,
-        filePart: Uint8Array,
-        progressTracker: unknown,
-    ) {
-        try {
-            const origin = await uploaderOrigin();
-            const response = await retryAsyncOperation(async () => {
-                const resp = await HTTPService.put(
-                    `${origin}/multipart-upload`,
-                    filePart,
-                    // @ts-ignore
-                    null,
-                    { "UPLOAD-URL": partUploadURL },
-                    progressTracker,
-                );
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                if (!resp?.data?.etag) {
-                    const err = Error(CustomError.ETAG_MISSING);
-                    log.error("putFile in parts failed", err);
-                    throw err;
-                }
-                return resp;
-            });
-            return response.data.etag as string;
-        } catch (e) {
-            if (
-                !(
-                    e instanceof Error &&
-                    e.message == CustomError.UPLOAD_CANCELLED
-                )
-            ) {
-                log.error("put filePart failed", e);
-            }
-            throw e;
-        }
-    }
-}
+/**
+ * Variant of {@link putFile} that uses a CF worker.
+ */
+export const putFileViaWorker = async (
+    fileUploadURL: string,
+    fileData: Uint8Array,
+    retrier: HTTPRequestRetrier,
+) =>
+    retrier(async () =>
+        fetch(`${await uploaderOrigin()}/file-upload`, {
+            method: "PUT",
+            headers: { ...publicRequestHeaders(), "UPLOAD-URL": fileUploadURL },
+            body: fileData,
+        }),
+    );
+
+/**
+ * Upload a part of a multipart upload using a pre-signed URL.
+ *
+ * See: [Note: Multipart uploads].
+ *
+ * @param partUploadURL A pre-signed URL that can be used to upload data to the
+ * remote S3-compatible storage.
+ *
+ * @param partData The part bytes to upload.
+ *
+ * @param retrier A function to wrap the request in retries if needed.
+ *
+ * @returns the value of the "ETag" header in the remote response, or
+ * `undefined` if the ETag was not present in the response (this is not expected
+ * from remote in case of a successful response, but it can happen in case the
+ * user has some misconfigured browser extension which is blocking the ETag
+ * header from being parsed).
+ */
+export const putFilePart = async (
+    partUploadURL: string,
+    partData: Uint8Array,
+    retrier: HTTPRequestRetrier,
+) => {
+    const res = await retrier(() =>
+        fetch(partUploadURL, {
+            method: "PUT",
+            headers: publicRequestHeaders(),
+            body: partData,
+        }),
+    );
+    return nullToUndefined(res.headers.get("etag"));
+};
+
+/**
+ * Variant of {@link putFilePart} that uses a CF worker.
+ */
+export const putFilePartViaWorker = async (
+    partUploadURL: string,
+    partData: Uint8Array,
+    retrier: HTTPRequestRetrier,
+) => {
+    const origin = await uploaderOrigin();
+    const res = await retrier(() =>
+        fetch(`${origin}/multipart-upload`, {
+            method: "PUT",
+            headers: { ...publicRequestHeaders(), "UPLOAD-URL": partUploadURL },
+            body: partData,
+        }),
+    );
+    return z.object({ etag: z.string() }).parse(await res.json()).etag;
+};
 
 /**
  * Information about an individual part of a multipart upload that has been
@@ -338,6 +332,8 @@ const createMultipartUploadRequestBody = (
  * @param completedParts Information about all the parts of the file that have
  * been uploaded. The part numbers must start at 1 and must be consecutive.
  *
+ * @param retrier A function to wrap the request in retries if needed.
+ *
  * [Note: Multipart uploads]
  *
  * Multipart uploads are a mechanism to upload large files onto an remote
@@ -366,13 +362,15 @@ const createMultipartUploadRequestBody = (
  *
  * 1. Obtain multiple presigned URLs from remote (museum). The specific API call
  *    will be different (because of the different authentication mechanisms)
- *    when we're running in the context of the photos app and when we're running
- *    in the context of the public albums app.
+ *    when we're running in the context of the photos app
+ *    ({@link fetchMultipartUploadURLs}) and when we're running in the context
+ *    of the public albums app ({@link fetchPublicAlbumsMultipartUploadURLs}).
  *
  * 2. Break the file to be uploaded into parts, and upload each part using a PUT
  *    request to one of the presigned URLs we got in step 1. There are two
- *    variants of this - one where we directly upload to the remote (S3), and
- *    one where we go via a worker.
+ *    variants of this - one where we directly upload to the remote (S3)
+ *    ({@link putFilePart}), and one where we go via a worker
+ *    ({@link putFilePartViaWorker}).
  *
  * 3. Once all the parts have been uploaded, send a consolidated report of all
  *    the uploaded parts (the step 2's) to remote via another presigned
@@ -384,8 +382,9 @@ const createMultipartUploadRequestBody = (
 export const completeMultipartUpload = (
     completionURL: string,
     completedParts: MultipartCompletedPart[],
+    retrier: HTTPRequestRetrier,
 ) =>
-    retryEnsuringHTTPOk(() =>
+    retrier(() =>
         fetch(completionURL, {
             method: "POST",
             headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
@@ -394,15 +393,15 @@ export const completeMultipartUpload = (
     );
 
 /**
- * Variant of {@link completeMultipartUpload} that uses the CF worker.
+ * Variant of {@link completeMultipartUpload} that uses a CF worker.
  */
 export const completeMultipartUploadViaWorker = async (
     completionURL: string,
     completedParts: MultipartCompletedPart[],
-) => {
-    const origin = await uploaderOrigin();
-    return retryEnsuringHTTPOk(() =>
-        fetch(`${origin}/multipart-complete`, {
+    retrier: HTTPRequestRetrier,
+) =>
+    retrier(async () =>
+        fetch(`${await uploaderOrigin()}/multipart-complete`, {
             method: "POST",
             headers: {
                 ...publicRequestHeaders(),
@@ -412,7 +411,34 @@ export const completeMultipartUploadViaWorker = async (
             body: createMultipartUploadRequestBody(completedParts),
         }),
     );
-};
+
+/**
+ * Lowest layer for file upload related HTTP operations when we're running in
+ * the context of the photos app.
+ */
+export class PhotosUploadHTTPClient {
+    async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
+        try {
+            const url = await apiURL("/files");
+            const headers = await authenticatedRequestHeaders();
+            const response = await retryAsyncOperation(
+                () =>
+                    HTTPService.post(
+                        url,
+                        uploadFile,
+                        // @ts-ignore
+                        null,
+                        headers,
+                    ),
+                handleUploadError,
+            );
+            return response.data;
+        } catch (e) {
+            log.error("upload Files Failed", e);
+            throw e;
+        }
+    }
+}
 
 /**
  * Lowest layer for file upload related HTTP operations when we're running in
@@ -439,40 +465,6 @@ export class PublicAlbumsUploadHTTPClient {
             return response.data;
         } catch (e) {
             log.error("upload public File Failed", e);
-            throw e;
-        }
-    }
-
-    /**
-     * Sibling of {@link fetchUploadURLs} for public albums.
-     */
-    async fetchUploadURLs(
-        countHint: number,
-        credentials: PublicAlbumsCredentials,
-    ) {
-        const count = Math.min(50, countHint * 2).toString();
-        const params = new URLSearchParams({ count });
-        const url = await apiURL("/public-collection/upload-urls");
-        const res = await fetch(`${url}?${params.toString()}`, {
-            headers: authenticatedPublicAlbumsRequestHeaders(credentials),
-        });
-        ensureOk(res);
-        return ObjectUploadURLResponse.parse(await res.json()).urls;
-    }
-
-    async fetchMultipartUploadURLs(
-        count: number,
-        credentials: PublicAlbumsCredentials,
-    ): Promise<MultipartUploadURLs> {
-        try {
-            const response = await HTTPService.get(
-                await apiURL("/public-collection/multipart-upload-urls"),
-                { count },
-                authenticatedPublicAlbumsRequestHeaders(credentials),
-            );
-            return response.data.urls;
-        } catch (e) {
-            log.error("fetch public multipart-upload-url failed", e);
             throw e;
         }
     }

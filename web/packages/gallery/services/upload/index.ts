@@ -288,8 +288,6 @@ export const toPathOrZipEntry = (fsUploadItem: FileSystemUploadItem) =>
         ? fsUploadItem
         : fsUploadItem.path;
 
-export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
-
 export type UploadPhase =
     | "preparing"
     | "readingMetadata"

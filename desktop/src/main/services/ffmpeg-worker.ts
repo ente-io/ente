@@ -840,11 +840,8 @@ const uploadVideoSegments = async (
                 // because when we use the node native fetch then we need to
                 // provide it explicitly.
                 headers: { "Content-Length": `${videoSize}` },
-                // The duplex option is required since we're passing a stream.
-                //
-                // @ts-expect-error TypeScript's libdom.d.ts does not include
-                // the "duplex" parameter, e.g. see
-                // https://github.com/node-fetch/node-fetch/issues/1769.
+                // See: [Note: duplex param required for stream body]
+                // @ts-expect-error ^see note above
                 duplex: "half",
                 body: webStream,
             });

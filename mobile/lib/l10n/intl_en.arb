@@ -1741,6 +1741,7 @@
   "cLBulkEdit": "Bulk Edit dates",
   "cLBulkEditDesc": "You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.",
   "curatedMemories": "Curated memories",
+  "onThisDay": "On this day",
   "deleteMultipleAlbumDialog": "Also delete the photos (and videos) present in these {count} albums from <bold>all</bold> other albums they are part of?",
   "addParticipants": "Add participants",
   "selectedAlbums": "{count} selected",
