@@ -1215,7 +1215,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
     _logger
         .info("Starting migration of $totalCount clip embeddings to vector DB");
-    const batchSize = 5000;
+    const batchSize = 1000;
     int offset = 0;
     int processedCount = 0;
     int weirdCount = 0;
