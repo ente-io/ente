@@ -205,9 +205,10 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
 export const initiateGenerateHLS = async (
     _: Electron,
     video: FileSystemUploadItem | ReadableStream,
-    objectUploadURL: string,
+    objectUploadURLs: string[],
 ): Promise<GenerateHLSResult | undefined> => {
-    const params = new URLSearchParams({ op: "generate-hls", objectUploadURL });
+    const params = new URLSearchParams({ op: "generate-hls" });
+    for (const url of objectUploadURLs) params.append("url", url);
 
     let body: ReadableStream | null;
     if (video instanceof ReadableStream) {

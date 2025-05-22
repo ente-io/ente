@@ -995,14 +995,37 @@ const processQueueItem = async ({
     //
     // So instead we provide the presigned upload URL to the node side so that
     // it can directly upload the generated video segments.
-    const { objectID, url: objectUploadURL } =
-        await getFilePreviewDataUploadURL(file);
+    const uploadURLs = await getFilePreviewDataUploadURL(file);
+
+    const { objectID } = uploadURLs;
+
+    // [Note: Passing HLS multipart upload URLs over IPC]
+    //
+    // For IPC convenience, we convert both normal upload URLs (where we have
+    // only a single pre-signed URL) and multipart upload URLs (where we have a
+    // list of pre-signed part upload URLs, and a completion URL) into an array.
+    //
+    // On the desktop side, we can parse the array and treat singleton arrays as
+    // expecting a normal upload, and otherwise split the array into parts and
+    // the completion URL (last item).
+    let objectUploadURLs: string[];
+    if (uploadURLs.url) {
+        objectUploadURLs = [uploadURLs.url];
+    } else if (uploadURLs.partURLs && uploadURLs.completeURL) {
+        objectUploadURLs = [...uploadURLs.partURLs, uploadURLs.completeURL];
+    } else {
+        throw new Error("Malformed upload URLs");
+    }
 
     log.info(`Generate HLS for ${fileLogID(file)} | start`);
 
     let res: GenerateHLSResult | undefined;
     try {
-        res = await initiateGenerateHLS(electron, sourceVideo, objectUploadURL);
+        res = await initiateGenerateHLS(
+            electron,
+            sourceVideo,
+            objectUploadURLs,
+        );
     } catch (e) {
         // Failures during stream generation on the native side are expected to
         // happen in two cases:

@@ -385,13 +385,30 @@ const FilePreviewDataUploadURLResponse = z.object({
     objectID: z.string(),
     /**
      * A presigned URL that can be used to upload the file.
+     *
+     * This will be present only if we requested a singular object upload URL.
      */
-    url: z.string(),
+    url: z.string().nullish().transform(nullToUndefined),
+    /**
+     * A list of pre-signed URLs that can be used to upload parts of a multipart
+     * upload of the uploaded data.
+     *
+     * This will be present only if we requested a multipart upload URLs for the
+     * object by setting `isMultiPart` true in the request.
+     */
+    partURLs: z.string().array().nullish().transform(nullToUndefined),
+    /**
+     * A pre-signed URL that can be used to finalize the multipart upload.
+     *
+     * This will be present only if we requested a multipart upload URLs for the
+     * object by setting `isMultiPart` true in the request.
+     */
+    completeURL: z.string().nullish().transform(nullToUndefined),
 });
 
 /**
- * Obtain a presigned URL that can be used to upload the "file preview data" of
- * type "vid_preview" (the file containing the encrypted video segments which
+ * Obtain a presigned URL(s) that can be used to upload the "file preview data"
+ * of type "vid_preview" (the file containing the encrypted video segments which
  * the "vid_preview" HLS playlist for the file would refer to).
  */
 export const getFilePreviewDataUploadURL = async (file: EnteFile) => {
