@@ -26,6 +26,7 @@ class AlbumHomeWidgetService {
   static const String ANDROID_CLASS_NAME = "EnteAlbumsWidgetProvider";
   static const String IOS_CLASS_NAME = "EnteAlbumWidget";
   static const String ALBUMS_CHANGED_KEY = "albumsChanged.widget";
+  static const String GOT_ALL_KEY = "gotAllAlbums.widget";
   static const String TOTAL_ALBUMS_KEY = "totalAlbums";
   static const int MAX_ALBUMS_LIMIT = 50;
 
@@ -54,6 +55,7 @@ class AlbumHomeWidgetService {
 
     await _albumsForceRefreshLock.synchronized(() async {
       if (await _hasAnyBlockers()) {
+        await clearWidget();
         return;
       }
 
@@ -104,13 +106,27 @@ class AlbumHomeWidgetService {
 
     _logger.info("Clearing AlbumsHomeWidget");
     await _setTotalAlbums(null);
+    await updateGotAll(true);
     _hasSyncedAlbums = false;
     await _refreshWidget(message: "AlbumsHomeWidget cleared & updated");
+  }
+
+  bool getAlbumsChanged() {
+    return _prefs.getBool(ALBUMS_CHANGED_KEY) ?? false;
   }
 
   Future<void> updateAlbumsChanged(bool value) async {
     _logger.info("Updating albums changed flag to $value");
     await _prefs.setBool(ALBUMS_CHANGED_KEY, value);
+  }
+
+  bool checkGotAll() {
+    return _prefs.getBool(GOT_ALL_KEY) ?? false;
+  }
+
+  Future<void> updateGotAll(bool value) async {
+    _logger.info("Updating got all albums flag to $value");
+    await _prefs.setBool(GOT_ALL_KEY, value);
   }
 
   Future<void> checkPendingAlbumsSync({bool addDelay = true}) async {
@@ -283,8 +299,11 @@ class AlbumHomeWidgetService {
     final lastHash = getAlbumsLastHash();
 
     if (currentHash == lastHash) {
-      _logger.warning("No changes detected in album content");
-      return false;
+      final didGotAllValues = checkGotAll();
+      if (didGotAllValues) {
+        _logger.info("Albums already synced, no action needed");
+        return false;
+      }
     }
 
     return true;
@@ -372,6 +391,8 @@ class AlbumHomeWidgetService {
     final bool isWidgetPresent = await countHomeWidgets() > 0;
     final limit = isWidgetPresent ? MAX_ALBUMS_LIMIT : 5;
 
+    await updateGotAll(false);
+
     for (final entry in albumsWithFiles.entries) {
       final albumId = entry.key;
       final albumName = entry.value.$1;
@@ -393,13 +414,14 @@ class AlbumHomeWidgetService {
         if (renderResult != null) {
           // Check for blockers again before continuing
           if (await _hasAnyBlockers()) {
+            await clearWidget();
             return;
           }
 
           await _setTotalAlbums(renderedCount);
 
           // Show update toast after first item is rendered
-          if (renderedCount == 1) {
+          if (renderedCount == 1 && albumFiles.length > 1) {
             await _refreshWidget(
               message: "First album fetched, updating widget",
             );
@@ -425,6 +447,7 @@ class AlbumHomeWidgetService {
     final hash = _calculateHash(selectedAlbumIds);
     await setAlbumsLastHash(hash);
 
+    await updateGotAll(isWidgetPresent);
     if (renderedCount == 0) {
       return;
     }
