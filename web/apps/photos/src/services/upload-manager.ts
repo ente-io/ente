@@ -251,6 +251,23 @@ class UIService {
         setFinishedUploads(groupByResult(this.finishedUploads));
     }
 
+    /**
+     * Update the upload progress shown in the UI for the file with the given
+     * {@link fileLocalID} after {@link partNumber} parts have been completed,
+     * each contributing {@link percentPerPart} to the total.
+     */
+    updateUploadProgress(
+        fileLocalID: number,
+        percentPerPart: number,
+        uploadedPartCount: number,
+    ) {
+        this.inProgressUploads.set(
+            fileLocalID,
+            Math.min(Math.round(percentPerPart * uploadedPartCount), 98),
+        );
+        this.updateProgressBarUI();
+    }
+
     trackUploadProgress(
         fileLocalID: number,
         percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
