@@ -150,10 +150,10 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                       "assets/albums-widget-static.png",
                       height: 160,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     Text(
                       "Add an album widget to your homescreen and come back here to customize",
-                      style: textTheme.largeFaint,
+                      style: textTheme.smallFaint,
                       textAlign: TextAlign.center,
                     ),
                   ],
