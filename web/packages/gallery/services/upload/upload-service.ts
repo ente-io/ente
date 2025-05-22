@@ -541,6 +541,15 @@ type MakeProgressTracker = (
     index?: number,
 ) => unknown;
 
+/**
+ * A function that is called to update the upload progress for a given file.
+ */
+type UpdateUploadProgress = (
+    fileLocalID: number,
+    percentPerPart: number,
+    uploadedPartCount: number,
+) => void;
+
 interface UploadResponse {
     uploadResult: UploadResult;
     uploadedFile?: EncryptedEnteFile | EnteFile;
@@ -552,6 +561,15 @@ interface UploadResponse {
  * This is lower layer implementation of the upload. It is invoked by
  * {@link UploadManager} after it has assembled all the relevant bits we need to
  * go forth and upload.
+ *
+ * @param abortIfCancelled A function that the upload flowchart should use
+ * periodically to check in if the upload has been cancelled by the user. If the
+ * upload has been cancelled, it will throw an exception with the message set to
+ * {@link CustomError.UPLOAD_CANCELLED}.
+ *
+ * @param updateUploadProgress A function that gets called update the progress
+ * shown in the UI as the parts of the file get uploaded. See
+ * {@link UpdateUploadProgress}.
  */
 export const upload = async (
     { collection, localID, fileName, ...uploadAsset }: UploadableUploadItem,
@@ -562,6 +580,7 @@ export const upload = async (
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
     makeProgressTracker: MakeProgressTracker,
+    updateUploadProgress: UpdateUploadProgress,
 ): Promise<UploadResponse> => {
     log.info(`Upload ${fileName} | start`);
     try {
@@ -668,6 +687,7 @@ export const upload = async (
             makeProgressTracker,
             isCFUploadProxyDisabled,
             abortIfCancelled,
+            updateUploadProgress,
         );
 
         const uploadedFile = await uploadService.uploadFile({
@@ -1459,6 +1479,7 @@ const uploadToBucket = async (
     makeProgressTracker: MakeProgressTracker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
+    updateUploadProgress: UpdateUploadProgress,
 ): Promise<BackupedFile> => {
     const { localID, file, thumbnail, metadata, pubMagicMetadata } =
         encryptedFilePieces;
@@ -1480,6 +1501,7 @@ const uploadToBucket = async (
                     makeProgressTracker,
                     isCFUploadProxyDisabled,
                     abortIfCancelled,
+                    updateUploadProgress,
                 ));
         } else {
             const data =
@@ -1583,13 +1605,14 @@ const createAbortableRetryEnsuringHTTPOk =
             },
         );
 
-async function uploadStreamUsingMultipart(
+const uploadStreamUsingMultipart = async (
     fileLocalID: number,
     dataStream: EncryptedFileStream,
     makeProgressTracker: MakeProgressTracker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
-) {
+    updateUploadProgress: UpdateUploadProgress,
+) => {
     const abortableRetryEnsuringHTTPOk =
         createAbortableRetryEnsuringHTTPOk(abortIfCancelled);
 
@@ -1634,6 +1657,7 @@ async function uploadStreamUsingMultipart(
                     abortableRetryEnsuringHTTPOk,
                 );
                 if (!eTag) throw new Error(CustomError.ETAG_MISSING);
+                updateUploadProgress(fileLocalID, percentPerPart, index);
             } else {
                 eTag = await photosHTTPClient.putFilePart(
                     partUploadURL,
@@ -1659,7 +1683,7 @@ async function uploadStreamUsingMultipart(
     }
 
     return { objectKey: multipartUploadURLs.objectKey, fileSize };
-}
+};
 
 /**
  * Construct byte arrays, up to 20 MB each, containing the contents of (up to)

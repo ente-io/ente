@@ -581,6 +581,9 @@ class UploadManager {
             uiService.setFileProgress(localID, 0);
             await wait(0);
 
+            const updateUploadProgress =
+                uiService.updateUploadProgress.bind(uiService);
+
             const { uploadResult, uploadedFile } = await upload(
                 uploadableItem,
                 this.uploaderName,
@@ -601,6 +604,7 @@ class UploadManager {
                         percentPerPart,
                         index,
                     ),
+                updateUploadProgress
             );
 
             const finalUploadResult = await this.postUploadTask(
