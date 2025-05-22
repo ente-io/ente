@@ -192,8 +192,6 @@ class NotificationService {
       message,
       scheduledDate,
       platformChannelSpecs,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.wallClockTime,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       payload: payload,
     );
