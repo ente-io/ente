@@ -278,6 +278,25 @@ export const putFilePart = async (
 };
 
 /**
+ * Variant of {@link putFilePart} that uses a CF worker.
+ */
+export const putFilePartViaWorker = async (
+    partUploadURL: string,
+    partData: Uint8Array,
+    retrier: HTTPRequestRetrier,
+) => {
+    const origin = await uploaderOrigin();
+    const res = await retrier(() =>
+        fetch(`${origin}/multipart-upload`, {
+            method: "PUT",
+            headers: { ...publicRequestHeaders(), "UPLOAD-URL": partUploadURL },
+            body: partData,
+        }),
+    );
+    return nullToUndefined(res.headers.get("etag"));
+};
+
+/**
  * Information about an individual part of a multipart upload that has been
  * uploaded to the remote (S3 or proxy).
  *
@@ -427,7 +446,7 @@ export const completeMultipartUpload = (
     });
 
 /**
- * Variant of {@link completeMultipartUpload} that uses the CF worker.
+ * Variant of {@link completeMultipartUpload} that uses a CF worker.
  */
 export const completeMultipartUploadViaWorker = async (
     completionURL: string,

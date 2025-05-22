@@ -62,6 +62,7 @@ import {
     PhotosUploadHTTPClient,
     PublicAlbumsUploadHTTPClient,
     putFilePart,
+    putFilePartViaWorker,
     type MultipartCompletedPart,
     type ObjectUploadURL,
 } from "./remote";
@@ -1498,7 +1499,6 @@ const uploadToBucket = async (
                 await uploadStreamUsingMultipart(
                     localID,
                     encryptedData,
-                    makeProgressTracker,
                     isCFUploadProxyDisabled,
                     abortIfCancelled,
                     updateUploadProgress,
@@ -1608,7 +1608,6 @@ const createAbortableRetryEnsuringHTTPOk =
 const uploadStreamUsingMultipart = async (
     fileLocalID: number,
     dataStream: EncryptedFileStream,
-    makeProgressTracker: MakeProgressTracker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
     updateUploadProgress: UpdateUploadProgress,
@@ -1627,8 +1626,9 @@ const uploadStreamUsingMultipart = async (
     const streamReader = stream.getReader();
     const percentPerPart =
         RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
-    const completedParts: MultipartCompletedPart[] = [];
+
     let fileSize = 0;
+    const completedParts: MultipartCompletedPart[] = [];
     for (const [
         index,
         partUploadURL,
@@ -1638,35 +1638,21 @@ const uploadStreamUsingMultipart = async (
         const partNumber = index + 1;
         const partData = await nextMultipartUploadPart(streamReader);
         fileSize += partData.length;
-        const progressTracker = makeProgressTracker(
-            fileLocalID,
-            percentPerPart,
-            index,
-        );
-        let eTag = null;
-        if (!isCFUploadProxyDisabled) {
-            eTag = await photosHTTPClient.putFilePartV2(
-                partUploadURL,
-                partData,
-                progressTracker,
-            );
-        } else {
-            if (process.env.NEXT_PUBLIC_ENTE_WIP_MP) {
-                eTag = await putFilePart(
-                    partUploadURL,
-                    partData,
-                    abortableRetryEnsuringHTTPOk,
-                );
-                if (!eTag) throw new Error(CustomError.ETAG_MISSING);
-                updateUploadProgress(fileLocalID, percentPerPart, partNumber);
-            } else {
-                eTag = await photosHTTPClient.putFilePart(
-                    partUploadURL,
-                    partData,
-                    progressTracker,
-                );
-            }
-        }
+
+        const eTag = !isCFUploadProxyDisabled
+            ? await putFilePartViaWorker(
+                  partUploadURL,
+                  partData,
+                  abortableRetryEnsuringHTTPOk,
+              )
+            : await putFilePart(
+                  partUploadURL,
+                  partData,
+                  abortableRetryEnsuringHTTPOk,
+              );
+        if (!eTag) throw new Error(CustomError.ETAG_MISSING);
+
+        updateUploadProgress(fileLocalID, percentPerPart, partNumber);
         completedParts.push({ partNumber, eTag });
     }
     const { done } = await streamReader.read();
