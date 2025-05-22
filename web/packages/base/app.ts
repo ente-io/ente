@@ -71,7 +71,7 @@ export const clientPackageName = (() => {
     if (isDesktop) {
         if (appName != "photos")
             throw new Error(`Unsupported desktop appName ${appName}`);
-        return `io.ente.photos.desktop`;
+        return "io.ente.photos.desktop";
     }
     return {
         accounts: "io.ente.accounts.web",
