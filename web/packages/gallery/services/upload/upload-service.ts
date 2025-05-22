@@ -46,7 +46,11 @@ import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
 import { addToCollection } from "ente-new/photos/services/collection";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
-import { CustomError, handleUploadError } from "ente-shared/error";
+import {
+    CustomError,
+    CustomErrorMessage,
+    handleUploadError,
+} from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import type { UploadableUploadItem, UploadItem } from ".";
@@ -726,7 +730,7 @@ export const upload = async (
 
         const error = handleUploadError(e);
         switch (error.message) {
-            case CustomError.ETAG_MISSING:
+            case CustomErrorMessage.eTagMissing:
                 return { uploadResult: "blocked" };
             case CustomError.FILE_TOO_LARGE:
                 return { uploadResult: "largerThanAvailableStorage" };
@@ -1662,7 +1666,7 @@ const uploadStreamUsingMultipart = async (
                   partData,
                   abortableRetryEnsuringHTTPOk,
               );
-        if (!eTag) throw new Error(CustomError.ETAG_MISSING);
+        if (!eTag) throw new Error(CustomErrorMessage.eTagMissing);
 
         updateUploadProgress(fileLocalID, percentPerPart, partNumber);
         completedParts.push({ partNumber, eTag });

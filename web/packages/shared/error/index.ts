@@ -21,6 +21,14 @@ export function isApiErrorResponse(object: any): object is ApiErrorResponse {
     return object && "code" in object && "message" in object;
 }
 
+/**
+ * Constant string values used mark custom errors that we need to subsequently
+ * catch and identify to deal with in a particular manner.
+ */
+export const CustomErrorMessage = {
+    eTagMissing: "ETag header not present in response",
+};
+
 export const CustomError = {
     ETAG_MISSING: "no header/etag present in response body",
     FILE_TOO_LARGE: "file too large",
@@ -28,7 +36,6 @@ export const CustomError = {
     STORAGE_QUOTA_EXCEEDED: "storage quota exceeded",
     SESSION_EXPIRED: "session expired",
     TOKEN_EXPIRED: "token expired",
-    TOKEN_MISSING: "token missing",
     TOO_MANY_REQUESTS: "too many requests",
     BAD_REQUEST: "bad request",
     SUBSCRIPTION_NEEDED: "subscription not present",
