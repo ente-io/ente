@@ -543,13 +543,34 @@ type MakeProgressTracker = (
 ) => unknown;
 
 /**
- * A function that is called to update the upload progress for a given file.
+ * Some state and callbacks used during upload that are not tied to a specific
+ * file being uploaded.
  */
-type UpdateUploadProgress = (
-    fileLocalID: number,
-    percentPerPart: number,
-    uploadedPartCount: number,
-) => void;
+interface UploadContext {
+    /**
+     * If `true`, then the upload does not go via the worker.
+     *
+     * See {@link shouldDisableCFUploadProxy} for more details.
+     */
+    isCFUploadProxyDisabled: boolean;
+    /**
+     * A function that the upload sequence should use to periodically check in
+     * and see if the upload has been cancelled by the user.
+     *
+     * If the upload has been cancelled, it will throw an exception with the
+     * message set to {@link CustomError.UPLOAD_CANCELLED}.
+     */
+    abortIfCancelled: () => void;
+    /**
+     * A function that gets called update the progress shown in the UI for a
+     * particular file as the parts of that file get uploaded.
+     */
+    updateUploadProgress: (
+        fileLocalID: number,
+        percentPerPart: number,
+        uploadedPartCount: number,
+    ) => void;
+}
 
 interface UploadResponse {
     uploadResult: UploadResult;
@@ -563,14 +584,8 @@ interface UploadResponse {
  * {@link UploadManager} after it has assembled all the relevant bits we need to
  * go forth and upload.
  *
- * @param abortIfCancelled A function that the upload flowchart should use
- * periodically to check in if the upload has been cancelled by the user. If the
- * upload has been cancelled, it will throw an exception with the message set to
- * {@link CustomError.UPLOAD_CANCELLED}.
- *
- * @param updateUploadProgress A function that gets called update the progress
- * shown in the UI as the parts of the file get uploaded. See
- * {@link UpdateUploadProgress}.
+ * @param uploadContext Some general state and callbacks for the entire set of
+ * files being uploaded.
  */
 export const upload = async (
     { collection, localID, fileName, ...uploadAsset }: UploadableUploadItem,
@@ -578,11 +593,11 @@ export const upload = async (
     existingFiles: EnteFile[],
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
-    isCFUploadProxyDisabled: boolean,
-    abortIfCancelled: () => void,
     makeProgressTracker: MakeProgressTracker,
-    updateUploadProgress: UpdateUploadProgress,
+    uploadContext: UploadContext,
 ): Promise<UploadResponse> => {
+    const { abortIfCancelled } = uploadContext;
+
     log.info(`Upload ${fileName} | start`);
     try {
         /*
@@ -686,9 +701,7 @@ export const upload = async (
         const backupedFile = await uploadToBucket(
             encryptedFilePieces,
             makeProgressTracker,
-            isCFUploadProxyDisabled,
-            abortIfCancelled,
-            updateUploadProgress,
+            uploadContext,
         );
 
         const uploadedFile = await uploadService.uploadFile({
@@ -1478,10 +1491,10 @@ const encryptFileStream = async (
 const uploadToBucket = async (
     encryptedFilePieces: EncryptedFilePieces,
     makeProgressTracker: MakeProgressTracker,
-    isCFUploadProxyDisabled: boolean,
-    abortIfCancelled: () => void,
-    updateUploadProgress: UpdateUploadProgress,
+    uploadContext: UploadContext,
 ): Promise<BackupedFile> => {
+    const { isCFUploadProxyDisabled } = uploadContext;
+
     const { localID, file, thumbnail, metadata, pubMagicMetadata } =
         encryptedFilePieces;
     try {
@@ -1499,9 +1512,7 @@ const uploadToBucket = async (
                 await uploadStreamUsingMultipart(
                     localID,
                     encryptedData,
-                    isCFUploadProxyDisabled,
-                    abortIfCancelled,
-                    updateUploadProgress,
+                    uploadContext,
                 ));
         } else {
             const data =
@@ -1608,10 +1619,11 @@ const createAbortableRetryEnsuringHTTPOk =
 const uploadStreamUsingMultipart = async (
     fileLocalID: number,
     dataStream: EncryptedFileStream,
-    isCFUploadProxyDisabled: boolean,
-    abortIfCancelled: () => void,
-    updateUploadProgress: UpdateUploadProgress,
+    uploadContext: UploadContext,
 ) => {
+    const { isCFUploadProxyDisabled, abortIfCancelled, updateUploadProgress } =
+        uploadContext;
+
     const abortableRetryEnsuringHTTPOk =
         createAbortableRetryEnsuringHTTPOk(abortIfCancelled);
 

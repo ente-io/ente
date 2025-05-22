@@ -581,8 +581,12 @@ class UploadManager {
             uiService.setFileProgress(localID, 0);
             await wait(0);
 
-            const updateUploadProgress =
-                uiService.updateUploadProgress.bind(uiService);
+            const uploadContext = {
+                isCFUploadProxyDisabled: shouldDisableCFUploadProxy(),
+                abortIfCancelled: this.abortIfCancelled.bind(this),
+                updateUploadProgress:
+                    uiService.updateUploadProgress.bind(uiService),
+            };
 
             const { uploadResult, uploadedFile } = await upload(
                 uploadableItem,
@@ -590,10 +594,6 @@ class UploadManager {
                 this.existingFiles,
                 this.parsedMetadataJSONMap,
                 worker,
-                shouldDisableCFUploadProxy(),
-                () => {
-                    this.abortIfCancelled();
-                },
                 (
                     fileLocalID: number,
                     percentPerPart?: number,
@@ -604,7 +604,7 @@ class UploadManager {
                         percentPerPart,
                         index,
                     ),
-                updateUploadProgress
+                uploadContext,
             );
 
             const finalUploadResult = await this.postUploadTask(
