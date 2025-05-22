@@ -919,7 +919,7 @@ const uploadVideoSegmentsMultipart = async (
     partUploadURLs: string[],
     completionURL: string,
 ) => {
-    const partSize = Math.floor(videoSize / partUploadURLs.length);
+    const partSize = Math.ceil(videoSize / partUploadURLs.length);
     let partNumber = 0;
     let nextStart = 0;
     // See `createMultipartUploadRequestBody` in the web code for a more
@@ -941,7 +941,7 @@ const uploadVideoSegmentsMultipart = async (
                 body: Readable.toWeb(
                     fs_.createReadStream(videoFilePath, {
                         start: nextStart,
-                        end: size - 1,
+                        end: nextStart + size - 1,
                     }),
                 ),
             }),

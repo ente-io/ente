@@ -445,7 +445,7 @@ export const getFilePreviewDataUploadURL = async (file: EnteFile) => {
     //
     // The eventual part size will then be:
     //
-    //     partSize = (totalSize, count) => Math.floor(totalSize / count)
+    //     partSize = (totalSize, count) => Math.ceil(totalSize / count)
     //
     // As an example, for a 200 MB file, we'll estimate partCount of 2, and
     // suppose the generated file is 50% of the original, then each part size
@@ -454,10 +454,13 @@ export const getFilePreviewDataUploadURL = async (file: EnteFile) => {
     // As a sanity check of the other extreme, if the generated file is 10% of
     // the original, we still end up with 10 MB parts.
     let partCount = 1; // Default is single object upload.
-    const fileSize = file.info?.fileSize;
-    if (fileSize && fileSize > 100 * 1024 /* 100 MB */) {
-        // For files larger than 100 MB, estimate the number of 100 MB parts.
-        partCount = Math.ceil((0.7 * fileSize) / (100 * 1024));
+    const fileSize = file.info?.fileSize; /* bytes */
+    if (fileSize) {
+        const fileSizeMB = fileSize / 1024 / 1024;
+        // For files larger than 100 MB, estimate the number of ~100 MB parts.
+        if (fileSizeMB > 100) {
+            partCount = Math.ceil((0.7 * fileSize) / (100 * 1024));
+        }
     }
 
     const params = new URLSearchParams({

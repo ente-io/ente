@@ -291,7 +291,7 @@ const handleGenerateHLSWrite = async (
     params: URLSearchParams,
 ) => {
     const uploadURLs = params.getAll("url");
-    if (uploadURLs.length) throw new Error("Missing upload URL(s)");
+    if (!uploadURLs.length) throw new Error("Missing upload URL(s)");
 
     let inputItem: Parameters<typeof makeFileForStreamOrPathOrZipItem>[0];
     const path = params.get("path");
