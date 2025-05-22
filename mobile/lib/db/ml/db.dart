@@ -83,6 +83,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       "MLDataDB Migration took ${stopwatch.elapsedMilliseconds} ms",
     );
     stopwatch.stop();
+    _logger.info("Starting CLIP vector DB migration check unawaited");
     unawaited(checkMigrateFillClipVectorDB());
 
     return asyncDBConnection;
@@ -1187,10 +1188,12 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   Future<void> checkMigrateFillClipVectorDB({bool force = false}) async {
+    _logger.info("Waiting for ClipVectorDB to be ready");
     await Future.delayed(const Duration(milliseconds: 100));
     _logger.info("Checking if ClipVectorDB migration is needed");
 
     // Check if vector DB migration has run
+    _logger.info("Checking if ClipVectorDB migration has run");
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final migrationFlagFile =
         File(join(documentsDirectory.path, 'clip_vector_migration_done'));
@@ -1200,6 +1203,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     }
 
     // Get total count first to track progress
+    _logger.info("Getting total count of clip embeddings");
     final db = await instance.asyncDB;
     final countResult =
         await db.getAll('SELECT COUNT($fileIDColumn) as total FROM $clipTable');
@@ -1209,9 +1213,13 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       await migrationFlagFile.create();
       return;
     }
+    _logger.info("Total count of clip embeddings: $totalCount");
 
+    _logger.info("First time referencing ClipVectorDB in migration");
     final clipVectorDB = ClipVectorDB.instance;
+    _logger.info("ClipVectorDB referenced");
     await clipVectorDB.deleteAllEmbeddings();
+    _logger.info("ClipVectorDB all embeddings cleared");
 
     _logger
         .info("Starting migration of $totalCount clip embeddings to vector DB");
@@ -1219,21 +1227,28 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     int offset = 0;
     int processedCount = 0;
     int weirdCount = 0;
+    int whileCount = 0;
     final stopwatch = Stopwatch()..start();
     try {
       while (true) {
+        whileCount++;
+        _logger.info("$whileCount st round of while loop");
         // Allow some time for any GC to finish
         await Future.delayed(const Duration(milliseconds: 100));
 
+        _logger.info("Reading $batchSize rows from DB");
         final List<Map<String, dynamic>> results = await db.getAll('''
         SELECT $fileIDColumn, $embeddingColumn 
         FROM $clipTable
         ORDER BY $fileIDColumn DESC
         LIMIT $batchSize OFFSET $offset
       ''');
+        _logger.info("Got ${results.length} results from DB");
         if (results.isEmpty) {
+          _logger.info("No more results, breaking out of while loop");
           break;
         }
+        _logger.info("Processing ${results.length} results");
         final List<int> fileIDs = [];
         final List<Float32List> embeddings = [];
         for (final result in results) {
@@ -1246,27 +1261,35 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
             weirdCount++;
           }
         }
+        _logger.info(
+          "Got ${fileIDs.length} valid embeddings, $weirdCount weird embeddings",
+        );
 
         await ClipVectorDB.instance
             .bulkInsertEmbeddings(fileIDs: fileIDs, embeddings: embeddings);
+        _logger.info("Inserted ${fileIDs.length} embeddings to ClipVectorDB");
         processedCount += fileIDs.length;
         offset += batchSize;
         _logger.info(
           "migrated $processedCount/$totalCount embeddings to ClipVectorDB",
         );
         if (processedCount >= totalCount) {
+          _logger.info("All embeddings migrated, breaking out of while loop");
           break;
         }
+        _logger.info("Clearing out embeddings and fileIDs");
         embeddings.clear();
         fileIDs.clear();
         results.clear();
         // Allow some time for any GC to finish
+        _logger.info("Waiting for 100ms for GC to finish");
         await Future.delayed(const Duration(milliseconds: 100));
       }
       _logger.info(
         "migrated all $totalCount embeddings to ClipVectorDB in ${stopwatch.elapsed.inMilliseconds} ms, with $weirdCount weird embeddings not migrated",
       );
       await migrationFlagFile.create();
+      _logger.info("ClipVectorDB migration done, flag file created");
     } catch (e) {
       _logger.severe(
         "Error migrating ClipVectorDB after ${stopwatch.elapsed.inMilliseconds} ms, clearing out DB again",
