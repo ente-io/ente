@@ -1,5 +1,5 @@
 import { expose, wrap } from "comlink";
-import { clientPackageName } from "ente-base/app";
+import { clientIdentifier } from "ente-base/app";
 import { assertionFailed } from "ente-base/assert";
 import { isHTTP4xxError, isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
@@ -590,13 +590,13 @@ const index = async (
 
         const remoteFaceIndex = existingRemoteFaceIndex ?? {
             version: faceIndexingVersion,
-            client: clientPackageName,
+            client: clientIdentifier,
             ...faceIndex,
         };
 
         const remoteCLIPIndex = existingRemoteCLIPIndex ?? {
             version: clipIndexingVersion,
-            client: clientPackageName,
+            client: clientIdentifier,
             ...clipIndex,
         };
 
