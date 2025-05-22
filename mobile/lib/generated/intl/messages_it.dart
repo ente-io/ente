@@ -1268,6 +1268,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("Sul dispositivo"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Su <branding>ente</branding>"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Solo loro"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
