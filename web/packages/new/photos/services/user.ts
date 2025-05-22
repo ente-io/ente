@@ -48,7 +48,7 @@ const DeleteChallengeResponse = z.object({
     allowDelete: z.boolean(),
     // An encrypted challenge that the client needs to decrypt and provide in
     // the actual account deletion request.
-    encryptedChallenge: z.string().nullable().transform(nullToUndefined),
+    encryptedChallenge: z.string().nullish().transform(nullToUndefined),
 });
 
 export const getAccountDeleteChallenge = async () => {

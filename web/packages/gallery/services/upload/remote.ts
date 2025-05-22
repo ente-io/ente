@@ -147,34 +147,6 @@ export const fetchPublicAlbumsMultipartUploadURLs = async (
 };
 
 /**
- * Lowest layer for file upload related HTTP operations when we're running in
- * the context of the photos app.
- */
-export class PhotosUploadHTTPClient {
-    async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
-        try {
-            const url = await apiURL("/files");
-            const headers = await authenticatedRequestHeaders();
-            const response = await retryAsyncOperation(
-                () =>
-                    HTTPService.post(
-                        url,
-                        uploadFile,
-                        // @ts-ignore
-                        null,
-                        headers,
-                    ),
-                handleUploadError,
-            );
-            return response.data;
-        } catch (e) {
-            log.error("upload Files Failed", e);
-            throw e;
-        }
-    }
-}
-
-/**
  * Upload a file using a pre-signed URL.
  *
  * @param fileUploadURL A pre-signed URL that can be used to upload data to the
@@ -439,6 +411,34 @@ export const completeMultipartUploadViaWorker = async (
             body: createMultipartUploadRequestBody(completedParts),
         }),
     );
+
+/**
+ * Lowest layer for file upload related HTTP operations when we're running in
+ * the context of the photos app.
+ */
+export class PhotosUploadHTTPClient {
+    async uploadFile(uploadFile: UploadFile): Promise<EnteFile> {
+        try {
+            const url = await apiURL("/files");
+            const headers = await authenticatedRequestHeaders();
+            const response = await retryAsyncOperation(
+                () =>
+                    HTTPService.post(
+                        url,
+                        uploadFile,
+                        // @ts-ignore
+                        null,
+                        headers,
+                    ),
+                handleUploadError,
+            );
+            return response.data;
+        } catch (e) {
+            log.error("upload Files Failed", e);
+            throw e;
+        }
+    }
+}
 
 /**
  * Lowest layer for file upload related HTTP operations when we're running in
