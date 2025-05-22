@@ -1635,6 +1635,7 @@ const uploadStreamUsingMultipart = async (
     ] of multipartUploadURLs.partURLs.entries()) {
         abortIfCancelled();
 
+        const partNumber = index + 1;
         const partData = await nextMultipartUploadPart(streamReader);
         fileSize += partData.length;
         const progressTracker = makeProgressTracker(
@@ -1657,7 +1658,7 @@ const uploadStreamUsingMultipart = async (
                     abortableRetryEnsuringHTTPOk,
                 );
                 if (!eTag) throw new Error(CustomError.ETAG_MISSING);
-                updateUploadProgress(fileLocalID, percentPerPart, index);
+                updateUploadProgress(fileLocalID, percentPerPart, partNumber);
             } else {
                 eTag = await photosHTTPClient.putFilePart(
                     partUploadURL,
@@ -1666,7 +1667,7 @@ const uploadStreamUsingMultipart = async (
                 );
             }
         }
-        completedParts.push({ partNumber: index + 1, eTag });
+        completedParts.push({ partNumber, eTag });
     }
     const { done } = await streamReader.read();
     if (!done) throw new Error("More chunks than expected");
