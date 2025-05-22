@@ -1,4 +1,3 @@
-import { Canceler } from "axios";
 import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
 import { type CryptoWorker } from "ente-base/crypto/worker";
@@ -7,7 +6,6 @@ import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import {
-    RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     markUploadedAndObtainProcessableItem,
     shouldDisableCFUploadProxy,
     type ClusteredUploadItem,
@@ -252,64 +250,15 @@ class UIService {
     }
 
     /**
-     * Update the upload progress shown in the UI for the file with the given
-     * {@link fileLocalID} after {@link partNumber} parts have been completed,
-     * each contributing {@link percentPerPart} to the total.
+     * Update the upload progress shown in the UI to {@link percentage} for the
+     * file with the given {@link fileLocalID}.
+     *
+     * @param percentage The upload completion percentage. It should be a value
+     * between 0 and 100 (inclusive).
      */
-    updateUploadProgress(
-        fileLocalID: number,
-        percentPerPart: number,
-        uploadedPartCount: number,
-    ) {
-        this.inProgressUploads.set(
-            fileLocalID,
-            Math.min(Math.round(percentPerPart * uploadedPartCount), 98),
-        );
+    updateUploadProgress(fileLocalID: number, percentage: number) {
+        this.inProgressUploads.set(fileLocalID, Math.round(percentage));
         this.updateProgressBarUI();
-    }
-
-    trackUploadProgress(
-        fileLocalID: number,
-        percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
-        index = 0,
-    ) {
-        const cancel: { exec: Canceler } = { exec: () => {} };
-        const cancelTimedOutRequest = () => cancel.exec("Request timed out");
-
-        const cancelCancelledUploadRequest = () =>
-            cancel.exec(CustomError.UPLOAD_CANCELLED);
-
-        let timeout = null;
-        const resetTimeout = () => {
-            if (timeout) {
-                clearTimeout(timeout);
-            }
-            timeout = setTimeout(cancelTimedOutRequest, 30 * 1000 /* 30 sec */);
-        };
-        return {
-            cancel,
-            onUploadProgress: (event) => {
-                this.inProgressUploads.set(
-                    fileLocalID,
-                    Math.min(
-                        Math.round(
-                            percentPerPart * index +
-                                (percentPerPart * event.loaded) / event.total,
-                        ),
-                        98,
-                    ),
-                );
-                this.updateProgressBarUI();
-                if (event.loaded === event.total) {
-                    clearTimeout(timeout);
-                } else {
-                    resetTimeout();
-                }
-                if (uploadCancelService.isUploadCancelationRequested()) {
-                    cancelCancelledUploadRequest();
-                }
-            },
-        };
     }
 }
 
@@ -568,6 +517,12 @@ class UploadManager {
 
     private async uploadNextItemInQueue(worker: CryptoWorker) {
         const uiService = this.uiService;
+        const uploadContext = {
+            isCFUploadProxyDisabled: shouldDisableCFUploadProxy(),
+            abortIfCancelled: this.abortIfCancelled.bind(this),
+            updateUploadProgress:
+                uiService.updateUploadProgress.bind(uiService),
+        };
 
         while (this.itemsToBeUploaded.length > 0) {
             this.abortIfCancelled();
@@ -581,29 +536,12 @@ class UploadManager {
             uiService.setFileProgress(localID, 0);
             await wait(0);
 
-            const uploadContext = {
-                isCFUploadProxyDisabled: shouldDisableCFUploadProxy(),
-                abortIfCancelled: this.abortIfCancelled.bind(this),
-                updateUploadProgress:
-                    uiService.updateUploadProgress.bind(uiService),
-            };
-
             const { uploadResult, uploadedFile } = await upload(
                 uploadableItem,
                 this.uploaderName,
                 this.existingFiles,
                 this.parsedMetadataJSONMap,
                 worker,
-                (
-                    fileLocalID: number,
-                    percentPerPart?: number,
-                    index?: number,
-                ) =>
-                    uiService.trackUploadProgress(
-                        fileLocalID,
-                        percentPerPart,
-                        index,
-                    ),
                 uploadContext,
             );
 
@@ -613,8 +551,8 @@ class UploadManager {
                 uploadedFile,
             );
 
-            this.uiService.moveFileToResultList(localID, finalUploadResult);
-            this.uiService.increaseFileUploaded();
+            uiService.moveFileToResultList(localID, finalUploadResult);
+            uiService.increaseFileUploaded();
             UploadService.reducePendingUploadCount();
         }
     }
