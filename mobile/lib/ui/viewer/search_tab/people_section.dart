@@ -223,7 +223,7 @@ class PersonSearchExample extends StatelessWidget {
         final bool isSelected = selectedPeople?.isPersonSelected(id) ?? false;
 
         return GestureDetector(
-          onTap: isSelected
+          onTap: selectedPeople != null
               ? toggleSelection
               : () {
                   RecentSearches().add(searchResult.name());
@@ -236,7 +236,6 @@ class PersonSearchExample extends StatelessWidget {
                     );
                   }
                 },
-          onLongPress: toggleSelection,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,

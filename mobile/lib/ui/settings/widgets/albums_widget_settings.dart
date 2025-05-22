@@ -172,6 +172,7 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                     selectedAlbums: _selectedAlbums,
                     shouldShowCreateAlbum: false,
                     enableSelectionMode: true,
+                    onlyAllowSelection: true,
                   );
                 } else if (snapshot.hasError) {
                   return SliverToBoxAdapter(
