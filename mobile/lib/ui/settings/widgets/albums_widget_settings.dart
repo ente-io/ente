@@ -1,3 +1,4 @@
+import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
@@ -143,16 +144,16 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      height: MediaQuery.sizeOf(context).height * 0.5 - 300,
+                      height: MediaQuery.sizeOf(context).height * 0.5 - 200,
                     ),
                     Image.asset(
                       "assets/albums-widget-static.png",
                       height: 160,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     Text(
                       "Add an album widget to your homescreen and come back here to customize",
-                      style: textTheme.largeFaint,
+                      style: textTheme.smallFaint,
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -165,13 +166,17 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                   CollectionsService.instance.getCollectionForOnEnteSection(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
+                  final data = snapshot.data!.sorted(
+                    (a, b) => _selectedAlbums.albums.contains(b) ? 1 : -1,
+                  );
                   return CollectionsFlexiGridViewWidget(
-                    snapshot.data!,
+                    data,
                     displayLimitCount: snapshot.data!.length,
                     shrinkWrap: true,
                     selectedAlbums: _selectedAlbums,
                     shouldShowCreateAlbum: false,
                     enableSelectionMode: true,
+                    onlyAllowSelection: true,
                   );
                 } else if (snapshot.hasError) {
                   return SliverToBoxAdapter(

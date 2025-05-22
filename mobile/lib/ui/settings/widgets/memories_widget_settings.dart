@@ -122,16 +122,16 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      height: MediaQuery.sizeOf(context).height * 0.5 - 300,
+                      height: MediaQuery.sizeOf(context).height * 0.5 - 200,
                     ),
                     Image.asset(
                       "assets/memories-widget-static.png",
                       height: 160,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     Text(
                       "Add a memories widget to your homescreen and come back here to customize",
-                      style: textTheme.largeFaint,
+                      style: textTheme.smallFaint,
                       textAlign: TextAlign.center,
                     ),
                   ],

@@ -98,10 +98,6 @@ class EntePeopleWidgetProvider : HomeWidgetProvider() {
                                                                 View.VISIBLE
                                                         )
                                                         setViewVisibility(
-                                                                R.id.widget_placeholder_container,
-                                                                View.VISIBLE
-                                                        )
-                                                        setViewVisibility(
                                                                 R.id.widget_subtitle,
                                                                 View.VISIBLE
                                                         )
@@ -152,10 +148,6 @@ class EntePeopleWidgetProvider : HomeWidgetProvider() {
                                                         )
                                                         setViewVisibility(
                                                                 R.id.widget_img,
-                                                                View.GONE
-                                                        )
-                                                        setViewVisibility(
-                                                                R.id.widget_placeholder_container,
                                                                 View.GONE
                                                         )
                                                         setViewVisibility(
