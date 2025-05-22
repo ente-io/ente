@@ -19,5 +19,6 @@
   "deleteAccountPermanentlyButton": "கணக்கை நிரந்தரமாக நீக்கவும்",
   "yourAccountHasBeenDeleted": "உங்கள் கணக்கு நீக்கப்பட்டது",
   "selectReason": "காரணத்தைத் தேர்ந்தெடுக்கவும்",
-  "deleteReason1": "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை"
+  "deleteReason1": "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை",
+  "onThisDay": "On this day"
 }

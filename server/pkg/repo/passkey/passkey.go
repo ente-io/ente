@@ -144,7 +144,7 @@ func (r *Repository) CreateBeginRegistrationData(user *ente.User) (options *prot
 	}
 
 	if len(passkeyUser.WebAuthnCredentials()) >= ente.MaxPasskeys {
-		err = stacktrace.NewError(ente.ErrMaxPasskeysReached.Error())
+		err = stacktrace.Propagate(&ente.ErrMaxPasskeysReached, "")
 		return
 	}
 

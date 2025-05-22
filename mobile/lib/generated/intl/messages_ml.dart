@@ -89,6 +89,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "nothingToSeeHere":
             MessageLookupByLibrary.simpleMessage("ഇവിടൊന്നും കാണ്മാനില്ല! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("ശരി"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
         "oops": MessageLookupByLibrary.simpleMessage("അയ്യോ"),
         "password": MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി"),
         "pleaseTryAgain":

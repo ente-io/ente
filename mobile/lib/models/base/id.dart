@@ -2,16 +2,16 @@ import 'package:nanoid/nanoid.dart';
 
 const enteWhiteListedAlphabet =
     '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-const clusterIDLength = 22;
+const randomIDLength = 22;
 
 String newClusterID() {
-  return "cluster_${customAlphabet(enteWhiteListedAlphabet, clusterIDLength)}";
+  return "cluster_${customAlphabet(enteWhiteListedAlphabet, randomIDLength)}";
 }
 
 String newID(String prefix) {
-  return "${prefix}_${customAlphabet(enteWhiteListedAlphabet, clusterIDLength)}";
+  return "${prefix}_${customAlphabet(enteWhiteListedAlphabet, randomIDLength)}";
 }
 
 String newIsolateTaskID(String task) {
-  return "${task}_${customAlphabet(enteWhiteListedAlphabet, clusterIDLength)}";
+  return "${task}_${customAlphabet(enteWhiteListedAlphabet, randomIDLength)}";
 }

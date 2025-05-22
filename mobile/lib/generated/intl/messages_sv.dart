@@ -442,6 +442,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Inga resultat hittades"),
         "notPersonLabel": m53,
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
         "onlyFamilyAdminCanChangeCode": m54,
         "oops": MessageLookupByLibrary.simpleMessage("Hoppsan"),
         "oopsSomethingWentWrong":
