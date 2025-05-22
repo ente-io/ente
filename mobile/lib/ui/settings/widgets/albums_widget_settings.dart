@@ -1,3 +1,4 @@
+import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
@@ -165,8 +166,11 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                   CollectionsService.instance.getCollectionForOnEnteSection(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
+                  final data = snapshot.data!.sorted(
+                    (a, b) => _selectedAlbums.albums.contains(b) ? 1 : -1,
+                  );
                   return CollectionsFlexiGridViewWidget(
-                    snapshot.data!,
+                    data,
                     displayLimitCount: snapshot.data!.length,
                     shrinkWrap: true,
                     selectedAlbums: _selectedAlbums,
