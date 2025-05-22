@@ -80,7 +80,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               final amount =
                   await NotificationService.instance.pendingNotifications();
               showShortToast(context, '$amount pending notifications');
-            } catch (e) {
+            } catch (e, s) {
+              logger.severe('pendingNotifications failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
@@ -98,7 +99,8 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               await NotificationService.instance
                   .clearAllScheduledNotifications();
               showShortToast(context, 'Done');
-            } catch (e) {
+            } catch (e, s) {
+              logger.severe('clearAllScheduledNotifications failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },
