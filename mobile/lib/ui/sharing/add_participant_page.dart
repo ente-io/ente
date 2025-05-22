@@ -293,6 +293,10 @@ class _AddParticipantPage extends State<AddParticipantPage> {
           labelText: S.of(context).addCollaborators(_selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
+            // TODO: This is not currently designed for best UX for action on
+            // multiple collections and emails, especially if some operations
+            // fail. Can be improved by using a different 'addEmailToCollection'
+            // that accepts list of emails and list of collections.
             final results = <bool>[];
             final collections = widget.collections;
 

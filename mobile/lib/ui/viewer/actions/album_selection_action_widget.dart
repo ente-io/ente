@@ -174,6 +174,9 @@ class _AlbumSelectionActionWidgetState
 
     final List errors = [];
     for (final collection in widget.selectedAlbums.albums) {
+      if (collection.type == CollectionType.favorites) {
+        continue;
+      }
       count = await FilesDB.instance.collectionFileCount(collection.id);
       final bool isEmptyCollection = count == 0;
       if (isEmptyCollection) {
@@ -183,8 +186,6 @@ class _AlbumSelectionActionWidgetState
           _logger.warning("failed to trash collection", e, s);
           errors.add(e);
         }
-      } else if (collection.type == CollectionType.favorites) {
-        continue;
       } else {
         nonEmptyCollection.add(collection);
       }

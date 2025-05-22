@@ -18,6 +18,7 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -213,6 +214,9 @@ class MemoriesCacheService {
         _cachedMemories = nowResult.memories
             .where((memory) => memory.shouldShowNow())
             .toList();
+        await _scheduleOnThisDayNotifications(
+          [...nowResult.memories, ...nextResult.memories],
+        );
         locationService.baseLocations = nowResult.baseLocations;
         await file.writeAsBytes(
           MemoriesCache.encodeToJsonString(newCache).codeUnits,
@@ -231,6 +235,51 @@ class MemoriesCacheService {
     final oldCache = await _readCacheFromDisk();
     final MemoriesCache newCache = _processOldCache(oldCache);
     return newCache;
+  }
+
+  Future<void> _scheduleOnThisDayNotifications(
+    List<SmartMemory> allMemories,
+  ) async {
+    await NotificationService.instance
+        .clearAllScheduledNotifications(containingPayload: "onThisDay");
+    final scheduledDates = <DateTime>{};
+    for (final memory in allMemories) {
+      if (memory.type != MemoryType.onThisDay) {
+        continue;
+      }
+      final numberOfMemories = memory.memories.length;
+      if (numberOfMemories < 5) continue;
+      final firstDateToShow =
+          DateTime.fromMicrosecondsSinceEpoch(memory.firstDateToShow);
+      final scheduleTime = DateTime(
+        firstDateToShow.year,
+        firstDateToShow.month,
+        firstDateToShow.day,
+        8,
+      );
+      if (scheduleTime.isBefore(DateTime.now())) {
+        _logger.info(
+          "Skipping scheduling notification for memory ${memory.id} because the date is in the past",
+        );
+        continue;
+      }
+      if (scheduledDates.contains(scheduleTime)) {
+        _logger.info(
+          "Skipping scheduling notification for memory ${memory.id} because the date is already scheduled",
+        );
+        continue;
+      }
+      await NotificationService.instance.scheduleNotification(
+        "On this day",
+        "Look back on $numberOfMemories memories 🌄",
+        id: memory.id.hashCode,
+        channelID: "onThisDay",
+        channelName: "On this day",
+        payload: memory.id,
+        dateTime: scheduleTime,
+      );
+      scheduledDates.add(scheduleTime);
+    }
   }
 
   MemoriesCache _processOldCache(MemoriesCache? oldCache) {
@@ -313,6 +362,7 @@ class MemoriesCacheService {
             memory.title,
             memory.firstTimeToShow,
             memory.lastTimeToShow,
+            id: memory.id,
           );
           if (smartMemory.memories.isNotEmpty) {
             memories.add(smartMemory);
@@ -390,7 +440,12 @@ class MemoriesCacheService {
       }
       _cachedMemories = await _getMemoriesFromCache();
       if (_cachedMemories == null || _cachedMemories!.isEmpty) {
+        _logger.warning(
+          "No memories found in cache, force updating cache. Possible severe caching issue",
+        );
         await updateCache(forced: true);
+      } else {
+        _logger.info("Found memories in cache");
       }
       if (_cachedMemories == null || _cachedMemories!.isEmpty) {
         _logger
@@ -441,6 +496,39 @@ class MemoriesCacheService {
         initialIndex: fileIdx,
         memories: allMemories[memoryIdx].memories,
         child: FullScreenMemory(allMemories[memoryIdx].title, fileIdx),
+      ),
+      forceCustomPageRoute: true,
+    );
+  }
+
+  Future<void> goToMemoryFromMemoryID(
+    BuildContext context,
+    String memoryID,
+  ) async {
+    final allMemories = await getMemories();
+    if (allMemories.isEmpty) return;
+    int memoryIdx = 0;
+    bool found = false;
+    memoryLoop:
+    for (final memory in _cachedMemories!) {
+      if (memory.id == memoryID) {
+        found = true;
+        break memoryLoop;
+      }
+      memoryIdx++;
+    }
+    if (!found) {
+      _logger.warning(
+        "Could not find memory with memoryID: $memoryID",
+      );
+      return;
+    }
+    await routeToPage(
+      context,
+      FullScreenMemoryDataUpdater(
+        initialIndex: 0,
+        memories: allMemories[memoryIdx].memories,
+        child: FullScreenMemory(allMemories[memoryIdx].title, 0),
       ),
       forceCustomPageRoute: true,
     );

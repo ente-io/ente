@@ -22,15 +22,13 @@ import "package:photos/utils/navigation_util.dart";
 
 class CollectionsFlexiGridViewWidget extends StatefulWidget {
   /*
-  Aspect ratio 1:1 Max width 224 Fixed gap 8
-  Width changes dynamically with screen width such that we can fit 2 in one row.
-  Keep the width integral (center the albums to distribute excess pixels)
-   */
-  static const maxThumbnailWidth = 224.0;
-  static const fixedGapBetweenAlbum = 4.0;
-  static const minGapForHorizontalPadding = 8.0;
-  static const collectionItemsToPreload = 20;
+  Aspect ratio 1:1
+  Width changes dynamically with screen width
+  */
 
+  static const maxThumbnailWidth = 224.0;
+  static const crossAxisSpacing = 8.0;
+  static const horizontalPadding = 16.0;
   final List<Collection>? collections;
   // At max how many albums to display
   final int displayLimitCount;
@@ -116,23 +114,15 @@ class _CollectionsFlexiGridViewWidgetState
 
   Widget _buildGridView(BuildContext context, Key key) {
     final double screenWidth = MediaQuery.sizeOf(context).width;
-    final int albumsCountInOneRow =
+    final int albumsCountInCrossAxis =
         max(screenWidth ~/ CollectionsFlexiGridViewWidget.maxThumbnailWidth, 3);
-    final double gapBetweenAlbums = (albumsCountInOneRow - 1) *
-        CollectionsFlexiGridViewWidget.fixedGapBetweenAlbum;
-    // gapOnSizeOfAlbums will be
-    final double gapOnSizeOfAlbums =
-        CollectionsFlexiGridViewWidget.minGapForHorizontalPadding +
-            (screenWidth -
-                    gapBetweenAlbums -
-                    (2 *
-                        CollectionsFlexiGridViewWidget
-                            .minGapForHorizontalPadding)) %
-                albumsCountInOneRow;
+    final double totalCrossAxisSpacing = (albumsCountInCrossAxis - 1) *
+        CollectionsFlexiGridViewWidget.crossAxisSpacing;
 
-    final double sideOfThumbnail =
-        (screenWidth - gapOnSizeOfAlbums - gapBetweenAlbums) /
-            albumsCountInOneRow;
+    final double sideOfThumbnail = (screenWidth -
+            totalCrossAxisSpacing -
+            CollectionsFlexiGridViewWidget.horizontalPadding) /
+        albumsCountInCrossAxis;
 
     final int totalCollections = widget.collections!.length;
     final bool showCreateAlbum = widget.shouldShowCreateAlbum;
@@ -143,8 +133,8 @@ class _CollectionsFlexiGridViewWidgetState
       key: key,
       padding: EdgeInsets.only(
         top: 8,
-        left: 8,
-        right: 8,
+        left: CollectionsFlexiGridViewWidget.horizontalPadding / 2,
+        right: CollectionsFlexiGridViewWidget.horizontalPadding / 2,
         bottom: widget.scrollBottomSafeArea,
       ),
       sliver: SliverGrid(
@@ -162,7 +152,6 @@ class _CollectionsFlexiGridViewWidgetState
               sideOfThumbnail,
               tag: widget.tag,
               selectedAlbums: widget.selectedAlbums,
-              showFileCount: false,
               onTapCallback: (c) {
                 isAnyAlbumSelected
                     ? _toggleAlbumSelection(c)
@@ -180,9 +169,9 @@ class _CollectionsFlexiGridViewWidgetState
           childCount: displayItemCount,
         ),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: albumsCountInOneRow,
+          crossAxisCount: albumsCountInCrossAxis,
           mainAxisSpacing: 2,
-          crossAxisSpacing: gapBetweenAlbums,
+          crossAxisSpacing: CollectionsFlexiGridViewWidget.crossAxisSpacing,
           childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 46),
         ),
       ),

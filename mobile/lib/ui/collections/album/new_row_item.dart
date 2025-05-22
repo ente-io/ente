@@ -23,72 +23,69 @@ class NewAlbumRowItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteColorScheme = getEnteColorScheme(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2.5),
-      child: GestureDetector(
-        onTap: () async {
-          final result = await showTextInputDialog(
-            context,
-            title: S.of(context).newAlbum,
-            submitButtonLabel: S.of(context).create,
-            hintText: S.of(context).enterAlbumName,
-            alwaysShowSuccessState: false,
-            initialValue: "",
-            textCapitalization: TextCapitalization.words,
-            popnavAfterSubmission: true,
-            onSubmit: (String text) async {
-              if (text.trim() == "") {
-                return;
-              }
+    return GestureDetector(
+      onTap: () async {
+        final result = await showTextInputDialog(
+          context,
+          title: S.of(context).newAlbum,
+          submitButtonLabel: S.of(context).create,
+          hintText: S.of(context).enterAlbumName,
+          alwaysShowSuccessState: false,
+          initialValue: "",
+          textCapitalization: TextCapitalization.words,
+          popnavAfterSubmission: true,
+          onSubmit: (String text) async {
+            if (text.trim() == "") {
+              return;
+            }
 
-              try {
-                final Collection c =
-                    await CollectionsService.instance.createAlbum(text);
-                // ignore: unawaited_futures
-                await routeToPage(
-                  context,
-                  CollectionPage(CollectionWithThumbnail(c, null)),
-                );
-              } catch (e, s) {
-                Logger("CreateNewAlbumRowItemWidget")
-                    .severe("Failed to rename album", e, s);
-                rethrow;
-              }
-            },
-          );
+            try {
+              final Collection c =
+                  await CollectionsService.instance.createAlbum(text);
+              // ignore: unawaited_futures
+              await routeToPage(
+                context,
+                CollectionPage(CollectionWithThumbnail(c, null)),
+              );
+            } catch (e, s) {
+              Logger("CreateNewAlbumRowItemWidget")
+                  .severe("Failed to rename album", e, s);
+              rethrow;
+            }
+          },
+        );
 
-          if (result is Exception) {
-            await showGenericErrorDialog(context: context, error: result);
-          }
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DottedBorder(
+        if (result is Exception) {
+          await showGenericErrorDialog(context: context, error: result);
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: height,
+            width: width,
+            child: DottedBorder(
               borderType: BorderType.RRect,
               strokeWidth: 1.5,
-              borderPadding: const EdgeInsets.all(0.75),
               dashPattern: const [3.75, 3.75],
               radius: const Radius.circular(2.35),
               padding: EdgeInsets.zero,
-              color: enteColorScheme.blurStrokePressed,
-              child: SizedBox(
-                height: height,
-                width: width,
+              color: getEnteColorScheme(context).strokeMuted,
+              child: Center(
                 child: Icon(
                   Icons.add,
-                  color: enteColorScheme.blurStrokePressed,
+                  color: getEnteColorScheme(context).strokeMuted,
                 ),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              S.of(context).addNew,
-              style: getEnteTextTheme(context).smallFaint,
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            S.of(context).addNew,
+            style: getEnteTextTheme(context).smallFaint,
+          ),
+        ],
       ),
     );
   }

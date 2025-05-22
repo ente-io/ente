@@ -18,7 +18,8 @@ export const authenticatedRequestHeaders = async () => ({
 
 /**
  * Return headers that should be passed alongwith (almost) all unauthenticated
- * `fetch` calls that we make to our API servers.
+ * `fetch` calls that we make to our remotes like our API servers (museum), or
+ * to presigned URLs that are handled by the S3 storage buckets themselves.
  *
  * - The client package name.
  */
@@ -202,13 +203,26 @@ export const retryAsyncOperation = async <T>(
 };
 
 /**
+ * A function that wraps the request(s) in retries if needed.
+ *
+ * See {@link retryEnsuringHTTPOk} for the canonical example. This typedef is to
+ * allow us to talk about and pass functions that behave similar to
+ * {@link retryEnsuringHTTPOk}, but perhaps with other additional checks.
+ */
+export type HTTPRequestRetrier = (
+    request: () => Promise<Response>,
+) => Promise<Response>;
+
+/**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
  *
  * This will ensure that the HTTP operation returning a non-200 OK status (as
  * matched by {@link ensureOk}) is also counted as an error when considering if
  * a request should be retried.
  */
-export const retryEnsuringHTTPOk = (request: () => Promise<Response>) =>
+export const retryEnsuringHTTPOk: HTTPRequestRetrier = (
+    request: () => Promise<Response>,
+) =>
     retryAsyncOperation(async () => {
         const r = await request();
         ensureOk(r);
@@ -222,7 +236,9 @@ export const retryEnsuringHTTPOk = (request: () => Promise<Response>) =>
  * This is similar to {@link retryEnsuringHTTPOk}, except it stops retrying if
  * remote responds with a 4xx HTTP status.
  */
-export const retryEnsuringHTTPOkOr4xx = (request: () => Promise<Response>) =>
+export const retryEnsuringHTTPOkOr4xx: HTTPRequestRetrier = (
+    request: () => Promise<Response>,
+) =>
     retryAsyncOperation(
         async () => {
             const r = await request();

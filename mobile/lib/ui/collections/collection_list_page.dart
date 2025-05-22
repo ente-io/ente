@@ -143,10 +143,10 @@ class _CollectionListPageState extends State<CollectionListPage> {
           text = S.of(context).name;
           break;
         case AlbumSortKey.newestPhoto:
-          text = "Date Created";
+          text = S.of(context).newest;
           break;
         case AlbumSortKey.lastUpdated:
-          text = "Date Modified";
+          text = S.of(context).lastUpdated;
       }
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -198,12 +198,12 @@ class AlbumRowItemWidget extends StatelessWidget {
                   }
                   if (cachedCount != null && cachedCount > 0) {
                     final String textCount = NumberFormat().format(cachedCount);
-                    return Row(
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
                           constraints: BoxConstraints(
-                            maxWidth:
-                                sideOfThumbnail - ((textCount.length + 3) * 10),
+                            maxWidth: sideOfThumbnail,
                           ),
                           child: Text(
                             c.displayName,
@@ -211,11 +211,12 @@ class AlbumRowItemWidget extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        const SizedBox(height: 2),
                         RichText(
                           text: TextSpan(
-                            style: enteTextTheme.smallMuted,
+                            style: enteTextTheme.tinyMuted,
                             children: [
-                              TextSpan(text: '  \u2022  $textCount'),
+                              TextSpan(text: textCount),
                             ],
                           ),
                         ),

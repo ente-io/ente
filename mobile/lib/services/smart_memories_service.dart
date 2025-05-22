@@ -417,7 +417,7 @@ class SmartMemoriesService {
       }
     }
     final List<String> orderedImportantPersonsID = persons
-        .where((person) => !person.data.isHidden)
+        .where((person) => !person.data.isHidden && !person.data.isIgnored)
         .map((p) => p.remoteID)
         .toList();
     orderedImportantPersonsID.shuffle(Random());

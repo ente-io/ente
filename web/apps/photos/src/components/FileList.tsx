@@ -311,7 +311,15 @@ export const FileList: React.FC<FileListProps> = ({
                 return timeStampList;
             }
             // TODO(RE): Remove after audit.
-            if (isDevBuild) throw new Error("Unexpected footer change");
+            if (
+                isDevBuild &&
+                (footer ||
+                    publicCollectionGalleryContext.credentials ||
+                    showAppDownloadBanner)
+            ) {
+                console.log({ timeStampList, footer, showAppDownloadBanner });
+                throw new Error("Unexpected footer change");
+            }
             if (footer) {
                 return [
                     ...timeStampList,

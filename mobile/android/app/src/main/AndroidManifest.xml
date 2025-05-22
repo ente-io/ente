@@ -164,6 +164,15 @@
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/people_widget" />
         </receiver>
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />  <!-- Needed for scheduling notifications -->
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">    <!-- Needed for scheduling notifications -->
+            <intent-filter>
+            <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
     </application>
 
     <!-- Android 11: https://developer.android.com/preview/privacy/package-visibility -->
@@ -191,4 +200,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="com.android.vending.BILLING" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>   <!-- Needed for scheduling notifications -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/> <!-- Needed for scheduling notifications -->
 </manifest>

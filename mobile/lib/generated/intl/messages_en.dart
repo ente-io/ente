@@ -948,6 +948,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please enter a valid email address."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Enter your email address"),
+        "enterYourNewEmailAddress": MessageLookupByLibrary.simpleMessage(
+            "Enter your new email address"),
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Enter your password"),
         "enterYourRecoveryKey":
