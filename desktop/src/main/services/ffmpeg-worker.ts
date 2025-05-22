@@ -829,28 +829,30 @@ const uploadVideoSegments = async (
     //
     // See: [Note: Passing HLS multipart upload URLs over IPC]
     const objectUploadURL = uploadURLs[0]!;
+    return uploadVideoSegmentsSingle(videoFilePath, videoSize, objectUploadURL);
+};
 
-    const nodeStream = fs_.createReadStream(videoFilePath);
-    const webStream = Readable.toWeb(nodeStream);
-
-    // net.fetch is 40-50x slower than the native fetch for this particular PUT
-    // request. This is easily reproducible - replace `fetch` with `net.fetch`,
-    // then even on localhost the PUT requests start taking a minute or so,
-    // while they take second(s) with node's native fetch.
-    await retryEnsuringHTTPOk(() =>
+const uploadVideoSegmentsSingle = (
+    videoFilePath: string,
+    videoSize: number,
+    objectUploadURL: string,
+) =>
+    retryEnsuringHTTPOk(() =>
+        // net.fetch is 40-50x slower than the native fetch for this particular
+        // PUT request. This is easily reproducible - replace `fetch` with
+        // `net.fetch`, then even on localhost the PUT requests start taking a
+        // minute or so, while they take second(s) with node's native fetch.
         fetch(objectUploadURL, {
             method: "PUT",
-            // net.fetch apparently deduces and inserts a content-length,
-            // because when we use the node native fetch then we need to
-            // provide it explicitly.
+            // net.fetch deduces and inserts a content-length for us, when we
+            // use the node native fetch then we need to provide it explicitly.
             headers: { "Content-Length": `${videoSize}` },
             // See: [Note: duplex param required for stream body]
             // @ts-expect-error ^see note above
             duplex: "half",
-            body: webStream,
+            body: Readable.toWeb(fs_.createReadStream(videoFilePath)),
         }),
     );
-};
 
 /**
  * Upload the given {@link stream} to the provided presigned
