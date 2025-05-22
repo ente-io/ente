@@ -1,325 +1,311 @@
 import "dart:async";
-import 'dart:io';
-import 'package:dio/dio.dart';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
+import "dart:io";
+
+import "package:dio/dio.dart";
+import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
+
+import 'package:photos/module/download/db.dart';
 import "package:photos/module/download/file_url.dart";
 import "package:photos/module/download/task.dart";
-import 'package:sqflite/sqflite.dart';
-
-class DatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
-  static Database? _database;
-
-  factory DatabaseHelper() => _instance;
-
-  DatabaseHelper._internal();
-
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDatabase();
-    return _database!;
-  }
-
-  Future<Database> _initDatabase() async {
-    final String path = join(await getDatabasesPath(), 'download_manager.db');
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: (Database db, int version) async {
-        await db.execute('''
-          CREATE TABLE downloads (
-            id INTEGER PRIMARY KEY,
-            url TEXT,
-            filename TEXT,
-            bytesDownloaded INTEGER,
-            totalBytes INTEGER,
-            status TEXT,
-            error TEXT
-          )
-        ''');
-      },
-    );
-  }
-
-  Future<int> insertDownload(DownloadTask task) async {
-    final db = await database;
-    return await db.insert('downloads', task.toMap());
-  }
-
-  Future<int> updateDownload(DownloadTask task) async {
-    final db = await database;
-    return await db.update(
-      'downloads',
-      task.toMap(),
-      where: 'id = ?',
-      whereArgs: [task.id],
-    );
-  }
-
-  Future<List<DownloadTask>> getDownloads() async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('downloads');
-    return List.generate(maps.length, (i) {
-      return DownloadTask.fromMap(maps[i]);
-    });
-  }
-
-  Future<DownloadTask?> getDownload(int id) async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'downloads',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-    if (maps.isNotEmpty) {
-      return DownloadTask.fromMap(maps.first);
-    }
-    return null;
-  }
-
-  Future<int> deleteDownload(int id) async {
-    final db = await database;
-    return await db.delete(
-      'downloads',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-}
 
 class DownloadManager {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
-  final Map<int, StreamController<DownloadTask>> _progressControllers = {};
+  static const int _chunkSize = 50 * 1024 * 1024;
+
+  final _db = DatabaseHelper();
+  final _dio = Dio();
+  final _logger = Logger('DownloadManager');
+
+  // Active downloads with their completers and streams
+  final Map<int, Completer<DownloadResult>> _completers = {};
+  final Map<int, StreamController<DownloadTask>> _streams = {};
   final Map<int, CancelToken> _cancelTokens = {};
-  final Dio _dio = Dio();
 
-  DownloadManager();
+  /// Subscribe to download progress updates for a specific file ID
+  Stream<DownloadTask> watchDownload(int fileId) {
+    _streams[fileId] ??= StreamController<DownloadTask>.broadcast();
+    return _streams[fileId]!.stream;
+  }
 
-  // Stream for subscribers to listen for download updates
-  Stream<DownloadTask> getDownloadProgress(int taskId) {
-    if (!_progressControllers.containsKey(taskId)) {
-      _progressControllers[taskId] = StreamController<DownloadTask>.broadcast();
+  /// Start download and return a Future that completes when download finishes
+  Future<DownloadResult> download(
+    int fileId,
+    String filename,
+    int totalBytes,
+  ) async {
+    // If already downloading, return existing future
+    if (_completers.containsKey(fileId)) {
+      return _completers[fileId]!.future;
     }
-    return _progressControllers[taskId]!.stream;
+
+    final completer = Completer<DownloadResult>();
+    _completers[fileId] = completer;
+
+    // Get or create task
+    final task = await _db.get(fileId) ??
+        DownloadTask(
+          id: fileId,
+          filename: filename,
+          totalBytes: totalBytes,
+        );
+
+    // Don't restart if already completed
+    if (task.isCompleted) {
+      final result = DownloadResult(task, true);
+      completer.complete(result);
+      return result;
+    }
+
+    unawaited(_startDownload(task, completer));
+    return completer.future;
   }
 
-  // Create a new download task
-  Future<DownloadTask> createDownload(int id, String filename, int size) async {
-    final task = DownloadTask(
-      id: DateTime.now().millisecondsSinceEpoch,
-      url: FileUrl.getUrl(id, FileUrlType.download),
-      totalBytes: size,
-      filename: filename,
-      status: 'pending',
-    );
-    await _dbHelper.insertDownload(task);
-    return task;
+  /// Pause download
+  Future<void> pause(int fileId) async {
+    final token = _cancelTokens[fileId];
+    if (token != null && !token.isCancelled) {
+      token.cancel('paused');
+    }
+
+    final task = await _db.get(fileId);
+    if (task != null && task.isActive) {
+      await _updateTask(task.copyWith(status: DownloadStatus.paused));
+    }
   }
 
-  // Start or resume a download
-  Future<void> startDownload(int taskId) async {
-    final task = await _dbHelper.getDownload(taskId);
-    if (task == null) return;
+  /// Cancel and delete download
+  Future<void> cancel(int fileId) async {
+    await pause(fileId);
 
-    if (task.status == 'downloading') return; // Already running
+    final task = await _db.get(fileId);
+    if (task != null) {
+      await _deleteFiles(task);
+      await _updateTask(task.copyWith(status: DownloadStatus.cancelled));
+      await _db.delete(fileId);
+    }
 
-    task.status = 'downloading';
-    await _dbHelper.updateDownload(task);
-    _updateProgress(task);
+    _cleanup(fileId);
+  }
 
-    // Create a cancel token for this download
-    final cancelToken = CancelToken();
-    _cancelTokens[taskId] = cancelToken;
+  /// Get current download status
+  Future<DownloadTask?> getDownload(int fileId) => _db.get(fileId);
 
+  /// Get all downloads
+  Future<List<DownloadTask>> getAllDownloads() => _db.getAll();
+
+  Future<void> _startDownload(
+    DownloadTask task,
+    Completer<DownloadResult> completer,
+  ) async {
     try {
-      // Get download directory and create file
-      final directory = await getApplicationDocumentsDirectory();
-      final filePath = '${directory.path}/${task.filename}';
-      final file = File(filePath);
+      task = task.copyWith(status: DownloadStatus.downloading);
+      await _updateTask(task);
 
-      // Prepare request options
-      final options = Options(
-        headers: {},
-        responseType: ResponseType.stream,
+      final cancelToken = CancelToken();
+      _cancelTokens[task.id] = cancelToken;
+
+      final directory = Configuration.instance.getTempDirectory();
+      final basePath = '$directory${task.id}_${task.filename}';
+
+      // Check existing chunks and calculate progress
+      final totalChunks = (task.totalBytes / _chunkSize).ceil();
+      final existingChunks =
+          await _validateExistingChunks(basePath, task.totalBytes, totalChunks);
+
+      task = task.copyWith(
+        bytesDownloaded: _calculateDownloadedBytes(
+          existingChunks,
+          task.totalBytes,
+          totalChunks,
+        ),
       );
+      await _updateTask(task);
 
-      // If we've already downloaded some bytes, add Range header
-      if (task.bytesDownloaded > 0) {
-        options.headers!['Range'] = 'bytes=${task.bytesDownloaded}-';
+      // Download missing chunks
+      for (int i = 0; i < totalChunks; i++) {
+        if (existingChunks[i] || cancelToken.isCancelled) continue;
+
+        await _downloadChunk(task, basePath, i, totalChunks, cancelToken);
+        existingChunks[i] = true;
       }
 
-      // Make actual download request
-      final response = await _dio.get(
-        task.url,
-        options: options,
-        cancelToken: cancelToken,
-      );
-
-      // For handling the response stream
-      final responseStream = response.data.stream as Stream<List<int>>;
-
-      // Check response status
-      final statusCode = response.statusCode ?? 0;
-
-      if (statusCode == 200 || statusCode == 206) {
-        // Open the file in append mode if resuming, otherwise create new
-        IOSink fileSink;
-        if (task.bytesDownloaded > 0 && statusCode == 206) {
-          fileSink = file.openWrite(mode: FileMode.append);
-        } else {
-          // If it's not a partial response, start from the beginning
-          task.bytesDownloaded = 0;
-          fileSink = file.openWrite(mode: FileMode.write);
-        }
-
-        // Process the response stream
-        await responseStream.listen(
-          (List<int> chunk) async {
-            // Write to file
-            fileSink.add(chunk);
-
-            // Update progress
-            task.bytesDownloaded += chunk.length;
-            await _dbHelper.updateDownload(task);
-            _updateProgress(task);
-          },
-          onDone: () async {
-            await fileSink.close();
-
-            // Download completed
-            task.status = 'completed';
-            await _dbHelper.updateDownload(task);
-            _updateProgress(task);
-
-            _cancelTokens.remove(taskId);
-          },
-          onError: (error) async {
-            await fileSink.close();
-
-            // Handle error
-            task.status = 'error';
-            task.error = error.toString();
-            await _dbHelper.updateDownload(task);
-            _updateProgress(task);
-
-            _cancelTokens.remove(taskId);
-          },
-          cancelOnError: true,
-        ).asFuture();
-      } else if (statusCode == 416) {
-        // Requested range not satisfiable
-        task.bytesDownloaded = 0;
-        task.error = 'Server does not support resume. Starting from beginning.';
-        await _dbHelper.updateDownload(task);
-        _updateProgress(task);
-
-        // Retry from beginning
-        await startDownload(taskId);
-      } else {
-        // Other HTTP error
-        task.status = 'error';
-        task.error = 'HTTP Error: $statusCode';
-        await _dbHelper.updateDownload(task);
-        _updateProgress(task);
-
-        _cancelTokens.remove(taskId);
+      if (!cancelToken.isCancelled) {
+        final finalPath = await _combineChunks(basePath, totalChunks);
+        task = task.copyWith(
+          status: DownloadStatus.completed,
+          filePath: finalPath,
+          bytesDownloaded: task.totalBytes,
+        );
+        await _updateTask(task);
+        completer.complete(DownloadResult(task, true));
       }
-    } on DioException catch (e) {
-      // Handle Dio exceptions
-      if (e.type == DioExceptionType.cancel) {
-        // Download was canceled - don't update status as it was likely paused
-        _cancelTokens.remove(taskId);
+    } catch (e) {
+      if (e is DioException && e.type == DioExceptionType.cancel) {
+        // Handle pause - don't complete the future
         return;
       }
 
-      task.status = 'error';
-      task.error = 'Download error: ${e.message}';
-      await _dbHelper.updateDownload(task);
-      _updateProgress(task);
+      task = task.copyWith(status: DownloadStatus.error, error: e.toString());
+      await _updateTask(task);
+      completer.complete(DownloadResult(task, false));
+    } finally {
+      _cleanup(task.id);
+    }
+  }
 
-      _cancelTokens.remove(taskId);
+  Future<List<bool>> _validateExistingChunks(
+    String basePath,
+    int totalBytes,
+    int totalChunks,
+  ) async {
+    final existingChunks = List.filled(totalChunks, false);
+
+    for (int i = 0; i < totalChunks; i++) {
+      final chunkFile = File('$basePath.part${i + 1}');
+      if (!await chunkFile.exists()) continue;
+
+      final expectedSize =
+          i == totalChunks - 1 ? totalBytes - (i * _chunkSize) : _chunkSize;
+
+      final actualSize = await chunkFile.length();
+      if (actualSize == expectedSize) {
+        existingChunks[i] = true;
+      } else {
+        await chunkFile.delete(); // Remove corrupted chunk
+      }
+    }
+
+    return existingChunks;
+  }
+
+  int _calculateDownloadedBytes(
+    List<bool> existingChunks,
+    int totalBytes,
+    int totalChunks,
+  ) {
+    int bytes = 0;
+    for (int i = 0; i < existingChunks.length; i++) {
+      if (existingChunks[i]) {
+        bytes +=
+            i == totalChunks - 1 ? totalBytes - (i * _chunkSize) : _chunkSize;
+      }
+    }
+    return bytes;
+  }
+
+  Future<void> _downloadChunk(
+    DownloadTask task,
+    String basePath,
+    int chunkIndex,
+    int totalChunks,
+    CancelToken cancelToken,
+  ) async {
+    final chunkPath = '$basePath.part${chunkIndex + 1}';
+    final startByte = chunkIndex * _chunkSize;
+    final endByte = chunkIndex == totalChunks - 1
+        ? task.totalBytes - 1
+        : (startByte + _chunkSize) - 1;
+
+    await _dio.download(
+      FileUrl.getUrl(task.id, FileUrlType.download),
+      chunkPath,
+      options: Options(
+        headers: {
+          "X-Auth-Token": Configuration.instance.getToken(),
+          "Range": "bytes=$startByte-$endByte",
+        },
+      ),
+      cancelToken: cancelToken,
+      onReceiveProgress: (received, total) async {
+        final updatedTask = task.copyWith(
+          bytesDownloaded: task.bytesDownloaded + received,
+        );
+        _notifyProgress(updatedTask);
+      },
+    );
+
+    // Update progress after chunk completion
+    final chunkSize = await File(chunkPath).length();
+    task = task.copyWith(bytesDownloaded: task.bytesDownloaded + chunkSize);
+    await _updateTask(task);
+  }
+
+  Future<String> _combineChunks(String basePath, int totalChunks) async {
+    final finalFile = File(basePath);
+    final sink = finalFile.openWrite();
+
+    try {
+      for (int i = 1; i <= totalChunks; i++) {
+        final chunkFile = File('$basePath.part$i');
+        final bytes = await chunkFile.readAsBytes();
+        sink.add(bytes);
+        await chunkFile.delete();
+      }
+    } finally {
+      await sink.close();
+    }
+
+    return finalFile.path;
+  }
+
+  Future<void> _deleteFiles(DownloadTask task) async {
+    try {
+      final directory = Configuration.instance.getTempDirectory();
+      final basePath = '$directory${task.id}_${task.filename}';
+      // Delete final file
+      final finalFile = File(basePath);
+      if (await finalFile.exists()) await finalFile.delete();
+
+      // Delete chunk files
+      final totalChunks = (task.totalBytes / _chunkSize).ceil();
+      for (int i = 1; i <= totalChunks; i++) {
+        final chunkFile = File('$basePath.part$i');
+        if (await chunkFile.exists()) await chunkFile.delete();
+      }
     } catch (e) {
-      // Handle generic exceptions
-      task.status = 'error';
-      task.error = e.toString();
-      await _dbHelper.updateDownload(task);
-      _updateProgress(task);
-
-      _cancelTokens.remove(taskId);
+      _logger.warning('Error deleting files: $e');
     }
   }
 
-  // Pause a download
-  Future<void> pauseDownload(int taskId) async {
-    final task = await _dbHelper.getDownload(taskId);
-    if (task == null) return;
+  Future<void> _updateTask(DownloadTask task) async {
+    await _db.save(task);
+    _notifyProgress(task);
+  }
 
-    if (task.status == 'downloading') {
-      task.status = 'paused';
-      await _dbHelper.updateDownload(task);
-      _updateProgress(task);
-
-      // Cancel the download
-      if (_cancelTokens.containsKey(taskId)) {
-        _cancelTokens[taskId]!.cancel('Download paused');
-        _cancelTokens.remove(taskId);
-      }
+  void _notifyProgress(DownloadTask task) {
+    final stream = _streams[task.id];
+    if (stream != null && !stream.isClosed) {
+      stream.add(task);
     }
   }
 
-  // Cancel and delete a download
-  Future<void> cancelDownload(int taskId) async {
-    // Pause download first
-    await pauseDownload(taskId);
+  void _cleanup(int fileId) {
+    _completers.remove(fileId);
+    _cancelTokens.remove(fileId);
 
-    // Delete the file
-    final task = await _dbHelper.getDownload(taskId);
-    if (task != null) {
-      try {
-        final directory = await getApplicationDocumentsDirectory();
-        final file = File('${directory.path}/${task.filename}');
-        if (await file.exists()) {
-          await file.delete();
-        }
-      } catch (e) {
-        print('Error deleting file: $e');
-      }
-    }
-
-    // Remove from database
-    await _dbHelper.deleteDownload(taskId);
-
-    // Close the stream controller
-    if (_progressControllers.containsKey(taskId)) {
-      await _progressControllers[taskId]!.close();
-      _progressControllers.remove(taskId);
+    final stream = _streams[fileId];
+    if (stream != null && !stream.hasListener) {
+      stream.close();
+      _streams.remove(fileId);
     }
   }
 
-  // Get a list of all downloads
-  Future<List<DownloadTask>> getAllDownloads() async {
-    return await _dbHelper.getDownloads();
-  }
-
-  // Update the progress and notify listeners
-  void _updateProgress(DownloadTask task) {
-    if (_progressControllers.containsKey(task.id) &&
-        !_progressControllers[task.id]!.isClosed) {
-      _progressControllers[task.id]!.add(task);
-    }
-  }
-
-  // Cleanup resources
   Future<void> dispose() async {
-    for (final controller in _progressControllers.values) {
-      await controller.close();
+    for (final completer in _completers.values) {
+      if (!completer.isCompleted) {
+        completer.completeError('Disposed');
+      }
     }
-    _progressControllers.clear();
+    _completers.clear();
 
-    for (final cancelToken in _cancelTokens.values) {
-      cancelToken.cancel('Disposed');
+    for (final token in _cancelTokens.values) {
+      token.cancel('Disposed');
     }
     _cancelTokens.clear();
+
+    for (final stream in _streams.values) {
+      await stream.close();
+    }
+    _streams.clear();
   }
 }
