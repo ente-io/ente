@@ -218,7 +218,7 @@ export const putFilePartViaWorker = async (
             body: partData,
         }),
     );
-    return nullToUndefined(res.headers.get("etag"));
+    return z.object({ etag: z.string() }).parse(await res.json()).etag;
 };
 
 /**
