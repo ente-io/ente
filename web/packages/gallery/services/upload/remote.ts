@@ -18,7 +18,7 @@ import { handleUploadError } from "ente-shared/error";
 import HTTPService from "ente-shared/network/HTTPService";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
-import type { MultipartUploadURLs, UploadFile } from "./upload-service";
+import type { UploadFile } from "./upload-service";
 
 /**
  * A pre-signed URL alongwith the associated object key that is later used to
@@ -26,12 +26,13 @@ import type { MultipartUploadURLs, UploadFile } from "./upload-service";
  */
 const ObjectUploadURL = z.object({
     /**
-     * A pre-signed URL that can be used to upload data to an S3-compatible
-     * remote.
+     * The objectKey with which remote (both museum and the S3 bucket) will
+     * refer to this object once it has been uploaded.
      */
     objectKey: z.string(),
     /**
-     * The objectKey with which remote (museum) will refer to this object.
+     * A pre-signed URL that can be used to upload data to an S3-compatible
+     * remote.
      */
     url: z.string(),
 });
@@ -41,14 +42,14 @@ export type ObjectUploadURL = z.infer<typeof ObjectUploadURL>;
 const ObjectUploadURLResponse = z.object({ urls: ObjectUploadURL.array() });
 
 /**
- * Fetch a fresh list of URLs from remote that can be used to upload files
- * and thumbnails to.
+ * Fetch a fresh list of URLs from remote that can be used to upload objects.
  *
- * @param countHint An approximate number of files that we're expecting to
+ * @param countHint An approximate number of objects that we're expecting to
  * upload.
  *
- * @returns A list of pre-signed object URLs that can be used to upload data
- * to the S3 bucket.
+ * @returns A list of pre-signed object URLs that can be used to upload data to
+ * the S3 bucket. Each URL also has an associated "object key" with which remote
+ * will refer to the uploaded object after it has been uploaded.
  */
 export const fetchUploadURLs = async (countHint: number) => {
     const count = Math.min(50, countHint * 2).toString();
@@ -79,6 +80,58 @@ export const fetchPublicAlbumsUploadURLs = async (
 };
 
 /**
+ * A list of URLs to use for multipart uploads.
+ *
+ * This is a list of pre-signed URLs (one for each part), a URL to indicate
+ * completion, and an associated object key that is later used to refer to the
+ * combined object that was uploaded to the part URLs.
+ */
+const MultipartUploadURLs = z.object({
+    /**
+     * The objectKey with which remote (museum and the S3 bucket) will refer to
+     * this object once it has been uploaded.
+     */
+    objectKey: z.string(),
+    /**
+     * A list of pre-signed URLs that can be used to upload the parts of the
+     * entire file's data to an S3-compatible remote.
+     */
+
+    partURLs: z.string().array(),
+    /**
+     * A pre-signed URL that can be used to complete the multipart upload by
+     * providing the list of parts that were uploaded (and their sequence) to
+     * the S3-compatible remote.
+     */
+    completeURL: z.string(),
+});
+
+export type MultipartUploadURLs = z.infer<typeof MultipartUploadURLs>;
+
+const MultipartUploadURLsResponse = z.object({ urls: MultipartUploadURLs });
+
+/**
+ * Fetch a {@link MultipartUploadURLs} from remote that can be used to upload
+ * large object by splitting then into {@link uploadPartCount} parts.
+ *
+ * See: [Note: Multipart uploads].
+ *
+ * @param uploadPartCount The number of parts in which we want to upload the file.
+ *
+ * @returns A structure ({@link MultipartUploadURLs}) containing pre-signed URLs
+ * for uploading each part, a completion URL, and the final object key.
+ */
+export const fetchMultipartUploadURLs = async (uploadPartCount: number) => {
+    const params = new URLSearchParams({ count: uploadPartCount.toString() });
+    const url = await apiURL("/files/multipart-upload-urls");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return MultipartUploadURLsResponse.parse(await res.json()).urls;
+};
+
+/**
  * Lowest layer for file upload related HTTP operations when we're running in
  * the context of the photos app.
  */
@@ -101,23 +154,6 @@ export class PhotosUploadHTTPClient {
             return response.data;
         } catch (e) {
             log.error("upload Files Failed", e);
-            throw e;
-        }
-    }
-
-    async fetchMultipartUploadURLs(
-        count: number,
-    ): Promise<MultipartUploadURLs> {
-        try {
-            const response = await HTTPService.get(
-                await apiURL("/files/multipart-upload-urls"),
-                { count },
-                await authenticatedRequestHeaders(),
-            );
-
-            return response.data.urls;
-        } catch (e) {
-            log.error("fetch multipart-upload-url failed", e);
             throw e;
         }
     }
@@ -339,8 +375,9 @@ const createMultipartUploadRequestBody = (
  *
  * 1. Obtain multiple presigned URLs from remote (museum). The specific API call
  *    will be different (because of the different authentication mechanisms)
- *    when we're running in the context of the photos app and when we're running
- *    in the context of the public albums app.
+ *    when we're running in the context of the photos app
+ *    ({@link fetchMultipartUploadURLs}) and when we're running in the context
+ *    of the public albums app ({@link fetchPublicAlbumsMultipartUploadURLs}).
  *
  * 2. Break the file to be uploaded into parts, and upload each part using a PUT
  *    request to one of the presigned URLs we got in step 1. There are two

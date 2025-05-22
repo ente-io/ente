@@ -59,6 +59,7 @@ import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
     completeMultipartUpload,
     completeMultipartUploadViaWorker,
+    fetchMultipartUploadURLs,
     fetchPublicAlbumsUploadURLs,
     fetchUploadURLs,
     PhotosUploadHTTPClient,
@@ -226,7 +227,7 @@ class UploadService {
                   count,
                   this.publicAlbumsCredentials,
               )
-            : photosHTTPClient.fetchMultipartUploadURLs(count);
+            : fetchMultipartUploadURLs(count);
     }
 }
 
@@ -328,12 +329,6 @@ export interface UploadFile extends BackupedFile {
     collectionID: number;
     encryptedKey: string;
     keyDecryptionNonce: string;
-}
-
-export interface MultipartUploadURLs {
-    objectKey: string;
-    partURLs: string[];
-    completeURL: string;
 }
 
 export interface PotentialLivePhotoAsset {
