@@ -107,6 +107,81 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Schedule notification 10 seconds",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await NotificationService.instance.scheduleNotification(
+                "test",
+                "test",
+                id: 10,
+                dateTime: DateTime.now().add(
+                  const Duration(seconds: 10),
+                ),
+              );
+              showShortToast(context, 'done');
+            } catch (e, s) {
+              logger.severe('schedule notification failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Schedule notification 1 hour",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await NotificationService.instance.scheduleNotification(
+                "test",
+                "test",
+                id: 11,
+                dateTime: DateTime.now().add(
+                  const Duration(hours: 1),
+                ),
+              );
+              showShortToast(context, 'done');
+            } catch (e, s) {
+              logger.severe('schedule notification failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Schedule notification 12 hours",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await NotificationService.instance.scheduleNotification(
+                "test",
+                "test",
+                id: 12,
+                dateTime: DateTime.now().add(
+                  const Duration(hours: 12),
+                ),
+              );
+              showShortToast(context, 'done');
+            } catch (e, s) {
+              logger.severe('schedule notification failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
           captionedTextWidget: FutureBuilder<IndexStatus>(
             future: getIndexStatus(),
             builder: (context, snapshot) {
