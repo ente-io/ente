@@ -41,6 +41,9 @@ class MemoriesCacheService {
   List<SmartMemory>? _cachedMemories;
   bool _shouldUpdate = false;
 
+  bool _isUpdatingMemories = false;
+  bool get isUpdatingMemories => _isUpdatingMemories;
+
   final _memoriesUpdateLock = Lock();
 
   MemoriesCacheService(this._prefs) {
@@ -173,6 +176,7 @@ class MemoriesCacheService {
       _logger.info(
         "Updating memories cache (shouldUpdate: $_shouldUpdate, forced: $forced)",
       );
+      _isUpdatingMemories = true;
       try {
         final EnteWatch? w =
             kDebugMode ? EnteWatch("MemoriesCacheService") : null;
@@ -222,6 +226,8 @@ class MemoriesCacheService {
         w?.logAndReset('_cacheUpdated method done');
       } catch (e, s) {
         _logger.info("Error updating memories cache", e, s);
+      } finally {
+        _isUpdatingMemories = false;
       }
     });
   }
