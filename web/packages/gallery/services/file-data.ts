@@ -412,10 +412,62 @@ const FilePreviewDataUploadURLResponse = z.object({
  * the "vid_preview" HLS playlist for the file would refer to).
  */
 export const getFilePreviewDataUploadURL = async (file: EnteFile) => {
+    // [Note: Estimating number of parts for a vid_preview upload]
+    //
+    // We need to determine the number of parts of a multipart upload that we
+    // will use to upload a vid_preview. However, we do not have the generated
+    // preview file yet - that'll happen later, in the desktop side.
+    //
+    // We could make this API request from the desktop app side, but that will
+    // require reinventing a lot of the wheels in that code.
+    //
+    // So instead, we try to estimate a reasonable number of parts into which
+    // the eventually generated video should be split for a multipart upload.
+    // Some relevant numbers:
+    //
+    // - A part needs to be a minimum 5 MB.
+    //
+    // - During regular file uploads, we use 20 MB parts.
+    //
+    // - If possible, we want to try and keep the part size below 100 MB. This
+    //   is not a hard limit, but just a good to have to avoid hitting request
+    //   size limits (e.g. see [Note: Multipart uploads]).
+    //
+    // The estimate we use is:
+    //
+    //     partCount = (size) => Math.ceil((0.7 * size) / 100)
+    //
+    // That is, if the generated preview file is 70% of the original's size, how
+    // many 100 MB parts will it need.
+    //
+    // In practice, this will is a big overestimate of the generated preview
+    // size, a more typical video preview size will be in the 30% to 60% range.
+    //
+    // The eventual part size will then be:
+    //
+    //     partSize = (totalSize, count) => Math.floor(totalSize / count)
+    //
+    // As an example, for a 200 MB file, we'll estimate partCount of 2, and
+    // suppose the generated file is 50% of the original, then each part size
+    // will be 50 MB.
+    //
+    // As a sanity check of the other extreme, if the generated file is 10% of
+    // the original, we still end up with 10 MB parts.
+    let partCount = 1; // Default is single object upload.
+    const fileSize = file.info?.fileSize;
+    if (fileSize && fileSize > 100 * 1024 /* 100 MB */) {
+        // For files larger than 100 MB, estimate the number of 100 MB parts.
+        partCount = Math.ceil((0.7 * fileSize) / (100 * 1024));
+    }
+
     const params = new URLSearchParams({
         fileID: `${file.id}`,
         type: "vid_preview",
     });
+    if (partCount > 1) {
+        params.set("isMultiPart", "true");
+        params.set("count", partCount.toString());
+    }
     const url = await apiURL("/files/data/preview-upload-url");
     const res = await fetch(`${url}?${params.toString()}`, {
         headers: await authenticatedRequestHeaders(),
