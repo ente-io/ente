@@ -44,7 +44,7 @@ export interface FFmpegUtilityProcess {
     ffmpegGenerateHLSPlaylistAndSegments: (
         inputFilePath: string,
         outputPathPrefix: string,
-        outputUploadURL: string,
+        uploadURLs: string[],
     ) => Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined>;
 
     ffmpegDetermineVideoDuration: (inputFilePath: string) => Promise<number>;
@@ -220,7 +220,7 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
 const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
-    outputUploadURL: string,
+    uploadURLs: string[],
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined> => {
     const { isH264, isHDR, bitrate } =
         await detectVideoCharacteristics(inputFilePath);
@@ -520,7 +520,7 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
         // the generated .ts file.
         videoSize = await fs.stat(videoPath).then((st) => st.size);
 
-        await uploadVideoSegments(videoPath, videoSize, outputUploadURL);
+        await uploadVideoSegments(videoPath, videoSize, uploadURLs);
     } catch (e) {
         log.error("HLS generation failed", e);
         await Promise.all([deletePathIgnoringErrors(playlistPath)]);
@@ -784,7 +784,7 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
 
 /**
  * Upload the file at the given {@link videoFilePath} to the provided presigned
- * {@link objectUploadURL} using a HTTP PUT request.
+ * URL(s) using a HTTP PUT request.
  *
  * In case on non-HTTP-4xx errors, retry up to 3 times with exponential backoff.
  *
@@ -795,7 +795,9 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
  *
  * @param videoSize The size in bytes of the file at {@link videoFilePath}.
  *
- * @param objectUploadURL A pre-signed URL to upload the file.
+ * @param uploadURLs A pre-signed URL(s) to upload the file. For singular
+ * uploads this'll be a singleton array, otherwise will contain multipart URLs
+ * and completion URL.
  *
  * ---
  *
@@ -819,9 +821,16 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
 const uploadVideoSegments = async (
     videoFilePath: string,
     videoSize: number,
-    objectUploadURL: string,
+    uploadURLs: string[],
 ) => {
     const waitTimeBeforeNextTry = [5000, 20000];
+
+    if (uploadURLs.length != 1) throw new Error("TODO(HLS): WIP");
+    // This can be either a single pre-signed URL (for a normal upload), or a
+    // list of part upload URLs and a completion URL (for multipart uploads).
+    //
+    // See: [Note: Passing HLS multipart upload URLs over IPC]
+    const objectUploadURL = uploadURLs[0]!;
 
     while (true) {
         let abort = false;
