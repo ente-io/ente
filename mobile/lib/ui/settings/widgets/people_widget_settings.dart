@@ -116,7 +116,7 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
-                      height: MediaQuery.sizeOf(context).height * 0.5 - 300,
+                      height: MediaQuery.sizeOf(context).height * 0.5 - 200,
                     ),
                     Image.asset(
                       "assets/people-widget-static.png",
