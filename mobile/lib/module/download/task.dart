@@ -32,7 +32,7 @@ class DownloadTask {
   bool get isFinished => [
         DownloadStatus.completed,
         DownloadStatus.error,
-        DownloadStatus.cancelled
+        DownloadStatus.cancelled,
       ].contains(status);
 
   Map<String, dynamic> toMap() => {

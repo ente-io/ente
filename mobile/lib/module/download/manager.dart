@@ -10,11 +10,12 @@ import "package:photos/module/download/file_url.dart";
 import "package:photos/module/download/task.dart";
 
 class DownloadManager {
-  static const int _chunkSize = 50 * 1024 * 1024;
+  static const int downloadChunkSize = 10 * 1024 * 1024;
 
   final _db = DatabaseHelper();
-  final _dio = Dio();
+  final Dio _dio;
   final _logger = Logger('DownloadManager');
+  DownloadManager(this._dio);
 
   // Active downloads with their completers and streams
   final Map<int, Completer<DownloadResult>> _completers = {};
@@ -51,11 +52,28 @@ class DownloadManager {
 
     // Don't restart if already completed
     if (task.isCompleted) {
-      final result = DownloadResult(task, true);
-      completer.complete(result);
-      return result;
+      // ensure that the file exists
+      final filePath = task.filePath;
+      if (filePath == null || !(await File(filePath).exists())) {
+        // If the file doesn't exist, mark the task as error
+        _logger.warning(
+          'File not found for ${task.filename} (${task.bytesDownloaded}/${task.totalBytes} bytes)',
+        );
+        final updatedTask = task.copyWith(
+          status: DownloadStatus.error,
+          error: 'File not found',
+          filePath: null,
+        );
+        await _updateTask(updatedTask);
+      } else {
+        _logger.info(
+          'Download already completed for ${task.filename} (${task.bytesDownloaded}/${task.totalBytes} bytes)',
+        );
+        final result = DownloadResult(task, true);
+        completer.complete(result);
+        return result;
+      }
     }
-
     unawaited(_startDownload(task, completer));
     return completer.future;
   }
@@ -108,7 +126,7 @@ class DownloadManager {
       final basePath = '$directory${task.id}_${task.filename}';
 
       // Check existing chunks and calculate progress
-      final totalChunks = (task.totalBytes / _chunkSize).ceil();
+      final totalChunks = (task.totalBytes / downloadChunkSize).ceil();
       final existingChunks =
           await _validateExistingChunks(basePath, task.totalBytes, totalChunks);
 
@@ -122,10 +140,15 @@ class DownloadManager {
       await _updateTask(task);
 
       // Download missing chunks
+      // log existing progress and download bytes
+      _logger.info(
+        'Resuming download for ${task.filename} (${task.bytesDownloaded}/${task.totalBytes} bytes)',
+      );
       for (int i = 0; i < totalChunks; i++) {
         if (existingChunks[i] || cancelToken.isCancelled) continue;
-
+        _logger.info('Downloading chunk ${i + 1} of $totalChunks');
         await _downloadChunk(task, basePath, i, totalChunks, cancelToken);
+        _logger.info('Chunk ${i + 1} downloaded');
         existingChunks[i] = true;
       }
 
@@ -164,13 +187,20 @@ class DownloadManager {
       final chunkFile = File('$basePath.part${i + 1}');
       if (!await chunkFile.exists()) continue;
 
-      final expectedSize =
-          i == totalChunks - 1 ? totalBytes - (i * _chunkSize) : _chunkSize;
+      final expectedSize = i == totalChunks - 1
+          ? totalBytes - (i * downloadChunkSize)
+          : downloadChunkSize;
 
       final actualSize = await chunkFile.length();
       if (actualSize == expectedSize) {
+        _logger.info('exiging chunk  ${i + 1} is valid');
         existingChunks[i] = true;
       } else {
+        _logger.warning(
+          'Chunk ${i + 1} is corrupted: expected $expectedSize bytes, '
+          'but got $actualSize bytes',
+        );
+        existingChunks[i] = false;
         await chunkFile.delete(); // Remove corrupted chunk
       }
     }
@@ -186,8 +216,9 @@ class DownloadManager {
     int bytes = 0;
     for (int i = 0; i < existingChunks.length; i++) {
       if (existingChunks[i]) {
-        bytes +=
-            i == totalChunks - 1 ? totalBytes - (i * _chunkSize) : _chunkSize;
+        bytes += i == totalChunks - 1
+            ? totalBytes - (i * downloadChunkSize)
+            : downloadChunkSize;
       }
     }
     return bytes;
@@ -201,13 +232,13 @@ class DownloadManager {
     CancelToken cancelToken,
   ) async {
     final chunkPath = '$basePath.part${chunkIndex + 1}';
-    final startByte = chunkIndex * _chunkSize;
+    final startByte = chunkIndex * downloadChunkSize;
     final endByte = chunkIndex == totalChunks - 1
         ? task.totalBytes - 1
-        : (startByte + _chunkSize) - 1;
+        : (startByte + downloadChunkSize) - 1;
 
     await _dio.download(
-      FileUrl.getUrl(task.id, FileUrlType.download),
+      FileUrl.getUrl(task.id, FileUrlType.directDownload),
       chunkPath,
       options: Options(
         headers: {
@@ -225,8 +256,8 @@ class DownloadManager {
     );
 
     // Update progress after chunk completion
-    final chunkSize = await File(chunkPath).length();
-    task = task.copyWith(bytesDownloaded: task.bytesDownloaded + chunkSize);
+    final chunkFileSize = await File(chunkPath).length();
+    task = task.copyWith(bytesDownloaded: task.bytesDownloaded + chunkFileSize);
     await _updateTask(task);
   }
 
@@ -257,7 +288,7 @@ class DownloadManager {
       if (await finalFile.exists()) await finalFile.delete();
 
       // Delete chunk files
-      final totalChunks = (task.totalBytes / _chunkSize).ceil();
+      final totalChunks = (task.totalBytes / downloadChunkSize).ceil();
       for (int i = 1; i <= totalChunks; i++) {
         final chunkFile = File('$basePath.part$i');
         if (await chunkFile.exists()) await chunkFile.delete();

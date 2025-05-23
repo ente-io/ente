@@ -38,8 +38,11 @@ class DatabaseHelper {
 
   Future<void> save(DownloadTask task) async {
     final db = await database;
-    await db.insert('downloads', task.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      'downloads',
+      task.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<DownloadTask?> get(int id) async {
