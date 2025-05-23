@@ -5,22 +5,24 @@ import "package:dio/dio.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 
-import 'package:photos/module/download/db.dart';
 import "package:photos/module/download/file_url.dart";
 import "package:photos/module/download/task.dart";
 
 class DownloadManager {
+  final _logger = Logger('DownloadManager');
   static const int downloadChunkSize = 40 * 1024 * 1024;
 
-  final _db = DatabaseHelper();
   final Dio _dio;
-  final _logger = Logger('DownloadManager');
-  DownloadManager(this._dio);
+
+  // In-memory storage for download tasks
+  final Map<int, DownloadTask> _tasks = {};
 
   // Active downloads with their completers and streams
   final Map<int, Completer<DownloadResult>> _completers = {};
   final Map<int, StreamController<DownloadTask>> _streams = {};
   final Map<int, CancelToken> _cancelTokens = {};
+
+  DownloadManager(this._dio);
 
   /// Subscribe to download progress updates for a specific file ID
   Stream<DownloadTask> watchDownload(int fileId) {
@@ -43,12 +45,16 @@ class DownloadManager {
     _completers[fileId] = completer;
 
     // Get or create task
-    final task = await _db.get(fileId) ??
+    final existingTask = _tasks[fileId];
+    final task = existingTask ??
         DownloadTask(
           id: fileId,
           filename: filename,
           totalBytes: totalBytes,
         );
+
+    // Store task in memory
+    _tasks[fileId] = task;
 
     // Don't restart if already completed
     if (task.isCompleted) {
@@ -64,7 +70,7 @@ class DownloadManager {
           error: 'File not found',
           filePath: null,
         );
-        await _updateTask(updatedTask);
+        _updateTask(updatedTask);
       } else {
         _logger.info(
           'Download already completed for ${task.filename} (${task.bytesDownloaded}/${task.totalBytes} bytes)',
@@ -85,9 +91,9 @@ class DownloadManager {
       token.cancel('paused');
     }
 
-    final task = await _db.get(fileId);
+    final task = _tasks[fileId];
     if (task != null && task.isActive) {
-      await _updateTask(task.copyWith(status: DownloadStatus.paused));
+      _updateTask(task.copyWith(status: DownloadStatus.paused));
     }
   }
 
@@ -95,21 +101,21 @@ class DownloadManager {
   Future<void> cancel(int fileId) async {
     await pause(fileId);
 
-    final task = await _db.get(fileId);
+    final task = _tasks[fileId];
     if (task != null) {
       await _deleteFiles(task);
-      await _updateTask(task.copyWith(status: DownloadStatus.cancelled));
-      await _db.delete(fileId);
+      _updateTask(task.copyWith(status: DownloadStatus.cancelled));
+      _tasks.remove(fileId);
     }
 
     _cleanup(fileId);
   }
 
   /// Get current download status
-  Future<DownloadTask?> getDownload(int fileId) => _db.get(fileId);
+  Future<DownloadTask?> getDownload(int fileId) async => _tasks[fileId];
 
   /// Get all downloads
-  Future<List<DownloadTask>> getAllDownloads() => _db.getAll();
+  Future<List<DownloadTask>> getAllDownloads() async => _tasks.values.toList();
 
   Future<void> _startDownload(
     DownloadTask task,
@@ -117,7 +123,7 @@ class DownloadManager {
   ) async {
     try {
       task = task.copyWith(status: DownloadStatus.downloading);
-      await _updateTask(task);
+      _updateTask(task);
 
       final cancelToken = CancelToken();
       _cancelTokens[task.id] = cancelToken;
@@ -137,7 +143,7 @@ class DownloadManager {
           totalChunks,
         ),
       );
-      await _updateTask(task);
+      _updateTask(task);
 
       // Download missing chunks
       // log existing progress and download bytes
@@ -159,7 +165,7 @@ class DownloadManager {
           filePath: finalPath,
           bytesDownloaded: task.totalBytes,
         );
-        await _updateTask(task);
+        _updateTask(task);
         completer.complete(DownloadResult(task, true));
       }
     } catch (e) {
@@ -169,7 +175,7 @@ class DownloadManager {
       }
 
       task = task.copyWith(status: DownloadStatus.error, error: e.toString());
-      await _updateTask(task);
+      _updateTask(task);
       completer.complete(DownloadResult(task, false));
     } finally {
       _cleanup(task.id);
@@ -177,7 +183,7 @@ class DownloadManager {
   }
 
   String _getChunkPath(String basePath, int part) {
-    return '$basePath.${part}_part}';
+    return '$basePath.${part}_part';
   }
 
   Future<List<bool>> _validateExistingChunks(
@@ -197,7 +203,7 @@ class DownloadManager {
 
       final actualSize = await chunkFile.length();
       if (actualSize == expectedSize) {
-        _logger.info('exiging chunk  ${i + 1} is valid');
+        _logger.info('existing chunk ${i + 1} is valid');
         existingChunks[i] = true;
       } else {
         _logger.warning(
@@ -262,13 +268,12 @@ class DownloadManager {
     // Update progress after chunk completion
     final chunkFileSize = await File(chunkPath).length();
     task = task.copyWith(bytesDownloaded: task.bytesDownloaded + chunkFileSize);
-    await _updateTask(task);
+    _updateTask(task);
   }
 
   Future<String> _combineChunks(String basePath, int totalChunks) async {
     final finalFile = File(basePath);
     final sink = finalFile.openWrite();
-
     try {
       for (int i = 1; i <= totalChunks; i++) {
         final chunkFile = File(_getChunkPath(basePath, i));
@@ -279,14 +284,13 @@ class DownloadManager {
     } finally {
       await sink.close();
     }
-
     return finalFile.path;
   }
 
   Future<void> _deleteFiles(DownloadTask task) async {
     try {
       final directory = Configuration.instance.getTempDirectory();
-      final basePath = '$directory${task.id}_${task.filename}';
+      final basePath = '$directory${task.id}.encrypted';
       // Delete final file
       final finalFile = File(basePath);
       if (await finalFile.exists()) await finalFile.delete();
@@ -302,8 +306,8 @@ class DownloadManager {
     }
   }
 
-  Future<void> _updateTask(DownloadTask task) async {
-    await _db.save(task);
+  void _updateTask(DownloadTask task) {
+    _tasks[task.id] = task;
     _notifyProgress(task);
   }
 
@@ -342,5 +346,7 @@ class DownloadManager {
       await stream.close();
     }
     _streams.clear();
+
+    _tasks.clear();
   }
 }
