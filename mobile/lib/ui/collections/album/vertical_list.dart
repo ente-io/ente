@@ -95,7 +95,6 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
           widget.collections.length + (widget.shouldShowCreateAlbum ? 1 : 0),
       shrinkWrap: false,
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.only(bottom: 40),
     );
   }
 

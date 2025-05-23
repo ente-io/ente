@@ -120,8 +120,7 @@ class CollectionActionSheet extends StatefulWidget {
 class _CollectionActionSheetState extends State<CollectionActionSheet> {
   late final bool _showOnlyHiddenCollections;
   late final bool _enableSelection;
-  static const int cancelButtonSize = 80;
-  static const int okButtonSize = 60;
+  static const int okButtonSize = 80;
   String _searchQuery = "";
   List<Collection> _selectedCollections = [];
 
@@ -143,10 +142,8 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         : widget.selectedFiles?.files.length ?? 0;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     final isKeyboardUp = bottomInset > 100;
-    final double bottomPadding = max(
-      0,
-      bottomInset - cancelButtonSize - (_enableSelection ? okButtonSize : 0),
-    );
+    final double bottomPadding =
+        max(0, bottomInset - (_enableSelection ? okButtonSize : 0));
     return Padding(
       padding: EdgeInsets.only(
         bottom: isKeyboardUp ? bottomPadding : 0,
@@ -177,6 +174,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                           caption: widget.showOptionToCreateNewAlbum
                               ? S.of(context).createOrSelectAlbum
                               : S.of(context).selectAlbum,
+                          showCloseButton: true,
                         ),
                         Padding(
                           padding: const EdgeInsets.only(
@@ -194,7 +192,6 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                             },
                             isClearable: true,
                             shouldUnfocusOnClearOrSubmit: true,
-                            borderRadius: 2,
                           ),
                         ),
                         _getCollectionItems(),
@@ -208,7 +205,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                       decoration: BoxDecoration(
                         border: Border(
                           top: BorderSide(
-                            color: getEnteColorScheme(context).strokeFaint,
+                            color: _enableSelection
+                                ? getEnteColorScheme(context).strokeFaint
+                                : Colors.transparent,
                           ),
                         ),
                       ),
@@ -232,50 +231,35 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     final List<Widget> widgets = [];
     if (_enableSelection) {
       widgets.add(
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          switchInCurve: Curves.easeOutBack,
-          switchOutCurve: Curves.easeIn,
-          child: _selectedCollections.isNotEmpty
-              ? ButtonWidget(
-                  key: const ValueKey('add_button'),
-                  buttonType: ButtonType.primary,
-                  isInAlert: true,
-                  labelText: S.of(context).add,
-                  shouldSurfaceExecutionStates: false,
-                  onTap: () async {
-                    final CollectionActions collectionActions =
-                        CollectionActions(CollectionsService.instance);
-                    final result =
-                        await collectionActions.addToMultipleCollections(
-                      context,
-                      _selectedCollections,
-                      true,
-                      selectedFiles: widget.selectedFiles?.files.toList(),
-                    );
-                    if (result) {
-                      showShortToast(
-                        context,
-                        "Added successfully to " +
-                            _selectedCollections.length.toString() +
-                            " albums",
-                      );
-                      widget.selectedFiles?.clearAll();
-                    }
-                  },
-                )
-              : const SizedBox.shrink(),
+        ButtonWidget(
+          key: const ValueKey('add_button'),
+          buttonType: ButtonType.primary,
+          isInAlert: true,
+          labelText: S.of(context).add,
+          shouldSurfaceExecutionStates: false,
+          isDisabled: _selectedCollections.isEmpty,
+          onTap: () async {
+            final CollectionActions collectionActions =
+                CollectionActions(CollectionsService.instance);
+            final result = await collectionActions.addToMultipleCollections(
+              context,
+              _selectedCollections,
+              true,
+              selectedFiles: widget.selectedFiles?.files.toList(),
+            );
+            if (result) {
+              showShortToast(
+                context,
+                "Added successfully to " +
+                    _selectedCollections.length.toString() +
+                    " albums",
+              );
+              widget.selectedFiles?.clearAll();
+            }
+          },
         ),
       );
     }
-    widgets.add(
-      ButtonWidget(
-        buttonType: ButtonType.secondary,
-        buttonAction: ButtonAction.cancel,
-        isInAlert: true,
-        labelText: S.of(context).cancel,
-      ),
-    );
     final widgetsWithSpaceBetween = addSeparators(
       widgets,
       const SizedBox(height: 8),
