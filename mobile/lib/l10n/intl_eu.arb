@@ -458,5 +458,10 @@
   "iOSLockOut": "Autentifikazio biometrikoa deuseztatuta dago. Mesedez, blokeatu eta desblokeatu zure pantaila indarrean jartzeko.",
   "@iOSLockOut": {
     "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
-  }
+  },
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
 }

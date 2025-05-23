@@ -185,19 +185,19 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
-  "allowAddPhotosDescription": "Bağlantıya sahip olan kişilere, paylaşılan albüme fotoğraf eklemelerine izin ver.",
+  "allowAddPhotosDescription": "Bağlantıya sahip olan kişilerin paylaşılan albüme fotoğraf eklemelerine izin ver.",
   "passwordLock": "Şifre kilidi",
   "canNotOpenTitle": "Albüm açılamadı",
   "canNotOpenBody": "Üzgünüz, Bu albüm uygulama içinde açılamadı.",
   "disableDownloadWarningTitle": "Lütfen dikkate alın",
   "disableDownloadWarningBody": "Görüntüleyiciler, hala harici araçlar kullanarak ekran görüntüsü alabilir veya fotoğraflarınızın bir kopyasını kaydedebilir. Lütfen bunu göz önünde bulundurunuz",
   "allowDownloads": "İndirmeye izin ver",
-  "linkDeviceLimit": "Cihaz limiti",
+  "linkDeviceLimit": "Cihaz sınırı",
   "noDeviceLimit": "Yok",
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
-  "linkExpiry": "Linkin geçerliliği",
+  "linkExpiry": "Bağlantı geçerliliği",
   "linkExpired": "Süresi dolmuş",
   "linkEnabled": "Geçerli",
   "linkNeverExpires": "Asla",
@@ -205,12 +205,12 @@
   "setAPassword": "Şifre ayarla",
   "lockButtonLabel": "Kilit",
   "enterPassword": "Şifrenizi girin",
-  "removeLink": "Linki kaldır",
-  "manageLink": "Linki yönet",
-  "linkExpiresOn": "Bu bağlantı {expiryTime} dan sonra geçersiz olacaktır",
+  "removeLink": "Bağlantıyı kaldır",
+  "manageLink": "Bağlantıyı yönet",
+  "linkExpiresOn": "Bu bağlantı {expiryTime} tarihinden itibaren geçersiz olacaktır",
   "albumUpdated": "Albüm güncellendi",
   "never": "Asla",
-  "custom": "Kişisel",
+  "custom": "Özel",
   "@custom": {
     "description": "Label for setting custom value for link expiry"
   },
@@ -232,14 +232,14 @@
   },
   "collabLinkSectionDescription": "Ente aplikasyonu veya hesabı olmadan insanların paylaşılan albümde fotoğraf ekleyip görüntülemelerine izin vermek için bir bağlantı oluşturun. Grup veya etkinlik fotoğraflarını toplamak için harika bir seçenek.",
   "collectPhotos": "Fotoğrafları topla",
-  "collaborativeLink": "Organizasyon bağlantısı",
+  "collaborativeLink": "Ortak bağlantı",
   "shareWithNonenteUsers": "Ente kullanıcısı olmayanlar için paylaş",
-  "createPublicLink": "Herkese açık link oluştur",
-  "sendLink": "Link gönder",
-  "copyLink": "Linki kopyala",
+  "createPublicLink": "Herkese açık bir bağlantı oluştur",
+  "sendLink": "Bağlantıyı gönder",
+  "copyLink": "Bağlantıyı kopyala",
   "linkHasExpired": "Bağlantının süresi dolmuş",
   "publicLinkEnabled": "Herkese açık bağlantı aktive edildi",
-  "shareALink": "Linki paylaş",
+  "shareALink": "Bir bağlantı paylaş",
   "sharedAlbumSectionDescription": "Diğer Ente kullanıcılarıyla paylaşılan ve topluluk albümleri oluşturun, bu arada ücretsiz planlara sahip kullanıcıları da içerir.",
   "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Belirli kişilerle paylaş} =1 {1 kişiyle paylaşıldı} other {{numberOfPeople} kişiyle paylaşıldı}}",
   "@shareWithPeopleSectionTitle": {
@@ -345,7 +345,7 @@
   "keepPhotos": "Fotoğrafları sakla",
   "deletePhotos": "Fotoğrafları sil",
   "inviteToEnte": "Ente'ye davet edin",
-  "removePublicLink": "Herkese açık link oluştur",
+  "removePublicLink": "Herkese açık bağlantıyı kaldır",
   "disableLinkMessage": "Bu, \"{albumName}\"e erişim için olan genel bağlantıyı kaldıracaktır.",
   "sharing": "Paylaşılıyor...",
   "youCannotShareWithYourself": "Kendinizle paylaşamazsınız",
@@ -738,7 +738,7 @@
     "description": "The text displayed above folders/albums stored on device",
     "type": "text"
   },
-  "onDevice": "Bu cihaz",
+  "onDevice": "Cihazda",
   "@onEnte": {
     "description": "The text displayed above albums backed up to Ente",
     "type": "text"
@@ -768,10 +768,10 @@
   },
   "permanentlyDelete": "Kalıcı olarak sil",
   "canOnlyCreateLinkForFilesOwnedByYou": "Yalnızca size ait dosyalar için bağlantı oluşturabilir",
-  "publicLinkCreated": "Herkese açık link oluşturuldu",
+  "publicLinkCreated": "Herkese açık bağlantı oluşturuldu",
   "youCanManageYourLinksInTheShareTab": "Bağlantılarınızı paylaşım sekmesinden yönetebilirsiniz.",
   "linkCopiedToClipboard": "Link panoya kopyalandı",
-  "restore": "Yenile",
+  "restore": "Geri yükle",
   "@restore": {
     "description": "Display text for an action which triggers a restore of item from trash",
     "type": "text"
@@ -781,7 +781,7 @@
   "unarchive": "Arşivden cıkar",
   "favorite": "Favori",
   "removeFromFavorite": "Favorilerden Kaldır",
-  "shareLink": "Linki paylaş",
+  "shareLink": "Bağlantıyı paylaş",
   "createCollage": "Kolaj oluştur",
   "saveCollage": "Kolajı kaydet",
   "collageSaved": "Kolajınız galeriye kaydedildi",
@@ -1281,6 +1281,8 @@
   "createCollaborativeLink": "Ortak bağlantı oluşturun",
   "search": "Ara",
   "enterPersonName": "Kişi ismini giriniz",
+  "editEmailAlreadyLinked": "Bu e-posta zaten {name} kişisine bağlı.",
+  "viewPersonToUnlink": "Bağlantıyı kaldırmak için {name} kişisini görüntüle",
   "enterName": "İsim girin",
   "savePerson": "Kişiyi kaydet",
   "editPerson": "Kişiyi düzenle",
@@ -1354,7 +1356,7 @@
   "passwordStrengthInfo": "Parola gücü, parolanın uzunluğu, kullanılan karakterler ve parolanın en çok kullanılan ilk 10.000 parola arasında yer alıp almadığı dikkate alınarak hesaplanır",
   "noQuickLinksSelected": "Hızlı bağlantılar seçilmedi",
   "pleaseSelectQuickLinksToRemove": "Lütfen kaldırmak için hızlı bağlantıları seçin",
-  "removePublicLinks": "Herkese açık link oluştur",
+  "removePublicLinks": "Herkese açık bağlantıları kaldır",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Bu, seçilen tüm hızlı bağlantıların genel bağlantılarını kaldıracaktır.",
   "guestView": "Misafir Görünümü",
   "guestViewEnablePreSteps": "Misafir görünümünü etkinleştirmek için lütfen sistem ayarlarınızda cihaz şifresi veya ekran kilidi ayarlayın.",
@@ -1660,8 +1662,9 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
+  "videoStreaming": "Akışlandırılabilir videolar",
   "processingVideos": "Videolar işleniyor",
-  "streamDetails": "Yayın detayları",
+  "streamDetails": "Akış detayları",
   "processing": "İşleniyor",
   "queued": "Kuyrukta",
   "ineligible": "Uygun Değil",
@@ -1736,5 +1739,10 @@
   "cLFamilyPlanDesc": "Artık aile üyelerinizin ne kadar depolama alanı kullanabileceğine dair sınırlar belirleyebilirsiniz.",
   "cLBulkEdit": "Tarihleri toplu düzenle",
   "cLBulkEditDesc": "Artık birden fazla fotoğraf seçebilir ve tek bir hızlı işlemle hepsi için tarih/saat düzenleyebilirsiniz. Tarih kaydırma da desteklenmektedir.",
-  "curatedMemories": "Seçilmiş anılar"
+  "curatedMemories": "Seçilmiş anılar",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
 }

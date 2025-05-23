@@ -1,8 +1,8 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "أدخل عنوان بريدك الإلكتروني",
-  "accountWelcomeBack": "مرحبًا مجددًا!",
-  "emailAlreadyRegistered": "البريد الإلكتروني مُسَجَّل من قبل.",
+  "accountWelcomeBack": "أهلاً بعودتك!",
+  "emailAlreadyRegistered": "البريد الإلكتروني مُسجل من قبل.",
   "emailNotRegistered": "البريد الإلكتروني غير مسجل.",
   "email": "البريد الإلكتروني",
   "cancel": "إلغاء",
@@ -17,7 +17,7 @@
   "confirmDeletePrompt": "نعم، أرغب في حذف هذا الحساب وبياناته نهائيًا من جميع التطبيقات.",
   "confirmAccountDeletion": "تأكيد حذف الحساب",
   "deleteAccountPermanentlyButton": "حذف الحساب نهائيًا",
-  "yourAccountHasBeenDeleted": "تم حذف حسابك بنجاح.",
+  "yourAccountHasBeenDeleted": "تم حذف حسابك بنجاح",
   "selectReason": "اختر سببًا",
   "deleteReason1": "تفتقر إلى مِيزة أساسية أحتاج إليها",
   "deleteReason2": "التطبيق أو مِيزة معينة لا تعمل كما هو متوقع",
@@ -70,7 +70,7 @@
   "changePasswordTitle": "تغيير كلمة المرور",
   "resetPasswordTitle": "إعادة تعيين كلمة المرور",
   "encryptionKeys": "مفاتيح التشفير",
-  "passwordWarning": "نحن لا نخزن كلمة المرور هذه، لذا إذا نسيتها، <underline>لا يمكننا المساعدة في فك تشفير بياناتك</underline>.",
+  "passwordWarning": "نحن لا نقوم بتخزين كلمة المرور هذه، لذا إذا نسيتها، <underline>لا يمكننا فك تشفير بياناتك</underline>",
   "enterPasswordToEncrypt": "أدخل كلمة مرور يمكننا استخدامها لتشفير بياناتك",
   "enterNewPasswordToEncrypt": "أدخل كلمة مرور جديدة يمكننا استخدامها لتشفير بياناتك",
   "weakStrength": "ضعيفة",
@@ -88,7 +88,7 @@
     },
     "message": "Password Strength: {passwordStrengthText}"
   },
-  "passwordChangedSuccessfully": "تم تغيير كلمة المرور بنجاح.",
+  "passwordChangedSuccessfully": "تم تغيير كلمة المرور بنجاح",
   "generatingEncryptionKeys": "جارٍ إنشاء مفاتيح التشفير...",
   "pleaseWait": "يرجى الانتظار...",
   "continueLabel": "متابعة",
@@ -721,6 +721,7 @@
     "type": "text"
   },
   "backupFailed": "فشل النسخ الاحتياطي",
+  "sorryBackupFailedDesc": "عذرًا، لم نتمكن من عمل نسخة احتياطية لهذا الملف الآن، سنعيد المحاولة لاحقًا.",
   "couldNotBackUpTryLater": "لم نتمكن من نسخ بياناتك احتياطيًا.\nسنحاول مرة أخرى لاحقًا.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "يمكن لـ Ente تشفير وحفظ الملفات فقط إذا منحت الإذن بالوصول إليها.",
   "pleaseGrantPermissions": "يرجى منح الأذونات.",
@@ -1029,6 +1030,7 @@
   "didYouKnow": "هل تعلم؟",
   "loadingMessage": "جارٍ تحميل صورك...",
   "loadMessage1": "يمكنك مشاركة اشتراكك مع عائلتك.",
+  "loadMessage2": "لقد حفظنا أكثر من 200 مليون ذكرى حتى الآن.",
   "loadMessage3": "نحتفظ بـ 3 نسخ من بياناتك، إحداها في ملجأ للطوارئ تحت الأرض.",
   "loadMessage4": "جميع تطبيقاتنا مفتوحة المصدر.",
   "loadMessage5": "تم تدقيق شفرتنا المصدرية والتشفير الخاص بنا خارجيًا.",
@@ -1279,6 +1281,8 @@
   "createCollaborativeLink": "إنشاء رابط تعاوني",
   "search": "بحث",
   "enterPersonName": "أدخل اسم الشخص",
+  "editEmailAlreadyLinked": "هذا البريد الإلكتروني مرتبط مسبقاً بـ {name}.",
+  "viewPersonToUnlink": "عرض {name} لإلغاء الربط",
   "enterName": "أدخل الاسم",
   "savePerson": "حفظ الشخص",
   "editPerson": "تعديل الشخص",
@@ -1658,6 +1662,7 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
+  "videoStreaming": "مقاطع فيديو قابلة للبث",
   "processingVideos": "معالجة مقاطع الفيديو",
   "streamDetails": "تفاصيل البث",
   "processing": "المعالجة",
@@ -1734,5 +1739,10 @@
   "cLFamilyPlanDesc": "يمكنك الآن تعيين حدود لمقدار التخزين الذي يمكن لأفراد عائلتك استخدامه.",
   "cLBulkEdit": "تعديل التواريخ بشكل جماعي",
   "cLBulkEditDesc": "يمكنك الآن تحديد صور متعددة، وتعديل التاريخ/الوقت لجميعها بإجراء سريع واحد. تغيير التواريخ مدعوم أيضًا.",
-  "curatedMemories": "ذكريات منسقة"
+  "curatedMemories": "ذكريات منسقة",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
 }

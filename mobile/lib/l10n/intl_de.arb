@@ -1738,5 +1738,10 @@
   "cLFamilyPlanDesc": "Du kannst jetzt festlegen, wie viel Speicherplatz deine Familienmitglieder nutzen können.",
   "cLBulkEdit": "Massenbearbeitung von Datumsangaben",
   "cLBulkEditDesc": "Du kannst jetzt mehrere Fotos auswählen, und das Datum/Uhrzeit für alle mit einer Aktion ändern. Das Verschieben von Daten wird auch unterstützt.",
-  "curatedMemories": "Ausgewählte Erinnerungen"
+  "curatedMemories": "Ausgewählte Erinnerungen",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
 }

@@ -398,7 +398,10 @@ class CollectionsService {
         .toList();
   }
 
-  SharedCollections getSharedCollections() {
+  Future<SharedCollections> getSharedCollections() async {
+    final AlbumSortKey sortKey = localSettings.albumSortKey();
+    final AlbumSortDirection sortDirection = localSettings.albumSortDirection();
+
     final List<Collection> outgoing = [];
     final List<Collection> incoming = [];
     final List<Collection> quickLinks = [];
@@ -415,17 +418,65 @@ class CollectionsService {
         incoming.add(c);
       }
     }
-    incoming.sort((first, second) {
-      return second.updationTime.compareTo(first.updationTime);
-    });
-    outgoing.sort((first, second) {
-      return second.updationTime.compareTo(first.updationTime);
-    });
+
+    late Map<int, int> collectionIDToNewestPhotoTime;
+    if (sortKey == AlbumSortKey.newestPhoto) {
+      collectionIDToNewestPhotoTime =
+          await CollectionsService.instance.getCollectionIDToNewestFileTime();
+    }
+
+    incoming.sort(
+      (first, second) {
+        int comparison;
+        if (sortKey == AlbumSortKey.albumName) {
+          comparison = compareAsciiLowerCaseNatural(
+            first.displayName,
+            second.displayName,
+          );
+        } else if (sortKey == AlbumSortKey.newestPhoto) {
+          comparison =
+              (collectionIDToNewestPhotoTime[second.id] ?? -1 * intMaxValue)
+                  .compareTo(
+            collectionIDToNewestPhotoTime[first.id] ?? -1 * intMaxValue,
+          );
+        } else {
+          comparison = second.updationTime.compareTo(first.updationTime);
+        }
+        return sortDirection == AlbumSortDirection.ascending
+            ? comparison
+            : -comparison;
+      },
+    );
+
+    outgoing.sort(
+      (first, second) {
+        int comparison;
+        if (sortKey == AlbumSortKey.albumName) {
+          comparison = compareAsciiLowerCaseNatural(
+            first.displayName,
+            second.displayName,
+          );
+        } else if (sortKey == AlbumSortKey.newestPhoto) {
+          comparison =
+              (collectionIDToNewestPhotoTime[second.id] ?? -1 * intMaxValue)
+                  .compareTo(
+            collectionIDToNewestPhotoTime[first.id] ?? -1 * intMaxValue,
+          );
+        } else {
+          comparison = second.updationTime.compareTo(first.updationTime);
+        }
+        return sortDirection == AlbumSortDirection.ascending
+            ? comparison
+            : -comparison;
+      },
+    );
+
     return SharedCollections(outgoing, incoming, quickLinks);
   }
 
   Future<List<Collection>> getCollectionForOnEnteSection() async {
     final AlbumSortKey sortKey = localSettings.albumSortKey();
+    final AlbumSortDirection sortDirection = localSettings.albumSortDirection();
     final List<Collection> collections =
         CollectionsService.instance.getCollectionsForUI();
     final bool hasFavorites = FavoritesService.instance.hasFavorites();
@@ -436,19 +487,24 @@ class CollectionsService {
     }
     collections.sort(
       (first, second) {
+        int comparison;
         if (sortKey == AlbumSortKey.albumName) {
-          return compareAsciiLowerCaseNatural(
+          comparison = compareAsciiLowerCaseNatural(
             first.displayName,
             second.displayName,
           );
         } else if (sortKey == AlbumSortKey.newestPhoto) {
-          return (collectionIDToNewestPhotoTime[second.id] ?? -1 * intMaxValue)
-              .compareTo(
+          comparison =
+              (collectionIDToNewestPhotoTime[second.id] ?? -1 * intMaxValue)
+                  .compareTo(
             collectionIDToNewestPhotoTime[first.id] ?? -1 * intMaxValue,
           );
         } else {
-          return second.updationTime.compareTo(first.updationTime);
+          comparison = second.updationTime.compareTo(first.updationTime);
         }
+        return sortDirection == AlbumSortDirection.ascending
+            ? comparison
+            : -comparison;
       },
     );
     final List<Collection> favorites = [];

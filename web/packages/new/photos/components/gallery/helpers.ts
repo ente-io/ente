@@ -52,7 +52,7 @@ export const constructUserIDToEmailMap = (
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (sharees) {
             sharees.forEach((item) => {
-                if (item.id !== user.id)
+                if (item.id !== user.id && item.email)
                     userIDToEmailMap.set(item.id, item.email);
             });
         }
@@ -78,10 +78,11 @@ export const createShareeSuggestionEmails = (
                 // type for Collection.
                 //
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                return (sharees ?? []).map((sharee) => sharee.email);
+                return (sharees ?? []).map(({ email }) => email);
             }
         })
-        .flat();
+        .flat()
+        .filter((e) => e !== undefined);
 
     // Add family members.
     if (familyData) {

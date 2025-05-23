@@ -94,6 +94,12 @@ export const _decryptMetadataJSON = async (r: {
         r.keyB64,
     );
 
+export const _chunkHashInit = libsodium.chunkHashInit;
+
+export const _chunkHashUpdate = libsodium.chunkHashUpdate;
+
+export const _chunkHashFinal = libsodium.chunkHashFinal;
+
 export const _generateKeyPair = libsodium.generateKeyPair;
 
 export const _boxSeal = libsodium.boxSeal;

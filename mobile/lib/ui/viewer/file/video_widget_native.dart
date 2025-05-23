@@ -112,6 +112,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _streamSwitchedSubscription =
         Bus.instance.on<StreamSwitchedEvent>().listen((event) {
       if (event.type != PlayerType.nativeVideoPlayer) return;
+      _filePath = null;
       if (event.selectedPreview) {
         loadPreview(update: true);
       } else {
@@ -133,6 +134,11 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   Future<void> setVideoSource() async {
+    if (_filePath == null) {
+      _logger.info('Stop video player, file path is null');
+      await _controller?.stop();
+      return;
+    }
     final videoSource = VideoSource(
       path: _filePath!,
       type: VideoSourceType.file,

@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/network/network.dart';
+import "package:photos/services/language_service.dart";
 import 'package:photos/services/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
@@ -90,10 +91,11 @@ class UpdateService {
 
   Future<void> showUpdateNotification() async {
     if (await shouldShowUpdateNotification()) {
+      final s = await LanguageService.s;
       // ignore: unawaited_futures
       NotificationService.instance.showNotification(
-        "Update available",
-        "Click to install our best version yet",
+        s.updateAvailable,
+        s.clickToInstallOurBestVersionYet,
       );
       await resetUpdateAvailableShownTime();
     } else {

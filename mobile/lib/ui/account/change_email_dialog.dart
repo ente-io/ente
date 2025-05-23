@@ -18,7 +18,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return AlertDialog(
-      title: Text(l10n.enterYourEmailAddress),
+      title: Text(l10n.enterYourNewEmailAddress),
       content: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,

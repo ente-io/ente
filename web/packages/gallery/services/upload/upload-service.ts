@@ -6,7 +6,12 @@ import type { BytesOrB64 } from "ente-base/crypto/types";
 import { type CryptoWorker } from "ente-base/crypto/worker";
 import { ensureElectron } from "ente-base/electron";
 import { basename, nameAndExtension } from "ente-base/file-name";
-import type { PublicAlbumsCredentials } from "ente-base/http";
+import {
+    ensureOk,
+    retryAsyncOperation,
+    type HTTPRequestRetrier,
+    type PublicAlbumsCredentials,
+} from "ente-base/http";
 import log from "ente-base/log";
 import { extractExif } from "ente-gallery/services/exif";
 import {
@@ -41,10 +46,13 @@ import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
 import { addToCollection } from "ente-new/photos/services/collection";
 import { settingsSnapshot } from "ente-new/photos/services/settings";
-import { CustomError, handleUploadError } from "ente-shared/error";
+import {
+    CustomError,
+    CustomErrorMessage,
+    handleUploadError,
+} from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
-import * as convert from "xml-js";
 import type { UploadableUploadItem, UploadItem } from ".";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
@@ -53,8 +61,13 @@ import {
 } from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
+    completeMultipartUpload,
+    completeMultipartUploadViaWorker,
     PhotosUploadHTTPClient,
     PublicAlbumsUploadHTTPClient,
+    putFilePart,
+    putFilePartViaWorker,
+    type MultipartCompletedPart,
     type ObjectUploadURL,
 } from "./remote";
 import type { ParsedMetadataJSON } from "./takeout";
@@ -533,6 +546,36 @@ type MakeProgressTracker = (
     index?: number,
 ) => unknown;
 
+/**
+ * Some state and callbacks used during upload that are not tied to a specific
+ * file being uploaded.
+ */
+interface UploadContext {
+    /**
+     * If `true`, then the upload does not go via the worker.
+     *
+     * See {@link shouldDisableCFUploadProxy} for more details.
+     */
+    isCFUploadProxyDisabled: boolean;
+    /**
+     * A function that the upload sequence should use to periodically check in
+     * and see if the upload has been cancelled by the user.
+     *
+     * If the upload has been cancelled, it will throw an exception with the
+     * message set to {@link CustomError.UPLOAD_CANCELLED}.
+     */
+    abortIfCancelled: () => void;
+    /**
+     * A function that gets called update the progress shown in the UI for a
+     * particular file as the parts of that file get uploaded.
+     */
+    updateUploadProgress: (
+        fileLocalID: number,
+        percentPerPart: number,
+        uploadedPartCount: number,
+    ) => void;
+}
+
 interface UploadResponse {
     uploadResult: UploadResult;
     uploadedFile?: EncryptedEnteFile | EnteFile;
@@ -544,6 +587,9 @@ interface UploadResponse {
  * This is lower layer implementation of the upload. It is invoked by
  * {@link UploadManager} after it has assembled all the relevant bits we need to
  * go forth and upload.
+ *
+ * @param uploadContext Some general state and callbacks for the entire set of
+ * files being uploaded.
  */
 export const upload = async (
     { collection, localID, fileName, ...uploadAsset }: UploadableUploadItem,
@@ -551,10 +597,11 @@ export const upload = async (
     existingFiles: EnteFile[],
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
     worker: CryptoWorker,
-    isCFUploadProxyDisabled: boolean,
-    abortIfCancelled: () => void,
     makeProgressTracker: MakeProgressTracker,
+    uploadContext: UploadContext,
 ): Promise<UploadResponse> => {
+    const { abortIfCancelled } = uploadContext;
+
     log.info(`Upload ${fileName} | start`);
     try {
         /*
@@ -658,8 +705,7 @@ export const upload = async (
         const backupedFile = await uploadToBucket(
             encryptedFilePieces,
             makeProgressTracker,
-            isCFUploadProxyDisabled,
-            abortIfCancelled,
+            uploadContext,
         );
 
         const uploadedFile = await uploadService.uploadFile({
@@ -684,7 +730,7 @@ export const upload = async (
 
         const error = handleUploadError(e);
         switch (error.message) {
-            case CustomError.ETAG_MISSING:
+            case CustomErrorMessage.eTagMissing:
                 return { uploadResult: "blocked" };
             case CustomError.FILE_TOO_LARGE:
                 return { uploadResult: "largerThanAvailableStorage" };
@@ -1147,20 +1193,33 @@ const tryDetermineVideoDuration = async (uploadItem: UploadItem) => {
     }
 };
 
+/**
+ * Compute the hash of an item we're attempting to upload.
+ *
+ * The hash is retained in the file metadata, and is also used to detect
+ * duplicates during upload.
+ *
+ * This process can take a noticable amount of time. As an extreme case, for a
+ * 10 GB upload item, this can take a 2-3 minutes.
+ *
+ * @param uploadItem The {@link UploadItem} we're attempting to upload.
+ *
+ * @param worker A {@link CryptoWorker} to use for computing the hash.
+ */
 const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
     const { stream, chunkCount } = await readUploadItem(uploadItem);
-    const hashState = await worker.initChunkHashing();
+    const hashState = await worker.chunkHashInit();
 
     const streamReader = stream.getReader();
     for (let i = 0; i < chunkCount; i++) {
         const { done, value: chunk } = await streamReader.read();
         if (done) throw new Error("Less chunks than expected");
-        await worker.hashFileChunk(hashState, Uint8Array.from(chunk));
+        await worker.chunkHashUpdate(hashState, Uint8Array.from(chunk));
     }
 
     const { done } = await streamReader.read();
     if (!done) throw new Error("More chunks than expected");
-    return await worker.completeChunkHashing(hashState);
+    return await worker.chunkHashFinal(hashState);
 };
 
 /**
@@ -1436,9 +1495,10 @@ const encryptFileStream = async (
 const uploadToBucket = async (
     encryptedFilePieces: EncryptedFilePieces,
     makeProgressTracker: MakeProgressTracker,
-    isCFUploadProxyDisabled: boolean,
-    abortIfCancelled: () => void,
+    uploadContext: UploadContext,
 ): Promise<BackupedFile> => {
+    const { isCFUploadProxyDisabled } = uploadContext;
+
     const { localID, file, thumbnail, metadata, pubMagicMetadata } =
         encryptedFilePieces;
     try {
@@ -1456,9 +1516,7 @@ const uploadToBucket = async (
                 await uploadStreamUsingMultipart(
                     localID,
                     encryptedData,
-                    makeProgressTracker,
-                    isCFUploadProxyDisabled,
-                    abortIfCancelled,
+                    uploadContext,
                 ));
         } else {
             const data =
@@ -1527,18 +1585,52 @@ const uploadToBucket = async (
     }
 };
 
-interface PartEtag {
-    PartNumber: number;
-    ETag: string;
-}
+/**
+ * A factory method that returns a function which will act like variant of
+ * {@link retryEnsuringHTTPOk} and also understands the cancellation mechanism
+ * used by the upload subsystem.
+ *
+ * @param abortIfCancelled A function that aborts the operation by throwing a
+ * error with the message set to {@link CustomError.UPLOAD_CANCELLED} if the
+ * user has cancelled the upload.
+ *
+ * @return A function of type {@link HTTPRequestRetrier} that can be used to
+ * retry requests. This function will retry requests (obtained afresh each time
+ * by calling the provided {@link request} function) in the same manner as
+ * {@link retryEnsuringHTTPOk}. Additionally, it will call
+ * {@link abortIfCancelled} before each attempt, and also bypass the retries
+ * when the abort happens on such cancellations.
+ */
+const createAbortableRetryEnsuringHTTPOk =
+    (abortIfCancelled: () => void): HTTPRequestRetrier =>
+    (request: () => Promise<Response>) =>
+        retryAsyncOperation(
+            async () => {
+                abortIfCancelled();
+                const r = await request();
+                ensureOk(r);
+                return r;
+            },
+            (e) => {
+                if (
+                    e instanceof Error &&
+                    e.message == CustomError.UPLOAD_CANCELLED
+                )
+                    throw e;
+            },
+        );
 
-async function uploadStreamUsingMultipart(
+const uploadStreamUsingMultipart = async (
     fileLocalID: number,
     dataStream: EncryptedFileStream,
-    makeProgressTracker: MakeProgressTracker,
-    isCFUploadProxyDisabled: boolean,
-    abortIfCancelled: () => void,
-) {
+    uploadContext: UploadContext,
+) => {
+    const { isCFUploadProxyDisabled, abortIfCancelled, updateUploadProgress } =
+        uploadContext;
+
+    const abortableRetryEnsuringHTTPOk =
+        createAbortableRetryEnsuringHTTPOk(abortIfCancelled);
+
     const uploadPartCount = Math.ceil(
         dataStream.chunkCount / multipartChunksPerPart,
     );
@@ -1550,64 +1642,65 @@ async function uploadStreamUsingMultipart(
     const streamReader = stream.getReader();
     const percentPerPart =
         RANDOM_PERCENTAGE_PROGRESS_FOR_PUT() / uploadPartCount;
-    const partEtags: PartEtag[] = [];
+
     let fileSize = 0;
+    const completedParts: MultipartCompletedPart[] = [];
     for (const [
         index,
-        fileUploadURL,
+        partUploadURL,
     ] of multipartUploadURLs.partURLs.entries()) {
         abortIfCancelled();
 
-        const uploadChunk = await combineChunksToFormUploadPart(streamReader);
-        fileSize += uploadChunk.length;
-        const progressTracker = makeProgressTracker(
-            fileLocalID,
-            percentPerPart,
-            index,
-        );
-        let eTag = null;
-        if (!isCFUploadProxyDisabled) {
-            eTag = await photosHTTPClient.putFilePartV2(
-                fileUploadURL,
-                uploadChunk,
-                progressTracker,
-            );
-        } else {
-            eTag = await photosHTTPClient.putFilePart(
-                fileUploadURL,
-                uploadChunk,
-                progressTracker,
-            );
-        }
-        partEtags.push({ PartNumber: index + 1, ETag: eTag });
+        const partNumber = index + 1;
+        const partData = await nextMultipartUploadPart(streamReader);
+        fileSize += partData.length;
+
+        const eTag = !isCFUploadProxyDisabled
+            ? await putFilePartViaWorker(
+                  partUploadURL,
+                  partData,
+                  abortableRetryEnsuringHTTPOk,
+              )
+            : await putFilePart(
+                  partUploadURL,
+                  partData,
+                  abortableRetryEnsuringHTTPOk,
+              );
+        if (!eTag) throw new Error(CustomErrorMessage.eTagMissing);
+
+        updateUploadProgress(fileLocalID, percentPerPart, partNumber);
+        completedParts.push({ partNumber, eTag });
     }
     const { done } = await streamReader.read();
     if (!done) throw new Error("More chunks than expected");
 
-    const completeURL = multipartUploadURLs.completeURL;
-    const cBody = convert.js2xml(
-        { CompleteMultipartUpload: { Part: partEtags } },
-        { compact: true, ignoreComment: true, spaces: 4 },
-    );
+    const completionURL = multipartUploadURLs.completeURL;
     if (!isCFUploadProxyDisabled) {
-        await photosHTTPClient.completeMultipartUploadV2(completeURL, cBody);
+        await abortableRetryEnsuringHTTPOk(() =>
+            completeMultipartUploadViaWorker(completionURL, completedParts),
+        );
     } else {
-        await photosHTTPClient.completeMultipartUpload(completeURL, cBody);
+        await abortableRetryEnsuringHTTPOk(() =>
+            completeMultipartUpload(completionURL, completedParts),
+        );
     }
 
     return { objectKey: multipartUploadURLs.objectKey, fileSize };
-}
+};
 
-async function combineChunksToFormUploadPart(
+/**
+ * Construct byte arrays, up to 20 MB each, containing the contents of (up to)
+ * the next 5 {@link streamEncryptionChunkSize} chunks read from the given
+ * {@link streamReader}.
+ */
+const nextMultipartUploadPart = async (
     streamReader: ReadableStreamDefaultReader<Uint8Array>,
-) {
-    const combinedChunks = [];
+) => {
+    const chunks = [];
     for (let i = 0; i < multipartChunksPerPart; i++) {
         const { done, value: chunk } = await streamReader.read();
-        if (done) {
-            break;
-        }
-        combinedChunks.push(chunk);
+        if (done) break;
+        chunks.push(chunk);
     }
-    return mergeUint8Arrays(combinedChunks);
-}
+    return mergeUint8Arrays(chunks);
+};

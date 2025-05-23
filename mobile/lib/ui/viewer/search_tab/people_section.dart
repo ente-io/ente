@@ -6,10 +6,12 @@ import "package:photos/events/event.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/models/selected_people.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
@@ -24,7 +26,7 @@ import "package:photos/utils/navigation_util.dart";
 
 class PeopleSection extends StatefulWidget {
   final SectionType sectionType = SectionType.face;
-  final List<SearchResult> examples;
+  final List<GenericSearchResult> examples;
   final int limit;
 
   const PeopleSection({
@@ -38,7 +40,7 @@ class PeopleSection extends StatefulWidget {
 }
 
 class _PeopleSectionState extends State<PeopleSection> {
-  late List<SearchResult> _examples;
+  late List<GenericSearchResult> _examples;
   final streamSubscriptions = <StreamSubscription>[];
 
   @override
@@ -50,10 +52,12 @@ class _PeopleSectionState extends State<PeopleSection> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          _examples = await widget.sectionType.getData(
-            context,
-            limit: kSearchSectionLimit,
-          );
+          _examples = await widget.sectionType
+              .getData(
+                context,
+                limit: kSearchSectionLimit,
+              )
+              .then((value) => List.from(value));
           setState(() {});
         }),
       );
@@ -161,7 +165,7 @@ class _PeopleSectionState extends State<PeopleSection> {
 
 class SearchExampleRow extends StatelessWidget {
   final SectionType sectionType;
-  final List<SearchResult> examples;
+  final List<GenericSearchResult> examples;
 
   const SearchExampleRow(this.examples, this.sectionType, {super.key});
 
@@ -177,6 +181,7 @@ class SearchExampleRow extends StatelessWidget {
         itemBuilder: (context, index) {
           return PersonSearchExample(
             searchResult: examples[index],
+            selectedPeople: null,
           );
         },
         separatorBuilder: (context, index) => const SizedBox(width: 3),
@@ -186,14 +191,22 @@ class SearchExampleRow extends StatelessWidget {
 }
 
 class PersonSearchExample extends StatelessWidget {
-  final SearchResult searchResult;
+  final GenericSearchResult searchResult;
   final double size;
+  final SelectedPeople? selectedPeople;
 
   const PersonSearchExample({
     super.key,
     required this.searchResult,
+    required this.selectedPeople,
     this.size = 102,
   });
+
+  void toggleSelection() {
+    selectedPeople?.toggleSelection(
+      (searchResult.hierarchicalSearchFilter as FaceFilter).personId!,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -202,124 +215,163 @@ class PersonSearchExample extends StatelessWidget {
     final bool isCluster = (searchResult.type() == ResultType.faces &&
         int.tryParse(searchResult.name()) != null);
 
-    return GestureDetector(
-      onTap: () {
-        RecentSearches().add(searchResult.name());
-        final genericSearchResult = searchResult as GenericSearchResult;
-        if (genericSearchResult.onResultTap != null) {
-          genericSearchResult.onResultTap!(context);
-        } else {
-          routeToPage(
-            context,
-            SearchResultPage(searchResult),
-          );
-        }
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
+    return ListenableBuilder(
+      listenable: selectedPeople ?? ValueNotifier(false),
+      builder: (context, _) {
+        final filter = (searchResult.hierarchicalSearchFilter as FaceFilter);
+        final id = filter.personId ?? filter.clusterId ?? "";
+        final bool isSelected = selectedPeople?.isPersonSelected(id) ?? false;
+
+        return GestureDetector(
+          onTap: selectedPeople != null
+              ? toggleSelection
+              : () {
+                  RecentSearches().add(searchResult.name());
+                  if (searchResult.onResultTap != null) {
+                    searchResult.onResultTap!(context);
+                  } else {
+                    routeToPage(
+                      context,
+                      SearchResultPage(searchResult),
+                    );
+                  }
+                },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ClipPath(
-                clipper: ShapeBorderClipper(
-                  shape: ContinuousRectangleBorder(
-                    borderRadius: BorderRadius.circular(borderRadius),
+              Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  ClipPath(
+                    clipper: ShapeBorderClipper(
+                      shape: ContinuousRectangleBorder(
+                        borderRadius: BorderRadius.circular(borderRadius),
+                      ),
+                    ),
+                    child: Container(
+                      width: size,
+                      height: size,
+                      decoration: BoxDecoration(
+                        color: getEnteColorScheme(context).strokeFaint,
+                      ),
+                    ),
                   ),
-                ),
-                child: Container(
-                  width: size,
-                  height: size,
-                  decoration: BoxDecoration(
-                    color: getEnteColorScheme(context).strokeFaint,
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: size - 2,
-                height: size - 2,
-                child: searchResult.previewThumbnail() != null
-                    ? ClipPath(
-                        clipper: ShapeBorderClipper(
-                          shape: ContinuousRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(borderRadius - 1),
-                          ),
-                        ),
-                        child: searchResult.type() != ResultType.faces
+                  Builder(
+                    builder: (context) {
+                      late Widget child;
+
+                      if (searchResult.previewThumbnail() != null) {
+                        child = searchResult.type() != ResultType.faces
                             ? ThumbnailWidget(
                                 searchResult.previewThumbnail()!,
                                 shouldShowSyncStatus: false,
                               )
-                            : FaceSearchResult(searchResult),
-                      )
-                    : ClipPath(
-                        clipper: ShapeBorderClipper(
-                          shape: ContinuousRectangleBorder(
-                            borderRadius: BorderRadius.circular(81),
+                            : FaceSearchResult(searchResult);
+                      } else {
+                        child = const NoThumbnailWidget(
+                          addBorder: false,
+                        );
+                      }
+                      return SizedBox(
+                        width: size - 2,
+                        height: size - 2,
+                        child: ClipPath(
+                          clipper: ShapeBorderClipper(
+                            shape: ContinuousRectangleBorder(
+                              borderRadius:
+                                  searchResult.previewThumbnail() != null
+                                      ? BorderRadius.circular(borderRadius - 1)
+                                      : BorderRadius.circular(81),
+                            ),
+                          ),
+                          child: ColorFiltered(
+                            colorFilter: ColorFilter.mode(
+                              Colors.black.withOpacity(
+                                isSelected ? 0.4 : 0,
+                              ),
+                              BlendMode.darken,
+                            ),
+                            child: child,
                           ),
                         ),
-                        child: const NoThumbnailWidget(
-                          addBorder: false,
-                        ),
-                      ),
-              ),
-            ],
-          ),
-          isCluster
-              ? GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () async {
-                    final result = await showAssignPersonAction(
-                      context,
-                      clusterID: searchResult.name(),
-                    );
-                    if (result != null && result is (PersonEntity, EnteFile)) {
-                      // ignore: unawaited_futures
-                      routeToPage(
-                        context,
-                        PeoplePage(
-                          person: result.$1,
-                          searchResult: null,
-                        ),
                       );
-                    } else if (result != null && result is PersonEntity) {
-                      // ignore: unawaited_futures
-                      routeToPage(
-                        context,
-                        PeoplePage(
-                          person: result,
-                          searchResult: null,
-                        ),
-                      );
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 6, bottom: 0),
-                    child: Text(
-                      "Add name",
-                      maxLines: 1,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      style: getEnteTextTheme(context).small,
+                    },
+                  ),
+                  Positioned(
+                    top: 5,
+                    right: 5,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      child: isSelected
+                          ? const Icon(
+                              Icons.check_circle_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            )
+                          : null,
                     ),
                   ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.only(top: 6, bottom: 0),
-                  child: Text(
-                    searchResult.name(),
-                    maxLines: 1,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                    style: getEnteTextTheme(context).small,
-                  ),
-                ),
-        ],
-      ),
+                ],
+              ),
+              isCluster
+                  ? GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () async {
+                        final result = await showAssignPersonAction(
+                          context,
+                          clusterID: searchResult.name(),
+                        );
+                        if (result != null &&
+                            result is (PersonEntity, EnteFile)) {
+                          // ignore: unawaited_futures
+                          routeToPage(
+                            context,
+                            PeoplePage(
+                              person: result.$1,
+                              searchResult: null,
+                            ),
+                          );
+                        } else if (result != null && result is PersonEntity) {
+                          // ignore: unawaited_futures
+                          routeToPage(
+                            context,
+                            PeoplePage(
+                              person: result,
+                              searchResult: null,
+                            ),
+                          );
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 6, bottom: 0),
+                        child: Text(
+                          "Add name",
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          style: getEnteTextTheme(context).small,
+                        ),
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 6, bottom: 0),
+                      child: Text(
+                        searchResult.name(),
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        style: getEnteTextTheme(context).small,
+                      ),
+                    ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

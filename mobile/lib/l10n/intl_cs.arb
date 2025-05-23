@@ -439,5 +439,10 @@
   "selfiesWithThem": "Selfie s {name}",
   "cLIcon": "Nová ikona",
   "cLMemories": "Vzpomínky",
-  "cLWidgets": "Widgety"
+  "cLWidgets": "Widgety",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
 }

@@ -1662,6 +1662,7 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
+  "videoStreaming": "Vídeos transmissíveis",
   "processingVideos": "Processando vídeos",
   "streamDetails": "Detalhes da transmissão",
   "processing": "Processando",
@@ -1738,5 +1739,10 @@
   "cLFamilyPlanDesc": "Agora você pode definir um limite de quanto armazenamento os seus entes queridos podem usar.",
   "cLBulkEdit": "Editar todas as datas",
   "cLBulkEditDesc": "Agora você pode selecionar várias fotos, editar data e hora de todos com um só clique. Alternar datas também são suportados.",
-  "curatedMemories": "Memórias restauradas"
+  "curatedMemories": "Memórias restauradas",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
 }
