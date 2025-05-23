@@ -193,6 +193,9 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
  *
  * - Otherwise it should be a {@link ReadableStream} of the video contents.
  *
+ * @param fileID The ID of the {@link EnteFile} for which we're generating the
+ * HLS.
+ *
  * @param fetchURL The fully resolved API URL for obtaining the pre-signed URLs
  * to which the video segment file should be uploaded.
  *
@@ -211,11 +214,13 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
 export const initiateGenerateHLS = async (
     _: Electron,
     video: FileSystemUploadItem | ReadableStream,
+    fileID: number,
     fetchURL: string,
     authToken: string,
 ): Promise<GenerateHLSResult | undefined> => {
     const params = new URLSearchParams({
         op: "generate-hls",
+        fileID: fileID.toString(),
         fetchURL,
         authToken,
     });

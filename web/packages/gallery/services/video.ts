@@ -1029,6 +1029,7 @@ const processQueueItem = async ({
         res = await initiateGenerateHLS(
             electron,
             sourceVideo,
+            file.id,
             fetchURL,
             authToken,
         );

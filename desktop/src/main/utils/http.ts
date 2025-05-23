@@ -12,5 +12,20 @@ export const clientPackageName = "io.ente.photos.desktop";
  */
 export const publicRequestHeaders = (desktopAppVersion: string) => ({
     "X-Client-Package": clientPackageName,
-    "X-Client-Version": desktopAppVersion
+    "X-Client-Version": desktopAppVersion,
+});
+
+/**
+ * Reimplementation of {@link authenticatedRequestHeaders} from the web source.
+ *
+ * This builds on top of {@link publicRequestHeaders} and takes the same
+ * parameters, and additionally also requires the {@link authToken} that will be
+ * passed as the "X-Auth-Token" header.
+ */
+export const authenticatedRequestHeaders = (
+    desktopAppVersion: string,
+    authToken: string,
+) => ({
+    ...publicRequestHeaders(desktopAppVersion),
+    "X-Auth-Token": authToken,
 });
