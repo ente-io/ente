@@ -430,10 +430,14 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         children: [
           SizedBox(
             width: 42,
-            child: Text(
-              S.of(context).color,
-              style: subtitle2.copyWith(
-                color: subtitle2.color!.withOpacity(0.8),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                S.of(context).color,
+                style: subtitle2.copyWith(
+                  color: subtitle2.color!.withOpacity(0.8),
+                ),
               ),
             ),
           ),
@@ -476,10 +480,14 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         children: [
           SizedBox(
             width: 42,
-            child: Text(
-              S.of(context).light,
-              style: subtitle2.copyWith(
-                color: subtitle2.color!.withOpacity(0.8),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                S.of(context).light,
+                style: subtitle2.copyWith(
+                  color: subtitle2.color!.withOpacity(0.8),
+                ),
               ),
             ),
           ),
