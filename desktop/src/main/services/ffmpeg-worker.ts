@@ -228,7 +228,7 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  *
  * Example invocation:
  *
- *     ffmpeg -i in.mov -vf 'scale=-2:720,fps=30,zscale=transfer=linear,tonemap=tonemap=hable:desat=0,zscale=primaries=709:transfer=709:matrix=709,format=yuv420p' -c:v libx264 -c:a aac -f hls -hls_key_info_file out.m3u8.info -hls_list_size 0 -hls_flags single_file out.m3u8
+ *     ffmpeg -i in.mov -vf "scale=-2:'min(720,ih)',fps=30,zscale=transfer=linear,tonemap=tonemap=hable:desat=0,zscale=primaries=709:transfer=709:matrix=709,format=yuv420p" -c:v libx264 -c:a aac -f hls -hls_key_info_file out.m3u8.info -hls_list_size 0 -hls_flags single_file out.m3u8
  *
  * See: [Note: Preview variant of videos]
  *
@@ -412,7 +412,7 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
 
     // Overview:
     //
-    // - Video H.264 HD 720p 30fps.
+    // - Video H.264 HD 720p (max) 30fps.
     // - Audio AAC 128kbps.
     // - Encrypted HLS playlist with a single file containing all the chunks.
     //
@@ -450,7 +450,7 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
                                 // keeping aspect ratio and the calculated
                                 // dimension divisible by 2 (some of the other
                                 // operations require an even pixel count).
-                                "scale=-2:720",
+                                "scale=-2:'min(720,ih)'",
                                 // Convert the video to a constant 30 fps,
                                 // duplicating or dropping frames as necessary.
                                 "fps=30",
