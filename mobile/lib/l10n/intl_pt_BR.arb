@@ -1741,5 +1741,8 @@
   "cLBulkEditDesc": "Agora você pode selecionar várias fotos, editar data e hora de todos com um só clique. Alternar datas também são suportados.",
   "curatedMemories": "Memórias restauradas",
   "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄"
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
 }

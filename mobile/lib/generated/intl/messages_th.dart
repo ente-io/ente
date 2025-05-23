@@ -87,6 +87,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("เปลี่ยนรหัสผ่าน"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "โปรดตรวจสอบกล่องจดหมาย (และสแปม) ของคุณ เพื่อยืนยันให้เสร็จสิ้น"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "คัดลอกรหัสไปยังคลิปบอร์ดแล้ว"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("รวบรวมรูปภาพ"),
@@ -212,6 +214,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "moderateStrength": MessageLookupByLibrary.simpleMessage("ปานกลาง"),
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("ย้ายไปยังอัลบั้ม"),
         "name": MessageLookupByLibrary.simpleMessage("ชื่อ"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newest": MessageLookupByLibrary.simpleMessage("ใหม่สุด"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ไม่มีคีย์การกู้คืน?"),
@@ -299,6 +302,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "มีบางอย่างผิดพลาด โปรดลองอีกครั้ง"),
         "sorry": MessageLookupByLibrary.simpleMessage("ขออภัย"),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "status": MessageLookupByLibrary.simpleMessage("สถานะ"),
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("ครอบครัว"),

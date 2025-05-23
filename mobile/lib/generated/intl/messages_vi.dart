@@ -520,6 +520,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Nhấn"),
         "clickOnTheOverflowMenu":
             MessageLookupByLibrary.simpleMessage("• Nhấn vào menu thả xuống"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Đóng"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("Nhóm theo thời gian chụp"),
@@ -1186,6 +1188,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Album mới"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Vị trí mới"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Người mới"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Mới đến Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Mới nhất"),
         "next": MessageLookupByLibrary.simpleMessage("Tiếp theo"),
@@ -1674,6 +1677,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Xin lỗi, chúng tôi không thể tạo khóa an toàn trên thiết bị này.\n\nVui lòng đăng ký từ một thiết bị khác."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sắp xếp"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sắp xếp theo"),
         "sortNewestFirst":

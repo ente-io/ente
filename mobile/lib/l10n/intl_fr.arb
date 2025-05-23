@@ -1695,5 +1695,8 @@
   "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes celles-ci, en une seule action rapide. Les dates de décalage sont également prises en charge.",
   "curatedMemories": "Souvenirs conservés",
   "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄"
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
 }

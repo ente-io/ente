@@ -1736,5 +1736,8 @@
   "cLBulkEditDesc": "Теперь вы можете выбрать несколько фото и отредактировать дату/время быстро и сразу для всех. Также поддерживается смещение дат.",
   "curatedMemories": "Отобранные воспоминания",
   "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄"
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
 }

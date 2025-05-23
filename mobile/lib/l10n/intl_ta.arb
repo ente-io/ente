@@ -21,5 +21,8 @@
   "selectReason": "காரணத்தைத் தேர்ந்தெடுக்கவும்",
   "deleteReason1": "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை",
   "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄"
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
 }

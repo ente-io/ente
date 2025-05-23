@@ -32,6 +32,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("കണക്കുകൂട്ടുന്നു..."),
         "cancel": MessageLookupByLibrary.simpleMessage("റദ്ദാക്കുക"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("ഇമെയിൽ മാറ്റുക"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("അടക്കുക"),
         "confirm": MessageLookupByLibrary.simpleMessage("നിജപ്പെടുത്തുക"),
         "confirmPassword":
@@ -86,6 +88,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "moderateStrength": MessageLookupByLibrary.simpleMessage("ഇടത്തരം"),
         "monthly": MessageLookupByLibrary.simpleMessage("പ്രതിമാസം"),
         "name": MessageLookupByLibrary.simpleMessage("പേര്"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "no": MessageLookupByLibrary.simpleMessage("വേണ്ട"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("ഒന്നുമില്ല"),
         "nothingToSeeHere":
@@ -121,6 +124,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "എന്തോ കുഴപ്പം സംഭവിച്ചു, ദയവായി വീണ്ടും ശ്രമിക്കുക"),
         "sorry": MessageLookupByLibrary.simpleMessage("ക്ഷമിക്കുക"),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sortAlbumsBy":
             MessageLookupByLibrary.simpleMessage("ഇപ്രകാരം അടുക്കുക"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ സഫലം"),

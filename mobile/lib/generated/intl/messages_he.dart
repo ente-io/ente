@@ -254,6 +254,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimed": MessageLookupByLibrary.simpleMessage("נתבע"),
         "claimedStorageSoFar": m14,
         "click": MessageLookupByLibrary.simpleMessage("• לחץ"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("סגור"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("קבץ לפי זמן הצילום"),
@@ -569,6 +571,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "name": MessageLookupByLibrary.simpleMessage("שם"),
         "never": MessageLookupByLibrary.simpleMessage("לעולם לא"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("אלבום חדש"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newest": MessageLookupByLibrary.simpleMessage("החדש ביותר"),
         "no": MessageLookupByLibrary.simpleMessage("לא"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("אין"),
@@ -807,6 +810,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "אנחנו מצטערים, לא הצלחנו ליצור מפתחות מאובטחים על מכשיר זה.\n\nאנא הירשם ממכשיר אחר."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("מיין לפי"),
         "sortOldestFirst":
             MessageLookupByLibrary.simpleMessage("הישן ביותר קודם"),

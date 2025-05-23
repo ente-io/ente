@@ -575,6 +575,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Valyti indeksavimus"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Spustelėkite ant perpildymo meniu"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Uždaryti"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage(
             "Grupuoti pagal užfiksavimo laiką"),
@@ -1270,6 +1272,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Naujas albumas"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Nauja vietovė"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Naujas asmuo"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Naujas intervalas"),
         "newToEnte":
             MessageLookupByLibrary.simpleMessage("Naujas platformoje „Ente“"),
@@ -1759,6 +1762,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Atsiprašome, šiame įrenginyje nepavyko sugeneruoti saugių raktų.\n\nRegistruokitės iš kito įrenginio."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Rikiuoti"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Rikiuoti pagal"),
         "sortNewestFirst":

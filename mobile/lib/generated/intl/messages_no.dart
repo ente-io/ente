@@ -607,6 +607,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Klikk"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Klikk på menyen med tre prikker"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Lukk"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage(
             "Grupper etter tidspunkt for opptak"),
@@ -1311,6 +1313,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nytt album"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Ny plassering"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Ny person"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Ny rekkevidde"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Ny til Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Nyeste"),
@@ -1855,6 +1858,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Beklager, vi kunne ikke generere sikre nøkler på denne enheten.\n\nvennligst registrer deg fra en annen enhet."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sorter"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sorter etter"),
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("Nyeste først"),

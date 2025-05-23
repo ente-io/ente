@@ -57,6 +57,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Змяніць пароль"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Праверце свае ўваходныя лісты (і спам) для завяршэння праверкі"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Код ужыты"),
         "confirm": MessageLookupByLibrary.simpleMessage("Пацвердзіць"),
@@ -175,6 +177,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Кіраванне"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Умераны"),
         "never": MessageLookupByLibrary.simpleMessage("Ніколі"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "noDuplicates":
             MessageLookupByLibrary.simpleMessage("✨ Няма дублікатаў"),
         "noRecoveryKey":
@@ -251,6 +254,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Немагчыма згенерыраваць ключы бяспекі на гэтай прыладзе.\n\nЗарэгіструйцеся з іншай прылады."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "status": MessageLookupByLibrary.simpleMessage("Стан"),
         "storageInGB": m91,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Надзейны"),

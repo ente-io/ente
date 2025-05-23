@@ -11955,6 +11955,36 @@ class S {
       args: [],
     );
   }
+
+  /// ` new 📸`
+  String get newPhotosEmoji {
+    return Intl.message(
+      ' new 📸',
+      name: 'newPhotosEmoji',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, we had to pause your backups`
+  String get sorryWeHadToPauseYourBackups {
+    return Intl.message(
+      'Sorry, we had to pause your backups',
+      name: 'sorryWeHadToPauseYourBackups',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click to install our best version yet`
+  String get clickToInstallOurBestVersionYet {
+    return Intl.message(
+      'Click to install our best version yet',
+      name: 'clickToInstallOurBestVersionYet',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

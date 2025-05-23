@@ -549,6 +549,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• 点击"),
         "clickOnTheOverflowMenu":
             MessageLookupByLibrary.simpleMessage("• 点击溢出菜单"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("关闭"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage("按拍摄时间分组"),
         "clubByFileName": MessageLookupByLibrary.simpleMessage("按文件名排序"),
@@ -1122,6 +1124,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("新建相册"),
         "newLocation": MessageLookupByLibrary.simpleMessage("新位置"),
         "newPerson": MessageLookupByLibrary.simpleMessage("新人物"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("新起始图片"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("初来 Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("最新"),
@@ -1552,6 +1555,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "抱歉，我们无法在此设备上生成安全密钥。\n\n请使用其他设备注册。"),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("排序"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("排序方式"),
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("最新在前"),

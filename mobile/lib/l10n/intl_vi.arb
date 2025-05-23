@@ -1534,5 +1534,8 @@
   "joinAlbumSubtextViewer": "thêm vào album được chia sẻ",
   "join": "Tham gia",
   "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄"
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet"
 }

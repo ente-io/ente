@@ -22,10 +22,15 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"),
         "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
             "Look back on your memories 🌄"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day")
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups")
       };
 }
