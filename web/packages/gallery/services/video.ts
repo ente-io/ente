@@ -604,7 +604,7 @@ const markProcessedVideoFileIDs = async (fileIDs: Set<number>) => {
 };
 
 /**
- * Mark the provided file ID as having failed in a non-transient manner when we
+ * Mark the provided file as having failed in a non-transient manner when we
  * tried processing it to generate a video preview on this client.
  *
  * Similar to [Note: Transient and permanent indexing failures], we attempt to
@@ -617,9 +617,10 @@ const markProcessedVideoFileIDs = async (fileIDs: Set<number>) => {
  * The mark is local only, and will be reset on logout, or if another client
  * with a different able is able to process it.
  */
-const markFailedVideoFileID = async (fileID: number) => {
+const markFailedVideoFile = async (file: EnteFile) => {
+    log.info(`Generate HLS for ${fileLogID(file)} | failed`);
     const failedIDs = await savedFailedVideoFileIDs();
-    failedIDs.add(fileID);
+    failedIDs.add(file.id);
     await saveFailedVideoFileIDs(failedIDs);
 };
 
@@ -836,6 +837,11 @@ const processQueue = async () => {
 
     const userID = ensureLocalUser().id;
 
+    // We mark failures in the local DB for in expected failure mode. As an
+    // additional protection against loops in unforeseen scenarios, keep a
+    // transient in-memory list of IDs which shouldn't be looped.
+    const transientFailedFileIDs = new Set<number>();
+
     let bq: typeof _state.liveQueue | undefined;
     while (isHLSGenerationEnabled()) {
         let item = _state.liveQueue.shift();
@@ -851,18 +857,19 @@ const processQueue = async () => {
             // Take item if queue is not empty.
             if (bq?.length) item = bq.pop();
         }
-        if (item) {
+        if (item && !transientFailedFileIDs.has(item.file.id)) {
             updateSnapshotIfNeeded("processing");
 
             try {
                 await processQueueItem(item);
                 await markProcessedVideoFileID(item.file.id);
+                // Reset the idle wait on success.
+                _state.idleWait = idleWaitInitial;
             } catch (e) {
                 // This will get retried again at some point later.
                 log.error(`Failed to process video ${fileLogID(item.file)}`, e);
+                transientFailedFileIDs.add(item.file.id);
             }
-            // Reset the idle wait on any activity.
-            _state.idleWait = idleWaitInitial;
         } else {
             // There are no more items in either the live queue or backlog.
             // Go to sleep (for increasingly longer durations, capped at a
@@ -975,8 +982,7 @@ const processQueueItem = async ({
         try {
             sourceVideo = (await downloadManager.fileStream(file))!;
         } catch (e) {
-            if (!isNetworkDownloadError(e))
-                await markFailedVideoFileID(file.id);
+            if (!isNetworkDownloadError(e)) await markFailedVideoFile(file);
             throw e;
         }
     }
@@ -1038,7 +1044,7 @@ const processQueueItem = async ({
         // The native side code already retries failures for case 2 (except HTTP
         // 4xx errors). Thus, usually we should come here only for case 1, and
         // retrying the same video again will not work either.
-        await markFailedVideoFileID(file.id);
+        await markFailedVideoFile(file);
         throw e;
     }
 
@@ -1067,7 +1073,7 @@ const processQueueItem = async ({
                 putVideoData(file, playlistData, objectID, videoSize),
             );
         } catch (e) {
-            if (isHTTP4xxError(e)) await markFailedVideoFileID(file.id);
+            if (isHTTP4xxError(e)) await markFailedVideoFile(file);
             throw e;
         }
 
