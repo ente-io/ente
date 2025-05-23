@@ -182,8 +182,10 @@ const createFFmpegUtilityProcessEndpoint = () => {
 
     const child = utilityProcess.fork(path.join(__dirname, "ffmpeg-worker.js"));
     // Send a handle to the port (one end of the message channel) to the utility
-    // process. The utility process will reply with an "ack" when it get it.
-    child.postMessage({}, [port1]);
+    // process (alongwith any other init data). The utility process will reply
+    // with an "ack" when it get it.
+    const appVersion = app.getVersion();
+    child.postMessage(/* FFmpegWorkerInitData */ { appVersion }, [port1]);
 
     child.on("message", (m: unknown) => {
         if (m && typeof m == "object" && "method" in m) {

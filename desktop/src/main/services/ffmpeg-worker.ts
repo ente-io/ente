@@ -12,6 +12,7 @@ import fs_ from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
+import { z } from "zod";
 import type { FFmpegCommand } from "../../types/ipc";
 import log from "../log-worker";
 import { messagePortMainEndpoint } from "../utils/comlink";
@@ -56,6 +57,8 @@ log.debugString("Started ffmpeg utility process");
 process.on("uncaughtException", (e, origin) => log.error(origin, e));
 
 process.parentPort.once("message", (e) => {
+    // Initialize ourselves with the data we got from our parent.
+    parseInitData(e.data);
     // Expose an instance of `FFmpegUtilityProcess` on the port we got from our
     // parent.
     expose(
@@ -67,8 +70,25 @@ process.parentPort.once("message", (e) => {
         } satisfies FFmpegUtilityProcess,
         messagePortMainEndpoint(e.ports[0]!),
     );
+    // Let the main process know we're ready.
     mainProcess("ack", undefined);
 });
+
+/**
+ * We cannot access Electron's {@link app} object within a utility process, so
+ * we pass the value of `app.getVersion()` during initialization, and it can be
+ * subsequently retrieved from here.
+ */
+let _desktopAppVersion: string | undefined;
+
+/** Equivalent to `app.getVersion()` */
+const desktopAppVersion = () => _desktopAppVersion!;
+
+const FFmpegWorkerInitData = z.object({ appVersion: z.string() });
+
+const parseInitData = (data: unknown) => {
+    _desktopAppVersion = FFmpegWorkerInitData.parse(data).appVersion;
+};
 
 /**
  * Send a message to the main process using a barebones RPC protocol.
@@ -846,7 +866,7 @@ const uploadVideoSegmentsSingle = (
             // net.fetch deduces and inserts a content-length for us, when we
             // use the node native fetch then we need to provide it explicitly.
             headers: {
-                ...publicRequestHeaders(),
+                ...publicRequestHeaders(desktopAppVersion()),
                 "Content-Length": `${videoSize}`,
             },
             // See: [Note: duplex param required for stream body]
@@ -921,7 +941,7 @@ const uploadVideoSegmentsMultipart = async (
             fetch(partUploadURL, {
                 method: "PUT",
                 headers: {
-                    ...publicRequestHeaders(),
+                    ...publicRequestHeaders(desktopAppVersion()),
                     "Content-Length": `${size}`,
                 },
                 // See: [Note: duplex param required for stream body]
@@ -946,7 +966,10 @@ const uploadVideoSegmentsMultipart = async (
     return await retryEnsuringHTTPOk(() =>
         fetch(completionURL, {
             method: "POST",
-            headers: { ...publicRequestHeaders(), "Content-Type": "text/xml" },
+            headers: {
+                ...publicRequestHeaders(desktopAppVersion()),
+                "Content-Type": "text/xml",
+            },
             body: completionBody,
         }),
     );

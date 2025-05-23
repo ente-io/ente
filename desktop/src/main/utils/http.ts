@@ -1,11 +1,16 @@
 export const clientPackageName = "io.ente.photos.desktop";
 
 /**
- * Partial implementation of {@link publicRequestHeaders} from the web source.
- * It does not contain the "X-Client-Version" because app.getVersion() is not
- * accessible to Electron utility processes.
+ * Reimplementation of {@link publicRequestHeaders} from the web source.
+ *
+ * @param desktopAppVersion The desktop app's version. This will get passed on
+ * as the "X-Client-Version" header.
+ *
+ * We cannot directly use `app.getVersion()` to obtain this value since the
+ * {@link app} module is not accessible to Electron utility processes which also
+ * calls this function.
  */
-export const publicRequestHeaders = () => ({
+export const publicRequestHeaders = (desktopAppVersion: string) => ({
     "X-Client-Package": clientPackageName,
-    // "X-Client-Version": desktopAppVersion
+    "X-Client-Version": desktopAppVersion
 });
