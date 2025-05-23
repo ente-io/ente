@@ -336,13 +336,18 @@ const handleGenerateHLSWrite = async (
             return new Response(null, { status: 204 });
         }
 
-        const { playlistPath, videoSize, dimensions } = result;
+        const { playlistPath, dimensions, videoSize, videoObjectID } = result;
 
         const playlistToken = randomUUID();
         pendingVideoResults.set(playlistToken, playlistPath);
 
         return new Response(
-            JSON.stringify({ playlistToken, videoSize, dimensions }),
+            JSON.stringify({
+                playlistToken,
+                dimensions,
+                videoSize,
+                videoObjectID,
+            }),
             { status: 200 },
         );
     } finally {

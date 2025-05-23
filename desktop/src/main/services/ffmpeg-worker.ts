@@ -856,46 +856,34 @@ const uploadVideoSegments = async (
     fetchURL: string,
     authToken: string,
 ) => {
-    // [Note: Passing HLS multipart upload URLs over IPC]
-    //
-    // For IPC convenience, we convert both normal upload URLs (where we have
-    // only a single pre-signed URL) and multipart upload URLs (where we have a
-    // list of pre-signed part upload URLs, and a completion URL) into an array.
-    //
-    // On the desktop side, we can parse the array and treat singleton arrays as
-    // expecting a normal upload, and otherwise split the array into parts and
-    // the completion URL (last item).
-    let objectUploadURLs: string[];
-    if (uploadURLs.url) {
-        objectUploadURLs = [uploadURLs.url];
-    } else if (uploadURLs.partURLs && uploadURLs.completeURL) {
-        objectUploadURLs = [...uploadURLs.partURLs, uploadURLs.completeURL];
+    let partCount = 1; /* By default, upload as a normal pre-signed upload */
+    if (videoSize > 100 * 1024 * 1024 /* 100 MB */) {
+        // For videos greater than 100 MB, upload in 100 MB parts.
+        partCount = Math.ceil(videoSize / (100 * 1024 * 1024));
+    }
+
+    const { objectID, url, partURLs, completeURL } =
+        await getFilePreviewDataUploadURL(
+            partCount,
+            fileID,
+            fetchURL,
+            authToken,
+        );
+
+    if (url) {
+        await uploadVideoSegmentsSingle(videoFilePath, videoSize, url);
+    } else if (partURLs && completeURL) {
+        await uploadVideoSegmentsMultipart(
+            videoFilePath,
+            videoSize,
+            partURLs,
+            completeURL,
+        );
     } else {
         throw new Error("Malformed upload URLs");
     }
 
-    // This can be either a single pre-signed URL (for a normal upload), or a
-    // list of part upload URLs and a completion URL (for multipart uploads).
-    //
-    // See: [Note: Passing HLS multipart upload URLs over IPC]
-    if (uploadURLs.length == 1) {
-        const objectUploadURL = uploadURLs[0]!;
-        return uploadVideoSegmentsSingle(
-            videoFilePath,
-            videoSize,
-            objectUploadURL,
-        );
-    } else {
-        const partURLs = [...uploadURLs];
-        const completionURL = partURLs.pop();
-        if (!partURLs.length || !completionURL) throw new Error("Invalid URLs");
-        return uploadVideoSegmentsMultipart(
-            videoFilePath,
-            videoSize,
-            partURLs,
-            completionURL,
-        );
-    }
+    return objectID;
 };
 
 const FilePreviewDataUploadURLResponse = z.object({
@@ -937,8 +925,8 @@ const FilePreviewDataUploadURLResponse = z.object({
  * @param partCount If greater than 1, then we request for a multipart upload.
  */
 export const getFilePreviewDataUploadURL = async (
-    fileID: string,
     partCount: number,
+    fileID: number,
     fetchURL: string,
     authToken: string,
 ) => {
