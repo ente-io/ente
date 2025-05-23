@@ -44,6 +44,12 @@
       "slug": "anycoindirect"
     },
     {
+      "title": "AR24",
+      "altNames": [
+        "Docaposte AR24"
+      ]
+    },
+    {
       "title": "Aruba",
       "slug": "aruba",
       "hex": "ef8a33"
@@ -440,6 +446,9 @@
     {
       "title": "Finanzfluss",
       "slug": "finanzfluss"
+    },
+    {
+      "title": "Finary"
     },
     {
       "title": "Firefox",
