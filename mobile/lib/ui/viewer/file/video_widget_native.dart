@@ -18,6 +18,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/preview/playlist_data.dart";
+import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/wake_lock_service.dart";
@@ -82,6 +83,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   final _elTooltipController = ElTooltipController();
   StreamSubscription<PlaybackEvent>? _subscription;
   StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
+  StreamSubscription<DownloadTask>? downloadTaskSubscription;
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
   int position = 0;
@@ -128,6 +130,19 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         }
       }
     });
+    if (widget.file.isUploaded) {
+      downloadTaskSubscription = downloadManager
+          .watchDownload(
+        widget.file.uploadedFileID!,
+      )
+          .listen((event) {
+        if (mounted) {
+          setState(() {
+            _progressNotifier.value = event.progress;
+          });
+        }
+      });
+    }
 
     EnteWakeLockService.instance
         .updateWakeLock(enable: true, wakeLockFor: WakeLockFor.videoPlayback);
@@ -201,6 +216,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   void dispose() {
     _subscription?.cancel();
     _controller?.dispose();
+    if (downloadTaskSubscription != null) {
+      downloadTaskSubscription!.cancel();
+      downloadManager.pause(
+        widget.file.uploadedFileID!,
+      );
+    }
 
     //https://github.com/fluttercandies/flutter_photo_manager/blob/8afba2745ebaac6af8af75de9cbded9157bc2690/README.md#clear-caches
     if (_shouldClearCache) {

@@ -128,20 +128,6 @@ Future<File?> downloadAndDecrypt(
     // check if great than 10MB
     if (file.fileSize != null &&
         file.fileSize! > DownloadManager.downloadChunkSize) {
-      // Subscribe to progress updates
-      downloadManager.watchDownload(file.uploadedFileID!).listen((task) {
-        final newProgress = (task.progress * 100).toStringAsFixed(1);
-        if (newProgress != lastProgress) {
-          lastProgress = newProgress;
-          _logger.info(
-            'Resumable Progress: $newProgress%',
-          );
-        }
-
-        if (progressCallback != null) {
-          progressCallback(task.bytesDownloaded, task.totalBytes);
-        }
-      });
       final DownloadResult result = await downloadManager.download(
         file.uploadedFileID!,
         file.displayName,
@@ -151,7 +137,9 @@ Future<File?> downloadAndDecrypt(
         encryptedFilePath = result.task.filePath!;
         encryptedFile = File(encryptedFilePath);
       } else {
-        _logger.warning('$logPrefix download failed ${result.task}');
+        _logger.warning(
+          '$logPrefix download failed ${result.task.error} ${result.task.status}',
+        );
         return null;
       }
     } else {

@@ -31,6 +31,7 @@ class DownloadManager {
   }
 
   /// Start download and return a Future that completes when download finishes
+  /// If download was paused, calling this again will resume it
   Future<DownloadResult> download(
     int fileId,
     String filename,
@@ -71,6 +72,9 @@ class DownloadManager {
           filePath: null,
         );
         _updateTask(updatedTask);
+        final result = DownloadResult(updatedTask, false);
+        completer.complete(result);
+        return result;
       } else {
         _logger.info(
           'Download already completed for ${task.filename} (${task.bytesDownloaded}/${task.totalBytes} bytes)',
@@ -95,11 +99,23 @@ class DownloadManager {
     if (task != null && task.isActive) {
       _updateTask(task.copyWith(status: DownloadStatus.paused));
     }
+
+    // Future will be completed in _startDownload's DioException handling
+
+    // Clean up streams if no listeners
+    final stream = _streams[fileId];
+    if (stream != null && !stream.hasListener) {
+      await stream.close();
+      _streams.remove(fileId);
+    }
   }
 
   /// Cancel and delete download
   Future<void> cancel(int fileId) async {
-    await pause(fileId);
+    final token = _cancelTokens[fileId];
+    if (token != null && !token.isCancelled) {
+      token.cancel('cancelled');
+    }
 
     final task = _tasks[fileId];
     if (task != null) {
@@ -107,6 +123,8 @@ class DownloadManager {
       _updateTask(task.copyWith(status: DownloadStatus.cancelled));
       _tasks.remove(fileId);
     }
+
+    // Future will be completed in _startDownload's DioException handling
 
     _cleanup(fileId);
   }
@@ -170,13 +188,19 @@ class DownloadManager {
       }
     } catch (e) {
       if (e is DioException && e.type == DioExceptionType.cancel) {
-        // Handle pause - don't complete the future
+        // Complete future with current task state (paused or cancelled)
+        final currentTask = _tasks[task.id];
+        if (currentTask != null && !completer.isCompleted) {
+          completer.complete(DownloadResult(currentTask, false));
+        }
         return;
       }
 
       task = task.copyWith(status: DownloadStatus.error, error: e.toString());
       _updateTask(task);
-      completer.complete(DownloadResult(task, false));
+      if (!completer.isCompleted) {
+        completer.complete(DownloadResult(task, false));
+      }
     } finally {
       _cleanup(task.id);
     }
@@ -264,10 +288,11 @@ class DownloadManager {
         _notifyProgress(updatedTask);
       },
     );
-
     // Update progress after chunk completion
     final chunkFileSize = await File(chunkPath).length();
-    task = task.copyWith(bytesDownloaded: task.bytesDownloaded + chunkFileSize);
+    task = task.copyWith(
+      bytesDownloaded: (chunkIndex) * downloadChunkSize + chunkFileSize,
+    );
     _updateTask(task);
   }
 
