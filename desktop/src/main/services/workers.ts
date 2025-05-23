@@ -103,7 +103,7 @@ export const triggerCreateMLUtilityProcess = (window: BrowserWindow) => {
 
     const child = utilityProcess.fork(path.join(__dirname, "ml-worker.js"));
     const userDataPath = app.getPath("userData");
-    child.postMessage({ userDataPath }, [port1]);
+    child.postMessage(/* MLWorkerInitData */ { userDataPath }, [port1]);
 
     window.webContents.postMessage("utilityProcessPort/ml", undefined, [port2]);
 
