@@ -122,7 +122,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   late final bool _enableSelection;
   static const int okButtonSize = 80;
   String _searchQuery = "";
-  List<Collection> _selectedCollections = [];
+  final _selectedCollections = <Collection>[];
 
   @override
   void initState() {
@@ -305,8 +305,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                     _searchQuery,
                     shouldShowCreateAlbum,
                     enableSelection: _enableSelection,
-                    onSelectionChanged: (c) {
-                      _updateSelectedCollections(c);
+                    selectedCollections: _selectedCollections,
+                    onSelectionChanged: () {
+                      setState(() {});
                     },
                   ),
                 ),
@@ -318,12 +319,6 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         ),
       ),
     );
-  }
-
-  void _updateSelectedCollections(List<Collection> collections) {
-    setState(() {
-      _selectedCollections = collections;
-    });
   }
 
   Future<List<Collection>> _getCollections() async {

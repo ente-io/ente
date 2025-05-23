@@ -34,7 +34,8 @@ class AlbumVerticalListWidget extends StatefulWidget {
   final String searchQuery;
   final bool shouldShowCreateAlbum;
   final bool enableSelection;
-  final Function(List<Collection>)? onSelectionChanged;
+  final List<Collection> selectedCollections;
+  final Function()? onSelectionChanged;
 
   const AlbumVerticalListWidget(
     this.collections,
@@ -43,6 +44,7 @@ class AlbumVerticalListWidget extends StatefulWidget {
     this.sharedFiles,
     this.searchQuery,
     this.shouldShowCreateAlbum, {
+    required this.selectedCollections,
     this.enableSelection = false,
     this.onSelectionChanged,
     super.key,
@@ -58,7 +60,6 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
 
   final CollectionActions _collectionActions =
       CollectionActions(CollectionsService.instance);
-  List<Collection> selectedCollections = [];
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +87,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
               : _albumListItemOnTap(context, item),
           child: AlbumColumnItemWidget(
             item,
-            selectedCollections: selectedCollections,
+            selectedCollections: widget.selectedCollections,
           ),
         );
       },
@@ -101,14 +102,16 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
   Future<void> _toggleCollectionSelection(
     Collection collection,
   ) async {
-    if (selectedCollections.contains(collection)) {
-      selectedCollections.remove(collection);
+    if (widget.selectedCollections.contains(collection)) {
+      widget.selectedCollections.remove(collection);
     } else {
-      selectedCollections.isEmpty ? await HapticFeedback.vibrate() : null;
-      selectedCollections.add(collection);
+      widget.selectedCollections.isEmpty
+          ? await HapticFeedback.vibrate()
+          : null;
+      widget.selectedCollections.add(collection);
     }
     if (widget.onSelectionChanged != null) {
-      widget.onSelectionChanged!(selectedCollections);
+      widget.onSelectionChanged!();
     }
     setState(() {});
   }
