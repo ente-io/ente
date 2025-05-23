@@ -24,6 +24,8 @@ import { fsStatMtime } from "./fs";
 
 log.debugString("Started ML utility process");
 
+process.on("uncaughtException", (e, origin) => log.error(origin, e));
+
 process.parentPort.once("message", (e) => {
     // Initialize ourselves with the data we got from our parent.
     parseInitData(e.data);

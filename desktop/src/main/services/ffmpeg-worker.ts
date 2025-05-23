@@ -53,6 +53,8 @@ export interface FFmpegUtilityProcess {
 
 log.debugString("Started ffmpeg utility process");
 
+process.on("uncaughtException", (e, origin) => log.error(origin, e));
+
 process.parentPort.once("message", (e) => {
     // Expose an instance of `FFmpegUtilityProcess` on the port we got from our
     // parent.
