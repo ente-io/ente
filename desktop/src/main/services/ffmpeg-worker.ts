@@ -904,14 +904,17 @@ const uploadVideoSegmentsMultipart = async (
     completionURL: string,
 ) => {
     const partSize = Math.ceil(videoSize / partUploadURLs.length);
+    // The part we're currently uploading.
     let partNumber = 0;
-    let nextStart = 0;
+    // A rolling offset into the file.
+    let start = 0;
     // See `createMultipartUploadRequestBody` in the web code for a more
     // expansive and documented version of this XML body construction.
     const completionXML = ["<CompleteMultipartUpload>"];
     for (const partUploadURL of partUploadURLs) {
         partNumber += 1;
-        const size = Math.min(nextStart + partSize, videoSize) - nextStart;
+        const size = Math.min(start + partSize, videoSize) - start;
+        const end = start + size - 1;
         const res = await retryEnsuringHTTPOk(() =>
             fetch(partUploadURL, {
                 method: "PUT",
@@ -923,16 +926,15 @@ const uploadVideoSegmentsMultipart = async (
                 // @ts-expect-error ^see note above
                 duplex: "half",
                 body: Readable.toWeb(
-                    fs_.createReadStream(videoFilePath, {
-                        start: nextStart,
-                        end: nextStart + size - 1,
-                    }),
+                    // start and end are inclusive 0-indexed range of bytes to
+                    // read from the file.
+                    fs_.createReadStream(videoFilePath, { start, end }),
                 ),
             }),
         );
         const eTag = res.headers.get("etag");
         if (!eTag) throw new Error("Response did not have an ETag");
-        nextStart += size;
+        start += size;
         completionXML.push(
             `<Part><PartNumber>${partNumber}</PartNumber><ETag>${eTag}</ETag></Part>`,
         );
