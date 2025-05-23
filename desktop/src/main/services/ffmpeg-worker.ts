@@ -856,11 +856,10 @@ const uploadVideoSegments = async (
     fetchURL: string,
     authToken: string,
 ) => {
-    let partCount = 1; /* By default, upload as a normal pre-signed upload */
-    if (videoSize > 100 * 1024 * 1024 /* 100 MB */) {
-        // For videos greater than 100 MB, upload in 100 MB parts.
-        partCount = Math.ceil(videoSize / (100 * 1024 * 1024));
-    }
+    // Self hosters might be using Cloudflare's free plan which (currently) has
+    // a maximum request size of 100 MB. Keeping a bit of margin for headers,
+    const partSize = 96 * 1024 * 1024; /* 96 MB */
+    const partCount = Math.ceil(videoSize / partSize);
 
     const { objectID, url, partURLs, completeURL } =
         await getFilePreviewDataUploadURL(
@@ -876,6 +875,7 @@ const uploadVideoSegments = async (
         await uploadVideoSegmentsMultipart(
             videoFilePath,
             videoSize,
+            partSize,
             partURLs,
             completeURL,
         );
@@ -1022,10 +1022,10 @@ const retryEnsuringHTTPOk = async (request: () => Promise<Response>) => {
 const uploadVideoSegmentsMultipart = async (
     videoFilePath: string,
     videoSize: number,
+    partSize: number,
     partUploadURLs: string[],
     completionURL: string,
 ) => {
-    const partSize = Math.ceil(videoSize / partUploadURLs.length);
     // The part we're currently uploading.
     let partNumber = 0;
     // A rolling offset into the file.
