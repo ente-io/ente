@@ -1189,6 +1189,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Ilgai paspauskite elementą, kad peržiūrėtumėte per visą ekraną"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff": MessageLookupByLibrary.simpleMessage(
             "Išjungtas vaizdo įrašo ciklas"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage(

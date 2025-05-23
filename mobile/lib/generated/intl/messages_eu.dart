@@ -394,6 +394,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "logInLabel": MessageLookupByLibrary.simpleMessage("Sartu"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Sartzeko klikatuz, <u-terms>zerbitzu baldintzak</u-terms> eta <u-policy>pribatutasun politikak</u-policy> onartzen ditut"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Gailua galdu duzu?"),
         "machineLearning":

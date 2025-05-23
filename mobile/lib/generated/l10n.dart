@@ -11945,6 +11945,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Look back on your memories 🌄`
+  String get lookBackOnYourMemories {
+    return Intl.message(
+      'Look back on your memories 🌄',
+      name: 'lookBackOnYourMemories',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

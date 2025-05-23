@@ -1246,6 +1246,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "اضغط مطولاً على عنصر لعرضه في وضع ملء الشاشة."),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("إيقاف تكرار الفيديو"),
         "loopVideoOn":

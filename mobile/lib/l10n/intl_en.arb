@@ -1753,5 +1753,6 @@
   "selectedAlbums": "{count} selected",
   "actionNotSupportedOnFavouritesAlbum": "Action not supported on Favourites album",
   "onThisDayMemories": "On this day memories",
-  "onThisDay": "On this day"
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄"
 }

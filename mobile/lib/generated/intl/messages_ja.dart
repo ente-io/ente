@@ -1075,6 +1075,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "表示されているEメールアドレスを長押しして、暗号化を確認します。"),
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage("アイテムを長押しして全画面表示する"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff": MessageLookupByLibrary.simpleMessage("ビデオのループをオフ"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage("ビデオのループをオン"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("デバイスを紛失しましたか？"),

@@ -1230,6 +1230,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Lang-trykk på en gjenstand for å vise i fullskjerm"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff": MessageLookupByLibrary.simpleMessage("Gjenta video av"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage("Gjenta video på"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Mistet enhet?"),

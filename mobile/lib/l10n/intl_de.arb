@@ -1739,5 +1739,6 @@
   "cLBulkEdit": "Massenbearbeitung von Datumsangaben",
   "cLBulkEditDesc": "Du kannst jetzt mehrere Fotos auswählen, und das Datum/Uhrzeit für alle mit einer Aktion ändern. Das Verschieben von Daten wird auch unterstützt.",
   "curatedMemories": "Ausgewählte Erinnerungen",
-  "onThisDay": "On this day"
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄"
 }

@@ -149,6 +149,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lukusta"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Logi sisse"),
         "logout": MessageLookupByLibrary.simpleMessage("Logi välja"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "manage": MessageLookupByLibrary.simpleMessage("Halda"),
         "manageLink": MessageLookupByLibrary.simpleMessage("Halda linki"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Halda"),

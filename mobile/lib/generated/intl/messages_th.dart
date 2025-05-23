@@ -204,6 +204,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "logInLabel": MessageLookupByLibrary.simpleMessage("เข้าสู่ระบบ"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "โดยการคลิกเข้าสู่ระบบ ฉันยอมรับ<u-terms>เงื่อนไขการให้บริการ</u-terms>และ<u-policy>นโยบายความเป็นส่วนตัว</u-policy>"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("จัดการ"),
         "map": MessageLookupByLibrary.simpleMessage("แผนที่"),
         "maps": MessageLookupByLibrary.simpleMessage("แผนที่"),

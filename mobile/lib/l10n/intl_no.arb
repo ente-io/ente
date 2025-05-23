@@ -1700,5 +1700,6 @@
   "cLFamilyPlanDesc": "Du kan nå sette grenser for hvor mye lagringsplass familiemedlemmer kan bruke.",
   "cLBulkEdit": "Masseendring av datoer",
   "cLBulkEditDesc": "Du kan nå velge flere bilder, og redigere dato/klokkeslett for alle med en rask handling. Forskyving av datoer støttes også.",
-  "onThisDay": "On this day"
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄"
 }

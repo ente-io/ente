@@ -79,6 +79,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("വിവരങ്ങൾ തന്നു സഹായിക്കുക"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("തെളിഞ"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("കാലഹരണപ്പെട്ടു"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "mastodon": MessageLookupByLibrary.simpleMessage("മാസ്റ്റഡോൺ"),
         "matrix": MessageLookupByLibrary.simpleMessage("മേട്രിക്സ്"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("ഇടത്തരം"),

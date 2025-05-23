@@ -167,6 +167,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Націскаючы ўвайсці, я пагаджаюся з <u-terms>умовамі абслугоўвання</u-terms> і <u-policy>палітыкай прыватнасці</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("Выйсці"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Згубілі прыладу?"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Магічны пошук"),
         "manage": MessageLookupByLibrary.simpleMessage("Кіраванне"),

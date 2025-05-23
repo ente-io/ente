@@ -404,6 +404,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Genom att klicka på logga in godkänner jag <u-terms>användarvillkoren</u-terms> och våran <u-policy>integritetspolicy</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("Logga ut"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Förlorad enhet?"),
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Maskininlärning"),

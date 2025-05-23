@@ -24,6 +24,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day")
       };
 }

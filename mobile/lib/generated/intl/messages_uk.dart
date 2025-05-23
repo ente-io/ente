@@ -1109,6 +1109,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Довго утримуйте поштову адресу, щоб перевірити наскрізне шифрування."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Натисніть і утримуйте елемент для перегляду в повноекранному режимі"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Вимкнено зациклювання відео"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage(

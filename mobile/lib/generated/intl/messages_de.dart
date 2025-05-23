@@ -1286,6 +1286,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Lange auf eine E-Mail drücken, um die Ende-zu-Ende-Verschlüsselung zu überprüfen."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Drücken Sie lange auf ein Element, um es im Vollbildmodus anzuzeigen"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Videoschleife aus"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage("Videoschleife an"),

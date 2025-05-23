@@ -40,6 +40,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("피드백"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("잘못된 이메일 주소"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
         "verify": MessageLookupByLibrary.simpleMessage("인증"),
         "yourAccountHasBeenDeleted":

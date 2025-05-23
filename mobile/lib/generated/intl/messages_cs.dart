@@ -308,6 +308,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loginWithTOTP":
             MessageLookupByLibrary.simpleMessage("Přihlášení pomocí TOTP"),
         "logout": MessageLookupByLibrary.simpleMessage("Odhlásit se"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Ztratili jste zařízení?"),
         "manage": MessageLookupByLibrary.simpleMessage("Spravovat"),
