@@ -9,7 +9,7 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { getKV, getKVB, getKVN, setKV } from "ente-base/kv";
-import { ensureLocalUser } from "ente-base/local-user";
+import { ensureAuthToken, ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import {
@@ -38,7 +38,6 @@ import { downloadManager, isNetworkDownloadError } from "./download";
 import {
     fetchFileData,
     fetchFilePreviewData,
-    getFilePreviewDataUploadURL,
     putVideoData,
     syncUpdatedFileDataFileIDs,
 } from "./file-data";
@@ -999,39 +998,33 @@ const processQueueItem = async ({
     // duplicate the stream beforehand, which invalidates the point of
     // streaming.
     //
-    // So instead we provide the presigned upload URL to the node side so that
-    // it can directly upload the generated video segments.
-    const uploadURLs = await getFilePreviewDataUploadURL(file);
-
-    const { objectID } = uploadURLs;
-
-    // [Note: Passing HLS multipart upload URLs over IPC]
+    // Another mid-way option was to do it partially here - obtain the presigned
+    // upload URLs here (since we already have the rest of the scaffolding to
+    // make API requests), and then provide this pre-signed URL to the node side
+    // so that it can directly upload the generated video segments.
     //
-    // For IPC convenience, we convert both normal upload URLs (where we have
-    // only a single pre-signed URL) and multipart upload URLs (where we have a
-    // list of pre-signed part upload URLs, and a completion URL) into an array.
+    // However, that then gets into a issue for multipart uploads since we don't
+    // know the size of the generated HLS video segment file beforehand. We can
+    // try to estimate it, and that is indeed what we started off with, and that
+    // approach worked fine too.
     //
-    // On the desktop side, we can parse the array and treat singleton arrays as
-    // expecting a normal upload, and otherwise split the array into parts and
-    // the completion URL (last item).
-    let objectUploadURLs: string[];
-    if (uploadURLs.url) {
-        objectUploadURLs = [uploadURLs.url];
-    } else if (uploadURLs.partURLs && uploadURLs.completeURL) {
-        objectUploadURLs = [...uploadURLs.partURLs, uploadURLs.completeURL];
-    } else {
-        throw new Error("Malformed upload URLs");
-    }
+    // However, estimates being estimates, it felt better to make things more
+    // deterministic by moving the request for the pre-signed URLs also to the
+    // desktop app side. This also sidesteps the issue of passing along too much
+    // data (the multipart upload URLs) as request params to the desktop app.
+    // There was no specific issue again, it just felt that doing everything in
+    // the desktop app is more simple and straightforward (at the cost of
+    // needing set up of some API request scaffolding on the desktop side).
+    //
+    // We also need to pass the auth token to allow the desktop app to make the
+    // API request.
+    const authToken = await ensureAuthToken();
 
     log.info(`Generate HLS for ${fileLogID(file)} | start`);
 
     let res: GenerateHLSResult | undefined;
     try {
-        res = await initiateGenerateHLS(
-            electron,
-            sourceVideo,
-            objectUploadURLs,
-        );
+        res = await initiateGenerateHLS(electron, sourceVideo, authToken);
     } catch (e) {
         // Failures during stream generation on the native side are expected to
         // happen in two cases:

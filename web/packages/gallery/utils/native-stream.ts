@@ -189,8 +189,8 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
  *
  * - Otherwise it should be a {@link ReadableStream} of the video contents.
  *
- * @param objectUploadURL A presigned URL where the video segments should be
- * uploaded to.
+ * @param authToken The user's auth token (needed to make API requests to obtain
+ * the pre-signed URLs where the video segments should be uploaded to).
  *
  * @returns a token that can be used to retrieve the generated HLS playlist, and
  * metadata about the generated video (its byte size and dimensions). See {@link
@@ -205,10 +205,9 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
 export const initiateGenerateHLS = async (
     _: Electron,
     video: FileSystemUploadItem | ReadableStream,
-    objectUploadURLs: string[],
+    authToken: string,
 ): Promise<GenerateHLSResult | undefined> => {
-    const params = new URLSearchParams({ op: "generate-hls" });
-    for (const url of objectUploadURLs) params.append("url", url);
+    const params = new URLSearchParams({ op: "generate-hls", authToken });
 
     let body: ReadableStream | null;
     if (video instanceof ReadableStream) {

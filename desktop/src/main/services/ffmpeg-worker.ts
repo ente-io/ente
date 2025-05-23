@@ -46,7 +46,7 @@ export interface FFmpegUtilityProcess {
     ffmpegGenerateHLSPlaylistAndSegments: (
         inputFilePath: string,
         outputPathPrefix: string,
-        uploadURLs: string[],
+        authToken: string,
     ) => Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined>;
 
     ffmpegDetermineVideoDuration: (inputFilePath: string) => Promise<number>;
@@ -233,9 +233,11 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  * the user's local file system. This function will write the generated HLS
  * playlist and video segments under this prefix.
  *
- * @returns The paths to two files on the user's local file system - one
- * containing the generated HLS playlist, and the other containing the
- * transcoded and encrypted video segments that the HLS playlist refers to.
+ * @param authToken A token that can be used to make API request to obtain
+ * pre-signed S3 URLs for uploading the generated video segment file.
+ *
+ * @returns The path to the file on the user's file system containing the
+ * generated HLS playlist, and other metadata about the generated video stream.
  *
  * If the video is such that it doesn't require stream generation, then this
  * function returns `undefined`.
@@ -243,7 +245,7 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
 const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
-    uploadURLs: string[],
+    authToken: string,
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined> => {
     const { isH264, isHDR, bitrate } =
         await detectVideoCharacteristics(inputFilePath);
@@ -543,7 +545,7 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
         // the generated .ts file.
         videoSize = await fs.stat(videoPath).then((st) => st.size);
 
-        await uploadVideoSegments(videoPath, videoSize, uploadURLs);
+        await uploadVideoSegments(videoPath, videoSize, authToken);
     } catch (e) {
         log.error("HLS generation failed", e);
         await Promise.all([deletePathIgnoringErrors(playlistPath)]);
@@ -818,15 +820,32 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
  *
  * @param videoSize The size in bytes of the file at {@link videoFilePath}.
  *
- * @param uploadURLs A pre-signed URL(s) to upload the file. For singular
- * uploads this'll be a singleton array, otherwise will contain multipart URLs
- * and completion URL.
+ * @param authToken The user's auth token (for fetch pre-signed upload URLs).
  */
 const uploadVideoSegments = async (
     videoFilePath: string,
     videoSize: number,
-    uploadURLs: string[],
+    authToken: string,
 ) => {
+
+    // [Note: Passing HLS multipart upload URLs over IPC]
+    //
+    // For IPC convenience, we convert both normal upload URLs (where we have
+    // only a single pre-signed URL) and multipart upload URLs (where we have a
+    // list of pre-signed part upload URLs, and a completion URL) into an array.
+    //
+    // On the desktop side, we can parse the array and treat singleton arrays as
+    // expecting a normal upload, and otherwise split the array into parts and
+    // the completion URL (last item).
+    let objectUploadURLs: string[];
+    if (uploadURLs.url) {
+        objectUploadURLs = [uploadURLs.url];
+    } else if (uploadURLs.partURLs && uploadURLs.completeURL) {
+        objectUploadURLs = [...uploadURLs.partURLs, uploadURLs.completeURL];
+    } else {
+        throw new Error("Malformed upload URLs");
+    }
+
     // This can be either a single pre-signed URL (for a normal upload), or a
     // list of part upload URLs and a completion URL (for multipart uploads).
     //
@@ -849,6 +868,108 @@ const uploadVideoSegments = async (
             completionURL,
         );
     }
+};
+
+const FilePreviewDataUploadURLResponse = z.object({
+    /**
+     * The objectID with which this uploaded data can be referred to post upload
+     * (e.g. when invoking {@link putVideoData}).
+     */
+    objectID: z.string(),
+    /**
+     * A presigned URL that can be used to upload the file.
+     *
+     * This will be present only if we requested a singular object upload URL.
+     */
+    url: z.string().nullish().transform(nullToUndefined),
+    /**
+     * A list of pre-signed URLs that can be used to upload parts of a multipart
+     * upload of the uploaded data.
+     *
+     * This will be present only if we requested a multipart upload URLs for the
+     * object by setting `isMultiPart` true in the request.
+     */
+    partURLs: z.string().array().nullish().transform(nullToUndefined),
+    /**
+     * A pre-signed URL that can be used to finalize the multipart upload.
+     *
+     * This will be present only if we requested a multipart upload URLs for the
+     * object by setting `isMultiPart` true in the request.
+     */
+    completeURL: z.string().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Obtain a presigned URL(s) that can be used to upload the "file preview data"
+ * of type "vid_preview" (the file containing the encrypted video segments which
+ * the "vid_preview" HLS playlist for the file would refer to).
+ */
+export const getFilePreviewDataUploadURL = async (file: EnteFile) => {
+    // [Note: Estimating number of parts for a vid_preview upload]
+    //
+    // We need to determine the number of parts of a multipart upload that we
+    // will use to upload a vid_preview. However, we do not have the generated
+    // preview file yet - that'll happen later, in the desktop side.
+    //
+    // We could make this API request from the desktop app side, but that will
+    // require reinventing a lot of the wheels in that code.
+    //
+    // So instead, we try to estimate a reasonable number of parts into which
+    // the eventually generated video should be split for a multipart upload.
+    // Some relevant numbers:
+    //
+    // - A part needs to be a minimum 5 MB.
+    //
+    // - During regular file uploads, we use 20 MB parts.
+    //
+    // - If possible, we want to try and keep the part size below 100 MB. This
+    //   is not a hard limit, but just a good to have to avoid hitting request
+    //   size limits (e.g. see [Note: Multipart uploads]).
+    //
+    // The estimate we use is:
+    //
+    //     partCount = (size) => Math.ceil((0.7 * size) / 100)
+    //
+    // That is, if the generated preview file is 70% of the original's size, how
+    // many 100 MB parts will it need.
+    //
+    // In practice, this will is a big overestimate of the generated preview
+    // size, a more typical video preview size will be in the 30% to 60% range.
+    //
+    // The eventual part size will then be:
+    //
+    //     partSize = (totalSize, count) => Math.ceil(totalSize / count)
+    //
+    // As an example, for a 200 MB file, we'll estimate partCount of 2, and
+    // suppose the generated file is 50% of the original, then each part size
+    // will be 50 MB.
+    //
+    // As a sanity check of the other extreme, if the generated file is 10% of
+    // the original, we still end up with 10 MB parts.
+    let partCount = 1; // Default is single object upload.
+    const fileSize = file.info?.fileSize; /* bytes */
+    if (fileSize) {
+        const fileSizeMB = fileSize / 1024 / 1024;
+        // For files larger than 100 MB, estimate the number of ~100 MB parts.
+        if (fileSizeMB > 100) {
+            partCount = Math.ceil((0.7 * fileSize) / (100 * 1024));
+        }
+    }
+
+    const params = new URLSearchParams({
+        fileID: `${file.id}`,
+        type: "vid_preview",
+    });
+    if (partCount > 1) {
+        params.set("isMultiPart", "true");
+        params.set("count", partCount.toString());
+    }
+    const url = await apiURL("/files/data/preview-upload-url");
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return FilePreviewDataUploadURLResponse.parse(await res.json());
 };
 
 const uploadVideoSegmentsSingle = (
