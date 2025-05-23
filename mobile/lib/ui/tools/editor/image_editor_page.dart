@@ -429,7 +429,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       child: Row(
         children: [
           SizedBox(
-            width: 50,
+            width: 42,
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
@@ -479,7 +479,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       child: Row(
         children: [
           SizedBox(
-            width: 50,
+            width: 42,
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,

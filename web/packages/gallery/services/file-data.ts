@@ -321,7 +321,7 @@ export const putFileData = async (
  * context of the public albums app. If these are not specified, then the
  * credentials of the logged in user are used.
  *
- * @returns the (presigned) URL to the preview data, or undefined if there is
+ * @returns the (pre-signed) URL to the preview data, or undefined if there is
  * not preview data of the given type for the given file yet.
  *
  * [Note: File data vs file preview data]
@@ -375,36 +375,6 @@ export const fetchFilePreviewData = async (
     if (res.status == 404) return undefined;
     ensureOk(res);
     return z.object({ url: z.string() }).parse(await res.json()).url;
-};
-
-const FilePreviewDataUploadURLResponse = z.object({
-    /**
-     * The objectID with which this uploaded data can be referred to post upload
-     * (e.g. when invoking {@link putVideoData}).
-     */
-    objectID: z.string(),
-    /**
-     * A presigned URL that can be used to upload the file.
-     */
-    url: z.string(),
-});
-
-/**
- * Obtain a presigned URL that can be used to upload the "file preview data" of
- * type "vid_preview" (the file containing the encrypted video segments which
- * the "vid_preview" HLS playlist for the file would refer to).
- */
-export const getFilePreviewDataUploadURL = async (file: EnteFile) => {
-    const params = new URLSearchParams({
-        fileID: `${file.id}`,
-        type: "vid_preview",
-    });
-    const url = await apiURL("/files/data/preview-upload-url");
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
-    ensureOk(res);
-    return FilePreviewDataUploadURLResponse.parse(await res.json());
 };
 
 /**
