@@ -711,7 +711,7 @@ const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
     //    credentials in the "X-Auth-Token".
     //
     // 2. The proxy then does both the original steps: (a). Use the credentials
-    //    to get the pre signed URL, and (b) fetch that pre signed URL and
+    //    to get the pre-signed URL, and (b) fetch that pre-signed URL and
     //    stream back the response.
 
     const getFile = async () => {

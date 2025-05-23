@@ -326,7 +326,7 @@ const createMultipartUploadRequestBody = (
  * Complete a multipart upload by reporting information about all the uploaded
  * parts to the provided {@link completionURL}.
  *
- * @param completionURL A presigned URL to which the final status of the
+ * @param completionURL A pre-signed URL to which the final status of the
  * uploaded parts should be reported to.
  *
  * @param completedParts Information about all the parts of the file that have
@@ -350,7 +350,7 @@ const createMultipartUploadRequestBody = (
  * The flow is implemented in two ways:
  *
  * a. The normal way, where each requests is made to a remote S3 bucket directly
- *    using the presigned URL.
+ *    using the pre-signed URL.
  *
  * b. Using workers, where the requests are proxied via a worker near to the
  *    user's network to speed the requests up.
@@ -360,20 +360,20 @@ const createMultipartUploadRequestBody = (
  *
  * In both cases, the overall flow is roughly like the following:
  *
- * 1. Obtain multiple presigned URLs from remote (museum). The specific API call
- *    will be different (because of the different authentication mechanisms)
- *    when we're running in the context of the photos app
+ * 1. Obtain multiple pre-signed URLs from remote (museum). The specific API
+ *    call will be different (because of the different authentication
+ *    mechanisms) when we're running in the context of the photos app
  *    ({@link fetchMultipartUploadURLs}) and when we're running in the context
  *    of the public albums app ({@link fetchPublicAlbumsMultipartUploadURLs}).
  *
  * 2. Break the file to be uploaded into parts, and upload each part using a PUT
- *    request to one of the presigned URLs we got in step 1. There are two
+ *    request to one of the pre-signed URLs we got in step 1. There are two
  *    variants of this - one where we directly upload to the remote (S3)
  *    ({@link putFilePart}), and one where we go via a worker
  *    ({@link putFilePartViaWorker}).
  *
  * 3. Once all the parts have been uploaded, send a consolidated report of all
- *    the uploaded parts (the step 2's) to remote via another presigned
+ *    the uploaded parts (the step 2's) to remote via another pre-signed
  *    "completion URL" that we also got in step 1. Like step 2, there are 2
  *    variants of this - one where we directly tell the remote (S3)
  *    ({@link completeMultipartUpload}), and one where we report via a worker

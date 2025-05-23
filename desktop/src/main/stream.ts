@@ -289,8 +289,9 @@ const handleGenerateHLSWrite = async (
     request: Request,
     params: URLSearchParams,
 ) => {
+    const fetchURL = params.get("fetchURL");
     const authToken = params.get("authToken");
-    if (!authToken) throw new Error("Missing auth token");
+    if (!fetchURL || !authToken) throw new Error("Missing params");
 
     let inputItem: Parameters<typeof makeFileForStreamOrPathOrZipItem>[0];
     const path = params.get("path");
@@ -324,6 +325,7 @@ const handleGenerateHLSWrite = async (
         result = await worker.ffmpegGenerateHLSPlaylistAndSegments(
             inputFilePath,
             outputFilePathPrefix,
+            fetchURL,
             authToken,
         );
 

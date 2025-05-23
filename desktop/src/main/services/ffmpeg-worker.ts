@@ -16,7 +16,7 @@ import { z } from "zod";
 import type { FFmpegCommand } from "../../types/ipc";
 import log from "../log-worker";
 import { messagePortMainEndpoint } from "../utils/comlink";
-import { wait } from "../utils/common";
+import { nullToUndefined, wait } from "../utils/common";
 import { execAsyncWorker } from "../utils/exec-worker";
 import { publicRequestHeaders } from "../utils/http";
 
@@ -46,6 +46,7 @@ export interface FFmpegUtilityProcess {
     ffmpegGenerateHLSPlaylistAndSegments: (
         inputFilePath: string,
         outputPathPrefix: string,
+        fetchURL: string,
         authToken: string,
     ) => Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined>;
 
@@ -207,6 +208,7 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
     playlistPath: string;
     dimensions: { width: number; height: number };
     videoSize: number;
+    videoObjectID: string;
 }
 
 /**
@@ -233,8 +235,11 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  * the user's local file system. This function will write the generated HLS
  * playlist and video segments under this prefix.
  *
- * @param authToken A token that can be used to make API request to obtain
- * pre-signed S3 URLs for uploading the generated video segment file.
+ * @param fetchURL The fully resolved API URL for obtaining pre-signed S3 URLs
+ * for uploading the generated video segment file.
+ *
+ * @param authToken A token that can be used to make API request to
+ * {@link fetchURL}.
  *
  * @returns The path to the file on the user's file system containing the
  * generated HLS playlist, and other metadata about the generated video stream.
@@ -245,6 +250,7 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
 const ffmpegGenerateHLSPlaylistAndSegments = async (
     inputFilePath: string,
     outputPathPrefix: string,
+    fetchURL: string,
     authToken: string,
 ): Promise<FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined> => {
     const { isH264, isHDR, bitrate } =
@@ -512,6 +518,7 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
 
     let dimensions: { width: number; height: number };
     let videoSize: number;
+    let videoObjectID: string;
 
     try {
         // Write the key and the keyInfo to their desired paths.
@@ -545,7 +552,12 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
         // the generated .ts file.
         videoSize = await fs.stat(videoPath).then((st) => st.size);
 
-        await uploadVideoSegments(videoPath, videoSize, authToken);
+        videoObjectID = await uploadVideoSegments(
+            videoPath,
+            videoSize,
+            fetchURL,
+            authToken,
+        );
     } catch (e) {
         log.error("HLS generation failed", e);
         await Promise.all([deletePathIgnoringErrors(playlistPath)]);
@@ -561,7 +573,7 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
         ]);
     }
 
-    return { playlistPath, dimensions, videoSize };
+    return { playlistPath, dimensions, videoSize, videoObjectID };
 };
 
 /**
@@ -808,7 +820,7 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
 };
 
 /**
- * Upload the file at the given {@link videoFilePath} to the provided presigned
+ * Upload the file at the given {@link videoFilePath} to the provided pre-signed
  * URL(s) using a HTTP PUT request.
  *
  * All HTTP requests are retried up to 3 times with exponential backoff.
@@ -820,14 +832,18 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
  *
  * @param videoSize The size in bytes of the file at {@link videoFilePath}.
  *
- * @param authToken The user's auth token (for fetch pre-signed upload URLs).
+ * @param fetchURL The API URL for fetching pre-signed upload URLs.
+ *
+ * @param authToken The user's auth token for use with {@link fetchURL}.
+ *
+ * @return The object ID of the uploaded file on remote storage.
  */
 const uploadVideoSegments = async (
     videoFilePath: string,
     videoSize: number,
+    fetchURL: string,
     authToken: string,
 ) => {
-
     // [Note: Passing HLS multipart upload URLs over IPC]
     //
     // For IPC convenience, we convert both normal upload URLs (where we have
@@ -877,7 +893,7 @@ const FilePreviewDataUploadURLResponse = z.object({
      */
     objectID: z.string(),
     /**
-     * A presigned URL that can be used to upload the file.
+     * A pre-signed URL that can be used to upload the file.
      *
      * This will be present only if we requested a singular object upload URL.
      */
@@ -900,7 +916,7 @@ const FilePreviewDataUploadURLResponse = z.object({
 });
 
 /**
- * Obtain a presigned URL(s) that can be used to upload the "file preview data"
+ * Obtain a pre-signed URL(s) that can be used to upload the "file preview data"
  * of type "vid_preview" (the file containing the encrypted video segments which
  * the "vid_preview" HLS playlist for the file would refer to).
  */

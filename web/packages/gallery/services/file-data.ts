@@ -321,7 +321,7 @@ export const putFileData = async (
  * context of the public albums app. If these are not specified, then the
  * credentials of the logged in user are used.
  *
- * @returns the (presigned) URL to the preview data, or undefined if there is
+ * @returns the (pre-signed) URL to the preview data, or undefined if there is
  * not preview data of the given type for the given file yet.
  *
  * [Note: File data vs file preview data]

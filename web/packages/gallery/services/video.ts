@@ -11,6 +11,7 @@ import {
 import { getKV, getKVB, getKVN, setKV } from "ente-base/kv";
 import { ensureAuthToken, ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
+import { apiURL } from "ente-base/origins";
 import { fileLogID, type EnteFile } from "ente-media/file";
 import {
     filePublicMagicMetadata,
@@ -318,7 +319,7 @@ export type HLSPlaylistDataForFile = HLSPlaylistData | "skip" | undefined;
  * - If a file has a corresponding HLS playlist, then currently there is no
  *   scenario (apart from file deletion, where the playlist also gets deleted)
  *   where the playlist is deleted after being created. There is a limit to the
- *   validity of the presigned chunk URLs within the playlist we create (which
+ *   validity of the pre-signed chunk URLs within the playlist we create (which
  *   we do handle, see `createHLSPlaylistItemDataValidity`), but the original
  *   playlist itself does not change. Updates are technically possible, but
  *   apart from a misbehaving client, are not expected (and should be no-ops in
@@ -998,7 +999,7 @@ const processQueueItem = async ({
     // duplicate the stream beforehand, which invalidates the point of
     // streaming.
     //
-    // Another mid-way option was to do it partially here - obtain the presigned
+    // Another mid-way option was to do it partially here - obtain the pre-signed
     // upload URLs here (since we already have the rest of the scaffolding to
     // make API requests), and then provide this pre-signed URL to the node side
     // so that it can directly upload the generated video segments.
@@ -1016,15 +1017,21 @@ const processQueueItem = async ({
     // the desktop app is more simple and straightforward (at the cost of
     // needing set up of some API request scaffolding on the desktop side).
     //
-    // We also need to pass the auth token to allow the desktop app to make the
-    // API request.
+    // Below we prepare the things that we need to pass to the desktop app to
+    // allow it to make the API request for obtaining pre-signed upload URLs.
+    const fetchURL = await apiURL("/files/data/preview-upload-url");
     const authToken = await ensureAuthToken();
 
     log.info(`Generate HLS for ${fileLogID(file)} | start`);
 
     let res: GenerateHLSResult | undefined;
     try {
-        res = await initiateGenerateHLS(electron, sourceVideo, authToken);
+        res = await initiateGenerateHLS(
+            electron,
+            sourceVideo,
+            fetchURL,
+            authToken,
+        );
     } catch (e) {
         // Failures during stream generation on the native side are expected to
         // happen in two cases:
@@ -1048,7 +1055,7 @@ const processQueueItem = async ({
         return;
     }
 
-    const { playlistToken, dimensions, videoSize } = res;
+    const { playlistToken, dimensions, videoSize, videoObjectID } = res;
     try {
         const playlist = await readVideoStream(electron, playlistToken).then(
             (res) => res.text(),
@@ -1063,7 +1070,8 @@ const processQueueItem = async ({
 
         try {
             await retryAsyncOperation(
-                () => putVideoData(file, playlistData, objectID, videoSize),
+                () =>
+                    putVideoData(file, playlistData, videoObjectID, videoSize),
                 { retryProfile: "background" },
             );
         } catch (e) {
