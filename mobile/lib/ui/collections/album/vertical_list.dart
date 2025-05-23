@@ -81,14 +81,9 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
             widget.collections[index - (widget.shouldShowCreateAlbum ? 1 : 0)];
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => widget.enableSelection && selectedCollections.isNotEmpty
+          onTap: () => widget.enableSelection
               ? _toggleCollectionSelection(item)
               : _albumListItemOnTap(context, item),
-          onLongPress: () {
-            widget.enableSelection && selectedCollections.isEmpty
-                ? _toggleCollectionSelection(item)
-                : null;
-          },
           child: AlbumColumnItemWidget(
             item,
             selectedCollections: selectedCollections,
@@ -98,7 +93,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemCount:
           widget.collections.length + (widget.shouldShowCreateAlbum ? 1 : 0),
-      shrinkWrap: true,
+      shrinkWrap: false,
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 40),
     );
@@ -278,9 +273,6 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     Collection collection, {
     bool showProgressDialog = true,
   }) async {
-    if (widget.enableSelection) {
-      return false;
-    }
     switch (widget.actionType) {
       case CollectionActionType.addFiles:
         return _addToCollection(
