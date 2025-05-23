@@ -171,10 +171,13 @@ extension CollectionFileActions on CollectionActions {
           error: e,
         );
         return false;
+      } finally {
+        // Syncing since successful addition to collection could have
+        // happened before a failure
+        unawaited(RemoteSyncService.instance.sync(silently: true));
       }
     }
 
-    unawaited(RemoteSyncService.instance.sync(silently: true));
     await dialog?.hide();
     return true;
   }
