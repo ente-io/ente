@@ -15,8 +15,21 @@ import type { UtilityProcessType } from "../../types/ipc";
 import log, { processUtilityProcessLogMessage } from "../log";
 import { messagePortMainEndpoint } from "../utils/comlink";
 
+/**
+ * Terminate any existing utility processes if they're running.
+ *
+ * This function is called during the logout sequence.
+ */
+export const terminateUtilityProcesses = () => {
+    terminateMLProcessIfRunning();
+    terminateFFmpegProcessIfRunning();
+};
+
 /** The active ML utility process, if any. */
 let _utilityProcessML: UtilityProcess | undefined;
+
+/** The active FFmpeg utility process, if any. */
+let _utilityProcessFFmpeg: UtilityProcess | undefined;
 
 /**
  * A promise to a comlink {@link Endpoint} that can be used to communicate with
@@ -92,18 +105,22 @@ export const triggerCreateUtilityProcess = (
     window: BrowserWindow,
 ) => triggerCreateMLUtilityProcess(window);
 
-export const triggerCreateMLUtilityProcess = (window: BrowserWindow) => {
+const terminateMLProcessIfRunning = () => {
     if (_utilityProcessML) {
-        log.debug(() => "Terminating previous ML utility process");
+        log.debug(() => "Terminating running ML utility process");
         _utilityProcessML.kill();
         _utilityProcessML = undefined;
     }
+};
+
+export const triggerCreateMLUtilityProcess = (window: BrowserWindow) => {
+    terminateMLProcessIfRunning();
 
     const { port1, port2 } = new MessageChannelMain();
 
     const child = utilityProcess.fork(path.join(__dirname, "ml-worker.js"));
     const userDataPath = app.getPath("userData");
-    child.postMessage({ userDataPath }, [port1]);
+    child.postMessage(/* MLWorkerInitData */ { userDataPath }, [port1]);
 
     window.webContents.postMessage("utilityProcessPort/ml", undefined, [port2]);
 
@@ -173,7 +190,20 @@ const handleMessagesFromMLUtilityProcess = (child: UtilityProcess) => {
 export const ffmpegUtilityProcessEndpoint = () =>
     (_utilityProcessFFmpegEndpoint ??= createFFmpegUtilityProcessEndpoint());
 
+const terminateFFmpegProcessIfRunning = () => {
+    if (_utilityProcessFFmpeg) {
+        log.debug(() => "Terminating running FFmpeg utility process");
+        _utilityProcessFFmpeg.kill();
+        _utilityProcessFFmpeg = undefined;
+        _utilityProcessFFmpegEndpoint = undefined;
+    }
+};
+
 const createFFmpegUtilityProcessEndpoint = () => {
+    if (_utilityProcessFFmpeg) {
+        throw new Error("FFmpeg utility process is already running");
+    }
+
     // Promise.withResolvers is currently in the node available to us.
     let resolve: ((endpoint: Endpoint) => void) | undefined;
     const promise = new Promise<Endpoint>((r) => (resolve = r));
@@ -182,8 +212,10 @@ const createFFmpegUtilityProcessEndpoint = () => {
 
     const child = utilityProcess.fork(path.join(__dirname, "ffmpeg-worker.js"));
     // Send a handle to the port (one end of the message channel) to the utility
-    // process. The utility process will reply with an "ack" when it get it.
-    child.postMessage({}, [port1]);
+    // process (alongwith any other init data). The utility process will reply
+    // with an "ack" when it get it.
+    const appVersion = app.getVersion();
+    child.postMessage(/* FFmpegWorkerInitData */ { appVersion }, [port1]);
 
     child.on("message", (m: unknown) => {
         if (m && typeof m == "object" && "method" in m) {
@@ -200,6 +232,8 @@ const createFFmpegUtilityProcessEndpoint = () => {
 
         log.info("Ignoring unknown message from ffmpeg utility process", m);
     });
+
+    _utilityProcessFFmpeg = child;
 
     // Resolve with the other end of the message channel (once we get an "ack"
     // from the utility process).

@@ -1590,12 +1590,14 @@ const createAbortableRetryEnsuringHTTPOk =
                 ensureOk(r);
                 return r;
             },
-            (e) => {
-                if (
-                    e instanceof Error &&
-                    e.message == CustomError.UPLOAD_CANCELLED
-                )
-                    throw e;
+            {
+                abortIfNeeded(e) {
+                    if (
+                        e instanceof Error &&
+                        e.message == CustomError.UPLOAD_CANCELLED
+                    )
+                        throw e;
+                },
             },
         );
 
