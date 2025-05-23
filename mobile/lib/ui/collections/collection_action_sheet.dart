@@ -96,7 +96,7 @@ void showCollectionActionSheet(
     topControl: const SizedBox.shrink(),
     backgroundColor: getEnteColorScheme(context).backgroundElevated,
     barrierColor: backdropFaintDark,
-    enableDrag: false,
+    enableDrag: true,
   );
 }
 
@@ -141,7 +141,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     final filesCount = widget.sharedFiles != null
         ? widget.sharedFiles!.length
         : widget.selectedFiles?.files.length ?? 0;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     final isKeyboardUp = bottomInset > 100;
     final double bottomPadding = max(
       0,
@@ -309,6 +309,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                   : collections;
               return Scrollbar(
                 thumbVisibility: true,
+                interactive: true,
                 radius: const Radius.circular(2),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 12),
