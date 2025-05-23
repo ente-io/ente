@@ -430,7 +430,7 @@ export class PhotosUploadHTTPClient {
                         null,
                         headers,
                     ),
-                handleUploadError,
+                { abortIfNeeded: handleUploadError },
             );
             return response.data;
         } catch (e) {
@@ -460,7 +460,7 @@ export class PublicAlbumsUploadHTTPClient {
                         null,
                         authenticatedPublicAlbumsRequestHeaders(credentials),
                     ),
-                handleUploadError,
+                { abortIfNeeded: handleUploadError },
             );
             return response.data;
         } catch (e) {

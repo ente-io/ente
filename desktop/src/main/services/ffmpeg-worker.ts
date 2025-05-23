@@ -787,7 +787,7 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
  * Upload the file at the given {@link videoFilePath} to the provided presigned
  * URL(s) using a HTTP PUT request.
  *
- * In case on non-HTTP-4xx errors, retry up to 3 times with exponential backoff.
+ * All HTTP requests are retried up to 3 times with exponential backoff.
  *
  * See: [Note: Upload HLS video segment from node side].
  *
@@ -799,25 +799,6 @@ const pseudoFFProbeVideo = async (inputFilePath: string) => {
  * @param uploadURLs A pre-signed URL(s) to upload the file. For singular
  * uploads this'll be a singleton array, otherwise will contain multipart URLs
  * and completion URL.
- *
- * ---
- *
- * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOkOr4xx`
- * from `web/packages/base/http.ts`
- *
- * - We don't have the rest of the scaffolding used by that function, which is
- *   why it is intially inlined bespoked.
- *
- * - It handles the specific use case of uploading videos since generating the
- *   HLS stream is a fairly expensive operation, so a retry to discount
- *   transient network issues is called for. There are only 2 retries for a
- *   total of 3 attempts, and the retry gaps are more spaced out.
- *
- * - Later it was discovered that net.fetch is much slower than node's native
- *   fetch, so this implementation has further diverged.
- *
- * - This also moved to a utility process, where we also have a more restricted
- *   ability to import electron API.
  */
 const uploadVideoSegments = async (
     videoFilePath: string,
@@ -874,6 +855,9 @@ const uploadVideoSegmentsSingle = (
     );
 
 /**
+ * Retry a async operation on failure up to 3 times (1 original + 2 retries)
+ * with exponential backoff.
+ *
  * This is an inlined but bespoke reimplementation of `retryEnsuringHTTPOk`
  * from `web/packages/base/http.ts`
  *
@@ -892,7 +876,7 @@ const uploadVideoSegmentsSingle = (
  *   ability to import electron API.
  */
 const retryEnsuringHTTPOk = async (request: () => Promise<Response>) => {
-    const waitTimeBeforeNextTry = [5000, 20000];
+    const waitTimeBeforeNextTry = [10000, 30000];
 
     while (true) {
         try {

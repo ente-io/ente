@@ -1069,8 +1069,9 @@ const processQueueItem = async ({
         });
 
         try {
-            await retryAsyncOperation(() =>
-                putVideoData(file, playlistData, objectID, videoSize),
+            await retryAsyncOperation(
+                () => putVideoData(file, playlistData, objectID, videoSize),
+                { retryProfile: "background" },
             );
         } catch (e) {
             if (isHTTP4xxError(e)) await markFailedVideoFile(file);
