@@ -429,7 +429,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       child: Row(
         children: [
           SizedBox(
-            width: 40,
+            width: 42,
             child: Text(
               S.of(context).color,
               style: subtitle2.copyWith(
@@ -475,7 +475,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       child: Row(
         children: [
           SizedBox(
-            width: 40,
+            width: 42,
             child: Text(
               S.of(context).light,
               style: subtitle2.copyWith(
