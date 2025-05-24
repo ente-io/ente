@@ -49,6 +49,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus":
             MessageLookupByLibrary.simpleMessage("Kontrolli staatust"),
         "checking": MessageLookupByLibrary.simpleMessage("Kontrollimine..."),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "collaborator": MessageLookupByLibrary.simpleMessage("Kaastööline"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Kogu fotod"),
         "color": MessageLookupByLibrary.simpleMessage("Värv"),
@@ -149,6 +151,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lukusta"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Logi sisse"),
         "logout": MessageLookupByLibrary.simpleMessage("Logi välja"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "manage": MessageLookupByLibrary.simpleMessage("Halda"),
         "manageLink": MessageLookupByLibrary.simpleMessage("Halda linki"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("Halda"),
@@ -162,6 +166,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Liigutatud prügikasti"),
         "name": MessageLookupByLibrary.simpleMessage("Nimi"),
         "never": MessageLookupByLibrary.simpleMessage("Mitte kunagi"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newest": MessageLookupByLibrary.simpleMessage("Uusimad"),
         "no": MessageLookupByLibrary.simpleMessage("Ei"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Puudub"),
@@ -222,6 +227,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Midagi läks valesti, palun proovi uuesti"),
         "sorry": MessageLookupByLibrary.simpleMessage("Vabandust"),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sorteeri"),
         "sortNewestFirst":
             MessageLookupByLibrary.simpleMessage("Uuemad eespool"),
