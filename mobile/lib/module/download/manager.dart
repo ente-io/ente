@@ -33,6 +33,7 @@ class DownloadManager {
 
   bool enableResumableDownload(int? size) {
     if (size == null) return false;
+    //todo: Use FileUrlType.direct instead of FileUrlType.directDownload
     return size > downloadChunkSize && flagService.internalUser;
   }
 
