@@ -7,6 +7,7 @@ import "package:photos/core/configuration.dart";
 
 import "package:photos/module/download/file_url.dart";
 import "package:photos/module/download/task.dart";
+import "package:photos/service_locator.dart";
 
 class DownloadManager {
   final _logger = Logger('DownloadManager');
@@ -28,6 +29,11 @@ class DownloadManager {
   Stream<DownloadTask> watchDownload(int fileId) {
     _streams[fileId] ??= StreamController<DownloadTask>.broadcast();
     return _streams[fileId]!.stream;
+  }
+
+  bool enableResumableDownload(int? size) {
+    if (size == null) return false;
+    return size > downloadChunkSize && flagService.internalUser;
   }
 
   /// Start download and return a Future that completes when download finishes
@@ -100,8 +106,6 @@ class DownloadManager {
       _updateTask(task.copyWith(status: DownloadStatus.paused));
     }
 
-    // Future will be completed in _startDownload's DioException handling
-
     // Clean up streams if no listeners
     final stream = _streams[fileId];
     if (stream != null && !stream.hasListener) {
@@ -123,9 +127,6 @@ class DownloadManager {
       _updateTask(task.copyWith(status: DownloadStatus.cancelled));
       _tasks.remove(fileId);
     }
-
-    // Future will be completed in _startDownload's DioException handling
-
     _cleanup(fileId);
   }
 
@@ -163,8 +164,6 @@ class DownloadManager {
       );
       _updateTask(task);
 
-      // Download missing chunks
-      // log existing progress and download bytes
       _logger.info(
         'Resuming download for ${task.filename} (${task.bytesDownloaded}/${task.totalBytes} bytes)',
       );
@@ -172,7 +171,6 @@ class DownloadManager {
         if (existingChunks[i] || cancelToken.isCancelled) continue;
         _logger.info('Downloading chunk ${i + 1} of $totalChunks');
         await _downloadChunk(task, basePath, i, totalChunks, cancelToken);
-        _logger.info('Chunk ${i + 1} downloaded');
         existingChunks[i] = true;
       }
 
@@ -316,7 +314,6 @@ class DownloadManager {
     try {
       final directory = Configuration.instance.getTempDirectory();
       final basePath = '$directory${task.id}.encrypted';
-      // Delete final file
       final finalFile = File(basePath);
       if (await finalFile.exists()) await finalFile.delete();
 

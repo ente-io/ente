@@ -98,8 +98,6 @@ Future<File?> downloadAndDecryptPublicFile(
   }
 }
 
-String lastProgress = "";
-
 Future<File?> downloadAndDecrypt(
   EnteFile file, {
   ProgressCallback? progressCallback,
@@ -125,9 +123,7 @@ Future<File?> downloadAndDecrypt(
   final startTime = DateTime.now().millisecondsSinceEpoch;
 
   try {
-    // check if great than 10MB
-    if (file.fileSize != null &&
-        file.fileSize! > DownloadManager.downloadChunkSize) {
+    if (downloadManager.enableResumableDownload(file.fileSize)) {
       final DownloadResult result = await downloadManager.download(
         file.uploadedFileID!,
         file.displayName,
