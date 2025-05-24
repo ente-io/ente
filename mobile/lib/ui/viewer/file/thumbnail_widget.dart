@@ -23,6 +23,7 @@ import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import 'package:photos/utils/file_util.dart';
+import "package:photos/utils/standalone/data.dart";
 import "package:photos/utils/standalone/task_queue.dart";
 import 'package:photos/utils/thumbnail_util.dart';
 
@@ -225,8 +226,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       viewChildren.add(TrashedFileOverlayText(widget.file as TrashFile));
     } else if (GalleryContextState.of(context)?.type == GroupType.size) {
       viewChildren.add(FileSizeOverlayText(widget.file));
-    } else if (widget.file.debugCaption != null) {
-      viewChildren.add(FileOverlayText(widget.file.debugCaption!));
+    } else if (widget.file.fileSize != null) {
+      viewChildren.add(FileOverlayText(formatBytes(widget.file.fileSize!)));
     }
     // todo: Move this icon overlay to the collection widget.
     if (widget.shouldShowArchiveStatus) {
