@@ -10,6 +10,7 @@ import (
 	"github.com/ente-io/cli/pkg/model"
 	"github.com/ente-io/cli/pkg/model/export"
 	"github.com/ente-io/cli/utils"
+	"golang.org/x/sync/semaphore"
 	"log"
 	"os"
 	"path/filepath"
@@ -19,8 +20,7 @@ import (
 
 func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 	log.Printf("Starting file download")
-	exportRoot := account.ExportDir
-	_, albumIDToMetaMap, err := readFolderMetadata(exportRoot)
+	_, albumIDToMetaMap, err := readFolderMetadata(account.ExportDir)
 	if err != nil {
 		return err
 	}
@@ -39,10 +39,11 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 	if err != nil {
 		return err
 	}
+	weighted := semaphore.NewWeighted(filter.Jobs)
 	log.Println("total entries", len(entries))
 	model.SortAlbumFileEntry(entries)
 	defer utils.TimeTrack(time.Now(), "process_files")
-	var albumDiskInfo *albumDiskInfo
+	albumDiskInfoCache := make(map[int64]*albumDiskInfo)
 	for i, albumFileEntry := range entries {
 		if albumFileEntry.SyncedLocally {
 			continue
@@ -63,41 +64,20 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 			continue
 		}
 
-		if albumDiskInfo == nil || albumDiskInfo.AlbumMeta.ID != albumInfo.ID {
-			albumDiskInfo, err = readFilesMetadata(exportRoot, albumInfo)
+		albumDiskInfo, ok := albumDiskInfoCache[albumInfo.ID]
+		if !ok {
+			albumDiskInfo, err = readFilesMetadata(account.ExportDir, albumInfo)
 			if err != nil {
 				return err
 			}
+			albumDiskInfoCache[albumInfo.ID] = albumDiskInfo
 		}
+
 		fileBytes, err := c.GetValue(ctx, model.RemoteFiles, []byte(fmt.Sprintf("%d", albumFileEntry.FileID)))
 		if err != nil {
 			return err
 		}
-		if fileBytes != nil {
-			var existingEntry *model.RemoteFile
-			err = json.Unmarshal(fileBytes, &existingEntry)
-			if err != nil {
-				return err
-			}
-			log.Printf("[%d/%d] Sync %s for album %s", i, len(entries), existingEntry.GetTitle(), albumInfo.AlbumName)
-			err = c.downloadEntry(ctx, albumDiskInfo, *existingEntry, albumFileEntry)
-			if err != nil {
-				if errors.Is(err, model.ErrDecryption) {
-					continue
-				} else if existingEntry.IsLivePhoto() && errors.Is(err, zip.ErrFormat) {
-					log.Printf(fmt.Sprintf("err processing live photo %s (%d), %s", existingEntry.GetTitle(), existingEntry.ID, err.Error()))
-					continue
-				} else if existingEntry.IsLivePhoto() && errors.Is(err, model.ErrLiveZip) {
-					continue
-				} else if model.IsBadTimeStampError(err) {
-					log.Printf("Skipping file due to error %s (%d)", existingEntry.GetTitle(), existingEntry.ID)
-					log.Printf("CreationTime %v, ModidicationTime %v", existingEntry.GetCreationTime(), existingEntry.GetModificationTime())
-					continue
-				} else {
-					return err
-				}
-			}
-		} else {
+		if fileBytes == nil {
 			// file metadata is missing in the localDB
 			if albumFileEntry.IsDeleted {
 				delErr := c.DeleteAlbumEntry(ctx, albumFileEntry)
@@ -108,6 +88,45 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 				log.Fatalf("Failed to find entry in db for file %d (deleted: %v)", albumFileEntry.FileID, albumFileEntry.IsDeleted)
 			}
 		}
+
+		var existingEntry *model.RemoteFile
+		err = json.Unmarshal(fileBytes, &existingEntry)
+		if err != nil {
+			return err
+		}
+		log.Printf("[%d/%d] Sync %s for album %s", i, len(entries), existingEntry.GetTitle(), albumInfo.AlbumName)
+
+		if err := weighted.Acquire(ctx, 1); err != nil {
+			log.Printf("Failed to acquire semaphore: %v", err)
+			break
+		}
+
+		go func() {
+			defer weighted.Release(1)
+			err := c.downloadEntry(ctx, albumDiskInfo, *existingEntry, albumFileEntry)
+			if err == nil {
+				log.Printf("Downloaded %s", existingEntry.GetTitle())
+				return
+			}
+			if errors.Is(err, model.ErrDecryption) {
+				return
+			} else if existingEntry.IsLivePhoto() && errors.Is(err, zip.ErrFormat) {
+				log.Printf(fmt.Sprintf("err processing live photo %s (%d), %s", existingEntry.GetTitle(), existingEntry.ID, err.Error()))
+				return
+			} else if existingEntry.IsLivePhoto() && errors.Is(err, model.ErrLiveZip) {
+				return
+			} else if model.IsBadTimeStampError(err) {
+				log.Printf("Skipping file due to error %s (%d)", existingEntry.GetTitle(), existingEntry.ID)
+				log.Printf("CreationTime %v, ModidicationTime %v", existingEntry.GetCreationTime(), existingEntry.GetModificationTime())
+				return
+			} else {
+				log.Fatalf("Failed to sync file %d due to error %s", albumFileEntry.FileID, err)
+			}
+		}()
+	}
+
+	if err := weighted.Acquire(ctx, filter.Jobs); err != nil {
+		log.Printf("Failed to acquire semaphore: %s", err)
 	}
 
 	return nil
