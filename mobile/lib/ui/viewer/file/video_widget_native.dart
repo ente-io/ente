@@ -218,9 +218,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _controller?.dispose();
     if (downloadTaskSubscription != null) {
       downloadTaskSubscription!.cancel();
-      downloadManager.pause(
-        widget.file.uploadedFileID!,
-      );
+      downloadManager.pause(widget.file.uploadedFileID!).ignore();
     }
 
     //https://github.com/fluttercandies/flutter_photo_manager/blob/8afba2745ebaac6af8af75de9cbded9157bc2690/README.md#clear-caches

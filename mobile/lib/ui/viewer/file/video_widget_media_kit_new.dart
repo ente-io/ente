@@ -14,6 +14,7 @@ import "package:photos/events/stream_switched_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/wake_lock_service.dart";
@@ -63,6 +64,7 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   bool _isGuestView = false;
   StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
+  StreamSubscription<DownloadTask>? _downloadTaskSubscription;
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
 
@@ -89,6 +91,17 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
         _isGuestView = event.isGuestView;
       });
     });
+    if (widget.file.isUploaded) {
+      _downloadTaskSubscription = downloadManager
+          .watchDownload(widget.file.uploadedFileID!)
+          .listen((event) {
+        if (mounted) {
+          setState(() {
+            _progressNotifier.value = event.progress;
+          });
+        }
+      });
+    }
 
     _streamSwitchedSubscription =
         Bus.instance.on<StreamSwitchedEvent>().listen((event) {
@@ -161,6 +174,10 @@ class _VideoWidgetMediaKitNewState extends State<VideoWidgetMediaKitNew>
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    if (_downloadTaskSubscription != null) {
+      _downloadTaskSubscription!.cancel();
+      downloadManager.pause(widget.file.uploadedFileID!).ignore();
+    }
     player.dispose();
     _captionUpdatedSubscription.cancel();
     if (EnteWakeLockService.instance.shouldKeepAppAwakeAcrossSessions) {
