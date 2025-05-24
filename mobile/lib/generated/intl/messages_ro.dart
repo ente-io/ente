@@ -528,6 +528,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Apăsați"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Apăsați pe meniul suplimentar"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Închidere"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage(
             "Grupare după timpul capturării"),
@@ -1138,6 +1140,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Apăsați lung pe un articol pentru a-l vizualiza pe tot ecranul"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Repetare video dezactivată"),
         "loopVideoOn":
@@ -1217,6 +1221,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Album nou"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Locație nouă"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Persoană nouă"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nou la Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Cele mai noi"),
         "next": MessageLookupByLibrary.simpleMessage("Înainte"),
@@ -1727,6 +1732,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Ne pare rău, nu am putut genera chei securizate pe acest dispozitiv.\n\nvă rugăm să vă înregistrați de pe un alt dispozitiv."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sortare"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sortare după"),
         "sortNewestFirst":

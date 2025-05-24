@@ -18,6 +18,7 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/language_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
@@ -269,12 +270,13 @@ class MemoriesCacheService {
         );
         continue;
       }
+      final s = await LanguageService.s;
       await NotificationService.instance.scheduleNotification(
-        "On this day",
-        "Look back on $numberOfMemories memories 🌄",
+        s.onThisDay,
+        s.lookBackOnYourMemories,
         id: memory.id.hashCode,
         channelID: "onThisDay",
-        channelName: "On this day",
+        channelName: s.onThisDay,
         payload: memory.id,
         dateTime: scheduleTime,
       );

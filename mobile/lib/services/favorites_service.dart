@@ -60,7 +60,7 @@ class FavoritesService {
   }
 
   Future<void> _warmUpCache() async {
-    final favCollection = await _getFavoritesCollection();
+    final favCollection = await getFavoritesCollection();
     if (favCollection != null) {
       Set<int> uploadedIDs;
       Map<String, int> fileHashes;
@@ -103,7 +103,7 @@ class FavoritesService {
   }
 
   Future<bool> isFavorite(EnteFile file) async {
-    final collection = await _getFavoritesCollection();
+    final collection = await getFavoritesCollection();
     if (collection == null || file.uploadedFileID == null) {
       return false;
     }
@@ -176,7 +176,7 @@ class FavoritesService {
     if (favFlag) {
       await _collectionsService.addOrCopyToCollection(collectionID, files);
     } else {
-      final Collection? favCollection = await _getFavoritesCollection();
+      final Collection? favCollection = await getFavoritesCollection();
       await _collectionActions.moveFilesFromCurrentCollection(
         context,
         favCollection!,
@@ -194,7 +194,7 @@ class FavoritesService {
     if (inUploadID == null) {
       // Do nothing, ignore
     } else {
-      final Collection? favCollection = await _getFavoritesCollection();
+      final Collection? favCollection = await getFavoritesCollection();
       // The file might be part of another collection. For unfav, we need to
       // move file from the fav collection to the .
       if (file.ownerID != _config.getUserID() &&
@@ -225,7 +225,7 @@ class FavoritesService {
     _updateFavoriteFilesCache([file], favFlag: false);
   }
 
-  Future<Collection?> _getFavoritesCollection() async {
+  Future<Collection?> getFavoritesCollection() async {
     if (_cachedFavoritesCollectionID == null) {
       final collections = _collectionsService.getActiveCollections();
       for (final collection in collections) {
@@ -241,7 +241,7 @@ class FavoritesService {
   }
 
   Future<int?> getFavoriteCollectionID() async {
-    final collection = await _getFavoritesCollection();
+    final collection = await getFavoritesCollection();
     return collection?.id;
   }
 

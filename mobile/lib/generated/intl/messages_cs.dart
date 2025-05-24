@@ -115,6 +115,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "clearCaches":
             MessageLookupByLibrary.simpleMessage("Vymazat mezipaměť"),
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Smazat indexy"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Zavřít"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Kód byl použit"),
@@ -308,6 +310,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loginWithTOTP":
             MessageLookupByLibrary.simpleMessage("Přihlášení pomocí TOTP"),
         "logout": MessageLookupByLibrary.simpleMessage("Odhlásit se"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Ztratili jste zařízení?"),
         "manage": MessageLookupByLibrary.simpleMessage("Spravovat"),
@@ -333,6 +337,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "never": MessageLookupByLibrary.simpleMessage("Nikdy"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nové album"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Nová osoba"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Nový rozsah"),
         "newest": MessageLookupByLibrary.simpleMessage("Nejnovější"),
         "next": MessageLookupByLibrary.simpleMessage("Další"),
@@ -481,6 +486,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharing": MessageLookupByLibrary.simpleMessage("Sdílení..."),
         "skip": MessageLookupByLibrary.simpleMessage("Přeskočit"),
         "sorry": MessageLookupByLibrary.simpleMessage("Omlouváme se"),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Seřadit"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Seřadit podle"),
         "sortNewestFirst":
