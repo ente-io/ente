@@ -560,6 +560,36 @@ class MemoriesCacheService {
     );
   }
 
+  Future<void> goToOnThisDayMemory(BuildContext context) async {
+    final allMemories = await getMemories();
+    if (allMemories.isEmpty) return;
+    int memoryIdx = 0;
+    bool found = false;
+    memoryLoop:
+    for (final memory in allMemories) {
+      if (memory.type == MemoryType.onThisDay) {
+        found = true;
+        break memoryLoop;
+      }
+      memoryIdx++;
+    }
+    if (!found) {
+      _logger.warning(
+        "Could not find onThisDay memory",
+      );
+      return;
+    }
+    await routeToPage(
+      context,
+      FullScreenMemoryDataUpdater(
+        initialIndex: 0,
+        memories: allMemories[memoryIdx].memories,
+        child: FullScreenMemory(allMemories[memoryIdx].title, 0),
+      ),
+      forceCustomPageRoute: true,
+    );
+  }
+
   Future<MemoriesCache?> _readCacheFromDisk() async {
     _logger.info("Reading memories cache result from disk");
     final file = File(await _getCachePath());
