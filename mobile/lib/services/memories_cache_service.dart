@@ -250,6 +250,7 @@ class MemoriesCacheService {
   }
 
   Future<void> _clearAllScheduledOnThisDayNotifications() async {
+    _logger.info('Clearing all scheduled On This Day notifications');
     await NotificationService.instance
         .clearAllScheduledNotifications(containingPayload: "onThisDay");
   }
