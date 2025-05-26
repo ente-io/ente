@@ -204,7 +204,7 @@ export const Export: React.FC<ExportProps> = ({
                 </Stack>
             </DialogContent>
             <Divider />
-            <ExportDialogContent
+            <ExportDialogStageContent
                 exportStage={exportStage}
                 stopExport={stopExport}
                 onHide={onClose}
@@ -302,7 +302,7 @@ const ContinuousExport: React.FC<ContinuousExportProps> = ({
     </SpacedRow>
 );
 
-interface ExportDialogContentProps {
+interface ExportDialogStageContentProps {
     exportStage: ExportStage;
     stopExport: () => void;
     onHide: () => void;
@@ -313,7 +313,7 @@ interface ExportDialogContentProps {
     onStartExport: (opts?: ExportOpts) => void;
 }
 
-const ExportDialogContent: React.FC<ExportDialogContentProps> = ({
+const ExportDialogStageContent: React.FC<ExportDialogStageContentProps> = ({
     exportStage,
     onStartExport,
     stopExport,
@@ -334,7 +334,7 @@ const ExportDialogContent: React.FC<ExportDialogContentProps> = ({
         case ExportStage.trashingDeletedFiles:
         case ExportStage.trashingDeletedCollections:
             return (
-                <ExportInProgress
+                <ExportInProgressDialogContent
                     exportStage={exportStage}
                     exportProgress={exportProgress}
                     onClose={onHide}
@@ -343,12 +343,12 @@ const ExportDialogContent: React.FC<ExportDialogContentProps> = ({
             );
         case ExportStage.finished:
             return (
-                <ExportFinished
+                <ExportFinishedDialogContent
                     pendingExports={pendingExports}
                     lastExportTime={lastExportTime}
                     allCollectionsNameByID={allCollectionsNameByID}
                     onClose={onHide}
-                    onResync={() => startExport({ resync: true })}
+                    onResync={() => onStartExport({ resync: true })}
                 />
             );
 
@@ -377,7 +377,7 @@ const ExportInitDialogContent: React.FC<ExportInitDialogContentProps> = ({
     </DialogContent>
 );
 
-interface ExportInProgressProps {
+interface ExportInProgressDialogContentProps {
     exportStage: ExportStage;
     exportProgress: ExportProgress;
     /**
@@ -391,12 +391,9 @@ interface ExportInProgressProps {
     onClose: () => void;
 }
 
-const ExportInProgress: React.FC<ExportInProgressProps> = ({
-    exportStage,
-    exportProgress,
-    onClose,
-    onStop,
-}) => (
+const ExportInProgressDialogContent: React.FC<
+    ExportInProgressDialogContentProps
+> = ({ exportStage, exportProgress, onClose, onStop }) => (
     <>
         <DialogContent>
             <VerticallyCentered>
@@ -469,7 +466,7 @@ const ExportInProgress: React.FC<ExportInProgressProps> = ({
     </>
 );
 
-interface ExportFinishedProps {
+interface ExportFinishedDialogContentProps {
     pendingExports: EnteFile[];
     lastExportTime: number;
     allCollectionsNameByID: Map<number, string>;
@@ -480,7 +477,9 @@ interface ExportFinishedProps {
     onResync: () => void;
 }
 
-const ExportFinished: React.FC<ExportFinishedProps> = ({
+const ExportFinishedDialogContent: React.FC<
+    ExportFinishedDialogContentProps
+> = ({
     pendingExports,
     lastExportTime,
     allCollectionsNameByID,
