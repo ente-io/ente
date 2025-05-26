@@ -89,7 +89,7 @@ interface ExportUIUpdaters {
     setExportStage: (stage: ExportStage) => void;
     setExportProgress: (progress: ExportProgress) => void;
     setLastExportTime: (exportTime: number) => void;
-    setPendingExports: (pendingExports: EnteFile[]) => void;
+    setPendingFiles: (pendingFiles: EnteFile[]) => void;
 }
 
 interface RequestCanceller {
@@ -111,7 +111,7 @@ class ExportService {
         setExportProgress: () => {},
         setExportStage: () => {},
         setLastExportTime: () => {},
-        setPendingExports: () => {},
+        setPendingFiles: () => {},
     };
     private currentExportProgress: ExportProgress = {
         total: 0,
@@ -223,22 +223,22 @@ class ExportService {
         }
     }
 
-    getPendingExports = async (
-        exportRecord: ExportRecord,
-    ): Promise<EnteFile[]> => {
-        try {
-            const files = await getAllLocalFiles();
-
-            const unExportedFiles = getUnExportedFiles(
-                files,
-                exportRecord,
-                undefined,
-            );
-            return unExportedFiles;
-        } catch (e) {
-            log.error("getUpdateFileLists failed", e);
-            throw e;
-        }
+    /**
+     * Return the list of files that have not yet been exported.
+     *
+     * @param exportRecord The export record containing information about the
+     * export, including files which've been exported. If an export record is
+     * not specified (e.g. if the user has not exported anything yet and we just
+     * wish to show a preview of what will be exported), then the function will
+     * return the list of all files that will be exported if an export were to
+     * happen.
+     */
+    pendingFiles = async (exportRecord?: ExportRecord): Promise<EnteFile[]> => {
+        return getUnExportedFiles(
+            await getAllLocalFiles(),
+            exportRecord,
+            undefined,
+        );
     };
 
     async preExport(exportFolder: string) {
@@ -262,11 +262,11 @@ class ExportService {
             }
             await this.updateExportStage(ExportStage.finished);
             await this.updateLastExportTime(Date.now());
-
-            const exportRecord = await this.getExportRecord(exportFolder);
-
-            const pendingExports = await this.getPendingExports(exportRecord);
-            this.uiUpdater.setPendingExports(pendingExports);
+            this.uiUpdater.setPendingFiles(
+                await this.pendingFiles(
+                    await this.getExportRecord(exportFolder),
+                ),
+            );
         } catch (e) {
             log.error("postExport failed", e);
         }
@@ -1329,7 +1329,7 @@ const readOnDiskFileExportRecordIDs = async (
  */
 const getUnExportedFiles = (
     allFiles: EnteFile[],
-    exportRecord: ExportRecord,
+    exportRecord: ExportRecord | undefined,
     diskFileRecordIDs: Set<string> | undefined,
 ) => {
     if (!exportRecord?.fileExportNames) {

@@ -74,7 +74,7 @@ export const Export: React.FC<ExportProps> = ({
         failed: 0,
         total: 0,
     });
-    const [pendingExports, setPendingExports] = useState<EnteFile[]>([]);
+    const [pendingFiles, setPendingFiles] = useState<EnteFile[]>([]);
     const [lastExportTime, setLastExportTime] = useState(0);
 
     // ====================
@@ -89,7 +89,7 @@ export const Export: React.FC<ExportProps> = ({
                 setExportStage,
                 setExportProgress,
                 setLastExportTime,
-                setPendingExports,
+                setPendingFiles,
             });
             const exportSettings: ExportSettings =
                 exportService.getExportSettings();
@@ -131,17 +131,13 @@ export const Export: React.FC<ExportProps> = ({
     const syncExportRecord = async (exportFolder: string): Promise<void> => {
         try {
             if (!(await exportService.exportFolderExists(exportFolder))) {
-                const pendingExports =
-                    await exportService.getPendingExports(null);
-                setPendingExports(pendingExports);
+                setPendingFiles(await exportService.pendingFiles());
             }
             const exportRecord =
                 await exportService.getExportRecord(exportFolder);
             setExportStage(exportRecord.stage);
             setLastExportTime(exportRecord.lastAttemptTimestamp);
-            const pendingExports =
-                await exportService.getPendingExports(exportRecord);
-            setPendingExports(pendingExports);
+            setPendingFiles(await exportService.pendingFiles(exportRecord));
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 log.error("syncExportRecord failed", e);
@@ -215,7 +211,7 @@ export const Export: React.FC<ExportProps> = ({
                 onHide={onClose}
                 lastExportTime={lastExportTime}
                 exportProgress={exportProgress}
-                pendingExports={pendingExports}
+                pendingFiles={pendingFiles}
                 allCollectionsNameByID={allCollectionsNameByID}
                 onStartExport={startExport}
             />
@@ -313,7 +309,7 @@ interface ExportDialogStageContentProps {
     onHide: () => void;
     lastExportTime: number;
     exportProgress: ExportProgress;
-    pendingExports: EnteFile[];
+    pendingFiles: EnteFile[];
     allCollectionsNameByID: Map<number, string>;
     onStartExport: (opts?: ExportOpts) => void;
 }
@@ -325,7 +321,7 @@ const ExportDialogStageContent: React.FC<ExportDialogStageContentProps> = ({
     onHide,
     lastExportTime,
     exportProgress,
-    pendingExports,
+    pendingFiles,
     allCollectionsNameByID,
 }) => {
     switch (exportStage) {
@@ -349,7 +345,7 @@ const ExportDialogStageContent: React.FC<ExportDialogStageContentProps> = ({
         case ExportStage.finished:
             return (
                 <ExportFinishedDialogContent
-                    pendingExports={pendingExports}
+                    pendingFiles={pendingFiles}
                     lastExportTime={lastExportTime}
                     allCollectionsNameByID={allCollectionsNameByID}
                     onClose={onHide}
@@ -472,7 +468,10 @@ const ExportInProgressDialogContent: React.FC<
 );
 
 interface ExportFinishedDialogContentProps {
-    pendingExports: EnteFile[];
+    /**
+     * The list of {@link EnteFile}s that have not been exported yet.
+     */
+    pendingFiles: EnteFile[];
     lastExportTime: number;
     allCollectionsNameByID: Map<number, string>;
     onClose: () => void;
@@ -485,7 +484,7 @@ interface ExportFinishedDialogContentProps {
 const ExportFinishedDialogContent: React.FC<
     ExportFinishedDialogContentProps
 > = ({
-    pendingExports,
+    pendingFiles,
     lastExportTime,
     allCollectionsNameByID,
     onClose,
@@ -502,13 +501,13 @@ const ExportFinishedDialogContent: React.FC<
                         <Typography sx={{ color: "text.muted" }}>
                             {t("pending_items")}
                         </Typography>
-                        {pendingExports.length ? (
+                        {pendingFiles.length ? (
                             <LinkButton onClick={showPendingList}>
-                                {formattedNumber(pendingExports.length)}
+                                {formattedNumber(pendingFiles.length)}
                             </LinkButton>
                         ) : (
                             <Typography>
-                                {formattedNumber(pendingExports.length)}
+                                {formattedNumber(pendingFiles.length)}
                             </Typography>
                         )}
                     </SpaceBetweenFlex>
@@ -538,7 +537,7 @@ const ExportFinishedDialogContent: React.FC<
             </DialogActions>
             <ExportPendingListDialog
                 {...pendingListVisibilityProps}
-                pendingExports={pendingExports}
+                pendingFiles={pendingFiles}
                 allCollectionsNameByID={allCollectionsNameByID}
             />
         </>
@@ -546,7 +545,7 @@ const ExportFinishedDialogContent: React.FC<
 };
 
 type ExportPendingListDialogProps = ModalVisibilityProps & {
-    pendingExports: EnteFile[];
+    pendingFiles: EnteFile[];
     allCollectionsNameByID: Map<number, string>;
 };
 
@@ -554,7 +553,7 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
     open,
     onClose,
     allCollectionsNameByID,
-    pendingExports,
+    pendingFiles,
 }) => {
     const renderListItem = (file: EnteFile) => {
         return (
@@ -581,11 +580,7 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
         }`;
     };
 
-    const itemData = createItemData(
-        renderListItem,
-        getItemTitle,
-        pendingExports,
-    );
+    const itemData = createItemData(renderListItem, getItemTitle, pendingFiles);
 
     const getItemKey: ListItemKeySelector<ItemData<T>> = (index, data) => {
         const { items } = data;
@@ -594,7 +589,7 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
     };
 
     const itemSize = 50; /* px */
-    const itemCount = pendingExports.length;
+    const itemCount = pendingFiles.length;
     const listHeight = Math.min(itemCount * itemSize, 240);
 
     return (
