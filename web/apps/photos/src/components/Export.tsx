@@ -26,7 +26,6 @@ import { useBaseContext } from "ente-base/context";
 import { ensureElectron } from "ente-base/electron";
 import log from "ente-base/log";
 import { EnteFile } from "ente-media/file";
-import { SpaceBetweenFlex } from "ente-shared/components/Container";
 import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
@@ -191,8 +190,8 @@ export const Export: React.FC<ExportProps> = ({
                         exportStage={exportStage}
                     />
                     <ContinuousExport
-                        continuousExport={continuousExport}
-                        toggleContinuousExport={toggleContinuousExport}
+                        enabled={continuousExport}
+                        onToggle={() => void toggleContinuousExport()}
                     />
                 </Stack>
             </DialogContent>
@@ -269,22 +268,31 @@ const ChangeDirectoryOption: React.FC<ButtonishProps> = ({ onClick }) => (
     </OverflowMenu>
 );
 
-function ContinuousExport({ continuousExport, toggleContinuousExport }) {
-    return (
-        <SpaceBetweenFlex minHeight={"48px"}>
-            <Typography sx={{ color: "text.muted" }}>
-                {t("sync_continuously")}
-            </Typography>
-            <Box>
-                <EnteSwitch
-                    color="accent"
-                    checked={continuousExport}
-                    onChange={toggleContinuousExport}
-                />
-            </Box>
-        </SpaceBetweenFlex>
-    );
+interface ContinuousExportProps {
+    /**
+     * If `true`, then continuous export is shown as enabled.
+     */
+    enabled: boolean;
+    /**
+     * Called when the user wants to toggle the current value of
+     * {@link enabled}.
+     */
+    onToggle: () => void;
 }
+
+const ContinuousExport: React.FC<ContinuousExportProps> = ({
+    enabled,
+    onToggle,
+}) => (
+    <SpacedRow sx={{ minHeight: "48px", mt: 1 }}>
+        <Typography sx={{ color: "text.muted" }}>
+            {t("sync_continuously")}
+        </Typography>
+        <Box>
+            <EnteSwitch color="accent" checked={enabled} onChange={onToggle} />
+        </Box>
+    </SpacedRow>
+);
 
 const ExportDynamicContent = ({
     exportStage,
