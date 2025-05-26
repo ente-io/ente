@@ -23,11 +23,11 @@ import {
     type DialogProps,
 } from "@mui/material";
 import ItemList from "components/ItemList";
+import { SpacedRow } from "ente-base/components/containers";
 import { FilledIconButton } from "ente-base/components/mui";
 import { useBaseContext } from "ente-base/context";
 import { formattedListJoin } from "ente-base/i18n";
 import { type UploadPhase } from "ente-gallery/services/upload";
-import { SpaceBetweenFlex } from "ente-shared/components/Container";
 import { t } from "i18next";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -170,22 +170,20 @@ const UploadProgressTitle: React.FC = () => {
 
     return (
         <DialogTitle>
-            <SpaceBetweenFlex>
+            <SpacedRow>
                 <Box>
                     <Typography variant="h3">{t("file_upload")}</Typography>
                     <UploadProgressSubtitleText />
                 </Box>
-                <Box>
-                    <Stack direction="row" sx={{ gap: 1 }}>
-                        <FilledIconButton onClick={toggleExpanded}>
-                            {expanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
-                        </FilledIconButton>
-                        <FilledIconButton onClick={onClose}>
-                            <CloseIcon />
-                        </FilledIconButton>
-                    </Stack>
-                </Box>
-            </SpaceBetweenFlex>
+                <Stack direction="row" sx={{ gap: 1 }}>
+                    <FilledIconButton onClick={toggleExpanded}>
+                        {expanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
+                    </FilledIconButton>
+                    <FilledIconButton onClick={onClose}>
+                        <CloseIcon />
+                    </FilledIconButton>
+                </Stack>
+            </SpacedRow>
         </DialogTitle>
     );
 };
