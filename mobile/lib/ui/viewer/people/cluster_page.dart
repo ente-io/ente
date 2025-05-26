@@ -66,8 +66,7 @@ class _ClusterPageState extends State<ClusterPage> {
     files = widget.searchResult;
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      if (event.type == EventType.deletedFromDevice ||
-          event.type == EventType.deletedFromEverywhere ||
+      if (event.type == EventType.deletedFromEverywhere ||
           event.type == EventType.deletedFromRemote ||
           event.type == EventType.hide) {
         for (var updatedFile in event.updatedFiles) {
@@ -133,7 +132,7 @@ class _ClusterPageState extends State<ClusterPage> {
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
       initialFiles: widget.searchResult,
-      header: widget.showNamingBanner
+      header: widget.showNamingBanner && files.isNotEmpty
           ? PeopleBanner(
               type: PeopleBannerType.addName,
               faceWidget: PersonFaceWidget(
