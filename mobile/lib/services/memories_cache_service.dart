@@ -527,39 +527,6 @@ class MemoriesCacheService {
     );
   }
 
-  Future<void> goToMemoryFromMemoryID(
-    BuildContext context,
-    String memoryID,
-  ) async {
-    final allMemories = await getMemories();
-    if (allMemories.isEmpty) return;
-    int memoryIdx = 0;
-    bool found = false;
-    memoryLoop:
-    for (final memory in _cachedMemories!) {
-      if (memory.id == memoryID) {
-        found = true;
-        break memoryLoop;
-      }
-      memoryIdx++;
-    }
-    if (!found) {
-      _logger.warning(
-        "Could not find memory with memoryID: $memoryID",
-      );
-      return;
-    }
-    await routeToPage(
-      context,
-      FullScreenMemoryDataUpdater(
-        initialIndex: 0,
-        memories: allMemories[memoryIdx].memories,
-        child: FullScreenMemory(allMemories[memoryIdx].title, 0),
-      ),
-      forceCustomPageRoute: true,
-    );
-  }
-
   Future<void> goToOnThisDayMemory(BuildContext context) async {
     final allMemories = await getMemories();
     if (allMemories.isEmpty) return;
