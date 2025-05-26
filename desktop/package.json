@@ -38,22 +38,23 @@
         "lru-cache": "^11.1.0",
         "next-electron-server": "^1.0.0",
         "node-stream-zip": "^1.15.0",
-        "onnxruntime-node": "^1.20.1"
+        "onnxruntime-node": "^1.20.1",
+        "zod": "^3.25.23"
     },
     "devDependencies": {
-        "@eslint/js": "^9.25.1",
-        "@tsconfig/node22": "^22.0.1",
+        "@eslint/js": "^9.27.0",
+        "@tsconfig/node22": "^22.0.2",
         "@types/auto-launch": "^5.0.5",
         "@types/ffmpeg-static": "^3.0.3",
         "ajv": "^8.17.1",
         "concurrently": "^9.1.2",
         "cross-env": "^7.0.3",
-        "electron": "^36.2.1",
+        "electron": "^36.3.1",
         "electron-builder": "^26.0.14",
         "eslint": "^9",
         "prettier": "3.5.3",
         "prettier-plugin-organize-imports": "^4.1.0",
-        "prettier-plugin-packagejson": "^2.5.13",
+        "prettier-plugin-packagejson": "^2.5.14",
         "shx": "^0.4.0",
         "typescript": "^5.8.3",
         "typescript-eslint": "^8.32.1"

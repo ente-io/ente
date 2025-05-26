@@ -1441,14 +1441,12 @@ const createCollectionSummaries = (
             // Use the first letter of the email of the user who shared this
             // particular favorite as a prefix to disambiguate this collection
             // from the user's own favorites.
-            // TODO(FAV): localize
-            const initial = collection.owner.email.at(0)?.toUpperCase();
+            // TODO(FAV): Use the person name when avail
+            const initial = collection.owner.email?.at(0)?.toUpperCase();
             if (initial) {
-                // TODO(FAV):
-                // name = `${initial}'s ${t("favorites")}`;
-                name = `${initial}'s favorites`;
+                name = t("person_favorites", { name: initial });
             } else {
-                name = "Shared favorites";
+                name = t("shared_favorites");
             }
         } else {
             name = collection.name;

@@ -8,6 +8,7 @@ import { Overlay } from "ente-base/components/containers";
 import { isSameDay } from "ente-base/date";
 import { isDevBuild } from "ente-base/env";
 import { formattedDateRelative } from "ente-base/i18n-date";
+import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { EnteFile, enteFileDeletionDate } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
@@ -311,7 +312,15 @@ export const FileList: React.FC<FileListProps> = ({
                 return timeStampList;
             }
             // TODO(RE): Remove after audit.
-            if (isDevBuild) throw new Error("Unexpected footer change");
+            if (
+                isDevBuild &&
+                (footer ||
+                    publicCollectionGalleryContext.credentials ||
+                    showAppDownloadBanner)
+            ) {
+                console.log({ timeStampList, footer, showAppDownloadBanner });
+                throw new Error("Unexpected footer change");
+            }
             if (footer) {
                 return [
                     ...timeStampList,
@@ -1181,7 +1190,10 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
 
         void downloadManager
             .renderableThumbnailURL(file, showPlaceholder)
-            .then((url) => !didCancel && setImageURL(url));
+            .then((url) => !didCancel && setImageURL(url))
+            .catch((e: unknown) => {
+                log.warn("Failed to fetch thumbnail", e);
+            });
 
         return () => {
             didCancel = true;

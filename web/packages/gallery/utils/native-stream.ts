@@ -105,11 +105,16 @@ export const writeStream = async (
     const req = new Request(url, {
         // GET can't have a body
         method: "POST",
-        body: stream,
-        // @ts-expect-error TypeScript's libdom.d.ts does not include the
-        // "duplex" parameter, e.g. see
+        // [Note: duplex param required for stream body]
+        //
+        // The duplex parameter needs to be set to 'half' when streaming
+        // requests. However, TypeScript's libdom.d.ts does not include the
+        // "duplex" parameter, so we need to silence the tsc error. e.g. see
         // https://github.com/node-fetch/node-fetch/issues/1769.
+        //
+        // @ts-expect-error See: [Note: duplex param required for stream body]
         duplex: "half",
+        body: stream,
     });
 
     const res = await fetch(req);
@@ -160,6 +165,10 @@ const GenerateHLSResult = z.object({
      * The size (in bytes) of the file containing the encrypted video segments.
      */
     videoSize: z.number(),
+    /**
+     * The ID of the uploaded encrypted video segment file on the remote bucket.
+     */
+    videoObjectID: z.string(),
 });
 
 export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
@@ -184,12 +193,17 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
  *
  * - Otherwise it should be a {@link ReadableStream} of the video contents.
  *
- * @param objectUploadURL A presigned URL where the video segments should be
- * uploaded to.
+ * @param fileID The ID of the {@link EnteFile} for which we're generating the
+ * HLS.
+ *
+ * @param fetchURL The fully resolved API URL for obtaining the pre-signed URLs
+ * to which the video segment file should be uploaded.
+ *
+ * @param authToken The user's auth token (for making the request to
+ * {@link fetchURL}).
  *
  * @returns a token that can be used to retrieve the generated HLS playlist, and
- * metadata about the generated video (its byte size and dimensions). See {@link
- * GenerateHLSResult}.
+ * metadata about the generated video (See {@link GenerateHLSResult}).
  *
  * In case the video is such that it doesn't require a separate stream to be
  * generated (e.g. it is a small video using an already compatible codec), then
@@ -200,9 +214,16 @@ export type GenerateHLSResult = z.infer<typeof GenerateHLSResult>;
 export const initiateGenerateHLS = async (
     _: Electron,
     video: FileSystemUploadItem | ReadableStream,
-    objectUploadURL: string,
+    fileID: number,
+    fetchURL: string,
+    authToken: string,
 ): Promise<GenerateHLSResult | undefined> => {
-    const params = new URLSearchParams({ op: "generate-hls", objectUploadURL });
+    const params = new URLSearchParams({
+        op: "generate-hls",
+        fileID: fileID.toString(),
+        fetchURL,
+        authToken,
+    });
 
     let body: ReadableStream | null;
     if (video instanceof ReadableStream) {
@@ -227,11 +248,7 @@ export const initiateGenerateHLS = async (
     const url = `stream://video?${params.toString()}`;
     const res = await fetch(url, {
         method: "POST",
-        // The duplex option is required when body is a stream.
-        //
-        // @ts-expect-error TypeScript's libdom.d.ts does not include the
-        // "duplex" parameter, e.g. see
-        // https://github.com/node-fetch/node-fetch/issues/1769.
+        // @ts-expect-error See: [Note: duplex param required for stream body]
         duplex: "half",
         body,
     });

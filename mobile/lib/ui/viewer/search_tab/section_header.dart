@@ -39,7 +39,7 @@ class SectionHeader extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(24, 12, 12, 12),
                     child: Icon(
                       Icons.chevron_right_outlined,
-                      color: getEnteColorScheme(context).strokeMuted,
+                      color: getEnteColorScheme(context).blurStrokePressed,
                     ),
                   ),
                 )

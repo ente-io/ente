@@ -1,6 +1,5 @@
 import { expose } from "comlink";
 import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
-import type { StateAddress } from "libsodium-wrappers-sumo";
 import * as ei from "./ente-impl";
 import * as libsodium from "./libsodium";
 
@@ -39,6 +38,9 @@ export class CryptoWorker {
     decryptStreamChunk = ei._decryptStreamChunk;
     decryptMetadataJSON_New = ei._decryptMetadataJSON_New;
     decryptMetadataJSON = ei._decryptMetadataJSON;
+    chunkHashInit = ei._chunkHashInit;
+    chunkHashUpdate = ei._chunkHashUpdate;
+    chunkHashFinal = ei._chunkHashFinal;
     generateKeyPair = ei._generateKeyPair;
     boxSeal = ei._boxSeal;
     boxSealOpen = ei._boxSealOpen;
@@ -47,18 +49,6 @@ export class CryptoWorker {
     deriveInteractiveKey = ei._deriveInteractiveKey;
 
     // TODO: -- AUDIT BELOW --
-
-    async initChunkHashing() {
-        return libsodium.initChunkHashing();
-    }
-
-    async hashFileChunk(hashState: StateAddress, chunk: Uint8Array) {
-        return libsodium.hashFileChunk(hashState, chunk);
-    }
-
-    async completeChunkHashing(hashState: StateAddress) {
-        return libsodium.completeChunkHashing(hashState);
-    }
 
     async decryptB64(data: string, nonce: string, key: string) {
         return libsodium.decryptB64(data, nonce, key);

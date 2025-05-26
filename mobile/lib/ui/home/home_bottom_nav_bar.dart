@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/tab_changed_event.dart';
+import "package:photos/models/selected_albums.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -10,12 +11,14 @@ import 'package:photos/ui/tabs/nav_bar.dart';
 
 class HomeBottomNavigationBar extends StatefulWidget {
   const HomeBottomNavigationBar(
-    this.selectedFiles, {
+    this.selectedFiles,
+    this.selectedAlbums, {
     required this.selectedTabIndex,
     super.key,
   });
 
   final SelectedFiles selectedFiles;
+  final SelectedAlbums selectedAlbums;
   final int selectedTabIndex;
 
   @override
@@ -32,6 +35,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     super.initState();
     currentTabIndex = widget.selectedTabIndex;
     widget.selectedFiles.addListener(_selectedFilesListener);
+    widget.selectedAlbums.addListener(_selectedAlbumsListener);
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source != TabChangedEventSource.tabBar) {
@@ -56,10 +60,17 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   void dispose() {
     _tabChangedEventSubscription.cancel();
     widget.selectedFiles.removeListener(_selectedFilesListener);
+    widget.selectedAlbums.removeListener(_selectedAlbumsListener);
     super.dispose();
   }
 
   void _selectedFilesListener() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _selectedAlbumsListener() {
     if (mounted) {
       setState(() {});
     }
@@ -78,6 +89,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   @override
   Widget build(BuildContext context) {
     final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
+    final bool albumsAreSelected = widget.selectedAlbums.albums.isNotEmpty;
     final enteColorScheme = getEnteColorScheme(context);
 
     return SafeArea(
@@ -85,9 +97,9 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          height: filesAreSelected ? 0 : 56,
+          height: filesAreSelected || albumsAreSelected ? 0 : 56,
           child: IgnorePointer(
-            ignoring: filesAreSelected,
+            ignoring: filesAreSelected || albumsAreSelected,
             child: ListView(
               physics: const NeverScrollableScrollPhysics(),
               children: [

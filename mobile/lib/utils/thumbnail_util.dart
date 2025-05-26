@@ -13,6 +13,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import "package:photos/image/in_memory_image_cache.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/module/download/file_url.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/utils/file_key.dart";
 import 'package:photos/utils/file_uploader_util.dart';
@@ -167,7 +168,10 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
       };
 
       encryptedThumbnail = (await NetworkClient.instance.getDio().get(
-                file.pubPreviewUrl,
+                FileUrl.getUrl(
+                  file.uploadedFileID!,
+                  FileUrlType.publicThumbnail,
+                ),
                 options: Options(
                   headers: headers,
                   responseType: ResponseType.bytes,
@@ -176,7 +180,10 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
           .data;
     } else {
       encryptedThumbnail = (await NetworkClient.instance.getDio().get(
-                file.thumbnailUrl,
+                FileUrl.getUrl(
+                  file.uploadedFileID!,
+                  FileUrlType.thumbnail,
+                ),
                 options: Options(
                   headers: {"X-Auth-Token": Configuration.instance.getToken()},
                   responseType: ResponseType.bytes,

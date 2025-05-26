@@ -25,7 +25,6 @@ import {
 } from "ente-base/components/OverflowMenu";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { pt } from "ente-base/i18n";
 import {
     isArchivedCollection,
     isPinnedCollection,
@@ -343,7 +342,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                               onClick={onCollectionShare}
                               startIcon={<PeopleIcon />}
                           >
-                              {/*TODO(FAV):*/ pt("Share favorites")}
+                              {t("share_favorites")}
                           </OverflowMenuOption>,
                       ]
                     : []),
@@ -582,9 +581,9 @@ const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
 );
 
 const showDownloadQuickOption = (type: CollectionSummaryType) =>
+    type == "album" ||
     type == "folder" ||
     type == "favorites" ||
-    type == "album" ||
     type == "uncategorized" ||
     type == "hiddenItems" ||
     type == "incomingShareViewer" ||
@@ -620,10 +619,10 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
 );
 
 const showShareQuickOption = (type: CollectionSummaryType) =>
+    type == "album" ||
     type == "folder" ||
     (type == "favorites" &&
         /* TODO(FAV): */ settingsSnapshot().isInternalUser) ||
-    type == "album" ||
     type == "outgoingShare" ||
     type == "sharedOnlyViaLink" ||
     type == "archived" ||
@@ -649,7 +648,7 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
                     collectionSummaryType == "sharedOnlyViaLink"
                   ? t("modify_sharing")
                   : collectionSummaryType == "favorites"
-                    ? /*TODO(FAV):*/ pt("Share favorites")
+                    ? t("share_favorites")
                     : t("share_album")
         }
     >

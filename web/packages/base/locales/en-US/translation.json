@@ -677,5 +677,8 @@
     "light": "Light",
     "dark": "Dark",
     "streamable_videos": "Streamable videos",
-    "processing_videos_status": "Processing videos..."
+    "processing_videos_status": "Processing videos...",
+    "share_favorites": "Share favorites",
+    "person_favorites": "{{name}}'s favorites",
+    "shared_favorites": "Shared favorites"
 }
