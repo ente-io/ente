@@ -44,6 +44,12 @@
       "slug": "anycoindirect"
     },
     {
+      "title": "AR24",
+      "altNames": [
+        "Docaposte AR24"
+      ]
+    },
+    {
       "title": "Aruba",
       "slug": "aruba",
       "hex": "ef8a33"
@@ -442,6 +448,9 @@
       "slug": "finanzfluss"
     },
     {
+      "title": "Finary"
+    },
+    {
       "title": "Firefox",
       "slug": "mozilla"
     },
@@ -743,6 +752,7 @@
     {
       "title": "Mistral",
       "altNames": [
+        "Le Chat",
         "Mistral AI",
         "MistralAI"
       ]
@@ -891,6 +901,10 @@
       "title": "OnShape",
       "slug": "onshape",
       "hex": "7abb5e"
+    },
+    {
+      "title": "Oracle Cloud",
+      "slug": "oracle_cloud"
     },
     {
       "title": "Parqet",

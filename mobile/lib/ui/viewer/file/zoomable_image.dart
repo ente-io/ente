@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data' show Uint8List;
 
 import 'package:flutter/material.dart';
 import "package:flutter_image_compress/flutter_image_compress.dart";
@@ -61,6 +62,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
   final _scaleStateController = PhotoViewScaleStateController();
   late final StreamSubscription<FileCaptionUpdatedEvent>
       _captionUpdatedSubscription;
+
+  // This is to prevent the app from crashing when loading 200MP images
+  // https://github.com/flutter/flutter/issues/110331
+  bool get isTooLargeImage => _photo.width * _photo.height > 160000000;
 
   @override
   void initState() {
@@ -362,10 +367,33 @@ class _ZoomableImageState extends State<ZoomableImage> {
   }
 
   void _onFileLoaded(File file) {
-    final imageProvider = Image.file(
-      file,
-      gaplessPlayback: true,
-    ).image;
+    ImageProvider imageProvider;
+    if (isTooLargeImage) {
+      _logger.info(
+        "Handling very large image (${_photo.width}x${_photo.height}) to prevent crash",
+      );
+      final aspectRatio = _photo.width / _photo.height;
+      int targetWidth, targetHeight;
+      if (aspectRatio > 1) {
+        targetWidth = 4096;
+        targetHeight = (targetWidth / aspectRatio).round();
+      } else {
+        targetHeight = 4096;
+        targetWidth = (targetHeight * aspectRatio).round();
+      }
+
+      imageProvider = Image.file(
+        file,
+        gaplessPlayback: true,
+        cacheWidth: targetWidth,
+        cacheHeight: targetHeight,
+      ).image;
+    } else {
+      imageProvider = Image.file(
+        file,
+        gaplessPlayback: true,
+      ).image;
+    }
 
     if (mounted) {
       precacheImage(
@@ -435,8 +463,31 @@ class _ZoomableImageState extends State<ZoomableImage> {
     _logger.info("Compressing ${_photo.displayName} to viewable format");
     _convertToSupportedFormat = true;
 
-    final compressedFile =
-        await FlutterImageCompress.compressWithFile(file.path);
+    Uint8List? compressedFile;
+    if (isTooLargeImage) {
+      _logger.info(
+        "Compressing very large image (${_photo.width}x${_photo.height}) more aggressively",
+      );
+      final aspectRatio = _photo.width / _photo.height;
+      int targetWidth, targetHeight;
+
+      if (aspectRatio > 1) {
+        targetWidth = 4096;
+        targetHeight = (targetWidth / aspectRatio).round();
+      } else {
+        targetHeight = 4096;
+        targetWidth = (targetHeight * aspectRatio).round();
+      }
+
+      compressedFile = await FlutterImageCompress.compressWithFile(
+        file.path,
+        minWidth: targetWidth,
+        minHeight: targetHeight,
+        quality: 85,
+      );
+    } else {
+      compressedFile = await FlutterImageCompress.compressWithFile(file.path);
+    }
 
     if (compressedFile != null) {
       final imageProvider = MemoryImage(compressedFile);

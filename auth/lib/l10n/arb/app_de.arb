@@ -173,6 +173,7 @@
   "invalidQRCode": "Ungültiger QR-Code",
   "noRecoveryKeyTitle": "Kein Wiederherstellungsschlüssel?",
   "enterEmailHint": "Geben Sie Ihre E-Mail-Adresse ein",
+  "enterNewEmailHint": "Gib deine neue E-Mail-Adresse ein",
   "invalidEmailTitle": "Ungültige E-Mail-Adresse",
   "invalidEmailMessage": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
   "deleteAccount": "Konto löschen",
@@ -517,5 +518,6 @@
   "advanced": "Erweitert",
   "algorithm": "Algorithmus",
   "type": "Typ",
+  "period": "Periode",
   "digits": "Ziffern"
 }

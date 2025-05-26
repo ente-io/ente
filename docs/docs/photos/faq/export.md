@@ -21,7 +21,7 @@ always available on your machine.
   background without you needing to run any other cron jobs. See
   [migration/export](/photos/migration/export/) for more details.
 
-## Does the exported data preserve folder structure?
+## Does the exported data preserve album structure?
 
 Yes. When you export your data for local backup, it will maintain the exact
 album structure how you have set up within Ente.

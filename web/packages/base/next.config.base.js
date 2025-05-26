@@ -64,7 +64,7 @@ const isDesktop = process.env._ENTE_IS_DESKTOP ? "1" : "";
 
 /**
  * When we're running within the desktop app, also extract the version of the
- * desktop app for use in our "X-Client-Package" string.
+ * desktop app for use in our "X-Client-Version" string.
  *
  * > The web app has continuous deployments, and doesn't have versions.
  */
