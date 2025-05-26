@@ -173,6 +173,7 @@
   "invalidQRCode": "二维码无效",
   "noRecoveryKeyTitle": "没有恢复密钥吗？",
   "enterEmailHint": "请输入您的电子邮件地址",
+  "enterNewEmailHint": "请输入您的新电子邮件地址",
   "invalidEmailTitle": "无效的电子邮件地址",
   "invalidEmailMessage": "请输入一个有效的电子邮件地址。",
   "deleteAccount": "删除账户",
