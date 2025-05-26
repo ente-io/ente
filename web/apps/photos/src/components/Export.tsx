@@ -555,38 +555,17 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
     allCollectionsNameByID,
     pendingFiles,
 }) => {
-    const renderListItem = (file: EnteFile) => {
-        return (
-            <FlexWrapper>
-                <Box sx={{ marginRight: "8px" }}>
-                    <ItemCard
-                        key={file.id}
-                        TileComponent={PreviewItemTile}
-                        coverFile={file}
-                    />
-                </Box>
-                <ItemContainer>
-                    {`${allCollectionsNameByID.get(file.collectionID)} / ${
-                        file.metadata.title
-                    }`}
-                </ItemContainer>
-            </FlexWrapper>
-        );
-    };
-
     const getItemTitle = (file: EnteFile) => {
         return `${allCollectionsNameByID.get(file.collectionID)} / ${
             file.metadata.title
         }`;
     };
 
-    const itemData = createItemData(renderListItem, getItemTitle, pendingFiles);
-
-    const getItemKey: ListItemKeySelector<ItemData<T>> = (index, data) => {
-        const { items } = data;
-        const file = items[index] as EnteFile;
-        return `${file.collectionID}-${file.id}`;
-    };
+    const itemData = createItemData(
+        allCollectionsNameByID,
+        getItemTitle,
+        pendingFiles,
+    );
 
     const itemSize = 50; /* px */
     const itemCount = pendingFiles.length;
@@ -603,7 +582,10 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
                 height={listHeight}
                 width="100%"
                 {...{ itemSize, itemCount }}
-                itemKey={getItemKey}
+                itemKey={(index, { items }) => {
+                    const file = items[index] as EnteFile;
+                    return `${file.collectionID}/${file.id}`;
+                }}
             >
                 {Row}
             </FixedSizeList>
@@ -631,29 +613,16 @@ const ItemContainer = styled("div")`
 
 import memoize from "memoize-one";
 import React, { ReactElement } from "react";
-import {
-    areEqual,
-    FixedSizeList,
-    ListChildComponentProps,
-    ListItemKeySelector,
-} from "react-window";
-
-export interface ItemListProps<T> {
-    items: T[];
-    getItemTitle: (item: T) => string;
-    renderListItem: (item: T) => React.JSX.Element;
-    maxHeight?: number;
-    itemSize?: number;
-}
+import { areEqual, FixedSizeList, ListChildComponentProps } from "react-window";
 
 interface ItemData<T> {
-    renderListItem: (item: T) => React.JSX.Element;
+    allCollectionsNameByID: Map<number, string>;
     getItemTitle: (item: T) => string;
     items: T[];
 }
 
 const createItemData: <T>(
-    renderListItem: (item: T) => React.JSX.Element,
+    allCollectionsNameByID: Map<number, string>,
     getItemTitle: (item: T) => string,
     items: T[],
 ) => ItemData<T> = memoize((renderListItem, getItemTitle, items) => ({
@@ -669,7 +638,8 @@ const Row: <T>({
     data,
 }: ListChildComponentProps<ItemData<T>>) => ReactElement = React.memo(
     ({ index, style, data }) => {
-        const { renderListItem, items, getItemTitle } = data;
+        const { allCollectionsNameByID, items, getItemTitle } = data;
+        const file = items[index] as EnteFile;
         return (
             <Tooltip
                 slotProps={{
@@ -686,11 +656,25 @@ const Row: <T>({
                 enterDelay={300}
                 enterNextDelay={100}
             >
-                <div style={style}>{renderListItem(items[index])}</div>
+                <div style={style}>
+                    {" "}
+                    <FlexWrapper>
+                        <Box sx={{ marginRight: "8px" }}>
+                            <ItemCard
+                                key={file.id}
+                                TileComponent={PreviewItemTile}
+                                coverFile={file}
+                            />
+                        </Box>
+                        <ItemContainer>
+                            {`${allCollectionsNameByID.get(file.collectionID)} / ${
+                                file.metadata.title
+                            }`}
+                        </ItemContainer>
+                    </FlexWrapper>
+                </div>
             </Tooltip>
         );
     },
     areEqual,
 );
-
-export default function ItemList<T>(props: ItemListProps<T>) {}
