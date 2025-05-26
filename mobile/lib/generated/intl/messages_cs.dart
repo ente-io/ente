@@ -360,6 +360,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Na <branding>ente</branding>"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("Jejda"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Jejda, něco se pokazilo"),

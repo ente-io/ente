@@ -187,6 +187,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "notifications": MessageLookupByLibrary.simpleMessage("Апавяшчэнні"),
         "ok": MessageLookupByLibrary.simpleMessage("Добра"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("Вой"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Штосьці пайшло не так"),

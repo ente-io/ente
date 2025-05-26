@@ -224,6 +224,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "บน <branding>ente</branding>"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("อ๊ะ"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("อ๊ะ มีบางอย่างผิดพลาด"),

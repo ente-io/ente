@@ -86,6 +86,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "हमारे एंड-टू-एंड एन्क्रिप्शन प्रोटोकॉल की प्रकृति के कारण, आपके डेटा को आपके पासवर्ड या रिकवरी कुंजी के बिना डिक्रिप्ट नहीं किया जा सकता है"),
         "ok": MessageLookupByLibrary.simpleMessage("ठीक है"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("ओह!"),
         "password": MessageLookupByLibrary.simpleMessage("पासवर्ड"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("पुनः प्राप्त"),

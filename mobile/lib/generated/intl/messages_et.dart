@@ -172,6 +172,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Puudub"),
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("Oih"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oih, midagi läks valesti"),

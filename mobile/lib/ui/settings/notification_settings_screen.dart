@@ -102,9 +102,9 @@ class NotificationSettingsScreen extends StatelessWidget {
                               alignCaptionedTextToLeft: true,
                               isGestureDetectorDisabled: true,
                             ),
-                            const MenuSectionDescriptionWidget(
+                            MenuSectionDescriptionWidget(
                               content:
-                                  "Receive reminders about memories from this day in previous years.",
+                                  S.of(context).onThisDayNotificationExplanation,
                             ),
                           ],
                         ),

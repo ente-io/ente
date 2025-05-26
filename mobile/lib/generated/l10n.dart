@@ -11985,6 +11985,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Receive reminders about memories from this day in previous years.`
+  String get onThisDayNotificationExplanation {
+    return Intl.message(
+      'Receive reminders about memories from this day in previous years.',
+      name: 'onThisDayNotificationExplanation',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

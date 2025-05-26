@@ -1431,6 +1431,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onTheRoad":
             MessageLookupByLibrary.simpleMessage("De nuevo en la carretera"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Solo ellos"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),

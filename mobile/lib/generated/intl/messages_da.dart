@@ -300,6 +300,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ingen gendannelsesnøgle?"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Ups, noget gik galt"),

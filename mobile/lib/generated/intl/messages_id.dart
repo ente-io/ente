@@ -940,6 +940,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Di <branding>ente</branding>"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "oops": MessageLookupByLibrary.simpleMessage("Aduh"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(

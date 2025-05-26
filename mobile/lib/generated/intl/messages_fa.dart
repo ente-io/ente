@@ -272,6 +272,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "notifications": MessageLookupByLibrary.simpleMessage("آگاه‌سازی‌ها"),
         "ok": MessageLookupByLibrary.simpleMessage("تایید"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("اوه"),
         "password": MessageLookupByLibrary.simpleMessage("رمز عبور"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(

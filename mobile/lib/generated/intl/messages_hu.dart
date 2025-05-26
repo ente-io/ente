@@ -44,6 +44,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Look back on your memories 🌄"),
         "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
             "Sorry, we had to pause your backups"),
         "verify": MessageLookupByLibrary.simpleMessage("Hitelesítés")
