@@ -92,6 +92,17 @@ class MemoriesCacheService {
     Bus.instance.fire(MemoriesSettingChanged());
   }
 
+  Future<void> toggleOnThisDayNotifications() async {
+    final oldValue = localSettings.isOnThisDayNotificationsEnabled;
+    await localSettings.setOnThisDayNotificationsEnabled(!oldValue);
+    _logger.info("Turning onThisDayNotifications ${oldValue ? "off" : "on"}");
+    if (oldValue) {
+      await _clearAllScheduledOnThisDayNotifications();
+    } else {
+      queueUpdateCache();
+    }
+  }
+
   bool get enableSmartMemories =>
       flagService.hasGrantedMLConsent &&
       localSettings.isMLLocalIndexingEnabled &&
@@ -238,11 +249,20 @@ class MemoriesCacheService {
     return newCache;
   }
 
+  Future<void> _clearAllScheduledOnThisDayNotifications() async {
+    await NotificationService.instance
+        .clearAllScheduledNotifications(containingPayload: "onThisDay");
+  }
+
   Future<void> _scheduleOnThisDayNotifications(
     List<SmartMemory> allMemories,
   ) async {
-    await NotificationService.instance
-        .clearAllScheduledNotifications(containingPayload: "onThisDay");
+    if (!localSettings.isOnThisDayNotificationsEnabled) {
+      _logger
+          .info("On this day notifications are disabled, skipping scheduling");
+      return;
+    }
+    await _clearAllScheduledOnThisDayNotifications();
     final scheduledDates = <DateTime>{};
     for (final memory in allMemories) {
       if (memory.type != MemoryType.onThisDay) {
