@@ -13,7 +13,6 @@ import {
     Tooltip,
     Typography,
 } from "@mui/material";
-import ItemList from "components/ItemList";
 import { isDesktop } from "ente-base/app";
 import { EnteSwitch } from "ente-base/components/EnteSwitch";
 import { LinkButton } from "ente-base/components/LinkButton";
@@ -584,10 +583,6 @@ const ExportPendingList: React.FC<ExportPendingListProps> = (props) => {
         }`;
     };
 
-    const generateItemKey = (file: EnteFile) => {
-        return `${file.collectionID}-${file.id}`;
-    };
-
     return (
         <TitledMiniDialog
             open={props.isOpen}
@@ -601,7 +596,6 @@ const ExportPendingList: React.FC<ExportPendingListProps> = (props) => {
                 items={props.pendingExports}
                 renderListItem={renderListItem}
                 getItemTitle={getItemTitle}
-                generateItemKey={generateItemKey}
             />
             <FocusVisibleButton
                 fullWidth
@@ -623,3 +617,100 @@ const ItemContainer = styled("div")`
     white-space: nowrap;
     text-overflow: ellipsis;
 `;
+
+import memoize from "memoize-one";
+import React, { ReactElement } from "react";
+import {
+    areEqual,
+    FixedSizeList as List,
+    ListChildComponentProps,
+    ListItemKeySelector,
+} from "react-window";
+
+export interface ItemListProps<T> {
+    items: T[];
+    getItemTitle: (item: T) => string;
+    renderListItem: (item: T) => React.JSX.Element;
+    maxHeight?: number;
+    itemSize?: number;
+}
+
+interface ItemData<T> {
+    renderListItem: (item: T) => React.JSX.Element;
+    getItemTitle: (item: T) => string;
+    items: T[];
+}
+
+const createItemData: <T>(
+    renderListItem: (item: T) => React.JSX.Element,
+    getItemTitle: (item: T) => string,
+    items: T[],
+) => ItemData<T> = memoize((renderListItem, getItemTitle, items) => ({
+    renderListItem,
+    getItemTitle,
+    items,
+}));
+
+// @ts-expect-error "TODO(MR): Understand and fix the type error here"
+const Row: <T>({
+    index,
+    style,
+    data,
+}: ListChildComponentProps<ItemData<T>>) => ReactElement = React.memo(
+    ({ index, style, data }) => {
+        const { renderListItem, items, getItemTitle } = data;
+        return (
+            <Tooltip
+                slotProps={{
+                    // Reduce the vertical offset of the tooltip "popper" from
+                    // the element on which the tooltip appears.
+                    popper: {
+                        modifiers: [
+                            { name: "offset", options: { offset: [0, -14] } },
+                        ],
+                    },
+                }}
+                title={getItemTitle(items[index])}
+                placement="bottom-start"
+                enterDelay={300}
+                enterNextDelay={100}
+            >
+                <div style={style}>{renderListItem(items[index])}</div>
+            </Tooltip>
+        );
+    },
+    areEqual,
+);
+
+export default function ItemList<T>(props: ItemListProps<T>) {
+    const itemData = createItemData(
+        props.renderListItem,
+        props.getItemTitle,
+        props.items,
+    );
+
+    const getItemKey: ListItemKeySelector<ItemData<T>> = (index, data) => {
+        const { items } = data;
+        const file = items[index] as EnteFile;
+        const key = `${file.collectionID}-${file.id}`;
+        return key;
+    };
+
+    return (
+        <Box sx={{ pl: 2 }}>
+            <List
+                itemData={itemData}
+                height={Math.min(
+                    props.itemSize * props.items.length,
+                    props.maxHeight,
+                )}
+                width={"100%"}
+                itemSize={props.itemSize}
+                itemCount={props.items.length}
+                itemKey={getItemKey}
+            >
+                {Row}
+            </List>
+        </Box>
+    );
+}
