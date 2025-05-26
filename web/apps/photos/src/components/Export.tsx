@@ -44,8 +44,9 @@ import {
 } from "ente-shared/components/Container";
 import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import { areEqual, FixedSizeList, ListChildComponentProps } from "react-window";
 import exportService, {
     ExportStage,
     selectAndPrepareExportDirectory,
@@ -555,18 +556,6 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
     allCollectionsNameByID,
     pendingFiles,
 }) => {
-    const getItemTitle = (file: EnteFile) => {
-        return `${allCollectionsNameByID.get(file.collectionID)} / ${
-            file.metadata.title
-        }`;
-    };
-
-    const itemData = createItemData(
-        allCollectionsNameByID,
-        getItemTitle,
-        pendingFiles,
-    );
-
     const itemSize = 50; /* px */
     const itemCount = pendingFiles.length;
     const listHeight = Math.min(itemCount * itemSize, 240);
@@ -578,12 +567,12 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
             title={t("pending_items")}
         >
             <FixedSizeList
-                itemData={itemData}
+                itemData={{ allCollectionsNameByID, pendingFiles }}
                 height={listHeight}
                 width="100%"
                 {...{ itemSize, itemCount }}
-                itemKey={(index, { items }) => {
-                    const file = items[index] as EnteFile;
+                itemKey={(index, { pendingFiles }) => {
+                    const file = pendingFiles[index]!;
                     return `${file.collectionID}/${file.id}`;
                 }}
             >
@@ -611,35 +600,25 @@ const ItemContainer = styled("div")`
     text-overflow: ellipsis;
 `;
 
-import memoize from "memoize-one";
-import React, { ReactElement } from "react";
-import { areEqual, FixedSizeList, ListChildComponentProps } from "react-window";
-
-interface ItemData<T> {
+interface ItemData {
     allCollectionsNameByID: Map<number, string>;
-    getItemTitle: (item: T) => string;
-    items: T[];
+    pendingFiles: EnteFile[];
 }
 
-const createItemData: <T>(
-    allCollectionsNameByID: Map<number, string>,
-    getItemTitle: (item: T) => string,
-    items: T[],
-) => ItemData<T> = memoize((renderListItem, getItemTitle, items) => ({
-    renderListItem,
-    getItemTitle,
-    items,
-}));
-
 // @ts-expect-error "TODO(MR): Understand and fix the type error here"
-const Row: <T>({
+const Row: ({
     index,
     style,
     data,
-}: ListChildComponentProps<ItemData<T>>) => ReactElement = React.memo(
+}: ListChildComponentProps<ItemData>) => ReactElement = React.memo(
     ({ index, style, data }) => {
-        const { allCollectionsNameByID, items, getItemTitle } = data;
-        const file = items[index] as EnteFile;
+        const { allCollectionsNameByID, pendingFiles } = data;
+        const file = pendingFiles[index] as EnteFile;
+
+        const itemTitle = `${allCollectionsNameByID.get(file.collectionID)} / ${
+            file.metadata.title
+        }`;
+
         return (
             <Tooltip
                 slotProps={{
@@ -651,7 +630,7 @@ const Row: <T>({
                         ],
                     },
                 }}
-                title={getItemTitle(items[index])}
+                title={itemTitle}
                 placement="bottom-start"
                 enterDelay={300}
                 enterNextDelay={100}
@@ -666,11 +645,7 @@ const Row: <T>({
                                 coverFile={file}
                             />
                         </Box>
-                        <ItemContainer>
-                            {`${allCollectionsNameByID.get(file.collectionID)} / ${
-                                file.metadata.title
-                            }`}
-                        </ItemContainer>
+                        <ItemContainer>{itemTitle}</ItemContainer>
                     </FlexWrapper>
                 </div>
             </Tooltip>
