@@ -9,12 +9,15 @@ import {
     Divider,
     LinearProgress,
     Stack,
+    styled,
     Tooltip,
     Typography,
 } from "@mui/material";
+import ItemList from "components/ItemList";
 import { isDesktop } from "ente-base/app";
 import { EnteSwitch } from "ente-base/components/EnteSwitch";
 import { LinkButton } from "ente-base/components/LinkButton";
+import { TitledMiniDialog } from "ente-base/components/MiniDialog";
 import {
     OverflowMenu,
     OverflowMenuOption,
@@ -31,6 +34,7 @@ import { formattedNumber } from "ente-base/i18n";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { EnteFile } from "ente-media/file";
+import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
 import {
     FlexWrapper,
     SpaceBetweenFlex,
@@ -47,7 +51,6 @@ import exportService, {
     type ExportProgress,
     type ExportSettings,
 } from "services/export";
-import ExportPendingList from "./ExportPendingList";
 
 type ExportProps = ModalVisibilityProps & {
     allCollectionsNameByID: Map<number, string>;
@@ -547,3 +550,76 @@ const ExportFinishedDialogContent: React.FC<
         </>
     );
 };
+
+interface ExportPendingListProps {
+    isOpen: boolean;
+    onClose: () => void;
+    allCollectionsNameByID: Map<number, string>;
+    pendingExports: EnteFile[];
+}
+
+const ExportPendingList: React.FC<ExportPendingListProps> = (props) => {
+    const renderListItem = (file: EnteFile) => {
+        return (
+            <FlexWrapper>
+                <Box sx={{ marginRight: "8px" }}>
+                    <ItemCard
+                        key={file.id}
+                        TileComponent={PreviewItemTile}
+                        coverFile={file}
+                    />
+                </Box>
+                <ItemContainer>
+                    {`${props.allCollectionsNameByID.get(file.collectionID)} / ${
+                        file.metadata.title
+                    }`}
+                </ItemContainer>
+            </FlexWrapper>
+        );
+    };
+
+    const getItemTitle = (file: EnteFile) => {
+        return `${props.allCollectionsNameByID.get(file.collectionID)} / ${
+            file.metadata.title
+        }`;
+    };
+
+    const generateItemKey = (file: EnteFile) => {
+        return `${file.collectionID}-${file.id}`;
+    };
+
+    return (
+        <TitledMiniDialog
+            open={props.isOpen}
+            onClose={props.onClose}
+            paperMaxWidth="444px"
+            title={t("pending_items")}
+        >
+            <ItemList
+                maxHeight={240}
+                itemSize={50}
+                items={props.pendingExports}
+                renderListItem={renderListItem}
+                getItemTitle={getItemTitle}
+                generateItemKey={generateItemKey}
+            />
+            <FocusVisibleButton
+                fullWidth
+                color="secondary"
+                onClick={props.onClose}
+            >
+                {t("close")}
+            </FocusVisibleButton>
+        </TitledMiniDialog>
+    );
+};
+
+const ItemContainer = styled("div")`
+    position: relative;
+    top: 5px;
+    display: inline-block;
+    max-width: 394px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+`;
