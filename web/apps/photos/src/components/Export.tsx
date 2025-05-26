@@ -338,8 +338,8 @@ const ExportDynamicContent: React.FC<ExportDynamicContentProps> = ({
                 <ExportInProgress
                     exportStage={exportStage}
                     exportProgress={exportProgress}
-                    stopExport={stopExport}
-                    closeExportDialog={onHide}
+                    onClose={onHide}
+                    onStop={stopExport}
                 />
             );
         case ExportStage.finished:
@@ -361,98 +361,94 @@ const ExportDynamicContent: React.FC<ExportDynamicContentProps> = ({
 interface ExportInProgressProps {
     exportStage: ExportStage;
     exportProgress: ExportProgress;
-    stopExport: () => void;
-    closeExportDialog: () => void;
+    /**
+     * Called when the user wants to stop the export.
+     */
+    onStop: () => void;
+    /**
+     * Called when the user closes the export dialog.
+     * @returns
+     */
+    onClose: () => void;
 }
 
-const ExportInProgress: React.FC<ExportInProgressProps> = (props) => {
-    const showIndeterminateProgress = () => {
-        return (
-            props.exportStage === ExportStage.starting ||
-            props.exportStage === ExportStage.migration ||
-            props.exportStage === ExportStage.renamingCollectionFolders ||
-            props.exportStage === ExportStage.trashingDeletedFiles ||
-            props.exportStage === ExportStage.trashingDeletedCollections
-        );
-    };
-    return (
-        <>
-            <DialogContent>
-                <VerticallyCentered>
-                    <Typography sx={{ mb: 1.5 }}>
-                        {props.exportStage === ExportStage.starting ? (
-                            t("export_starting")
-                        ) : props.exportStage === ExportStage.migration ? (
-                            t("export_preparing")
-                        ) : props.exportStage ===
-                          ExportStage.renamingCollectionFolders ? (
-                            t("export_renaming_album_folders")
-                        ) : props.exportStage ===
-                          ExportStage.trashingDeletedFiles ? (
-                            t("export_trashing_deleted_files")
-                        ) : props.exportStage ===
-                          ExportStage.trashingDeletedCollections ? (
-                            t("export_trashing_deleted_albums")
-                        ) : (
-                            <Typography
-                                component="span"
-                                sx={{ color: "text.muted" }}
-                            >
-                                <Trans
-                                    i18nKey={"export_progress"}
-                                    components={{
-                                        a: (
-                                            <Typography
-                                                component="span"
-                                                sx={{
-                                                    color: "text.base",
-                                                    pr: "1rem",
-                                                    wordSpacing: "1rem",
-                                                }}
-                                            />
-                                        ),
-                                    }}
-                                    values={{ progress: props.exportProgress }}
-                                />
-                            </Typography>
-                        )}
-                    </Typography>
-                    <FlexWrapper px={1}>
-                        {showIndeterminateProgress() ? (
-                            <LinearProgress />
-                        ) : (
-                            <LinearProgress
-                                variant="determinate"
-                                value={Math.round(
-                                    ((props.exportProgress.success +
-                                        props.exportProgress.failed) *
-                                        100) /
-                                        props.exportProgress.total,
-                                )}
+const ExportInProgress: React.FC<ExportInProgressProps> = ({
+    exportStage,
+    exportProgress,
+    onClose,
+    onStop,
+}) => (
+    <>
+        <DialogContent>
+            <VerticallyCentered>
+                <Typography sx={{ mb: 1.5 }}>
+                    {exportStage === ExportStage.starting ? (
+                        t("export_starting")
+                    ) : exportStage === ExportStage.migration ? (
+                        t("export_preparing")
+                    ) : exportStage ===
+                      ExportStage.renamingCollectionFolders ? (
+                        t("export_renaming_album_folders")
+                    ) : exportStage === ExportStage.trashingDeletedFiles ? (
+                        t("export_trashing_deleted_files")
+                    ) : exportStage ===
+                      ExportStage.trashingDeletedCollections ? (
+                        t("export_trashing_deleted_albums")
+                    ) : (
+                        <Typography
+                            component="span"
+                            sx={{ color: "text.muted" }}
+                        >
+                            <Trans
+                                i18nKey={"export_progress"}
+                                components={{
+                                    a: (
+                                        <Typography
+                                            component="span"
+                                            sx={{
+                                                color: "text.base",
+                                                pr: "1rem",
+                                                wordSpacing: "1rem",
+                                            }}
+                                        />
+                                    ),
+                                }}
+                                values={{ progress: exportProgress }}
                             />
-                        )}
-                    </FlexWrapper>
-                </VerticallyCentered>
-            </DialogContent>
-            <DialogActions>
-                <FocusVisibleButton
-                    fullWidth
-                    color="secondary"
-                    onClick={props.closeExportDialog}
-                >
-                    {t("close")}
-                </FocusVisibleButton>
-                <FocusVisibleButton
-                    fullWidth
-                    color="critical"
-                    onClick={props.stopExport}
-                >
-                    {t("stop")}
-                </FocusVisibleButton>
-            </DialogActions>
-        </>
-    );
-};
+                        </Typography>
+                    )}
+                </Typography>
+                <FlexWrapper px={1}>
+                    {exportStage === ExportStage.starting ||
+                    exportStage === ExportStage.migration ||
+                    exportStage === ExportStage.renamingCollectionFolders ||
+                    exportStage === ExportStage.trashingDeletedFiles ||
+                    exportStage === ExportStage.trashingDeletedCollections ? (
+                        <LinearProgress />
+                    ) : (
+                        <LinearProgress
+                            variant="determinate"
+                            value={Math.round(
+                                ((exportProgress.success +
+                                    exportProgress.failed) *
+                                    100) /
+                                    exportProgress.total,
+                            )}
+                        />
+                    )}
+                </FlexWrapper>
+            </VerticallyCentered>
+        </DialogContent>
+        <DialogActions>
+            <FocusVisibleButton fullWidth color="secondary" onClick={onClose}>
+                {t("close")}
+            </FocusVisibleButton>
+            <FocusVisibleButton fullWidth color="critical" onClick={onStop}>
+                {t("stop")}
+            </FocusVisibleButton>
+        </DialogActions>
+    </>
+);
 
 interface ExportFinishedProps {
     pendingExports: EnteFile[];
