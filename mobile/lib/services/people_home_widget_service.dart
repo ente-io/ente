@@ -1,3 +1,5 @@
+import "dart:math";
+
 import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -380,52 +382,48 @@ class PeopleHomeWidgetService {
     final limit = isWidgetPresent ? MAX_PEOPLE_LIMIT : 5;
     await updatePeopleStatus(WidgetStatus.notSynced);
 
-    for (final entry in peopleWithFiles.entries) {
-      final personId = entry.key;
-      final personName = entry.value.$1;
-      final personFiles = entry.value.$2;
+    final peopleWithFilesLength = peopleWithFiles.length;
+    final peopleWithFilesEntries = peopleWithFiles.entries.toList();
+    final random = Random();
 
-      for (final file in personFiles) {
-        final renderResult = await HomeWidgetService.instance
-            .renderFile(
-          file,
-          "people_widget_$renderedCount",
-          personName,
-          personId,
-        )
-            .catchError((e, stackTrace) {
-          _logger.severe("Error rendering widget", e, stackTrace);
-          return null;
-        });
+    while (renderedCount < limit) {
+      final randomEntry =
+          peopleWithFilesEntries[random.nextInt(peopleWithFilesLength)];
+      final randomPersonFile = randomEntry.value.$2.elementAt(
+        random.nextInt(randomEntry.value.$2.length),
+      );
+      final personId = randomEntry.key;
+      final personName = randomEntry.value.$1;
 
-        if (renderResult != null) {
-          // Check for blockers again before continuing
-          if (await _hasAnyBlockers()) {
-            return;
-          }
+      final renderResult = await HomeWidgetService.instance
+          .renderFile(
+        randomPersonFile,
+        "people_widget_$renderedCount",
+        personName,
+        personId,
+      )
+          .catchError((e, stackTrace) {
+        _logger.severe("Error rendering widget", e, stackTrace);
+        return null;
+      });
 
-          await _setTotalPeople(renderedCount);
-
-          // Show update toast after first item is rendered
-          if (renderedCount == 1) {
-            await _refreshWidget(
-              message: "First person fetched, updating widget",
-            );
-            await updatePeopleStatus(WidgetStatus.syncedPartially);
-          }
-
-          renderedCount++;
-
-          // Limit the number of people to avoid performance issues
-          if (renderedCount >= limit) {
-            _logger.warning("Maximum people limit ($limit) reached");
-            break;
-          }
+      if (renderResult != null) {
+        // Check for blockers again before continuing
+        if (await _hasAnyBlockers()) {
+          return;
         }
-      }
 
-      if (renderedCount >= limit) {
-        break;
+        await _setTotalPeople(renderedCount);
+
+        // Show update toast after first item is rendered
+        if (renderedCount == 1) {
+          await _refreshWidget(
+            message: "First person fetched, updating widget",
+          );
+          await updatePeopleStatus(WidgetStatus.syncedPartially);
+        }
+
+        renderedCount++;
       }
     }
 
