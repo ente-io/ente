@@ -581,19 +581,37 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
         }`;
     };
 
+    const itemData = createItemData(
+        renderListItem,
+        getItemTitle,
+        pendingExports,
+    );
+
+    const getItemKey: ListItemKeySelector<ItemData<T>> = (index, data) => {
+        const { items } = data;
+        const file = items[index] as EnteFile;
+        return `${file.collectionID}-${file.id}`;
+    };
+
+    const itemSize = 50; /* px */
+    const itemCount = pendingExports.length;
+    const listHeight = Math.min(itemCount * itemSize, 240);
+
     return (
         <TitledMiniDialog
             {...{ open, onClose }}
             paperMaxWidth="444px"
             title={t("pending_items")}
         >
-            <ItemList
-                maxHeight={240}
-                itemSize={50}
-                items={pendingExports}
-                renderListItem={renderListItem}
-                getItemTitle={getItemTitle}
-            />
+            <FixedSizeList
+                itemData={itemData}
+                height={listHeight}
+                width="100%"
+                {...{ itemSize, itemCount }}
+                itemKey={getItemKey}
+            >
+                {Row}
+            </FixedSizeList>
             <FocusVisibleButton
                 fullWidth
                 color="secondary"
@@ -620,7 +638,7 @@ import memoize from "memoize-one";
 import React, { ReactElement } from "react";
 import {
     areEqual,
-    FixedSizeList as List,
+    FixedSizeList,
     ListChildComponentProps,
     ListItemKeySelector,
 } from "react-window";
@@ -680,32 +698,4 @@ const Row: <T>({
     areEqual,
 );
 
-export default function ItemList<T>(props: ItemListProps<T>) {
-    const itemData = createItemData(
-        props.renderListItem,
-        props.getItemTitle,
-        props.items,
-    );
-
-    const getItemKey: ListItemKeySelector<ItemData<T>> = (index, data) => {
-        const { items } = data;
-        const file = items[index] as EnteFile;
-        return `${file.collectionID}-${file.id}`;
-    };
-
-    return (
-        <List
-            itemData={itemData}
-            height={Math.min(
-                props.itemSize * props.items.length,
-                props.maxHeight,
-            )}
-            width={"100%"}
-            itemSize={props.itemSize}
-            itemCount={props.items.length}
-            itemKey={getItemKey}
-        >
-            {Row}
-        </List>
-    );
-}
+export default function ItemList<T>(props: ItemListProps<T>) {}
