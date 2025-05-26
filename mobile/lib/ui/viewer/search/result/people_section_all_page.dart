@@ -1,6 +1,5 @@
 import "dart:async";
 
-import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/events/event.dart";
@@ -121,18 +120,6 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                       ((crossAxisCount - 1) * gridPadding))) /
               crossAxisCount;
 
-          List<GenericSearchResult> data = results;
-
-          if (widget.namedOnly && widget.selectedPeople != null) {
-            data = data.sorted(
-              (a, b) => widget.selectedPeople!.isPersonSelected(
-                (b.hierarchicalSearchFilter as FaceFilter).personId!,
-              )
-                  ? 1
-                  : -1,
-            );
-          }
-
           return GridView.builder(
             padding: const EdgeInsets.fromLTRB(
               horizontalEdgePadding,
@@ -151,7 +138,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             itemCount: results.length,
             itemBuilder: (context, index) {
               return PersonSearchExample(
-                searchResult: data[index],
+                searchResult: results[index],
                 size: itemSize,
                 selectedPeople: widget.selectedPeople,
               )
