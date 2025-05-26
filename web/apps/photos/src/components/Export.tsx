@@ -18,6 +18,7 @@ import {
     OverflowMenuOption,
 } from "ente-base/components/OverflowMenu";
 import { EllipsizedTypography } from "ente-base/components/Typography";
+import { SpacedRow } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
@@ -177,10 +178,10 @@ export const Export: React.FC<ExportProps> = ({
 
     return (
         <Dialog {...{ open, onClose }} maxWidth="xs" fullWidth>
-            <SpaceBetweenFlex sx={{ p: "12px 4px 0px 0px" }}>
+            <SpacedRow sx={{ p: "12px 4px 0px 0px" }}>
                 <DialogTitle variant="h3">{t("export_data")}</DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />
-            </SpaceBetweenFlex>
+            </SpacedRow>
 
             <DialogContent>
                 <Stack>
