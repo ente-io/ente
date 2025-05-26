@@ -11995,6 +11995,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Add a memories widget to your homescreen and come back here to customize.`
+  String get addMemoriesWidgetPrompt {
+    return Intl.message(
+      'Add a memories widget to your homescreen and come back here to customize.',
+      name: 'addMemoriesWidgetPrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add an album widget to your homescreen and come back here to customize.`
+  String get addAlbumWidgetPrompt {
+    return Intl.message(
+      'Add an album widget to your homescreen and come back here to customize.',
+      name: 'addAlbumWidgetPrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add a people widget to your homescreen and come back here to customize.`
+  String get addPeopleWidgetPrompt {
+    return Intl.message(
+      'Add a people widget to your homescreen and come back here to customize.',
+      name: 'addPeopleWidgetPrompt',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

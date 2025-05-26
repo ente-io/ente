@@ -349,6 +349,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addAName": MessageLookupByLibrary.simpleMessage("Add a name"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage("Add a new email"),
+        "addAlbumWidgetPrompt": MessageLookupByLibrary.simpleMessage(
+            "Add an album widget to your homescreen and come back here to customize."),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Add collaborator"),
         "addCollaborators": m1,
@@ -358,6 +360,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addItem": m2,
         "addLocation": MessageLookupByLibrary.simpleMessage("Add location"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Add"),
+        "addMemoriesWidgetPrompt": MessageLookupByLibrary.simpleMessage(
+            "Add a memories widget to your homescreen and come back here to customize."),
         "addMore": MessageLookupByLibrary.simpleMessage("Add more"),
         "addName": MessageLookupByLibrary.simpleMessage("Add name"),
         "addNameOrMerge":
@@ -370,6 +374,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addOns": MessageLookupByLibrary.simpleMessage("Add-ons"),
         "addParticipants":
             MessageLookupByLibrary.simpleMessage("Add participants"),
+        "addPeopleWidgetPrompt": MessageLookupByLibrary.simpleMessage(
+            "Add a people widget to your homescreen and come back here to customize."),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Add photos"),
         "addSelected": MessageLookupByLibrary.simpleMessage("Add selected"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("Add to album"),

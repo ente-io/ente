@@ -1758,5 +1758,8 @@
   "newPhotosEmoji": " new 📸",
   "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
   "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years.",
+  "addMemoriesWidgetPrompt": "Add a memories widget to your homescreen and come back here to customize.",
+  "addAlbumWidgetPrompt": "Add an album widget to your homescreen and come back here to customize.",
+  "addPeopleWidgetPrompt": "Add a people widget to your homescreen and come back here to customize."
 }
