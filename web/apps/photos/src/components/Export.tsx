@@ -26,7 +26,10 @@ import { SpacedRow } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
-import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { ensureElectron } from "ente-base/electron";
 import { formattedNumber } from "ente-base/i18n";
@@ -488,16 +491,9 @@ const ExportFinishedDialogContent: React.FC<
     onClose,
     onResync,
 }) => {
-    const [pendingFileListView, setPendingFileListView] =
-        useState<boolean>(false);
+    const { show: showPendingList, props: pendingListVisibilityProps } =
+        useModalVisibility();
 
-    const openPendingFileList = () => {
-        setPendingFileListView(true);
-    };
-
-    const closePendingFileList = () => {
-        setPendingFileListView(false);
-    };
     return (
         <>
             <DialogContent>
@@ -507,7 +503,7 @@ const ExportFinishedDialogContent: React.FC<
                             {t("pending_items")}
                         </Typography>
                         {pendingExports.length ? (
-                            <LinkButton onClick={openPendingFileList}>
+                            <LinkButton onClick={showPendingList}>
                                 {formattedNumber(pendingExports.length)}
                             </LinkButton>
                         ) : (
@@ -540,24 +536,26 @@ const ExportFinishedDialogContent: React.FC<
                     {t("export_again")}
                 </FocusVisibleButton>
             </DialogActions>
-            <ExportPendingList
+            <ExportPendingListDialog
+                {...pendingListVisibilityProps}
                 pendingExports={pendingExports}
                 allCollectionsNameByID={allCollectionsNameByID}
-                isOpen={pendingFileListView}
-                onClose={closePendingFileList}
             />
         </>
     );
 };
 
-interface ExportPendingListProps {
-    isOpen: boolean;
-    onClose: () => void;
-    allCollectionsNameByID: Map<number, string>;
+type ExportPendingListDialogProps = ModalVisibilityProps & {
     pendingExports: EnteFile[];
-}
+    allCollectionsNameByID: Map<number, string>;
+};
 
-const ExportPendingList: React.FC<ExportPendingListProps> = (props) => {
+const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
+    open,
+    onClose,
+    allCollectionsNameByID,
+    pendingExports,
+}) => {
     const renderListItem = (file: EnteFile) => {
         return (
             <FlexWrapper>
@@ -569,7 +567,7 @@ const ExportPendingList: React.FC<ExportPendingListProps> = (props) => {
                     />
                 </Box>
                 <ItemContainer>
-                    {`${props.allCollectionsNameByID.get(file.collectionID)} / ${
+                    {`${allCollectionsNameByID.get(file.collectionID)} / ${
                         file.metadata.title
                     }`}
                 </ItemContainer>
@@ -578,29 +576,29 @@ const ExportPendingList: React.FC<ExportPendingListProps> = (props) => {
     };
 
     const getItemTitle = (file: EnteFile) => {
-        return `${props.allCollectionsNameByID.get(file.collectionID)} / ${
+        return `${allCollectionsNameByID.get(file.collectionID)} / ${
             file.metadata.title
         }`;
     };
 
     return (
         <TitledMiniDialog
-            open={props.isOpen}
-            onClose={props.onClose}
+            {...{ open, onClose }}
             paperMaxWidth="444px"
             title={t("pending_items")}
         >
             <ItemList
                 maxHeight={240}
                 itemSize={50}
-                items={props.pendingExports}
+                items={pendingExports}
                 renderListItem={renderListItem}
                 getItemTitle={getItemTitle}
             />
             <FocusVisibleButton
                 fullWidth
                 color="secondary"
-                onClick={props.onClose}
+                onClick={onClose}
+                sx={{ mt: 2 }}
             >
                 {t("close")}
             </FocusVisibleButton>
@@ -692,25 +690,22 @@ export default function ItemList<T>(props: ItemListProps<T>) {
     const getItemKey: ListItemKeySelector<ItemData<T>> = (index, data) => {
         const { items } = data;
         const file = items[index] as EnteFile;
-        const key = `${file.collectionID}-${file.id}`;
-        return key;
+        return `${file.collectionID}-${file.id}`;
     };
 
     return (
-        <Box sx={{ pl: 2 }}>
-            <List
-                itemData={itemData}
-                height={Math.min(
-                    props.itemSize * props.items.length,
-                    props.maxHeight,
-                )}
-                width={"100%"}
-                itemSize={props.itemSize}
-                itemCount={props.items.length}
-                itemKey={getItemKey}
-            >
-                {Row}
-            </List>
-        </Box>
+        <List
+            itemData={itemData}
+            height={Math.min(
+                props.itemSize * props.items.length,
+                props.maxHeight,
+            )}
+            width={"100%"}
+            itemSize={props.itemSize}
+            itemCount={props.items.length}
+            itemKey={getItemKey}
+        >
+            {Row}
+        </List>
     );
 }
