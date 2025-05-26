@@ -197,7 +197,7 @@ class NotificationService {
         payload: payload,
       );
       _logger.info(
-        "Scheduled notification with: $title, $message, $channelID, $channelName, $payload",
+        "Scheduled notification with: $title, $message, $channelID, $channelName, $payload for $dateTime",
       );
     } catch (e, s) {
       // For now we're swallowing any exceptions here because we don't want the memories logic to get disturbed
