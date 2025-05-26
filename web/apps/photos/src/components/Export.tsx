@@ -7,6 +7,7 @@ import {
     DialogContent,
     DialogTitle,
     Divider,
+    LinearProgress,
     Stack,
     Tooltip,
     Typography,
@@ -30,7 +31,11 @@ import { formattedNumber } from "ente-base/i18n";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { EnteFile } from "ente-media/file";
-import { SpaceBetweenFlex } from "ente-shared/components/Container";
+import {
+    FlexWrapper,
+    SpaceBetweenFlex,
+    VerticallyCentered,
+} from "ente-shared/components/Container";
 import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
@@ -42,7 +47,6 @@ import exportService, {
     type ExportProgress,
     type ExportSettings,
 } from "services/export";
-import ExportInProgress from "./ExportInProgress";
 import ExportInit from "./ExportInit";
 import ExportPendingList from "./ExportPendingList";
 
@@ -352,6 +356,102 @@ const ExportDynamicContent: React.FC<ExportDynamicContentProps> = ({
         default:
             return <></>;
     }
+};
+
+interface ExportInProgressProps {
+    exportStage: ExportStage;
+    exportProgress: ExportProgress;
+    stopExport: () => void;
+    closeExportDialog: () => void;
+}
+
+const ExportInProgress: React.FC<ExportInProgressProps> = (props) => {
+    const showIndeterminateProgress = () => {
+        return (
+            props.exportStage === ExportStage.starting ||
+            props.exportStage === ExportStage.migration ||
+            props.exportStage === ExportStage.renamingCollectionFolders ||
+            props.exportStage === ExportStage.trashingDeletedFiles ||
+            props.exportStage === ExportStage.trashingDeletedCollections
+        );
+    };
+    return (
+        <>
+            <DialogContent>
+                <VerticallyCentered>
+                    <Typography sx={{ mb: 1.5 }}>
+                        {props.exportStage === ExportStage.starting ? (
+                            t("export_starting")
+                        ) : props.exportStage === ExportStage.migration ? (
+                            t("export_preparing")
+                        ) : props.exportStage ===
+                          ExportStage.renamingCollectionFolders ? (
+                            t("export_renaming_album_folders")
+                        ) : props.exportStage ===
+                          ExportStage.trashingDeletedFiles ? (
+                            t("export_trashing_deleted_files")
+                        ) : props.exportStage ===
+                          ExportStage.trashingDeletedCollections ? (
+                            t("export_trashing_deleted_albums")
+                        ) : (
+                            <Typography
+                                component="span"
+                                sx={{ color: "text.muted" }}
+                            >
+                                <Trans
+                                    i18nKey={"export_progress"}
+                                    components={{
+                                        a: (
+                                            <Typography
+                                                component="span"
+                                                sx={{
+                                                    color: "text.base",
+                                                    pr: "1rem",
+                                                    wordSpacing: "1rem",
+                                                }}
+                                            />
+                                        ),
+                                    }}
+                                    values={{ progress: props.exportProgress }}
+                                />
+                            </Typography>
+                        )}
+                    </Typography>
+                    <FlexWrapper px={1}>
+                        {showIndeterminateProgress() ? (
+                            <LinearProgress />
+                        ) : (
+                            <LinearProgress
+                                variant="determinate"
+                                value={Math.round(
+                                    ((props.exportProgress.success +
+                                        props.exportProgress.failed) *
+                                        100) /
+                                        props.exportProgress.total,
+                                )}
+                            />
+                        )}
+                    </FlexWrapper>
+                </VerticallyCentered>
+            </DialogContent>
+            <DialogActions>
+                <FocusVisibleButton
+                    fullWidth
+                    color="secondary"
+                    onClick={props.closeExportDialog}
+                >
+                    {t("close")}
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    fullWidth
+                    color="critical"
+                    onClick={props.stopExport}
+                >
+                    {t("stop")}
+                </FocusVisibleButton>
+            </DialogActions>
+        </>
+    );
 };
 
 interface ExportFinishedProps {
