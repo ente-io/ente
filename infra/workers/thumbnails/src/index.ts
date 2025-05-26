@@ -21,7 +21,7 @@ const handleOPTIONS = (request: Request) => {
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, OPTIONS",
-            "Access-Control-Allow-Headers": "X-Auth-Token, X-Client-Package",
+            "Access-Control-Allow-Headers": "X-Auth-Token, X-Client-Package, X-Client-Version",
             "Access-Control-Max-Age": "86400",
         },
     });
