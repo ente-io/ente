@@ -285,7 +285,7 @@ export default function PublicCollectionGallery() {
         );
     }, [onAddPhotos]);
 
-    const handleSyncWithRemote = useCallback(async () => {
+    const syncWithRemote = useCallback(async () => {
         const collectionUID = getPublicCollectionUID(
             credentials.current.accessToken,
         );
@@ -366,9 +366,6 @@ export default function PublicCollectionGallery() {
             setLoading(false);
         }
     }, [showLoadingBar, hideLoadingBar]);
-
-    // TODO: See gallery
-    const syncWithRemote = handleSyncWithRemote;
 
     // See: [Note: Visual feedback to acknowledge user actions]
     const handleVisualFeedback = useCallback(() => {
@@ -523,7 +520,7 @@ export default function PublicCollectionGallery() {
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
-                    onSyncWithRemote={handleSyncWithRemote}
+                    onSyncWithRemote={syncWithRemote}
                     onVisualFeedback={handleVisualFeedback}
                 />
                 {blockingLoad && <TranslucentLoadingOverlay />}
