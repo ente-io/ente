@@ -423,8 +423,7 @@ class DownloadManager {
 
         const onDownloadProgress = this.trackDownloadProgress(
             file.id,
-            // TODO: Is info supposed to be optional though?
-            file.info?.fileSize ?? 0,
+            file.info?.fileSize,
         );
 
         const contentLength =
@@ -517,7 +516,10 @@ class DownloadManager {
         }
     }
 
-    private trackDownloadProgress(fileID: number, fileSize: number) {
+    private trackDownloadProgress(
+        fileID: number,
+        fileSize: number | undefined,
+    ) {
         return (event: { loaded: number; total: number }) => {
             if (isNaN(event.total) || event.total === 0) {
                 if (!fileSize) {
