@@ -299,16 +299,7 @@ const ContinuousExport: React.FC<ContinuousExportProps> = ({
     </SpacedRow>
 );
 
-const ExportDynamicContent = ({
-    exportStage,
-    startExport,
-    stopExport,
-    onHide,
-    lastExportTime,
-    exportProgress,
-    pendingExports,
-    allCollectionsNameByID,
-}: {
+interface ExportDynamicContentProps {
     exportStage: ExportStage;
     startExport: (opts?: ExportOpts) => void;
     stopExport: () => void;
@@ -317,6 +308,17 @@ const ExportDynamicContent = ({
     exportProgress: ExportProgress;
     pendingExports: EnteFile[];
     allCollectionsNameByID: Map<number, string>;
+}
+
+const ExportDynamicContent: React.FC<ExportDynamicContentProps> = ({
+    exportStage,
+    startExport,
+    stopExport,
+    onHide,
+    lastExportTime,
+    exportProgress,
+    pendingExports,
+    allCollectionsNameByID,
 }) => {
     switch (exportStage) {
         case ExportStage.init:
