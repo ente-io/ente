@@ -677,5 +677,8 @@
     "light": "Claro",
     "dark": "Oscuro",
     "streamable_videos": "",
-    "processing_videos_status": ""
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": ""
 }
