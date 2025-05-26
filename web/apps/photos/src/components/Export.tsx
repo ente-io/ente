@@ -47,7 +47,6 @@ import exportService, {
     type ExportProgress,
     type ExportSettings,
 } from "services/export";
-import ExportInit from "./ExportInit";
 import ExportPendingList from "./ExportPendingList";
 
 type ExportProps = ModalVisibilityProps & {
@@ -205,15 +204,15 @@ export const Export: React.FC<ExportProps> = ({
                 </Stack>
             </DialogContent>
             <Divider />
-            <ExportDynamicContent
+            <ExportDialogContent
                 exportStage={exportStage}
-                startExport={startExport}
                 stopExport={stopExport}
                 onHide={onClose}
                 lastExportTime={lastExportTime}
                 exportProgress={exportProgress}
                 pendingExports={pendingExports}
                 allCollectionsNameByID={allCollectionsNameByID}
+                onStartExport={startExport}
             />
         </Dialog>
     );
@@ -303,20 +302,20 @@ const ContinuousExport: React.FC<ContinuousExportProps> = ({
     </SpacedRow>
 );
 
-interface ExportDynamicContentProps {
+interface ExportDialogContentProps {
     exportStage: ExportStage;
-    startExport: (opts?: ExportOpts) => void;
     stopExport: () => void;
     onHide: () => void;
     lastExportTime: number;
     exportProgress: ExportProgress;
     pendingExports: EnteFile[];
     allCollectionsNameByID: Map<number, string>;
+    onStartExport: (opts?: ExportOpts) => void;
 }
 
-const ExportDynamicContent: React.FC<ExportDynamicContentProps> = ({
+const ExportDialogContent: React.FC<ExportDialogContentProps> = ({
     exportStage,
-    startExport,
+    onStartExport,
     stopExport,
     onHide,
     lastExportTime,
@@ -326,7 +325,7 @@ const ExportDynamicContent: React.FC<ExportDynamicContentProps> = ({
 }) => {
     switch (exportStage) {
         case ExportStage.init:
-            return <ExportInit startExport={startExport} />;
+            return <ExportInitDialogContent {...{ onStartExport }} />;
 
         case ExportStage.migration:
         case ExportStage.starting:
@@ -357,6 +356,26 @@ const ExportDynamicContent: React.FC<ExportDynamicContentProps> = ({
             return <></>;
     }
 };
+
+interface ExportInitDialogContentProps {
+    onStartExport: () => void;
+}
+
+const ExportInitDialogContent: React.FC<ExportInitDialogContentProps> = ({
+    onStartExport,
+}) => (
+    <DialogContent>
+        <DialogActions>
+            <FocusVisibleButton
+                fullWidth
+                color="accent"
+                onClick={onStartExport}
+            >
+                {t("start")}
+            </FocusVisibleButton>
+        </DialogActions>
+    </DialogContent>
+);
 
 interface ExportInProgressProps {
     exportStage: ExportStage;
