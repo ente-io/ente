@@ -3,6 +3,7 @@ import {
     Box,
     Button,
     Dialog,
+    DialogActions,
     DialogContent,
     DialogTitle,
     Divider,
@@ -21,11 +22,15 @@ import { EllipsizedTypography } from "ente-base/components/Typography";
 import { SpacedRow } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { ensureElectron } from "ente-base/electron";
+import { formattedNumber } from "ente-base/i18n";
+import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { EnteFile } from "ente-media/file";
+import { SpaceBetweenFlex } from "ente-shared/components/Container";
 import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
@@ -37,9 +42,9 @@ import exportService, {
     type ExportProgress,
     type ExportSettings,
 } from "services/export";
-import ExportFinished from "./ExportFinished";
 import ExportInProgress from "./ExportInProgress";
 import ExportInit from "./ExportInit";
+import ExportPendingList from "./ExportPendingList";
 
 type ExportProps = ModalVisibilityProps & {
     allCollectionsNameByID: Map<number, string>;
@@ -334,10 +339,10 @@ const ExportDynamicContent = ({
         case ExportStage.finished:
             return (
                 <ExportFinished
-                    onHide={onHide}
-                    lastExportTime={lastExportTime}
                     pendingExports={pendingExports}
+                    lastExportTime={lastExportTime}
                     allCollectionsNameByID={allCollectionsNameByID}
+                    onClose={onHide}
                     onResync={() => startExport({ resync: true })}
                 />
             );
@@ -345,4 +350,84 @@ const ExportDynamicContent = ({
         default:
             return <></>;
     }
+};
+
+interface ExportFinishedProps {
+    pendingExports: EnteFile[];
+    lastExportTime: number;
+    allCollectionsNameByID: Map<number, string>;
+    onClose: () => void;
+    /**
+     * Called when the user presses the "Resync" button.
+     */
+    onResync: () => void;
+}
+
+const ExportFinished: React.FC<ExportFinishedProps> = ({
+    pendingExports,
+    lastExportTime,
+    allCollectionsNameByID,
+    onClose,
+    onResync,
+}) => {
+    const [pendingFileListView, setPendingFileListView] =
+        useState<boolean>(false);
+
+    const openPendingFileList = () => {
+        setPendingFileListView(true);
+    };
+
+    const closePendingFileList = () => {
+        setPendingFileListView(false);
+    };
+    return (
+        <>
+            <DialogContent>
+                <Stack sx={{ pr: 2 }}>
+                    <SpaceBetweenFlex minHeight={"48px"}>
+                        <Typography sx={{ color: "text.muted" }}>
+                            {t("pending_items")}
+                        </Typography>
+                        {pendingExports.length ? (
+                            <LinkButton onClick={openPendingFileList}>
+                                {formattedNumber(pendingExports.length)}
+                            </LinkButton>
+                        ) : (
+                            <Typography>
+                                {formattedNumber(pendingExports.length)}
+                            </Typography>
+                        )}
+                    </SpaceBetweenFlex>
+                    <SpaceBetweenFlex minHeight={"48px"}>
+                        <Typography sx={{ color: "text.muted" }}>
+                            {t("last_export_time")}
+                        </Typography>
+                        <Typography>
+                            {lastExportTime
+                                ? formattedDateTime(new Date(lastExportTime))
+                                : t("never")}
+                        </Typography>
+                    </SpaceBetweenFlex>
+                </Stack>
+            </DialogContent>
+            <DialogActions>
+                <FocusVisibleButton
+                    fullWidth
+                    color="secondary"
+                    onClick={onClose}
+                >
+                    {t("close")}
+                </FocusVisibleButton>
+                <FocusVisibleButton fullWidth onClick={onResync}>
+                    {t("export_again")}
+                </FocusVisibleButton>
+            </DialogActions>
+            <ExportPendingList
+                pendingExports={pendingExports}
+                allCollectionsNameByID={allCollectionsNameByID}
+                isOpen={pendingFileListView}
+                onClose={closePendingFileList}
+            />
+        </>
+    );
 };
