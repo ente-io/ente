@@ -1,12 +1,12 @@
 import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/services/album_home_widget_service.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/favorites_service.dart";
-import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/collections/flex_grid_view.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -85,7 +85,6 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
     return Scaffold(
       bottomNavigationBar: hasInstalledAny
           ? Padding(
@@ -122,7 +121,9 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
               title: S.of(context).albums,
             ),
             expandedHeight: 120,
-            flexibleSpaceCaption: S.of(context).albumsWidgetDesc,
+            flexibleSpaceCaption: hasInstalledAny
+                ? S.of(context).albumsWidgetDesc
+                : context.l10n.addAlbumWidgetPrompt,
             actionIcons: [
               IconButtonWidget(
                 icon: Icons.close_outlined,
@@ -149,12 +150,6 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                     Image.asset(
                       "assets/albums-widget-static.png",
                       height: 160,
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      "Add an album widget to your homescreen and come back here to customize",
-                      style: textTheme.smallFaint,
-                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
