@@ -23,16 +23,3 @@ export const FlexWrapper = styled(Box)`
 export const SpaceBetweenFlex = styled(FlexWrapper)`
     justify-content: space-between;
 `;
-
-/**
- * Deprecated, use {@link CenteredRow} from ente-base/components/mui/container
- * instead
- */
-export const CenteredFlex = styled(FlexWrapper)`
-    justify-content: center;
-`;
-
-export const VerticallyCenteredFlex = styled(Box)({
-    display: "flex",
-    alignItems: "center",
-});
