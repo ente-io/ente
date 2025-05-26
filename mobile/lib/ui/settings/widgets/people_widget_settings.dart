@@ -3,7 +3,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/selected_people.dart";
 import "package:photos/services/people_home_widget_service.dart";
-import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
@@ -60,7 +59,6 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
     return Scaffold(
       bottomNavigationBar: hasInstalledAny
           ? Padding(
