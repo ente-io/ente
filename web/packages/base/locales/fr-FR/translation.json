@@ -676,6 +676,6 @@
     "system": "Système",
     "light": "Clair",
     "dark": "Sombre",
-    "streamable_videos": "",
-    "processing_videos_status": ""
+    "streamable_videos": "Vidéos diffusables",
+    "processing_videos_status": "Traitement des vidéos..."
 }
