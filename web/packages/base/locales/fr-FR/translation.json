@@ -677,5 +677,8 @@
     "light": "Clair",
     "dark": "Sombre",
     "streamable_videos": "Vidéos diffusables",
-    "processing_videos_status": "Traitement des vidéos..."
+    "processing_videos_status": "Traitement des vidéos...",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": ""
 }

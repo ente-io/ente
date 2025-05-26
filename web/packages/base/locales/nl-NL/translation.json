@@ -677,5 +677,8 @@
     "light": "Licht",
     "dark": "Donker",
     "streamable_videos": "Video's met stream",
-    "processing_videos_status": "Video's verwerken..."
+    "processing_videos_status": "Video's verwerken...",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": ""
 }
