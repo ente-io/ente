@@ -32,11 +32,6 @@ export const CenteredFlex = styled(FlexWrapper)`
     justify-content: center;
 `;
 
-/** Deprecated */
-export const FluidContainer = styled(FlexWrapper)`
-    flex: 1;
-`;
-
 export const VerticallyCenteredFlex = styled(Box)({
     display: "flex",
     alignItems: "center",
