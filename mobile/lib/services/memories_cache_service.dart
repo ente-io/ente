@@ -281,13 +281,13 @@ class MemoriesCacheService {
       );
       if (scheduleTime.isBefore(DateTime.now())) {
         _logger.info(
-          "Skipping scheduling notification for memory ${memory.id} because the date is in the past",
+          "Skipping scheduling notification for memory ${memory.id} because the date is in the past (date: $scheduleTime)",
         );
         continue;
       }
       if (scheduledDates.contains(scheduleTime)) {
         _logger.info(
-          "Skipping scheduling notification for memory ${memory.id} because the date is already scheduled",
+          "Skipping scheduling notification for memory ${memory.id} because the date is already scheduled (date: $scheduleTime)",
         );
         continue;
       }
