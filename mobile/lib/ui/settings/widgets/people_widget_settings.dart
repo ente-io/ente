@@ -94,7 +94,9 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
               title: S.of(context).people,
             ),
             expandedHeight: 120,
-            flexibleSpaceCaption: S.of(context).peopleWidgetDesc,
+            flexibleSpaceCaption: hasInstalledAny
+                ? S.of(context).peopleWidgetDesc
+                : "Add a people widget to your homescreen and come back here to customize.",
             actionIcons: [
               IconButtonWidget(
                 icon: Icons.close_outlined,
@@ -121,12 +123,6 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                     Image.asset(
                       "assets/people-widget-static.png",
                       height: 160,
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      "Add a people widget to your homescreen and come back here to customize",
-                      style: textTheme.smallFaint,
-                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
