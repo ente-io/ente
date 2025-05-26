@@ -227,8 +227,13 @@ class NotificationService {
           );
           continue;
         }
-        _logger.info("Clearing notification with id: ${request.id}");
+        _logger.info(
+          "Clearing notification with id: ${request.id} and payload: ${request.payload}",
+        );
         await _notificationsPlugin.cancel(request.id);
+        _logger.info(
+          "Cleared notification with id: ${request.id} and payload: ${request.payload}",
+        );
       }
     } catch (e, s) {
       _logger.severe("Something is wrong with scheduled notifications", e, s);

@@ -281,6 +281,9 @@ class MemoriesCacheService {
         dateTime: scheduleTime,
       );
       scheduledDates.add(scheduleTime);
+      _logger.info(
+        "Scheduled notification for memory ${memory.id} on $scheduleTime",
+      );
     }
   }
 
