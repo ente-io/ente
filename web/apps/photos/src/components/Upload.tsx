@@ -36,6 +36,7 @@ import {
     type UploadItemAndPath,
     type UploadPhase,
 } from "ente-gallery/services/upload";
+import type { ParsedMetadataJSON } from "ente-gallery/services/upload/metadata-json";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { UploaderNameInput } from "ente-new/albums/components/UploaderNameInput";
@@ -647,8 +648,10 @@ export const Upload: React.FC<UploadProps> = ({
         await currentUploadPromise.current;
     };
 
-    const preUploadAction = async () => {
-        uploadManager.prepareForNewUpload();
+    const preUploadAction = async (
+        parsedMetadataJSONMap?: Map<string, ParsedMetadataJSON>,
+    ) => {
+        uploadManager.prepareForNewUpload(parsedMetadataJSONMap);
         setUploadProgressView(true);
         await props.syncWithRemote(true, true);
     };
@@ -709,10 +712,10 @@ export const Upload: React.FC<UploadProps> = ({
     const retryFailed = async () => {
         try {
             log.info("Retrying failed uploads");
-            const { items, collections } =
-                uploadManager.getFailedItemsWithCollections();
+            const { items, collections, parsedMetadataJSONMap } =
+                uploadManager.failedItemState();
             const uploaderName = uploadManager.getUploaderName();
-            await preUploadAction();
+            await preUploadAction(parsedMetadataJSONMap);
             await uploadManager.uploadItems(items, collections, uploaderName);
         } catch (e) {
             log.error("Retrying failed uploads failed", e);

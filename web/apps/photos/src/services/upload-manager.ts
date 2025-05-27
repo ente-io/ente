@@ -325,10 +325,17 @@ class UploadManager {
         this.uploaderName = null;
     }
 
-    public prepareForNewUpload() {
+    public prepareForNewUpload(
+        parsedMetadataJSONMap?: Map<string, ParsedMetadataJSON>,
+    ) {
         this.resetState();
         this.uiService.reset();
         uploadCancelService.reset();
+
+        if (parsedMetadataJSONMap) {
+            this.parsedMetadataJSONMap = parsedMetadataJSONMap;
+        }
+
         this.uiService.setUploadPhase("preparing");
     }
 
@@ -651,10 +658,15 @@ class UploadManager {
         uploadCancelService.requestUploadCancelation();
     }
 
-    public getFailedItemsWithCollections() {
+    /**
+     * Return the list of failed items from the last upload, along with other
+     * state needed to attempt to reupload them.
+     */
+    public failedItemState() {
         return {
             items: this.failedItems,
             collections: [...this.collections.values()],
+            parsedMetadataJSONMap: this.parsedMetadataJSONMap,
         };
     }
 
