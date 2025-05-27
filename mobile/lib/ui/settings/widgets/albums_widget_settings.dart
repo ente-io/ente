@@ -163,7 +163,7 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                   return CollectionsFlexiGridViewWidget(
                     snapshot.data,
                     displayLimitCount: snapshot.data!.length,
-                    shrinkWrap: true,
+                    shrinkWrap: false,
                     selectedAlbums: _selectedAlbums,
                     shouldShowCreateAlbum: false,
                     enableSelectionMode: true,
