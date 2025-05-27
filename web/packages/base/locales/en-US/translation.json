@@ -681,5 +681,6 @@
     "processing_videos_status": "Processing videos...",
     "share_favorites": "Share favorites",
     "person_favorites": "{{name}}'s favorites",
-    "shared_favorites": "Shared favorites"
+    "shared_favorites": "Shared favorites",
+    "added_by_name": "Added by {{name}}"
 }
