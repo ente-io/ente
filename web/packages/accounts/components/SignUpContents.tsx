@@ -17,12 +17,12 @@ import { generateKeyAndSRPAttributes } from "ente-accounts/services/srp";
 import { sendOTT } from "ente-accounts/services/user";
 import { isWeakPassword } from "ente-accounts/utils/password";
 import { LinkButton } from "ente-base/components/LinkButton";
+import { ShowHidePasswordInputAdornment } from "ente-base/components/MUI/PasswordInputAdornment";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { setLSUser } from "ente-shared//storage/localStorage";
 import { VerticallyCentered } from "ente-shared/components/Container";
-import ShowHidePassword from "ente-shared/components/Form/ShowHidePassword";
 import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
@@ -68,13 +68,10 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleShowPassword = useCallback(() => setShowPassword((show) => !show), []);
-
-    const handleMouseDownPassword = (
-        event: React.MouseEvent<HTMLButtonElement>,
-    ) => {
-        event.preventDefault();
-    };
+    const handleToggleShowHidePassword = useCallback(
+        () => setShowPassword((show) => !show),
+        [],
+    );
 
     const registerUser = async (
         { email, passphrase, confirm, referral }: FormValues,
@@ -183,13 +180,10 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                             slotProps={{
                                 input: {
                                     endAdornment: (
-                                        <ShowHidePassword
+                                        <ShowHidePasswordInputAdornment
                                             showPassword={showPassword}
-                                            handleClickShowPassword={
-                                                handleShowPassword
-                                            }
-                                            handleMouseDownPassword={
-                                                handleMouseDownPassword
+                                            onToggle={
+                                                handleToggleShowHidePassword
                                             }
                                         />
                                     ),
