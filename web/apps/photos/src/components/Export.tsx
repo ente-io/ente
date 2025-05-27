@@ -169,7 +169,7 @@ export const Export: React.FC<ExportProps> = ({
             });
             setContinuousExport(newContinuousExport);
         })();
-    }, [continuousExport]);
+    }, [verifyExportFolderExists, continuousExport]);
 
     const handleStartExport = useCallback(
         (opts?: ExportOpts) => {
