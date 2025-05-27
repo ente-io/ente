@@ -185,6 +185,7 @@
   },
   "allowAddPhotosDescription": "Izinkan orang yang memiliki link untuk menambahkan foto ke album berbagi ini.",
   "passwordLock": "Kunci dengan sandi",
+  "canNotOpenTitle": "Tidak dapat membuka album ini",
   "disableDownloadWarningTitle": "Perlu diketahui",
   "disableDownloadWarningBody": "Orang yang melihat masih bisa mengambil tangkapan layar atau menyalin foto kamu menggunakan alat eksternal",
   "allowDownloads": "Izinkan pengunduhan",
@@ -723,8 +724,11 @@
     "description": "Display text for an action which triggers a restore of item from trash",
     "type": "text"
   },
+  "moveToAlbum": "Pindahkan ke album",
   "unarchive": "Keluarkan dari arsip",
+  "favorite": "Favorit",
   "shareLink": "Bagikan link",
+  "collageLayout": "Tata letak",
   "addToEnte": "Tambah ke Ente",
   "addToAlbum": "Tambah ke album",
   "delete": "Hapus",
@@ -888,7 +892,6 @@
   "didYouKnow": "Tahukah kamu?",
   "loadingMessage": "Memuat fotomu...",
   "loadMessage1": "Kamu bisa membagikan langgananmu dengan keluarga",
-  "loadMessage2": "Kami telah memelihara lebih dari 30 juta kenangan saat ini",
   "loadMessage3": "Kami menyimpan 3 salinan dari data kamu, salah satunya di tempat pengungsian bawah tanah",
   "loadMessage7": "App seluler kami berjalan di latar belakang untuk mengenkripsi dan mencadangkan foto yang kamu potret",
   "loadMessage8": "web.ente.io menyediakan alat pengunggah yang bagus",
@@ -1093,5 +1096,6 @@
   "rotate": "Putar",
   "left": "Kiri",
   "right": "Kanan",
-  "whatsNew": "Hal yang baru"
+  "whatsNew": "Hal yang baru",
+  "onThisDay": "On this day"
 }

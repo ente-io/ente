@@ -28,8 +28,8 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/play_pause_button.dart";
 import "package:photos/ui/viewer/file/native_video_player_controls/seek_bar.dart";
-import "package:photos/ui/viewer/file/preview_status_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/file/video_stream_change.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -112,6 +112,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _streamSwitchedSubscription =
         Bus.instance.on<StreamSwitchedEvent>().listen((event) {
       if (event.type != PlayerType.nativeVideoPlayer) return;
+      _filePath = null;
       if (event.selectedPreview) {
         loadPreview(update: true);
       } else {
@@ -133,6 +134,11 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   Future<void> setVideoSource() async {
+    if (_filePath == null) {
+      _logger.info('Stop video player, file path is null');
+      await _controller?.stop();
+      return;
+    }
     final videoSource = VideoSource(
       path: _filePath!,
       type: VideoSourceType.file,
@@ -357,7 +363,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                 ValueListenableBuilder(
                                   valueListenable: _showControls,
                                   builder: (context, value, _) {
-                                    return PreviewStatusWidget(
+                                    return VideoStreamChangeWidget(
                                       showControls: value,
                                       file: widget.file,
                                       isPreviewPlayer: widget.selectedPreview,
@@ -646,9 +652,14 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
     if (widget.playlistData != null && widget.selectedPreview) {
       aspectRatio = widget.playlistData!.width! / widget.playlistData!.height!;
-      if (widget.file.duration != null &&
-          (duration == "0:00" || duration == null)) {
-        duration = secondsToDuration(widget.file.duration!);
+      if (duration == "0:00" || duration == null) {
+        if ((widget.file.duration ?? 0) > 0) {
+          duration = secondsToDuration(widget.file.duration!);
+        } else if (widget.playlistData!.durationInSeconds != null) {
+          duration = secondsToDuration(
+            widget.playlistData!.durationInSeconds!,
+          );
+        }
       }
       _logger.info("Getting aspect ratio from preview video");
       return;

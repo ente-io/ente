@@ -47,7 +47,7 @@ class NewAlbumListItemWidget extends StatelessWidget {
             IgnorePointer(
               child: DottedBorder(
                 dashPattern: const [4],
-                color: colorScheme.strokeFainter,
+                color: colorScheme.strokeFaint,
                 strokeWidth: 1,
                 padding: const EdgeInsets.all(0),
                 borderType: BorderType.RRect,

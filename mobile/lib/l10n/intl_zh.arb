@@ -1029,7 +1029,6 @@
   "didYouKnow": "您知道吗？",
   "loadingMessage": "正在加载您的照片...",
   "loadMessage1": "您可以与家庭分享您的订阅",
-  "loadMessage2": "到目前为止，我们已经保存了超过3 000万个回忆",
   "loadMessage3": "我们保存你的3个数据副本，其中一个在地下安全屋中",
   "loadMessage4": "我们所有的应用程序都是开源的",
   "loadMessage5": "我们的源代码和加密技术已经由外部审计",
@@ -1659,7 +1658,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "影音流",
   "processingVideos": "正在处理视频",
   "streamDetails": "流详情",
   "processing": "正在处理",
@@ -1735,5 +1733,6 @@
   "cLFamilyPlan": "家庭计划存储限制",
   "cLFamilyPlanDesc": "你现在可以为家庭成员设置存储空间使用上限。",
   "cLBulkEdit": "批量编辑日期",
-  "cLBulkEditDesc": "你现在可以选择多张照片，一键批量修改日期/时间，并支持日期顺移。"
+  "cLBulkEditDesc": "你现在可以选择多张照片，一键批量修改日期/时间，并支持日期顺移。",
+  "onThisDay": "On this day"
 }

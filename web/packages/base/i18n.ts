@@ -35,6 +35,7 @@ export const supportedLocales = [
     "vi-VN" /* Vietnamese */,
     "ja-JP" /* Japanese */,
     "ar-SA" /* Arabic */,
+    "tr-TR" /* Turkish */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -198,6 +199,8 @@ const closestSupportedLocale = (
             return "ja-JP";
         } else if (ls.startsWith("ar")) {
             return "ar-SA";
+        } else if (ls.startsWith("tr")) {
+            return "tr-TR";
         }
     }
 

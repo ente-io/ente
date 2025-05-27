@@ -109,6 +109,10 @@ func (h *FileHandler) GetFileData(ctx *gin.Context) {
 		handler.Error(ctx, err)
 		return
 	}
+	if resp == nil {
+		ctx.Status(http.StatusNoContent)
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"data": resp,
 	})

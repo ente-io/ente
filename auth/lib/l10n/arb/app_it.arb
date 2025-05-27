@@ -173,6 +173,7 @@
   "invalidQRCode": "Codice QR non valido",
   "noRecoveryKeyTitle": "Nessuna chiave di recupero?",
   "enterEmailHint": "Inserisci il tuo indirizzo email",
+  "enterNewEmailHint": "Inserisci il tuo nuovo indirizzo email",
   "invalidEmailTitle": "Indirizzo email non valido",
   "invalidEmailMessage": "Inserisci un indirizzo email valido.",
   "deleteAccount": "Elimina account",
@@ -513,5 +514,10 @@
   "free5GB": "5GB gratis su <bold-green>ente</bold-green> Foto",
   "loginWithAuthAccount": "Accedi con il tuo account Auth",
   "freeStorageOffer": "10% di sconto su <bold-green>ente</bold-green> Foto",
-  "freeStorageOfferDescription": "Utilizzare il codice \"AUTH\" per ottenere il 10% di sconto al primo anno"
+  "freeStorageOfferDescription": "Utilizzare il codice \"AUTH\" per ottenere il 10% di sconto al primo anno",
+  "advanced": "Avanzate",
+  "algorithm": "Algoritmo",
+  "type": "Tipo",
+  "period": "Periodo",
+  "digits": "Cifre"
 }

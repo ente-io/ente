@@ -1030,7 +1030,7 @@
   "didYouKnow": "Você sabia?",
   "loadingMessage": "Carregando suas fotos...",
   "loadMessage1": "Você pode compartilhar sua assinatura com seus familiares",
-  "loadMessage2": "Nós preservamos mais de 30 milhões de memórias até então",
+  "loadMessage2": "Preservamos mais de 200 milhões de memórias até então",
   "loadMessage3": "Mantemos 3 cópias dos seus dados, uma em um abrigo subterrâneo",
   "loadMessage4": "Todos os nossos aplicativos são de código aberto",
   "loadMessage5": "Nosso código-fonte e criptografia foram auditadas externamente",
@@ -1281,6 +1281,8 @@
   "createCollaborativeLink": "Criar link colaborativo",
   "search": "Buscar",
   "enterPersonName": "Inserir nome da pessoa",
+  "editEmailAlreadyLinked": "Este e-mail já está vinculado a {name}.",
+  "viewPersonToUnlink": "Visualizar {name} para desvincular",
   "enterName": "Inserir nome",
   "savePerson": "Salvar pessoa",
   "editPerson": "Editar pessoa",
@@ -1660,7 +1662,7 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Transmissão de vídeo",
+  "videoStreaming": "Vídeos transmissíveis",
   "processingVideos": "Processando vídeos",
   "streamDetails": "Detalhes da transmissão",
   "processing": "Processando",
@@ -1737,5 +1739,6 @@
   "cLFamilyPlanDesc": "Agora você pode definir um limite de quanto armazenamento os seus entes queridos podem usar.",
   "cLBulkEdit": "Editar todas as datas",
   "cLBulkEditDesc": "Agora você pode selecionar várias fotos, editar data e hora de todos com um só clique. Alternar datas também são suportados.",
-  "curatedMemories": "Memórias restauradas"
+  "curatedMemories": "Memórias restauradas",
+  "onThisDay": "On this day"
 }

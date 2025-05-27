@@ -43,7 +43,13 @@
       "title": "Anycoin Direct",
       "slug": "anycoindirect"
     },
-     {
+    {
+      "title": "AR24",
+      "altNames": [
+        "Docaposte AR24"
+      ]
+    },
+    {
       "title": "Aruba",
       "slug": "aruba",
       "hex": "ef8a33"
@@ -133,6 +139,10 @@
       ]
     },
     {
+      "title": "Bitazza",
+      "slug": "bitazza"
+    },
+    {
       "title": "Bitkub",
       "slug": "bitkub"
     },
@@ -188,7 +198,9 @@
       "slug": "blue_sky"
     },
     {
-      "title": "bonify"
+      "title": "bonify",
+      "slug": "bonify",
+      "altNames": ["bonify.de"]
     },
     {
       "title": "Booking",
@@ -298,6 +310,10 @@
     {
       "title": "CSGORoll",
       "slug": "csgoroll"
+    },
+    {
+      "title": "Cryptee",
+      "slug": "cryptee"
     },
     {
       "title": "Cwallet",
@@ -430,6 +446,9 @@
     {
       "title": "Finanzfluss",
       "slug": "finanzfluss"
+    },
+    {
+      "title": "Finary"
     },
     {
       "title": "Firefox",
@@ -733,6 +752,7 @@
     {
       "title": "Mistral",
       "altNames": [
+        "Le Chat",
         "Mistral AI",
         "MistralAI"
       ]
@@ -877,10 +897,14 @@
         "欧易"
       ]
     },
-     {
+    {
       "title": "OnShape",
       "slug": "onshape",
       "hex": "7abb5e"
+    },
+    {
+      "title": "Oracle Cloud",
+      "slug": "oracle_cloud"
     },
     {
       "title": "Parqet",
@@ -1001,7 +1025,7 @@
       "title": "RealMe",
       "slug": "realme"
     },
-     {
+    {
       "title": "RealVNC",
       "slug": "realvnc",
       "hex": "488aec"

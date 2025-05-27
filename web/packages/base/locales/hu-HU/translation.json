@@ -32,6 +32,7 @@
     "set_password": "",
     "sign_in": "",
     "incorrect_password": "",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "",
     "pick_password_caution": "",
     "key_generation_in_progress": "",
@@ -674,5 +675,10 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": ""
 }

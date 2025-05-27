@@ -32,6 +32,7 @@
     "set_password": "パスワードを設定",
     "sign_in": "サインイン",
     "incorrect_password": "パスワードが間違っています",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "あなたのデータを暗号化するためのパスワードを入力してください",
     "pick_password_caution": "私たちはあなたのパスワードを保存していないため、もし忘れてしまった場合、<strong>リカバリーキーなしではデータを回復するお手伝いができません</strong>。",
     "key_generation_in_progress": "暗号化キーを生成中...",
@@ -674,5 +675,10 @@
     "theme": "テーマ",
     "system": "システム",
     "light": "ライト",
-    "dark": "ダーク"
+    "dark": "ダーク",
+    "streamable_videos": "",
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": ""
 }

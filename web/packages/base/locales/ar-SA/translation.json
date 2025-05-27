@@ -32,6 +32,7 @@
     "set_password": "تعيين كلمة المرور",
     "sign_in": "تسجيل الدخول",
     "incorrect_password": "كلمة المرور غير صحيحة",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "الرجاء إدخال كلمة المرور التي يمكننا استخدامها لتشفير بياناتك",
     "pick_password_caution": "نحن لا نخزن كلمة مرورك، لذا إذا نسيتها، <strong>لن نتمكن من مساعدتك </strong>في استرداد بياناتك دون مفتاح الاسترداد.",
     "key_generation_in_progress": "جارٍ توليد مفاتيح التشفير...",
@@ -674,5 +675,10 @@
     "theme": "المظهر",
     "system": "النظام",
     "light": "فاتح",
-    "dark": "داكن"
+    "dark": "داكن",
+    "streamable_videos": "",
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": ""
 }

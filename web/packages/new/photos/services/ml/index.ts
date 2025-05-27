@@ -471,10 +471,16 @@ export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
  *
  * See also {@link mlStatusSubscribe}.
  *
+ * This function can be safely called even if {@link isMLSupported} is `false`
+ * (in such cases, it will always return `undefined`). This is so that it can be
+ * unconditionally called as part of a React hook.
+ *
  * A return value of `undefined` indicates that we're still performing the
  * asynchronous tasks that are needed to get the status.
  */
 export const mlStatusSnapshot = (): MLStatus | undefined => {
+    if (!isMLSupported) return undefined;
+
     const result = _state.mlStatusSnapshot;
     // We don't have it yet, trigger an update.
     if (!result) triggerStatusUpdate();

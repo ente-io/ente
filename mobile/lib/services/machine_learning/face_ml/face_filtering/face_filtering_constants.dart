@@ -8,6 +8,9 @@ const kLaplacianVerySoftThreshold = 200;
 /// Default blur value
 const kLapacianDefault = 10000.0;
 
+/// The minimum score for a face to be shown as detected in the UI
+const kMinimumFaceShowScore = 0.70;
+
 /// The minimum score for a face to be considered a high quality face for clustering and person detection
 const kMinimumQualityFaceScore = 0.80;
 const kMediumQualityFaceScore = 0.85;

@@ -992,7 +992,6 @@
   "didYouKnow": "Știați că?",
   "loadingMessage": "Se încarcă fotografiile...",
   "loadMessage1": "Puteți împărți abonamentul cu familia dvs.",
-  "loadMessage2": "Am păstrat până acum peste 30 de milioane de amintiri",
   "loadMessage3": "Păstrăm 3 copii ale datelor dvs., dintre care una într-un adăpost antiatomic subteran",
   "loadMessage4": "Toate aplicațiile noastre sunt open source",
   "loadMessage5": "Codul nostru sursă și criptografia au fost evaluate extern",
@@ -1523,5 +1522,6 @@
   "joinAlbum": "Alăturați-vă albumului",
   "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
   "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
-  "join": "Alăturare"
+  "join": "Alăturare",
+  "onThisDay": "On this day"
 }
