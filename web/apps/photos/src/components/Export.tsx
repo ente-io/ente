@@ -38,7 +38,6 @@ import { EnteFile } from "ente-media/file";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
 import {
     FlexWrapper,
-    SpaceBetweenFlex,
     VerticallyCentered,
 } from "ente-shared/components/Container";
 import { CustomError } from "ente-shared/error";
@@ -504,8 +503,8 @@ const ExportFinishedDialogContent: React.FC<
     return (
         <>
             <DialogContent>
-                <Stack sx={{ pr: 2 }}>
-                    <SpaceBetweenFlex minHeight={"48px"}>
+                <Stack sx={{ pr: 1 }}>
+                    <SpacedRow sx={{ minHeight: "48px" }}>
                         <Typography sx={{ color: "text.muted" }}>
                             {t("pending_items")}
                         </Typography>
@@ -518,8 +517,8 @@ const ExportFinishedDialogContent: React.FC<
                                 {formattedNumber(pendingFiles.length)}
                             </Typography>
                         )}
-                    </SpaceBetweenFlex>
-                    <SpaceBetweenFlex minHeight={"48px"}>
+                    </SpacedRow>
+                    <SpacedRow sx={{ minHeight: "48px" }}>
                         <Typography sx={{ color: "text.muted" }}>
                             {t("last_export_time")}
                         </Typography>
@@ -528,7 +527,7 @@ const ExportFinishedDialogContent: React.FC<
                                 ? formattedDateTime(new Date(lastExportTime))
                                 : t("never")}
                         </Typography>
-                    </SpaceBetweenFlex>
+                    </SpacedRow>
                 </Stack>
             </DialogContent>
             <DialogActions>
