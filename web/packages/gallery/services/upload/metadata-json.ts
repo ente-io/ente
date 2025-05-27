@@ -4,15 +4,23 @@ import { ensureElectron } from "ente-base/electron";
 import { nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { type Location } from "ente-base/types";
-import type { UploadItem } from "ente-gallery/services/upload";
+import type {
+    UploadItem,
+    UploadPathPrefix,
+} from "ente-gallery/services/upload";
 import { readStream } from "ente-gallery/utils/native-stream";
 
 /**
  * The data we read from the JSON metadata sidecar files.
  *
- * Originally these were used to read the JSON metadata sidecar files present in
- * a Google Takeout. However, during our own export, we also write out files
- * with a similar structure.
+ * The metadata JSON file format is similar to the JSON metadata sidecar format
+ * produced by Google Takeout. This is so that the user can import their Google
+ * Takeouts while preserving the metadata.
+ *
+ * During export the Ente app also writes out its own metadata in a similar and
+ * compatible format so that the user can easily round trip (i.e. export their
+ * data out of Ente, and import it back again). This also allows users to reuse
+ * existing third party tools for working with the takeout format.
  */
 export interface ParsedMetadataJSON {
     creationTime?: number;
@@ -25,29 +33,54 @@ export interface ParsedMetadataJSON {
  * Derive a key for the given {@link jsonFileName} that should be used to index
  * into the {@link ParsedMetadataJSON} JSON map.
  *
+ * @param pathPrefix The {@link UploadPathPrefix}, if available.
+ *
  * @param collectionID The collection to which we're uploading.
  *
  * @param jsonFileName The file name for the JSON file.
  *
  * @returns A key suitable for indexing into the metadata JSON map.
+ *
+ * @see also {@link matchJSONMetadata}.
  */
 export const metadataJSONMapKeyForJSON = (
+    pathPrefix: UploadPathPrefix | undefined,
     collectionID: number,
     jsonFileName: string,
-) => `${collectionID}-${jsonFileName.slice(0, -1 * ".json".length)}`;
+) =>
+    makeKey3(
+        pathPrefix,
+        collectionID,
+        jsonFileName.slice(0, -1 * ".json".length),
+    );
+
+const makeKey3 = (
+    pathPrefix: UploadPathPrefix | undefined,
+    collectionID: number,
+    fileName: string,
+) => `${pathPrefix ?? ""}-${collectionID}-${fileName}`;
 
 /**
  * Return the matching entry, if any, from {@link parsedMetadataJSONMap} for the
- * {@link fileName} and {@link collectionID} combination.
+ * {@link pathPrefix}, {@link collectionID} and {@link fileName} combination.
  *
  * This is the sibling of {@link metadataJSONMapKeyForJSON}, except for deriving
  * the filename key we might have to try a bunch of different variations, so
  * this does not return a single key but instead tries the combinations until it
  * finds an entry in the map, and returns the found entry instead of the key.
+ *
+ * In brief,
+ *
+ * - When inserting the metadata entry into {@link parsedMetadataJSONMap}, we
+ *   use {@link metadataJSONMapKeyForJSON}.
+ *
+ * - When reading back the metadata entry from {@link parsedMetadataJSONMap}, we
+ *   use {@link matchJSONMetadata}
  */
-export const matchTakeoutMetadata = (
-    fileName: string,
+export const matchJSONMetadata = (
+    pathPrefix: UploadPathPrefix | undefined,
     collectionID: number,
+    fileName: string,
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
 ) => {
     // Break the fileName down into its components.
@@ -85,9 +118,13 @@ export const matchTakeoutMetadata = (
         name = name.slice(0, -1 * editedFileSuffix.length);
     }
 
+    // Convenience function to wary only the file name component when
+    // constructing a key. Delegates to `makeKey3`.
+    const makeKey = (fn: string) => makeKey3(pathPrefix, collectionID, fn);
+
     // Derive a key from the collection name, file name and the suffix if any.
     let baseFileName = `${name}${extension}`;
-    let key = `${collectionID}-${baseFileName}${numberedSuffix}`;
+    let key = makeKey(`${baseFileName}${numberedSuffix}`);
 
     let takeoutMetadata = parsedMetadataJSONMap.get(key);
     if (takeoutMetadata) return takeoutMetadata;
@@ -97,7 +134,9 @@ export const matchTakeoutMetadata = (
     // the clipped file name to get the key.
 
     const maxGoogleFileNameLength = 46;
-    key = `${collectionID}-${baseFileName.slice(0, maxGoogleFileNameLength)}${numberedSuffix}`;
+    key = makeKey(
+        `${baseFileName.slice(0, maxGoogleFileNameLength)}${numberedSuffix}`,
+    );
 
     takeoutMetadata = parsedMetadataJSONMap.get(key);
     if (takeoutMetadata) return takeoutMetadata;
@@ -118,7 +157,9 @@ export const matchTakeoutMetadata = (
 
     const supplSuffix = ".supplemental-metadata";
     baseFileName = `${name}${extension}${supplSuffix}`;
-    key = `${collectionID}-${baseFileName.slice(0, maxGoogleFileNameLength)}${numberedSuffix}`;
+    key = makeKey(
+        `${baseFileName.slice(0, maxGoogleFileNameLength)}${numberedSuffix}`,
+    );
 
     takeoutMetadata = parsedMetadataJSONMap.get(key);
     return takeoutMetadata;

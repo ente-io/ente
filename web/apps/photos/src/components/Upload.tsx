@@ -563,7 +563,7 @@ export const Upload: React.FC<UploadProps> = ({
         const uploadItemsWithCollection = uploadItemsAndPaths.current.map(
             ([uploadItem, path], index) => ({
                 uploadItem,
-                uploadItemPathPrefix: uploadPathPrefix(path),
+                pathPrefix: uploadPathPrefix(path),
                 localID: index,
                 collectionID: collection.id,
             }),
@@ -615,7 +615,7 @@ export const Upload: React.FC<UploadProps> = ({
                     ...uploadItemsWithCollection,
                     ...uploadItems.map(([uploadItem, path]) => ({
                         localID: index++,
-                        uploadItemPathPrefix: uploadPathPrefix(path),
+                        pathPrefix: uploadPathPrefix(path),
                         collectionID: collection.id,
                         uploadItem,
                     })),

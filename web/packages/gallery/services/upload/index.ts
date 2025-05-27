@@ -248,9 +248,7 @@ export const groupItemsBasedOnParentFolder = (
 
 export interface LivePhotoAssets {
     image: UploadItem;
-    imagePathPrefix?: UploadPathPrefix;
     video: UploadItem;
-    videoPathPrefix?: UploadPathPrefix;
 }
 
 /**
@@ -264,6 +262,7 @@ export interface ClusteredUploadItem {
     fileName: string;
     isLivePhoto: boolean;
     uploadItem?: UploadItem;
+    pathPrefix: UploadPathPrefix | undefined;
     // TODO: Tie this to the isLivePhoto flag using a discriminated union.
     livePhotoAssets?: LivePhotoAssets;
 }
