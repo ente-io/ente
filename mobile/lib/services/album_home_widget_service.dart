@@ -371,8 +371,10 @@ class AlbumHomeWidgetService {
       if (collection != null) {
         final files =
             await FilesDB.instance.getAllFilesCollection(collection.id);
-        albumsWithFiles[collection.id] =
-            (collection.decryptedName ?? "Album", files);
+        if (files.isNotEmpty) {
+          albumsWithFiles[collection.id] =
+              (collection.decryptedName ?? "Album", files);
+        }
       }
     }
 
