@@ -40,6 +40,7 @@
     "referral_source_hint": "",
     "referral_source_info": "",
     "password_mismatch_error": "",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "به <a/> خوش آمدید",
     "welcome_to_ente_subtitle": "",
     "new_album": "",
@@ -677,5 +678,9 @@
     "light": "",
     "dark": "",
     "streamable_videos": "",
-    "processing_videos_status": ""
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": "",
+    "added_by_name": ""
 }

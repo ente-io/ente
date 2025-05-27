@@ -23,7 +23,6 @@ import {
     getLocalTrashFileIDs,
     uniqueFilesByID,
 } from "ente-new/photos/services/files";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
@@ -208,18 +207,8 @@ const updateSnapshotIfNeeded = (
 /**
  * Return `true` if this client is capable of generating HLS streams for
  * uploaded videos.
- *
- * This function implementation is fast and can be called many times (e.g.
- * during UI rendering).
  */
-export const isHLSGenerationSupported = () =>
-    // Keep this check fast, we get called many times.
-    isDesktop &&
-    // TODO(HLS):
-    settingsSnapshot().isInternalUser;
-
-// TODO(HLS): Only the isDesktop flag is needed eventually.
-export const isHLSGenerationSupportedTemp = () => isDesktop;
+export const isHLSGenerationSupported = isDesktop;
 
 /**
  * Initialize the video processing subsystem if the user has enabled HLS
@@ -257,7 +246,7 @@ const saveGenerateHLS = (enabled: boolean) => setKV("generateHLS", enabled);
  * Precondition: {@link isHLSGenerationSupported} must be `true`.
  */
 export const toggleHLSGeneration = async () => {
-    if (!isHLSGenerationSupported()) {
+    if (!isHLSGenerationSupported) {
         assertionFailed();
         return;
     }
@@ -673,7 +662,7 @@ const syncProcessedFileIDs = async () =>
 export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
     deletedFileIDs: Set<number>,
 ) => {
-    if (!isHLSGenerationSupported()) return;
+    if (!isHLSGenerationSupported) return;
 
     const existing = await savedProcessedVideoFileIDs();
     if (existing.size > 0) {
@@ -702,7 +691,7 @@ export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
  * that have already been processed elsewhere.
  */
 export const videoProcessingSyncIfNeeded = async () => {
-    if (!isHLSGenerationSupported()) return;
+    if (!isHLSGenerationSupported) return;
 
     // The `haveSyncedOnce` flag tracks whether or not a sync has happened for
     // the app, and is not specific to video processing. We always set it even
@@ -745,7 +734,7 @@ export const processVideoNewUpload = (
     file: EnteFile,
     processableUploadItem: ProcessableUploadItem,
 ) => {
-    if (!isHLSGenerationSupported()) return;
+    if (!isHLSGenerationSupported) return;
     if (!isHLSGenerationEnabled()) return;
     if (file.metadata.fileType !== FileType.video) return;
     if (processableUploadItem instanceof File) {
@@ -830,7 +819,7 @@ export const isHLSGenerationEnabled = () => _state.isHLSGenerationEnabled;
  * batches, and the externally triggered processing of live uploads.
  */
 const processQueue = async () => {
-    if (!isHLSGenerationSupported() || !isHLSGenerationEnabled()) {
+    if (!isHLSGenerationSupported || !isHLSGenerationEnabled()) {
         assertionFailed(); /* we shouldn't have come here */
         return;
     }

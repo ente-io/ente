@@ -40,6 +40,7 @@
     "referral_source_hint": "Comment avez-vous entendu parler de Ente? (facultatif)",
     "referral_source_info": "Nous ne suivons pas les installations d'applications. Il serait utile que vous nous disiez comment vous nous avez trouvés !",
     "password_mismatch_error": "Les mots de passe ne correspondent pas",
+    "show_or_hide_password": "Afficher/Masquer le mot de passe",
     "welcome_to_ente_title": "Bienvenue sur <a/>",
     "welcome_to_ente_subtitle": "Stockage et partage de photos chiffrés de bout en bout",
     "new_album": "Nouvel album",
@@ -677,5 +678,9 @@
     "light": "Clair",
     "dark": "Sombre",
     "streamable_videos": "Vidéos diffusables",
-    "processing_videos_status": "Traitement des vidéos..."
+    "processing_videos_status": "Traitement des vidéos...",
+    "share_favorites": "Partager les favoris",
+    "person_favorites": "Favoris de {{name}}",
+    "shared_favorites": "Favoris partagés",
+    "added_by_name": ""
 }

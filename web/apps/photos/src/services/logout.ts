@@ -7,11 +7,11 @@ import { logoutFileViewerDataSource } from "ente-gallery/components/viewer/data-
 import { downloadManager } from "ente-gallery/services/download";
 import { resetUploadState } from "ente-gallery/services/upload";
 import { resetVideoState } from "ente-gallery/services/video";
+import exportService from "ente-new/photos/services/export";
 import { logoutML, terminateMLWorker } from "ente-new/photos/services/ml";
 import { logoutSearch } from "ente-new/photos/services/search";
 import { logoutSettings } from "ente-new/photos/services/settings";
 import { logoutUserDetails } from "ente-new/photos/services/user-details";
-import exportService from "./export";
 import { uploadManager } from "./upload-manager";
 
 /**

@@ -489,23 +489,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale": MessageLookupByLibrary.simpleMessage(
             "Juodojo penktadienio išpardavimas"),
         "blog": MessageLookupByLibrary.simpleMessage("Tinklaraštis"),
-        "cLBulkEdit":
-            MessageLookupByLibrary.simpleMessage("Masiškai redaguokite datas"),
-        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
-            "Dabar galite pasirinkti kelias nuotraukas ir vienu sparčiu veiksmu redaguoti visų nuotraukų datą ir laiką. Taip pat palaikomas datų perkėlimas."),
-        "cLFamilyPlan":
-            MessageLookupByLibrary.simpleMessage("Šeimos plano ribos"),
-        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
-            "Dabar galite nustatyti ribas, kiek saugyklos gali naudoti jūsų šeimos nariai."),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("Nauja piktograma"),
-        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
-            "Pagaliau – nauja programos piktograma, kuri, mūsų manymu, geriausiai atspindi mūsų kūrybą. Taip pat pridėjome piktogramos perjungiklį, tad galite ir toliau naudoti senąją piktogramą."),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("Prisiminimai"),
-        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "Iš naujo atraskite ypatingas akimirkas – atkreipkite dėmesį į mėgstamus asmenis, keliones ir atostogas, geriausias nuotraukas bei daug daugiau. Įjunkite mašininį mokymąsi, pažymėkite save ir įvardykite draugus dėl geriausios patirties."),
-        "cLWidgets": MessageLookupByLibrary.simpleMessage("Valdikliai"),
-        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
-            "Dabar galima naudoti su prisiminimais integruotus pagrindinio ekrano valdiklius. Jie parodys jūsų ypatingas akimirkas neatvėrus programos."),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Podėliuoti duomenis"),
         "calculating": MessageLookupByLibrary.simpleMessage("Skaičiuojama..."),

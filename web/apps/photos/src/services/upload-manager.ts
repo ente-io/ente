@@ -17,7 +17,7 @@ import {
     metadataJSONMapKeyForJSON,
     tryParseTakeoutMetadataJSON,
     type ParsedMetadataJSON,
-} from "ente-gallery/services/upload/takeout";
+} from "ente-gallery/services/upload/metadata-json";
 import UploadService, {
     areLivePhotoAssets,
     upload,
@@ -325,10 +325,17 @@ class UploadManager {
         this.uploaderName = null;
     }
 
-    public prepareForNewUpload() {
+    public prepareForNewUpload(
+        parsedMetadataJSONMap?: Map<string, ParsedMetadataJSON>,
+    ) {
         this.resetState();
         this.uiService.reset();
         uploadCancelService.reset();
+
+        if (parsedMetadataJSONMap) {
+            this.parsedMetadataJSONMap = parsedMetadataJSONMap;
+        }
+
         this.uiService.setUploadPhase("preparing");
     }
 
@@ -447,6 +454,7 @@ class UploadManager {
 
         const item = {
             uploadItem: file,
+            pathPrefix: undefined,
             localID: 1,
             collectionID: collection.id,
             externalParsedMetadata: { creationDate, creationTime },
@@ -481,16 +489,19 @@ class UploadManager {
     ) {
         this.uiService.reset(items.length);
 
-        for (const { uploadItem, fileName, collectionID } of items) {
+        for (const item of items) {
             this.abortIfCancelled();
 
+            const { uploadItem, pathPrefix, fileName, collectionID } = item;
             log.info(`Parsing metadata JSON ${fileName}`);
             const metadataJSON = await tryParseTakeoutMetadataJSON(uploadItem!);
             if (metadataJSON) {
-                this.parsedMetadataJSONMap.set(
-                    metadataJSONMapKeyForJSON(collectionID, fileName),
-                    metadataJSON,
+                const key = metadataJSONMapKeyForJSON(
+                    pathPrefix,
+                    collectionID,
+                    fileName,
                 );
+                this.parsedMetadataJSONMap.set(key, metadataJSON);
                 this.uiService.increaseFileUploaded();
             }
         }
@@ -647,10 +658,15 @@ class UploadManager {
         uploadCancelService.requestUploadCancelation();
     }
 
-    public getFailedItemsWithCollections() {
+    /**
+     * Return the list of failed items from the last upload, along with other
+     * state needed to attempt to reupload them.
+     */
+    public failedItemState() {
         return {
-            items: this.failedItems,
+            items: [...this.failedItems],
             collections: [...this.collections.values()],
+            parsedMetadataJSONMap: this.parsedMetadataJSONMap,
         };
     }
 
@@ -725,6 +741,7 @@ const makeUploadItemWithCollectionIDAndName = (
         : uploadItemFileName(f.uploadItem))!,
     isLivePhoto: f.isLivePhoto,
     uploadItem: f.uploadItem,
+    pathPrefix: f.pathPrefix,
     livePhotoAssets: f.livePhotoAssets,
     externalParsedMetadata: f.externalParsedMetadata,
 });
@@ -771,12 +788,14 @@ const clusterLivePhotos = async (
             fileType: fFileType,
             collectionID: f.collectionID,
             uploadItem: f.uploadItem,
+            pathPrefix: f.pathPrefix,
         };
         const ga: PotentialLivePhotoAsset = {
             fileName: g.fileName,
             fileType: gFileType,
             collectionID: g.collectionID,
             uploadItem: g.uploadItem,
+            pathPrefix: g.pathPrefix,
         };
         if (await areLivePhotoAssets(fa, ga, parsedMetadataJSONMap)) {
             const [image, video] =
@@ -786,6 +805,7 @@ const clusterLivePhotos = async (
                 collectionID: f.collectionID,
                 fileName: image.fileName,
                 isLivePhoto: true,
+                pathPrefix: image.pathPrefix,
                 livePhotoAssets: {
                     image: image.uploadItem,
                     video: video.uploadItem,
@@ -793,12 +813,15 @@ const clusterLivePhotos = async (
             });
             index += 2;
         } else {
-            result.push({ ...f, isLivePhoto: false });
+            // They may already be a live photo (we might be retrying a
+            // previously failed upload).
+            result.push({ ...f, isLivePhoto: f.isLivePhoto ?? false });
             index += 1;
         }
     }
-    if (index === items.length - 1) {
-        result.push({ ...items[index], isLivePhoto: false });
+    if (index == items.length - 1) {
+        const f = items[index]!;
+        result.push({ ...f, isLivePhoto: f.isLivePhoto ?? false });
     }
     return result;
 };

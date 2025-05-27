@@ -7,7 +7,6 @@ import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
-import { Export } from "components/Export";
 import { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import {
@@ -49,6 +48,7 @@ import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "ente-new/photos/components/CollectionSelector";
+import { Export } from "ente-new/photos/components/Export";
 import { PlanSelector } from "ente-new/photos/components/PlanSelector";
 import {
     SearchBar,
@@ -77,6 +77,7 @@ import {
 } from "ente-new/photos/services/collection";
 import { areOnlySystemCollections } from "ente-new/photos/services/collection/ui";
 import { getAllLocalCollections } from "ente-new/photos/services/collections";
+import exportService from "ente-new/photos/services/export";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
@@ -120,7 +121,6 @@ import {
     createUnCategorizedCollection,
     removeFromFavorites,
 } from "services/collectionService";
-import exportService from "services/export";
 import { uploadManager } from "services/upload-manager";
 import {
     GalleryContextType,
@@ -1146,7 +1146,7 @@ const Page: React.FC = () => {
                 )}
                 <Export
                     {...exportVisibilityProps}
-                    allCollectionsNameByID={collectionNameByID}
+                    {...{ collectionNameByID }}
                 />
                 <AuthenticateUser
                     {...authenticateUserVisibilityProps}

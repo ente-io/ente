@@ -40,6 +40,7 @@
     "referral_source_hint": "كيف سمعت عن Ente؟ (اختياري)",
     "referral_source_info": "نحن لا نتتبع عمليات تثبيت التطبيق، سيكون من المفيد لنا أن تخبرنا أين وجدتنا!",
     "password_mismatch_error": "كلمات المرور غير متطابقة",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "مرحبًا بك في <a/>",
     "welcome_to_ente_subtitle": "تخزين الصور ومشاركتها بشكل مشفر من طرف إلى طرف",
     "new_album": "ألبوم جديد",
@@ -677,5 +678,9 @@
     "light": "فاتح",
     "dark": "داكن",
     "streamable_videos": "",
-    "processing_videos_status": ""
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": "",
+    "added_by_name": ""
 }

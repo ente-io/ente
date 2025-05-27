@@ -256,6 +256,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         onSelectPerson?.(personID);
     };
 
+    const uploaderName = filePublicMagicMetadata(file)?.uploaderName;
+
     return (
         <FileInfoSidebar {...{ open, onClose }}>
             <Titlebar onClose={onClose} title={t("info")} backIsClose />
@@ -365,6 +367,14 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             }}
                         />
                     )}
+                {uploaderName && (
+                    <Typography
+                        variant="small"
+                        sx={{ m: 2, textAlign: "right", color: "text.muted" }}
+                    >
+                        {t("added_by_name", { name: uploaderName })}
+                    </Typography>
+                )}
             </Stack>
             <RawExif
                 {...rawExifVisibilityProps}

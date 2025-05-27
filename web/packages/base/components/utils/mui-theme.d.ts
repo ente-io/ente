@@ -186,7 +186,6 @@ declare module "@mui/material/Button" {
         success: false;
         info: false;
         warning: false;
-        inherit: false;
         // Add our custom palette colors.
         accent: true;
         critical: true;
@@ -200,7 +199,6 @@ declare module "@mui/material/IconButton" {
         success: false;
         info: false;
         warning: false;
-        inherit: false;
     }
 }
 

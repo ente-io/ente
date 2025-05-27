@@ -461,21 +461,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "birthday": MessageLookupByLibrary.simpleMessage("誕生日"),
         "blackFridaySale": MessageLookupByLibrary.simpleMessage("ブラックフライデーセール"),
         "blog": MessageLookupByLibrary.simpleMessage("ブログ"),
-        "cLBulkEdit": MessageLookupByLibrary.simpleMessage("日付を一括編集"),
-        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
-            "複数の写真を、1回の操作で日付/時刻を編集することもできるようになりました。"),
-        "cLFamilyPlan": MessageLookupByLibrary.simpleMessage("ファミリープランの制限"),
-        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
-            "ファミリーメンバーが使用できるストレージ容量の制限を設定できるようになりました。"),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("新しいアイコン"),
-        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
-            "新しいアプリのアイコンが登場です！ちなみに、古いアイコンが好きだった人のためにアイコンの切り替え機能も用意がございます。"),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("思い出"),
-        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "あなたにとって特別な瞬間を再発見しましょう。 - あなたの好きな人々、あなたの旅行や休日。 機械学習をオンにすると、自分自身にタグを付けたり、友達の顔に名前をつけたりすることができます。"),
-        "cLWidgets": MessageLookupByLibrary.simpleMessage("ウィジェット"),
-        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
-            "Enteの「思い出」機能と統合されたホーム画面ウィジェットが利用可能になりました！"),
         "cachedData": MessageLookupByLibrary.simpleMessage("キャッシュデータ"),
         "calculating": MessageLookupByLibrary.simpleMessage("計算中..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(

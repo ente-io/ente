@@ -8,6 +8,7 @@ import { Overlay } from "ente-base/components/containers";
 import { isSameDay } from "ente-base/date";
 import { isDevBuild } from "ente-base/env";
 import { formattedDateRelative } from "ente-base/i18n-date";
+import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { EnteFile, enteFileDeletionDate } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
@@ -1189,7 +1190,10 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
 
         void downloadManager
             .renderableThumbnailURL(file, showPlaceholder)
-            .then((url) => !didCancel && setImageURL(url));
+            .then((url) => !didCancel && setImageURL(url))
+            .catch((e: unknown) => {
+                log.warn("Failed to fetch thumbnail", e);
+            });
 
         return () => {
             didCancel = true;
