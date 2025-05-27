@@ -90,43 +90,6 @@ export const Export: React.FC<ExportProps> = ({
     const [pendingFiles, setPendingFiles] = useState<EnteFile[]>([]);
     const [lastExportTime, setLastExportTime] = useState(0);
 
-    useEffect(() => {
-        if (!isDesktop) return;
-
-        exportService.setUIUpdaters({
-            setExportStage,
-            setExportProgress,
-            setLastExportTime,
-            setPendingFiles,
-        });
-        const exportSettings: ExportSettings =
-            exportService.getExportSettings();
-        setExportFolder(exportSettings?.folder ?? null);
-        setContinuousExport(exportSettings?.continuousExport ?? false);
-        void syncExportRecord(exportSettings?.folder);
-    }, []);
-
-    useEffect(() => {
-        if (!open) return;
-        void syncExportRecord(exportFolder);
-    }, [open]);
-
-    const verifyExportFolderExists = useCallback(async () => {
-        if (!(await exportService.exportFolderExists(exportFolder))) {
-            showMiniDialog({
-                title: t("export_directory_does_not_exist"),
-                message: (
-                    <Trans
-                        i18nKey={"export_directory_does_not_exist_message"}
-                    />
-                ),
-                cancel: t("ok"),
-            });
-            return false;
-        }
-        return true;
-    }, [exportFolder, showMiniDialog]);
-
     const syncExportRecord = useCallback(async (exportFolder: string) => {
         try {
             if (!(await exportService.exportFolderExists(exportFolder))) {
@@ -144,6 +107,43 @@ export const Export: React.FC<ExportProps> = ({
             }
         }
     }, []);
+
+    useEffect(() => {
+        if (!isDesktop) return;
+
+        exportService.setUIUpdaters({
+            setExportStage,
+            setExportProgress,
+            setLastExportTime,
+            setPendingFiles,
+        });
+        const exportSettings: ExportSettings =
+            exportService.getExportSettings();
+        setExportFolder(exportSettings?.folder ?? null);
+        setContinuousExport(exportSettings?.continuousExport ?? false);
+        void syncExportRecord(exportSettings?.folder);
+    }, [syncExportRecord]);
+
+    useEffect(() => {
+        if (!open) return;
+        void syncExportRecord(exportFolder);
+    }, [open, exportFolder, syncExportRecord]);
+
+    const verifyExportFolderExists = useCallback(async () => {
+        if (!(await exportService.exportFolderExists(exportFolder))) {
+            showMiniDialog({
+                title: t("export_directory_does_not_exist"),
+                message: (
+                    <Trans
+                        i18nKey={"export_directory_does_not_exist_message"}
+                    />
+                ),
+                cancel: t("ok"),
+            });
+            return false;
+        }
+        return true;
+    }, [exportFolder, showMiniDialog]);
 
     const handleChangeExportDirectory = useCallback(() => {
         void (async () => {
