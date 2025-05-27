@@ -56,6 +56,7 @@ import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import type { UploadableUploadItem, UploadItem, UploadPathPrefix } from ".";
 import { type LivePhotoAssets, type UploadResult } from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
+import { matchJSONMetadata, type ParsedMetadataJSON } from "./metadata-json";
 import {
     completeMultipartUpload,
     completeMultipartUploadViaWorker,
@@ -72,7 +73,6 @@ import {
     type MultipartCompletedPart,
     type ObjectUploadURL,
 } from "./remote";
-import { type ParsedMetadataJSON, matchJSONMetadata } from "./metadata-json";
 import {
     fallbackThumbnail,
     generateThumbnailNative,

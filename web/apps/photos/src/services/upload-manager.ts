@@ -664,7 +664,7 @@ class UploadManager {
      */
     public failedItemState() {
         return {
-            items: this.failedItems,
+            items: [...this.failedItems],
             collections: [...this.collections.values()],
             parsedMetadataJSONMap: this.parsedMetadataJSONMap,
         };
@@ -813,12 +813,15 @@ const clusterLivePhotos = async (
             });
             index += 2;
         } else {
-            result.push({ ...f, isLivePhoto: false });
+            // They may already be a live photo (we might be retrying a
+            // previously failed upload).
+            result.push({ ...f, isLivePhoto: f.isLivePhoto ?? false });
             index += 1;
         }
     }
-    if (index === items.length - 1) {
-        result.push({ ...items[index], isLivePhoto: false });
+    if (index == items.length - 1) {
+        const f = items[index]!;
+        result.push({ ...f, isLivePhoto: f.isLivePhoto ?? false });
     }
     return result;
 };
