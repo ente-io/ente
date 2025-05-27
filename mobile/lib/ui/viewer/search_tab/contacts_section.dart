@@ -16,8 +16,8 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/search/result/contact_result_page.dart";
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/utils/navigation_util.dart";

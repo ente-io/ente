@@ -12,7 +12,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
-import 'package:photos/ui/viewer/search/result/person_face_widget.dart';
+import 'package:photos/ui/viewer/people/person_face_widget.dart';
 
 class SearchThumbnailWidget extends StatelessWidget {
   final EnteFile? file;

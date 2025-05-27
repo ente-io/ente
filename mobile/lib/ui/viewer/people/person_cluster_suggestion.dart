@@ -19,7 +19,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 
 class SuggestionUserFeedback {

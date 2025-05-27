@@ -14,7 +14,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:visibility_detector/visibility_detector.dart";
 
 class PersonClustersPage extends StatefulWidget {

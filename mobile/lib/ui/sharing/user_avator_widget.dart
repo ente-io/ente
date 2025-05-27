@@ -12,7 +12,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/standalone/debouncer.dart";
 import 'package:tuple/tuple.dart';
 

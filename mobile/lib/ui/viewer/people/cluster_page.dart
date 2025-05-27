@@ -22,7 +22,7 @@ import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/cluster_app_bar.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
-import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/utils/navigation_util.dart";
 
