@@ -40,6 +40,7 @@
     "referral_source_hint": "Πώς ακούσατε για το Ente; (προαιρετικό)",
     "referral_source_info": "Δεν παρακολουθούμε τις εγκαταστάσεις εφαρμογών. Θα μας βοηθούσε αν μας λέγατε που μας βρήκατε!",
     "password_mismatch_error": "Οι κωδικοί πρόσβασης δεν ταιριάζουν",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Καλώς ήρθατε στο <a/>",
     "welcome_to_ente_subtitle": "",
     "new_album": "Νέο άλμπουμ",

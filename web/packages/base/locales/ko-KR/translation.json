@@ -40,6 +40,7 @@
     "referral_source_hint": "Ente에 대해 어떻게 알게 되었나요? (선택 사항)",
     "referral_source_info": "저희는 앱 설치를 추적하지 않습니다. 어디서 저희를 찾으셨는지 알려주시면 도움이 될 거예요!",
     "password_mismatch_error": "비밀번호가 일치하지 않습니다",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "환영합니다 <a/>",
     "welcome_to_ente_subtitle": "종간단 암호화된 사진 저장 및 공유",
     "new_album": "새 앨범",
