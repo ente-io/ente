@@ -36,7 +36,6 @@ import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { EnteFile } from "ente-media/file";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
-import { FlexWrapper } from "ente-shared/components/Container";
 import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
 import React, { memo, useCallback, useEffect, useState } from "react";
@@ -395,8 +394,8 @@ const ExportInProgressDialogContent: React.FC<
 > = ({ exportStage, exportProgress, onClose, onStopExport }) => (
     <>
         <DialogContent>
-            <Stack sx={{ alignItems: "center" }}>
-                <Typography sx={{ mb: 1.5 }}>
+            <Stack sx={{ alignItems: "center", gap: 3, mt: 1 }}>
+                <Typography>
                     {exportStage === ExportStage.starting ? (
                         t("export_starting")
                     ) : exportStage === ExportStage.migration ? (
@@ -433,14 +432,9 @@ const ExportInProgressDialogContent: React.FC<
                         </Typography>
                     )}
                 </Typography>
-                <FlexWrapper px={1}>
-                    {exportStage === ExportStage.starting ||
-                    exportStage === ExportStage.migration ||
-                    exportStage === ExportStage.renamingCollectionFolders ||
-                    exportStage === ExportStage.trashingDeletedFiles ||
-                    exportStage === ExportStage.trashingDeletedCollections ? (
-                        <LinearProgress />
-                    ) : (
+
+                <Box sx={{ alignSelf: "stretch" }}>
+                    {exportStage === ExportStage.exportingFiles ? (
                         <LinearProgress
                             variant="determinate"
                             value={Math.round(
@@ -450,8 +444,10 @@ const ExportInProgressDialogContent: React.FC<
                                     exportProgress.total,
                             )}
                         />
+                    ) : (
+                        <LinearProgress />
                     )}
-                </FlexWrapper>
+                </Box>
             </Stack>
         </DialogContent>
         <DialogActions>
