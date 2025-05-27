@@ -9,7 +9,6 @@ import {
     Divider,
     LinearProgress,
     Stack,
-    styled,
     Tooltip,
     Typography,
 } from "@mui/material";
@@ -611,49 +610,26 @@ const ExportPendingListItem: React.FC<
     const { pendingFiles, collectionNameByID } = data;
     const file = pendingFiles[index]!;
 
-    const itemTitle = `${collectionNameByID.get(file.collectionID)} / ${
-        file.metadata.title
-    }`;
+    const fileName = file.metadata.title;
+    const collectionName = collectionNameByID.get(file.collectionID);
 
     return (
-        <Tooltip
-            slotProps={{
-                // Reduce the vertical offset of the tooltip "popper" from
-                // the element on which the tooltip appears.
-                popper: {
-                    modifiers: [
-                        { name: "offset", options: { offset: [0, -14] } },
-                    ],
-                },
-            }}
-            title={itemTitle}
-            placement="bottom-start"
-            enterDelay={300}
-            enterNextDelay={100}
-        >
-            <div style={style}>
-                {" "}
-                <FlexWrapper>
-                    <Box sx={{ marginRight: "8px" }}>
-                        <ItemCard
-                            key={file.id}
-                            TileComponent={PreviewItemTile}
-                            coverFile={file}
-                        />
-                    </Box>
-                    <ItemContainer>{itemTitle}</ItemContainer>
-                </FlexWrapper>
-            </div>
-        </Tooltip>
+        <div style={style}>
+            <Stack direction="row" sx={{ gap: 1 }}>
+                <ItemCard
+                    key={file.id}
+                    TileComponent={PreviewItemTile}
+                    coverFile={file}
+                />
+                <Stack>
+                    <Tooltip title={fileName}>
+                        <EllipsizedTypography>{fileName}</EllipsizedTypography>
+                    </Tooltip>
+                    <Typography sx={{ color: "text.muted" }} variant="small">
+                        {collectionName}
+                    </Typography>
+                </Stack>
+            </Stack>
+        </div>
     );
 }, areEqual);
-
-const ItemContainer = styled("div")`
-    position: relative;
-    top: 5px;
-    display: inline-block;
-    max-width: 394px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-`;
