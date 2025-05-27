@@ -194,7 +194,17 @@ class _CollectionsFlexiGridViewWidgetState
         right: 8,
         bottom: widget.scrollBottomSafeArea,
       ),
-      sliver: SliverList(
+      sliver: SliverPrototypeExtentList(
+        prototypeItem: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: showCreateAlbum
+              ? const NewAlbumListItemWidget()
+              : AlbumListItemWidget(
+                  widget.collections![0],
+                  selectedAlbums: widget.selectedAlbums,
+                  onTapCallback: (c) {},
+                ),
+        ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             Widget item;
@@ -270,7 +280,7 @@ class _CollectionsFlexiGridViewWidgetState
             }
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
               child: item,
             );
           },
