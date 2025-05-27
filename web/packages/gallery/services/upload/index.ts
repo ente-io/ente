@@ -1,3 +1,4 @@
+import { basename, dirname } from "ente-base/file-name";
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
 import type { ZipItem } from "ente-base/types/ipc";
@@ -200,24 +201,27 @@ export const groupItemsBasedOnParentFolder = (
 ) => {
     const result = new Map<string, UploadItemAndPath[]>();
     for (const [uploadItem, pathOrName] of uploadItemAndPaths) {
-        let folderPath = pathOrName.substring(0, pathOrName.lastIndexOf("/"));
-        // If the parent folder of a file is "metadata", then we consider it to
-        // be part of the parent folder.
+        const folderPath = dirname(pathOrName);
+        let folderName = basename(folderPath);
+        // [Note: Fold "metadata" directory into parent folder]
         //
-        // e.g. for FileList
+        // If the parent folder of a file is "metadata" (the directory in which
+        // the exported JSON files are written), then we consider it to be part
+        // of the parent folder.
+        //
+        // e.g. for the file list
         //
         //    [a/x.png, a/metadata/x.png.json]
         //
-        // they will both be grouped into the collection "a". This is so that we
-        // cluster the metadata json files in the same collection as the file it
-        // is for.
-        if (folderPath.endsWith(exportMetadataDirectoryName)) {
-            folderPath = folderPath.substring(0, folderPath.lastIndexOf("/"));
+        // we want both to be grouped into the collection "a". This is so that
+        // we can cluster the metadata JSON files in the same collection as the
+        // file it is for.
+        if (folderName == exportMetadataDirectoryName) {
+            folderName = basename(dirname(folderPath));
         }
-        let folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
         if (!folderName) {
             if (!defaultFolderName)
-                throw Error(`Leaf file (without default): ${folderPath}`);
+                throw Error(`Leaf file (without default): ${pathOrName}`);
             folderName = defaultFolderName;
         }
         if (!result.has(folderName)) result.set(folderName, []);
