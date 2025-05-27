@@ -44,7 +44,7 @@ import {
 } from "ente-shared/components/Container";
 import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { areEqual, FixedSizeList, ListChildComponentProps } from "react-window";
 import exportService, {
@@ -576,7 +576,7 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
                     return `${file.collectionID}/${file.id}`;
                 }}
             >
-                {Row}
+                {ExportPendingListItem}
             </FixedSizeList>
             <FocusVisibleButton
                 fullWidth
@@ -590,6 +590,54 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
     );
 };
 
+interface ExportPendingListItemData {
+    allCollectionsNameByID: Map<number, string>;
+    pendingFiles: EnteFile[];
+}
+
+const ExportPendingListItem: React.FC<
+    ListChildComponentProps<ExportPendingListItemData>
+> = memo(({ index, style, data }) => {
+    const { allCollectionsNameByID, pendingFiles } = data;
+    const file = pendingFiles[index] as EnteFile;
+
+    const itemTitle = `${allCollectionsNameByID.get(file.collectionID)} / ${
+        file.metadata.title
+    }`;
+
+    return (
+        <Tooltip
+            slotProps={{
+                // Reduce the vertical offset of the tooltip "popper" from
+                // the element on which the tooltip appears.
+                popper: {
+                    modifiers: [
+                        { name: "offset", options: { offset: [0, -14] } },
+                    ],
+                },
+            }}
+            title={itemTitle}
+            placement="bottom-start"
+            enterDelay={300}
+            enterNextDelay={100}
+        >
+            <div style={style}>
+                {" "}
+                <FlexWrapper>
+                    <Box sx={{ marginRight: "8px" }}>
+                        <ItemCard
+                            key={file.id}
+                            TileComponent={PreviewItemTile}
+                            coverFile={file}
+                        />
+                    </Box>
+                    <ItemContainer>{itemTitle}</ItemContainer>
+                </FlexWrapper>
+            </div>
+        </Tooltip>
+    );
+}, areEqual);
+
 const ItemContainer = styled("div")`
     position: relative;
     top: 5px;
@@ -599,57 +647,3 @@ const ItemContainer = styled("div")`
     white-space: nowrap;
     text-overflow: ellipsis;
 `;
-
-interface ItemData {
-    allCollectionsNameByID: Map<number, string>;
-    pendingFiles: EnteFile[];
-}
-
-// @ts-expect-error "TODO(MR): Understand and fix the type error here"
-const Row: ({
-    index,
-    style,
-    data,
-}: ListChildComponentProps<ItemData>) => ReactElement = React.memo(
-    ({ index, style, data }) => {
-        const { allCollectionsNameByID, pendingFiles } = data;
-        const file = pendingFiles[index] as EnteFile;
-
-        const itemTitle = `${allCollectionsNameByID.get(file.collectionID)} / ${
-            file.metadata.title
-        }`;
-
-        return (
-            <Tooltip
-                slotProps={{
-                    // Reduce the vertical offset of the tooltip "popper" from
-                    // the element on which the tooltip appears.
-                    popper: {
-                        modifiers: [
-                            { name: "offset", options: { offset: [0, -14] } },
-                        ],
-                    },
-                }}
-                title={itemTitle}
-                placement="bottom-start"
-                enterDelay={300}
-                enterNextDelay={100}
-            >
-                <div style={style}>
-                    {" "}
-                    <FlexWrapper>
-                        <Box sx={{ marginRight: "8px" }}>
-                            <ItemCard
-                                key={file.id}
-                                TileComponent={PreviewItemTile}
-                                coverFile={file}
-                            />
-                        </Box>
-                        <ItemContainer>{itemTitle}</ItemContainer>
-                    </FlexWrapper>
-                </div>
-            </Tooltip>
-        );
-    },
-    areEqual,
-);
