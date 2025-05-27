@@ -1,4 +1,4 @@
-import "dart:async";
+      import "dart:async";
 
 import 'package:flutter/material.dart';
 import "package:photos/core/event_bus.dart";
@@ -153,18 +153,13 @@ class _CollectionListPageState extends State<CollectionListPage> {
         children: [
           Text(
             text,
-            style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  fontSize: 14,
-                  color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
-                ),
           ),
           Icon(
             sortKey == key
                 ? (albumSortDirection == AlbumSortDirection.ascending
-                    ? Icons.arrow_upward_outlined
-                    : Icons.arrow_downward_outlined)
+                    ? Icons.arrow_upward
+                    : Icons.arrow_downward)
                 : null,
-            color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
           ),
         ],
       );
@@ -195,6 +190,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
           GestureDetector(
             onTapDown: (TapDownDetails details) async {
               final int? selectedValue = await showMenu<int>(
+                color: colorTheme.backgroundElevated, 
                 context: context,
                 position: RelativeRect.fromLTRB(
                   details.globalPosition.dx,
@@ -226,7 +222,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
               iconButtonType: IconButtonType.secondary,
               iconColor: colorTheme.blurStrokePressed,
             ),
-          ),
+          )   ,   
         ],
       ),
     );
