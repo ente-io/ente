@@ -111,6 +111,59 @@ export interface TimestampedFileSystemUploadItem {
     lastModifiedMs: number;
 }
 
+/**
+ * An "path prefix"-like opaque string which can be used to disambiguate
+ * distinct source {@link UploadItem}s with the same name that are meant to be
+ * uploaded to the same destination Ente album.
+ *
+ * Th documentation of {@link UploadItem} describes the four cases that an
+ * {@link UploadItem} can be. For each of these, we augment an
+ * {@link UploadItem} with a prefix ("dirname") derived from its best "path":
+ *
+ * - Relative path or name in the case of web {@link File}s.
+ *
+ * - Absolute path in the case of desktop {@link File} or path or
+ *   {@link FileAndPath}.
+ *
+ * - Path within the zip file for desktop {@link ZipItem}s.
+ *
+ * Thus, this path should not be treated as an address that can be used to
+ * retrieve the upload item, but rather as extra context that can help us
+ * distinguish between items by their relative or path prefix when their file
+ * names are the same and they're being uploaded to the same album.
+ *
+ * Consider the following hierarchy:
+ *
+ *     Foo/2017/Album1/1.png
+ *     Foo/2017/Album1/1.png.json
+ *
+ *     Foo/2020/Album1/1.png
+ *     Foo/2020/Album1/1.png.json
+ *
+ * If user uploads `Foo`, irrespective of if they select the "root" or "parent"
+ * option {@link CollectionMapping} option, when matching the takeout, only the
+ * Ente album is considered. So it will be undefined which JSON will get used,
+ * and both PNG files will get the same JSON, not their file system siblings.
+ *
+ * In such cases, the path prefix of the item being uploaded can act as extra
+ * context that can help us disambiguate and pick the sibling. Note how we don't
+ * need the path prefix to be absolute or relative or even addressable, we just
+ * need it as extra context that can help us disambiguate two items with
+ * otherwise the same name and that are destined for the same Ente album.
+ *
+ * So for our example, the path prefixes will be
+ *
+ *     Foo/2017/Album1/1.png          "Foo/2017/Album1"
+ *     Foo/2017/Album1/1.png.json     "Foo/2017/Album1"
+ *
+ *     Foo/2020/Album1/1.png          "Foo/2020/Album1"
+ *     Foo/2020/Album1/1.png.json     "Foo/2020/Album1"
+ *
+ * And can thus be used to associate the correct metadata JSON with the
+ * corresponding {@link UploadItem}.
+ */
+export type UploadPathPrefix = string;
+
 export interface LivePhotoAssets {
     image: UploadItem;
     video: UploadItem;
