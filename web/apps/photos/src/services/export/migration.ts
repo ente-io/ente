@@ -17,7 +17,6 @@ import {
 import { getData } from "ente-shared/storage/localStorage";
 import type { User } from "ente-shared/user/types";
 import { wait } from "ente-utils/promise";
-import { getIDBasedSortedFiles, getPersonalFiles } from "utils/file";
 import {
     getCollectionIDFromFileUID,
     getExportRecordFileUID,
@@ -154,6 +153,26 @@ async function migrationV0ToV1(
         collectionIDPathMap,
     );
 }
+
+const getPersonalFiles = (
+    files: EnteFile[],
+    user: User,
+    collectionIdToOwnerIDMap?: Map<number, number>,
+) => {
+    if (!user?.id) {
+        throw Error("user missing");
+    }
+    return files.filter(
+        (file) =>
+            file.ownerID === user.id &&
+            (!collectionIdToOwnerIDMap ||
+                collectionIdToOwnerIDMap.get(file.collectionID) === user.id),
+    );
+};
+
+const getIDBasedSortedFiles = (files: EnteFile[]) => {
+    return files.sort((a, b) => a.id - b.id);
+};
 
 async function migrationV1ToV2(
     exportRecord: ExportRecordV1,
