@@ -24,6 +24,7 @@ class AlbumsWidgetSettings extends StatefulWidget {
 class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
   final _selectedAlbums = SelectedAlbums();
   bool hasInstalledAny = false;
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -70,6 +71,12 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: hasInstalledAny
@@ -106,81 +113,86 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
               ),
             )
           : null,
-      body: CustomScrollView(
-        primary: false,
-        slivers: <Widget>[
-          TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).albums,
+      body: Scrollbar(
+        interactive: true,
+        controller: _scrollController,
+        child: CustomScrollView(
+          controller: _scrollController,
+          primary: false,
+          slivers: <Widget>[
+            TitleBarWidget(
+              flexibleSpaceTitle: TitleBarTitleWidget(
+                title: S.of(context).albums,
+              ),
+              expandedHeight: 120,
+              flexibleSpaceCaption: hasInstalledAny
+                  ? S.of(context).albumsWidgetDesc
+                  : context.l10n.addAlbumWidgetPrompt,
+              actionIcons: [
+                IconButtonWidget(
+                  icon: Icons.close_outlined,
+                  iconButtonType: IconButtonType.secondary,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
             ),
-            expandedHeight: 120,
-            flexibleSpaceCaption: hasInstalledAny
-                ? S.of(context).albumsWidgetDesc
-                : context.l10n.addAlbumWidgetPrompt,
-            actionIcons: [
-              IconButtonWidget(
-                icon: Icons.close_outlined,
-                iconButtonType: IconButtonType.secondary,
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+            if (!hasInstalledAny)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.sizeOf(context).height * 0.5 - 200,
+                      ),
+                      Image.asset(
+                        "assets/albums-widget-static.png",
+                        height: 160,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              FutureBuilder<List<Collection>>(
+                future:
+                    CollectionsService.instance.getCollectionForOnEnteSection(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final data = snapshot.data!;
+                    for (final collection in snapshot.data!) {
+                      if (_selectedAlbums.albums.contains(collection)) {
+                        data.remove(collection);
+                        data.insert(0, collection);
+                      }
+                    }
+
+                    return CollectionsFlexiGridViewWidget(
+                      data,
+                      displayLimitCount: snapshot.data!.length,
+                      shrinkWrap: false,
+                      selectedAlbums: _selectedAlbums,
+                      shouldShowCreateAlbum: false,
+                      enableSelectionMode: true,
+                      onlyAllowSelection: true,
+                    );
+                  } else if (snapshot.hasError) {
+                    return SliverToBoxAdapter(
+                      child: Text(snapshot.error.toString()),
+                    );
+                  } else {
+                    return const SliverToBoxAdapter(child: EnteLoadingWidget());
+                  }
                 },
               ),
-            ],
-          ),
-          if (!hasInstalledAny)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: MediaQuery.sizeOf(context).height * 0.5 - 200,
-                    ),
-                    Image.asset(
-                      "assets/albums-widget-static.png",
-                      height: 160,
-                    ),
-                  ],
-                ),
-              ),
-            )
-          else
-            FutureBuilder<List<Collection>>(
-              future:
-                  CollectionsService.instance.getCollectionForOnEnteSection(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  final data = snapshot.data!;
-                  for (final collection in snapshot.data!) {
-                    if (_selectedAlbums.albums.contains(collection)) {
-                      data.remove(collection);
-                      data.insert(0, collection);
-                    }
-                  }
-
-                  return CollectionsFlexiGridViewWidget(
-                    data,
-                    displayLimitCount: snapshot.data!.length,
-                    shrinkWrap: false,
-                    selectedAlbums: _selectedAlbums,
-                    shouldShowCreateAlbum: false,
-                    enableSelectionMode: true,
-                    onlyAllowSelection: true,
-                  );
-                } else if (snapshot.hasError) {
-                  return SliverToBoxAdapter(
-                    child: Text(snapshot.error.toString()),
-                  );
-                } else {
-                  return const SliverToBoxAdapter(child: EnteLoadingWidget());
-                }
-              },
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
