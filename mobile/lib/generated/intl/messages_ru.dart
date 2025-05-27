@@ -615,6 +615,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Нажмите"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Нажмите на меню дополнительных действий"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Закрыть"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage(
             "Группировать по времени съёмки"),
@@ -1254,6 +1256,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Нажмите с удержанием на электронную почту для подтверждения сквозного шифрования."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Нажмите с удержанием на элемент для просмотра в полноэкранном режиме"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Видео не зациклено"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage("Видео зациклено"),
@@ -1339,6 +1343,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newLocation":
             MessageLookupByLibrary.simpleMessage("Новое местоположение"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Новый человек"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Новый диапазон"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Впервые в Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Недавние"),
@@ -1902,6 +1907,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "К сожалению, мы не смогли сгенерировать безопасные ключи на этом устройстве.\n\nПожалуйста, зарегистрируйтесь с другого устройства."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Сортировать"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Сортировать по"),
         "sortNewestFirst":

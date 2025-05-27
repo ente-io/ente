@@ -11716,11 +11716,71 @@ class S {
     );
   }
 
-  /// `On this day`
-  String get onThisDay {
+  /// `Widgets`
+  String get widgets {
     return Intl.message(
-      'On this day',
-      name: 'onThisDay',
+      'Widgets',
+      name: 'widgets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Memories`
+  String get memories {
+    return Intl.message(
+      'Memories',
+      name: 'memories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select the people you wish to see on your homescreen.`
+  String get peopleWidgetDesc {
+    return Intl.message(
+      'Select the people you wish to see on your homescreen.',
+      name: 'peopleWidgetDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select the albums you wish to see on your homescreen.`
+  String get albumsWidgetDesc {
+    return Intl.message(
+      'Select the albums you wish to see on your homescreen.',
+      name: 'albumsWidgetDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select the kind of memories you wish to see on your homescreen.`
+  String get memoriesWidgetDesc {
+    return Intl.message(
+      'Select the kind of memories you wish to see on your homescreen.',
+      name: 'memoriesWidgetDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Smart memories`
+  String get smartMemories {
+    return Intl.message(
+      'Smart memories',
+      name: 'smartMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Past years' memories`
+  String get pastYearsMemories {
+    return Intl.message(
+      'Past years\' memories',
+      name: 'pastYearsMemories',
       desc: '',
       args: [],
     );
@@ -11761,6 +11821,66 @@ class S {
     return Intl.message(
       'Action not supported on Favourites album',
       name: 'actionNotSupportedOnFavouritesAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On this day memories`
+  String get onThisDayMemories {
+    return Intl.message(
+      'On this day memories',
+      name: 'onThisDayMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `On this day`
+  String get onThisDay {
+    return Intl.message(
+      'On this day',
+      name: 'onThisDay',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Look back on your memories 🌄`
+  String get lookBackOnYourMemories {
+    return Intl.message(
+      'Look back on your memories 🌄',
+      name: 'lookBackOnYourMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// ` new 📸`
+  String get newPhotosEmoji {
+    return Intl.message(
+      ' new 📸',
+      name: 'newPhotosEmoji',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, we had to pause your backups`
+  String get sorryWeHadToPauseYourBackups {
+    return Intl.message(
+      'Sorry, we had to pause your backups',
+      name: 'sorryWeHadToPauseYourBackups',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click to install our best version yet`
+  String get clickToInstallOurBestVersionYet {
+    return Intl.message(
+      'Click to install our best version yet',
+      name: 'clickToInstallOurBestVersionYet',
       desc: '',
       args: [],
     );

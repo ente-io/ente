@@ -97,19 +97,14 @@ extension SectionTypeExtensions on SectionType {
   bool get isCTAVisible {
     switch (this) {
       case SectionType.face:
-        return false;
       case SectionType.magic:
-        return false;
       case SectionType.moment:
-        return false;
-      case SectionType.location:
-        return true;
-      case SectionType.contacts:
-        return true;
-      case SectionType.album:
-        return true;
       case SectionType.fileTypesAndExtension:
         return false;
+      case SectionType.location:
+      case SectionType.contacts:
+      case SectionType.album:
+        return true;
     }
   }
 
@@ -123,19 +118,14 @@ extension SectionTypeExtensions on SectionType {
   bool get isEmptyCTAVisible {
     switch (this) {
       case SectionType.face:
-        return false;
       case SectionType.magic:
-        return false;
       case SectionType.moment:
-        return false;
-      case SectionType.location:
-        return true;
-      case SectionType.contacts:
-        return true;
-      case SectionType.album:
-        return true;
       case SectionType.fileTypesAndExtension:
         return false;
+      case SectionType.location:
+      case SectionType.contacts:
+      case SectionType.album:
+        return true;
     }
   }
 
@@ -237,21 +227,21 @@ extension SectionTypeExtensions on SectionType {
   }
 
   Future<List<SearchResult>> getData(
-    BuildContext context, {
+    BuildContext? context, {
     int? limit,
   }) {
     switch (this) {
       case SectionType.face:
         return SearchService.instance.getAllFace(limit);
       case SectionType.magic:
-        return SearchService.instance.getMagicSectionResults(context);
+        return SearchService.instance.getMagicSectionResults(context!);
 
       case SectionType.moment:
         if (flagService.internalUser) {
           // TODO: lau: remove this whole smart memories and moment altogether
-          return SearchService.instance.smartMemories(context, limit);
+          return SearchService.instance.smartMemories(context!, limit);
         }
-        return SearchService.instance.getRandomMomentsSearchResults(context);
+        return SearchService.instance.getRandomMomentsSearchResults(context!);
 
       case SectionType.location:
         return SearchService.instance.getAllLocationTags(limit);
@@ -264,7 +254,7 @@ extension SectionTypeExtensions on SectionType {
 
       case SectionType.fileTypesAndExtension:
         return SearchService.instance
-            .getAllFileTypesAndExtensionsResults(context, limit);
+            .getAllFileTypesAndExtensionsResults(context!, limit);
     }
   }
 

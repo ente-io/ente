@@ -42,6 +42,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
   final bool shouldShowCreateAlbum;
   final SelectedAlbums? selectedAlbums;
   final double scrollBottomSafeArea;
+  final bool onlyAllowSelection;
 
   const CollectionsFlexiGridViewWidget(
     this.collections, {
@@ -54,6 +55,7 @@ class CollectionsFlexiGridViewWidget extends StatefulWidget {
     this.shouldShowCreateAlbum = false,
     this.selectedAlbums,
     this.scrollBottomSafeArea = 8,
+    this.onlyAllowSelection = false,
   });
 
   @override
@@ -146,7 +148,6 @@ class _CollectionsFlexiGridViewWidgetState
                 width: sideOfThumbnail,
               );
             }
-
             final collectionIndex = showCreateAlbum ? index - 1 : index;
             return AlbumRowItemWidget(
               widget.collections![collectionIndex],
@@ -154,13 +155,13 @@ class _CollectionsFlexiGridViewWidgetState
               tag: widget.tag,
               selectedAlbums: widget.selectedAlbums,
               onTapCallback: (c) {
-                isAnyAlbumSelected
+                isAnyAlbumSelected || widget.onlyAllowSelection
                     ? _toggleAlbumSelection(c)
                     : _navigateToCollectionPage(c);
               },
               onLongPressCallback: widget.enableSelectionMode
                   ? (c) {
-                      isAnyAlbumSelected
+                      isAnyAlbumSelected || widget.onlyAllowSelection
                           ? _navigateToCollectionPage(c)
                           : _toggleAlbumSelection(c);
                     }

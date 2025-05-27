@@ -192,6 +192,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimed": MessageLookupByLibrary.simpleMessage("Nyttjad"),
         "claimedStorageSoFar": m14,
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Rensa index"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Stäng"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Kod tillämpad"),
@@ -404,6 +406,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Genom att klicka på logga in godkänner jag <u-terms>användarvillkoren</u-terms> och våran <u-policy>integritetspolicy</u-policy>"),
         "logout": MessageLookupByLibrary.simpleMessage("Logga ut"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Förlorad enhet?"),
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Maskininlärning"),
@@ -427,6 +431,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "never": MessageLookupByLibrary.simpleMessage("Aldrig"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nytt album"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Ny person"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "next": MessageLookupByLibrary.simpleMessage("Nästa"),
         "no": MessageLookupByLibrary.simpleMessage("Nej"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Ingen"),
@@ -602,6 +607,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Tyvärr, vi kunde inte generera säkra nycklar på den här enheten.\n\nVänligen registrera dig från en annan enhet."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sortera"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sortera efter"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),

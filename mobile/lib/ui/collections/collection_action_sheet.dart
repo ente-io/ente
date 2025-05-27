@@ -11,6 +11,8 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/actions/collection/collection_file_actions.dart";
+import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import 'package:photos/ui/collections/album/vertical_list.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
@@ -18,6 +20,8 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/components/text_input_widget.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
+import "package:photos/ui/notification/toast.dart";
+import "package:photos/utils/separators_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 enum CollectionActionType {
@@ -55,8 +59,10 @@ String _actionName(
       break;
     case CollectionActionType.collectPhotos:
       text = S.of(context).share;
+      break;
     case CollectionActionType.addToHiddenAlbum:
       text = S.of(context).addToHiddenAlbum;
+      break;
     case CollectionActionType.moveToHiddenCollection:
       text = S.of(context).moveToHiddenAlbum;
       break;
@@ -90,7 +96,7 @@ void showCollectionActionSheet(
     topControl: const SizedBox.shrink(),
     backgroundColor: getEnteColorScheme(context).backgroundElevated,
     barrierColor: backdropFaintDark,
-    enableDrag: false,
+    enableDrag: true,
   );
 }
 
@@ -113,8 +119,10 @@ class CollectionActionSheet extends StatefulWidget {
 
 class _CollectionActionSheetState extends State<CollectionActionSheet> {
   late final bool _showOnlyHiddenCollections;
-  static const int cancelButtonSize = 80;
+  late final bool _enableSelection;
+  static const int okButtonSize = 80;
   String _searchQuery = "";
+  final _selectedCollections = <Collection>[];
 
   @override
   void initState() {
@@ -122,6 +130,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     _showOnlyHiddenCollections =
         widget.actionType == CollectionActionType.moveToHiddenCollection ||
             widget.actionType == CollectionActionType.addToHiddenAlbum;
+    _enableSelection = (widget.actionType == CollectionActionType.addFiles ||
+            widget.actionType == CollectionActionType.addToHiddenAlbum) &&
+        (widget.sharedFiles == null || widget.sharedFiles!.isEmpty);
   }
 
   @override
@@ -129,11 +140,13 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     final filesCount = widget.sharedFiles != null
         ? widget.sharedFiles!.length
         : widget.selectedFiles?.files.length ?? 0;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     final isKeyboardUp = bottomInset > 100;
+    final double bottomPadding =
+        max(0, bottomInset - (_enableSelection ? okButtonSize : 0));
     return Padding(
       padding: EdgeInsets.only(
-        bottom: isKeyboardUp ? bottomInset - cancelButtonSize : 0,
+        bottom: isKeyboardUp ? bottomPadding : 0,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -161,6 +174,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                           caption: widget.showOptionToCreateNewAlbum
                               ? S.of(context).createOrSelectAlbum
                               : S.of(context).selectAlbum,
+                          showCloseButton: true,
                         ),
                         Padding(
                           padding: const EdgeInsets.only(
@@ -178,7 +192,6 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                             },
                             isClearable: true,
                             shouldUnfocusOnClearOrSubmit: true,
-                            borderRadius: 2,
                           ),
                         ),
                         _getCollectionItems(),
@@ -192,15 +205,16 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                       decoration: BoxDecoration(
                         border: Border(
                           top: BorderSide(
-                            color: getEnteColorScheme(context).strokeFaint,
+                            color: _enableSelection
+                                ? getEnteColorScheme(context).strokeFaint
+                                : Colors.transparent,
                           ),
                         ),
                       ),
-                      child: ButtonWidget(
-                        buttonType: ButtonType.secondary,
-                        buttonAction: ButtonAction.cancel,
-                        isInAlert: true,
-                        labelText: S.of(context).cancel,
+                      child: Column(
+                        children: [
+                          ..._actionButtons(),
+                        ],
                       ),
                     ),
                   ),
@@ -211,6 +225,46 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         ],
       ),
     );
+  }
+
+  List<Widget> _actionButtons() {
+    final List<Widget> widgets = [];
+    if (_enableSelection) {
+      widgets.add(
+        ButtonWidget(
+          key: const ValueKey('add_button'),
+          buttonType: ButtonType.primary,
+          isInAlert: true,
+          labelText: S.of(context).add,
+          shouldSurfaceExecutionStates: false,
+          isDisabled: _selectedCollections.isEmpty,
+          onTap: () async {
+            final CollectionActions collectionActions =
+                CollectionActions(CollectionsService.instance);
+            final result = await collectionActions.addToMultipleCollections(
+              context,
+              _selectedCollections,
+              true,
+              selectedFiles: widget.selectedFiles?.files.toList(),
+            );
+            if (result) {
+              showShortToast(
+                context,
+                "Added successfully to " +
+                    _selectedCollections.length.toString() +
+                    " albums",
+              );
+              widget.selectedFiles?.clearAll();
+            }
+          },
+        ),
+      );
+    }
+    final widgetsWithSpaceBetween = addSeparators(
+      widgets,
+      const SizedBox(height: 8),
+    );
+    return widgetsWithSpaceBetween;
   }
 
   Flexible _getCollectionItems() {
@@ -239,6 +293,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                   : collections;
               return Scrollbar(
                 thumbVisibility: true,
+                interactive: true,
                 radius: const Radius.circular(2),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 12),
@@ -249,6 +304,11 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                     widget.sharedFiles,
                     _searchQuery,
                     shouldShowCreateAlbum,
+                    enableSelection: _enableSelection,
+                    selectedCollections: _selectedCollections,
+                    onSelectionChanged: () {
+                      setState(() {});
+                    },
                   ),
                 ),
               );

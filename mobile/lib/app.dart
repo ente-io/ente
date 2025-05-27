@@ -13,12 +13,14 @@ import 'package:media_extension/media_extension_action_types.dart';
 import "package:photos/core/event_bus.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/events/memories_changed_event.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
+import "package:photos/services/people_home_widget_service.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
@@ -51,6 +53,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   final _logger = Logger("EnteAppState");
   late Locale? locale;
   late StreamSubscription<MemoriesChangedEvent> _memoriesChangedSubscription;
+  late StreamSubscription<PeopleChangedEvent> _peopleChangedSubscription;
 
   @override
   void initState() {
@@ -67,6 +70,11 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         Bus.instance.on<MemoriesChangedEvent>().listen(
       (event) async {
         await MemoryHomeWidgetService.instance.memoryChanged();
+      },
+    );
+    _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen(
+      (event) async {
+        await PeopleHomeWidgetService.instance.peopleChanged();
       },
     );
   }
@@ -168,6 +176,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _memoriesChangedSubscription.cancel();
+    _peopleChangedSubscription.cancel();
     super.dispose();
   }
 

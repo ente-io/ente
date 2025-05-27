@@ -184,6 +184,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimMore": MessageLookupByLibrary.simpleMessage("Eskatu gehiago!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Eskatuta"),
         "claimedStorageSoFar": m14,
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Kodea aplikatuta"),
         "codeChangeLimitReached": MessageLookupByLibrary.simpleMessage(
@@ -394,6 +396,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "logInLabel": MessageLookupByLibrary.simpleMessage("Sartu"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Sartzeko klikatuz, <u-terms>zerbitzu baldintzak</u-terms> eta <u-policy>pribatutasun politikak</u-policy> onartzen ditut"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Gailua galdu duzu?"),
         "machineLearning":
@@ -421,6 +425,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "movedToTrash": MessageLookupByLibrary.simpleMessage("Zarama mugituta"),
         "never": MessageLookupByLibrary.simpleMessage("Inoiz ez"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Album berria"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Bat ere ez"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Berreskuratze giltzarik ez?"),
@@ -565,6 +570,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Tamalez, ezin dugu giltza segururik sortu gailu honetan. \n\nMesedez, eman izena beste gailu batetik."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "storageInGB": m91,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Gogorra"),
         "subscribe": MessageLookupByLibrary.simpleMessage("Harpidetu"),

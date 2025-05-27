@@ -400,6 +400,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "albumTitle": MessageLookupByLibrary.simpleMessage("Album title"),
         "albumUpdated": MessageLookupByLibrary.simpleMessage("Album updated"),
         "albums": MessageLookupByLibrary.simpleMessage("Albums"),
+        "albumsWidgetDesc": MessageLookupByLibrary.simpleMessage(
+            "Select the albums you wish to see on your homescreen."),
         "allClear": MessageLookupByLibrary.simpleMessage("✨ All clear"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("All memories preserved"),
@@ -615,6 +617,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Click on the overflow menu"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Close"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("Club by capture time"),
@@ -1236,6 +1240,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Long-press on an item to view in full-screen"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Lost device?"),
@@ -1261,6 +1267,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "me": MessageLookupByLibrary.simpleMessage("Me"),
+        "memories": MessageLookupByLibrary.simpleMessage("Memories"),
+        "memoriesWidgetDesc": MessageLookupByLibrary.simpleMessage(
+            "Select the kind of memories you wish to see on your homescreen."),
         "memoryCount": m49,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
         "mergeWithExisting":
@@ -1312,6 +1321,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("New album"),
         "newLocation": MessageLookupByLibrary.simpleMessage("New location"),
         "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("New range"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("New to Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Newest"),
@@ -1366,6 +1376,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "On <branding>ente</branding>"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("On the road again"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayMemories":
+            MessageLookupByLibrary.simpleMessage("On this day memories"),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
@@ -1410,6 +1422,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "We don\'t store this password, so if you forget, <underline>we cannot decrypt your data</underline>"),
+        "pastYearsMemories":
+            MessageLookupByLibrary.simpleMessage("Past years\' memories"),
         "paymentDetails":
             MessageLookupByLibrary.simpleMessage("Payment details"),
         "paymentFailed": MessageLookupByLibrary.simpleMessage("Payment failed"),
@@ -1421,6 +1435,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "people": MessageLookupByLibrary.simpleMessage("People"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
+        "peopleWidgetDesc": MessageLookupByLibrary.simpleMessage(
+            "Select the people you wish to see on your homescreen."),
         "permDeleteWarning": MessageLookupByLibrary.simpleMessage(
             "All items in trash will be permanently deleted\n\nThis action cannot be undone"),
         "permanentlyDelete":
@@ -1817,6 +1833,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "singleFileInBothLocalAndRemote": m87,
         "singleFileInRemoteOnly": m88,
         "skip": MessageLookupByLibrary.simpleMessage("Skip"),
+        "smartMemories": MessageLookupByLibrary.simpleMessage("Smart memories"),
         "social": MessageLookupByLibrary.simpleMessage("Social"),
         "someItemsAreInBothEnteAndYourDevice":
             MessageLookupByLibrary.simpleMessage(
@@ -1846,6 +1863,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sort by"),
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("Newest first"),
@@ -2094,6 +2113,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsNew": MessageLookupByLibrary.simpleMessage("What\'s new"),
         "whyAddTrustContact": MessageLookupByLibrary.simpleMessage(
             "Trusted contact can help in recovering your data."),
+        "widgets": MessageLookupByLibrary.simpleMessage("Widgets"),
         "yearShort": MessageLookupByLibrary.simpleMessage("yr"),
         "yearly": MessageLookupByLibrary.simpleMessage("Yearly"),
         "yearsAgo": m113,
