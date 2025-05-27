@@ -44,9 +44,14 @@ import {
 } from "ente-shared/components/Container";
 import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { areEqual, FixedSizeList, ListChildComponentProps } from "react-window";
+import {
+    areEqual,
+    FixedSizeList,
+    ListChildComponentProps,
+    type ListItemKeySelector,
+} from "react-window";
 import exportService, {
     ExportStage,
     selectAndPrepareExportDirectory,
@@ -56,13 +61,23 @@ import exportService, {
 } from "services/export";
 
 type ExportProps = ModalVisibilityProps & {
-    allCollectionsNameByID: Map<number, string>;
+    /**
+     * A map from collection IDs to their user visible name.
+     *
+     * It will contain entries for all collections (both normal and hidden).
+     */
+    collectionNameByID: Map<number, string>;
 };
 
+/**
+ * A dialog that allows the user to view and manage the export of their data.
+ *
+ * Available only in the desktop app (export requires direct disk access).
+ */
 export const Export: React.FC<ExportProps> = ({
     open,
     onClose,
-    allCollectionsNameByID,
+    collectionNameByID,
 }) => {
     const { showMiniDialog } = useBaseContext();
     const [exportStage, setExportStage] = useState<ExportStage>(
@@ -75,6 +90,7 @@ export const Export: React.FC<ExportProps> = ({
         failed: 0,
         total: 0,
     });
+    // The list of EnteFiles that have not been exported yet.
     const [pendingFiles, setPendingFiles] = useState<EnteFile[]>([]);
     const [lastExportTime, setLastExportTime] = useState(0);
 
@@ -113,7 +129,7 @@ export const Export: React.FC<ExportProps> = ({
     // HELPER FUNCTIONS
     // =======================
 
-    const verifyExportFolderExists = async () => {
+    const verifyExportFolderExists = useCallback(async () => {
         if (!(await exportService.exportFolderExists(exportFolder))) {
             showMiniDialog({
                 title: t("export_directory_does_not_exist"),
@@ -127,7 +143,7 @@ export const Export: React.FC<ExportProps> = ({
             return false;
         }
         return true;
-    };
+    }, [showMiniDialog]);
 
     const syncExportRecord = async (exportFolder: string): Promise<void> => {
         try {
@@ -175,15 +191,20 @@ export const Export: React.FC<ExportProps> = ({
         setContinuousExport(newContinuousExport);
     };
 
-    const startExport = async (opts?: ExportOpts) => {
-        if (!(await verifyExportFolderExists())) return;
+    const handleStartExport = useCallback(
+        (opts?: ExportOpts) => {
+            void (async () => {
+                if (!(await verifyExportFolderExists())) return;
 
-        await exportService.scheduleExport(opts ?? {});
-    };
+                await exportService.scheduleExport(opts ?? {});
+            });
+        },
+        [verifyExportFolderExists],
+    );
 
-    const stopExport = () => {
+    const handleStopExport = useCallback(() => {
         void exportService.stopRunningExport();
-    };
+    }, []);
 
     return (
         <Dialog {...{ open, onClose }} maxWidth="xs" fullWidth>
@@ -207,14 +228,17 @@ export const Export: React.FC<ExportProps> = ({
             </DialogContent>
             <Divider />
             <ExportDialogStageContent
-                exportStage={exportStage}
-                stopExport={stopExport}
-                onHide={onClose}
-                lastExportTime={lastExportTime}
-                exportProgress={exportProgress}
-                pendingFiles={pendingFiles}
-                allCollectionsNameByID={allCollectionsNameByID}
-                onStartExport={startExport}
+                {...{
+                    exportStage,
+                    exportProgress,
+                    pendingFiles,
+                    lastExportTime,
+                    collectionNameByID,
+                    onClose,
+                }}
+                onStartExport={handleStartExport}
+                onResyncExport={() => handleStartExport({ resync: true })}
+                onStopExport={handleStopExport}
             />
         </Dialog>
     );
@@ -304,26 +328,20 @@ const ContinuousExport: React.FC<ContinuousExportProps> = ({
     </SpacedRow>
 );
 
-interface ExportDialogStageContentProps {
-    exportStage: ExportStage;
-    stopExport: () => void;
-    onHide: () => void;
-    lastExportTime: number;
-    exportProgress: ExportProgress;
-    pendingFiles: EnteFile[];
-    allCollectionsNameByID: Map<number, string>;
-    onStartExport: (opts?: ExportOpts) => void;
-}
+type ExportDialogStageContentProps = ExportInitDialogContentProps &
+    ExportInProgressDialogContentProps &
+    ExportFinishedDialogContentProps;
 
 const ExportDialogStageContent: React.FC<ExportDialogStageContentProps> = ({
     exportStage,
-    onStartExport,
-    stopExport,
-    onHide,
-    lastExportTime,
     exportProgress,
     pendingFiles,
-    allCollectionsNameByID,
+    lastExportTime,
+    collectionNameByID,
+    onClose,
+    onStartExport,
+    onStopExport,
+    onResyncExport,
 }) => {
     switch (exportStage) {
         case ExportStage.init:
@@ -337,20 +355,19 @@ const ExportDialogStageContent: React.FC<ExportDialogStageContentProps> = ({
         case ExportStage.trashingDeletedCollections:
             return (
                 <ExportInProgressDialogContent
-                    exportStage={exportStage}
-                    exportProgress={exportProgress}
-                    onClose={onHide}
-                    onStop={stopExport}
+                    {...{ exportStage, exportProgress, onClose, onStopExport }}
                 />
             );
         case ExportStage.finished:
             return (
                 <ExportFinishedDialogContent
-                    pendingFiles={pendingFiles}
-                    lastExportTime={lastExportTime}
-                    allCollectionsNameByID={allCollectionsNameByID}
-                    onClose={onHide}
-                    onResync={() => onStartExport({ resync: true })}
+                    {...{
+                        pendingFiles,
+                        lastExportTime,
+                        collectionNameByID,
+                        onClose,
+                        onResyncExport,
+                    }}
                 />
             );
 
@@ -382,20 +399,13 @@ const ExportInitDialogContent: React.FC<ExportInitDialogContentProps> = ({
 interface ExportInProgressDialogContentProps {
     exportStage: ExportStage;
     exportProgress: ExportProgress;
-    /**
-     * Called when the user wants to stop the export.
-     */
-    onStop: () => void;
-    /**
-     * Called when the user closes the export dialog.
-     * @returns
-     */
     onClose: () => void;
+    onStopExport: () => void;
 }
 
 const ExportInProgressDialogContent: React.FC<
     ExportInProgressDialogContentProps
-> = ({ exportStage, exportProgress, onClose, onStop }) => (
+> = ({ exportStage, exportProgress, onClose, onStopExport }) => (
     <>
         <DialogContent>
             <VerticallyCentered>
@@ -461,7 +471,11 @@ const ExportInProgressDialogContent: React.FC<
             <FocusVisibleButton fullWidth color="secondary" onClick={onClose}>
                 {t("close")}
             </FocusVisibleButton>
-            <FocusVisibleButton fullWidth color="critical" onClick={onStop}>
+            <FocusVisibleButton
+                fullWidth
+                color="critical"
+                onClick={onStopExport}
+            >
                 {t("stop")}
             </FocusVisibleButton>
         </DialogActions>
@@ -469,17 +483,11 @@ const ExportInProgressDialogContent: React.FC<
 );
 
 interface ExportFinishedDialogContentProps {
-    /**
-     * The list of {@link EnteFile}s that have not been exported yet.
-     */
     pendingFiles: EnteFile[];
     lastExportTime: number;
-    allCollectionsNameByID: Map<number, string>;
+    collectionNameByID: Map<number, string>;
     onClose: () => void;
-    /**
-     * Called when the user presses the "Resync" button.
-     */
-    onResync: () => void;
+    onResyncExport: () => void;
 }
 
 const ExportFinishedDialogContent: React.FC<
@@ -487,9 +495,9 @@ const ExportFinishedDialogContent: React.FC<
 > = ({
     pendingFiles,
     lastExportTime,
-    allCollectionsNameByID,
+    collectionNameByID,
     onClose,
-    onResync,
+    onResyncExport,
 }) => {
     const { show: showPendingList, props: pendingListVisibilityProps } =
         useModalVisibility();
@@ -532,33 +540,39 @@ const ExportFinishedDialogContent: React.FC<
                 >
                     {t("close")}
                 </FocusVisibleButton>
-                <FocusVisibleButton fullWidth onClick={onResync}>
+                <FocusVisibleButton fullWidth onClick={onResyncExport}>
                     {t("export_again")}
                 </FocusVisibleButton>
             </DialogActions>
             <ExportPendingListDialog
                 {...pendingListVisibilityProps}
                 pendingFiles={pendingFiles}
-                allCollectionsNameByID={allCollectionsNameByID}
+                collectionNameByID={collectionNameByID}
             />
         </>
     );
 };
 
-type ExportPendingListDialogProps = ModalVisibilityProps & {
-    pendingFiles: EnteFile[];
-    allCollectionsNameByID: Map<number, string>;
-};
+type ExportPendingListDialogProps = ModalVisibilityProps &
+    ExportPendingListItemData;
 
 const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
     open,
     onClose,
-    allCollectionsNameByID,
+    collectionNameByID,
     pendingFiles,
 }) => {
     const itemSize = 50; /* px */
     const itemCount = pendingFiles.length;
     const listHeight = Math.min(itemCount * itemSize, 240);
+
+    const itemKey: ListItemKeySelector<ExportPendingListItemData> = (
+        index,
+        { pendingFiles },
+    ) => {
+        const file = pendingFiles[index]!;
+        return `${file.collectionID}/${file.id}`;
+    };
 
     return (
         <TitledMiniDialog
@@ -567,14 +581,10 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
             title={t("pending_items")}
         >
             <FixedSizeList
-                itemData={{ allCollectionsNameByID, pendingFiles }}
+                itemData={{ collectionNameByID, pendingFiles }}
                 height={listHeight}
                 width="100%"
-                {...{ itemSize, itemCount }}
-                itemKey={(index, { pendingFiles }) => {
-                    const file = pendingFiles[index]!;
-                    return `${file.collectionID}/${file.id}`;
-                }}
+                {...{ itemSize, itemCount, itemKey }}
             >
                 {ExportPendingListItem}
             </FixedSizeList>
@@ -591,17 +601,17 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
 };
 
 interface ExportPendingListItemData {
-    allCollectionsNameByID: Map<number, string>;
     pendingFiles: EnteFile[];
+    collectionNameByID: Map<number, string>;
 }
 
 const ExportPendingListItem: React.FC<
     ListChildComponentProps<ExportPendingListItemData>
 > = memo(({ index, style, data }) => {
-    const { allCollectionsNameByID, pendingFiles } = data;
-    const file = pendingFiles[index] as EnteFile;
+    const { pendingFiles, collectionNameByID } = data;
+    const file = pendingFiles[index]!;
 
-    const itemTitle = `${allCollectionsNameByID.get(file.collectionID)} / ${
+    const itemTitle = `${collectionNameByID.get(file.collectionID)} / ${
         file.metadata.title
     }`;
 

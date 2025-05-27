@@ -1146,7 +1146,7 @@ const Page: React.FC = () => {
                 )}
                 <Export
                     {...exportVisibilityProps}
-                    allCollectionsNameByID={collectionNameByID}
+                    {...{ collectionNameByID }}
                 />
                 <AuthenticateUser
                     {...authenticateUserVisibilityProps}
