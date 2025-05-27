@@ -53,7 +53,7 @@ import {
 } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
-import type { UploadableUploadItem, UploadItem } from ".";
+import type { UploadableUploadItem, UploadItem, UploadPathPrefix } from ".";
 import { type LivePhotoAssets, type UploadResult } from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import {
@@ -260,6 +260,10 @@ export interface UploadAsset {
     livePhotoAssets?: LivePhotoAssets;
     /* Valid for non-live photos */
     uploadItem?: UploadItem;
+    /**
+     * The path prefix of the uploadItem, if available.
+     */
+    uploadItemPathPrefix?: UploadPathPrefix;
     /**
      * Metadata we know about a file externally. Valid for non-live photos.
      *

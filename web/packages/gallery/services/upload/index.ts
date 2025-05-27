@@ -1,6 +1,7 @@
 import log from "ente-base/log";
 import { customAPIOrigin } from "ente-base/origins";
 import type { ZipItem } from "ente-base/types/ipc";
+import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import type { Collection } from "ente-media/collection";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
@@ -164,9 +165,72 @@ export interface TimestampedFileSystemUploadItem {
  */
 export type UploadPathPrefix = string;
 
+export type UploadItemAndPath = [UploadItem, string];
+
+/**
+ * Group files that are that have the same parent folder into collections.
+ *
+ * This is used to segregate the list of {@link UploadItemAndPath}s that we
+ * obtain when an upload is initiated into per-collection groups when the user
+ * chooses the "parent" {@link CollectionMapping} option.
+ *
+ * For example, if the user selects files have a directory structure like:
+ *
+ *               a
+ *             / |  \
+ *            b  j   c
+ *           /|\    /  \
+ *          e f g   h  i
+ *
+ * The files will grouped into 3 collections:
+ *
+ *     [
+ *       a => [j],
+ *       b => [e, f, g],
+ *       c => [h, i]
+ *     ]
+ *
+ * @param defaultFolderName Optional collection name to use for any rooted files
+ * that do not have a parent folder. The function will throw if a default is not
+ * provided and we encounter any such files without a parent.
+ */
+export const groupItemsBasedOnParentFolder = (
+    uploadItemAndPaths: UploadItemAndPath[],
+    defaultFolderName: string | undefined,
+) => {
+    const result = new Map<string, UploadItemAndPath[]>();
+    for (const [uploadItem, pathOrName] of uploadItemAndPaths) {
+        let folderPath = pathOrName.substring(0, pathOrName.lastIndexOf("/"));
+        // If the parent folder of a file is "metadata", then we consider it to
+        // be part of the parent folder.
+        //
+        // e.g. for FileList
+        //
+        //    [a/x.png, a/metadata/x.png.json]
+        //
+        // they will both be grouped into the collection "a". This is so that we
+        // cluster the metadata json files in the same collection as the file it
+        // is for.
+        if (folderPath.endsWith(exportMetadataDirectoryName)) {
+            folderPath = folderPath.substring(0, folderPath.lastIndexOf("/"));
+        }
+        let folderName = folderPath.substring(folderPath.lastIndexOf("/") + 1);
+        if (!folderName) {
+            if (!defaultFolderName)
+                throw Error(`Leaf file (without default): ${folderPath}`);
+            folderName = defaultFolderName;
+        }
+        if (!result.has(folderName)) result.set(folderName, []);
+        result.get(folderName)!.push([uploadItem, pathOrName]);
+    }
+    return result;
+};
+
 export interface LivePhotoAssets {
     image: UploadItem;
+    imagePathPrefix?: UploadPathPrefix;
     video: UploadItem;
+    videoPathPrefix?: UploadPathPrefix;
 }
 
 /**
