@@ -11,7 +11,6 @@ import ScienceIcon from "@mui/icons-material/Science";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
     Box,
-    Button,
     Dialog,
     DialogContent,
     Divider,
@@ -40,6 +39,7 @@ import {
 import { SpacedRow } from "ente-base/components/containers";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawer,
@@ -114,10 +114,6 @@ import {
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { initiateEmail, openURL } from "ente-new/photos/utils/web";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "ente-shared/components/Container";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
@@ -410,7 +406,7 @@ const ManageMemberSubscription: React.FC<ManageMemberSubscriptionProps> = ({
                 <DialogCloseIconButton {...{ onClose }} />
             </SpacedRow>
             <DialogContent>
-                <VerticallyCentered>
+                <Stack sx={{ alignItems: "center", mx: 2 }}>
                     <Box sx={{ mb: 4 }}>
                         <Typography sx={{ color: "text.muted" }}>
                             {t("subscription_info_family")}
@@ -419,23 +415,20 @@ const ManageMemberSubscription: React.FC<ManageMemberSubscriptionProps> = ({
                             {familyAdminEmail(userDetails) ?? ""}
                         </Typography>
                     </Box>
-
                     <img
                         height={256}
                         src="/images/family-plan/1x.png"
                         srcSet="/images/family-plan/2x.png 2x, /images/family-plan/3x.png 3x"
                     />
-                    <FlexWrapper px={2}>
-                        <Button
-                            fullWidth
-                            variant="outlined"
-                            color="critical"
-                            onClick={confirmLeaveFamily}
-                        >
-                            {t("leave_family_plan")}
-                        </Button>
-                    </FlexWrapper>
-                </VerticallyCentered>
+                    <FocusVisibleButton
+                        fullWidth
+                        variant="outlined"
+                        color="critical"
+                        onClick={confirmLeaveFamily}
+                    >
+                        {t("leave_family_plan")}
+                    </FocusVisibleButton>
+                </Stack>
             </DialogContent>
         </Dialog>
     );
