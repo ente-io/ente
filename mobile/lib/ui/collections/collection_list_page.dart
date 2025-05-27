@@ -1,4 +1,4 @@
-      import "dart:async";
+import "dart:async";
 
 import 'package:flutter/material.dart';
 import "package:photos/core/event_bus.dart";
@@ -160,6 +160,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
                     ? Icons.arrow_upward
                     : Icons.arrow_downward)
                 : null,
+            size: 18,
           ),
         ],
       );
@@ -190,7 +191,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
           GestureDetector(
             onTapDown: (TapDownDetails details) async {
               final int? selectedValue = await showMenu<int>(
-                color: colorTheme.backgroundElevated, 
+                color: colorTheme.backgroundElevated,
                 context: context,
                 position: RelativeRect.fromLTRB(
                   details.globalPosition.dx,
@@ -222,7 +223,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
               iconButtonType: IconButtonType.secondary,
               iconColor: colorTheme.blurStrokePressed,
             ),
-          )   ,   
+          ),
         ],
       ),
     );
