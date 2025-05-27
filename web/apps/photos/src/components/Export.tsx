@@ -9,7 +9,6 @@ import {
     Divider,
     LinearProgress,
     Stack,
-    styled,
     Tooltip,
     Typography,
 } from "@mui/material";
@@ -37,16 +36,16 @@ import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { EnteFile } from "ente-media/file";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
-import {
-    FlexWrapper,
-    SpaceBetweenFlex,
-    VerticallyCentered,
-} from "ente-shared/components/Container";
 import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { areEqual, FixedSizeList, ListChildComponentProps } from "react-window";
+import {
+    areEqual,
+    FixedSizeList,
+    ListChildComponentProps,
+    type ListItemKeySelector,
+} from "react-window";
 import exportService, {
     ExportStage,
     selectAndPrepareExportDirectory,
@@ -56,13 +55,23 @@ import exportService, {
 } from "services/export";
 
 type ExportProps = ModalVisibilityProps & {
-    allCollectionsNameByID: Map<number, string>;
+    /**
+     * A map from collection IDs to their user visible name.
+     *
+     * It will contain entries for all collections (both normal and hidden).
+     */
+    collectionNameByID: Map<number, string>;
 };
 
+/**
+ * A dialog that allows the user to view and manage the export of their data.
+ *
+ * Available only in the desktop app (export requires direct disk access).
+ */
 export const Export: React.FC<ExportProps> = ({
     open,
     onClose,
-    allCollectionsNameByID,
+    collectionNameByID,
 }) => {
     const { showMiniDialog } = useBaseContext();
     const [exportStage, setExportStage] = useState<ExportStage>(
@@ -75,45 +84,32 @@ export const Export: React.FC<ExportProps> = ({
         failed: 0,
         total: 0,
     });
+    // The list of EnteFiles that have not been exported yet.
     const [pendingFiles, setPendingFiles] = useState<EnteFile[]>([]);
     const [lastExportTime, setLastExportTime] = useState(0);
 
-    // ====================
-    // SIDE EFFECTS
-    // ====================
     useEffect(() => {
-        if (!isDesktop) {
-            return;
-        }
-        try {
-            exportService.setUIUpdaters({
-                setExportStage,
-                setExportProgress,
-                setLastExportTime,
-                setPendingFiles,
-            });
-            const exportSettings: ExportSettings =
-                exportService.getExportSettings();
-            setExportFolder(exportSettings?.folder ?? null);
-            setContinuousExport(exportSettings?.continuousExport ?? false);
-            void syncExportRecord(exportSettings?.folder);
-        } catch (e) {
-            log.error("export on mount useEffect failed", e);
-        }
+        if (!isDesktop) return;
+
+        exportService.setUIUpdaters({
+            setExportStage,
+            setExportProgress,
+            setLastExportTime,
+            setPendingFiles,
+        });
+        const exportSettings: ExportSettings =
+            exportService.getExportSettings();
+        setExportFolder(exportSettings?.folder ?? null);
+        setContinuousExport(exportSettings?.continuousExport ?? false);
+        void syncExportRecord(exportSettings?.folder);
     }, []);
 
     useEffect(() => {
-        if (!open) {
-            return;
-        }
+        if (!open) return;
         void syncExportRecord(exportFolder);
     }, [open]);
 
-    // ======================
-    // HELPER FUNCTIONS
-    // =======================
-
-    const verifyExportFolderExists = async () => {
+    const verifyExportFolderExists = useCallback(async () => {
         if (!(await exportService.exportFolderExists(exportFolder))) {
             showMiniDialog({
                 title: t("export_directory_does_not_exist"),
@@ -127,9 +123,9 @@ export const Export: React.FC<ExportProps> = ({
             return false;
         }
         return true;
-    };
+    }, [exportFolder, showMiniDialog]);
 
-    const syncExportRecord = async (exportFolder: string): Promise<void> => {
+    const syncExportRecord = useCallback(async (exportFolder: string) => {
         try {
             if (!(await exportService.exportFolderExists(exportFolder))) {
                 setPendingFiles(await exportService.pendingFiles());
@@ -144,46 +140,55 @@ export const Export: React.FC<ExportProps> = ({
                 log.error("syncExportRecord failed", e);
             }
         }
-    };
+    }, []);
 
-    // =============
-    // UI functions
-    // =============
+    const handleChangeExportDirectory = useCallback(() => {
+        void (async () => {
+            const newFolder = await selectAndPrepareExportDirectory();
+            if (!newFolder) return;
 
-    const handleChangeExportDirectoryClick = async () => {
-        const newFolder = await selectAndPrepareExportDirectory();
-        if (!newFolder) return;
+            log.info(`Export folder changed to ${newFolder}`);
+            exportService.updateExportSettings({ folder: newFolder });
+            setExportFolder(newFolder);
+            await syncExportRecord(newFolder);
+        })();
+    }, [syncExportRecord]);
 
-        log.info(`Export folder changed to ${newFolder}`);
-        exportService.updateExportSettings({ folder: newFolder });
-        setExportFolder(newFolder);
-        await syncExportRecord(newFolder);
-    };
+    const handleToggleContinuousExport = useCallback(() => {
+        void (async () => {
+            if (!(await verifyExportFolderExists())) return;
 
-    const toggleContinuousExport = async () => {
-        if (!(await verifyExportFolderExists())) return;
+            const newContinuousExport = !continuousExport;
+            if (newContinuousExport) {
+                exportService.enableContinuousExport();
+            } else {
+                exportService.disableContinuousExport();
+            }
+            exportService.updateExportSettings({
+                continuousExport: newContinuousExport,
+            });
+            setContinuousExport(newContinuousExport);
+        })();
+    }, [verifyExportFolderExists, continuousExport]);
 
-        const newContinuousExport = !continuousExport;
-        if (newContinuousExport) {
-            exportService.enableContinuousExport();
-        } else {
-            exportService.disableContinuousExport();
-        }
-        exportService.updateExportSettings({
-            continuousExport: newContinuousExport,
-        });
-        setContinuousExport(newContinuousExport);
-    };
+    const handleStartExport = useCallback(
+        (opts?: ExportOpts) => {
+            void (async () => {
+                if (!(await verifyExportFolderExists())) return;
 
-    const startExport = async (opts?: ExportOpts) => {
-        if (!(await verifyExportFolderExists())) return;
+                await exportService.scheduleExport(opts ?? {});
+            })();
+        },
+        [verifyExportFolderExists],
+    );
 
-        await exportService.scheduleExport(opts ?? {});
-    };
+    const handleResyncExport = useCallback(() => {
+        handleStartExport({ resync: true });
+    }, [handleStartExport]);
 
-    const stopExport = () => {
+    const handleStopExport = useCallback(() => {
         void exportService.stopRunningExport();
-    };
+    }, []);
 
     return (
         <Dialog {...{ open, onClose }} maxWidth="xs" fullWidth>
@@ -195,65 +200,70 @@ export const Export: React.FC<ExportProps> = ({
             <DialogContent>
                 <Stack>
                     <ExportDirectory
-                        exportFolder={exportFolder}
-                        changeExportDirectory={handleChangeExportDirectoryClick}
                         exportStage={exportStage}
+                        exportFolder={exportFolder}
+                        onChangeExportDirectory={handleChangeExportDirectory}
                     />
                     <ContinuousExport
                         enabled={continuousExport}
-                        onToggle={() => void toggleContinuousExport()}
+                        onToggle={handleToggleContinuousExport}
                     />
                 </Stack>
             </DialogContent>
             <Divider />
             <ExportDialogStageContent
-                exportStage={exportStage}
-                stopExport={stopExport}
-                onHide={onClose}
-                lastExportTime={lastExportTime}
-                exportProgress={exportProgress}
-                pendingFiles={pendingFiles}
-                allCollectionsNameByID={allCollectionsNameByID}
-                onStartExport={startExport}
+                {...{
+                    exportStage,
+                    exportProgress,
+                    pendingFiles,
+                    lastExportTime,
+                    collectionNameByID,
+                    onClose,
+                }}
+                onStartExport={handleStartExport}
+                onResyncExport={handleResyncExport}
+                onStopExport={handleStopExport}
             />
         </Dialog>
     );
 };
 
-function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
-    return (
-        <Stack
-            direction="row"
-            sx={{
-                gap: 1,
-                justifyContent: "space-between",
-                alignItems: "center",
-            }}
-        >
-            <Typography sx={{ color: "text.muted", mr: 1 }}>
-                {t("destination")}
-            </Typography>
-            {exportFolder ? (
-                <>
-                    <DirectoryPath path={exportFolder} />
-                    {exportStage === ExportStage.finished ||
-                    exportStage === ExportStage.init ? (
-                        <ChangeDirectoryOption
-                            onClick={changeExportDirectory}
-                        />
-                    ) : (
-                        // Prevent layout shift.
-                        <Box sx={{ width: "16px", height: "48px" }} />
-                    )}
-                </>
-            ) : (
-                <Button color="accent" onClick={changeExportDirectory}>
-                    {t("select_folder")}
-                </Button>
-            )}
-        </Stack>
-    );
+interface ExportDirectoryProps {
+    exportStage: ExportStage;
+    exportFolder: string;
+    onChangeExportDirectory: () => void;
 }
+
+const ExportDirectory: React.FC<ExportDirectoryProps> = ({
+    exportStage,
+    exportFolder,
+    onChangeExportDirectory,
+}) => (
+    <Stack
+        direction="row"
+        sx={{ gap: 1, justifyContent: "space-between", alignItems: "center" }}
+    >
+        <Typography sx={{ color: "text.muted", mr: 1 }}>
+            {t("destination")}
+        </Typography>
+        {exportFolder ? (
+            <>
+                <DirectoryPath path={exportFolder} />
+                {exportStage === ExportStage.finished ||
+                exportStage === ExportStage.init ? (
+                    <ChangeDirectoryOption onClick={onChangeExportDirectory} />
+                ) : (
+                    // Prevent layout shift.
+                    <Box sx={{ width: "16px", height: "48px" }} />
+                )}
+            </>
+        ) : (
+            <Button color="accent" onClick={onChangeExportDirectory}>
+                {t("select_folder")}
+            </Button>
+        )}
+    </Stack>
+);
 
 const DirectoryPath = ({ path }) => (
     <LinkButton onClick={() => void ensureElectron().openDirectory(path)}>
@@ -304,26 +314,20 @@ const ContinuousExport: React.FC<ContinuousExportProps> = ({
     </SpacedRow>
 );
 
-interface ExportDialogStageContentProps {
-    exportStage: ExportStage;
-    stopExport: () => void;
-    onHide: () => void;
-    lastExportTime: number;
-    exportProgress: ExportProgress;
-    pendingFiles: EnteFile[];
-    allCollectionsNameByID: Map<number, string>;
-    onStartExport: (opts?: ExportOpts) => void;
-}
+type ExportDialogStageContentProps = ExportInitDialogContentProps &
+    ExportInProgressDialogContentProps &
+    ExportFinishedDialogContentProps;
 
 const ExportDialogStageContent: React.FC<ExportDialogStageContentProps> = ({
     exportStage,
-    onStartExport,
-    stopExport,
-    onHide,
-    lastExportTime,
     exportProgress,
     pendingFiles,
-    allCollectionsNameByID,
+    lastExportTime,
+    collectionNameByID,
+    onClose,
+    onStartExport,
+    onStopExport,
+    onResyncExport,
 }) => {
     switch (exportStage) {
         case ExportStage.init:
@@ -337,20 +341,19 @@ const ExportDialogStageContent: React.FC<ExportDialogStageContentProps> = ({
         case ExportStage.trashingDeletedCollections:
             return (
                 <ExportInProgressDialogContent
-                    exportStage={exportStage}
-                    exportProgress={exportProgress}
-                    onClose={onHide}
-                    onStop={stopExport}
+                    {...{ exportStage, exportProgress, onClose, onStopExport }}
                 />
             );
         case ExportStage.finished:
             return (
                 <ExportFinishedDialogContent
-                    pendingFiles={pendingFiles}
-                    lastExportTime={lastExportTime}
-                    allCollectionsNameByID={allCollectionsNameByID}
-                    onClose={onHide}
-                    onResync={() => onStartExport({ resync: true })}
+                    {...{
+                        pendingFiles,
+                        lastExportTime,
+                        collectionNameByID,
+                        onClose,
+                        onResyncExport,
+                    }}
                 />
             );
 
@@ -382,24 +385,17 @@ const ExportInitDialogContent: React.FC<ExportInitDialogContentProps> = ({
 interface ExportInProgressDialogContentProps {
     exportStage: ExportStage;
     exportProgress: ExportProgress;
-    /**
-     * Called when the user wants to stop the export.
-     */
-    onStop: () => void;
-    /**
-     * Called when the user closes the export dialog.
-     * @returns
-     */
     onClose: () => void;
+    onStopExport: () => void;
 }
 
 const ExportInProgressDialogContent: React.FC<
     ExportInProgressDialogContentProps
-> = ({ exportStage, exportProgress, onClose, onStop }) => (
+> = ({ exportStage, exportProgress, onClose, onStopExport }) => (
     <>
         <DialogContent>
-            <VerticallyCentered>
-                <Typography sx={{ mb: 1.5 }}>
+            <Stack sx={{ alignItems: "center", gap: 3, mt: 1 }}>
+                <Typography>
                     {exportStage === ExportStage.starting ? (
                         t("export_starting")
                     ) : exportStage === ExportStage.migration ? (
@@ -436,14 +432,9 @@ const ExportInProgressDialogContent: React.FC<
                         </Typography>
                     )}
                 </Typography>
-                <FlexWrapper px={1}>
-                    {exportStage === ExportStage.starting ||
-                    exportStage === ExportStage.migration ||
-                    exportStage === ExportStage.renamingCollectionFolders ||
-                    exportStage === ExportStage.trashingDeletedFiles ||
-                    exportStage === ExportStage.trashingDeletedCollections ? (
-                        <LinearProgress />
-                    ) : (
+
+                <Box sx={{ alignSelf: "stretch" }}>
+                    {exportStage === ExportStage.exportingFiles ? (
                         <LinearProgress
                             variant="determinate"
                             value={Math.round(
@@ -453,15 +444,21 @@ const ExportInProgressDialogContent: React.FC<
                                     exportProgress.total,
                             )}
                         />
+                    ) : (
+                        <LinearProgress />
                     )}
-                </FlexWrapper>
-            </VerticallyCentered>
+                </Box>
+            </Stack>
         </DialogContent>
         <DialogActions>
             <FocusVisibleButton fullWidth color="secondary" onClick={onClose}>
                 {t("close")}
             </FocusVisibleButton>
-            <FocusVisibleButton fullWidth color="critical" onClick={onStop}>
+            <FocusVisibleButton
+                fullWidth
+                color="critical"
+                onClick={onStopExport}
+            >
                 {t("stop")}
             </FocusVisibleButton>
         </DialogActions>
@@ -469,17 +466,11 @@ const ExportInProgressDialogContent: React.FC<
 );
 
 interface ExportFinishedDialogContentProps {
-    /**
-     * The list of {@link EnteFile}s that have not been exported yet.
-     */
     pendingFiles: EnteFile[];
     lastExportTime: number;
-    allCollectionsNameByID: Map<number, string>;
+    collectionNameByID: Map<number, string>;
     onClose: () => void;
-    /**
-     * Called when the user presses the "Resync" button.
-     */
-    onResync: () => void;
+    onResyncExport: () => void;
 }
 
 const ExportFinishedDialogContent: React.FC<
@@ -487,9 +478,9 @@ const ExportFinishedDialogContent: React.FC<
 > = ({
     pendingFiles,
     lastExportTime,
-    allCollectionsNameByID,
+    collectionNameByID,
     onClose,
-    onResync,
+    onResyncExport,
 }) => {
     const { show: showPendingList, props: pendingListVisibilityProps } =
         useModalVisibility();
@@ -497,8 +488,8 @@ const ExportFinishedDialogContent: React.FC<
     return (
         <>
             <DialogContent>
-                <Stack sx={{ pr: 2 }}>
-                    <SpaceBetweenFlex minHeight={"48px"}>
+                <Stack sx={{ pr: 1 }}>
+                    <SpacedRow sx={{ minHeight: "48px" }}>
                         <Typography sx={{ color: "text.muted" }}>
                             {t("pending_items")}
                         </Typography>
@@ -511,8 +502,8 @@ const ExportFinishedDialogContent: React.FC<
                                 {formattedNumber(pendingFiles.length)}
                             </Typography>
                         )}
-                    </SpaceBetweenFlex>
-                    <SpaceBetweenFlex minHeight={"48px"}>
+                    </SpacedRow>
+                    <SpacedRow sx={{ minHeight: "48px" }}>
                         <Typography sx={{ color: "text.muted" }}>
                             {t("last_export_time")}
                         </Typography>
@@ -521,7 +512,7 @@ const ExportFinishedDialogContent: React.FC<
                                 ? formattedDateTime(new Date(lastExportTime))
                                 : t("never")}
                         </Typography>
-                    </SpaceBetweenFlex>
+                    </SpacedRow>
                 </Stack>
             </DialogContent>
             <DialogActions>
@@ -532,33 +523,39 @@ const ExportFinishedDialogContent: React.FC<
                 >
                     {t("close")}
                 </FocusVisibleButton>
-                <FocusVisibleButton fullWidth onClick={onResync}>
+                <FocusVisibleButton fullWidth onClick={onResyncExport}>
                     {t("export_again")}
                 </FocusVisibleButton>
             </DialogActions>
             <ExportPendingListDialog
                 {...pendingListVisibilityProps}
                 pendingFiles={pendingFiles}
-                allCollectionsNameByID={allCollectionsNameByID}
+                collectionNameByID={collectionNameByID}
             />
         </>
     );
 };
 
-type ExportPendingListDialogProps = ModalVisibilityProps & {
-    pendingFiles: EnteFile[];
-    allCollectionsNameByID: Map<number, string>;
-};
+type ExportPendingListDialogProps = ModalVisibilityProps &
+    ExportPendingListItemData;
 
 const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
     open,
     onClose,
-    allCollectionsNameByID,
+    collectionNameByID,
     pendingFiles,
 }) => {
-    const itemSize = 50; /* px */
+    const itemSize = 56; /* px */
     const itemCount = pendingFiles.length;
     const listHeight = Math.min(itemCount * itemSize, 240);
+
+    const itemKey: ListItemKeySelector<ExportPendingListItemData> = (
+        index,
+        { pendingFiles },
+    ) => {
+        const file = pendingFiles[index]!;
+        return `${file.collectionID}/${file.id}`;
+    };
 
     return (
         <TitledMiniDialog
@@ -567,16 +564,12 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
             title={t("pending_items")}
         >
             <FixedSizeList
-                itemData={{ allCollectionsNameByID, pendingFiles }}
+                itemData={{ collectionNameByID, pendingFiles }}
                 height={listHeight}
                 width="100%"
-                {...{ itemSize, itemCount }}
-                itemKey={(index, { pendingFiles }) => {
-                    const file = pendingFiles[index]!;
-                    return `${file.collectionID}/${file.id}`;
-                }}
+                {...{ itemSize, itemCount, itemKey }}
             >
-                {Row}
+                {ExportPendingListItem}
             </FixedSizeList>
             <FocusVisibleButton
                 fullWidth
@@ -590,66 +583,46 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
     );
 };
 
-const ItemContainer = styled("div")`
-    position: relative;
-    top: 5px;
-    display: inline-block;
-    max-width: 394px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-`;
-
-interface ItemData {
-    allCollectionsNameByID: Map<number, string>;
+interface ExportPendingListItemData {
     pendingFiles: EnteFile[];
+    collectionNameByID: Map<number, string>;
 }
 
-// @ts-expect-error "TODO(MR): Understand and fix the type error here"
-const Row: ({
-    index,
-    style,
-    data,
-}: ListChildComponentProps<ItemData>) => ReactElement = React.memo(
-    ({ index, style, data }) => {
-        const { allCollectionsNameByID, pendingFiles } = data;
-        const file = pendingFiles[index] as EnteFile;
+const ExportPendingListItem: React.FC<
+    ListChildComponentProps<ExportPendingListItemData>
+> = memo(({ index, style, data }) => {
+    const { pendingFiles, collectionNameByID } = data;
+    const file = pendingFiles[index]!;
 
-        const itemTitle = `${allCollectionsNameByID.get(file.collectionID)} / ${
-            file.metadata.title
-        }`;
+    const fileName = file.metadata.title;
+    const collectionName = collectionNameByID.get(file.collectionID);
 
-        return (
-            <Tooltip
-                slotProps={{
-                    // Reduce the vertical offset of the tooltip "popper" from
-                    // the element on which the tooltip appears.
-                    popper: {
-                        modifiers: [
-                            { name: "offset", options: { offset: [0, -14] } },
-                        ],
-                    },
-                }}
-                title={itemTitle}
-                placement="bottom-start"
-                enterDelay={300}
-                enterNextDelay={100}
-            >
-                <div style={style}>
-                    {" "}
-                    <FlexWrapper>
-                        <Box sx={{ marginRight: "8px" }}>
-                            <ItemCard
-                                key={file.id}
-                                TileComponent={PreviewItemTile}
-                                coverFile={file}
-                            />
-                        </Box>
-                        <ItemContainer>{itemTitle}</ItemContainer>
-                    </FlexWrapper>
-                </div>
-            </Tooltip>
-        );
-    },
-    areEqual,
-);
+    return (
+        <div style={style}>
+            <Stack direction="row" sx={{ gap: 1 }}>
+                <Box sx={{ flexShrink: 0 }}>
+                    <ItemCard
+                        key={file.id}
+                        TileComponent={PreviewItemTile} /* 48 px */
+                        coverFile={file}
+                    />
+                </Box>
+                <Stack
+                    sx={{
+                        // We need to set overflow hidden on the containing
+                        // stack for the EllipsizedTypography to kick in.
+                        overflow: "hidden",
+                        gap: "2px",
+                    }}
+                >
+                    <Tooltip title={fileName}>
+                        <EllipsizedTypography>{fileName}</EllipsizedTypography>
+                    </Tooltip>
+                    <Typography sx={{ color: "text.muted" }} variant="small">
+                        {collectionName}
+                    </Typography>
+                </Stack>
+            </Stack>
+        </div>
+    );
+}, areEqual);
