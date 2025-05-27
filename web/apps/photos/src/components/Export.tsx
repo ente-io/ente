@@ -561,7 +561,7 @@ const ExportPendingListDialog: React.FC<ExportPendingListDialogProps> = ({
     collectionNameByID,
     pendingFiles,
 }) => {
-    const itemSize = 50; /* px */
+    const itemSize = 56; /* px */
     const itemCount = pendingFiles.length;
     const listHeight = Math.min(itemCount * itemSize, 240);
 
@@ -619,7 +619,7 @@ const ExportPendingListItem: React.FC<
                 <Box sx={{ flexShrink: 0 }}>
                     <ItemCard
                         key={file.id}
-                        TileComponent={PreviewItemTile}
+                        TileComponent={PreviewItemTile} /* 48 px */
                         coverFile={file}
                     />
                 </Box>
@@ -628,6 +628,7 @@ const ExportPendingListItem: React.FC<
                         // We need to set overflow hidden on the containing
                         // stack for the EllipsizedTypography to kick in.
                         overflow: "hidden",
+                        gap: "2px",
                     }}
                 >
                     <Tooltip title={fileName}>
