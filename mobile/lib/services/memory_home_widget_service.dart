@@ -320,6 +320,9 @@ class MemoryHomeWidgetService {
     while (renderedCount < limit && attemptsCount < maxAttempts) {
       final randomEntry =
           memoriesWithFilesEntries[random.nextInt(memoriesWithFilesLength)];
+
+      if (randomEntry.value.isEmpty) continue;
+
       final randomMemoryFile = randomEntry.value.elementAt(
         random.nextInt(randomEntry.value.length),
       );

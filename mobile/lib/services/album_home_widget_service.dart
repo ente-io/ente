@@ -414,6 +414,9 @@ class AlbumHomeWidgetService {
     while (renderedCount < limit && attemptsCount < maxAttempts) {
       final randomEntry =
           albumsWithFilesEntries[random.nextInt(albumsWithFilesLength)];
+
+      if (randomEntry.value.$2.isEmpty) continue;
+
       final randomAlbumFile = randomEntry.value.$2.elementAt(
         random.nextInt(randomEntry.value.$2.length),
       );

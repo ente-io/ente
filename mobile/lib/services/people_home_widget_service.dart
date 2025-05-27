@@ -393,6 +393,9 @@ class PeopleHomeWidgetService {
     while (renderedCount < limit && attemptsCount < maxAttempts) {
       final randomEntry =
           peopleWithFilesEntries[random.nextInt(peopleWithFilesLength)];
+
+      if (randomEntry.value.$2.isEmpty) continue;
+
       final randomPersonFile = randomEntry.value.$2.elementAt(
         random.nextInt(randomEntry.value.$2.length),
       );
