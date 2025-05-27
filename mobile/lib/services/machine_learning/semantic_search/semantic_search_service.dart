@@ -266,13 +266,25 @@ class SemanticSearchService {
     required Map<String, double> minimumSimilarityMap,
   }) async {
     final startTime = DateTime.now();
-    // TODO: lau: remove this when we feel confident about vector DB
-    // await _cacheClipVectors();
-    // final Map<String, List<QueryResult>> queryResults = await MLComputer
-    //     .instance
-    //     .computeBulkSimilarities(textQueryToEmbeddingMap, minimumSimilarityMap);
-    final queryResults = await ClipVectorDB.instance
-        .computeBulkSimilarities(textQueryToEmbeddingMap, minimumSimilarityMap);
+    if (kDebugMode) {
+      for (final queryText in textQueryToEmbeddingMap.keys) {
+        final embedding = textQueryToEmbeddingMap[queryText]!;
+        dev.log("CLIPTEXT Query: $queryText, embedding: $embedding");
+      }
+    }
+    late final Map<String, List<QueryResult>> queryResults;
+    if (flagService.enableVectorDb) {
+      queryResults = await ClipVectorDB.instance.computeBulkSimilarities(
+        textQueryToEmbeddingMap,
+        minimumSimilarityMap,
+      );
+    } else {
+      await _cacheClipVectors();
+      queryResults = await MLComputer.instance.computeBulkSimilarities(
+        textQueryToEmbeddingMap,
+        minimumSimilarityMap,
+      );
+    }
     final endTime = DateTime.now();
     _logger.info(
       "computingSimilarities took for ${textQueryToEmbeddingMap.length} queries " +

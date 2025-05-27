@@ -20,6 +20,7 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/models/ml/vector.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -84,7 +85,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     );
     stopwatch.stop();
     _logger.info("Starting CLIP vector DB migration check unawaited");
-    unawaited(checkMigrateFillClipVectorDB());
+    if (flagService.enableVectorDb) unawaited(checkMigrateFillClipVectorDB());
 
     return asyncDBConnection;
   }
@@ -1335,21 +1336,25 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) VALUES (?, ?, ?)',
         _getRowFromEmbedding(embeddings.first),
       );
-      await ClipVectorDB.instance.insertEmbedding(
-        fileID: embeddings.first.fileID,
-        embedding: embeddings.first.embedding,
-      );
+      if (flagService.enableVectorDb) {
+        await ClipVectorDB.instance.insertEmbedding(
+          fileID: embeddings.first.fileID,
+          embedding: embeddings.first.embedding,
+        );
+      }
     } else {
       final inputs = embeddings.map((e) => _getRowFromEmbedding(e)).toList();
       await db.executeBatch(
         'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) values(?, ?, ?)',
         inputs,
       );
-      await ClipVectorDB.instance.bulkInsertEmbeddings(
-        fileIDs: embeddings.map((e) => e.fileID).toList(),
-        embeddings:
-            embeddings.map((e) => Float32List.fromList(e.embedding)).toList(),
-      );
+      if (flagService.enableVectorDb) {
+        await ClipVectorDB.instance.bulkInsertEmbeddings(
+          fileIDs: embeddings.map((e) => e.fileID).toList(),
+          embeddings:
+              embeddings.map((e) => Float32List.fromList(e.embedding)).toList(),
+        );
+      }
     }
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
@@ -1360,7 +1365,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(
       'DELETE FROM $clipTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})',
     );
-    await ClipVectorDB.instance.deleteEmbeddings(fileIDs);
+    if (flagService.enableVectorDb) {
+      await ClipVectorDB.instance.deleteEmbeddings(fileIDs);
+    }
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
@@ -1368,7 +1375,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   Future<void> deleteClipIndexes() async {
     final db = await instance.asyncDB;
     await db.execute('DELETE FROM $clipTable');
-    await ClipVectorDB.instance.deleteAllEmbeddings();
+    if (flagService.enableVectorDb) {
+      await ClipVectorDB.instance.deleteAllEmbeddings();
+    }
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 

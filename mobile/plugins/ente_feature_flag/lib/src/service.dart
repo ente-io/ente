@@ -58,6 +58,8 @@ class FlagService {
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 
+  bool get enableVectorDb => flags.internalUser;
+
   String get castUrl => flags.castUrl;
 
   Future<void> setMapEnabled(bool isEnabled) async {
