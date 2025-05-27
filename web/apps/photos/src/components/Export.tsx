@@ -36,10 +36,7 @@ import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { EnteFile } from "ente-media/file";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "ente-shared/components/Container";
+import { FlexWrapper } from "ente-shared/components/Container";
 import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
 import React, { memo, useCallback, useEffect, useState } from "react";
@@ -398,7 +395,7 @@ const ExportInProgressDialogContent: React.FC<
 > = ({ exportStage, exportProgress, onClose, onStopExport }) => (
     <>
         <DialogContent>
-            <VerticallyCentered>
+            <Stack sx={{ alignItems: "center" }}>
                 <Typography sx={{ mb: 1.5 }}>
                     {exportStage === ExportStage.starting ? (
                         t("export_starting")
@@ -455,7 +452,7 @@ const ExportInProgressDialogContent: React.FC<
                         />
                     )}
                 </FlexWrapper>
-            </VerticallyCentered>
+            </Stack>
         </DialogContent>
         <DialogActions>
             <FocusVisibleButton fullWidth color="secondary" onClick={onClose}>
