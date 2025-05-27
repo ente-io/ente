@@ -819,7 +819,7 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         label={t("advanced")}
                         onClick={showAdvancedSettings}
                     />
-                    {isHLSGenerationSupported() && (
+                    {isHLSGenerationSupported && (
                         <Stack>
                             <RowButtonGroupTitle icon={<ScienceIcon />}>
                                 {t("labs")}

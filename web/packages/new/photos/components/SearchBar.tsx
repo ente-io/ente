@@ -389,7 +389,7 @@ const shouldShowEmptyState = (inputValue: string) => {
     // Don't show empty state if there is no ML related information AND we're
     // not processing videos.
 
-    if (!isMLSupported && !isHLSGenerationSupported()) {
+    if (!isMLSupported && !isHLSGenerationSupported) {
         // Neither of ML or HLS generation is supported on current client. This
         // is the code path for web.
         return false;

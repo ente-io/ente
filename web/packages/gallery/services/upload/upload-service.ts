@@ -45,7 +45,6 @@ import {
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
 import { addToCollection } from "ente-new/photos/services/collection";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import {
     CustomError,
     CustomErrorMessage,
@@ -1105,11 +1104,7 @@ const extractImageOrVideoMetadata = async (
 
     // Video duration
     let duration: number | undefined;
-    if (
-        fileType == FileType.video &&
-        // TODO(HLS):
-        settingsSnapshot().isInternalUser
-    ) {
+    if (fileType == FileType.video) {
         duration = await tryDetermineVideoDuration(uploadItem);
     }
 
