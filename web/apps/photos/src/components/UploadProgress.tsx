@@ -18,19 +18,32 @@ import {
     Snackbar,
     Stack,
     styled,
+    Tooltip,
     Typography,
     type AccordionProps,
     type DialogProps,
 } from "@mui/material";
-import ItemList from "components/ItemList";
 import { SpacedRow } from "ente-base/components/containers";
 import { FilledIconButton } from "ente-base/components/mui";
 import { useBaseContext } from "ente-base/context";
 import { formattedListJoin } from "ente-base/i18n";
 import { type UploadPhase } from "ente-gallery/services/upload";
 import { t } from "i18next";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import memoize from "memoize-one";
+import React, {
+    createContext,
+    ReactElement,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 import { Trans } from "react-i18next";
+import {
+    areEqual,
+    FixedSizeList as List,
+    ListChildComponentProps,
+    ListItemKeySelector,
+} from "react-window";
 import type {
     FinishedUploadResult,
     InProgressUpload,
@@ -555,6 +568,93 @@ const TitleText: React.FC<TitleTextProps> = ({ title, count }) => (
         </Typography>
     </Stack>
 );
+
+interface ItemListProps<T> {
+    items: T[];
+    generateItemKey: (item: T) => string | number;
+    getItemTitle: (item: T) => string;
+    renderListItem: (item: T) => React.JSX.Element;
+    maxHeight?: number;
+    itemSize?: number;
+}
+
+interface ItemData<T> {
+    renderListItem: (item: T) => React.JSX.Element;
+    getItemTitle: (item: T) => string;
+    items: T[];
+}
+
+const createItemData: <T>(
+    renderListItem: (item: T) => React.JSX.Element,
+    getItemTitle: (item: T) => string,
+    items: T[],
+) => ItemData<T> = memoize((renderListItem, getItemTitle, items) => ({
+    renderListItem,
+    getItemTitle,
+    items,
+}));
+
+// @ts-expect-error "TODO(MR): Understand and fix the type error here"
+const Row: <T>({
+    index,
+    style,
+    data,
+}: ListChildComponentProps<ItemData<T>>) => ReactElement = React.memo(
+    ({ index, style, data }) => {
+        const { renderListItem, items, getItemTitle } = data;
+        return (
+            <Tooltip
+                slotProps={{
+                    // Reduce the vertical offset of the tooltip "popper" from
+                    // the element on which the tooltip appears.
+                    popper: {
+                        modifiers: [
+                            { name: "offset", options: { offset: [0, -14] } },
+                        ],
+                    },
+                }}
+                title={getItemTitle(items[index])}
+                placement="bottom-start"
+                enterDelay={300}
+                enterNextDelay={100}
+            >
+                <div style={style}>{renderListItem(items[index])}</div>
+            </Tooltip>
+        );
+    },
+    areEqual,
+);
+
+function ItemList<T>(props: ItemListProps<T>) {
+    const itemData = createItemData(
+        props.renderListItem,
+        props.getItemTitle,
+        props.items,
+    );
+
+    const getItemKey: ListItemKeySelector<ItemData<T>> = (index, data) => {
+        const { items } = data;
+        return props.generateItemKey(items[index]);
+    };
+
+    return (
+        <Box sx={{ pl: 2 }}>
+            <List
+                itemData={itemData}
+                height={Math.min(
+                    props.itemSize * props.items.length,
+                    props.maxHeight,
+                )}
+                width={"100%"}
+                itemSize={props.itemSize}
+                itemCount={props.items.length}
+                itemKey={getItemKey}
+            >
+                {Row}
+            </List>
+        </Box>
+    );
+}
 
 const DoneFooter: React.FC = () => {
     const { uploadPhase, finishedUploads, retryFailed, onClose } = useContext(
