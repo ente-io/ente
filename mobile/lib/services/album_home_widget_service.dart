@@ -1,4 +1,5 @@
 import 'dart:convert';
+import "dart:math";
 
 import "package:collection/collection.dart";
 import 'package:crypto/crypto.dart';
@@ -398,56 +399,51 @@ class AlbumHomeWidgetService {
 
     final bool isWidgetPresent = await countHomeWidgets() > 0;
     final limit = isWidgetPresent ? MAX_ALBUMS_LIMIT : 5;
-
     await updateAlbumsStatus(WidgetStatus.notSynced);
 
-    for (final entry in albumsWithFiles.entries) {
-      final albumId = entry.key;
-      final albumName = entry.value.$1;
-      final albumFiles = entry.value.$2;
+    final albumsWithFilesLength = albumsWithFiles.length;
+    final albumsWithFilesEntries = albumsWithFiles.entries.toList();
+    final random = Random();
 
-      for (final file in albumFiles) {
-        final renderResult = await HomeWidgetService.instance
-            .renderFile(
-          file,
-          "albums_widget_$renderedCount",
-          albumName,
-          albumId.toString(),
-        )
-            .catchError((e, stackTrace) {
-          _logger.severe("Error rendering widget", e, stackTrace);
-          return null;
-        });
+    while (renderedCount < limit) {
+      final randomEntry =
+          albumsWithFilesEntries[random.nextInt(albumsWithFilesLength)];
+      final randomAlbumFile = randomEntry.value.$2.elementAt(
+        random.nextInt(randomEntry.value.$2.length),
+      );
+      final albumId = randomEntry.key;
+      final albumName = randomEntry.value.$1;
 
-        if (renderResult != null) {
-          // Check for blockers again before continuing
-          if (await _hasAnyBlockers()) {
-            await clearWidget();
-            return;
-          }
+      final renderResult = await HomeWidgetService.instance
+          .renderFile(
+        randomAlbumFile,
+        "albums_widget_$renderedCount",
+        albumName,
+        albumId.toString(),
+      )
+          .catchError((e, stackTrace) {
+        _logger.severe("Error rendering widget", e, stackTrace);
+        return null;
+      });
 
-          await _setTotalAlbums(renderedCount);
-
-          // Show update toast after first item is rendered
-          if (renderedCount == 1) {
-            await _refreshWidget(
-              message: "First album fetched, updating widget",
-            );
-            await updateAlbumsStatus(WidgetStatus.syncedPartially);
-          }
-
-          renderedCount++;
-
-          // Limit the number of albums to avoid performance issues
-          if (renderedCount >= limit) {
-            _logger.warning("Maximum albums limit ($limit) reached");
-            break;
-          }
+      if (renderResult != null) {
+        // Check for blockers again before continuing
+        if (await _hasAnyBlockers()) {
+          await clearWidget();
+          return;
         }
-      }
 
-      if (renderedCount >= limit) {
-        break;
+        await _setTotalAlbums(renderedCount);
+
+        // Show update toast after first item is rendered
+        if (renderedCount == 1) {
+          await _refreshWidget(
+            message: "First album fetched, updating widget",
+          );
+          await updateAlbumsStatus(WidgetStatus.syncedPartially);
+        }
+
+        renderedCount++;
       }
     }
 
