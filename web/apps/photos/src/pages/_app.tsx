@@ -22,6 +22,10 @@ import { BaseContext, deriveBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import { logStartupBanner } from "ente-base/log-web";
 import { AppUpdate } from "ente-base/types/ipc";
+import {
+    initVideoProcessing,
+    isHLSGenerationSupported,
+} from "ente-gallery/services/video";
 import { Notification } from "ente-new/photos/components/Notification";
 import { ThemedLoadingBar } from "ente-new/photos/components/ThemedLoadingBar";
 import {
@@ -46,10 +50,6 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { photosLogout } from "services/logout";
 
-import {
-    initVideoProcessing,
-    isHLSGenerationSupportedTemp,
-} from "ente-gallery/services/video";
 import "photoswipe/dist/photoswipe.css";
 import "styles/global.css";
 import "styles/photoswipe.css";
@@ -112,7 +112,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         };
 
         if (isMLSupported) initML();
-        if (isHLSGenerationSupportedTemp()) void initVideoProcessing();
+        if (isHLSGenerationSupported) void initVideoProcessing();
 
         electron.onOpenEnteURL(handleOpenEnteURL);
         electron.onAppUpdateAvailable(showUpdateDialog);
