@@ -126,7 +126,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
       final lastViewedClusterID = ClusterFeedbackService.lastViewedClusterID;
 
-      final faceWidgets = <FaceWidget>[];
+      final faceWidgets = <FileInfoFaceWidget>[];
 
       // await generation of the face crops here, so that the file info shows one central loading spinner
       final _ = await getCachedFaceCrops(file, faces);
@@ -144,7 +144,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         faceIDs.add(face.faceID);
         faceScores.add(face.score);
         faceWidgets.add(
-          FaceWidget(
+          FileInfoFaceWidget(
             file,
             face,
             faceCrops: faceCrops,
@@ -163,7 +163,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       return faceWidgets;
     } catch (e, s) {
       _logger.severe('failed to get face widgets in file info', e, s);
-      return <FaceWidget>[];
+      return <FileInfoFaceWidget>[];
     }
   }
 }

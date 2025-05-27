@@ -24,7 +24,7 @@ import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 
-class FaceWidget extends StatefulWidget {
+class FileInfoFaceWidget extends StatefulWidget {
   final EnteFile file;
   final Face face;
   final Future<Map<String, Uint8List>?>? faceCrops;
@@ -33,7 +33,7 @@ class FaceWidget extends StatefulWidget {
   final bool highlight;
   final bool editMode;
 
-  const FaceWidget(
+  const FileInfoFaceWidget(
     this.file,
     this.face, {
     this.faceCrops,
@@ -45,10 +45,10 @@ class FaceWidget extends StatefulWidget {
   });
 
   @override
-  State<FaceWidget> createState() => _FaceWidgetState();
+  State<FileInfoFaceWidget> createState() => _FileInfoFaceWidgetState();
 }
 
-class _FaceWidgetState extends State<FaceWidget> {
+class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
   bool isJustRemoved = false;
 
   final _logger = Logger("FaceWidget");
