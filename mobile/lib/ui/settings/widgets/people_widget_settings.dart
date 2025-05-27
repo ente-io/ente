@@ -21,12 +21,9 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
   bool hasInstalledAny = false;
   final _selectedPeople = SelectedPeople();
 
-  Set<String> people = <String>{};
-
   @override
   void initState() {
     super.initState();
-    _selectedPeople.addListener(_selectedPeopleListener);
     getSelections();
     checkIfAnyWidgetInstalled();
   }
@@ -46,17 +43,6 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
     });
   }
 
-  void _selectedPeopleListener() {
-    people = _selectedPeople.personIds;
-    setState(() {});
-  }
-
-  @override
-  void dispose() {
-    _selectedPeople.removeListener(_selectedPeopleListener);
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,20 +54,28 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                 16,
                 8 + MediaQuery.viewPaddingOf(context).bottom,
               ),
-              child: ButtonWidget(
-                buttonType: ButtonType.primary,
-                buttonSize: ButtonSize.large,
-                labelText: S.of(context).save,
-                shouldSurfaceExecutionStates: false,
-                isDisabled: people.isEmpty,
-                onTap: people.isEmpty
-                    ? null
-                    : () async {
-                        await PeopleHomeWidgetService.instance
-                            .setSelectedPeople(people.toList());
-                        Navigator.pop(context);
-                        await PeopleHomeWidgetService.instance.peopleChanged();
-                      },
+              child: ListenableBuilder(
+                listenable: _selectedPeople,
+                builder: (context, _) {
+                  return ButtonWidget(
+                    buttonType: ButtonType.primary,
+                    buttonSize: ButtonSize.large,
+                    labelText: S.of(context).save,
+                    shouldSurfaceExecutionStates: false,
+                    isDisabled: _selectedPeople.personIds.isEmpty,
+                    onTap: _selectedPeople.personIds.isEmpty
+                        ? null
+                        : () async {
+                            await PeopleHomeWidgetService.instance
+                                .setSelectedPeople(
+                              _selectedPeople.personIds.toList(),
+                            );
+                            Navigator.pop(context);
+                            await PeopleHomeWidgetService.instance
+                                .peopleChanged();
+                          },
+                  );
+                },
               ),
             )
           : null,
