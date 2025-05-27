@@ -1,4 +1,5 @@
 import 'dart:convert';
+import "dart:math";
 
 import "package:collection/collection.dart";
 import 'package:crypto/crypto.dart';
@@ -370,8 +371,10 @@ class AlbumHomeWidgetService {
       if (collection != null) {
         final files =
             await FilesDB.instance.getAllFilesCollection(collection.id);
-        albumsWithFiles[collection.id] =
-            (collection.decryptedName ?? "Album", files);
+        if (files.isNotEmpty) {
+          albumsWithFiles[collection.id] =
+              (collection.decryptedName ?? "Album", files);
+        }
       }
     }
 
@@ -394,61 +397,71 @@ class AlbumHomeWidgetService {
     final currentTotal = await _getTotalAlbums();
     _logger.info("Current total albums in widget: $currentTotal");
 
-    int renderedCount = 0;
-
     final bool isWidgetPresent = await countHomeWidgets() > 0;
+
     final limit = isWidgetPresent ? MAX_ALBUMS_LIMIT : 5;
+    final maxAttempts = limit * 10;
+
+    int renderedCount = 0;
+    int attemptsCount = 0;
 
     await updateAlbumsStatus(WidgetStatus.notSynced);
 
-    for (final entry in albumsWithFiles.entries) {
-      final albumId = entry.key;
-      final albumName = entry.value.$1;
-      final albumFiles = entry.value.$2;
+    final albumsWithFilesLength = albumsWithFiles.length;
+    final albumsWithFilesEntries = albumsWithFiles.entries.toList();
+    final random = Random();
 
-      for (final file in albumFiles) {
-        final renderResult = await HomeWidgetService.instance
-            .renderFile(
-          file,
-          "albums_widget_$renderedCount",
-          albumName,
-          albumId.toString(),
-        )
-            .catchError((e, stackTrace) {
-          _logger.severe("Error rendering widget", e, stackTrace);
-          return null;
-        });
+    while (renderedCount < limit && attemptsCount < maxAttempts) {
+      final randomEntry =
+          albumsWithFilesEntries[random.nextInt(albumsWithFilesLength)];
 
-        if (renderResult != null) {
-          // Check for blockers again before continuing
-          if (await _hasAnyBlockers()) {
-            await clearWidget();
-            return;
-          }
+      if (randomEntry.value.$2.isEmpty) continue;
 
-          await _setTotalAlbums(renderedCount);
+      final randomAlbumFile = randomEntry.value.$2.elementAt(
+        random.nextInt(randomEntry.value.$2.length),
+      );
+      final albumId = randomEntry.key;
+      final albumName = randomEntry.value.$1;
 
-          // Show update toast after first item is rendered
-          if (renderedCount == 1) {
-            await _refreshWidget(
-              message: "First album fetched, updating widget",
-            );
-            await updateAlbumsStatus(WidgetStatus.syncedPartially);
-          }
+      final renderResult = await HomeWidgetService.instance
+          .renderFile(
+        randomAlbumFile,
+        "albums_widget_$renderedCount",
+        albumName,
+        albumId.toString(),
+      )
+          .catchError((e, stackTrace) {
+        _logger.severe("Error rendering widget", e, stackTrace);
+        return null;
+      });
 
-          renderedCount++;
-
-          // Limit the number of albums to avoid performance issues
-          if (renderedCount >= limit) {
-            _logger.warning("Maximum albums limit ($limit) reached");
-            break;
-          }
+      if (renderResult != null) {
+        // Check for blockers again before continuing
+        if (await _hasAnyBlockers()) {
+          await clearWidget();
+          return;
         }
+
+        await _setTotalAlbums(renderedCount);
+
+        // Show update toast after first item is rendered
+        if (renderedCount == 1) {
+          await _refreshWidget(
+            message: "First album fetched, updating widget",
+          );
+          await updateAlbumsStatus(WidgetStatus.syncedPartially);
+        }
+
+        renderedCount++;
       }
 
-      if (renderedCount >= limit) {
-        break;
-      }
+      attemptsCount++;
+    }
+
+    if (attemptsCount >= maxAttempts) {
+      _logger.warning(
+        "Hit max attempts $maxAttempts. Only rendered $renderedCount of limit $limit.",
+      );
     }
 
     // Update the hash to track changes

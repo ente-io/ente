@@ -1,4 +1,3 @@
-import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
@@ -25,19 +24,12 @@ class AlbumsWidgetSettings extends StatefulWidget {
 class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
   final _selectedAlbums = SelectedAlbums();
   bool hasInstalledAny = false;
-  Set<Collection> _albums = {};
 
   @override
   void initState() {
     super.initState();
-    _selectedAlbums.addListener(_selectedAlbumsListener);
     checkIfAnyWidgetInstalled();
     selectExisting();
-  }
-
-  void _selectedAlbumsListener() {
-    _albums = _selectedAlbums.albums;
-    setState(() {});
   }
 
   Future<void> checkIfAnyWidgetInstalled() async {
@@ -78,12 +70,6 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
   }
 
   @override
-  void dispose() {
-    _selectedAlbums.removeListener(_selectedAlbumsListener);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: hasInstalledAny
@@ -94,22 +80,29 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                 16,
                 8 + MediaQuery.viewPaddingOf(context).bottom,
               ),
-              child: ButtonWidget(
-                buttonType: ButtonType.primary,
-                buttonSize: ButtonSize.large,
-                labelText: S.of(context).save,
-                shouldSurfaceExecutionStates: false,
-                onTap: _albums.isNotEmpty
-                    ? () async {
-                        final albums =
-                            _albums.map((e) => e.id.toString()).toList();
-                        await AlbumHomeWidgetService.instance
-                            .setSelectedAlbums(albums);
-                        Navigator.pop(context);
-                        await AlbumHomeWidgetService.instance.albumsChanged();
-                      }
-                    : null,
-                isDisabled: _albums.isEmpty,
+              child: ListenableBuilder(
+                listenable: _selectedAlbums,
+                builder: (context, _) {
+                  return ButtonWidget(
+                    buttonType: ButtonType.primary,
+                    buttonSize: ButtonSize.large,
+                    labelText: S.of(context).save,
+                    shouldSurfaceExecutionStates: false,
+                    onTap: _selectedAlbums.albums.isNotEmpty
+                        ? () async {
+                            final albums = _selectedAlbums.albums
+                                .map((e) => e.id.toString())
+                                .toList();
+                            await AlbumHomeWidgetService.instance
+                                .setSelectedAlbums(albums);
+                            Navigator.pop(context);
+                            await AlbumHomeWidgetService.instance
+                                .albumsChanged();
+                          }
+                        : null,
+                    isDisabled: _selectedAlbums.albums.isEmpty,
+                  );
+                },
               ),
             )
           : null,
@@ -161,13 +154,18 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                   CollectionsService.instance.getCollectionForOnEnteSection(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  final data = snapshot.data!.sorted(
-                    (a, b) => _selectedAlbums.albums.contains(b) ? 1 : -1,
-                  );
+                  final data = snapshot.data!;
+                  for (final collection in snapshot.data!) {
+                    if (_selectedAlbums.albums.contains(collection)) {
+                      data.remove(collection);
+                      data.insert(0, collection);
+                    }
+                  }
+
                   return CollectionsFlexiGridViewWidget(
                     data,
                     displayLimitCount: snapshot.data!.length,
-                    shrinkWrap: true,
+                    shrinkWrap: false,
                     selectedAlbums: _selectedAlbums,
                     shouldShowCreateAlbum: false,
                     enableSelectionMode: true,
