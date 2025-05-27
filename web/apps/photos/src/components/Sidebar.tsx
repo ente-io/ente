@@ -218,13 +218,10 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     onShowPlanSelector,
 }) => {
     const userDetails = useUserDetailsSnapshot();
-    const [memberSubscriptionManageView, setMemberSubscriptionManageView] =
-        useState(false);
-
-    const openMemberSubscriptionManage = () =>
-        setMemberSubscriptionManageView(true);
-    const closeMemberSubscriptionManage = () =>
-        setMemberSubscriptionManageView(false);
+    const {
+        show: showManageMemberSubscription,
+        props: manageMemberSubscriptionVisibilityProps,
+    } = useModalVisibility();
 
     useEffect(() => {
         if (sidebarOpen) void syncUserDetails();
@@ -240,7 +237,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
 
     const handleSubscriptionCardClick = () => {
         if (isNonAdminFamilyMember) {
-            openMemberSubscriptionManage();
+            showManageMemberSubscription();
         } else {
             if (
                 userDetails &&
@@ -275,11 +272,10 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                     />
                 )}
             </Box>
-            {isNonAdminFamilyMember && (
-                <MemberSubscriptionManage
-                    userDetails={userDetails}
-                    open={memberSubscriptionManageView}
-                    onClose={closeMemberSubscriptionManage}
+            {isNonAdminFamilyMember && userDetails && (
+                <ManageMemberSubscription
+                    {...manageMemberSubscriptionVisibilityProps}
+                    {...{ userDetails }}
                 />
             )}
         </>
@@ -379,7 +375,15 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     );
 };
 
-function MemberSubscriptionManage({ open, userDetails, onClose }) {
+type ManageMemberSubscriptionProps = ModalVisibilityProps & {
+    userDetails: UserDetails;
+};
+
+const ManageMemberSubscription: React.FC<ManageMemberSubscriptionProps> = ({
+    open,
+    onClose,
+    userDetails,
+}) => {
     const { showMiniDialog } = useBaseContext();
     const fullScreen = useIsSmallWidth();
 
@@ -393,10 +397,6 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                 action: leaveFamily,
             },
         });
-
-    if (!userDetails) {
-        return <></>;
-    }
 
     return (
         <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
@@ -439,7 +439,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
             </DialogContent>
         </Dialog>
     );
-}
+};
 
 type ShortcutSectionProps = SectionProps & {
     collectionSummaries: SidebarProps["collectionSummaries"];
