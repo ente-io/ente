@@ -118,7 +118,7 @@ export const matchJSONMetadata = (
         name = name.slice(0, -1 * editedFileSuffix.length);
     }
 
-    // Convenience function to wary only the file name component when
+    // Convenience function to vary only the file name component when
     // constructing a key. Delegates to `makeKey3`.
     const makeKey = (fn: string) => makeKey3(pathPrefix, collectionID, fn);
 
