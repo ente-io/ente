@@ -1,3 +1,4 @@
+import 'dart:math';
 import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -306,51 +307,49 @@ class MemoryHomeWidgetService {
 
     final bool isWidgetPresent = await countHomeWidgets() > 0;
     final limit = isWidgetPresent ? MAX_MEMORIES_LIMIT : 5;
-
     await updateMemoriesStatus(WidgetStatus.notSynced);
 
-    for (final entry in memoriesWithFiles.entries) {
-      final memoryTitle = entry.key;
-      final memoryFiles = entry.value;
+    final memoriesWithFilesLength = memoriesWithFiles.length;
+    final memoriesWithFilesEntries = memoriesWithFiles.entries.toList();
+    final random = Random();
 
-      for (final file in memoryFiles) {
-        final renderResult = await HomeWidgetService.instance
-            .renderFile(file, "memory_widget_$renderedCount", memoryTitle, null)
-            .catchError((e, stackTrace) {
-          _logger.severe("Error rendering widget", e, stackTrace);
-          return null;
-        });
+    while (renderedCount < limit) {
+      final randomEntry =
+          memoriesWithFilesEntries[random.nextInt(memoriesWithFilesLength)];
+      final randomMemoryFile = randomEntry.value.elementAt(
+        random.nextInt(randomEntry.value.length),
+      );
+      final memoryTitle = randomEntry.key;
 
-        if (renderResult != null) {
-          // Check for blockers again before continuing
-          if (await _hasAnyBlockers()) {
-            return;
-          }
+      final renderResult = await HomeWidgetService.instance
+          .renderFile(
+        randomMemoryFile,
+        "memory_widget_$renderedCount",
+        memoryTitle,
+        null,
+      )
+          .catchError((e, stackTrace) {
+        _logger.severe("Error rendering widget", e, stackTrace);
+        return null;
+      });
 
-          await _setTotalMemories(renderedCount);
-
-          // Show update toast after first item is rendered
-          if (renderedCount == 1) {
-            await _refreshWidget(
-              message: "First memory fetched, updating widget",
-            );
-            await updateMemoriesStatus(WidgetStatus.syncedPartially);
-          }
-
-          renderedCount++;
-
-          // Limit the number of memories to avoid performance issues
-          if (renderedCount >= limit) {
-            _logger.warning(
-              "Maximum memories limit ($limit) reached",
-            );
-            break;
-          }
+      if (renderResult != null) {
+        // Check for blockers again before continuing
+        if (await _hasAnyBlockers()) {
+          return;
         }
-      }
 
-      if (renderedCount >= limit) {
-        break;
+        await _setTotalMemories(renderedCount);
+
+        // Show update toast after first item is rendered
+        if (renderedCount == 1) {
+          await _refreshWidget(
+            message: "First memory fetched, updating widget",
+          );
+          await updateMemoriesStatus(WidgetStatus.syncedPartially);
+        }
+
+        renderedCount++;
       }
     }
 
