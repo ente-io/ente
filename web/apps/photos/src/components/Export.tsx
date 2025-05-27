@@ -92,40 +92,26 @@ export const Export: React.FC<ExportProps> = ({
     const [pendingFiles, setPendingFiles] = useState<EnteFile[]>([]);
     const [lastExportTime, setLastExportTime] = useState(0);
 
-    // ====================
-    // SIDE EFFECTS
-    // ====================
     useEffect(() => {
-        if (!isDesktop) {
-            return;
-        }
-        try {
-            exportService.setUIUpdaters({
-                setExportStage,
-                setExportProgress,
-                setLastExportTime,
-                setPendingFiles,
-            });
-            const exportSettings: ExportSettings =
-                exportService.getExportSettings();
-            setExportFolder(exportSettings?.folder ?? null);
-            setContinuousExport(exportSettings?.continuousExport ?? false);
-            void syncExportRecord(exportSettings?.folder);
-        } catch (e) {
-            log.error("export on mount useEffect failed", e);
-        }
+        if (!isDesktop) return;
+
+        exportService.setUIUpdaters({
+            setExportStage,
+            setExportProgress,
+            setLastExportTime,
+            setPendingFiles,
+        });
+        const exportSettings: ExportSettings =
+            exportService.getExportSettings();
+        setExportFolder(exportSettings?.folder ?? null);
+        setContinuousExport(exportSettings?.continuousExport ?? false);
+        void syncExportRecord(exportSettings?.folder);
     }, []);
 
     useEffect(() => {
-        if (!open) {
-            return;
-        }
+        if (!open) return;
         void syncExportRecord(exportFolder);
     }, [open]);
-
-    // ======================
-    // HELPER FUNCTIONS
-    // =======================
 
     const verifyExportFolderExists = useCallback(async () => {
         if (!(await exportService.exportFolderExists(exportFolder))) {
@@ -141,9 +127,9 @@ export const Export: React.FC<ExportProps> = ({
             return false;
         }
         return true;
-    }, [showMiniDialog]);
+    }, [exportFolder, showMiniDialog]);
 
-    const syncExportRecord = async (exportFolder: string): Promise<void> => {
+    const syncExportRecord = useCallback(async (exportFolder: string) => {
         try {
             if (!(await exportService.exportFolderExists(exportFolder))) {
                 setPendingFiles(await exportService.pendingFiles());
@@ -158,11 +144,7 @@ export const Export: React.FC<ExportProps> = ({
                 log.error("syncExportRecord failed", e);
             }
         }
-    };
-
-    // =============
-    // UI functions
-    // =============
+    }, []);
 
     const handleChangeExportDirectory = useCallback(() => {
         void (async () => {
@@ -176,20 +158,22 @@ export const Export: React.FC<ExportProps> = ({
         })();
     }, [syncExportRecord]);
 
-    const toggleContinuousExport = async () => {
-        if (!(await verifyExportFolderExists())) return;
+    const handleToggleContinuousExport = useCallback(() => {
+        void (async () => {
+            if (!(await verifyExportFolderExists())) return;
 
-        const newContinuousExport = !continuousExport;
-        if (newContinuousExport) {
-            exportService.enableContinuousExport();
-        } else {
-            exportService.disableContinuousExport();
-        }
-        exportService.updateExportSettings({
-            continuousExport: newContinuousExport,
-        });
-        setContinuousExport(newContinuousExport);
-    };
+            const newContinuousExport = !continuousExport;
+            if (newContinuousExport) {
+                exportService.enableContinuousExport();
+            } else {
+                exportService.disableContinuousExport();
+            }
+            exportService.updateExportSettings({
+                continuousExport: newContinuousExport,
+            });
+            setContinuousExport(newContinuousExport);
+        })();
+    }, [continuousExport]);
 
     const handleStartExport = useCallback(
         (opts?: ExportOpts) => {
@@ -197,10 +181,14 @@ export const Export: React.FC<ExportProps> = ({
                 if (!(await verifyExportFolderExists())) return;
 
                 await exportService.scheduleExport(opts ?? {});
-            });
+            })();
         },
         [verifyExportFolderExists],
     );
+
+    const handleResyncExport = useCallback(() => {
+        handleStartExport({ resync: true });
+    }, [handleStartExport]);
 
     const handleStopExport = useCallback(() => {
         void exportService.stopRunningExport();
@@ -216,13 +204,13 @@ export const Export: React.FC<ExportProps> = ({
             <DialogContent>
                 <Stack>
                     <ExportDirectory
+                        exportStage={exportStage}
                         exportFolder={exportFolder}
                         onChangeExportDirectory={handleChangeExportDirectory}
-                        exportStage={exportStage}
                     />
                     <ContinuousExport
                         enabled={continuousExport}
-                        onToggle={() => void toggleContinuousExport()}
+                        onToggle={handleToggleContinuousExport}
                     />
                 </Stack>
             </DialogContent>
@@ -237,7 +225,7 @@ export const Export: React.FC<ExportProps> = ({
                     onClose,
                 }}
                 onStartExport={handleStartExport}
-                onResyncExport={() => handleStartExport({ resync: true })}
+                onResyncExport={handleResyncExport}
                 onStopExport={handleStopExport}
             />
         </Dialog>
