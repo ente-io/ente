@@ -37,7 +37,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: TitleBarTitleWidget(
                   // title: S.of(context).whatsNew,
-                  title: "v1.0",
+                  title: "v1.1.0",
                 ),
               ),
             ),
