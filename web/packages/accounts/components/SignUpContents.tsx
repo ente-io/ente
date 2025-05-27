@@ -35,7 +35,7 @@ import {
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
 import { PasswordStrengthHint } from "./PasswordStrength";
@@ -68,9 +68,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleClickShowPassword = () => {
-        setShowPassword(!showPassword);
-    };
+    const handleShowPassword = useCallback(() => setShowPassword((show) => !show), []);
 
     const handleMouseDownPassword = (
         event: React.MouseEvent<HTMLButtonElement>,
@@ -188,7 +186,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                                         <ShowHidePassword
                                             showPassword={showPassword}
                                             handleClickShowPassword={
-                                                handleClickShowPassword
+                                                handleShowPassword
                                             }
                                             handleMouseDownPassword={
                                                 handleMouseDownPassword
