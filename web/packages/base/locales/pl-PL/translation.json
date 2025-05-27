@@ -40,6 +40,7 @@
     "referral_source_hint": "Jak usłyszałeś/aś o Ente? (opcjonalnie)",
     "referral_source_info": "Nie śledzimy instalacji aplikacji. Pomogłyby nam, gdybyś powiedział/a nam, gdzie nas znalazłeś/aś!",
     "password_mismatch_error": "Hasła nie pasują do siebie",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Witamy w <a/>",
     "welcome_to_ente_subtitle": "Zaszyfrowana metodą end-to-end pamięć na zdjęcia i udostępnianie",
     "new_album": "Nowy album",

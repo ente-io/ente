@@ -40,6 +40,7 @@
     "referral_source_hint": "Miten kuulit Entestä? (valinnainen)",
     "referral_source_info": "Emme seuraa sovelluksen asennuksia. Se auttaisi meitä, jos kertoisit mistä löysit meidät!",
     "password_mismatch_error": "Salasanat eivät täsmää",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "",
     "welcome_to_ente_subtitle": "Päästä päähän salattu valokuvien tallennustila ja jakaminen",
     "new_album": "Uusi albumi",

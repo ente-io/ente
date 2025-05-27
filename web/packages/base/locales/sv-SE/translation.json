@@ -40,6 +40,7 @@
     "referral_source_hint": "Hur hörde du talas om Ente? (valfritt)",
     "referral_source_info": "Vi spårar inte appinstallationer, Det skulle hjälpa oss om du berättade var du hittade oss!",
     "password_mismatch_error": "Lösenorden matchar inte",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Välkommen till <a/>",
     "welcome_to_ente_subtitle": "Totalsträckskrypterad lagring och delning av foton",
     "new_album": "Nytt album",

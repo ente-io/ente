@@ -40,6 +40,7 @@
     "referral_source_hint": "Wie hast du von Ente erfahren? (optional)",
     "referral_source_info": "Wir tracken keine App-Installationen. Es würde uns jedoch helfen, wenn du uns mitteilst, wie du von uns erfahren hast!",
     "password_mismatch_error": "Die Passwörter stimmen nicht überein",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Willkommen bei <a/>",
     "welcome_to_ente_subtitle": "Ende-zu-Ende verschlüsselte Fotospeicherung und Freigabe",
     "new_album": "Neues Album",

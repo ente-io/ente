@@ -40,6 +40,7 @@
     "referral_source_hint": "Come hai conosciuto Ente? (opzionale)",
     "referral_source_info": "Non teniamo traccia delle installazioni dell'app. Ci sarebbe utile se ci dicessi come ci hai trovato!",
     "password_mismatch_error": "Le password non corrispondono",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Benvenuto su <a/>",
     "welcome_to_ente_subtitle": "Archiviazione e condivisione di foto crittografate end-to-end",
     "new_album": "Nuovo album",
