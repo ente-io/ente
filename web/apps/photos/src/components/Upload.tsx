@@ -30,6 +30,7 @@ import type { CollectionMapping, Electron, ZipItem } from "ente-base/types/ipc";
 import { useFileInput } from "ente-gallery/components/utils/use-file-input";
 import {
     groupItemsBasedOnParentFolder,
+    uploadPathPrefix,
     type FileAndPath,
     type UploadItem,
     type UploadItemAndPath,
@@ -562,7 +563,7 @@ export const Upload: React.FC<UploadProps> = ({
         const uploadItemsWithCollection = uploadItemsAndPaths.current.map(
             ([uploadItem, path], index) => ({
                 uploadItem,
-                uploadItemPathPrefix: dirname(path),
+                uploadItemPathPrefix: uploadPathPrefix(path),
                 localID: index,
                 collectionID: collection.id,
             }),
@@ -614,7 +615,7 @@ export const Upload: React.FC<UploadProps> = ({
                     ...uploadItemsWithCollection,
                     ...uploadItems.map(([uploadItem, path]) => ({
                         localID: index++,
-                        uploadItemPathPrefix: dirname(path),
+                        uploadItemPathPrefix: uploadPathPrefix(path),
                         collectionID: collection.id,
                         uploadItem,
                     })),

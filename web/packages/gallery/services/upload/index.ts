@@ -163,8 +163,24 @@ export interface TimestampedFileSystemUploadItem {
  *
  * And can thus be used to associate the correct metadata JSON with the
  * corresponding {@link UploadItem}.
+ *
+ * As a special case, "/metadata" at the end of the path prefix is discarded.
+ * This allows the metadata JSON written by export to be read back in during
+ * uploads. See: [Note: Fold "metadata" directory into parent folder].
  */
 export type UploadPathPrefix = string;
+
+/**
+ * Return the {@link UploadPathPrefix} for the given {@link pathOrName} of an
+ * item being uploaded.
+ */
+export const uploadPathPrefix = (pathOrName: string) => {
+    const folderPath = dirname(pathOrName);
+    if (basename(folderPath) == exportMetadataDirectoryName) {
+        return dirname(folderPath);
+    }
+    return folderPath;
+};
 
 export type UploadItemAndPath = [UploadItem, string];
 

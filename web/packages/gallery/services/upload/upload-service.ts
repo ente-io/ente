@@ -254,14 +254,26 @@ export type ExternalParsedMetadata = ParsedMetadata & {
 };
 
 export interface UploadAsset {
-    /** `true` if this is a live photo. */
+    /**
+     * `true` if this is a live photo.
+     */
     isLivePhoto?: boolean;
-    /* Valid for live photos */
+    /**
+     * The two parts of the live photo being uploaded.
+     *
+     * Valid for live photos.
+     */
     livePhotoAssets?: LivePhotoAssets;
-    /* Valid for non-live photos */
+    /**
+     * The item being uploaded.
+     *
+     * Valid for non-live photos.
+     */
     uploadItem?: UploadItem;
     /**
      * The path prefix of the uploadItem, if available.
+     *
+     * Valid for non-live photos.
      */
     uploadItemPathPrefix?: UploadPathPrefix;
     /**
