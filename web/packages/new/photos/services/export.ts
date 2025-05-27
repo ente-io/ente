@@ -8,6 +8,10 @@
 import { ensureElectron } from "ente-base/electron";
 import { joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
+import {
+    exportMetadataDirectoryName,
+    exportTrashDirectoryName,
+} from "ente-gallery/export-dirs";
 import { downloadManager } from "ente-gallery/services/download";
 import { writeStream } from "ente-gallery/utils/native-stream";
 import type { Collection } from "ente-media/collection";
@@ -30,10 +34,6 @@ import { getData, setData } from "ente-shared/storage/localStorage";
 import { PromiseQueue } from "ente-utils/promise";
 import i18n from "i18next";
 import { migrateExport, type ExportRecord } from "./export-migration";
-import {
-    exportMetadataDirectoryName,
-    exportTrashDirectoryName,
-} from "ente-gallery/export-dirs";
 
 /** Name of the JSON file in which we keep the state of the export. */
 const exportRecordFileName = "export_status.json";
