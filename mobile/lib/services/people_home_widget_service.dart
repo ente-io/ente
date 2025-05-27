@@ -376,17 +376,21 @@ class PeopleHomeWidgetService {
     final currentTotal = await _getTotalPeople();
     _logger.info("Current total people in widget: $currentTotal");
 
-    int renderedCount = 0;
-
     final bool isWidgetPresent = await countHomeWidgets() > 0;
+
     final limit = isWidgetPresent ? MAX_PEOPLE_LIMIT : 5;
+    final maxAttempts = limit * 10;
+
+    int renderedCount = 0;
+    int attemptsCount = 0;
+
     await updatePeopleStatus(WidgetStatus.notSynced);
 
     final peopleWithFilesLength = peopleWithFiles.length;
     final peopleWithFilesEntries = peopleWithFiles.entries.toList();
     final random = Random();
 
-    while (renderedCount < limit) {
+    while (renderedCount < limit && attemptsCount < maxAttempts) {
       final randomEntry =
           peopleWithFilesEntries[random.nextInt(peopleWithFilesLength)];
       final randomPersonFile = randomEntry.value.$2.elementAt(
@@ -425,6 +429,14 @@ class PeopleHomeWidgetService {
 
         renderedCount++;
       }
+
+      attemptsCount++;
+    }
+
+    if (attemptsCount >= maxAttempts) {
+      _logger.warning(
+        "Hit max attempts $maxAttempts. Only rendered $renderedCount of limit $limit.",
+      );
     }
 
     if (renderedCount == 0) {

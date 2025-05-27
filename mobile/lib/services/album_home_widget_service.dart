@@ -397,17 +397,21 @@ class AlbumHomeWidgetService {
     final currentTotal = await _getTotalAlbums();
     _logger.info("Current total albums in widget: $currentTotal");
 
-    int renderedCount = 0;
-
     final bool isWidgetPresent = await countHomeWidgets() > 0;
+
     final limit = isWidgetPresent ? MAX_ALBUMS_LIMIT : 5;
+    final maxAttempts = limit * 10;
+
+    int renderedCount = 0;
+    int attemptsCount = 0;
+
     await updateAlbumsStatus(WidgetStatus.notSynced);
 
     final albumsWithFilesLength = albumsWithFiles.length;
     final albumsWithFilesEntries = albumsWithFiles.entries.toList();
     final random = Random();
 
-    while (renderedCount < limit) {
+    while (renderedCount < limit && attemptsCount < maxAttempts) {
       final randomEntry =
           albumsWithFilesEntries[random.nextInt(albumsWithFilesLength)];
       final randomAlbumFile = randomEntry.value.$2.elementAt(
@@ -447,6 +451,14 @@ class AlbumHomeWidgetService {
 
         renderedCount++;
       }
+
+      attemptsCount++;
+    }
+
+    if (attemptsCount >= maxAttempts) {
+      _logger.warning(
+        "Hit max attempts $maxAttempts. Only rendered $renderedCount of limit $limit.",
+      );
     }
 
     // Update the hash to track changes

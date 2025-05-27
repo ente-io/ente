@@ -303,17 +303,21 @@ class MemoryHomeWidgetService {
     final currentTotal = await _getTotalMemories();
     _logger.info("Current total memories in widget: $currentTotal");
 
-    int renderedCount = 0;
-
     final bool isWidgetPresent = await countHomeWidgets() > 0;
+
     final limit = isWidgetPresent ? MAX_MEMORIES_LIMIT : 5;
+    final maxAttempts = limit * 10;
+
+    int renderedCount = 0;
+    int attemptsCount = 0;
+
     await updateMemoriesStatus(WidgetStatus.notSynced);
 
     final memoriesWithFilesLength = memoriesWithFiles.length;
     final memoriesWithFilesEntries = memoriesWithFiles.entries.toList();
     final random = Random();
 
-    while (renderedCount < limit) {
+    while (renderedCount < limit && attemptsCount < maxAttempts) {
       final randomEntry =
           memoriesWithFilesEntries[random.nextInt(memoriesWithFilesLength)];
       final randomMemoryFile = randomEntry.value.elementAt(
@@ -351,6 +355,14 @@ class MemoryHomeWidgetService {
 
         renderedCount++;
       }
+
+      attemptsCount++;
+    }
+
+    if (attemptsCount >= maxAttempts) {
+      _logger.warning(
+        "Hit max attempts $maxAttempts. Only rendered $renderedCount of limit $limit.",
+      );
     }
 
     if (renderedCount == 0) {
