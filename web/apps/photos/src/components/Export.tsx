@@ -616,12 +616,20 @@ const ExportPendingListItem: React.FC<
     return (
         <div style={style}>
             <Stack direction="row" sx={{ gap: 1 }}>
-                <ItemCard
-                    key={file.id}
-                    TileComponent={PreviewItemTile}
-                    coverFile={file}
-                />
-                <Stack>
+                <Box sx={{ flexShrink: 0 }}>
+                    <ItemCard
+                        key={file.id}
+                        TileComponent={PreviewItemTile}
+                        coverFile={file}
+                    />
+                </Box>
+                <Stack
+                    sx={{
+                        // We need to set overflow hidden on the containing
+                        // stack for the EllipsizedTypography to kick in.
+                        overflow: "hidden",
+                    }}
+                >
                     <Tooltip title={fileName}>
                         <EllipsizedTypography>{fileName}</EllipsizedTypography>
                     </Tooltip>
