@@ -190,11 +190,12 @@ struct EnteMemoryWidgetEntryView: View {
                             .aspectRatio(contentMode: .fit)
                             .padding(8)
 
-                        Text("Go to Settings->General to customise the widget")
-                            .font(.custom("Inter", size: 14, relativeTo: .caption))
+                        Text("Go to Settings -> General to customise the widget")
+                            .font(.custom("Inter", size: 12, relativeTo: .caption))
                             .foregroundStyle(.white)  // Tint-aware color
                             .multilineTextAlignment(.center)
                             .padding(.bottom, 12)
+                            .padding(.horizontal, 8)
                             .backwardWidgetAccentable(true)
                         Spacer()
                     }
