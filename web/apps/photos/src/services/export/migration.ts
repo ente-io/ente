@@ -17,7 +17,7 @@ import {
 import { getData } from "ente-shared/storage/localStorage";
 import type { User } from "ente-shared/user/types";
 import { wait } from "ente-utils/promise";
-import {
+import exportService, {
     getCollectionIDFromFileUID,
     getExportRecordFileUID,
     getLivePhotoExportName,
@@ -27,7 +27,6 @@ import {
     type ExportStage,
     type FileExportNames,
 } from ".";
-import exportService from "./index";
 
 type ExportedCollectionPaths = Record<number, string>;
 
@@ -138,7 +137,7 @@ async function migrationV0ToV1(
     const localFiles = mergeMetadata(await getAllLocalFiles());
     const localCollections = await getLocalCollections();
     const personalFiles = getIDBasedSortedFiles(
-        getPersonalFiles(localFiles, user),
+        localFiles.filter((file) => file.ownerID == user.id),
     );
     const personalCollections = localCollections.filter(
         (collection) => collection.owner.id === user?.id,
@@ -153,22 +152,6 @@ async function migrationV0ToV1(
         collectionIDPathMap,
     );
 }
-
-const getPersonalFiles = (
-    files: EnteFile[],
-    user: User,
-    collectionIdToOwnerIDMap?: Map<number, number>,
-) => {
-    if (!user?.id) {
-        throw Error("user missing");
-    }
-    return files.filter(
-        (file) =>
-            file.ownerID === user.id &&
-            (!collectionIdToOwnerIDMap ||
-                collectionIdToOwnerIDMap.get(file.collectionID) === user.id),
-    );
-};
 
 const getIDBasedSortedFiles = (files: EnteFile[]) => {
     return files.sort((a, b) => a.id - b.id);
@@ -192,7 +175,7 @@ async function migrationV2ToV3(
     const user: User = getData("user");
     const localFiles = mergeMetadata(await getAllLocalFiles());
     const personalFiles = getIDBasedSortedFiles(
-        getPersonalFiles(localFiles, user),
+        localFiles.filter((file) => file.ownerID == user.id),
     );
 
     const collectionExportNames =
