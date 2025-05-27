@@ -342,7 +342,6 @@ export const getUserOwnedFiles = (files: EnteFile[]) => {
     return files.filter((file) => file.ownerID === user.id);
 };
 
-
 export const shouldShowAvatar = (file: EnteFile, user: User) => {
     if (!file || !user) {
         return false;

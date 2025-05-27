@@ -87,6 +87,7 @@ import {
     TRASH_SECTION,
 } from "ente-new/photos/services/collection";
 import type { CollectionSummaries } from "ente-new/photos/services/collection/ui";
+import exportService from "ente-new/photos/services/export";
 import { isMLSupported } from "ente-new/photos/services/ml";
 import {
     isDevBuildAndUser,
@@ -130,7 +131,6 @@ import React, {
 } from "react";
 import { Trans } from "react-i18next";
 import { getUncategorizedCollection } from "services/collectionService";
-import exportService from "services/export";
 import { testUpload } from "../../tests/upload.test";
 import { SubscriptionCard } from "./SubscriptionCard";
 

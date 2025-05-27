@@ -12,7 +12,6 @@ import { mergeMetadata, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import { getLocalCollections } from "ente-new/photos/services/collections";
-import { exportMetadataDirectoryName } from "ente-new/photos/services/export";
 import { getAllLocalFiles } from "ente-new/photos/services/files";
 import {
     safeDirectoryName,
@@ -23,6 +22,7 @@ import { getData } from "ente-shared/storage/localStorage";
 import type { User } from "ente-shared/user/types";
 import { wait } from "ente-utils/promise";
 import exportService, {
+    exportMetadataDirectoryName,
     getCollectionIDFromFileUID,
     getExportRecordFileUID,
     getLivePhotoExportName,
