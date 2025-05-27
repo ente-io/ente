@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import FolderIcon from "@mui/icons-material/Folder";
 import {
     Box,
@@ -34,7 +36,7 @@ import { ensureElectron } from "ente-base/electron";
 import { formattedNumber } from "ente-base/i18n";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
-import { EnteFile } from "ente-media/file";
+import { type EnteFile } from "ente-media/file";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
 import { CustomError } from "ente-shared/error";
 import { t } from "i18next";
@@ -43,7 +45,7 @@ import { Trans } from "react-i18next";
 import {
     areEqual,
     FixedSizeList,
-    ListChildComponentProps,
+    type ListChildComponentProps,
     type ListItemKeySelector,
 } from "react-window";
 import exportService, {
@@ -52,7 +54,7 @@ import exportService, {
     type ExportOpts,
     type ExportProgress,
     type ExportSettings,
-} from "services/export";
+} from "../services/export";
 
 type ExportProps = ModalVisibilityProps & {
     /**
@@ -88,6 +90,24 @@ export const Export: React.FC<ExportProps> = ({
     const [pendingFiles, setPendingFiles] = useState<EnteFile[]>([]);
     const [lastExportTime, setLastExportTime] = useState(0);
 
+    const syncExportRecord = useCallback(async (exportFolder: string) => {
+        try {
+            if (!(await exportService.exportFolderExists(exportFolder))) {
+                setPendingFiles(await exportService.pendingFiles());
+            }
+            const exportRecord =
+                await exportService.getExportRecord(exportFolder);
+            setExportStage(exportRecord.stage);
+            setLastExportTime(exportRecord.lastAttemptTimestamp);
+            setPendingFiles(await exportService.pendingFiles(exportRecord));
+        } catch (e) {
+            // @ts-ignore
+            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
+                log.error("syncExportRecord failed", e);
+            }
+        }
+    }, []);
+
     useEffect(() => {
         if (!isDesktop) return;
 
@@ -102,12 +122,12 @@ export const Export: React.FC<ExportProps> = ({
         setExportFolder(exportSettings?.folder ?? null);
         setContinuousExport(exportSettings?.continuousExport ?? false);
         void syncExportRecord(exportSettings?.folder);
-    }, []);
+    }, [syncExportRecord]);
 
     useEffect(() => {
         if (!open) return;
         void syncExportRecord(exportFolder);
-    }, [open]);
+    }, [open, exportFolder, syncExportRecord]);
 
     const verifyExportFolderExists = useCallback(async () => {
         if (!(await exportService.exportFolderExists(exportFolder))) {
@@ -124,23 +144,6 @@ export const Export: React.FC<ExportProps> = ({
         }
         return true;
     }, [exportFolder, showMiniDialog]);
-
-    const syncExportRecord = useCallback(async (exportFolder: string) => {
-        try {
-            if (!(await exportService.exportFolderExists(exportFolder))) {
-                setPendingFiles(await exportService.pendingFiles());
-            }
-            const exportRecord =
-                await exportService.getExportRecord(exportFolder);
-            setExportStage(exportRecord.stage);
-            setLastExportTime(exportRecord.lastAttemptTimestamp);
-            setPendingFiles(await exportService.pendingFiles(exportRecord));
-        } catch (e) {
-            if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                log.error("syncExportRecord failed", e);
-            }
-        }
-    }, []);
 
     const handleChangeExportDirectory = useCallback(() => {
         void (async () => {
@@ -265,7 +268,11 @@ const ExportDirectory: React.FC<ExportDirectoryProps> = ({
     </Stack>
 );
 
-const DirectoryPath = ({ path }) => (
+interface DirectoryPathProps {
+    path: string;
+}
+
+const DirectoryPath: React.FC<DirectoryPathProps> = ({ path }) => (
     <LinkButton onClick={() => void ensureElectron().openDirectory(path)}>
         <Tooltip title={path}>
             <EllipsizedTypography

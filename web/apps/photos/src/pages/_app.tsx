@@ -29,6 +29,7 @@ import {
     updateReadyToInstallDialogAttributes,
 } from "ente-new/photos/components/utils/download";
 import { useLoadingBar } from "ente-new/photos/components/utils/use-loading-bar";
+import { resumeExportsIfNeeded } from "ente-new/photos/services/export";
 import { runMigrations } from "ente-new/photos/services/migration";
 import { initML, isMLSupported } from "ente-new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "ente-new/photos/services/user-details";
@@ -43,7 +44,6 @@ import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 
 import {
