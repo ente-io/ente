@@ -11,7 +11,7 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
-import "package:photos/ui/viewer/file_details/face_widget.dart";
+import "package:photos/ui/viewer/file_details/file_info_face_widget.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 
 final Logger _logger = Logger("FacesItemWidget");
