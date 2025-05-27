@@ -164,15 +164,17 @@ export const Export: React.FC<ExportProps> = ({
     // UI functions
     // =============
 
-    const handleChangeExportDirectoryClick = async () => {
-        const newFolder = await selectAndPrepareExportDirectory();
-        if (!newFolder) return;
+    const handleChangeExportDirectory = useCallback(() => {
+        void (async () => {
+            const newFolder = await selectAndPrepareExportDirectory();
+            if (!newFolder) return;
 
-        log.info(`Export folder changed to ${newFolder}`);
-        exportService.updateExportSettings({ folder: newFolder });
-        setExportFolder(newFolder);
-        await syncExportRecord(newFolder);
-    };
+            log.info(`Export folder changed to ${newFolder}`);
+            exportService.updateExportSettings({ folder: newFolder });
+            setExportFolder(newFolder);
+            await syncExportRecord(newFolder);
+        })();
+    }, [syncExportRecord]);
 
     const toggleContinuousExport = async () => {
         if (!(await verifyExportFolderExists())) return;
@@ -215,7 +217,7 @@ export const Export: React.FC<ExportProps> = ({
                 <Stack>
                     <ExportDirectory
                         exportFolder={exportFolder}
-                        changeExportDirectory={handleChangeExportDirectoryClick}
+                        onChangeExportDirectory={handleChangeExportDirectory}
                         exportStage={exportStage}
                     />
                     <ContinuousExport
@@ -242,40 +244,42 @@ export const Export: React.FC<ExportProps> = ({
     );
 };
 
-function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
-    return (
-        <Stack
-            direction="row"
-            sx={{
-                gap: 1,
-                justifyContent: "space-between",
-                alignItems: "center",
-            }}
-        >
-            <Typography sx={{ color: "text.muted", mr: 1 }}>
-                {t("destination")}
-            </Typography>
-            {exportFolder ? (
-                <>
-                    <DirectoryPath path={exportFolder} />
-                    {exportStage === ExportStage.finished ||
-                    exportStage === ExportStage.init ? (
-                        <ChangeDirectoryOption
-                            onClick={changeExportDirectory}
-                        />
-                    ) : (
-                        // Prevent layout shift.
-                        <Box sx={{ width: "16px", height: "48px" }} />
-                    )}
-                </>
-            ) : (
-                <Button color="accent" onClick={changeExportDirectory}>
-                    {t("select_folder")}
-                </Button>
-            )}
-        </Stack>
-    );
+interface ExportDirectoryProps {
+    exportStage: ExportStage;
+    exportFolder: string;
+    onChangeExportDirectory: () => void;
 }
+
+const ExportDirectory: React.FC<ExportDirectoryProps> = ({
+    exportStage,
+    exportFolder,
+    onChangeExportDirectory,
+}) => (
+    <Stack
+        direction="row"
+        sx={{ gap: 1, justifyContent: "space-between", alignItems: "center" }}
+    >
+        <Typography sx={{ color: "text.muted", mr: 1 }}>
+            {t("destination")}
+        </Typography>
+        {exportFolder ? (
+            <>
+                <DirectoryPath path={exportFolder} />
+                {exportStage === ExportStage.finished ||
+                exportStage === ExportStage.init ? (
+                    <ChangeDirectoryOption onClick={onChangeExportDirectory} />
+                ) : (
+                    // Prevent layout shift.
+                    <Box sx={{ width: "16px", height: "48px" }} />
+                )}
+            </>
+        ) : (
+            <Button color="accent" onClick={onChangeExportDirectory}>
+                {t("select_folder")}
+            </Button>
+        )}
+    </Stack>
+);
 
 const DirectoryPath = ({ path }) => (
     <LinkButton onClick={() => void ensureElectron().openDirectory(path)}>
