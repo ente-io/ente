@@ -84,6 +84,12 @@ class _PendingSyncInfoScreenState extends State<PendingSyncInfoScreen> {
       ),
       PathInfoStorageItem.name(
         tempDownload,
+        "Partial Download",
+        "_part",
+        allowCacheClear: true,
+      ),
+      PathInfoStorageItem.name(
+        tempDownload,
         "Video Preview",
         "pv",
         allowCacheClear: false,
