@@ -122,13 +122,21 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
       final faceWidgets = <FileInfoFaceWidget>[];
 
-      // await generation of the face crops here, so that the file info shows one central loading spinner
-      final _ = await getCachedFaceCrops(file, faces);
-
-      final faceCrops = getCachedFaceCrops(file, faces);
+      final faceCrops = await getCachedFaceCrops(file, faces);
       final List<String> faceIDs = [];
       final List<double> faceScores = [];
       for (final Face face in faces) {
+        final faceCrop = faceCrops != null ? faceCrops[face.faceID] : null;
+        if (faceCrop == null) {
+          _logger.severe(
+            'Face crop for face ${face.faceID} in file ${file.uploadedFileID} is null, skipping face widget.',
+          );
+          return [
+            const NoFaceChipButtonWidget(
+              NoFacesReason.faceThumbnailGenerationFailed,
+            ),
+          ];
+        }
         final String? clusterID = faceIdsToClusterIds[face.faceID];
         final PersonEntity? person = clusterIDToPerson[clusterID] != null
             ? persons[clusterIDToPerson[clusterID]!]
@@ -141,7 +149,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           FileInfoFaceWidget(
             file,
             face,
-            faceCrops: faceCrops,
+            faceCrop: faceCrop,
             clusterID: clusterID,
             person: person,
             highlight: highlight,
@@ -165,6 +173,7 @@ enum NoFacesReason {
   fileNotUploaded,
   fileNotAnalyzed,
   noFacesFound,
+  faceThumbnailGenerationFailed,
 }
 
 String getNoFaceReasonText(
@@ -178,6 +187,8 @@ String getNoFaceReasonText(
       return S.of(context).imageNotAnalyzed;
     case NoFacesReason.noFacesFound:
       return S.of(context).noFacesFound;
+    case NoFacesReason.faceThumbnailGenerationFailed:
+      return "Unable to generate face thumbnails";
   }
 }
 

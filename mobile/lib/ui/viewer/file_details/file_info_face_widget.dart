@@ -3,7 +3,6 @@ import "dart:typed_data";
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
-import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/base/id.dart";
@@ -16,15 +15,14 @@ import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/notification/toast.dart";
-import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/face_widget.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
-import "package:photos/utils/face/face_box_crop.dart";
 
 class FileInfoFaceWidget extends StatefulWidget {
   final EnteFile file;
   final Face face;
-  final Future<Map<String, Uint8List>?>? faceCrops;
+  final Uint8List faceCrop;
   final PersonEntity? person;
   final String? clusterID;
   final bool highlight;
@@ -32,7 +30,7 @@ class FileInfoFaceWidget extends StatefulWidget {
   const FileInfoFaceWidget(
     this.file,
     this.face, {
-    this.faceCrops,
+    required this.faceCrop,
     this.person,
     this.clusterID,
     this.highlight = false,
@@ -44,90 +42,49 @@ class FileInfoFaceWidget extends StatefulWidget {
 }
 
 class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
-  bool isJustRemoved = false;
-
-  final _logger = Logger("FaceWidget");
-
   @override
   Widget build(BuildContext context) {
-    final bool givenFaces = widget.faceCrops != null;
-    return FutureBuilder<Map<String, Uint8List>?>(
-      future: givenFaces
-          ? widget.faceCrops
-          : getCachedFaceCrops(widget.file, [widget.face]),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final ImageProvider imageProvider =
-              MemoryImage(snapshot.data![widget.face.faceID]!);
-
-          return GestureDetector(
-            onTap: _onTap,
-            child: Column(
-              children: [
-                Stack(
-                  children: [
-                    Container(
-                      height: 60,
-                      width: 60,
-                      decoration: ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: const BorderRadius.all(
-                            Radius.elliptical(16, 12),
-                          ),
-                          side: widget.highlight
-                              ? BorderSide(
-                                  color: getEnteColorScheme(context).primary700,
-                                  width: 1.0,
-                                )
-                              : BorderSide.none,
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.elliptical(16, 12)),
-                        child: SizedBox(
-                          width: 60,
-                          height: 60,
-                          child: Image(
-                            image: imageProvider,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ..._buildFaceInfo(),
-              ],
-            ),
-          );
-        } else {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const ClipRRect(
-              borderRadius: BorderRadius.all(Radius.elliptical(16, 12)),
-              child: SizedBox(
-                width: 60,
+    return GestureDetector(
+      onTap: _routeToPersonOrClusterPage,
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
                 height: 60,
-                child: CircularProgressIndicator(),
+                width: 60,
+                decoration: ShapeDecoration(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: const BorderRadius.all(
+                      Radius.elliptical(16, 12),
+                    ),
+                    side: widget.highlight
+                        ? BorderSide(
+                            color: getEnteColorScheme(context).primary700,
+                            width: 1.0,
+                          )
+                        : BorderSide.none,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius:
+                      const BorderRadius.all(Radius.elliptical(16, 12)),
+                  child: SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: FaceWidget(
+                      widget.file,
+                      faceCrop: widget.faceCrop,
+                    ),
+                  ),
+                ),
               ),
-            );
-          }
-          if (snapshot.hasError) {
-            _logger.severe(
-              'Error getting face: ${snapshot.error} ${snapshot.stackTrace}',
-            );
-          }
-          return const ClipRRect(
-            borderRadius: BorderRadius.all(Radius.elliptical(16, 12)),
-            child: SizedBox(
-              width: 60,
-              height: 60,
-              child: NoThumbnailWidget(),
-            ),
-          );
-        }
-      },
+            ],
+          ),
+          const SizedBox(height: 8),
+          ..._buildFaceInfo(),
+        ],
+      ),
     );
   }
 
@@ -187,7 +144,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
     return faceInfo;
   }
 
-  Future<void> _onTap() async {
+  Future<void> _routeToPersonOrClusterPage() async {
     final mlDataDB = MLDataDB.instance;
     if (widget.person != null) {
       await Navigator.of(context).push(
