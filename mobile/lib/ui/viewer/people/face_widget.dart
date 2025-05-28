@@ -2,6 +2,7 @@ import "dart:typed_data";
 
 import 'package:flutter/widgets.dart';
 import "package:logging/logging.dart";
+import "package:photos/db/ml/db.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -13,9 +14,12 @@ final _logger = Logger("FaceWidget");
 
 class FaceWidget extends StatefulWidget {
   final EnteFile file;
-  final Face? face;
+
+  // Data to find the right face, in order of preference
   final Uint8List? faceCrop;
+  final Face? face;
   final String? clusterID;
+
   final bool useFullFile;
   final bool thumbnailFallback;
 
@@ -90,6 +94,38 @@ class _FaceWidgetState extends State<FaceWidget> {
   Future<Uint8List?> _getFaceCrop() async {
     if (widget.faceCrop != null) {
       return widget.faceCrop;
+    }
+    try {
+      final Face? faceToUse = widget.face ??
+          await MLDataDB.instance.getCoverFaceForPerson(
+            recentFileID: widget.file.uploadedFileID!,
+            clusterID: widget.clusterID,
+          );
+      if (faceToUse == null) {
+        _logger.severe(
+          "Cannot find face to crop, widget.face: ${widget.face}, clusterID: ${widget.clusterID}",
+        );
+      }
+      final cropMap = await getCachedFaceCrops(
+        widget.file,
+        [faceToUse!],
+        useFullFile: widget.useFullFile,
+      );
+      if (cropMap != null && cropMap[faceToUse.faceID] != null) {
+        return cropMap[faceToUse.faceID];
+      } else {
+        _logger.severe(
+          "No face crop found for face ${faceToUse.faceID} in file ${widget.file.uploadedFileID}",
+        );
+        return null;
+      }
+    } catch (e, s) {
+      _logger.severe(
+        "Failed to get face crop for file ${widget.file.uploadedFileID}",
+        e,
+        s,
+      );
+      return null;
     }
   }
 }
