@@ -12,7 +12,7 @@ import "package:photos/utils/face/face_box_crop.dart";
 
 final _logger = Logger("FaceWidget");
 
-class FaceWidget extends StatefulWidget {
+class FileFaceWidget extends StatefulWidget {
   final EnteFile file;
 
   // Data to find the right face, in order of preference
@@ -23,7 +23,7 @@ class FaceWidget extends StatefulWidget {
   final bool useFullFile;
   final bool thumbnailFallback;
 
-  const FaceWidget(
+  const FileFaceWidget(
     this.file, {
     this.face,
     this.faceCrop,
@@ -34,10 +34,10 @@ class FaceWidget extends StatefulWidget {
   });
 
   @override
-  State<FaceWidget> createState() => _FaceWidgetState();
+  State<FileFaceWidget> createState() => _FileFaceWidgetState();
 }
 
-class _FaceWidgetState extends State<FaceWidget> {
+class _FileFaceWidgetState extends State<FileFaceWidget> {
   Future<Uint8List?>? faceCropFuture;
 
   @override

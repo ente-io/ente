@@ -16,7 +16,7 @@ import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
-import "package:photos/ui/viewer/people/face_widget.dart";
+import "package:photos/ui/viewer/people/file_face_widget.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 
 class FileInfoFaceWidget extends StatefulWidget {
@@ -72,7 +72,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                   child: SizedBox(
                     width: 60,
                     height: 60,
-                    child: FaceWidget(
+                    child: FileFaceWidget(
                       widget.file,
                       faceCrop: widget.faceCrop,
                     ),
