@@ -1449,16 +1449,14 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
             >
                 <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                     <RowButtonGroup>
-                        {options.map((item, index) => (
-                            <React.Fragment key={item.value()}>
+                        {options.map(({ label, value }, index) => (
+                            <React.Fragment key={value()}>
                                 <RowButton
                                     fontWeight="regular"
-                                    onClick={changeShareExpiryValue(
-                                        item.value(),
-                                    )}
-                                    label={item.label}
+                                    onClick={changeShareExpiryValue(value())}
+                                    label={label}
                                 />
-                                {index !== options.length - 1 && (
+                                {index != options.length - 1 && (
                                     <RowButtonDivider />
                                 )}
                             </React.Fragment>
@@ -1470,7 +1468,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
     );
 };
 
-export const shareExpiryOptions = () => [
+const shareExpiryOptions = () => [
     { label: t("never"), value: () => 0 },
     { label: t("after_time.hour"), value: () => microsecsAfter("hour") },
     { label: t("after_time.day"), value: () => microsecsAfter("day") },
@@ -1514,29 +1512,21 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
     updatePublicShareURLHelper,
     onRootClose,
 }) => {
+    const { show: showDeviceOptions, props: deviceOptionsVisibilityProps } =
+        useModalVisibility();
+
+    const options = useMemo(() => getDeviceLimitOptions(), []);
+
     const updateDeviceLimit = async (newLimit: number) => {
         return updatePublicShareURLHelper({
             collectionID: collection.id,
             deviceLimit: newLimit,
         });
     };
-    const [isChangeDeviceLimitVisible, setIsChangeDeviceLimitVisible] =
-        useState(false);
-    const deviceLimitOptions = useMemo(() => getDeviceLimitOptions(), []);
-
-    const closeDeviceLimitChangeModal = () =>
-        setIsChangeDeviceLimitVisible(false);
-    const openDeviceLimitChangeModalView = () =>
-        setIsChangeDeviceLimitVisible(true);
 
     const changeDeviceLimitValue = (value: number) => async () => {
         await updateDeviceLimit(value);
-        setIsChangeDeviceLimitVisible(false);
-    };
-
-    const handleRootClose = () => {
-        closeDeviceLimitChangeModal();
-        onRootClose();
+        deviceOptionsVisibilityProps.onClose();
     };
 
     return (
@@ -1548,42 +1538,32 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                         ? t("none")
                         : publicShareProp.deviceLimit.toString()
                 }
-                onClick={openDeviceLimitChangeModalView}
+                onClick={showDeviceOptions}
                 endIcon={<ChevronRightIcon />}
             />
-            <NestedSidebarDrawer
+            <TitledNestedSidebarDrawer
                 anchor="right"
-                open={isChangeDeviceLimitVisible}
-                onClose={closeDeviceLimitChangeModal}
-                onRootClose={handleRootClose}
+                {...deviceOptionsVisibilityProps}
+                onRootClose={onRootClose}
+                title={t("device_limit")}
             >
-                <Stack sx={{ gap: "4px", py: "12px" }}>
-                    <Titlebar
-                        onClose={closeDeviceLimitChangeModal}
-                        onRootClose={handleRootClose}
-                        title={t("device_limit")}
-                    />
-                    <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
-                        <RowButtonGroup>
-                            {deviceLimitOptions.map((item, index) => (
-                                <React.Fragment key={item.label}>
-                                    <RowButton
-                                        fontWeight="regular"
-                                        onClick={changeDeviceLimitValue(
-                                            item.value,
-                                        )}
-                                        label={item.label}
-                                    />
-                                    {index !==
-                                        deviceLimitOptions.length - 1 && (
-                                        <RowButtonDivider />
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </RowButtonGroup>
-                    </Stack>
+                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+                    <RowButtonGroup>
+                        {options.map(({ label, value }, index) => (
+                            <React.Fragment key={label}>
+                                <RowButton
+                                    fontWeight="regular"
+                                    onClick={changeDeviceLimitValue(value)}
+                                    label={label}
+                                />
+                                {index != options.length - 1 && (
+                                    <RowButtonDivider />
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </RowButtonGroup>
                 </Stack>
-            </NestedSidebarDrawer>
+            </TitledNestedSidebarDrawer>
         </>
     );
 };
