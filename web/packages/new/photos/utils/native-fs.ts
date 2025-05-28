@@ -9,7 +9,7 @@ import { joinPath, nameAndExtension } from "ente-base/file-name";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
-} from "ente-new/photos/services/export";
+} from "ente-gallery/export-dirs";
 import sanitize from "sanitize-filename";
 
 /**

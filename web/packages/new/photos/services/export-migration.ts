@@ -6,6 +6,7 @@
 import { ensureElectron } from "ente-base/electron";
 import { joinPath, nameAndExtension } from "ente-base/file-name";
 import log from "ente-base/log";
+import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import { downloadManager } from "ente-gallery/services/download";
 import type { Collection } from "ente-media/collection";
 import { mergeMetadata, type EnteFile } from "ente-media/file";
@@ -22,7 +23,6 @@ import { getData } from "ente-shared/storage/localStorage";
 import type { User } from "ente-shared/user/types";
 import { wait } from "ente-utils/promise";
 import exportService, {
-    exportMetadataDirectoryName,
     getCollectionIDFromFileUID,
     getExportRecordFileUID,
     getLivePhotoExportName,

@@ -681,5 +681,6 @@
     "processing_videos_status": "Video's verwerken...",
     "share_favorites": "",
     "person_favorites": "",
-    "shared_favorites": ""
+    "shared_favorites": "",
+    "added_by_name": ""
 }
