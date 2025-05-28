@@ -541,14 +541,11 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                     onClose={onClose}
                     callback={collectionShare}
                     optionsList={nonSharedEmails}
-                    placeholder={t("enter_email")}
-                    fieldType="email"
                     buttonText={
                         type == "VIEWER"
                             ? t("add_viewers")
                             : t("add_collaborators")
                     }
-                    disableAutoFocus
                 />
             </Stack>
         </NestedSidebarDrawer>
@@ -562,10 +559,7 @@ interface AddParticipantFormValues {
 
 interface AddParticipantFormProps {
     callback: (props: { email?: string; emails?: string[] }) => Promise<void>;
-    fieldType: "text" | "email" | "password";
-    placeholder: string;
     buttonText: string;
-    disableAutoFocus?: boolean;
     onClose?: () => void;
     optionsList?: string[];
 }
@@ -594,17 +588,10 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
     };
 
     const validationSchema = useMemo(() => {
-        switch (props.fieldType) {
-            case "text":
-                return Yup.object().shape({
-                    inputValue: Yup.string().required(t("required")),
-                });
-            case "email":
-                return Yup.object().shape({
-                    inputValue: Yup.string().email(t("invalid_email_error")),
-                });
-        }
-    }, [props.fieldType]);
+        return Yup.object().shape({
+            inputValue: Yup.string().email(t("invalid_email_error")),
+        });
+    }, []);
 
     const handleInputFieldClick = (setFieldValue) => {
         setFieldValue("selectedOptions", []);
@@ -632,21 +619,20 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                 {t("add_new_email")}
                             </RowButtonGroupTitle>
                             <TextField
-                                sx={{ marginTop: 0 }}
                                 fullWidth
-                                type={props.fieldType}
-                                id={props.fieldType}
+                                id={"email"}
+                                name={"email"}
+                                type={"email"}
+                                label={t("enter_email")}
+                                sx={{ mt: 0 }}
+                                disabled={loading}
                                 onChange={handleChange("inputValue")}
                                 onClick={() =>
                                     handleInputFieldClick(setFieldValue)
                                 }
-                                name={props.fieldType}
-                                label={props.placeholder}
                                 error={Boolean(errors.inputValue)}
                                 helperText={errors.inputValue}
                                 value={values.inputValue}
-                                disabled={loading}
-                                autoFocus={!props.disableAutoFocus}
                             />
                         </Stack>
 
