@@ -12,13 +12,14 @@ import Photo, { default as PhotoIcon } from "@mui/icons-material/Photo";
 import PublicIcon from "@mui/icons-material/Public";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import WorkspacesIcon from "@mui/icons-material/Workspaces";
-import { Dialog, DialogProps, Stack, styled, Typography } from "@mui/material";
+import { Dialog, Stack, styled, Typography } from "@mui/material";
 import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Avatar from "components/pages/gallery/Avatar";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     SidebarDrawer,
+    SidebarDrawerTitlebar,
     TitledNestedSidebarDrawer,
 } from "ente-base/components/mui/SidebarDrawer";
 import {
@@ -30,9 +31,11 @@ import {
     RowLabel,
     RowSwitch,
 } from "ente-base/components/RowButton";
-import { Titlebar } from "ente-base/components/Titlebar";
 import { useClipboardCopy } from "ente-base/components/utils/hooks";
-import { useModalVisibility } from "ente-base/components/utils/modal";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import { isHTTP4xxError } from "ente-base/http";
@@ -67,66 +70,50 @@ import {
 } from "services/collectionService";
 import * as Yup from "yup";
 
-interface CollectionShareProps {
-    open: boolean;
-    onClose: () => void;
+type CollectionShareProps = ModalVisibilityProps & {
     collection: Collection;
     collectionSummary: CollectionSummary;
-}
+};
 
 export const CollectionShare: React.FC<CollectionShareProps> = ({
+    open,
+    onClose,
+    collection,
     collectionSummary,
-    ...props
 }) => {
-    const handleRootClose = () => {
-        props.onClose();
-    };
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            handleRootClose();
-        } else {
-            props.onClose();
-        }
-    };
-    if (!props.collection || !collectionSummary) {
+    if (!collection || !collectionSummary) {
         return <></>;
     }
+
     const { type } = collectionSummary;
 
     return (
-        <SidebarDrawer
-            anchor="right"
-            open={props.open}
-            onClose={handleDrawerClose}
-        >
+        <SidebarDrawer anchor="right" {...{ open, onClose }}>
             <Stack sx={{ gap: "4px", py: "12px" }}>
-                <Titlebar
-                    onClose={props.onClose}
+                <SidebarDrawerTitlebar
+                    onClose={onClose}
+                    onRootClose={onClose}
                     title={
                         type == "incomingShareCollaborator" ||
                         type == "incomingShareViewer"
                             ? t("sharing_details")
                             : t("share_album")
                     }
-                    onRootClose={handleRootClose}
-                    caption={props.collection.name}
+                    caption={collection.name}
                 />
                 <Stack sx={{ py: "20px", px: "8px", gap: "24px" }}>
                     {type == "incomingShareCollaborator" ||
                     type == "incomingShareViewer" ? (
-                        <SharingDetails
-                            collection={props.collection}
-                            type={type}
-                        />
+                        <SharingDetails {...{ collection, type }} />
                     ) : (
                         <>
                             <EmailShare
-                                collection={props.collection}
-                                onRootClose={handleRootClose}
+                                onRootClose={onClose}
+                                {...{ collection }}
                             />
                             <PublicShare
-                                collection={props.collection}
-                                onRootClose={handleRootClose}
+                                onRootClose={onClose}
+                                {...{ collection }}
                             />
                         </>
                     )}
