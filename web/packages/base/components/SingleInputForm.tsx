@@ -23,8 +23,11 @@ export type SingleInputFormProps = Pick<
      *
      * This function is called when the user activates the cancel button in the
      * form.
+     *
+     * If this is not provided, then only a full width submit button will be
+     * shown in the form (below the input).
      */
-    onCancel: () => void;
+    onCancel?: () => void;
     /**
      * Submission handler. A callback invoked when the submit button is pressed.
      *
@@ -40,7 +43,7 @@ export type SingleInputFormProps = Pick<
 };
 
 /**
- * A TextField and two buttons.
+ * A TextField and cancel/submit buttons.
  *
  * A common requirement is taking a single textual input from the user. This is
  * a form suitable for that purpose. It contains a single MUI {@link TextField}
@@ -74,6 +77,17 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
         },
     });
 
+    const submitButton = (
+        <LoadingButton
+            fullWidth
+            color="primary"
+            type="submit"
+            loading={formik.isSubmitting}
+        >
+            {submitButtonTitle}
+        </LoadingButton>
+    );
+
     // Note: [Use space as default TextField helperText]
     //
     // For MUI text fields that use a conditional helperText, e.g. in case of
@@ -94,23 +108,20 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 helperText={formik.errors.value ?? " "}
                 {...rest}
             />
-            <Stack direction="row" sx={{ gap: "12px" }}>
-                <FocusVisibleButton
-                    fullWidth
-                    color="secondary"
-                    onClick={onCancel}
-                >
-                    {t("cancel")}
-                </FocusVisibleButton>
-                <LoadingButton
-                    fullWidth
-                    color="primary"
-                    type="submit"
-                    loading={formik.isSubmitting}
-                >
-                    {submitButtonTitle}
-                </LoadingButton>
-            </Stack>
+            {onCancel ? (
+                <Stack direction="row" sx={{ gap: "12px" }}>
+                    <FocusVisibleButton
+                        fullWidth
+                        color="secondary"
+                        onClick={onCancel}
+                    >
+                        {t("cancel")}
+                    </FocusVisibleButton>
+                    {submitButton}
+                </Stack>
+            ) : (
+                submitButton
+            )}
         </form>
     );
 };
