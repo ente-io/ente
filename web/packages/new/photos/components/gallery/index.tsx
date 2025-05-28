@@ -63,7 +63,7 @@ import { Trans } from "react-i18next";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-export function GalleryEmptyState({ openUploader, shouldAllowNewUpload }) {
+export function GalleryEmptyState({ openUploader, isUploadInProgress }) {
     return (
         <Wrapper>
             <Stack sx={{ flex: "none", paddingBlock: "12px 32px" }}>
@@ -102,7 +102,7 @@ export function GalleryEmptyState({ openUploader, shouldAllowNewUpload }) {
                     color="accent"
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
                     onClick={() => openUploader("upload")}
-                    disabled={!shouldAllowNewUpload}
+                    disabled={isUploadInProgress}
                     sx={{ mt: 1.5, p: 1, width: 320, borderRadius: 0.5 }}
                 >
                     <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
@@ -113,7 +113,7 @@ export function GalleryEmptyState({ openUploader, shouldAllowNewUpload }) {
                 <Button
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
                     onClick={() => openUploader("import")}
-                    disabled={!shouldAllowNewUpload}
+                    disabled={isUploadInProgress}
                     sx={{ mt: 1.5, p: 1, width: 320, borderRadius: 0.5 }}
                 >
                     <FlexWrapper sx={{ gap: 1 }} justifyContent="center">

@@ -682,8 +682,13 @@ class UploadManager {
         this.onUploadFile(decryptedFile);
     }
 
-    public shouldAllowNewUpload = () => {
-        return !this.uploadInProgress || watcher.isUploadRunning();
+    /**
+     * `true` if an upload is currently in-progress (either a bunch of files
+     * directly uploaded by the user, or files being uploaded by the folder
+     * watch functionality).
+     */
+    public isUploadInProgress = () => {
+        return this.uploadInProgress || watcher.isUploadRunning();
     };
 }
 

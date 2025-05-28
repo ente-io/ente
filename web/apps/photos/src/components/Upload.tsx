@@ -551,7 +551,7 @@ export const Upload: React.FC<UploadProps> = ({
 
     const preCollectionCreationAction = async () => {
         props.onCloseCollectionSelector?.();
-        props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
+        props.setShouldDisableDropzone(uploadManager.isUploadInProgress());
         setUploadPhase("preparing");
         setUploadProgressView(true);
     };

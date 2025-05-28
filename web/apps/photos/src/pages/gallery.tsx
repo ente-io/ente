@@ -785,9 +785,7 @@ const Page: React.FC = () => {
     };
 
     const openUploader = (intent?: UploadTypeSelectorIntent) => {
-        if (!uploadManager.shouldAllowNewUpload()) {
-            return;
-        }
+        if (uploadManager.isUploadInProgress()) return;
         setUploadTypeSelectorView(true);
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
@@ -1096,7 +1094,7 @@ const Page: React.FC = () => {
                 activeCollectionID === ALL_SECTION ? (
                     <GalleryEmptyState
                         openUploader={openUploader}
-                        shouldAllowNewUpload={uploadManager.shouldAllowNewUpload()}
+                        isUploadInProgress={uploadManager.isUploadInProgress()}
                     />
                 ) : !isInSearchMode &&
                   !isFirstLoad &&
@@ -1218,7 +1216,7 @@ const SidebarButton: React.FC<ButtonishProps> = ({ onClick }) => (
 );
 
 const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = !uploadManager.shouldAllowNewUpload();
+    const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
     const icon = <FileUploadOutlinedIcon />;
