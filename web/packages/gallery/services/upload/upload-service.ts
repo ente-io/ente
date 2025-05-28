@@ -45,7 +45,6 @@ import {
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
 import { addToCollection } from "ente-new/photos/services/collection";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import {
     CustomError,
     CustomErrorMessage,
@@ -53,9 +52,10 @@ import {
 } from "ente-shared/error";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
-import type { UploadableUploadItem, UploadItem } from ".";
+import type { UploadableUploadItem, UploadItem, UploadPathPrefix } from ".";
 import { type LivePhotoAssets, type UploadResult } from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
+import { matchJSONMetadata, type ParsedMetadataJSON } from "./metadata-json";
 import {
     completeMultipartUpload,
     completeMultipartUploadViaWorker,
@@ -72,8 +72,6 @@ import {
     type MultipartCompletedPart,
     type ObjectUploadURL,
 } from "./remote";
-import type { ParsedMetadataJSON } from "./takeout";
-import { matchTakeoutMetadata } from "./takeout";
 import {
     fallbackThumbnail,
     generateThumbnailNative,
@@ -247,19 +245,37 @@ export const uploadItemFileName = (uploadItem: UploadItem) => {
     return uploadItem.file.name;
 };
 
-/* -- Various intermediate type used during upload -- */
+/* -- Various intermediate types used during upload -- */
 
 export type ExternalParsedMetadata = ParsedMetadata & {
     creationTime?: number | undefined;
 };
 
 export interface UploadAsset {
-    /** `true` if this is a live photo. */
+    /**
+     * `true` if this is a live photo.
+     */
     isLivePhoto?: boolean;
-    /* Valid for live photos */
+    /**
+     * The two parts of the live photo being uploaded.
+     *
+     * Valid for live photos.
+     */
     livePhotoAssets?: LivePhotoAssets;
-    /* Valid for non-live photos */
+    /**
+     * The item being uploaded.
+     *
+     * Valid for non-live photos.
+     */
     uploadItem?: UploadItem;
+    /**
+     * The path prefix of the uploadItem (if not a live photo), or of the image
+     * component of the live photo (otherwise).
+     *
+     * The only expected scenario where this will not be present is when we're
+     * uploading an edited file (edited in the in-app image editor).
+     */
+    pathPrefix: UploadPathPrefix | undefined;
     /**
      * Metadata we know about a file externally. Valid for non-live photos.
      *
@@ -337,6 +353,7 @@ export interface PotentialLivePhotoAsset {
     fileType: FileType;
     collectionID: number;
     uploadItem: UploadItem;
+    pathPrefix: UploadPathPrefix | undefined;
 }
 
 /**
@@ -348,6 +365,7 @@ export const areLivePhotoAssets = async (
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
 ) => {
     if (f.collectionID != g.collectionID) return false;
+    if (f.pathPrefix != g.pathPrefix) return false;
 
     const [fName, fExt] = nameAndExtension(f.fileName);
     const [gName, gExt] = nameAndExtension(g.fileName);
@@ -397,15 +415,16 @@ export const areLivePhotoAssets = async (
     // items that coincidentally have the same name (this is not uncommon since,
     // e.g. many cameras use a deterministic numbering scheme).
 
-    const fParsedMetadataJSON = matchTakeoutMetadata(
-        f.fileName,
+    const fParsedMetadataJSON = matchJSONMetadata(
+        f.pathPrefix,
         f.collectionID,
+        f.fileName,
         parsedMetadataJSONMap,
     );
-
-    const gParsedMetadataJSON = matchTakeoutMetadata(
-        g.fileName,
+    const gParsedMetadataJSON = matchJSONMetadata(
+        g.pathPrefix,
         g.collectionID,
+        g.fileName,
         parsedMetadataJSONMap,
     );
 
@@ -942,8 +961,9 @@ const extractAssetMetadata = async (
     {
         isLivePhoto,
         uploadItem,
-        externalParsedMetadata,
         livePhotoAssets,
+        pathPrefix,
+        externalParsedMetadata,
     }: UploadAsset,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
@@ -955,6 +975,7 @@ const extractAssetMetadata = async (
         ? await extractLivePhotoMetadata(
               // @ts-ignore
               livePhotoAssets,
+              pathPrefix,
               fileTypeInfo,
               lastModifiedMs,
               collectionID,
@@ -964,6 +985,7 @@ const extractAssetMetadata = async (
         : await extractImageOrVideoMetadata(
               // @ts-ignore
               uploadItem,
+              pathPrefix,
               externalParsedMetadata,
               fileTypeInfo,
               lastModifiedMs,
@@ -974,6 +996,7 @@ const extractAssetMetadata = async (
 
 const extractLivePhotoMetadata = async (
     livePhotoAssets: LivePhotoAssets,
+    pathPrefix: UploadPathPrefix | undefined,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -988,6 +1011,7 @@ const extractLivePhotoMetadata = async (
     const { metadata: imageMetadata, publicMagicMetadata } =
         await extractImageOrVideoMetadata(
             livePhotoAssets.image,
+            pathPrefix,
             undefined,
             imageFileTypeInfo,
             lastModifiedMs,
@@ -1014,6 +1038,7 @@ const extractLivePhotoMetadata = async (
 
 const extractImageOrVideoMetadata = async (
     uploadItem: UploadItem,
+    pathPrefix: UploadPathPrefix | undefined,
     externalParsedMetadata: ExternalParsedMetadata | undefined,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
@@ -1050,9 +1075,10 @@ const extractImageOrVideoMetadata = async (
     //
     // See: [Note: Duplicate retrieval of creation date for live photo clubbing]
 
-    const parsedMetadataJSON = matchTakeoutMetadata(
-        fileName,
+    const parsedMetadataJSON = matchJSONMetadata(
+        pathPrefix,
         collectionID,
+        fileName,
         parsedMetadataJSONMap,
     );
 
@@ -1078,11 +1104,7 @@ const extractImageOrVideoMetadata = async (
 
     // Video duration
     let duration: number | undefined;
-    if (
-        fileType == FileType.video &&
-        // TODO(HLS):
-        settingsSnapshot().isInternalUser
-    ) {
+    if (fileType == FileType.video) {
         duration = await tryDetermineVideoDuration(uploadItem);
     }
 
@@ -1590,12 +1612,14 @@ const createAbortableRetryEnsuringHTTPOk =
                 ensureOk(r);
                 return r;
             },
-            (e) => {
-                if (
-                    e instanceof Error &&
-                    e.message == CustomError.UPLOAD_CANCELLED
-                )
-                    throw e;
+            {
+                abortIfNeeded(e) {
+                    if (
+                        e instanceof Error &&
+                        e.message == CustomError.UPLOAD_CANCELLED
+                    )
+                        throw e;
+                },
             },
         );
 

@@ -521,23 +521,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday salg"),
         "blog": MessageLookupByLibrary.simpleMessage("Blogg"),
-        "cLBulkEdit":
-            MessageLookupByLibrary.simpleMessage("Masseendring av datoer"),
-        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
-            "Du kan nå velge flere bilder, og redigere dato/klokkeslett for alle med en rask handling. Forskyving av datoer støttes også."),
-        "cLFamilyPlan": MessageLookupByLibrary.simpleMessage(
-            "Begrensninger for familieabonnement"),
-        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
-            "Du kan nå sette grenser for hvor mye lagringsplass familiemedlemmer kan bruke."),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("Nytt ikon"),
-        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
-            "Endelig er et nytt appikon, som vi tror best representerer arbeidet vårt. Vi har også lagt til en icon-switcher slik at du kan fortsette å bruke det gamle ikonet."),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("Minner"),
-        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "Gjenoppdag dine spesielle øyeblikk - fremhev dine favorittpersoner, dine turer og ferier, de beste bildene dine, og mye mer.  Skru på maskinlæring, merk deg selv og navngi vennene dine for best mulig opplevelse."),
-        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgeter"),
-        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
-            "Hjemmeskjermwidgeter som er integrert med minner er nå tilgjengelige. De vil vise dine spesielle øyeblikk uten å åpne appen."),
         "cachedData": MessageLookupByLibrary.simpleMessage("Bufrede data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Beregner..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(

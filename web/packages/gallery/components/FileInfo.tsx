@@ -34,6 +34,7 @@ import {
     type ButtonProps,
     type DialogProps,
 } from "@mui/material";
+import { isDesktop } from "ente-base/app";
 import { LinkButtonUndecorated } from "ente-base/components/LinkButton";
 import { type ButtonishProps } from "ente-base/components/mui";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
@@ -256,6 +257,11 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         onSelectPerson?.(personID);
     };
 
+    // TODO(REL):
+    const uploaderName = isDesktop
+        ? undefined
+        : filePublicMagicMetadata(file)?.uploaderName;
+
     return (
         <FileInfoSidebar {...{ open, onClose }}>
             <Titlebar onClose={onClose} title={t("info")} backIsClose />
@@ -365,6 +371,14 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             }}
                         />
                     )}
+                {uploaderName && (
+                    <Typography
+                        variant="small"
+                        sx={{ m: 2, textAlign: "right", color: "text.muted" }}
+                    >
+                        {t("added_by_name", { name: uploaderName })}
+                    </Typography>
+                )}
             </Stack>
             <RawExif
                 {...rawExifVisibilityProps}

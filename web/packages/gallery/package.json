@@ -18,8 +18,8 @@
         "react-dropzone": "14.2.10"
     },
     "devDependencies": {
-        "@types/leaflet": "^1.9.17",
-        "@types/react": "^19.1.4",
+        "@types/leaflet": "^1.9.18",
+        "@types/react": "^19.1.5",
         "@types/react-dom": "^19.1.5",
         "ente-build-config": "*"
     }

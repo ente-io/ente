@@ -15,7 +15,7 @@
         "zxcvbn": "^4.4.2"
     },
     "devDependencies": {
-        "@types/react": "^19.1.4",
+        "@types/react": "^19.1.5",
         "@types/react-dom": "^19.1.5",
         "ente-build-config": "*"
     }

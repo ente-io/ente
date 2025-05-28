@@ -7,7 +7,6 @@ import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
-import { Export } from "components/Export";
 import { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
 import {
@@ -15,7 +14,6 @@ import {
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
-import GalleryEmptyState from "components/GalleryEmptyState";
 import { Sidebar } from "components/Sidebar";
 import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
@@ -49,6 +47,7 @@ import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "ente-new/photos/components/CollectionSelector";
+import { Export } from "ente-new/photos/components/Export";
 import { PlanSelector } from "ente-new/photos/components/PlanSelector";
 import {
     SearchBar,
@@ -56,6 +55,7 @@ import {
 } from "ente-new/photos/components/SearchBar";
 import { WhatsNew } from "ente-new/photos/components/WhatsNew";
 import {
+    GalleryEmptyState,
     PeopleEmptyState,
     SearchResultsHeader,
 } from "ente-new/photos/components/gallery";
@@ -77,6 +77,7 @@ import {
 } from "ente-new/photos/services/collection";
 import { areOnlySystemCollections } from "ente-new/photos/services/collection/ui";
 import { getAllLocalCollections } from "ente-new/photos/services/collections";
+import exportService from "ente-new/photos/services/export";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
@@ -120,7 +121,6 @@ import {
     createUnCategorizedCollection,
     removeFromFavorites,
 } from "services/collectionService";
-import exportService from "services/export";
 import { uploadManager } from "services/upload-manager";
 import {
     GalleryContextType,
@@ -1094,7 +1094,10 @@ const Page: React.FC = () => {
                 !normalFiles?.length &&
                 !hiddenFiles?.length &&
                 activeCollectionID === ALL_SECTION ? (
-                    <GalleryEmptyState openUploader={openUploader} />
+                    <GalleryEmptyState
+                        openUploader={openUploader}
+                        shouldAllowNewUpload={uploadManager.shouldAllowNewUpload()}
+                    />
                 ) : !isInSearchMode &&
                   !isFirstLoad &&
                   state.view.type == "people" &&
@@ -1146,7 +1149,7 @@ const Page: React.FC = () => {
                 )}
                 <Export
                     {...exportVisibilityProps}
-                    allCollectionsNameByID={collectionNameByID}
+                    {...{ collectionNameByID }}
                 />
                 <AuthenticateUser
                     {...authenticateUserVisibilityProps}

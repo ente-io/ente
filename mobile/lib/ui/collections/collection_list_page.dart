@@ -52,6 +52,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
   AlbumSortDirection? albumSortDirection;
   String _searchQuery = "";
   final _selectedAlbum = SelectedAlbums();
+  late final ScrollController _scrollController;
 
   @override
   void initState() {
@@ -64,11 +65,15 @@ class _CollectionListPageState extends State<CollectionListPage> {
     sortKey = localSettings.albumSortKey();
     albumViewType = localSettings.albumViewType();
     albumSortDirection = localSettings.albumSortDirection();
+    _scrollController = ScrollController(
+      initialScrollOffset: widget.initialScrollOffset ?? 0,
+    );
   }
 
   @override
   void dispose() {
     _collectionUpdatesSubscription.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -85,41 +90,43 @@ class _CollectionListPageState extends State<CollectionListPage> {
         child: Stack(
           alignment: Alignment.bottomCenter,
           children: [
-            CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              controller: ScrollController(
-                initialScrollOffset: widget.initialScrollOffset ?? 0,
+            Scrollbar(
+              interactive: true,
+              controller: _scrollController,
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                controller: _scrollController,
+                slivers: [
+                  SearchableAppBar(
+                    title: widget.appTitle ?? const SizedBox.shrink(),
+                    heroTag: widget.tag,
+                    onSearch: (value) {
+                      setState(() {
+                        _searchQuery = value;
+                      });
+                      refreshCollections();
+                    },
+                    onSearchClosed: () {
+                      setState(() {
+                        _searchQuery = '';
+                      });
+                      refreshCollections();
+                    },
+                    actions: [
+                      _sortMenu(collections!),
+                    ],
+                  ),
+                  CollectionsFlexiGridViewWidget(
+                    collections,
+                    displayLimitCount: displayLimitCount,
+                    tag: widget.tag,
+                    enableSelectionMode: enableSelectionMode,
+                    albumViewType: albumViewType ?? AlbumViewType.grid,
+                    selectedAlbums: _selectedAlbum,
+                    scrollBottomSafeArea: 140,
+                  ),
+                ],
               ),
-              slivers: [
-                SearchableAppBar(
-                  title: widget.appTitle ?? const SizedBox.shrink(),
-                  heroTag: widget.tag,
-                  onSearch: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
-                    refreshCollections();
-                  },
-                  onSearchClosed: () {
-                    setState(() {
-                      _searchQuery = '';
-                    });
-                    refreshCollections();
-                  },
-                  actions: [
-                    _sortMenu(collections!),
-                  ],
-                ),
-                CollectionsFlexiGridViewWidget(
-                  collections,
-                  displayLimitCount: displayLimitCount,
-                  tag: widget.tag,
-                  enableSelectionMode: enableSelectionMode,
-                  albumViewType: albumViewType ?? AlbumViewType.grid,
-                  selectedAlbums: _selectedAlbum,
-                  scrollBottomSafeArea: 140,
-                ),
-              ],
             ),
             AlbumSelectionOverlayBar(
               _selectedAlbum,
@@ -153,18 +160,14 @@ class _CollectionListPageState extends State<CollectionListPage> {
         children: [
           Text(
             text,
-            style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  fontSize: 14,
-                  color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
-                ),
           ),
           Icon(
             sortKey == key
                 ? (albumSortDirection == AlbumSortDirection.ascending
-                    ? Icons.arrow_upward_outlined
-                    : Icons.arrow_downward_outlined)
+                    ? Icons.arrow_upward
+                    : Icons.arrow_downward)
                 : null,
-            color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
+            size: 18,
           ),
         ],
       );
@@ -195,6 +198,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
           GestureDetector(
             onTapDown: (TapDownDetails details) async {
               final int? selectedValue = await showMenu<int>(
+                color: colorTheme.backgroundElevated,
                 context: context,
                 position: RelativeRect.fromLTRB(
                   details.globalPosition.dx,

@@ -549,23 +549,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Promoção Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "cLBulkEdit":
-            MessageLookupByLibrary.simpleMessage("Editar todas as datas"),
-        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
-            "Agora você pode selecionar várias fotos, editar data e hora de todos com um só clique. Alternar datas também são suportados."),
-        "cLFamilyPlan": MessageLookupByLibrary.simpleMessage(
-            "Limites de planos familiares"),
-        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
-            "Agora você pode definir um limite de quanto armazenamento os seus entes queridos podem usar."),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("Novo Ícone"),
-        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
-            "Finalmente, um novo ícone para o ente que acreditamos que represente melhor nosso trabalho. Também, adicionamos um alterador de ícone para que você ainda consiga utilizar o ícone antigo."),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("Memórias"),
-        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "Relembre momentos especiais - destaque pessoas favoritas, suas viagens e feriados, melhores fotos, e muito mais. Ative o aprendizado automático, marque-se e nomeie seus amigos para melhorar a experiência."),
-        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgets"),
-        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
-            "Widgets integrados com memórias já estão disponíveis. Eles apareceram com seus melhores momentos sem precisar abrir o ente."),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Dados armazenados em cache"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculando..."),

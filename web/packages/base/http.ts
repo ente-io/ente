@@ -1,3 +1,4 @@
+import { desktopAppVersion, isDesktop } from "ente-base/app";
 import { wait } from "ente-utils/promise";
 import { z } from "zod";
 import { clientPackageName } from "./app";
@@ -14,17 +15,19 @@ import log from "./log";
 export const authenticatedRequestHeaders = async () => ({
     "X-Auth-Token": await ensureAuthToken(),
     "X-Client-Package": clientPackageName,
+    ...(isDesktop ? { "X-Client-Version": desktopAppVersion } : {}),
 });
 
 /**
  * Return headers that should be passed alongwith (almost) all unauthenticated
  * `fetch` calls that we make to our remotes like our API servers (museum), or
- * to presigned URLs that are handled by the S3 storage buckets themselves.
+ * to pre-signed URLs that are handled by the S3 storage buckets themselves.
  *
  * - The client package name.
  */
 export const publicRequestHeaders = () => ({
     "X-Client-Package": clientPackageName,
+    ...(isDesktop ? { "X-Client-Version": desktopAppVersion } : {}),
 });
 
 /**
@@ -165,16 +168,36 @@ export const isMuseumHTTPError = async (
     return false;
 };
 
+interface RetryAsyncOperationOpts {
+    /**
+     * An optional modification to the default wait times between retries.
+     *
+     * - default       1 orig + 3 retries (2s, 5s, 10s)
+     * - "background"  1 orig + 3 retries (5s, 25s, 120s)
+     *
+     * default is fine for most operations, including interactive ones where we
+     * don't want to wait too long before giving up. "background" is suitable
+     * for non-interactive operations where we can wait for longer (thus better
+     * handle remote hiccups) without degrading the user's experience.
+     */
+    retryProfile?: "background";
+    /**
+     * An optional function that is called with the corresponding error whenever
+     * {@link op} rejects. It should throw the error if the retries should
+     * immediately be aborted.
+     */
+    abortIfNeeded?: (error: unknown) => void;
+}
+
 /**
- * Retry a async operation like a HTTP request 3 (+ 1 original) times with
- * exponential backoff.
+ * Retry a async operation on failure up to 4 times (1 original + 3 retries)
+ * with exponential backoff.
  *
  * @param op A function that performs the operation, returning the promise for
  * its completion.
  *
- * @param abortIfNeeded An optional function that is called with the
- * corresponding error whenever {@link op} rejects. It should throw the error if
- * the retries should immediately be aborted.
+ * @param opts Optional tweaks to the default implementation. See
+ * {@link RetryAsyncOperationOpts}.
  *
  * @returns A promise that fulfills with to the result of a first successfully
  * fulfilled promise of the 4 (1 + 3) attempts, or rejects with the error
@@ -183,9 +206,13 @@ export const isMuseumHTTPError = async (
  */
 export const retryAsyncOperation = async <T>(
     op: () => Promise<T>,
-    abortIfNeeded?: (error: unknown) => void,
+    opts?: RetryAsyncOperationOpts,
 ): Promise<T> => {
-    const waitTimeBeforeNextTry = [2000, 5000, 10000];
+    const { retryProfile, abortIfNeeded } = opts ?? {};
+    const waitTimeBeforeNextTry =
+        retryProfile == "background"
+            ? [5000, 25000, 120000]
+            : [2000, 5000, 10000];
 
     while (true) {
         try {
@@ -216,9 +243,8 @@ export type HTTPRequestRetrier = (
 /**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
  *
- * This will ensure that the HTTP operation returning a non-200 OK status (as
- * matched by {@link ensureOk}) is also counted as an error when considering if
- * a request should be retried.
+ * This extends {@link retryAsyncOperation} by treating any non-200 OK status
+ * (as matched by {@link ensureOk}) as an error that should be retried.
  */
 export const retryEnsuringHTTPOk: HTTPRequestRetrier = (
     request: () => Promise<Response>,
@@ -230,8 +256,8 @@ export const retryEnsuringHTTPOk: HTTPRequestRetrier = (
     });
 
 /**
- * A helper function to {@link retryAsyncOperation} for HTTP fetches, but
- * considering any 4xx HTTP responses as irrecoverable failures.
+ * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches, but
+ * treating any 4xx HTTP responses as irrecoverable failures.
  *
  * This is similar to {@link retryEnsuringHTTPOk}, except it stops retrying if
  * remote responds with a 4xx HTTP status.
@@ -245,7 +271,9 @@ export const retryEnsuringHTTPOkOr4xx: HTTPRequestRetrier = (
             ensureOk(r);
             return r;
         },
-        (e) => {
-            if (isHTTP4xxError(e)) throw e;
+        {
+            abortIfNeeded(e) {
+                if (isHTTP4xxError(e)) throw e;
+            },
         },
     );

@@ -40,6 +40,7 @@
     "referral_source_hint": "Enteをどのように知りましたか？（任意）",
     "referral_source_info": "アプリのインストールを追跡していませんが、どこで私たちを見つけたか教えていただけると助かります！",
     "password_mismatch_error": "パスワードが一致しません",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "<a/> へようこそ",
     "welcome_to_ente_subtitle": "エンドツーエンド暗号化された写真の保存と共有",
     "new_album": "新しいアルバム",
@@ -677,5 +678,9 @@
     "light": "ライト",
     "dark": "ダーク",
     "streamable_videos": "",
-    "processing_videos_status": ""
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": "",
+    "added_by_name": ""
 }

@@ -173,6 +173,7 @@
   "invalidQRCode": "Ongeldige QR-code",
   "noRecoveryKeyTitle": "Geen herstelsleutel?",
   "enterEmailHint": "Voer je e-mailadres in",
+  "enterNewEmailHint": "Voer uw nieuwe e-mailadres in",
   "invalidEmailTitle": "Ongeldig e-mailadres",
   "invalidEmailMessage": "Voer een geldig e-mailadres in.",
   "deleteAccount": "Account verwijderen",
@@ -513,5 +514,10 @@
   "free5GB": "5GB gratis op <bold-green>ente</bold-green> Photos",
   "loginWithAuthAccount": "Log in met je Auth account",
   "freeStorageOffer": "10% korting op <bold-green>ente</bold-green> photos",
-  "freeStorageOfferDescription": "Gebruik de code \"AUTH\" voor 10% korting op je eerste jaar"
+  "freeStorageOfferDescription": "Gebruik de code \"AUTH\" voor 10% korting op je eerste jaar",
+  "advanced": "Geavanceerd",
+  "algorithm": "Algoritme",
+  "type": "Type",
+  "period": "Periode",
+  "digits": "Cijfers"
 }

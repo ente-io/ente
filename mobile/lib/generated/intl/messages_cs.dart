@@ -91,9 +91,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupStatus": MessageLookupByLibrary.simpleMessage("Stav zálohování"),
         "birthday": MessageLookupByLibrary.simpleMessage("Narozeniny"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("Nová ikona"),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("Vzpomínky"),
-        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgety"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Data uložená v mezipaměti"),
         "calculating":

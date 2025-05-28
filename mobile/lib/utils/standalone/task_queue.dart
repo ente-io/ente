@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:developer";
 
 import 'package:collection/collection.dart';
 
@@ -216,7 +217,7 @@ class TaskQueue<T> {
       if (!queueItem.completer.isCompleted) {
         queueItem.completer.completeError(e);
       }
-      print('Task error: $e');
+      log('Task error: $e');
     } finally {
       // Mark the task as completed
       _runningTasks.remove(taskId);

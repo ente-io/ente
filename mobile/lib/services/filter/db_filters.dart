@@ -4,6 +4,7 @@ import "package:photos/services/filter/collection_ignore.dart";
 import "package:photos/services/filter/dedupe_by_upload_id.dart";
 import "package:photos/services/filter/filter.dart";
 import "package:photos/services/filter/only_uploaded_files_filter.dart";
+import "package:photos/services/filter/shared.dart";
 import "package:photos/services/filter/upload_ignore.dart";
 import "package:photos/services/ignored_files_service.dart";
 
@@ -18,12 +19,16 @@ class DBFilterOptions {
   bool ignoreSavedFiles;
   bool onlyUploadedFiles;
 
+  // If true, files owned by other users or uploaded by other users will be ignored.
+  bool ignoreSharedItems = false;
+
   DBFilterOptions({
     this.ignoredCollectionIDs,
     this.hideIgnoredForUpload = false,
     this.dedupeUploadID = true,
     this.ignoreSavedFiles = false,
     this.onlyUploadedFiles = false,
+    this.ignoreSharedItems = false,
   });
 
   static DBFilterOptions dedupeOption = DBFilterOptions(
@@ -39,6 +44,9 @@ Future<List<EnteFile>> applyDBFilters(
     return files;
   }
   final List<Filter> filters = [];
+  if (options.ignoreSharedItems) {
+    filters.add(SkipSharedFileFilter());
+  }
   if (options.hideIgnoredForUpload) {
     final Map<String, String> idToReasonMap =
         await IgnoredFilesService.instance.idToIgnoreReasonMap;
