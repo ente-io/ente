@@ -1402,6 +1402,11 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
     updatePublicShareURLHelper,
     onRootClose,
 }) => {
+    const { show: showExpiryOptions, props: expiryOptionsVisibilityProps } =
+        useModalVisibility();
+
+    const options = useMemo(() => shareExpiryOptions(), []);
+
     const updateDeviceExpiry = async (optionFn) => {
         return updatePublicShareURLHelper({
             collectionID: collection.id,
@@ -1409,33 +1414,17 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
         });
     };
 
-    const [shareExpiryOptionsModalView, setShareExpiryOptionsModalView] =
-        useState(false);
-
-    const shareExpireOption = useMemo(() => shareExpiryOptions(), []);
-
-    const closeShareExpiryOptionsModalView = () =>
-        setShareExpiryOptionsModalView(false);
-
-    const openShareExpiryOptionsModalView = () =>
-        setShareExpiryOptionsModalView(true);
-
     const changeShareExpiryValue = (value: number) => async () => {
         await updateDeviceExpiry(value);
         publicShareProp.validTill = value;
-        setShareExpiryOptionsModalView(false);
-    };
-
-    const handleRootClose = () => {
-        closeShareExpiryOptionsModalView();
-        onRootClose();
+        expiryOptionsVisibilityProps.onClose();
     };
 
     return (
         <>
             <RowButtonGroup>
                 <RowButton
-                    onClick={openShareExpiryOptionsModalView}
+                    onClick={showExpiryOptions}
                     endIcon={<ChevronRightIcon />}
                     label={t("link_expiry")}
                     color={
@@ -1454,14 +1443,13 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
             </RowButtonGroup>
             <TitledNestedSidebarDrawer
                 anchor="right"
-                open={shareExpiryOptionsModalView}
-                onClose={closeShareExpiryOptionsModalView}
-                onRootClose={handleRootClose}
+                {...expiryOptionsVisibilityProps}
+                onRootClose={onRootClose}
                 title={t("link_expiry")}
             >
                 <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                     <RowButtonGroup>
-                        {shareExpireOption.map((item, index) => (
+                        {options.map((item, index) => (
                             <React.Fragment key={item.value()}>
                                 <RowButton
                                     fontWeight="regular"
@@ -1470,7 +1458,7 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                                     )}
                                     label={item.label}
                                 />
-                                {index !== shareExpireOption.length - 1 && (
+                                {index !== options.length - 1 && (
                                     <RowButtonDivider />
                                 )}
                             </React.Fragment>
