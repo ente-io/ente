@@ -432,10 +432,6 @@ func (c *FileController) getWasabiSignedUrlIfAvailable(fileID int64, objType ent
 			return c.getPreSignedURLForDC(s3Object.ObjectKey, dc)
 		}
 	}
-	// todo: (neeraj) remove this log after some time
-	log.WithFields(log.Fields{
-		"fileID": fileID}).Info("File not found in wasabi, returning signed url from B2")
-	// return signed url from default hot bucket
 	return c.getHotDcSignedUrl(s3Object.ObjectKey)
 }
 
