@@ -181,6 +181,30 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
 );
 
 /**
+ * A variant of {@link SidebarDrawerTitlebar} with a close button where the back
+ * button is, and none of the other whistles.
+ *
+ * This is currently only used by the top level "File info" screen; the reason
+ * for keeping this here so that it also gets modified when we modify the
+ * spacing etc for {@link SidebarDrawerTitlebar} so that they both look visually
+ * similar (apart from the obvious icon differences).
+ */
+export const SidebarDrawerTitlebarClose: React.FC<
+    Pick<SidebarDrawerTitlebarProps, "onClose" | "title">
+> = ({ title, onClose }) => (
+    <Stack sx={{ gap: "4px" }}>
+        <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+            <IconButton onClick={onClose} color="secondary">
+                <CloseIcon />
+            </IconButton>
+        </Stack>
+        <Box sx={{ px: "16px", py: "4px" }}>
+            <Typography variant="h3">{title}</Typography>
+        </Box>
+    </Stack>
+);
+
+/**
  * A variant of {@link NestedSidebarDrawer} that additionally shows a title.
  *
  * {@link NestedSidebarDrawer} is for second level, nested drawers that are

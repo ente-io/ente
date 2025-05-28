@@ -38,9 +38,12 @@ import { isDesktop } from "ente-base/app";
 import { LinkButtonUndecorated } from "ente-base/components/LinkButton";
 import { type ButtonishProps } from "ente-base/components/mui";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
-import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
+import {
+    SidebarDrawer,
+    SidebarDrawerTitlebar,
+    SidebarDrawerTitlebarClose,
+} from "ente-base/components/mui/SidebarDrawer";
 import { SingleInputForm } from "ente-base/components/SingleInputForm";
-import { Titlebar } from "ente-base/components/Titlebar";
 import { EllipsizedTypography } from "ente-base/components/Typography";
 import {
     useModalVisibility,
@@ -264,7 +267,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     return (
         <FileInfoSidebar {...{ open, onClose }}>
-            <Titlebar onClose={onClose} title={t("info")} backIsClose />
+            <SidebarDrawerTitlebarClose {...{ onClose }} title={t("info")} />
             <Stack sx={{ pt: 1, pb: 3, gap: "20px" }}>
                 <Caption
                     {...{
@@ -985,11 +988,11 @@ const RawExif: React.FC<RawExifProps> = ({
 
     return (
         <FileInfoSidebar open={open} onClose={onClose}>
-            <Titlebar
+            <SidebarDrawerTitlebar
                 onClose={onClose}
+                onRootClose={handleRootClose}
                 title={t("exif")}
                 caption={fileName}
-                onRootClose={handleRootClose}
                 actionButton={
                     <CopyButton size="small" text={JSON.stringify(tags)} />
                 }
