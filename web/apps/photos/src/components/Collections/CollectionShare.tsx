@@ -66,7 +66,6 @@ import {
     unshareCollection,
     updateShareableURL,
 } from "services/collectionService";
-import { getDeviceLimitOptions } from "utils/collection";
 import * as Yup from "yup";
 
 interface CollectionShareProps {
@@ -1515,7 +1514,7 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
     const { show: showDeviceOptions, props: deviceOptionsVisibilityProps } =
         useModalVisibility();
 
-    const options = useMemo(() => getDeviceLimitOptions(), []);
+    const options = useMemo(() => deviceLimitOptions(), []);
 
     const updateDeviceLimit = async (newLimit: number) => {
         return updatePublicShareURLHelper({
@@ -1567,6 +1566,12 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
         </>
     );
 };
+
+const deviceLimitOptions = () =>
+    [0, 2, 5, 10, 25, 50].map((i) => ({
+        label: i == 0 ? t("none") : i.toString(),
+        value: i,
+    }));
 
 interface ManageDownloadAccessProps {
     publicShareProp: PublicURL;

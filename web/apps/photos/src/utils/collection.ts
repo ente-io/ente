@@ -183,15 +183,6 @@ async function createCollectionDownloadFolder(
     return collectionDownloadPath;
 }
 
-const _intSelectOption = (i: number) => {
-    const label = i === 0 ? t("none") : i.toString();
-    return { label, value: i };
-};
-
-export function getDeviceLimitOptions() {
-    return [0, 2, 5, 10, 25, 50].map((i) => _intSelectOption(i));
-}
-
 export const changeCollectionVisibility = async (
     collection: Collection,
     visibility: ItemVisibility,
