@@ -18,7 +18,6 @@ import TextField from "@mui/material/TextField";
 import Avatar from "components/pages/gallery/Avatar";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
-    NestedSidebarDrawer,
     SidebarDrawer,
     TitledNestedSidebarDrawer,
 } from "ente-base/components/mui/SidebarDrawer";
@@ -776,104 +775,95 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
         );
         setManageParticipantView(true);
     };
+
     const closeManageParticipant = () => {
         setManageParticipantView(false);
     };
 
     return (
         <>
-            <NestedSidebarDrawer
+            <TitledNestedSidebarDrawer
                 anchor="right"
                 {...{ open, onClose }}
                 onRootClose={handleRootClose}
+                title={collection.name}
+                caption={t("participants_count", { count: peopleCount })}
             >
-                <Stack sx={{ gap: "4px", py: "12px" }}>
-                    <Titlebar
-                        onClose={onClose}
-                        title={collection.name}
-                        onRootClose={handleRootClose}
-                        caption={t("participants_count", {
-                            count: peopleCount,
-                        })}
-                    />
-                    <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
-                        <Stack>
-                            <RowButtonGroupTitle
-                                icon={<AdminPanelSettingsIcon />}
-                            >
-                                {t("owner")}
-                            </RowButtonGroupTitle>
-                            <RowButtonGroup>
-                                <RowLabel
-                                    startIcon={<Avatar email={ownerEmail} />}
-                                    label={isOwner ? t("you") : ownerEmail}
-                                />
-                            </RowButtonGroup>
-                        </Stack>
-                        <Stack>
-                            <RowButtonGroupTitle icon={<ModeEditIcon />}>
-                                {t("collaborators")}
-                            </RowButtonGroupTitle>
-                            <RowButtonGroup>
-                                {collaborators.map((item) => (
-                                    <React.Fragment key={item}>
-                                        <RowButton
-                                            fontWeight="regular"
-                                            onClick={() =>
-                                                openManageParticipant(item)
-                                            }
-                                            label={item}
-                                            startIcon={<Avatar email={item} />}
-                                            endIcon={<ChevronRightIcon />}
-                                        />
-                                        <RowButtonDivider />
-                                    </React.Fragment>
-                                ))}
+                <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
+                    <Stack>
+                        <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
+                            {t("owner")}
+                        </RowButtonGroupTitle>
+                        <RowButtonGroup>
+                            <RowLabel
+                                startIcon={<Avatar email={ownerEmail} />}
+                                label={isOwner ? t("you") : ownerEmail}
+                            />
+                        </RowButtonGroup>
+                    </Stack>
+                    <Stack>
+                        <RowButtonGroupTitle icon={<ModeEditIcon />}>
+                            {t("collaborators")}
+                        </RowButtonGroupTitle>
+                        <RowButtonGroup>
+                            {collaborators.map((item) => (
+                                <React.Fragment key={item}>
+                                    <RowButton
+                                        fontWeight="regular"
+                                        onClick={() =>
+                                            openManageParticipant(item)
+                                        }
+                                        label={item}
+                                        startIcon={<Avatar email={item} />}
+                                        endIcon={<ChevronRightIcon />}
+                                    />
+                                    <RowButtonDivider />
+                                </React.Fragment>
+                            ))}
 
-                                <RowButton
-                                    startIcon={<AddIcon />}
-                                    onClick={openAddCollab}
-                                    label={
-                                        collaborators?.length
-                                            ? t("add_more")
-                                            : t("add_collaborators")
-                                    }
-                                />
-                            </RowButtonGroup>
-                        </Stack>
-                        <Stack>
-                            <RowButtonGroupTitle icon={<Photo />}>
-                                {t("viewers")}
-                            </RowButtonGroupTitle>
-                            <RowButtonGroup>
-                                {viewers.map((item) => (
-                                    <React.Fragment key={item}>
-                                        <RowButton
-                                            fontWeight="regular"
-                                            onClick={() =>
-                                                openManageParticipant(item)
-                                            }
-                                            label={item}
-                                            startIcon={<Avatar email={item} />}
-                                            endIcon={<ChevronRightIcon />}
-                                        />
-                                        <RowButtonDivider />
-                                    </React.Fragment>
-                                ))}
-                                <RowButton
-                                    startIcon={<AddIcon />}
-                                    onClick={openAddViewer}
-                                    label={
-                                        viewers?.length
-                                            ? t("add_more")
-                                            : t("add_viewers")
-                                    }
-                                />
-                            </RowButtonGroup>
-                        </Stack>
+                            <RowButton
+                                startIcon={<AddIcon />}
+                                onClick={openAddCollab}
+                                label={
+                                    collaborators?.length
+                                        ? t("add_more")
+                                        : t("add_collaborators")
+                                }
+                            />
+                        </RowButtonGroup>
+                    </Stack>
+                    <Stack>
+                        <RowButtonGroupTitle icon={<Photo />}>
+                            {t("viewers")}
+                        </RowButtonGroupTitle>
+                        <RowButtonGroup>
+                            {viewers.map((item) => (
+                                <React.Fragment key={item}>
+                                    <RowButton
+                                        fontWeight="regular"
+                                        onClick={() =>
+                                            openManageParticipant(item)
+                                        }
+                                        label={item}
+                                        startIcon={<Avatar email={item} />}
+                                        endIcon={<ChevronRightIcon />}
+                                    />
+                                    <RowButtonDivider />
+                                </React.Fragment>
+                            ))}
+                            <RowButton
+                                startIcon={<AddIcon />}
+                                onClick={openAddViewer}
+                                label={
+                                    viewers?.length
+                                        ? t("add_more")
+                                        : t("add_viewers")
+                                }
+                            />
+                        </RowButtonGroup>
                     </Stack>
                 </Stack>
-            </NestedSidebarDrawer>
+            </TitledNestedSidebarDrawer>
             <ManageParticipant
                 collectionUnshare={collectionUnshare}
                 open={manageParticipantView}
@@ -992,83 +982,77 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     }
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             anchor="right"
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("manage")}
+            caption={selectedParticipant.email}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <Titlebar
-                    onClose={onClose}
-                    title={t("manage")}
-                    onRootClose={handleRootClose}
-                    caption={selectedParticipant.email}
-                />
+            <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+                <Stack>
+                    <Typography
+                        variant="small"
+                        sx={{ color: "text.muted", padding: 1 }}
+                    >
+                        {t("added_as")}
+                    </Typography>
 
-                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
-                    <Stack>
+                    <RowButtonGroup>
+                        <RowButton
+                            fontWeight="regular"
+                            onClick={handleRoleChange("COLLABORATOR")}
+                            label={"Collaborator"}
+                            startIcon={<ModeEditIcon />}
+                            endIcon={
+                                selectedParticipant.role === "COLLABORATOR" && (
+                                    <DoneIcon />
+                                )
+                            }
+                        />
+                        <RowButtonDivider />
+
+                        <RowButton
+                            fontWeight="regular"
+                            onClick={handleRoleChange("VIEWER")}
+                            label={"Viewer"}
+                            startIcon={<PhotoIcon />}
+                            endIcon={
+                                selectedParticipant.role == "VIEWER" && (
+                                    <DoneIcon />
+                                )
+                            }
+                        />
+                    </RowButtonGroup>
+
+                    <Typography
+                        variant="small"
+                        sx={{ color: "text.muted", padding: 1 }}
+                    >
+                        {t("collaborator_hint")}
+                    </Typography>
+
+                    <Stack sx={{ py: "30px" }}>
                         <Typography
                             variant="small"
                             sx={{ color: "text.muted", padding: 1 }}
                         >
-                            {t("added_as")}
+                            {t("remove_participant")}
                         </Typography>
 
                         <RowButtonGroup>
                             <RowButton
+                                color="critical"
                                 fontWeight="regular"
-                                onClick={handleRoleChange("COLLABORATOR")}
-                                label={"Collaborator"}
-                                startIcon={<ModeEditIcon />}
-                                endIcon={
-                                    selectedParticipant.role ===
-                                        "COLLABORATOR" && <DoneIcon />
-                                }
-                            />
-                            <RowButtonDivider />
-
-                            <RowButton
-                                fontWeight="regular"
-                                onClick={handleRoleChange("VIEWER")}
-                                label={"Viewer"}
-                                startIcon={<PhotoIcon />}
-                                endIcon={
-                                    selectedParticipant.role == "VIEWER" && (
-                                        <DoneIcon />
-                                    )
-                                }
+                                onClick={removeParticipant}
+                                label={"Remove"}
+                                startIcon={<BlockIcon />}
                             />
                         </RowButtonGroup>
-
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.muted", padding: 1 }}
-                        >
-                            {t("collaborator_hint")}
-                        </Typography>
-
-                        <Stack sx={{ py: "30px" }}>
-                            <Typography
-                                variant="small"
-                                sx={{ color: "text.muted", padding: 1 }}
-                            >
-                                {t("remove_participant")}
-                            </Typography>
-
-                            <RowButtonGroup>
-                                <RowButton
-                                    color="critical"
-                                    fontWeight="regular"
-                                    onClick={removeParticipant}
-                                    label={"Remove"}
-                                    startIcon={<BlockIcon />}
-                                />
-                            </RowButtonGroup>
-                        </Stack>
                     </Stack>
                 </Stack>
             </Stack>
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -1270,87 +1254,75 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             anchor="right"
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("share_album")}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <Titlebar
-                    onClose={onClose}
-                    title={t("share_album")}
-                    onRootClose={handleRootClose}
+            <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
+                <ManagePublicCollect
+                    collection={collection}
+                    publicShareProp={publicShareProp}
+                    updatePublicShareURLHelper={updatePublicShareURLHelper}
                 />
-                <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
-                    <ManagePublicCollect
-                        collection={collection}
-                        publicShareProp={publicShareProp}
-                        updatePublicShareURLHelper={updatePublicShareURLHelper}
-                    />
-                    <ManageLinkExpiry
+                <ManageLinkExpiry
+                    collection={collection}
+                    publicShareProp={publicShareProp}
+                    updatePublicShareURLHelper={updatePublicShareURLHelper}
+                    onRootClose={onRootClose}
+                />
+                <RowButtonGroup>
+                    <ManageDeviceLimit
                         collection={collection}
                         publicShareProp={publicShareProp}
                         updatePublicShareURLHelper={updatePublicShareURLHelper}
                         onRootClose={onRootClose}
                     />
-                    <RowButtonGroup>
-                        <ManageDeviceLimit
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                            onRootClose={onRootClose}
-                        />
-                        <RowButtonDivider />
-                        <ManageDownloadAccess
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                        <RowButtonDivider />
-                        <ManageLinkPassword
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            startIcon={
-                                copied ? (
-                                    <DoneIcon sx={{ color: "accent.main" }} />
-                                ) : (
-                                    <ContentCopyIcon />
-                                )
-                            }
-                            onClick={handleCopyLink}
-                            label={t("copy_link")}
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            color="critical"
-                            startIcon={<RemoveCircleOutlineIcon />}
-                            onClick={disablePublicSharing}
-                            label={t("remove_link")}
-                        />
-                    </RowButtonGroup>
-                    {sharableLinkError && (
-                        <Typography
-                            variant="small"
-                            sx={{ color: "critical.main", textAlign: "center" }}
-                        >
-                            {sharableLinkError}
-                        </Typography>
-                    )}
-                </Stack>
+                    <RowButtonDivider />
+                    <ManageDownloadAccess
+                        collection={collection}
+                        publicShareProp={publicShareProp}
+                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                    />
+                    <RowButtonDivider />
+                    <ManageLinkPassword
+                        collection={collection}
+                        publicShareProp={publicShareProp}
+                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        startIcon={
+                            copied ? (
+                                <DoneIcon sx={{ color: "accent.main" }} />
+                            ) : (
+                                <ContentCopyIcon />
+                            )
+                        }
+                        onClick={handleCopyLink}
+                        label={t("copy_link")}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        color="critical"
+                        startIcon={<RemoveCircleOutlineIcon />}
+                        onClick={disablePublicSharing}
+                        label={t("remove_link")}
+                    />
+                </RowButtonGroup>
+                {sharableLinkError && (
+                    <Typography
+                        variant="small"
+                        sx={{ color: "critical.main", textAlign: "center" }}
+                    >
+                        {sharableLinkError}
+                    </Typography>
+                )}
             </Stack>
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };
 

@@ -31,7 +31,6 @@ import {
 import { safeDirectoryName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
 import type { User } from "ente-shared/user/types";
-import { t } from "i18next";
 import {
     createAlbum,
     removeFromCollection,
