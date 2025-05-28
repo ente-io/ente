@@ -558,7 +558,7 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
 }));
 
 const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = !uploadManager.shouldAllowNewUpload();
+    const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
     const icon = <AddPhotoAlternateOutlinedIcon />;
@@ -585,7 +585,7 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
  * shrink on mobile sized screens.
  */
 const AddMorePhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = !uploadManager.shouldAllowNewUpload();
+    const disabled = uploadManager.isUploadInProgress();
 
     return (
         <FocusVisibleButton

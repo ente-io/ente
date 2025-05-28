@@ -27,6 +27,7 @@ import { useBaseContext } from "ente-base/context";
 import { basename, dirname, joinPath } from "ente-base/file-name";
 import log from "ente-base/log";
 import type { CollectionMapping, Electron, ZipItem } from "ente-base/types/ipc";
+import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useFileInput } from "ente-gallery/components/utils/use-file-input";
 import {
     groupItemsBasedOnParentFolder,
@@ -76,8 +77,6 @@ import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { SetCollectionNamerAttributes } from "./Collections/CollectionNamer";
 import { UploadProgress } from "./UploadProgress";
-
-export type UploadTypeSelectorIntent = "upload" | "import" | "collect";
 
 interface UploadProps {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
@@ -551,7 +550,7 @@ export const Upload: React.FC<UploadProps> = ({
 
     const preCollectionCreationAction = async () => {
         props.onCloseCollectionSelector?.();
-        props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
+        props.setShouldDisableDropzone(uploadManager.isUploadInProgress());
         setUploadPhase("preparing");
         setUploadProgressView(true);
     };
