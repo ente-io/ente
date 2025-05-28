@@ -49,7 +49,6 @@ import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCr
 import { avatarTextColor } from "ente-new/photos/services/avatar";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { FlexWrapper } from "ente-shared/components/Container";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "ente-shared/components/SingleInputForm";
@@ -697,23 +696,17 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                             </Stack>
                         )}
                     </Stack>
-                    <FlexWrapper
-                        px={"8px"}
-                        justifyContent={"center"}
-                        flexWrap={"nowrap"}
-                    >
-                        <Stack sx={{ px: "8px", width: "100%" }}>
-                            <LoadingButton
-                                type="submit"
-                                color="accent"
-                                fullWidth
-                                loading={loading}
-                                sx={{ mt: 4, mb: 4 }}
-                            >
-                                {props.buttonText}
-                            </LoadingButton>
-                        </Stack>
-                    </FlexWrapper>
+                    <Stack sx={{ px: 2 }}>
+                        <LoadingButton
+                            type="submit"
+                            color="accent"
+                            fullWidth
+                            loading={loading}
+                            sx={{ mt: 4, mb: 4 }}
+                        >
+                            {props.buttonText}
+                        </LoadingButton>
+                    </Stack>
                 </form>
             )}
         </Formik>

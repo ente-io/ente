@@ -101,7 +101,6 @@ import {
     verifyStripeSubscription,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { FlexWrapper } from "ente-shared/components/Container";
 import { getData } from "ente-shared/storage/localStorage";
 import {
     getToken,
@@ -1250,16 +1249,15 @@ const HiddenSectionNavbarContents: React.FC<
         direction="row"
         sx={(theme) => ({
             gap: "24px",
-            width: "100%",
+            flex: 1,
+            alignItems: "center",
             background: theme.vars.palette.background.default,
         })}
     >
         <IconButton onClick={onBack}>
             <ArrowBackIcon />
         </IconButton>
-        <FlexWrapper>
-            <Typography>{t("section_hidden")}</Typography>
-        </FlexWrapper>
+        <Typography sx={{ flex: 1 }}>{t("section_hidden")}</Typography>
     </Stack>
 );
 
