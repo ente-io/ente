@@ -15,7 +15,7 @@ import {
 } from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
 import { Sidebar } from "components/Sidebar";
-import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
+import { Upload } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import { stashRedirect } from "ente-accounts/services/redirect";
@@ -37,6 +37,7 @@ import {
     masterKeyFromSessionIfLoggedIn,
 } from "ente-base/session";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
+import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import {
@@ -1093,8 +1094,8 @@ const Page: React.FC = () => {
                 !hiddenFiles?.length &&
                 activeCollectionID === ALL_SECTION ? (
                     <GalleryEmptyState
-                        openUploader={openUploader}
                         isUploadInProgress={uploadManager.isUploadInProgress()}
+                        onUpload={openUploader}
                     />
                 ) : !isInSearchMode &&
                   !isFirstLoad &&

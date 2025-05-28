@@ -7,11 +7,20 @@
  * there.
  */
 
-import { Paper, Stack, Typography } from "@mui/material";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
+import FolderIcon from "@mui/icons-material/FolderOutlined";
+import { Button, Paper, Stack, styled, Typography } from "@mui/material";
 import { CenteredFill } from "ente-base/components/containers";
+import { EnteLogo } from "ente-base/components/EnteLogo";
+import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import type { SearchSuggestion } from "ente-new/photos/services/search/types";
+import {
+    FlexWrapper,
+    VerticallyCentered,
+} from "ente-shared/components/Container";
 import { t } from "i18next";
 import React, { useState } from "react";
+import { Trans } from "react-i18next";
 import { enableML } from "../../services/ml";
 import { EnableML, FaceConsent } from "../sidebar/MLSettings";
 import { useMLStatusSnapshot } from "../utils/use-snapshot";
@@ -51,80 +60,80 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     </GalleryItemsHeaderAdapter>
 );
 
-import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
-import FolderIcon from "@mui/icons-material/FolderOutlined";
-import { Button, styled } from "@mui/material";
-import { EnteLogo } from "ente-base/components/EnteLogo";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "ente-shared/components/Container";
-import { Trans } from "react-i18next";
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-export function GalleryEmptyState({ openUploader, isUploadInProgress }) {
-    return (
-        <Wrapper>
-            <Stack sx={{ flex: "none", paddingBlock: "12px 32px" }}>
-                <VerticallyCentered sx={{ flex: "none" }}>
-                    <Typography
-                        variant="h3"
-                        sx={{
-                            color: "text.muted",
-                            userSelect: "none",
-                            marginBlockEnd: 1,
-                            svg: {
-                                color: "text.base",
-                                verticalAlign: "middle",
-                                marginBlockEnd: "2px",
-                            },
-                        }}
-                    >
-                        <Trans
-                            i18nKey="welcome_to_ente_title"
-                            components={{ a: <EnteLogo /> }}
-                        />
-                    </Typography>
-                    <Typography variant="h2">
-                        {t("welcome_to_ente_subtitle")}
-                    </Typography>
-                </VerticallyCentered>
-            </Stack>
-            <NonDraggableImage
-                height={287.57}
-                alt=""
-                src="/images/empty-state/ente_duck.png"
-                srcSet="/images/empty-state/ente_duck@2x.png, /images/empty-state/ente_duck@3x.png"
-            />
-            <VerticallyCentered paddingTop={1.5} paddingBottom={1.5}>
-                <Button
-                    color="accent"
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
-                    onClick={() => openUploader("upload")}
-                    disabled={isUploadInProgress}
-                    sx={{ mt: 1.5, p: 1, width: 320, borderRadius: 0.5 }}
-                >
-                    <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
-                        <AddPhotoAlternateIcon />
-                        {t("upload_first_photo")}
-                    </FlexWrapper>
-                </Button>
-                <Button
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
-                    onClick={() => openUploader("import")}
-                    disabled={isUploadInProgress}
-                    sx={{ mt: 1.5, p: 1, width: 320, borderRadius: 0.5 }}
-                >
-                    <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
-                        <FolderIcon />
-                        {t("import_your_folders")}
-                    </FlexWrapper>
-                </Button>
-            </VerticallyCentered>
-        </Wrapper>
-    );
+interface GalleryEmptyStateProps {
+    /**
+     * If `true`, then an upload is already in progress (the empty state will
+     * then disable the prompts for uploads).
+     */
+    isUploadInProgress: boolean;
+    /**
+     * Called when the user selects one of the upload buttons. It is passed the
+     * "intent" of the user.
+     */
+    onUpload: (intent: UploadTypeSelectorIntent) => void;
 }
+
+export const GalleryEmptyState: React.FC<GalleryEmptyStateProps> = ({
+    isUploadInProgress,
+    onUpload,
+}) => (
+    <Wrapper>
+        <Stack sx={{ flex: "none", paddingBlock: "12px 32px" }}>
+            <VerticallyCentered sx={{ flex: "none" }}>
+                <Typography
+                    variant="h3"
+                    sx={{
+                        color: "text.muted",
+                        userSelect: "none",
+                        marginBlockEnd: 1,
+                        svg: {
+                            color: "text.base",
+                            verticalAlign: "middle",
+                            marginBlockEnd: "2px",
+                        },
+                    }}
+                >
+                    <Trans
+                        i18nKey="welcome_to_ente_title"
+                        components={{ a: <EnteLogo /> }}
+                    />
+                </Typography>
+                <Typography variant="h2">
+                    {t("welcome_to_ente_subtitle")}
+                </Typography>
+            </VerticallyCentered>
+        </Stack>
+        <NonDraggableImage
+            height={287.57}
+            alt=""
+            src="/images/empty-state/ente_duck.png"
+            srcSet="/images/empty-state/ente_duck@2x.png, /images/empty-state/ente_duck@3x.png"
+        />
+        <VerticallyCentered paddingTop={1.5} paddingBottom={1.5}>
+            <Button
+                color="accent"
+                onClick={() => onUpload("upload")}
+                disabled={isUploadInProgress}
+                sx={{ mt: 1.5, p: 1, width: 320, borderRadius: 0.5 }}
+            >
+                <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
+                    <AddPhotoAlternateIcon />
+                    {t("upload_first_photo")}
+                </FlexWrapper>
+            </Button>
+            <Button
+                onClick={() => onUpload("import")}
+                disabled={isUploadInProgress}
+                sx={{ mt: 1.5, p: 1, width: 320, borderRadius: 0.5 }}
+            >
+                <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
+                    <FolderIcon />
+                    {t("import_your_folders")}
+                </FlexWrapper>
+            </Button>
+        </VerticallyCentered>
+    </Wrapper>
+);
 
 const Wrapper = styled("div")`
     display: flex;
