@@ -109,7 +109,7 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                             );
                             unawaited(
                               MemoryHomeWidgetService.instance
-                                  .initMemoryHW(true),
+                                  .initMemoryHomeWidget(true),
                             );
                             setState(() {});
                           },

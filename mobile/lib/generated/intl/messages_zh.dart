@@ -534,6 +534,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• 点击"),
         "clickOnTheOverflowMenu":
             MessageLookupByLibrary.simpleMessage("• 点击溢出菜单"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("关闭"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage("按拍摄时间分组"),
         "clubByFileName": MessageLookupByLibrary.simpleMessage("按文件名排序"),
@@ -1037,6 +1039,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("长按电子邮件以验证端到端加密。"),
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage("长按一个项目来全屏查看"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff": MessageLookupByLibrary.simpleMessage("循环播放视频关闭"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage("循环播放视频开启"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("设备丢失？"),
@@ -1105,6 +1109,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("新建相册"),
         "newLocation": MessageLookupByLibrary.simpleMessage("新位置"),
         "newPerson": MessageLookupByLibrary.simpleMessage("新人物"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("新起始图片"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("初来 Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("最新"),
@@ -1149,6 +1154,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "在 <branding>ente</branding> 上"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("再次踏上旅途"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("仅限他们"),
         "oops": MessageLookupByLibrary.simpleMessage("哎呀"),
@@ -1535,6 +1542,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "抱歉，我们无法在此设备上生成安全密钥。\n\n请使用其他设备注册。"),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("排序"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("排序方式"),
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("最新在前"),

@@ -101,7 +101,7 @@ class ToShowMemory {
     final relevantForNow = now >= firstTimeToShow && now < lastTimeToShow;
     final calculatedForNow = (now >= calculationTime) &&
         (now < calculationTime + kMemoriesUpdateFrequency.inMicroseconds);
-    return relevantForNow && calculatedForNow;
+    return relevantForNow && (calculatedForNow || type == MemoryType.onThisDay);
   }
 
   ToShowMemory(

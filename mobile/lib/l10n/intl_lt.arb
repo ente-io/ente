@@ -1594,5 +1594,10 @@
   "cLBulkEdit": "Masiškai redaguokite datas",
   "cLBulkEditDesc": "Dabar galite pasirinkti kelias nuotraukas ir vienu sparčiu veiksmu redaguoti visų nuotraukų datą ir laiką. Taip pat palaikomas datų perkėlimas.",
   "curatedMemories": "Kuruoti prisiminimai",
-  "onThisDay": "On this day"
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }

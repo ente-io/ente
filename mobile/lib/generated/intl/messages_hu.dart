@@ -27,6 +27,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason":
             MessageLookupByLibrary.simpleMessage("Miért törli a fiókját?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Mégse"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Fiók törlése"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
             "Sajnáljuk, hogy távozik. Kérjük, ossza meg velünk visszajelzéseit, hogy segítsen nekünk a fejlődésben."),
@@ -38,7 +40,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("Visszajelzés"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Érvénytelen e-mail cím"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "verify": MessageLookupByLibrary.simpleMessage("Hitelesítés")
       };
 }

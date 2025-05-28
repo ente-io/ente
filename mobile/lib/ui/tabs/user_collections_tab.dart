@@ -60,7 +60,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   );
 
   static const int _kOnEnteItemLimitCount = 12;
-
   @override
   void initState() {
     super.initState();

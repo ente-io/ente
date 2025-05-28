@@ -625,6 +625,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Klick"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Klicken Sie auf das Überlaufmenü"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Schließen"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage(
             "Nach Aufnahmezeit gruppieren"),
@@ -1269,6 +1271,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Lange auf eine E-Mail drücken, um die Ende-zu-Ende-Verschlüsselung zu überprüfen."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Drücken Sie lange auf ein Element, um es im Vollbildmodus anzuzeigen"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Videoschleife aus"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage("Videoschleife an"),
@@ -1350,6 +1354,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Neues Album"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Neuer Ort"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Neue Person"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Neue Auswahl"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Neu bei Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Zuletzt"),
@@ -1407,6 +1412,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Auf <branding>ente</branding>"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("Wieder unterwegs"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Nur diese"),
         "oops": MessageLookupByLibrary.simpleMessage("Hoppla"),
@@ -1906,6 +1913,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Es tut uns leid, wir konnten keine sicheren Schlüssel auf diesem Gerät generieren.\n\nBitte starte die Registrierung auf einem anderen Gerät."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sortierung"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sortieren nach"),
         "sortNewestFirst":

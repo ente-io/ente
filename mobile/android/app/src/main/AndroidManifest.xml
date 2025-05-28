@@ -153,6 +153,20 @@
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/memory_widget" />
         </receiver>
+        <receiver android:name="EnteAlbumsWidgetProvider" android:label="Albums" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/albums_widget" />
+        </receiver>
+        <receiver android:name="EntePeopleWidgetProvider" android:label="People" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/people_widget" />
+        </receiver>
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />  <!-- Needed for scheduling notifications -->
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">    <!-- Needed for scheduling notifications -->
             <intent-filter>

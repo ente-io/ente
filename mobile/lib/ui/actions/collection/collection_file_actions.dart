@@ -84,6 +84,104 @@ extension CollectionFileActions on CollectionActions {
     }
   }
 
+  Future<bool> addToMultipleCollections(
+    BuildContext context,
+    List<Collection> collections,
+    bool showProgressDialog, {
+    List<EnteFile>? selectedFiles,
+  }) async {
+    final ProgressDialog? dialog = showProgressDialog
+        ? createProgressDialog(
+            context,
+            S.of(context).uploadingFilesToAlbum,
+            isDismissible: true,
+          )
+        : null;
+    await dialog?.show();
+    final int currentUserID = Configuration.instance.getUserID()!;
+    for (final collection in collections) {
+      try {
+        final List<EnteFile> files = [];
+        final List<EnteFile> filesPendingUpload = [];
+        for (final file in selectedFiles!) {
+          EnteFile? currentFile;
+          if (file.uploadedFileID != null) {
+            currentFile = file.copyWith();
+          } else if (file.generatedID != null) {
+            // when file is not uploaded, refresh the state from the db to
+            // ensure we have latest upload status for given file before
+            // queueing it up as pending upload
+            currentFile = await (FilesDB.instance.getFile(file.generatedID!));
+          } else if (file.generatedID == null) {
+            logger.severe("generated id should not be null");
+          }
+          if (currentFile == null) {
+            logger.severe("Failed to find fileBy genID");
+            continue;
+          }
+
+          if (currentFile.uploadedFileID == null) {
+            currentFile.collectionID = collection.id;
+            filesPendingUpload.add(currentFile);
+          } else {
+            files.add(currentFile);
+          }
+        }
+        if (filesPendingUpload.isNotEmpty) {
+          // Newly created collection might not be cached
+          final Collection? c =
+              CollectionsService.instance.getCollectionByID(collection.id);
+          if (c != null && c.owner.id != currentUserID) {
+            final Collection uncat =
+                await CollectionsService.instance.getUncategorizedCollection();
+            for (EnteFile unuploadedFile in filesPendingUpload) {
+              final uploadedFile = await FileUploader.instance.forceUpload(
+                unuploadedFile,
+                uncat.id,
+              );
+              files.add(uploadedFile);
+            }
+          } else {
+            for (final file in filesPendingUpload) {
+              file.collectionID = collection.id;
+            }
+            // filesPendingUpload might be getting ignored during auto-upload
+            // because the user deleted these files from ente in the past.
+            await IgnoredFilesService.instance
+                .removeIgnoredMappings(filesPendingUpload);
+            await FilesDB.instance.insertMultiple(filesPendingUpload);
+            Bus.instance.fire(
+              CollectionUpdatedEvent(
+                collection.id,
+                filesPendingUpload,
+                "pendingFilesAdd",
+              ),
+            );
+          }
+        }
+        if (files.isNotEmpty) {
+          await CollectionsService.instance
+              .addOrCopyToCollection(collection.id, files);
+        }
+      } catch (e, s) {
+        logger.severe("Failed to add to album", e, s);
+        await dialog?.hide();
+        await showGenericErrorDialog(
+          context: context,
+          error: e,
+        );
+        return false;
+      } finally {
+        // Syncing since successful addition to collection could have
+        // happened before a failure
+        unawaited(RemoteSyncService.instance.sync(silently: true));
+      }
+    }
+
+    await dialog?.hide();
+    return true;
+  }
+
   Future<bool> addToCollection(
     BuildContext context,
     int collectionID,

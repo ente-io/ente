@@ -520,6 +520,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Nhấn"),
         "clickOnTheOverflowMenu":
             MessageLookupByLibrary.simpleMessage("• Nhấn vào menu thả xuống"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Đóng"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("Nhóm theo thời gian chụp"),
@@ -1111,6 +1113,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Nhấn và giữ vào một mục để xem toàn màn hình"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Dừng phát video lặp lại"),
         "loopVideoOn":
@@ -1184,6 +1188,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Album mới"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Vị trí mới"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Người mới"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Mới đến Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Mới nhất"),
         "next": MessageLookupByLibrary.simpleMessage("Tiếp theo"),
@@ -1235,6 +1240,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Trên <branding>ente</branding>"),
         "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Chỉ họ"),
         "oops": MessageLookupByLibrary.simpleMessage("Ôi"),
@@ -1672,6 +1679,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Xin lỗi, chúng tôi không thể tạo khóa an toàn trên thiết bị này.\n\nVui lòng đăng ký từ một thiết bị khác."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sắp xếp"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sắp xếp theo"),
         "sortNewestFirst":

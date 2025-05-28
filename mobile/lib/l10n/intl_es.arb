@@ -1735,5 +1735,10 @@
   "cLBulkEdit": "Edición masiva de fechas",
   "cLBulkEditDesc": "Ahora puedes seleccionar múltiples fotos y editar la fecha/hora para todas ellas con una acción rápida. También es posible cambiar las fechas.",
   "curatedMemories": "Memorias revisadas",
-  "onThisDay": "On this day"
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }
