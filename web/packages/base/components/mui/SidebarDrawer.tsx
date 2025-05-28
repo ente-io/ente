@@ -164,18 +164,67 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
                 </IconButton>
             </Stack>
         </Stack>
-        <Box sx={{ px: "16px", py: "4px" }}>
+        <Stack sx={{ px: "16px", gap: "4px" }}>
             <Typography variant="h3">{title}</Typography>
             <Typography
                 variant="small"
                 sx={{
                     color: "text.muted",
                     wordBreak: "break-all",
+                    px: "1px",
                     minHeight: "17px",
                 }}
             >
                 {caption}
             </Typography>
+        </Stack>
+    </Stack>
+);
+
+/**
+ * A variant of {@link SidebarDrawerTitlebar} with a close button where the back
+ * button is, and none of the other whistles.
+ *
+ * This is currently only used by the top level "File info" screen; the reason
+ * for keeping this here so that it also gets modified when we modify the
+ * spacing etc for {@link SidebarDrawerTitlebar} so that they both look visually
+ * similar (apart from the obvious icon differences).
+ */
+export const SidebarDrawerTitlebarClose: React.FC<
+    Pick<SidebarDrawerTitlebarProps, "onClose" | "title">
+> = ({ title, onClose }) => (
+    <Stack sx={{ gap: "4px" }}>
+        <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+            <IconButton onClick={onClose} color="secondary">
+                <CloseIcon />
+            </IconButton>
+        </Stack>
+        <Box sx={{ px: "16px", py: "4px" }}>
+            <Typography variant="h3">{title}</Typography>
         </Box>
     </Stack>
+);
+
+/**
+ * A variant of {@link NestedSidebarDrawer} that additionally shows a title.
+ *
+ * {@link NestedSidebarDrawer} is for second level, nested drawers that are
+ * shown atop an already visible {@link SidebarDrawer}. This component combines
+ * the {@link NestedSidebarDrawer} with a {@link SidebarDrawerTitlebar} and some
+ * standard spacing, so that the caller can just provide the content as the
+ * children.
+ */
+export const TitledNestedSidebarDrawer: React.FC<
+    React.PropsWithChildren<
+        NestedSidebarDrawerVisibilityProps &
+            Pick<DrawerProps, "anchor"> &
+            SidebarDrawerTitlebarProps
+    >
+> = ({ open, onClose, onRootClose, anchor, children, ...rest }) => (
+    <NestedSidebarDrawer {...{ open, onClose, onRootClose, anchor }}>
+        <Stack sx={{ gap: "4px", py: "12px" }}>
+            <SidebarDrawerTitlebar {...{ onClose, onRootClose }} {...rest} />
+            {children}
+        </Stack>
+    </NestedSidebarDrawer>
 );

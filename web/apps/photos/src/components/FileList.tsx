@@ -26,7 +26,6 @@ import {
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
 import { TRASH_SECTION } from "ente-new/photos/services/collection";
-import { FlexWrapper } from "ente-shared/components/Container";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -1019,12 +1018,16 @@ const ListContainer = styled(Box, {
     }
 `;
 
-const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
+const ListItemContainer = styled("div")<{ span: number }>`
     grid-column: span ${(props) => props.span};
+    display: flex;
+    align-items: center;
 `;
 
-const FullSpanListItemContainer = styled(FlexWrapper)`
+const FullSpanListItemContainer = styled("div")`
     grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
 `;
 
 const asFullSpanListItem = ({ item, ...rest }: TimeStampListItem) => ({

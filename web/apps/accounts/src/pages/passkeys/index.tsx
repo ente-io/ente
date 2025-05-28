@@ -5,7 +5,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import KeyIcon from "@mui/icons-material/Key";
 import { Box, Paper, Stack, Typography, styled } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
-import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
+import {
+    SidebarDrawer,
+    SidebarDrawerTitlebar,
+} from "ente-base/components/mui/SidebarDrawer";
 import { NavbarBase } from "ente-base/components/Navbar";
 import {
     RowButton,
@@ -13,7 +16,6 @@ import {
     RowButtonGroup,
 } from "ente-base/components/RowButton";
 import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
-import { Titlebar } from "ente-base/components/Titlebar";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
@@ -287,7 +289,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
             <SidebarDrawer anchor="right" {...{ open, onClose }}>
                 {token && passkey && (
                     <Stack sx={{ gap: "4px", py: "12px" }}>
-                        <Titlebar
+                        <SidebarDrawerTitlebar
                             onClose={onClose}
                             title={t("manage_passkey")}
                             onRootClose={onClose}
@@ -295,7 +297,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                         <CreatedAtEntry>
                             {formattedDateTime(passkey.createdAt)}
                         </CreatedAtEntry>
-                        <RowButtonGroup>
+                        <RowButtonGroup sx={{ m: 1 }}>
                             <RowButton
                                 startIcon={<EditIcon />}
                                 label={t("rename_passkey")}
