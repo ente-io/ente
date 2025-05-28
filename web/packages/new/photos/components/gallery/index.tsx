@@ -14,10 +14,7 @@ import { CenteredFill } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import type { SearchSuggestion } from "ente-new/photos/services/search/types";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "ente-shared/components/Container";
+import { FlexWrapper } from "ente-shared/components/Container";
 import { t } from "i18next";
 import React, { useState } from "react";
 import { Trans } from "react-i18next";
@@ -78,30 +75,34 @@ export const GalleryEmptyState: React.FC<GalleryEmptyStateProps> = ({
     onUpload,
 }) => (
     <Stack sx={{ alignItems: "center" }}>
-        <Stack sx={{ flex: "none", paddingBlock: "12px 32px" }}>
-            <VerticallyCentered sx={{ flex: "none" }}>
-                <Typography
-                    variant="h3"
-                    sx={{
-                        color: "text.muted",
-                        userSelect: "none",
-                        marginBlockEnd: 1,
-                        svg: {
-                            color: "text.base",
-                            verticalAlign: "middle",
-                            marginBlockEnd: "2px",
-                        },
-                    }}
-                >
-                    <Trans
-                        i18nKey="welcome_to_ente_title"
-                        components={{ a: <EnteLogo /> }}
-                    />
-                </Typography>
-                <Typography variant="h2">
-                    {t("welcome_to_ente_subtitle")}
-                </Typography>
-            </VerticallyCentered>
+        <Stack
+            sx={{
+                alignItems: "center",
+                textAlign: "center",
+                paddingBlock: "12px 32px",
+                userSelect: "none",
+            }}
+        >
+            <Typography
+                variant="h3"
+                sx={{
+                    color: "text.muted",
+                    mb: 1,
+                    svg: {
+                        color: "text.base",
+                        verticalAlign: "middle",
+                        mb: "2px",
+                    },
+                }}
+            >
+                <Trans
+                    i18nKey="welcome_to_ente_title"
+                    components={{ a: <EnteLogo /> }}
+                />
+            </Typography>
+            <Typography variant="h2">
+                {t("welcome_to_ente_subtitle")}
+            </Typography>
         </Stack>
         <NonDraggableImage
             height={287.57}
@@ -109,7 +110,7 @@ export const GalleryEmptyState: React.FC<GalleryEmptyStateProps> = ({
             src="/images/empty-state/ente_duck.png"
             srcSet="/images/empty-state/ente_duck@2x.png, /images/empty-state/ente_duck@3x.png"
         />
-        <VerticallyCentered paddingTop={1.5} paddingBottom={1.5}>
+        <Stack sx={{ py: 1.5 }}>
             <Button
                 color="accent"
                 onClick={() => onUpload("upload")}
@@ -131,7 +132,7 @@ export const GalleryEmptyState: React.FC<GalleryEmptyStateProps> = ({
                     {t("import_your_folders")}
                 </FlexWrapper>
             </Button>
-        </VerticallyCentered>
+        </Stack>
     </Stack>
 );
 
