@@ -99,9 +99,6 @@ export function GalleryEmptyState({ openUploader, shouldAllowNewUpload }) {
             />
             <VerticallyCentered paddingTop={1.5} paddingBottom={1.5}>
                 <Button
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    style={{ cursor: !shouldAllowNewUpload && "not-allowed" }}
                     color="accent"
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
                     onClick={() => openUploader("upload")}
@@ -114,9 +111,6 @@ export function GalleryEmptyState({ openUploader, shouldAllowNewUpload }) {
                     </FlexWrapper>
                 </Button>
                 <Button
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    style={{ cursor: !shouldAllowNewUpload && "not-allowed" }}
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
                     onClick={() => openUploader("import")}
                     disabled={!shouldAllowNewUpload}
