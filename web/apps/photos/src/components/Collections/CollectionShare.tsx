@@ -12,18 +12,10 @@ import Photo, { default as PhotoIcon } from "@mui/icons-material/Photo";
 import PublicIcon from "@mui/icons-material/Public";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import WorkspacesIcon from "@mui/icons-material/Workspaces";
-import {
-    Dialog,
-    DialogProps,
-    FormHelperText,
-    Stack,
-    styled,
-    Typography,
-} from "@mui/material";
+import { Dialog, DialogProps, Stack, styled, Typography } from "@mui/material";
 import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Avatar from "components/pages/gallery/Avatar";
-import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     NestedSidebarDrawer,
@@ -556,7 +548,6 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                             ? t("add_viewers")
                             : t("add_collaborators")
                     }
-                    submitButtonProps={{ size: "large", sx: { mt: 1, mb: 2 } }}
                     disableAutoFocus
                 />
             </Stack>
@@ -574,24 +565,12 @@ interface AddParticipantFormProps {
     fieldType: "text" | "email" | "password";
     placeholder: string;
     buttonText: string;
-    submitButtonProps?: any;
-    initialValue?: string;
-    secondaryButtonAction?: () => void;
     disableAutoFocus?: boolean;
-    hiddenPreInput?: any;
-    caption?: any;
-    hiddenPostInput?: any;
-    autoComplete?: string;
-    blockButton?: boolean;
-    hiddenLabel?: boolean;
     onClose?: () => void;
     optionsList?: string[];
 }
 
 const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
-    const { submitButtonProps } = props;
-    const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
-
     const [loading, SetLoading] = useState(false);
 
     const submitForm = async (
@@ -633,10 +612,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
 
     return (
         <Formik<AddParticipantFormValues>
-            initialValues={{
-                inputValue: props.initialValue ?? "",
-                selectedOptions: [],
-            }}
+            initialValues={{ inputValue: "", selectedOptions: [] }}
             onSubmit={submitForm}
             validationSchema={validationSchema}
             validateOnChange={false}
@@ -651,14 +627,12 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
             }) => (
                 <form noValidate onSubmit={handleSubmit}>
                     <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
-                        {props.hiddenPreInput}
                         <Stack>
                             <RowButtonGroupTitle>
                                 {t("add_new_email")}
                             </RowButtonGroupTitle>
                             <TextField
                                 sx={{ marginTop: 0 }}
-                                hiddenLabel={props.hiddenLabel}
                                 fullWidth
                                 type={props.fieldType}
                                 id={props.fieldType}
@@ -667,15 +641,12 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                     handleInputFieldClick(setFieldValue)
                                 }
                                 name={props.fieldType}
-                                {...(props.hiddenLabel
-                                    ? { placeholder: props.placeholder }
-                                    : { label: props.placeholder })}
+                                label={props.placeholder}
                                 error={Boolean(errors.inputValue)}
                                 helperText={errors.inputValue}
                                 value={values.inputValue}
                                 disabled={loading}
                                 autoFocus={!props.disableAutoFocus}
-                                autoComplete={props.autoComplete}
                             />
                         </Stack>
 
@@ -735,51 +706,19 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                                 </RowButtonGroup>
                             </Stack>
                         )}
-
-                        <FormHelperText
-                            sx={{
-                                position: "relative",
-                                top: errors.inputValue ? "-22px" : "0",
-                                float: "right",
-                                padding: "0 8px",
-                            }}
-                        >
-                            {props.caption}
-                        </FormHelperText>
-                        {props.hiddenPostInput}
                     </Stack>
                     <FlexWrapper
                         px={"8px"}
                         justifyContent={"center"}
-                        flexWrap={props.blockButton ? "wrap-reverse" : "nowrap"}
+                        flexWrap={"nowrap"}
                     >
                         <Stack sx={{ px: "8px", width: "100%" }}>
-                            {props.secondaryButtonAction && (
-                                <FocusVisibleButton
-                                    onClick={props.secondaryButtonAction}
-                                    fullWidth
-                                    color="secondary"
-                                    sx={{
-                                        "&&&": {
-                                            mt: !props.blockButton ? 2 : 0.5,
-                                            mb: !props.blockButton ? 4 : 0,
-                                            mr: !props.blockButton ? 1 : 0,
-                                            ...buttonSx,
-                                        },
-                                    }}
-                                    {...restSubmitButtonProps}
-                                >
-                                    {t("cancel")}
-                                </FocusVisibleButton>
-                            )}
-
                             <LoadingButton
                                 type="submit"
                                 color="accent"
                                 fullWidth
                                 loading={loading}
-                                sx={{ mt: 2, mb: 4 }}
-                                {...restSubmitButtonProps}
+                                sx={{ mt: 4, mb: 4 }}
                             >
                                 {props.buttonText}
                             </LoadingButton>
