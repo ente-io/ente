@@ -11,7 +11,6 @@ import ScienceIcon from "@mui/icons-material/Science";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
     Box,
-    Button,
     Dialog,
     DialogContent,
     Divider,
@@ -40,6 +39,7 @@ import {
 import { SpacedRow } from "ente-base/components/containers";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawer,
@@ -114,10 +114,6 @@ import {
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { initiateEmail, openURL } from "ente-new/photos/utils/web";
-import {
-    FlexWrapper,
-    VerticallyCentered,
-} from "ente-shared/components/Container";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
@@ -218,13 +214,10 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     onShowPlanSelector,
 }) => {
     const userDetails = useUserDetailsSnapshot();
-    const [memberSubscriptionManageView, setMemberSubscriptionManageView] =
-        useState(false);
-
-    const openMemberSubscriptionManage = () =>
-        setMemberSubscriptionManageView(true);
-    const closeMemberSubscriptionManage = () =>
-        setMemberSubscriptionManageView(false);
+    const {
+        show: showManageMemberSubscription,
+        props: manageMemberSubscriptionVisibilityProps,
+    } = useModalVisibility();
 
     useEffect(() => {
         if (sidebarOpen) void syncUserDetails();
@@ -240,7 +233,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
 
     const handleSubscriptionCardClick = () => {
         if (isNonAdminFamilyMember) {
-            openMemberSubscriptionManage();
+            showManageMemberSubscription();
         } else {
             if (
                 userDetails &&
@@ -275,11 +268,10 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                     />
                 )}
             </Box>
-            {isNonAdminFamilyMember && (
-                <MemberSubscriptionManage
-                    userDetails={userDetails}
-                    open={memberSubscriptionManageView}
-                    onClose={closeMemberSubscriptionManage}
+            {isNonAdminFamilyMember && userDetails && (
+                <ManageMemberSubscription
+                    {...manageMemberSubscriptionVisibilityProps}
+                    {...{ userDetails }}
                 />
             )}
         </>
@@ -379,7 +371,15 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     );
 };
 
-function MemberSubscriptionManage({ open, userDetails, onClose }) {
+type ManageMemberSubscriptionProps = ModalVisibilityProps & {
+    userDetails: UserDetails;
+};
+
+const ManageMemberSubscription: React.FC<ManageMemberSubscriptionProps> = ({
+    open,
+    onClose,
+    userDetails,
+}) => {
     const { showMiniDialog } = useBaseContext();
     const fullScreen = useIsSmallWidth();
 
@@ -394,10 +394,6 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
             },
         });
 
-    if (!userDetails) {
-        return <></>;
-    }
-
     return (
         <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
             <SpacedRow sx={{ p: "20px 8px 12px 16px" }}>
@@ -410,7 +406,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                 <DialogCloseIconButton {...{ onClose }} />
             </SpacedRow>
             <DialogContent>
-                <VerticallyCentered>
+                <Stack sx={{ alignItems: "center", mx: 2 }}>
                     <Box sx={{ mb: 4 }}>
                         <Typography sx={{ color: "text.muted" }}>
                             {t("subscription_info_family")}
@@ -419,27 +415,24 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                             {familyAdminEmail(userDetails) ?? ""}
                         </Typography>
                     </Box>
-
                     <img
                         height={256}
                         src="/images/family-plan/1x.png"
                         srcSet="/images/family-plan/2x.png 2x, /images/family-plan/3x.png 3x"
                     />
-                    <FlexWrapper px={2}>
-                        <Button
-                            fullWidth
-                            variant="outlined"
-                            color="critical"
-                            onClick={confirmLeaveFamily}
-                        >
-                            {t("leave_family_plan")}
-                        </Button>
-                    </FlexWrapper>
-                </VerticallyCentered>
+                    <FocusVisibleButton
+                        fullWidth
+                        variant="outlined"
+                        color="critical"
+                        onClick={confirmLeaveFamily}
+                    >
+                        {t("leave_family_plan")}
+                    </FocusVisibleButton>
+                </Stack>
             </DialogContent>
         </Dialog>
     );
-}
+};
 
 type ShortcutSectionProps = SectionProps & {
     collectionSummaries: SidebarProps["collectionSummaries"];

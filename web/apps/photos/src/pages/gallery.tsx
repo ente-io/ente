@@ -14,7 +14,6 @@ import {
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
-import GalleryEmptyState from "components/GalleryEmptyState";
 import { Sidebar } from "components/Sidebar";
 import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
@@ -56,6 +55,7 @@ import {
 } from "ente-new/photos/components/SearchBar";
 import { WhatsNew } from "ente-new/photos/components/WhatsNew";
 import {
+    GalleryEmptyState,
     PeopleEmptyState,
     SearchResultsHeader,
 } from "ente-new/photos/components/gallery";
@@ -1094,7 +1094,10 @@ const Page: React.FC = () => {
                 !normalFiles?.length &&
                 !hiddenFiles?.length &&
                 activeCollectionID === ALL_SECTION ? (
-                    <GalleryEmptyState openUploader={openUploader} />
+                    <GalleryEmptyState
+                        openUploader={openUploader}
+                        shouldAllowNewUpload={uploadManager.shouldAllowNewUpload()}
+                    />
                 ) : !isInSearchMode &&
                   !isFirstLoad &&
                   state.view.type == "people" &&
