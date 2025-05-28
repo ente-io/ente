@@ -1312,7 +1312,7 @@ class CollectionsService {
         collection.id,
         collection.isOwner(_config.getUserID()!),
         encKey: collection.encryptedKey,
-        encKeyNonce: collection.keyDecryptionNonce!,
+        encKeyNonce: collection.keyDecryptionNonce ?? 'NA',
         source: "fetchDecryptMeta",
       );
       if (collectionData['magicMetadata'] != null) {
@@ -2046,7 +2046,7 @@ class CollectionsService {
           collection.id,
           collection.isOwner(_config.getUserID()!),
           encKey: collection.encryptedKey,
-          encKeyNonce: collection.keyDecryptionNonce!,
+          encKeyNonce: collection.keyDecryptionNonce ?? 'NA',
           source: "Name",
         );
         final result = CryptoUtil.decryptSync(
