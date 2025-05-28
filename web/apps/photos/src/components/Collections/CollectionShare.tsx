@@ -1452,38 +1452,32 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                     }
                 />
             </RowButtonGroup>
-            <NestedSidebarDrawer
+            <TitledNestedSidebarDrawer
                 anchor="right"
                 open={shareExpiryOptionsModalView}
                 onClose={closeShareExpiryOptionsModalView}
                 onRootClose={handleRootClose}
+                title={t("link_expiry")}
             >
-                <Stack sx={{ gap: "4px", py: "12px" }}>
-                    <Titlebar
-                        onClose={closeShareExpiryOptionsModalView}
-                        onRootClose={handleRootClose}
-                        title={t("link_expiry")}
-                    />
-                    <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
-                        <RowButtonGroup>
-                            {shareExpireOption.map((item, index) => (
-                                <React.Fragment key={item.value()}>
-                                    <RowButton
-                                        fontWeight="regular"
-                                        onClick={changeShareExpiryValue(
-                                            item.value(),
-                                        )}
-                                        label={item.label}
-                                    />
-                                    {index !== shareExpireOption.length - 1 && (
-                                        <RowButtonDivider />
+                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+                    <RowButtonGroup>
+                        {shareExpireOption.map((item, index) => (
+                            <React.Fragment key={item.value()}>
+                                <RowButton
+                                    fontWeight="regular"
+                                    onClick={changeShareExpiryValue(
+                                        item.value(),
                                     )}
-                                </React.Fragment>
-                            ))}
-                        </RowButtonGroup>
-                    </Stack>
+                                    label={item.label}
+                                />
+                                {index !== shareExpireOption.length - 1 && (
+                                    <RowButtonDivider />
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </RowButtonGroup>
                 </Stack>
-            </NestedSidebarDrawer>
+            </TitledNestedSidebarDrawer>
         </>
     );
 };
