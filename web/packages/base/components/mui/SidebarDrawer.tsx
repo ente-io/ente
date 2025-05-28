@@ -215,10 +215,12 @@ export const SidebarDrawerTitlebarClose: React.FC<
  */
 export const TitledNestedSidebarDrawer: React.FC<
     React.PropsWithChildren<
-        NestedSidebarDrawerVisibilityProps & SidebarDrawerTitlebarProps
+        NestedSidebarDrawerVisibilityProps &
+            Pick<DrawerProps, "anchor"> &
+            SidebarDrawerTitlebarProps
     >
-> = ({ open, onClose, onRootClose, children, ...rest }) => (
-    <NestedSidebarDrawer {...{ open, onClose, onRootClose }}>
+> = ({ open, onClose, onRootClose, anchor, children, ...rest }) => (
+    <NestedSidebarDrawer {...{ open, onClose, onRootClose, anchor }}>
         <Stack sx={{ gap: "4px", py: "12px" }}>
             <SidebarDrawerTitlebar {...{ onClose, onRootClose }} {...rest} />
             {children}

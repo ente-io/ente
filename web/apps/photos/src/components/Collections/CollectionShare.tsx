@@ -20,6 +20,7 @@ import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawer,
+    TitledNestedSidebarDrawer,
 } from "ente-base/components/mui/SidebarDrawer";
 import {
     RowButton,
@@ -485,6 +486,8 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
         onRootClose();
     };
 
+    const title = type == "VIEWER" ? t("add_viewers") : t("add_collaborators");
+
     const collectionShare: AddParticipantFormProps["callback"] = async ({
         email,
         emails,
@@ -524,34 +527,20 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             anchor="right"
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={title}
+            caption={collection.name}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <Titlebar
-                    {...{ onClose }}
-                    onRootClose={handleRootClose}
-                    title={
-                        type == "VIEWER"
-                            ? t("add_viewers")
-                            : t("add_collaborators")
-                    }
-                    caption={collection.name}
-                />
-                <AddParticipantForm
-                    onClose={onClose}
-                    callback={collectionShare}
-                    optionsList={nonSharedEmails}
-                    buttonText={
-                        type == "VIEWER"
-                            ? t("add_viewers")
-                            : t("add_collaborators")
-                    }
-                />
-            </Stack>
-        </NestedSidebarDrawer>
+            <AddParticipantForm
+                onClose={onClose}
+                callback={collectionShare}
+                optionsList={nonSharedEmails}
+                buttonText={title}
+            />
+        </TitledNestedSidebarDrawer>
     );
 };
 
