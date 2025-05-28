@@ -25,8 +25,6 @@ class FacesItemWidget extends StatefulWidget {
 }
 
 class _FacesItemWidgetState extends State<FacesItemWidget> {
-  bool editMode = false;
-
   @override
   void initState() {
     super.initState();
@@ -38,18 +36,14 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     return InfoItemWidget(
       key: const ValueKey("Faces"),
       leadingIcon: Icons.face_retouching_natural_outlined,
-      subtitleSection: _faceWidgets(context, widget.file, editMode),
+      subtitleSection: _faceWidgets(context, widget.file),
       hasChipButtons: true,
       biggerSpinner: true,
     );
   }
 
-  Future<List<Widget>> _faceWidgets(
-    BuildContext context,
-    EnteFile file,
-    bool editMode,
-  ) async {
-    late final mlDataDB = MLDataDB.instance;
+  Future<List<Widget>> _faceWidgets(BuildContext context, EnteFile file) async {
+    final mlDataDB = MLDataDB.instance;
     try {
       if (file.uploadedFileID == null) {
         return [const NoFaceChipButtonWidget(NoFacesReason.fileNotUploaded)];
@@ -151,7 +145,6 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
             clusterID: clusterID,
             person: person,
             highlight: highlight,
-            editMode: highlight ? editMode : false,
           ),
         );
       }
