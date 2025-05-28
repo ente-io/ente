@@ -9,12 +9,12 @@
 
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import FolderIcon from "@mui/icons-material/FolderOutlined";
-import { Button, Paper, Stack, styled, Typography } from "@mui/material";
+import { Paper, Stack, styled, Typography } from "@mui/material";
 import { CenteredFill } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
+import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import type { SearchSuggestion } from "ente-new/photos/services/search/types";
-import { FlexWrapper } from "ente-shared/components/Container";
 import { t } from "i18next";
 import React, { useState } from "react";
 import { Trans } from "react-i18next";
@@ -110,28 +110,28 @@ export const GalleryEmptyState: React.FC<GalleryEmptyStateProps> = ({
             src="/images/empty-state/ente_duck.png"
             srcSet="/images/empty-state/ente_duck@2x.png, /images/empty-state/ente_duck@3x.png"
         />
-        <Stack sx={{ py: 1.5 }}>
-            <Button
+        <Stack sx={{ py: 3, width: 320, gap: 1 }}>
+            <FocusVisibleButton
                 color="accent"
                 onClick={() => onUpload("upload")}
                 disabled={isUploadInProgress}
-                sx={{ mt: 1.5, p: 1, width: 320, borderRadius: 0.5 }}
+                sx={{ p: 1 }}
             >
-                <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
+                <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
                     <AddPhotoAlternateIcon />
                     {t("upload_first_photo")}
-                </FlexWrapper>
-            </Button>
-            <Button
+                </Stack>
+            </FocusVisibleButton>
+            <FocusVisibleButton
                 onClick={() => onUpload("import")}
                 disabled={isUploadInProgress}
-                sx={{ mt: 1.5, p: 1, width: 320, borderRadius: 0.5 }}
+                sx={{ p: 1 }}
             >
-                <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
+                <Stack direction="row" sx={{ gap: 1, alignItems: "center" }}>
                     <FolderIcon />
                     {t("import_your_folders")}
-                </FlexWrapper>
-            </Button>
+                </Stack>
+            </FocusVisibleButton>
         </Stack>
     </Stack>
 );
