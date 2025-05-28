@@ -179,3 +179,25 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
         </Box>
     </Stack>
 );
+
+/**
+ * A variant of {@link NestedSidebarDrawer} that additionally shows a title.
+ *
+ * {@link NestedSidebarDrawer} is for second level, nested drawers that are
+ * shown atop an already visible {@link SidebarDrawer}. This component combines
+ * the {@link NestedSidebarDrawer} with a {@link SidebarDrawerTitlebar} and some
+ * standard spacing, so that the caller can just provide the content as the
+ * children.
+ */
+export const TitledNestedSidebarDrawer: React.FC<
+    React.PropsWithChildren<
+        NestedSidebarDrawerVisibilityProps & SidebarDrawerTitlebarProps
+    >
+> = ({ open, onClose, onRootClose, children, ...rest }) => (
+    <NestedSidebarDrawer {...{ open, onClose, onRootClose }}>
+        <Stack sx={{ gap: "4px", py: "12px" }}>
+            <SidebarDrawerTitlebar {...{ onClose, onRootClose }} {...rest} />
+            {children}
+        </Stack>
+    </NestedSidebarDrawer>
+);
