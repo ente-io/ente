@@ -40,6 +40,7 @@
     "referral_source_hint": "How did you hear about Ente? (optional)",
     "referral_source_info": "We don't track app installs, It'd help us if you told us where you found us!",
     "password_mismatch_error": "Passwords don't match",
+    "show_or_hide_password": "Show or hide password",
     "welcome_to_ente_title": "Welcome to <a/>",
     "welcome_to_ente_subtitle": "End to end encrypted photo storage and sharing",
     "new_album": "New album",
@@ -680,5 +681,6 @@
     "processing_videos_status": "Processing videos...",
     "share_favorites": "Share favorites",
     "person_favorites": "{{name}}'s favorites",
-    "shared_favorites": "Shared favorites"
+    "shared_favorites": "Shared favorites",
+    "added_by_name": "Added by {{name}}"
 }

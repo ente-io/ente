@@ -545,23 +545,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Muhteşem Cuma kampanyası"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "cLBulkEdit":
-            MessageLookupByLibrary.simpleMessage("Tarihleri toplu düzenle"),
-        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
-            "Artık birden fazla fotoğraf seçebilir ve tek bir hızlı işlemle hepsi için tarih/saat düzenleyebilirsiniz. Tarih kaydırma da desteklenmektedir."),
-        "cLFamilyPlan":
-            MessageLookupByLibrary.simpleMessage("Aile Planı Sınırları"),
-        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
-            "Artık aile üyelerinizin ne kadar depolama alanı kullanabileceğine dair sınırlar belirleyebilirsiniz."),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("Yeni Simge"),
-        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
-            "Son olarak, çalışmalarımızı en iyi şekilde temsil ettiğini düşündüğümüz yeni bir uygulama simgesi. Eski simgeyi kullanmaya devam edebilmeniz için bir simge değiştirici de ekledik."),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("Anılar"),
-        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "Özel anlarınızı yeniden keşfedin - en sevdiğiniz kişilere, seyahatlerinize ve tatillerinize, en iyi tıklamalarınıza ve çok daha fazlasına odaklanın. En iyi deneyim için makine öğrenimini açın, kendinizi etiketleyin ve arkadaşlarınızı adlandırın."),
-        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widget\'lar"),
-        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
-            "Anılarla entegre edilmiş ana ekran widget\'ları artık kullanılabilir. Uygulamayı açmadan özel anlarınızı gösterir."),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Önbelleğe alınmış veriler"),
         "calculating": MessageLookupByLibrary.simpleMessage("Hesaplanıyor..."),

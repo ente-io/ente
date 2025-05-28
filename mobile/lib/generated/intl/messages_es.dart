@@ -552,23 +552,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Oferta del Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "cLBulkEdit":
-            MessageLookupByLibrary.simpleMessage("Edición masiva de fechas"),
-        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
-            "Ahora puedes seleccionar múltiples fotos y editar la fecha/hora para todas ellas con una acción rápida. También es posible cambiar las fechas."),
-        "cLFamilyPlan":
-            MessageLookupByLibrary.simpleMessage("Límites de plan familiar"),
-        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
-            "Ahora puede establecer límites en cuanto al almacenamiento que los miembros de tu familia pueden utilizar."),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("Nuevo ícono"),
-        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
-            "Por fin, un nuevo icono de la aplicación, que creemos que representa mejor nuestro trabajo. También hemos añadido una opción para que puedas seguir utilizando el icono anterior."),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("Recuerdos"),
-        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "Redescubre tus momentos especiales: enfócate en tu gente favorita, tus viajes y vacaciones, tus mejores clics, y mucho más. Activa el aprendizaje de automático, etiquétate a ti mismo y etiqueta a tus amigos para la mejor experiencia."),
-        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgets"),
-        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
-            "Ya están disponibles los widgets de pantalla de inicio con tus recuerdos. Podrás ver tus momentos especiales sin abrir la aplicación."),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Datos almacenados en caché"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculando..."),

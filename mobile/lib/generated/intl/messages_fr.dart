@@ -527,23 +527,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Offre Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "cLBulkEdit": MessageLookupByLibrary.simpleMessage(
-            "Dates de modification multiples"),
-        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
-            "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes celles-ci, en une seule action rapide. Les dates de décalage sont également prises en charge."),
-        "cLFamilyPlan": MessageLookupByLibrary.simpleMessage(
-            "Limites pour le forfait Famille"),
-        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
-            "Vous pouvez maintenant fixer des limites sur la quantité de stockage que les membres de votre famille peuvent utiliser."),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("Nouvel icône"),
-        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
-            "Finalement, création d\'un nouvel icône d\'application qui, selon nous, représente au mieux notre travail. Nous avons également ajouté un changeur d\'icône pour que vous puissiez continuer à utiliser l\'ancien."),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("Souvenirs"),
-        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "Redécouvrez vos précieux souvenirs - focus sur vos connaissances préférées, vos voyages et vos vacances, vos meilleurs clics et bien plus encore. Activez l\'apprentissage automatique, taguez-vous et nommez vos amis pour une meilleure expérience."),
-        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgets"),
-        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
-            "Les widgets (ou gadgets) de l\'écran d\'accueil, qui sont intégrés à des souvenirs, sont maintenant disponibles. Ils montreront vos moments spéciaux sans nécessité d\'ouvrir l\'application."),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Données mises en cache"),
         "calculating":

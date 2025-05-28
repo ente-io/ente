@@ -524,23 +524,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale": MessageLookupByLibrary.simpleMessage(
             "Распродажа в \"Черную пятницу\""),
         "blog": MessageLookupByLibrary.simpleMessage("Блог"),
-        "cLBulkEdit":
-            MessageLookupByLibrary.simpleMessage("Массовое редактирование дат"),
-        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
-            "Теперь вы можете выбрать несколько фото и отредактировать дату/время быстро и сразу для всех. Также поддерживается смещение дат."),
-        "cLFamilyPlan": MessageLookupByLibrary.simpleMessage(
-            "Ограничения семейного тарифа"),
-        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
-            "Теперь вы можете установить ограничения на объём хранилища, которое могут использовать члены вашей семьи."),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("Новая иконка"),
-        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
-            "Наконец-то новая иконка приложения, которая, как мы считаем, лучше всего отражает нашу работу. Мы также добавили переключатель иконок, чтобы вы могли продолжать использовать старую иконку."),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("Воспоминания"),
-        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "Откройте заново свои особенные моменты — в центре внимания ваши любимые люди, поездки и праздники, лучшие снимки и многое другое. Для наилучших впечатлений включите машинное обучение и отметьте себя и своих друзей."),
-        "cLWidgets": MessageLookupByLibrary.simpleMessage("Виджеты"),
-        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
-            "Теперь доступны виджеты домашнего экрана, интегрированные с воспоминаниями. Они покажут ваши особенные моменты, не открывая приложения."),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Кэшированные данные"),
         "calculating": MessageLookupByLibrary.simpleMessage("Подсчёт..."),

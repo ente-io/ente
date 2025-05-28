@@ -548,23 +548,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black-Friday-Aktion"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
-        "cLBulkEdit": MessageLookupByLibrary.simpleMessage(
-            "Massenbearbeitung von Datumsangaben"),
-        "cLBulkEditDesc": MessageLookupByLibrary.simpleMessage(
-            "Du kannst jetzt mehrere Fotos auswählen, und das Datum/Uhrzeit für alle mit einer Aktion ändern. Das Verschieben von Daten wird auch unterstützt."),
-        "cLFamilyPlan": MessageLookupByLibrary.simpleMessage(
-            "Obergrenzen für den Familientarif"),
-        "cLFamilyPlanDesc": MessageLookupByLibrary.simpleMessage(
-            "Du kannst jetzt festlegen, wie viel Speicherplatz deine Familienmitglieder nutzen können."),
-        "cLIcon": MessageLookupByLibrary.simpleMessage("Neues Icon"),
-        "cLIconDesc": MessageLookupByLibrary.simpleMessage(
-            "Endlich ein neues App-Icon, das unserer Meinung nach unser Werk am besten repräsentiert. Zudem ist es möglich, weiterhin das alte App-Icon zu verwenden."),
-        "cLMemories": MessageLookupByLibrary.simpleMessage("Erinnerungen"),
-        "cLMemoriesDesc": MessageLookupByLibrary.simpleMessage(
-            "Entdecke Deine besonderen Momente neu – Spot auf Deine liebsten Personen, Deine Reisen und Urlaube, Deine besten Schnappschüsse und vieles mehr. Aktiviere das maschinelle Lernen, tagge Dich selbst und benenne Deine Freunde für die besten Ergebnisse."),
-        "cLWidgets": MessageLookupByLibrary.simpleMessage("Widgets"),
-        "cLWidgetsDesc": MessageLookupByLibrary.simpleMessage(
-            "Homescreen-Widgets mit integrierten Erinnerungen sind nun verfügbar. Sie zeigen dir deine besonderen Momente an, ohne die App zu öffnen."),
         "cachedData": MessageLookupByLibrary.simpleMessage("Daten im Cache"),
         "calculating":
             MessageLookupByLibrary.simpleMessage("Wird berechnet..."),

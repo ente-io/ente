@@ -2,11 +2,11 @@ import { FormHelperText } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { FlexWrapper } from "ente-shared/components/Container";
-import ShowHidePassword from "ente-shared/components/Form/ShowHidePassword";
 import { Formik, type FormikHelpers, type FormikState } from "formik";
 import { t } from "i18next";
-import React, { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import * as Yup from "yup";
 
 interface formValues {
@@ -64,6 +64,11 @@ export default function SingleInputForm(props: SingleInputFormProps) {
     const [loading, SetLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
+    const handleToggleShowHidePassword = useCallback(
+        () => setShowPassword((show) => !show),
+        [],
+    );
+
     const submitForm = async (
         values: formValues,
         { setFieldError, resetForm }: FormikHelpers<formValues>,
@@ -75,16 +80,6 @@ export default function SingleInputForm(props: SingleInputFormProps) {
             resetForm,
         );
         SetLoading(false);
-    };
-
-    const handleClickShowPassword = () => {
-        setShowPassword(!showPassword);
-    };
-
-    const handleMouseDownPassword = (
-        event: React.MouseEvent<HTMLButtonElement>,
-    ) => {
-        event.preventDefault();
     };
 
     const validationSchema = useMemo(() => {
@@ -148,14 +143,9 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                                         : "on",
                                 endAdornment: props.fieldType ===
                                     "password" && (
-                                    <ShowHidePassword
+                                    <ShowHidePasswordInputAdornment
                                         showPassword={showPassword}
-                                        handleClickShowPassword={
-                                            handleClickShowPassword
-                                        }
-                                        handleMouseDownPassword={
-                                            handleMouseDownPassword
-                                        }
+                                        onToggle={handleToggleShowHidePassword}
                                     />
                                 ),
                             },

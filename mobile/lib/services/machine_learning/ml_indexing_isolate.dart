@@ -28,6 +28,9 @@ class MLIndexingIsolate extends SuperIsolate {
   @override
   bool get shouldAutomaticDispose => true;
 
+  int _loadedModelsCount = 0;
+  int _deloadedModelsCount = 0;
+
   final _initModelLock = Lock();
   final _downloadModelLock = Lock();
 
@@ -145,6 +148,10 @@ class MLIndexingIsolate extends SuperIsolate {
       _logger.info(
         'Loading models. faces: $shouldLoadFaces, clip: $shouldLoadClip',
       );
+      _loadedModelsCount++;
+      _logger.info(
+        "Loaded models count: $_loadedModelsCount, deloaded models count: $_deloadedModelsCount",
+      );
       await MLIndexingIsolate.instance
           ._loadModels(loadFaces: shouldLoadFaces, loadClip: shouldLoadClip);
       _logger.info('Models loaded');
@@ -250,6 +257,11 @@ class MLIndexingIsolate extends SuperIsolate {
     }
     if (modelNames.isEmpty) return;
     try {
+      _logger.info("Releasing models $modelNames");
+      _deloadedModelsCount++;
+      _logger.info(
+        "Loaded models count: $_loadedModelsCount, deloaded models count: $_deloadedModelsCount",
+      );
       await runInIsolate(IsolateOperation.releaseIndexingModels, {
         "modelNames": modelNames,
         "modelAddresses": modelAddresses,

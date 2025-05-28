@@ -53,6 +53,9 @@ class MLService {
   bool _isRunningML = false;
   bool _shouldPauseIndexingAndClustering = false;
 
+  bool get isRunningML =>
+      _isRunningML || memoriesCacheService.isUpdatingMemories;
+
   static const _kForceClusteringFaceCount = 8000;
 
   bool get isOffline => true;

@@ -40,6 +40,7 @@
     "referral_source_hint": "Como é que soube do Ente? (opcional)",
     "referral_source_info": "Não monitorizamos as instalações de aplicações. Seria útil se nos dissesse onde nos encontrou!",
     "password_mismatch_error": "As palavras-passe não correspondem",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Bem-vindo ao <a/>",
     "welcome_to_ente_subtitle": "Armazenamento criptografado de ponta a ponta de fotos e compartilhamento",
     "new_album": "Novo álbum",
@@ -680,5 +681,6 @@
     "processing_videos_status": "",
     "share_favorites": "",
     "person_favorites": "",
-    "shared_favorites": ""
+    "shared_favorites": "",
+    "added_by_name": ""
 }

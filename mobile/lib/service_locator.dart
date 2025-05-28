@@ -6,6 +6,7 @@ import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/db/local/db.dart";
 import "package:photos/db/remote/db.dart";
 import "package:photos/gateways/entity_gw.dart";
+import "package:photos/module/download/manager.dart";
 import "package:photos/services/account/billing_service.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/location_service.dart";
@@ -25,6 +26,7 @@ import "package:shared_preferences/shared_preferences.dart";
 class ServiceLocator {
   late final SharedPreferences prefs;
   late final Dio enteDio;
+  late final Dio nonEnteDio;
   late final PackageInfo packageInfo;
 
   // instance
@@ -32,9 +34,11 @@ class ServiceLocator {
 
   static final ServiceLocator instance = ServiceLocator._privateConstructor();
 
-  init(SharedPreferences prefs, Dio enteDio, PackageInfo packageInfo) {
+  init(SharedPreferences prefs, Dio enteDio, Dio nonEnteDio,
+      PackageInfo packageInfo) {
     this.prefs = prefs;
     this.enteDio = enteDio;
+    this.nonEnteDio = nonEnteDio;
     this.packageInfo = packageInfo;
   }
 }
@@ -170,4 +174,12 @@ RemoteCache? _remoteCache;
 RemoteCache get remoteCache {
   _remoteCache ??= RemoteCache();
   return _remoteCache!;
+}
+
+DownloadManager? _downloadManager;
+DownloadManager get downloadManager {
+  _downloadManager ??= DownloadManager(
+    ServiceLocator.instance.nonEnteDio,
+  );
+  return _downloadManager!;
 }
