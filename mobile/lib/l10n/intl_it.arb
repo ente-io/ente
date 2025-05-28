@@ -1548,6 +1548,5 @@
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
   "processingVideos": "Elaborando video",
-  "onThisDay": "On this day",
   "joinAlbumConfirmationDialogBody": "Unirsi a un album renderà visibile la tua email ai suoi partecipanti."
 }
