@@ -77,7 +77,7 @@ export const GalleryEmptyState: React.FC<GalleryEmptyStateProps> = ({
     isUploadInProgress,
     onUpload,
 }) => (
-    <Wrapper>
+    <Stack sx={{ alignItems: "center" }}>
         <Stack sx={{ flex: "none", paddingBlock: "12px 32px" }}>
             <VerticallyCentered sx={{ flex: "none" }}>
                 <Typography
@@ -132,15 +132,8 @@ export const GalleryEmptyState: React.FC<GalleryEmptyStateProps> = ({
                 </FlexWrapper>
             </Button>
         </VerticallyCentered>
-    </Wrapper>
+    </Stack>
 );
-
-const Wrapper = styled("div")`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-`;
 
 /**
  * Prevent the image from being selected _and_ dragged, since dragging it
