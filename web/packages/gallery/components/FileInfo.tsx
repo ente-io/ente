@@ -599,7 +599,9 @@ const Caption: React.FC<CaptionProps> = ({
     const { values, errors, handleChange, handleSubmit, resetForm } = formik;
 
     if (!caption.length && !allowEdits) {
-        return <></>;
+        // Visually take up some space, otherwise the info panel for the shared
+        // photos without a caption looks squished at the top.
+        return <Box sx={{ minHeight: 2 }}></Box>;
     }
 
     return (

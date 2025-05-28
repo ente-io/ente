@@ -164,19 +164,20 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
                 </IconButton>
             </Stack>
         </Stack>
-        <Box sx={{ px: "16px", py: "4px" }}>
+        <Stack sx={{ px: "16px", gap: "4px" }}>
             <Typography variant="h3">{title}</Typography>
             <Typography
                 variant="small"
                 sx={{
                     color: "text.muted",
                     wordBreak: "break-all",
+                    px: "1px",
                     minHeight: "17px",
                 }}
             >
                 {caption}
             </Typography>
-        </Box>
+        </Stack>
     </Stack>
 );
 
