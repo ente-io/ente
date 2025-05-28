@@ -718,11 +718,12 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const galleryContext = useContext(GalleryContext);
 
-    const [addParticipantView, setAddParticipantView] = useState(false);
-    const [manageParticipantView, setManageParticipantView] = useState(false);
-
-    const closeAddParticipant = () => setAddParticipantView(false);
-    const openAddParticipant = () => setAddParticipantView(true);
+    const { show: showAddParticipant, props: addParticipantVisibilityProps } =
+        useModalVisibility();
+    const {
+        show: showManageParticipant,
+        props: manageParticipantVisibilityProps,
+    } = useModalVisibility();
 
     const participantType = useRef<"COLLABORATOR" | "VIEWER">(null);
 
@@ -730,12 +731,12 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
 
     const openAddCollab = () => {
         participantType.current = "COLLABORATOR";
-        openAddParticipant();
+        showAddParticipant();
     };
 
     const openAddViewer = () => {
         participantType.current = "VIEWER";
-        openAddParticipant();
+        showAddParticipant();
     };
 
     const handleRootClose = () => {
@@ -773,11 +774,7 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
         selectedParticipant.current = collection.sharees.find(
             (sharee) => sharee.email === email,
         );
-        setManageParticipantView(true);
-    };
-
-    const closeManageParticipant = () => {
-        setManageParticipantView(false);
+        showManageParticipant();
     };
 
     return (
@@ -864,20 +861,18 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
                     </Stack>
                 </Stack>
             </TitledNestedSidebarDrawer>
-            <ManageParticipant
-                collectionUnshare={collectionUnshare}
-                open={manageParticipantView}
-                collection={collection}
-                onRootClose={onRootClose}
-                onClose={closeManageParticipant}
-                selectedParticipant={selectedParticipant.current}
-            />
             <AddParticipant
-                open={addParticipantView}
-                onClose={closeAddParticipant}
+                {...addParticipantVisibilityProps}
                 onRootClose={onRootClose}
                 collection={collection}
                 type={participantType.current}
+            />
+            <ManageParticipant
+                {...manageParticipantVisibilityProps}
+                onRootClose={onRootClose}
+                collectionUnshare={collectionUnshare}
+                collection={collection}
+                selectedParticipant={selectedParticipant.current}
             />
         </>
     );
