@@ -35,6 +35,7 @@ import { useClipboardCopy } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { sharedCryptoWorker } from "ente-base/crypto";
+import { isHTTP4xxError } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { appendCollectionKeyToShareURL } from "ente-gallery/services/share";
@@ -514,6 +515,9 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                 await shareCollection(collection, email, type);
                 await syncWithRemote(false, true);
             } catch (e) {
+                if (isHTTP4xxError(e)) {
+                    throw new Error(t("sharing_user_does_not_exist"));
+                }
                 const errorMessage = handleSharingErrors(e);
                 throw new Error(errorMessage);
             }
