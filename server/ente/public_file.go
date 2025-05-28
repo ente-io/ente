@@ -5,7 +5,7 @@ type CreateFileUrl struct {
 	FileID int64 `json:"fileID" binding:"required"`
 }
 
-// UpdateFileResponse represents a response to the UpdateFileRequest
+// UpdateFileUrl ..
 type UpdateFileUrl struct {
 	LinkID          string        `json:"linkID" binding:"required"`
 	FileID          int64         `json:"fileID" binding:"required"`
@@ -34,6 +34,7 @@ type PublicFileUrlRow struct {
 	PasswordInfo   *PassWordInfo
 	EnableDownload bool
 	CreatedAt      int64
+	UpdatedAt      int64
 }
 
 type FileUrl struct {

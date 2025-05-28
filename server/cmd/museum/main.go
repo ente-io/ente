@@ -440,6 +440,8 @@ func main() {
 	privateAPI.GET("/files/preview/:fileID", fileHandler.GetThumbnail)
 	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
 
+	privateAPI.POST("files/share-url", fileHandler.ShareUrl)
+
 	privateAPI.PUT("/files/data", fileHandler.PutFileData)
 	privateAPI.PUT("/files/video-data", fileHandler.PutVideoData)
 	privateAPI.POST("/files/data/status-diff", fileHandler.FileDataStatusDiff)
