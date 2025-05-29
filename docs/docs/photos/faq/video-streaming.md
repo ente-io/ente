@@ -16,7 +16,7 @@ description:
 #### On mobile
 
 - Open Settings -> General -> Advanced
-- Switch on the toggle for `Video streaming`
+- Enable the toggle for `Streamable videos`
 
 #### On desktop
 
