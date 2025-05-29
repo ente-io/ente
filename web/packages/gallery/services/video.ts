@@ -969,7 +969,9 @@ const processQueueItem = async ({
         uploadItem;
     if (!sourceVideo) {
         try {
-            sourceVideo = (await downloadManager.fileStream(file))!;
+            sourceVideo = (await downloadManager.fileStream(file, {
+                background: true,
+            }))!;
         } catch (e) {
             if (!isNetworkDownloadError(e)) await markFailedVideoFile(file);
             throw e;
