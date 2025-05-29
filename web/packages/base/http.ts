@@ -211,7 +211,7 @@ export const retryAsyncOperation = async <T>(
     const { retryProfile, abortIfNeeded } = opts ?? {};
     const waitTimeBeforeNextTry =
         retryProfile == "background"
-            ? [5000, 25000, 120000]
+            ? [10000, 30000, 120000]
             : [2000, 5000, 10000];
 
     while (true) {
