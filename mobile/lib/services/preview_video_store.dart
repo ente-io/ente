@@ -31,6 +31,7 @@ import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/file_data.dart";
+import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -121,7 +122,10 @@ class PreviewVideoStore {
     EnteFile enteFile, [
     bool forceUpload = false,
   ]) async {
-    if (!isVideoStreamingEnabled) {
+    if (!isVideoStreamingEnabled || MLService.instance.isRunningML) {
+      _logger.info(
+        "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or MLRunning (${MLService.instance.isRunningML})",
+      );
       clearQueue();
       return;
     }
