@@ -289,6 +289,8 @@ extension SectionTypeExtensions on SectionType {
         return [Bus.instance.on<LocationTagUpdatedEvent>()];
       case SectionType.magic:
         return [Bus.instance.on<MagicCacheUpdatedEvent>()];
+      case SectionType.contacts:
+        return [Bus.instance.on<PeopleChangedEvent>()];
       default:
         return [];
     }
