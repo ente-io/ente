@@ -305,7 +305,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           unpinned.add(collection);
         }
       }
-      return pinned + unpinned + (uncategorized != null ? [uncategorized] : []);
+      return (uncategorized != null ? [uncategorized] + pinned + unpinned : []);
     }
   }
 
