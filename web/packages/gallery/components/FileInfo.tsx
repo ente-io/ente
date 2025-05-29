@@ -41,7 +41,6 @@ import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import {
     SidebarDrawer,
     SidebarDrawerTitlebar,
-    SidebarDrawerTitlebarClose,
 } from "ente-base/components/mui/SidebarDrawer";
 import { SingleInputForm } from "ente-base/components/SingleInputForm";
 import { EllipsizedTypography } from "ente-base/components/Typography";
@@ -267,7 +266,11 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     return (
         <FileInfoSidebar {...{ open, onClose }}>
-            <SidebarDrawerTitlebarClose {...{ onClose }} title={t("info")} />
+            <SidebarDrawerTitlebar
+                onClose={onClose}
+                onRootClose={onClose}
+                title={t("info")}
+            />
             <Stack sx={{ pt: 1, pb: 3, gap: "20px" }}>
                 <Caption
                     {...{
