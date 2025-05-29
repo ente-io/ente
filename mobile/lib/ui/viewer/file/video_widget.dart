@@ -58,8 +58,8 @@ class _VideoWidgetState extends State<VideoWidget> {
       });
     });
     if (widget.file.isUploaded) {
-      isPreviewLoadable = FileDataService.instance.previewIds
-          .containsKey(widget.file.uploadedFileID);
+      isPreviewLoadable =
+          fileDataService.previewIds.containsKey(widget.file.uploadedFileID);
       if (!widget.file.isOwner) {
         // For shared video, we need to on-demand check if the file is streamable
         // and if not, we need to set isPreviewLoadable to false

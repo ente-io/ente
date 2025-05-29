@@ -179,7 +179,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ),
       const FileDetailsDivider(),
       if (widget.file.uploadedFileID != null &&
-          (FileDataService.instance.previewIds
+          (fileDataService.previewIds
               .containsKey(widget.file.uploadedFileID))) ...[
         ValueListenableBuilder(
           valueListenable: _exifNotifier,

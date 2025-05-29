@@ -127,7 +127,7 @@ class RemoteSyncService {
         await syncDeviceCollectionFilesForUpload();
       }
 
-      FileDataService.instance.syncFDStatus().then((_) {
+      fileDataService.syncFDStatus().then((_) {
         PreviewVideoStore.instance.queueFiles();
       }).ignore();
       final filesToBeUploaded = await _getFilesToBeUploaded();

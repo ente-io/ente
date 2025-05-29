@@ -29,6 +29,7 @@ import "package:photos/models/file/file_type.dart";
 import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/ui/notification/toast.dart";
@@ -85,7 +86,7 @@ class PreviewVideoStore {
     Bus.instance.fire(VideoStreamingChanged());
 
     if (isVideoStreamingEnabled) {
-      await FileDataService.instance.syncFDStatus();
+      await fileDataService.syncFDStatus();
       _putFilesForPreviewCreation().ignore();
     } else {
       clearQueue();
@@ -105,8 +106,7 @@ class PreviewVideoStore {
 
   Future<bool> isSharedFileStreamble(EnteFile file) async {
     try {
-      if (FileDataService.instance.previewIds
-          .containsKey(file.uploadedFileID)) {
+      if (fileDataService.previewIds.containsKey(file.uploadedFileID)) {
         return true;
       }
       await _getPreviewUrl(file);
@@ -349,7 +349,7 @@ class PreviewVideoStore {
 
       if (error == null) {
         // update previewIds
-        FileDataService.instance.appendPreview(
+        fileDataService.appendPreview(
           enteFile.uploadedFileID!,
           objectId!,
           objectSize!,
@@ -526,7 +526,7 @@ class PreviewVideoStore {
     try {
       late final String objectID;
       final PreviewInfo? previewInfo =
-          FileDataService.instance.previewIds[file.uploadedFileID!];
+          fileDataService.previewIds[file.uploadedFileID!];
       bool shouldAppendPreview = false;
       (String, String)? previewURLResult;
       if (previewInfo == null) {
@@ -628,7 +628,7 @@ class PreviewVideoStore {
         durationInSeconds: parseDurationFromHLS(finalPlaylist),
       );
       if (shouldAppendPreview) {
-        FileDataService.instance.appendPreview(
+        fileDataService.appendPreview(
           file.uploadedFileID!,
           objectID,
           size!,
@@ -765,7 +765,7 @@ class PreviewVideoStore {
       userID: Configuration.instance.getUserID()!,
     );
 
-    final previewIds = FileDataService.instance.previewIds;
+    final previewIds = fileDataService.previewIds;
     final allFiles = files
         .where((file) => previewIds[file.uploadedFileID] == null)
         .sorted((a, b) {

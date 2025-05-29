@@ -237,7 +237,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     FavoritesService.instance.initFav().ignore();
     LocalFileUpdateService.instance.init(preferences);
     SearchService.instance.init();
-    FileDataService.instance.init(preferences);
 
     _logger.info("FileUploader init $tlog");
     await FileUploader.instance.init(preferences, isBackground);

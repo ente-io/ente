@@ -205,7 +205,7 @@ Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(
       pendingIndex[instruction.file.uploadedFileID!] = instruction;
     }
     _logger.info("fetching embeddings for ${ids.length} files");
-    final res = await FileDataService.instance.getFilesData(ids);
+    final res = await fileDataService.getFilesData(ids);
     _logger.info("embeddingResponse ${res.debugLog()}");
     final List<Face> faces = [];
     final List<ClipEmbedding> clipEmbeddings = [];

@@ -119,7 +119,7 @@ class MLService {
   }
 
   Future<void> sync() async {
-    await FileDataService.instance.syncFDStatus();
+    await fileDataService.syncFDStatus();
     await faceRecognitionService.syncPersonFeedback();
   }
 
@@ -497,7 +497,7 @@ class MLService {
         );
       }
       // Storing results on remote
-      await FileDataService.instance.putFileData(
+      await fileDataService.putFileData(
         instruction.file,
         dataEntity,
       );

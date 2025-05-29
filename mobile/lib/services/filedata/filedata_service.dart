@@ -1,9 +1,9 @@
 import "dart:async";
 
 import "package:computer/computer.dart";
+import "package:dio/dio.dart";
 import "package:flutter/foundation.dart" show Uint8List;
 import "package:logging/logging.dart";
-import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
@@ -16,17 +16,15 @@ import "package:photos/utils/gzip.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class FileDataService {
-  FileDataService._privateConstructor();
-
   static final Computer _computer = Computer.shared();
-  static final FileDataService instance = FileDataService._privateConstructor();
   final _logger = Logger("FileDataService");
-  final _dio = NetworkClient.instance.enteDio;
-  late final SharedPreferences _prefs;
-  Map<int, PreviewInfo> previewIds = {};
+  final Dio _dio;
+  final SharedPreferences _prefs;
+  late Map<int, PreviewInfo> previewIds;
 
-  void init(SharedPreferences prefs) {
-    _prefs = prefs;
+  FileDataService(this._prefs, this._dio) {
+    _logger.info("FileDataService constructor called");
+    previewIds = <int, PreviewInfo>{};
   }
 
   /// Used to not sync preview ids everytime a chunking and preview
@@ -151,6 +149,9 @@ class FileDataService {
         previewIds = await MLDataDB.instance.getFileIDsVidPreview();
       } while (hasMoreData);
     } catch (e) {
+      if (previewIds.isEmpty) {
+        previewIds = await MLDataDB.instance.getFileIDsVidPreview();
+      }
       _logger.severe("Failed to syncDiff", e);
       rethrow;
     }

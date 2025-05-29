@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/theme/colors.dart";
 
@@ -37,8 +38,7 @@ class _VideoStreamChangeWidgetState extends State<VideoStreamChangeWidget> {
   @override
   Widget build(BuildContext context) {
     final bool isPreviewAvailable = widget.file.uploadedFileID != null &&
-        (FileDataService.instance.previewIds
-            .containsKey(widget.file.uploadedFileID));
+        (fileDataService.previewIds.containsKey(widget.file.uploadedFileID));
     if (!isPreviewAvailable) {
       return const SizedBox();
     }
