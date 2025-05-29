@@ -1,4 +1,9 @@
-import { Stack, TextField, type TextFieldProps } from "@mui/material";
+import {
+    Stack,
+    TextField,
+    type ButtonProps,
+    type TextFieldProps,
+} from "@mui/material";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import log from "ente-base/log";
@@ -20,6 +25,12 @@ export type SingleInputFormProps = Pick<
      * Title for the submit button.
      */
     submitButtonTitle: string;
+    /**
+     * Color of the submit button.
+     *
+     * Default: "primary".
+     */
+    submitButtonColor?: ButtonProps["color"];
     /**
      * Cancellation handler.
      *
@@ -74,6 +85,7 @@ export type SingleInputFormProps = Pick<
 export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     initialValue,
     submitButtonTitle,
+    submitButtonColor,
     onCancel,
     onSubmit,
     ...rest
@@ -101,9 +113,9 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     const submitButton = (
         <LoadingButton
             fullWidth
-            color="primary"
             type="submit"
             loading={formik.isSubmitting}
+            color={submitButtonColor ?? "primary"}
         >
             {submitButtonTitle}
         </LoadingButton>
