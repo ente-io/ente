@@ -682,5 +682,5 @@
     "share_favorites": "Compartilhar favoritos",
     "person_favorites": "Favoritos de {{name}}",
     "shared_favorites": "Favoritos compartilhados",
-    "added_by_name": ""
+    "added_by_name": "Adicionado por {{name}}"
 }
