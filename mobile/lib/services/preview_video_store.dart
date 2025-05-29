@@ -46,7 +46,7 @@ class PreviewVideoStore {
   LinkedHashMap<int, EnteFile> fileQueue = LinkedHashMap();
   Set<int>? _failureFiles;
 
-  bool _initSuccess = false;
+  bool _hasQueuedFile = false;
 
   PreviewVideoStore._privateConstructor();
 
@@ -95,6 +95,7 @@ class PreviewVideoStore {
   void clearQueue() {
     fileQueue.clear();
     _items.clear();
+    _hasQueuedFile = false;
   }
 
   DateTime? get videoStreamingCutoff {
@@ -736,7 +737,7 @@ class PreviewVideoStore {
 
     final cutoff = videoStreamingCutoff;
     if (cutoff == null) return;
-    if (updateInit) _initSuccess = true;
+    if (updateInit) _hasQueuedFile = true;
 
     Map<int, String> failureFiles = {};
     try {
@@ -813,9 +814,9 @@ class PreviewVideoStore {
   }
 
   void queueFiles() {
-    if (!_initSuccess) {
+    if (!_hasQueuedFile) {
       _putFilesForPreviewCreation(true).catchError((_) {
-        _initSuccess = false;
+        _hasQueuedFile = false;
       });
     }
   }
