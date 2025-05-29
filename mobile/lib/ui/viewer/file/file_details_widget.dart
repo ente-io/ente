@@ -180,8 +180,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       const FileDetailsDivider(),
       if (widget.file.uploadedFileID != null &&
           (FileDataService.instance.previewIds
-                  ?.containsKey(widget.file.uploadedFileID) ??
-              false)) ...[
+              .containsKey(widget.file.uploadedFileID))) ...[
         ValueListenableBuilder(
           valueListenable: _exifNotifier,
           builder: (context, _, __) => PreviewPropertiesItemWidget(

@@ -23,7 +23,7 @@ class FileDataService {
   final _logger = Logger("FileDataService");
   final _dio = NetworkClient.instance.enteDio;
   late final SharedPreferences _prefs;
-  Map<int, PreviewInfo>? previewIds;
+  Map<int, PreviewInfo> previewIds = {};
 
   void init(SharedPreferences prefs) {
     _prefs = prefs;
@@ -33,9 +33,8 @@ class FileDataService {
   /// upload is successful, instead update the local copy of those
   /// preview ids
   void appendPreview(int id, String objectId, int objectSize) {
-    if (previewIds?.containsKey(id) ?? false) return;
-    previewIds ??= {};
-    previewIds?[id] = PreviewInfo(
+    if (previewIds.containsKey(id)) return;
+    previewIds[id] = PreviewInfo(
       objectId: objectId,
       objectSize: objectSize,
     );

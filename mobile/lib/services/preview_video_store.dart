@@ -106,8 +106,7 @@ class PreviewVideoStore {
   Future<bool> isSharedFileStreamble(EnteFile file) async {
     try {
       if (FileDataService.instance.previewIds
-              ?.containsKey(file.uploadedFileID) ??
-          false) {
+          .containsKey(file.uploadedFileID)) {
         return true;
       }
       await _getPreviewUrl(file);
@@ -527,7 +526,7 @@ class PreviewVideoStore {
     try {
       late final String objectID;
       final PreviewInfo? previewInfo =
-          FileDataService.instance.previewIds?[file.uploadedFileID!];
+          FileDataService.instance.previewIds[file.uploadedFileID!];
       bool shouldAppendPreview = false;
       (String, String)? previewURLResult;
       if (previewInfo == null) {
@@ -768,7 +767,7 @@ class PreviewVideoStore {
 
     final previewIds = FileDataService.instance.previewIds;
     final allFiles = files
-        .where((file) => previewIds?[file.uploadedFileID] == null)
+        .where((file) => previewIds[file.uploadedFileID] == null)
         .sorted((a, b) {
       // put higher duration videos last along with remote files
       final first = (a.localID == null ? 2 : 0) +
