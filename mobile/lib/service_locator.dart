@@ -32,8 +32,12 @@ class ServiceLocator {
 
   static final ServiceLocator instance = ServiceLocator._privateConstructor();
 
-  init(SharedPreferences prefs, Dio enteDio, Dio nonEnteDio,
-      PackageInfo packageInfo) {
+  init(
+    SharedPreferences prefs,
+    Dio enteDio,
+    Dio nonEnteDio,
+    PackageInfo packageInfo,
+  ) {
     this.prefs = prefs;
     this.enteDio = enteDio;
     this.nonEnteDio = nonEnteDio;
