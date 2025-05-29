@@ -270,14 +270,12 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       });
       return hiddenCollections;
     } else {
-      final bool includeUncategorized =
-          widget.actionType == CollectionActionType.restoreFiles;
       final List<Collection> collections =
           CollectionsService.instance.getCollectionsForUI(
         // in collections where user is a collaborator, only addTo and remove
         // action can to be performed
         includeCollab: widget.actionType == CollectionActionType.addFiles,
-        includeUncategorized: includeUncategorized,
+        includeUncategorized: true,
       );
       collections.sort((first, second) {
         return compareAsciiLowerCaseNatural(
@@ -293,8 +291,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         if (collection.isQuickLinkCollection() ||
             collection.type == CollectionType.favorites ||
             collection.type == CollectionType.uncategorized) {
-          if (collection.type == CollectionType.uncategorized &&
-              includeUncategorized) {
+          if (collection.type == CollectionType.uncategorized) {
             uncategorized = collection;
           }
           continue;
