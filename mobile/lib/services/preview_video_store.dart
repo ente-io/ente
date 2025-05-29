@@ -43,7 +43,7 @@ const _maxRetryCount = 3;
 
 class PreviewVideoStore {
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
-  LinkedHashSet<EnteFile> fileQueue = LinkedHashSet();
+  LinkedHashMap<int, EnteFile> fileQueue = LinkedHashMap();
   Set<int>? _failureFiles;
 
   bool _initSuccess = false;
@@ -137,14 +137,13 @@ class PreviewVideoStore {
 
       try {
         // check if playlist already exist
-        await getPlaylist(enteFile);
-        final _ = await _getPreviewUrl(enteFile);
-
-        if (ctx != null && ctx.mounted) {
-          showShortToast(ctx, 'Video preview already exists');
+        if (await getPlaylist(enteFile) != null) {
+          if (ctx != null && ctx.mounted) {
+            showShortToast(ctx, 'Video preview already exists');
+          }
+          removeFile = true;
+          return;
         }
-        removeFile = true;
-        return;
       } catch (e, s) {
         if (e is DioException && e.response?.statusCode == 404) {
           _logger.info("No preview found for $enteFile");
@@ -174,7 +173,7 @@ class PreviewVideoStore {
               : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
           collectionID: enteFile.collectionID ?? 0,
         );
-        fileQueue.add(enteFile);
+        fileQueue[enteFile.uploadedFileID!] = enteFile;
         return;
       }
 
@@ -380,8 +379,9 @@ class PreviewVideoStore {
       _logger.info("[chunk] Processing ${_items.length} items for streaming");
       // process next file
       if (fileQueue.isNotEmpty) {
-        final file = fileQueue.first;
-        fileQueue.remove(file);
+        final entry = fileQueue.entries.first;
+        final file = entry.value;
+        fileQueue.remove(entry.key);
         await chunkAndUploadVideo(ctx, file);
       }
     }
@@ -410,7 +410,7 @@ class PreviewVideoStore {
         retryCount: _items[enteFile.uploadedFileID!]!.retryCount + 1,
         collectionID: enteFile.collectionID ?? 0,
       );
-      fileQueue.add(enteFile);
+      fileQueue[enteFile.uploadedFileID!] = enteFile;
     } else {
       _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.failed,
@@ -824,7 +824,12 @@ class PreviewVideoStore {
 
     // take first file and put it for stream generation
     final file = allFiles.removeAt(0);
-    fileQueue.addAll(allFiles);
+    for (final enteFile in allFiles) {
+      if (_items.containsKey(enteFile.uploadedFileID!)) {
+        continue;
+      }
+      fileQueue[enteFile.uploadedFileID!] = enteFile;
+    }
     chunkAndUploadVideo(null, file).ignore();
   }
 
