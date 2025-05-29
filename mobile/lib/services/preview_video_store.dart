@@ -766,16 +766,8 @@ class PreviewVideoStore {
     );
 
     final previewIds = fileDataService.previewIds;
-    final allFiles = files
-        .where((file) => previewIds[file.uploadedFileID] == null)
-        .sorted((a, b) {
-      // put higher duration videos last along with remote files
-      final first = (a.localID == null ? 2 : 0) +
-          (a.duration == null || a.duration! >= 10 * 60 ? 1 : 0);
-      final second = (b.localID == null ? 2 : 0) +
-          (b.duration == null || b.duration! >= 10 * 60 ? 1 : 0);
-      return first.compareTo(second);
-    }).toList();
+    final allFiles =
+        files.where((file) => previewIds[file.uploadedFileID] == null).toList();
 
     // set all video status to in queue
     var n = allFiles.length, i = 0;
