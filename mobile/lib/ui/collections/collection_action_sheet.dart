@@ -26,7 +26,6 @@ enum CollectionActionType {
   restoreFiles,
   unHide,
   shareCollection,
-  collectPhotos,
   addToHiddenAlbum,
   moveToHiddenCollection,
 }
@@ -53,8 +52,6 @@ String _actionName(
     case CollectionActionType.shareCollection:
       text = S.of(context).share;
       break;
-    case CollectionActionType.collectPhotos:
-      text = S.of(context).share;
     case CollectionActionType.addToHiddenAlbum:
       text = S.of(context).addToHiddenAlbum;
     case CollectionActionType.moveToHiddenCollection:
@@ -313,8 +310,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   }
 
   void _removeIncomingCollections(List<Collection> items) {
-    if (widget.actionType == CollectionActionType.shareCollection ||
-        widget.actionType == CollectionActionType.collectPhotos) {
+    if (widget.actionType == CollectionActionType.shareCollection) {
       final ownerID = Configuration.instance.getUserID();
       items.removeWhere(
         (e) => !e.isOwner(ownerID!),

@@ -256,8 +256,6 @@ class AlbumVerticalListWidget extends StatelessWidget {
         return _restoreFilesToCollection(context, collection.id);
       case CollectionActionType.shareCollection:
         return _showShareCollectionPage(context, collection);
-      case CollectionActionType.collectPhotos:
-        return _createCollaborativeLink(context, collection);
       case CollectionActionType.moveToHiddenCollection:
         return _moveFilesToCollection(context, collection.id);
       case CollectionActionType.addToHiddenAlbum:
@@ -277,76 +275,6 @@ class AlbumVerticalListWidget extends StatelessWidget {
         hasVerifiedLock: hasVerifiedLock,
       ),
     );
-  }
-
-  Future<bool> _createCollaborativeLink(
-    BuildContext context,
-    Collection collection,
-  ) async {
-    final CollectionActions collectionActions =
-        CollectionActions(CollectionsService.instance);
-
-    if (collection.hasLink) {
-      if (collection.publicURLs.first.enableCollect) {
-        if (Configuration.instance.getUserID() == collection.owner.id) {
-          unawaited(
-            routeToPage(
-              context,
-              ShareCollectionPage(collection),
-            ),
-          );
-        }
-        showShortToast(
-          context,
-          S.of(context).thisAlbumAlreadyHDACollaborativeLink,
-        );
-        return Future.value(false);
-      } else {
-        try {
-          unawaited(
-            routeToPage(
-              context,
-              ShareCollectionPage(collection),
-            ),
-          );
-          // ignore: unawaited_futures
-          CollectionsService.instance
-              .updateShareUrl(collection, {'enableCollect': true}).then(
-            (value) => showShortToast(
-              context,
-              S.of(context).collaborativeLinkCreatedFor(collection.displayName),
-            ),
-          );
-          return true;
-        } catch (e) {
-          await showGenericErrorDialog(context: context, error: e);
-          return false;
-        }
-      }
-    }
-    final bool result = await collectionActions.enableUrl(
-      context,
-      collection,
-      enableCollect: true,
-    );
-    if (result) {
-      showShortToast(
-        context,
-        S.of(context).collaborativeLinkCreatedFor(collection.displayName),
-      );
-      if (Configuration.instance.getUserID() == collection.owner.id) {
-        unawaited(
-          routeToPage(
-            context,
-            ShareCollectionPage(collection),
-          ),
-        );
-      } else {
-        await showGenericErrorDialog(context: context, error: result);
-        _logger.severe("Cannot share collections owned by others");
-      }
-    }
-    return result;
   }
 
   Future<bool> _showShareCollectionPage(
