@@ -132,7 +132,6 @@ class PreviewVideoStore {
         removeFile = true;
         return;
       }
-
       try {
         // check if playlist already exist
         if (await getPlaylist(enteFile) != null) {
@@ -151,7 +150,6 @@ class PreviewVideoStore {
           return;
         }
       }
-
       // elimination case for <=10 MB with H.264
       var (props, result, file) = await _checkFileForPreviewCreation(enteFile);
       if (result) {
@@ -684,20 +682,37 @@ class PreviewVideoStore {
   Future<(FFProbeProps?, bool, File?)> _checkFileForPreviewCreation(
     EnteFile enteFile,
   ) async {
-    final fileSize = enteFile.fileSize;
+    if ((enteFile.pubMagicMetadata?.sv ?? 0) == 1) {
+      _logger.info(
+        "Skip Preview due to sv=1 for  ${enteFile.displayName}",
+      );
+      return (null, true, null);
+    }
+    if (enteFile.fileSize == null || enteFile.duration == null) {
+      _logger.warning(
+        "Skip Preview due to misisng size/duration for ${enteFile.displayName}",
+      );
+      return (null, true, null);
+    }
+    final int size = enteFile.fileSize!;
+    final int duration = enteFile.duration!;
+    if (size >= 500 * 1024 * 1024 || duration > 60) {
+      _logger.info(
+        "Skip Preview due to size: $size or duration: $duration",
+      );
+      return (null, true, null);
+    }
     FFProbeProps? props;
     File? file;
     bool skipFile = false;
-
     try {
-      final isFileUnder10MB = fileSize != null && fileSize <= 10 * 1024 * 1024;
+      final isFileUnder10MB = size <= 10 * 1024 * 1024;
       if (isFileUnder10MB) {
         file = await getFile(enteFile, isOrigin: true);
         if (file != null) {
           props = await getVideoPropsAsync(file);
           final videoData = List.from(props?.propData?["streams"] ?? [])
               .firstWhereOrNull((e) => e["type"] == "video");
-
           final codec = videoData["codec_name"]?.toString().toLowerCase();
           skipFile = codec?.contains("h264") ?? false;
 
@@ -708,28 +723,6 @@ class PreviewVideoStore {
             return (props, skipFile, file);
           }
         }
-      }
-
-      int? size = enteFile.fileSize;
-      int? duration = enteFile.duration;
-
-      if (size == null) {
-        file = await getFile(enteFile, isOrigin: true);
-        size = file?.lengthSync();
-      }
-
-      if (duration == null) {
-        file ??= await getFile(enteFile, isOrigin: true);
-        props = await getVideoPropsAsync(file!);
-        duration = props?.duration?.inSeconds;
-      }
-
-      if ((size == null || duration == null) ||
-          (size >= 500 * 1024 * 1024 || duration > 60)) {
-        skipFile = true;
-        _logger.info(
-          "[init] Ignoring file ${enteFile.displayName} for preview due to size: $size and duration: $duration",
-        );
       }
     } catch (e, sT) {
       _logger.warning("Failed to check props", e, sT);
