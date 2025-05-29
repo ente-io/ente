@@ -21,7 +21,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/upload_locks_db.dart";
-import "package:photos/events/preview_updated_event.dart";
 import "package:photos/events/video_streaming_changed.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
@@ -44,7 +43,7 @@ const _maxRetryCount = 3;
 
 class PreviewVideoStore {
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
-  LinkedHashMap<int, PreviewItem> get previews => _items;
+  LinkedHashSet<EnteFile> fileQueue = LinkedHashSet();
   Set<int>? _failureFiles;
 
   bool _initSuccess = false;
@@ -58,7 +57,6 @@ class PreviewVideoStore {
   final cacheManager = DefaultCacheManager();
   final videoCacheManager = VideoCacheManager.instance;
 
-  LinkedHashSet<EnteFile> fileQueue = LinkedHashSet();
   int uploadingFileId = -1;
 
   final _dio = NetworkClient.instance.enteDio;
@@ -97,7 +95,6 @@ class PreviewVideoStore {
   void clearQueue() {
     fileQueue.clear();
     _items.clear();
-    Bus.instance.fire(PreviewUpdatedEvent(_items));
   }
 
   DateTime? get videoStreamingCutoff {
@@ -177,7 +174,6 @@ class PreviewVideoStore {
               : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
           collectionID: enteFile.collectionID ?? 0,
         );
-        Bus.instance.fire(PreviewUpdatedEvent(_items));
         fileQueue.add(enteFile);
         return;
       }
@@ -191,7 +187,6 @@ class PreviewVideoStore {
             forceUpload ? 0 : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
         collectionID: enteFile.collectionID ?? 0,
       );
-      Bus.instance.fire(PreviewUpdatedEvent(_items));
 
       // get file
       file ??= await getFile(enteFile, isOrigin: true);
@@ -299,7 +294,6 @@ class PreviewVideoStore {
             collectionID: enteFile.collectionID ?? 0,
             retryCount: _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
           );
-          Bus.instance.fire(PreviewUpdatedEvent(_items));
 
           _logger.info('Playlist Generated ${enteFile.displayName}');
 
@@ -371,17 +365,13 @@ class PreviewVideoStore {
         );
         _removeFromLocks(enteFile).ignore();
         Directory(prefix).delete(recursive: true).ignore();
-
-        Bus.instance.fire(PreviewUpdatedEvent(_items));
       }
     } finally {
       if (error != null) {
         _retryFile(enteFile, error);
-        Bus.instance.fire(PreviewUpdatedEvent(_items));
       } else if (removeFile) {
         _removeFile(enteFile);
         _removeFromLocks(enteFile).ignore();
-        Bus.instance.fire(PreviewUpdatedEvent(_items));
       }
       // reset uploading status if this was getting processed
       if (uploadingFileId == enteFile.uploadedFileID!) {
@@ -764,7 +754,7 @@ class PreviewVideoStore {
 
       // handle case when failures are already previewed
       for (final failure in _failureFiles!) {
-        if (previews.containsKey(failure)) {
+        if (_items.containsKey(failure)) {
           UploadLocksDB.instance.deleteStreamUploadErrorEntry(failure).ignore();
         }
       }
@@ -825,7 +815,6 @@ class PreviewVideoStore {
       i++;
     }
 
-    Bus.instance.fire(PreviewUpdatedEvent(_items));
     if (allFiles.isEmpty) {
       _logger.info("[init] No preview to cache");
       return;
