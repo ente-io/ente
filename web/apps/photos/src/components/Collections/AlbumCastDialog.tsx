@@ -7,6 +7,7 @@ import {
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { ut } from "ente-base/i18n";
 import log from "ente-base/log";
 import type { Collection } from "ente-media/collection";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
@@ -194,7 +195,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     </Stack>
                     <SingleInputForm
                         label={t("code")}
-                        placeholder={"123456"}
+                        placeholder={ut("123456")}
                         submitButtonTitle={t("pair_device_to_tv")}
                         submitButtonColor="accent"
                         onSubmit={onSubmit}
@@ -203,6 +204,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         variant="text"
                         fullWidth
                         onClick={() => setView("choose")}
+                        sx={{ mt: 1 }}
                     >
                         {t("go_back")}
                     </FocusVisibleButton>

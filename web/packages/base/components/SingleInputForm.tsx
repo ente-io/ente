@@ -11,8 +11,6 @@ import { useFormik } from "formik";
 import { t } from "i18next";
 import React from "react";
 
-export type SingleInputFormShowError = (message: string) => void;
-
 export type SingleInputFormProps = Pick<
     TextFieldProps,
     "label" | "placeholder" | "autoComplete" | "autoFocus" | "slotProps"
@@ -64,10 +62,10 @@ export type SingleInputFormProps = Pick<
      * {@link showError} will get overwritten by the generic error message.
      */
     onSubmit:
-        | ((name: string, showError: SingleInputFormShowError) => void)
+        | ((name: string, showError: (message: string) => void) => void)
         | ((
               name: string,
-              showError: SingleInputFormShowError,
+              showError: (message: string) => void,
           ) => Promise<void>);
 };
 
