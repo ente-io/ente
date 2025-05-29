@@ -818,10 +818,12 @@ class PreviewVideoStore {
   }
 
   void queueFiles() {
-    if (!_hasQueuedFile) {
-      _putFilesForPreviewCreation(true).catchError((_) {
-        _hasQueuedFile = false;
-      });
-    }
+    Future.delayed(const Duration(seconds: 5), () {
+      if (!_hasQueuedFile) {
+        _putFilesForPreviewCreation(true).catchError((_) {
+          _hasQueuedFile = false;
+        });
+      }
+    });
   }
 }
