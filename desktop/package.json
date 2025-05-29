@@ -49,7 +49,7 @@
         "ajv": "^8.17.1",
         "concurrently": "^9.1.2",
         "cross-env": "^7.0.3",
-        "electron": "^36.3.1",
+        "electron": "^36.3.2",
         "electron-builder": "^26.0.14",
         "eslint": "^9",
         "prettier": "3.5.3",
