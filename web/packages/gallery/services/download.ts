@@ -678,7 +678,10 @@ const photos_downloadThumbnail = async (file: EnteFile) => {
     return new Uint8Array(await res.arrayBuffer());
 };
 
-const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
+const photos_downloadFile = async (
+    file: EnteFile,
+    userInitiated: boolean,
+): Promise<Response> => {
     const customOrigin = await customAPIOrigin();
 
     // [Note: Passing credentials for self-hosted file fetches]
@@ -715,6 +718,14 @@ const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
     // 2. The proxy then does both the original steps: (a). Use the credentials
     //    to get the pre-signed URL, and (b) fetch that pre-signed URL and
     //    stream back the response.
+    //
+    // The faster proxy approach is used for interactive requests to reduce the
+    // latency for the user (e.g. when the user is waiting to see a full
+    // resolution file). It can be faster than a direct connection as the proxy
+    // is network-nearer to the user (See: [Note: Faster uploads via workers])
+    //
+    // For background processing (e.g., ML indexing, HLS generation), the direct
+    // S3 connection (as what'd happen when self hosting) gets used.
 
     const getFile = async () => {
         if (customOrigin) {
