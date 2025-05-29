@@ -30,7 +30,6 @@ import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
@@ -773,12 +772,8 @@ class PreviewVideoStore {
     var n = allFiles.length, i = 0;
     while (i < n) {
       final enteFile = allFiles[i];
-
-      // elimination case for <=10 MB with H.264
-      final (_, result, _) = await _checkFileForPreviewCreation(enteFile);
       final isFailure =
           _failureFiles?.contains(enteFile.uploadedFileID!) ?? false;
-
       if (isFailure) {
         _items[enteFile.uploadedFileID!] = PreviewItem(
           status: PreviewItemStatus.failed,
@@ -788,7 +783,7 @@ class PreviewVideoStore {
           error: failureFiles[enteFile.uploadedFileID!],
         );
       }
-      if (result || isFailure) {
+      if (isFailure) {
         _logger.info(
           "[init] Ignoring file ${enteFile.displayName} for preview",
         );
