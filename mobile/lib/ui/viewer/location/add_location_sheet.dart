@@ -129,8 +129,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           children: [
                             Expanded(
                               child: TextInputWidget(
-                                hintText: S.of(context).locationName,
-                                borderRadius: 2,
+                                hintText: S.of(context).locationName, 
                                 focusNode: _focusNode,
                                 submitNotifier: _submitNotifer,
                                 cancelNotifier: _cancelNotifier,
