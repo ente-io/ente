@@ -9,12 +9,24 @@ import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import log from "ente-base/log";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import React from "react";
+import React, { useCallback, useState } from "react";
+import { ShowHidePasswordInputAdornment } from "./mui/PasswordInputAdornment";
 
 export type SingleInputFormProps = Pick<
     TextFieldProps,
     "label" | "placeholder" | "autoComplete" | "autoFocus" | "slotProps"
 > & {
+    /**
+     * The type attribute of the HTML input element that will be used.
+     *
+     * Default is "text".
+     *
+     * In addition to changing the behaviour of the HTML input element, the
+     * {@link SingleInputForm} component also has special casing for type
+     * "password", wherein it'll show an adornment at the end of the text field
+     * allowing the user to show or hide the password.
+     */
+    type?: TextFieldProps["type"];
     /**
      * The initial value, if any, to prefill in the input.
      */
@@ -81,6 +93,7 @@ export type SingleInputFormProps = Pick<
  * as the helper text associated with the text field.
  */
 export const SingleInputForm: React.FC<SingleInputFormProps> = ({
+    type,
     initialValue,
     submitButtonTitle,
     submitButtonColor,
@@ -88,6 +101,13 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     onSubmit,
     ...rest
 }) => {
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleToggleShowHidePassword = useCallback(
+        () => setShowPassword((show) => !show),
+        [],
+    );
+
     const formik = useFormik({
         initialValues: { value: initialValue ?? "" },
         onSubmit: async (values, { setFieldError }) => {
@@ -131,12 +151,27 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 name="value"
                 value={formik.values.value}
                 onChange={formik.handleChange}
-                type="text"
+                type={type ?? "text"}
                 fullWidth
                 margin="normal"
                 disabled={formik.isSubmitting}
                 error={!!formik.errors.value}
                 helperText={formik.errors.value ?? " "}
+                slotProps={{
+                    input:
+                        type == "password"
+                            ? {
+                                  endAdornment: (
+                                      <ShowHidePasswordInputAdornment
+                                          showPassword={showPassword}
+                                          onToggle={
+                                              handleToggleShowHidePassword
+                                          }
+                                      />
+                                  ),
+                              }
+                            : {},
+                }}
                 {...rest}
             />
             {onCancel ? (
