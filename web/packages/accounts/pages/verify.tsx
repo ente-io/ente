@@ -29,12 +29,13 @@ import {
 } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
+import {
+    SingleInputForm,
+    type SingleInputFormProps,
+} from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import { clearSessionStorage } from "ente-base/session";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "ente-shared/components/SingleInputForm";
 import { ApiError } from "ente-shared/error";
 import localForage from "ente-shared/storage/localForage";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
@@ -77,7 +78,7 @@ const Page: React.FC = () => {
         void main();
     }, [router]);
 
-    const onSubmit: SingleInputFormProps["callback"] = async (
+    const onSubmit: SingleInputFormProps["onSubmit"] = async (
         ott,
         setFieldError,
     ) => {
@@ -170,7 +171,7 @@ const Page: React.FC = () => {
                 }
             } else {
                 log.error("OTT verification failed", e);
-                setFieldError(t("generic_error_retry"));
+                throw e;
             }
         }
     };
@@ -236,11 +237,10 @@ const Page: React.FC = () => {
                 {t("check_inbox_hint")}
             </Typography>
             <SingleInputForm
-                fieldType="text"
                 autoComplete="one-time-code"
-                placeholder={t("verification_code")}
-                buttonText={t("verify")}
-                callback={onSubmit}
+                label={t("verification_code")}
+                submitButtonTitle={t("verify")}
+                onSubmit={onSubmit}
             />
 
             <AccountsPageFooter>
