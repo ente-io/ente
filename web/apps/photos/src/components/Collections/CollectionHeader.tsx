@@ -15,7 +15,6 @@ import UnarchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Menu, Stack, Tooltip } from "@mui/material";
-import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import { assertionFailed } from "ente-base/assert";
 import { SpacedRow } from "ente-base/components/containers";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
@@ -71,7 +70,6 @@ interface CollectionHeaderProps {
     isActiveCollectionDownloadInProgress: () => boolean;
     onCollectionShare: () => void;
     onCollectionCast: () => void;
-    setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
 }
 

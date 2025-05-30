@@ -3,9 +3,6 @@ import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
-import CollectionNamer, {
-    CollectionNamerAttributes,
-} from "components/Collections/CollectionNamer";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { TimeStampListItem } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
@@ -194,9 +191,6 @@ const Page: React.FC = () => {
         context: { mode: "albums", collectionID: ALL_SECTION },
     });
     const [blockingLoad, setBlockingLoad] = useState(false);
-    const [collectionNamerAttributes, setCollectionNamerAttributes] =
-        useState<CollectionNamerAttributes>(null);
-    const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
         [],
@@ -382,10 +376,6 @@ const Page: React.FC = () => {
     }, [user, normalCollections, familyData]);
 
     useEffect(() => {
-        collectionNamerAttributes && setCollectionNamerView(true);
-    }, [collectionNamerAttributes]);
-
-    useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
             return;
         }
@@ -461,12 +451,12 @@ const Page: React.FC = () => {
             // - Any of the modals are open.
             uploadTypeSelectorView ||
             openCollectionSelector ||
-            collectionNamerView ||
             sidebarVisibilityProps.open ||
             planSelectorVisibilityProps.open ||
             fixCreationTimeVisibilityProps.open ||
             exportVisibilityProps.open ||
             authenticateUserVisibilityProps.open ||
+            albumNameInputVisibilityProps.open ||
             isFileViewerOpen
         ) {
             return;
@@ -932,11 +922,6 @@ const Page: React.FC = () => {
                     {...planSelectorVisibilityProps}
                     setLoading={(v) => setBlockingLoad(v)}
                 />
-                <CollectionNamer
-                    show={collectionNamerView}
-                    onHide={setCollectionNamerView.bind(null, false)}
-                    attributes={collectionNamerAttributes}
-                />
                 <CollectionSelector
                     open={openCollectionSelector}
                     onClose={handleCloseCollectionSelector}
@@ -1033,7 +1018,6 @@ const Page: React.FC = () => {
                         activeCollection,
                         activeCollectionID,
                         activePerson,
-                        setCollectionNamerAttributes,
                         setPhotoListHeader,
                         setFilesDownloadProgressAttributesCreator,
                         filesDownloadProgressAttributesList,
@@ -1064,7 +1048,6 @@ const Page: React.FC = () => {
                     onOpenCollectionSelector={handleOpenCollectionSelector}
                     onCloseCollectionSelector={handleCloseCollectionSelector}
                     setLoading={setBlockingLoad}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
                     onUploadFile={(file) =>
                         dispatch({ type: "uploadNormalFile", file })

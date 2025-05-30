@@ -76,7 +76,6 @@ import watcher from "services/watch";
 import { SetLoading } from "types/gallery";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { SetCollectionNamerAttributes } from "./Collections/CollectionNamer";
 import { UploadProgress } from "./UploadProgress";
 
 interface UploadProps {
@@ -92,7 +91,6 @@ interface UploadProps {
      * Close the collection selector if it is open.
      */
     onCloseCollectionSelector?: () => void;
-    setCollectionNamerAttributes?: SetCollectionNamerAttributes;
     setLoading: SetLoading;
     setShouldDisableDropzone: (value: boolean) => void;
     showCollectionSelector?: () => void;
