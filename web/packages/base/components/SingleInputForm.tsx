@@ -66,18 +66,18 @@ export type SingleInputFormProps = Pick<
      *
      * @param name The current value of the text input.
      *
-     * @param showError A function that can be called to set the error message
+     * @param setFieldError A function that can be called to set the error message
      * shown below the text input if submission fails.
      *
-     * Note that if {@link showError} is called, then the {@link onSubmit}
+     * Note that if {@link setFieldError} is called, then the {@link onSubmit}
      * function should not throw, otherwise the error message shown by
-     * {@link showError} will get overwritten by the generic error message.
+     * {@link setFieldError} will get overwritten by the generic error message.
      */
     onSubmit:
-        | ((name: string, showError: (message: string) => void) => void)
+        | ((name: string, setFieldError: (message: string) => void) => void)
         | ((
               name: string,
-              showError: (message: string) => void,
+              setFieldError: (message: string) => void,
           ) => Promise<void>);
 };
 
@@ -112,18 +112,18 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
         initialValues: { value: initialValue ?? "" },
         onSubmit: async (values, { setFieldError }) => {
             const value = values.value;
-            const showError = (message: string) =>
+            const setValueFieldError = (message: string) =>
                 setFieldError("value", message);
 
             if (!value) {
-                showError(t("required"));
+                setValueFieldError(t("required"));
                 return;
             }
             try {
-                await onSubmit(value, showError);
+                await onSubmit(value, setValueFieldError);
             } catch (e) {
                 log.error(`Failed to submit input ${value}`, e);
-                showError(t("generic_error"));
+                setValueFieldError(t("generic_error"));
             }
         },
     });

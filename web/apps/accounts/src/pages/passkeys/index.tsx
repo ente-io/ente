@@ -154,11 +154,11 @@ export const AddPasskeyForm: React.FC<AddPasskeyFormProps> = ({
         initialValues: { value: "" },
         onSubmit: async (values, { setFieldError, resetForm }) => {
             const value = values.value;
-            const showError = (message: string) =>
+            const setValueFieldError = (message: string) =>
                 setFieldError("value", message);
 
             if (!value) {
-                showError(t("required"));
+                setValueFieldError(t("required"));
                 return;
             }
 
@@ -173,7 +173,7 @@ export const AddPasskeyForm: React.FC<AddPasskeyFormProps> = ({
                 // add passkey text field. The browser is expected to already have
                 // shown an error dialog to the user.
                 if (!(e instanceof Error && e.name == "NotAllowedError")) {
-                    showError(t("passkey_add_failed"));
+                    setValueFieldError(t("passkey_add_failed"));
                 }
                 return;
             }
