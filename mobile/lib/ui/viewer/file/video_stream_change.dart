@@ -1,13 +1,7 @@
-import "dart:async";
-
 import "package:flutter/material.dart";
-import "package:photos/core/event_bus.dart";
-import "package:photos/events/preview_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/preview/preview_item.dart";
-import "package:photos/services/filedata/filedata_service.dart";
-import "package:photos/services/preview_video_store.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 
 class VideoStreamChangeWidget extends StatefulWidget {
@@ -30,36 +24,20 @@ class VideoStreamChangeWidget extends StatefulWidget {
 }
 
 class _VideoStreamChangeWidgetState extends State<VideoStreamChangeWidget> {
-  StreamSubscription? previewSubscription;
-  late PreviewItem? preview =
-      PreviewVideoStore.instance.previews[widget.file.uploadedFileID];
-
   @override
   void initState() {
     super.initState();
-    previewSubscription =
-        Bus.instance.on<PreviewUpdatedEvent>().listen((event) {
-      final newPreview = event.items[widget.file.uploadedFileID];
-      if (newPreview != preview) {
-        setState(() {
-          preview = event.items[widget.file.uploadedFileID];
-        });
-      }
-    });
   }
 
   @override
   void dispose() {
-    previewSubscription?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final bool isPreviewAvailable = widget.file.uploadedFileID != null &&
-        (FileDataService.instance.previewIds
-                ?.containsKey(widget.file.uploadedFileID) ??
-            false);
+        (fileDataService.previewIds.containsKey(widget.file.uploadedFileID));
     if (!isPreviewAvailable) {
       return const SizedBox();
     }

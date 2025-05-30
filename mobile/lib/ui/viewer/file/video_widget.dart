@@ -11,7 +11,6 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/preview_video_store.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -58,9 +57,8 @@ class _VideoWidgetState extends State<VideoWidget> {
       });
     });
     if (widget.file.isUploaded) {
-      isPreviewLoadable = FileDataService.instance.previewIds
-              ?.containsKey(widget.file.uploadedFileID) ??
-          false;
+      isPreviewLoadable =
+          fileDataService.previewIds.containsKey(widget.file.uploadedFileID);
       if (!widget.file.isOwner) {
         // For shared video, we need to on-demand check if the file is streamable
         // and if not, we need to set isPreviewLoadable to false

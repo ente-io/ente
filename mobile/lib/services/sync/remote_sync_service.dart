@@ -25,7 +25,6 @@ import 'package:photos/models/upload_strategy.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
@@ -127,7 +126,7 @@ class RemoteSyncService {
         await syncDeviceCollectionFilesForUpload();
       }
 
-      FileDataService.instance.syncFDStatus().then((_) {
+      fileDataService.syncFDStatus().then((_) {
         PreviewVideoStore.instance.queueFiles();
       }).ignore();
       final filesToBeUploaded = await _getFilesToBeUploaded();
