@@ -18,6 +18,7 @@ import { SpacedRow } from "ente-base/components/containers";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { RowButton } from "ente-base/components/RowButton";
+import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import {
     useModalVisibility,
@@ -75,7 +76,6 @@ import watcher from "services/watch";
 import { SetLoading } from "types/gallery";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { SetCollectionNamerAttributes } from "./Collections/CollectionNamer";
 import { UploadProgress } from "./UploadProgress";
 
 interface UploadProps {
@@ -91,7 +91,6 @@ interface UploadProps {
      * Close the collection selector if it is open.
      */
     onCloseCollectionSelector?: () => void;
-    setCollectionNamerAttributes?: SetCollectionNamerAttributes;
     setLoading: SetLoading;
     setShouldDisableDropzone: (value: boolean) => void;
     showCollectionSelector?: () => void;
@@ -152,12 +151,17 @@ export const Upload: React.FC<UploadProps> = ({
         useState<SegregatedFinishedUploads>(new Map());
     const [percentComplete, setPercentComplete] = useState(0);
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
+    const [prefilledNewAlbumName, setPrefilledNewAlbumName] = useState("");
 
     const [openCollectionMappingChoice, setOpenCollectionMappingChoice] =
         useState(false);
     const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
         defaultImportSuggestion,
     );
+    const {
+        show: showNewAlbumNameInput,
+        props: newAlbumNameInputVisibilityProps,
+    } = useModalVisibility();
     const {
         show: showUploaderNameInput,
         props: uploaderNameInputVisibilityProps,
@@ -535,8 +539,10 @@ export const Upload: React.FC<UploadProps> = ({
             if (importSuggestion.hasNestedFolders) {
                 showNextModal = () => setOpenCollectionMappingChoice(true);
             } else {
-                showNextModal = () =>
-                    showCollectionCreateModal(importSuggestion.rootFolderName);
+                showNextModal = () => {
+                    setPrefilledNewAlbumName(importSuggestion.rootFolderName);
+                    showNewAlbumNameInput();
+                };
             }
 
             props.onOpenCollectionSelector({
@@ -761,15 +767,6 @@ export const Upload: React.FC<UploadProps> = ({
         uploadFilesToNewCollections("root", collectionName);
     };
 
-    const showCollectionCreateModal = (suggestedName: string) => {
-        props.setCollectionNamerAttributes({
-            title: t("new_album"),
-            buttonText: t("create"),
-            autoFilledName: suggestedName,
-            callback: uploadToSingleNewCollection,
-        });
-    };
-
     const cancelUploads = () => {
         uploadManager.cancelRunningUpload();
     };
@@ -858,6 +855,16 @@ export const Upload: React.FC<UploadProps> = ({
                 retryFailed={retryFailed}
                 finishedUploads={finishedUploads}
                 cancelUploads={cancelUploads}
+            />
+            <SingleInputDialog
+                {...newAlbumNameInputVisibilityProps}
+                title={t("new_album")}
+                label={t("album_name")}
+                autoFocus
+                initialValue={prefilledNewAlbumName}
+                submitButtonColor="accent"
+                submitButtonTitle={t("create")}
+                onSubmit={uploadToSingleNewCollection}
             />
             <UploaderNameInput
                 open={uploaderNameInputVisibilityProps.open}
