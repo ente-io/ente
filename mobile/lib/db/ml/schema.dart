@@ -132,7 +132,7 @@ const createFaceCacheTable = '''
 CREATE TABLE IF NOT EXISTS $faceCacheTable (
   $personOrClusterIdColumn TEXT NOT NULL UNIQUE,
   $faceIDColumn TEXT NOT NULL UNIQUE,
-  PRIMARY KEY ($personOrClusterIdColumn),
+  PRIMARY KEY ($personOrClusterIdColumn)
 );
 ''';
 
