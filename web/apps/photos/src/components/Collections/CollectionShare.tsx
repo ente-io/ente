@@ -57,6 +57,7 @@ import { avatarTextColor } from "ente-new/photos/services/avatar";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
+import { wait } from "ente-utils/promise";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -1648,6 +1649,13 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
         await enablePublicUrlPassword(passphrase);
         publicShareProp.passwordEnabled = true;
         onClose();
+        // The onClose above will close the dialog, but if we return immediately
+        // from this function, then the dialog will be temporarily rendered
+        // without the activity indicator on the button (before the entire
+        // dialog disappears). This gives a ungainly visual flash, so add a wait
+        // long enough so that the form's activity indicator persists longer
+        // than it'll take for the dialog to get closed.
+        return wait(1000 /* 1 second */);
     };
 
     const enablePublicUrlPassword = async (password: string) => {
