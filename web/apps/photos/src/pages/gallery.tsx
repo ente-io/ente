@@ -753,8 +753,12 @@ const Page: React.FC = () => {
     const handleAlbumNameSubmit = useCallback(
         async (name: string) => {
             const collection = await createAlbum(name);
-            await collectionOpsHelper(postCreateAlbumOp!)(collection);
-            setPostCreateAlbumOp(undefined);
+            setPostCreateAlbumOp((postCreateAlbumOp) => {
+                // collectionOpsHelper does its own progress and error
+                // reporting, defer to that.
+                void collectionOpsHelper(postCreateAlbumOp!)(collection);
+                return undefined;
+            });
         },
         [postCreateAlbumOp, collectionOpsHelper],
     );
