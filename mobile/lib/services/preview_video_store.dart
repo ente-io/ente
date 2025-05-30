@@ -45,6 +45,7 @@ const _maxRetryCount = 3;
 class PreviewVideoStore {
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
   LinkedHashMap<int, EnteFile> fileQueue = LinkedHashMap();
+  final int _minPreviewSizeForCache = 50 * 1024 * 1024; // 50 MB
   Set<int>? _failureFiles;
 
   bool _hasQueuedFile = false;
@@ -600,12 +601,14 @@ class PreviewVideoStore {
           ?.file;
       if (videoFile == null) {
         previewURLResult = previewURLResult ?? await _getPreviewUrl(file);
-        unawaited(
-          videoCacheManager.downloadFile(
-            previewURLResult.$1,
-            key: _getVideoPreviewKey(objectID),
-          ),
-        );
+        if (size != null && size < _minPreviewSizeForCache) {
+          unawaited(
+            videoCacheManager.downloadFile(
+              previewURLResult.$1,
+              key: _getVideoPreviewKey(objectID),
+            ),
+          );
+        }
         finalPlaylist =
             finalPlaylist.replaceAll('\noutput.ts', '\n${previewURLResult.$1}');
       } else {
