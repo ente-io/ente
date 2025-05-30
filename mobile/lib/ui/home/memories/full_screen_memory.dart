@@ -4,17 +4,20 @@ import "dart:io";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/models/file/file_type.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
+import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
+import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
-import "package:step_progress_indicator/step_progress_indicator.dart";
+// import "package:step_progress_indicator/step_progress_indicator.dart";
 
 //There are two states of variables that FullScreenMemory depends on:
 //1. The list of memories
@@ -131,6 +134,8 @@ class FullScreenMemory extends StatefulWidget {
 class _FullScreenMemoryState extends State<FullScreenMemory> {
   PageController? _pageController;
   final _showTitle = ValueNotifier<bool>(true);
+  AnimationController? _progressAnimationController;
+  Duration duration = const Duration(seconds: 5);
 
   @override
   void initState() {
@@ -151,10 +156,49 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     super.dispose();
   }
 
+  void _toggleProgressAnimation(bool pause) {
+    if (_progressAnimationController != null) {
+      if (pause) {
+        _progressAnimationController!.stop();
+      } else {
+        _progressAnimationController!.forward();
+      }
+    }
+  }
+
+  void _resetProgressAnimation() {
+    if (_progressAnimationController != null) {
+      _progressAnimationController!.reset();
+      _progressAnimationController!.forward();
+    }
+  }
+
+  Future<Duration> _getVideoDuration() async {
+    final inheritedData = FullScreenMemoryData.of(context)!;
+    final currentIndex = inheritedData.indexNotifier.value;
+    final currentFile = inheritedData.memories[currentIndex].file;
+
+    if (currentFile.fileType == FileType.video) {
+      final file = await getFile(
+        inheritedData.memories[currentIndex].file,
+        isOrigin: true,
+      );
+      if (file == null) {
+        return const Duration(seconds: 5);
+      }
+      final props = await getVideoPropsAsync(file);
+      if (props != null && props.duration != null) {
+        return props.duration! + const Duration(seconds: 1);
+      }
+    }
+    return const Duration(seconds: 5);
+  }
+
   @override
   Widget build(BuildContext context) {
     final inheritedData = FullScreenMemoryData.of(context)!;
     final showStepProgressIndicator = inheritedData.memories.length < 60;
+
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
@@ -180,17 +224,42 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 showStepProgressIndicator
-                    ? StepProgressIndicator(
-                        totalSteps: inheritedData.memories.length,
-                        currentStep: value + 1,
-                        size: 2,
-                        selectedColor: Colors.white, //same for both themes
-                        unselectedColor: Colors.white.withOpacity(0.4),
+                    ? FutureBuilder<Duration>(
+                        future: _getVideoDuration(),
+                        builder: (context, snapshot) {
+                          final isLoading =
+                              snapshot.connectionState != ConnectionState.done;
+                          final duration =
+                              snapshot.data ?? const Duration(seconds: 5);
+
+                          return NewProgressIndicator(
+                            totalSteps: inheritedData.memories.length,
+                            currentIndex: value,
+                            selectedColor: Colors.white,
+                            unselectedColor: Colors.white.withOpacity(0.4),
+                            duration: duration,
+                            animationController: (controller) {
+                              _progressAnimationController = controller;
+                              if (!isLoading) {
+                                _progressAnimationController!.forward();
+                              }
+                            },
+                            onComplete: () {
+                              final currentIndex =
+                                  inheritedData.indexNotifier.value;
+                              if (currentIndex <
+                                  inheritedData.memories.length - 1) {
+                                _pageController!.nextPage(
+                                  duration: const Duration(milliseconds: 250),
+                                  curve: Curves.ease,
+                                );
+                              }
+                            },
+                          );
+                        },
                       )
                     : const SizedBox.shrink(),
-                const SizedBox(
-                  height: 10,
-                ),
+                const SizedBox(height: 10),
                 Row(
                   children: [
                     child!,
@@ -241,6 +310,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 preloadThumbnail(nextFile);
                 preloadFile(nextFile);
               }
+              final currentFile = inheritedData.memories[index].file;
+              final isVideo = currentFile.fileType == FileType.video;
               return GestureDetector(
                 onTapDown: (TapDownDetails details) {
                   final screenWidth = MediaQuery.of(context).size.width;
@@ -262,6 +333,16 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     }
                   }
                 },
+                onLongPress: () {
+                  if (!isVideo) {
+                    _toggleProgressAnimation(true);  
+                  }
+                },
+                onLongPressUp: () {
+                  if (!isVideo) {
+                    _toggleProgressAnimation(false); 
+                  }
+                },
                 child: FileWidget(
                   inheritedData.memories[index].file,
                   autoPlay: false,
@@ -269,10 +350,18 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   backgroundDecoration: const BoxDecoration(
                     color: Colors.transparent,
                   ),
+                  isFromMemories: true,
+                  playbackCallback: (isPlaying) {
+                    if (isPlaying) {
+                      _toggleProgressAnimation(false);
+                    } else {
+                      _toggleProgressAnimation(true);
+                    }
+                  },
                 ),
               );
             },
-            onPageChanged: (index) {
+            onPageChanged: (index) async {
               unawaited(
                 memoriesCacheService.markMemoryAsSeen(
                   inheritedData.memories[index],
@@ -280,6 +369,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 ),
               );
               inheritedData.indexNotifier.value = index;
+              _resetProgressAnimation();
             },
             itemCount: inheritedData.memories.length,
           ),
