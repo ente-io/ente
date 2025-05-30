@@ -428,7 +428,6 @@ class _RoundedPersonFaceWidget extends StatelessWidget {
                     child: personEntitiesWithThumbnailFile.thumbnailFile == null
                         ? const NoThumbnailWidget(addBorder: false)
                         : PersonFaceWidget(
-                            personEntitiesWithThumbnailFile.thumbnailFile!,
                             personId:
                                 personEntitiesWithThumbnailFile.person.remoteID,
                             useFullFile: true,

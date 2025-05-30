@@ -81,7 +81,6 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                             ),
                             child: files.isNotEmpty
                                 ? PersonFaceWidget(
-                                    files.first,
                                     clusterID: clusterID,
                                   )
                                 : const NoThumbnailWidget(
@@ -283,7 +282,6 @@ class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
                       ),
                       child: widget.files.isNotEmpty
                           ? PersonFaceWidget(
-                              widget.files.first,
                               clusterID: widget.clusterID,
                             )
                           : const NoThumbnailWidget(

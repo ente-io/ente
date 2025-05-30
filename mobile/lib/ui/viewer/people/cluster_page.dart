@@ -136,7 +136,6 @@ class _ClusterPageState extends State<ClusterPage> {
           ? PeopleBanner(
               type: PeopleBannerType.addName,
               faceWidget: PersonFaceWidget(
-                files.first,
                 clusterID: widget.clusterID,
               ),
               actionIcon: Icons.add_outlined,

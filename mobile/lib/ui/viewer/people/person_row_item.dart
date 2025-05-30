@@ -28,7 +28,7 @@ class PersonRowItem extends StatelessWidget {
           borderRadius: const BorderRadius.all(
             Radius.elliptical(16, 12),
           ),
-          child: PersonFaceWidget(personFile, personId: person.remoteID),
+          child: PersonFaceWidget(personId: person.remoteID),
         ),
       ),
       title: Text(person.data.name),
@@ -67,7 +67,7 @@ class PersonGridItem extends StatelessWidget {
                     borderRadius: BorderRadius.circular(80),
                   ),
                 ),
-                child: PersonFaceWidget(personFile, personId: person.remoteID),
+                child: PersonFaceWidget(personId: person.remoteID),
               ),
             ),
             const SizedBox(height: 4),

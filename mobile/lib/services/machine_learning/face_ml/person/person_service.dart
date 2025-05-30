@@ -500,6 +500,7 @@ class PersonService {
     }
   }
 
+  // TODO: lau-face: rework this method using new scores logic
   Future<EnteFile?> getThumbnailFileOfPerson(
     PersonEntity person,
   ) async {

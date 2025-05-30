@@ -7,14 +7,11 @@ import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
-import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/search/result/contact_result_page.dart";
@@ -149,7 +146,7 @@ class ContactRecommendation extends StatefulWidget {
 }
 
 class _ContactRecommendationState extends State<ContactRecommendation> {
-  Future<EnteFile?>? _mostRecentFileOfPerson;
+  bool _canUsePersonFaceWidget = true;
   late String? _personID;
   final _logger = Logger("_ContactRecommendationState");
 
@@ -157,16 +154,7 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
   void initState() {
     super.initState();
     _personID = widget.contactSearchResult.params[kPersonParamID];
-    if (_personID != null) {
-      _mostRecentFileOfPerson =
-          PersonService.instance.getPerson(_personID!).then((person) {
-        if (person == null) {
-          return null;
-        } else {
-          return PersonService.instance.getThumbnailFileOfPerson(person);
-        }
-      });
-    }
+    _canUsePersonFaceWidget = _personID != null;
   }
 
   @override
@@ -203,44 +191,17 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
                   child: SizedBox(
                     width: 67.75,
                     height: 67.75,
-                    child: _mostRecentFileOfPerson != null
-                        ? FutureBuilder(
-                            future: _mostRecentFileOfPerson,
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return PersonFaceWidget(
-                                  snapshot.data!,
-                                  personId: _personID,
-                                  onErrorCallback: () {
-                                    if (mounted) {
-                                      setState(() {
-                                        _mostRecentFileOfPerson = null;
-                                      });
-                                    }
-                                  },
-                                );
-                              } else if (snapshot.connectionState ==
-                                      ConnectionState.done &&
-                                  snapshot.data == null) {
-                                return FirstLetterUserAvatar(
-                                  User(
-                                    email: widget.contactSearchResult
-                                        .params[kContactEmail],
-                                  ),
-                                );
-                              } else if (snapshot.hasError) {
+                    child: _canUsePersonFaceWidget
+                        ? PersonFaceWidget(
+                            personId: _personID,
+                            onErrorCallback: () {
+                              if (mounted) {
                                 _logger.severe(
-                                  "Error loading personID",
-                                  snapshot.error,
+                                  "Failed to load face for person with ID: $_personID",
                                 );
-                                return FirstLetterUserAvatar(
-                                  User(
-                                    email: widget.contactSearchResult
-                                        .params[kContactEmail],
-                                  ),
-                                );
-                              } else {
-                                return const EnteLoadingWidget();
+                                setState(() {
+                                  _canUsePersonFaceWidget = false;
+                                });
                               }
                             },
                           )

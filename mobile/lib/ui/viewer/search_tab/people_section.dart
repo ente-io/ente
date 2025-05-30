@@ -333,7 +333,6 @@ class FaceSearchResult extends StatelessWidget {
   Widget build(BuildContext context) {
     final params = (searchResult as GenericSearchResult).params;
     return PersonFaceWidget(
-      searchResult.previewThumbnail()!,
       personId: params[kPersonParamID],
       clusterID: params[kClusterParamId],
       key: params.containsKey(kPersonWidgetKey)

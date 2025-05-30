@@ -59,7 +59,6 @@ class _ClusterBreakupPageState extends State<ClusterBreakupPage> {
                               Radius.elliptical(16, 12),
                             ),
                             child: PersonFaceWidget(
-                              files.first,
                               clusterID: clusterID,
                             ),
                           )

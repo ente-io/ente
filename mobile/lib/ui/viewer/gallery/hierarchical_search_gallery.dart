@@ -171,11 +171,8 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
                       ? PeopleBanner(
                           type: PeopleBannerType.addName,
                           faceWidget: PersonFaceWidget(
-                            _firstUnnamedAppliedFaceFilter!.faceFile,
                             clusterID:
                                 _firstUnnamedAppliedFaceFilter!.clusterId,
-                            thumbnailFallback: false,
-                            cannotTrustFile: true,
                           ),
                           actionIcon: Icons.add_outlined,
                           text: S.of(context).savePerson,
