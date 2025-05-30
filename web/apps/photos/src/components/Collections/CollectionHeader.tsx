@@ -23,6 +23,7 @@ import {
     OverflowMenu,
     OverflowMenuOption,
 } from "ente-base/components/OverflowMenu";
+import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import {
@@ -128,7 +129,6 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     setActiveCollectionID,
     onCollectionShare,
     onCollectionCast,
-    setCollectionNamerAttributes,
     setFilesDownloadProgressAttributesCreator,
     isActiveCollectionDownloadInProgress,
 }) => {
@@ -138,6 +138,8 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
+        useModalVisibility();
+    const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
 
     const { type: collectionSummaryType } = collectionSummary;
@@ -165,23 +167,15 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
         [showLoadingBar, hideLoadingBar, onGenericError, syncWithRemote],
     );
 
-    const showRenameCollectionModal = () => {
-        setCollectionNamerAttributes({
-            title: t("rename_album"),
-            buttonText: t("rename"),
-            autoFilledName: activeCollection.name,
-            callback: renameCollection,
-        });
-    };
-
-    const _renameCollection = async (newName: string) => {
-        if (activeCollection.name !== newName) {
-            await CollectionAPI.renameCollection(activeCollection, newName);
-        }
-    };
-
-    const renameCollection = (newName: string) =>
-        wrap(() => _renameCollection(newName))();
+    const renameCollection = useCallback(
+        async (newName: string) => {
+            if (activeCollection.name !== newName) {
+                await CollectionAPI.renameCollection(activeCollection, newName);
+                void syncWithRemote(false, true);
+            }
+        },
+        [activeCollection],
+    );
 
     const confirmDeleteCollection = () => {
         showMiniDialog({
@@ -403,7 +397,7 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
             menuOptions = [
                 <OverflowMenuOption
                     key="rename"
-                    onClick={showRenameCollectionModal}
+                    onClick={showAlbumNameInput}
                     startIcon={<EditIcon />}
                 >
                     {t("rename_album")}
@@ -516,6 +510,15 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 overFlowMenuIconRef={overFlowMenuIconRef}
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
+            />
+            <SingleInputDialog
+                {...albumNameInputVisibilityProps}
+                title={t("rename_album")}
+                label={t("enter_album_name")}
+                autoFocus
+                initialValue={activeCollection.name}
+                submitButtonTitle={t("rename")}
+                onSubmit={renameCollection}
             />
         </Box>
     );
