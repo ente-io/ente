@@ -122,19 +122,12 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
         final fileID = getFileIdFromFaceId<int>(fixedFaceID);
         final fileInDB = await FilesDB.instance.getAnyUploadedFile(fileID);
         if (fileInDB == null) {
-          if (personEntity?.data.avatarFaceID != null) {
-            await PersonService.instance.removeAvatar(personEntity!);
-            _logger.severe(
-              "Removed avatar for person ${widget.personId} as the file was not found in DB.",
-            );
-          } else {
-            _logger.severe(
-              "File with ID $fileID not found in DB, cannot get cover face.",
-            );
-            await checkRemoveCachedFaceIDForPersonOrClusterId(
-              personOrClusterId,
-            );
-          }
+          _logger.severe(
+            "File with ID $fileID not found in DB, cannot get cover face.",
+          );
+          await checkRemoveCachedFaceIDForPersonOrClusterId(
+            personOrClusterId,
+          );
         } else if (hiddenFileIDs.contains(fileInDB.uploadedFileID)) {
           _logger.info(
             "File with ID $fileID is hidden, skipping it for face crop.",

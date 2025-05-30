@@ -447,14 +447,6 @@ class PersonService {
     return updatedPerson;
   }
 
-  Future<PersonEntity> removeAvatar(PersonEntity p) async {
-    final person = (await getPerson(p.remoteID))!;
-    person.data.avatarFaceID = null;
-    await updatePerson(person);
-    await checkRemoveCachedFaceIDForPersonOrClusterId(p.remoteID);
-    return person;
-  }
-
   Future<PersonEntity> updateAttributes(
     String id, {
     String? name,
