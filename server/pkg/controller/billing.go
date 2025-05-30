@@ -5,8 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller/commonbilling"
 	"strconv"
+
+	"github.com/ente-io/museum/pkg/controller/commonbilling"
 
 	"github.com/ente-io/museum/pkg/repo/storagebonus"
 
@@ -292,6 +293,7 @@ func (c *BillingController) VerifySubscription(
 	if err != nil {
 		return ente.Subscription{}, stacktrace.Propagate(err, "")
 	}
+
 	log.Info("Replaced subscription")
 	newSubscription.ID = currentSubscription.ID
 	if paymentProvider == ente.PlayStore &&

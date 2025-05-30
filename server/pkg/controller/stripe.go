@@ -46,7 +46,18 @@ type StripeController struct {
 const BufferPeriodOnPaymentFailureInDays = 7
 
 // Return a new instance of StripeController
-func NewStripeController(plans ente.BillingPlansPerAccount, stripeClients ente.StripeClientPerAccount, billingRepo *repo.BillingRepository, fileRepo *repo.FileRepository, userRepo *repo.UserRepository, storageBonusRepo *storagebonus.Repository, discordController *discord.DiscordController, emailNotificationController *emailCtrl.EmailNotificationController, offerController *offer.OfferController, commonBillCtrl *commonbilling.Controller) *StripeController {
+func NewStripeController(
+	plans ente.BillingPlansPerAccount,
+	stripeClients ente.StripeClientPerAccount,
+	billingRepo *repo.BillingRepository,
+	fileRepo *repo.FileRepository,
+	userRepo *repo.UserRepository,
+	storageBonusRepo *storagebonus.Repository,
+	discordController *discord.DiscordController,
+	emailNotificationController *emailCtrl.EmailNotificationController,
+	offerController *offer.OfferController,
+	commonBillCtrl *commonbilling.Controller,
+) *StripeController {
 	return &StripeController{
 		StripeClients:          stripeClients,
 		BillingRepo:            billingRepo,
@@ -249,7 +260,7 @@ func (c *StripeController) handleCheckoutSessionCompleted(event stripe.Event, co
 			}()
 		}
 		if err != nil {
-			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
+			return ente.StripeEventLog{}, stacktrace.Propagate(err, "Failed to change subscription")
 		}
 		return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, nil
 	} else {
