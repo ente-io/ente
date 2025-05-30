@@ -1286,6 +1286,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     ];
   }
 
+  /// WARNING: Better to use the similarly named [putFaceIdCachedForPersonOrCluster]
+  /// method from face_thumbnail_cache instead!
   Future<void> putFaceIdCachedForPersonOrCluster(
     String personOrClusterId,
     String faceID,

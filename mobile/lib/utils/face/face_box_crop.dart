@@ -65,6 +65,17 @@ Future<String?> checkUsedFaceIDForPersonOrClusterId(
   return faceIDFromDB;
 }
 
+Future<void> putFaceIdCachedForPersonOrCluster(
+  String personOrClusterID,
+  String faceID,
+) async {
+  await MLDataDB.instance.putFaceIdCachedForPersonOrCluster(
+    personOrClusterID,
+    faceID,
+  );
+  _personOrClusterIdToCachedFaceID.put(personOrClusterID, faceID);
+}
+
 Future<void> _putCachedCropForFaceID(
   String faceID,
   Uint8List data, [
@@ -72,11 +83,7 @@ Future<void> _putCachedCropForFaceID(
 ]) async {
   _faceCropCache.put(faceID, data);
   if (personOrClusterID != null) {
-    await MLDataDB.instance.putFaceIdCachedForPersonOrCluster(
-      personOrClusterID,
-      faceID,
-    );
-    _personOrClusterIdToCachedFaceID.put(personOrClusterID, faceID);
+    await putFaceIdCachedForPersonOrCluster(personOrClusterID, faceID);
   }
 }
 

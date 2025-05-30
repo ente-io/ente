@@ -443,10 +443,7 @@ class PersonService {
       data: person.data.copyWith(avatarFaceId: face.faceID),
     );
     await updatePerson(updatedPerson);
-    await faceMLDataDB.putFaceIdCachedForPersonOrCluster(
-      p.remoteID,
-      face.faceID,
-    );
+    await putFaceIdCachedForPersonOrCluster(p.remoteID, face.faceID);
     return updatedPerson;
   }
 
