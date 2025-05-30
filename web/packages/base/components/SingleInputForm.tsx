@@ -26,7 +26,7 @@ export type SingleInputFormProps = Pick<
      * "password", wherein it'll show an adornment at the end of the text field
      * allowing the user to show or hide the password.
      */
-    type?: TextFieldProps["type"];
+    inputType?: TextFieldProps["type"];
     /**
      * The initial value, if any, to prefill in the input.
      */
@@ -93,7 +93,7 @@ export type SingleInputFormProps = Pick<
  * as the helper text associated with the text field.
  */
 export const SingleInputForm: React.FC<SingleInputFormProps> = ({
-    type,
+    inputType,
     initialValue,
     submitButtonTitle,
     submitButtonColor,
@@ -151,7 +151,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 name="value"
                 value={formik.values.value}
                 onChange={formik.handleChange}
-                type={type ?? "text"}
+                type={showPassword ? "text" : (inputType ?? "text")}
                 fullWidth
                 margin="normal"
                 disabled={formik.isSubmitting}
@@ -159,7 +159,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
                 helperText={formik.errors.value ?? " "}
                 slotProps={{
                     input:
-                        type == "password"
+                        inputType == "password"
                             ? {
                                   endAdornment: (
                                       <ShowHidePasswordInputAdornment
