@@ -230,9 +230,9 @@ const Page: React.FC = () => {
         filesDownloadProgressAttributesList,
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
-    const [postCreateAlbumOp, setPostCreateAlbumOp] = useState<
-        CollectionOp | undefined
-    >(undefined);
+    const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
+        undefined,
+    );
 
     const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
@@ -750,7 +750,7 @@ const Page: React.FC = () => {
                 return undefined;
             });
         },
-        [postCreateAlbumOp, collectionOpsHelper],
+        [collectionOpsHelper],
     );
 
     const handleSelectSearchOption = (
