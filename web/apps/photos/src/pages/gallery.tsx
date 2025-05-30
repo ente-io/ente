@@ -22,6 +22,7 @@ import { stashRedirect } from "ente-accounts/services/redirect";
 import { isSessionInvalid } from "ente-accounts/services/session";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { NavbarBase } from "ente-base/components/Navbar";
+import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
 import type { ButtonishProps } from "ente-base/components/mui";
@@ -235,6 +236,9 @@ const Page: React.FC = () => {
         filesDownloadProgressAttributesList,
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
+    const [postCreateAlbumOp, setPostCreateAlbumOp] = useState<
+        CollectionOp | undefined
+    >(undefined);
 
     const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
@@ -254,6 +258,8 @@ const Page: React.FC = () => {
         show: showAuthenticateUser,
         props: authenticateUserVisibilityProps,
     } = useModalVisibility();
+    const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
+        useModalVisibility();
 
     const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
 
@@ -736,26 +742,22 @@ const Page: React.FC = () => {
         }
     };
 
-    const showCreateCollectionModal = (op: CollectionOp) => {
-        const callback = async (collectionName: string) => {
-            try {
-                showLoadingBar();
-                const collection = await createAlbum(collectionName);
-                await collectionOpsHelper(op)(collection);
-            } catch (e) {
-                onGenericError(e);
-            } finally {
-                hideLoadingBar();
-            }
-        };
-        return () =>
-            setCollectionNamerAttributes({
-                title: t("new_album"),
-                buttonText: t("create"),
-                autoFilledName: "",
-                callback,
-            });
-    };
+    const handleCreateAlbumForOp = useCallback(
+        (op: CollectionOp) => {
+            setPostCreateAlbumOp(op);
+            return showAlbumNameInput;
+        },
+        [showAlbumNameInput],
+    );
+
+    const handleAlbumNameSubmit = useCallback(
+        async (name: string) => {
+            const collection = await createAlbum(name);
+            await collectionOpsHelper(postCreateAlbumOp!)(collection);
+            setPostCreateAlbumOp(undefined);
+        },
+        [postCreateAlbumOp, collectionOpsHelper],
+    );
 
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
@@ -965,9 +967,7 @@ const Page: React.FC = () => {
                         <SelectedFileOptions
                             handleCollectionOp={collectionOpsHelper}
                             handleFileOp={fileOpHelper}
-                            showCreateCollectionModal={
-                                showCreateCollectionModal
-                            }
+                            showCreateCollectionModal={handleCreateAlbumForOp}
                             onOpenCollectionSelector={
                                 handleOpenCollectionSelector
                             }
@@ -1152,6 +1152,15 @@ const Page: React.FC = () => {
                 <AuthenticateUser
                     {...authenticateUserVisibilityProps}
                     onAuthenticate={onAuthenticateCallback.current!}
+                />
+                <SingleInputDialog
+                    {...albumNameInputVisibilityProps}
+                    title={t("new_album")}
+                    label={t("enter_album_name")}
+                    autoFocus
+                    submitButtonColor="accent"
+                    submitButtonTitle={t("create")}
+                    onSubmit={handleAlbumNameSubmit}
                 />
             </FullScreenDropZone>
         </GalleryContext.Provider>
