@@ -1644,15 +1644,10 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
 }) => {
     const savePassword: SingleInputFormProps["onSubmit"] = async (
         passphrase,
-        setFieldError,
     ) => {
-        if (passphrase && passphrase.trim().length >= 1) {
-            await enablePublicUrlPassword(passphrase);
-            publicShareProp.passwordEnabled = true;
-            onClose();
-        } else {
-            setFieldError(t("required"));
-        }
+        await enablePublicUrlPassword(passphrase);
+        publicShareProp.passwordEnabled = true;
+        onClose();
     };
 
     const enablePublicUrlPassword = async (password: string) => {
