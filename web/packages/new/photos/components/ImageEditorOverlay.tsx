@@ -49,7 +49,6 @@ import { downloadManager } from "ente-gallery/services/download";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { getLocalCollections } from "ente-new/photos/services/collections";
-import { CenteredFlex } from "ente-shared/components/Container";
 import { t } from "i18next";
 import React, {
     forwardRef,
@@ -610,7 +609,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                             )}
                         </Stack>
                         {currentTab == "crop" && (
-                            <CenteredFlex marginTop="1rem">
+                            <Stack sx={{ mt: 2, alignItems: "center" }}>
                                 <Button
                                     color="accent"
                                     startIcon={<CropIcon />}
@@ -618,7 +617,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
                                 >
                                     {t("apply_crop")}
                                 </Button>
-                            </CenteredFlex>
+                            </Stack>
                         )}
                     </Box>
                 </Stack>

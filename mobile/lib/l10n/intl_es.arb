@@ -1029,7 +1029,6 @@
   "didYouKnow": "¿Sabías que?",
   "loadingMessage": "Cargando tus fotos...",
   "loadMessage1": "Puedes compartir tu suscripción con tu familia",
-  "loadMessage2": "Hasta ahora hemos conservado más de 30 millones de recuerdos",
   "loadMessage3": "Guardamos 3 copias de tus datos, una en un refugio subterráneo",
   "loadMessage4": "Todas nuestras aplicaciones son de código abierto",
   "loadMessage5": "Nuestro código fuente y criptografía han sido auditados externamente",
@@ -1659,7 +1658,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Transmisión de vídeo",
   "processingVideos": "Procesando vídeos",
   "streamDetails": "Detalles de la transmisión",
   "processing": "Procesando",
@@ -1736,5 +1734,11 @@
   "cLFamilyPlanDesc": "Ahora puede establecer límites en cuanto al almacenamiento que los miembros de tu familia pueden utilizar.",
   "cLBulkEdit": "Edición masiva de fechas",
   "cLBulkEditDesc": "Ahora puedes seleccionar múltiples fotos y editar la fecha/hora para todas ellas con una acción rápida. También es posible cambiar las fechas.",
-  "curatedMemories": "Memorias revisadas"
+  "curatedMemories": "Memorias revisadas",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }

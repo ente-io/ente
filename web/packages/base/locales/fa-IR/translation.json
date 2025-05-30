@@ -32,6 +32,7 @@
     "set_password": "",
     "sign_in": "",
     "incorrect_password": "",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "",
     "pick_password_caution": "",
     "key_generation_in_progress": "",
@@ -39,6 +40,7 @@
     "referral_source_hint": "",
     "referral_source_info": "",
     "password_mismatch_error": "",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "به <a/> خوش آمدید",
     "welcome_to_ente_subtitle": "",
     "new_album": "",
@@ -674,5 +676,11 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": "",
+    "added_by_name": ""
 }

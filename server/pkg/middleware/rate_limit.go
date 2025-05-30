@@ -9,13 +9,13 @@ import (
 	"time"
 
 	"github.com/ente-io/museum/pkg/controller/discord"
+	util "github.com/ente-io/museum/pkg/utils"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/network"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"github.com/ulule/limiter/v3"
-	"github.com/ulule/limiter/v3/drivers/store/memory"
 )
 
 type RateLimitMiddleware struct {
@@ -30,8 +30,8 @@ type RateLimitMiddleware struct {
 
 func NewRateLimitMiddleware(discordCtrl *discord.DiscordController, limit int64, reset time.Duration) *RateLimitMiddleware {
 	rl := &RateLimitMiddleware{
-		limit10ReqPerMin:  rateLimiter("10-M"),
-		limit200ReqPerSec: rateLimiter("200-S"),
+		limit10ReqPerMin:  util.NewRateLimiter("10-M"),
+		limit200ReqPerSec: util.NewRateLimiter("200-S"),
 		discordCtrl:       discordCtrl,
 		limit:             limit,
 		reset:             reset,
@@ -56,20 +56,6 @@ func (r *RateLimitMiddleware) Increment() bool {
 // Stop the internal ticker, effectively stopping the rate limiter.
 func (r *RateLimitMiddleware) Stop() {
 	r.ticker.Stop()
-}
-
-// rateLimiter will return instance of limiter.Limiter based on internal <limit>-<period>
-// Examples: 5 reqs/sec: "5-S", 10 reqs/min: "10-M"
-// 1000 reqs/hour: "1000-H", 2000 reqs/day: "2000-D"
-// https://github.com/ulule/limiter/
-func rateLimiter(interval string) *limiter.Limiter {
-	store := memory.NewStore()
-	rate, err := limiter.NewRateFromFormatted(interval)
-	if err != nil {
-		panic(err)
-	}
-	instance := limiter.New(store, rate)
-	return instance
 }
 
 // GlobalRateLimiter rate limits all requests to the server, regardless of the endpoint.
@@ -147,6 +133,8 @@ func (r *RateLimitMiddleware) APIRateLimitForUserMiddleware(urlSanitizer func(_ 
 func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limiter.Limiter {
 	if reqPath == "/users/ott" ||
 		reqPath == "/users/verify-email" ||
+		reqPath == "/user/change-email" ||
+		reqPath == "/users/public-key" ||
 		reqPath == "/public-collection/verify-password" ||
 		reqPath == "/family/accept-invite" ||
 		reqPath == "/users/srp/attributes" ||

@@ -992,7 +992,6 @@
   "didYouKnow": "Bạn có biết?",
   "loadingMessage": "Đang tải ảnh của bạn...",
   "loadMessage1": "Bạn có thể chia sẻ đăng ký của mình với gia đình",
-  "loadMessage2": "Chúng tôi đã bảo tồn hơn 30 triệu kỷ niệm cho đến nay",
   "loadMessage3": "Chúng tôi giữ 3 bản sao dữ liệu của bạn, một trong nơi trú ẩn dưới lòng đất",
   "loadMessage4": "Tất cả các ứng dụng của chúng tôi đều là mã nguồn mở",
   "loadMessage5": "Mã nguồn và mật mã của chúng tôi đã được kiểm toán bên ngoài",
@@ -1533,5 +1532,11 @@
   "joinAlbum": "Tham gia album",
   "joinAlbumSubtext": "để xem và thêm ảnh của bạn",
   "joinAlbumSubtextViewer": "thêm vào album được chia sẻ",
-  "join": "Tham gia"
+  "join": "Tham gia",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }

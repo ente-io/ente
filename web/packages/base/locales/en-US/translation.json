@@ -32,6 +32,7 @@
     "set_password": "Set password",
     "sign_in": "Sign in",
     "incorrect_password": "Incorrect password",
+    "incorrect_password_or_no_account": "Incorrect password or email not registered",
     "pick_password_hint": "Please enter a password that we can use to encrypt your data",
     "pick_password_caution": "We don't store your password, so if you forget it, <strong>we will not be able to help you </strong>recover your data without a recovery key.",
     "key_generation_in_progress": "Generating encryption keys...",
@@ -39,6 +40,7 @@
     "referral_source_hint": "How did you hear about Ente? (optional)",
     "referral_source_info": "We don't track app installs, It'd help us if you told us where you found us!",
     "password_mismatch_error": "Passwords don't match",
+    "show_or_hide_password": "Show or hide password",
     "welcome_to_ente_title": "Welcome to <a/>",
     "welcome_to_ente_subtitle": "End to end encrypted photo storage and sharing",
     "new_album": "New album",
@@ -674,5 +676,11 @@
     "theme": "Theme",
     "system": "System",
     "light": "Light",
-    "dark": "Dark"
+    "dark": "Dark",
+    "streamable_videos": "Streamable videos",
+    "processing_videos_status": "Processing videos...",
+    "share_favorites": "Share favorites",
+    "person_favorites": "{{name}}'s favorites",
+    "shared_favorites": "Shared favorites",
+    "added_by_name": "Added by {{name}}"
 }

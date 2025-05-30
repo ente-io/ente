@@ -45,12 +45,23 @@ func (c *Controller) PreviewUploadURL(ctx *gin.Context, request filedata.Preview
 	// note: instead of the final url, give a temp url for upload purpose.
 	objectKey := filedata.ObjectKey(request.FileID, fileOwnerID, request.Type, &id)
 	bucketID := c.S3Config.GetBucketID(request.Type)
+	if request.IsMultiPart {
+		multiPartUploadURLs, err2 := c.getMultiPartUploadURL(bucketID, objectKey, request.Count)
+		if err2 != nil {
+			return nil, stacktrace.Propagate(err2, "")
+		}
+		return &filedata.PreviewUploadUrl{
+			ObjectID:    id,
+			PartURLs:    &multiPartUploadURLs.PartURLs,
+			CompleteURL: &multiPartUploadURLs.CompleteURL,
+		}, nil
+	}
 	enteUrl, err := c.getUploadURL(bucketID, objectKey)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
 	return &filedata.PreviewUploadUrl{
 		ObjectID: id,
-		Url:      enteUrl.URL,
+		Url:      &enteUrl.URL,
 	}, nil
 }

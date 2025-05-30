@@ -8,6 +8,16 @@ enum AlbumSortKey {
   lastUpdated,
 }
 
+enum AlbumSortDirection {
+  ascending,
+  descending,
+}
+
+enum AlbumViewType {
+  grid,
+  list,
+}
+
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
@@ -16,6 +26,8 @@ class LocalSettings {
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kCuratedMemoriesEnabled = "ls.curated_memories_enabled";
+  static const kOnThisDayNotificationsEnabled =
+      "ls.on_this_day_notifications_enabled";
   static const kRateUsPromptThreshold = 2;
   static const shouldLoopVideoKey = "video.should_loop";
   static const onGuestViewKey = "on_guest_view";
@@ -23,6 +35,8 @@ class LocalSettings {
       "has_configured_links_in_app_permission";
   static const _hideSharedItemsFromHomeGalleryTag =
       "hide_shared_items_from_home_gallery";
+  static const kCollectionViewType = "collection_view_type";
+  static const kCollectionSortDirection = "collection_sort_direction";
 
   final SharedPreferences _prefs;
 
@@ -34,6 +48,24 @@ class LocalSettings {
 
   Future<bool> setAlbumSortKey(AlbumSortKey key) {
     return _prefs.setInt(kCollectionSortPref, key.index);
+  }
+
+  Future<void> setAlbumViewType(AlbumViewType viewType) async {
+    await _prefs.setInt(kCollectionViewType, viewType.index);
+  }
+
+  AlbumViewType albumViewType() {
+    final index = _prefs.getInt(kCollectionViewType) ?? 0;
+    return AlbumViewType.values[index];
+  }
+
+  AlbumSortDirection albumSortDirection() {
+    return AlbumSortDirection
+        .values[_prefs.getInt(kCollectionSortDirection) ?? 1];
+  }
+
+  Future<bool> setAlbumSortDirection(AlbumSortDirection direction) {
+    return _prefs.setInt(kCollectionSortDirection, direction.index);
   }
 
   int getPhotoGridSize() {
@@ -86,6 +118,14 @@ class LocalSettings {
 
   Future<bool> setSmartMemories(bool value) async {
     await _prefs.setBool(kCuratedMemoriesEnabled, value);
+    return value;
+  }
+
+  bool get isOnThisDayNotificationsEnabled =>
+      _prefs.getBool(kOnThisDayNotificationsEnabled) ?? true;
+
+  Future<bool> setOnThisDayNotificationsEnabled(bool value) async {
+    await _prefs.setBool(kOnThisDayNotificationsEnabled, value);
     return value;
   }
 

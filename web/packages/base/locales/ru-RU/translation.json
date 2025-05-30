@@ -32,6 +32,7 @@
     "set_password": "Установить пароль",
     "sign_in": "Зарегистрироваться",
     "incorrect_password": "Неверный пароль",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Пожалуйста, введите пароль, который мы можем использовать для шифрования ваших данных",
     "pick_password_caution": "Мы не храним ваш пароль, поэтому, если вы его забудете, <strong>мы ничем не сможем вам помочь</strong>для восстановления ваших данных без пароля.",
     "key_generation_in_progress": "Генерируем ключи шифрования...",
@@ -39,6 +40,7 @@
     "referral_source_hint": "Как вы узнали о Ente? (необязательно)",
     "referral_source_info": "Будет полезно, если вы укажете, где вы узнали о нас, так как мы не отслеживаем установки приложения!",
     "password_mismatch_error": "Пароли не совпадают",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Добро пожаловать в <a/>",
     "welcome_to_ente_subtitle": "Сквозное зашифрованное хранение фотографий и общий доступ к ним",
     "new_album": "Новый альбом",
@@ -674,5 +676,11 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": "",
+    "added_by_name": ""
 }

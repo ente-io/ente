@@ -371,6 +371,21 @@
   "deleteFromBoth": "Supprimer des deux",
   "newAlbum": "Nouvel album",
   "albums": "Albums",
+  "memoryCount": "{count, plural, =0{aucun souvenir} one{{formattedCount} souvenir} other{{formattedCount} souvenirs}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
+      }
+    }
+  },
   "selectedPhotos": "{count} sélectionné(s)",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -993,7 +1008,6 @@
   "didYouKnow": "Le savais-tu ?",
   "loadingMessage": "Chargement de vos photos...",
   "loadMessage1": "Vous pouvez partager votre abonnement avec votre famille",
-  "loadMessage2": "Nous avons conservé plus de 30 millions de souvenirs jusqu'à présent",
   "loadMessage3": "Nous conservons 3 copies de vos données, l'une dans un abri anti-atomique",
   "loadMessage4": "Toutes nos applications sont open source",
   "loadMessage5": "Notre code source et notre cryptographie ont été audités en externe",
@@ -1242,6 +1256,7 @@
   "createCollaborativeLink": "Créer un lien collaboratif",
   "search": "Rechercher",
   "enterPersonName": "Entrez le nom d'une personne",
+  "viewPersonToUnlink": "Voir {name} pour délier",
   "enterName": "Saisir un nom",
   "savePerson": "Enregistrer la personne",
   "editPerson": "Modifier la personne",
@@ -1602,7 +1617,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Streaming vidéo",
   "processingVideos": "Traitement des vidéos",
   "streamDetails": "Détails du stream",
   "processing": "Traitement en cours",
@@ -1640,7 +1654,7 @@
   "selectedItemsWillBeRemovedFromThisPerson": "Les éléments sélectionnés seront retirés de cette personne, mais pas supprimés de votre bibliothèque.",
   "throughTheYears": "{dateFormat} au fil des années",
   "thisWeekThroughTheYears": "Cette semaine au fil des années",
-  "thisWeekXYearsAgo": "{count, plural, one {}=1 {Cette semaine, {count} il y a l'année} other {Cette semaine, {count} il y a des années}}",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Cette semaine, {count} il y a l'année} other {Cette semaine, {count} il y a des années}}",
   "youAndThem": "Vous et {name}",
   "admiringThem": "Admirant {name}",
   "embracingThem": "Embrasse {name}",
@@ -1679,5 +1693,11 @@
   "cLFamilyPlanDesc": "Vous pouvez maintenant fixer des limites sur la quantité de stockage que les membres de votre famille peuvent utiliser.",
   "cLBulkEdit": "Dates de modification multiples",
   "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes celles-ci, en une seule action rapide. Les dates de décalage sont également prises en charge.",
-  "curatedMemories": "Souvenirs conservés"
+  "curatedMemories": "Souvenirs conservés",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }

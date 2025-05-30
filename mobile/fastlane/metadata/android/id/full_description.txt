@@ -1,4 +1,4 @@
-ente merupakan app sederhana yang memungkinkanmu untuk mencadangkan serta membagikan foto dan video.
+ente adalah aplikasi sederhana untuk mencadangkan serta membagikan foto dan video anda.
 
 Jika kamu ingin alternatif Google Photos yang ramah privasi, kamu menemukan app yang tepat. Dengan ente, kenanganmu terenkripsi dari ujung ke ujung (e2ee). Sehingga, hanya kamu yang dapat melihatnya.
 

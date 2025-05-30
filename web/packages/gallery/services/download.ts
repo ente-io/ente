@@ -423,8 +423,7 @@ class DownloadManager {
 
         const onDownloadProgress = this.trackDownloadProgress(
             file.id,
-            // TODO: Is info supposed to be optional though?
-            file.info?.fileSize ?? 0,
+            file.info?.fileSize,
         );
 
         const contentLength =
@@ -517,7 +516,10 @@ class DownloadManager {
         }
     }
 
-    private trackDownloadProgress(fileID: number, fileSize: number) {
+    private trackDownloadProgress(
+        fileID: number,
+        fileSize: number | undefined,
+    ) {
         return (event: { loaded: number; total: number }) => {
             if (isNaN(event.total) || event.total === 0) {
                 if (!fileSize) {
@@ -711,7 +713,7 @@ const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
     //    credentials in the "X-Auth-Token".
     //
     // 2. The proxy then does both the original steps: (a). Use the credentials
-    //    to get the pre signed URL, and (b) fetch that pre signed URL and
+    //    to get the pre-signed URL, and (b) fetch that pre-signed URL and
     //    stream back the response.
 
     const getFile = async () => {

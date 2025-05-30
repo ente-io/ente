@@ -32,6 +32,7 @@
     "set_password": "Ställ in lösenord",
     "sign_in": "Logga in",
     "incorrect_password": "Felaktigt lösenord",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Ange ett lösenord som vi kan använda för att kryptera din data",
     "pick_password_caution": "Vi lagrar inte ditt lösenord, så om du glömmer det, <strong>vi kommer inte att kunna hjälpa dig </strong>återställa dina data utan en återställningsnyckel.",
     "key_generation_in_progress": "Genererar krypteringsnycklar...",
@@ -39,6 +40,7 @@
     "referral_source_hint": "Hur hörde du talas om Ente? (valfritt)",
     "referral_source_info": "Vi spårar inte appinstallationer, Det skulle hjälpa oss om du berättade var du hittade oss!",
     "password_mismatch_error": "Lösenorden matchar inte",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Välkommen till <a/>",
     "welcome_to_ente_subtitle": "Totalsträckskrypterad lagring och delning av foton",
     "new_album": "Nytt album",
@@ -674,5 +676,11 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": "",
+    "added_by_name": ""
 }

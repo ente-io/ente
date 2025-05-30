@@ -2,6 +2,12 @@
 
 ## v1.7.13 (Unreleased)
 
+- Generate streams for videos (beta)
+
+    > Streamable videos can be enabled in Preferences. For more details, see the
+    > [video streaming FAQ](https://help.ente.io/photos/faq/video-streaming).
+
+- Support Turkish translations.
 - .
 
 ## v1.7.12

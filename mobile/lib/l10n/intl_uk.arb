@@ -439,7 +439,7 @@
   "skip": "Пропустити",
   "updatingFolderSelection": "Оновлення вибору теки...",
   "itemCount": "{count, plural, one{{count} елемент} few {{count} елементи} many {{count} елементів} other{{count} елементів}}",
-  "deleteItemCount": "{count, plural, =1 {Видалено {count} елемент} few {Видалено {count} елементи} many {Видалено {count} елементів} other {Видалено {count} елементів}}",
+  "deleteItemCount": "{count, plural, =1 {Видалено {count} елемент} other {Видалено {count} елементів}}",
   "duplicateItemsGroup": "{count} файлів, кожен по {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -456,7 +456,7 @@
     }
   },
   "showMemories": "Показати спогади",
-  "yearsAgo": "{count, plural, one{{count} рік тому} few {{count} роки тому} many {{count} років тому} other{{count} років тому}}",
+  "yearsAgo": "{count, plural, one{{count} рік тому} other{{count} років тому}}",
   "backupSettings": "Налаштування резервного копіювання",
   "backupStatus": "Стан резервного копіювання",
   "backupStatusDescription": "Елементи, для яких було створено резервну копію, показуватимуться тут",
@@ -868,7 +868,7 @@
   "authToViewYourMemories": "Авторизуйтеся, щоб переглянути ваші спогади",
   "unlock": "Розблокувати",
   "freeUpSpace": "Звільнити місце",
-  "filesBackedUpInAlbum": "{count, plural, one {Для 1 файлу} few {Для {formattedNumber} файлів} many {Для {formattedNumber} файлів} other {Для {formattedNumber} файлів}} у цьому альбомі було створено резервну копію",
+  "filesBackedUpInAlbum": "{count, plural, one {Для 1 файлу} other {Для {formattedNumber} файлів}} у цьому альбомі було створено резервну копію",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
     "placeholders": {
@@ -987,7 +987,6 @@
   "didYouKnow": "Чи знали ви?",
   "loadingMessage": "Завантажуємо ваші фотографії...",
   "loadMessage1": "Ви можете поділитися своєю передплатою з родиною",
-  "loadMessage2": "На цей час ми зберегли понад 30 мільйонів спогадів",
   "loadMessage3": "Ми зберігаємо 3 копії ваших даних, одну в підземному бункері",
   "loadMessage4": "Всі наші застосунки мають відкритий код",
   "loadMessage5": "Наш вихідний код та шифрування пройшли перевірку спільнотою",
@@ -1355,16 +1354,6 @@
   "enableMachineLearningBanner": "Увімкніть машинне навчання для магічного пошуку та розпізнавання облич",
   "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення оброблення та синхронізації",
   "searchPersonsEmptySection": "Люди будуть показані тут після завершення оброблення та синхронізації",
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {} few {Додано {count} співаторів} many {Додано {count} співаторів}=0 {Додано 0 співавторів} =1 {Додано 1 співавтор} other {Додано {count} співавторів}}",
-  "@collaboratorsSuccessfullyAdded": {
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "2"
-      }
-    },
-    "description": "Number of collaborators that were successfully added to an album."
-  },
   "accountIsAlreadyConfigured": "Обліковий запис уже налаштовано.",
   "sessionIdMismatch": "Невідповідність ідентифікатора сеансу",
   "@sessionIdMismatch": {
@@ -1521,5 +1510,11 @@
   },
   "legacyInvite": "{email} запросив вас стати довіреною особою",
   "authToManageLegacy": "Авторизуйтесь, щоби керувати довіреними контактами",
-  "useDifferentPlayerInfo": "Виникли проблеми з відтворенням цього відео? Натисніть і утримуйте тут, щоб спробувати інший плеєр."
+  "useDifferentPlayerInfo": "Виникли проблеми з відтворенням цього відео? Натисніть і утримуйте тут, щоб спробувати інший плеєр.",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }

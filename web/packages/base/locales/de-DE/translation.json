@@ -32,6 +32,7 @@
     "set_password": "Passwort setzen",
     "sign_in": "Einloggen",
     "incorrect_password": "Falsches Passwort",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Bitte gib ein Passwort ein, mit dem wir deine Daten verschlüsseln können",
     "pick_password_caution": "Wir speichern dein Passwort nicht. Wenn du es vergisst, <strong>können wir dir nicht helfen</strong>, deine Daten ohne einen Wiederherstellungsschlüssel wiederherzustellen.",
     "key_generation_in_progress": "Generierung von Verschlüsselungsschlüsseln...",
@@ -39,6 +40,7 @@
     "referral_source_hint": "Wie hast du von Ente erfahren? (optional)",
     "referral_source_info": "Wir tracken keine App-Installationen. Es würde uns jedoch helfen, wenn du uns mitteilst, wie du von uns erfahren hast!",
     "password_mismatch_error": "Die Passwörter stimmen nicht überein",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Willkommen bei <a/>",
     "welcome_to_ente_subtitle": "Ende-zu-Ende verschlüsselte Fotospeicherung und Freigabe",
     "new_album": "Neues Album",
@@ -674,5 +676,11 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": "",
+    "added_by_name": ""
 }

@@ -32,6 +32,7 @@
     "set_password": "تعيين كلمة المرور",
     "sign_in": "تسجيل الدخول",
     "incorrect_password": "كلمة المرور غير صحيحة",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "الرجاء إدخال كلمة المرور التي يمكننا استخدامها لتشفير بياناتك",
     "pick_password_caution": "نحن لا نخزن كلمة مرورك، لذا إذا نسيتها، <strong>لن نتمكن من مساعدتك </strong>في استرداد بياناتك دون مفتاح الاسترداد.",
     "key_generation_in_progress": "جارٍ توليد مفاتيح التشفير...",
@@ -39,6 +40,7 @@
     "referral_source_hint": "كيف سمعت عن Ente؟ (اختياري)",
     "referral_source_info": "نحن لا نتتبع عمليات تثبيت التطبيق، سيكون من المفيد لنا أن تخبرنا أين وجدتنا!",
     "password_mismatch_error": "كلمات المرور غير متطابقة",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "مرحبًا بك في <a/>",
     "welcome_to_ente_subtitle": "تخزين الصور ومشاركتها بشكل مشفر من طرف إلى طرف",
     "new_album": "ألبوم جديد",
@@ -674,5 +676,11 @@
     "theme": "المظهر",
     "system": "النظام",
     "light": "فاتح",
-    "dark": "داكن"
+    "dark": "داكن",
+    "streamable_videos": "",
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": "",
+    "added_by_name": ""
 }

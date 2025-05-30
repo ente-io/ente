@@ -237,7 +237,7 @@
   "publicLinkEnabled": "Link público ativado",
   "shareALink": "Partilhar um link",
   "sharedAlbumSectionDescription": "Criar álbuns compartilhados e colaborativos com outros usuários da Ente, incluindo usuários em planos gratuitos.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Compartilhe com pessoas específicas} =1 {Compartilhado com 1 pessoa} other {Compartilhado com {numberOfPeople} pessoas}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Compartilhe com pessoas específicas} =1 {Compartilhado com 1 pessoa} other {Compartilhado com {numberOfPeople} pessoas}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -984,7 +984,6 @@
   "didYouKnow": "Você sabia?",
   "loadingMessage": "Carregar as suas fotos...",
   "loadMessage1": "Pode partilhar a sua subscrição com a sua família",
-  "loadMessage2": "Nós preservamos mais de 30 milhões de memórias até agora",
   "loadMessage3": "Mantemos 3 cópias dos seus dados, uma em um abrigo subterrâneo",
   "loadMessage4": "Todos os nossos aplicativos são de código aberto",
   "loadMessage5": "Nosso código-fonte e criptografia foram auditadas externamente",
@@ -1388,5 +1387,11 @@
         "example": "no network"
       }
     }
-  }
+  },
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }

@@ -2,7 +2,7 @@ import { ensureElectron } from "ente-base/electron";
 import log from "ente-base/log";
 import type { Electron } from "ente-base/types/ipc";
 import {
-    toDataOrPathOrZipEntry,
+    toPathOrZipEntry,
     type FileSystemUploadItem,
     type UploadItem,
 } from "ente-gallery/services/upload";
@@ -15,13 +15,12 @@ import {
     parseMetadataDate,
     type ParsedMetadata,
 } from "ente-media/file-metadata";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,
     outputPathPlaceholder,
 } from "./constants";
-import { ffmpegExecWeb } from "./web";
+import { determineVideoDurationWeb, ffmpegExecWeb } from "./web";
 
 /**
  * Generate a thumbnail for the given video using a Wasm FFmpeg running in a web
@@ -38,14 +37,7 @@ import { ffmpegExecWeb } from "./web";
  */
 export const generateVideoThumbnailWeb = async (blob: Blob) =>
     _generateVideoThumbnail((seekTime: number) =>
-        ffmpegExecWeb(
-            // TODO(HLS): Enable for all
-            settingsSnapshot().isInternalUser
-                ? makeGenThumbnailCommand(seekTime)
-                : _makeGenThumbnailCommand(seekTime, false),
-            blob,
-            "jpeg",
-        ),
+        ffmpegExecWeb(makeGenThumbnailCommand(seekTime), blob, "jpeg"),
     );
 
 const _generateVideoThumbnail = async (
@@ -82,7 +74,7 @@ export const generateVideoThumbnailNative = async (
     _generateVideoThumbnail((seekTime: number) =>
         electron.ffmpegExec(
             makeGenThumbnailCommand(seekTime),
-            toDataOrPathOrZipEntry(fsUploadItem),
+            toPathOrZipEntry(fsUploadItem),
             "jpeg",
         ),
     );
@@ -124,18 +116,17 @@ const _makeGenThumbnailCommand = (seekTime: number, forHDR: boolean) => [
 ];
 
 /**
- * Extract metadata from the given video
+ * Extract metadata from the given video.
  *
- * When we're running in the context of our desktop app _and_ we're passed a
- * file path , this uses the native FFmpeg bundled with our desktop app.
- * Otherwise it uses a Wasm build of FFmpeg running in a web worker.
+ * When we're running in the context of our desktop app _and_ we're passed an
+ * upload item that resolves to a path of the user's file system, this uses the
+ * native FFmpeg bundled with our desktop app. Otherwise it uses a Wasm build of
+ * FFmpeg running in a web worker.
  *
- * This function is called during upload, when we need to extract the metadata
- * of videos that the user is uploading.
+ * This function is called during upload, when we need to extract the
+ * "ffmetadata" of videos that the user is uploading.
  *
- * @param uploadItem A {@link File}, or the absolute path to a file on the
- * user's local file system. A path can only be provided when we're running in
- * the context of our desktop app.
+ * @param uploadItem The video item being uploaded.
  */
 export const extractVideoMetadata = async (
     uploadItem: UploadItem,
@@ -146,7 +137,7 @@ export const extractVideoMetadata = async (
             ? await ffmpegExecWeb(command, uploadItem, "txt")
             : await ensureElectron().ffmpegExec(
                   command,
-                  toDataOrPathOrZipEntry(uploadItem),
+                  toPathOrZipEntry(uploadItem),
                   "txt",
               ),
     );
@@ -193,8 +184,13 @@ const parseFFmpegExtractedMetadata = (ffmpegOutput: Uint8Array) => {
     // with comments and newlines.
     //
     // https://ffmpeg.org/ffmpeg-formats.html#Metadata-2
+    //
+    // On Windows, while I couldn't find it documented anywhere, the generated
+    // ffmetadata file uses Unix line separators ("\n"). But for the sake of
+    // extra (albeit possibly unnecessary) safety, handle both \r\n and \n
+    // separators in the split. See: [Note: ffmpeg newlines]
 
-    const lines = new TextDecoder().decode(ffmpegOutput).split("\n");
+    const lines = new TextDecoder().decode(ffmpegOutput).split(/\r?\n/);
     const isPair = (xs: string[]): xs is [string, string] => xs.length == 2;
     const kvPairs = lines.map((property) => property.split("=")).filter(isPair);
 
@@ -267,6 +263,26 @@ const parseFFMetadataDate = (s: string | undefined) => {
 
     return d;
 };
+
+/**
+ * Extract the duration (in seconds) from the given video
+ *
+ * This is a sibling of {@link extractVideoMetadata}, except it tries to
+ * determine the duration of the video. The duration is not part of the
+ * "ffmetadata", and is instead a property of the video itself.
+ *
+ * @param uploadItem The video item being uploaded.
+ *
+ * @return the duration of the video in seconds (a floating point number).
+ */
+export const determineVideoDuration = async (
+    uploadItem: UploadItem,
+): Promise<number> =>
+    uploadItem instanceof File
+        ? determineVideoDurationWeb(uploadItem)
+        : ensureElectron().ffmpegDetermineVideoDuration(
+              toPathOrZipEntry(uploadItem),
+          );
 
 /**
  * Convert a video from a format that is not supported in the browser to MP4.

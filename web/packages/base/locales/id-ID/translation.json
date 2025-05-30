@@ -32,6 +32,7 @@
     "set_password": "Atur sandi",
     "sign_in": "Masuk",
     "incorrect_password": "Sandi salah",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Silakan masukkan kata sandi yang dapat kami gunakan untuk mengenkripsi data Anda",
     "pick_password_caution": "Kami tidak menyimpan sandi kamu, jadi jika kamu lupa, <strong>kami tidak akan dapat membantumu </strong>memulihkan data tanpa kunci pemulihan.",
     "key_generation_in_progress": "Menghasilkan kunci enkripsi...",
@@ -39,6 +40,7 @@
     "referral_source_hint": "Dari mana Anda menemukan Ente? (opsional)",
     "referral_source_info": "Kami tidak melacak pemasangan aplikasi, Ini akan membantu kami jika Anda memberi tahu kami di mana Anda menemukan kami!",
     "password_mismatch_error": "Sandi tidak cocok",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Selamat datang di <a/>",
     "welcome_to_ente_subtitle": "Penyimpanan dan berbagi foto terenkripsi ujung ke ujung",
     "new_album": "Album baru",
@@ -674,5 +676,11 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": "",
+    "added_by_name": ""
 }

@@ -156,7 +156,9 @@ export const verifySRPSession = async (
             // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
             e.httpStatusCode === HttpStatusCode.Unauthorized
         ) {
-            throw Error(CustomError.INCORRECT_PASSWORD);
+            // The API contract allows for a SRP verification 401 both because
+            // of incorrect credentials or a non existent account.
+            throw Error(CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT);
         } else {
             throw e;
         }

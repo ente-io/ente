@@ -993,7 +993,6 @@
   "didYouKnow": "ご存知ですか?",
   "loadingMessage": "あなたの写真を読み込み中...",
   "loadMessage1": "サブスクリプションを家族と共有できます",
-  "loadMessage2": "私たちはこれまでに3000万以上の思い出を保存してきました",
   "loadMessage3": "私たちはあなたのデータのコピーを3つ保管しています。1つは地下のシェルターにあります。",
   "loadMessage4": "すべてのアプリはオープンソースです",
   "loadMessage5": "当社のソースコードと暗号方式は外部から監査されています",
@@ -1602,7 +1601,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "動画ストリーミング",
   "processingVideos": "動画を処理中",
   "streamDetails": "動画の詳細",
   "processing": "処理中",
@@ -1678,5 +1676,11 @@
   "cLFamilyPlan": "ファミリープランの制限",
   "cLFamilyPlanDesc": "ファミリーメンバーが使用できるストレージ容量の制限を設定できるようになりました。",
   "cLBulkEdit": "日付を一括編集",
-  "cLBulkEditDesc": "複数の写真を、1回の操作で日付/時刻を編集することもできるようになりました。"
+  "cLBulkEditDesc": "複数の写真を、1回の操作で日付/時刻を編集することもできるようになりました。",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }

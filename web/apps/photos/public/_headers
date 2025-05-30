@@ -5,5 +5,6 @@
     X-Download-Options: noopen
     X-Frame-Options: deny
     X-XSS-Protection: 1; mode=block
-    Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' blob: data: https://*.openstreetmap.org; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' https://assets.ente.io 'unsafe-eval' blob:; manifest-src 'self'; child-src 'self' blob:; object-src 'none'; connect-src 'self' https://*.ente.io data: blob: https://ente-prod-eu.s3.eu-central-003.backblazeb2.com https://ente-prod-v3.s3.eu-central-2.wasabisys.com; base-uri 'self'; frame-ancestors 'none'; form-action 'none'; report-uri https://csp-reporter.ente.io; report-to https://csp-reporter.ente.io;
+    Reporting-Endpoints: csp-endpoint="https://csp-reporter.ente.io"
+    Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' blob: data: https://*.openstreetmap.org; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self' https://assets.ente.io 'unsafe-eval' blob:; manifest-src 'self'; child-src 'self' blob:; object-src 'none'; connect-src 'self' https://*.ente.io data: blob: https://*.s3.eu-central-003.backblazeb2.com https://*.s3.eu-central-2.wasabisys.com; base-uri 'self'; frame-ancestors 'none'; form-action 'none'; report-uri https://csp-reporter.ente.io; report-to csp-endpoint;
 

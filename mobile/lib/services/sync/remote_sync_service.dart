@@ -27,6 +27,7 @@ import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
+import "package:photos/services/language_service.dart";
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/preview_video_store.dart";
@@ -998,10 +999,11 @@ class RemoteSyncService {
           'creating notification for ${collection?.displayName} '
           'shared: $sharedFilesIDs, collected: $collectedFilesIDs files',
         );
+        final s = await LanguageService.s;
         // ignore: unawaited_futures
         NotificationService.instance.showNotification(
           collection!.displayName,
-          totalCount.toString() + " new 📸",
+          totalCount.toString() + s.newPhotosEmoji,
           channelID: "collection:" + collectionID.toString(),
           channelName: collection.displayName,
           payload: "ente://collection/?collectionID=" + collectionID.toString(),

@@ -32,6 +32,7 @@
     "set_password": "Ορισμός κωδικού πρόσβασης",
     "sign_in": "Σύνδεση",
     "incorrect_password": "Λάθος κωδικός πρόσβασης",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Εισάγετε έναν κωδικό πρόσβασης που μπορούμε να χρησιμοποιήσουμε για την κρυπτογράφηση των δεδομένων σας",
     "pick_password_caution": "Δεν αποθηκεύουμε τον κωδικό πρόσβασής σας, επομένως, αν τον ξεχάσετε, <strong>δεν θα μπορέσουμε να σας βοηθήσουμε </strong>να ανακτήσετε τα δεδομένα σας χωρίς κλειδί ανάκτησης.",
     "key_generation_in_progress": "Δημιουργία κλειδιών κρυπτογράφησης...",
@@ -39,6 +40,7 @@
     "referral_source_hint": "Πώς ακούσατε για το Ente; (προαιρετικό)",
     "referral_source_info": "Δεν παρακολουθούμε τις εγκαταστάσεις εφαρμογών. Θα μας βοηθούσε αν μας λέγατε που μας βρήκατε!",
     "password_mismatch_error": "Οι κωδικοί πρόσβασης δεν ταιριάζουν",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Καλώς ήρθατε στο <a/>",
     "welcome_to_ente_subtitle": "",
     "new_album": "Νέο άλμπουμ",
@@ -674,5 +676,11 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": "",
+    "added_by_name": ""
 }

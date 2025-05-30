@@ -32,6 +32,7 @@
     "set_password": "Ustaw hasło",
     "sign_in": "Zaloguj się",
     "incorrect_password": "Nieprawidłowe hasło",
+    "incorrect_password_or_no_account": "",
     "pick_password_hint": "Wprowadź hasło, którego możemy użyć do zaszyfrowania Twoich danych",
     "pick_password_caution": "Nie przechowujemy Twojego hasła, więc jeśli je zapomnisz, <strong>nie będziemy w stanie Ci pomóc </strong>odzyskać Twoich danych bez klucza odzyskiwania.",
     "key_generation_in_progress": "Generowanie kluczy szyfrujących...",
@@ -39,6 +40,7 @@
     "referral_source_hint": "Jak usłyszałeś/aś o Ente? (opcjonalnie)",
     "referral_source_info": "Nie śledzimy instalacji aplikacji. Pomogłyby nam, gdybyś powiedział/a nam, gdzie nas znalazłeś/aś!",
     "password_mismatch_error": "Hasła nie pasują do siebie",
+    "show_or_hide_password": "",
     "welcome_to_ente_title": "Witamy w <a/>",
     "welcome_to_ente_subtitle": "Zaszyfrowana metodą end-to-end pamięć na zdjęcia i udostępnianie",
     "new_album": "Nowy album",
@@ -674,5 +676,11 @@
     "theme": "",
     "system": "",
     "light": "",
-    "dark": ""
+    "dark": "",
+    "streamable_videos": "",
+    "processing_videos_status": "",
+    "share_favorites": "",
+    "person_favorites": "",
+    "shared_favorites": "",
+    "added_by_name": ""
 }

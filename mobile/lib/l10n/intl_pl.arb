@@ -992,7 +992,6 @@
   "didYouKnow": "Czy wiedziałeś/aś?",
   "loadingMessage": "Wczytywanie Twoich zdjęć...",
   "loadMessage1": "Możesz udostępnić swoją subskrypcję swojej rodzinie",
-  "loadMessage2": "Do tej pory zachowaliśmy ponad 30 milionów wspomnień",
   "loadMessage3": "Przechowujemy 3 kopie Twoich danych, jedną w podziemnym schronie",
   "loadMessage4": "Wszystkie nasze aplikacje są otwarto źródłowe",
   "loadMessage5": "Nasz kod źródłowy i kryptografia zostały poddane zewnętrznemu audytowi",
@@ -1534,5 +1533,11 @@
   "joinAlbumSubtextViewer": "aby dodać to do udostępnionych albumów",
   "join": "Dołącz",
   "linkEmail": "Połącz adres e-mail",
-  "noEnteAccountExclamation": "Brak konta Ente!"
+  "noEnteAccountExclamation": "Brak konta Ente!",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }

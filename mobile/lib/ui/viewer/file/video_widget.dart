@@ -7,6 +7,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/stream_switched_event.dart";
 import "package:photos/events/use_media_kit_for_video.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/service_locator.dart";
@@ -44,7 +45,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   final nativePlayerKey = GlobalKey();
   final mediaKitKey = GlobalKey();
 
-  bool isPreviewLoadable = true;
+  bool isPreviewLoadable = false;
 
   @override
   void initState() {
@@ -56,7 +57,17 @@ class _VideoWidgetState extends State<VideoWidget> {
         useNativeVideoPlayer = false;
       });
     });
-    _checkForPreview();
+    if (widget.file.isUploaded) {
+      isPreviewLoadable = FileDataService.instance.previewIds
+              ?.containsKey(widget.file.uploadedFileID) ??
+          false;
+      if (!widget.file.isOwner) {
+        // For shared video, we need to on-demand check if the file is streamable
+        // and if not, we need to set isPreviewLoadable to false
+        isPreviewLoadable = true;
+      }
+      _checkForPreview();
+    }
   }
 
   @override
@@ -66,11 +77,15 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   Future<void> _checkForPreview() async {
-    final isPreviewAvailable = FileDataService.instance.previewIds
-            ?.containsKey(widget.file.uploadedFileID) ??
-        false;
-    if (!PreviewVideoStore.instance.isVideoStreamingEnabled ||
-        !isPreviewAvailable) {
+    if (!widget.file.isOwner) {
+      final bool isStreamable =
+          await PreviewVideoStore.instance.isSharedFileStreamble(widget.file);
+      if (!isStreamable && mounted) {
+        isPreviewLoadable = false;
+        setState(() {});
+      }
+    }
+    if (!isPreviewLoadable) {
       return;
     }
     widget.playbackCallback?.call(false);
@@ -84,18 +99,15 @@ class _VideoWidgetState extends State<VideoWidget> {
     });
     if (!mounted) return;
     if (data != null) {
-      if (flagService.internalUser) {
-        final d =
-            FileDataService.instance.previewIds?[widget.file.uploadedFileID!];
-        if (d != null && widget.file.fileSize != null) {
-          // show toast with human readable size
-          final size = formatBytes(widget.file.fileSize!);
-          showToast(
-            context,
-            gravity: ToastGravity.TOP,
-            "[i] Preview OG Size ($size), previewSize: ${formatBytes(d.objectSize)}",
-          );
-        }
+      if (flagService.internalUser &&
+          data.size != null &&
+          widget.file.fileSize != null) {
+        final size = formatBytes(widget.file.fileSize!);
+        showToast(
+          context,
+          gravity: ToastGravity.TOP,
+          "[i] Preview OG Size ($size), previewSize: ${formatBytes(data.size!)}",
+        );
       }
       playlistData = data;
     } else {
@@ -106,13 +118,7 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final isPreviewVideoPlayable = isPreviewLoadable &&
-        PreviewVideoStore.instance.isVideoStreamingEnabled &&
-        widget.file.isUploaded &&
-        (FileDataService.instance.previewIds
-                ?.containsKey(widget.file.uploadedFileID!) ??
-            false);
-    final playPreview = isPreviewVideoPlayable && selectPreviewForPlay;
+    final playPreview = isPreviewLoadable && selectPreviewForPlay;
     if (playPreview && playlistData == null) {
       return Center(
         child: Container(

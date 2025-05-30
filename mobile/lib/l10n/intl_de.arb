@@ -1030,7 +1030,7 @@
   "didYouKnow": "Schon gewusst?",
   "loadingMessage": "Fotos werden geladen...",
   "loadMessage1": "Du kannst dein Abonnement mit deiner Familie teilen",
-  "loadMessage2": "Wir haben bereits mehr als 30 Millionen Erinnerungsstücke gesichert",
+  "loadMessage2": "Wir haben bereits über 200 Millionen Erinnerungen bewahrt",
   "loadMessage3": "Wir behalten 3 Kopien Ihrer Daten, eine in einem unterirdischen Schutzbunker",
   "loadMessage4": "Alle unsere Apps sind Open-Source",
   "loadMessage5": "Unser Quellcode und unsere Kryptografie wurden extern geprüft",
@@ -1281,6 +1281,8 @@
   "createCollaborativeLink": "Gemeinschaftlichen Link erstellen",
   "search": "Suche",
   "enterPersonName": "Namen der Person eingeben",
+  "editEmailAlreadyLinked": "Diese E-Mail ist bereits verknüpft mit {name}.",
+  "viewPersonToUnlink": "{name} zum Entfernen des Links anzeigen",
   "enterName": "Name eingeben",
   "savePerson": "Person speichern",
   "editPerson": "Person bearbeiten",
@@ -1411,7 +1413,7 @@
     },
     "description": "Number of viewers that were successfully added to an album."
   },
-  "collaboratorsSuccessfullyAdded": "{count, plural, one {}=0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 Mitarbeiter hinzugefügt} =1 {1 Mitarbeiter hinzugefügt} other {{count} Mitarbeiter hinzugefügt}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1660,7 +1662,6 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Video-Streaming",
   "processingVideos": "Verarbeite Videos",
   "streamDetails": "Stream-Details",
   "processing": "In Bearbeitung",
@@ -1737,5 +1738,11 @@
   "cLFamilyPlanDesc": "Du kannst jetzt festlegen, wie viel Speicherplatz deine Familienmitglieder nutzen können.",
   "cLBulkEdit": "Massenbearbeitung von Datumsangaben",
   "cLBulkEditDesc": "Du kannst jetzt mehrere Fotos auswählen, und das Datum/Uhrzeit für alle mit einer Aktion ändern. Das Verschieben von Daten wird auch unterstützt.",
-  "curatedMemories": "Ausgewählte Erinnerungen"
+  "curatedMemories": "Ausgewählte Erinnerungen",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }

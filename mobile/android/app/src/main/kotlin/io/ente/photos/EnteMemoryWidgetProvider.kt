@@ -92,10 +92,6 @@ class EnteMemoryWidgetProvider : HomeWidgetProvider() {
                                                                 View.VISIBLE
                                                         )
                                                         setViewVisibility(
-                                                                R.id.widget_placeholder_container,
-                                                                View.VISIBLE
-                                                        )
-                                                        setViewVisibility(
                                                                 R.id.widget_subtitle,
                                                                 View.VISIBLE
                                                         )
@@ -149,10 +145,6 @@ class EnteMemoryWidgetProvider : HomeWidgetProvider() {
                                                                 View.GONE
                                                         )
                                                         setViewVisibility(
-                                                                R.id.widget_placeholder_container,
-                                                                View.GONE
-                                                        )
-                                                        setViewVisibility(
                                                                 R.id.widget_subtitle,
                                                                 View.GONE
                                                         )
@@ -181,7 +173,7 @@ class EnteMemoryWidgetProvider : HomeWidgetProvider() {
                                                                 ContextCompat.getDrawable(
                                                                         context,
                                                                         R.drawable
-                                                                                .ic_home_widget_default
+                                                                                .ic_memories_widget
                                                                 )
                                                         val bitmap =
                                                                 (drawable as BitmapDrawable).bitmap

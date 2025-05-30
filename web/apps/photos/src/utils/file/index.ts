@@ -22,6 +22,7 @@ import {
 import { safeFileName } from "ente-new/photos/utils/native-fs";
 import { getData } from "ente-shared/storage/localStorage";
 import type { User } from "ente-shared/user/types";
+import { wait } from "ente-utils/promise";
 import { t } from "i18next";
 import {
     addMultipleToFavorites,
@@ -60,6 +61,9 @@ export async function downloadFile(file: EnteFile) {
                 new Blob([videoData], { type: videoType.mimeType }),
             );
             downloadAndRevokeObjectURL(tempImageURL, imageFileName);
+            // Downloading multiple works everywhere except, you guessed it,
+            // Safari. Make up for their incompetence by adding a setTimeout.
+            await wait(300) /* arbitrary constant, 300ms */;
             downloadAndRevokeObjectURL(tempVideoURL, videoFileName);
         } else {
             const fileType = await detectFileTypeInfo(
@@ -337,26 +341,6 @@ export const getUserOwnedFiles = (files: EnteFile[]) => {
     }
     return files.filter((file) => file.ownerID === user.id);
 };
-
-export function getPersonalFiles(
-    files: EnteFile[],
-    user: User,
-    collectionIdToOwnerIDMap?: Map<number, number>,
-) {
-    if (!user?.id) {
-        throw Error("user missing");
-    }
-    return files.filter(
-        (file) =>
-            file.ownerID === user.id &&
-            (!collectionIdToOwnerIDMap ||
-                collectionIdToOwnerIDMap.get(file.collectionID) === user.id),
-    );
-}
-
-export function getIDBasedSortedFiles(files: EnteFile[]) {
-    return files.sort((a, b) => a.id - b.id);
-}
 
 export const shouldShowAvatar = (file: EnteFile, user: User) => {
     if (!file || !user) {
