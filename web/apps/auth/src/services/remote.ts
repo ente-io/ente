@@ -14,8 +14,8 @@ import { z } from "zod";
 export interface AuthCodesAndTimeOffset {
     codes: Code[];
     /**
-     * An optional and approximate correction which should be applied to the
-     * current client's time when deriving TOTPs.
+     * An optional and approximate correction (milliseconds) which should be
+     * applied to the current client's time when deriving TOTPs.
      */
     timeOffset?: number;
 }
@@ -112,7 +112,14 @@ const RemoteAuthenticatorEntityChange = z.object({
 });
 
 const AuthenticatorEntityDiffResponse = z.object({
+    /**
+     * Changes to entities.
+     */
     diff: z.array(RemoteAuthenticatorEntityChange),
+    /**
+     * An optional epoch microseconds indicating the remote time when it
+     * generated the response.
+     */
     timestamp: z.number().nullish().transform(nullToUndefined),
 });
 
@@ -122,8 +129,8 @@ export interface AuthenticatorEntityDiffResult {
      */
     entities: AuthenticatorEntity[];
     /**
-     * An optional and approximate offset by which the time on the current client
-     * is out of sync.
+     * An optional and approximate offset (in milliseconds) by which the time on
+     * the current client is out of sync.
      *
      * This offset is computed by calculated by comparing the timestamp when the
      * remote generated the response to the time we received it. As such
@@ -174,10 +181,17 @@ export const authenticatorEntityDiff = async (
             headers: await authenticatedRequestHeaders(),
         });
         ensureOk(res);
+
         const { diff, timestamp } = AuthenticatorEntityDiffResponse.parse(
             await res.json(),
         );
-        if (timestamp) timeOffset = Date.now() - timestamp;
+
+        if (timestamp) {
+            // - timestamp is in epoch microseconds.
+            // - Date.now and timeOffset are in epoch milliseconds.
+            timeOffset = Date.now() - Math.floor(timestamp / 1e3);
+        }
+
         if (diff.length == 0) break;
 
         for (const change of diff) {

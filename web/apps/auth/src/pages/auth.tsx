@@ -180,13 +180,13 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code, timeOffset }) => {
 
     const regen = useCallback(() => {
         try {
-            const [m, n] = generateOTPs(code);
+            const [m, n] = generateOTPs(code, timeOffset);
             setOTP(m);
             setNextOTP(n);
         } catch (e) {
             setErrorMessage(e instanceof Error ? e.message : String(e));
         }
-    }, [code]);
+    }, [code, timeOffset]);
 
     const copyCode = () =>
         void navigator.clipboard.writeText(otp).then(() => {
@@ -327,7 +327,7 @@ const CodeValidityBar: React.FC<CodeValidityBarProps> = ({
             code.type == "hotp" ? undefined : setInterval(advance, 10);
 
         return () => ticker && clearInterval(ticker);
-    }, [code]);
+    }, [code, timeOffset]);
 
     const progressColor =
         progress > 0.4
