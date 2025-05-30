@@ -22,6 +22,9 @@ final _logger = Logger("FaceCropUtils");
 const int _retryLimit = 3;
 final LRUMap<String, Uint8List?> _faceCropCache = LRUMap(1000);
 final LRUMap<String, Uint8List?> _faceCropThumbnailCache = LRUMap(1000);
+
+final LRUMap<String, String> _personOrClusterIdToCachedFaceID = LRUMap(1000);
+
 TaskQueue _queueFullFileFaceGenerations = TaskQueue<String>(
   maxConcurrentTasks: 5,
   taskTimeout: const Duration(minutes: 1),
@@ -33,36 +36,83 @@ TaskQueue _queueThumbnailFaceGenerations = TaskQueue<String>(
   maxQueueSize: 100,
 );
 
-Future<Uint8List?> checkGetCachedCropForFaceID(String faceID) async {
+Uint8List? checkInMemoryCachedCropForPersonOrClusterID(
+  String personOrClusterID,
+) {
+  final String? faceID =
+      _personOrClusterIdToCachedFaceID.get(personOrClusterID);
+  if (faceID == null) return null;
   final Uint8List? cachedCover = _faceCropCache.get(faceID);
   return cachedCover;
 }
 
-Future<void> putCachedCropForFaceID(
-  String faceID,
-  Uint8List data,
-) async {
-  _faceCropCache.put(faceID, data);
+Uint8List? _checkInMemoryCachedCropForFaceID(String faceID) {
+  final Uint8List? cachedCover = _faceCropCache.get(faceID);
+  return cachedCover;
 }
 
+Future<String?> checkUsedFaceIDForPersonOrClusterId(
+  String personOrClusterID,
+) async {
+  final String? cachedFaceID =
+      _personOrClusterIdToCachedFaceID.get(personOrClusterID);
+  if (cachedFaceID != null) return cachedFaceID;
+  final String? faceIDFromDB = await MLDataDB.instance
+      .getFaceIdUsedForPersonOrCluster(personOrClusterID);
+  if (faceIDFromDB != null) {
+    _personOrClusterIdToCachedFaceID.put(personOrClusterID, faceIDFromDB);
+  }
+  return faceIDFromDB;
+}
+
+Future<void> _putCachedCropForFaceID(
+  String faceID,
+  Uint8List data, [
+  String? personOrClusterID,
+]) async {
+  _faceCropCache.put(faceID, data);
+  if (personOrClusterID != null) {
+    await MLDataDB.instance.putFaceIdCachedForPersonOrCluster(
+      personOrClusterID,
+      faceID,
+    );
+    _personOrClusterIdToCachedFaceID.put(personOrClusterID, faceID);
+  }
+}
+
+Future<void> checkRemoveCachedFaceIDForPersonOrClusterId(
+  String personOrClusterID,
+) async {
+  final String? cachedFaceID = await MLDataDB.instance
+      .getFaceIdUsedForPersonOrCluster(personOrClusterID);
+  if (cachedFaceID != null) {
+    _personOrClusterIdToCachedFaceID.remove(personOrClusterID);
+    await MLDataDB.instance
+        .removeFaceIdCachedForPersonOrCluster(personOrClusterID);
+  }
+}
+
+/// Careful to only use [personOrClusterID] if all [faces] are from the same person or cluster.
 Future<Map<String, Uint8List>?> getCachedFaceCrops(
   EnteFile enteFile,
   Iterable<Face> faces, {
   int fetchAttempt = 1,
   bool useFullFile = true,
+  String? personOrClusterID,
 }) async {
   try {
     final faceIdToCrop = <String, Uint8List>{};
     final facesWithoutCrops = <String, FaceBox>{};
     for (final face in faces) {
-      final Uint8List? cachedFace = _faceCropCache.get(face.faceID);
+      final Uint8List? cachedFace =
+          _checkInMemoryCachedCropForFaceID(face.faceID);
       if (cachedFace != null) {
         faceIdToCrop[face.faceID] = cachedFace;
       } else {
         final faceCropCacheFile = cachedFaceCropPath(face.faceID);
         if ((await faceCropCacheFile.exists())) {
           final data = await faceCropCacheFile.readAsBytes();
-          _faceCropCache.put(face.faceID, data);
+          await _putCachedCropForFaceID(face.faceID, data, personOrClusterID);
           faceIdToCrop[face.faceID] = data;
         } else {
           facesWithoutCrops[face.faceID] = face.detection.box;
@@ -102,7 +152,11 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
       if (computedCrop != null) {
         faceIdToCrop[entry.key] = computedCrop;
         if (useFullFile) {
-          _faceCropCache.put(entry.key, computedCrop);
+          await _putCachedCropForFaceID(
+            entry.key,
+            computedCrop,
+            personOrClusterID,
+          );
           final faceCropCacheFile = cachedFaceCropPath(entry.key);
           faceCropCacheFile.writeAsBytes(computedCrop).ignore();
         } else {
@@ -191,11 +245,10 @@ Future<Uint8List?> precomputeClusterFaceCrop(
 }
 
 void checkStopTryingToGenerateFaceThumbnails(
-  EnteFile file, {
+  int fileID, {
   bool useFullFile = true,
 }) {
-  final taskId =
-      [file.uploadedFileID!, useFullFile ? "-full" : "-thumbnail"].join();
+  final taskId = [fileID, useFullFile ? "-full" : "-thumbnail"].join();
   if (useFullFile) {
     _queueFullFileFaceGenerations.removeTask(taskId);
   } else {

@@ -16,6 +16,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/utils/face/face_box_crop.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class PersonService {
@@ -445,7 +446,19 @@ class PersonService {
       data: person.data.copyWith(avatarFaceId: face.faceID),
     );
     await updatePerson(updatedPerson);
+    await faceMLDataDB.putFaceIdCachedForPersonOrCluster(
+      p.remoteID,
+      face.faceID,
+    );
     return updatedPerson;
+  }
+
+  Future<PersonEntity> removeAvatar(PersonEntity p) async {
+    final person = (await getPerson(p.remoteID))!;
+    person.data.avatarFaceID = null;
+    await updatePerson(person);
+    await checkRemoveCachedFaceIDForPersonOrClusterId(p.remoteID);
+    return person;
   }
 
   Future<PersonEntity> updateAttributes(

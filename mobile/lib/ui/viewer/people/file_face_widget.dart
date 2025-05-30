@@ -51,7 +51,7 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
     super.dispose();
     if (widget.faceCrop == null) {
       checkStopTryingToGenerateFaceThumbnails(
-        widget.file,
+        widget.file.uploadedFileID!,
         useFullFile: widget.useFullFile,
       );
     }
