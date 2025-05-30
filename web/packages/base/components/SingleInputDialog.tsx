@@ -26,8 +26,8 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
     ...rest
 }) => {
     const handleSubmit: SingleInputFormProps["onSubmit"] = useCallback(
-        async (value, showError) => {
-            await onSubmit(value, showError);
+        async (value, setFieldError) => {
+            await onSubmit(value, setFieldError);
             onClose();
         },
         [onClose, onSubmit],

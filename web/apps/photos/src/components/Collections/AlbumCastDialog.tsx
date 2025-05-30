@@ -56,7 +56,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     }, []);
 
     const onSubmit: SingleInputFormProps["onSubmit"] = useCallback(
-        async (value, showError) => {
+        async (value, setFieldError) => {
             try {
                 await publishCastPayload(value.trim(), collection);
                 onClose();
@@ -66,7 +66,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     e instanceof Error &&
                     e.message == unknownDeviceCodeErrorMessage
                 ) {
-                    showError(t("tv_not_found"));
+                    setFieldError(t("tv_not_found"));
                 } else {
                     throw e;
                 }

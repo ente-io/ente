@@ -28,6 +28,7 @@ import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodesAndTimeOffset } from "services/remote";
+import { prettyFormatCode } from "utils/format";
 
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
@@ -221,7 +222,11 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code, timeOffset }) => {
                 <UnparseableCode {...{ code, errorMessage }} />
             ) : (
                 <ButtonBase component="div" onClick={copyCode}>
-                    <OTPDisplay {...{ code, timeOffset, otp, nextOTP }} />
+                    <OTPDisplay
+                        {...{ code, timeOffset }}
+                        otp={prettyFormatCode(otp)}
+                        nextOTP={prettyFormatCode(nextOTP)}
+                    />
                     <Snackbar
                         open={openCopied}
                         message={t("copied")}

@@ -31,6 +31,10 @@ import {
     RowLabel,
     RowSwitch,
 } from "ente-base/components/RowButton";
+import {
+    SingleInputForm,
+    type SingleInputFormProps,
+} from "ente-base/components/SingleInputForm";
 import { useClipboardCopy } from "ente-base/components/utils/hooks";
 import {
     useModalVisibility,
@@ -52,10 +56,8 @@ import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCr
 import { avatarTextColor } from "ente-new/photos/services/avatar";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "ente-shared/components/SingleInputForm";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
+import { wait } from "ente-utils/promise";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -1587,15 +1589,14 @@ const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
     updatePublicShareURLHelper,
 }) => {
     const { showMiniDialog } = useBaseContext();
-    const [changePasswordView, setChangePasswordView] = useState(false);
-
-    const closeConfigurePassword = () => setChangePasswordView(false);
+    const { show: showSetPassword, props: setPasswordVisibilityProps } =
+        useModalVisibility();
 
     const handlePasswordChangeSetting = async () => {
         if (publicShareProp.passwordEnabled) {
             await confirmDisablePublicUrlPassword();
         } else {
-            setChangePasswordView(true);
+            showSetPassword();
         }
     };
 
@@ -1622,37 +1623,39 @@ const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
                 checked={!!publicShareProp?.passwordEnabled}
                 onClick={handlePasswordChangeSetting}
             />
-            <PublicLinkSetPassword
-                open={changePasswordView}
-                onClose={closeConfigurePassword}
+            <SetPublicLinkPassword
+                {...setPasswordVisibilityProps}
                 collection={collection}
                 publicShareProp={publicShareProp}
                 updatePublicShareURLHelper={updatePublicShareURLHelper}
-                setChangePasswordView={setChangePasswordView}
             />
         </>
     );
 };
 
-function PublicLinkSetPassword({
+type SetPublicLinkPasswordProps = ModalVisibilityProps &
+    ManageLinkPasswordProps;
+
+const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
     open,
     onClose,
     collection,
     publicShareProp,
     updatePublicShareURLHelper,
-    setChangePasswordView,
-}) {
-    const savePassword: SingleInputFormProps["callback"] = async (
+}) => {
+    const savePassword: SingleInputFormProps["onSubmit"] = async (
         passphrase,
-        setFieldError,
     ) => {
-        if (passphrase && passphrase.trim().length >= 1) {
-            await enablePublicUrlPassword(passphrase);
-            setChangePasswordView(false);
-            publicShareProp.passwordEnabled = true;
-        } else {
-            setFieldError("can not be empty");
-        }
+        await enablePublicUrlPassword(passphrase);
+        publicShareProp.passwordEnabled = true;
+        onClose();
+        // The onClose above will close the dialog, but if we return immediately
+        // from this function, then the dialog will be temporarily rendered
+        // without the activity indicator on the button (before the entire
+        // dialog disappears). This gives a ungainly visual flash, so add a wait
+        // long enough so that the form's activity indicator persists longer
+        // than it'll take for the dialog to get closed.
+        return wait(1000 /* 1 second */);
     };
 
     const enablePublicUrlPassword = async (password: string) => {
@@ -1668,10 +1671,10 @@ function PublicLinkSetPassword({
             memLimit: kek.memLimit,
         });
     };
+
     return (
         <Dialog
-            open={open}
-            onClose={onClose}
+            {...{ open, onClose }}
             disablePortal
             slotProps={{
                 // We're being shown within the sidebar drawer, so limit the
@@ -1691,14 +1694,13 @@ function PublicLinkSetPassword({
                     {t("password_lock")}
                 </Typography>
                 <SingleInputForm
-                    callback={savePassword}
-                    placeholder={t("password")}
-                    buttonText={t("lock")}
-                    fieldType="password"
-                    secondaryButtonAction={onClose}
-                    submitButtonProps={{ sx: { mt: 1, mb: 0 } }}
+                    inputType="password"
+                    label={t("password")}
+                    submitButtonTitle={t("lock")}
+                    onCancel={onClose}
+                    onSubmit={savePassword}
                 />
             </Stack>
         </Dialog>
     );
-}
+};
