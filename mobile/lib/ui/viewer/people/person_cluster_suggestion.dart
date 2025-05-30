@@ -20,7 +20,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/file_face_widget.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
-import "package:photos/utils/face/face_box_crop.dart";
+import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 class SuggestionUserFeedback {
   final bool accepted;

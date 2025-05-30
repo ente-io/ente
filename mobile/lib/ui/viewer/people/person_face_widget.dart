@@ -12,7 +12,7 @@ import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
-import "package:photos/utils/face/face_box_crop.dart";
+import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 final _logger = Logger("PersonFaceWidget");
 

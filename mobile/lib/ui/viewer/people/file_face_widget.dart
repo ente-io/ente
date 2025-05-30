@@ -8,7 +8,7 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-import "package:photos/utils/face/face_box_crop.dart";
+import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 final _logger = Logger("FaceWidget");
 
