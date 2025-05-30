@@ -1143,7 +1143,7 @@ const Page: React.FC = () => {
                 <SingleInputDialog
                     {...albumNameInputVisibilityProps}
                     title={t("new_album")}
-                    label={t("enter_album_name")}
+                    label={t("album_name")}
                     autoFocus
                     submitButtonColor="accent"
                     submitButtonTitle={t("create")}

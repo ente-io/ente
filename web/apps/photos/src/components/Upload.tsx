@@ -859,7 +859,7 @@ export const Upload: React.FC<UploadProps> = ({
             <SingleInputDialog
                 {...newAlbumNameInputVisibilityProps}
                 title={t("new_album")}
-                label={t("enter_album_name")}
+                label={t("album_name")}
                 autoFocus
                 initialValue={prefilledNewAlbumName}
                 submitButtonColor="accent"
