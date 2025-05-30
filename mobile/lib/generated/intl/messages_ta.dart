@@ -27,8 +27,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "உங்கள் கணக்கை நீக்குவதற்கான முக்கிய காரணம் என்ன?"),
         "cancel": MessageLookupByLibrary.simpleMessage("ரத்து செய்"),
-        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
-            "Click to install our best version yet"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "கணக்கு நீக்குதலை உறுதிப்படுத்தவும்"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
@@ -54,16 +52,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("தவறான மின்னஞ்சல் முகவரி"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "இந்த தகவலுடன் தயவுசெய்து எங்களுக்கு உதவுங்கள்"),
-        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
-            "Look back on your memories 🌄"),
-        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
-        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders about memories from this day in previous years."),
         "selectReason": MessageLookupByLibrary.simpleMessage(
             "காரணத்தைத் தேர்ந்தெடுக்கவும்"),
-        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
-            "Sorry, we had to pause your backups"),
         "verify": MessageLookupByLibrary.simpleMessage("சரிபார்க்கவும்"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("உங்கள் கணக்கு நீக்கப்பட்டது")

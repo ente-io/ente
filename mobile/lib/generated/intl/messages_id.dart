@@ -388,8 +388,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimedStorageSoFar": m14,
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Hapus indeks"),
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
-        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
-            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Tutup"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Kode diterapkan"),
@@ -846,8 +844,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "longPressAnEmailToVerifyEndToEndEncryption":
             MessageLookupByLibrary.simpleMessage(
                 "Tekan dan tahan email untuk membuktikan enkripsi ujung ke ujung."),
-        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
-            "Look back on your memories 🌄"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Perangkat hilang?"),
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Pemelajaran mesin"),
@@ -899,7 +895,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tidak dapat terhubung dengan Ente, harap periksa pengaturan jaringan kamu dan hubungi dukungan jika masalah berlanjut."),
         "never": MessageLookupByLibrary.simpleMessage("Tidak pernah"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Album baru"),
-        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Baru di Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Terbaru"),
         "no": MessageLookupByLibrary.simpleMessage("Tidak"),
@@ -939,9 +934,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("Di perangkat ini"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Di <branding>ente</branding>"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
-        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "oops": MessageLookupByLibrary.simpleMessage("Aduh"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
@@ -1283,8 +1275,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Maaf, kami tidak dapat menghasilkan kunci yang aman di perangkat ini.\n\nHarap mendaftar dengan perangkat lain."),
-        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
-            "Sorry, we had to pause your backups"),
         "sortAlbumsBy":
             MessageLookupByLibrary.simpleMessage("Urut berdasarkan"),
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("Terbaru dulu"),

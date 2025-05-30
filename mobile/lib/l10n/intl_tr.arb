@@ -1739,11 +1739,5 @@
   "cLFamilyPlanDesc": "Artık aile üyelerinizin ne kadar depolama alanı kullanabileceğine dair sınırlar belirleyebilirsiniz.",
   "cLBulkEdit": "Tarihleri toplu düzenle",
   "cLBulkEditDesc": "Artık birden fazla fotoğraf seçebilir ve tek bir hızlı işlemle hepsi için tarih/saat düzenleyebilirsiniz. Tarih kaydırma da desteklenmektedir.",
-  "curatedMemories": "Seçilmiş anılar",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "curatedMemories": "Seçilmiş anılar"
 }

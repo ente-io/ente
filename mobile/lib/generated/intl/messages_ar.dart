@@ -606,8 +606,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• انقر على"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• انقر على قائمة الخيارات الإضافية"),
-        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
-            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("إغلاق"),
         "clubByCaptureTime":
             MessageLookupByLibrary.simpleMessage("التجميع حسب وقت الالتقاط"),
@@ -1230,8 +1228,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "اضغط مطولاً على عنصر لعرضه في وضع ملء الشاشة."),
-        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
-            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("إيقاف تكرار الفيديو"),
         "loopVideoOn":
@@ -1312,7 +1308,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("ألبوم جديد"),
         "newLocation": MessageLookupByLibrary.simpleMessage("موقع جديد"),
         "newPerson": MessageLookupByLibrary.simpleMessage("شخص جديد"),
-        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("نطاق جديد"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("جديد في Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("الأحدث"),
@@ -1369,9 +1364,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "على <branding>Ente</branding>"),
         "onTheRoad":
             MessageLookupByLibrary.simpleMessage("على الطريق مرة أخرى"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
-        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("هم فقط"),
         "oops": MessageLookupByLibrary.simpleMessage("عفوًا"),
@@ -1854,8 +1846,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "عذرًا، لم نتمكن من إنشاء مفاتيح آمنة على هذا الجهاز.\n\nيرجى التسجيل من جهاز مختلف."),
-        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
-            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("فرز"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("فرز حسب"),
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("الأحدث أولاً"),

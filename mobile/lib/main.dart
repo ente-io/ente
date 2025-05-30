@@ -224,7 +224,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("NetworkClient init done $tlog");
 
     ServiceLocator.instance
-        .init(preferences, NetworkClient.instance.enteDio, packageInfo);
+        .init(preferences, NetworkClient.instance.enteDio,NetworkClient.instance.getDio(), packageInfo);
 
     _logger.info("UserService init $tlog");
     await UserService.instance.init();

@@ -522,8 +522,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• クリック"),
         "clickOnTheOverflowMenu":
             MessageLookupByLibrary.simpleMessage("• 三点ドットをクリックしてください"),
-        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
-            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("閉じる"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage("時間ごとにまとめる"),
         "clubByFileName": MessageLookupByLibrary.simpleMessage("ファイル名ごとにまとめる"),
@@ -1062,8 +1060,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "表示されているEメールアドレスを長押しして、暗号化を確認します。"),
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage("アイテムを長押しして全画面表示する"),
-        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
-            "Look back on your memories 🌄"),
         "loopVideoOff": MessageLookupByLibrary.simpleMessage("ビデオのループをオフ"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage("ビデオのループをオン"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("デバイスを紛失しましたか？"),
@@ -1132,7 +1128,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("新しいアルバム"),
         "newLocation": MessageLookupByLibrary.simpleMessage("新しいロケーション"),
         "newPerson": MessageLookupByLibrary.simpleMessage("新しい人物"),
-        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("範囲を追加"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Enteを初めて使用する"),
         "newest": MessageLookupByLibrary.simpleMessage("新しい順"),
@@ -1181,9 +1176,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "<branding>Ente</branding>が保管"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("再び道で"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
-        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("この人のみ"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
@@ -1599,8 +1591,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "このデバイスでは安全な鍵を生成することができませんでした。\n\n他のデバイスからサインアップを試みてください。"),
-        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
-            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("並び替え"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("並び替え"),
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("新しい順"),

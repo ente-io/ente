@@ -1733,11 +1733,5 @@
   "cLFamilyPlan": "家庭计划存储限制",
   "cLFamilyPlanDesc": "你现在可以为家庭成员设置存储空间使用上限。",
   "cLBulkEdit": "批量编辑日期",
-  "cLBulkEditDesc": "你现在可以选择多张照片，一键批量修改日期/时间，并支持日期顺移。",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "cLBulkEditDesc": "你现在可以选择多张照片，一键批量修改日期/时间，并支持日期顺移。"
 }

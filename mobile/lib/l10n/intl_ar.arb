@@ -1739,11 +1739,5 @@
   "cLFamilyPlanDesc": "يمكنك الآن تعيين حدود لمقدار التخزين الذي يمكن لأفراد عائلتك استخدامه.",
   "cLBulkEdit": "تعديل التواريخ بشكل جماعي",
   "cLBulkEditDesc": "يمكنك الآن تحديد صور متعددة، وتعديل التاريخ/الوقت لجميعها بإجراء سريع واحد. تغيير التواريخ مدعوم أيضًا.",
-  "curatedMemories": "ذكريات منسقة",
-  "onThisDay": "On this day",
-  "lookBackOnYourMemories": "Look back on your memories 🌄",
-  "newPhotosEmoji": " new 📸",
-  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
-  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
-  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
+  "curatedMemories": "ذكريات منسقة"
 }

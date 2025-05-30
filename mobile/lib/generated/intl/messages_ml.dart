@@ -32,8 +32,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("കണക്കുകൂട്ടുന്നു..."),
         "cancel": MessageLookupByLibrary.simpleMessage("റദ്ദാക്കുക"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("ഇമെയിൽ മാറ്റുക"),
-        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
-            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("അടക്കുക"),
         "confirm": MessageLookupByLibrary.simpleMessage("നിജപ്പെടുത്തുക"),
         "confirmPassword":
@@ -81,22 +79,16 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("വിവരങ്ങൾ തന്നു സഹായിക്കുക"),
         "lightTheme": MessageLookupByLibrary.simpleMessage("തെളിഞ"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("കാലഹരണപ്പെട്ടു"),
-        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
-            "Look back on your memories 🌄"),
         "mastodon": MessageLookupByLibrary.simpleMessage("മാസ്റ്റഡോൺ"),
         "matrix": MessageLookupByLibrary.simpleMessage("മേട്രിക്സ്"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("ഇടത്തരം"),
         "monthly": MessageLookupByLibrary.simpleMessage("പ്രതിമാസം"),
         "name": MessageLookupByLibrary.simpleMessage("പേര്"),
-        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "no": MessageLookupByLibrary.simpleMessage("വേണ്ട"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("ഒന്നുമില്ല"),
         "nothingToSeeHere":
             MessageLookupByLibrary.simpleMessage("ഇവിടൊന്നും കാണ്മാനില്ല! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("ശരി"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
-        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("അയ്യോ"),
         "password": MessageLookupByLibrary.simpleMessage("സങ്കേതക്കുറി"),
         "pleaseTryAgain":
@@ -126,8 +118,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "എന്തോ കുഴപ്പം സംഭവിച്ചു, ദയവായി വീണ്ടും ശ്രമിക്കുക"),
         "sorry": MessageLookupByLibrary.simpleMessage("ക്ഷമിക്കുക"),
-        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
-            "Sorry, we had to pause your backups"),
         "sortAlbumsBy":
             MessageLookupByLibrary.simpleMessage("ഇപ്രകാരം അടുക്കുക"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ സഫലം"),

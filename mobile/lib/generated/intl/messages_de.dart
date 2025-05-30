@@ -84,6 +84,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m21(count) =>
       "${Intl.plural(count, one: 'Lösche ${count} Element', other: 'Lösche ${count} Elemente')}";
 
+  static String m116(count) =>
+      "Sollen die Fotos (und Videos) aus diesen ${count} Alben auch aus <bold>allen</bold> anderen Alben gelöscht werden, in denen sie enthalten sind?";
+
   static String m22(currentlyDeleting, totalCount) =>
       "Lösche ${currentlyDeleting} / ${totalCount}";
 
@@ -226,6 +229,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m77(snapshotLength, searchLength) =>
       "Abschnittslänge stimmt nicht überein: ${snapshotLength} != ${searchLength}";
 
+  static String m117(count) => "${count} ausgewählt";
+
   static String m78(count) => "${count} ausgewählt";
 
   static String m79(count, yourCount) =>
@@ -340,6 +345,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Willkommen zurück!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "Ich verstehe, dass ich meine Daten verlieren kann, wenn ich mein Passwort vergesse, da meine Daten <underline>Ende-zu-Ende-verschlüsselt</underline> sind."),
+        "actionNotSupportedOnFavouritesAlbum":
+            MessageLookupByLibrary.simpleMessage(
+                "Aktion für das Favoritenalbum nicht unterstützt"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktive Sitzungen"),
         "add": MessageLookupByLibrary.simpleMessage("Hinzufügen"),
@@ -367,6 +375,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Details der Add-ons"),
         "addOnValidTill": m3,
         "addOns": MessageLookupByLibrary.simpleMessage("Add-ons"),
+        "addParticipants":
+            MessageLookupByLibrary.simpleMessage("Teilnehmer hinzufügen"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Fotos hinzufügen"),
         "addSelected":
             MessageLookupByLibrary.simpleMessage("Auswahl hinzufügen"),
@@ -625,8 +635,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Klick"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Klicken Sie auf das Überlaufmenü"),
-        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
-            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Schließen"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage(
             "Nach Aufnahmezeit gruppieren"),
@@ -775,6 +783,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteItemCount": m21,
         "deleteLocation":
             MessageLookupByLibrary.simpleMessage("Standort löschen"),
+        "deleteMultipleAlbumDialog": m116,
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Fotos löschen"),
         "deleteProgress": m22,
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
@@ -949,6 +958,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bitte gib eine gültige E-Mail-Adresse ein."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Gib deine E-Mail-Adresse ein"),
+        "enterYourNewEmailAddress": MessageLookupByLibrary.simpleMessage(
+            "Gib Deine neue E-Mail-Adresse ein"),
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Passwort eingeben"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -1271,8 +1282,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Lange auf eine E-Mail drücken, um die Ende-zu-Ende-Verschlüsselung zu überprüfen."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Drücken Sie lange auf ein Element, um es im Vollbildmodus anzuzeigen"),
-        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
-            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Videoschleife aus"),
         "loopVideoOn": MessageLookupByLibrary.simpleMessage("Videoschleife an"),
@@ -1354,7 +1363,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Neues Album"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Neuer Ort"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Neue Person"),
-        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Neue Auswahl"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Neu bei Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Zuletzt"),
@@ -1411,9 +1419,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Auf <branding>ente</branding>"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("Wieder unterwegs"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
-        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders about memories from this day in previous years."),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("An diesem Tag"),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Nur diese"),
         "oops": MessageLookupByLibrary.simpleMessage("Hoppla"),
@@ -1797,6 +1803,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Wähle dein Gesicht"),
         "selectYourPlan":
             MessageLookupByLibrary.simpleMessage("Wähle dein Abo aus"),
+        "selectedAlbums": m117,
         "selectedFilesAreNotOnEnte": MessageLookupByLibrary.simpleMessage(
             "Ausgewählte Dateien sind nicht auf Ente"),
         "selectedFoldersWillBeEncryptedAndBackedUp":
@@ -1913,8 +1920,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Es tut uns leid, wir konnten keine sicheren Schlüssel auf diesem Gerät generieren.\n\nBitte starte die Registrierung auf einem anderen Gerät."),
-        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
-            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sortierung"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sortieren nach"),
         "sortNewestFirst":
@@ -2143,6 +2148,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoInfo":
             MessageLookupByLibrary.simpleMessage("Video-Informationen"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("Video"),
+        "videoStreaming":
+            MessageLookupByLibrary.simpleMessage("Streambare Videos"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("Aktive Sitzungen anzeigen"),

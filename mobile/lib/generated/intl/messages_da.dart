@@ -107,8 +107,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Tjek venligst din indbakke (og spam) for at færdiggøre verificeringen"),
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Ryd indekser"),
-        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
-            "Click to install our best version yet"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Kode kopieret til udklipsholder"),
         "collabLinkSectionDescription": MessageLookupByLibrary.simpleMessage(
@@ -270,8 +268,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "longPressAnEmailToVerifyEndToEndEncryption":
             MessageLookupByLibrary.simpleMessage(
                 "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen."),
-        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
-            "Look back on your memories 🌄"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Har du mistet enhed?"),
         "machineLearning": MessageLookupByLibrary.simpleMessage("Maskinlæring"),
@@ -293,15 +289,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "moments": MessageLookupByLibrary.simpleMessage("Øjeblikke"),
         "never": MessageLookupByLibrary.simpleMessage("Aldrig"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nyt album"),
-        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "next": MessageLookupByLibrary.simpleMessage("Næste"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Ingen"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Ingen gendannelsesnøgle?"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
-        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Ups, noget gik galt"),
@@ -410,8 +402,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Beklager, vi kunne ikke generere sikre krypteringsnøgler på denne enhed.\n\nForsøg venligst at oprette en konto fra en anden enhed."),
-        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
-            "Sorry, we had to pause your backups"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
         "storageInGB": m91,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Stærkt"),

@@ -103,8 +103,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "لطفا صندوق ورودی (و هرزنامه) خود را برای تایید کامل بررسی کنید"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("بررسی وضعیت"),
         "checking": MessageLookupByLibrary.simpleMessage("در حال بررسی..."),
-        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
-            "Click to install our best version yet"),
         "collabLinkSectionDescription": MessageLookupByLibrary.simpleMessage(
             "پیوندی ایجاد کنید تا به افراد اجازه دهید بدون نیاز به برنامه یا حساب کاربری Ente عکس‌ها را در آلبوم اشتراک گذاشته شده شما اضافه و مشاهده کنند. برای جمع‌آوری عکس‌های رویداد عالی است."),
         "collaborator": MessageLookupByLibrary.simpleMessage("همکار"),
@@ -249,8 +247,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "با کلیک بر روی ورود به سیستم، من با <u-terms>شرایط خدمات</u-terms> و <u-policy>سیاست حفظ حریم خصوصی</u-policy> موافقم"),
         "logout": MessageLookupByLibrary.simpleMessage("خروج"),
-        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
-            "Look back on your memories 🌄"),
         "manage": MessageLookupByLibrary.simpleMessage("مدیریت"),
         "manageFamily": MessageLookupByLibrary.simpleMessage("مدیریت خانواده"),
         "manageLink": MessageLookupByLibrary.simpleMessage("مدیریت پیوند"),
@@ -262,7 +258,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "merchandise": MessageLookupByLibrary.simpleMessage("کالا"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("متوسط"),
         "never": MessageLookupByLibrary.simpleMessage("هرگز"),
-        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("کاربر جدید Ente"),
         "no": MessageLookupByLibrary.simpleMessage("خیر"),
         "noRecoveryKey":
@@ -271,9 +266,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "با توجه به ماهیت پروتکل رمزگذاری سرتاسر ما، اطلاعات شما بدون رمز عبور یا کلید بازیابی شما قابل رمزگشایی نیست"),
         "notifications": MessageLookupByLibrary.simpleMessage("آگاه‌سازی‌ها"),
         "ok": MessageLookupByLibrary.simpleMessage("تایید"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
-        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
-            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("اوه"),
         "password": MessageLookupByLibrary.simpleMessage("رمز عبور"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
@@ -361,8 +353,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "با عرض پوزش، ما نمی‌توانیم کلیدهای امن را در این دستگاه تولید کنیم.\n\nلطفا از دستگاه دیگری ثبت نام کنید."),
-        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
-            "Sorry, we had to pause your backups"),
         "sortAlbumsBy":
             MessageLookupByLibrary.simpleMessage("مرتب‌سازی براساس"),
         "sortNewestFirst":
