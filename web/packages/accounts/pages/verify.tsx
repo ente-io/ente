@@ -34,6 +34,7 @@ import {
     type SingleInputFormProps,
 } from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
+import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { clearSessionStorage } from "ente-base/session";
 import { ApiError } from "ente-shared/error";
@@ -161,7 +162,11 @@ const Page: React.FC = () => {
                 }
             }
         } catch (e) {
-            if (e instanceof ApiError) {
+            if (isHTTPErrorWithStatus(e, 401)) {
+                setFieldError(t("invalid_code_error"));
+            } else if (isHTTPErrorWithStatus(e, 410)) {
+                setFieldError(t("expired_code_error"));
+            } else if (e instanceof ApiError) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 if (e?.httpStatusCode === HttpStatusCode.Unauthorized) {
                     setFieldError(t("invalid_code_error"));
@@ -239,6 +244,7 @@ const Page: React.FC = () => {
             <SingleInputForm
                 autoComplete="one-time-code"
                 label={t("verification_code")}
+                submitButtonColor="accent"
                 submitButtonTitle={t("verify")}
                 onSubmit={onSubmit}
             />
