@@ -249,6 +249,23 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               ],
             ),
           ),
+          if (widget.person.data.email != null &&
+              (widget.person.data.email == Configuration.instance.getEmail()))
+            PopupMenuItem(
+              value: PeoplePopupAction.reassignMe,
+              child: Row(
+                children: [
+                  const Icon(Icons.person_2_outlined),
+                  const Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text(
+                    context.l10n.reassignMe,
+                    style: textTheme.bodyBold,
+                  ),
+                ],
+              ),
+            ),
           PopupMenuItem(
             value: PeoplePopupAction.removeLabel,
             child: Row(
@@ -264,23 +281,6 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               ],
             ),
           ),
-          if (widget.person.data.email != null &&
-              (widget.person.data.email == Configuration.instance.getEmail()))
-            PopupMenuItem(
-              value: PeoplePopupAction.reassignMe,
-              child: Row(
-                children: [
-                  const Icon(Icons.delete_outline),
-                  const Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text(
-                    context.l10n.reassignMe,
-                    style: textTheme.bodyBold,
-                  ),
-                ],
-              ),
-            ),
         ],
       );
     } else {
