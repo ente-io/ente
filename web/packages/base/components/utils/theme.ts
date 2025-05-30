@@ -565,6 +565,12 @@ const components: Components = {
                             boxShadow: "var(--mui-palette-boxShadow-paper)",
                         },
                     },
+                    {
+                        // Undo the effects of variant "elevation" case above
+                        // case when elevation is 0.
+                        props: { elevation: 0 },
+                        style: { boxShadow: "none" },
+                    },
                 ],
             },
         },
@@ -717,6 +723,13 @@ const components: Components = {
                 // notification popups).
                 borderRadius: "8px",
             },
+        },
+    },
+
+    MuiAlert: {
+        defaultProps: {
+            // Use the outlined variant by default (instead of "standard").
+            variant: "outlined",
         },
     },
 };
