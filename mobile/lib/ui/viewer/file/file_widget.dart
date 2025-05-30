@@ -12,6 +12,7 @@ class FileWidget extends StatelessWidget {
   final Function(bool)? playbackCallback;
   final BoxDecoration? backgroundDecoration;
   final bool? autoPlay;
+  final bool? isFromMemories;
 
   const FileWidget(
     this.file, {
@@ -20,6 +21,7 @@ class FileWidget extends StatelessWidget {
     this.playbackCallback,
     required this.tagPrefix,
     this.backgroundDecoration,
+    this.isFromMemories = false,
     super.key,
   });
 
@@ -37,6 +39,7 @@ class FileWidget extends StatelessWidget {
         shouldDisableScroll: shouldDisableScroll,
         tagPrefix: tagPrefix,
         backgroundDecoration: backgroundDecoration,
+        isFromMemories: isFromMemories ?? false,
         key: key ?? ValueKey(fileKey),
       );
     } else if (file.fileType == FileType.video) {

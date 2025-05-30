@@ -23,6 +23,7 @@ class ZoomableLiveImageNew extends StatefulWidget {
   final Function(bool)? shouldDisableScroll;
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
+  final bool isFromMemories;
 
   const ZoomableLiveImageNew(
     this.enteFile, {
@@ -30,6 +31,7 @@ class ZoomableLiveImageNew extends StatefulWidget {
     this.shouldDisableScroll,
     required this.tagPrefix,
     this.backgroundDecoration,
+    this.isFromMemories = false,
   });
 
   @override
@@ -96,11 +98,14 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
         isGuestView: isGuestView,
       );
     }
+  if (!widget.isFromMemories) {
     return GestureDetector(
-      onLongPressStart: (_) => {_onLongPressEvent(true)},
-      onLongPressEnd: (_) => {_onLongPressEvent(false)},
+      onLongPressStart: (_) => _onLongPressEvent(true),
+      onLongPressEnd: (_) => _onLongPressEvent(false),
       child: content,
     );
+  }
+    return content;
   }
 
   @override
