@@ -21,6 +21,7 @@ import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/standalone/debouncer.dart";
 
 class ContactsSection extends StatefulWidget {
   final List<GenericSearchResult> contactSearchResults;
@@ -33,6 +34,9 @@ class ContactsSection extends StatefulWidget {
 class _ContactsSectionState extends State<ContactsSection> {
   late List<GenericSearchResult> _contactSearchResults;
   final streamSubscriptions = <StreamSubscription>[];
+  final _debouncer = Debouncer(
+    const Duration(milliseconds: 1500),
+  );
 
   @override
   void initState() {
@@ -43,11 +47,13 @@ class _ContactsSectionState extends State<ContactsSection> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          _contactSearchResults = (await SectionType.contacts.getData(
-            context,
-            limit: kSearchSectionLimit,
-          )) as List<GenericSearchResult>;
-          setState(() {});
+          _debouncer.run(() async {
+            _contactSearchResults = (await SectionType.contacts.getData(
+              context,
+              limit: kSearchSectionLimit,
+            )) as List<GenericSearchResult>;
+            setState(() {});
+          });
         }),
       );
     }
@@ -58,6 +64,7 @@ class _ContactsSectionState extends State<ContactsSection> {
     for (var subscriptions in streamSubscriptions) {
       subscriptions.cancel();
     }
+    _debouncer.cancelDebounceTimer();
     super.dispose();
   }
 
