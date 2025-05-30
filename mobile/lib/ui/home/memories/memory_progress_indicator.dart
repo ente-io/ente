@@ -43,7 +43,7 @@ class _NewProgressIndicatorState extends State<NewProgressIndicator>
 
     _animation =
         Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
-    _animationController.forward();
+
     if (widget.animationController != null) {
       widget.animationController!(_animationController);
     }
@@ -53,15 +53,6 @@ class _NewProgressIndicatorState extends State<NewProgressIndicator>
         widget.onComplete!();
       }
     });
-  }
-
-  @override
-  void didUpdateWidget(NewProgressIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.currentIndex != widget.currentIndex) {
-      _animationController.reset();
-      _animationController.forward();
-    }
   }
 
   @override
@@ -82,7 +73,7 @@ class _NewProgressIndicatorState extends State<NewProgressIndicator>
                     height: widget.height,
                     decoration: BoxDecoration(
                       color: widget.selectedColor,
-                      borderRadius: BorderRadius.circular(widget.height / 2),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   )
                 : index == widget.currentIndex
@@ -96,8 +87,7 @@ class _NewProgressIndicatorState extends State<NewProgressIndicator>
                               widget.selectedColor,
                             ),
                             minHeight: widget.height,
-                            borderRadius:
-                                BorderRadius.circular(widget.height / 2),
+                            borderRadius: BorderRadius.circular(2),
                           );
                         },
                       )
@@ -105,8 +95,7 @@ class _NewProgressIndicatorState extends State<NewProgressIndicator>
                         height: widget.height,
                         decoration: BoxDecoration(
                           color: widget.unselectedColor,
-                          borderRadius:
-                              BorderRadius.circular(widget.height / 2),
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
           ),
