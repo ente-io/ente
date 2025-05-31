@@ -1,26 +1,5 @@
-name: "Windows build (auth)"
+name: "Windows build & Sign (auth)"
 
-# [Note: Testing release workflows that are triggered by tags]
-#
-# To test this out, push a tag with a pre-release version. The version number
-# should be the version number of the next actual release.
-#
-# > When major, minor, and patch are equal, a pre-release version has lower
-# > precedence than a normal version. Example: 1.0.0-alpha < 1.0.0.
-# > https://semver.org
-#
-# So if the next release we intend to put out is 1.2.3, you can:
-#
-#     git tag auth-v1.2.3-test
-#     git push origin auth-v1.2.3-test
-#
-# We use a suffix like `-test` to indicate that these are test tags, and that
-# they belong to a pre-release.
-#
-# If you need to do multiple tests, add a .x at the end of the tag. e.g.
-# `auth-v1.2.3-test.1`.
-#
-# Once the testing is done, also delete the tag(s) please.
 
 on:
     workflow_dispatch: # Allow manually running the action
@@ -75,7 +54,7 @@ jobs:
                 azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
                 azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
                 endpoint: ${{ secrets.AZURE_ENDPOINT }}
-                trusted-signing-account-name: v${{ secrets.AZURE_CODE_SIGNING_NAME }}
+                trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
                 certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
                 files: |
                       ${{ github.workspace }}/auth/artifacts/ente-${{ github.ref_name }}-installer.exe
@@ -89,11 +68,3 @@ jobs:
 
             - name: Generate checksums
               run: sha256sum artifacts/ente-* > artifacts/sha256sum-windows
-
-            - name: Create a draft GitHub release
-              uses: ncipollo/release-action@v1
-              with:
-                  artifacts: "auth/artifacts/*"
-                  draft: true
-                  allowUpdates: true
-                  updateOnlyUnreleased: true
