@@ -24,10 +24,12 @@ class VideoWidget extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
+  final Function(bool, int)? onFileLoad;
   const VideoWidget(
     this.file, {
     this.tagPrefix,
     this.playbackCallback,
+    this.onFileLoad,
     super.key,
   });
 
@@ -164,6 +166,7 @@ class _VideoWidgetState extends State<VideoWidget> {
             );
           });
         },
+        onFileLoad: widget.onFileLoad,
       );
     }
     return VideoWidgetMediaKitNew(
@@ -186,6 +189,7 @@ class _VideoWidgetState extends State<VideoWidget> {
           );
         });
       },
+      onFileLoad: widget.onFileLoad,
     );
   }
 }

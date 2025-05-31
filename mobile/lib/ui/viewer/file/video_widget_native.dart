@@ -45,6 +45,7 @@ class VideoWidgetNative extends StatefulWidget {
   final void Function()? onStreamChange;
   final PlaylistData? playlistData;
   final bool selectedPreview;
+  final Function(bool, int)? onFileLoad;
 
   const VideoWidgetNative(
     this.file, {
@@ -54,6 +55,7 @@ class VideoWidgetNative extends StatefulWidget {
     required this.onStreamChange,
     super.key,
     this.playlistData,
+    this.onFileLoad,
     required this.selectedPreview,
   });
 
@@ -506,6 +508,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   Future<void> _onPlaybackReady() async {
     if (_isPlaybackReady.value) return;
     await _controller!.play();
+    final durationInSeconds = durationToSeconds(duration) ?? 0;
+    widget.onFileLoad?.call(true, durationInSeconds);
     unawaited(_controller!.setVolume(1));
     _isPlaybackReady.value = true;
   }

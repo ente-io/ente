@@ -31,6 +31,7 @@ class ZoomableImage extends StatefulWidget {
   final Decoration? backgroundDecoration;
   final bool shouldCover;
   final bool isGuestView;
+  final Function(bool, int)? onFileLoad;
 
   const ZoomableImage(
     this.photo, {
@@ -40,6 +41,7 @@ class ZoomableImage extends StatefulWidget {
     this.backgroundDecoration,
     this.shouldCover = false,
     this.isGuestView = false,
+    this.onFileLoad,
   });
 
   @override
@@ -292,6 +294,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
         }
       });
     }
+    if (_imageProvider == null) {
+      widget.onFileLoad?.call(false, 5);
+    } else {
+      widget.onFileLoad?.call(true, 5);
+    }
   }
 
   void _loadLocalImage(BuildContext context) {
@@ -347,6 +354,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
           }
         }
       });
+    }
+    if (_imageProvider == null) {
+      widget.onFileLoad?.call(false, 5);
+    } else {
+      widget.onFileLoad?.call(true, 5);
     }
   }
 

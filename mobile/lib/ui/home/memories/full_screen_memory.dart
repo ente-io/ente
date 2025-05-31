@@ -135,7 +135,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   PageController? _pageController;
   final _showTitle = ValueNotifier<bool>(true);
   AnimationController? _progressAnimationController;
-  Duration duration = const Duration(seconds: 5);
+  final ValueNotifier<Duration> durationNotifier =
+      ValueNotifier(const Duration(seconds: 5));
 
   @override
   void initState() {
@@ -153,6 +154,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   void dispose() {
     _pageController?.dispose();
     _showTitle.dispose();
+    durationNotifier.dispose();
     super.dispose();
   }
 
@@ -169,7 +171,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   void _resetProgressAnimation() {
     if (_progressAnimationController != null) {
       _progressAnimationController!.reset();
-      _progressAnimationController!.forward();
     }
   }
 
@@ -224,14 +225,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 showStepProgressIndicator
-                    ? FutureBuilder<Duration>(
-                        future: _getVideoDuration(),
-                        builder: (context, snapshot) {
-                          final isLoading =
-                              snapshot.connectionState != ConnectionState.done;
-                          final duration =
-                              snapshot.data ?? const Duration(seconds: 5);
-
+                    ? ValueListenableBuilder<Duration>(
+                        valueListenable: durationNotifier,
+                        builder: (context, duration, _) {
                           return NewProgressIndicator(
                             totalSteps: inheritedData.memories.length,
                             currentIndex: value,
@@ -240,9 +236,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                             duration: duration,
                             animationController: (controller) {
                               _progressAnimationController = controller;
-                              if (!isLoading) {
-                                _progressAnimationController!.forward();
-                              }
                             },
                             onComplete: () {
                               final currentIndex =
@@ -335,12 +328,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 },
                 onLongPress: () {
                   if (!isVideo) {
-                    _toggleProgressAnimation(true);  
+                    _toggleProgressAnimation(true);
                   }
                 },
                 onLongPressUp: () {
                   if (!isVideo) {
-                    _toggleProgressAnimation(false); 
+                    _toggleProgressAnimation(false);
                   }
                 },
                 child: FileWidget(
@@ -351,11 +344,15 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     color: Colors.transparent,
                   ),
                   isFromMemories: true,
-                  playbackCallback: (isPlaying) {
-                    if (isPlaying) {
-                      _toggleProgressAnimation(false);
+                  onFileLoad: (isLoaded, duration) {
+                    if (isLoaded) {
+                      durationNotifier.value = Duration(seconds: duration);
+                      _progressAnimationController!.reset();
+                      _progressAnimationController!.duration =
+                          durationNotifier.value;
+                      _progressAnimationController!.forward();
                     } else {
-                      _toggleProgressAnimation(true);
+                      _progressAnimationController!.stop();
                     }
                   },
                 ),
