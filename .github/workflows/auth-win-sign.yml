@@ -1,4 +1,4 @@
-name: "Windows build and signing (auth)"
+name: "Windows build (auth)"
 
 # [Note: Testing release workflows that are triggered by tags]
 #
@@ -78,8 +78,8 @@ jobs:
                 trusted-signing-account-name: v${{ secrets.AZURE_CODE_SIGNING_NAME }}
                 certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
                 files: |
-                      auth/artifacts/ente-${{ github.ref_name }}-installer.exe
-                      auth/ente-${{ github.ref_name }}-windows/auth.exe
+                      ${{ github.workspace }}/auth/artifacts/ente-${{ github.ref_name }}-installer.exe
+                      ${{ github.workspace }}/auth/ente-${{ github.ref_name }}-windows/auth.exe
                 file-digest: SHA256
                 timestamp-rfc3161: http://timestamp.acs.microsoft.com
                 timestamp-digest: SHA256  
