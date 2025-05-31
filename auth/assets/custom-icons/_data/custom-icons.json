@@ -1353,6 +1353,32 @@
     },
     {
       "title": "CoinSpot"
+    },
+    {
+      "title": "Atomic Mail",
+      "slug": "atomic_mail"
+      ]
+    },
+    {
+      "title": "Aternos",
+      "slug": "aternos"
+      ]
+    },
+    {
+      "title": "Toshl Finance",
+      "slug": "toshl_finance",
+      "altNames": [
+        "Toshl"
+      ]
+    },
+    {
+      "title": "xAI",
+      "slug": "xai"
+      ]
+    },
+    {
+      "title": "Cronometer",
+      "slug": "cronometer"
     }
   ]
 }
