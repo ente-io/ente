@@ -5,6 +5,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/create_new_album_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/selected_files.dart';
@@ -123,6 +125,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   static const int okButtonSize = 80;
   String _searchQuery = "";
   final _selectedCollections = <Collection>[];
+  late StreamSubscription<CreateNewAlbumEvent> _createNewAlbumSubscription;
 
   @override
   void initState() {
@@ -133,6 +136,14 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     _enableSelection = (widget.actionType == CollectionActionType.addFiles ||
             widget.actionType == CollectionActionType.addToHiddenAlbum) &&
         (widget.sharedFiles == null || widget.sharedFiles!.isEmpty);
+    _createNewAlbumSubscription =
+        Bus.instance.on<CreateNewAlbumEvent>().listen((event) {});
+  }
+
+  @override
+  void dispose() {
+    _createNewAlbumSubscription.cancel();
+    super.dispose();
   }
 
   @override
