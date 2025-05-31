@@ -1,99 +1,39 @@
-name: "Windows build (auth)"
-
-# [Note: Testing release workflows that are triggered by tags]
-#
-# To test this out, push a tag with a pre-release version. The version number
-# should be the version number of the next actual release.
-#
-# > When major, minor, and patch are equal, a pre-release version has lower
-# > precedence than a normal version. Example: 1.0.0-alpha < 1.0.0.
-# > https://semver.org
-#
-# So if the next release we intend to put out is 1.2.3, you can:
-#
-#     git tag auth-v1.2.3-test
-#     git push origin auth-v1.2.3-test
-#
-# We use a suffix like `-test` to indicate that these are test tags, and that
-# they belong to a pre-release.
-#
-# If you need to do multiple tests, add a .x at the end of the tag. e.g.
-# `auth-v1.2.3-test.1`.
-#
-# Once the testing is done, also delete the tag(s) please.
+name: "Windows Installer Signing Test (auth)"
 
 on:
     workflow_dispatch: # Allow manually running the action
-
-env:
-    FLUTTER_VERSION: "3.24.3"
 
 permissions:
     contents: write
 
 jobs:
-    build-windows:
+    sign-windows-installer:
         runs-on: windows-latest
         environment: "auth-win-build"
 
-        defaults:
-            run:
-                working-directory: auth
-
         steps:
-            - name: Checkout code and submodules
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
-
-            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
-              uses: subosito/flutter-action@v2
-              with:
-                  channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION  }}
-                  cache: true
-
             - name: Create artifacts directory
-              run: mkdir artifacts
+              run: mkdir -p artifacts
 
-            - name: Build Windows installer
+            - name: Download Windows installer
               run: |
-                  flutter config --enable-windows-desktop
-                  # dart pub global activate flutter_distributor
-                  dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
-                  make innoinstall
-                  flutter_distributor package --platform=windows --targets=exe --skip-clean
-                  mv dist/**/*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
+                curl -L https://github.com/ente-io/ente/releases/download/auth-v4.3.5/ente-auth-v4.3.5-installer.exe -o artifacts/unsigned-installer.exe
 
-            - name: Retain Windows EXE and DLLs
-              run: cp -r build/windows/x64/runner/Release ente-${{ github.ref_name }}-windows
-
-            - name: Sign files with Trusted Signing
+            - name: Sign installer with Trusted Signing
               uses: azure/trusted-signing-action@v0
               with:
                 azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
                 azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
                 azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
                 endpoint: ${{ secrets.AZURE_ENDPOINT }}
-                trusted-signing-account-name: v${{ secrets.AZURE_CODE_SIGNING_NAME }}
+                trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
                 certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
                 files: |
-                      ${{ github.workspace }}/auth/artifacts/ente-${{ github.ref_name }}-installer.exe
-                      ${{ github.workspace }}/auth/ente-${{ github.ref_name }}-windows/auth.exe
+                    ${{ github.workspace }}/artifacts/unsigned-installer.exe
                 file-digest: SHA256
                 timestamp-rfc3161: http://timestamp.acs.microsoft.com
-                timestamp-digest: SHA256  
-
-            - name: Zip Windows EXE and DLLs
-              run: tar.exe -a -c -f artifacts/ente-${{ github.ref_name }}-windows.zip ente-${{ github.ref_name }}-windows
-
-            - name: Generate checksums
-              run: sha256sum artifacts/ente-* > artifacts/sha256sum-windows
-
-            - name: Create a draft GitHub release
-              uses: ncipollo/release-action@v1
-              with:
-                  artifacts: "auth/artifacts/*"
-                  draft: true
-                  allowUpdates: true
-                  updateOnlyUnreleased: true
+                timestamp-digest: SHA256
+                
+            - name: Verify signing
+              run: |
+                powershell -Command "Get-AuthenticodeSignature artifacts/unsigned-installer.exe | Format-List"
