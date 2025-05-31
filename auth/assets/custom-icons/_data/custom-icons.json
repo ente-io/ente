@@ -200,7 +200,9 @@
     {
       "title": "bonify",
       "slug": "bonify",
-      "altNames": ["bonify.de"]
+      "altNames": [
+        "bonify.de"
+      ]
     },
     {
       "title": "Booking",
@@ -303,6 +305,15 @@
     },
     {
       "title": "CSAM"
+    },
+    {
+      "title": "CSSBuy",
+      "slug": "cssbuy",
+      "altNames": [
+        "CSS Buy",
+        "CSS-Buy",
+        "cssbuy.com"
+      ]
     },
     {
       "title": "CSFloat"
@@ -1294,6 +1305,14 @@
     {
       "title": "US Mobile",
       "slug": "us_mobile"
+    },
+    {
+      "title": "uollet",
+      "slug": "uollet",
+      "altNames": [
+        "UOLLET",
+        "uollet.com.br"
+      ]
     },
     {
       "title": "Vikunja"
