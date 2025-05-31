@@ -30,7 +30,7 @@ const (
 	Period3Years = "3"
 
 	Period5Years = "5"
-	
+
 	Period10Years = "10"
 
 	// FamilyPlanProductID is the product ID of family (internal employees & their friends & family) plan
@@ -127,6 +127,7 @@ type Subscription struct {
 	// LinkedPurchaseToken on PlayStore , OriginalTransactionID on AppStore and SubscriptionID on Stripe
 	OriginalTransactionID string                 `json:"originalTransactionID"`
 	ExpiryTime            int64                  `json:"expiryTime"`
+	UpgradedAt            int64                  `json:"upgradedAt,omitempty"`
 	PaymentProvider       PaymentProvider        `json:"paymentProvider"`
 	Attributes            SubscriptionAttributes `json:"attributes"`
 	Price                 string                 `json:"price"`

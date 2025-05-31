@@ -38,8 +38,8 @@ func MicrosecondsAfterDays(noOfDays int) int64 {
 	return Microseconds() + int64(noOfDays*24)*MicroSecondsInOneHour
 }
 
-// MicrosecondBeforeDays returns the time in micro seconds before noOfDays
-func MicrosecondBeforeDays(noOfDays int) int64 {
+// MicrosecondsBeforeDays returns the time in micro seconds before noOfDays
+func MicrosecondsBeforeDays(noOfDays int) int64 {
 	return Microseconds() - int64(noOfDays*24)*MicroSecondsInOneHour
 }
 

@@ -332,6 +332,35 @@ func (repo *UserRepository) GetUsersWithIndividualPlanWhoHaveExceededStorageQuot
 	return users, nil
 }
 
+func (repo *UserRepository) GetUsersWhoUpgradedNDaysAgo(days int) ([]ente.User, error) {
+	rows, err := repo.DB.Query(`
+        SELECT u.user_id, u.encrypted_email, u.email_decryption_nonce, u.email_hash, u.creation_time 
+        FROM users u
+        INNER JOIN subscriptions s ON u.user_id = s.user_id
+        WHERE s.upgraded_at >= $1 AND s.upgraded_at < $2 AND u.encrypted_email IS NOT NULL`,
+		time.MicrosecondsBeforeDays(days+1), time.MicrosecondsBeforeDays(days))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+	users := make([]ente.User, 0)
+	for rows.Next() {
+		var user ente.User
+		var encryptedEmail, nonce []byte
+		err := rows.Scan(&user.ID, &encryptedEmail, &nonce, &user.Hash, &user.CreationTime)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		user.Email = email
+		users = append(users, user)
+	}
+	return users, nil
+}
+
 // SetTwoFactorSecret sets the two factor secret for a user
 func (repo *UserRepository) SetTwoFactorSecret(userID int64, secret ente.EncryptionResult, secretHash string, recoveryEncryptedTwoFactorSecret string, recoveryTwoFactorSecretDecryptionNonce string) error {
 	_, err := repo.DB.Exec(`INSERT INTO two_factor(user_id,encrypted_two_factor_secret,two_factor_secret_decryption_nonce,two_factor_secret_hash,recovery_encrypted_two_factor_secret,recovery_two_factor_secret_decryption_nonce) 
