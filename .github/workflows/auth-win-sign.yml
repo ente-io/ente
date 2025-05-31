@@ -1,4 +1,4 @@
-name: "Release (auth)"
+name: "Windows build and signing (auth)"
 
 # [Note: Testing release workflows that are triggered by tags]
 #
