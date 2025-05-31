@@ -989,6 +989,10 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		emailNotificationCtrl.SendStorageLimitExceededMails()
 	})
 
+	scheduleAndRun(c, "@every 24h", func() {
+		emailNotificationCtrl.SayHelloToCustomers()
+	})
+
 	schedule(c, "@every 1m", func() {
 		pushController.SendPushes()
 	})
