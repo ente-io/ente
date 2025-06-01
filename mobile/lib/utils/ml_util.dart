@@ -410,7 +410,10 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final startTime = DateTime.now();
 
     // Decode the image once to use for both face detection and alignment
-    final (image, rawRgbaBytes) = await decodeImageFromPath(imagePath);
+    final decodedImage =
+        await decodeImageFromPath(imagePath, includeRgbaBytes: true);
+    final image = decodedImage.image;
+    final rawRgbaBytes = decodedImage.rawRgbaBytes!;
     final decodedImageSize =
         Dimensions(height: image.height, width: image.width);
     final result = MLResult.fromEnteFileID(enteFileID);
