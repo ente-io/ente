@@ -21,7 +21,5 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'bg';
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day")
-      };
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{};
 }

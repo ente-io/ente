@@ -1176,7 +1176,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "<branding>Ente</branding>が保管"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("再び道で"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("この人のみ"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
