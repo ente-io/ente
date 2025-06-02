@@ -42,10 +42,6 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   void initState() {
     super.initState();
     Future(_showAutoLogoutDialogIfRequired);
-    Future.delayed(
-      const Duration(seconds: 1),
-      _autoEnableResumableUpload,
-    );
   }
 
   @override
@@ -307,10 +303,6 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         _navigateToSignInPage();
       }
     }
-  }
-
-  void _autoEnableResumableUpload() {
-    localSettings.autoEnableMultiplePart(50).ignore();
   }
 }
 

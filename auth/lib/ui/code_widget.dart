@@ -152,6 +152,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                   key: ValueKey('period_${widget.code.period}'),
                   period: widget.code.period,
                   isCompactMode: widget.isCompactMode,
+                  timeOffsetInMilliseconds:
+                      PreferenceService.instance.timeOffsetInMilliSeconds(),
                 ),
               widget.isCompactMode
                   ? const SizedBox(height: 4)

@@ -1,3 +1,4 @@
+import CheckIcon from "@mui/icons-material/Check";
 import { Alert, Box, Stack, TextField } from "@mui/material";
 import {
     AccountsPageContents,
@@ -122,7 +123,8 @@ const ChangeEmailForm: React.FC = () => {
                 <>
                     {showMessage && (
                         <Alert
-                            color="success"
+                            icon={<CheckIcon fontSize="inherit" />}
+                            severity="success"
                             onClose={() => setShowMessage(false)}
                         >
                             <Trans

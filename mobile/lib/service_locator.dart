@@ -7,6 +7,7 @@ import "package:photos/gateways/entity_gw.dart";
 import "package:photos/module/download/manager.dart";
 import "package:photos/services/account/billing_service.dart";
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
@@ -31,7 +32,12 @@ class ServiceLocator {
 
   static final ServiceLocator instance = ServiceLocator._privateConstructor();
 
-  init(SharedPreferences prefs, Dio enteDio, Dio nonEnteDio, PackageInfo packageInfo) {
+  init(
+    SharedPreferences prefs,
+    Dio enteDio,
+    Dio nonEnteDio,
+    PackageInfo packageInfo,
+  ) {
     this.prefs = prefs;
     this.enteDio = enteDio;
     this.nonEnteDio = nonEnteDio;
@@ -152,6 +158,15 @@ PermissionService? _permissionService;
 PermissionService get permissionService {
   _permissionService ??= PermissionService(ServiceLocator.instance.prefs);
   return _permissionService!;
+}
+
+FileDataService? _fileDataService;
+FileDataService get fileDataService {
+  _fileDataService ??= FileDataService(
+    ServiceLocator.instance.prefs,
+    ServiceLocator.instance.enteDio,
+  );
+  return _fileDataService!;
 }
 
 DownloadManager? _downloadManager;

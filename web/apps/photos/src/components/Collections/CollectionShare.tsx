@@ -12,14 +12,15 @@ import Photo, { default as PhotoIcon } from "@mui/icons-material/Photo";
 import PublicIcon from "@mui/icons-material/Public";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import WorkspacesIcon from "@mui/icons-material/Workspaces";
-import { Dialog, DialogProps, Stack, styled, Typography } from "@mui/material";
+import { Dialog, Stack, styled, Typography } from "@mui/material";
 import NumberAvatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Avatar from "components/pages/gallery/Avatar";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
-    NestedSidebarDrawer,
     SidebarDrawer,
+    SidebarDrawerTitlebar,
+    TitledNestedSidebarDrawer,
 } from "ente-base/components/mui/SidebarDrawer";
 import {
     RowButton,
@@ -30,9 +31,15 @@ import {
     RowLabel,
     RowSwitch,
 } from "ente-base/components/RowButton";
-import { Titlebar } from "ente-base/components/Titlebar";
+import {
+    SingleInputForm,
+    type SingleInputFormProps,
+} from "ente-base/components/SingleInputForm";
 import { useClipboardCopy } from "ente-base/components/utils/hooks";
-import { useModalVisibility } from "ente-base/components/utils/modal";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import { isHTTP4xxError } from "ente-base/http";
@@ -49,11 +56,8 @@ import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCr
 import { avatarTextColor } from "ente-new/photos/services/avatar";
 import type { CollectionSummary } from "ente-new/photos/services/collection/ui";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { FlexWrapper } from "ente-shared/components/Container";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "ente-shared/components/SingleInputForm";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
+import { wait } from "ente-utils/promise";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -66,69 +70,52 @@ import {
     unshareCollection,
     updateShareableURL,
 } from "services/collectionService";
-import { getDeviceLimitOptions } from "utils/collection";
 import * as Yup from "yup";
 
-interface CollectionShareProps {
-    open: boolean;
-    onClose: () => void;
+type CollectionShareProps = ModalVisibilityProps & {
     collection: Collection;
     collectionSummary: CollectionSummary;
-}
+};
 
 export const CollectionShare: React.FC<CollectionShareProps> = ({
+    open,
+    onClose,
+    collection,
     collectionSummary,
-    ...props
 }) => {
-    const handleRootClose = () => {
-        props.onClose();
-    };
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") {
-            handleRootClose();
-        } else {
-            props.onClose();
-        }
-    };
-    if (!props.collection || !collectionSummary) {
+    if (!collection || !collectionSummary) {
         return <></>;
     }
+
     const { type } = collectionSummary;
 
     return (
-        <SidebarDrawer
-            anchor="right"
-            open={props.open}
-            onClose={handleDrawerClose}
-        >
+        <SidebarDrawer anchor="right" {...{ open, onClose }}>
             <Stack sx={{ gap: "4px", py: "12px" }}>
-                <Titlebar
-                    onClose={props.onClose}
+                <SidebarDrawerTitlebar
+                    onClose={onClose}
+                    onRootClose={onClose}
                     title={
                         type == "incomingShareCollaborator" ||
                         type == "incomingShareViewer"
                             ? t("sharing_details")
                             : t("share_album")
                     }
-                    onRootClose={handleRootClose}
-                    caption={props.collection.name}
+                    caption={collection.name}
                 />
                 <Stack sx={{ py: "20px", px: "8px", gap: "24px" }}>
                     {type == "incomingShareCollaborator" ||
                     type == "incomingShareViewer" ? (
-                        <SharingDetails
-                            collection={props.collection}
-                            type={type}
-                        />
+                        <SharingDetails {...{ collection, type }} />
                     ) : (
                         <>
                             <EmailShare
-                                collection={props.collection}
-                                onRootClose={handleRootClose}
+                                onRootClose={onClose}
+                                {...{ collection }}
                             />
                             <PublicShare
-                                collection={props.collection}
-                                onRootClose={handleRootClose}
+                                onRootClose={onClose}
+                                {...{ collection }}
                             />
                         </>
                     )}
@@ -486,6 +473,8 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
         onRootClose();
     };
 
+    const title = type == "VIEWER" ? t("add_viewers") : t("add_collaborators");
+
     const collectionShare: AddParticipantFormProps["callback"] = async ({
         email,
         emails,
@@ -525,34 +514,20 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             anchor="right"
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={title}
+            caption={collection.name}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <Titlebar
-                    {...{ onClose }}
-                    onRootClose={handleRootClose}
-                    title={
-                        type == "VIEWER"
-                            ? t("add_viewers")
-                            : t("add_collaborators")
-                    }
-                    caption={collection.name}
-                />
-                <AddParticipantForm
-                    onClose={onClose}
-                    callback={collectionShare}
-                    optionsList={nonSharedEmails}
-                    buttonText={
-                        type == "VIEWER"
-                            ? t("add_viewers")
-                            : t("add_collaborators")
-                    }
-                />
-            </Stack>
-        </NestedSidebarDrawer>
+            <AddParticipantForm
+                onClose={onClose}
+                callback={collectionShare}
+                optionsList={nonSharedEmails}
+                buttonText={title}
+            />
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -697,23 +672,17 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = (props) => {
                             </Stack>
                         )}
                     </Stack>
-                    <FlexWrapper
-                        px={"8px"}
-                        justifyContent={"center"}
-                        flexWrap={"nowrap"}
-                    >
-                        <Stack sx={{ px: "8px", width: "100%" }}>
-                            <LoadingButton
-                                type="submit"
-                                color="accent"
-                                fullWidth
-                                loading={loading}
-                                sx={{ mt: 4, mb: 4 }}
-                            >
-                                {props.buttonText}
-                            </LoadingButton>
-                        </Stack>
-                    </FlexWrapper>
+                    <Stack sx={{ px: 2 }}>
+                        <LoadingButton
+                            type="submit"
+                            color="accent"
+                            fullWidth
+                            loading={loading}
+                            sx={{ mt: 4, mb: 4 }}
+                        >
+                            {props.buttonText}
+                        </LoadingButton>
+                    </Stack>
                 </form>
             )}
         </Formik>
@@ -738,11 +707,12 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
     const galleryContext = useContext(GalleryContext);
 
-    const [addParticipantView, setAddParticipantView] = useState(false);
-    const [manageParticipantView, setManageParticipantView] = useState(false);
-
-    const closeAddParticipant = () => setAddParticipantView(false);
-    const openAddParticipant = () => setAddParticipantView(true);
+    const { show: showAddParticipant, props: addParticipantVisibilityProps } =
+        useModalVisibility();
+    const {
+        show: showManageParticipant,
+        props: manageParticipantVisibilityProps,
+    } = useModalVisibility();
 
     const participantType = useRef<"COLLABORATOR" | "VIEWER">(null);
 
@@ -750,12 +720,12 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
 
     const openAddCollab = () => {
         participantType.current = "COLLABORATOR";
-        openAddParticipant();
+        showAddParticipant();
     };
 
     const openAddViewer = () => {
         participantType.current = "VIEWER";
-        openAddParticipant();
+        showAddParticipant();
     };
 
     const handleRootClose = () => {
@@ -793,120 +763,105 @@ const ManageEmailShare: React.FC<ManageEmailShareProps> = ({
         selectedParticipant.current = collection.sharees.find(
             (sharee) => sharee.email === email,
         );
-        setManageParticipantView(true);
-    };
-    const closeManageParticipant = () => {
-        setManageParticipantView(false);
+        showManageParticipant();
     };
 
     return (
         <>
-            <NestedSidebarDrawer
+            <TitledNestedSidebarDrawer
                 anchor="right"
                 {...{ open, onClose }}
                 onRootClose={handleRootClose}
+                title={collection.name}
+                caption={t("participants_count", { count: peopleCount })}
             >
-                <Stack sx={{ gap: "4px", py: "12px" }}>
-                    <Titlebar
-                        onClose={onClose}
-                        title={collection.name}
-                        onRootClose={handleRootClose}
-                        caption={t("participants_count", {
-                            count: peopleCount,
-                        })}
-                    />
-                    <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
-                        <Stack>
-                            <RowButtonGroupTitle
-                                icon={<AdminPanelSettingsIcon />}
-                            >
-                                {t("owner")}
-                            </RowButtonGroupTitle>
-                            <RowButtonGroup>
-                                <RowLabel
-                                    startIcon={<Avatar email={ownerEmail} />}
-                                    label={isOwner ? t("you") : ownerEmail}
-                                />
-                            </RowButtonGroup>
-                        </Stack>
-                        <Stack>
-                            <RowButtonGroupTitle icon={<ModeEditIcon />}>
-                                {t("collaborators")}
-                            </RowButtonGroupTitle>
-                            <RowButtonGroup>
-                                {collaborators.map((item) => (
-                                    <React.Fragment key={item}>
-                                        <RowButton
-                                            fontWeight="regular"
-                                            onClick={() =>
-                                                openManageParticipant(item)
-                                            }
-                                            label={item}
-                                            startIcon={<Avatar email={item} />}
-                                            endIcon={<ChevronRightIcon />}
-                                        />
-                                        <RowButtonDivider />
-                                    </React.Fragment>
-                                ))}
+                <Stack sx={{ gap: "24px", py: "20px", px: "12px" }}>
+                    <Stack>
+                        <RowButtonGroupTitle icon={<AdminPanelSettingsIcon />}>
+                            {t("owner")}
+                        </RowButtonGroupTitle>
+                        <RowButtonGroup>
+                            <RowLabel
+                                startIcon={<Avatar email={ownerEmail} />}
+                                label={isOwner ? t("you") : ownerEmail}
+                            />
+                        </RowButtonGroup>
+                    </Stack>
+                    <Stack>
+                        <RowButtonGroupTitle icon={<ModeEditIcon />}>
+                            {t("collaborators")}
+                        </RowButtonGroupTitle>
+                        <RowButtonGroup>
+                            {collaborators.map((item) => (
+                                <React.Fragment key={item}>
+                                    <RowButton
+                                        fontWeight="regular"
+                                        onClick={() =>
+                                            openManageParticipant(item)
+                                        }
+                                        label={item}
+                                        startIcon={<Avatar email={item} />}
+                                        endIcon={<ChevronRightIcon />}
+                                    />
+                                    <RowButtonDivider />
+                                </React.Fragment>
+                            ))}
 
-                                <RowButton
-                                    startIcon={<AddIcon />}
-                                    onClick={openAddCollab}
-                                    label={
-                                        collaborators?.length
-                                            ? t("add_more")
-                                            : t("add_collaborators")
-                                    }
-                                />
-                            </RowButtonGroup>
-                        </Stack>
-                        <Stack>
-                            <RowButtonGroupTitle icon={<Photo />}>
-                                {t("viewers")}
-                            </RowButtonGroupTitle>
-                            <RowButtonGroup>
-                                {viewers.map((item) => (
-                                    <React.Fragment key={item}>
-                                        <RowButton
-                                            fontWeight="regular"
-                                            onClick={() =>
-                                                openManageParticipant(item)
-                                            }
-                                            label={item}
-                                            startIcon={<Avatar email={item} />}
-                                            endIcon={<ChevronRightIcon />}
-                                        />
-                                        <RowButtonDivider />
-                                    </React.Fragment>
-                                ))}
-                                <RowButton
-                                    startIcon={<AddIcon />}
-                                    onClick={openAddViewer}
-                                    label={
-                                        viewers?.length
-                                            ? t("add_more")
-                                            : t("add_viewers")
-                                    }
-                                />
-                            </RowButtonGroup>
-                        </Stack>
+                            <RowButton
+                                startIcon={<AddIcon />}
+                                onClick={openAddCollab}
+                                label={
+                                    collaborators?.length
+                                        ? t("add_more")
+                                        : t("add_collaborators")
+                                }
+                            />
+                        </RowButtonGroup>
+                    </Stack>
+                    <Stack>
+                        <RowButtonGroupTitle icon={<Photo />}>
+                            {t("viewers")}
+                        </RowButtonGroupTitle>
+                        <RowButtonGroup>
+                            {viewers.map((item) => (
+                                <React.Fragment key={item}>
+                                    <RowButton
+                                        fontWeight="regular"
+                                        onClick={() =>
+                                            openManageParticipant(item)
+                                        }
+                                        label={item}
+                                        startIcon={<Avatar email={item} />}
+                                        endIcon={<ChevronRightIcon />}
+                                    />
+                                    <RowButtonDivider />
+                                </React.Fragment>
+                            ))}
+                            <RowButton
+                                startIcon={<AddIcon />}
+                                onClick={openAddViewer}
+                                label={
+                                    viewers?.length
+                                        ? t("add_more")
+                                        : t("add_viewers")
+                                }
+                            />
+                        </RowButtonGroup>
                     </Stack>
                 </Stack>
-            </NestedSidebarDrawer>
-            <ManageParticipant
-                collectionUnshare={collectionUnshare}
-                open={manageParticipantView}
-                collection={collection}
-                onRootClose={onRootClose}
-                onClose={closeManageParticipant}
-                selectedParticipant={selectedParticipant.current}
-            />
+            </TitledNestedSidebarDrawer>
             <AddParticipant
-                open={addParticipantView}
-                onClose={closeAddParticipant}
+                {...addParticipantVisibilityProps}
                 onRootClose={onRootClose}
                 collection={collection}
                 type={participantType.current}
+            />
+            <ManageParticipant
+                {...manageParticipantVisibilityProps}
+                onRootClose={onRootClose}
+                collectionUnshare={collectionUnshare}
+                collection={collection}
+                selectedParticipant={selectedParticipant.current}
             />
         </>
     );
@@ -1011,83 +966,77 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     }
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             anchor="right"
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("manage")}
+            caption={selectedParticipant.email}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <Titlebar
-                    onClose={onClose}
-                    title={t("manage")}
-                    onRootClose={handleRootClose}
-                    caption={selectedParticipant.email}
-                />
+            <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+                <Stack>
+                    <Typography
+                        variant="small"
+                        sx={{ color: "text.muted", padding: 1 }}
+                    >
+                        {t("added_as")}
+                    </Typography>
 
-                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
-                    <Stack>
+                    <RowButtonGroup>
+                        <RowButton
+                            fontWeight="regular"
+                            onClick={handleRoleChange("COLLABORATOR")}
+                            label={"Collaborator"}
+                            startIcon={<ModeEditIcon />}
+                            endIcon={
+                                selectedParticipant.role === "COLLABORATOR" && (
+                                    <DoneIcon />
+                                )
+                            }
+                        />
+                        <RowButtonDivider />
+
+                        <RowButton
+                            fontWeight="regular"
+                            onClick={handleRoleChange("VIEWER")}
+                            label={"Viewer"}
+                            startIcon={<PhotoIcon />}
+                            endIcon={
+                                selectedParticipant.role == "VIEWER" && (
+                                    <DoneIcon />
+                                )
+                            }
+                        />
+                    </RowButtonGroup>
+
+                    <Typography
+                        variant="small"
+                        sx={{ color: "text.muted", padding: 1 }}
+                    >
+                        {t("collaborator_hint")}
+                    </Typography>
+
+                    <Stack sx={{ py: "30px" }}>
                         <Typography
                             variant="small"
                             sx={{ color: "text.muted", padding: 1 }}
                         >
-                            {t("added_as")}
+                            {t("remove_participant")}
                         </Typography>
 
                         <RowButtonGroup>
                             <RowButton
+                                color="critical"
                                 fontWeight="regular"
-                                onClick={handleRoleChange("COLLABORATOR")}
-                                label={"Collaborator"}
-                                startIcon={<ModeEditIcon />}
-                                endIcon={
-                                    selectedParticipant.role ===
-                                        "COLLABORATOR" && <DoneIcon />
-                                }
-                            />
-                            <RowButtonDivider />
-
-                            <RowButton
-                                fontWeight="regular"
-                                onClick={handleRoleChange("VIEWER")}
-                                label={"Viewer"}
-                                startIcon={<PhotoIcon />}
-                                endIcon={
-                                    selectedParticipant.role == "VIEWER" && (
-                                        <DoneIcon />
-                                    )
-                                }
+                                onClick={removeParticipant}
+                                label={"Remove"}
+                                startIcon={<BlockIcon />}
                             />
                         </RowButtonGroup>
-
-                        <Typography
-                            variant="small"
-                            sx={{ color: "text.muted", padding: 1 }}
-                        >
-                            {t("collaborator_hint")}
-                        </Typography>
-
-                        <Stack sx={{ py: "30px" }}>
-                            <Typography
-                                variant="small"
-                                sx={{ color: "text.muted", padding: 1 }}
-                            >
-                                {t("remove_participant")}
-                            </Typography>
-
-                            <RowButtonGroup>
-                                <RowButton
-                                    color="critical"
-                                    fontWeight="regular"
-                                    onClick={removeParticipant}
-                                    label={"Remove"}
-                                    startIcon={<BlockIcon />}
-                                />
-                            </RowButtonGroup>
-                        </Stack>
                     </Stack>
                 </Stack>
             </Stack>
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -1289,87 +1238,75 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             anchor="right"
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("share_album")}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <Titlebar
-                    onClose={onClose}
-                    title={t("share_album")}
-                    onRootClose={handleRootClose}
+            <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
+                <ManagePublicCollect
+                    collection={collection}
+                    publicShareProp={publicShareProp}
+                    updatePublicShareURLHelper={updatePublicShareURLHelper}
                 />
-                <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
-                    <ManagePublicCollect
-                        collection={collection}
-                        publicShareProp={publicShareProp}
-                        updatePublicShareURLHelper={updatePublicShareURLHelper}
-                    />
-                    <ManageLinkExpiry
+                <ManageLinkExpiry
+                    collection={collection}
+                    publicShareProp={publicShareProp}
+                    updatePublicShareURLHelper={updatePublicShareURLHelper}
+                    onRootClose={onRootClose}
+                />
+                <RowButtonGroup>
+                    <ManageDeviceLimit
                         collection={collection}
                         publicShareProp={publicShareProp}
                         updatePublicShareURLHelper={updatePublicShareURLHelper}
                         onRootClose={onRootClose}
                     />
-                    <RowButtonGroup>
-                        <ManageDeviceLimit
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                            onRootClose={onRootClose}
-                        />
-                        <RowButtonDivider />
-                        <ManageDownloadAccess
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                        <RowButtonDivider />
-                        <ManageLinkPassword
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            startIcon={
-                                copied ? (
-                                    <DoneIcon sx={{ color: "accent.main" }} />
-                                ) : (
-                                    <ContentCopyIcon />
-                                )
-                            }
-                            onClick={handleCopyLink}
-                            label={t("copy_link")}
-                        />
-                    </RowButtonGroup>
-                    <RowButtonGroup>
-                        <RowButton
-                            color="critical"
-                            startIcon={<RemoveCircleOutlineIcon />}
-                            onClick={disablePublicSharing}
-                            label={t("remove_link")}
-                        />
-                    </RowButtonGroup>
-                    {sharableLinkError && (
-                        <Typography
-                            variant="small"
-                            sx={{ color: "critical.main", textAlign: "center" }}
-                        >
-                            {sharableLinkError}
-                        </Typography>
-                    )}
-                </Stack>
+                    <RowButtonDivider />
+                    <ManageDownloadAccess
+                        collection={collection}
+                        publicShareProp={publicShareProp}
+                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                    />
+                    <RowButtonDivider />
+                    <ManageLinkPassword
+                        collection={collection}
+                        publicShareProp={publicShareProp}
+                        updatePublicShareURLHelper={updatePublicShareURLHelper}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        startIcon={
+                            copied ? (
+                                <DoneIcon sx={{ color: "accent.main" }} />
+                            ) : (
+                                <ContentCopyIcon />
+                            )
+                        }
+                        onClick={handleCopyLink}
+                        label={t("copy_link")}
+                    />
+                </RowButtonGroup>
+                <RowButtonGroup>
+                    <RowButton
+                        color="critical"
+                        startIcon={<RemoveCircleOutlineIcon />}
+                        onClick={disablePublicSharing}
+                        label={t("remove_link")}
+                    />
+                </RowButtonGroup>
+                {sharableLinkError && (
+                    <Typography
+                        variant="small"
+                        sx={{ color: "critical.main", textAlign: "center" }}
+                    >
+                        {sharableLinkError}
+                    </Typography>
+                )}
             </Stack>
-        </NestedSidebarDrawer>
+        </TitledNestedSidebarDrawer>
     );
 };
 
@@ -1420,6 +1357,11 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
     updatePublicShareURLHelper,
     onRootClose,
 }) => {
+    const { show: showExpiryOptions, props: expiryOptionsVisibilityProps } =
+        useModalVisibility();
+
+    const options = useMemo(() => shareExpiryOptions(), []);
+
     const updateDeviceExpiry = async (optionFn) => {
         return updatePublicShareURLHelper({
             collectionID: collection.id,
@@ -1427,33 +1369,17 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
         });
     };
 
-    const [shareExpiryOptionsModalView, setShareExpiryOptionsModalView] =
-        useState(false);
-
-    const shareExpireOption = useMemo(() => shareExpiryOptions(), []);
-
-    const closeShareExpiryOptionsModalView = () =>
-        setShareExpiryOptionsModalView(false);
-
-    const openShareExpiryOptionsModalView = () =>
-        setShareExpiryOptionsModalView(true);
-
     const changeShareExpiryValue = (value: number) => async () => {
         await updateDeviceExpiry(value);
         publicShareProp.validTill = value;
-        setShareExpiryOptionsModalView(false);
-    };
-
-    const handleRootClose = () => {
-        closeShareExpiryOptionsModalView();
-        onRootClose();
+        expiryOptionsVisibilityProps.onClose();
     };
 
     return (
         <>
             <RowButtonGroup>
                 <RowButton
-                    onClick={openShareExpiryOptionsModalView}
+                    onClick={showExpiryOptions}
                     endIcon={<ChevronRightIcon />}
                     label={t("link_expiry")}
                     color={
@@ -1470,43 +1396,34 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
                     }
                 />
             </RowButtonGroup>
-            <NestedSidebarDrawer
+            <TitledNestedSidebarDrawer
                 anchor="right"
-                open={shareExpiryOptionsModalView}
-                onClose={closeShareExpiryOptionsModalView}
-                onRootClose={handleRootClose}
+                {...expiryOptionsVisibilityProps}
+                onRootClose={onRootClose}
+                title={t("link_expiry")}
             >
-                <Stack sx={{ gap: "4px", py: "12px" }}>
-                    <Titlebar
-                        onClose={closeShareExpiryOptionsModalView}
-                        onRootClose={handleRootClose}
-                        title={t("link_expiry")}
-                    />
-                    <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
-                        <RowButtonGroup>
-                            {shareExpireOption.map((item, index) => (
-                                <React.Fragment key={item.value()}>
-                                    <RowButton
-                                        fontWeight="regular"
-                                        onClick={changeShareExpiryValue(
-                                            item.value(),
-                                        )}
-                                        label={item.label}
-                                    />
-                                    {index !== shareExpireOption.length - 1 && (
-                                        <RowButtonDivider />
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </RowButtonGroup>
-                    </Stack>
+                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+                    <RowButtonGroup>
+                        {options.map(({ label, value }, index) => (
+                            <React.Fragment key={value()}>
+                                <RowButton
+                                    fontWeight="regular"
+                                    onClick={changeShareExpiryValue(value())}
+                                    label={label}
+                                />
+                                {index != options.length - 1 && (
+                                    <RowButtonDivider />
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </RowButtonGroup>
                 </Stack>
-            </NestedSidebarDrawer>
+            </TitledNestedSidebarDrawer>
         </>
     );
 };
 
-export const shareExpiryOptions = () => [
+const shareExpiryOptions = () => [
     { label: t("never"), value: () => 0 },
     { label: t("after_time.hour"), value: () => microsecsAfter("hour") },
     { label: t("after_time.day"), value: () => microsecsAfter("day") },
@@ -1550,29 +1467,21 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
     updatePublicShareURLHelper,
     onRootClose,
 }) => {
+    const { show: showDeviceOptions, props: deviceOptionsVisibilityProps } =
+        useModalVisibility();
+
+    const options = useMemo(() => deviceLimitOptions(), []);
+
     const updateDeviceLimit = async (newLimit: number) => {
         return updatePublicShareURLHelper({
             collectionID: collection.id,
             deviceLimit: newLimit,
         });
     };
-    const [isChangeDeviceLimitVisible, setIsChangeDeviceLimitVisible] =
-        useState(false);
-    const deviceLimitOptions = useMemo(() => getDeviceLimitOptions(), []);
-
-    const closeDeviceLimitChangeModal = () =>
-        setIsChangeDeviceLimitVisible(false);
-    const openDeviceLimitChangeModalView = () =>
-        setIsChangeDeviceLimitVisible(true);
 
     const changeDeviceLimitValue = (value: number) => async () => {
         await updateDeviceLimit(value);
-        setIsChangeDeviceLimitVisible(false);
-    };
-
-    const handleRootClose = () => {
-        closeDeviceLimitChangeModal();
-        onRootClose();
+        deviceOptionsVisibilityProps.onClose();
     };
 
     return (
@@ -1584,45 +1493,41 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                         ? t("none")
                         : publicShareProp.deviceLimit.toString()
                 }
-                onClick={openDeviceLimitChangeModalView}
+                onClick={showDeviceOptions}
                 endIcon={<ChevronRightIcon />}
             />
-            <NestedSidebarDrawer
+            <TitledNestedSidebarDrawer
                 anchor="right"
-                open={isChangeDeviceLimitVisible}
-                onClose={closeDeviceLimitChangeModal}
-                onRootClose={handleRootClose}
+                {...deviceOptionsVisibilityProps}
+                onRootClose={onRootClose}
+                title={t("device_limit")}
             >
-                <Stack sx={{ gap: "4px", py: "12px" }}>
-                    <Titlebar
-                        onClose={closeDeviceLimitChangeModal}
-                        onRootClose={handleRootClose}
-                        title={t("device_limit")}
-                    />
-                    <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
-                        <RowButtonGroup>
-                            {deviceLimitOptions.map((item, index) => (
-                                <React.Fragment key={item.label}>
-                                    <RowButton
-                                        fontWeight="regular"
-                                        onClick={changeDeviceLimitValue(
-                                            item.value,
-                                        )}
-                                        label={item.label}
-                                    />
-                                    {index !==
-                                        deviceLimitOptions.length - 1 && (
-                                        <RowButtonDivider />
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </RowButtonGroup>
-                    </Stack>
+                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+                    <RowButtonGroup>
+                        {options.map(({ label, value }, index) => (
+                            <React.Fragment key={label}>
+                                <RowButton
+                                    fontWeight="regular"
+                                    onClick={changeDeviceLimitValue(value)}
+                                    label={label}
+                                />
+                                {index != options.length - 1 && (
+                                    <RowButtonDivider />
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </RowButtonGroup>
                 </Stack>
-            </NestedSidebarDrawer>
+            </TitledNestedSidebarDrawer>
         </>
     );
 };
+
+const deviceLimitOptions = () =>
+    [0, 2, 5, 10, 25, 50].map((i) => ({
+        label: i == 0 ? t("none") : i.toString(),
+        value: i,
+    }));
 
 interface ManageDownloadAccessProps {
     publicShareProp: PublicURL;
@@ -1684,15 +1589,14 @@ const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
     updatePublicShareURLHelper,
 }) => {
     const { showMiniDialog } = useBaseContext();
-    const [changePasswordView, setChangePasswordView] = useState(false);
-
-    const closeConfigurePassword = () => setChangePasswordView(false);
+    const { show: showSetPassword, props: setPasswordVisibilityProps } =
+        useModalVisibility();
 
     const handlePasswordChangeSetting = async () => {
         if (publicShareProp.passwordEnabled) {
             await confirmDisablePublicUrlPassword();
         } else {
-            setChangePasswordView(true);
+            showSetPassword();
         }
     };
 
@@ -1719,37 +1623,39 @@ const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
                 checked={!!publicShareProp?.passwordEnabled}
                 onClick={handlePasswordChangeSetting}
             />
-            <PublicLinkSetPassword
-                open={changePasswordView}
-                onClose={closeConfigurePassword}
+            <SetPublicLinkPassword
+                {...setPasswordVisibilityProps}
                 collection={collection}
                 publicShareProp={publicShareProp}
                 updatePublicShareURLHelper={updatePublicShareURLHelper}
-                setChangePasswordView={setChangePasswordView}
             />
         </>
     );
 };
 
-function PublicLinkSetPassword({
+type SetPublicLinkPasswordProps = ModalVisibilityProps &
+    ManageLinkPasswordProps;
+
+const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
     open,
     onClose,
     collection,
     publicShareProp,
     updatePublicShareURLHelper,
-    setChangePasswordView,
-}) {
-    const savePassword: SingleInputFormProps["callback"] = async (
+}) => {
+    const savePassword: SingleInputFormProps["onSubmit"] = async (
         passphrase,
-        setFieldError,
     ) => {
-        if (passphrase && passphrase.trim().length >= 1) {
-            await enablePublicUrlPassword(passphrase);
-            setChangePasswordView(false);
-            publicShareProp.passwordEnabled = true;
-        } else {
-            setFieldError("can not be empty");
-        }
+        await enablePublicUrlPassword(passphrase);
+        publicShareProp.passwordEnabled = true;
+        onClose();
+        // The onClose above will close the dialog, but if we return immediately
+        // from this function, then the dialog will be temporarily rendered
+        // without the activity indicator on the button (before the entire
+        // dialog disappears). This gives a ungainly visual flash, so add a wait
+        // long enough so that the form's activity indicator persists longer
+        // than it'll take for the dialog to get closed.
+        return wait(1000 /* 1 second */);
     };
 
     const enablePublicUrlPassword = async (password: string) => {
@@ -1765,10 +1671,10 @@ function PublicLinkSetPassword({
             memLimit: kek.memLimit,
         });
     };
+
     return (
         <Dialog
-            open={open}
-            onClose={onClose}
+            {...{ open, onClose }}
             disablePortal
             slotProps={{
                 // We're being shown within the sidebar drawer, so limit the
@@ -1788,14 +1694,13 @@ function PublicLinkSetPassword({
                     {t("password_lock")}
                 </Typography>
                 <SingleInputForm
-                    callback={savePassword}
-                    placeholder={t("password")}
-                    buttonText={t("lock")}
-                    fieldType="password"
-                    secondaryButtonAction={onClose}
-                    submitButtonProps={{ sx: { mt: 1, mb: 0 } }}
+                    inputType="password"
+                    label={t("password")}
+                    submitButtonTitle={t("lock")}
+                    onCancel={onClose}
+                    onSubmit={savePassword}
                 />
             </Stack>
         </Dialog>
     );
-}
+};

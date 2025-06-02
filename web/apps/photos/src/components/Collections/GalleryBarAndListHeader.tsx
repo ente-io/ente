@@ -1,5 +1,4 @@
 import { AllAlbums } from "components/Collections/AllAlbums";
-import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import { CollectionShare } from "components/Collections/CollectionShare";
 import { TimeStampListItem } from "components/FileList";
 import { useModalVisibility } from "ente-base/components/utils/modal";
@@ -48,7 +47,6 @@ type CollectionsProps = Omit<
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
     hiddenCollectionSummaries: CollectionSummaries;
-    setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setPhotoListHeader: (value: TimeStampListItem) => void;
     filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
@@ -84,7 +82,6 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     people,
     activePerson,
     onSelectPerson,
-    setCollectionNamerAttributes,
     setPhotoListHeader,
     filesDownloadProgressAttributesList,
     setFilesDownloadProgressAttributesCreator,
@@ -145,7 +142,6 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                         {...{
                             activeCollection,
                             setActiveCollectionID,
-                            setCollectionNamerAttributes,
                             setFilesDownloadProgressAttributesCreator,
                             isActiveCollectionDownloadInProgress,
                         }}

@@ -13,8 +13,7 @@ import { RowButtonGroup, RowSwitch } from "ente-base/components/RowButton";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import {
-    NestedSidebarDrawer,
-    SidebarDrawerTitlebar,
+    TitledNestedSidebarDrawer,
     type NestedSidebarDrawerVisibilityProps,
 } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
@@ -66,19 +65,13 @@ export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 
     return (
         <>
-            <NestedSidebarDrawer
+            <TitledNestedSidebarDrawer
                 {...{ open, onClose }}
                 onRootClose={handleRootClose}
+                title={t("ml_search")}
             >
-                <Stack sx={{ gap: "4px", py: "12px" }}>
-                    <SidebarDrawerTitlebar
-                        onClose={onClose}
-                        onRootClose={handleRootClose}
-                        title={t("ml_search")}
-                    />
-                    {component}
-                </Stack>
-            </NestedSidebarDrawer>
+                {component}
+            </TitledNestedSidebarDrawer>
 
             <FaceConsentDrawer
                 open={openFaceConsent}
@@ -151,19 +144,13 @@ const FaceConsentDrawer: React.FC<FaceConsentDrawerProps> = ({
     };
 
     return (
-        <NestedSidebarDrawer
+        <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
+            title={t("ml_consent_title")}
         >
-            <Stack sx={{ gap: "4px", py: "12px" }}>
-                <SidebarDrawerTitlebar
-                    onClose={onClose}
-                    onRootClose={handleRootClose}
-                    title={t("ml_consent_title")}
-                />
-                <FaceConsent onConsent={onConsent} onCancel={onClose} />
-            </Stack>
-        </NestedSidebarDrawer>
+            <FaceConsent onConsent={onConsent} onCancel={onClose} />
+        </TitledNestedSidebarDrawer>
     );
 };
 

@@ -1,8 +1,10 @@
 import { encryptBlobB64 } from "ente-base/crypto";
+import type { EncryptedBlobB64 } from "ente-base/crypto/types";
 import {
     authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
     ensureOk,
+    retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
@@ -394,8 +396,8 @@ export const fetchFilePreviewData = async (
  *
  * @param file {@link EnteFile} which this data is associated with.
  *
- * @param playlistData The playlist data, suitably encoded in a form ready for
- * encryption.
+ * @param encryptedPlaylist The encrypted playlist data (along with the nonce
+ * used during encryption).
  *
  * @param objectID Object ID of an already uploaded "file preview data" (see
  * {@link getFilePreviewDataUploadURL}).
@@ -405,25 +407,22 @@ export const fetchFilePreviewData = async (
  */
 export const putVideoData = async (
     file: EnteFile,
-    playlistData: Uint8Array,
+    encryptedPlaylist: EncryptedBlobB64,
     objectID: string,
     objectSize: number,
-) => {
-    const { encryptedData, decryptionHeader } = await encryptBlobB64(
-        playlistData,
-        file.key,
+) =>
+    retryEnsuringHTTPOk(
+        async () =>
+            fetch(await apiURL("/files/video-data"), {
+                method: "PUT",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    fileID: file.id,
+                    objectID,
+                    objectSize,
+                    playlist: encryptedPlaylist.encryptedData,
+                    playlistHeader: encryptedPlaylist.decryptionHeader,
+                }),
+            }),
+        { retryProfile: "background" },
     );
-
-    const res = await fetch(await apiURL("/files/video-data"), {
-        method: "PUT",
-        headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify({
-            fileID: file.id,
-            objectID,
-            objectSize,
-            playlist: encryptedData,
-            playlistHeader: decryptionHeader,
-        }),
-    });
-    ensureOk(res);
-};
