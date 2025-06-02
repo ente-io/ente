@@ -56,9 +56,6 @@ String _actionName(
     case CollectionActionType.shareCollection:
       text = S.of(context).share;
       break;
-    case CollectionActionType.collectPhotos:
-      text = S.of(context).share;
-      break;
     case CollectionActionType.addToHiddenAlbum:
       text = S.of(context).addToHiddenAlbum;
       break;
