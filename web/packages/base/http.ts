@@ -193,6 +193,16 @@ interface RetryAsyncOperationOpts {
  * Retry a async operation on failure up to 4 times (1 original + 3 retries)
  * with exponential backoff.
  *
+ * [Note: Retries of network requests should be idempotent]
+ *
+ * When dealing with network requests, avoid using this function directly, use
+ * one of its wrappers like {@link retryEnsuringHTTPOk} instead. Those wrappers
+ * ultimately use this function only, and there is nothing wrong with this
+ * function generally, however since this function allows retrying arbitrary
+ * promises, it is easy accidentally try and attempt retries of non-idemponent
+ * requests, while the more restricted API of {@link retryEnsuringHTTPOk} and
+ * other {@link HTTPRequestRetrier}s makes such misuse less likely.
+ *
  * @param op A function that performs the operation, returning the promise for
  * its completion.
  *
@@ -235,6 +245,8 @@ export const retryAsyncOperation = async <T>(
  * See {@link retryEnsuringHTTPOk} for the canonical example. This typedef is to
  * allow us to talk about and pass functions that behave similar to
  * {@link retryEnsuringHTTPOk}, but perhaps with other additional checks.
+ *
+ * See also: [Note: Retries of network requests should be idempotent]
  */
 export type HTTPRequestRetrier = (
     request: () => Promise<Response>,
