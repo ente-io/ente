@@ -1,5 +1,5 @@
 ---
-title: About Ente
+title: Introduction
 description: >
     An overview of Ente: the company, and the people behind it, and the products
     that we make.
@@ -7,9 +7,9 @@ description: >
 
 # About
 
-Ente is a end-to-end encrypted platform for privately, reliably, and securely
-storing your data on the cloud. On top of this platform, Ente offers two
-products:
+Ente (pronounced en-_tay_. Like ca<i>fe</i>) is a end-to-end encrypted platform
+for privately, reliably, and securely storing your data on the cloud. On top of
+this platform, Ente offers two products:
 
 - **Ente Photos** - An alternative to Google Photos and Apple Photos
 
@@ -48,25 +48,3 @@ the name, and also led to the adoption of "Ducky", Ente's mascot:
 
 For the full origin story of Ducky you can check out
 [this blog post](https://ente.io/blog/ducky/).
-
-### How do I pronounce Ente?
-
-en-_tay_. Like ca<i>fe</i>.
-
-## Get in touch
-
-If you have a support query that is not answered by these docs, please reach out
-to our Customer Support by sending an email to support@ente.io
-
-To stay up to date with new product launches, and behind the scenes details of
-how we're building Ente, you can read our [blog](https://ente.io/blog) (or
-subscribe to it via [RSS](https://ente.io/blog/rss.xml))
-
-To suggest new features and/or offer your perspective on how we should design
-planned and upcoming features, use our
-[GitHub discussions](https://github.com/ente-io/ente/discussions)
-
-Or if you'd just like to hang out, join our
-[Discord](https://discord.gg/z2YVKkycX3), follow us on
-[Twitter](https://twitter.com/enteio) or give us a shout out on
-[Mastodon](https://mstdn.social/@ente)

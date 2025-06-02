@@ -5,22 +5,20 @@ description:
     server
 ---
 
-
-> [!WARNING] NOTE
-> This page covers documentation around self-hosting the web app manually. If you
-> want to deploy Ente hassle free, please use the [one line](https://ente.io/blog/self-hosting-quickstart/) 
-> command to setup Ente. This guide might be deprecated in the near future.
+> [!WARNING] NOTE This page covers documentation around self-hosting the web app
+> manually. If you want to deploy Ente hassle free, please use the
+> [one line](https://ente.io/blog/self-hosting-quickstart/) command to setup
+> Ente. This guide might be deprecated in the near future.
 
 # Web app
 
 The getting started instructions mention using `yarn dev` (which is an alias of
 `yarn dev:photos`) to serve your web app.
 
->[!IMPORTANT]
-> Please note that Ente's Web App supports the Yarn version 1.22.xx or 1.22.22 specifically.
-> Make sure to install the right version or modify your yarn installation to meet the requirements.
-> The user might end up into unknown version and dependency related errors if yarn
-> is on different version.
+> [!IMPORTANT] Please note that Ente's Web App supports the Yarn version 1.22.xx
+> or 1.22.22 specifically. Make sure to install the right version or modify your
+> yarn installation to meet the requirements. The user might end up into unknown
+> version and dependency related errors if yarn is on different version.
 
 ```sh
 cd ente/web
@@ -146,15 +144,15 @@ docker compose logs <container-name>
 
 ## Configure App Endpoints
 
-> [!NOTE]
-> Previously, this was dependent on the env variables `NEXT_ENTE_PUBLIC_ACCOUNTS_ENDPOINT`
-> and etc. Please check the below documentation to update your setup configurations
+> [!NOTE] Previously, this was dependent on the env variables
+> `NEXT_ENTE_PUBLIC_ACCOUNTS_ENDPOINT` and etc. Please check the below
+> documentation to update your setup configurations
 
-You can configure the web endpoints for the other apps including Accounts, Albums
-Family and Cast in your `museum.yaml` configuration file. Checkout
+You can configure the web endpoints for the other apps including Accounts,
+Albums Family and Cast in your `museum.yaml` configuration file. Checkout
 [`local.yaml`](https://github.com/ente-io/ente/blob/543411254b2bb55bd00a0e515dcafa12d12d3b35/server/configurations/local.yaml#L76-L89)
-to configure the endpoints. Make sure to setup up your DNS Records accordingly to the
-similar URL's you set up in `museum.yaml`.
+to configure the endpoints. Make sure to setup up your DNS Records accordingly
+to the similar URL's you set up in `museum.yaml`.
 
 Next part is to configure the web server.
 
