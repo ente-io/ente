@@ -332,6 +332,13 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
                 >
                     {t("share_favorites")}
                 </OverflowMenuOption>,
+                <OverflowMenuOption
+                    key="cast"
+                    startIcon={<TvIcon />}
+                    onClick={onCollectionCast}
+                >
+                    {t("cast_to_tv")}
+                </OverflowMenuOption>,
             ];
             break;
 
