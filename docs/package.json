@@ -5,7 +5,8 @@
         "dev": "vitepress dev docs",
         "build": "vitepress build docs",
         "preview": "vitepress preview docs",
-        "pretty": "prettier --write ."
+        "pretty": "prettier --write .",
+        "pretty:check": "prettier -c ."
     },
     "devDependencies": {
         "prettier": "^3.3.4",

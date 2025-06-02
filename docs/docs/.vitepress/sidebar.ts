@@ -10,12 +10,16 @@ export const sidebar = [
                 link: "/overview/",
             },
             {
+                text: "Community",
+                link: "/overview/community",
+            },
+            {
                 text: "Contributing",
                 link: "/overview/contribute",
             },
             {
                 text: "Help",
-                link: "/overview/community",
+                link: "/overview/help",
             },
         ],
     },

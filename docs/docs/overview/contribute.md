@@ -1,9 +1,17 @@
 ---
 title: Contribute
-description: Details about how to contribute to Ente's docs
+description: Details about how to contribute to Ente
 ---
 
 # Contributing
+
+## Suggest a feature
+
+To suggest new features and/or offer your perspective on how we should design
+(planned and upcoming features), use our
+[GitHub discussions](https://github.com/ente-io/ente/discussions)
+
+## Documentation
 
 To contribute to these docs, you can use the "Edit this page" button at the
 bottom of each page. This will allow you to directly edit the markdown file that

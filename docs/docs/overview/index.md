@@ -16,8 +16,8 @@ this platform, Ente offers two products:
 - **Ente Auth** - A free 2FA alternative to Authy
 
 Both these apps are available for all desktop (Linux, Mac, Windows) and mobile
-(Android, iOS and F-Droid) platforms. They also work directly in your web
-browser without you needing to install anything.
+(Android and iOS) platforms. They also work directly in your web browser without
+you needing to install anything.
 
 More products are in the pipeline.
 
