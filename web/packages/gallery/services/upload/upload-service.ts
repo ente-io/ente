@@ -45,6 +45,7 @@ import {
 import { FileType, type FileTypeInfo } from "ente-media/file-type";
 import { encodeLivePhoto } from "ente-media/live-photo";
 import { addToCollection } from "ente-new/photos/services/collection";
+import { settingsSnapshot } from "ente-new/photos/services/settings";
 import {
     CustomError,
     CustomErrorMessage,
@@ -635,7 +636,10 @@ export const upload = async (
 
         const { fileTypeInfo, fileSize, lastModifiedMs } = assetDetails;
 
-        const maxFileSize = 4 * 1024 * 1024 * 1024; /* 4 GB */
+        // TODO(REL):
+        const maxFileSize = settingsSnapshot().isInternalUser
+            ? 10 * 1024 * 1024 * 1024 /* 10 GB */
+            : 4 * 1024 * 1024 * 1024; /* 4 GB */
         if (fileSize >= maxFileSize) return { uploadResult: "tooLarge" };
 
         abortIfCancelled();
