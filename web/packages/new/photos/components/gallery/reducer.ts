@@ -1462,10 +1462,11 @@ const createCollectionSummaries = (
             coverFile: coverFiles.get(collection.id),
             fileCount: collectionFiles?.length ?? 0,
             updationTime: collection.updationTime,
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             order: isIncomingShare(collection, user)
-                ? (collection.sharedMagicMetadata?.data?.order ?? 0)
-                : (collection.magicMetadata?.data?.order ?? 0),
+                ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                  (collection.sharedMagicMetadata?.data?.order ?? 0)
+                : // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                  (collection.magicMetadata?.data?.order ?? 0),
         });
     }
 
