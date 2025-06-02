@@ -397,7 +397,7 @@ export const fetchFilePreviewData = async (
  * @param file {@link EnteFile} which this data is associated with.
  *
  * @param encryptedPlaylist The encrypted playlist data (along with the nonce
- * used during encryption) encryption.
+ * used during encryption).
  *
  * @param objectID Object ID of an already uploaded "file preview data" (see
  * {@link getFilePreviewDataUploadURL}).
