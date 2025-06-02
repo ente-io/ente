@@ -626,6 +626,7 @@
     "faster_upload_description": "Định tuyến tải lên qua các máy chủ gần đó",
     "open_ente_on_startup": "",
     "cast_album_to_tv": "Phát album trên TV",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "Nhập mã bạn thấy trên TV bên dưới để ghép nối thiết bị này.",
     "code": "Mã",
     "pair_device_to_tv": "Ghép nối thiết bị",

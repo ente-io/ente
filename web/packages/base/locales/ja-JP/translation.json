@@ -626,6 +626,7 @@
     "faster_upload_description": "近くのサーバー経由でのアップロード",
     "open_ente_on_startup": "開始時に Ente を開く",
     "cast_album_to_tv": "TVでアルバムを再生",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "このデバイスをペアリングするには、以下のテレビで表示されているコードを入力してください。",
     "code": "コード",
     "pair_device_to_tv": "デバイスを接続する",

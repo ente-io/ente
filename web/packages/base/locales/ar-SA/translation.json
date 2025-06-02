@@ -626,6 +626,7 @@
     "faster_upload_description": "توجيه التحميلات عبر خوادم قريبة",
     "open_ente_on_startup": "فتح Ente عند بدء التشغيل",
     "cast_album_to_tv": "تشغيل الألبوم على التلفزيون",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "أدخل الرمز الذي تراه على التلفزيون أدناه لإقران هذا الجهاز.",
     "code": "الرمز",
     "pair_device_to_tv": "إقران الأجهزة",

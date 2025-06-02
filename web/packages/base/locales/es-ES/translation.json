@@ -626,6 +626,7 @@
     "faster_upload_description": "Enrutar subidas a través de servidores cercanos",
     "open_ente_on_startup": "Abrir ente al iniciar",
     "cast_album_to_tv": "Reproducir álbum en TV",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "Introduce el código que ves en el televisor para emparejar este dispositivo.",
     "code": "Código",
     "pair_device_to_tv": "Emparejar dispositivos",

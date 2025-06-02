@@ -626,6 +626,7 @@
     "faster_upload_description": "Kieruj przesłania przez pobliskie serwery",
     "open_ente_on_startup": "",
     "cast_album_to_tv": "Odtwórz album na telewizorze",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "Wprowadź kod, który widzisz na telewizorze poniżej, aby sparować to urządzenie.",
     "code": "Kod",
     "pair_device_to_tv": "Sparuj urządzenia",
