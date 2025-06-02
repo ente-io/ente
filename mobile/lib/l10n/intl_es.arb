@@ -1724,15 +1724,5 @@
   "onTheRoad": "De nuevo en la carretera",
   "food": "Delicia culinaria",
   "pets": "Compañeros peludos",
-  "cLIcon": "Nuevo ícono",
-  "cLIconDesc": "Por fin, un nuevo icono de la aplicación, que creemos que representa mejor nuestro trabajo. También hemos añadido una opción para que puedas seguir utilizando el icono anterior.",
-  "cLMemories": "Recuerdos",
-  "cLMemoriesDesc": "Redescubre tus momentos especiales: enfócate en tu gente favorita, tus viajes y vacaciones, tus mejores clics, y mucho más. Activa el aprendizaje de automático, etiquétate a ti mismo y etiqueta a tus amigos para la mejor experiencia.",
-  "cLWidgets": "Widgets",
-  "cLWidgetsDesc": "Ya están disponibles los widgets de pantalla de inicio con tus recuerdos. Podrás ver tus momentos especiales sin abrir la aplicación.",
-  "cLFamilyPlan": "Límites de plan familiar",
-  "cLFamilyPlanDesc": "Ahora puede establecer límites en cuanto al almacenamiento que los miembros de tu familia pueden utilizar.",
-  "cLBulkEdit": "Edición masiva de fechas",
-  "cLBulkEditDesc": "Ahora puedes seleccionar múltiples fotos y editar la fecha/hora para todas ellas con una acción rápida. También es posible cambiar las fechas.",
   "curatedMemories": "Memorias revisadas"
 }
