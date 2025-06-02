@@ -1604,7 +1604,7 @@ const uploadToBucket = async (
  */
 const createAbortableRetryEnsuringHTTPOk =
     (abortIfCancelled: () => void): HTTPRequestRetrier =>
-    (request: () => Promise<Response>) =>
+    (request, opts) =>
         retryAsyncOperation(
             async () => {
                 abortIfCancelled();
@@ -1613,6 +1613,7 @@ const createAbortableRetryEnsuringHTTPOk =
                 return r;
             },
             {
+                ...opts,
                 abortIfNeeded(e) {
                     if (
                         e instanceof Error &&

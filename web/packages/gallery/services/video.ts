@@ -1,13 +1,9 @@
 import { isDesktop } from "ente-base/app";
 import { assertionFailed } from "ente-base/assert";
-import { decryptBlob } from "ente-base/crypto";
+import { decryptBlob, encryptBlobB64 } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
 import { ensureElectron } from "ente-base/electron";
-import {
-    isHTTP4xxError,
-    retryAsyncOperation,
-    type PublicAlbumsCredentials,
-} from "ente-base/http";
+import { isHTTP4xxError, type PublicAlbumsCredentials } from "ente-base/http";
 import { getKV, getKVB, getKVN, setKV } from "ente-base/kv";
 import { ensureAuthToken, ensureLocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
@@ -1060,11 +1056,14 @@ const processQueueItem = async ({
             size: videoSize,
         });
 
+        const encryptedPlaylist = await encryptBlobB64(playlistData, file.key);
+
         try {
-            await retryAsyncOperation(
-                () =>
-                    putVideoData(file, playlistData, videoObjectID, videoSize),
-                { retryProfile: "background" },
+            await putVideoData(
+                file,
+                encryptedPlaylist,
+                videoObjectID,
+                videoSize,
             );
         } catch (e) {
             if (isHTTP4xxError(e)) await markFailedVideoFile(file);
