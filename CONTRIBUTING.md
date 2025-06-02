@@ -23,7 +23,7 @@ Just hang around, enjoy the vibe. Answer someone's query on our
 [Discord](https://discord.gg/z2YVKkycX3), or pile on in the sporadic #off-topic
 rants there. Chuckle (or wince!) at our [Twitter](https://twitter.com/enteio)
 memes. Suggest a new feature in our [Github
-Discussions](https://github.com/ente-io/ente/discussions/new?category=feature-requests),
+Discussions](https://github.com/ente-io/ente/discussions/new?category=enhancements),
 or upvote the existing ones that you feel we should focus on first. Provide your
 opinion on existing threads.
 
@@ -68,8 +68,8 @@ best to start small. Consider some well-scoped changes, say like adding more
 Each of the individual product/platform specific directories in this repository
 have instructions on setting up a dev environment.
 
-For anything beyond trivial bug fixes, please use [features requests and
-discussions](https://github.com/ente-io/ente/discussions) instead of performing
+For anything beyond trivial bug fixes, please use
+[discussions](https://github.com/ente-io/ente/discussions) instead of performing
 code changes directly.
 
 > [!TIP]
