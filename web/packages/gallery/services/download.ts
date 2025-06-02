@@ -343,8 +343,8 @@ class DownloadManager {
      * This is a convenience abstraction over {@link fileStream} that converts
      * it into a {@link Blob}.
      */
-    async fileBlob(file: EnteFile) {
-        return this.fileStream(file).then((s) => new Response(s).blob());
+    async fileBlob(file: EnteFile, opts?: FileDownloadOpts) {
+        return this.fileStream(file, opts).then((s) => new Response(s).blob());
     }
 
     /**
@@ -356,6 +356,8 @@ class DownloadManager {
      * cached for subsequent use.
      *
      * @param file The {@link EnteFile} whose data we want.
+     *
+     * @param opts Optional options to modify the download.
      */
     async fileStream(
         file: EnteFile,
