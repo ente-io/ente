@@ -1301,7 +1301,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Saugykloje <branding>ente</branding>"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("Vėl kelyje"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("Šią dieną"),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Tik jiems"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
@@ -1944,6 +1944,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoInfo":
             MessageLookupByLibrary.simpleMessage("Vaizdo įrašo informacija"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("vaizdo įrašas"),
+        "videoStreaming":
+            MessageLookupByLibrary.simpleMessage("Srautiniai vaizdo įrašai"),
         "videos": MessageLookupByLibrary.simpleMessage("Vaizdo įrašai"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("Peržiūrėti aktyvius seansus"),
