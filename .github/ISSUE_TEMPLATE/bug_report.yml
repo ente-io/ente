@@ -17,8 +17,8 @@ body:
               Please describe the bug. If possible, also include the steps to
               reproduce the behaviour, and the expected behaviour (sometimes
               bugs are just expectation mismatches, in which case this would be
-              a good fit for [feature
-              requests](https://github.com/ente-io/ente/discussions/categories/feature-requests)).
+              a good fit for
+              [enhancements](https://github.com/ente-io/ente/discussions/categories/enhancements)).
       validations:
           required: true
     - type: input
@@ -33,12 +33,12 @@ body:
               The version where the feature was last known to be working. It is
               fine if you don't remember the exact version (mention roughly
               then), but if there just isn't a last known working version, then
-              it is likely that what is being reported is not an issue but a
-              feature request. The difference between the two categories is not
-              just semantic - feature requests use GitHub discussions and so can
-              be [upvoted by the
-              community](https://github.com/ente-io/ente/discussions/categories/feature-requests)
-              (issues can't be).
+              it is likely that what is being reported is not an issue
+              (regression) but an enhancement. The difference between the two
+              categories is not just semantic - **enhancements use GitHub
+              discussions and so can be [upvoted by the
+              community](https://github.com/ente-io/ente/discussions/categories/enhancements)**
+              (while issues cannot be).
           placeholder: e.g. v1.2.3
     - type: dropdown
       attributes:
