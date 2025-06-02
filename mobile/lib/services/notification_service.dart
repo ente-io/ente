@@ -150,6 +150,7 @@ class NotificationService {
     String channelName = "ente",
     String payload = "ente://home",
     required DateTime dateTime,
+    Duration? timeoutDurationAndroid,
   }) async {
     _logger.info(
       "Scheduling notification with: $title, $message, $channelID, $channelName, $payload",
@@ -173,6 +174,7 @@ class NotificationService {
       priority: Priority.high,
       category: AndroidNotificationCategory.reminder,
       showWhen: false,
+      timeoutAfter: timeoutDurationAndroid?.inMilliseconds,
     );
     final iosSpecs = DarwinNotificationDetails(threadIdentifier: channelID);
     final platformChannelSpecs =
