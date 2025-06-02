@@ -1,5 +1,7 @@
 import "dart:async";
 import "dart:io";
+import "dart:math";
+import "dart:ui";
 
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
@@ -13,8 +15,8 @@ import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
+import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
-import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
 // import "package:step_progress_indicator/step_progress_indicator.dart";
@@ -135,6 +137,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   PageController? _pageController;
   final _showTitle = ValueNotifier<bool>(true);
   AnimationController? _progressAnimationController;
+  AnimationController? _kenBurnsAnimationController;
   final ValueNotifier<Duration> durationNotifier =
       ValueNotifier(const Duration(seconds: 5));
 
@@ -158,7 +161,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     super.dispose();
   }
 
-  void _toggleProgressAnimation(bool pause) {
+  void _toggleAnimation(bool pause) {
     if (_progressAnimationController != null) {
       if (pause) {
         _progressAnimationController!.stop();
@@ -166,33 +169,42 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         _progressAnimationController!.forward();
       }
     }
+    if (_kenBurnsAnimationController != null) {
+      if (pause) {
+        _kenBurnsAnimationController!.stop();
+      } else {
+        _kenBurnsAnimationController!.forward();
+      }
+    }
   }
 
-  void _resetProgressAnimation() {
+  void _resetAnimation() {
     if (_progressAnimationController != null) {
       _progressAnimationController!.reset();
     }
+    if (_kenBurnsAnimationController != null) {
+      _kenBurnsAnimationController!.reset();
+    }
   }
 
-  Future<Duration> _getVideoDuration() async {
-    final inheritedData = FullScreenMemoryData.of(context)!;
-    final currentIndex = inheritedData.indexNotifier.value;
-    final currentFile = inheritedData.memories[currentIndex].file;
+  void onFileLoad(
+    bool isLoaded,
+    int duration, {
+    bool isVideo = false,
+  }) {
+    if (isLoaded) {
+      durationNotifier.value = Duration(seconds: duration);
 
-    if (currentFile.fileType == FileType.video) {
-      final file = await getFile(
-        inheritedData.memories[currentIndex].file,
-        isOrigin: true,
-      );
-      if (file == null) {
-        return const Duration(seconds: 5);
-      }
-      final props = await getVideoPropsAsync(file);
-      if (props != null && props.duration != null) {
-        return props.duration! + const Duration(seconds: 1);
-      }
+      _progressAnimationController?.reset();
+      _progressAnimationController?.duration = durationNotifier.value;
+      _progressAnimationController?.forward();
+
+      _kenBurnsAnimationController?.reset();
+      _kenBurnsAnimationController?.forward();
+    } else {
+      _progressAnimationController?.stop();
+      _kenBurnsAnimationController?.stop();
     }
-    return const Duration(seconds: 5);
   }
 
   @override
@@ -293,10 +305,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
+          const MemoryBackDrop(),
           PageView.builder(
             controller: _pageController ??= PageController(
               initialPage: widget.initialIndex,
             ),
+            physics: const BouncingScrollPhysics(),
             itemBuilder: (context, index) {
               if (index < inheritedData.memories.length - 1) {
                 final nextFile = inheritedData.memories[index + 1].file;
@@ -327,34 +341,37 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   }
                 },
                 onLongPress: () {
-                  if (!isVideo) {
-                    _toggleProgressAnimation(true);
-                  }
+                  isVideo ? null : _toggleAnimation(true);
                 },
                 onLongPressUp: () {
-                  if (!isVideo) {
-                    _toggleProgressAnimation(false);
-                  }
+                  isVideo ? null : _toggleAnimation(false);
                 },
-                child: FileWidget(
-                  inheritedData.memories[index].file,
-                  autoPlay: false,
-                  tagPrefix: "memories",
-                  backgroundDecoration: const BoxDecoration(
-                    color: Colors.transparent,
-                  ),
-                  isFromMemories: true,
-                  onFileLoad: (isLoaded, duration) {
-                    if (isLoaded) {
-                      durationNotifier.value = Duration(seconds: duration);
-                      _progressAnimationController!.reset();
-                      _progressAnimationController!.duration =
-                          durationNotifier.value;
-                      _progressAnimationController!.forward();
-                    } else {
-                      _progressAnimationController!.stop();
-                    }
+                child: MemoriesZoomWidget(
+                  scaleController: (controller) {
+                    _kenBurnsAnimationController = controller;
                   },
+                  isVideo: isVideo,
+                  child: FileWidget(
+                    inheritedData.memories[index].file,
+                    autoPlay: false,
+                    tagPrefix: "memories",
+                    backgroundDecoration: const BoxDecoration(
+                      color: Colors.transparent,
+                    ),
+                    isFromMemories: true,
+                    playbackCallback: (isPlaying) {
+                      isPlaying
+                          ? _toggleAnimation(false)
+                          : _toggleAnimation(true);
+                    },
+                    onFileLoad: (isLoaded, duration) {
+                      onFileLoad(
+                        isLoaded,
+                        duration,
+                        isVideo: isVideo,
+                      );
+                    },
+                  ),
                 ),
               );
             },
@@ -366,7 +383,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 ),
               );
               inheritedData.indexNotifier.value = index;
-              _resetProgressAnimation();
+              _resetAnimation();
             },
             itemCount: inheritedData.memories.length,
           ),
@@ -535,5 +552,151 @@ class BottomGradient extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class MemoryBackDrop extends StatelessWidget {
+  const MemoryBackDrop({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final inheritedData = FullScreenMemoryData.of(context)!;
+    return ValueListenableBuilder(
+      valueListenable: inheritedData.indexNotifier,
+      builder: (context, value, _) {
+        final currentFile = inheritedData.memories[value].file;
+        if (currentFile.fileType == FileType.video ||
+            currentFile.fileType == FileType.livePhoto) {
+          return const SizedBox.shrink();
+        }
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          child: Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.transparent,
+              ),
+              ThumbnailWidget(
+                currentFile,
+                shouldShowSyncStatus: false,
+                shouldShowFavoriteIcon: false,
+              ),
+              BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: 100,
+                  sigmaY: 100,
+                ),
+                child: Container(
+                  color: Colors.transparent,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class MemoriesZoomWidget extends StatefulWidget {
+  final Widget child;
+  final bool isVideo;
+  final void Function(AnimationController)? scaleController;
+
+  const MemoriesZoomWidget({
+    super.key,
+    required this.child,
+    required this.isVideo,
+    this.scaleController,
+  });
+
+  @override
+  State<MemoriesZoomWidget> createState() => _MemoriesZoomWidgetState();
+}
+
+class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<Offset> _panAnimation;
+  Random random = Random();
+
+  @override
+  void initState() {
+    super.initState();
+    _initAnimation();
+  }
+
+  void _initAnimation() {
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(
+        seconds: 5,
+      ),
+    );
+
+    final zoomIn = random.nextBool();
+    final startScale = zoomIn ? 1.05 : 1.15;
+    final endScale = zoomIn ? 1.15 : 1.05;
+
+    final startX = (random.nextDouble() - 0.5) * 0.1;
+    final startY = (random.nextDouble() - 0.5) * 0.1;
+    final endX = (random.nextDouble() - 0.5) * 0.1;
+    final endY = (random.nextDouble() - 0.5) * 0.1;
+
+    _scaleAnimation = Tween<double>(
+      begin: startScale,
+      end: endScale,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _panAnimation = Tween<Offset>(
+      begin: Offset(startX, startY),
+      end: Offset(endX, endY),
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    if (widget.scaleController != null) {
+      widget.scaleController!(_controller);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.isVideo
+        ? widget.child
+        : AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return ClipRect(
+                child: Transform.scale(
+                  scale: _scaleAnimation.value,
+                  child: Transform.translate(
+                    offset: Offset(
+                      _panAnimation.value.dx * 100,
+                      _panAnimation.value.dy * 100,
+                    ),
+                    child: widget.child,
+                  ),
+                ),
+              );
+            },
+          );
   }
 }

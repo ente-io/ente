@@ -294,11 +294,6 @@ class _ZoomableImageState extends State<ZoomableImage> {
         }
       });
     }
-    if (_imageProvider == null) {
-      widget.onFileLoad?.call(false, 5);
-    } else {
-      widget.onFileLoad?.call(true, 5);
-    }
   }
 
   void _loadLocalImage(BuildContext context) {
@@ -354,11 +349,6 @@ class _ZoomableImageState extends State<ZoomableImage> {
           }
         }
       });
-    }
-    if (_imageProvider == null) {
-      widget.onFileLoad?.call(false, 5);
-    } else {
-      widget.onFileLoad?.call(true, 5);
     }
   }
 
@@ -438,6 +428,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
       _loadedFinalImage = true;
       _logger.info("Final image loaded");
     });
+    if (_imageProvider == null) {
+      widget.onFileLoad?.call(false, 5);
+    } else {
+      widget.onFileLoad?.call(true, 5);
+    }
   }
 
   Future<void> _updatePhotoViewController({
