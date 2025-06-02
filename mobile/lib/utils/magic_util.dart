@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -130,7 +131,12 @@ Future<void> updateOrder(
     final Map<String, dynamic> update = {
       orderKey: order,
     };
-    await CollectionsService.instance.updateMagicMetadata(collection, update);
+    if (collection.isOwner(Configuration.instance.getUserID() ?? -1)) {
+      await CollectionsService.instance.updateMagicMetadata(collection, update);
+    } else {
+      await CollectionsService.instance
+          .updateShareeMagicMetadata(collection, update);
+    }
     Bus.instance.fire(
       CollectionMetaEvent(collection.id, CollectionMetaEventType.orderChanged),
     );

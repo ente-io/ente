@@ -88,7 +88,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                                   : c.hasShareeArchived(),
                               showFavForAlbumOnly: true,
                               shouldShowSyncStatus: false,
-                              shouldShowPinIcon: isOwner && c.isPinned,
+                              shouldShowPinIcon: c.isPinned,
                               key: Key(heroTag),
                             );
                             return Hero(
@@ -154,13 +154,13 @@ class AlbumRowItemWidget extends StatelessWidget {
                       ),
                       if (!isOwner)
                         Align(
-                          alignment: Alignment.bottomRight,
+                          alignment: Alignment.topRight,
                           child: Hero(
                             tag: tagPrefix + "_owner_other",
                             transitionOnUserGestures: true,
                             child: Padding(
                               padding:
-                                  const EdgeInsets.only(right: 4, bottom: 4),
+                                  const EdgeInsets.only(right: 4, top: 4),
                               child: UserAvatarWidget(
                                 c.owner,
                                 thumbnailView: true,

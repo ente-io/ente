@@ -352,7 +352,8 @@ extension GalleryAppBarExtn on GalleryType {
   }
 
   bool canPin() {
-    return this == GalleryType.ownedCollection;
+    return this == GalleryType.ownedCollection ||
+        this == GalleryType.sharedCollection;
   }
 
   bool canHide() {

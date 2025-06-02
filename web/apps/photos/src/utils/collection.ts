@@ -252,13 +252,29 @@ export const changeCollectionOrder = async (
             order,
         };
 
-        const updatedMagicMetadata = await updateMagicMetadata(
-            updatedMagicMetadataProps,
-            collection.magicMetadata,
-            collection.key,
-        );
+        const user: User = getData("user");
+        if (collection.owner.id === user.id) {
+            const updatedMagicMetadata = await updateMagicMetadata(
+                updatedMagicMetadataProps,
+                collection.magicMetadata,
+                collection.key,
+            );
 
-        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
+            await updateCollectionMagicMetadata(
+                collection,
+                updatedMagicMetadata,
+            );
+        } else {
+            const updatedMagicMetadata = await updateMagicMetadata(
+                updatedMagicMetadataProps,
+                collection.sharedMagicMetadata,
+                collection.key,
+            );
+            await updateSharedCollectionMagicMetadata(
+                collection,
+                updatedMagicMetadata,
+            );
+        }
     } catch (e) {
         log.error("change collection order failed", e);
     }

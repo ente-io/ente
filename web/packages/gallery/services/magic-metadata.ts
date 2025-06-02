@@ -24,16 +24,28 @@ export const isArchivedCollection = (item: Collection) => {
 };
 
 export function isPinnedCollection(item: Collection) {
-    if (
-        !item ||
-        !item.magicMetadata ||
-        !item.magicMetadata.data ||
-        typeof item.magicMetadata.data == "string" ||
-        typeof item.magicMetadata.data.order == "undefined"
-    ) {
+    if (!item) {
         return false;
     }
-    return item.magicMetadata.data.order !== 0;
+
+    if (
+        item.magicMetadata && 
+        item.magicMetadata.data && 
+        typeof item.magicMetadata.data != "string" && 
+        typeof item.magicMetadata.data.order != "undefined"
+        ) {
+            return item.magicMetadata.data.order !== 0
+    }
+
+    if (
+        item.sharedMagicMetadata && 
+        item.sharedMagicMetadata.data && 
+        typeof item.sharedMagicMetadata.data != "string" && 
+        typeof item.sharedMagicMetadata.data.order != "undefined"
+        ) {
+            return item.sharedMagicMetadata.data.order !== 0
+    }
+    return false;
 }
 
 export async function updateMagicMetadata<T>(

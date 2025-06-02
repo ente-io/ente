@@ -216,6 +216,7 @@ export type CollectionMagicMetadata =
 
 export interface CollectionShareeMetadataProps {
     visibility?: ItemVisibility;
+    order?: number;
 }
 export type CollectionShareeMagicMetadata =
     MagicMetadataCore<CollectionShareeMetadataProps>;

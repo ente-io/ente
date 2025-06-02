@@ -113,7 +113,15 @@ class Collection {
   // hasSharees returns true if the collection is shared with other ente users
   bool get hasSharees => sharees.isNotEmpty;
 
-  bool get isPinned => (magicMetadata.order ?? 0) != 0;
+  bool get isPinned {
+    final magicOrder = magicMetadata.order ?? 0;
+    if (magicOrder != 0) {
+      return true;
+    }
+
+    final sharedOrder = sharedMagicMetadata.order ?? 0;
+    return sharedOrder != 0;
+  }
 
   bool isHidden() {
     if (isDefaultHidden()) {

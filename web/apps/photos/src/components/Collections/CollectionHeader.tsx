@@ -364,6 +364,23 @@ const CollectionOptions: React.FC<CollectionHeaderProps> = ({
         case "incomingShareViewer":
         case "incomingShareCollaborator":
             menuOptions = [
+                isPinnedCollection(activeCollection) ? (
+                    <OverflowMenuOption
+                        key="unpin"
+                        onClick={unpinAlbum}
+                        startIcon={<PushPinOutlinedIcon />}
+                    >
+                        {t("unpin_album")}
+                    </OverflowMenuOption>
+                ) : (
+                    <OverflowMenuOption
+                        key="pin"
+                        onClick={pinAlbum}
+                        startIcon={<PushPinIcon />}
+                    >
+                        {t("pin_album")}
+                    </OverflowMenuOption>
+                ),
                 isArchivedCollection(activeCollection) ? (
                     <OverflowMenuOption
                         key="unarchive"
