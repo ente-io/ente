@@ -626,6 +626,7 @@
     "faster_upload_description": "通过附近的服务器路由上传",
     "open_ente_on_startup": "启动时打开 Ente",
     "cast_album_to_tv": "在电视上播放相册",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "输入您在下面的电视上看到的代码来配对此设备。",
     "code": "代码",
     "pair_device_to_tv": "配对设备",

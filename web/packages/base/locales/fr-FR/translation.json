@@ -626,6 +626,7 @@
     "faster_upload_description": "Router les chargements vers les serveurs à proximité",
     "open_ente_on_startup": "Ouvrir Ente au démarrage",
     "cast_album_to_tv": "Jouer l'album sur la TV",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "Entrez le code que vous voyez sur la TV ci-dessous pour appairer cet appareil.",
     "code": "Code",
     "pair_device_to_tv": "Associer les appareils",

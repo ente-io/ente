@@ -626,6 +626,7 @@
     "faster_upload_description": "Rotas enviam em servidores próximos",
     "open_ente_on_startup": "",
     "cast_album_to_tv": "Reproduzir álbum na TV",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "Introduza o código que vê na TV abaixo para emparelhar este dispositivo.",
     "code": "",
     "pair_device_to_tv": "Emparelhar dispositivos",
