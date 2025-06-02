@@ -12,7 +12,7 @@ import "package:photos/events/machine_learning_control_event.dart";
 class MachineLearningController {
   final _logger = Logger("MachineLearningController");
 
-  static const kMaximumTemperature = 42; // 42 degree celsius
+  static const kMaximumTemperatureAndroid = 42; // 42 degree celsius
   static const kMinimumBatteryLevel = 20; // 20%
   final kDefaultInteractionTimeout = Duration(seconds: Platform.isIOS ? 5 : 15);
   static const kUnhealthyStates = ["over_heat", "over_voltage", "dead"];
@@ -109,7 +109,9 @@ class MachineLearningController {
 
   bool _computeIsAndroidDeviceHealthy(AndroidBatteryInfo info) {
     return _hasSufficientBattery(info.batteryLevel ?? kMinimumBatteryLevel) &&
-        _isAcceptableTemperature(info.temperature ?? kMaximumTemperature) &&
+        _isAcceptableTemperatureAndroid(
+          info.temperature ?? kMaximumTemperatureAndroid,
+        ) &&
         _isBatteryHealthy(info.health ?? "");
   }
 
@@ -121,8 +123,8 @@ class MachineLearningController {
     return batteryLevel >= kMinimumBatteryLevel;
   }
 
-  bool _isAcceptableTemperature(int temperature) {
-    return temperature <= kMaximumTemperature;
+  bool _isAcceptableTemperatureAndroid(int temperature) {
+    return temperature <= kMaximumTemperatureAndroid;
   }
 
   bool _isBatteryHealthy(String health) {
