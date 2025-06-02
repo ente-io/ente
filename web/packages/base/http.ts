@@ -250,7 +250,10 @@ export const retryAsyncOperation = async <T>(
  */
 export type HTTPRequestRetrier = (
     request: () => Promise<Response>,
+    opts?: HTTPRequestRetrierOpts,
 ) => Promise<Response>;
+
+type HTTPRequestRetrierOpts = Pick<RetryAsyncOperationOpts, "retryProfile">;
 
 /**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
@@ -260,12 +263,13 @@ export type HTTPRequestRetrier = (
  */
 export const retryEnsuringHTTPOk: HTTPRequestRetrier = (
     request: () => Promise<Response>,
+    opts?: HTTPRequestRetrierOpts,
 ) =>
     retryAsyncOperation(async () => {
         const r = await request();
         ensureOk(r);
         return r;
-    });
+    }, opts);
 
 /**
  * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches, but
@@ -276,6 +280,7 @@ export const retryEnsuringHTTPOk: HTTPRequestRetrier = (
  */
 export const retryEnsuringHTTPOkOr4xx: HTTPRequestRetrier = (
     request: () => Promise<Response>,
+    opts?: HTTPRequestRetrierOpts,
 ) =>
     retryAsyncOperation(
         async () => {
@@ -284,6 +289,7 @@ export const retryEnsuringHTTPOkOr4xx: HTTPRequestRetrier = (
             return r;
         },
         {
+            ...opts,
             abortIfNeeded(e) {
                 if (isHTTP4xxError(e)) throw e;
             },
