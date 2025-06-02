@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	t "time"
 
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
@@ -126,6 +127,39 @@ func (repo *UserRepository) GetAll(sinceTime int64, tillTime int64) ([]ente.User
 		users = append(users, user)
 	}
 	return users, nil
+}
+
+// GetSubscribedUsersWithoutFamily returns notification candidates who are on paid plan
+// but not part of any family plan.
+func (repo *UserRepository) GetSubscribedUsersWithoutFamily(accountAgeInDays int64) ([]ente.User, error) {
+	rows, err := repo.DB.Query(`SELECT u.user_id, u.encrypted_email, u.email_decryption_nonce, u.email_hash, s.created_at 
+        FROM subscriptions s 
+        INNER JOIN users u ON s.user_id = u.user_id 
+        WHERE u.creation_time <= $1 AND u.family_admin_id IS NULL 
+        AND s.product_id != 'free'
+        AND u.encrypted_email IS NOT NULL`, time.MicrosecondBeforeDays(int(accountAgeInDays)))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+	subscribedUsers := make([]ente.User, 0)
+	for rows.Next() {
+		var user ente.User
+		var encryptedEmail, nonce []byte
+		var createdAt t.Time
+
+		err := rows.Scan(&user.ID, &encryptedEmail, &nonce, &user.Hash, &createdAt)
+		if err != nil {
+			return subscribedUsers, stacktrace.Propagate(err, "user scan failed")
+		}
+		email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		user.Email = email
+		subscribedUsers = append(subscribedUsers, user)
+	}
+	return subscribedUsers, nil
 }
 
 // GetUserUsageWithSubData will return current storage usage & basic information about subscription for given list
@@ -280,17 +314,17 @@ func (repo *UserRepository) GetPublicKey(userID int64) (string, error) {
 	return publicKey, stacktrace.Propagate(err, "")
 }
 
-// GetUsersWithIndividualPlanWhoHaveExceededStorageQuota returns list of users who have consumed their storage quota
-// and they are not part of any family plan
-func (repo *UserRepository) GetUsersWithIndividualPlanWhoHaveExceededStorageQuota() ([]ente.User, error) {
+// GetUsersWithExceedingStorage returns list of users who have consumed 90% or 100% of their total storage quota
+// depending on the percentageThreshold (90% or 100%) and they are not part of any family plan
+func (repo *UserRepository) GetUsersWithExceedingStorage(percentageThreshold int64) ([]ente.User, error) {
 	rows, err := repo.DB.Query(`
 		SELECT users.user_id, users.encrypted_email, users.email_decryption_nonce, users.email_hash, usage.storage_consumed, subscriptions.storage
 		FROM users 
 		INNER JOIN usage 
 		ON users.user_id = usage.user_id 
 		INNER JOIN subscriptions 
-		ON users.user_id = subscriptions.user_id AND usage.storage_consumed > subscriptions.storage AND users.encrypted_email IS NOT NULL AND users.family_admin_id IS NULL;
-	`)
+		ON users.user_id = subscriptions.user_id AND usage.storage_consumed >= (subscriptions.storage * ($1 / 100.0) AND users.encrypted_email IS NOT NULL AND users.family_admin_id is NULL
+		`, percentageThreshold)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -304,7 +338,7 @@ func (repo *UserRepository) GetUsersWithIndividualPlanWhoHaveExceededStorageQuot
 		var user ente.User
 		var encryptedEmail, nonce []byte
 		var storageConsumed, subStorage int64
-		err := rows.Scan(&user.ID, &encryptedEmail, &nonce, &user.Hash, &storageConsumed, &subStorage)
+		err = rows.Scan(&user.ID, &encryptedEmail, &nonce, &user.Hash, &storageConsumed, &subStorage)
 		if err != nil {
 			return users, stacktrace.Propagate(err, "")
 		}
@@ -312,15 +346,26 @@ func (repo *UserRepository) GetUsersWithIndividualPlanWhoHaveExceededStorageQuot
 		if strings.EqualFold(user.Hash, fmt.Sprintf(DELETED_EMAIL_HASH_FORMAT, &user.ID)) || len(encryptedEmail) == 0 {
 			continue
 		}
-		if refBonusStorage, ok := refBonus[user.ID]; ok {
-			addOnBonusStorage := addOnBonus[user.ID]
+		refBonusStorage := int64(0)
+		addOnBonusStorage := int64(0)
+
+		if bonus, ok := refBonus[user.ID]; ok {
+			refBonusStorage = bonus
+			addOnBonusStorage = addOnBonus[user.ID]
 			// cap usable ref bonus to the subscription storage + addOnBonus
 			if refBonusStorage > (subStorage + addOnBonusStorage) {
 				refBonusStorage = subStorage + addOnBonusStorage
 			}
-			if (storageConsumed) <= (subStorage + refBonusStorage + addOnBonusStorage) {
-				continue
-			}
+		}
+		totalStorage := refBonusStorage + subStorage + addOnBonusStorage
+		usagePercentage := (storageConsumed * 100.0) / totalStorage
+		if percentageThreshold >= 100 && usagePercentage < 100.0 {
+			continue
+		}
+		// when required percentage is below 100, skip email if the usage is below
+		// percentageThreshold or usage above 100% (which means user has used all the storage)
+		if percentageThreshold < 100 && (usagePercentage < percentageThreshold || usagePercentage >= 100.0) {
+			continue
 		}
 		email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
 		if err != nil {
@@ -328,6 +373,7 @@ func (repo *UserRepository) GetUsersWithIndividualPlanWhoHaveExceededStorageQuot
 		}
 		user.Email = email
 		users = append(users, user)
+
 	}
 	return users, nil
 }
