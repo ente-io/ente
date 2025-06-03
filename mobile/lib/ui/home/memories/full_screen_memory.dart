@@ -350,6 +350,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   scaleController: (controller) {
                     _kenBurnsAnimationController = controller;
                   },
+                  zoomIn: index % 2 == 0,
                   isVideo: isVideo,
                   child: FileWidget(
                     inheritedData.memories[index].file,
@@ -604,11 +605,13 @@ class MemoriesZoomWidget extends StatefulWidget {
   final Widget child;
   final bool isVideo;
   final void Function(AnimationController)? scaleController;
+  final bool zoomIn;
 
   const MemoriesZoomWidget({
     super.key,
     required this.child,
     required this.isVideo,
+    required this.zoomIn,
     this.scaleController,
   });
 
@@ -636,10 +639,9 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
         seconds: 5,
       ),
     );
-
-    final zoomIn = random.nextBool();
-    final startScale = zoomIn ? 1.05 : 1.15;
-    final endScale = zoomIn ? 1.15 : 1.05;
+ 
+    final startScale = widget.zoomIn ? 1.05 : 1.15;
+    final endScale = widget.zoomIn ? 1.15 : 1.05;
 
     final startX = (random.nextDouble() - 0.5) * 0.1;
     final startY = (random.nextDouble() - 0.5) * 0.1;
