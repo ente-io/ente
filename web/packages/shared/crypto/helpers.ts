@@ -1,6 +1,5 @@
-import { putUserRecoveryKeyAttributes } from "ente-accounts/services/user";
+import { getUserRecoveryKeyB64 } from "ente-accounts/services/recovery-key";
 import { sharedCryptoWorker } from "ente-base/crypto";
-import log from "ente-base/log";
 import { masterKeyFromSession } from "ente-base/session";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { type SessionKey, setKey } from "ente-shared/storage/sessionStorage";
@@ -108,78 +107,8 @@ export const saveKeyInSessionStore = async (
 
 export const encryptWithRecoveryKey = async (data: string) => {
     const cryptoWorker = await sharedCryptoWorker();
-    const recoveryKeyB64 = await getRecoveryKey();
+    const recoveryKeyB64 = await getUserRecoveryKeyB64();
     return cryptoWorker.encryptBoxB64(data, recoveryKeyB64);
-};
-
-export const getRecoveryKey = async () => {
-    try {
-        const cryptoWorker = await sharedCryptoWorker();
-
-        const keyAttributes: KeyAttributes = getData("keyAttributes");
-        const {
-            recoveryKeyEncryptedWithMasterKey,
-            recoveryKeyDecryptionNonce,
-        } = keyAttributes;
-        const masterKey = await masterKeyFromSession();
-
-        let recoveryKey: string;
-        if (recoveryKeyEncryptedWithMasterKey) {
-            recoveryKey = await cryptoWorker.decryptBoxB64(
-                {
-                    encryptedData: recoveryKeyEncryptedWithMasterKey!,
-                    nonce: recoveryKeyDecryptionNonce!,
-                },
-                masterKey,
-            );
-        } else {
-            recoveryKey = await createNewRecoveryKey(masterKey);
-        }
-        return recoveryKey;
-    } catch (e) {
-        log.error("getRecoveryKey failed", e);
-        throw e;
-    }
-};
-
-/**
- * Generate a new recovery key, tell remote about it, update our local state,
- * and then return it.
- *
- * This function will be used only for legacy users for whom we did not generate
- * recovery keys during sign up.
- *
- * @returns a new base64 encoded recovery key.
- */
-const createNewRecoveryKey = async (masterKey: Uint8Array) => {
-    const existingAttributes = getData("keyAttributes");
-
-    const cryptoWorker = await sharedCryptoWorker();
-    const recoveryKey = await cryptoWorker.generateKey();
-    const encryptedMasterKey = await cryptoWorker.encryptBoxB64(
-        masterKey,
-        recoveryKey,
-    );
-    const encryptedRecoveryKey = await cryptoWorker.encryptBoxB64(
-        recoveryKey,
-        masterKey,
-    );
-
-    const recoveryKeyAttributes = {
-        masterKeyEncryptedWithRecoveryKey: encryptedMasterKey.encryptedData,
-        masterKeyDecryptionNonce: encryptedMasterKey.nonce,
-        recoveryKeyEncryptedWithMasterKey: encryptedRecoveryKey.encryptedData,
-        recoveryKeyDecryptionNonce: encryptedRecoveryKey.nonce,
-    };
-
-    await putUserRecoveryKeyAttributes(recoveryKeyAttributes);
-
-    setData("keyAttributes", {
-        ...existingAttributes,
-        ...recoveryKeyAttributes,
-    });
-
-    return recoveryKey;
 };
 
 /**

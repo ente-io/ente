@@ -1,7 +1,6 @@
 import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
 import { clientPackageName, isDesktop } from "ente-base/app";
-import { generateKey } from "ente-base/crypto";
-import { encryptToB64 } from "ente-base/crypto/libsodium";
+import { encryptBoxB64, generateKey } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -10,11 +9,11 @@ import {
 } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { getRecoveryKey } from "ente-shared/crypto/helpers";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { z } from "zod";
+import { getUserRecoveryKeyB64 } from "./recovery-key";
 import { unstashRedirect } from "./redirect";
 
 /**
@@ -108,11 +107,10 @@ export const openAccountsManagePasskeysPage = async () => {
     if (!recoveryEnabled) {
         // If not, enable it for them by creating the necessary recovery
         // information to prevent them from getting locked out.
-        const recoveryKeyB64 = await getRecoveryKey();
         const resetSecret = await generateKey();
-        const encryptionResult = await encryptToB64(
+        const encryptionResult = await encryptBoxB64(
             resetSecret,
-            recoveryKeyB64,
+            await getUserRecoveryKeyB64(),
         );
         await configurePasskeyRecovery(
             resetSecret,
