@@ -372,9 +372,17 @@ export class FileViewerPhotoSwipe {
             | undefined;
 
         /**
+         * File ID of the file which was last initially played.
+         *
+         * This allows us to skip retriggering initial playback on slide reloads
+         * when decoding of the image component completes.
+         */
+        let livePhotoPlayInitialFileID: number | undefined;
+
+        /**
          * Last state of the live photo playback toggle.
          */
-        let livePhotoPlay = true;
+        let isLivePhotoPlaying = false;
 
         /**
          * Last state of the live photo muted toggle.
@@ -403,15 +411,17 @@ export class FileViewerPhotoSwipe {
          *    controlled by the {@link livePhotoUpdatePlayInitial} function.
          *
          * 2. If the user toggles playback of during the initial video playback,
-         *    then remember their choice for the current session in the using
+         *    then remember their choice for the current session by disabling
          *    the {@link livePhotoPlayInitial} variable.
          *
-         * 3. The user can play the video again in a loop by activating the
-         *    {@link livePhotoPlayButtonElement}, which triggers the
-         *    {@link livePhotoUpdatePlayToggle} function. This playback state is
-         *    maintained in the {@link livePhotoPlay} variable.
+         * 3. Post initial playback, user can play the video again in a loop by
+         *    activating the {@link livePhotoPlayButtonElement}, which triggers
+         *    the {@link livePhotoUpdatePlayToggle} function.
          */
         const livePhotoUpdatePlayInitial = (video: HTMLVideoElement) => {
+            const button = livePhotoPlayButtonElement;
+            if (button) showIf(button, true);
+
             // If we're already doing the initial playback for the same video
             // element, then do nothing.
             //
@@ -421,19 +431,30 @@ export class FileViewerPhotoSwipe {
                 return;
             }
 
-            const button = livePhotoPlayButtonElement;
-            if (button) showIf(button, true);
+            const currFileID = currSlideData().fileID;
+
+            // If we're already doing initial playback for the same file ID,
+            // then do nothing.
+            //
+            // This check is to ignore duplicate retriggers of this function
+            // when the slide gets reloaded once the photo component is decoded.
+            if (livePhotoPlayInitialFileID == currFileID) {
+                return;
+            }
 
             // Remove any loop attributes we might've inherited from a
             // previously displayed live photos elements on the current slide.
             video.removeAttribute("loop");
 
-            // And same for the transient playback state.
+            // Same for the transient playback state.
             if (livePhotoPlayInitialEndedEvent) {
                 const { video, listener } = livePhotoPlayInitialEndedEvent;
                 video.removeEventListener("ended", listener);
                 livePhotoPlayInitialEndedEvent = undefined;
             }
+
+            // Mark the current file ID's initial playback.
+            livePhotoPlayInitialFileID = currFileID;
 
             if (livePhotoPlayInitial) {
                 // Play it once
@@ -444,15 +465,16 @@ export class FileViewerPhotoSwipe {
                     button?.classList.add("pswp-ente-off");
                     video.style.display = "none";
                     livePhotoPlayInitialEndedEvent = undefined;
+                    isLivePhotoPlaying = false;
                 };
                 livePhotoPlayInitialEndedEvent = { video, listener };
                 video.addEventListener("ended", listener, { once: true });
-                livePhotoPlay = true;
+                isLivePhotoPlaying = true;
             } else {
                 button?.classList.add("pswp-ente-off");
                 video.pause();
                 video.style.display = "none";
-                livePhotoPlay = false;
+                isLivePhotoPlaying = false;
             }
         };
 
@@ -466,9 +488,10 @@ export class FileViewerPhotoSwipe {
             const button = livePhotoPlayButtonElement;
             if (button) showIf(button, true);
 
-            if (livePhotoPlay) {
-                // Remove the loop attributes to clean up after ourselves (not
-                // necessarily needed because we remove it on slide change too).
+            if (isLivePhotoPlaying) {
+                // Remove the loop attribute (not necessarily needed because we
+                // remove it on slide change too, but good to clean up after
+                // ourselves).
                 video.removeAttribute("loop");
 
                 // If we're in the middle of the initial playback, remember the
@@ -485,7 +508,7 @@ export class FileViewerPhotoSwipe {
                 button?.classList.add("pswp-ente-off");
                 video.pause();
                 video.style.display = "none";
-                livePhotoPlay = false;
+                isLivePhotoPlaying = false;
             } else {
                 // Add the loop attribute.
                 video.setAttribute("loop", "");
@@ -493,7 +516,7 @@ export class FileViewerPhotoSwipe {
                 button?.classList.remove("pswp-ente-off");
                 void abortablePlayVideo(video);
                 video.style.display = "initial";
-                livePhotoPlay = true;
+                isLivePhotoPlaying = true;
             }
         };
 
