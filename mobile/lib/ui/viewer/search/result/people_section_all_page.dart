@@ -5,7 +5,7 @@ import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
-import "package:photos/models/search/hierarchical/face_filter.dart";
+import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/models/selected_people.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -70,14 +70,13 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
 
     if (widget.namedOnly) {
       results.removeWhere(
-        (element) =>
-            (element.hierarchicalSearchFilter as FaceFilter).personId == null,
+        (element) => element.params[kPersonParamID] == null,
       );
       if (widget.selectedPeople?.personIds.isEmpty ?? false) {
         widget.selectedPeople!.select(
           results
               .take(2)
-              .map((e) => (e.hierarchicalSearchFilter as FaceFilter).personId!)
+              .map((e) => e.params[kPersonParamID] as String)
               .toSet(),
         );
       }

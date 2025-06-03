@@ -203,9 +203,8 @@ class PersonSearchExample extends StatelessWidget {
   });
 
   void toggleSelection() {
-    selectedPeople?.toggleSelection(
-      (searchResult.hierarchicalSearchFilter as FaceFilter).personId!,
-    );
+    selectedPeople
+        ?.toggleSelection(searchResult.params[kPersonParamID]! as String);
   }
 
   @override
