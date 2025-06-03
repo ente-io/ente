@@ -412,6 +412,15 @@ export class FileViewerPhotoSwipe {
          *    maintained in the {@link livePhotoPlay} variable.
          */
         const livePhotoUpdatePlayInitial = (video: HTMLVideoElement) => {
+            // If we're already doing the initial playback for the same video
+            // element, then do nothing.
+            //
+            // This check is to ignore dup inits (this function is called from
+            // two places, it can be called twice for the first slide).
+            if (livePhotoPlayInitialEndedEvent?.video == video) {
+                return;
+            }
+
             const button = livePhotoPlayButtonElement;
             if (button) showIf(button, true);
 
