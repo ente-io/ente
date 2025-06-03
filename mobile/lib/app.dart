@@ -107,7 +107,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     if (Platform.isAndroid || kDebugMode) {
       return Listener(
         onPointerDown: (event) {
-          machineLearningController.onUserInteraction();
+          computeController.onUserInteraction();
         },
         child: AdaptiveTheme(
           light: lightThemeData,
@@ -142,7 +142,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     } else {
       return Listener(
         onPointerDown: (event) {
-          machineLearningController.onUserInteraction();
+          computeController.onUserInteraction();
         },
         child: MaterialApp(
           title: "ente",

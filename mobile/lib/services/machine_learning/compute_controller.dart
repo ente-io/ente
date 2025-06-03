@@ -10,7 +10,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 import "package:thermal/thermal.dart";
 
-class MachineLearningController {
+class ComputeController {
   final _logger = Logger("MachineLearningController");
 
   static const kMaximumTemperatureAndroid = 42; // 42 degree celsius
@@ -31,7 +31,7 @@ class MachineLearningController {
 
   bool get isDeviceHealthy => _isDeviceHealthy;
 
-  MachineLearningController() {
+  ComputeController() {
     _logger.info('MachineLearningController constructor');
     _startInteractionTimer(kDefaultInteractionTimeout);
     if (Platform.isIOS) {
