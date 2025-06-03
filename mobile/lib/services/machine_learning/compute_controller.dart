@@ -10,6 +10,12 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/machine_learning_control_event.dart";
 import "package:thermal/thermal.dart";
 
+enum _ComputeRunState {
+  idle,
+  runningML,
+  generatingStream,
+}
+
 class ComputeController {
   final _logger = Logger("MachineLearningController");
 
@@ -28,6 +34,9 @@ class ComputeController {
   bool _canRunML = false;
   bool mlInteractionOverride = false;
   late Timer _userInteractionTimer;
+
+  _ComputeRunState _currentRunState = _ComputeRunState.idle;
+  bool _waitingToRunML = false;
 
   bool get isDeviceHealthy => _isDeviceHealthy;
 
@@ -59,6 +68,64 @@ class ComputeController {
       _onThermalStateUpdate(thermalState);
     });
     _logger.info('init done ');
+  }
+
+  bool requestCompute({bool ml = false, bool stream = false}) {
+    _logger.info("Requesting compute: ml: $ml, stream: $stream");
+    if (!_isDeviceHealthy || !_canRunGivenUserInteraction()) {
+      _logger.info("Device not healthy or user interacting, denying request.");
+      return false;
+    }
+    if (ml) {
+      return _requestML();
+    } else if (stream) {
+      return _requestStream();
+    }
+    _logger.severe("No compute request specified, denying request.");
+    return false;
+  }
+
+  bool _requestML() {
+    if (_currentRunState == _ComputeRunState.idle) {
+      _currentRunState = _ComputeRunState.runningML;
+      _waitingToRunML = false;
+      _logger.info("ML request granted");
+      return true;
+    }
+    _logger.info(
+      "ML request denied, current state: $_currentRunState, wants to run ML: $_waitingToRunML",
+    );
+    _waitingToRunML = true;
+    return false;
+  }
+
+  bool _requestStream() {
+    if (_currentRunState == _ComputeRunState.idle && !_waitingToRunML) {
+      _logger.info("Stream request granted");
+      _currentRunState = _ComputeRunState.generatingStream;
+      return true;
+    }
+    _logger.info(
+      "Stream request denied, current state: $_currentRunState, wants to run ML: $_waitingToRunML",
+    );
+    return false;
+  }
+
+  void releaseCompute({bool ml = false, bool stream = false}) {
+    _logger.info(
+      "Releasing compute: ml: $ml, stream: $stream, current state: $_currentRunState",
+    );
+
+    if (ml) {
+      if (_currentRunState == _ComputeRunState.runningML) {
+        _currentRunState = _ComputeRunState.idle;
+      }
+      _waitingToRunML = false;
+    } else if (stream) {
+      if (_currentRunState == _ComputeRunState.generatingStream) {
+        _currentRunState = _ComputeRunState.idle;
+      }
+    }
   }
 
   void onUserInteraction() {
@@ -174,3 +241,5 @@ class ComputeController {
     return !kUnhealthyStates.contains(_androidLastBatteryInfo?.health ?? "");
   }
 }
+
+// keyword: unicorn
