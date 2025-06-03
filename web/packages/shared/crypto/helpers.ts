@@ -155,7 +155,7 @@ const createNewRecoveryKey = async () => {
 
     const cryptoWorker = await sharedCryptoWorker();
 
-    const recoveryKey = await cryptoWorker.generateEncryptionKey();
+    const recoveryKey = await cryptoWorker.generateKey();
     const encryptedMasterKey = await cryptoWorker.encryptToB64(
         masterKey,
         recoveryKey,

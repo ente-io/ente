@@ -1,9 +1,7 @@
 import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
 import { clientPackageName, isDesktop } from "ente-base/app";
-import {
-    encryptToB64,
-    generateEncryptionKey,
-} from "ente-base/crypto/libsodium";
+import { generateKey } from "ente-base/crypto";
+import { encryptToB64 } from "ente-base/crypto/libsodium";
 import {
     authenticatedRequestHeaders,
     ensureOk,
@@ -111,7 +109,7 @@ export const openAccountsManagePasskeysPage = async () => {
         // If not, enable it for them by creating the necessary recovery
         // information to prevent them from getting locked out.
         const recoveryKeyB64 = await getRecoveryKey();
-        const resetSecret = await generateEncryptionKey();
+        const resetSecret = await generateKey();
         const encryptionResult = await encryptToB64(
             resetSecret,
             recoveryKeyB64,

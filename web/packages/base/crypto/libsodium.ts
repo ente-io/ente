@@ -879,11 +879,6 @@ export const deriveInteractiveKey = async (
     return { key, opsLimit, memLimit };
 };
 
-/** Deprecated, use generateKey */
-export async function generateEncryptionKey() {
-    return generateKey();
-}
-
 export async function generateSaltToDeriveKey() {
     await sodium.ready;
     return await toB64(sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES));

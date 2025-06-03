@@ -171,8 +171,8 @@ export async function generateKeyAndSRPAttributes(
     srpSetupAttributes: SRPSetupAttributes;
 }> {
     const cryptoWorker = await sharedCryptoWorker();
-    const masterKey = await cryptoWorker.generateEncryptionKey();
-    const recoveryKey = await cryptoWorker.generateEncryptionKey();
+    const masterKey = await cryptoWorker.generateKey();
+    const recoveryKey = await cryptoWorker.generateKey();
     const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
     const kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
 
