@@ -416,7 +416,8 @@ export class FileViewerPhotoSwipe {
          *
          * 3. Post initial playback, user can play the video again in a loop by
          *    activating the {@link livePhotoPlayButtonElement}, which triggers
-         *    the {@link livePhotoUpdatePlayToggle} function.
+         *    the {@link livePhotoUpdatePlayToggle} function (and also resets
+         *    {@link livePhotoPlayInitial}).
          */
         const livePhotoUpdatePlayInitial = (video: HTMLVideoElement) => {
             const button = livePhotoPlayButtonElement;
@@ -459,6 +460,9 @@ export class FileViewerPhotoSwipe {
             if (livePhotoPlayInitial) {
                 // Play it once
                 button?.classList.remove("pswp-ente-off");
+                // Start at the beginning (we might've been coming back to an
+                // already loaded video on an adjacent slide).
+                video.currentTime = 0;
                 void abortablePlayVideo(video);
                 video.style.display = "initial";
                 const listener = () => {
@@ -517,6 +521,13 @@ export class FileViewerPhotoSwipe {
                 void abortablePlayVideo(video);
                 video.style.display = "initial";
                 isLivePhotoPlaying = true;
+
+                // Take an explicit playback trigger as a signal to reset the
+                // initial playback flag.
+                //
+                // This is the only way for the user to reset the initial
+                // playback state (short of repopening the file viewer).
+                livePhotoPlayInitial = true;
             }
         };
 
@@ -731,10 +742,12 @@ export class FileViewerPhotoSwipe {
                 updateVideoControlsAndPlayback(currSlideData());
             }
 
-            // Rest of this function deals with live photos.
+            if (fileType != FileType.livePhoto || !videoURL) {
+                // Not a live photo, or its video hasn't loaded yet.
+                return;
+            }
 
-            if (fileType != FileType.livePhoto) return;
-            if (!videoURL) return;
+            // Rest of this function deals with live photos.
 
             // This slide is displaying a live photo. Append a video element to
             // show its video part.
