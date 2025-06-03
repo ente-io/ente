@@ -438,10 +438,12 @@ export class FileViewerPhotoSwipe {
                 };
                 livePhotoPlayInitialEndedEvent = { video, listener };
                 video.addEventListener("ended", listener, { once: true });
+                livePhotoPlay = true;
             } else {
                 button?.classList.add("pswp-ente-off");
                 video.pause();
                 video.style.display = "none";
+                livePhotoPlay = false;
             }
         };
 
@@ -456,13 +458,6 @@ export class FileViewerPhotoSwipe {
             if (button) showIf(button, true);
 
             if (livePhotoPlay) {
-                // Add the loop attribute.
-                video.setAttribute("loop", "");
-
-                button?.classList.remove("pswp-ente-off");
-                void abortablePlayVideo(video);
-                video.style.display = "initial";
-            } else {
                 // Remove the loop attributes to clean up after ourselves (not
                 // necessarily needed because we remove it on slide change too).
                 video.removeAttribute("loop");
@@ -481,6 +476,15 @@ export class FileViewerPhotoSwipe {
                 button?.classList.add("pswp-ente-off");
                 video.pause();
                 video.style.display = "none";
+                livePhotoPlay = false;
+            } else {
+                // Add the loop attribute.
+                video.setAttribute("loop", "");
+
+                button?.classList.remove("pswp-ente-off");
+                void abortablePlayVideo(video);
+                video.style.display = "initial";
+                livePhotoPlay = true;
             }
         };
 
@@ -535,7 +539,6 @@ export class FileViewerPhotoSwipe {
             const video = livePhotoVideoOnSlide(pswp.currSlide);
             if (!buttonElement || !video) return;
 
-            livePhotoPlay = !livePhotoPlay;
             livePhotoUpdatePlayToggle(video);
         };
 
