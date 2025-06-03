@@ -443,9 +443,12 @@ export class FileViewerPhotoSwipe {
             }
 
             if (livePhotoPlayInitial) {
-                // Initial playback is enabled - Play the video once. Start at
-                // the beginning since we might've been coming back to an
-                // already loaded video on an adjacent slide.
+                // Initial playback is enabled - Play the video once.
+                //
+                // There are a few playback cases (initial, resumed, adjacent
+                // slide with a reused video element, new slide with a new video
+                // element). Always start at the beginning in all cases for user
+                // the feel the app is responding consistently.
                 video.currentTime = 0;
                 void abortablePlayVideo(video);
                 video.style.display = "initial";
@@ -493,6 +496,7 @@ export class FileViewerPhotoSwipe {
                 // playback state (short of repopening the file viewer).
                 livePhotoPlayInitial = true;
 
+                video.currentTime = 0;
                 void abortablePlayVideo(video);
             } else {
                 // Remove the loop attribute (not necessarily needed because we
