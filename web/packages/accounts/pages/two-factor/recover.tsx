@@ -10,10 +10,10 @@ import {
     removeTwoFactor,
     type TwoFactorType,
 } from "ente-accounts/services/user";
+import { decryptUsingRecoveryKeyMnemonic } from "ente-accounts/utils/recovery-key";
 import { LinkButton } from "ente-base/components/LinkButton";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { useBaseContext } from "ente-base/context";
-import { sharedCryptoWorker } from "ente-base/crypto";
 import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
 import log from "ente-base/log";
 import SingleInputForm, {
@@ -25,11 +25,6 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const bip39 = require("bip39");
-// mobile client library only supports english.
-bip39.setDefaultWordlist("english");
 
 export interface RecoverPageProps {
     twoFactorType: TwoFactorType;
@@ -95,26 +90,13 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
         setFieldError,
     ) => {
         try {
-            recoveryKey = recoveryKey
-                .trim()
-                .split(" ")
-                .map((part) => part.trim())
-                .filter((part) => !!part)
-                .join(" ");
-            // check if user is entering mnemonic recovery key
-            if (recoveryKey.indexOf(" ") > 0) {
-                if (recoveryKey.split(" ").length !== 24) {
-                    throw new Error("recovery code should have 24 words");
-                }
-                recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
-            }
-            const cryptoWorker = await sharedCryptoWorker();
             const { encryptedData, nonce } = encryptedTwoFactorSecret!;
-            const twoFactorSecret = await cryptoWorker.decryptB64(
+            const twoFactorSecret = await decryptUsingRecoveryKeyMnemonic(
                 encryptedData,
                 nonce,
-                await cryptoWorker.fromHex(recoveryKey),
+                recoveryKey,
             );
+
             const resp = await removeTwoFactor(
                 sessionID!,
                 twoFactorSecret,

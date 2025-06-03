@@ -5,6 +5,7 @@ import {
 } from "ente-accounts/components/layouts/centered-paper";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import { sendOTT } from "ente-accounts/services/user";
+import { decryptUsingRecoveryKeyMnemonic } from "ente-accounts/utils/recovery-key";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
@@ -21,7 +22,6 @@ import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { decryptUsingRecoveryKeyMnemonic } from "../utils/recovery-key";
 
 const Page: React.FC = () => {
     const { showMiniDialog } = useBaseContext();
