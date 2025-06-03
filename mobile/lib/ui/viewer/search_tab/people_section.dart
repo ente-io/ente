@@ -51,12 +51,10 @@ class _PeopleSectionState extends State<PeopleSection> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          _examples = await widget.sectionType
-              .getData(
-                context,
-                limit: kSearchSectionLimit,
-              )
-              .then((value) => List.from(value));
+          _examples = await widget.sectionType.getData(
+            context,
+            limit: kSearchSectionLimit,
+          ) as List<GenericSearchResult>;
           setState(() {});
         }),
       );

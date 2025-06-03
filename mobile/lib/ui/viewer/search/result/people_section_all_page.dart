@@ -66,7 +66,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
 
   Future<List<GenericSearchResult>> getResults() async {
     final results =
-        List<GenericSearchResult>.from(await SectionType.face.getData(context));
+        await SectionType.face.getData(context) as List<GenericSearchResult>;
 
     if (widget.namedOnly) {
       results.removeWhere(
@@ -126,8 +126,6 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
               horizontalEdgePadding,
               96,
             ),
-            shrinkWrap: true,
-            primary: false,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               mainAxisSpacing: gridPadding,
               crossAxisSpacing: gridPadding,

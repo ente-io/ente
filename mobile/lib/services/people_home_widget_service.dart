@@ -291,7 +291,7 @@ class PeopleHomeWidgetService {
     if (peopleIds == null || peopleIds.isEmpty) {
       // Search Filter with face and pick top two faces
       final searchFilter = await SectionType.face.getData(null).then(
-            (value) => List<GenericSearchResult>.from(value).where(
+            (value) => (value as List<GenericSearchResult>).where(
               (element) => (element.params[kPersonParamID] as String?) != null,
             ),
           );

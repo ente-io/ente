@@ -122,7 +122,7 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
               ),
             )
           else
-            SliverToBoxAdapter(
+            SliverFillRemaining(
               child: PeopleSectionAllWidget(
                 selectedPeople: _selectedPeople,
                 namedOnly: true,
