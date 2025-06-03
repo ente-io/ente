@@ -5,9 +5,10 @@ import {
 } from "ente-accounts/components/layouts/centered-paper";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import { sendOTT } from "ente-accounts/services/user";
-import { decryptUsingRecoveryKeyMnemonic } from "ente-accounts/utils/recovery-key";
+import { recoveryKeyB64FromMnemonic } from "ente-accounts/utils/recovery-key";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { useBaseContext } from "ente-base/context";
+import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -61,10 +62,11 @@ const Page: React.FC = () => {
     ) => {
         try {
             const keyAttr = keyAttributes!;
-            const masterKey = await decryptUsingRecoveryKeyMnemonic(
+            const cryptoWorker = await sharedCryptoWorker();
+            const masterKey = await cryptoWorker.decryptB64(
                 keyAttr.masterKeyEncryptedWithRecoveryKey!,
                 keyAttr.masterKeyDecryptionNonce!,
-                recoveryKey,
+                await recoveryKeyB64FromMnemonic(recoveryKey),
             );
             await saveKeyInSessionStore("encryptionKey", masterKey);
             await decryptAndStoreToken(keyAttr, masterKey);

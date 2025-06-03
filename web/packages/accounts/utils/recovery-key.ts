@@ -1,27 +1,19 @@
 import * as bip39 from "bip39";
-import { fromHex, sharedCryptoWorker, toHex } from "ente-base/crypto";
+import { fromHex, toHex } from "ente-base/crypto";
 
 // Mobile client library only supports English.
 bip39.setDefaultWordlist("english");
 
 /**
- * Decrypt the provided data that was encrypted with the user's recovery key
- * using the recovery key derived from the provided mnemonic string.
+ * Convert the provided BIP-39 mnemonic string into its base64 representation.
  *
- * @param encryptedData The data to decrypt. The data should've been encrypted
- * using the same recovery key otherwise the decryption would fail.
+ * @param recoveryKeyMnemonicOrHex The BIP-39 mnemonic (24 word) string
+ * representing the recovery key. For legacy compatibility, the function also
+ * works if provided the hex representation of the recovery key.
  *
- * @param decryptionNonce The nonce that was using encryption.
- *
- * @param recoveryKey The BIP-39 mnemonic (24 word) string representing the
- * recovery key. For legacy compatibility, the function also works if provided
- * the hex representation of the recovery key.
- *
- * @returns A base64 string representing the decrypted data.
+ * @returns A base64 string representing the underlying bytes of the recovery key.
  */
-export const decryptUsingRecoveryKeyMnemonic = async (
-    encryptedData: any,
-    decryptionNonce: any,
+export const recoveryKeyB64FromMnemonic = (
     recoveryKeyMnemonicOrHex: string,
 ) => {
     const trimmedInput = recoveryKeyMnemonicOrHex
@@ -42,12 +34,7 @@ export const decryptUsingRecoveryKeyMnemonic = async (
         recoveryKeyHex = trimmedInput;
     }
 
-    const cryptoWorker = await sharedCryptoWorker();
-    return cryptoWorker.decryptB64(
-        encryptedData,
-        decryptionNonce,
-        await fromHex(recoveryKeyHex),
-    );
+    return fromHex(recoveryKeyHex);
 };
 
 /**
