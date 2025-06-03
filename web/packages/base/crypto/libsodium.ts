@@ -157,12 +157,6 @@ export const generateKey = async () => {
     return toB64(sodium.crypto_secretbox_keygen());
 };
 
-/** Deprecated, use generateKey */
-export const generateBoxKey = async () => {
-    await sodium.ready;
-    return toB64(sodium.crypto_secretbox_keygen());
-};
-
 /**
  * Generate a new key for use with the *Blob or *Stream encryption functions,
  * and return its base64 string representation.
