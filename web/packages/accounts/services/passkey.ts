@@ -1,6 +1,5 @@
 import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
 import { clientPackageName, isDesktop } from "ente-base/app";
-import { sharedCryptoWorker } from "ente-base/crypto";
 import {
     encryptToB64,
     generateEncryptionKey,
@@ -111,16 +110,12 @@ export const openAccountsManagePasskeysPage = async () => {
     if (!recoveryEnabled) {
         // If not, enable it for them by creating the necessary recovery
         // information to prevent them from getting locked out.
-        const recoveryKey = await getRecoveryKey();
-
+        const recoveryKeyB64 = await getRecoveryKey();
         const resetSecret = await generateEncryptionKey();
-
-        const cryptoWorker = await sharedCryptoWorker();
         const encryptionResult = await encryptToB64(
             resetSecret,
-            await cryptoWorker.fromHex(recoveryKey),
+            recoveryKeyB64,
         );
-
         await configurePasskeyRecovery(
             resetSecret,
             encryptionResult.encryptedData,

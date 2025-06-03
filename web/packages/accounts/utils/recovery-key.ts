@@ -48,10 +48,14 @@ export const decryptUsingRecoveryKeyMnemonic = async (
 };
 
 /**
- * Convert the provided recovery key into its BIP-39 mnemonic (24-word) string.
+ * Convert the provided base64 encoded recovery key into its BIP-39 mnemonic.
  *
- * @returns A string containing 24-words that serves as the user visible
- * recovery key.
+ * @param recoveryKeyB64 The base64 encoded recovery key to mnemonize.
+ *
+ * @returns A 24-word mnemonic that serves as the user visible recovery key.
  */
-export const convertRecoveryKeyToMnemonic = (recoveryKeyHex: string) =>
-    bip39.entropyToMnemonic(recoveryKeyHex);
+export const recoveryKeyB64ToMnemonic = async (recoveryKeyB64: string) => {
+    const cryptoWorker = await sharedCryptoWorker();
+    const recoveryKeyHex = await cryptoWorker.toHex(recoveryKeyB64);
+    return bip39.entropyToMnemonic(recoveryKeyHex);
+};

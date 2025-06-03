@@ -18,7 +18,7 @@ import { downloadString } from "ente-base/utils/web";
 import { getRecoveryKey } from "ente-shared/crypto/helpers";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
-import { convertRecoveryKeyToMnemonic } from "../utils/recovery-key";
+import { recoveryKeyB64ToMnemonic } from "../utils/recovery-key";
 import { CodeBlock } from "./CodeBlock";
 
 type RecoveryKeyProps = ModalVisibilityProps & {
@@ -113,7 +113,7 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
 };
 
 const getRecoveryKeyMnemonic = async () =>
-    convertRecoveryKeyToMnemonic(await getRecoveryKey());
+    recoveryKeyB64ToMnemonic(await getRecoveryKey());
 
 const downloadRecoveryKeyMnemonic = (key: string) =>
     downloadString(key, "ente-recovery-key.txt");

@@ -110,9 +110,8 @@ export const saveKeyInSessionStore = async (
 
 export const encryptWithRecoveryKey = async (data: string) => {
     const cryptoWorker = await sharedCryptoWorker();
-    const hexRecoveryKey = await getRecoveryKey();
-    const recoveryKey = await cryptoWorker.fromHex(hexRecoveryKey);
-    return cryptoWorker.encryptBoxB64(data, recoveryKey);
+    const recoveryKeyB64 = await getRecoveryKey();
+    return cryptoWorker.encryptBoxB64(data, recoveryKeyB64);
 };
 
 export const getRecoveryKey = async () => {
@@ -135,7 +134,6 @@ export const getRecoveryKey = async () => {
         } else {
             recoveryKey = await createNewRecoveryKey();
         }
-        recoveryKey = await cryptoWorker.toHex(recoveryKey);
         return recoveryKey;
     } catch (e) {
         log.error("getRecoveryKey failed", e);
@@ -145,6 +143,7 @@ export const getRecoveryKey = async () => {
 
 // Used only for legacy users for whom we did not generate recovery keys during
 // sign up
+// @returns a new base64 encoded recovery key.
 async function createNewRecoveryKey() {
     const masterKey = await getActualKey();
     const existingAttributes = getData("keyAttributes");
