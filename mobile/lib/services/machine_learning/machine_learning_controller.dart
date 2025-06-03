@@ -129,10 +129,8 @@ class MachineLearningController {
     return _hasSufficientBattery(
           _androidLastBatteryInfo?.batteryLevel ?? kMinimumBatteryLevel,
         ) &&
-        _isAcceptableTemperatureAndroid(
-          _androidLastBatteryInfo?.temperature ?? kMaximumTemperatureAndroid,
-        ) &&
-        _isBatteryHealthyAndroid(_androidLastBatteryInfo?.health ?? "") &&
+        _isAcceptableTemperatureAndroid() &&
+        _isBatteryHealthyAndroid() &&
         _isAcceptableThermalState();
   }
 
@@ -166,11 +164,13 @@ class MachineLearningController {
     return batteryLevel >= kMinimumBatteryLevel;
   }
 
-  bool _isAcceptableTemperatureAndroid(int temperature) {
-    return temperature <= kMaximumTemperatureAndroid;
+  bool _isAcceptableTemperatureAndroid() {
+    return (_androidLastBatteryInfo?.temperature ??
+            kMaximumTemperatureAndroid) <=
+        kMaximumTemperatureAndroid;
   }
 
-  bool _isBatteryHealthyAndroid(String health) {
-    return !kUnhealthyStates.contains(health);
+  bool _isBatteryHealthyAndroid() {
+    return !kUnhealthyStates.contains(_androidLastBatteryInfo?.health ?? "");
   }
 }
