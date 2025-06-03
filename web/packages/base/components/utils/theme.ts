@@ -696,11 +696,8 @@ const components: Components = {
                         props: { color: "secondary" },
                         style: { color: "var(--mui-palette-stroke-muted)" },
                     },
-                    {
-                        props: { color: "disabled" },
-                        style: { color: "var(--mui-palette-stroke-faint)" },
-                    },
                 ],
+                "&.Mui-disabled": { color: "var(--mui-palette-stroke-faint)" },
             },
         },
     },
