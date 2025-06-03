@@ -14,7 +14,7 @@ import { recoveryKeyB64FromMnemonic } from "ente-accounts/utils/recovery-key";
 import { LinkButton } from "ente-base/components/LinkButton";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { useBaseContext } from "ente-base/context";
-import { sharedCryptoWorker } from "ente-base/crypto";
+import { decryptBoxB64 } from "ente-base/crypto";
 import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
 import log from "ente-base/log";
 import SingleInputForm, {
@@ -92,10 +92,8 @@ const Page: React.FC<RecoverPageProps> = ({ twoFactorType }) => {
     ) => {
         try {
             const { encryptedData, nonce } = encryptedTwoFactorSecret!;
-            const cryptoWorker = await sharedCryptoWorker();
-            const twoFactorSecret = await cryptoWorker.decryptB64(
-                encryptedData,
-                nonce,
+            const twoFactorSecret = await decryptBoxB64(
+                { encryptedData, nonce },
                 await recoveryKeyB64FromMnemonic(recoveryKey),
             );
             const resp = await removeTwoFactor(

@@ -8,7 +8,7 @@ import { sendOTT } from "ente-accounts/services/user";
 import { recoveryKeyB64FromMnemonic } from "ente-accounts/utils/recovery-key";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { useBaseContext } from "ente-base/context";
-import { sharedCryptoWorker } from "ente-base/crypto";
+import { decryptBoxB64 } from "ente-base/crypto";
 import log from "ente-base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -62,10 +62,11 @@ const Page: React.FC = () => {
     ) => {
         try {
             const keyAttr = keyAttributes!;
-            const cryptoWorker = await sharedCryptoWorker();
-            const masterKey = await cryptoWorker.decryptB64(
-                keyAttr.masterKeyEncryptedWithRecoveryKey!,
-                keyAttr.masterKeyDecryptionNonce!,
+            const masterKey = await decryptBoxB64(
+                {
+                    encryptedData: keyAttr.masterKeyEncryptedWithRecoveryKey!,
+                    nonce: keyAttr.masterKeyDecryptionNonce!,
+                },
                 await recoveryKeyB64FromMnemonic(recoveryKey),
             );
             await saveKeyInSessionStore("encryptionKey", masterKey);
