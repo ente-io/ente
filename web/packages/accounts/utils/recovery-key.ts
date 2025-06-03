@@ -1,5 +1,5 @@
 import * as bip39 from "bip39";
-import { sharedCryptoWorker } from "ente-base/crypto";
+import { fromHex, sharedCryptoWorker, toHex } from "ente-base/crypto";
 
 // Mobile client library only supports English.
 bip39.setDefaultWordlist("english");
@@ -46,7 +46,7 @@ export const decryptUsingRecoveryKeyMnemonic = async (
     return cryptoWorker.decryptB64(
         encryptedData,
         decryptionNonce,
-        await cryptoWorker.fromHex(recoveryKeyHex),
+        await fromHex(recoveryKeyHex),
     );
 };
 
@@ -57,8 +57,5 @@ export const decryptUsingRecoveryKeyMnemonic = async (
  *
  * @returns A 24-word mnemonic that serves as the user visible recovery key.
  */
-export const recoveryKeyB64ToMnemonic = async (recoveryKeyB64: string) => {
-    const cryptoWorker = await sharedCryptoWorker();
-    const recoveryKeyHex = await cryptoWorker.toHex(recoveryKeyB64);
-    return bip39.entropyToMnemonic(recoveryKeyHex);
-};
+export const recoveryKeyB64ToMnemonic = async (recoveryKeyB64: string) =>
+    bip39.entropyToMnemonic(await toHex(recoveryKeyB64));
