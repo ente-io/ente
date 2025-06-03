@@ -9,7 +9,7 @@
         "ente-shared": "*"
     },
     "devDependencies": {
-        "@types/chromecast-caf-receiver": "^6.0.21",
+        "@types/chromecast-caf-receiver": "^6.0.22",
         "ente-build-config": "*"
     }
 }
