@@ -118,7 +118,7 @@ class RemoteDBMigration {
       file_id INTEGER PRIMARY KEY,
       local_id TEXT NOT NULL,
       -- icloud identifier if available
-      local_clould_id TEXT,
+      local_cloud_id TEXT,
       local_mapping_src TEXT DEFAULT NULL
     )'''
   ];

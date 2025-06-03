@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/constants.dart';
 import "package:photos/core/event_bus.dart";
-import 'package:photos/db/device_files_db.dart';
-import 'package:photos/db/files_db.dart';
 import "package:photos/db/local/schema.dart";
 import 'package:photos/events/files_updated_event.dart';
 import "package:photos/events/v1/LocalAssetChangedEvent.dart";

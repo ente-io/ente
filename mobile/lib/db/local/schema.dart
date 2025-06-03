@@ -162,6 +162,15 @@ class LocalDBMigration {
     '''
         CREATE INDEX IF NOT EXISTS assets_created_at ON assets(created_at);
     ''',
+    '''
+    CREATE TABLE path_backup_config(
+      device_path_id TEXT PRIMARY KEY,
+      owner_id INTEGER NOT NULL,
+      collection_id INTEGER,
+      should_backup INTEGER NOT NULL DEFAULT 0,
+      upload_strategy INTEGER NOT NULL DEFAULT 0
+    );
+  ''',
   ];
 
   static Future<void> migrate(
