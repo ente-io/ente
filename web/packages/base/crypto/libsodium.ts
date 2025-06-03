@@ -130,12 +130,34 @@ const bytes = async (bob: BytesOrB64) =>
     typeof bob == "string" ? fromB64(bob) : bob;
 
 /**
- * Generate a new key for use with the *Box encryption functions, and return its
- * base64 string representation.
+ * Generate a new randomly generated 256-bit key for use as a general encryption
+ * key and return its base64 string representation.
  *
- * This returns a new randomly generated 256-bit key suitable for being used
- * with libsodium's secretbox APIs.
+ * From the architecture docs:
+ *
+ * > [`crypto_secretbox_keygen`](https://libsodium.gitbook.io/doc/public-key_cryptography/sealed_boxes)
+ * > is used to generate all random keys within the application. Your
+ * > `masterKey`, `recoveryKey`, `collectionKey`, `fileKey` are all 256-bit keys
+ * > generated using this API.
+ *
+ * {@link generateKey} can be contrasted with {@link generateBlobOrStreamKey}
+ * and can be thought of as a hypothetical "generateBoxKey". That is, the key
+ * returned by this function is suitable for being used with the *Box encryption
+ * functions (which eventually delegate to the libsodium's secretbox APIs).
+ *
+ * While this is a reasonable semantic distinction, in terms of implementation
+ * there is no difference: currently both {@link generateKey} (or the
+ * hypothetical "generateBoxKey") and {@link generateBlobOrStreamKey} produce
+ * 256-bits of entropy that does not have any ties to a particular algorithm.
+ *
+ * @returns A new randomly generated 256-bit key.
  */
+export const generateKey = async () => {
+    await sodium.ready;
+    return toB64(sodium.crypto_secretbox_keygen());
+};
+
+/** Deprecated, use generateKey */
 export const generateBoxKey = async () => {
     await sodium.ready;
     return toB64(sodium.crypto_secretbox_keygen());
@@ -863,9 +885,9 @@ export const deriveInteractiveKey = async (
     return { key, opsLimit, memLimit };
 };
 
+/** Deprecated, use generateKey */
 export async function generateEncryptionKey() {
-    await sodium.ready;
-    return await toB64(sodium.crypto_kdf_keygen());
+    return generateKey();
 }
 
 export async function generateSaltToDeriveKey() {
