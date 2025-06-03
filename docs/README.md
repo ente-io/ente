@@ -41,10 +41,10 @@ Then start a local server
 yarn dev
 ```
 
-For an editor, VSCode is a good choice. Also install the Prettier extension for
-VSCode, and set VSCode to format on save. This way the editor will automatically
+For an editor, VS Code is a good choice. Also install the Prettier extension for
+VS Code, and set VS Code to format on save. This way the editor will automatically
 format and wrap the text using the project's standard, so you can just focus on
-the content. You can also format without VSCode by using the `yarn pretty`
+the content. You can also format without VS Code by using the `yarn pretty`
 command.
 
 ## Have fun!
