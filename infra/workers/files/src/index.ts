@@ -22,7 +22,7 @@ const handleOPTIONS = (request: Request) => {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, OPTIONS",
             "Access-Control-Allow-Headers":
-                "X-Auth-Token, X-Client-Package, X-Client-Version",
+                "X-Auth-Token, X-Client-Package, X-Client-Version, Range",
             "Access-Control-Max-Age": "86400",
         },
     });
@@ -76,6 +76,7 @@ const handleGET = async (request: Request) => {
         "X-Client-Package": request.headers.get("X-Client-Package") ?? "",
         "X-Client-Version": request.headers.get("X-Client-Version") ?? "",
         "User-Agent": request.headers.get("User-Agent") ?? "",
+        "Range": request.headers.get("Range") ?? "",
     };
 
     let response = await fetch(
