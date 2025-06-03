@@ -10,7 +10,6 @@ import "package:ffmpeg_kit_flutter/ffmpeg_kit.dart";
 import "package:ffmpeg_kit_flutter/ffmpeg_session.dart";
 import "package:ffmpeg_kit_flutter/return_code.dart";
 import "package:flutter/foundation.dart";
-// import "package:flutter/wid.dart";
 import "package:flutter/widgets.dart";
 import "package:flutter_cache_manager/flutter_cache_manager.dart";
 import "package:logging/logging.dart";
@@ -31,7 +30,6 @@ import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/file_data.dart";
-import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -123,10 +121,12 @@ class PreviewVideoStore {
     EnteFile enteFile, [
     bool forceUpload = false,
   ]) async {
-    if (!isVideoStreamingEnabled || MLService.instance.isRunningML) {
+    if (!isVideoStreamingEnabled ||
+        !computeController.requestCompute(stream: true)) {
       _logger.info(
-        "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or MLRunning (${MLService.instance.isRunningML})",
+        "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission)",
       );
+      if (isVideoStreamingEnabled) _logger.info("No permission to run compute");
       clearQueue();
       return;
     }
@@ -368,6 +368,7 @@ class PreviewVideoStore {
         Directory(prefix).delete(recursive: true).ignore();
       }
     } finally {
+      computeController.releaseCompute(stream: true);
       if (error != null) {
         _retryFile(enteFile, error);
       } else if (removeFile) {

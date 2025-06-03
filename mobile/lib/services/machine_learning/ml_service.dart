@@ -128,6 +128,7 @@ class MLService {
         _mlControllerStatus = true;
       }
       if (!_canRunMLFunction(function: "AllML") && !force) return;
+      if (!computeController.requestCompute(ml: true)) return;
       _isRunningML = true;
       await sync();
 
@@ -161,6 +162,7 @@ class MLService {
       _logger.severe("runAllML failed", e, s);
       rethrow;
     } finally {
+      computeController.releaseCompute(ml: true);
       _isRunningML = false;
     }
   }
