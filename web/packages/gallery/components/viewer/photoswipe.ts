@@ -1244,7 +1244,13 @@ export class FileViewerPhotoSwipe {
 
         const handleSeekBackOrPreviousSlide = () => {
             const video = videoVideoEl;
-            if (video && !isUserLikelyNavigatingBetweenSlides()) {
+            if (
+                video &&
+                !isUserLikelyNavigatingBetweenSlides() &&
+                // If the video is at the beginning, then use the left arrow to
+                // move to the preview slide.
+                video.currentTime > 0
+            ) {
                 video.currentTime = Math.max(video.currentTime - 5, 0);
             } else {
                 handlePreviousSlide();
@@ -1253,7 +1259,13 @@ export class FileViewerPhotoSwipe {
 
         const handleSeekForwardOrNextSlide = () => {
             const video = videoVideoEl;
-            if (video && !isUserLikelyNavigatingBetweenSlides()) {
+            if (
+                video &&
+                !isUserLikelyNavigatingBetweenSlides() &&
+                // If the video has ended, then use right arrow to move to the
+                // next slide.
+                !video.ended
+            ) {
                 video.currentTime = video.currentTime + 5;
             } else {
                 handleNextSlide();
