@@ -1,9 +1,8 @@
-import { setRecoveryKey } from "ente-accounts/services/user";
+import { putUserRecoveryKeyAttributes } from "ente-accounts/services/user";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { masterKeyFromSession } from "ente-base/session";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { type SessionKey, setKey } from "ente-shared/storage/sessionStorage";
 import { getActualKey } from "ente-shared/user";
 import type { KeyAttributes } from "ente-shared/user/types";
@@ -141,10 +140,16 @@ export const getRecoveryKey = async () => {
     }
 };
 
-// Used only for legacy users for whom we did not generate recovery keys during
-// sign up
-// @returns a new base64 encoded recovery key.
-async function createNewRecoveryKey() {
+/**
+ * Generate a new recovery key, tell remote about it, update our local state,
+ * and then return it.
+ *
+ * This function will be used only for legacy users for whom we did not generate
+ * recovery keys during sign up.
+ *
+ * @returns a new base64 encoded recovery key.
+ */
+const createNewRecoveryKey = async () => {
     const masterKey = await getActualKey();
     const existingAttributes = getData("keyAttributes");
 
@@ -159,22 +164,23 @@ async function createNewRecoveryKey() {
         recoveryKey,
         masterKey,
     );
+
     const recoveryKeyAttributes = {
         masterKeyEncryptedWithRecoveryKey: encryptedMasterKey.encryptedData,
         masterKeyDecryptionNonce: encryptedMasterKey.nonce,
         recoveryKeyEncryptedWithMasterKey: encryptedRecoveryKey.encryptedData,
         recoveryKeyDecryptionNonce: encryptedRecoveryKey.nonce,
     };
-    await setRecoveryKey(getToken(), recoveryKeyAttributes);
 
-    const updatedKeyAttributes = Object.assign(
-        existingAttributes,
-        recoveryKeyAttributes,
-    );
-    setData("keyAttributes", updatedKeyAttributes);
+    await putUserRecoveryKeyAttributes(recoveryKeyAttributes);
+
+    setData("keyAttributes", {
+        ...existingAttributes,
+        ...recoveryKeyAttributes,
+    });
 
     return recoveryKey;
-}
+};
 
 /**
  * Decrypt the {@link encryptedChallenge} sent by remote during the delete
