@@ -1,8 +1,7 @@
+import * as bip39 from "bip39";
 import { sharedCryptoWorker } from "ente-base/crypto";
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const bip39 = require("bip39");
-// mobile client library only supports english.
+// Mobile client library only supports English.
 bip39.setDefaultWordlist("english");
 
 /**
@@ -47,3 +46,12 @@ export const decryptUsingRecoveryKeyMnemonic = async (
         await cryptoWorker.fromHex(recoveryKey),
     );
 };
+
+/**
+ * Convert the provided recovery key into its BIP-39 mnemonic (24-word) string.
+ *
+ * @returns A string containing 24-words that serves as the user visible
+ * recovery key.
+ */
+export const convertRecoveryKeyToMnemonic = (recoveryKeyHex: string) =>
+    bip39.entropyToMnemonic(recoveryKeyHex);
