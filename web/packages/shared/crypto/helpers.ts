@@ -4,7 +4,6 @@ import log from "ente-base/log";
 import { masterKeyFromSession } from "ente-base/session";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { type SessionKey, setKey } from "ente-shared/storage/sessionStorage";
-import { getActualKey } from "ente-shared/user";
 import type { KeyAttributes } from "ente-shared/user/types";
 
 const LOGIN_SUB_KEY_LENGTH = 32;
@@ -122,16 +121,19 @@ export const getRecoveryKey = async () => {
             recoveryKeyEncryptedWithMasterKey,
             recoveryKeyDecryptionNonce,
         } = keyAttributes;
-        const masterKey = await getActualKey();
+        const masterKey = await masterKeyFromSession();
+
         let recoveryKey: string;
         if (recoveryKeyEncryptedWithMasterKey) {
-            recoveryKey = await cryptoWorker.decryptB64(
-                recoveryKeyEncryptedWithMasterKey!,
-                recoveryKeyDecryptionNonce!,
+            recoveryKey = await cryptoWorker.decryptBoxB64(
+                {
+                    encryptedData: recoveryKeyEncryptedWithMasterKey!,
+                    nonce: recoveryKeyDecryptionNonce!,
+                },
                 masterKey,
             );
         } else {
-            recoveryKey = await createNewRecoveryKey();
+            recoveryKey = await createNewRecoveryKey(masterKey);
         }
         return recoveryKey;
     } catch (e) {
@@ -149,8 +151,7 @@ export const getRecoveryKey = async () => {
  *
  * @returns a new base64 encoded recovery key.
  */
-const createNewRecoveryKey = async () => {
-    const masterKey = await masterKeyFromSession();
+const createNewRecoveryKey = async (masterKey: Uint8Array) => {
     const existingAttributes = getData("keyAttributes");
 
     const cryptoWorker = await sharedCryptoWorker();
