@@ -205,6 +205,9 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
   [pDebounce](https://github.com/sindresorhus/p-debounce) are used for
   debouncing operations (See also: `[Note: Throttle and debounce]`).
 
+- [bip39](https://github.com/bitcoinjs/bip39) is used for generating the 24-word
+  recovery key mnemonic.
+
 - [zxcvbn](https://github.com/dropbox/zxcvbn) is used for password strength
   estimation.
 

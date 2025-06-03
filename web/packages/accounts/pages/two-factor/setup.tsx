@@ -8,11 +8,12 @@ import { CenteredFill } from "ente-base/components/containers";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
-import { encryptWithRecoveryKey } from "ente-shared/crypto/helpers";
+import { encryptBoxB64 } from "ente-base/crypto";
 import { getData, setLSUser } from "ente-shared/storage/localStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { getUserRecoveryKeyB64 } from "../../services/recovery-key";
 
 const Page: React.FC = () => {
     const [twoFactorSecret, setTwoFactorSecret] = useState<
@@ -26,14 +27,14 @@ const Page: React.FC = () => {
     }, []);
 
     const handleSubmit = async (otp: string) => {
-        const {
-            encryptedData: encryptedTwoFactorSecret,
-            nonce: twoFactorSecretDecryptionNonce,
-        } = await encryptWithRecoveryKey(twoFactorSecret!.secretCode);
+        const box = await encryptBoxB64(
+            twoFactorSecret!.secretCode,
+            await getUserRecoveryKeyB64(),
+        );
         await enableTwoFactor({
             code: otp,
-            encryptedTwoFactorSecret,
-            twoFactorSecretDecryptionNonce,
+            encryptedTwoFactorSecret: box.encryptedData,
+            twoFactorSecretDecryptionNonce: box.nonce,
         });
         await setLSUser({ ...getData("user"), isTwoFactorEnabled: true });
         await router.push(appHomeRoute);

@@ -70,7 +70,7 @@ const createCollection = async (
         const cryptoWorker = await sharedCryptoWorker();
         const encryptionKey = await getActualKey();
         const token = getToken();
-        const collectionKey = await cryptoWorker.generateEncryptionKey();
+        const collectionKey = await cryptoWorker.generateKey();
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
             await cryptoWorker.encryptToB64(collectionKey, encryptionKey);
         const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
