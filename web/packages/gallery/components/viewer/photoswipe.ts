@@ -354,14 +354,24 @@ export class FileViewerPhotoSwipe {
         });
 
         /**
+         * File IDs for which we've already done initial live photo playback
+         * attempts in the current session (invocation of file viewer).
+         *
+         * This not only allows us to skip triggering initial playback when
+         * coming back to the same slide again (a behavioural choice), it also
+         * allows us to skip retriggering playback when decoding of the image
+         * component completes (a functional need).
+         */
+        const livePhotoInitialVisitedFileIDs = new Set<number>();
+
+        /**
          * Last state of the live photo playback on initial display.
          */
         let livePhotoPlayInitial = true;
 
         /**
          * Set to the event listener that will be called at the end of the
-         * initial playback of the initial playback of a live photo on the
-         * currently displayed slide.
+         * initial playback of a live photo on the currently displayed slide.
          *
          * This will be present only during the initial playback (it will be
          * cleared when initial playback completes), and can also thus be used
@@ -370,19 +380,6 @@ export class FileViewerPhotoSwipe {
         let livePhotoPlayInitialEndedEvent:
             | { listener: () => void; video: HTMLVideoElement }
             | undefined;
-
-        /**
-         * File ID of the file which was last initially played.
-         *
-         * This allows us to skip retriggering initial playback on slide reloads
-         * when decoding of the image component completes.
-         */
-        let livePhotoPlayInitialFileID: number | undefined;
-
-        /**
-         * Last state of the live photo playback toggle.
-         */
-        let isLivePhotoPlaying = false;
 
         /**
          * Last state of the live photo muted toggle.
@@ -411,8 +408,11 @@ export class FileViewerPhotoSwipe {
          *    controlled by the {@link livePhotoUpdatePlayInitial} function.
          *
          * 2. If the user toggles playback of during the initial video playback,
-         *    then remember their choice for the current session by disabling
-         *    the {@link livePhotoPlayInitial} variable.
+         *    then remember their choice for the current session (invocation of
+         *    file viewer) by disabling {@link livePhotoPlayInitial}.
+         *
+         * 3. Also keep track of which files have already been initial played in
+         *    the current session (using {@link livePhotoInitialVisitedFileIDs}).
          *
          * 3. Post initial playback, user can play the video again in a loop by
          *    activating the {@link livePhotoPlayButtonElement}, which triggers
@@ -420,65 +420,58 @@ export class FileViewerPhotoSwipe {
          *    {@link livePhotoPlayInitial}).
          */
         const livePhotoUpdatePlayInitial = (video: HTMLVideoElement) => {
-            const button = livePhotoPlayButtonElement;
-            if (button) showIf(button, true);
+            livePhotoUpdateUIState(video);
 
-            // If we're already doing the initial playback for the same video
-            // element, then do nothing.
-            //
-            // This check is to ignore dup inits (this function is called from
-            // two places, it can be called twice for the first slide).
-            if (livePhotoPlayInitialEndedEvent?.video == video) {
-                return;
-            }
-
+            // Ignore if we've already visited this file.
             const currFileID = currSlideData().fileID;
-
-            // If we're already doing initial playback for the same file ID,
-            // then do nothing.
-            //
-            // This check is to ignore duplicate retriggers of this function
-            // when the slide gets reloaded once the photo component is decoded.
-            if (livePhotoPlayInitialFileID == currFileID) {
+            if (livePhotoInitialVisitedFileIDs.has(currFileID)) {
                 return;
             }
+
+            // Otherwise mark it as visited.
+            livePhotoInitialVisitedFileIDs.add(currFileID);
 
             // Remove any loop attributes we might've inherited from a
             // previously displayed live photos elements on the current slide.
             video.removeAttribute("loop");
 
-            // Same for the transient playback state.
+            // Clear any other initial playback listeners.
             if (livePhotoPlayInitialEndedEvent) {
                 const { video, listener } = livePhotoPlayInitialEndedEvent;
                 video.removeEventListener("ended", listener);
                 livePhotoPlayInitialEndedEvent = undefined;
             }
 
-            // Mark the current file ID's initial playback.
-            livePhotoPlayInitialFileID = currFileID;
-
             if (livePhotoPlayInitial) {
-                // Play it once
-                button?.classList.remove("pswp-ente-off");
-                // Start at the beginning (we might've been coming back to an
-                // already loaded video on an adjacent slide).
+                // Initial playback is enabled - Play the video once. Start at
+                // the beginning since we might've been coming back to an
+                // already loaded video on an adjacent slide.
                 video.currentTime = 0;
                 void abortablePlayVideo(video);
                 video.style.display = "initial";
                 const listener = () => {
-                    button?.classList.add("pswp-ente-off");
-                    video.style.display = "none";
                     livePhotoPlayInitialEndedEvent = undefined;
-                    isLivePhotoPlaying = false;
+                    livePhotoUpdateUIState(video);
                 };
                 livePhotoPlayInitialEndedEvent = { video, listener };
                 video.addEventListener("ended", listener, { once: true });
-                isLivePhotoPlaying = true;
             } else {
-                button?.classList.add("pswp-ente-off");
                 video.pause();
+            }
+
+            livePhotoUpdateUIState(video);
+        };
+
+        const livePhotoUpdateUIState = (video: HTMLVideoElement) => {
+            const button = livePhotoPlayButtonElement;
+            if (button) showIf(button, true);
+
+            if (video.paused || video.ended) {
+                button?.classList.add("pswp-ente-off");
                 video.style.display = "none";
-                isLivePhotoPlaying = false;
+            } else {
+                button?.classList.remove("pswp-ente-off");
+                video.style.display = "initial";
             }
         };
 
@@ -489,10 +482,19 @@ export class FileViewerPhotoSwipe {
          * action (button activation or keyboard shortcut).
          */
         const livePhotoUpdatePlayToggle = (video: HTMLVideoElement) => {
-            const button = livePhotoPlayButtonElement;
-            if (button) showIf(button, true);
+            if (video.paused || video.ended) {
+                // Add the loop attribute.
+                video.setAttribute("loop", "");
 
-            if (isLivePhotoPlaying) {
+                // Take an explicit playback trigger as a signal to reset the
+                // initial playback flag.
+                //
+                // This is the only way for the user to reset the initial
+                // playback state (short of repopening the file viewer).
+                livePhotoPlayInitial = true;
+
+                void abortablePlayVideo(video);
+            } else {
                 // Remove the loop attribute (not necessarily needed because we
                 // remove it on slide change too, but good to clean up after
                 // ourselves).
@@ -509,26 +511,10 @@ export class FileViewerPhotoSwipe {
                     livePhotoPlayInitialEndedEvent = undefined;
                 }
 
-                button?.classList.add("pswp-ente-off");
                 video.pause();
-                video.style.display = "none";
-                isLivePhotoPlaying = false;
-            } else {
-                // Add the loop attribute.
-                video.setAttribute("loop", "");
-
-                button?.classList.remove("pswp-ente-off");
-                void abortablePlayVideo(video);
-                video.style.display = "initial";
-                isLivePhotoPlaying = true;
-
-                // Take an explicit playback trigger as a signal to reset the
-                // initial playback flag.
-                //
-                // This is the only way for the user to reset the initial
-                // playback state (short of repopening the file viewer).
-                livePhotoPlayInitial = true;
             }
+
+            livePhotoUpdateUIState(video);
         };
 
         /**
