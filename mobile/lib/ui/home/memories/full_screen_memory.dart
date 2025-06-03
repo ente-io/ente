@@ -329,6 +329,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                         duration: const Duration(milliseconds: 250),
                         curve: Curves.ease,
                       );
+                      _resetAnimation();
                     }
                   } else if (details.localPosition.dx >
                       screenWidth - edgeWidth) {
@@ -338,6 +339,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                         curve: Curves.ease,
                       );
                     }
+                    _resetAnimation();
                   }
                 },
                 onLongPress: () {
@@ -384,7 +386,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 ),
               );
               inheritedData.indexNotifier.value = index;
-              _resetAnimation();
             },
             itemCount: inheritedData.memories.length,
           ),
@@ -639,7 +640,7 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
         seconds: 5,
       ),
     );
- 
+
     final startScale = widget.zoomIn ? 1.05 : 1.15;
     final endScale = widget.zoomIn ? 1.15 : 1.05;
 
