@@ -150,17 +150,16 @@ export const getRecoveryKey = async () => {
  * @returns a new base64 encoded recovery key.
  */
 const createNewRecoveryKey = async () => {
-    const masterKey = await getActualKey();
+    const masterKey = await masterKeyFromSession();
     const existingAttributes = getData("keyAttributes");
 
     const cryptoWorker = await sharedCryptoWorker();
-
     const recoveryKey = await cryptoWorker.generateKey();
-    const encryptedMasterKey = await cryptoWorker.encryptToB64(
+    const encryptedMasterKey = await cryptoWorker.encryptBoxB64(
         masterKey,
         recoveryKey,
     );
-    const encryptedRecoveryKey = await cryptoWorker.encryptToB64(
+    const encryptedRecoveryKey = await cryptoWorker.encryptBoxB64(
         recoveryKey,
         masterKey,
     );
