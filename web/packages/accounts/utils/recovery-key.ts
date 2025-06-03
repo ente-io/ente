@@ -22,28 +22,31 @@ bip39.setDefaultWordlist("english");
 export const decryptUsingRecoveryKeyMnemonic = async (
     encryptedData: any,
     decryptionNonce: any,
-    recoveryKey: string,
+    recoveryKeyMnemonicOrHex: string,
 ) => {
-    recoveryKey = recoveryKey
+    const trimmedInput = recoveryKeyMnemonicOrHex
         .trim()
         .split(" ")
         .map((part) => part.trim())
         .filter((part) => !!part)
         .join(" ");
 
+    let recoveryKeyHex: string;
     // Check if user is entering mnemonic recovery key.
-    if (recoveryKey.indexOf(" ") > 0) {
-        if (recoveryKey.split(" ").length != 24) {
+    if (trimmedInput.indexOf(" ") > 0) {
+        if (trimmedInput.split(" ").length != 24) {
             throw new Error("recovery code should have 24 words");
         }
-        recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
+        recoveryKeyHex = bip39.mnemonicToEntropy(trimmedInput);
+    } else {
+        recoveryKeyHex = trimmedInput;
     }
 
     const cryptoWorker = await sharedCryptoWorker();
     return cryptoWorker.decryptB64(
         encryptedData,
         decryptionNonce,
-        await cryptoWorker.fromHex(recoveryKey),
+        await cryptoWorker.fromHex(recoveryKeyHex),
     );
 };
 
