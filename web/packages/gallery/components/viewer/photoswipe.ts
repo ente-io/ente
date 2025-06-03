@@ -354,6 +354,24 @@ export class FileViewerPhotoSwipe {
         });
 
         /**
+         * Last state of the live photo playback on initial display.
+         */
+        let livePhotoPlayInitial = true;
+
+        /**
+         * Set to the event listener that will be called at the end of the
+         * initial playback of the initial playback of a live photo on the
+         * currently displayed slide.
+         *
+         * This will be present only during the initial playback (it will be
+         * cleared when initial playback completes), and can also thus be used
+         * as a pseudo `isPlayingLivePhotoInitial`.
+         */
+        let livePhotoPlayInitialEndedEvent:
+            | { listener: () => void; video: HTMLVideoElement }
+            | undefined;
+
+        /**
          * Last state of the live photo playback toggle.
          */
         let livePhotoPlay = true;
@@ -375,17 +393,91 @@ export class FileViewerPhotoSwipe {
 
         /**
          * Update the state of the given {@link videoElement} and the
-         * {@link livePhotoPlayButtonElement} to reflect {@link livePhotoPlay}.
+         * {@link livePhotoPlayButtonElement} to reflect
+         * {@link livePhotoPlayInitial}.
+         *
+         * [Note: Live photo playback]
+         *
+         * 1. When opening a live photo, play it once unless
+         *    {@link livePhotoPlayInitial} is disabled. This is the behaviour
+         *    controlled by the {@link livePhotoUpdatePlayInitial} function.
+         *
+         * 2. If the user toggles playback of during the initial video playback,
+         *    then remember their choice for the current session in the using
+         *    the {@link livePhotoPlayInitial} variable.
+         *
+         * 3. The user can play the video again in a loop by activating the
+         *    {@link livePhotoPlayButtonElement}, which triggers the
+         *    {@link livePhotoUpdatePlayToggle} function. This playback state is
+         *    maintained in the {@link livePhotoPlay} variable.
          */
-        const livePhotoUpdatePlay = (video: HTMLVideoElement) => {
+        const livePhotoUpdatePlayInitial = (video: HTMLVideoElement) => {
+            const button = livePhotoPlayButtonElement;
+            if (button) showIf(button, true);
+
+            // Remove any loop attributes we might've inherited from a
+            // previously displayed live photos elements on the current slide.
+            video.removeAttribute("loop");
+
+            // And same for the transient playback state.
+            if (livePhotoPlayInitialEndedEvent) {
+                const { video, listener } = livePhotoPlayInitialEndedEvent;
+                video.removeEventListener("ended", listener);
+                livePhotoPlayInitialEndedEvent = undefined;
+            }
+
+            if (livePhotoPlayInitial) {
+                // Play it once
+                button?.classList.remove("pswp-ente-off");
+                void abortablePlayVideo(video);
+                video.style.display = "initial";
+                const listener = () => {
+                    button?.classList.add("pswp-ente-off");
+                    video.style.display = "none";
+                    livePhotoPlayInitialEndedEvent = undefined;
+                };
+                livePhotoPlayInitialEndedEvent = { video, listener };
+                video.addEventListener("ended", listener, { once: true });
+            } else {
+                button?.classList.add("pswp-ente-off");
+                video.pause();
+                video.style.display = "none";
+            }
+        };
+
+        /**
+         * See: [Note: Live photo playback]
+         *
+         * This function handles the playback toggled via an explicit user
+         * action (button activation or keyboard shortcut).
+         */
+        const livePhotoUpdatePlayToggle = (video: HTMLVideoElement) => {
             const button = livePhotoPlayButtonElement;
             if (button) showIf(button, true);
 
             if (livePhotoPlay) {
+                // Add the loop attribute.
+                video.setAttribute("loop", "");
+
                 button?.classList.remove("pswp-ente-off");
                 void abortablePlayVideo(video);
                 video.style.display = "initial";
             } else {
+                // Remove the loop attributes to clean up after ourselves (not
+                // necessarily needed because we remove it on slide change too).
+                video.removeAttribute("loop");
+
+                // If we're in the middle of the initial playback, remember the
+                // user's choice to disable autoplay.
+                if (livePhotoPlayInitialEndedEvent) {
+                    livePhotoPlayInitial = false;
+
+                    // And reset the event handler.
+                    const { video, listener } = livePhotoPlayInitialEndedEvent;
+                    video.removeEventListener("ended", listener);
+                    livePhotoPlayInitialEndedEvent = undefined;
+                }
+
                 button?.classList.add("pswp-ente-off");
                 video.pause();
                 video.style.display = "none";
@@ -444,7 +536,7 @@ export class FileViewerPhotoSwipe {
             if (!buttonElement || !video) return;
 
             livePhotoPlay = !livePhotoPlay;
-            livePhotoUpdatePlay(video);
+            livePhotoUpdatePlayToggle(video);
         };
 
         /**
@@ -634,7 +726,7 @@ export class FileViewerPhotoSwipe {
             // already been called, but now "contentAppend" is happening.
 
             if (currSlideData().fileID == fileID) {
-                livePhotoUpdatePlay(video);
+                livePhotoUpdatePlayInitial(video);
                 livePhotoUpdateMute(video);
             }
         });
@@ -909,7 +1001,7 @@ export class FileViewerPhotoSwipe {
                     pswp.on("change", () => {
                         const video = livePhotoVideoOnSlide(pswp.currSlide);
                         if (video) {
-                            livePhotoUpdatePlay(video);
+                            livePhotoUpdatePlayInitial(video);
                         } else {
                             // Not a live photo, or its video hasn't loaded yet.
                             showIf(buttonElement, false);
@@ -1529,7 +1621,7 @@ const hlsVideoControlsHTML = () => `
 // playsinline will play the video inline on mobile browsers (where the default
 // is to open a full screen player).
 const livePhotoVideoHTML = (videoURL: string) => `
-<video loop muted playsinline oncontextmenu="return false;">
+<video muted playsinline oncontextmenu="return false;">
   <source src="${videoURL}" />
 </video>
 `;
