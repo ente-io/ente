@@ -8,6 +8,7 @@
 import type { AxiosResponse } from "axios";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import { nameAndExtension } from "ente-base/file-name";
+import { publicRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
 import { apiURL, customAPIOrigin } from "ente-base/origins";
 import type {
@@ -320,13 +321,18 @@ const downloadFile = async (
             const baseURL = shouldUseThumbnail
                 ? `${customOrigin}/cast/files/preview/${file.id}`
                 : `${customOrigin}/cast/files/download/${file.id}`;
-            return fetch(`${baseURL}?${params.toString()}`);
+            return fetch(`${baseURL}?${params.toString()}`, {
+                headers: publicRequestHeaders(),
+            });
         } else {
             const url = shouldUseThumbnail
                 ? `https://cast-albums.ente.io/preview/?fileID=${file.id}`
                 : `https://cast-albums.ente.io/download/?fileID=${file.id}`;
             return fetch(url, {
-                headers: { "X-Cast-Access-Token": castToken },
+                headers: {
+                    ...publicRequestHeaders(),
+                    "X-Cast-Access-Token": castToken,
+                },
             });
         }
     };
