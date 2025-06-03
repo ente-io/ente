@@ -108,14 +108,14 @@ export const openAccountsManagePasskeysPage = async () => {
         // If not, enable it for them by creating the necessary recovery
         // information to prevent them from getting locked out.
         const resetSecret = await generateKey();
-        const encryptionResult = await encryptBoxB64(
+        const box = await encryptBoxB64(
             resetSecret,
             await getUserRecoveryKeyB64(),
         );
         await configurePasskeyRecovery(
             resetSecret,
-            encryptionResult.encryptedData,
-            encryptionResult.nonce,
+            box.encryptedData,
+            box.nonce,
         );
     }
 

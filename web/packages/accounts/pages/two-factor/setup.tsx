@@ -27,14 +27,14 @@ const Page: React.FC = () => {
     }, []);
 
     const handleSubmit = async (otp: string) => {
-        const encryptedBox = await encryptBoxB64(
+        const box = await encryptBoxB64(
             twoFactorSecret!.secretCode,
             await getUserRecoveryKeyB64(),
         );
         await enableTwoFactor({
             code: otp,
-            encryptedTwoFactorSecret: encryptedBox.encryptedData,
-            twoFactorSecretDecryptionNonce: encryptedBox.nonce,
+            encryptedTwoFactorSecret: box.encryptedData,
+            twoFactorSecretDecryptionNonce: box.nonce,
         });
         await setLSUser({ ...getData("user"), isTwoFactorEnabled: true });
         await router.push(appHomeRoute);
