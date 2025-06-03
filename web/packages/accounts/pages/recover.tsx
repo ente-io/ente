@@ -3,9 +3,9 @@ import {
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
+import { recoveryKeyB64FromMnemonic } from "ente-accounts/services/recovery-key";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import { sendOTT } from "ente-accounts/services/user";
-import { recoveryKeyB64FromMnemonic } from "ente-accounts/utils/recovery-key";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { useBaseContext } from "ente-base/context";
 import { decryptBoxB64 } from "ente-base/crypto";

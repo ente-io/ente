@@ -1,4 +1,3 @@
-import { getUserRecoveryKeyB64 } from "ente-accounts/services/recovery-key";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import { masterKeyFromSession } from "ente-base/session";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
@@ -103,12 +102,6 @@ export const saveKeyInSessionStore = async (
     if (electron && !fromDesktop && keyType == "encryptionKey") {
         electron.saveMasterKeyB64(key);
     }
-};
-
-export const encryptWithRecoveryKey = async (data: string) => {
-    const cryptoWorker = await sharedCryptoWorker();
-    const recoveryKeyB64 = await getUserRecoveryKeyB64();
-    return cryptoWorker.encryptBoxB64(data, recoveryKeyB64);
 };
 
 /**
