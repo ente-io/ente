@@ -8,6 +8,7 @@ import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/machine_learning_control_event.dart";
+import "package:thermal/thermal.dart";
 
 class MachineLearningController {
   final _logger = Logger("MachineLearningController");
@@ -16,6 +17,11 @@ class MachineLearningController {
   static const kMinimumBatteryLevel = 20; // 20%
   final kDefaultInteractionTimeout = Duration(seconds: Platform.isIOS ? 5 : 15);
   static const kUnhealthyStates = ["over_heat", "over_voltage", "dead"];
+
+  static final _thermal = Thermal();
+  IosBatteryInfo? _iosLastBatteryInfo;
+  AndroidBatteryInfo? _androidLastBatteryInfo;
+  ThermalStatus? _lastThermalStatus;
 
   bool _isDeviceHealthy = true;
   bool _isUserInteracting = true;
@@ -49,6 +55,9 @@ class MachineLearningController {
         _onAndroidBatteryStateUpdate(batteryInfo);
       });
     }
+    _thermal.onThermalStatusChanged.listen((ThermalStatus thermalState) {
+      _onThermalStateUpdate(thermalState);
+    });
     _logger.info('init done ');
   }
 
@@ -96,27 +105,61 @@ class MachineLearningController {
   }
 
   void _onAndroidBatteryStateUpdate(AndroidBatteryInfo? batteryInfo) {
+    _androidLastBatteryInfo = batteryInfo;
     _logger.info("Battery info: ${batteryInfo!.toJson()}");
-    _isDeviceHealthy = _computeIsAndroidDeviceHealthy(batteryInfo);
+    _isDeviceHealthy = _computeIsAndroidDeviceHealthy();
     _fireControlEvent();
   }
 
   void _oniOSBatteryStateUpdate(IosBatteryInfo? batteryInfo) {
+    _iosLastBatteryInfo = batteryInfo;
     _logger.info("Battery info: ${batteryInfo!.toJson()}");
-    _isDeviceHealthy = _computeIsiOSDeviceHealthy(batteryInfo);
+    _isDeviceHealthy = _computeIsiOSDeviceHealthy();
     _fireControlEvent();
   }
 
-  bool _computeIsAndroidDeviceHealthy(AndroidBatteryInfo info) {
-    return _hasSufficientBattery(info.batteryLevel ?? kMinimumBatteryLevel) &&
-        _isAcceptableTemperatureAndroid(
-          info.temperature ?? kMaximumTemperatureAndroid,
-        ) &&
-        _isBatteryHealthy(info.health ?? "");
+  void _onThermalStateUpdate(ThermalStatus? thermalStatus) {
+    _lastThermalStatus = thermalStatus;
+    _logger.info("Thermal status: $thermalStatus");
+    _isDeviceHealthy = _computeIsAndroidDeviceHealthy();
+    _fireControlEvent();
   }
 
-  bool _computeIsiOSDeviceHealthy(IosBatteryInfo info) {
-    return _hasSufficientBattery(info.batteryLevel ?? kMinimumBatteryLevel);
+  bool _computeIsAndroidDeviceHealthy() {
+    return _hasSufficientBattery(
+          _androidLastBatteryInfo?.batteryLevel ?? kMinimumBatteryLevel,
+        ) &&
+        _isAcceptableTemperatureAndroid(
+          _androidLastBatteryInfo?.temperature ?? kMaximumTemperatureAndroid,
+        ) &&
+        _isBatteryHealthyAndroid(_androidLastBatteryInfo?.health ?? "") &&
+        _isAcceptableThermalState();
+  }
+
+  bool _computeIsiOSDeviceHealthy() {
+    return _hasSufficientBattery(
+          _iosLastBatteryInfo?.batteryLevel ?? kMinimumBatteryLevel,
+        ) &&
+        _isAcceptableThermalState();
+  }
+
+  bool _isAcceptableThermalState() {
+    switch (_lastThermalStatus) {
+      case null:
+        _logger.info("Thermal status is null, assuming acceptable temperature");
+        return true;
+      case ThermalStatus.none:
+      case ThermalStatus.light:
+      case ThermalStatus.moderate:
+        _logger.info("Thermal status is acceptable: $_lastThermalStatus");
+        return true;
+      case ThermalStatus.severe:
+      case ThermalStatus.critical:
+      case ThermalStatus.emergency:
+      case ThermalStatus.shutdown:
+        _logger.warning("Thermal status is unacceptable: $_lastThermalStatus");
+        return false;
+    }
   }
 
   bool _hasSufficientBattery(int batteryLevel) {
@@ -127,7 +170,7 @@ class MachineLearningController {
     return temperature <= kMaximumTemperatureAndroid;
   }
 
-  bool _isBatteryHealthy(String health) {
+  bool _isBatteryHealthyAndroid(String health) {
     return !kUnhealthyStates.contains(health);
   }
 }
