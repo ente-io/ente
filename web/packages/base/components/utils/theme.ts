@@ -1,7 +1,6 @@
-import type { Theme } from "@mui/material";
+import type { Theme, TypographyVariantsOptions } from "@mui/material";
 import { createTheme } from "@mui/material";
-import type { Components } from "@mui/material/styles/components";
-import type { TypographyOptions } from "@mui/material/styles/createTypography";
+import type { Components } from "@mui/material/styles";
 import type { AppName } from "ente-base/app";
 
 const getTheme = (appName: AppName): Theme => {
@@ -411,7 +410,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
  * to bother with the light variant (though for consistency of specifying every
  * value, we alias it the same weight as regular, 500).
  */
-const typography: TypographyOptions = {
+const typography: TypographyVariantsOptions = {
     fontFamily: '"Inter Variable", sans-serif',
     fontWeightLight: 500,
     fontWeightRegular: 500 /* CSS baseline reset sets this as the default */,
@@ -552,11 +551,26 @@ const components: Components = {
     MuiPaper: {
         styleOverrides: {
             root: {
-                // MUI applies a semi-transparent background image for elevation
-                // in dark mode. Remove it to match background for our designs.
-                backgroundImage: "none",
-                // Use our paper shadow.
-                boxShadow: "var(--mui-palette-boxShadow-paper)",
+                variants: [
+                    {
+                        // Use our "paper" shadow for elevated Paper.
+                        props: { variant: "elevation" },
+                        style: {
+                            // MUI applies a semi-transparent background image
+                            // for elevation in dark mode. Remove it to match
+                            // background for our designs.
+                            backgroundImage: "none",
+                            // Use our paper shadow.
+                            boxShadow: "var(--mui-palette-boxShadow-paper)",
+                        },
+                    },
+                    {
+                        // Undo the effects of variant "elevation" case above
+                        // case when elevation is 0.
+                        props: { elevation: 0 },
+                        style: { boxShadow: "none" },
+                    },
+                ],
             },
         },
     },
@@ -682,11 +696,8 @@ const components: Components = {
                         props: { color: "secondary" },
                         style: { color: "var(--mui-palette-stroke-muted)" },
                     },
-                    {
-                        props: { color: "disabled" },
-                        style: { color: "var(--mui-palette-stroke-faint)" },
-                    },
                 ],
+                "&.Mui-disabled": { color: "var(--mui-palette-stroke-faint)" },
             },
         },
     },
@@ -708,6 +719,13 @@ const components: Components = {
                 // notification popups).
                 borderRadius: "8px",
             },
+        },
+    },
+
+    MuiAlert: {
+        defaultProps: {
+            // Use the outlined variant by default (instead of "standard").
+            variant: "outlined",
         },
     },
 };

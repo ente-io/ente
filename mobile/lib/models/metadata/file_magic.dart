@@ -9,6 +9,7 @@ const captionKey = "caption";
 const uploaderNameKey = "uploaderName";
 const widthKey = 'w';
 const heightKey = 'h';
+const streamVersionKey = 'sv';
 const mediaTypeKey = 'mediaType';
 const latKey = "lat";
 const longKey = "long";
@@ -48,6 +49,10 @@ class PubMagicMetadata {
   double? lat;
   double? long;
 
+  // Indicates streaming version of the file.
+  // If this is set, then the file is a streaming version of the original file.
+  int? sv;
+
   // ISO 8601 datetime without timezone. This contains the date and time of the photo in the original tz
   // where the photo was taken.
   String? dateTime;
@@ -83,6 +88,7 @@ class PubMagicMetadata {
     this.mediaType,
     this.dateTime,
     this.offsetTime,
+    this.sv,
   });
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
@@ -107,6 +113,7 @@ class PubMagicMetadata {
       mediaType: map[mediaTypeKey],
       dateTime: map[dateTimeKey],
       offsetTime: map[offsetTimeKey],
+      sv: safeParseInt(map[streamVersionKey], streamVersionKey),
     );
   }
 

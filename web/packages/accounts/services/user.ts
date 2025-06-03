@@ -61,13 +61,6 @@ export interface UpdatedKey {
     opsLimit: number;
 }
 
-export interface RecoveryKey {
-    masterKeyEncryptedWithRecoveryKey: string;
-    masterKeyDecryptionNonce: string;
-    recoveryKeyEncryptedWithMasterKey: string;
-    recoveryKeyDecryptionNonce: string;
-}
-
 /**
  * Ask remote to send a OTP / OTT to the given email to verify that the user has
  * access to it. Subsequent the app will pass this OTT back via the
@@ -311,10 +304,28 @@ export const enableTwoFactor = async (req: EnableTwoFactorRequest) =>
         }),
     );
 
-export const setRecoveryKey = async (token: string, recoveryKey: RecoveryKey) =>
-    HTTPService.put(
-        await apiURL("/users/recovery-key"),
-        recoveryKey,
-        undefined,
-        { "X-Auth-Token": token },
+export interface RecoveryKeyAttributes {
+    masterKeyEncryptedWithRecoveryKey: string;
+    masterKeyDecryptionNonce: string;
+    recoveryKeyEncryptedWithMasterKey: string;
+    recoveryKeyDecryptionNonce: string;
+}
+
+/**
+ * Update the encrypted recovery key attributes for the logged in user.
+ *
+ * In practice, this is not expected to be called and is meant as a rare
+ * fallback for very old accounts created prior to recovery key related
+ * attributes being assigned on account setup. Even for these, it'll be called
+ * only once.
+ */
+export const putUserRecoveryKeyAttributes = async (
+    recoveryKeyAttributes: RecoveryKeyAttributes,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/users/recovery-key"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify(recoveryKeyAttributes),
+        }),
     );

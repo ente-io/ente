@@ -12,7 +12,7 @@ export const _toHex = libsodium.toHex;
 
 export const _fromHex = libsodium.fromHex;
 
-export const _generateBoxKey = libsodium.generateBoxKey;
+export const _generateKey = libsodium.generateKey;
 
 export const _generateBlobOrStreamKey = libsodium.generateBlobOrStreamKey;
 

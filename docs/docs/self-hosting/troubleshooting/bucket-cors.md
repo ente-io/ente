@@ -37,13 +37,21 @@ aws s3api put-bucket-cors --bucket YOUR_S3_BUCKET --cors-configuration /path/to/
 
 ## For Self-hosted Minio Instance
 
-> Important: MinIO does not take JSON CORS file as the input, instead you will
-> have to build a CORS.xml file or just convert the above `cors.json` to XML.
+::: warning
+
+- MinIO does not support bucket CORS in the community edition which is used by
+  default. For more information, check
+  [this discussion](https://github.com/minio/minio/discussions/20841). However,
+  global CORS configuration is possible.
+- MinIO does not take JSON CORS file as the input, instead you will have to
+  build a CORS.xml file or just convert the above `cors.json` to XML.
+
+:::
 
 A minor requirement here is the tool `mc` for managing buckets via command line
 interface. Checkout the `mc set alias` document to configure alias for your
 instance and bucket. After this you will be prompted for your AccessKey and
-Secret, which is your username and password, go ahead and enter that.
+Secret, which is your username and password.
 
 ```sh
 mc cors set <your-minio>/<your-bucket-name /path/to/cors.xml

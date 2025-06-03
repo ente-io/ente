@@ -33,6 +33,10 @@ import {
     OverflowMenuOption,
 } from "ente-base/components/OverflowMenu";
 import {
+    SingleInputForm,
+    type SingleInputFormProps,
+} from "ente-base/components/SingleInputForm";
+import {
     useIsSmallWidth,
     useIsTouchscreen,
 } from "ente-base/components/utils/hooks";
@@ -56,9 +60,6 @@ import {
 } from "ente-new/photos/services/collection";
 import { sortFiles } from "ente-new/photos/services/files";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "ente-shared/components/SingleInputForm";
 import { CustomError, parseSharingErrorCodes } from "ente-shared/error";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -376,7 +377,7 @@ export default function PublicCollectionGallery() {
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
 
-    const verifyLinkPassword: SingleInputFormProps["callback"] = async (
+    const handleSubmitPassword: SingleInputFormProps["onSubmit"] = async (
         password,
         setFieldError,
     ) => {
@@ -396,10 +397,9 @@ export default function PublicCollectionGallery() {
             log.error("Failed to verifyLinkPassword", e);
             if (isHTTP401Error(e)) {
                 setFieldError(t("incorrect_password"));
-            } else {
-                setFieldError(t("generic_error_retry"));
+                return;
             }
-            return;
+            throw e;
         }
 
         await syncWithRemote();
@@ -456,10 +456,10 @@ export default function PublicCollectionGallery() {
                         {t("link_password_description")}
                     </Typography>
                     <SingleInputForm
-                        callback={verifyLinkPassword}
-                        placeholder={t("password")}
-                        buttonText={t("unlock")}
-                        fieldType="password"
+                        inputType="password"
+                        label={t("password")}
+                        submitButtonTitle={t("unlock")}
+                        onSubmit={handleSubmitPassword}
                     />
                 </Stack>
             </AccountsPageContents>
@@ -558,7 +558,7 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
 }));
 
 const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = !uploadManager.shouldAllowNewUpload();
+    const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
     const icon = <AddPhotoAlternateOutlinedIcon />;
@@ -585,7 +585,7 @@ const AddPhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
  * shrink on mobile sized screens.
  */
 const AddMorePhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = !uploadManager.shouldAllowNewUpload();
+    const disabled = uploadManager.isUploadInProgress();
 
     return (
         <FocusVisibleButton

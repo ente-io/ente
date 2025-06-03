@@ -306,6 +306,7 @@ class MemoriesCacheService {
         channelName: s.onThisDay,
         payload: memory.id,
         dateTime: scheduleTime,
+        timeoutDurationAndroid: const Duration(hours: 16),
       );
       scheduledDates.add(scheduleTime);
       _logger.info(

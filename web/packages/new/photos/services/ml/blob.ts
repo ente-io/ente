@@ -164,7 +164,9 @@ export const fetchRenderableEnteFileBlob = async (
         return new Blob([thumbnailData!]);
     }
 
-    const originalFileBlob = await downloadManager.fileBlob(file);
+    const originalFileBlob = await downloadManager.fileBlob(file, {
+        background: true,
+    });
 
     if (fileType == FileType.livePhoto) {
         const { imageFileName, imageData } = await decodeLivePhoto(

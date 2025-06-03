@@ -1953,6 +1953,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoInfo":
             MessageLookupByLibrary.simpleMessage("Vaizdo įrašo informacija"),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("vaizdo įrašas"),
+        "videoStreaming":
+            MessageLookupByLibrary.simpleMessage("Srautiniai vaizdo įrašai"),
         "videos": MessageLookupByLibrary.simpleMessage("Vaizdo įrašai"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("Peržiūrėti aktyvius seansus"),

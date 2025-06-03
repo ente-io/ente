@@ -137,13 +137,15 @@ export const fromHex = (hexString: string) =>
         : sharedWorker().then((w) => w.fromHex(hexString));
 
 /**
- * Return a new randomly generated 256-bit key (as a base64 string) suitable for
- * use with the *Box encryption functions.
+ * Return a new randomly generated 256-bit key (as a base64 string).
+ *
+ * The returned key is suitable for use with the *Box encryption functions, and
+ * as a general encryption key (e.g. as the user's master key or recovery key).
  */
-export const generateBoxKey = () =>
+export const generateKey = () =>
     inWorker()
-        ? ei._generateBoxKey()
-        : sharedWorker().then((w) => w.generateBoxKey());
+        ? ei._generateKey()
+        : sharedWorker().then((w) => w.generateKey());
 
 /**
  * Return a new randomly generated 256-bit key (as a base64 string) suitable for

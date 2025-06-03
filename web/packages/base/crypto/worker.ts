@@ -18,7 +18,7 @@ export class CryptoWorker {
     fromB64 = ei._fromB64;
     toHex = ei._toHex;
     fromHex = ei._fromHex;
-    generateBoxKey = ei._generateBoxKey;
+    generateKey = ei._generateKey;
     generateBlobOrStreamKey = ei._generateBlobOrStreamKey;
     encryptBoxB64 = ei._encryptBoxB64;
     encryptThumbnail = ei._encryptThumbnail;
@@ -68,10 +68,6 @@ export class CryptoWorker {
 
     async encryptUTF8(data: string, key: string) {
         return libsodium.encryptUTF8(data, key);
-    }
-
-    async generateEncryptionKey() {
-        return libsodium.generateEncryptionKey();
     }
 
     async generateSaltToDeriveKey() {

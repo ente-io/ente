@@ -1,6 +1,7 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Entrez votre adresse e-mail",
+  "enterYourNewEmailAddress": "Entrez votre nouvelle adresse e-mail",
   "accountWelcomeBack": "Bon retour parmi nous !",
   "emailAlreadyRegistered": "Email déjà enregistré.",
   "emailNotRegistered": "E-mail non enregistré.",
@@ -721,6 +722,7 @@
     "type": "text"
   },
   "backupFailed": "Échec de la sauvegarde",
+  "sorryBackupFailedDesc": "Désolé, nous n'avons pas pu sauvegarder ce fichier maintenant, nous allons réessayer plus tard.",
   "couldNotBackUpTryLater": "Nous n'avons pas pu sauvegarder vos données.\nNous allons réessayer plus tard.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente peut chiffrer et conserver des fichiers que si vous leur accordez l'accès",
   "pleaseGrantPermissions": "Veuillez accorder la permission",
@@ -889,6 +891,7 @@
   "authToViewYourMemories": "Authentifiez-vous pour voir vos souvenirs",
   "unlock": "Déverrouiller",
   "freeUpSpace": "Libérer de l'espace",
+  "freeUpSpaceSaving": "{count, plural, one {}=1 {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 fichier dans cet album a été sauvegardé en toute sécurité} other {{formattedNumber} fichiers dans cet album ont été sauvegardés en toute sécurité}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -916,6 +919,18 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, one {}=1 {l'} other {les}} accéder sur Ente tant que vous avez un abonnement actif",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
       }
     }
   },
@@ -1008,6 +1023,7 @@
   "didYouKnow": "Le savais-tu ?",
   "loadingMessage": "Chargement de vos photos...",
   "loadMessage1": "Vous pouvez partager votre abonnement avec votre famille",
+  "loadMessage2": "Nous avons préservé plus de 200 millions de souvenirs jusqu'à présent",
   "loadMessage3": "Nous conservons 3 copies de vos données, l'une dans un abri anti-atomique",
   "loadMessage4": "Toutes nos applications sont open source",
   "loadMessage5": "Notre code source et notre cryptographie ont été audités en externe",
@@ -1245,6 +1261,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Trouver des personnes rapidement par leur nom",
+  "addViewers": "{count, plural, one {}=0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
+  "addCollaborators": "{count, plural, one {}=0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Appuyez longuement sur un email pour vérifier le chiffrement de bout en bout.",
   "developerSettingsWarning": "Êtes-vous sûr de vouloir modifier les paramètres du développeur ?",
   "developerSettings": "Paramètres du développeur",
@@ -1256,6 +1274,7 @@
   "createCollaborativeLink": "Créer un lien collaboratif",
   "search": "Rechercher",
   "enterPersonName": "Entrez le nom d'une personne",
+  "editEmailAlreadyLinked": "Cet e-mail est déjà lié à {name}.",
   "viewPersonToUnlink": "Voir {name} pour délier",
   "enterName": "Saisir un nom",
   "savePerson": "Enregistrer la personne",
@@ -1377,6 +1396,16 @@
   "enableMachineLearningBanner": "Activer l'apprentissage automatique pour la reconnaissance des visages et la recherche magique",
   "searchDiscoverEmptySection": "Les images seront affichées ici une fois le traitement terminé",
   "searchPersonsEmptySection": "Les personnes seront affichées ici une fois le traitement terminé",
+  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {0 collaborateur ajouté} =1 {1 collaborateur ajouté} other {{count} collaborateurs ajoutés}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1452,6 +1481,15 @@
   },
   "currentlyRunning": "en cours d'exécution",
   "ignored": "ignoré",
+  "photosCount": "{count, plural, =0 {0 photo} =1 {1 photo} other {{count} photos}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "file": "Fichier",
   "searchSectionsLengthMismatch": "Incompatibilité de longueur des sections : {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1617,6 +1655,7 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
+  "videoStreaming": "Vidéos diffusables",
   "processingVideos": "Traitement des vidéos",
   "streamDetails": "Détails du stream",
   "processing": "Traitement en cours",

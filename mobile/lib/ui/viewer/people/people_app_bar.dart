@@ -17,6 +17,7 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
 import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_appbar.dart";
@@ -250,6 +251,38 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
             ),
           ),
           PopupMenuItem(
+            value: PeoplePopupAction.setCover,
+            child: Row(
+              children: [
+                const Icon(Icons.image_outlined),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(
+                  S.of(context).setCover,
+                  style: textTheme.bodyBold,
+                ),
+              ],
+            ),
+          ),
+          if (widget.person.data.email != null &&
+              (widget.person.data.email == Configuration.instance.getEmail()))
+            PopupMenuItem(
+              value: PeoplePopupAction.reassignMe,
+              child: Row(
+                children: [
+                  const Icon(Icons.person_2_outlined),
+                  const Padding(
+                    padding: EdgeInsets.all(8),
+                  ),
+                  Text(
+                    context.l10n.reassignMe,
+                    style: textTheme.bodyBold,
+                  ),
+                ],
+              ),
+            ),
+          PopupMenuItem(
             value: PeoplePopupAction.removeLabel,
             child: Row(
               children: [
@@ -264,23 +297,6 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               ],
             ),
           ),
-          if (widget.person.data.email != null &&
-              (widget.person.data.email == Configuration.instance.getEmail()))
-            PopupMenuItem(
-              value: PeoplePopupAction.reassignMe,
-              child: Row(
-                children: [
-                  const Icon(Icons.delete_outline),
-                  const Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text(
-                    context.l10n.reassignMe,
-                    style: textTheme.bodyBold,
-                  ),
-                ],
-              ),
-            ),
         ],
       );
     } else {
@@ -394,13 +410,25 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   }
 
   Future<void> setCoverPhoto(BuildContext context) async {
-    // final int? coverPhotoID = await showPickCoverPhotoSheet(
-    //   context,
-    //   widget.collection!,
-    // );
-    // if (coverPhotoID != null) {
-    //   unawaited(changeCoverPhoto(context, widget.collection!, coverPhotoID));
-    // }
+    final result = await showPersonAvatarPhotoSheet(
+      context,
+      person,
+    );
+    if (result != null) {
+      _logger.info(
+        'Person avatar updated',
+      );
+      setState(() {
+        person = result;
+      });
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "_PeopleAppBarState.setCoverPhoto",
+          person: result,
+        ),
+      );
+    }
   }
 
   Future<void> _reassignMe(BuildContext context) async {

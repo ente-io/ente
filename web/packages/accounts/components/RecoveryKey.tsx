@@ -6,7 +6,6 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
-import * as bip39 from "bip39";
 import { type MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { SpacedRow } from "ente-base/components/containers";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
@@ -16,13 +15,13 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
 import { downloadString } from "ente-base/utils/web";
-import { getRecoveryKey } from "ente-shared/crypto/helpers";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
+import {
+    getUserRecoveryKeyB64,
+    recoveryKeyB64ToMnemonic,
+} from "../services/recovery-key";
 import { CodeBlock } from "./CodeBlock";
-
-// mobile client library only supports english.
-bip39.setDefaultWordlist("english");
 
 type RecoveryKeyProps = ModalVisibilityProps & {
     showMiniDialog: (attributes: MiniDialogAttributes) => void;
@@ -116,7 +115,7 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
 };
 
 const getRecoveryKeyMnemonic = async () =>
-    bip39.entropyToMnemonic(await getRecoveryKey());
+    recoveryKeyB64ToMnemonic(await getUserRecoveryKeyB64());
 
 const downloadRecoveryKeyMnemonic = (key: string) =>
     downloadString(key, "ente-recovery-key.txt");

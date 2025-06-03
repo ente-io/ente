@@ -1,11 +1,7 @@
-import { setRecoveryKey } from "ente-accounts/services/user";
 import { sharedCryptoWorker } from "ente-base/crypto";
-import log from "ente-base/log";
 import { masterKeyFromSession } from "ente-base/session";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
 import { type SessionKey, setKey } from "ente-shared/storage/sessionStorage";
-import { getActualKey } from "ente-shared/user";
 import type { KeyAttributes } from "ente-shared/user/types";
 
 const LOGIN_SUB_KEY_LENGTH = 32;
@@ -107,75 +103,6 @@ export const saveKeyInSessionStore = async (
         electron.saveMasterKeyB64(key);
     }
 };
-
-export const encryptWithRecoveryKey = async (data: string) => {
-    const cryptoWorker = await sharedCryptoWorker();
-    const hexRecoveryKey = await getRecoveryKey();
-    const recoveryKey = await cryptoWorker.fromHex(hexRecoveryKey);
-    return cryptoWorker.encryptBoxB64(data, recoveryKey);
-};
-
-export const getRecoveryKey = async () => {
-    try {
-        const cryptoWorker = await sharedCryptoWorker();
-
-        const keyAttributes: KeyAttributes = getData("keyAttributes");
-        const {
-            recoveryKeyEncryptedWithMasterKey,
-            recoveryKeyDecryptionNonce,
-        } = keyAttributes;
-        const masterKey = await getActualKey();
-        let recoveryKey: string;
-        if (recoveryKeyEncryptedWithMasterKey) {
-            recoveryKey = await cryptoWorker.decryptB64(
-                recoveryKeyEncryptedWithMasterKey!,
-                recoveryKeyDecryptionNonce!,
-                masterKey,
-            );
-        } else {
-            recoveryKey = await createNewRecoveryKey();
-        }
-        recoveryKey = await cryptoWorker.toHex(recoveryKey);
-        return recoveryKey;
-    } catch (e) {
-        log.error("getRecoveryKey failed", e);
-        throw e;
-    }
-};
-
-// Used only for legacy users for whom we did not generate recovery keys during
-// sign up
-async function createNewRecoveryKey() {
-    const masterKey = await getActualKey();
-    const existingAttributes = getData("keyAttributes");
-
-    const cryptoWorker = await sharedCryptoWorker();
-
-    const recoveryKey = await cryptoWorker.generateEncryptionKey();
-    const encryptedMasterKey = await cryptoWorker.encryptToB64(
-        masterKey,
-        recoveryKey,
-    );
-    const encryptedRecoveryKey = await cryptoWorker.encryptToB64(
-        recoveryKey,
-        masterKey,
-    );
-    const recoveryKeyAttributes = {
-        masterKeyEncryptedWithRecoveryKey: encryptedMasterKey.encryptedData,
-        masterKeyDecryptionNonce: encryptedMasterKey.nonce,
-        recoveryKeyEncryptedWithMasterKey: encryptedRecoveryKey.encryptedData,
-        recoveryKeyDecryptionNonce: encryptedRecoveryKey.nonce,
-    };
-    await setRecoveryKey(getToken(), recoveryKeyAttributes);
-
-    const updatedKeyAttributes = Object.assign(
-        existingAttributes,
-        recoveryKeyAttributes,
-    );
-    setData("keyAttributes", updatedKeyAttributes);
-
-    return recoveryKey;
-}
 
 /**
  * Decrypt the {@link encryptedChallenge} sent by remote during the delete

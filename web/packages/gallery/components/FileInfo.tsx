@@ -37,9 +37,11 @@ import {
 import { LinkButtonUndecorated } from "ente-base/components/LinkButton";
 import { type ButtonishProps } from "ente-base/components/mui";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
-import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
+import {
+    SidebarDrawer,
+    SidebarDrawerTitlebar,
+} from "ente-base/components/mui/SidebarDrawer";
 import { SingleInputForm } from "ente-base/components/SingleInputForm";
-import { Titlebar } from "ente-base/components/Titlebar";
 import { EllipsizedTypography } from "ente-base/components/Typography";
 import {
     useModalVisibility,
@@ -260,7 +262,11 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     return (
         <FileInfoSidebar {...{ open, onClose }}>
-            <Titlebar onClose={onClose} title={t("info")} backIsClose />
+            <SidebarDrawerTitlebar
+                onClose={onClose}
+                onRootClose={onClose}
+                title={t("info")}
+            />
             <Stack sx={{ pt: 1, pb: 3, gap: "20px" }}>
                 <Caption
                     {...{
@@ -592,7 +598,9 @@ const Caption: React.FC<CaptionProps> = ({
     const { values, errors, handleChange, handleSubmit, resetForm } = formik;
 
     if (!caption.length && !allowEdits) {
-        return <></>;
+        // Visually take up some space, otherwise the info panel for the shared
+        // photos without a caption looks squished at the top.
+        return <Box sx={{ minHeight: 2 }}></Box>;
     }
 
     return (
@@ -981,11 +989,11 @@ const RawExif: React.FC<RawExifProps> = ({
 
     return (
         <FileInfoSidebar open={open} onClose={onClose}>
-            <Titlebar
+            <SidebarDrawerTitlebar
                 onClose={onClose}
+                onRootClose={handleRootClose}
                 title={t("exif")}
                 caption={fileName}
-                onRootClose={handleRootClose}
                 actionButton={
                     <CopyButton size="small" text={JSON.stringify(tags)} />
                 }

@@ -1,6 +1,7 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Insira seu endereço de e-mail",
+  "enterYourNewEmailAddress": "Insira seu novo e-mail",
   "accountWelcomeBack": "Bem-vindo(a) de volta!",
   "emailAlreadyRegistered": "E-mail já registrado.",
   "emailNotRegistered": "E-mail não registrado.",

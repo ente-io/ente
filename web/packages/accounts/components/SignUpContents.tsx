@@ -22,7 +22,6 @@ import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/Passwor
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { setLSUser } from "ente-shared//storage/localStorage";
-import { VerticallyCentered } from "ente-shared/components/Container";
 import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
@@ -149,7 +148,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                 handleSubmit,
             }): React.JSX.Element => (
                 <form noValidate onSubmit={handleSubmit}>
-                    <VerticallyCentered sx={{ mb: 2 }}>
+                    <Stack sx={{ mb: 2 }}>
                         <TextField
                             fullWidth
                             id="email"
@@ -290,7 +289,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
                                 }
                             />
                         </FormGroup>
-                    </VerticallyCentered>
+                    </Stack>
                     <Box sx={{ mb: 1 }}>
                         <LoadingButton
                             fullWidth

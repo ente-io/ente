@@ -11,8 +11,8 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
-import "package:photos/ui/viewer/file_details/face_widget.dart";
-import "package:photos/utils/face/face_box_crop.dart";
+import "package:photos/ui/viewer/file_details/file_info_face_widget.dart";
+import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 final Logger _logger = Logger("FacesItemWidget");
 
@@ -25,8 +25,6 @@ class FacesItemWidget extends StatefulWidget {
 }
 
 class _FacesItemWidgetState extends State<FacesItemWidget> {
-  bool editMode = false;
-
   @override
   void initState() {
     super.initState();
@@ -38,18 +36,14 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     return InfoItemWidget(
       key: const ValueKey("Faces"),
       leadingIcon: Icons.face_retouching_natural_outlined,
-      subtitleSection: _faceWidgets(context, widget.file, editMode),
+      subtitleSection: _faceWidgets(context, widget.file),
       hasChipButtons: true,
       biggerSpinner: true,
     );
   }
 
-  Future<List<Widget>> _faceWidgets(
-    BuildContext context,
-    EnteFile file,
-    bool editMode,
-  ) async {
-    late final mlDataDB = MLDataDB.instance;
+  Future<List<Widget>> _faceWidgets(BuildContext context, EnteFile file) async {
+    final mlDataDB = MLDataDB.instance;
     try {
       if (file.uploadedFileID == null) {
         return [const NoFaceChipButtonWidget(NoFacesReason.fileNotUploaded)];
@@ -126,15 +120,23 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
       final lastViewedClusterID = ClusterFeedbackService.lastViewedClusterID;
 
-      final faceWidgets = <FaceWidget>[];
+      final faceWidgets = <FileInfoFaceWidget>[];
 
-      // await generation of the face crops here, so that the file info shows one central loading spinner
-      final _ = await getCachedFaceCrops(file, faces);
-
-      final faceCrops = getCachedFaceCrops(file, faces);
+      final faceCrops = await getCachedFaceCrops(file, faces);
       final List<String> faceIDs = [];
       final List<double> faceScores = [];
       for (final Face face in faces) {
+        final faceCrop = faceCrops != null ? faceCrops[face.faceID] : null;
+        if (faceCrop == null) {
+          _logger.severe(
+            'Face crop for face ${face.faceID} in file ${file.uploadedFileID} is null, skipping face widget.',
+          );
+          return [
+            const NoFaceChipButtonWidget(
+              NoFacesReason.faceThumbnailGenerationFailed,
+            ),
+          ];
+        }
         final String? clusterID = faceIdsToClusterIds[face.faceID];
         final PersonEntity? person = clusterIDToPerson[clusterID] != null
             ? persons[clusterIDToPerson[clusterID]!]
@@ -144,14 +146,13 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         faceIDs.add(face.faceID);
         faceScores.add(face.score);
         faceWidgets.add(
-          FaceWidget(
+          FileInfoFaceWidget(
             file,
             face,
-            faceCrops: faceCrops,
+            faceCrop: faceCrop,
             clusterID: clusterID,
             person: person,
             highlight: highlight,
-            editMode: highlight ? editMode : false,
           ),
         );
       }
@@ -163,7 +164,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       return faceWidgets;
     } catch (e, s) {
       _logger.severe('failed to get face widgets in file info', e, s);
-      return <FaceWidget>[];
+      return <FileInfoFaceWidget>[];
     }
   }
 }
@@ -172,6 +173,7 @@ enum NoFacesReason {
   fileNotUploaded,
   fileNotAnalyzed,
   noFacesFound,
+  faceThumbnailGenerationFailed,
 }
 
 String getNoFaceReasonText(
@@ -185,6 +187,8 @@ String getNoFaceReasonText(
       return S.of(context).imageNotAnalyzed;
     case NoFacesReason.noFacesFound:
       return S.of(context).noFacesFound;
+    case NoFacesReason.faceThumbnailGenerationFailed:
+      return "Unable to generate face thumbnails";
   }
 }
 
