@@ -52,6 +52,11 @@ Ente also provides a tool for manual de-duplication in _Settings → Backup →
 Remove duplicates_. This is useful if you have an existing library with
 duplicates across different albums, but wish to keep only one copy.
 
+During this operation, Ente will discard duplicates across all albums, retain a
+single copy, and add symlinks to this copy within all existing albums. So your
+existing album structure remains unchanged, while the space consumed by the
+duplicate data is freed up.
+
 ## Adding to Ente album creates symlinks
 
 Note that once a file is in Ente, adding it to another Ente album will create a
