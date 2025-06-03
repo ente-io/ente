@@ -6,7 +6,6 @@ import "package:photos/events/event.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/generic_search_result.dart";
-import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_result.dart";
@@ -217,9 +216,9 @@ class PersonSearchExample extends StatelessWidget {
     return ListenableBuilder(
       listenable: selectedPeople ?? ValueNotifier(false),
       builder: (context, _) {
-        final filter = (searchResult.hierarchicalSearchFilter as FaceFilter);
-        final id = filter.personId ?? filter.clusterId ?? "";
-        final bool isSelected = selectedPeople?.isPersonSelected(id) ?? false;
+        final id = searchResult.params[kPersonParamID] as String?;
+        final bool isSelected =
+            id != null ? selectedPeople?.isPersonSelected(id) ?? false : false;
 
         return GestureDetector(
           onTap: selectedPeople != null
