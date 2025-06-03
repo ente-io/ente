@@ -351,7 +351,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("V zařízení"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Na <branding>ente</branding>"),
-        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
         "oops": MessageLookupByLibrary.simpleMessage("Jejda"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Jejda, něco se pokazilo"),

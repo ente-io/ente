@@ -15,6 +15,7 @@ const imageHeight = 'height';
 const mlVersionColumn = 'ml_version';
 const personIdColumn = 'person_id';
 const clusterIDColumn = 'cluster_id';
+const personOrClusterIdColumn = 'person_or_cluster_id';
 
 String getCreateFacesTable(bool isOfflineDB) {
   return '''CREATE TABLE IF NOT EXISTS $facesTable (
@@ -127,3 +128,16 @@ CREATE TABLE IF NOT EXISTS $fileDataTable (
 ''';
 
 const deleteFileDataTable = 'DELETE FROM $fileDataTable';
+
+// ## FACE CACHE TABLE
+const faceCacheTable = 'face_cache';
+
+const createFaceCacheTable = '''
+CREATE TABLE IF NOT EXISTS $faceCacheTable (
+  $personOrClusterIdColumn TEXT NOT NULL UNIQUE,
+  $faceIDColumn TEXT NOT NULL UNIQUE,
+  PRIMARY KEY ($personOrClusterIdColumn)
+);
+''';
+
+const deleteFaceCacheTable = 'DELETE FROM $faceCacheTable';

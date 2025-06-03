@@ -37,7 +37,6 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/ignored_files_service.dart";
-import "package:photos/services/preview_video_store.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -98,8 +97,6 @@ class FileUploader {
   }
 
   static FileUploader instance = FileUploader._privateConstructor();
-
-  static final _previewVideoStore = PreviewVideoStore.instance;
 
   Future<void> init(SharedPreferences preferences, bool isBackground) async {
     _prefs = preferences;
@@ -472,14 +469,6 @@ class FileUploader {
     }
   }
 
-  void _uploadPreview(EnteFile file) {
-    if (file.fileType == FileType.video) {
-      unawaited(
-        _previewVideoStore.chunkAndUploadVideo(null, file),
-      );
-    }
-  }
-
   Future<EnteFile> _tryToUpload(
     EnteFile file,
     int collectionID,
@@ -814,9 +803,6 @@ class FileUploader {
         }
         await FilesDB.instance.update(remoteFile);
       }
-      if (PreviewVideoStore.instance.isVideoStreamingEnabled) {
-        _uploadPreview(file);
-      }
       await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
 
       Bus.instance.fire(
@@ -907,12 +893,15 @@ class FileUploader {
   files. if the link is successful, it returns true otherwise false.
   When false, we should go ahead and re-upload or update the file.
   It performs following checks:
-    a) Uploaded file with same localID and destination collection. Delete the
-     fileToUpload entry
+    a) Target file with same localID and destination collection exists. Delete the
+     fileToUpload entry. If target file is sandbox file, then we skip localID match
+     check.
     b) Uploaded file in any collection but with missing localID.
      Update the localID for uploadedFile and delete the fileToUpload entry
     c) A uploaded file exist with same localID but in a different collection.
-    Add a symlink in the destination collection and update the fileToUpload
+    Add a symlink in the destination collection and update the fileToUpload.
+    If target file is sandbox file, then we skip localID match
+     check.
     d) File already exists but different localID. Re-upload
     In case the existing files already have local identifier, which is
     different from the {fileToUpload}, then most probably device has
@@ -931,6 +920,7 @@ class FileUploader {
       );
       return Tuple2(false, fileToUpload);
     }
+    final bool isSandBoxFile = fileToUpload.isSharedMediaToAppSandbox;
 
     final List<EnteFile> existingUploadedFiles =
         await FilesDB.instance.getUploadedFilesWithHashes(
@@ -947,12 +937,13 @@ class FileUploader {
     final EnteFile? sameLocalSameCollection =
         existingUploadedFiles.firstWhereOrNull(
       (e) =>
-          e.collectionID == toCollectionID && e.localID == fileToUpload.localID,
+          e.collectionID == toCollectionID &&
+          (e.localID == fileToUpload.localID || isSandBoxFile),
     );
     if (sameLocalSameCollection != null) {
       _logger.fine(
-        "sameLocalSameCollection: \n toUpload  ${fileToUpload.tag} "
-        "\n existing: ${sameLocalSameCollection.tag}",
+        "sameLocalSameCollection: toUpload  ${fileToUpload.tag} "
+        "existing: ${sameLocalSameCollection.tag} $isSandBoxFile",
       );
       // should delete the fileToUploadEntry
       if (fileToUpload.generatedID != null) {
@@ -1005,12 +996,13 @@ class FileUploader {
     final EnteFile? fileExistsButDifferentCollection =
         existingUploadedFiles.firstWhereOrNull(
       (e) =>
-          e.collectionID != toCollectionID && e.localID == fileToUpload.localID,
+          e.collectionID != toCollectionID &&
+          (e.localID == fileToUpload.localID || isSandBoxFile),
     );
     if (fileExistsButDifferentCollection != null) {
       _logger.fine(
-        "fileExistsButDifferentCollection: \n toUpload  ${fileToUpload.tag} "
-        "\n existing: ${fileExistsButDifferentCollection.tag}",
+        "fileExistsButDifferentCollection: toUpload  ${fileToUpload.tag} "
+        "existing: ${fileExistsButDifferentCollection.tag} $isSandBoxFile",
       );
       final linkedFile = await CollectionsService.instance
           .linkLocalFileToExistingUploadedFileInAnotherCollection(

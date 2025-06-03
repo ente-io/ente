@@ -283,6 +283,7 @@ class MemoriesCacheService {
         channelName: "On this day",
         payload: memory.id,
         dateTime: scheduleTime,
+        timeoutDurationAndroid: const Duration(hours: 16),
       );
       scheduledDates.add(scheduleTime);
     }

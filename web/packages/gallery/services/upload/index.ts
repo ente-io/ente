@@ -445,6 +445,8 @@ export type UploadResult =
 /**
  * Return true to disable the upload of files via Cloudflare Workers.
  *
+ * [Note: Faster uploads via workers]
+ *
  * These workers were introduced as a way of make file uploads faster:
  * https://ente.io/blog/tech/making-uploads-faster/
  *

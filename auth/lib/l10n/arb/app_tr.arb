@@ -173,6 +173,7 @@
   "invalidQRCode": "Geçersiz QR kodu",
   "noRecoveryKeyTitle": "Kurtarma anahtarınız yok mu?",
   "enterEmailHint": "E-posta adresinizi girin",
+  "enterNewEmailHint": "Yeni e-posta adresinizi girin",
   "invalidEmailTitle": "Geçersiz e-posta adresi",
   "invalidEmailMessage": "Lütfen geçerli bir e-posta adresi girin.",
   "deleteAccount": "Hesabı sil",

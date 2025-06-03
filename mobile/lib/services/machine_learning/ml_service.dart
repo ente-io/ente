@@ -16,7 +16,6 @@ import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
@@ -122,7 +121,7 @@ class MLService {
   }
 
   Future<void> sync() async {
-    await FileDataService.instance.syncFDStatus();
+    await fileDataService.syncFDStatus();
     await faceRecognitionService.syncPersonFeedback();
   }
 
@@ -536,7 +535,7 @@ class MLService {
             ),
           );
         }
-        await FileDataService.instance.putFileData(
+        await fileDataService.putFileData(
           instruction.file,
           dataEntity,
         );

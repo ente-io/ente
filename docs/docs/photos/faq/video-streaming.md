@@ -1,7 +1,6 @@
 ---
 title: Video streaming FAQ
-description:
-    Frequently asked questions about Ente's video streaming feature
+description: Frequently asked questions about Ente's video streaming feature
 ---
 
 # Video streaming
@@ -16,7 +15,7 @@ description:
 #### On mobile
 
 - Open Settings -> General -> Advanced
-- Switch on the toggle for `Video streaming`
+- Enable the toggle for `Streamable videos`
 
 #### On desktop
 
@@ -78,6 +77,7 @@ generated stream.
 While this feature is in beta, we will not count the storage consumed by your
 streams against your storage quota. This may change in the future. If it does,
 we will provide an option to opt-in to one of the following:
+
 1. Original videos only
 2. Compressed streams only
 3. Both

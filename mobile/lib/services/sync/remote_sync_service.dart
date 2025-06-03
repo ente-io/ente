@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -9,11 +8,9 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/core/network/network.dart";
 import 'package:photos/db/device_files_db.dart';
-import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
-import "package:photos/events/diff_sync_complete_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -26,7 +23,6 @@ import 'package:photos/models/upload_strategy.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
@@ -35,7 +31,6 @@ import "package:photos/services/remote/fetch/collection_files.dart";
 import "package:photos/services/remote/fetch/diff.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
-import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RemoteSyncService {
@@ -134,7 +129,7 @@ class RemoteSyncService {
         await syncDeviceCollectionFilesForUpload();
       }
 
-      FileDataService.instance.syncFDStatus().then((_) {
+      fileDataService.syncFDStatus().then((_) {
         PreviewVideoStore.instance.queueFiles();
       }).ignore();
       final filesToBeUploaded = await _getFilesToBeUploaded();
@@ -478,7 +473,7 @@ class RemoteSyncService {
       _logger.info("Skipped $skippedVideos videos and $ignoredForUpload "
           "ignored files for upload");
     }
-    _sortByTimeAndType(filesToBeUploaded);
+    _sortByTime(filesToBeUploaded);
     _logger.info("${filesToBeUploaded.length} new files to be uploaded.");
     return filesToBeUploaded;
   }
@@ -627,164 +622,6 @@ class RemoteSyncService {
     }
   }
 
-  /* _storeDiff maps each remoteFile to existing
-      entries in files table. When match is found, it compares both file to
-      perform relevant actions like
-      [1] Clear local cache when required (Both Shared and Owned files)
-      [2] Retain localID of remote file based on matching logic [Owned files]
-      [3] Refresh UI if visibility or creationTime has changed [Owned files]
-      [4] Schedule file update if the local file has changed since last time
-      [Owned files]
-    [Important Note: If given uploadedFileID and collectionID is already present
-     in files db, the generateID should already point to existing entry.
-     Known Issues:
-      [K1] Cached entry will not be cleared when if a file was edited and
-      moved to different collection as Vid/Image cache key is uploadedID.
-      [Existing]
-    ]
-   */
-  Future<void> _storeDiff(List<EnteFile> diff, int collectionID) async {
-    int sharedFileNew = 0,
-        sharedFileUpdated = 0,
-        localUploadedFromDevice = 0,
-        localButUpdatedOnDevice = 0,
-        remoteNewFile = 0;
-    final int userID = _config.getUserID()!;
-    bool needsGalleryReload = false;
-    // this is required when same file is uploaded twice in the same
-    // collection. Without this check, if both remote files are part of same
-    // diff response, then we end up inserting one entry instead of two
-    // as we update the generatedID for remoteFile to local file's genID
-    final Set<int> alreadyClaimedLocalFilesGenID = {};
-
-    final List<EnteFile> toBeInserted = [];
-    for (EnteFile remoteFile in diff) {
-      // existingFile will be either set to existing collectionID+localID or
-      // to the unclaimed aka not already linked to any uploaded file.
-      EnteFile? existingFile;
-      if (remoteFile.generatedID != null) {
-        // Case [1] Check and clear local cache when uploadedFile already exist
-        // Note: Existing file can be null here if it's replaced by the time we
-        // reach here
-        existingFile = await remoteCache.getCollectionFile(
-          remoteFile.collectionID!,
-          remoteFile.uploadedFileID!,
-        );
-        if (existingFile != null &&
-            _shouldClearCache(remoteFile, existingFile)) {
-          needsGalleryReload = true;
-          await clearCache(remoteFile);
-        }
-      }
-
-      /* If file is not owned by the user, no further processing is required
-      as Case [2,3,4] are only relevant to files owned by user
-       */
-      if (userID != remoteFile.ownerID) {
-        if (existingFile == null) {
-          sharedFileNew++;
-          remoteFile.localID = null;
-        } else {
-          sharedFileUpdated++;
-          // if user has downloaded the file on the device, avoid removing the
-          // localID reference.
-          // [Todo-fix: Excluded shared file's localIDs during syncALL]
-          remoteFile.localID = existingFile.localID;
-        }
-        toBeInserted.add(remoteFile);
-        // end processing for file here, move to next file now
-        continue;
-      }
-
-      // If remoteFile was synced before, assign the localID of the existing
-      // file entry.
-      // If remoteFile is not synced before and has localID (i.e. existingFile
-      // is null), check if the remoteFile was uploaded from this device.
-      // Note: DeviceFolder is ignored for iOS during matching
-      if (existingFile != null) {
-        remoteFile.localID = existingFile.localID;
-      } else if (remoteFile.localID != null && existingFile == null) {
-        final localFileEntries = await _db.getUnlinkedLocalMatchesForRemoteFile(
-          userID,
-          remoteFile.localID!,
-          remoteFile.fileType,
-          title: remoteFile.title ?? '',
-          deviceFolder: remoteFile.deviceFolder ?? '',
-        );
-        if (localFileEntries.isEmpty) {
-          // set remote file's localID as null because corresponding local file
-          // does not exist [Case 2, do not retain localID of the remote file]
-          remoteFile.localID = null;
-        } else {
-          // case 4: Check and schedule the file for update
-          final int maxModificationTime = localFileEntries
-              .map(
-                (e) => e.modificationTime ?? 0,
-              )
-              .reduce(max);
-
-          /* Note: In case of iOS, we will miss any asset modification in
-            between of two installation. This is done to avoid fetching assets
-            from iCloud when modification time could have changed for number of
-            reasons. To fix this, we need to identify a way to store version
-            for the adjustments or just if the asset has been modified ever.
-            https://stackoverflow.com/a/50093266/546896
-            */
-          if (maxModificationTime > remoteFile.modificationTime! &&
-              Platform.isAndroid) {
-            localButUpdatedOnDevice++;
-            await FileUpdationDB.instance.insertMultiple(
-              [remoteFile.localID!],
-              FileUpdationDB.modificationTimeUpdated,
-            );
-          }
-
-          localFileEntries.removeWhere(
-            (e) =>
-                e.uploadedFileID != null ||
-                alreadyClaimedLocalFilesGenID.contains(e.generatedID),
-          );
-
-          if (localFileEntries.isNotEmpty) {
-            // file uploaded from same device, replace the local file row by
-            // setting the generated ID of remoteFile to localFile generatedID
-            existingFile = localFileEntries.first;
-            localUploadedFromDevice++;
-            alreadyClaimedLocalFilesGenID.add(existingFile.generatedID!);
-            remoteFile.generatedID = existingFile.generatedID;
-          }
-        }
-      }
-      if (existingFile != null &&
-          _shouldReloadHomeGallery(remoteFile, existingFile)) {
-        needsGalleryReload = true;
-      } else {
-        remoteNewFile++;
-      }
-      toBeInserted.add(remoteFile);
-    }
-    await _db.insertMultiple(toBeInserted);
-    _logger.info(
-      "Diff to be deduplicated was: " +
-          diff.length.toString() +
-          " out of which \n" +
-          localUploadedFromDevice.toString() +
-          " was uploaded from device, \n" +
-          localButUpdatedOnDevice.toString() +
-          " was uploaded from device, but has been updated since and should be reuploaded, \n" +
-          sharedFileNew.toString() +
-          " new sharedFiles, \n" +
-          sharedFileUpdated.toString() +
-          " updatedSharedFiles, and \n" +
-          remoteNewFile.toString() +
-          " remoteFiles seen first time",
-    );
-    if (needsGalleryReload) {
-      // 'force reload home gallery'
-      Bus.instance.fire(ForceReloadHomeGalleryEvent("remoteSync"));
-    }
-  }
-
   bool _shouldClearCache(EnteFile remoteFile, EnteFile existingFile) {
     if (remoteFile.hash != null && existingFile.hash != null) {
       return remoteFile.hash != existingFile.hash;
@@ -814,17 +651,11 @@ class RemoteSyncService {
     return Platform.isIOS && !AppLifecycleService.instance.isForeground;
   }
 
-  // _sortByTimeAndType moves videos to end and sort by creation time (desc).
+  // _sortByTime sort by creation time (desc).
   // This is done to upload most recent photo first.
-  void _sortByTimeAndType(List<EnteFile> file) {
+  void _sortByTime(List<EnteFile> file) {
     file.sort((first, second) {
-      if (first.fileType == second.fileType) {
-        return second.creationTime!.compareTo(first.creationTime!);
-      } else if (first.fileType == FileType.video) {
-        return 1;
-      } else {
-        return -1;
-      }
+      return second.creationTime!.compareTo(first.creationTime!);
     });
     // move updated files towards the end
     file.sort((first, second) {

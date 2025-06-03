@@ -1294,7 +1294,7 @@ class CollectionsService {
     return null;
   }
 
-  /// Is a public link opened in the app
+  /// Is a public link opened in the app via deeplink
   bool isSharedPublicLink(int collectionID) {
     return _cachedPublicCollectionID.contains(collectionID);
   }

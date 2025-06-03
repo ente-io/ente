@@ -45,7 +45,7 @@
     "welcome_to_ente_subtitle": "Armazenamento de fotos e compartilhamento criptografado de ponta a ponta",
     "new_album": "Novo álbum",
     "create_albums": "Criar álbuns",
-    "enter_album_name": "Nome do álbum",
+    "album_name": "Nome do álbum",
     "close": "Fechar",
     "yes": "Sim",
     "no": "Não",
@@ -626,6 +626,7 @@
     "faster_upload_description": "Rotas enviam em servidores próximos",
     "open_ente_on_startup": "Abrir Ente no Início",
     "cast_album_to_tv": "Reproduzir álbum na TV",
+    "cast_to_tv": "",
     "enter_cast_pin_code": "Digite o código que você vê na TV abaixo para parear este dispositivo.",
     "code": "Código",
     "pair_device_to_tv": "Parear dispositivos",
@@ -682,5 +683,5 @@
     "share_favorites": "Compartilhar favoritos",
     "person_favorites": "Favoritos de {{name}}",
     "shared_favorites": "Favoritos compartilhados",
-    "added_by_name": ""
+    "added_by_name": "Adicionado por {{name}}"
 }

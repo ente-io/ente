@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/ente-io/museum/ente"
 	model "github.com/ente-io/museum/ente/authenticator"
@@ -105,7 +106,9 @@ func (h *AuthenticatorHandler) GetDiff(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to fetch authenticator entity diff"))
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"diff": entities,
+		"diff":      entities,
+		"timestamp": time.Now().UnixMicro(),
 	})
 }
