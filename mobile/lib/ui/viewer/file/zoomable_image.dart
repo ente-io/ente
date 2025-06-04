@@ -428,9 +428,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
       _loadedFinalImage = true;
       _logger.info("Final image loaded");
     });
-    if (_imageProvider != null) {
-      widget.onFinalFileLoad?.call(memoryDuration: 5);
-    }
+    widget.onFinalFileLoad?.call(memoryDuration: 5);
   }
 
   Future<void> _updatePhotoViewController({
