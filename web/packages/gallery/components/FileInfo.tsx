@@ -844,6 +844,7 @@ const RenameFileDialog: React.FC<RenameFileDialogProps> = ({
                     placeholder={t("file_name")}
                     autoFocus
                     initialValue={name}
+                    submitButtonColor="primary"
                     submitButtonTitle={t("rename")}
                     onSubmit={handleSubmit}
                     onCancel={onClose}

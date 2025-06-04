@@ -12,7 +12,7 @@ import { apiURL } from "ente-base/origins";
 import HTTPService from "ente-shared/network/HTTPService";
 import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
 import { getToken } from "ente-shared/storage/localStorage/helpers";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { getUserRecoveryKeyB64 } from "./recovery-key";
 import { unstashRedirect } from "./redirect";
 

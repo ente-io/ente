@@ -794,6 +794,14 @@
   "share": "Partager",
   "unhideToAlbum": "Afficher dans l'album",
   "restoreToAlbum": "Restaurer vers l'album",
+  "moveItem": "{count, plural,=1 {Déplacer un élément} other {Déplacer des éléments}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, =1 {Ajouter un élément} other {Ajouter des éléments}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Créez ou sélectionnez un album",
   "selectAlbum": "Sélectionner album",
   "searchByAlbumNameHint": "Nom de l'album",
@@ -891,7 +899,7 @@
   "authToViewYourMemories": "Authentifiez-vous pour voir vos souvenirs",
   "unlock": "Déverrouiller",
   "freeUpSpace": "Libérer de l'espace",
-  "freeUpSpaceSaving": "{count, plural, one {}=1 {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 fichier dans cet album a été sauvegardé en toute sécurité} other {{formattedNumber} fichiers dans cet album ont été sauvegardés en toute sécurité}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -925,7 +933,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, one {}=1 {l'} other {les}} accéder sur Ente tant que vous avez un abonnement actif",
+  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, =1 {l'} other {les}} accéder sur Ente tant que vous avez un abonnement actif",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1261,8 +1269,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Trouver des personnes rapidement par leur nom",
-  "addViewers": "{count, plural, one {}=0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
-  "addCollaborators": "{count, plural, one {}=0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
+  "addViewers": "{count, plural, =0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
+  "addCollaborators": "{count, plural, =0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Appuyez longuement sur un email pour vérifier le chiffrement de bout en bout.",
   "developerSettingsWarning": "Êtes-vous sûr de vouloir modifier les paramètres du développeur ?",
   "developerSettings": "Paramètres du développeur",
@@ -1396,7 +1404,7 @@
   "enableMachineLearningBanner": "Activer l'apprentissage automatique pour la reconnaissance des visages et la recherche magique",
   "searchDiscoverEmptySection": "Les images seront affichées ici une fois le traitement terminé",
   "searchPersonsEmptySection": "Les personnes seront affichées ici une fois le traitement terminé",
-  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1722,16 +1730,6 @@
   "onTheRoad": "De nouveau sur la route",
   "food": "Plaisir culinaire",
   "pets": "Compagnons à quatre pattes",
-  "cLIcon": "Nouvel icône",
-  "cLIconDesc": "Finalement, création d'un nouvel icône d'application qui, selon nous, représente au mieux notre travail. Nous avons également ajouté un changeur d'icône pour que vous puissiez continuer à utiliser l'ancien.",
-  "cLMemories": "Souvenirs",
-  "cLMemoriesDesc": "Redécouvrez vos précieux souvenirs - focus sur vos connaissances préférées, vos voyages et vos vacances, vos meilleurs clics et bien plus encore. Activez l'apprentissage automatique, taguez-vous et nommez vos amis pour une meilleure expérience.",
-  "cLWidgets": "Widgets",
-  "cLWidgetsDesc": "Les widgets (ou gadgets) de l'écran d'accueil, qui sont intégrés à des souvenirs, sont maintenant disponibles. Ils montreront vos moments spéciaux sans nécessité d'ouvrir l'application.",
-  "cLFamilyPlan": "Limites pour le forfait Famille",
-  "cLFamilyPlanDesc": "Vous pouvez maintenant fixer des limites sur la quantité de stockage que les membres de votre famille peuvent utiliser.",
-  "cLBulkEdit": "Dates de modification multiples",
-  "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes celles-ci, en une seule action rapide. Les dates de décalage sont également prises en charge.",
   "curatedMemories": "Souvenirs conservés",
   "onThisDay": "On this day",
   "lookBackOnYourMemories": "Look back on your memories 🌄",

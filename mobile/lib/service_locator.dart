@@ -9,8 +9,8 @@ import "package:photos/services/account/billing_service.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/services/machine_learning/compute_controller.dart";
 import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
-import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/memories_cache_service.dart";
 import "package:photos/services/permission/service.dart";
@@ -142,10 +142,10 @@ BillingService get billingService {
   return _billingService!;
 }
 
-MachineLearningController? _machineLearningController;
-MachineLearningController get machineLearningController {
-  _machineLearningController ??= MachineLearningController();
-  return _machineLearningController!;
+ComputeController? _computeController;
+ComputeController get computeController {
+  _computeController ??= ComputeController();
+  return _computeController!;
 }
 
 FaceRecognitionService? _faceRecognitionService;

@@ -5,7 +5,7 @@ import type { ZipItem } from "ente-base/types/ipc";
 import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import type { Collection } from "ente-media/collection";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * Internal in-memory state shared by the functions in this module.

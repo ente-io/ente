@@ -18,7 +18,7 @@ import {
 } from "ente-new/photos/services/cast";
 import { loadCast } from "ente-new/photos/utils/chromecast-sender";
 import { t } from "i18next";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
 type AlbumCastDialogProps = ModalVisibilityProps & {
@@ -30,6 +30,37 @@ type AlbumCastDialogProps = ModalVisibilityProps & {
  * A dialog that shows various options that the user has for casting an album.
  */
 export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
+    open,
+    onClose,
+    collection,
+}) => (
+    <TitledMiniDialog {...{ open, onClose }} title={t("cast_album_to_tv")}>
+        <AlbumCastDialogContents {...{ open, onClose, collection }} />
+    </TitledMiniDialog>
+);
+
+/**
+ * [Note: MUI dialog state reset]
+ *
+ * Keep the dialog contents in a separate component so that they get rendered
+ * afresh when the dialog is unmounted and then shown again.
+ *
+ * Details:
+ *
+ * Any state we keep inside the React component that a MUI Dialog as a child
+ * gets retained across visibility changes. For example, if the
+ * {@link AlbumCastDialogContents} were inlined into {@link AlbumCastDialog},
+ * then if we were to open the dialog, switch over to the "pin" view, then close
+ * the dialog by clicking on the backdrop, and then reopen it again, then we'd
+ * still remain on the "pin" view.
+ *
+ * This behaviour might be desirable or undesirable, depending on the
+ * circumstance. If it is undesirable, there are multiple approaches:
+ * https://github.com/mui/material-ui/issues/16325
+ *
+ * One of those is to keep the dialog contents in a separate component.
+ */
+export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
     open,
     onClose,
     collection,
@@ -128,7 +159,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     }, [open]);
 
     return (
-        <TitledMiniDialog {...{ open, onClose }} title={t("cast_album_to_tv")}>
+        <>
             {view == "choose" && (
                 <Stack sx={{ py: 1, gap: 4 }}>
                     {browserCanCast && (
@@ -197,7 +228,6 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         label={t("code")}
                         placeholder={ut("123456")}
                         submitButtonTitle={t("pair_device_to_tv")}
-                        submitButtonColor="accent"
                         onSubmit={onSubmit}
                     />
                     <FocusVisibleButton
@@ -210,6 +240,6 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     </FocusVisibleButton>
                 </>
             )}
-        </TitledMiniDialog>
+        </>
     );
 };

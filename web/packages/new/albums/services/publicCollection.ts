@@ -5,7 +5,7 @@ import {
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import type { PublicURL } from "ente-media/collection";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * Verify with remote that the password entered by the user is the same as the

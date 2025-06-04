@@ -1,6 +1,6 @@
 import { desktopAppVersion, isDesktop } from "ente-base/app";
 import { wait } from "ente-utils/promise";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { clientPackageName } from "./app";
 import { ensureAuthToken } from "./local-user";
 import log from "./log";

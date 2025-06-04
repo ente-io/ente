@@ -1,7 +1,9 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Masukkan alamat email kamu",
+  "enterYourNewEmailAddress": "Masukkan alamat email baru anda",
   "accountWelcomeBack": "Selamat datang kembali!",
+  "emailAlreadyRegistered": "Email sudah terdaftar.",
   "email": "Email",
   "cancel": "Batal",
   "verify": "Verifikasi",

@@ -7,12 +7,13 @@ import { recoveryKeyB64FromMnemonic } from "ente-accounts/services/recovery-key"
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
 import { sendOTT } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
+import {
+    SingleInputForm,
+    type SingleInputFormProps,
+} from "ente-base/components/SingleInputForm";
 import { useBaseContext } from "ente-base/context";
 import { decryptBoxB64 } from "ente-base/crypto";
 import log from "ente-base/log";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "ente-shared/components/SingleInputForm";
 import {
     decryptAndStoreToken,
     saveKeyInSessionStore,
@@ -56,7 +57,7 @@ const Page: React.FC = () => {
         }
     }, [router]);
 
-    const recover: SingleInputFormProps["callback"] = async (
+    const recover: SingleInputFormProps["onSubmit"] = async (
         recoveryKey: string,
         setFieldError,
     ) => {
@@ -92,11 +93,10 @@ const Page: React.FC = () => {
         <AccountsPageContents>
             <AccountsPageTitle>{t("recover_account")}</AccountsPageTitle>
             <SingleInputForm
-                callback={recover}
-                fieldType="text"
-                placeholder={t("recovery_key")}
-                buttonText={t("recover")}
-                disableAutoComplete
+                autoComplete="off"
+                label={t("recovery_key")}
+                submitButtonTitle={t("recover")}
+                onSubmit={recover}
             />
             <AccountsPageFooter>
                 <LinkButton onClick={showNoRecoveryKeyMessage}>
