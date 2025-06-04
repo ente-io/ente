@@ -1,7 +1,6 @@
 import "dart:async";
 
 import "package:dotted_border/dotted_border.dart";
-import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
@@ -156,9 +155,8 @@ class AlbumRecommendation extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipSmoothRect(
-              radius:
-                  SmoothBorderRadius(cornerRadius: 2.35, cornerSmoothing: 1),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
               child: SizedBox(
                 width: _width,
                 height: 100,
@@ -198,7 +196,7 @@ class AlbumRecommendation extends StatelessWidget {
                           snapshot.data != 0) {
                         return Text(
                           snapshot.data.toString(),
-                          style: enteTextTheme.smallMuted,
+                          style: enteTextTheme.miniMuted,
                         );
                       } else {
                         return const SizedBox.shrink();
@@ -228,20 +226,24 @@ class AlbumCTA extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DottedBorder(
-              borderType: BorderType.RRect,
-              strokeWidth: 1.5,
-              borderPadding: const EdgeInsets.all(0.75),
-              dashPattern: const [3.75, 3.75],
-              radius: const Radius.circular(2.35),
-              padding: EdgeInsets.zero,
-              color: enteColorScheme.strokeFaint,
-              child: SizedBox(
-                height: 100,
-                width: 100,
-                child: Icon(
-                  Icons.add,
-                  color: enteColorScheme.strokeFaint,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: DottedBorder(
+                borderType: BorderType.RRect,
+                strokeWidth: 1.5,
+                borderPadding: const EdgeInsets.all(0.75),
+                dashPattern: const [3.75, 3.75],
+                radius: const Radius.circular(8),
+                padding: EdgeInsets.zero,
+                color: enteColorScheme.strokeFaint,
+                child: Container( 
+                  color: enteColorScheme.fillFaintPressed,
+                  height: 100,
+                  width: 100,
+                  child: Icon(
+                    Icons.add,
+                    color: enteColorScheme.strokeFaint,
+                  ),
                 ),
               ),
             ),

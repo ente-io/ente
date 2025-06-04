@@ -24,7 +24,7 @@ class DeviceFolderItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           ClipRRect(
-            borderRadius: BorderRadius.circular(1),
+            borderRadius: BorderRadius.circular(12),
             child: SizedBox(
               height: sideOfThumbnail,
               width: sideOfThumbnail,

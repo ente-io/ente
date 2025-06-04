@@ -36,9 +36,7 @@ class AlbumListItemWidget extends StatelessWidget {
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: const BorderRadius.horizontal(
-              left: Radius.circular(4),
-            ),
+            borderRadius: BorderRadius.circular(4),
             child: SizedBox(
               height: sideOfThumbnail,
               width: sideOfThumbnail,

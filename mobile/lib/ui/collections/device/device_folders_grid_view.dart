@@ -80,7 +80,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
                       itemBuilder: (context, index) {
                         final deviceCollection = snapshot.data![index];
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: DeviceFolderItem(deviceCollection),
                         );
                       },
