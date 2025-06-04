@@ -208,9 +208,9 @@ dependencies:
       ref: android_video_roation_fix
       path: packages/video_player/video_player/
   video_thumbnail:
-  visibility_detector: ^0.3.3
+  visibility_detector: ^0.4.0+2
   wakelock_plus: ^1.1.1
-  wechat_assets_picker: ^8.6.3
+  wechat_assets_picker: ^9.5.1
   widgets_to_image: ^0.0.2
   xml: ^6.3.0
 
