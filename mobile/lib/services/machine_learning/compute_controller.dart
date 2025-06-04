@@ -91,6 +91,8 @@ class ComputeController {
       _waitingToRunML = false;
       _logger.info("ML request granted");
       return true;
+    } else if (_currentRunState == _ComputeRunState.runningML) {
+      return true;
     }
     _logger.info(
       "ML request denied, current state: $_currentRunState, wants to run ML: $_waitingToRunML",
@@ -103,6 +105,8 @@ class ComputeController {
     if (_currentRunState == _ComputeRunState.idle && !_waitingToRunML) {
       _logger.info("Stream request granted");
       _currentRunState = _ComputeRunState.generatingStream;
+      return true;
+    } else if (_currentRunState == _ComputeRunState.generatingStream && !_waitingToRunML) {
       return true;
     }
     _logger.info(
