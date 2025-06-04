@@ -74,7 +74,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         await MemoryHomeWidgetService.instance.memoryChanged();
       },
     );
-    _changeCallbackDebouncer = Debouncer(const Duration(milliseconds: 500));
+    _changeCallbackDebouncer = Debouncer(const Duration(milliseconds: 1500));
     _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen(
       (event) async {
         _changeCallbackDebouncer.run(
