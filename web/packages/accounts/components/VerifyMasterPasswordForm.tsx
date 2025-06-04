@@ -1,4 +1,4 @@
-import { Input, TextField, type ButtonProps } from "@mui/material";
+import { Input, TextField } from "@mui/material";
 import type { SRPAttributes } from "ente-accounts/services/srp-remote";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
@@ -7,18 +7,14 @@ import log from "ente-base/log";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { useCallback, useState } from "react";
-import { CustomError } from "../error";
-import type { KeyAttributes, User } from "../user/types";
+import { CustomError } from "ente-shared/error"
+import type { KeyAttributes, User } from "ente-shared/user/types";
 
 export interface VerifyMasterPasswordFormProps {
+    /**
+     * The user whose password we're trying to verify.
+     */
     user: User | undefined;
-    callback: (
-        key: string,
-        kek: string,
-        keyAttributes: KeyAttributes,
-        passphrase?: string,
-    ) => void;
-    buttonText: string;
     keyAttributes: KeyAttributes | undefined;
     /**
      * A callback invoked when the form wants to get {@link KeyAttributes}.
@@ -38,18 +34,41 @@ export interface VerifyMasterPasswordFormProps {
      */
     getKeyAttributes?: (kek: string) => Promise<KeyAttributes | undefined>;
     srpAttributes?: SRPAttributes;
-    submitButtonProps?: ButtonProps;
+    /**
+     * The title of the submit button no the form.
+     */
+    submitButtonTitle: string;
+    /**
+     * The callback invoked with the verified password, and all the other
+     * auxillary information that was ascertained when verifying it.
+     *
+     * @param key The user's master key
+     * @param kek
+     * @param keyAttributes
+     * @param passphrase The plaintext password
+     */
+    onSubmit: (
+        key: string,
+        kek: string,
+        keyAttributes: KeyAttributes,
+        passphrase?: string,
+    ) => void;
 }
 
-export default function VerifyMasterPasswordForm({
+/**
+ * A form with a text field that can be used to ask the user to verify their
+ * password.
+ */
+export const VerifyMasterPasswordForm: React.FC<
+    VerifyMasterPasswordFormProps
+> = ({
     user,
     keyAttributes,
     srpAttributes,
-    callback,
-    buttonText,
-    submitButtonProps,
     getKeyAttributes,
-}: VerifyMasterPasswordFormProps) {
+    onSubmit,
+    submitButtonTitle,
+}) => {
     const [showPassword, setShowPassword] = useState(false);
 
     const handleToggleShowHidePassword = useCallback(
@@ -112,7 +131,7 @@ export default function VerifyMasterPasswordForm({
                     keyAttributes.keyDecryptionNonce,
                     kek,
                 );
-                callback(key, kek, keyAttributes, passphrase);
+                onSubmit(key, kek, keyAttributes, passphrase);
             } catch (e) {
                 log.error("user entered a wrong password", e);
                 throw Error(CustomError.INCORRECT_PASSWORD);
@@ -180,10 +199,9 @@ export default function VerifyMasterPasswordForm({
                 type="submit"
                 loading={formik.isSubmitting}
                 color={"accent"}
-                {...submitButtonProps}
             >
-                {buttonText}
+                {submitButtonTitle}
             </LoadingButton>
         </form>
     );
-}
+};

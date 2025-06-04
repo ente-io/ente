@@ -8,6 +8,10 @@ import { SecondFactorChoice } from "ente-accounts/components/SecondFactorChoice"
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import { useSecondFactorChoiceIfNeeded } from "ente-accounts/components/utils/second-factor-choice";
 import {
+    VerifyMasterPasswordForm,
+    type VerifyMasterPasswordFormProps,
+} from "ente-accounts/components/VerifyMasterPasswordForm";
+import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
 } from "ente-accounts/services/passkey";
@@ -31,9 +35,6 @@ import { sharedCryptoWorker } from "ente-base/crypto";
 import type { B64EncryptionResult } from "ente-base/crypto/libsodium";
 import { clearLocalStorage } from "ente-base/local-storage";
 import log from "ente-base/log";
-import VerifyMasterPasswordForm, {
-    type VerifyMasterPasswordFormProps,
-} from "ente-shared/components/VerifyMasterPasswordForm";
 import {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
@@ -258,7 +259,7 @@ const Page: React.FC = () => {
         };
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    const useMasterPassword: VerifyMasterPasswordFormProps["callback"] = async (
+    const useMasterPassword: VerifyMasterPasswordFormProps["onSubmit"] = async (
         key,
         kek,
         keyAttributes,
@@ -334,16 +335,14 @@ const Page: React.FC = () => {
     return (
         <AccountsPageContents>
             <PasswordHeader>{user?.email ?? ""}</PasswordHeader>
-
             <VerifyMasterPasswordForm
-                buttonText={t("sign_in")}
-                callback={useMasterPassword}
                 user={user}
                 keyAttributes={keyAttributes}
                 getKeyAttributes={getKeyAttributes}
                 srpAttributes={srpAttributes}
+                submitButtonTitle={t("sign_in")}
+                onSubmit={useMasterPassword}
             />
-
             <AccountsPageFooterWithHost>
                 <LinkButton onClick={() => router.push("/recover")}>
                     {t("forgot_password")}
