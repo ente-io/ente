@@ -24,7 +24,7 @@ class ZoomableLiveImageNew extends StatefulWidget {
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
   final bool isFromMemories;
-  final Function(bool, int)? onFileLoad;
+  final Function(bool, int)? onFinalFileLoad;
 
   const ZoomableLiveImageNew(
     this.enteFile, {
@@ -33,7 +33,7 @@ class ZoomableLiveImageNew extends StatefulWidget {
     required this.tagPrefix,
     this.backgroundDecoration,
     this.isFromMemories = false,
-    this.onFileLoad,
+    this.onFinalFileLoad,
   });
 
   @override
@@ -98,7 +98,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
         shouldDisableScroll: widget.shouldDisableScroll,
         backgroundDecoration: widget.backgroundDecoration,
         isGuestView: isGuestView,
-        onFileLoad: widget.onFileLoad,
+        onFinalFileLoad: widget.onFinalFileLoad,
       );
     }
     if (!widget.isFromMemories) {

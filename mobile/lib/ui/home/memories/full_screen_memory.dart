@@ -137,7 +137,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   PageController? _pageController;
   final _showTitle = ValueNotifier<bool>(true);
   AnimationController? _progressAnimationController;
-  AnimationController? _kenBurnsAnimationController;
+  AnimationController? _zoomAnimationController;
   final ValueNotifier<Duration> durationNotifier =
       ValueNotifier(const Duration(seconds: 5));
 
@@ -169,42 +169,38 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         _progressAnimationController!.forward();
       }
     }
-    if (_kenBurnsAnimationController != null) {
+    if (_zoomAnimationController != null) {
       if (pause) {
-        _kenBurnsAnimationController!.stop();
+        _zoomAnimationController!.stop();
       } else {
-        _kenBurnsAnimationController!.forward();
+        _zoomAnimationController!.forward();
       }
     }
   }
 
   void _resetAnimation() {
-    if (_progressAnimationController != null) {
-      _progressAnimationController!.reset();
-    }
-    if (_kenBurnsAnimationController != null) {
-      _kenBurnsAnimationController!.reset();
-    }
+    _progressAnimationController
+      ?..stop()
+      ..reset();
+    _zoomAnimationController
+      ?..stop()
+      ..reset();
   }
 
-  void onFileLoad(
-    bool isLoaded,
-    int duration, {
-    bool isVideo = false,
-  }) {
-    if (isLoaded) {
-      durationNotifier.value = Duration(seconds: duration);
-
-      _progressAnimationController?.reset();
-      _progressAnimationController?.duration = durationNotifier.value;
-      _progressAnimationController?.forward();
-
-      _kenBurnsAnimationController?.reset();
-      _kenBurnsAnimationController?.forward();
-    } else {
-      _progressAnimationController?.stop();
-      _kenBurnsAnimationController?.stop();
+  void onFinalFileLoad(bool isLoaded, int duration) {
+    if (_progressAnimationController!.isAnimating == true) {
+      _progressAnimationController!.stop();
     }
+    durationNotifier.value = Duration(seconds: duration);
+    _progressAnimationController
+      ?..stop()
+      ..reset()
+      ..duration = durationNotifier.value
+      ..forward();
+    _zoomAnimationController
+      ?..stop()
+      ..reset()
+      ..forward();
   }
 
   @override
@@ -254,6 +250,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                   inheritedData.indexNotifier.value;
                               if (currentIndex <
                                   inheritedData.memories.length - 1) {
+                                _resetAnimation();
                                 _pageController!.nextPage(
                                   duration: const Duration(milliseconds: 250),
                                   curve: Curves.ease,
@@ -325,32 +322,32 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   final edgeWidth = screenWidth * 0.20;
                   if (details.localPosition.dx < edgeWidth) {
                     if (index > 0) {
+                      _resetAnimation();
                       _pageController!.previousPage(
                         duration: const Duration(milliseconds: 250),
                         curve: Curves.ease,
                       );
-                      _resetAnimation();
                     }
                   } else if (details.localPosition.dx >
                       screenWidth - edgeWidth) {
                     if (index < (inheritedData.memories.length - 1)) {
+                      _resetAnimation();
                       _pageController!.nextPage(
                         duration: const Duration(milliseconds: 250),
                         curve: Curves.ease,
                       );
                     }
-                    _resetAnimation();
                   }
                 },
                 onLongPress: () {
-                  isVideo ? null : _toggleAnimation(true);
+                  _toggleAnimation(true);
                 },
                 onLongPressUp: () {
-                  isVideo ? null : _toggleAnimation(false);
+                  _toggleAnimation(false);
                 },
                 child: MemoriesZoomWidget(
                   scaleController: (controller) {
-                    _kenBurnsAnimationController = controller;
+                    _zoomAnimationController = controller;
                   },
                   zoomIn: index % 2 == 0,
                   isVideo: isVideo,
@@ -367,12 +364,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                           ? _toggleAnimation(false)
                           : _toggleAnimation(true);
                     },
-                    onFileLoad: (isLoaded, duration) {
-                      onFileLoad(
-                        isLoaded,
-                        duration,
-                        isVideo: isVideo,
-                      );
+                    onFinalFileLoad: (isLoaded, duration) {
+                      onFinalFileLoad(isLoaded, duration);
                     },
                   ),
                 ),
