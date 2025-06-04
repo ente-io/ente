@@ -15,6 +15,7 @@ import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/memories/memories_cache.dart";
 import "package:photos/models/memories/memory.dart";
+import "package:photos/models/memories/people_memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/service_locator.dart";
@@ -218,7 +219,7 @@ class MemoriesCacheService {
         _cachedMemories = nowResult.memories
             .where((memory) => memory.shouldShowNow())
             .toList();
-        await _scheduleOnThisDayNotifications(
+        await _scheduleMemoryNotifications(
           [...nowResult.memories, ...nextResult.memories],
         );
         locationService.baseLocations = nowResult.baseLocations;
@@ -241,6 +242,13 @@ class MemoriesCacheService {
     final oldCache = await _readCacheFromDisk();
     final MemoriesCache newCache = _processOldCache(oldCache);
     return newCache;
+  }
+
+  Future<void> _scheduleMemoryNotifications(
+    List<SmartMemory> allMemories,
+  ) async {
+    await _scheduleOnThisDayNotifications(allMemories);
+    await _scheduleBirthdayNotifications(allMemories);
   }
 
   Future<void> _scheduleOnThisDayNotifications(
@@ -286,6 +294,73 @@ class MemoriesCacheService {
         timeoutDurationAndroid: const Duration(hours: 16),
       );
       scheduledDates.add(scheduleTime);
+    }
+  }
+
+  Future<void> _scheduleBirthdayNotifications(
+    List<SmartMemory> allMemories,
+  ) async {
+    await NotificationService.instance
+        .clearAllScheduledNotifications(containingPayload: "birthday");
+    final scheduledPersons = <String>{};
+    final toSchedule = <PeopleMemory>[];
+    final peopleToBirthdayMemories = <String, List<PeopleMemory>>{};
+    for (final memory in allMemories) {
+      if (memory is PeopleMemory && (memory.isBirthday ?? false)) {
+        peopleToBirthdayMemories
+            .putIfAbsent(memory.personID, () => [])
+            .add(memory);
+      }
+    }
+    personLoop:
+    for (final personID in peopleToBirthdayMemories.keys) {
+      final birthdayMemories = peopleToBirthdayMemories[personID]!;
+      for (final memory in birthdayMemories) {
+        if (memory.peopleMemoryType == PeopleMemoryType.youAndThem) {
+          toSchedule.add(memory);
+          continue personLoop;
+        }
+      }
+      for (final memory in birthdayMemories) {
+        if (memory.peopleMemoryType == PeopleMemoryType.spotlight) {
+          toSchedule.add(memory);
+          continue personLoop;
+        }
+      }
+    }
+    for (final memory in toSchedule) {
+      final firstDateToShow =
+          DateTime.fromMicrosecondsSinceEpoch(memory.firstDateToShow);
+      final scheduleTime = DateTime(
+        firstDateToShow.year,
+        firstDateToShow.month,
+        firstDateToShow.day,
+        7,
+      );
+      if (scheduleTime.isBefore(DateTime.now())) {
+        _logger.info(
+          "Skipping scheduling notification for memory ${memory.id} because the date is in the past",
+        );
+        continue;
+      }
+      if (scheduledPersons.contains(memory.personID)) {
+        _logger.severe(
+          "Skipping scheduling notification for memory ${memory.id} because the person's birthday is already scheduled",
+        );
+        continue;
+      }
+      await NotificationService.instance.scheduleNotification(
+        memory.personName != null
+            ? "Happy birthday to ${memory.personName}! 🎉"
+            : "Happy birthday! 🥳",
+        id: memory.id.hashCode,
+        channelID: "birthday",
+        channelName: "Birthdays",
+        payload: "birthday_${memory.personID}",
+        dateTime: scheduleTime,
+        timeoutDurationAndroid: const Duration(hours: 17),
+      );
+      scheduledPersons.add(memory.personID);
     }
   }
 
