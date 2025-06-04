@@ -228,7 +228,6 @@ export const AlbumCastDialogContents: React.FC<AlbumCastDialogProps> = ({
                         label={t("code")}
                         placeholder={ut("123456")}
                         submitButtonTitle={t("pair_device_to_tv")}
-                        submitButtonColor="accent"
                         onSubmit={onSubmit}
                     />
                     <FocusVisibleButton

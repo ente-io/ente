@@ -32,15 +32,15 @@ export type SingleInputFormProps = Pick<
      */
     initialValue?: string;
     /**
+     * Color of the submit button.
+     *
+     * Default: "accent".
+     */
+    submitButtonColor?: ButtonProps["color"];
+    /**
      * Title for the submit button.
      */
     submitButtonTitle: string;
-    /**
-     * Color of the submit button.
-     *
-     * Default: "primary".
-     */
-    submitButtonColor?: ButtonProps["color"];
     /**
      * Cancellation handler.
      *
@@ -133,7 +133,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
             fullWidth
             type="submit"
             loading={formik.isSubmitting}
-            color={submitButtonColor ?? "primary"}
+            color={submitButtonColor ?? "accent"}
         >
             {submitButtonTitle}
         </LoadingButton>

@@ -1145,7 +1145,6 @@ const Page: React.FC = () => {
                     title={t("new_album")}
                     label={t("album_name")}
                     autoFocus
-                    submitButtonColor="accent"
                     submitButtonTitle={t("create")}
                     onSubmit={handleAlbumNameSubmit}
                 />

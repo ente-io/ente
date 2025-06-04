@@ -95,7 +95,6 @@ const Page: React.FC = () => {
             <SingleInputForm
                 autoComplete="off"
                 label={t("recovery_key")}
-                submitButtonColor="accent"
                 submitButtonTitle={t("recover")}
                 onSubmit={recover}
             />

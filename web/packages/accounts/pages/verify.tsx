@@ -244,7 +244,6 @@ const Page: React.FC = () => {
             <SingleInputForm
                 autoComplete="one-time-code"
                 label={t("verification_code")}
-                submitButtonColor="accent"
                 submitButtonTitle={t("verify")}
                 onSubmit={onSubmit}
             />
