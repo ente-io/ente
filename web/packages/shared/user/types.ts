@@ -90,8 +90,3 @@ export interface User {
     twoFactorSessionID: string;
 }
 
-export interface KEK {
-    key: string;
-    opsLimit: number;
-    memLimit: number;
-}
