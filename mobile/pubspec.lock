@@ -2557,7 +2557,7 @@ packages:
       sha256: "12391302411737c176b0b5d6491f466b0dd56d4763e347b6714efbaa74d7953d"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.4"
+    version: "0.6.5"
   thermal:
     dependency: "direct main"
     description:
