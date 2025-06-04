@@ -3,6 +3,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, Typography } from "@mui/material";
 import { styled, ThemeProvider } from "@mui/material/styles";
 import { useNotification } from "components/utils/hooks-app";
+import type { User } from "ente-accounts/services/user";
 import { clientPackageName, isDesktop, staticAppTitle } from "ente-base/app";
 import { CenteredRow } from "ente-base/components/containers";
 import { CustomHead } from "ente-base/components/Head";
@@ -43,7 +44,6 @@ import {
     getData,
     isLocalStorageAndIndexedDBMismatch,
 } from "ente-shared/storage/localStorage";
-import type { User } from "ente-shared/user/types";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";

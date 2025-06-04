@@ -1,7 +1,7 @@
 import { TimeStampListItem } from "components/FileList";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
+import type { User } from "ente-accounts/services/user";
 import { type SelectionContext } from "ente-new/photos/components/gallery";
-import type { User } from "ente-shared/user/types";
 
 export interface SelectedState {
     [k: number]: boolean;

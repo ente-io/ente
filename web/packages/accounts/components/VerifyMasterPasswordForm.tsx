@@ -1,11 +1,11 @@
 import { Input, TextField } from "@mui/material";
 import type { SRPAttributes } from "ente-accounts/services/srp-remote";
+import type { KeyAttributes, User } from "ente-accounts/services/user";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
 import { CustomError } from "ente-shared/error";
-import type { KeyAttributes, User } from "ente-shared/user/types";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { useCallback, useState } from "react";
@@ -101,7 +101,12 @@ export const VerifyMasterPasswordForm: React.FC<
                 return;
             }
 
-            await verifyPassphrase(password, setPasswordFieldError);
+            try {
+                await verifyPassphrase(password, setPasswordFieldError);
+            } catch (e) {
+                log.error("Failed to to verify passphrase", e);
+                setPasswordFieldError(t("generic_error"));
+            }
         },
     });
 
@@ -109,76 +114,77 @@ export const VerifyMasterPasswordForm: React.FC<
         passphrase: string,
         setFieldError: (message: string) => void,
     ) => {
-        try {
-            const cryptoWorker = await sharedCryptoWorker();
-            let kek: string;
-            if (srpAttributes) {
-                try {
-                    kek = await cryptoWorker.deriveKey(
-                        passphrase,
-                        srpAttributes.kekSalt,
-                        srpAttributes.opsLimit,
-                        srpAttributes.memLimit,
-                    );
-                } catch (e) {
-                    log.error("Failed to derive kek", e);
-                    setFieldError(t("weak_device_hint"));
-                    return;
-                }
-            } else if (keyAttributes) {
-                try {
-                    kek = await cryptoWorker.deriveKey(
-                        passphrase,
-                        keyAttributes.kekSalt,
-                        keyAttributes.opsLimit,
-                        keyAttributes.memLimit,
-                    );
-                } catch (e) {
-                    log.error("Failed to derive kek", e);
-                    setFieldError(t("weak_device_hint"));
-                    return;
-                }
-            } else throw new Error("Both SRP and key attributes are missing");
-
-            if (!keyAttributes && typeof getKeyAttributes == "function") {
-                keyAttributes = await getKeyAttributes(kek);
-            }
-            if (!keyAttributes) {
-                throw Error("couldn't get key attributes");
-            }
-
+        const cryptoWorker = await sharedCryptoWorker();
+        let kek: string;
+        if (srpAttributes) {
             try {
-                const key = await cryptoWorker.decryptB64(
-                    keyAttributes.encryptedKey,
-                    keyAttributes.keyDecryptionNonce,
-                    kek,
+                kek = await cryptoWorker.deriveKey(
+                    passphrase,
+                    srpAttributes.kekSalt,
+                    srpAttributes.opsLimit,
+                    srpAttributes.memLimit,
                 );
-                onVerify(key, kek, keyAttributes, passphrase);
             } catch (e) {
-                log.error("user entered a wrong password", e);
-                throw Error(CustomError.INCORRECT_PASSWORD);
+                log.error("Failed to derive kek", e);
+                setFieldError(t("weak_device_hint"));
+                return;
             }
-        } catch (e) {
-            if (e instanceof Error) {
-                if (e.message === CustomError.TWO_FACTOR_ENABLED) {
-                    // two factor enabled, user has been redirected to two factor page
-                    return;
+        } else if (keyAttributes) {
+            try {
+                kek = await cryptoWorker.deriveKey(
+                    passphrase,
+                    keyAttributes.kekSalt,
+                    keyAttributes.opsLimit,
+                    keyAttributes.memLimit,
+                );
+            } catch (e) {
+                log.error("Failed to derive kek", e);
+                setFieldError(t("weak_device_hint"));
+                return;
+            }
+        } else throw new Error("Both SRP and key attributes are missing");
+
+        if (!keyAttributes && typeof getKeyAttributes == "function") {
+            try {
+                keyAttributes = await getKeyAttributes(kek);
+            } catch (e) {
+                if (e instanceof Error) {
+                    switch (e.message) {
+                        case CustomError.TWO_FACTOR_ENABLED:
+                            // Two factor enabled, user has been redirected to
+                            // the two-factor verification page.
+                            return;
+
+                        case CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT:
+                            log.error("Incorrect password or no account", e);
+                            setFieldError(
+                                t("incorrect_password_or_no_account"),
+                            );
+                            return;
+                    }
                 }
-                log.error("failed to verify passphrase", e);
-                switch (e.message) {
-                    case CustomError.INCORRECT_PASSWORD:
-                        setFieldError(t("incorrect_password"));
-                        break;
-                    case CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT:
-                        setFieldError(t("incorrect_password_or_no_account"));
-                        break;
-                    default:
-                        setFieldError(t("generic_error"));
-                }
-            } else {
-                log.error("failed to verify passphrase", e);
+                throw e;
             }
         }
+
+        if (!keyAttributes) throw Error("Couldn't get key attributes");
+
+        let key: string;
+        try {
+            key = await cryptoWorker.decryptBoxB64(
+                {
+                    encryptedData: keyAttributes.encryptedKey,
+                    nonce: keyAttributes.keyDecryptionNonce,
+                },
+                kek,
+            );
+        } catch (e) {
+            log.warn("Incorrect password", e);
+            setFieldError(t("incorrect_password"));
+            return;
+        }
+
+        onVerify(key, kek, keyAttributes, passphrase);
     };
 
     return (

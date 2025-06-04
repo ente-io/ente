@@ -28,6 +28,7 @@ import {
 } from "ente-accounts/services/srp";
 import type { SRPAttributes } from "ente-accounts/services/srp-remote";
 import { getSRPAttributes } from "ente-accounts/services/srp-remote";
+import type { KeyAttributes, User } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingIndicator } from "ente-base/components/loaders";
 import { useBaseContext } from "ente-base/context";
@@ -49,7 +50,6 @@ import {
     setIsFirstLogin,
 } from "ente-shared/storage/localStorage/helpers";
 import { getKey, removeKey, setKey } from "ente-shared/storage/sessionStorage";
-import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
@@ -140,14 +140,18 @@ const Page: React.FC = () => {
             if (kekEncryptedAttributes && keyAttributes) {
                 removeKey("keyEncryptionKey");
                 const cryptoWorker = await sharedCryptoWorker();
-                const kek = await cryptoWorker.decryptB64(
-                    kekEncryptedAttributes.encryptedData,
-                    kekEncryptedAttributes.nonce,
+                const kek = await cryptoWorker.decryptBoxB64(
+                    {
+                        encryptedData: kekEncryptedAttributes.encryptedData,
+                        nonce: kekEncryptedAttributes.nonce,
+                    },
                     kekEncryptedAttributes.key,
                 );
-                const key = await cryptoWorker.decryptB64(
-                    keyAttributes.encryptedKey,
-                    keyAttributes.keyDecryptionNonce,
+                const key = await cryptoWorker.decryptBoxB64(
+                    {
+                        encryptedData: keyAttributes.encryptedKey,
+                        nonce: keyAttributes.keyDecryptionNonce,
+                    },
                     kek,
                 );
                 void postVerification(key, kek, keyAttributes);

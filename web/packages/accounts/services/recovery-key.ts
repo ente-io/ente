@@ -1,4 +1,5 @@
 import * as bip39 from "bip39";
+import type { KeyAttributes } from "ente-accounts/services/user";
 import {
     decryptBoxB64,
     fromHex,
@@ -7,7 +8,6 @@ import {
 } from "ente-base/crypto";
 import { masterKeyFromSession } from "ente-base/session";
 import { getData, setData } from "ente-shared/storage/localStorage";
-import type { KeyAttributes } from "ente-shared/user/types";
 import { putUserRecoveryKeyAttributes } from "./user";
 
 // Mobile client library only supports English.

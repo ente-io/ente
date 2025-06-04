@@ -195,16 +195,14 @@ const decryptEnteFile = async (
         pubMagicMetadata,
         ...restFileProps
     } = encryptedFile;
-    const fileKey = await worker.decryptB64(
-        encryptedKey,
-        keyDecryptionNonce,
+    const fileKey = await worker.decryptBoxB64(
+        { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
         collectionKey,
     );
-    const fileMetadata = await worker.decryptMetadataJSON({
-        encryptedDataB64: metadata.encryptedData,
-        decryptionHeaderB64: metadata.decryptionHeader,
-        keyB64: fileKey,
-    });
+    const fileMetadata = await worker.decryptMetadataJSON_New(
+        metadata,
+        fileKey,
+    );
     let fileMagicMetadata: FileMagicMetadata | undefined;
     let filePubMagicMetadata: FilePublicMagicMetadata | undefined;
     if (magicMetadata?.data) {
