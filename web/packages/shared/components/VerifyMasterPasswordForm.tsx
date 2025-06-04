@@ -1,11 +1,12 @@
-import { Input, type ButtonProps } from "@mui/material";
+import { Input, TextField, type ButtonProps } from "@mui/material";
 import type { SRPAttributes } from "ente-accounts/services/srp-remote";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
+import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
+import { useFormik } from "formik";
 import { t } from "i18next";
-import SingleInputForm, {
-    type SingleInputFormProps,
-} from "../components/SingleInputForm";
+import { useCallback, useState } from "react";
 import { CustomError } from "../error";
 import type { KeyAttributes, User } from "../user/types";
 
@@ -49,9 +50,31 @@ export default function VerifyMasterPasswordForm({
     submitButtonProps,
     getKeyAttributes,
 }: VerifyMasterPasswordFormProps) {
-    const verifyPassphrase: SingleInputFormProps["callback"] = async (
-        passphrase,
-        setFieldError,
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleToggleShowHidePassword = useCallback(
+        () => setShowPassword((show) => !show),
+        [],
+    );
+
+    const formik = useFormik({
+        initialValues: { password: "" },
+        onSubmit: async ({ password }, { setFieldError }) => {
+            const setPasswordFieldError = (message: string) =>
+                setFieldError("password", message);
+
+            if (!password) {
+                setPasswordFieldError(t("required"));
+                return;
+            }
+
+            await verifyPassphrase(password, setPasswordFieldError);
+        },
+    });
+
+    const verifyPassphrase = async (
+        passphrase: string,
+        setFieldError: (message: string) => void,
     ) => {
         try {
             const cryptoWorker = await sharedCryptoWorker();
@@ -114,28 +137,54 @@ export default function VerifyMasterPasswordForm({
                     default:
                         setFieldError(t("generic_error"));
                 }
+            } else {
+                log.error("failed to verify passphrase", e);
             }
         }
     };
 
     return (
-        <SingleInputForm
-            callback={verifyPassphrase}
-            placeholder={t("password")}
-            buttonText={buttonText}
-            submitButtonProps={submitButtonProps}
-            hiddenPreInput={
-                <Input
-                    sx={{ display: "none" }}
-                    id="email"
-                    name="email"
-                    autoComplete="username"
-                    type="email"
-                    value={user?.email}
-                />
-            }
-            autoComplete={"current-password"}
-            fieldType="password"
-        />
+        <form onSubmit={formik.handleSubmit}>
+            <Input
+                sx={{ display: "none" }}
+                id="email"
+                name="email"
+                autoComplete="username"
+                type="email"
+                value={user?.email}
+            />
+            <TextField
+                name="password"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                label={t("password")}
+                fullWidth
+                margin="normal"
+                disabled={formik.isSubmitting}
+                error={!!formik.errors.password}
+                helperText={formik.errors.password ?? " "}
+                slotProps={{
+                    input: {
+                        endAdornment: (
+                            <ShowHidePasswordInputAdornment
+                                showPassword={showPassword}
+                                onToggle={handleToggleShowHidePassword}
+                            />
+                        ),
+                    },
+                }}
+            />
+            <LoadingButton
+                fullWidth
+                type="submit"
+                loading={formik.isSubmitting}
+                color={"accent"}
+                {...submitButtonProps}
+            >
+                {buttonText}
+            </LoadingButton>
+        </form>
     );
 }
