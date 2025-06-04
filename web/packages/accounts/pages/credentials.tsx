@@ -150,8 +150,7 @@ const Page: React.FC = () => {
                     keyAttributes.keyDecryptionNonce,
                     kek,
                 );
-                // eslint-disable-next-line react-hooks/rules-of-hooks
-                useMasterPassword(key, kek, keyAttributes);
+                void postVerification(key, kek, keyAttributes);
                 return;
             }
             if (keyAttributes) {
@@ -258,46 +257,46 @@ const Page: React.FC = () => {
             }
         };
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    const useMasterPassword: VerifyMasterPasswordFormProps["onSubmit"] = async (
-        key,
-        kek,
-        keyAttributes,
-        passphrase,
+    const handleVerifyMasterPassword: VerifyMasterPasswordFormProps["onVerify"] =
+        (key, kek, keyAttributes, passphrase) => {
+            void (async () => {
+                if (isFirstLogin()) {
+                    await generateAndSaveIntermediateKeyAttributes(
+                        passphrase,
+                        keyAttributes,
+                        key,
+                    );
+                }
+                await postVerification(key, kek, keyAttributes);
+            })();
+        };
+
+    const postVerification = async (
+        key: string,
+        kek: string,
+        keyAttributes: KeyAttributes,
     ) => {
+        await saveKeyInSessionStore("encryptionKey", key);
+        await decryptAndStoreToken(keyAttributes, key);
         try {
-            if (isFirstLogin() && passphrase) {
-                await generateAndSaveIntermediateKeyAttributes(
-                    passphrase,
-                    keyAttributes,
-                    key,
-                );
-            }
-            await saveKeyInSessionStore("encryptionKey", key);
-            await decryptAndStoreToken(keyAttributes, key);
-            try {
-                let srpAttributes: SRPAttributes | null =
-                    getData("srpAttributes");
-                if (!srpAttributes && user) {
-                    srpAttributes = await getSRPAttributes(user.email);
-                    if (srpAttributes) {
-                        setData("srpAttributes", srpAttributes);
-                    }
+            let srpAttributes: SRPAttributes | null = getData("srpAttributes");
+            if (!srpAttributes && user) {
+                srpAttributes = await getSRPAttributes(user.email);
+                if (srpAttributes) {
+                    setData("srpAttributes", srpAttributes);
                 }
-                log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
-                if (!srpAttributes) {
-                    const loginSubKey = await generateLoginSubKey(kek);
-                    const srpSetupAttributes =
-                        await generateSRPSetupAttributes(loginSubKey);
-                    await configureSRP(srpSetupAttributes);
-                }
-            } catch (e) {
-                log.error("migrate to srp failed", e);
             }
-            void router.push(unstashRedirect() ?? appHomeRoute);
+            log.debug(() => `userSRPSetupPending ${!srpAttributes}`);
+            if (!srpAttributes) {
+                const loginSubKey = await generateLoginSubKey(kek);
+                const srpSetupAttributes =
+                    await generateSRPSetupAttributes(loginSubKey);
+                await configureSRP(srpSetupAttributes);
+            }
         } catch (e) {
-            log.error("useMasterPassword failed", e);
+            log.error("migrate to srp failed", e);
         }
+        void router.push(unstashRedirect() ?? appHomeRoute);
     };
 
     if (!keyAttributes && !srpAttributes) {
@@ -341,7 +340,7 @@ const Page: React.FC = () => {
                 getKeyAttributes={getKeyAttributes}
                 srpAttributes={srpAttributes}
                 submitButtonTitle={t("sign_in")}
-                onSubmit={useMasterPassword}
+                onVerify={handleVerifyMasterPassword}
             />
             <AccountsPageFooterWithHost>
                 <LinkButton onClick={() => router.push("/recover")}>

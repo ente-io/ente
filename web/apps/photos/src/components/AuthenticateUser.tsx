@@ -99,7 +99,7 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
                 user={user}
                 keyAttributes={keyAttributes}
                 submitButtonTitle={t("authenticate")}
-                onSubmit={() => {
+                onVerify={() => {
                     onClose();
                     onAuthenticate();
                 }}

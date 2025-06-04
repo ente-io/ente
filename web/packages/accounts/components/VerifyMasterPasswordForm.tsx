@@ -4,11 +4,11 @@ import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { ShowHidePasswordInputAdornment } from "ente-base/components/mui/PasswordInputAdornment";
 import { sharedCryptoWorker } from "ente-base/crypto";
 import log from "ente-base/log";
+import { CustomError } from "ente-shared/error";
+import type { KeyAttributes, User } from "ente-shared/user/types";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { useCallback, useState } from "react";
-import { CustomError } from "ente-shared/error"
-import type { KeyAttributes, User } from "ente-shared/user/types";
 
 export interface VerifyMasterPasswordFormProps {
     /**
@@ -42,16 +42,22 @@ export interface VerifyMasterPasswordFormProps {
      * The callback invoked with the verified password, and all the other
      * auxillary information that was ascertained when verifying it.
      *
-     * @param key The user's master key
+     * @param key The user's master key obtained after decrypting it from their
+     * passphrase.
+     *
      * @param kek
+     *
      * @param keyAttributes
-     * @param passphrase The plaintext password
+     *
+     * @param passphrase The plaintext passphrase. This can be used during login
+     * to derive another encrypted key using interactive mem/ops limits for
+     * faster reauthentication after the initial login.
      */
-    onSubmit: (
+    onVerify: (
         key: string,
         kek: string,
         keyAttributes: KeyAttributes,
-        passphrase?: string,
+        passphrase: string,
     ) => void;
 }
 
@@ -66,7 +72,7 @@ export const VerifyMasterPasswordForm: React.FC<
     keyAttributes,
     srpAttributes,
     getKeyAttributes,
-    onSubmit,
+    onVerify,
     submitButtonTitle,
 }) => {
     const [showPassword, setShowPassword] = useState(false);
@@ -131,7 +137,7 @@ export const VerifyMasterPasswordForm: React.FC<
                     keyAttributes.keyDecryptionNonce,
                     kek,
                 );
-                onSubmit(key, kek, keyAttributes, passphrase);
+                onVerify(key, kek, keyAttributes, passphrase);
             } catch (e) {
                 log.error("user entered a wrong password", e);
                 throw Error(CustomError.INCORRECT_PASSWORD);
