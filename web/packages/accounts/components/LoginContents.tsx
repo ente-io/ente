@@ -58,21 +58,21 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
     );
 
     const formik = useFormik({
-        initialValues: { value: "" },
+        initialValues: { email: "" },
         onSubmit: async (values, { setFieldError }) => {
-            const value = values.value;
-            const setValueFieldError = (message: string) =>
+            const value = values.email;
+            const setEmailFieldError = (message: string) =>
                 setFieldError("value", message);
 
             if (!value) {
-                setValueFieldError(t("required"));
+                setEmailFieldError(t("required"));
                 return;
             }
             try {
-                await loginUser(value, setValueFieldError);
+                await loginUser(value, setEmailFieldError);
             } catch (e) {
                 log.error("Failed to login", e);
-                setValueFieldError(t("generic_error"));
+                setEmailFieldError(t("generic_error"));
             }
         },
     });
@@ -85,8 +85,9 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
             </Typography>
             <form onSubmit={formik.handleSubmit}>
                 <TextField
-                    name="value"
-                    value={formik.values.value}
+                    id="email"
+                    name="email"
+                    value={formik.values.email}
                     onChange={formik.handleChange}
                     type="email"
                     autoComplete="username"
@@ -94,9 +95,9 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
                     fullWidth
                     margin="normal"
                     disabled={formik.isSubmitting}
-                    error={!!formik.errors.value}
+                    error={!!formik.errors.email}
                     // See: Note: [Use space as default TextField helperText]
-                    helperText={formik.errors.value ?? " "}
+                    helperText={formik.errors.email ?? " "}
                 />
                 <Input sx={{ display: "none" }} type="password" value="" />
                 <LoadingButton
