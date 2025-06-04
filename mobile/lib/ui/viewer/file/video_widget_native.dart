@@ -46,6 +46,7 @@ class VideoWidgetNative extends StatefulWidget {
   final void Function()? onStreamChange;
   final PlaylistData? playlistData;
   final bool selectedPreview;
+  final Function(int)? onFinalFileLoad;
 
   const VideoWidgetNative(
     this.file, {
@@ -55,6 +56,7 @@ class VideoWidgetNative extends StatefulWidget {
     required this.onStreamChange,
     super.key,
     this.playlistData,
+    this.onFinalFileLoad,
     required this.selectedPreview,
   });
 
@@ -302,11 +304,22 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () {
+                          if (widget.isFromMemories) return;
                           _showControls.value = !_showControls.value;
                           if (widget.playbackCallback != null) {
                             widget.playbackCallback!(!_showControls.value);
                           }
                           _elTooltipController.hide();
+                        },
+                        onLongPress: () {
+                          if (widget.isFromMemories) {
+                            _controller?.pause();
+                          }
+                        },
+                        onLongPressUp: () {
+                          if (widget.isFromMemories) {
+                            _controller?.play();
+                          }
                         },
                         child: Container(
                           constraints: const BoxConstraints.expand(),
@@ -331,32 +344,38 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                               ),
                             )
                           : const SizedBox.shrink(),
-                      Positioned.fill(
-                        child: Center(
-                          child: ValueListenableBuilder(
-                            builder: (BuildContext context, bool value, _) {
-                              return value
-                                  ? ValueListenableBuilder(
-                                      builder: (context, bool value, _) {
-                                        return AnimatedOpacity(
-                                          duration:
-                                              const Duration(milliseconds: 200),
-                                          opacity: value ? 1 : 0,
-                                          curve: Curves.easeInOutQuad,
-                                          child: IgnorePointer(
-                                            ignoring: !value,
-                                            child: PlayPauseButton(_controller),
-                                          ),
-                                        );
-                                      },
-                                      valueListenable: _showControls,
-                                    )
-                                  : const SizedBox();
-                            },
-                            valueListenable: _isPlaybackReady,
-                          ),
-                        ),
-                      ),
+                      widget.isFromMemories
+                          ? const SizedBox.shrink()
+                          : Positioned.fill(
+                              child: Center(
+                                child: ValueListenableBuilder(
+                                  builder:
+                                      (BuildContext context, bool value, _) {
+                                    return value
+                                        ? ValueListenableBuilder(
+                                            builder: (context, bool value, _) {
+                                              return AnimatedOpacity(
+                                                duration: const Duration(
+                                                  milliseconds: 200,
+                                                ),
+                                                opacity: value ? 1 : 0,
+                                                curve: Curves.easeInOutQuad,
+                                                child: IgnorePointer(
+                                                  ignoring: !value,
+                                                  child: PlayPauseButton(
+                                                    _controller,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            valueListenable: _showControls,
+                                          )
+                                        : const SizedBox();
+                                  },
+                                  valueListenable: _isPlaybackReady,
+                                ),
+                              ),
+                            ),
                       Positioned(
                         bottom: verticalMargin,
                         right: 0,
@@ -394,7 +413,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                   valueListenable: _isPlaybackReady,
                                   builder:
                                       (BuildContext context, bool value, _) {
-                                    return value
+                                    return value && !widget.isFromMemories
                                         ? _SeekBarAndDuration(
                                             controller: _controller,
                                             duration: duration,
@@ -525,6 +544,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   Future<void> _onPlaybackReady() async {
     if (_isPlaybackReady.value) return;
     await _controller!.play();
+    final durationInSeconds = durationToSeconds(duration) ?? 0;
+    widget.onFinalFileLoad?.call(durationInSeconds);
     unawaited(_controller!.setVolume(1));
     _isPlaybackReady.value = true;
   }
@@ -739,11 +760,7 @@ class _SeekBarAndDuration extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: showControls,
-      builder: (
-        BuildContext context,
-        bool value,
-        _,
-      ) {
+      builder: (BuildContext context, bool value, _) {
         return AnimatedOpacity(
           duration: const Duration(
             milliseconds: 200,
