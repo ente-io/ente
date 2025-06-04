@@ -1,7 +1,7 @@
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * Fetch the public key from remote for the user (if any) who has registered

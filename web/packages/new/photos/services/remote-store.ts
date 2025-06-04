@@ -1,6 +1,6 @@
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * [Note: Remote store]

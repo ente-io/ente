@@ -53,7 +53,6 @@ export const UploaderNameInput: React.FC<UploaderNameInput> = ({
             const setValueFieldError = (message: string) =>
                 setFieldError("value", message);
 
-            // TODO(RE): Reintroduce email validation after zod migration
             if (!value) {
                 setValueFieldError(t("required"));
                 return;

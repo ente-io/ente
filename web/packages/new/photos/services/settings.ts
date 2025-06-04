@@ -7,7 +7,7 @@ import { localUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
 
 /**
