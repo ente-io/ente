@@ -352,8 +352,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                           ? _toggleAnimation(false)
                           : _toggleAnimation(true);
                     },
-                    onFinalFileLoad: (duration) {
-                      onFinalFileLoad(duration);
+                    onFinalFileLoad: ({required int memoryDuration}) {
+                      onFinalFileLoad(memoryDuration);
                     },
                   ),
                 ),

@@ -31,7 +31,7 @@ class ZoomableImage extends StatefulWidget {
   final Decoration? backgroundDecoration;
   final bool shouldCover;
   final bool isGuestView;
-  final Function(int)? onFinalFileLoad;
+  final Function({required int memoryDuration})? onFinalFileLoad;
 
   const ZoomableImage(
     this.photo, {
@@ -429,8 +429,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
       _logger.info("Final image loaded");
     });
     if (_imageProvider != null) {
-      widget.onFinalFileLoad?.call(5);
-    } 
+      widget.onFinalFileLoad?.call(memoryDuration: 5);
+    }
   }
 
   Future<void> _updatePhotoViewController({
