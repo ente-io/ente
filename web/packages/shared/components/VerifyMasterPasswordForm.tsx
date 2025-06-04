@@ -147,7 +147,6 @@ export default function VerifyMasterPasswordForm({
         <form onSubmit={formik.handleSubmit}>
             <Input
                 sx={{ display: "none" }}
-                id="email"
                 name="email"
                 autoComplete="username"
                 type="email"
