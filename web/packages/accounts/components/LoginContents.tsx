@@ -11,6 +11,7 @@ import { useFormik } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback } from "react";
+import { z } from "zod/v4";
 
 interface LoginContentsProps {
     /** Called when the user clicks the signup option instead.  */
@@ -59,17 +60,22 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
 
     const formik = useFormik({
         initialValues: { email: "" },
-        onSubmit: async (values, { setFieldError }) => {
-            const value = values.email;
+        onSubmit: async ({ email }, { setFieldError }) => {
             const setEmailFieldError = (message: string) =>
-                setFieldError("value", message);
+                setFieldError("email", message);
 
-            if (!value) {
+            if (!email) {
                 setEmailFieldError(t("required"));
                 return;
             }
+
+            if (!z.email().safeParse(email).success) {
+                setEmailFieldError(t("invalid_email_error"));
+                return;
+            }
+
             try {
-                await loginUser(value, setEmailFieldError);
+                await loginUser(email, setEmailFieldError);
             } catch (e) {
                 log.error("Failed to login", e);
                 setEmailFieldError(t("generic_error"));
