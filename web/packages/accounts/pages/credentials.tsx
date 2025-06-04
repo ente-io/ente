@@ -140,14 +140,18 @@ const Page: React.FC = () => {
             if (kekEncryptedAttributes && keyAttributes) {
                 removeKey("keyEncryptionKey");
                 const cryptoWorker = await sharedCryptoWorker();
-                const kek = await cryptoWorker.decryptB64(
-                    kekEncryptedAttributes.encryptedData,
-                    kekEncryptedAttributes.nonce,
+                const kek = await cryptoWorker.decryptBoxB64(
+                    {
+                        encryptedData: kekEncryptedAttributes.encryptedData,
+                        nonce: kekEncryptedAttributes.nonce,
+                    },
                     kekEncryptedAttributes.key,
                 );
-                const key = await cryptoWorker.decryptB64(
-                    keyAttributes.encryptedKey,
-                    keyAttributes.keyDecryptionNonce,
+                const key = await cryptoWorker.decryptBoxB64(
+                    {
+                        encryptedData: keyAttributes.encryptedKey,
+                        nonce: keyAttributes.keyDecryptionNonce,
+                    },
                     kek,
                 );
                 void postVerification(key, kek, keyAttributes);
