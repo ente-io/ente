@@ -40,7 +40,6 @@ export const CustomError = {
     BAD_REQUEST: "bad request",
     SUBSCRIPTION_NEEDED: "subscription not present",
     NOT_FOUND: "not found ",
-    WEAK_DEVICE: "password decryption failed on the device",
     INCORRECT_PASSWORD: "incorrect password",
     INCORRECT_PASSWORD_OR_NO_ACCOUNT: "incorrect password or no such account",
     UPLOAD_CANCELLED: "upload cancelled",
