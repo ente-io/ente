@@ -686,9 +686,19 @@ class SmartMemoriesService {
           if (youAndThemMem != null) {
             memoryResults.add(
               youAndThemMem.copyWith(
+                isBirthday: false,
+                newAge: newAge,
                 firstDateToShow: thisBirthday
                     .subtract(const Duration(days: 5))
                     .microsecondsSinceEpoch,
+                lastDateToShow: thisBirthday.microsecondsSinceEpoch,
+              ),
+            );
+            memoryResults.add(
+              youAndThemMem.copyWith(
+                isBirthday: true,
+                newAge: newAge,
+                firstDateToShow: thisBirthday.microsecondsSinceEpoch,
                 lastDateToShow:
                     thisBirthday.add(kDayItself).microsecondsSinceEpoch,
               ),
