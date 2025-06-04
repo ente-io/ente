@@ -147,17 +147,20 @@ export const VerifyMasterPasswordForm: React.FC<
                 throw Error("couldn't get key attributes");
             }
 
+            let key: string;
             try {
-                const key = await cryptoWorker.decryptB64(
+                key = await cryptoWorker.decryptB64(
                     keyAttributes.encryptedKey,
                     keyAttributes.keyDecryptionNonce,
                     kek,
                 );
-                onVerify(key, kek, keyAttributes, passphrase);
             } catch (e) {
-                log.error("user entered a wrong password", e);
-                throw Error(CustomError.INCORRECT_PASSWORD);
+                log.warn("Incorrect password", e);
+                setFieldError(t("incorrect_password"));
+                return;
             }
+
+            onVerify(key, kek, keyAttributes, passphrase);
         } catch (e) {
             if (e instanceof Error) {
                 if (e.message === CustomError.TWO_FACTOR_ENABLED) {
@@ -166,9 +169,6 @@ export const VerifyMasterPasswordForm: React.FC<
                 }
                 log.error("failed to verify passphrase", e);
                 switch (e.message) {
-                    case CustomError.INCORRECT_PASSWORD:
-                        setFieldError(t("incorrect_password"));
-                        break;
                     case CustomError.INCORRECT_PASSWORD_OR_NO_ACCOUNT:
                         setFieldError(t("incorrect_password_or_no_account"));
                         break;
