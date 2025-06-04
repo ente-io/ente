@@ -17,7 +17,7 @@ enum _ComputeRunState {
 }
 
 class ComputeController {
-  final _logger = Logger("MachineLearningController");
+  final _logger = Logger("ComputeController");
 
   static const kMaximumTemperatureAndroid = 42; // 42 degree celsius
   static const kMinimumBatteryLevel = 20; // 20%
@@ -160,7 +160,6 @@ class ComputeController {
 
   void _startInteractionTimer(Duration timeout) {
     _userInteractionTimer = Timer(timeout, () {
-      _logger.info("User is not interacting with the app");
       _isUserInteracting = false;
       _fireControlEvent();
     });
@@ -211,12 +210,10 @@ class ComputeController {
   bool _isAcceptableThermalState() {
     switch (_lastThermalStatus) {
       case null:
-        _logger.info("Thermal status is null, assuming acceptable temperature");
         return true;
       case ThermalStatus.none:
       case ThermalStatus.light:
       case ThermalStatus.moderate:
-        _logger.info("Thermal status is acceptable: $_lastThermalStatus");
         return true;
       case ThermalStatus.severe:
       case ThermalStatus.critical:
@@ -241,5 +238,3 @@ class ComputeController {
     return !kUnhealthyStates.contains(_androidLastBatteryInfo?.health ?? "");
   }
 }
-
-// keyword: unicorn
