@@ -178,15 +178,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     }
   }
 
-  void _resetAnimation() {
-    _progressAnimationController
-      ?..stop()
-      ..reset();
-    _zoomAnimationController
-      ?..stop()
-      ..reset();
-  }
-
   void onFinalFileLoad(int duration) {
     if (_progressAnimationController!.isAnimating == true) {
       _progressAnimationController!.stop();
@@ -250,7 +241,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                   inheritedData.indexNotifier.value;
                               if (currentIndex <
                                   inheritedData.memories.length - 1) {
-                                _resetAnimation();
                                 _pageController!.nextPage(
                                   duration: const Duration(milliseconds: 250),
                                   curve: Curves.ease,
@@ -322,7 +312,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   final edgeWidth = screenWidth * 0.20;
                   if (details.localPosition.dx < edgeWidth) {
                     if (index > 0) {
-                      _resetAnimation();
                       _pageController!.previousPage(
                         duration: const Duration(milliseconds: 250),
                         curve: Curves.ease,
@@ -331,7 +320,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   } else if (details.localPosition.dx >
                       screenWidth - edgeWidth) {
                     if (index < (inheritedData.memories.length - 1)) {
-                      _resetAnimation();
                       _pageController!.nextPage(
                         duration: const Duration(milliseconds: 250),
                         curve: Curves.ease,
@@ -680,16 +668,14 @@ class _MemoriesZoomWidgetState extends State<MemoriesZoomWidget>
         : AnimatedBuilder(
             animation: _controller,
             builder: (context, child) {
-              return ClipRect(
-                child: Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: Transform.translate(
-                    offset: Offset(
-                      _panAnimation.value.dx * 100,
-                      _panAnimation.value.dy * 100,
-                    ),
-                    child: widget.child,
+              return Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Transform.translate(
+                  offset: Offset(
+                    _panAnimation.value.dx * 100,
+                    _panAnimation.value.dy * 100,
                   ),
+                  child: widget.child,
                 ),
               );
             },
