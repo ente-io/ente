@@ -57,7 +57,11 @@ Future<Uint8List> cryptoGenericHash(Map<String, dynamic> args) async {
   final state =
       Sodium.cryptoGenerichashInit(null, Sodium.cryptoGenerichashBytesMax);
   await for (final chunk in file.openRead()) {
-    Sodium.cryptoGenerichashUpdate(state, Uint8List.fromList(chunk));
+    if (chunk is Uint8List) {
+      Sodium.cryptoGenerichashUpdate(state, chunk);
+    } else {
+      Sodium.cryptoGenerichashUpdate(state, Uint8List.fromList(chunk));
+    }
   }
   return Sodium.cryptoGenerichashFinal(state, Sodium.cryptoGenerichashBytesMax);
 }
