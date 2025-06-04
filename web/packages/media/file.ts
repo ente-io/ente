@@ -321,16 +321,15 @@ export async function decryptFile(
             pubMagicMetadata,
             ...restFileProps
         } = file;
-        const fileKey = await worker.decryptB64(
-            encryptedKey,
-            keyDecryptionNonce,
+        const fileKey = await worker.decryptBoxB64(
+            { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
             collectionKey,
         );
-        const fileMetadata = await worker.decryptMetadataJSON({
-            encryptedDataB64: metadata.encryptedData,
-            decryptionHeaderB64: metadata.decryptionHeader,
-            keyB64: fileKey,
-        });
+        const fileMetadata = await worker.decryptMetadataJSON_New(
+            metadata,
+            fileKey,
+        );
+
         let fileMagicMetadata: FileMagicMetadata;
         let filePubMagicMetadata: FilePublicMagicMetadata;
         /* eslint-disable @typescript-eslint/no-unnecessary-condition */
