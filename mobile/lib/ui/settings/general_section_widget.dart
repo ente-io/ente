@@ -15,6 +15,7 @@ import 'package:photos/ui/settings/advanced_settings_screen.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/ui/settings/language_picker.dart";
 import "package:photos/ui/settings/notification_settings_screen.dart";
+import "package:photos/ui/settings/widget_settings_screen.dart";
 import 'package:photos/utils/navigation_util.dart';
 
 class GeneralSectionWidget extends StatelessWidget {
@@ -99,6 +100,18 @@ class GeneralSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).widgets,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            _onWidgetsTapped(context);
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).advanced,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
@@ -124,6 +137,13 @@ class GeneralSectionWidget extends StatelessWidget {
     routeToPage(
       context,
       const NotificationSettingsScreen(),
+    );
+  }
+
+  void _onWidgetsTapped(BuildContext context) {
+    routeToPage(
+      context,
+      const WidgetSettingsScreen(),
     );
   }
 

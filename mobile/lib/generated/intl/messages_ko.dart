@@ -27,6 +27,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason":
             MessageLookupByLibrary.simpleMessage("계정을 삭제하는 가장 큰 이유가 무엇인가요?"),
         "cancel": MessageLookupByLibrary.simpleMessage("닫기"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("계정 삭제 확인"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("계정 삭제"),
@@ -40,6 +42,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("피드백"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("잘못된 이메일 주소"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "verify": MessageLookupByLibrary.simpleMessage("인증"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("계정이 삭제되었습니다.")

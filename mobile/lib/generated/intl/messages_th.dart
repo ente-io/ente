@@ -87,6 +87,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("เปลี่ยนรหัสผ่าน"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "โปรดตรวจสอบกล่องจดหมาย (และสแปม) ของคุณ เพื่อยืนยันให้เสร็จสิ้น"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "คัดลอกรหัสไปยังคลิปบอร์ดแล้ว"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("รวบรวมรูปภาพ"),
@@ -204,12 +206,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "logInLabel": MessageLookupByLibrary.simpleMessage("เข้าสู่ระบบ"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "โดยการคลิกเข้าสู่ระบบ ฉันยอมรับ<u-terms>เงื่อนไขการให้บริการ</u-terms>และ<u-policy>นโยบายความเป็นส่วนตัว</u-policy>"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "manageParticipants": MessageLookupByLibrary.simpleMessage("จัดการ"),
         "map": MessageLookupByLibrary.simpleMessage("แผนที่"),
         "maps": MessageLookupByLibrary.simpleMessage("แผนที่"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("ปานกลาง"),
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("ย้ายไปยังอัลบั้ม"),
         "name": MessageLookupByLibrary.simpleMessage("ชื่อ"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newest": MessageLookupByLibrary.simpleMessage("ใหม่สุด"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ไม่มีคีย์การกู้คืน?"),
@@ -218,6 +223,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("ตกลง"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "บน <branding>ente</branding>"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "oops": MessageLookupByLibrary.simpleMessage("อ๊ะ"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("อ๊ะ มีบางอย่างผิดพลาด"),
@@ -296,6 +304,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "มีบางอย่างผิดพลาด โปรดลองอีกครั้ง"),
         "sorry": MessageLookupByLibrary.simpleMessage("ขออภัย"),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "status": MessageLookupByLibrary.simpleMessage("สถานะ"),
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("ครอบครัว"),

@@ -53,7 +53,7 @@ analyzer:
     sort_child_properties_last: warning
     sort_pub_dependencies: warning
     library_private_types_in_public_api: warning
-    constant_identifier_names: warning
+    constant_identifier_names: ignore
     prefer_const_constructors: warning
     prefer_const_declarations: warning
     prefer_const_constructors_in_immutables: warning

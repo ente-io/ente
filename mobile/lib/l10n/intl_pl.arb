@@ -1533,5 +1533,11 @@
   "joinAlbumSubtextViewer": "aby dodać to do udostępnionych albumów",
   "join": "Dołącz",
   "linkEmail": "Połącz adres e-mail",
-  "noEnteAccountExclamation": "Brak konta Ente!"
+  "noEnteAccountExclamation": "Brak konta Ente!",
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }

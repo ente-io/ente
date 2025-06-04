@@ -1731,9 +1731,10 @@
   "food": "Amor por culinária",
   "pets": "Companhias peludas",
   "curatedMemories": "Memórias restauradas",
-  "onThisDay": "Neste dia",
-  "deleteMultipleAlbumDialog": "E também excluir todas as fotos (e vídeos) presente dentro desses {count} álbuns e de <bold>todos</bold> os álbuns que eles fazem parte?",
-  "addParticipants": "Adicionar participante",
-  "selectedAlbums": "{count} selecionado(s)",
-  "actionNotSupportedOnFavouritesAlbum": "Ação não suportada em álbum favorito"
+  "onThisDay": "On this day",
+  "lookBackOnYourMemories": "Look back on your memories 🌄",
+  "newPhotosEmoji": " new 📸",
+  "sorryWeHadToPauseYourBackups": "Sorry, we had to pause your backups",
+  "clickToInstallOurBestVersionYet": "Click to install our best version yet",
+  "onThisDayNotificationExplanation": "Receive reminders about memories from this day in previous years."
 }

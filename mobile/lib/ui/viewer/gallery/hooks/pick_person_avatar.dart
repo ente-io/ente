@@ -38,7 +38,7 @@ Future<dynamic> showPersonAvatarPhotoSheet(
     topControl: const SizedBox.shrink(),
     backgroundColor: getEnteColorScheme(context).backgroundElevated,
     barrierColor: backdropFaintDark,
-    enableDrag: false,
+    enableDrag: true,
   );
 }
 
@@ -137,57 +137,36 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
                           ),
                         ),
                       ),
-                      child: Column(
-                        children: [
-                          ValueListenableBuilder(
-                            valueListenable: isFileSelected,
-                            builder: (context, bool value, _) {
-                              return AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 300),
-                                switchInCurve: Curves.easeInOutExpo,
-                                switchOutCurve: Curves.easeInOutExpo,
-                                child: ButtonWidget(
-                                  key: ValueKey(value),
-                                  isDisabled: !value,
-                                  buttonType: ButtonType.neutral,
-                                  labelText: S.of(context).useSelectedPhoto,
-                                  onTap: () async {
-                                    final selectedFile =
-                                        selectedFiles.files.first;
-                                    final result = await PersonService.instance
-                                        .updateAvatar(
-                                      personEntity,
-                                      selectedFile,
-                                    );
-                                    Bus.instance.fire(
-                                      PeopleChangedEvent(
-                                        type: PeopleEventType.saveOrEditPerson,
-                                        person: result,
-                                      ),
-                                    );
-                                    Navigator.pop(context, result);
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                          ButtonWidget(
-                            buttonType: ButtonType.secondary,
-                            buttonAction: ButtonAction.cancel,
-                            labelText: S.of(context).cancel,
-                            // labelText: collection.hasCover
-                            //     ? S.of(context).resetToDefault
-                            //     : S.of(context).cancel,
-                            icon: null,
-                            // icon: collection.hasCover
-                            //     ? Icons.restore_outlined
-                            //     : null,
-                            onTap: () async {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                        ],
+                      child: ValueListenableBuilder(
+                        valueListenable: isFileSelected,
+                        builder: (context, bool value, _) {
+                          return AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            switchInCurve: Curves.easeInOutExpo,
+                            switchOutCurve: Curves.easeInOutExpo,
+                            child: ButtonWidget(
+                              key: ValueKey(value),
+                              isDisabled: !value,
+                              buttonType: ButtonType.neutral,
+                              labelText: S.of(context).useSelectedPhoto,
+                              onTap: () async {
+                                final selectedFile = selectedFiles.files.first;
+                                final result =
+                                    await PersonService.instance.updateAvatar(
+                                  personEntity,
+                                  selectedFile,
+                                );
+                                Bus.instance.fire(
+                                  PeopleChangedEvent(
+                                    type: PeopleEventType.saveOrEditPerson,
+                                    person: result,
+                                  ),
+                                );
+                                Navigator.pop(context, result);
+                              },
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

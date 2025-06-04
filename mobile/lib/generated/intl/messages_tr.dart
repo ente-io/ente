@@ -618,6 +618,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "click": MessageLookupByLibrary.simpleMessage("• Tıklamak"),
         "clickOnTheOverflowMenu":
             MessageLookupByLibrary.simpleMessage("• Taşma menüsüne tıklayın"),
+        "clickToInstallOurBestVersionYet": MessageLookupByLibrary.simpleMessage(
+            "Click to install our best version yet"),
         "close": MessageLookupByLibrary.simpleMessage("Kapat"),
         "clubByCaptureTime": MessageLookupByLibrary.simpleMessage(
             "Yakalama zamanına göre kulüp"),
@@ -1254,6 +1256,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Tam ekranda görüntülemek için bir öğeye uzun basın"),
+        "lookBackOnYourMemories": MessageLookupByLibrary.simpleMessage(
+            "Look back on your memories 🌄"),
         "loopVideoOff":
             MessageLookupByLibrary.simpleMessage("Video Döngüsü Kapalı"),
         "loopVideoOn":
@@ -1335,6 +1339,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "newAlbum": MessageLookupByLibrary.simpleMessage("Yeni albüm"),
         "newLocation": MessageLookupByLibrary.simpleMessage("Yeni konum"),
         "newPerson": MessageLookupByLibrary.simpleMessage("Yeni Kişi"),
+        "newPhotosEmoji": MessageLookupByLibrary.simpleMessage(" new 📸"),
         "newRange": MessageLookupByLibrary.simpleMessage("Yeni aralık"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Ente\'de yeniyim"),
         "newest": MessageLookupByLibrary.simpleMessage("En yeni"),
@@ -1389,6 +1394,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "<branding>ente</branding> üzerinde"),
         "onTheRoad": MessageLookupByLibrary.simpleMessage("Yeniden yollarda"),
+        "onThisDay": MessageLookupByLibrary.simpleMessage("On this day"),
+        "onThisDayNotificationExplanation": MessageLookupByLibrary.simpleMessage(
+            "Receive reminders about memories from this day in previous years."),
         "onlyFamilyAdminCanChangeCode": m54,
         "onlyThem": MessageLookupByLibrary.simpleMessage("Sadece onlar"),
         "oops": MessageLookupByLibrary.simpleMessage("Hay aksi"),
@@ -1885,6 +1893,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Üzgünüm, bu cihazda güvenli anahtarlarını oluşturamadık.\n\nLütfen başka bir cihazdan giriş yapmayı deneyiniz."),
+        "sorryWeHadToPauseYourBackups": MessageLookupByLibrary.simpleMessage(
+            "Sorry, we had to pause your backups"),
         "sort": MessageLookupByLibrary.simpleMessage("Sırala"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sırala"),
         "sortNewestFirst":
