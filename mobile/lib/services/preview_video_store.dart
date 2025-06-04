@@ -823,7 +823,7 @@ class PreviewVideoStore {
 
   void queueFiles() {
     Future.delayed(const Duration(seconds: 5), () {
-      if (!_hasQueuedFile) {
+      if (!_hasQueuedFile && computeController.requestCompute(stream: true)) {
         _putFilesForPreviewCreation(true).catchError((_) {
           _hasQueuedFile = false;
         });
