@@ -193,6 +193,7 @@ dependencies:
   syncfusion_flutter_sliders: ^25.2.5
   synchronized: ^3.3.0+3
   system_info_plus: ^0.0.6
+  thermal: ^1.1.11
   timezone: ^0.9.4
   tuple: ^2.0.0
   ua_client_hints: ^1.4.0

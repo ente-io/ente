@@ -2550,6 +2550,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.4"
+  thermal:
+    dependency: "direct main"
+    description:
+      name: thermal
+      sha256: c6275ebc609e75f1bbbfc354d56d6c559a0c6045a06a8e8c3939c03306a07e18
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.11"
   timezone:
     dependency: "direct main"
     description:
