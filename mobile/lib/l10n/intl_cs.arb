@@ -436,8 +436,5 @@
   "previous": "Předchozí",
   "newRange": "Nový rozsah",
   "youAndThem": "Vy a {name}",
-  "selfiesWithThem": "Selfie s {name}",
-  "cLIcon": "Nová ikona",
-  "cLMemories": "Vzpomínky",
-  "cLWidgets": "Widgety"
+  "selfiesWithThem": "Selfie s {name}"
 }

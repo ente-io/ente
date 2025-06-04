@@ -794,6 +794,14 @@
   "share": "Partager",
   "unhideToAlbum": "Afficher dans l'album",
   "restoreToAlbum": "Restaurer vers l'album",
+  "moveItem": "{count, plural,=1 {Déplacer un élément} other {Déplacer des éléments}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, =1 {Ajouter un élément} other {Ajouter des éléments}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Créez ou sélectionnez un album",
   "selectAlbum": "Sélectionner album",
   "searchByAlbumNameHint": "Nom de l'album",
@@ -1722,16 +1730,6 @@
   "onTheRoad": "De nouveau sur la route",
   "food": "Plaisir culinaire",
   "pets": "Compagnons à quatre pattes",
-  "cLIcon": "Nouvel icône",
-  "cLIconDesc": "Finalement, création d'un nouvel icône d'application qui, selon nous, représente au mieux notre travail. Nous avons également ajouté un changeur d'icône pour que vous puissiez continuer à utiliser l'ancien.",
-  "cLMemories": "Souvenirs",
-  "cLMemoriesDesc": "Redécouvrez vos précieux souvenirs - focus sur vos connaissances préférées, vos voyages et vos vacances, vos meilleurs clics et bien plus encore. Activez l'apprentissage automatique, taguez-vous et nommez vos amis pour une meilleure expérience.",
-  "cLWidgets": "Widgets",
-  "cLWidgetsDesc": "Les widgets (ou gadgets) de l'écran d'accueil, qui sont intégrés à des souvenirs, sont maintenant disponibles. Ils montreront vos moments spéciaux sans nécessité d'ouvrir l'application.",
-  "cLFamilyPlan": "Limites pour le forfait Famille",
-  "cLFamilyPlanDesc": "Vous pouvez maintenant fixer des limites sur la quantité de stockage que les membres de votre famille peuvent utiliser.",
-  "cLBulkEdit": "Dates de modification multiples",
-  "cLBulkEditDesc": "Vous pouvez maintenant sélectionner plusieurs photos et modifier la date/heure pour toutes celles-ci, en une seule action rapide. Les dates de décalage sont également prises en charge.",
   "curatedMemories": "Souvenirs conservés",
   "onThisDay": "Ce jour-ci",
   "deleteMultipleAlbumDialog": "Supprimer également les photos (et les vidéos) présentes dans ces {count} albums de <bold>tous les</bold> autres albums dont ils font partie ?",
